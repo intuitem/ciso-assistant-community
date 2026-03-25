@@ -1,0 +1,2073 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:cintamaya:risk:library:passi-framework-2.2
+locale: fr
+ref_id: PASSI Framework 2.2
+name: ANSSI - Certification PASSI
+description: "La certification PASSI est d\xE9livr\xE9e par l'Agence Nationale de\
+  \ la S\xE9curit\xE9 des Syst\xE8mes d'Information en France pour qualifier les prestataires\
+  \ d'audit"
+copyright: "\xA9 2026 Cintamaya"
+version: 1
+publication_date: 2026-03-25
+provider: ANSSI
+packager: Cintamaya
+objects:
+  framework:
+    urn: urn:cintamaya:risk:framework:passi-framework-2.2
+    ref_id: PASSI Framework
+    name: ANSSI-Certification PASSI
+    description: "La certification PASSI est d\xE9livr\xE9e par l'Agence Nationale\
+      \ de la S\xE9curit\xE9 des Syst\xE8mes d'Information en France pour qualifier\
+      \ les prestataires d'audit\nVersion d\xE9taill\xE9e :\nhttps://cyber.gouv.fr/documents/375/PASSI_Referentiel-exigences_v2.2.pdf"
+    implementation_groups_definition:
+    - ref_id: S
+      name: Substantiel
+      description: "Correspond \xE0 la mise en conformit\xE9 au niveau essentiel du\
+        \ substantiel mis en place par l'ANSSI"
+    - ref_id: E
+      name: "Elev\xE9"
+      description: "Correspond \xE0 la mise en conformit\xE9 au niveau \xE9lev\xE9\
+        \ du r\xE9f\xE9rentiel mis en place par l'ANSSI"
+    requirement_nodes:
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv
+      assessable: false
+      depth: 1
+      ref_id: IV
+      name: Exigences applicables au prestataire
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv
+      ref_id: IV.1
+      name: "Exigences g\xE9n\xE9rales"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      ref_id: IV.1.a
+      description: "Le prestataire doit \xEAtre une personne morale."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      ref_id: IV.1.b
+      description: "Le prestataire doit \xEAtre soumis au droit d\u2019un \xC9tat\
+        \ membre de l\u2019Union europ\xE9enne."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      ref_id: IV.1.c
+      description: "Le prestataire doit, en sa qualit\xE9 de professionnel, avoir\
+        \ un devoir de conseil vis-\xE0-vis du commanditaire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      ref_id: IV.1.d
+      description: "Le prestataire doit s\u2019assurer du consentement du commanditaire\
+        \ avant toute communication \xE0 des tiers d'informations et supports relatifs\
+        \ \xE0 la prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      ref_id: IV.1.e
+      description: "Le prestataire doit apporter la preuve que son organisation, les\
+        \ moyens qu\u2019il met en \u0153uvre pour r\xE9aliser la prestation et les\
+        \ modalit\xE9s de son fonctionnement, notamment financi\xE8res, ne sont pas\
+        \ susceptibles de compromettre son impartialit\xE9 \xE0 l\u2019\xE9gard du\
+        \ commanditaire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      ref_id: IV.1.f
+      description: "Le prestataire doit r\xE9aliser la prestation de mani\xE8re impartiale,\
+        \ en toute bonne foi et dans le respect du commanditaire, de ses personnels\
+        \ et de ses infrastructures."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      ref_id: IV.1.g
+      description: "Le prestataire doit enregistrer et traiter les plaintes relatives\
+        \ aux prestations qualifi\xE9es d\xE9pos\xE9es par les commanditaires, les\
+        \ b\xE9n\xE9ficiaires et, de mani\xE8re g\xE9n\xE9rale, l\u2019ensemble des\
+        \ tiers."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.1
+      ref_id: IV.1.h
+      description: "Le prestataire doit informer sans d\xE9lai l\u2019ANSSI de tout\
+        \ d\xE9p\xF4t d\u2019une plainte relative \xE0 une prestation qualifi\xE9\
+        e et du traitement de celle-ci."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv
+      ref_id: IV.2
+      name: Gestion des personnels
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      ref_id: IV.2.a
+      description: "Le prestataire doit, avant toute incorporation d\u2019un auditeur\
+        \ ou d\u2019un responsable d\u2019\xE9quipe dans ses \xE9quipes, proc\xE9\
+        der \xE0 la v\xE9rification des formations, connaissances, comp\xE9tences\
+        \ et r\xE9f\xE9rences professionnelles, et de la v\xE9racit\xE9 de leur curriculum\
+        \ vitae."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      ref_id: IV.2.b
+      description: "Le prestataire doit s\u2019assurer, avant le d\xE9but de chaque\
+        \ prestation, que les membres de l'\xE9quipe, disposent des connaissances\
+        \ et comp\xE9tences associ\xE9es \xE0 leurs activit\xE9s conform\xE9ment \xE0\
+        \ l\u2019Annexe 2."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      ref_id: IV.2.c
+      description: "Le prestataire ne doit recourir qu\u2019\xE0 des auditeurs et\
+        \ responsables d\u2019\xE9quipe disposant d\u2019une attestation individuelle\
+        \ de comp\xE9tence pour r\xE9aliser la prestation. Le prestataire peut, avec\
+        \ l\u2019accord du commanditaire, incorporer dans l\u2019\xE9quipe d\u2019\
+        audit des personnes ne disposant pas d\u2019attestation individuelle de comp\xE9\
+        tence au titre de leur formation ou de leur mont\xE9e en comp\xE9tence. Ces\
+        \ personnes sont pr\xE9sentes en tant qu\u2019observateurs et ne participent\
+        \ pas \xE0 la r\xE9alisation de la prestation."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      ref_id: IV.2.d
+      description: "Le prestataire doit assurer la formation continue des auditeurs\
+        \ et responsables d\u2019\xE9quipe afin de maintenir \xE0 jour leurs connaissances\
+        \ et comp\xE9tences en mati\xE8re de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information, et en particulier celles  requises pour la r\xE9alisation de\
+        \ leurs missions."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      ref_id: IV.2.e
+      description: "Le prestataire doit permettre aux auditeurs et responsables d\u2019\
+        \xE9quipe d\u2019assurer une veille afin de maintenir \xE0 jour leurs connaissances\
+        \ et comp\xE9tences en mati\xE8re de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information, et en particulier celles requises pour la r\xE9alisation de leurs\
+        \ missions."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      ref_id: IV.2.f
+      description: "Le prestataire est responsable des m\xE9thodes et outils utilis\xE9\
+        s par l\u2019\xE9quipe d\u2019audit ainsi que de leur bonne utilisation durant\
+        \ la prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      ref_id: IV.2.g
+      description: "Le prestataire doit sensibiliser les auditeurs et responsables\
+        \ d\u2019\xE9quipe \xE0 la r\xE9glementation en vigueur au sein de l\u2019\
+        Union europ\xE9enne en mati\xE8re de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information, et en particulier celle applicable \xE0 leurs missions."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.2
+      ref_id: IV.2.h
+      description: "Le prestataire doit s\u2019assurer qu\u2019aucun membre de l\u2019\
+        \xE9quipe d\u2019audit ne fait l\u2019objet d\u2019une inscription au casier\
+        \ judiciaire incompatible avec l\u2019exercice de ses missions."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv
+      ref_id: IV.3
+      name: "Protection de l\u2019information"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.a
+      description: "Le prestataire doit \xE9laborer et tenir \xE0 jour une appr\xE9\
+        ciation des risques relatifs \xE0 son activit\xE9 d\u2019audit."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.b
+      description: "Il est recommand\xE9 que le prestataire mette en \u0153uvre la\
+        \ m\xE9thode pour r\xE9aliser l\u2019appr\xE9ciation et le traitement des\
+        \ risques relatifs \xE0 son activit\xE9 d\u2019audit."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.c
+      description: "Le prestataire doit prot\xE9ger en int\xE9grit\xE9 et en confidentialit\xE9\
+        \ les informations et supports relatifs \xE0 la prestation selon leur marquage\
+        \ et leur niveau de sensibilit\xE9."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.d
+      description: "Le prestataire doit appliquer le principe du moindre privil\xE8\
+        ge et limiter l\u2019acc\xE8s aux informations et supports relatifs \xE0 la\
+        \ prestation aux strictes personnes ayant le droit et le besoin d\u2019en\
+        \ conna\xEEtre."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.e
+      description: "Le prestataire peut \xEAtre amen\xE9 \xE0 connecter un m\xEAme\
+        \ \xE9quipement (cl\xE9 USB, ordinateur,\netc.) \xE0 son syst\xE8me d'information\
+        \ homologu\xE9 et au syst\xE8me d'information audit\xE9. Le\nprestataire doit\
+        \ mettre en \u0153uvre des mesures de s\xE9curit\xE9 adapt\xE9es pour ces\
+        \ \xE9quipements afin de r\xE9pondre aux besoins op\xE9rationnels de la prestation\
+        \ et aux besoins de s\xE9curit\xE9 de son syst\xE8me d'information homologu\xE9\
+        ."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.e-bis
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.e bis
+      description: "Il n\u2019est pas exig\xE9 du prestataire qu\u2019il homologue\
+        \ ces \xE9quipements Diffusion Restreinte si le syst\xE8me d\u2019information\
+        \ audit\xE9 n\u2019est pas homologu\xE9 Diffusion Restreinte."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.f
+      description: "Le prestataire doit homologuer son syst\xE8me d\u2019information."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.g
+      description: "Le prestataire doit homologuer son syst\xE8me d\u2019information\
+        \ pour la protection d'informations et supports portant la mention Diffusion\
+        \ Restreinte."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.h
+      description: "Il est recommand\xE9 que le prestataire mette en \u0153uvre la\
+        \ d\xE9marche d\xE9crite dans le guide pour homologuer son d\u2019information."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.i
+      description: "Le prestataire doit \xEAtre capable d\u2019utiliser son syst\xE8\
+        me d\u2019information pour r\xE9aliser la totalit\xE9 d\u2019une prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.j
+      description: "Le prestataire doit mettre en \u0153uvre l\u2019ensemble des r\xE8\
+        gles du guide d\u2019hygi\xE8ne informatique pour le niveau renforc\xE9 sur\
+        \ son syst\xE8me d\u2019information homologu\xE9 Diffusion Restreinte"
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.k
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.k
+      description: "Le prestataire doit mettre en \u0153uvre l\u2019ensemble des r\xE8\
+        gles relatives \xE0 la protection des syst\xE8mes d'information traitant des\
+        \ informations et supports portant la mention Diffusion Restreinte d\xE9finies\
+        \ dans sur son syst\xE8me d\u2019information homologu\xE9 Diffusion Restreinte."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.l
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.l
+      description: "Il est recommand\xE9 que le prestataire mette en \u0153uvre les\
+        \ recommandations du guide sur son syst\xE8me d\u2019information homologu\xE9\
+        \ Diffusion Restreinte."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.m
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.m
+      description: "Le prestataire doit mettre en \u0153uvre l\u2019ensemble des r\xE8\
+        gles du guide d\u2019hygi\xE8ne informatique pour le niveau standard sur son\
+        \ syst\xE8me d\u2019information."
+      implementation_groups:
+      - S
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.n
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.n
+      description: "Le prestataire doit r\xE9aliser une revue p\xE9riodique des droits\
+        \ d\u2019acc\xE8s sur son syst\xE8me d\u2019information."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.o
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.o
+      description: "Le prestataire doit r\xE9aliser une revue des droits d\u2019acc\xE8\
+        s sur son syst\xE8me d\u2019information tous les six mois."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3.p
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
+      ref_id: IV.3.p
+      description: "Le prestataire doit disposer d\u2019un syst\xE8me d\u2019information\
+        \ hors ligne afin de conserver l\u2019ensemble des informations et supports\
+        \ relatifs \xE0 la prestation pour lesquels il a re\xE7u une autorisation\
+        \ de conservation du commanditaire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v
+      assessable: false
+      depth: 1
+      ref_id: V
+      name: Exigences applicables aux personnels du prestataire
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v
+      ref_id: V.1
+      name: "Connaissances et comp\xE9tences g\xE9n\xE9rales"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1
+      ref_id: V.1.a
+      description: "Les auditeurs et responsables d\u2019\xE9quipe doivent ma\xEE\
+        triser les bonnes pratiques et la m\xE9thodologie d\u2019audit d\xE9crites\
+        \ dans la norme  ISO/IEC 1901."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1
+      ref_id: V.1.b
+      description: "Les auditeurs doivent poss\xE9der les qualit\xE9s personnelles\
+        \ d\xE9crites au chapitre \xAB 7.2.2 Comportements personnels \xBB de la norme\
+        \  ISO/IEC 1901."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1
+      ref_id: V.1.c
+      description: "Les responsables d\u2019\xE9quipe doivent poss\xE9der les qualit\xE9\
+        s personnelles d\xE9crites au chapitre \xAB 7.2.3.4 Comp\xE9tences g\xE9n\xE9\
+        rales du responsable d\u2019une \xE9quipe d\u2019audit \xBB de la norme."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.1
+      ref_id: V.1.d
+      description: "Les auditeurs et responsables d\u2019\xE9quipe doivent disposer\
+        \ de qualit\xE9s r\xE9dactionnelles et de synth\xE8se, et savoir restituer\
+        \ les informations pertinentes et adapt\xE9es aux profils de leurs interlocuteurs\
+        \ (direction, services techniques, responsables m\xE9tier et s\xE9curit\xE9\
+        , etc.)."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v
+      ref_id: V.2
+      name: "Connaissances et comp\xE9tences sp\xE9cifiques"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.2
+      ref_id: V.2.a
+      description: "Les auditeurs et responsables d\u2019\xE9quipe doivent, selon\
+        \ leur r\xF4le, r\xE9aliser la prestation conform\xE9ment aux exigences du\
+        \ chapitre VI."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.2
+      ref_id: V.2.b
+      description: "Les auditeurs et responsables d\u2019\xE9quipe doivent, selon\
+        \ leur r\xF4le, assurer les missions d\xE9crites dans l\u2019Annexe 2."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.2
+      ref_id: V.2.c
+      description: "Les auditeurs et responsables d\u2019\xE9quipe doivent, selon\
+        \ leur r\xF4le, disposer des connaissances et comp\xE9tences en mati\xE8re\
+        \ de s\xE9curit\xE9 des syst\xE8mes d\u2019information \xE0 jour, particuli\xE8\
+        rement celles d\xE9crites dans l\u2019Annexe 2."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v
+      ref_id: V.3
+      name: "Exp\xE9rience"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.3
+      ref_id: V.3.a
+      description: "Il est recommand\xE9 que les auditeurs et responsables d\u2019\
+        \xE9quipe aient re\xE7u une formation en s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.3
+      ref_id: V.3.b
+      description: "Il est recommand\xE9 que les auditeurs et responsables d\u2019\
+        \xE9quipe justifient d\u2019au moins d\u2019une ann\xE9e d\u2019exp\xE9rience\
+        \ dans le domaine de l\u2019audit de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v
+      ref_id: V.4
+      name: Engagement
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.4
+      ref_id: V.4.a
+      description: "Les auditeurs et responsable d\u2019\xE9quipe doivent avoir un\
+        \ contrat de travail avec le prestataire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:v.4
+      ref_id: V.4.b
+      description: Le prestataire doit avoir un cadre contractuel avec les experts.
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi
+      assessable: false
+      depth: 1
+      ref_id: VI
+      name: "Exigences applicables \xE0 la prestation"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi
+      ref_id: VI.1
+      name: "\xC9tape 1 \u2013 Qualification pr\xE9alable d\u2019aptitude \xE0 la\
+        \ r\xE9alisation de la prestation"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.1
+      ref_id: VI.1.a
+      description: "Le prestataire doit, en se fondant sur les informations communiqu\xE9\
+        es par le commanditaire et notamment les objectifs, les crit\xE8res, le p\xE9\
+        rim\xE8tre, les activit\xE9s d\u2019audit et les \xE9ventuelles modalit\xE9\
+        s particuli\xE8res de la prestation1, r\xE9aliser une qualification pr\xE9\
+        alable d\u2019aptitude afin d\u2019\xE9valuer de mani\xE8re impartiale s\u2019\
+        il est en mesure de r\xE9aliser pleinement, partiellement ou non la prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.1
+      ref_id: VI.1.b
+      description: "Le prestataire doit informer le commanditaire des conclusions\
+        \ de la qualification pr\xE9alable d\u2019aptitude \xE0 la r\xE9alisation\
+        \ de la prestation et notamment s\u2019il estime \xEAtre en mesure de r\xE9\
+        aliser pleinement, partiellement ou non la prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.1
+      ref_id: VI.1.c
+      description: "Le prestataire ne doit accepter de r\xE9aliser la prestation que\
+        \ si les conclusions de la qualification pr\xE9alable d\u2019aptitude confirment\
+        \ qu\u2019il est en mesure de r\xE9aliser pleinement la prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi
+      ref_id: VI.2
+      name: "\xC9tape 2 \u2013 Elaboration de la convention de service"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
+      ref_id: VI.2.a
+      description: "Le prestataire doit \xE9tablir une convention de service avec\
+        \ le commanditaire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
+      ref_id: VI.2.b
+      description: "La convention de service doit \xEAtre sign\xE9e par un repr\xE9\
+        sentant l\xE9gal du prestataire et un repr\xE9sentant l\xE9gal du commanditaire,\
+        \ ou toute personne pouvant engager le prestataire et le commanditaire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
+      ref_id: VI.2.1
+      name: Qualification
+      description: 'La convention de service doit :'
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1
+      ref_id: VI.2.1.a
+      description: "pr\xE9ciser que la prestation est qualifi\xE9e"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1
+      ref_id: VI.2.1.b
+      description: identifier le niveau de qualification de la prestation
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1
+      ref_id: VI.2.1.c
+      description: "identifier les activit\xE9s d\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1
+      ref_id: VI.2.1.d
+      description: "inclure l\u2019attestation de qualification du prestataire"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1
+      ref_id: VI.2.1.e
+      description: "pr\xE9ciser que chaque auditeur et responsable d\u2019\xE9quipe\
+        \ dispose d\u2019une attestation individuelle de comp\xE9tence"
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.1
+      ref_id: VI.2.1.f
+      description: "pr\xE9ciser que le commanditaire peut, conform\xE9ment au processus\
+        \ de qualification d\u2019un service, d\xE9poser aupr\xE8s de l\u2019ANSSI\
+        \ une r\xE9clamation lorsqu\u2019il estime que le prestataire n\u2019a pas\
+        \ respect\xE9 une ou plusieurs exigences du r\xE9f\xE9rentiel dans le cadre\
+        \ d\u2019une prestation qualifi\xE9e, et rappeler qu\u2019en cas de manquement\
+        \ du prestataire, la qualification du prestataire peut \xEAtre retir\xE9e,\
+        \ la port\xE9e de qualification r\xE9duite, ou le niveau de recommandation\
+        \ du prestataire d\xE9grad\xE9."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
+      ref_id: VI.2.2
+      name: "Modalit\xE9s de la prestation"
+      description: La convention de service doit
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      ref_id: VI.2.2.a
+      description: "d\xE9crire de mani\xE8re g\xE9n\xE9rale la d\xE9marche, les objectifs,\
+        \ les crit\xE8res, le p\xE9rim\xE8tre et les activit\xE9s d\u2019audit, ainsi\
+        \ que les modalit\xE9s de la prestation : pr\xE9requis, jalons, livrables,\
+        \ dates et lieux d\u2019ex\xE9cution de la prestation. Ces informations pourront\
+        \ \xEAtre pr\xE9cis\xE9es et mises \xE0 jour si besoin dans la note de cadrage\
+        \ ou dans le plan d'audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      ref_id: VI.2.2.b
+      description: "pr\xE9ciser que le droit applicable \xE0 la convention de service\
+        \ est celui d\u2019un \xC9tat membre de l\u2019Union europ\xE9enne et pr\xE9\
+        ciser lequel"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      ref_id: VI.2.2.c
+      description: "pr\xE9ciser les r\xE8gles de titularit\xE9 des \xE9l\xE9ments\
+        \ prot\xE9g\xE9s par la propri\xE9t\xE9 intellectuelle tels que les outils\
+        \ d\xE9velopp\xE9s sp\xE9cifiquement par le prestataire dans le cadre de la\
+        \ prestation et les livrables de la prestation, en particulier le rapport\
+        \ d\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      ref_id: VI.2.2.d
+      description: "pr\xE9ciser que toute modification de la convention de service\
+        \ doit \xEAtre soumise \xE0 l\u2019acceptation d\u2019un repr\xE9sentant l\xE9\
+        gal du prestataire et d\u2019un repr\xE9sentant l\xE9gal du commanditaire,\
+        \ ou toute personne pouvant engager le prestataire et le commanditaire"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      ref_id: VI.2.3
+      name: "Responsabilit\xE9s"
+      description: La convention de service doit
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      ref_id: VI.2.3.a
+      description: "pr\xE9ciser que le commanditaire dispose de l\u2019ensemble des\
+        \ droits de propri\xE9t\xE9 et d\u2019acc\xE8s sur le p\xE9rim\xE8tre de la\
+        \ prestation ou qu\u2019il a recueilli l\u2019accord des \xE9ventuelles parties\
+        \ dont les syst\xE8mes d\u2019information entrent dans le p\xE9rim\xE8tre\
+        \ de la prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      ref_id: VI.2.3.b
+      description: "pr\xE9ciser que le prestataire informe le commanditaire par \xE9\
+        crit et sans d\xE9lai en cas de manquement \xE0 la convention de service"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      ref_id: VI.2.3.c
+      description: "d\xE9crire les principaux risques relatifs \xE0 la prestation,\
+        \ en particulier ceux concernant les atteintes \xE0 la disponibilit\xE9 du\
+        \ syst\xE8me d\u2019information audit\xE9 et \xE0 la confidentialit\xE9 de\
+        \ ses donn\xE9es"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
+      ref_id: VI.2.4
+      name: "Confidentialit\xE9"
+      description: La convention de service doit
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      ref_id: VI.2.4.a
+      description: "pr\xE9ciser que le prestataire ne collecte et n\u2019audite que\
+        \ les informations et supports strictement n\xE9cessaires \xE0 la bonne ex\xE9\
+        cution de la prestation en ad\xE9quation avec les objectifs, crit\xE8res,\
+        \ p\xE9rim\xE8tre et activit\xE9s de la prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      ref_id: VI.2.4.b
+      description: "pr\xE9ciser que le prestataire ne divulgue ou ne partage aucune\
+        \ information ou support relatif la prestation \xE0 des tiers, sauf autorisation\
+        \ \xE9crite du commanditaire"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      ref_id: VI.2.4.c
+      description: "pr\xE9ciser que le prestataire, \xE0 l\u2019issue de la prestation,\
+        \ restitue, supprime ou d\xE9truit l\u2019ensemble des informations et supports\
+        \ relatifs \xE0 la prestation \xE0 l\u2019exception de ceux pour lesquels\
+        \ il a re\xE7u une autorisation de conservation du commanditaire"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      ref_id: VI.2.4.d
+      description: "pr\xE9ciser que le prestataire, \xE0 l\u2019issue de la prestation,\
+        \ conserve sur un syst\xE8me d\u2019information hors ligne l\u2019ensemble\
+        \ des informations et supports relatifs \xE0 la prestation pour lesquels il\
+        \ a re\xE7u une autorisation de conservation du commanditaire"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      ref_id: VI.2.5
+      name: Experts
+      description: La convention de service doit
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      ref_id: VI.2.5.a
+      description: "pr\xE9ciser que le prestataire peut incorporer dans l\u2019\xE9\
+        quipe d\u2019audit un ou plusieurs experts pour participer \xE0 la r\xE9alisation\
+        \ de certaines activit\xE9s d\u2019audit lorsque ces derni\xE8res requi\xE8\
+        rent des connaissances ou des comp\xE9tences sp\xE9cifiques dont les auditeurs\
+        \ ne disposent pas sous r\xE9serve que : \ni. il existe une un cadre contractuel\
+        \ entre le prestataire et les experts ;\nii. le recours aux experts est accept\xE9\
+        \ par le commanditaire ;\niii. les experts sont d\xFBment encadr\xE9s par\
+        \ le responsable d\u2019\xE9quipe."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
+      ref_id: VI.2.6
+      name: Sous-traitance
+      description: La convention de service doit
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.6
+      ref_id: VI.2.6.a
+      description: "pr\xE9ciser que le prestataire peut sous-traiter tout ou partie\
+        \ des activit\xE9s d\u2019audit \xE0 un prestataire sous-traitant sous r\xE9\
+        serve que : \ni. le prestataire sous-traitant est qualifi\xE9 pour les activit\xE9\
+        s d\u2019audit sous-trait\xE9es ;\nii. la prestation sous-trait\xE9e est qualifi\xE9\
+        e au m\xEAme niveau de qualification ;\niii. il existe un cadre contractuel\
+        \ entre le prestataire et le prestataire sous-traitant ;\niv. le recours \xE0\
+        \ la sous-traitance est accept\xE9 par le commanditaire dans la note de cadrage."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
+      ref_id: VI.2.7
+      name: Note de cadrage
+      description: La convention de service doit
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.7.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.7
+      ref_id: VI.2.7.a
+      description: "pr\xE9voir l\u2019\xE9laboration d\u2019une note de cadrage et\
+        \ sa mise \xE0 jour durant la prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.7.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.7
+      ref_id: VI.2.7.b
+      description: "indiquer que la note de cadrage respecte les exigences \xE9nonc\xE9\
+        es au chapitre VI.3.2"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi
+      ref_id: VI.3
+      name: "\xC9tape 3 \u2013 Pr\xE9paration de la prestation"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3
+      ref_id: VI.3.1
+      name: "Constitution de l\u2019\xE9quipe"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1
+      ref_id: VI.3.1.a
+      description: "Le prestataire doit d\xE9signer un responsable d\u2019\xE9quipe."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1
+      ref_id: VI.3.1.b
+      description: "Le responsable d\u2019\xE9quipe doit disposer d\u2019une attestation\
+        \ individuelle de comp\xE9tence en vigueur."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1
+      ref_id: VI.3.1.c
+      description: "Le responsable d\u2019\xE9quipe doit constituer une \xE9quipe\
+        \ compos\xE9e d\u2019auditeurs et, le cas \xE9ch\xE9ant, d\u2019experts disposant\
+        \ de toutes les connaissances et comp\xE9tences requises pour mener la prestation.\
+        \ Le responsable d\u2019\xE9quipe peut, s\u2019il dispose des connaissances\
+        \ et comp\xE9tences suffisantes, r\xE9aliser la prestation seul."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1
+      ref_id: VI.3.1.d
+      description: "Le responsable d\u2019\xE9quipe d\u2019audit doit r\xE9\xE9valuer\
+        \ r\xE9guli\xE8rement le profil et le nombre d\u2019auditeurs et, le cas \xE9\
+        ch\xE9ant, d\u2019experts afin de s\u2019assurer que l\u2019engagement du\
+        \ prestataire reste adapt\xE9 \xE0 la bonne ex\xE9cution de la prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.1
+      ref_id: VI.3.1.e
+      description: "Les auditeurs doivent chacun disposer d\u2019une attestation individuelle\
+        \ de comp\xE9tence en vigueur pour les activit\xE9s qui leur sont confi\xE9\
+        es."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3
+      ref_id: VI.3.2
+      name: "\xC9laboration de la note de cadrage"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.a
+      description: "Le responsable d\u2019\xE9quipe doit \xE9laborer la note de cadrage\
+        \ en concertation avec l\u2019\xE9quipe d\u2019audit et le correspondant de\
+        \ la prestation au sein du commanditaire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.b
+      name: La note de cadrage doit
+      description: "pr\xE9ciser les objectifs, les crit\xE8res, le p\xE9rim\xE8tre\
+        \ et les activit\xE9s d\u2019audit, ainsi que les modalit\xE9s de la prestation\
+        \ : pr\xE9requis, jalons, livrables, dates et lieux d\u2019ex\xE9cution de\
+        \ la prestation, etc."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.c
+      description: "identifier les instances de gouvernance de la prestation et pr\xE9\
+        ciser leurs r\xF4les et fr\xE9quences de r\xE9union"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.d
+      description: "identifier le nom du correspondant de la prestation au sein du\
+        \ commanditaire dont le r\xF4le est de g\xE9rer la relation avec le prestataire,\
+        \ de veiller \xE0 la bonne ex\xE9cution de la prestation et de s\u2019assurer\
+        \ que la convention de service et la note de cadrage sont respect\xE9es"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.e
+      description: "identifier si le commanditaire autorise le prestataire \xE0 sous-traiter\
+        \ tout ou partie de la prestation et, le cas \xE9ch\xE9ant, identifier le\
+        \ prestataire sous-traitant et les activit\xE9s d\u2019audit sous-trait\xE9\
+        es"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.f
+      description: "identifier si le commanditaire autorise le prestataire \xE0 recourir\
+        \ \xE0 des experts"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.g
+      description: "identifier les noms et les coordonn\xE9es des membres de l\u2019\
+        \xE9quipe d\u2019audit et pr\xE9ciser pour chacun d\u2019eux leur r\xF4le\
+        \ (responsable d\u2019\xE9quipe, auditeur ou expert) et les activit\xE9s d\u2019\
+        audit qui leur sont confi\xE9es"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.h
+      description: "annexer les attestations individuelles de comp\xE9tences du responsable\
+        \ d\u2019\xE9quipe et des auditeurs"
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.i
+      description: "identifier les noms, r\xF4les et responsabilit\xE9s des personnes\
+        \ d\xE9sign\xE9es par le commanditaire et intervenant dans le cadre de la\
+        \ prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.j
+      description: "d\xE9crire, le cas \xE9ch\xE9ant, les modalit\xE9s de collaboration\
+        \ avec les tiers (sous-traitants, etc.)"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.k
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.k
+      description: "identifier les droits et besoins d\u2019en conna\xEEtre des informations\
+        \ et supports relatifs \xE0 la prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.l
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.l
+      description: "identifier le marquage des informations et supports relatifs \xE0\
+        \ la prestation selon leur niveau de sensibilit\xE9"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.m
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.m
+      description: "identifier les moyens de protection des informations et supports\
+        \ relatifs \xE0 la prestation selon leur niveau de sensibilit\xE9 et leur\
+        \ marquage"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.n
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.n
+      description: "pr\xE9ciser les livrables de la prestation et d\xE9crire les modalit\xE9\
+        s applicables : contenu, forme, langue, etc."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.o
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.o
+      description: "identifier pour chaque information et support relatif \xE0 la\
+        \ prestation lesquels seront conserv\xE9s, effac\xE9s ou d\xE9truits par le\
+        \ prestataire ou restitu\xE9s au commanditaire, et pr\xE9ciser les modalit\xE9\
+        s de conservation, effacement, destruction et restitution"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.p
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.p
+      description: "identifier, le cas \xE9ch\xE9ant, les exigences l\xE9gales et\
+        \ r\xE9glementaires sp\xE9cifiques auxquelles est soumis le commanditaire,\
+        \ en particulier celles applicables au syst\xE8me audit\xE9"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.q
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.q
+      description: "identifier, le cas \xE9ch\xE9ant, les demandes sp\xE9cifiques\
+        \ du commanditaire notamment les sujets pour lesquels il souhaite que le prestataire\
+        \ ait une attention particuli\xE8re. Il peut s\u2019agir par exemple de contraintes\
+        \ particuli\xE8res auxquelles pourraient \xEAtre soumis le syst\xE8me audit\xE9\
+        \ ou le commanditaire"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.r
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.r
+      description: "[INTRUSION] identifier le mode des tests d\u2019intrusion : bo\xEE\
+        te noire, bo\xEEte grise ou bo\xEEte blanche"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.s
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.s
+      description: "[INTRUSION] identifier les profils d\u2019attaquants \xE0 simuler"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2.t
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.2
+      ref_id: VI.3.2.t
+      description: "\xEAtre valid\xE9e par le correspondant de la prestation au sein\
+        \ du commanditaire et par le responsable d\u2019\xE9quipe et \xE0 chaque mise\
+        \ \xE0 jour durant la prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3
+      ref_id: VI.3.3
+      name: "Mesures de pr\xE9caution particuli\xE8res"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.3
+      ref_id: VI.3.3.a
+      description: "Le responsable d\u2019\xE9quipe doit sensibiliser le commanditaire\
+        \ sur les th\xE8mes identifi\xE9s en Annexe 3 et notamment :\ni. la mise en\
+        \ place de mesures de sauvegarde du syst\xE8me d\u2019information audit\xE9\
+        \ ;\nii. [INTRUSION] la gestion des risques associ\xE9s aux tests d\u2019\
+        intrusion sur les\nenvironnements de production ou mutualis\xE9s ;\niii. [INTRUSION]\
+        \ la mise en place d\u2019une fiche d\u2019autorisation de tests d\u2019intrusion\
+        \ ;\niv. la mise en place de mesures de s\xE9curit\xE9 lorsque la prestation\
+        \ n\xE9cessite l\u2019installation\nd\u2019outils ou l\u2019ex\xE9cution de\
+        \ commandes sur le syst\xE8me audit\xE9."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.3
+      ref_id: VI.3.3.b
+      description: "Le responsable d\u2019\xE9quipe doit obtenir l\u2019accord du\
+        \ commanditaire pour la r\xE9alisation de toute action pouvant entra\xEEner\
+        \ un dysfonctionnement voire un d\xE9ni de service du syst\xE8me d\u2019information\
+        \ audit\xE9."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3
+      ref_id: VI.3.4
+      name: "Elaboration du plan d\u2019audit"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4
+      ref_id: VI.3.4.a
+      description: "Le responsable d\u2019\xE9quipe doit \xE9laborer le plan d\u2019\
+        audit en concertation avec l\u2019\xE9quipe d\u2019audit et le correspondant\
+        \ de la prestation au sein du commanditaire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4
+      ref_id: VI.3.4.b
+      name: "Le plan d\u2019audit doit d\xE9crire :"
+      description: "les objectifs, les crit\xE8res, le p\xE9rim\xE8tre de l\u2019\
+        audit et les activit\xE9s d\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4
+      ref_id: VI.3.4.c
+      description: "le calendrier de la prestation faisant appara\xEEtre les principaux\
+        \ jalons"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4
+      ref_id: VI.3.4.d
+      description: "le nom du responsable de l\u2019\xE9quipe d\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.4
+      ref_id: VI.3.4.e
+      description: "pour chacune des activit\xE9s d\u2019audit :\nPrestataires d\u2019\
+        audit de la s\xE9curit\xE9 des syst\xE8mes d\u2019information \u2013 R\xE9\
+        f\xE9rentiel d\u2019exigences\nVersion Date Crit\xE8re de diffusion Page\n\
+        2.2 01/08/2024 PUBLIC 22/45\ni. les noms des auditeurs, et le cas \xE9ch\xE9\
+        ant des experts, en charge de la r\xE9alisation de\nl\u2019activit\xE9,\n\
+        ii. les dates et lieux de r\xE9alisation de l\u2019activit\xE9,\niii. les\
+        \ \xE9ventuels pr\xE9requis pour la r\xE9alisation de l\u2019activit\xE9 :\
+        \ documents, personnels, etc.,\niv. la m\xE9thode d\u2019audit. La m\xE9thode\
+        \ d\u2019audit doit \xEAtre adapt\xE9e aux objectifs, crit\xE8res et\np\xE9\
+        rim\xE8tre d\u2019audit ainsi qu\u2019aux \xE9ventuelles demandes sp\xE9cifiques\
+        \ formul\xE9es par le\ncommanditaire. Elle doit pr\xE9ciser si l\u2019activit\xE9\
+        \ d\u2019audit est r\xE9alis\xE9e de mani\xE8re\nexhaustive ou par \xE9chantillonnage,\
+        \ et dans ce cas justifier les motifs du choix d\u2019un\n\xE9chantillonnage\
+        \ et pr\xE9ciser la m\xE9thode d\u2019\xE9chantillonnage : m\xE9thode de s\xE9\
+        lection\ndes \xE9chantillons, taille de l\u2019\xE9chantillon, etc."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3
+      ref_id: VI.3.5
+      name: "R\xE9union d\u2019ouverture"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.3.5
+      ref_id: VI.3.5.a
+      description: "Il est recommand\xE9 que le responsable d\u2019\xE9quipe organise\
+        \ une r\xE9union d\u2019ouverture \xE0 laquelle participent a minima le responsable\
+        \ d\u2019\xE9quipe, les auditeurs, les experts le cas \xE9ch\xE9ant, le correspondant\
+        \ de la prestation au sein du commanditaire ainsi que les responsables s\xE9\
+        curit\xE9 et m\xE9tier du syst\xE8me d\u2019information audit\xE9 afin de\
+        \ confirmer, pr\xE9alablement \xE0 l\u2019ex\xE9cution de la prestation, leur\
+        \ accord sur l\u2019ensemble des modalit\xE9s de la prestation, en particulier\
+        \ la note de cadrage et le plan d\u2019audit."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi
+      ref_id: VI.4
+      name: "\xC9tape 4 \u2013 Ex\xE9cution de la prestation"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4
+      ref_id: VI.4.1
+      name: "Exigences g\xE9n\xE9rales"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.1
+      ref_id: VI.4.1.a
+      description: "Les auditeurs doivent, en ad\xE9quation avec les objectifs, crit\xE8\
+        res, p\xE9rim\xE8tre et activit\xE9s d\u2019audit, \xE9valuer le niveau de\
+        \ conformit\xE9 et/ou de s\xE9curit\xE9 du syst\xE8me d\u2019information audit\xE9\
+        ."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.1
+      ref_id: VI.4.1.b
+      description: "Les auditeurs doivent, en adoptant une approche par les risques,\
+        \ identifier les composants du syst\xE8me d\u2019information et les documents\
+        \ pertinents \xE0 auditer ainsi que les personnes pertinentes \xE0 rencontrer."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.1
+      ref_id: VI.4.1.c
+      description: "Les auditeurs doivent rendre compte au responsable d\u2019\xE9\
+        quipe des constats d\u2019audit durant toute la prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4
+      ref_id: VI.4.2
+      name: "Audit d\u2019architecture"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.2
+      ref_id: VI.4.2.a
+      description: "[ARCHI] Le prestataire doit \xEAtre capable, en ad\xE9quation\
+        \ avec les objectifs, crit\xE8res et p\xE9rim\xE8tre de l\u2019audit, d\u2019\
+        \xE9valuer la conformit\xE9 et/ou la s\xE9curit\xE9 de l\u2019architecture\
+        \ du syst\xE8me d\u2019information audit\xE9 en analysant, lorsqu\u2019ils\
+        \ existent, les documents suivants :\ni. les documents d\u2019architecture\
+        \ technique (DAT) ;\nii. les sch\xE9mas d\u2019architecture de niveau 2 et\
+        \ 3 du mod\xE8le OSI ;\niii. les matrices de flux ;\niv. les inventaires des\
+        \ interconnexions avec des r\xE9seaux tiers ou Internet"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.2
+      ref_id: VI.4.2.b
+      description: "[ARCHI] Le prestataire doit \xEAtre capable, en ad\xE9quation\
+        \ avec les objectifs, crit\xE8res et p\xE9rim\xE8tre de l\u2019audit, d\u2019\
+        \xE9valuer la configuration des composants du syst\xE8me d\u2019information\
+        \ audit\xE9 afin d\u2019\xE9valuer la conformit\xE9 et/ou la s\xE9curit\xE9\
+        \ de l\u2019architecture du syst\xE8me d\u2019information audit\xE9."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4
+      ref_id: VI.4.3
+      name: Audit de configuration
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.3
+      ref_id: VI.4.3.a
+      description: "[CONF] Le prestataire doit \xEAtre capable, en ad\xE9quation avec\
+        \ les objectifs, crit\xE8res et p\xE9rim\xE8tre de l\u2019audit, d\u2019\xE9\
+        valuer la conformit\xE9 et/ou la s\xE9curit\xE9 des configurations des \xE9\
+        l\xE9ments suivants :\ni. annuaires d\u2019utilisateurs ;\nii. composants\
+        \ de s\xE9curit\xE9 physique (UTL, lecteurs de badges, cam\xE9ras, etc.) ;\n\
+        iii. composants r\xE9seaux (routeurs, commutateurs, etc.) ;\niv. composants\
+        \ de s\xE9curit\xE9 r\xE9seaux (pare-feu, chiffreurs, antivirus, etc.) ;\n\
+        v. composants de s\xE9curit\xE9 locaux (antivirus, Endpoint Detection and\
+        \ Response (EDR),\netc.) ;\nvi. syst\xE8mes d\u2019exploitation (serveurs,\
+        \ postes de travail, \xE9quipements sp\xE9cifiques) ;\nvii. applications (m\xE9\
+        tier, base de donn\xE9es, serveurs Web, etc.) ;\nviii. environnements d\u2019\
+        informatique en nuage, de conteneurisation et de virtualisation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4
+      ref_id: VI.4.4
+      name: Audit de code source
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.4
+      ref_id: VI.4.4.a
+      description: "[CODE] Le prestataire doit \xEAtre capable, en ad\xE9quation avec\
+        \ les objectifs, crit\xE8res et p\xE9rim\xE8tre de l\u2019audit, d\u2019\xE9\
+        valuer la conformit\xE9 et/ou la s\xE9curit\xE9 du code source du logiciel\
+        \ audit\xE9 en analysant, lorsqu\u2019ils existent, les documents relatifs\
+        \ :\ni. aux sp\xE9cifications du logiciel ;\nii. \xE0 l\u2019architecture\
+        \ du logiciel ;\niii. \xE0 l\u2019impl\xE9mentation du logiciel ;\niv. \xE0\
+        \ l\u2019administration du logiciel ;\nv. \xE0 l\u2019utilisation du logiciel\
+        \ ;\nvi. aux m\xE9thodes et r\xE9sultats de tests du logiciel."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.4
+      ref_id: VI.4.4.b
+      description: "[CODE] Le prestataire doit \xEAtre capable, en ad\xE9quation avec\
+        \ les objectifs, crit\xE8res et p\xE9rim\xE8tre de l\u2019audit, d\u2019\xE9\
+        valuer la conformit\xE9 et/ou la s\xE9curit\xE9 des parties de code source\
+        \ du logiciel audit\xE9 relatives :\ni. aux m\xE9canismes d\u2019authentification\
+        \ ;\nii. aux m\xE9canismes cryptographiques ;\niii. \xE0 la gestion des utilisateurs\
+        \ ;\niv. aux contr\xF4les d\u2019acc\xE8s aux ressources ;\nv. aux interactions\
+        \ avec d\u2019autres applications ;\nvi. \xE0 la validation des donn\xE9es."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4
+      ref_id: VI.4.5
+      name: "Test d\u2019intrusion"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5
+      ref_id: VI.4.5.a
+      description: "[INTRUSION] Le prestataire doit \xEAtre capable de r\xE9aliser\
+        \ un test d\u2019intrusion selon les trois modes : bo\xEEte noire, bo\xEE\
+        te grise, bo\xEEte blanche."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5
+      ref_id: VI.4.5.b
+      description: "[INTRUSION] Le prestataire doit \xEAtre capable de simuler des\
+        \ profils d\u2019attaquants disposant de potentiels d\u2019attaque associ\xE9\
+        s \xE0 une menace strat\xE9gique."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5
+      ref_id: VI.4.5.c
+      description: "[INTRUSION] Le prestataire doit \xEAtre capable de simuler des\
+        \ profils d\u2019attaquants disposant de potentiels d\u2019attaque associ\xE9\
+        s \xE0 une menace syst\xE9mique, hacktiviste ou isol\xE9e."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5
+      ref_id: VI.4.5.d
+      description: "[INTRUSION] Le prestataire ne doit exploiter les vuln\xE9rabilit\xE9\
+        s susceptibles de rendre le syst\xE8me d\u2019information audit\xE9 instable\
+        \ voire provoquer un d\xE9ni de service qu\u2019avec l\u2019accord \xE9crit\
+        \ du commanditaire"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.5
+      ref_id: VI.4.5.e
+      description: "[INTRUSION] Le prestataire doit, si le test d\u2019intrusion n\u2019\
+        est pas, \xE0 la demande du\ncommanditaire, r\xE9alis\xE9 sur l\u2019environnement\
+        \ de production mais sur un autre\nenvironnement (test, pr\xE9production,\
+        \ etc.), v\xE9rifier que cet environnement est comparable \xE0 l\u2019environnement\
+        \ de production, et v\xE9rifier que les r\xE9sultats du test d\u2019intrusion\
+        \ sont applicables \xE0 l\u2019environnement de production."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4
+      ref_id: VI.4.6
+      name: Audit organisationnel et physique
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.6
+      ref_id: VI.4.6.a
+      description: "[ORGAPHY] Le prestataire doit, en ad\xE9quation avec les objectifs,\
+        \ crit\xE8res et p\xE9rim\xE8tre de l\u2019audit, \xE9valuer l\u2019organisation\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.6
+      ref_id: VI.4.6.b
+      description: "[ORGAPHY] Le prestataire doit \xEAtre capable d\u2019\xE9valuer\
+        \ l\u2019organisation de la s\xE9curit\xE9 en analysant, lorsqu\u2019ils existent,\
+        \ les documents suivants :\ni. l\u2019appr\xE9ciation des risques ;\nii. la\
+        \ politique de s\xE9curit\xE9 des syst\xE8mes d\u2019information (PSSI) ;\n\
+        iii. le dossier d\u2019homologation ;\niv. le plan de reprise d\u2019activit\xE9\
+        \ (PRA) ;\nv. le plan de continuit\xE9 d\u2019activit\xE9 (PCA) ;\nvi. le\
+        \ plan d\u2019assurance s\xE9curit\xE9 (PAS) ;\nvii. le processus de gestion\
+        \ des incidents."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.6.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.4.6
+      ref_id: VI.4.6.c
+      description: "[ORGAPHY] Le prestataire doit \xEAtre capable d\u2019\xE9valuer\
+        \ la s\xE9curit\xE9 physique du syst\xE8me d\u2019information audit\xE9 et\
+        \ notamment les syst\xE8mes de :\ni. contr\xF4le d\u2019acc\xE8s physique\
+        \ ;\nii. d\xE9tection d\u2019intrusions physiques ;\niii. vid\xE9oprotection\
+        \ ;\niv. pr\xE9vention des risques naturels : incendie, inondations, etc."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi
+      ref_id: VI.5
+      name: "\xC9tape 5 \u2013 Restitution"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.5.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.5
+      ref_id: VI.5.a
+      description: "Le responsable d\u2019\xE9quipe doit organiser une restitution\
+        \ dite \xAB \xE0 chaud \xBB \xE0 la fin de chaque journ\xE9e afin de pr\xE9\
+        senter au correspondant de la prestation au sein du commanditaire :\ni. un\
+        \ \xE9tat d\u2019avancement de la prestation ;\nii. une synth\xE8se des r\xE9\
+        sultats des activit\xE9s d\u2019audit de la journ\xE9e ;\niii. les \xE9ventuelles\
+        \ non-conformit\xE9s et/ou vuln\xE9rabilit\xE9s identifi\xE9es au cours de\
+        \ la\njourn\xE9e dont l\u2019exploitation pourrait engendrer des risques critiques,\
+        \ les sc\xE9narios\nde menaces associ\xE9es ainsi que les mesures de s\xE9\
+        curit\xE9 recommand\xE9es pour traiter\nces risques ;\niv. les \xE9ventuelles\
+        \ difficult\xE9s rencontr\xE9es durant la journ\xE9e : collaboration difficile\
+        \ ou\nindisponibilit\xE9 du personnel du commanditaire ou du b\xE9n\xE9ficiaire,\
+        \ difficult\xE9 d\u2019acc\xE8s\naux locaux, au syst\xE8me d\u2019information\
+        \ ou \xE0 la documentation, etc."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.5.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.5
+      ref_id: VI.5.b
+      description: "Le responsable d\u2019\xE9quipe doit, d\xE8s la fin de l\u2019\
+        audit et sans attendre que le rapport d\u2019audit soit achev\xE9, informer\
+        \ le commanditaire des constats et des premi\xE8res conclusions de la prestation."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.5.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.5
+      ref_id: VI.5.c
+      description: "Le responsable d\u2019\xE9quipe doit, d\xE8s la fin des activit\xE9\
+        s d\u2019audit et sans attendre que le rapport d\u2019audit soit achev\xE9\
+        , fournir au commanditaire un support \xE9crit pr\xE9sentant pour chaque non-conformit\xE9\
+        \ majeure et/ou vuln\xE9rabilit\xE9 dont l\u2019exploitation pourrait engendrer\
+        \ des risques critiques, les sc\xE9narios de menace associ\xE9s ainsi que\
+        \ les mesures de s\xE9curit\xE9 recommand\xE9es pour traiter ces risques."
+      implementation_groups:
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi
+      ref_id: VI.6
+      name: "\xC9tape 6 \u2013 Elaboration du rapport"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6
+      ref_id: VI.6.a
+      description: "Le prestataire doit \xE9laborer un rapport d\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6
+      ref_id: VI.6.1
+      name: Qualification
+      description: "Le rapport d\u2019audit doit"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1
+      ref_id: VI.6.1.a
+      description: "pr\xE9ciser que la prestation est qualifi\xE9e"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1
+      ref_id: VI.6.1.b
+      description: identifier le niveau de qualification de la prestation
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1
+      ref_id: VI.6.1.c
+      description: "identifier les activit\xE9s d\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.1
+      ref_id: VI.6.1.d
+      description: "identifier les noms et les coordonn\xE9es des membres de l\u2019\
+        \xE9quipe d\u2019audit et pr\xE9ciser pour chacun d\u2019eux leur r\xF4le\
+        \ (responsable d\u2019\xE9quipe, auditeur ou expert) et les activit\xE9s d\u2019\
+        audit r\xE9alis\xE9es."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6
+      ref_id: VI.6.2
+      name: Cadre
+      description: "Le rapport d\u2019audit doit"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.2
+      ref_id: VI.6.2.a
+      description: "d\xE9crire les objectifs, les crit\xE8res, le p\xE9rim\xE8tre\
+        \ d\u2019audit ainsi que les \xE9ventuelles modalit\xE9s particuli\xE8res\
+        \ de la prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.2
+      ref_id: VI.6.2.b
+      description: identifier les dates et lieux de la prestation
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.2
+      ref_id: VI.6.2.c
+      description: "identifier de mani\xE8re pr\xE9cise (r\xE9f\xE9rence, num\xE9\
+        ro de version, date, etc.) les documents sur lesquels le prestataire s\u2019\
+        est fond\xE9 pour r\xE9aliser la prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6
+      ref_id: VI.6.3
+      name: "Synth\xE8se manag\xE9riale"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3
+      ref_id: VI.6.3.a
+      description: "Le rapport d\u2019audit doit pr\xE9senter une synth\xE8se manag\xE9\
+        riale."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3
+      ref_id: VI.6.3.b
+      name: "La synth\xE8se manag\xE9riale doit :"
+      description: "\xEAtre compr\xE9hensible par des personnes non expertes en s\xE9\
+        curit\xE9 des syst\xE8mes d\u2019information"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3
+      ref_id: VI.6.3.c
+      description: "fournir une appr\xE9ciation g\xE9n\xE9rale de la conformit\xE9\
+        \ et/ou de la s\xE9curit\xE9 du syst\xE8me d\u2019information audit\xE9 corr\xE9\
+        lant les r\xE9sultats de l\u2019ensemble des activit\xE9s d\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3
+      ref_id: VI.6.3.d
+      description: "d\xE9crire les risques critiques et les sc\xE9narios de menace\
+        \ associ\xE9s exploitant les non-conformit\xE9s et/ou vuln\xE9rabilit\xE9\
+        s identifi\xE9es durant l\u2019audit ainsi que les mesures de s\xE9curit\xE9\
+        \ recommand\xE9es pour traiter ces risques"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3
+      ref_id: VI.6.3.e
+      description: "d\xE9crire les \xE9ventuelles r\xE9serves relatives aux r\xE9\
+        sultats de la prestation : inad\xE9quation entre les objectifs, les crit\xE8\
+        res, le p\xE9rim\xE8tre, les activit\xE9s et la charge, difficult\xE9s rencontr\xE9\
+        es durant la prestation, limite de l\u2019\xE9chantillonnage, collaboration\
+        \ difficile ou indisponibilit\xE9 du personnel du commanditaire ou du b\xE9\
+        n\xE9ficiaire, difficult\xE9 d\u2019acc\xE8s aux locaux, au syst\xE8me d\u2019\
+        information ou \xE0 la documentation, etc."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.3
+      ref_id: VI.6.3.f
+      description: "recommander un audit de contr\xF4le afin de v\xE9rifier que les\
+        \ mesures de s\xE9curit\xE9 permettant de traiter les risques critiques ont\
+        \ \xE9t\xE9 correctement mises en \u0153uvre."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6
+      ref_id: VI.6.4
+      name: "R\xE9sultats"
+      description: "Le rapport d\u2019audit doit :"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.a
+      description: "identifier de mani\xE8re unique chaque non-conformit\xE9 et/ou\
+        \ vuln\xE9rabilit\xE9 identifi\xE9e durant l\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.b
+      description: "fournir, pour chaque non-conformit\xE9 et/ou vuln\xE9rabilit\xE9\
+        , les preuves d\u2019audit sur lesquelles le constat d\u2019audit est fond\xE9"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.c
+      description: "d\xE9crire chaque non-conformit\xE9 et identifier la ou les exigences\
+        \ non satisfaites"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.d
+      description: "d\xE9crire chaque vuln\xE9rabilit\xE9 et pr\xE9ciser pour chacune\
+        \ d\u2019elle : les profils d\u2019attaquants, les sc\xE9narios d\u2019attaque,\
+        \ les conditions d\u2019exploitation, si une tentative d\u2019exploitation\
+        \ a \xE9t\xE9 r\xE9alis\xE9e et le r\xE9sultat de cette tentative"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.e
+      description: "d\xE9finir, en ad\xE9quation avec les objectifs et les crit\xE8\
+        res de l\u2019audit, une \xE9chelle de classement de la gravit\xE9 des non-conformit\xE9\
+        s et/ou vuln\xE9rabilit\xE9s en fonction des risques encourus"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.f
+      description: "proposer, pour chaque non-conformit\xE9 et/ou vuln\xE9rabilit\xE9\
+        , un niveau de gravit\xE9 selon l\u2019\xE9chelle de classement d\xE9finie"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.g
+      description: "recommander, pour chaque non-conformit\xE9 et/ou vuln\xE9rabilit\xE9\
+        , une ou plusieurs mesures de s\xE9curit\xE9. Ces mesures doivent \xEAtre\
+        \ proportionn\xE9es et adapt\xE9es"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.h
+      description: "d\xE9finir, en ad\xE9quation avec les objectifs et les crit\xE8\
+        res de l\u2019audit, une \xE9chelle de classement de la priorit\xE9 des mesures\
+        \ de s\xE9curit\xE9 recommand\xE9es. Cette \xE9chelle doit au minimum prendre\
+        \ en compte les crit\xE8res suivants : complexit\xE9, co\xFBt et d\xE9lai\
+        \ de mise en \u0153uvre de la mesure de s\xE9curit\xE9"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.i
+      description: "proposer, pour chaque mesure de s\xE9curit\xE9, un niveau de priorit\xE9\
+        \ selon l\u2019\xE9chelle de classement d\xE9finie"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.j
+      description: "identifier, le cas \xE9ch\xE9ant, les activit\xE9s d\u2019audit\
+        \ ayant \xE9t\xE9 r\xE9alis\xE9es en partie de mani\xE8re automatique"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.k
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.k
+      description: "identifier les noms et fonctions des personnes au sein du commanditaire,\
+        \ du b\xE9n\xE9ficiaire et des \xE9ventuels tiers (sous-traitants, etc.) avec\
+        \ qui le prestataire a interagi pour r\xE9aliser la prestation"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.l
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.l
+      description: "Il est recommand\xE9 que le rapport d\u2019audit cat\xE9gorise\
+        \ chaque vuln\xE9rabilit\xE9 selon une nomenclature reconnue"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.m
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.m
+      description: "Il est recommand\xE9 que le prestataire utilise l\u2019\xE9chelle\
+        \ de classement de la gravit\xE9 des non-conformit\xE9s et/ou vuln\xE9rabilit\xE9\
+        s du commanditaire si ce dernier en dispose d\u2019une"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4.n
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.4
+      ref_id: VI.6.4.n
+      description: "Il est recommand\xE9 que le prestataire utilise l\u2019\xE9chelle\
+        \ de classement de la priorit\xE9 des mesures de s\xE9curit\xE9 du commanditaire\
+        \ si ce dernier en dispose d\u2019une"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6
+      ref_id: VI.6.5
+      name: Annexes
+      description: "Le rapport d\u2019audit doit annexer :"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.5
+      ref_id: VI.6.5.a
+      description: "le plan d\u2019audit"
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.6.5
+      ref_id: VI.6.5.b
+      description: la note de cadrage.
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi
+      ref_id: VI.7
+      name: "\xC9tape 7 \u2013 Cl\xF4ture de la prestation"
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7
+      ref_id: VI.7.a
+      description: "Il est recommand\xE9 que, suite \xE0 la remise du rapport d\u2019\
+        audit, le responsable d\u2019\xE9quipe organise une r\xE9union de cl\xF4ture\
+        \ \xE0 laquelle participent a minima le responsable d\u2019\xE9quipe, les\
+        \ auditeurs, les experts le cas \xE9ch\xE9ant, le correspondant de la prestation\
+        \ au sein du commanditaire, la direction du commanditaire ainsi que les responsables\
+        \ s\xE9curit\xE9 et m\xE9tier du syst\xE8me d\u2019information audit\xE9.\
+        \ Cette r\xE9union permet de pr\xE9senter la synth\xE8se du\nrapport d\u2019\
+        audit et de r\xE9pondre aux \xE9ventuelles questions du commanditaire."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7
+      ref_id: VI.7.b
+      description: "Le prestataire doit proc\xE9der \xE0 la restitution, \xE0 l\u2019\
+        effacement ou \xE0 la destruction des informations ou supports relatifs \xE0\
+        \ la prestation pour lesquels il n\u2019a pas obtenu l\u2019accord de conservation\
+        \ du commanditaire dans la note de cadrage."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7
+      ref_id: VI.7.c
+      description: "Le prestataire doit conserver hors ligne les informations et supports\
+        \ relatifs \xE0 la prestation pour lesquels il a obtenu l\u2019accord de conservation\
+        \ du commanditaire dans la note de cadrage."
+      implementation_groups:
+      - S
+      - E
+    - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.7
+      ref_id: VI.7.d
+      description: "Il est recommand\xE9 que le prestataire produise un proc\xE8s-verbal\
+        \ de destruction, d\u2019effacement ou de restitution des informations ou\
+        \ supports relatifs \xE0 la prestation pour lesquels il n\u2019a pas obtenu\
+        \ l\u2019accord de conservation du commanditaire dans la note de cadrage.\
+        \ Ce proc\xE8s-verbal, remis au commanditaire, devrait identifier de mani\xE8\
+        re pr\xE9cise les informations ou supports d\xE9truits, effac\xE9s ou restitu\xE9\
+        s, la date et le mode de\ndestruction, d\u2019effacement ou de restitution."
+      implementation_groups:
+      - E
