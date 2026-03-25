@@ -149,7 +149,10 @@ def _load_or_build() -> DiGraph:
             if cache_mtime >= lib_mtime:
                 t0 = time.time()
                 with open(_CACHE_FILE, "rb") as f:
-                    graph = pickle.load(f)
+                    # SECURITY: This pickle file is application-generated
+                    # (written by _save_cache below), not user-uploaded.
+                    # The cache directory (db/cache/) is not web-accessible.
+                    graph = pickle.load(f)  # nosec B301
                 logger.info(
                     "knowledge_graph_loaded_from_cache",
                     duration=round(time.time() - t0, 2),
@@ -159,7 +162,7 @@ def _load_or_build() -> DiGraph:
             else:
                 logger.info("knowledge_graph_cache_stale")
     except Exception as e:
-        logger.warning("knowledge_graph_cache_load_failed", error=str(e))
+        logger.warning("knowledge_graph_cache_load_failed", error=e)
 
     graph = _build_graph()
     _save_cache(graph)
@@ -176,7 +179,7 @@ def _save_cache(graph: DiGraph) -> None:
             pickle.dump(graph, f, protocol=pickle.HIGHEST_PROTOCOL)
         logger.info("knowledge_graph_cache_saved", path=str(_CACHE_FILE))
     except Exception as e:
-        logger.warning("knowledge_graph_cache_save_failed", error=str(e))
+        logger.warning("knowledge_graph_cache_save_failed", error=e)
 
 
 def _build_graph() -> DiGraph:
@@ -200,7 +203,7 @@ def _build_graph() -> DiGraph:
             with open(filepath, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
         except Exception as e:
-            logger.warning("yaml_parse_failed", file=filepath.name, error=str(e))
+            logger.warning("yaml_parse_failed", file=filepath.name, error=e)
             continue
 
         if not isinstance(data, dict):

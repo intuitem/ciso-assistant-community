@@ -1590,8 +1590,8 @@ def startup(sender: AppConfig, **kwargs):
         from chat.knowledge_graph import get_graph
 
         get_graph()
-    except Exception:
-        pass  # non-critical — will build on first query instead
+    except Exception as e:
+        logger.debug("knowledge_graph_prewarm_skipped", error=e)
 
 
 class CoreConfig(AppConfig):

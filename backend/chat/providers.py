@@ -358,7 +358,7 @@ class OllamaLLM:
                 content=message.get("content", "")[:200],
             )
         except Exception as e:
-            logger.warning("tool_call_failed", error=str(e))
+            logger.warning("tool_call_failed", error=e)
 
         return None
 
@@ -497,7 +497,7 @@ class OpenAICompatibleLLM:
                 content=message.get("content", "")[:200],
             )
         except Exception as e:
-            logger.warning("tool_call_failed", error=str(e))
+            logger.warning("tool_call_failed", error=e)
 
         return None
 
@@ -604,8 +604,8 @@ def get_chat_settings() -> dict:
                 "openai_model": gs.value.get("openai_model", ""),
                 "openai_api_key": gs.value.get("openai_api_key", ""),
             }
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("chat_settings_load_failed", error=e)
     return {
         "llm_provider": "ollama",
         "ollama_base_url": "http://localhost:11434",
@@ -704,7 +704,7 @@ def get_llm() -> LLM:
             logger.warning(
                 "openai_compatible_connection_failed",
                 base_url=base_url,
-                error=str(e),
+                error=e,
             )
         # Don't fall through to Ollama — user explicitly chose openai_compatible
         logger.info(
@@ -730,8 +730,8 @@ def get_llm() -> LLM:
                 model=settings["ollama_model"],
             )
             return _cached_llm
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("ollama_connection_failed", error=e)
 
     logger.info("no_llm_available", mode="retrieval-only")
     # Don't cache StubLLM — retry on next request in case LLM comes back
@@ -746,5 +746,6 @@ def is_ollama_available() -> bool:
 
         resp = httpx.get(f"{settings['ollama_base_url']}/api/tags", timeout=5)
         return resp.status_code == 200
-    except Exception:
+    except Exception as e:
+        logger.debug("ollama_health_check_failed", error=e)
         return False

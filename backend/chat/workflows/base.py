@@ -226,7 +226,7 @@ class Workflow:
             )
             return result
         except Exception as e:
-            logger.error("call_llm_failed", workflow=self.name, error=str(e))
+            logger.error("call_llm_failed", workflow=self.name, error=e)
             return ""
 
     def _stream_llm(

@@ -31,7 +31,7 @@ def _get_reranker():
             _reranker = CrossEncoder(_RERANKER_MODEL)
             logger.info("reranker_loaded", model=_RERANKER_MODEL)
         except Exception as e:
-            logger.warning("reranker_load_failed", error=str(e))
+            logger.warning("reranker_load_failed", error=e)
     return _reranker
 
 
@@ -109,7 +109,7 @@ def search(
             )
             all_results.extend(user_results.points)
         except Exception as e:
-            logger.error("qdrant_user_search_failed", error=str(e))
+            logger.error("qdrant_user_search_failed", error=e)
 
     # --- Search 2: Library knowledge (shared, no folder filter) ---
     if source_type in (None, "library"):
@@ -130,7 +130,7 @@ def search(
             )
             all_results.extend(library_results.points)
         except Exception as e:
-            logger.error("qdrant_library_search_failed", error=str(e))
+            logger.error("qdrant_library_search_failed", error=e)
 
     # Merge and deduplicate
     seen_ids = set()
@@ -157,7 +157,7 @@ def search(
                 duration=round(time.time() - t0, 2),
             )
         except Exception as e:
-            logger.warning("reranker_failed", error=str(e))
+            logger.warning("reranker_failed", error=e)
             merged = merged[:top_k]
     else:
         merged = merged[:top_k]

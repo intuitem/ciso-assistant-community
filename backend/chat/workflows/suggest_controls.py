@@ -323,8 +323,8 @@ class SuggestControlsWorkflow(Workflow):
                 return {
                     str(pk) for pk in ra.applied_controls.values_list("id", flat=True)
                 }
-        except Exception:
-            pass
+        except (LookupError, AttributeError) as e:
+            logger.warning("attached_controls_lookup_failed", error=e)
         return set()
 
     def _build_ranking_prompt(

@@ -259,7 +259,7 @@ def _parse_library_yaml(filepath) -> list[dict]:
         with open(filepath, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
     except Exception as e:
-        logger.warning("failed_to_parse_yaml", file=str(filepath), error=str(e))
+        logger.warning("failed_to_parse_yaml", file=str(filepath), error=e)
         return []
 
     if not isinstance(data, dict):
@@ -424,7 +424,7 @@ def index_library_knowledge_base():
             logger.error(
                 "library_embedding_failed",
                 batch_start=batch_start,
-                error=str(e),
+                error=e,
             )
             continue
 
@@ -457,7 +457,7 @@ def index_library_knowledge_base():
             logger.error(
                 "library_upsert_failed",
                 batch_start=batch_start,
-                error=str(e),
+                error=e,
             )
 
     logger.info(

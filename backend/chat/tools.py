@@ -728,8 +728,8 @@ def _build_create_proposal(
                             ).first()
                             if parent_obj and hasattr(parent_obj, "folder_id"):
                                 folder_id = str(parent_obj.folder_id)
-                        except Exception:
-                            pass
+                        except (LookupError, AttributeError) as e:
+                            logger.warning("parent_folder_lookup_failed", error=e)
                 break
 
     if not folder_id:
@@ -799,8 +799,8 @@ def _build_create_proposal(
                     matrix = RiskMatrix.objects.filter(is_enabled=True).first()
                 if matrix:
                     entry["risk_matrix"] = str(matrix.id)
-            except Exception:
-                pass
+            except LookupError as e:
+                logger.warning("risk_matrix_lookup_failed", error=e)
 
         proposal_items.append(entry)
 
@@ -898,8 +898,8 @@ def _build_attach_proposal(
                 req = ra_obj.requirement
                 # Use the requirement's description or name as search context
                 search = req.description[:200] if req.description else (req.name or "")
-        except Exception:
-            pass
+        except (LookupError, AttributeError) as e:
+            logger.warning("requirement_context_lookup_failed", error=e)
 
     query_args = {
         "model": related_model_key,
@@ -923,7 +923,8 @@ def _build_attach_proposal(
             )
         else:
             existing_ids = set()
-    except Exception:
+    except (LookupError, AttributeError, TypeError) as e:
+        logger.warning("existing_ids_lookup_failed", error=e)
         existing_ids = set()
 
     # Filter out already-attached objects
