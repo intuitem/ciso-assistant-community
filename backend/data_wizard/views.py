@@ -707,6 +707,15 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "extralarge": "XL",
         "xl": "XL",
     }
+    COST_KEYS: Final[frozenset[str]] = frozenset(
+        {
+            "amortization_period",
+            "build_fixed_cost",
+            "build_people_days",
+            "run_fixed_cost",
+            "run_people_days",
+        }
+    )
 
     def create_context(self):
         return None, None
@@ -765,15 +774,23 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             if ref_control:
                 reference_control_id = ref_control.id
 
+        csf_function = record.get("csf_function", "govern")
+        if isinstance(csf_function, str):
+            csf_function = csf_function.lower()
+
+        category = record.get("category", "")
+        if isinstance(category, str):
+            category = category.lower()
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
-            "category": record.get("category", ""),
+            "category": category,
             "folder": domain,
             "status": record.get("status", "to_do"),
             "priority": priority,
-            "csf_function": record.get("csf_function", "govern"),
+            "csf_function": csf_function,
             "effort": effort,
             "control_impact": control_impact,
             "link": record.get("link", ""),
@@ -785,6 +802,22 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
 
         if reference_control_id:
             data["reference_control"] = reference_control_id
+
+        has_cost_related_key = any(key in self.COST_KEYS for key in record.keys())
+        if has_cost_related_key:
+            cost = {
+                "currency": "€",
+                "amortization_period": record.get("amortization_period", 1),
+                "build": {
+                    "fixed_cost": record.get("build_fixed_cost", 0),
+                    "people_days": record.get("build_people_days", 0),
+                },
+                "run": {
+                    "fixed_cost": record.get("run_fixed_cost", 0),
+                    "people_days": record.get("run_people_days", 0),
+                },
+            }
+            data["cost"] = cost
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
