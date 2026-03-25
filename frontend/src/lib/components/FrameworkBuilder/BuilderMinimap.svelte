@@ -92,6 +92,30 @@
 			</span>
 		{/if}
 
+		<!-- Preview button -->
+		{#if $unsavedStore}
+			<span
+				class="shrink-0 text-xs text-gray-300 px-2 py-1 flex items-center gap-1 cursor-not-allowed"
+				title="Save your draft first to preview"
+			>
+				<i class="fa-solid fa-eye text-[10px]"></i>
+				Preview
+			</span>
+		{:else}
+			<a
+				href="/frameworks/{frameworkId}/builder/preview"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="shrink-0 text-xs text-purple-600 hover:text-purple-800 transition-colors px-2 py-1 flex items-center gap-1"
+				title="Preview as respondent (opens in new tab)"
+			>
+				<i class="fa-solid fa-eye text-[10px]"></i>
+				Preview
+			</a>
+		{/if}
+
+		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+
 		{#each $sectionsStore as section (section.node.id)}
 			<button
 				type="button"
@@ -116,9 +140,7 @@
 			<button
 				type="button"
 				class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5
-					{$savingStore
-					? 'bg-gray-400 text-white cursor-wait'
-					: 'bg-gray-600 text-white hover:bg-gray-700'}"
+					{$savingStore ? 'bg-gray-400 text-white cursor-wait' : 'bg-gray-600 text-white hover:bg-gray-700'}"
 				disabled={$savingStore}
 				onclick={() => builder.flushDraft()}
 				title="Save draft (Ctrl+S)"

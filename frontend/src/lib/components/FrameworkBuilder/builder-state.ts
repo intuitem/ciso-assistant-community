@@ -275,7 +275,7 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
  * Hydrate draft JSON (flat arrays with _id suffixed FK fields) into
  * the RequirementNode[] and Question[] format expected by buildTree.
  */
-function hydrateDraft(
+export function hydrateDraft(
 	draft: DraftJSON,
 	frameworkId: string
 ): {
@@ -394,7 +394,7 @@ export interface BuilderStore {
 	destroy: () => void;
 }
 
-function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSection[] {
+export function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSection[] {
 	const questionsByNode = new Map<string, Question[]>();
 	for (const q of questions) {
 		const nodeId = typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
@@ -483,8 +483,8 @@ export function createBuilderState(
 	const errors = writable<Map<string, string>>(new Map());
 	const activeSection = writable<string>(initialSections[0]?.node.id ?? '');
 	const hasPendingFlush = writable(false);
-	const unsaved = writable(false);  // local edits not yet saved to draft
-	const unpublished = writable(false);  // draft differs from live DB
+	const unsaved = writable(false); // local edits not yet saved to draft
+	const unpublished = writable(false); // draft differs from live DB
 
 	function markDirty() {
 		unsaved.set(true);
@@ -539,7 +539,7 @@ export function createBuilderState(
 		try {
 			const draft = serializeDraft(get(framework), get(sections));
 			await apiSaveDraft(frameworkId, draft);
-			unsaved.set(false);  // saved to draft, but still unpublished
+			unsaved.set(false); // saved to draft, but still unpublished
 			clearError('save-draft');
 		} catch (e) {
 			setError('save-draft', (e as Error).message);
