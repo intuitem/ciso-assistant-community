@@ -859,24 +859,14 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
         if has_cost_related_key:
             cost = {
                 "currency": context.currency,
-                "amortization_period": int(
-                    record.get("amortization_period") or 1
-                ),
+                "amortization_period": int(record.get("amortization_period") or 1),
                 "build": {
-                    "fixed_cost": int(
-                        record.get("build_fixed_cost") or 0
-                    ),
-                    "people_days": int(
-                        record.get("build_people_days") or 0
-                    ),
+                    "fixed_cost": int(record.get("build_fixed_cost") or 0),
+                    "people_days": int(record.get("build_people_days") or 0),
                 },
                 "run": {
-                    "fixed_cost": int(
-                        record.get("run_fixed_cost") or 0
-                    ),
-                    "people_days": int(
-                        record.get("run_people_days") or 0
-                    ),
+                    "fixed_cost": int(record.get("run_fixed_cost") or 0),
+                    "people_days": int(record.get("run_people_days") or 0),
                 },
             }
             data["cost"] = cost
