@@ -72,7 +72,7 @@ docker compose exec -it backend poetry run python manage.py createsuperuser
 
 Open your browser at:
 
-```
+```text
 https://your-domain:8443
 ```
 
@@ -93,11 +93,44 @@ This stops and removes all containers. Your data in `db/` is preserved.
 
 ## Updating
 
+### Recommended: pin a specific version
+
+By default, the generated `docker-compose.yml` uses the `latest` tag for backend and frontend images. For production, we recommend pinning a specific version to control when upgrades happen.
+
+In your `docker-compose.yml`, replace:
+
+```yaml
+image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
+image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest
+```
+
+Available versions can be found on the [releases page](https://github.com/intuitem/ciso-assistant-community/releases).
+
+Replace with a specific version tag (e.g. `v1.0.0`):
+
+```yaml
+image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:v1.0.0
+image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:v1.0.0
+```
+
+Then to upgrade, update the tag to the desired version and run:
+
+```bash
+cd enterprise/config
+docker compose up -d
+```
+
+### Alternative: use latest
+
+If you prefer to always track the latest release:
+
 ```bash
 cd enterprise/config
 docker compose pull
 docker compose up -d
 ```
+
+> **Note**: `pull_policy: always` is set on application services, so `docker compose up -d` will also pull newer images if available. Running `docker compose pull` first ensures all images are updated before restarting.
 
 Database migrations are applied automatically on restart.
 
