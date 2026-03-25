@@ -438,7 +438,7 @@ objects:
       ref_id: V.1.a
       description: "Les auditeurs et responsables d\u2019\xE9quipe doivent ma\xEE\
         triser les bonnes pratiques et la m\xE9thodologie d\u2019audit d\xE9crites\
-        \ dans la norme  ISO 1901."
+        \ dans la norme  ISO 19011."
       implementation_groups:
       - S
       - E
@@ -449,7 +449,7 @@ objects:
       ref_id: V.1.b
       description: "Les auditeurs doivent poss\xE9der les qualit\xE9s personnelles\
         \ d\xE9crites au chapitre \xAB 7.2.2 Comportements personnels \xBB de la norme\
-        \  ISO 1901."
+        \  ISO 19011."
       implementation_groups:
       - S
       - E
