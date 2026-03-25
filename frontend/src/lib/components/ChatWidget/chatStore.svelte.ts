@@ -236,6 +236,9 @@ async function streamResponse(userMessage: string) {
 		});
 
 		if (!response.ok) {
+			if (response.status === 429) {
+				throw new Error('rate_limited');
+			}
 			throw new Error(`Chat request failed: ${response.statusText}`);
 		}
 
@@ -408,11 +411,22 @@ async function streamResponse(userMessage: string) {
 			return;
 		}
 
+		const errMsg = error instanceof Error ? error.message : '';
+		let userMessage: string;
+		if (errMsg === 'rate_limited') {
+			userMessage =
+				'Chat is temporarily rate-limited. Please wait a moment before sending another message.';
+		} else if (errMsg === 'Stream timeout') {
+			userMessage =
+				'The response took too long. The LLM service may be overloaded. Your message was not lost — try again.';
+		} else {
+			userMessage =
+				'Sorry, I could not connect to the chat service. Please check that the LLM service is configured and running.';
+		}
 		messages.push({
 			id: generateId(),
 			role: 'assistant',
-			content:
-				'Sorry, I could not connect to the chat service. Please check that the LLM service is configured and running.',
+			content: userMessage,
 			timestamp: new Date()
 		});
 		saveState();

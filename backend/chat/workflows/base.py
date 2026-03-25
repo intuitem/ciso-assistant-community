@@ -16,33 +16,11 @@ from chat.page_context import ParsedContext
 
 logger = structlog.get_logger(__name__)
 
-# Language code → explicit name for LLM instructions
-_LANG_MAP = {
-    "fr": "French",
-    "en": "English",
-    "de": "German",
-    "es": "Spanish",
-    "it": "Italian",
-    "nl": "Dutch",
-    "pt": "Portuguese",
-    "ar": "Arabic",
-    "pl": "Polish",
-    "ro": "Romanian",
-    "sv": "Swedish",
-    "da": "Danish",
-    "cs": "Czech",
-    "uk": "Ukrainian",
-    "el": "Greek",
-    "tr": "Turkish",
-    "hr": "Croatian",
-    "zh": "Chinese",
-    "lt": "Lithuanian",
-    "ko": "Korean",
-}
+from chat.constants import LANG_MAP
 
 
 def _language_instruction(lang_code: str = "en") -> str:
-    lang_name = _LANG_MAP.get(lang_code[:2], "English")
+    lang_name = LANG_MAP.get(lang_code[:2], "English")
     return f"\n\nYou MUST respond in {lang_name}."
 
 

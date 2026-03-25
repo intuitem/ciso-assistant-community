@@ -17,31 +17,9 @@ from .serializers import (
 )
 from .providers import get_llm, is_ollama_available
 
+from .constants import LANG_MAP, LLM_HISTORY_LIMIT
+
 logger = structlog.get_logger(__name__)
-
-_LANG_MAP = {
-    "fr": "French",
-    "en": "English",
-    "de": "German",
-    "es": "Spanish",
-    "it": "Italian",
-    "nl": "Dutch",
-    "pt": "Portuguese",
-    "ar": "Arabic",
-    "pl": "Polish",
-    "ro": "Romanian",
-    "sv": "Swedish",
-    "da": "Danish",
-    "cs": "Czech",
-    "uk": "Ukrainian",
-    "el": "Greek",
-    "tr": "Turkish",
-    "hr": "Croatian",
-    "zh": "Chinese",
-    "lt": "Lithuanian",
-    "ko": "Korean",
-}
-
 
 import re as _re
 
@@ -173,7 +151,7 @@ class ChatSessionViewSet(BaseModelViewSet):
             # like "give me more", "next page", "show me page 3"
             last_query_meta = _get_last_query_meta(session)
             user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
-            lang_name = _LANG_MAP.get(user_lang, "English")
+            lang_name = LANG_MAP.get(user_lang, "English")
             tool_prompt = f"LANGUAGE: Generate all names and descriptions in {lang_name}.\n\n{user_content}"
             if page_context_prefix or last_query_meta:
                 tool_prompt = f"LANGUAGE: Generate all names and descriptions in {lang_name}.\n\n{page_context_prefix}"
@@ -504,13 +482,13 @@ class ChatSessionViewSet(BaseModelViewSet):
         ):
             history_messages = history_messages[:-1]
         # Keep only the last 20 messages to stay within context limits
-        history_messages = history_messages[-20:]
+        history_messages = history_messages[-LLM_HISTORY_LIMIT:]
 
         # Assemble context with structured priorities
         from .context import ContextBuilder
 
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
-        lang_name = _LANG_MAP.get(user_lang, "English")
+        lang_name = LANG_MAP.get(user_lang, "English")
 
         ctx_builder = ContextBuilder(max_chars=12000)
         ctx_builder.add(

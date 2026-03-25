@@ -760,6 +760,9 @@ def _build_create_proposal(
         "locale",
         "default_locale",
         "provider",
+        "workflow_state",
+        "owner",
+        "meta",
     }
 
     proposal_items = []
