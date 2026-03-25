@@ -146,24 +146,60 @@
 		)
 	);
 
-	// --- Assessable items only (for prev/next navigation) ---
-	const assessableItems = $derived(requirementAssessments.filter((ra) => ra.assessable));
+	// --- Navigation items: assessable items + splash screen nodes ---
+	type NavItem =
+		| { type: 'assessment'; data: (typeof requirementAssessments)[0] }
+		| { type: 'splash'; data: Record<string, any> };
+
+	const assessmentNavItems: NavItem[] = $derived(
+		requirementAssessments
+			.filter((ra) => ra.assessable)
+			.map((ra) => ({ type: 'assessment' as const, data: ra }))
+	);
+
+	const splashNavItems: NavItem[] = $derived(
+		data.requirements
+			.filter((r: Record<string, any>) => r.display_mode === 'splash')
+			.map((r: Record<string, any>) => ({ type: 'splash' as const, data: r }))
+	);
+
+	const navItems: NavItem[] = $derived(
+		[...assessmentNavItems, ...splashNavItems].sort((a, b) => {
+			const orderA =
+				a.type === 'assessment'
+					? (requirementHashmap[a.data.requirement?.id]?.order_id ?? 0)
+					: (a.data.order_id ?? 0);
+			const orderB =
+				b.type === 'assessment'
+					? (requirementHashmap[b.data.requirement?.id]?.order_id ?? 0)
+					: (b.data.order_id ?? 0);
+			return orderA - orderB;
+		})
+	);
+
+	const assessableItems = $derived(
+		navItems.filter((item): item is NavItem & { type: 'assessment' } => item.type === 'assessment')
+	);
+
 	let currentIndex = $state(0);
-	const currentItem = $derived(assessableItems[currentIndex]);
+	const currentNavItem = $derived(navItems[currentIndex]);
+	const currentItem = $derived(currentNavItem?.type === 'assessment' ? currentNavItem.data : null);
+	const currentSplashNode = $derived(
+		currentNavItem?.type === 'splash' ? currentNavItem.data : null
+	);
 
 	function goTo(index: number) {
-		if (index >= 0 && index < assessableItems.length) {
+		if (index >= 0 && index < navItems.length) {
 			currentIndex = index;
-			// Scroll to top of the requirement card
 			const el = document.getElementById('current-requirement');
 			if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		}
 	}
 
-	// --- Progress ---
+	// --- Progress (only assessable items count) ---
 	const totalAssessable = $derived(assessableItems.length);
 	const assessedCount = $derived(
-		assessableItems.filter((ra) => ra.result !== 'not_assessed').length
+		assessableItems.filter((item) => item.data.result !== 'not_assessed').length
 	);
 	const progressPercent = $derived(
 		totalAssessable > 0 ? Math.round((assessedCount / totalAssessable) * 100) : 0
@@ -348,8 +384,16 @@
 
 	// --- ToC items ---
 	const tocSections = $derived(
-		assessableItems.map((ra, index) => {
-			const req = ra.requirement;
+		navItems.map((item, index) => {
+			if (item.type === 'splash') {
+				return {
+					index,
+					id: item.data.id,
+					title: item.data.name || 'Splash',
+					result: '__splash__'
+				};
+			}
+			const req = item.data.requirement;
 			const refId = req?.ref_id ?? '';
 			const name = req?.name ?? '';
 			let title = '';
@@ -364,9 +408,9 @@
 			}
 			return {
 				index,
-				id: ra.id,
+				id: item.data.id,
 				title,
-				result: ra.result
+				result: item.data.result
 			};
 		})
 	);
@@ -463,7 +507,9 @@
 					>
 						<span
 							class="inline-block w-2 h-2 rounded-full flex-shrink-0"
-							style="background-color: {complianceResultColorMap[section.result] ?? '#d1d5db'};"
+							style="background-color: {section.result === '__splash__'
+								? '#a855f7'
+								: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
 						></span>
 						<span class="truncate">{section.title}</span>
 					</button>
@@ -495,7 +541,7 @@
 					</div>
 				</div>
 				<div class="text-sm text-gray-500">
-					{currentIndex + 1} / {totalAssessable}
+					{currentIndex + 1} / {navItems.length}
 				</div>
 			</div>
 			<!-- ETA / Due date -->
@@ -639,8 +685,23 @@
 			</div>
 		{/if}
 
-		<!-- Current requirement assessment -->
-		{#if currentItem}
+		<!-- Current item: splash screen or requirement assessment -->
+		{#if currentSplashNode}
+			<div
+				id="current-requirement"
+				class="card bg-white shadow-md border-l-4 border-l-purple-400 overflow-hidden"
+			>
+				{#if currentSplashNode.name}
+					<div class="px-6 py-4 border-b border-purple-100 flex items-center gap-2">
+						<i class="fa-solid fa-display text-purple-400"></i>
+						<span class="text-lg font-semibold text-gray-800">{currentSplashNode.name}</span>
+					</div>
+				{/if}
+				<div class="px-6 py-5">
+					<MarkdownRenderer content={currentSplashNode.description} />
+				</div>
+			</div>
+		{:else if currentItem}
 			{@const requirementAssessment = currentItem}
 			{@const requirement =
 				requirementHashmap[
@@ -1005,8 +1066,10 @@
 					<CommentsPanel parentType="requirement_assessment" parentId={requirementAssessment.id} />
 				{/if}
 			</div>
+		{/if}
 
-			<!-- Previous / Next navigation -->
+		<!-- Previous / Next navigation (shown for both splash and assessment items) -->
+		{#if currentSplashNode || currentItem}
 			<div class="flex items-center justify-between card bg-white shadow-sm px-5 py-3">
 				<button
 					class="btn preset-tonal-surface"
@@ -1017,11 +1080,11 @@
 					{m.previous()}
 				</button>
 				<span class="text-sm text-gray-500">
-					{currentIndex + 1} / {totalAssessable}
+					{currentIndex + 1} / {navItems.length}
 				</span>
 				<button
 					class="btn preset-filled-primary-500"
-					disabled={currentIndex >= assessableItems.length - 1}
+					disabled={currentIndex >= navItems.length - 1}
 					onclick={() => goTo(currentIndex + 1)}
 				>
 					{m.next()}
