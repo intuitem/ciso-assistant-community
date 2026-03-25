@@ -79,7 +79,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 ### Template
 
-{% file src="../.gitbook/assets/applied_controls_sample.xlsx" %}
+{% file src="../.gitbook/assets/applied_controls_sample (1).xlsx" %}
 
 ### Supported fields
 
@@ -116,6 +116,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
   * `XL`
   * full names also accepted, e.g. `Extra Small`
 * control\_impact - integer 1–5; also accepted as `impact`
+*
 * start\_date - date (YYYY-MM-DD)
 * eta - estimated completion date (YYYY-MM-DD)
 * expiry\_date - expiry date (YYYY-MM-DD)
@@ -123,7 +124,12 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 * observation - free-text observation
 * filtering\_labels - pipe- or comma-separated label names (created if missing)
 * reference\_control - lookup by `ref_id`; also accepted as `reference_control_ref_id`
-* owner&#x20;
+* owner
+* amortization\_period - integer (1–50), defaults to 1
+* build\_fixed\_cost - number, defaults to 0
+* build\_people\_days - number, defaults to 0
+* run\_fixed\_cost - number, defaults to 0
+* run\_people\_days - number, defaults to 0
 
 ### Special considerations
 
