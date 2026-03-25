@@ -555,6 +555,11 @@ class ChatSessionViewSet(BaseModelViewSet):
                                 "url_slug": creation_proposal["url_slug"],
                                 "display_name": creation_proposal["display_name"],
                                 "items": creation_proposal["items"],
+                                "folder_id": creation_proposal.get("folder_id"),
+                                "folder_name": creation_proposal.get("folder_name", ""),
+                                "available_folders": creation_proposal.get(
+                                    "available_folders", []
+                                ),
                             }
                         )
                     yield f"data: {action_data}\n\n"

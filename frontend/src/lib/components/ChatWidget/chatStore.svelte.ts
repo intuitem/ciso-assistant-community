@@ -574,6 +574,15 @@ export async function confirmAction(messageId: string) {
 			if (res.ok) {
 				action.results = selectedItems.map((i) => ({ name: i.name, id: i.id }));
 				action.status = 'created';
+				const names = selectedItems.map((i) => i.name).join(', ');
+				messages.push({
+					id: generateId(),
+					role: 'assistant',
+					content: `Attached ${selectedItems.length} ${action.displayName}: ${names}.`,
+					timestamp: new Date()
+				});
+				messages = [...messages];
+				saveState();
 				window.location.reload();
 			} else {
 				const err = await res.json().catch(() => ({ detail: res.statusText }));
@@ -622,9 +631,34 @@ export async function confirmAction(messageId: string) {
 
 		const allOk = action.results!.every((r) => !r.error);
 		action.status = allOk ? 'created' : 'error';
+
+		// Record the outcome so the chat history knows what was created
+		if (allOk) {
+			const names = action.results!.map((r) => r.name).join(', ');
+			const folderInfo = action.folderName ? ` in domain "${action.folderName}"` : '';
+			messages.push({
+				id: generateId(),
+				role: 'assistant',
+				content: `Created ${action.results!.length} ${action.displayName}${folderInfo}: ${names}.`,
+				timestamp: new Date()
+			});
+		}
 		messages = [...messages];
 		if (allOk) {
-			window.location.reload();
+			saveState();
+			// Navigate to the created object if it's a complex type (study, assessment)
+			const navigableModels: Record<string, string> = {
+				ebios_rm_study: '/ebios-rm/',
+				risk_assessment: '/risk-assessments/',
+				compliance_assessment: '/compliance-assessments/'
+			};
+			const basePath = action.modelKey ? navigableModels[action.modelKey] : undefined;
+			if (basePath && action.results!.length === 1 && action.results![0].id) {
+				const { goto } = await import('$lib/utils/breadcrumbs');
+				goto(`${basePath}${action.results![0].id}`, { label: '', breadcrumbAction: 'push' });
+			} else {
+				window.location.reload();
+			}
 		}
 	}
 	saveState();
