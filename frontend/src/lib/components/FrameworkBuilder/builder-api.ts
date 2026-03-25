@@ -10,6 +10,7 @@ export interface DraftJSON {
 	framework_meta: {
 		name: string;
 		description: string | null;
+		annotation?: string | null;
 		min_score: number;
 		max_score: number;
 		scores_definition: Record<string, unknown> | null;

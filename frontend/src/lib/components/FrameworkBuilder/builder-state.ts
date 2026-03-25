@@ -68,10 +68,18 @@ export interface OutcomeRule {
 	expression: string;
 }
 
+export interface ImplementationGroup {
+	ref_id: string;
+	name: string;
+	description: string;
+	default_selected?: boolean;
+}
+
 export interface Framework {
 	id: string;
 	name: string;
 	description: string | null;
+	annotation: string | null;
 	folder: { id: string; str: string };
 	library: { id: string; str: string } | null;
 	min_score: number;
@@ -259,6 +267,7 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 		framework_meta: {
 			name: fw.name,
 			description: fw.description,
+			annotation: fw.annotation,
 			min_score: fw.min_score,
 			max_score: fw.max_score,
 			scores_definition: fw.scores_definition,
@@ -287,6 +296,7 @@ export function hydrateDraft(
 	const frameworkPatch: Partial<Framework> = {
 		name: meta.name,
 		description: meta.description,
+		annotation: meta.annotation ?? null,
 		min_score: meta.min_score,
 		max_score: meta.max_score,
 		scores_definition: meta.scores_definition,

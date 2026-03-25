@@ -12,6 +12,7 @@
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import SectionBlock from './SectionBlock.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
+	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 
 	interface Props {
 		framework: Framework;
@@ -36,6 +37,54 @@
 
 	let urnCopied = $state(false);
 	let showScoringSettings = $state(false);
+	let showScalesEditor = $state(false);
+
+	interface ScaleEntry {
+		score: number;
+		name: string;
+		description: string;
+	}
+
+	function getScaleEntries(): ScaleEntry[] {
+		const def = $frameworkStore.scores_definition;
+		if (!def) return [];
+		if (Array.isArray(def)) {
+			return def.map((e) => ({
+				score: (e as Record<string, unknown>).score as number ?? 0,
+				name: (e as Record<string, unknown>).name as string ?? '',
+				description: (e as Record<string, unknown>).description as string ?? ''
+			}));
+		}
+		if ('scale' in def && Array.isArray(def.scale)) {
+			return (def.scale as Record<string, unknown>[]).map((e) => ({
+				score: e.score as number ?? 0,
+				name: e.name as string ?? '',
+				description: e.description as string ?? ''
+			}));
+		}
+		return [];
+	}
+
+	function setScaleEntries(entries: ScaleEntry[]) {
+		const def = $frameworkStore.scores_definition;
+		if (entries.length === 0) {
+			// Remove scale from definition, keep other keys
+			if (def && typeof def === 'object' && !Array.isArray(def)) {
+				const { scale: _, ...rest } = def as Record<string, unknown>;
+				builder.updateFramework({
+					scores_definition: Object.keys(rest).length > 0 ? rest : null
+				});
+			} else {
+				builder.updateFramework({ scores_definition: null });
+			}
+			return;
+		}
+		// Preserve other keys (e.g. aggregation) alongside scale
+		const base = def && typeof def === 'object' && !Array.isArray(def) ? { ...def } : {};
+		builder.updateFramework({
+			scores_definition: { ...base, scale: entries }
+		});
+	}
 
 	function getAggregation(): string {
 		const def = $frameworkStore.scores_definition;
@@ -183,6 +232,15 @@
 					builder.updateFramework({ description: e.currentTarget.value || null });
 				}}
 			></textarea>
+			<textarea
+				value={$frameworkStore.annotation ?? ''}
+				placeholder="Framework annotation (optional guidance text)"
+				rows="2"
+				class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+				onblur={(e) => {
+					builder.updateFramework({ annotation: e.currentTarget.value || null });
+				}}
+			></textarea>
 			{#if $frameworkStore.urn}
 				<button
 					type="button"
@@ -259,6 +317,90 @@
 						<strong>Average</strong> divides total score by number of questions.
 						<strong>Sum</strong> adds all scores directly. Use Sum for binary (0/1) scoring.
 					</p>
+
+					<!-- Scale entries editor -->
+					<div class="border-t border-gray-200 pt-3 space-y-2">
+						<button
+							type="button"
+							class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+							onclick={() => (showScalesEditor = !showScalesEditor)}
+						>
+							<i class="fa-solid {showScalesEditor ? 'fa-chevron-down' : 'fa-chevron-right'} text-[9px]"></i>
+							Score scale ({getScaleEntries().length} {getScaleEntries().length === 1 ? 'level' : 'levels'})
+						</button>
+						{#if showScalesEditor}
+							{@const scaleEntries = getScaleEntries()}
+							<div class="space-y-1.5">
+								{#each scaleEntries as entry, idx}
+									<div class="flex items-start gap-2 bg-white border border-gray-200 rounded px-2 py-1.5">
+										<label class="block w-16 shrink-0">
+											<span class="text-[10px] text-gray-400">Score</span>
+											<input
+												type="number"
+												value={entry.score}
+												class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+												onblur={(e) => {
+													const entries = getScaleEntries();
+													entries[idx].score = parseInt(e.currentTarget.value) || 0;
+													setScaleEntries(entries);
+												}}
+											/>
+										</label>
+										<label class="block flex-1 min-w-0">
+											<span class="text-[10px] text-gray-400">Name</span>
+											<input
+												type="text"
+												value={entry.name}
+												placeholder="e.g. Partial"
+												class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+												onblur={(e) => {
+													const entries = getScaleEntries();
+													entries[idx].name = e.currentTarget.value;
+													setScaleEntries(entries);
+												}}
+											/>
+										</label>
+										<label class="block flex-1 min-w-0">
+											<span class="text-[10px] text-gray-400">Description</span>
+											<input
+												type="text"
+												value={entry.description}
+												placeholder="Optional"
+												class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+												onblur={(e) => {
+													const entries = getScaleEntries();
+													entries[idx].description = e.currentTarget.value;
+													setScaleEntries(entries);
+												}}
+											/>
+										</label>
+										<button
+											type="button"
+											class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
+											onclick={() => {
+												const entries = getScaleEntries();
+												entries.splice(idx, 1);
+												setScaleEntries(entries);
+											}}
+										>
+											<i class="fa-solid fa-trash"></i>
+										</button>
+									</div>
+								{/each}
+								<button
+									type="button"
+									class="text-xs text-blue-600 hover:text-blue-700 font-medium"
+									onclick={() => {
+										const entries = getScaleEntries();
+										entries.push({ score: 0, name: '', description: '' });
+										setScaleEntries(entries);
+									}}
+								>
+									<i class="fa-solid fa-plus mr-1"></i>Add scale level
+								</button>
+							</div>
+						{/if}
+					</div>
 				</div>
 			{/if}
 		</div>
@@ -267,6 +409,17 @@
 		<OutcomesEditor
 			outcomes={$frameworkStore.outcomes_definition ?? []}
 			onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
+		/>
+
+		<!-- Implementation groups -->
+		<ImplementationGroupsEditor
+			groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => ({
+				ref_id: (g as Record<string, string>).ref_id ?? '',
+				name: (g as Record<string, string>).name ?? '',
+				description: (g as Record<string, string>).description ?? '',
+				default_selected: (g as Record<string, unknown>).default_selected as boolean ?? false
+			}))}
+			onupdate={(groups) => builder.updateFramework({ implementation_groups_definition: groups })}
 		/>
 
 		<!-- Sections -->

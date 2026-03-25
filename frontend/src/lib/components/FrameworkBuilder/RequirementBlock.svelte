@@ -121,9 +121,25 @@
 					class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 					onblur={(e) => saveField('description', e.currentTarget.value || null)}
 				></textarea>
+				<textarea
+					value={requirement.node.typical_evidence ?? ''}
+					placeholder="Typical evidence (optional)"
+					rows="1"
+					class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+					onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
+				></textarea>
 			</div>
 
 			<div class="flex items-center gap-1 shrink-0">
+				<label class="flex items-center gap-1 text-xs text-gray-400">
+					<input
+						type="checkbox"
+						checked={requirement.node.assessable}
+						onchange={(e) => saveField('assessable', e.currentTarget.checked)}
+						class="w-3.5 h-3.5 rounded border-gray-300"
+					/>
+					Assessable
+				</label>
 				{#if confirmDelete}
 					<button
 						type="button"
