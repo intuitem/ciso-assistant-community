@@ -131,12 +131,15 @@
 			</div>
 
 			<div class="flex items-center gap-1 shrink-0">
-				<label class="flex items-center gap-1 text-xs text-gray-400">
+				<label
+					class="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
+					title="Whether this requirement is assessable by respondents"
+				>
 					<input
 						type="checkbox"
 						checked={requirement.node.assessable}
 						onchange={(e) => saveField('assessable', e.currentTarget.checked)}
-						class="w-3.5 h-3.5 rounded border-gray-300"
+						class="w-4 h-4 rounded border-gray-300 cursor-pointer"
 					/>
 					Assessable
 				</label>
