@@ -154,6 +154,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
+                    "display_mode": RequirementNode.objects.all()[
+                        0
+                    ].display_mode,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -303,6 +306,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
+                    "display_mode": RequirementNode.objects.all()[
+                        0
+                    ].display_mode,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
