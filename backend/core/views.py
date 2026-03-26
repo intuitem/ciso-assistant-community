@@ -5432,30 +5432,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
 
 class ActionPlanList(generics.ListAPIView):
-    filterset_fields = {
-        "folder": ["exact"],
-        "status": ["exact"],
-        "category": ["exact"],
-        "csf_function": ["exact"],
-        "priority": ["exact"],
-        "reference_control": ["exact"],
-        "effort": ["exact"],
-        "control_impact": ["exact"],
-        "filtering_labels": ["exact"],
-        "risk_scenarios": ["exact"],
-        "risk_scenarios_e": ["exact"],
-        "requirement_assessments": ["exact"],
-        "evidences": ["exact"],
-        "objectives": ["exact"],
-        "assets": ["exact"],
-        "stakeholders": ["exact"],
-        "progress_field": ["exact"],
-        "security_exceptions": ["exact"],
-        "owner": ["exact"],
-        "findings": ["exact"],
-        "eta": ["exact", "lte", "gte", "lt", "gt"],
-    }
     search_fields = ["name", "description", "ref_id"]
+    filterset_class = AppliedControlFilterSet
 
     filter_backends = [
         DjangoFilterBackend,
