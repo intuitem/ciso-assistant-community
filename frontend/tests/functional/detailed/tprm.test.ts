@@ -250,23 +250,26 @@ test('third-party representative can fill their assigned audit', async ({
 			await page.waitForTimeout(1000); // workaround flakiness due to overlapping calls
 		};
 
-		// Fill first requirement and navigate to next ones
+		// Card view shows one requirement at a time — fill each and navigate
+		// Requirement 1: click Yes
 		await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
-		await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
-		await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
 
-		await page.getByRole('button', { name: m.next() }).click();
-		await page.waitForTimeout(500);
-
-		await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
-		await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
-		await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
+		// Navigate through remaining requirements and set results
+		const nextButton = page.getByRole('button', { name: m.next() });
+		while (!(await nextButton.isDisabled())) {
+			await nextButton.click();
+			await page.waitForTimeout(500);
+			await clickAndPause(page.getByRole('button', { name: 'No' }).first());
+		}
 	});
 
 	await test.step('third party respondent can create evidence', async () => {
 		// Go back to first requirement
-		await page.getByRole('button', { name: m.previous() }).click();
-		await page.waitForTimeout(500);
+		const prevButton = page.getByRole('button', { name: m.previous() });
+		while (!(await prevButton.isDisabled())) {
+			await prevButton.click();
+			await page.waitForTimeout(300);
+		}
 
 		await page.getByTestId('create-evidence-button').click();
 		await page.getByTestId('form-input-name').click();
