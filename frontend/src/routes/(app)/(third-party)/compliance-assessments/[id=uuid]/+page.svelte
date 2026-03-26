@@ -40,6 +40,7 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -971,117 +972,126 @@
 					{/if}
 				</span>
 			</div>
-			<Popover
-				open={filterPopupOpen}
-				onOpenChange={(e) => (filterPopupOpen = e.open)}
-				positioning={{ placement: 'bottom-start' }}
-				autoFocus={false}
-				onPointerDownOutside={() => (filterPopupOpen = false)}
-				closeOnInteractOutside={false}
-			>
-				<Popover.Trigger class="btn preset-filled-primary-500 w-fit">
-					<i class="fa-solid fa-filter mr-2"></i>
-					{m.filters()}
-					{#if filterCount}
-						<span class="text-xs">{filterCount}</span>
-					{/if}
-				</Popover.Trigger>
-				<Popover.Positioner>
-					<Popover.Content
-						class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
-					>
-						<div>
-							<span class="text-sm font-bold">{m.result()}</span>
-							<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-								{#each Object.entries(complianceResultColorMap) as [result, color]}
-									<button
-										type="button"
-										onclick={() => toggleResult(result)}
-										class="px-2 py-1 rounded-md font-bold"
-										style="background-color: {selectedResults.includes(result)
-											? color
-											: 'grey'}; color: {selectedResults.includes(result)
-											? result === 'not_applicable'
-												? 'white'
-												: 'black'
-											: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
-									>
-										{safeTranslate(result)}
-									</button>
-								{/each}
-							</div>
-						</div>
-						{#if data.compliance_assessment.progress_status_enabled}
-							<div>
-								<span class="text-sm font-bold">{m.status()}</span>
-								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-									{#each Object.entries(complianceStatusColorMap) as [status, color]}
-										<button
-											type="button"
-											onclick={() => toggleStatus(status)}
-											class="px-2 py-1 rounded-md font-bold"
-											style="background-color: {selectedStatus.includes(status)
-												? color + '44'
-												: 'grey'}; color: {selectedStatus.includes(status)
-												? darkenColor(color, 0.3)
-												: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
-										>
-											{safeTranslate(status)}
-										</button>
-									{/each}
-								</div>
-							</div>
+			<div class="flex items-center gap-2">
+				{#if treeViewNodes}
+					<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+				{/if}
+				<Popover
+					open={filterPopupOpen}
+					onOpenChange={(e) => (filterPopupOpen = e.open)}
+					positioning={{ placement: 'bottom-start' }}
+					autoFocus={false}
+					onPointerDownOutside={() => (filterPopupOpen = false)}
+					closeOnInteractOutside={false}
+				>
+					<Popover.Trigger class="btn preset-filled-primary-500 w-fit">
+						<i class="fa-solid fa-filter mr-2"></i>
+						{m.filters()}
+						{#if filterCount}
+							<span class="text-xs">{filterCount}</span>
 						{/if}
-						{#if data.compliance_assessment.extended_result_enabled}
+					</Popover.Trigger>
+					<Popover.Positioner>
+						<Popover.Content
+							class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+						>
 							<div>
-								<span class="text-sm font-bold">{m.extendedResult()}</span>
-								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-									{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+								<span class="text-sm font-bold">{m.result()}</span>
+								<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									{#each Object.entries(complianceResultColorMap) as [result, color]}
 										<button
 											type="button"
-											onclick={() => toggleExtendedResult(extendedResult)}
+											onclick={() => toggleResult(result)}
 											class="px-2 py-1 rounded-md font-bold"
-											style="background-color: {selectedExtendedResults.includes(extendedResult)
+											style="background-color: {selectedResults.includes(result)
 												? color
-												: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
-												extendedResult
-											)
-												? 1
-												: 0.3};"
+												: 'grey'}; color: {selectedResults.includes(result)
+												? result === 'not_applicable'
+													? 'white'
+													: 'black'
+												: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
 										>
-											{safeTranslate(extendedResult)}
+											{safeTranslate(result)}
 										</button>
 									{/each}
 								</div>
 							</div>
-						{/if}
-						<div>
-							<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
-							<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
-								<Switch
-									name="questionnaireToggle"
-									class="flex flex-row items-center justify-center"
-									checked={displayOnlyAssessableNodes}
-									onCheckedChange={(e) => {
-										displayOnlyAssessableNodes = e.checked;
-										auditFiltersStore.setDisplayOnlyAssessableNodes(id, e.checked);
-									}}
-								>
-									<Switch.Control>
-										<Switch.Thumb />
-									</Switch.Control>
-									<Switch.HiddenInput />
-									{#if displayOnlyAssessableNodes}
-										<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
-									{:else}
-										<span class="font-bold text-xs text-gray-500">{m.no()}</span>
-									{/if}
-								</Switch>
+							{#if data.compliance_assessment.progress_status_enabled}
+								<div>
+									<span class="text-sm font-bold">{m.status()}</span>
+									<div
+										class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md"
+									>
+										{#each Object.entries(complianceStatusColorMap) as [status, color]}
+											<button
+												type="button"
+												onclick={() => toggleStatus(status)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedStatus.includes(status)
+													? color + '44'
+													: 'grey'}; color: {selectedStatus.includes(status)
+													? darkenColor(color, 0.3)
+													: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+											>
+												{safeTranslate(status)}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+							{#if data.compliance_assessment.extended_result_enabled}
+								<div>
+									<span class="text-sm font-bold">{m.extendedResult()}</span>
+									<div
+										class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md"
+									>
+										{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+											<button
+												type="button"
+												onclick={() => toggleExtendedResult(extendedResult)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedExtendedResults.includes(extendedResult)
+													? color
+													: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+													extendedResult
+												)
+													? 1
+													: 0.3};"
+											>
+												{safeTranslate(extendedResult)}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+							<div>
+								<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+								<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+									<Switch
+										name="questionnaireToggle"
+										class="flex flex-row items-center justify-center"
+										checked={displayOnlyAssessableNodes}
+										onCheckedChange={(e) => {
+											displayOnlyAssessableNodes = e.checked;
+											auditFiltersStore.setDisplayOnlyAssessableNodes(id, e.checked);
+										}}
+									>
+										<Switch.Control>
+											<Switch.Thumb />
+										</Switch.Control>
+										<Switch.HiddenInput />
+										{#if displayOnlyAssessableNodes}
+											<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+										{:else}
+											<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+										{/if}
+									</Switch>
+								</div>
 							</div>
-						</div>
-					</Popover.Content>
-				</Popover.Positioner>
-			</Popover>
+						</Popover.Content>
+					</Popover.Positioner>
+				</Popover>
+			</div>
 		</div>
 
 		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
