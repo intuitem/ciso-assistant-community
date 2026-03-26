@@ -9711,7 +9711,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     item.get("eta"),
                     item.get("expiry_date"),
                     item.get("effort"),
-                    item.get("impact"),
+                    item.get("control_impact"),
                     item.get("annual_cost"),
                     "\n".join(
                         [ra.get("str") for ra in item.get("requirement_assessments")]
