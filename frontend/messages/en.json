@@ -264,6 +264,7 @@
 	"residualLevel": "Residual level",
 	"riskMatrix": "Risk matrix",
 	"riskMatrixColon": "Risk matrix:",
+	"riskMatrixEmpty": "The risk matrix definition is incomplete, probably because it is still in draft. Use the matrix editor to define probability, impact, and risk levels.",
 	"riskOptionHelper": "You can review your levels definition by clicking on the matrix above (opens in a new tab)",
 	"perimeter": "Perimeter",
 	"folder": "Domain",
