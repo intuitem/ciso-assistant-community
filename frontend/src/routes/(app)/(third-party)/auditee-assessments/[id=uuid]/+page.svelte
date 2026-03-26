@@ -97,10 +97,7 @@
 	async function handleSubmitForReview() {
 		if (!assignment || !canSubmit) return;
 
-		const remaining = totalAssessable - assessedCount;
-		const body = hasUnassessed
-			? `${m.incompleteAssessmentWarning({ remaining, total: totalAssessable })}\n\n${m.submitForReviewConfirm()}`
-			: m.submitForReviewConfirm();
+		const body = m.submitForReviewConfirm();
 
 		const modal: ModalSettings = {
 			type: 'confirm',
@@ -201,15 +198,39 @@
 		}
 	}
 
-	// --- Progress (only assessable items count) ---
+	// --- Progress (question-based when framework has questions, else result-based) ---
+	const totalQuestions = $derived(
+		assessableItems.reduce((sum, item) => sum + (item.data.visible_questions ?? 0), 0)
+	);
+	const answeredQuestions = $derived(
+		assessableItems.reduce((sum, item) => sum + (item.data.answered_questions ?? 0), 0)
+	);
+	const useQuestionProgress = $derived(totalQuestions > 0);
+
 	const totalAssessable = $derived(assessableItems.length);
 	const assessedCount = $derived(
 		assessableItems.filter((item) => item.data.result !== 'not_assessed').length
 	);
 	const progressPercent = $derived(
-		totalAssessable > 0 ? Math.round((assessedCount / totalAssessable) * 100) : 0
+		useQuestionProgress
+			? Math.round((answeredQuestions / totalQuestions) * 100)
+			: totalAssessable > 0
+				? Math.round((assessedCount / totalAssessable) * 100)
+				: 0
 	);
-	let hasUnassessed = $derived(assessedCount < totalAssessable);
+	let hasUnassessed = $derived(
+		useQuestionProgress ? answeredQuestions < totalQuestions : assessedCount < totalAssessable
+	);
+
+	// Per-requirement question completion status for ToC dots
+	function getQuestionStatus(item: { data: Record<string, any> }): string {
+		const visible = item.data.visible_questions ?? 0;
+		const answered = item.data.answered_questions ?? 0;
+		if (visible === 0) return '#22c55e'; // no questions = complete (green)
+		if (answered >= visible) return '#22c55e'; // all answered (green)
+		if (answered > 0) return '#f59e0b'; // partial (amber)
+		return '#d1d5db'; // empty (gray)
+	}
 
 	// --- Update logic (same as table-mode) ---
 	async function updateBulk(
@@ -415,7 +436,8 @@
 				index,
 				id: item.data.id,
 				title,
-				result: item.data.result
+				result: item.data.result,
+				questionColor: getQuestionStatus(item)
 			};
 		})
 	);
@@ -514,7 +536,9 @@
 							class="inline-block w-2 h-2 rounded-full flex-shrink-0"
 							style="background-color: {section.result === '__splash__'
 								? '#a855f7'
-								: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
+								: useQuestionProgress
+									? section.questionColor
+									: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
 						></span>
 						<span class="truncate">{section.title}</span>
 					</button>
@@ -572,9 +596,13 @@
 						style="width: {progressPercent}%; background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));"
 					></div>
 				</div>
-				<span class="text-sm font-medium text-gray-600 whitespace-nowrap"
-					>{assessedCount}/{totalAssessable} ({progressPercent}%)</span
-				>
+				<span class="text-sm font-medium text-gray-600 whitespace-nowrap">
+					{#if useQuestionProgress}
+						{answeredQuestions}/{totalQuestions} {m.questions()} ({progressPercent}%)
+					{:else}
+						{assessedCount}/{totalAssessable} ({progressPercent}%)
+					{/if}
+				</span>
 			</div>
 		</div>
 

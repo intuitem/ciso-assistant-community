@@ -691,6 +691,18 @@
 					</div>
 				{/if}
 			{/key}
+			{#if data.compliance_assessment.answers_progress != null}
+				<div class="flex items-center gap-2 text-sm text-gray-600 mt-2">
+					<i class="fa-solid fa-clipboard-question text-primary-500"></i>
+					<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
+					<div class="flex-1 bg-gray-200 rounded-full h-1.5 max-w-32">
+						<div
+							class="h-1.5 rounded-full bg-primary-400 transition-all"
+							style="width: {data.compliance_assessment.answers_progress}%;"
+						></div>
+					</div>
+				</div>
+			{/if}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
 					<Popover
