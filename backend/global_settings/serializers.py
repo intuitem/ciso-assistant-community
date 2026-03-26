@@ -3,6 +3,8 @@ from rest_framework import serializers
 
 from .models import GlobalSettings
 
+from django.conf import settings as django_settings
+
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
     "ebios_radar_max",
@@ -23,6 +25,10 @@ GENERAL_SETTINGS_KEYS = [
     "allow_assignments_to_entities",
     "enforce_mfa",
     "default_language",
+]
+
+# Chat/AI settings only accepted when ENABLE_CHAT is set
+_CHAT_SETTINGS_KEYS = [
     "llm_provider",
     "ollama_base_url",
     "ollama_model",
@@ -33,6 +39,9 @@ GENERAL_SETTINGS_KEYS = [
     "openai_model",
     "openai_api_key",
 ]
+
+if getattr(django_settings, "ENABLE_CHAT", False):
+    GENERAL_SETTINGS_KEYS.extend(_CHAT_SETTINGS_KEYS)
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
@@ -282,6 +291,14 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "is_published",
         ]
         read_only_fields = ["name"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        from django.conf import settings
+
+        if not getattr(settings, "ENABLE_CHAT", False):
+            fields.pop("chat_mode", None)
+        return fields
 
     def update(self, instance, validated_data):
         """

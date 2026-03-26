@@ -13,8 +13,6 @@ Steps:
     4. Present summary of what was created (deterministic)
 """
 
-import json
-import re
 import structlog
 from typing import Iterator
 
@@ -1046,5 +1044,3 @@ class EbiosRMAssistWorkflow(Workflow):
             if last_user.lower() == name.lower():
                 return option
         return None
-
-    # _parse_json_array is inherited from Workflow base class

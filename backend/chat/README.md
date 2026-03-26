@@ -1,12 +1,30 @@
 # AI Chat Mode — Setup Guide
 
-> Early-adopter / developer guide for testing the AI assistant in CISO Assistant.
+> Setup guide for enabling the AI assistant in CISO Assistant.
+
+## 0. Enable the Chat Module
+
+The chat feature is **disabled by default**. Set the `ENABLE_CHAT` environment variable to enable it:
+
+```bash
+export ENABLE_CHAT=true
+```
+
+For Docker deployments, add it to your `docker-compose.yml` or `.env` file. This controls:
+- Visibility of the `chat_mode` feature flag in Settings
+- Visibility of the Chat/AI settings section (LLM provider, model, etc.)
+- Signal handlers for RAG indexing
+- Knowledge graph pre-warming at startup
+
+Without `ENABLE_CHAT=true`, the chat app is installed (for migrations) but completely dormant.
+
+---
 
 ## Prerequisites
 
 | Component | Purpose | Required? |
 |-----------|---------|-----------|
-| **LLM server** | Local LLM inference — [Ollama](https://ollama.com) or [LM Studio](https://lmstudio.ai) (or any OpenAI-compatible server) | Yes (one of them) |
+| **LLM server** | Local LLM inference — [Ollama](https://ollama.com), [LM Studio](https://lmstudio.ai), [MLX](https://github.com/ml-explore/mlx-examples/tree/main/llms/mlx_lm), or [llama.cpp](https://github.com/ggml-org/llama.cpp) | Yes (one of them) |
 | **Qdrant** | Vector database for RAG | Yes |
 | **Huey worker** | Background indexing tasks | Recommended |
 
@@ -30,11 +48,33 @@ ollama pull snowflake-arctic-embed2
 
 > You can use any model Ollama supports. Smaller models (mistral, phi3) work but are less reliable at tool selection. Larger models (llama3, mixtral) give better results.
 
-### LM Studio (alternative to Ollama)
+### LM Studio
 
 1. Download from [lmstudio.ai](https://lmstudio.ai)
 2. Load a model and start the local server (default: `http://localhost:1234/v1`)
 3. Set `llm_provider` to `openai_compatible` in settings (see step 3)
+
+### MLX (macOS Apple Silicon)
+
+Best performance on Mac — uses Metal natively.
+
+```bash
+pip install mlx-lm
+mlx_lm.server --model mlx-community/gpt-oss-20b-MXFP4-Q4 --port 8080
+```
+
+Set `llm_provider` to `openai_compatible` and `openai_api_base` to `http://localhost:8080/v1`.
+
+### llama.cpp
+
+Lightweight, supports GGUF models.
+
+```bash
+brew install llama.cpp
+llama-server -m ./models/your-model.gguf -c 8192 -ngl 999 --port 8081
+```
+
+Set `llm_provider` to `openai_compatible` and `openai_api_base` to `http://localhost:8081/v1`.
 
 ### Qdrant
 
@@ -100,6 +140,7 @@ In **Settings > General**, set:
 | `embedding_backend` | `sentence-transformers` | `sentence-transformers` (CPU, no setup) or `ollama` |
 | `openai_api_base` | `http://localhost:1234/v1` | For LM Studio / vLLM / llama.cpp |
 | `openai_model` | _(empty)_ | Model identifier for OpenAI-compatible servers |
+| `openai_api_key` | _(empty)_ | API key for authenticated endpoints (optional) |
 | `chat_system_prompt` | _(empty)_ | Custom system prompt (overrides the built-in GRC prompt) |
 
 ---
@@ -154,8 +195,13 @@ Click the chat widget in the bottom-right corner of the app (only visible when c
 
 ### Chat widget doesn't appear
 
-- Check that the `chat_mode` feature flag is enabled
+- Check that `ENABLE_CHAT=true` is set in your environment
+- Check that the `chat_mode` feature flag is enabled in Settings > Feature Flags
 - Hard-refresh the browser (Ctrl+Shift+R)
+
+### Chat settings section not visible
+
+- `ENABLE_CHAT` env var must be set to `true` — the settings section is hidden otherwise
 
 ### "No LLM available" / responses are just raw context
 
@@ -183,6 +229,24 @@ Small models (< 7B params) struggle with function calling. Options:
 
 - Use a larger model (`ollama pull mixtral` or `llama3`)
 - The system has deterministic keyword-based pre-routing for common workflows (suggest controls, risk treatment, evidence guidance) that bypasses the LLM
+
+---
+
+## Maintenance
+
+### Clean up old sessions
+
+Chat sessions accumulate over time. Use the management command to purge old ones:
+
+```bash
+# Preview what would be deleted
+.venv/bin/python backend/manage.py cleanup_sessions --days 90 --dry-run
+
+# Delete sessions older than 90 days
+.venv/bin/python backend/manage.py cleanup_sessions --days 90
+```
+
+Messages cascade-delete with their sessions.
 
 ---
 

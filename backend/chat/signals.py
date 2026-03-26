@@ -45,6 +45,11 @@ def connect_signals():
         return
     _connected = True
 
+    from django.conf import settings as django_settings
+
+    if not getattr(django_settings, "ENABLE_CHAT", False):
+        return
+
     from global_settings.utils import ff_is_enabled
 
     for model_class in _get_model_classes():

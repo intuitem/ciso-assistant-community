@@ -1586,12 +1586,13 @@ def startup(sender: AppConfig, **kwargs):
         logger.error(f"Failed to reset global settings: {e}")
 
     # Pre-warm the chat knowledge graph (reads YAML files, no DB needed)
-    try:
-        from chat.knowledge_graph import get_graph
+    if getattr(settings, "ENABLE_CHAT", False):
+        try:
+            from chat.knowledge_graph import get_graph
 
-        get_graph()
-    except Exception as e:
-        logger.debug("knowledge_graph_prewarm_skipped", error=e)
+            get_graph()
+        except Exception as e:
+            logger.debug("knowledge_graph_prewarm_skipped", error=e)
 
 
 class CoreConfig(AppConfig):

@@ -26,19 +26,23 @@
 		}
 	}));
 
-	// Action commands (non-navigation)
-	const actionCommands = [
-		{
-			label: safeTranslate('openAssistant'),
-			icon: 'fa-solid fa-robot',
-			onSelect: () => {
-				opened = false;
-				expandChat();
-			}
-		}
-	];
-
 	const featureFlags = $derived(page.data?.featureflags ?? {});
+
+	// Action commands (non-navigation) — only show chat when enabled
+	const actionCommands = $derived(
+		featureFlags.chat_mode
+			? [
+					{
+						label: safeTranslate('openAssistant'),
+						icon: 'fa-solid fa-robot',
+						onSelect: () => {
+							opened = false;
+							expandChat();
+						}
+					}
+				]
+			: []
+	);
 	const sideBarVisibleItems = $derived(getSidebarVisibleItems(featureFlags));
 
 	const visibilityKeyByHref = Object.fromEntries(
