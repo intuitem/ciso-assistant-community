@@ -755,7 +755,7 @@
 									<select
 										value={$frameworkStore.locale ?? 'en'}
 										class="text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
-										onchange={(e) => builder.updateFramework({ locale: e.currentTarget.value })}
+										onchange={(e) => builder.setBaseLocale(e.currentTarget.value)}
 									>
 										{#each frameworkLocales as code}
 											<option value={code}>{localeLabel(code)}</option>

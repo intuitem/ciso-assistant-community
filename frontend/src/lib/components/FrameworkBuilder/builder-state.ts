@@ -453,6 +453,7 @@ export interface BuilderStore {
 	copyFromBase: (lang: string) => void;
 	addLanguage: (lang: string) => void;
 	removeLanguage: (lang: string) => void;
+	setBaseLocale: (locale: string) => void;
 	flushDraft: () => Promise<void>;
 	publish: () => Promise<void>;
 	discard: () => Promise<void>;
@@ -1110,6 +1111,225 @@ export function createBuilderState(
 		markDirty();
 	}
 
+	function setBaseLocale(newLocale: string) {
+		const fw = get(framework);
+		const oldLocale = fw.locale ?? 'en';
+		if (newLocale === oldLocale) return;
+
+		// --- Swap framework meta fields ---
+		const fwTrans = { ...(fw.translations ?? {}) };
+		// Demote current base fields into translations[oldLocale]
+		const demoted: Record<string, string> = {};
+		if (fw.name) demoted.name = fw.name;
+		if (fw.description) demoted.description = fw.description;
+		if (fw.annotation) demoted.annotation = fw.annotation;
+		fwTrans[oldLocale] = demoted;
+		// Promote translations[newLocale] to base fields
+		const promoted = fwTrans[newLocale] ?? {};
+		delete fwTrans[newLocale];
+
+		// Swap nested translations in scores_definition entries
+		const swappedScores = swapJsonEntryTranslations(
+			fw.scores_definition,
+			oldLocale,
+			newLocale,
+			['name', 'description']
+		);
+		// Swap nested translations in implementation_groups_definition entries
+		const swappedIgs = swapJsonArrayTranslations(
+			fw.implementation_groups_definition,
+			oldLocale,
+			newLocale,
+			['name', 'description']
+		);
+		// Swap nested translations in outcomes_definition entries
+		const swappedOutcomes = swapJsonArrayTranslations(
+			fw.outcomes_definition as Record<string, unknown>[] | null,
+			oldLocale,
+			newLocale,
+			['annotation']
+		);
+
+		// Update available_languages
+		const langs = new Set(fw.available_languages ?? []);
+		langs.delete(newLocale);
+		langs.add(oldLocale);
+
+		framework.update((f) => ({
+			...f,
+			locale: newLocale,
+			name: promoted.name || f.name,
+			description: promoted.description || f.description,
+			annotation: promoted.annotation || f.annotation,
+			translations: fwTrans,
+			scores_definition: swappedScores,
+			implementation_groups_definition: swappedIgs,
+			outcomes_definition: swappedOutcomes as typeof f.outcomes_definition,
+			available_languages: [...langs].sort()
+		}));
+
+		// --- Swap all node/question/choice fields ---
+		sections.update((secs) =>
+			secs.map((sec) => ({
+				...sec,
+				node: swapNodeFields(sec.node, oldLocale, newLocale),
+				requirements: swapReqFields(sec.requirements, oldLocale, newLocale)
+			}))
+		);
+
+		// If we were translating into the new base, deselect
+		const currentLang = get(activeLanguage);
+		if (currentLang === newLocale) activeLanguage.set(null);
+		markDirty();
+	}
+
+	/** Swap base ↔ translation fields on a RequirementNode */
+	function swapNodeFields(
+		node: RequirementNode,
+		oldLocale: string,
+		newLocale: string
+	): RequirementNode {
+		const trans = { ...(node.translations ?? {}) };
+		// Demote current base fields
+		const demoted: Record<string, string> = {};
+		if (node.name) demoted.name = node.name;
+		if (node.description) demoted.description = node.description;
+		if (node.annotation) demoted.annotation = node.annotation;
+		if (node.typical_evidence) demoted.typical_evidence = node.typical_evidence;
+		trans[oldLocale] = demoted;
+		// Promote new locale
+		const promoted = trans[newLocale] ?? {};
+		delete trans[newLocale];
+		return {
+			...node,
+			name: promoted.name || node.name,
+			description: promoted.description || node.description,
+			annotation: promoted.annotation || node.annotation,
+			typical_evidence: promoted.typical_evidence || node.typical_evidence,
+			translations: trans
+		};
+	}
+
+	/** Swap base ↔ translation fields on a Question */
+	function swapQuestionFields(
+		q: Question,
+		oldLocale: string,
+		newLocale: string
+	): Question {
+		const trans = { ...(q.translations ?? {}) };
+		const demoted: Record<string, string> = {};
+		if (q.text) demoted.text = q.text;
+		trans[oldLocale] = demoted;
+		const promoted = trans[newLocale] ?? {};
+		delete trans[newLocale];
+		return {
+			...q,
+			text: promoted.text || q.text,
+			translations: trans,
+			choices: q.choices.map((c) => swapChoiceFields(c, oldLocale, newLocale))
+		};
+	}
+
+	/** Swap base ↔ translation fields on a QuestionChoice */
+	function swapChoiceFields(
+		c: QuestionChoice,
+		oldLocale: string,
+		newLocale: string
+	): QuestionChoice {
+		const trans = { ...(c.translations ?? {}) };
+		const demoted: Record<string, string> = {};
+		if (c.value) demoted.value = c.value;
+		if (c.description) demoted.description = c.description;
+		trans[oldLocale] = demoted;
+		const promoted = trans[newLocale] ?? {};
+		delete trans[newLocale];
+		return {
+			...c,
+			value: promoted.value || c.value,
+			description: promoted.description || c.description,
+			translations: trans
+		};
+	}
+
+	/** Recursively swap fields on all requirements */
+	function swapReqFields(
+		reqs: BuilderRequirement[],
+		oldLocale: string,
+		newLocale: string
+	): BuilderRequirement[] {
+		return reqs.map((req) => ({
+			...req,
+			node: swapNodeFields(req.node, oldLocale, newLocale),
+			questions: req.questions.map((bq) => ({
+				...bq,
+				question: swapQuestionFields(bq.question, oldLocale, newLocale)
+			})),
+			children: swapReqFields(req.children, oldLocale, newLocale)
+		}));
+	}
+
+	/**
+	 * Swap translations in a scores_definition JSON (handles both array and {scale:[...]} shapes).
+	 * Each entry has name/description + nested translations.
+	 */
+	function swapJsonEntryTranslations(
+		def: Record<string, unknown> | null,
+		oldLocale: string,
+		newLocale: string,
+		fields: string[]
+	): Record<string, unknown> | null {
+		if (!def) return def;
+		if (Array.isArray(def)) {
+			return def.map((e) =>
+				swapSingleEntryTranslations(e as Record<string, unknown>, oldLocale, newLocale, fields)
+			) as unknown as Record<string, unknown>;
+		}
+		if ('scale' in def && Array.isArray(def.scale)) {
+			return {
+				...def,
+				scale: (def.scale as Record<string, unknown>[]).map((e) =>
+					swapSingleEntryTranslations(e, oldLocale, newLocale, fields)
+				)
+			};
+		}
+		return def;
+	}
+
+	/** Swap translations in an array of JSON objects (IG defs, outcome defs) */
+	function swapJsonArrayTranslations(
+		arr: Record<string, unknown>[] | null,
+		oldLocale: string,
+		newLocale: string,
+		fields: string[]
+	): Record<string, unknown>[] | null {
+		if (!arr) return arr;
+		return arr.map((e) => swapSingleEntryTranslations(e, oldLocale, newLocale, fields));
+	}
+
+	/** Swap base ↔ translation on a single JSON entry with a translations sub-dict */
+	function swapSingleEntryTranslations(
+		entry: Record<string, unknown>,
+		oldLocale: string,
+		newLocale: string,
+		fields: string[]
+	): Record<string, unknown> {
+		const trans = { ...((entry.translations as Record<string, Record<string, string>>) ?? {}) };
+		// Demote current base fields
+		const demoted: Record<string, string> = {};
+		for (const f of fields) {
+			if (entry[f]) demoted[f] = entry[f] as string;
+		}
+		trans[oldLocale] = demoted;
+		// Promote new locale
+		const promoted = trans[newLocale] ?? {};
+		delete trans[newLocale];
+		const result = { ...entry, translations: trans };
+		for (const f of fields) {
+			if (promoted[f]) result[f] = promoted[f];
+		}
+		return result;
+	}
+
 	function getTranslationProgress(lang: string): { translated: number; total: number } {
 		let total = 0;
 		let translated = 0;
@@ -1250,6 +1470,7 @@ export function createBuilderState(
 		copyFromBase,
 		addLanguage,
 		removeLanguage,
+		setBaseLocale,
 		flushDraft,
 		publish,
 		discard,
