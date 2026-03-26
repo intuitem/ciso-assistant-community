@@ -271,6 +271,8 @@ test('third-party representative can fill their assigned audit', async ({
 			await page.waitForTimeout(300);
 		}
 
+		// Open the evidence accordion section (collapsed by default)
+		await page.getByTestId('evidence-accordion-trigger').click();
 		await page.getByTestId('create-evidence-button').click();
 		await page.getByTestId('form-input-name').click();
 		await page.getByTestId('form-input-name').fill('tp-evidence');
