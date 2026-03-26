@@ -12,6 +12,24 @@ logger = structlog.get_logger(__name__)
 
 CHUNK_SIZE = 500  # Target tokens per chunk (approx 4 chars per token)
 CHUNK_OVERLAP = 50  # Token overlap between chunks
+MAX_CHUNK_CHARS = CHUNK_SIZE * 4
+
+
+def _split_long_text(text: str, max_len: int) -> list[str]:
+    """Split text that exceeds max_len on sentence boundaries."""
+    parts = []
+    while len(text) > max_len:
+        # Try to split on sentence boundary
+        cut = text.rfind(". ", 0, max_len)
+        if cut < max_len // 2:
+            cut = text.rfind(" ", 0, max_len)
+        if cut < max_len // 2:
+            cut = max_len
+        parts.append(text[: cut + 1].strip())
+        text = text[cut + 1 :].strip()
+    if text:
+        parts.append(text)
+    return parts
 
 
 @dataclass
@@ -28,7 +46,7 @@ def get_extractor(content_type: str):
     extractors = {
         "application/pdf": extract_pdf,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": extract_excel,
-        "application/vnd.ms-excel": extract_excel,
+        # .xls (vnd.ms-excel) excluded — openpyxl only supports .xlsx
         "text/csv": extract_csv,
         "text/plain": extract_text,
     }
@@ -57,18 +75,25 @@ def extract_pdf(file) -> list[Chunk]:
         current_chunk = ""
 
         for para in paragraphs:
-            if len(current_chunk) + len(para) > CHUNK_SIZE * 4:
-                if current_chunk:
-                    chunks.append(
-                        Chunk(
-                            text=current_chunk.strip(),
-                            index=len(chunks),
-                            metadata={"page": page_num + 1},
-                        )
-                    )
-                current_chunk = para
+            # Split oversized paragraphs to stay within chunk limits
+            if len(para) > CHUNK_SIZE * 4:
+                para_parts = _split_long_text(para, CHUNK_SIZE * 4)
             else:
-                current_chunk += "\n\n" + para if current_chunk else para
+                para_parts = [para]
+
+            for part in para_parts:
+                if len(current_chunk) + len(part) > CHUNK_SIZE * 4:
+                    if current_chunk:
+                        chunks.append(
+                            Chunk(
+                                text=current_chunk.strip(),
+                                index=len(chunks),
+                                metadata={"page": page_num + 1},
+                            )
+                        )
+                    current_chunk = part
+                else:
+                    current_chunk += "\n\n" + part if current_chunk else part
 
         if current_chunk:
             chunks.append(
@@ -173,14 +198,22 @@ def extract_text(file) -> list[Chunk]:
     current_chunk = ""
 
     for para in paragraphs:
-        if len(current_chunk) + len(para) > CHUNK_SIZE * 4:
-            if current_chunk:
-                chunks.append(
-                    Chunk(text=current_chunk.strip(), index=len(chunks), metadata={})
-                )
-            current_chunk = para
+        if len(para) > MAX_CHUNK_CHARS:
+            para_parts = _split_long_text(para, MAX_CHUNK_CHARS)
         else:
-            current_chunk += "\n\n" + para if current_chunk else para
+            para_parts = [para]
+
+        for part in para_parts:
+            if len(current_chunk) + len(part) > MAX_CHUNK_CHARS:
+                if current_chunk:
+                    chunks.append(
+                        Chunk(
+                            text=current_chunk.strip(), index=len(chunks), metadata={}
+                        )
+                    )
+                current_chunk = part
+            else:
+                current_chunk += "\n\n" + part if current_chunk else part
 
     if current_chunk:
         chunks.append(Chunk(text=current_chunk.strip(), index=len(chunks), metadata={}))

@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatView, PendingAction, SuggestedAction } from './types';
+import type { ChatMessage, ChatSession, ChatView, PendingAction, SuggestedAction } from './types';
 import { browser } from '$app/environment';
 import { m } from '$paraglide/messages';
 
@@ -519,15 +519,9 @@ export function retryLastMessage() {
 	const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
 	if (!lastUserMsg || isTyping) return;
 
-	// Remove the last assistant response (if it exists after the last user message)
+	// Remove the user message and everything after it — sendMessage will re-add it
 	const lastUserIdx = messages.lastIndexOf(lastUserMsg);
-	if (lastUserIdx < messages.length - 1) {
-		// Remove everything after the last user message
-		messages = messages.slice(0, lastUserIdx);
-	} else {
-		// Remove the user message itself — it will be re-added by sendMessage
-		messages = messages.slice(0, lastUserIdx);
-	}
+	messages = messages.slice(0, lastUserIdx);
 
 	// Re-send
 	sendMessage(lastUserMsg.content);

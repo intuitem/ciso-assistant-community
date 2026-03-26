@@ -125,7 +125,10 @@ class SuggestControlsWorkflow(Workflow):
                 RequirementAssessment.objects.select_related(
                     "requirement", "compliance_assessment__framework"
                 )
-                .filter(id=ctx.parsed_context.object_id)
+                .filter(
+                    id=ctx.parsed_context.object_id,
+                    compliance_assessment__folder_id__in=ctx.accessible_folder_ids,
+                )
                 .first()
             )
             if not ra or not ra.requirement:
@@ -317,7 +320,8 @@ class SuggestControlsWorkflow(Workflow):
         try:
             RequirementAssessment = apps.get_model("core", "RequirementAssessment")
             ra = RequirementAssessment.objects.filter(
-                id=ctx.parsed_context.object_id
+                id=ctx.parsed_context.object_id,
+                compliance_assessment__folder_id__in=ctx.accessible_folder_ids,
             ).first()
             if ra:
                 return {

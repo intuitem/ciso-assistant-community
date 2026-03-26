@@ -679,8 +679,10 @@
 		transition:fly={{ y: 40, duration: 250 }}
 		class="fixed inset-0 z-[9990] flex items-center justify-center p-6"
 	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
+			role="dialog"
+			aria-modal="true"
+			aria-label="CISO Assistant Chat"
 			class="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}

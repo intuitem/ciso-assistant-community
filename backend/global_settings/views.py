@@ -123,12 +123,12 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         # Clear cached LLM/embedder so new settings take effect immediately
-        try:
+        from django.conf import settings as django_settings
+
+        if getattr(django_settings, "ENABLE_CHAT", False):
             from chat.providers import clear_provider_cache
 
             clear_provider_cache()
-        except ImportError:
-            pass
         return Response(serializer.data)
 
     def get_object(self):

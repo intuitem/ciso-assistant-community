@@ -179,6 +179,9 @@ class EbiosRMAssistWorkflow(Workflow):
         yield self._thinking("Looking up domain and existing assets...")
 
         folder_id = ctx.parsed_context.object_id
+        if str(folder_id) not in ctx.accessible_folder_ids:
+            yield self._token("You don't have access to this domain.")
+            return
         try:
             folder = Folder.objects.get(id=folder_id)
         except Folder.DoesNotExist:
@@ -567,7 +570,10 @@ class EbiosRMAssistWorkflow(Workflow):
             EbiosRMStudy = apps.get_model("ebios_rm", "EbiosRMStudy")
             study = (
                 EbiosRMStudy.objects.select_related("risk_matrix", "folder")
-                .filter(id=ctx.parsed_context.object_id)
+                .filter(
+                    id=ctx.parsed_context.object_id,
+                    folder_id__in=ctx.accessible_folder_ids,
+                )
                 .first()
             )
             if not study:

@@ -1,33 +1,39 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ fetch }) => {
-	const res = await fetch(`${BASE_API_URL}/chat/sessions/`);
-	const responseData = await res.text();
+const BACKEND_ERROR = JSON.stringify({ detail: 'Chat service unavailable' });
 
-	return new Response(responseData, {
-		status: res.status,
-		headers: {
-			'Content-Type': res.headers.get('Content-Type') ?? 'application/json'
-		}
-	});
+export const GET: RequestHandler = async ({ fetch }) => {
+	try {
+		const res = await fetch(`${BASE_API_URL}/chat/sessions/`);
+		return new Response(await res.text(), {
+			status: res.status,
+			headers: { 'Content-Type': res.headers.get('Content-Type') ?? 'application/json' }
+		});
+	} catch {
+		return new Response(BACKEND_ERROR, {
+			status: 502,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
 };
 
 export const POST: RequestHandler = async ({ fetch, request }) => {
-	const body = await request.text();
-	const res = await fetch(`${BASE_API_URL}/chat/sessions/`, {
-		method: 'POST',
-		body,
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
-	const responseData = await res.text();
-
-	return new Response(responseData, {
-		status: res.status,
-		headers: {
-			'Content-Type': res.headers.get('Content-Type') ?? 'application/json'
-		}
-	});
+	try {
+		const body = await request.text();
+		const res = await fetch(`${BASE_API_URL}/chat/sessions/`, {
+			method: 'POST',
+			body,
+			headers: { 'Content-Type': 'application/json' }
+		});
+		return new Response(await res.text(), {
+			status: res.status,
+			headers: { 'Content-Type': res.headers.get('Content-Type') ?? 'application/json' }
+		});
+	} catch {
+		return new Response(BACKEND_ERROR, {
+			status: 502,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
 };

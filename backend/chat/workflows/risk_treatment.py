@@ -103,7 +103,10 @@ class RiskTreatmentWorkflow(Workflow):
                 RiskScenario.objects.prefetch_related(
                     "threats", "assets", "applied_controls", "existing_applied_controls"
                 )
-                .filter(id=ctx.parsed_context.object_id)
+                .filter(
+                    id=ctx.parsed_context.object_id,
+                    risk_assessment__folder_id__in=ctx.accessible_folder_ids,
+                )
                 .first()
             )
             if not scenario:

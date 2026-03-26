@@ -101,7 +101,10 @@ class EvidenceGuidanceWorkflow(Workflow):
                     "requirement", "compliance_assessment__framework"
                 )
                 .prefetch_related("applied_controls", "evidences")
-                .filter(id=ctx.parsed_context.object_id)
+                .filter(
+                    id=ctx.parsed_context.object_id,
+                    compliance_assessment__folder_id__in=ctx.accessible_folder_ids,
+                )
                 .first()
             )
             if not ra or not ra.requirement:

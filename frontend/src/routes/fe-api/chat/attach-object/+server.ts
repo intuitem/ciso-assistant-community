@@ -1,8 +1,21 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { RequestHandler } from './$types';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SLUG_RE = /^[a-z0-9-/]+$/;
+
 export const POST: RequestHandler = async ({ fetch, request }) => {
-	const { parent_url_slug, parent_id, m2m_field, item_ids } = await request.json();
+	let body: Record<string, unknown>;
+	try {
+		body = await request.json();
+	} catch {
+		return new Response(JSON.stringify({ detail: 'Invalid JSON' }), {
+			status: 400,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
+
+	const { parent_url_slug, parent_id, m2m_field, item_ids } = body as Record<string, any>;
 
 	if (!parent_url_slug || !parent_id || !m2m_field || !item_ids?.length) {
 		return new Response(
@@ -12,6 +25,14 @@ export const POST: RequestHandler = async ({ fetch, request }) => {
 				headers: { 'Content-Type': 'application/json' }
 			}
 		);
+	}
+
+	// Validate to prevent path traversal
+	if (!SLUG_RE.test(parent_url_slug) || !UUID_RE.test(parent_id)) {
+		return new Response(JSON.stringify({ detail: 'Invalid slug or ID format' }), {
+			status: 400,
+			headers: { 'Content-Type': 'application/json' }
+		});
 	}
 
 	// First, get the current object to read existing M2M values

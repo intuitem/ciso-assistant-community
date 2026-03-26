@@ -58,25 +58,25 @@ def connect_signals():
         def on_save(sender, instance, **kwargs):
             if not ff_is_enabled("chat_mode"):
                 return
+            from django.db import transaction
             from .tasks import index_model_object
 
-            index_model_object(
-                sender._meta.app_label,
-                sender.__name__,
-                str(instance.id),
-            )
+            app = sender._meta.app_label
+            name = sender.__name__
+            obj_id = str(instance.id)
+            transaction.on_commit(lambda: index_model_object(app, name, obj_id))
 
         @receiver(post_delete, sender=model_class, weak=False)
         def on_delete(sender, instance, **kwargs):
             if not ff_is_enabled("chat_mode"):
                 return
+            from django.db import transaction
             from .tasks import remove_model_object
 
-            remove_model_object(
-                sender._meta.app_label,
-                sender.__name__,
-                str(instance.id),
-            )
+            app = sender._meta.app_label
+            name = sender.__name__
+            obj_id = str(instance.id)
+            transaction.on_commit(lambda: remove_model_object(app, name, obj_id))
 
     # Auto-ingest evidence attachments when a new revision is uploaded
     _connect_evidence_signal(ff_is_enabled)

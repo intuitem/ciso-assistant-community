@@ -18,5 +18,12 @@ export const DELETE: RequestHandler = async ({ fetch, params }) => {
 		method: 'DELETE'
 	});
 
-	return new Response(null, { status: res.status });
+	if (!res.ok) {
+		const body = await res.text();
+		return new Response(body, {
+			status: res.status,
+			headers: { 'Content-Type': res.headers.get('Content-Type') ?? 'application/json' }
+		});
+	}
+	return new Response(null, { status: 204 });
 };

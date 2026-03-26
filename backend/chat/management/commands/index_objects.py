@@ -5,7 +5,7 @@ Management command to bulk-index existing model objects into Qdrant for chat RAG
 import uuid
 
 from django.apps import apps
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from chat.rag import COLLECTION_NAME, get_qdrant_client
 from chat.signals import INDEXED_MODELS
@@ -40,12 +40,9 @@ class Command(BaseCommand):
         client = get_qdrant_client()
         collections = [c.name for c in client.get_collections().collections]
         if COLLECTION_NAME not in collections:
-            self.stderr.write(
-                self.style.ERROR(
-                    f"Collection '{COLLECTION_NAME}' does not exist. Run 'init_qdrant' first."
-                )
+            raise CommandError(
+                f"Collection '{COLLECTION_NAME}' does not exist. Run 'init_qdrant' first."
             )
-            return
 
         embedder = get_embedder()
         total_indexed = 0
@@ -69,8 +66,11 @@ class Command(BaseCommand):
 
             for obj in queryset.iterator():
                 text = _build_object_text(obj, model_name)
-                folder_id = str(getattr(obj, "folder_id", ""))
-                if not text or not folder_id:
+                raw_folder_id = getattr(obj, "folder_id", None)
+                if not text or not raw_folder_id:
+                    continue
+                folder_id = str(raw_folder_id)
+                if not folder_id:
                     continue
 
                 batch_texts.append(text)

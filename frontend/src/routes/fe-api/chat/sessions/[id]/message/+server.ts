@@ -11,6 +11,17 @@ export const POST: RequestHandler = async ({ fetch, request, params }) => {
 		}
 	});
 
+	// Forward error responses with their original content type
+	if (!res.ok) {
+		const body = await res.text();
+		return new Response(body, {
+			status: res.status,
+			headers: {
+				'Content-Type': res.headers.get('Content-Type') ?? 'application/json'
+			}
+		});
+	}
+
 	// Forward the SSE stream
 	if (!res.body) {
 		return new Response('No response body', { status: 502 });
