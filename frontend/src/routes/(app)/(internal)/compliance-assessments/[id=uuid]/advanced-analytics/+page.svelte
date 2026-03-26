@@ -232,7 +232,7 @@
 					{@const scoredSections = sections.filter(
 						(s: any) => s.score !== null && s.scored_count > 0
 					)}
-					{#if scoredSections.length > 0}
+					{#if data.compliance_assessment.scoring_enabled && scoredSections.length > 0}
 						{@const isSum = sectionData.score_calculation_method === 'sum'}
 						{@const baseMax = sectionData.max_score ?? 100}
 						{@const showDocRadar =
@@ -272,7 +272,7 @@
 							</div>
 						</div>
 					{/if}
-					{#if sections.some((s: any) => s.scored_count > 0)}
+					{#if data.compliance_assessment.scoring_enabled && sections.some((s: any) => s.scored_count > 0)}
 						<div class="mt-5 border-t border-slate-100 pt-5">
 							<table class="w-full text-sm">
 								<thead>

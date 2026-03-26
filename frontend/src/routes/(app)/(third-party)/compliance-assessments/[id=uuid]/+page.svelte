@@ -221,6 +221,7 @@
 					canEditRequirementAssessment,
 					hasParentNode,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
 					selectedStatus
@@ -235,6 +236,7 @@
 					score: node.score,
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
+					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score,
 					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,

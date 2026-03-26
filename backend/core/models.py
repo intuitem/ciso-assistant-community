@@ -6013,6 +6013,7 @@ class ComplianceAssessment(Assessment):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
         SUM = "sum", "Sum"
+        AVG_OF_AVG = "average_of_averages", "Average of averages"
 
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
@@ -6029,6 +6030,7 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
+    scoring_enabled = models.BooleanField(default=False)
     show_documentation_score = models.BooleanField(default=False)
 
     assets = models.ManyToManyField(
@@ -6294,6 +6296,9 @@ class ComplianceAssessment(Assessment):
 
         For AVG (average): Returns weighted average = Σ(score × weight) / Σ(weight)
         For SUM: Returns weighted sum = Σ(score × weight)
+        For AVG_OF_AVG (average of averages): Groups requirement assessments by their
+            parent requirement node, computes the weighted average per group, then
+            returns the average of those group averages.
 
         When show_documentation_score is enabled, documentation scores are included
         in the calculation with the same weight as the main score.
@@ -6303,12 +6308,42 @@ class ComplianceAssessment(Assessment):
             .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
+            .select_related("requirement")
         )
         ig = (
             set(self.selected_implementation_groups)
             if self.selected_implementation_groups
             else None
         )
+
+        if self.score_calculation_method == self.CalculationMethod.AVG_OF_AVG:
+            # Group by parent_urn, compute weighted average per group, then average
+            groups = defaultdict(lambda: {"weighted_score": 0, "total_weight": 0})
+            for ras in requirement_assessments_scored:
+                if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
+                    parent_key = ras.requirement.parent_urn or ras.requirement.urn
+                    weight = ras.requirement.weight if ras.requirement.weight else 1
+                    groups[parent_key]["weighted_score"] += (ras.score or 0) * weight
+                    groups[parent_key]["total_weight"] += weight
+                    if self.show_documentation_score:
+                        groups[parent_key]["weighted_score"] += (
+                            ras.documentation_score or 0
+                        ) * weight
+                        groups[parent_key]["total_weight"] += weight
+
+            group_averages = []
+            for group in groups.values():
+                if group["total_weight"] > 0:
+                    group_averages.append(
+                        group["weighted_score"] / group["total_weight"]
+                    )
+
+            if not group_averages:
+                return -1
+
+            global_score = sum(group_averages) / len(group_averages)
+            return int(global_score * 10) / 10
+
         weighted_score = 0
         total_weight = 0
 
@@ -6338,6 +6373,7 @@ class ComplianceAssessment(Assessment):
         Calculate the theoretical total maximum score based on the score_calculation_method.
 
         For AVG: Returns the framework's max_score (e.g., 100) since the average is bounded by it
+        For AVG_OF_AVG: Returns max_score since the average of averages is also bounded by it
         For SUM: Returns max_score × Σ(weight) of all scored requirements
         """
         if self.score_calculation_method == self.CalculationMethod.SUM:
@@ -6366,6 +6402,7 @@ class ComplianceAssessment(Assessment):
                 else self.max_score
             )
         else:
+            # For AVG and AVG_OF_AVG, the score is bounded by max_score
             return self.max_score
 
     def get_selected_implementation_groups(self):
