@@ -2236,7 +2236,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
-    progress = serializers.ReadOnlyField()
+    progress = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
@@ -2249,6 +2249,28 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         ],
         source="validationflow_set",
     )
+
+    def get_progress(self, obj):
+        if not obj.selected_implementation_groups:
+            total = getattr(obj, "total_requirements", 0)
+            assessed = getattr(obj, "assessed_requirements", 0)
+        else:
+            selected_groups = set(obj.selected_implementation_groups)
+            ras = [
+                ra
+                for ra in obj.requirement_assessments.all()
+                if selected_groups & set(ra.requirement.implementation_groups or [])
+            ]
+            total = len(ras)
+            assessed = len(
+                [
+                    ra
+                    for ra in ras
+                    if ra.result != RequirementAssessment.Result.NOT_ASSESSED
+                    or ra.score is not None
+                ]
+            )
+        return int((assessed / total) * 100) if total else 0
 
     class Meta:
         model = ComplianceAssessment

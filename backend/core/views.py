@@ -10112,7 +10112,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
-                "requirement_assessments",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.select_related("requirement"),
+                ),
                 Prefetch(
                     "validationflow_set",
                     queryset=ValidationFlow.objects.select_related("approver"),
@@ -11022,7 +11025,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         _framework = compliance_assessment.framework
         requirement_assessments = list(
             compliance_assessment.get_requirement_assessments(
-                include_non_assessable=True
+                include_non_assessable=True, lightweight=True
             )
         )
         # Auditee filtering: scope to assigned requirements only

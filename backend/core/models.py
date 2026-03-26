@@ -6719,6 +6719,7 @@ class ComplianceAssessment(Assessment):
         """
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
+            .select_related("requirement")
             .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
@@ -6762,6 +6763,7 @@ class ComplianceAssessment(Assessment):
         if self.score_calculation_method == self.CalculationMethod.SUM:
             requirement_assessments_scored = (
                 RequirementAssessment.objects.filter(compliance_assessment=self)
+                .select_related("requirement")
                 .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
                 .exclude(is_scored=False)
                 .exclude(requirement__assessable=False)
@@ -6823,34 +6825,39 @@ class ComplianceAssessment(Assessment):
 
         return bool(selected_groups & requirement_groups)
 
-    def get_requirement_assessments(self, include_non_assessable: bool):
+    def get_requirement_assessments(
+        self, include_non_assessable: bool, lightweight: bool = False
+    ):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
+        If lightweight is True, only prefetch answers/questions (for tree view), skip controls/evidences.
         """
-        base_queryset = (
-            RequirementAssessment.objects.filter(compliance_assessment=self)
-            .select_related(
+        base_queryset = RequirementAssessment.objects.filter(
+            compliance_assessment=self
+        ).select_related("requirement", "requirement__framework")
+
+        if not lightweight:
+            base_queryset = base_queryset.select_related(
                 "folder",
-                "requirement",
-                "requirement__framework",
                 "compliance_assessment",
                 "compliance_assessment__framework",
                 "compliance_assessment__perimeter",
                 "compliance_assessment__perimeter__folder",
-            )
-            .prefetch_related(
+            ).prefetch_related(
                 Prefetch("applied_controls"),
                 Prefetch("security_exceptions"),
                 Prefetch("evidences"),
                 Prefetch("requirement__reference_controls"),
                 Prefetch("requirement__threats"),
-                "requirement__questions",
-                "requirement__questions__choices",
-                "answers",
-                "answers__question",
-                "answers__selected_choices",
             )
+
+        base_queryset = base_queryset.prefetch_related(
+            "requirement__questions",
+            "requirement__questions__choices",
+            "answers",
+            "answers__question",
+            "answers__selected_choices",
         )
 
         if not include_non_assessable:
