@@ -15585,6 +15585,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         assignment = self.get_object()
         compliance_assessment = assignment.compliance_assessment
 
+        # Determine viewer role: respondent if user is an assigned actor, auditor otherwise
+        user_actors = Actor.get_all_for_user(request.user)
+        is_assigned_actor = assignment.actor.filter(
+            id__in=[a.id for a in user_actors]
+        ).exists()
+        viewer_role = "respondent" if is_assigned_actor else "auditor"
+
         assigned_ra_ids = set(
             assignment.requirement_assessments.values_list("id", flat=True)
         )
@@ -15618,7 +15625,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments_objects,
             many=True,
-            context={"viewer_role": "respondent"},
+            context={"viewer_role": viewer_role},
         ).data
         requirements = RequirementNodeReadSerializer(
             requirements_objects, many=True
@@ -15649,6 +15656,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 "requirement_assessments": requirement_assessments,
                 "total_visible_questions": total_visible_questions,
                 "total_answered_questions": total_answered_questions,
+                "viewer_role": viewer_role,
             },
             status=status.HTTP_200_OK,
         )
