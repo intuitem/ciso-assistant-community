@@ -6,11 +6,29 @@ icon: diagram-previous
 # Data import wizard
 
 {% hint style="info" %}
-Applicable for: Data import wizard UI (Pro) and CLI (Community or Pro)\
-\
+## Applicable for: Data import wizard UI (Pro) and CLI (Community or Pro)
+
 Importing existing data from excel sheets is supported on the Pro plan through the UI and CLI, and on Community edition through the dedicated CLI, not a django command. The cli is available on the cli folder with the associated instructions.\
 Keep in mind that the CLI needs to reach the API as it wraps its actions around it.\
 The mention to the API is regarding the fact that users on both plans can still interact with the API directly in case they have some data prep phase on their end for batch import or equivalent.
+{% endhint %}
+
+{% hint style="warning" %}
+### Connection Error
+
+![](<../.gitbook/assets/image (86).png>)
+
+If you encounter this error, it could be due to the Excel file being protected by **Information Rights Management (IRM)**.
+
+IRM protection restricts access to the file and prevents it from being read by external tools such as data-wizard.
+
+#### How to fix
+
+To resolve this issue, use an unprotected version of the file:
+
+* Download a copy of the file (**File → Create a Copy → Download a Copy**)
+* Or export the file as **CSV**
+* Or remove IRM protection using the desktop version of Excel
 {% endhint %}
 
 ## Overview
