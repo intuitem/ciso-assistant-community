@@ -92,13 +92,13 @@
 					<i class="fa-solid fa-grip-vertical text-xs"></i>
 				</span>
 
-				<span class="text-sm font-medium text-gray-700 truncate min-w-0">
-					{group.ref_id || 'Untitled group'}
-				</span>
-
 				{#if group.name}
-					<span class="text-xs text-gray-400 truncate min-w-0">{group.name}</span>
+					<span class="text-sm font-medium text-gray-700 truncate min-w-0">
+						{group.name || 'Untitled group'}
+					</span>
 				{/if}
+
+				<span class="text-xs text-gray-400 truncate min-w-0">{group.ref_id}</span>
 
 				{#if group.default_selected}
 					<span
