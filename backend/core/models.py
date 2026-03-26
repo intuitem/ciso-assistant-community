@@ -6471,21 +6471,19 @@ class ComplianceAssessment(Assessment):
         verbose_name_plural = _("Compliance assessments")
 
     def upsert_daily_metrics(self):
-        per_status = dict()
-        per_result = dict()
-        for item in self.get_requirements_status_count():
-            per_status[item[1]] = item[0]
-
-        for item in self.get_requirements_result_count():
-            per_result[item[1]] = item[0]
+        per_status = {item[1]: item[0] for item in self.get_requirements_status_count()}
+        per_result = {item[1]: item[0] for item in self.get_requirements_result_count()}
         total = RequirementAssessment.objects.filter(compliance_assessment=self).count()
+        score = self.get_global_score()
+        progress = self.progress
+
         data = {
             "reqs": {
                 "total": total,
                 "per_status": per_status,
                 "per_result": per_result,
-                "progress_perc": self.progress,
-                "score": self.get_global_score(),
+                "progress_perc": progress,
+                "score": score,
             },
         }
 
@@ -6493,10 +6491,19 @@ class ComplianceAssessment(Assessment):
             model=self.__class__.__name__, object_id=self.id, data=data
         )
 
-        # Also update BuiltinMetricSample
+        # Pass pre-computed metrics to BuiltinMetricSample to avoid double computation
         from metrology.models import BuiltinMetricSample
 
-        BuiltinMetricSample.update_or_create_snapshot(self)
+        BuiltinMetricSample.update_or_create_snapshot(
+            self,
+            precomputed_metrics={
+                "progress": progress,
+                "score": score,
+                "total_requirements": total,
+                "status_breakdown": per_status,
+                "result_breakdown": per_result,
+            },
+        )
 
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
@@ -6717,7 +6724,7 @@ class ComplianceAssessment(Assessment):
         When show_documentation_score is enabled, documentation scores are included
         in the calculation with the same weight as the main score.
         """
-        requirement_assessments_scored = (
+        qs = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .select_related("requirement")
             .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
@@ -6729,17 +6736,22 @@ class ComplianceAssessment(Assessment):
             if self.selected_implementation_groups
             else None
         )
+        if ig is not None:
+            ig_filter = Q()
+            for group in ig:
+                ig_filter |= Q(requirement__implementation_groups__contains=[group])
+            qs = qs.filter(ig_filter)
+
         weighted_score = 0
         total_weight = 0
 
-        for ras in requirement_assessments_scored:
-            if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
-                weight = ras.requirement.weight if ras.requirement.weight else 1
-                weighted_score += (ras.score or 0) * weight
+        for ras in qs:
+            weight = ras.requirement.weight if ras.requirement.weight else 1
+            weighted_score += (ras.score or 0) * weight
+            total_weight += weight
+            if self.show_documentation_score:
+                weighted_score += (ras.documentation_score or 0) * weight
                 total_weight += weight
-                if self.show_documentation_score:
-                    weighted_score += (ras.documentation_score or 0) * weight
-                    total_weight += weight
 
         if total_weight == 0:
             return -1
@@ -6981,33 +6993,26 @@ class ComplianceAssessment(Assessment):
     def get_requirements_result_count(
         self,
     ) -> list[tuple[int, RequirementAssessment.Result]]:
-        requirements_result_count = []
-        selected_implementation_groups_set = (
+        requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        )
+        ig = (
             set(self.selected_implementation_groups)
             if self.selected_implementation_groups
             else None
         )
 
-        requirements = RequirementAssessment.objects.filter(
-            compliance_assessment=self, requirement__assessable=True
-        ).select_related("requirement")
+        if ig is not None:
+            ig_filter = Q()
+            for group in ig:
+                ig_filter |= Q(requirement__implementation_groups__contains=[group])
+            requirements = requirements.filter(ig_filter)
 
-        if selected_implementation_groups_set is not None:
-            result_groups = {}
-            for req in requirements:
-                req_groups = set(req.requirement.implementation_groups or [])
-                if selected_implementation_groups_set & req_groups:
-                    result_groups.setdefault(req.result, []).append(req)
-
-            for rs in RequirementAssessment.Result:
-                count = len(result_groups.get(rs, []))
-                requirements_result_count.append((count, rs))
-        else:
-            for rs in RequirementAssessment.Result:
-                count = requirements.filter(result=rs).count()
-                requirements_result_count.append((count, rs))
-
-        return requirements_result_count
+        count_by_result = {
+            row["result"]: row["count"]
+            for row in requirements.values("result").annotate(count=Count("result"))
+        }
+        return [(count_by_result.get(rs, 0), rs) for rs in RequirementAssessment.Result]
 
     def get_measures_status_count(self):
         measures_status_count = []

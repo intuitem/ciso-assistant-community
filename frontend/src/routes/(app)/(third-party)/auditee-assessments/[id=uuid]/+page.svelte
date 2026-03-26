@@ -97,10 +97,15 @@
 	async function handleSubmitForReview() {
 		if (!assignment || !canSubmit) return;
 
+		const remaining = totalAssessable - assessedCount;
+		const body = hasUnassessed
+			? `${m.incompleteAssessmentWarning({ remaining, total: totalAssessable })}\n\n${m.submitForReviewConfirm()}`
+			: m.submitForReviewConfirm();
+
 		const modal: ModalSettings = {
 			type: 'confirm',
 			title: m.submitForReview(),
-			body: m.submitForReviewConfirm(),
+			body,
 			response: async (confirmed: boolean) => {
 				if (!confirmed) return;
 				isSubmitting = true;
@@ -204,7 +209,7 @@
 	const progressPercent = $derived(
 		totalAssessable > 0 ? Math.round((assessedCount / totalAssessable) * 100) : 0
 	);
-	let submitBlocked = $derived(assessedCount < totalAssessable);
+	let hasUnassessed = $derived(assessedCount < totalAssessable);
 
 	// --- Update logic (same as table-mode) ---
 	async function updateBulk(
@@ -642,20 +647,10 @@
 		<!-- Submit for Review button -->
 		{#if canSubmit}
 			<div class="flex flex-col items-end gap-2">
-				{#if submitBlocked}
-					<p class="text-xs text-amber-600 flex items-center gap-1.5">
-						<i class="fa-solid fa-circle-exclamation"></i>
-						{m.incompleteAssessmentWarning({
-							remaining: totalAssessable - assessedCount,
-							total: totalAssessable
-						})}
-					</p>
-				{/if}
 				<button
 					class="btn preset-filled-primary-500"
 					onclick={handleSubmitForReview}
-					disabled={isSubmitting || submitBlocked}
-					title={submitBlocked ? m.incompleteAssessmentError() : ''}
+					disabled={isSubmitting}
 				>
 					{#if isSubmitting}
 						<i class="fa-solid fa-spinner fa-spin mr-2"></i>

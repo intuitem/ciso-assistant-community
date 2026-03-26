@@ -12398,9 +12398,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         return qs
 
     def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        cache.clear()
-        return response
+        return super().update(request, *args, **kwargs)
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
@@ -15457,12 +15455,10 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         ("draft", "in_progress"): {"reviewer_only": True},
         ("in_progress", "submitted"): {
             "actor_only": True,
-            "check_completion": True,
             "observation": "clear",
         },
         ("changes_requested", "submitted"): {
             "actor_only": True,
-            "check_completion": True,
             "observation": "clear",
         },
         ("submitted", "closed"): {
@@ -15523,20 +15519,6 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 return Response(
                     {"error": "You are not assigned to this assignment."},
                     status=status.HTTP_403_FORBIDDEN,
-                )
-
-        # Completion check: all assessable requirements must be assessed
-        if config.get("check_completion"):
-            unassessed_count = assignment.requirement_assessments.filter(
-                requirement__assessable=True, result="not_assessed"
-            ).count()
-            if unassessed_count > 0:
-                return Response(
-                    {
-                        "error": f"{unassessed_count} requirement(s) have not been assessed yet.",
-                        "unassessed_count": unassessed_count,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
         # Handle reviewer_observation (stored as event_notes)
