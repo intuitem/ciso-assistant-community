@@ -28,9 +28,7 @@
 	const showAppliedControls = $derived(
 		isFieldVisible(fw, complianceAssessment, 'applied_controls', 'auditor')
 	);
-	const showEvidences = $derived(
-		isFieldVisible(fw, complianceAssessment, 'evidences', 'auditor')
-	);
+	const showEvidences = $derived(isFieldVisible(fw, complianceAssessment, 'evidences', 'auditor'));
 	const showSecurityExceptions = $derived(
 		isFieldVisible(fw, complianceAssessment, 'security_exceptions', 'auditor')
 	);

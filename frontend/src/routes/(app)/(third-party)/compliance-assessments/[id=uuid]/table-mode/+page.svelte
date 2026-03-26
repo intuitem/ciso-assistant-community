@@ -93,9 +93,7 @@
 	const showAppliedControls = $derived(
 		isFieldVisible(fw, complianceAssessment, 'applied_controls', viewerRole)
 	);
-	const showEvidences = $derived(
-		isFieldVisible(fw, complianceAssessment, 'evidences', viewerRole)
-	);
+	const showEvidences = $derived(isFieldVisible(fw, complianceAssessment, 'evidences', viewerRole));
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -853,200 +851,207 @@
 												onValueChange={(e) => (accordionItems[requirementAssessment.id] = e.value)}
 											>
 												{#if showObservation}
-												{#if shallow}
-													{#if requirementAssessment.observation}
-														<MarkdownRenderer
-															content={requirementAssessment.observation}
-															class="text-primary-500"
-														/>
-													{:else}
-														<p class="text-gray-400 italic">{m.noObservation()}</p>
-													{/if}
-												{:else}
-													<Accordion.Item value="observation">
-														<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-															<p class="flex flex-1 text-left">{m.observation()}</p>
-
-															<Accordion.ItemIndicator
-																class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-																><svg
-																	xmlns="http://www.w3.org/2000/svg"
-																	width="14px"
-																	height="14px"
-																	viewBox="0 0 448 512"
-																	><path
-																		d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-																	/></svg
-																></Accordion.ItemIndicator
-															>
-														</Accordion.ItemTrigger>
-														<Accordion.ItemContent>
-															<TableMarkdownField
-																bind:value={requirementAssessment.observation}
-																disabled={isReadOnly}
-																onSave={async (newValue) => {
-																	await update(requirementAssessment, 'observation');
-																	requirementAssessment.observationBuffer = newValue;
-																}}
+													{#if shallow}
+														{#if requirementAssessment.observation}
+															<MarkdownRenderer
+																content={requirementAssessment.observation}
+																class="text-primary-500"
 															/>
-														</Accordion.ItemContent>
-													</Accordion.Item>
-												{/if}
+														{:else}
+															<p class="text-gray-400 italic">{m.noObservation()}</p>
+														{/if}
+													{:else}
+														<Accordion.Item value="observation">
+															<Accordion.ItemTrigger
+																class="flex w-full items-center cursor-pointer"
+															>
+																<p class="flex flex-1 text-left">{m.observation()}</p>
+
+																<Accordion.ItemIndicator
+																	class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+																	><svg
+																		xmlns="http://www.w3.org/2000/svg"
+																		width="14px"
+																		height="14px"
+																		viewBox="0 0 448 512"
+																		><path
+																			d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																		/></svg
+																	></Accordion.ItemIndicator
+																>
+															</Accordion.ItemTrigger>
+															<Accordion.ItemContent>
+																<TableMarkdownField
+																	bind:value={requirementAssessment.observation}
+																	disabled={isReadOnly}
+																	onSave={async (newValue) => {
+																		await update(requirementAssessment, 'observation');
+																		requirementAssessment.observationBuffer = newValue;
+																	}}
+																/>
+															</Accordion.ItemContent>
+														</Accordion.Item>
+													{/if}
 												{/if}
 
 												{#if showAppliedControls}
-												{#if requirementAssessment.applied_controls.length === 0 && shallow}
-													<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
-												{:else}
-													<Accordion.Item value="appliedControl">
-														<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-															<p class="flex flex-1 items-center space-x-2 text-left">
-																<span>{m.appliedControl()}</span>
-																{#key addedMeasure}
-																	{#if requirementAssessment.applied_controls != null}
-																		<span class="badge preset-tonal-primary"
-																			>{requirementAssessment.applied_controls.length}</span
-																		>
-																	{/if}
-																{/key}
-															</p>
-
-															<Accordion.ItemIndicator
-																class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-																><svg
-																	xmlns="http://www.w3.org/2000/svg"
-																	width="14px"
-																	height="14px"
-																	viewBox="0 0 448 512"
-																	><path
-																		d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-																	/></svg
-																></Accordion.ItemIndicator
+													{#if requirementAssessment.applied_controls.length === 0 && shallow}
+														<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
+													{:else}
+														<Accordion.Item value="appliedControl">
+															<Accordion.ItemTrigger
+																class="flex w-full items-center cursor-pointer"
 															>
-														</Accordion.ItemTrigger>
-														<Accordion.ItemContent>
-															<div class="flex flex-row space-x-2 items-center">
-																{#if !shallow && !isReadOnly}
-																	<button
-																		class="btn preset-filled-primary-500 self-start"
-																		onclick={() =>
-																			modalMeasureCreateForm(
-																				requirementAssessment.measureCreateForm
-																			)}
-																		type="button"
-																		><i class="fa-solid fa-plus mr-2"
-																		></i>{m.addAppliedControl()}</button
-																	>
-																	<button
-																		class="btn preset-filled-secondary-500 self-start"
-																		type="button"
-																		onclick={() =>
-																			modalUpdateForm(
-																				requirementAssessment,
-																				'selectAppliedControls'
-																			)}
-																		><i class="fa-solid fa-hand-pointer mr-2"
-																		></i>{m.selectAppliedControls()}
-																	</button>
-																{/if}
-															</div>
-															<div class="flex flex-wrap space-x-2 items-center">
-																{#key addedMeasure}
-																	{#each requirementAssessment.applied_controls as ac}
-																		<p class="p-2">
-																			<Anchor
-																				class="anchor"
-																				href="/applied-controls/{ac.id}"
-																				label={ac.str}
-																				><i class="fa-solid fa-fire-extinguisher mr-2"
-																				></i>{ac.str}</Anchor
+																<p class="flex flex-1 items-center space-x-2 text-left">
+																	<span>{m.appliedControl()}</span>
+																	{#key addedMeasure}
+																		{#if requirementAssessment.applied_controls != null}
+																			<span class="badge preset-tonal-primary"
+																				>{requirementAssessment.applied_controls.length}</span
 																			>
-																		</p>
-																	{/each}
-																{/key}
-															</div>
-														</Accordion.ItemContent>
-													</Accordion.Item>
-												{/if}
+																		{/if}
+																	{/key}
+																</p>
+
+																<Accordion.ItemIndicator
+																	class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+																	><svg
+																		xmlns="http://www.w3.org/2000/svg"
+																		width="14px"
+																		height="14px"
+																		viewBox="0 0 448 512"
+																		><path
+																			d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																		/></svg
+																	></Accordion.ItemIndicator
+																>
+															</Accordion.ItemTrigger>
+															<Accordion.ItemContent>
+																<div class="flex flex-row space-x-2 items-center">
+																	{#if !shallow && !isReadOnly}
+																		<button
+																			class="btn preset-filled-primary-500 self-start"
+																			onclick={() =>
+																				modalMeasureCreateForm(
+																					requirementAssessment.measureCreateForm
+																				)}
+																			type="button"
+																			><i class="fa-solid fa-plus mr-2"
+																			></i>{m.addAppliedControl()}</button
+																		>
+																		<button
+																			class="btn preset-filled-secondary-500 self-start"
+																			type="button"
+																			onclick={() =>
+																				modalUpdateForm(
+																					requirementAssessment,
+																					'selectAppliedControls'
+																				)}
+																			><i class="fa-solid fa-hand-pointer mr-2"
+																			></i>{m.selectAppliedControls()}
+																		</button>
+																	{/if}
+																</div>
+																<div class="flex flex-wrap space-x-2 items-center">
+																	{#key addedMeasure}
+																		{#each requirementAssessment.applied_controls as ac}
+																			<p class="p-2">
+																				<Anchor
+																					class="anchor"
+																					href="/applied-controls/{ac.id}"
+																					label={ac.str}
+																					><i class="fa-solid fa-fire-extinguisher mr-2"
+																					></i>{ac.str}</Anchor
+																				>
+																			</p>
+																		{/each}
+																	{/key}
+																</div>
+															</Accordion.ItemContent>
+														</Accordion.Item>
+													{/if}
 												{/if}
 
 												{#if showEvidences}
-												{#if requirementAssessment.evidences.length === 0 && shallow}
-													<p class="text-gray-400 italic" data-testid="no-evidence">
-														{m.noEvidences()}
-													</p>
-												{:else}
-													<Accordion.Item value="evidence">
-														<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-															<p class="flex flex-1 items-center space-x-2 text-left">
-																<span>{m.evidence()}</span>
-																{#key addedEvidence}
-																	{#if requirementAssessment.evidences != null}
-																		<span
-																			class="badge preset-tonal-primary"
-																			data-testid="evidence-count"
-																			>{requirementAssessment.evidences.length}</span
-																		>
-																	{/if}
-																{/key}
-															</p>
-
-															<Accordion.ItemIndicator
-																class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-																><svg
-																	xmlns="http://www.w3.org/2000/svg"
-																	width="14px"
-																	height="14px"
-																	viewBox="0 0 448 512"
-																	><path
-																		d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-																	/></svg
-																></Accordion.ItemIndicator
+													{#if requirementAssessment.evidences.length === 0 && shallow}
+														<p class="text-gray-400 italic" data-testid="no-evidence">
+															{m.noEvidences()}
+														</p>
+													{:else}
+														<Accordion.Item value="evidence">
+															<Accordion.ItemTrigger
+																class="flex w-full items-center cursor-pointer"
 															>
-														</Accordion.ItemTrigger>
-														<Accordion.ItemContent>
-															<div class="flex flex-row space-x-2 items-center">
-																{#if !shallow && !isReadOnly}
-																	<button
-																		class="btn preset-filled-primary-500 self-start"
-																		onclick={() =>
-																			modalEvidenceCreateForm(
-																				requirementAssessment.evidenceCreateForm
-																			)}
-																		type="button"
-																		data-testid="create-evidence-button"
-																		><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
-																	>
-																	<button
-																		class="btn preset-filled-secondary-500 self-start"
-																		type="button"
-																		data-testid="select-evidence-button"
-																		onclick={() =>
-																			modalUpdateForm(requirementAssessment, 'selectEvidences')}
-																		><i class="fa-solid fa-hand-pointer mr-2"
-																		></i>{m.selectEvidence()}
-																	</button>
-																{/if}
-															</div>
-															<div class="flex flex-wrap space-x-2 items-center">
-																{#key addedEvidence}
-																	{#each requirementAssessment.evidences as evidence}
-																		<p class="p-2">
-																			<Anchor
-																				class="anchor"
-																				href="/evidences/{evidence.id}"
-																				label={evidence.str}
-																				data-testid="evidence-link"
-																				><i class="fa-solid fa-file-lines mr-2"
-																				></i>{evidence.str}</Anchor
+																<p class="flex flex-1 items-center space-x-2 text-left">
+																	<span>{m.evidence()}</span>
+																	{#key addedEvidence}
+																		{#if requirementAssessment.evidences != null}
+																			<span
+																				class="badge preset-tonal-primary"
+																				data-testid="evidence-count"
+																				>{requirementAssessment.evidences.length}</span
 																			>
-																		</p>
-																	{/each}
-																{/key}
-															</div>
-														</Accordion.ItemContent>
-													</Accordion.Item>
-												{/if}
+																		{/if}
+																	{/key}
+																</p>
+
+																<Accordion.ItemIndicator
+																	class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+																	><svg
+																		xmlns="http://www.w3.org/2000/svg"
+																		width="14px"
+																		height="14px"
+																		viewBox="0 0 448 512"
+																		><path
+																			d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																		/></svg
+																	></Accordion.ItemIndicator
+																>
+															</Accordion.ItemTrigger>
+															<Accordion.ItemContent>
+																<div class="flex flex-row space-x-2 items-center">
+																	{#if !shallow && !isReadOnly}
+																		<button
+																			class="btn preset-filled-primary-500 self-start"
+																			onclick={() =>
+																				modalEvidenceCreateForm(
+																					requirementAssessment.evidenceCreateForm
+																				)}
+																			type="button"
+																			data-testid="create-evidence-button"
+																			><i class="fa-solid fa-plus mr-2"
+																			></i>{m.addEvidence()}</button
+																		>
+																		<button
+																			class="btn preset-filled-secondary-500 self-start"
+																			type="button"
+																			data-testid="select-evidence-button"
+																			onclick={() =>
+																				modalUpdateForm(requirementAssessment, 'selectEvidences')}
+																			><i class="fa-solid fa-hand-pointer mr-2"
+																			></i>{m.selectEvidence()}
+																		</button>
+																	{/if}
+																</div>
+																<div class="flex flex-wrap space-x-2 items-center">
+																	{#key addedEvidence}
+																		{#each requirementAssessment.evidences as evidence}
+																			<p class="p-2">
+																				<Anchor
+																					class="anchor"
+																					href="/evidences/{evidence.id}"
+																					label={evidence.str}
+																					data-testid="evidence-link"
+																					><i class="fa-solid fa-file-lines mr-2"
+																					></i>{evidence.str}</Anchor
+																				>
+																			</p>
+																		{/each}
+																	{/key}
+																</div>
+															</Accordion.ItemContent>
+														</Accordion.Item>
+													{/if}
 												{/if}
 											</Accordion>
 										</div>

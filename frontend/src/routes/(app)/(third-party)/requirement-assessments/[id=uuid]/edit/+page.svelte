@@ -677,8 +677,8 @@
 											hideFilters={true}
 											URLModel="evidences"
 											expectedCount={countMasked(page.data.requirementAssessment.evidences)}
-											baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
-												.id}"
+											baseEndpoint="/evidences?requirement_assessments={page.data
+												.requirementAssessment.id}"
 										/>
 									</div>
 								</Tabs.Content>
@@ -707,7 +707,9 @@
 											source={page.data.tables['security-exceptions']}
 											hideFilters={true}
 											URLModel="security-exceptions"
-											expectedCount={countMasked(page.data.requirementAssessment.security_exceptions)}
+											expectedCount={countMasked(
+												page.data.requirementAssessment.security_exceptions
+											)}
 											baseEndpoint="/security-exceptions?requirement_assessments={page.data
 												.requirementAssessment.id}"
 										/>

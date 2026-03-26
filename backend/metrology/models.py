@@ -453,7 +453,11 @@ class BuiltinMetricSample(AbstractBaseModel):
             date = now().date()
 
         content_type = ContentType.objects.get_for_model(obj)
-        metrics = precomputed_metrics if precomputed_metrics is not None else cls.compute_metrics(obj)
+        metrics = (
+            precomputed_metrics
+            if precomputed_metrics is not None
+            else cls.compute_metrics(obj)
+        )
 
         return cls.objects.update_or_create(
             content_type=content_type,

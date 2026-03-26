@@ -1129,12 +1129,10 @@ export function createBuilderState(
 		delete fwTrans[newLocale];
 
 		// Swap nested translations in scores_definition entries
-		const swappedScores = swapJsonEntryTranslations(
-			fw.scores_definition,
-			oldLocale,
-			newLocale,
-			['name', 'description']
-		);
+		const swappedScores = swapJsonEntryTranslations(fw.scores_definition, oldLocale, newLocale, [
+			'name',
+			'description'
+		]);
 		// Swap nested translations in implementation_groups_definition entries
 		const swappedIgs = swapJsonArrayTranslations(
 			fw.implementation_groups_definition,
@@ -1211,11 +1209,7 @@ export function createBuilderState(
 	}
 
 	/** Swap base ↔ translation fields on a Question */
-	function swapQuestionFields(
-		q: Question,
-		oldLocale: string,
-		newLocale: string
-	): Question {
+	function swapQuestionFields(q: Question, oldLocale: string, newLocale: string): Question {
 		const trans = { ...(q.translations ?? {}) };
 		const demoted: Record<string, string> = {};
 		if (q.text) demoted.text = q.text;

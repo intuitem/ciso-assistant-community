@@ -11276,21 +11276,30 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             done = ras.exclude(result="not_assessed").count()
 
             # Use question-based progress when framework has questions
-            has_questions = Question.objects.filter(
-                requirement_node__framework=ca.framework
-            ).exists() if ca.framework else False
+            has_questions = (
+                Question.objects.filter(
+                    requirement_node__framework=ca.framework
+                ).exists()
+                if ca.framework
+                else False
+            )
 
             if has_questions:
                 total_q = 0
                 answered_q = 0
                 for ra in ras.prefetch_related(
-                    "answers", "answers__question", "answers__selected_choices",
-                    "requirement__questions", "requirement__questions__choices",
+                    "answers",
+                    "answers__question",
+                    "answers__selected_choices",
+                    "requirement__questions",
+                    "requirement__questions__choices",
                 ):
                     v, a = ra.get_visible_questions_counts()
                     total_q += v
                     answered_q += a
-                progress_percent = round(answered_q / total_q * 100) if total_q > 0 else 0
+                progress_percent = (
+                    round(answered_q / total_q * 100) if total_q > 0 else 0
+                )
             else:
                 progress_percent = round(done / total * 100) if total > 0 else 0
 
@@ -15647,8 +15656,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         for ra_data in requirement_assessments:
             ra_id = str(ra_data["id"])
             if ra_id in question_counts:
-                ra_data["visible_questions"] = question_counts[ra_id]["visible_questions"]
-                ra_data["answered_questions"] = question_counts[ra_id]["answered_questions"]
+                ra_data["visible_questions"] = question_counts[ra_id][
+                    "visible_questions"
+                ]
+                ra_data["answered_questions"] = question_counts[ra_id][
+                    "answered_questions"
+                ]
 
         return Response(
             {

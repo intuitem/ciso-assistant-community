@@ -49,8 +49,12 @@
 	const viewerRole = $derived((data.viewerRole ?? 'respondent') as 'respondent' | 'auditor');
 	const showResult = $derived(isFieldVisible(fw, complianceAssessment, 'result', viewerRole));
 	const showScore = $derived(isFieldVisible(fw, complianceAssessment, 'score', viewerRole));
-	const showObservation = $derived(isFieldVisible(fw, complianceAssessment, 'observation', viewerRole));
-	const showAppliedControls = $derived(isFieldVisible(fw, complianceAssessment, 'applied_controls', viewerRole));
+	const showObservation = $derived(
+		isFieldVisible(fw, complianceAssessment, 'observation', viewerRole)
+	);
+	const showAppliedControls = $derived(
+		isFieldVisible(fw, complianceAssessment, 'applied_controls', viewerRole)
+	);
 	const showEvidences = $derived(isFieldVisible(fw, complianceAssessment, 'evidences', viewerRole));
 
 	// Single assignment — the URL param (params.id) IS the assignment ID
@@ -69,8 +73,7 @@
 	);
 
 	let canSubmit = $derived(
-		!isAuditor &&
-			(assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested')
+		!isAuditor && (assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested')
 	);
 
 	// Get latest observation from the most recent changes_requested event
@@ -821,128 +824,128 @@
 
 							<!-- Result -->
 							{#if showResult || Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
-							<div class="flex flex-col items-center w-full my-2">
-								<p class="flex items-center font-semibold text-purple-600 italic">
-									{m.result()}
-								</p>
-								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
-									<span
-										class="badge text-sm font-semibold"
-										style="background-color: {complianceResultColorMap[
-											requirementAssessment.result
-										] || '#ddd'}"
-									>
-										{safeTranslate(requirementAssessment.result)}
-									</span>
-								{:else}
-									<RadioGroup
-										possibleOptions={result_options}
-										key="id"
-										labelKey="label"
-										field="result"
-										colorMap={complianceResultTailwindColorMap}
-										disabled={isReadOnly}
-										initialValue={requirementAssessment.result}
-										onChange={(newValue) => {
-											const newResult =
-												requirementAssessment.result === newValue ? 'not_assessed' : newValue;
-											requirementAssessment.result = newResult;
-											update(requirementAssessment, 'result');
-										}}
-									/>
-								{/if}
-							</div>
+								<div class="flex flex-col items-center w-full my-2">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.result()}
+									</p>
+									{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
+										<span
+											class="badge text-sm font-semibold"
+											style="background-color: {complianceResultColorMap[
+												requirementAssessment.result
+											] || '#ddd'}"
+										>
+											{safeTranslate(requirementAssessment.result)}
+										</span>
+									{:else}
+										<RadioGroup
+											possibleOptions={result_options}
+											key="id"
+											labelKey="label"
+											field="result"
+											colorMap={complianceResultTailwindColorMap}
+											disabled={isReadOnly}
+											initialValue={requirementAssessment.result}
+											onChange={(newValue) => {
+												const newResult =
+													requirementAssessment.result === newValue ? 'not_assessed' : newValue;
+												requirementAssessment.result = newResult;
+												update(requirementAssessment, 'result');
+											}}
+										/>
+									{/if}
+								</div>
 							{/if}
 
 							<!-- Score -->
 							{#if showScore}
-							<div
-								class="flex flex-col w-full place-items-center {isReadOnly
-									? 'pointer-events-none opacity-60'
-									: ''}"
-							>
-								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
-									<div class="flex flex-row items-center space-x-4">
-										<span class="font-medium">{m.score()}</span>
-										<div class="shrink-0 relative">
-											<Progress
-												value={formatScoreValue(
-													requirementAssessment.score,
-													complianceAssessment.max_score
-												)}
-												min={0}
-												max={100}
-											>
-												<Progress.Circle class="[--size:--spacing(10)]">
-													<Progress.CircleTrack />
-													<Progress.CircleRange
-														class={displayScoreColor(
-															requirementAssessment.score,
-															complianceAssessment.max_score
-														)}
-													/>
-												</Progress.Circle>
-												<div class="absolute inset-0 flex items-center justify-center">
-													<span class="text-xs font-bold">{requirementAssessment.score}</span>
-												</div>
-											</Progress>
-										</div>
-									</div>
-								{:else if requirementAssessment.result !== 'not_applicable'}
-									<Score
-										form={scoreForms[requirementAssessment.id]}
-										min_score={complianceAssessment.min_score}
-										max_score={complianceAssessment.max_score}
-										scores_definition={complianceAssessment.scores_definition}
-										field="score"
-										label={complianceAssessment.show_documentation_score
-											? m.implementationScore()
-											: m.score()}
-										styles="w-full p-1"
-										onChange={(newScore) => {
-											requirementAssessment.score = newScore;
-											updateScore(requirementAssessment);
-										}}
-										disabled={!requirementAssessment.is_scored}
-									>
-										{#snippet left()}
-											<div>
-												<Checkbox
-													form={isScoredForms[requirementAssessment.id]}
-													field="is_scored"
-													disabled={isReadOnly}
-													label={''}
-													helpText={m.scoringHelpText()}
-													checkboxComponent="switch"
-													classes="h-full flex flex-row items-center justify-center my-1"
-													classesContainer="h-full flex flex-row items-center space-x-4"
-													onChange={async (newValue) => {
-														requirementAssessment.is_scored = newValue;
-														await update(requirementAssessment, 'is_scored');
-													}}
-												/>
+								<div
+									class="flex flex-col w-full place-items-center {isReadOnly
+										? 'pointer-events-none opacity-60'
+										: ''}"
+								>
+									{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
+										<div class="flex flex-row items-center space-x-4">
+											<span class="font-medium">{m.score()}</span>
+											<div class="shrink-0 relative">
+												<Progress
+													value={formatScoreValue(
+														requirementAssessment.score,
+														complianceAssessment.max_score
+													)}
+													min={0}
+													max={100}
+												>
+													<Progress.Circle class="[--size:--spacing(10)]">
+														<Progress.CircleTrack />
+														<Progress.CircleRange
+															class={displayScoreColor(
+																requirementAssessment.score,
+																complianceAssessment.max_score
+															)}
+														/>
+													</Progress.Circle>
+													<div class="absolute inset-0 flex items-center justify-center">
+														<span class="text-xs font-bold">{requirementAssessment.score}</span>
+													</div>
+												</Progress>
 											</div>
-										{/snippet}
-									</Score>
-									{#if complianceAssessment.show_documentation_score}
+										</div>
+									{:else if requirementAssessment.result !== 'not_applicable'}
 										<Score
-											form={docScoreForms[requirementAssessment.id]}
+											form={scoreForms[requirementAssessment.id]}
 											min_score={complianceAssessment.min_score}
 											max_score={complianceAssessment.max_score}
 											scores_definition={complianceAssessment.scores_definition}
-											field="documentation_score"
-											label={m.documentationScore()}
-											isDoc={true}
+											field="score"
+											label={complianceAssessment.show_documentation_score
+												? m.implementationScore()
+												: m.score()}
 											styles="w-full p-1"
 											onChange={(newScore) => {
-												requirementAssessment.documentation_score = newScore;
+												requirementAssessment.score = newScore;
 												updateScore(requirementAssessment);
 											}}
 											disabled={!requirementAssessment.is_scored}
-										/>
+										>
+											{#snippet left()}
+												<div>
+													<Checkbox
+														form={isScoredForms[requirementAssessment.id]}
+														field="is_scored"
+														disabled={isReadOnly}
+														label={''}
+														helpText={m.scoringHelpText()}
+														checkboxComponent="switch"
+														classes="h-full flex flex-row items-center justify-center my-1"
+														classesContainer="h-full flex flex-row items-center space-x-4"
+														onChange={async (newValue) => {
+															requirementAssessment.is_scored = newValue;
+															await update(requirementAssessment, 'is_scored');
+														}}
+													/>
+												</div>
+											{/snippet}
+										</Score>
+										{#if complianceAssessment.show_documentation_score}
+											<Score
+												form={docScoreForms[requirementAssessment.id]}
+												min_score={complianceAssessment.min_score}
+												max_score={complianceAssessment.max_score}
+												scores_definition={complianceAssessment.scores_definition}
+												field="documentation_score"
+												label={m.documentationScore()}
+												isDoc={true}
+												styles="w-full p-1"
+												onChange={(newScore) => {
+													requirementAssessment.documentation_score = newScore;
+													updateScore(requirementAssessment);
+												}}
+												disabled={!requirementAssessment.is_scored}
+											/>
+										{/if}
 									{/if}
-								{/if}
-							</div>
+								</div>
 							{/if}
 
 							<Accordion
@@ -951,160 +954,161 @@
 							>
 								<!-- Applied Controls -->
 								{#if showAppliedControls}
-								<Accordion.Item value="appliedControl">
-									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-										<p class="flex flex-1 items-center space-x-2 text-left">
-											<span>{m.appliedControl()}</span>
-											{#if requirementAssessment.applied_controls != null}
-												<span class="badge preset-tonal-primary"
-													>{requirementAssessment.applied_controls.length}</span
-												>
-											{/if}
-										</p>
+									<Accordion.Item value="appliedControl">
+										<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+											<p class="flex flex-1 items-center space-x-2 text-left">
+												<span>{m.appliedControl()}</span>
+												{#if requirementAssessment.applied_controls != null}
+													<span class="badge preset-tonal-primary"
+														>{requirementAssessment.applied_controls.length}</span
+													>
+												{/if}
+											</p>
 
-										<Accordion.ItemIndicator
-											class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-											><svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="14px"
-												height="14px"
-												viewBox="0 0 448 512"
-												><path
-													d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-												/></svg
-											></Accordion.ItemIndicator
-										>
-									</Accordion.ItemTrigger>
-									<Accordion.ItemContent>
-										{#if !isReadOnly}
-											<div class="flex flex-row space-x-2 items-center">
-												<button
-													class="btn preset-filled-primary-500 self-start"
-													onclick={() =>
-														modalMeasureCreateForm(requirementAssessment.measureCreateForm)}
-													type="button"
-												>
-													<i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}
-												</button>
-												<button
-													class="btn preset-filled-secondary-500 self-start"
-													type="button"
-													onclick={() =>
-														modalUpdateForm(requirementAssessment, 'selectAppliedControls')}
-												>
-													<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectAppliedControls()}
-												</button>
+											<Accordion.ItemIndicator
+												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+												><svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="14px"
+													height="14px"
+													viewBox="0 0 448 512"
+													><path
+														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+													/></svg
+												></Accordion.ItemIndicator
+											>
+										</Accordion.ItemTrigger>
+										<Accordion.ItemContent>
+											{#if !isReadOnly}
+												<div class="flex flex-row space-x-2 items-center">
+													<button
+														class="btn preset-filled-primary-500 self-start"
+														onclick={() =>
+															modalMeasureCreateForm(requirementAssessment.measureCreateForm)}
+														type="button"
+													>
+														<i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}
+													</button>
+													<button
+														class="btn preset-filled-secondary-500 self-start"
+														type="button"
+														onclick={() =>
+															modalUpdateForm(requirementAssessment, 'selectAppliedControls')}
+													>
+														<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectAppliedControls()}
+													</button>
+												</div>
+											{/if}
+											<div class="flex flex-wrap space-x-2 items-center">
+												{#each requirementAssessment.applied_controls ?? [] as ac}
+													<p class="p-2">
+														<Anchor class="anchor" href="/applied-controls/{ac.id}" label={ac.str}>
+															<i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac.str}
+														</Anchor>
+													</p>
+												{/each}
 											</div>
-										{/if}
-										<div class="flex flex-wrap space-x-2 items-center">
-											{#each requirementAssessment.applied_controls ?? [] as ac}
-												<p class="p-2">
-													<Anchor class="anchor" href="/applied-controls/{ac.id}" label={ac.str}>
-														<i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac.str}
-													</Anchor>
-												</p>
-											{/each}
-										</div>
-									</Accordion.ItemContent>
-								</Accordion.Item>
+										</Accordion.ItemContent>
+									</Accordion.Item>
 								{/if}
 
 								<!-- Evidence -->
 								{#if showEvidences}
-								<Accordion.Item value="evidence">
-									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-										<p class="flex flex-1 items-center space-x-2 text-left">
-											<span>{m.evidence()}</span>
-											{#if requirementAssessment.evidences != null}
-												<span class="badge preset-tonal-primary" data-testid="evidence-count"
-													>{requirementAssessment.evidences.length}</span
-												>
-											{/if}
-										</p>
-
-										<Accordion.ItemIndicator
-											class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-											><svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="14px"
-												height="14px"
-												viewBox="0 0 448 512"
-												><path
-													d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-												/></svg
-											></Accordion.ItemIndicator
-										>
-									</Accordion.ItemTrigger>
-									<Accordion.ItemContent>
-										{#if !isReadOnly}
-											<div class="flex flex-row space-x-2 items-center">
-												<button
-													class="btn preset-filled-primary-500 self-start"
-													onclick={() =>
-														modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-													type="button"
-													data-testid="create-evidence-button"
-												>
-													<i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}
-												</button>
-												<button
-													class="btn preset-filled-secondary-500 self-start"
-													type="button"
-													data-testid="select-evidence-button"
-													onclick={() => modalUpdateForm(requirementAssessment, 'selectEvidences')}
-												>
-													<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
-												</button>
-											</div>
-										{/if}
-										<div class="flex flex-wrap space-x-2 items-center">
-											{#each requirementAssessment.evidences ?? [] as evidence}
-												<p class="p-2">
-													<Anchor
-														class="anchor"
-														href="/evidences/{evidence.id}"
-														label={evidence.str}
-														data-testid="evidence-link"
+									<Accordion.Item value="evidence">
+										<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+											<p class="flex flex-1 items-center space-x-2 text-left">
+												<span>{m.evidence()}</span>
+												{#if requirementAssessment.evidences != null}
+													<span class="badge preset-tonal-primary" data-testid="evidence-count"
+														>{requirementAssessment.evidences.length}</span
 													>
-														<i class="fa-solid fa-file-lines mr-2"></i>{evidence.str}
-													</Anchor>
-												</p>
-											{/each}
-										</div>
-									</Accordion.ItemContent>
-								</Accordion.Item>
+												{/if}
+											</p>
+
+											<Accordion.ItemIndicator
+												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+												><svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="14px"
+													height="14px"
+													viewBox="0 0 448 512"
+													><path
+														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+													/></svg
+												></Accordion.ItemIndicator
+											>
+										</Accordion.ItemTrigger>
+										<Accordion.ItemContent>
+											{#if !isReadOnly}
+												<div class="flex flex-row space-x-2 items-center">
+													<button
+														class="btn preset-filled-primary-500 self-start"
+														onclick={() =>
+															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+														type="button"
+														data-testid="create-evidence-button"
+													>
+														<i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}
+													</button>
+													<button
+														class="btn preset-filled-secondary-500 self-start"
+														type="button"
+														data-testid="select-evidence-button"
+														onclick={() =>
+															modalUpdateForm(requirementAssessment, 'selectEvidences')}
+													>
+														<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
+													</button>
+												</div>
+											{/if}
+											<div class="flex flex-wrap space-x-2 items-center">
+												{#each requirementAssessment.evidences ?? [] as evidence}
+													<p class="p-2">
+														<Anchor
+															class="anchor"
+															href="/evidences/{evidence.id}"
+															label={evidence.str}
+															data-testid="evidence-link"
+														>
+															<i class="fa-solid fa-file-lines mr-2"></i>{evidence.str}
+														</Anchor>
+													</p>
+												{/each}
+											</div>
+										</Accordion.ItemContent>
+									</Accordion.Item>
 								{/if}
 
 								<!-- Observation -->
 								{#if showObservation}
-								<Accordion.Item value="observation">
-									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-										<p class="flex flex-1 text-left">{m.observation()}</p>
+									<Accordion.Item value="observation">
+										<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+											<p class="flex flex-1 text-left">{m.observation()}</p>
 
-										<Accordion.ItemIndicator
-											class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-											><svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="14px"
-												height="14px"
-												viewBox="0 0 448 512"
-												><path
-													d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-												/></svg
-											></Accordion.ItemIndicator
-										>
-									</Accordion.ItemTrigger>
-									<Accordion.ItemContent>
-										<TableMarkdownField
-											bind:value={requirementAssessment.observation}
-											disabled={isReadOnly}
-											onSave={async (newValue) => {
-												await update(requirementAssessment, 'observation');
-												requirementAssessment.observationBuffer = newValue;
-											}}
-										/>
-									</Accordion.ItemContent>
-								</Accordion.Item>
+											<Accordion.ItemIndicator
+												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+												><svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="14px"
+													height="14px"
+													viewBox="0 0 448 512"
+													><path
+														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+													/></svg
+												></Accordion.ItemIndicator
+											>
+										</Accordion.ItemTrigger>
+										<Accordion.ItemContent>
+											<TableMarkdownField
+												bind:value={requirementAssessment.observation}
+												disabled={isReadOnly}
+												onSave={async (newValue) => {
+													await update(requirementAssessment, 'observation');
+													requirementAssessment.observationBuffer = newValue;
+												}}
+											/>
+										</Accordion.ItemContent>
+									</Accordion.Item>
 								{/if}
 							</Accordion>
 						</form>
