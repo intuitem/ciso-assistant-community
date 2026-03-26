@@ -145,9 +145,7 @@ test('user can create representatives, solutions and entity assessments inside e
 		await entityAssessmentsPage.hasUrl();
 		await page.getByText(m.sendQuestionnaire()).click();
 		await page.getByRole('button', { name: m.submit() }).click();
-		await entityAssessmentsPage.isToastVisible(
-			m.mailSuccessfullySent() + /.+/.source
-		);
+		await entityAssessmentsPage.isToastVisible(m.mailSuccessfullySent() + /.+/.source);
 	});
 
 	await test.step('check that third parties overview was updated', async () => {
@@ -185,11 +183,11 @@ test('third-party representative can set their password', async ({ sideBar, mail
 	test.slow();
 	await test.step('set password and log in as third party representative', async () => {
 		await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
-		const lastMail = await mailer.getLastEmail();
-		await lastMail.hasWelcomeEmailDetails();
-		await lastMail.hasEmailRecipient('third-party@tests.com');
+		const welcomeMail = await mailer.getEmailBySubject('Welcome to CISO Assistant!');
+		await welcomeMail.hasWelcomeEmailDetails();
+		await welcomeMail.hasEmailRecipient('third-party@tests.com');
 
-		await lastMail.open();
+		await welcomeMail.open();
 		const pagePromise = page.context().waitForEvent('page');
 		await expect(mailer.emailContent.setPasswordButton).toBeVisible();
 		await mailer.emailContent.setPasswordButton.click();
