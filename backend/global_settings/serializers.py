@@ -3,9 +3,7 @@ from rest_framework import serializers
 
 from .models import GlobalSettings
 
-from django.conf import settings as django_settings
-
-GENERAL_SETTINGS_KEYS = [
+_GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
     "ebios_radar_max",
     "ebios_radar_green_zone_radius",
@@ -27,7 +25,6 @@ GENERAL_SETTINGS_KEYS = [
     "default_language",
 ]
 
-# Chat/AI settings only accepted when ENABLE_CHAT is set
 _CHAT_SETTINGS_KEYS = [
     "llm_provider",
     "ollama_base_url",
@@ -40,8 +37,19 @@ _CHAT_SETTINGS_KEYS = [
     "openai_api_key",
 ]
 
-if getattr(django_settings, "ENABLE_CHAT", False):
-    GENERAL_SETTINGS_KEYS.extend(_CHAT_SETTINGS_KEYS)
+
+def _get_general_settings_keys() -> list[str]:
+    """Return accepted settings keys, including chat keys when ENABLE_CHAT is set."""
+    from django.conf import settings as django_settings
+
+    keys = list(_GENERAL_SETTINGS_KEYS)
+    if getattr(django_settings, "ENABLE_CHAT", False):
+        keys.extend(_CHAT_SETTINGS_KEYS)
+    return keys
+
+
+# Keep module-level name for backward compatibility
+GENERAL_SETTINGS_KEYS = _GENERAL_SETTINGS_KEYS
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
@@ -80,8 +88,9 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         elif "conversion_rate" in validated_data:
             conversion_rate = validated_data.pop("conversion_rate")
 
+        allowed_keys = _get_general_settings_keys()
         for key, value in validated_data["value"].items():
-            if key not in GENERAL_SETTINGS_KEYS:
+            if key not in allowed_keys:
                 raise serializers.ValidationError(f"Invalid key: {key}")
             # Validate builtin_metrics_retention_days minimum value
             if key == "builtin_metrics_retention_days":
