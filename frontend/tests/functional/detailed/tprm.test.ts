@@ -237,7 +237,9 @@ test('third-party representative can fill their assigned audit', async ({
 	});
 
 	await test.step('third party representative can open their assigned audit', async () => {
-		await expect(page.getByText(entityAssessment.name)).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: entityAssessment.name, exact: true })
+		).toBeVisible();
 		await page.getByRole('link', { name: m.startAssessment() }).first().click();
 		await page.waitForURL('/auditee-assessments/**');
 	});
