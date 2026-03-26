@@ -731,7 +731,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         context = {
             "set_password_url": f"{settings.CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
             "reset_password_url": f"{settings.CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
-            "questionnaire_url": f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}/table-mode"
+            "questionnaire_url": f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}"
             if object
             else settings.CISO_ASSISTANT_URL,
         }
