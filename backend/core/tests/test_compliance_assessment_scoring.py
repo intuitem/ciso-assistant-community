@@ -25,7 +25,7 @@ def scoring_setup():
             ├── Req B1 (assessable, weight=1)
             └── Req B2 (assessable, weight=3)
     """
-    root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    root_folder = Folder.get_root_folder()
     folder = Folder.objects.create(
         parent_folder=root_folder,
         name="scoring test folder",
@@ -37,7 +37,7 @@ def scoring_setup():
         urn="urn:test:scoring-framework",
         min_score=0,
         max_score=100,
-        folder=Folder.get_root_folder(),
+        folder=root_folder,
     )
 
     # Parent sections (non-assessable)
@@ -47,7 +47,7 @@ def scoring_setup():
         ref_id="A",
         framework=framework,
         assessable=False,
-        folder=Folder.get_root_folder(),
+        folder=root_folder,
     )
     section_b = RequirementNode.objects.create(
         name="Section B",
@@ -55,7 +55,7 @@ def scoring_setup():
         ref_id="B",
         framework=framework,
         assessable=False,
-        folder=Folder.get_root_folder(),
+        folder=root_folder,
     )
 
     # Assessable requirements under Section A
@@ -67,7 +67,7 @@ def scoring_setup():
         parent_urn=section_a.urn,
         assessable=True,
         weight=1,
-        folder=Folder.get_root_folder(),
+        folder=root_folder,
     )
     req_a2 = RequirementNode.objects.create(
         name="Requirement A2",
@@ -77,7 +77,7 @@ def scoring_setup():
         parent_urn=section_a.urn,
         assessable=True,
         weight=1,
-        folder=Folder.get_root_folder(),
+        folder=root_folder,
     )
 
     # Assessable requirements under Section B
@@ -89,7 +89,7 @@ def scoring_setup():
         parent_urn=section_b.urn,
         assessable=True,
         weight=1,
-        folder=Folder.get_root_folder(),
+        folder=root_folder,
     )
     req_b2 = RequirementNode.objects.create(
         name="Requirement B2",
@@ -99,7 +99,7 @@ def scoring_setup():
         parent_urn=section_b.urn,
         assessable=True,
         weight=3,
-        folder=Folder.get_root_folder(),
+        folder=root_folder,
     )
 
     ca = ComplianceAssessment.objects.create(
