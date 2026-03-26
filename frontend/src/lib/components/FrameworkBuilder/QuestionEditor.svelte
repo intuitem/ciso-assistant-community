@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { getBuilderContext, type Question } from './builder-state';
+	import {
+		getBuilderContext,
+		getTranslation,
+		withTranslation,
+		type Question
+	} from './builder-state';
 	import TypeSelector from './TypeSelector.svelte';
 	import ChoiceListEditor from './ChoiceListEditor.svelte';
 	import DependsOnEditor from './DependsOnEditor.svelte';
@@ -15,7 +20,11 @@
 	let { question, reqNodeId, qIndex, siblingQuestions }: Props = $props();
 
 	const builder = getBuilderContext();
-	const { framework: frameworkStore, errors: errorsStore } = builder;
+	const {
+		framework: frameworkStore,
+		errors: errorsStore,
+		activeLanguage: activeLanguageStore
+	} = builder;
 
 	let expanded = $state(false);
 	let confirmDelete = $state(false);
@@ -90,7 +99,17 @@
 				<i class="fa-solid {typeIcons[question.type] ?? 'fa-question'} text-xs"></i>
 			</span>
 			<span class="flex-1 text-sm text-gray-700 truncate">
-				{question.text || 'Untitled question'}
+				{#if $activeLanguageStore}
+					{@const translated = getTranslation(question.translations, $activeLanguageStore, 'text')}
+					<span class="text-gray-400">{question.text || 'Untitled'}</span>
+					{#if translated}
+						<span class="text-blue-600 ml-1">| {translated}</span>
+					{:else}
+						<span class="text-amber-500 ml-1" title="Not translated">*</span>
+					{/if}
+				{:else}
+					{question.text || 'Untitled question'}
+				{/if}
 			</span>
 			{#if dependsOnLabel}
 				<span class="text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
@@ -155,15 +174,39 @@
 			</div>
 
 			<!-- Question text -->
-			<textarea
-				value={question.text ?? ''}
-				placeholder="Enter your question..."
-				rows="2"
-				class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
-				onblur={(e) => {
-					saveField('text', e.currentTarget.value);
-				}}
-			></textarea>
+			{#if $activeLanguageStore}
+				{@const lang = $activeLanguageStore}
+				<div class="grid grid-cols-2 gap-3">
+					<textarea
+						value={question.text ?? ''}
+						readonly
+						rows="2"
+						class="w-full text-sm border border-gray-100 rounded-lg px-3 py-2 resize-none text-gray-400 bg-gray-50 cursor-default"
+					></textarea>
+					<textarea
+						value={getTranslation(question.translations, lang, 'text')}
+						placeholder="Translate question..."
+						rows="2"
+						class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+						onblur={(e) => {
+							saveField(
+								'translations',
+								withTranslation(question.translations, lang, 'text', e.currentTarget.value)
+							);
+						}}
+					></textarea>
+				</div>
+			{:else}
+				<textarea
+					value={question.text ?? ''}
+					placeholder="Enter your question..."
+					rows="2"
+					class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+					onblur={(e) => {
+						saveField('text', e.currentTarget.value);
+					}}
+				></textarea>
+			{/if}
 
 			<!-- Metadata row -->
 			<div class="grid grid-cols-3 gap-2">

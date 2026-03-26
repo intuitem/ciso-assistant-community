@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { getBuilderContext, type BuilderRequirement } from './builder-state';
+	import {
+		getBuilderContext,
+		getTranslation,
+		withTranslation,
+		type BuilderRequirement
+	} from './builder-state';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
@@ -9,7 +14,7 @@
 	let { requirement }: Props = $props();
 
 	const builder = getBuilderContext();
-	const { errors: errorsStore } = builder;
+	const { errors: errorsStore, activeLanguage: activeLanguageStore } = builder;
 	let confirmDelete = $state(false);
 	let urnCopied = $state(false);
 	let mode: 'edit' | 'preview' = $state('edit');
@@ -18,10 +23,19 @@
 	let fileInputEl: HTMLInputElement | undefined = $state();
 
 	let description = $state(requirement.node.description ?? '');
+	let transDescription = $state('');
 
 	// Sync local description when the prop changes (e.g., after discard)
 	$effect(() => {
 		description = requirement.node.description ?? '';
+	});
+
+	// Sync translation description with active language
+	$effect(() => {
+		const lang = $activeLanguageStore;
+		if (lang) {
+			transDescription = getTranslation(requirement.node.translations, lang, 'description');
+		}
 	});
 
 	// Resolve the framework ID for building absolute proxy URLs
@@ -37,6 +51,19 @@
 
 	async function saveDescription() {
 		await builder.updateNode(requirement.node.id, { description: description || null });
+	}
+
+	async function saveTransDescription() {
+		const lang = $activeLanguageStore;
+		if (!lang) return;
+		await builder.updateNode(requirement.node.id, {
+			translations: withTranslation(
+				requirement.node.translations,
+				lang,
+				'description',
+				transDescription
+			)
+		});
 	}
 
 	// --- Markdown editing helpers (ported from policy editor) ---
@@ -154,13 +181,34 @@
 					class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-purple-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-purple-500/40 transition-colors text-gray-500"
 					onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 				/>
-				<input
-					type="text"
-					value={requirement.node.name ?? ''}
-					placeholder="Splash screen title"
-					class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-purple-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-purple-500/40 transition-colors"
-					onblur={(e) => saveField('name', e.currentTarget.value || null)}
-				/>
+				{#if $activeLanguageStore}
+					{@const lang = $activeLanguageStore}
+					<input
+						type="text"
+						value={requirement.node.name ?? ''}
+						readonly
+						class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
+					/>
+					<input
+						type="text"
+						value={getTranslation(requirement.node.translations, lang, 'name')}
+						placeholder="Translate title..."
+						class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-purple-300 focus:border-purple-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-purple-500/40 transition-colors"
+						onblur={(e) =>
+							saveField(
+								'translations',
+								withTranslation(requirement.node.translations, lang, 'name', e.currentTarget.value)
+							)}
+					/>
+				{:else}
+					<input
+						type="text"
+						value={requirement.node.name ?? ''}
+						placeholder="Splash screen title"
+						class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-purple-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-purple-500/40 transition-colors"
+						onblur={(e) => saveField('name', e.currentTarget.value || null)}
+					/>
+				{/if}
 			</div>
 			{#if requirement.node.urn}
 				<button
@@ -215,126 +263,157 @@
 
 	<!-- Markdown editor -->
 	<div class="px-4 py-3">
-		<!-- Toolbar -->
-		<div class="flex items-center gap-1 mb-2">
-			<div class="flex rounded-lg border border-gray-200 overflow-hidden">
-				<button
-					class="px-2.5 py-1 text-xs font-medium transition-colors {mode === 'edit'
-						? 'bg-purple-500 text-white'
-						: 'bg-gray-50 text-gray-600 hover:bg-gray-100'}"
-					onclick={() => (mode = 'edit')}
-				>
-					<i class="fa-solid fa-pen mr-1 text-[10px]"></i>Edit
-				</button>
-				<button
-					class="px-2.5 py-1 text-xs font-medium border-l border-gray-200 transition-colors {mode ===
-					'preview'
-						? 'bg-purple-500 text-white'
-						: 'bg-gray-50 text-gray-600 hover:bg-gray-100'}"
-					onclick={() => (mode = 'preview')}
-				>
-					<i class="fa-solid fa-eye mr-1 text-[10px]"></i>Preview
-				</button>
-			</div>
-
-			{#if mode === 'edit'}
-				<div class="flex items-center gap-0.5 ml-2 border-l border-gray-200 pl-2">
-					<button
-						class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						onclick={() => wrapSelection('**', '**')}
-						title="Bold"
-					>
-						<i class="fa-solid fa-bold text-xs"></i>
-					</button>
-					<button
-						class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						onclick={() => wrapSelection('*', '*')}
-						title="Italic"
-					>
-						<i class="fa-solid fa-italic text-xs"></i>
-					</button>
-					<button
-						class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						onclick={() => insertLinePrefix('# ')}
-						title="Heading"
-					>
-						<i class="fa-solid fa-heading text-xs"></i>
-					</button>
-					<button
-						class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						onclick={() => insertLinePrefix('- ')}
-						title="Bullet list"
-					>
-						<i class="fa-solid fa-list-ul text-xs"></i>
-					</button>
-					<button
-						class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						onclick={() => insertLinePrefix('1. ')}
-						title="Numbered list"
-					>
-						<i class="fa-solid fa-list-ol text-xs"></i>
-					</button>
-					<button
-						class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						onclick={() => wrapSelection('[', '](url)')}
-						title="Link"
-					>
-						<i class="fa-solid fa-link text-xs"></i>
-					</button>
-					<button
-						class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						onclick={() =>
-							insertAtCursor(
-								'\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell     | Cell     |\n'
-							)}
-						title="Table"
-					>
-						<i class="fa-solid fa-table text-xs"></i>
-					</button>
-					<button
-						class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						onclick={() => fileInputEl?.click()}
-						title="Insert image"
-						disabled={uploading}
-					>
-						{#if uploading}
-							<i class="fa-solid fa-spinner fa-spin text-xs"></i>
+		{#if $activeLanguageStore}
+			<!-- Side-by-side translation mode -->
+			<div class="grid grid-cols-2 gap-4">
+				<!-- Source (read-only preview) -->
+				<div>
+					<span class="text-[10px] text-gray-400 uppercase tracking-wider mb-1 block">Source</span>
+					<div class="min-h-[120px] bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+						{#if description.trim()}
+							<MarkdownRenderer content={description} />
 						{:else}
-							<i class="fa-solid fa-image text-xs"></i>
+							<p class="text-sm text-gray-300 italic">No source content.</p>
 						{/if}
-					</button>
-					<input
-						type="file"
-						accept="image/*"
-						class="hidden"
-						bind:this={fileInputEl}
-						onchange={handleFileInput}
-					/>
+					</div>
 				</div>
-			{/if}
-		</div>
-
-		<!-- Content area -->
-		{#if mode === 'edit'}
-			<textarea
-				bind:value={description}
-				bind:this={textareaEl}
-				onpaste={handlePaste}
-				onblur={saveDescription}
-				placeholder="Write markdown content for your splash screen..."
-				rows="6"
-				class="w-full text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
-			></textarea>
+				<!-- Target (editable) -->
+				<div>
+					<span class="text-[10px] text-blue-600 uppercase tracking-wider font-medium mb-1 block"
+						>{$activeLanguageStore.toUpperCase()}</span
+					>
+					<textarea
+						bind:value={transDescription}
+						onblur={saveTransDescription}
+						placeholder="Translate markdown content..."
+						rows="6"
+						class="w-full text-sm bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
+					></textarea>
+				</div>
+			</div>
 		{:else}
-			<div class="min-h-[120px] bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-				{#if description.trim()}
-					<MarkdownRenderer content={description} />
-				{:else}
-					<p class="text-sm text-gray-400 italic">
-						No content yet. Switch to Edit to add markdown.
-					</p>
+			<!-- Normal editing mode -->
+			<!-- Toolbar -->
+			<div class="flex items-center gap-1 mb-2">
+				<div class="flex rounded-lg border border-gray-200 overflow-hidden">
+					<button
+						class="px-2.5 py-1 text-xs font-medium transition-colors {mode === 'edit'
+							? 'bg-purple-500 text-white'
+							: 'bg-gray-50 text-gray-600 hover:bg-gray-100'}"
+						onclick={() => (mode = 'edit')}
+					>
+						<i class="fa-solid fa-pen mr-1 text-[10px]"></i>Edit
+					</button>
+					<button
+						class="px-2.5 py-1 text-xs font-medium border-l border-gray-200 transition-colors {mode ===
+						'preview'
+							? 'bg-purple-500 text-white'
+							: 'bg-gray-50 text-gray-600 hover:bg-gray-100'}"
+						onclick={() => (mode = 'preview')}
+					>
+						<i class="fa-solid fa-eye mr-1 text-[10px]"></i>Preview
+					</button>
+				</div>
+
+				{#if mode === 'edit'}
+					<div class="flex items-center gap-0.5 ml-2 border-l border-gray-200 pl-2">
+						<button
+							class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+							onclick={() => wrapSelection('**', '**')}
+							title="Bold"
+						>
+							<i class="fa-solid fa-bold text-xs"></i>
+						</button>
+						<button
+							class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+							onclick={() => wrapSelection('*', '*')}
+							title="Italic"
+						>
+							<i class="fa-solid fa-italic text-xs"></i>
+						</button>
+						<button
+							class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+							onclick={() => insertLinePrefix('# ')}
+							title="Heading"
+						>
+							<i class="fa-solid fa-heading text-xs"></i>
+						</button>
+						<button
+							class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+							onclick={() => insertLinePrefix('- ')}
+							title="Bullet list"
+						>
+							<i class="fa-solid fa-list-ul text-xs"></i>
+						</button>
+						<button
+							class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+							onclick={() => insertLinePrefix('1. ')}
+							title="Numbered list"
+						>
+							<i class="fa-solid fa-list-ol text-xs"></i>
+						</button>
+						<button
+							class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+							onclick={() => wrapSelection('[', '](url)')}
+							title="Link"
+						>
+							<i class="fa-solid fa-link text-xs"></i>
+						</button>
+						<button
+							class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+							onclick={() =>
+								insertAtCursor(
+									'\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell     | Cell     |\n'
+								)}
+							title="Table"
+						>
+							<i class="fa-solid fa-table text-xs"></i>
+						</button>
+						<button
+							class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+							onclick={() => fileInputEl?.click()}
+							title="Insert image"
+							disabled={uploading}
+						>
+							{#if uploading}
+								<i class="fa-solid fa-spinner fa-spin text-xs"></i>
+							{:else}
+								<i class="fa-solid fa-image text-xs"></i>
+							{/if}
+						</button>
+						<input
+							type="file"
+							accept="image/*"
+							class="hidden"
+							bind:this={fileInputEl}
+							onchange={handleFileInput}
+						/>
+					</div>
 				{/if}
 			</div>
+
+			<!-- Content area -->
+			{#if mode === 'edit'}
+				<textarea
+					bind:value={description}
+					bind:this={textareaEl}
+					onpaste={handlePaste}
+					onblur={saveDescription}
+					placeholder="Write markdown content for your splash screen..."
+					rows="6"
+					class="w-full text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
+				></textarea>
+			{:else}
+				<div class="min-h-[120px] bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+					{#if description.trim()}
+						<MarkdownRenderer content={description} />
+					{:else}
+						<p class="text-sm text-gray-400 italic">
+							No content yet. Switch to Edit to add markdown.
+						</p>
+					{/if}
+				</div>
+			{/if}
 		{/if}
 	</div>
 

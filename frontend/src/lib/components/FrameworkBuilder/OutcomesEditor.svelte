@@ -1,12 +1,13 @@
 <script lang="ts">
-	import type { OutcomeRule } from './builder-state';
+	import { getTranslation, withTranslation, type OutcomeRule } from './builder-state';
 
 	interface Props {
 		outcomes: OutcomeRule[];
 		onupdate: (rules: OutcomeRule[]) => void;
+		activeLanguage?: string | null;
 	}
 
-	let { outcomes, onupdate }: Props = $props();
+	let { outcomes, onupdate, activeLanguage = null }: Props = $props();
 
 	let rules: OutcomeRule[] = $state(outcomes.map((r) => ({ ...r })));
 	let draggedIndex: number | null = $state(null);
@@ -214,6 +215,28 @@
 							{/if}
 						</div>
 					</label>
+
+					{#if activeLanguage}
+						{@const lang = activeLanguage}
+						<label class="block border-t border-gray-200 pt-2">
+							<span class="text-xs text-blue-500">{lang.toUpperCase()} Label</span>
+							<input
+								type="text"
+								value={getTranslation(rule.translations, lang, 'annotation')}
+								placeholder="Translate label..."
+								class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								onblur={(e) => {
+									rules[index].translations = withTranslation(
+										rules[index].translations,
+										lang,
+										'annotation',
+										e.currentTarget.value
+									);
+									persist();
+								}}
+							/>
+						</label>
+					{/if}
 				</div>
 			{/if}
 		</div>

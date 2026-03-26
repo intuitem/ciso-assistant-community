@@ -1,6 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
+	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+
+	const localeMapTyped = LOCALE_MAP as Record<string, { name: string; flag: string }>;
+	const defaultLabels = defaultLangLabels as Record<string, string>;
+	const langNames = language as Record<string, string>;
+
+	function localeLabel(code: string): string {
+		const entry = localeMapTyped[code];
+		if (!entry) return code.toUpperCase();
+		return `${defaultLabels[code]} (${langNames[entry.name]})`;
+	}
 
 	interface Props {
 		frameworkId: string;
@@ -13,7 +24,9 @@
 		saving: savingStore,
 		errors: errorsStore,
 		unsaved: unsavedStore,
-		unpublished: unpublishedStore
+		unpublished: unpublishedStore,
+		framework: frameworkStore,
+		activeLanguage: activeLanguageStore
 	} = builder;
 
 	let topOffset = $state(0);
@@ -22,6 +35,12 @@
 	let publishing = $state(false);
 	let discarding = $state(false);
 	let publishSuccess = $state(false);
+	let confirmCopyBase = $state(false);
+
+	let translationProgress = $derived.by(() => {
+		if (!$activeLanguageStore) return null;
+		return builder.getTranslationProgress($activeLanguageStore);
+	});
 
 	onMount(() => {
 		const appBar = document.querySelector('[data-scope="app-bar"]');
@@ -102,6 +121,65 @@
 				<i class="fa-solid fa-eye text-[10px]"></i>
 				Preview
 			</a>
+		{/if}
+
+		<!-- Language selector -->
+		{#if ($frameworkStore.available_languages ?? []).length > 0}
+			<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+			<div class="flex items-center gap-1.5 shrink-0">
+				<i class="fa-solid fa-language text-gray-400 text-xs"></i>
+				<select
+					value={$activeLanguageStore ?? ''}
+					class="text-xs border border-gray-200 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-white cursor-pointer"
+					onchange={(e) => builder.setActiveLanguage(e.currentTarget.value || null)}
+				>
+					<option value="">No translation</option>
+					{#each $frameworkStore.available_languages ?? [] as lang}
+						<option value={lang}>{localeLabel(lang)}</option>
+					{/each}
+				</select>
+				{#if translationProgress}
+					<span
+						class="text-xs tabular-nums {translationProgress.translated ===
+						translationProgress.total
+							? 'text-green-600'
+							: 'text-amber-600'}"
+					>
+						{translationProgress.translated}/{translationProgress.total}
+					</span>
+				{/if}
+				{#if $activeLanguageStore}
+					{#if confirmCopyBase}
+						<span class="text-xs text-amber-600">Copy base text?</span>
+						<button
+							type="button"
+							class="text-xs text-amber-700 font-medium px-1.5 py-0.5 rounded bg-amber-50 hover:bg-amber-100"
+							onclick={() => {
+								builder.copyFromBase($activeLanguageStore!);
+								confirmCopyBase = false;
+							}}
+						>
+							Yes
+						</button>
+						<button
+							type="button"
+							class="text-xs text-gray-500 px-1"
+							onclick={() => (confirmCopyBase = false)}
+						>
+							No
+						</button>
+					{:else}
+						<button
+							type="button"
+							class="text-xs text-gray-400 hover:text-amber-600 transition-colors px-1.5 py-0.5"
+							title="Copy base language text to {$activeLanguageStore?.toUpperCase()} (won't overwrite existing translations)"
+							onclick={() => (confirmCopyBase = true)}
+						>
+							<i class="fa-solid fa-copy mr-0.5"></i>Copy base
+						</button>
+					{/if}
+				{/if}
+			</div>
 		{/if}
 
 		<!-- Spacer -->

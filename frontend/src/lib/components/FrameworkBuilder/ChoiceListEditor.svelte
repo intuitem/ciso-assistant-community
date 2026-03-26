@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { getBuilderContext, type QuestionChoice } from './builder-state';
+	import {
+		getBuilderContext,
+		getTranslation,
+		withTranslation,
+		type QuestionChoice
+	} from './builder-state';
 
 	interface Props {
 		choices: QuestionChoice[];
@@ -20,7 +25,7 @@
 	}: Props = $props();
 
 	const builder = getBuilderContext();
-	const { errors: errorsStore } = builder;
+	const { errors: errorsStore, activeLanguage: activeLanguageStore } = builder;
 	let draggedIndex: number | null = $state(null);
 	let expandedIndex: number | null = $state(null);
 	let confirmDeleteIndex: number | null = $state(null);
@@ -86,13 +91,32 @@
 					></span>
 				{/if}
 
-				<input
-					type="text"
-					value={choice.value ?? ''}
-					placeholder="Choice text..."
-					class="flex-1 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm outline-none transition-colors"
-					onblur={(e) => saveField(choice.id, 'value', e.currentTarget.value)}
-				/>
+				{#if $activeLanguageStore}
+					{@const lang = $activeLanguageStore}
+					<span class="text-sm text-gray-400 truncate max-w-[40%]" title={choice.value ?? ''}
+						>{choice.value ?? ''}</span
+					>
+					<input
+						type="text"
+						value={getTranslation(choice.translations, lang, 'value')}
+						placeholder="Translate..."
+						class="flex-1 bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-1 py-0.5 text-sm outline-none transition-colors"
+						onblur={(e) =>
+							saveField(
+								choice.id,
+								'translations',
+								withTranslation(choice.translations, lang, 'value', e.currentTarget.value)
+							)}
+					/>
+				{:else}
+					<input
+						type="text"
+						value={choice.value ?? ''}
+						placeholder="Choice text..."
+						class="flex-1 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm outline-none transition-colors"
+						onblur={(e) => saveField(choice.id, 'value', e.currentTarget.value)}
+					/>
+				{/if}
 
 				{#if choice.add_score != null}
 					<span class="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">

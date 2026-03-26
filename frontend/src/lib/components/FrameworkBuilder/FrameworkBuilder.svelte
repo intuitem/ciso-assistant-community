@@ -4,11 +4,15 @@
 	import {
 		createBuilderState,
 		setBuilderContext,
+		getTranslation,
+		withTranslation,
 		type Framework,
 		type RequirementNode,
 		type Question
 	} from './builder-state';
 	import type { DraftJSON } from './builder-api';
+	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+	import { locales as supportedLocales } from '$paraglide/runtime';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
 	import SectionBlock from './SectionBlock.svelte';
@@ -89,13 +93,39 @@
 		errors: errorsStore,
 		saving: savingStore,
 		unsaved: unsavedStore,
-		unpublished: unpublishedStore
+		unpublished: unpublishedStore,
+		activeLanguage: activeLanguageStore
 	} = builder;
+
+	const localeMapTyped = LOCALE_MAP as Record<string, { name: string; flag: string }>;
+	const defaultLabels = defaultLangLabels as Record<string, string>;
+	const langNames = language as Record<string, string>;
+
+	function localeLabel(code: string): string {
+		const entry = localeMapTyped[code];
+		if (!entry) return code.toUpperCase();
+		return `${defaultLabels[code]} (${langNames[entry.name]})`;
+	}
+
+	/** Languages in which this framework has content (base + translated) */
+	let frameworkLocales = $derived([
+		...new Set([$frameworkStore.locale ?? 'en', ...($frameworkStore.available_languages ?? [])])
+	]);
+
+	/** Locales available to add as target languages (not base, not already added) */
+	let addableLocales = $derived(
+		(supportedLocales as string[]).filter(
+			(l) =>
+				l !== ($frameworkStore.locale ?? 'en') &&
+				!($frameworkStore.available_languages ?? []).includes(l)
+		)
+	);
 
 	let urnCopied = $state(false);
 	let showSettings = $state(false);
 	let showScoringSettings = $state(false);
 	let showScalesEditor = $state(false);
+	let newLangCode = $state('');
 
 	// Settings summary for the collapsed state
 	let settingsSummary = $derived.by(() => {
@@ -111,23 +141,29 @@
 		score: number;
 		name: string;
 		description: string;
+		translations?: Record<string, Record<string, string>> | null;
 	}
 
 	function getScaleEntries(): ScaleEntry[] {
 		const def = $frameworkStore.scores_definition;
 		if (!def) return [];
 		if (Array.isArray(def)) {
-			return def.map((e) => ({
-				score: ((e as Record<string, unknown>).score as number) ?? 0,
-				name: ((e as Record<string, unknown>).name as string) ?? '',
-				description: ((e as Record<string, unknown>).description as string) ?? ''
-			}));
+			return def.map((e) => {
+				const rec = e as Record<string, unknown>;
+				return {
+					score: (rec.score as number) ?? 0,
+					name: (rec.name as string) ?? '',
+					description: (rec.description as string) ?? '',
+					translations: (rec.translations as ScaleEntry['translations']) ?? null
+				};
+			});
 		}
 		if ('scale' in def && Array.isArray(def.scale)) {
 			return (def.scale as Record<string, unknown>[]).map((e) => ({
 				score: (e.score as number) ?? 0,
 				name: (e.name as string) ?? '',
-				description: (e.description as string) ?? ''
+				description: (e.description as string) ?? '',
+				translations: (e.translations as ScaleEntry['translations']) ?? null
 			}));
 		}
 		return [];
@@ -300,27 +336,90 @@
 		<BuilderToC />
 
 		<div class="flex-1 min-w-0">
-			<div class="max-w-3xl mx-auto px-6 py-8 space-y-8">
+			<div class="{$activeLanguageStore ? 'max-w-5xl' : 'max-w-3xl'} mx-auto px-6 py-8 space-y-8">
 				<!-- Framework metadata -->
 				<div class="space-y-2" data-framework-metadata>
-					<input
-						type="text"
-						value={$frameworkStore.name}
-						placeholder="Framework name"
-						class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
-						onblur={(e) => {
-							builder.updateFramework({ name: e.currentTarget.value });
-						}}
-					/>
-					<textarea
-						value={$frameworkStore.description ?? ''}
-						placeholder="Framework description (optional)"
-						rows="2"
-						class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
-						onblur={(e) => {
-							builder.updateFramework({ description: e.currentTarget.value || null });
-						}}
-					></textarea>
+					{#if $activeLanguageStore}
+						<div class="grid grid-cols-2 gap-4">
+							<div>
+								<span class="text-[10px] text-gray-400 uppercase tracking-wider"
+									>{$frameworkStore.locale?.toUpperCase() ?? 'BASE'}</span
+								>
+								<input
+									type="text"
+									value={$frameworkStore.name}
+									readonly
+									class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent py-1 text-gray-400 cursor-default"
+								/>
+								<textarea
+									value={$frameworkStore.description ?? ''}
+									readonly
+									rows="2"
+									class="w-full text-sm text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-1 cursor-default"
+								></textarea>
+							</div>
+							<div>
+								<span class="text-[10px] text-blue-600 uppercase tracking-wider font-medium"
+									>{$activeLanguageStore.toUpperCase()}</span
+								>
+								<input
+									type="text"
+									value={getTranslation($frameworkStore.translations, $activeLanguageStore, 'name')}
+									placeholder="Translate name..."
+									class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
+									onblur={(e) => {
+										builder.updateFramework({
+											translations: withTranslation(
+												$frameworkStore.translations,
+												$activeLanguageStore!,
+												'name',
+												e.currentTarget.value
+											)
+										});
+									}}
+								/>
+								<textarea
+									value={getTranslation(
+										$frameworkStore.translations,
+										$activeLanguageStore,
+										'description'
+									)}
+									placeholder="Translate description..."
+									rows="2"
+									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+									onblur={(e) => {
+										builder.updateFramework({
+											translations: withTranslation(
+												$frameworkStore.translations,
+												$activeLanguageStore!,
+												'description',
+												e.currentTarget.value
+											)
+										});
+									}}
+								></textarea>
+							</div>
+						</div>
+					{:else}
+						<input
+							type="text"
+							value={$frameworkStore.name}
+							placeholder="Framework name"
+							class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
+							onblur={(e) => {
+								builder.updateFramework({ name: e.currentTarget.value });
+							}}
+						/>
+						<textarea
+							value={$frameworkStore.description ?? ''}
+							placeholder="Framework description (optional)"
+							rows="2"
+							class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+							onblur={(e) => {
+								builder.updateFramework({ description: e.currentTarget.value || null });
+							}}
+						></textarea>
+					{/if}
 					{#if $frameworkStore.urn}
 						<button
 							type="button"
@@ -465,60 +564,115 @@
 												<div class="space-y-1.5">
 													{#each scaleEntries as entry, idx}
 														<div
-															class="flex items-start gap-2 bg-white border border-gray-200 rounded px-2 py-1.5"
+															class="bg-white border border-gray-200 rounded px-2 py-1.5 space-y-1"
 														>
-															<label class="block w-16 shrink-0">
-																<span class="text-[10px] text-gray-400">Score</span>
-																<input
-																	type="number"
-																	value={entry.score}
-																	class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																	onblur={(e) => {
+															<div class="flex items-start gap-2">
+																<label class="block w-16 shrink-0">
+																	<span class="text-[10px] text-gray-400">Score</span>
+																	<input
+																		type="number"
+																		value={entry.score}
+																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		onblur={(e) => {
+																			const entries = getScaleEntries();
+																			entries[idx].score = parseInt(e.currentTarget.value) || 0;
+																			setScaleEntries(entries);
+																		}}
+																	/>
+																</label>
+																<label class="block flex-1 min-w-0">
+																	<span class="text-[10px] text-gray-400">Name</span>
+																	<input
+																		type="text"
+																		value={entry.name}
+																		placeholder="e.g. Partial"
+																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		onblur={(e) => {
+																			const entries = getScaleEntries();
+																			entries[idx].name = e.currentTarget.value;
+																			setScaleEntries(entries);
+																		}}
+																	/>
+																</label>
+																<label class="block flex-1 min-w-0">
+																	<span class="text-[10px] text-gray-400">Description</span>
+																	<input
+																		type="text"
+																		value={entry.description}
+																		placeholder="Optional"
+																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		onblur={(e) => {
+																			const entries = getScaleEntries();
+																			entries[idx].description = e.currentTarget.value;
+																			setScaleEntries(entries);
+																		}}
+																	/>
+																</label>
+																<button
+																	type="button"
+																	class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
+																	onclick={() => {
 																		const entries = getScaleEntries();
-																		entries[idx].score = parseInt(e.currentTarget.value) || 0;
+																		entries.splice(idx, 1);
 																		setScaleEntries(entries);
 																	}}
-																/>
-															</label>
-															<label class="block flex-1 min-w-0">
-																<span class="text-[10px] text-gray-400">Name</span>
-																<input
-																	type="text"
-																	value={entry.name}
-																	placeholder="e.g. Partial"
-																	class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																	onblur={(e) => {
-																		const entries = getScaleEntries();
-																		entries[idx].name = e.currentTarget.value;
-																		setScaleEntries(entries);
-																	}}
-																/>
-															</label>
-															<label class="block flex-1 min-w-0">
-																<span class="text-[10px] text-gray-400">Description</span>
-																<input
-																	type="text"
-																	value={entry.description}
-																	placeholder="Optional"
-																	class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																	onblur={(e) => {
-																		const entries = getScaleEntries();
-																		entries[idx].description = e.currentTarget.value;
-																		setScaleEntries(entries);
-																	}}
-																/>
-															</label>
-															<button
-																type="button"
-																class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
-																onclick={() => {
-																	const entries = getScaleEntries();
-																	entries.splice(idx, 1);
-																	setScaleEntries(entries);
-																}}
-															>
-																<i class="fa-solid fa-trash"></i>
-															</button>
+																>
+																	<i class="fa-solid fa-trash"></i>
+																</button>
+															</div>
+															{#if $activeLanguageStore}
+																{@const lang = $activeLanguageStore}
+																<div
+																	class="flex items-start gap-2 pl-16 border-t border-gray-100 pt-1"
+																>
+																	<label class="block flex-1 min-w-0">
+																		<span class="text-[10px] text-blue-500"
+																			>{lang.toUpperCase()} Name</span
+																		>
+																		<input
+																			type="text"
+																			value={getTranslation(entry.translations, lang, 'name')}
+																			placeholder="Translate name..."
+																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			onblur={(e) => {
+																				const entries = getScaleEntries();
+																				entries[idx].translations = withTranslation(
+																					entries[idx].translations,
+																					lang,
+																					'name',
+																					e.currentTarget.value
+																				);
+																				setScaleEntries(entries);
+																			}}
+																		/>
+																	</label>
+																	<label class="block flex-1 min-w-0">
+																		<span class="text-[10px] text-blue-500"
+																			>{lang.toUpperCase()} Description</span
+																		>
+																		<input
+																			type="text"
+																			value={getTranslation(
+																				entry.translations,
+																				lang,
+																				'description'
+																			)}
+																			placeholder="Translate description..."
+																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			onblur={(e) => {
+																				const entries = getScaleEntries();
+																				entries[idx].translations = withTranslation(
+																					entries[idx].translations,
+																					lang,
+																					'description',
+																					e.currentTarget.value
+																				);
+																				setScaleEntries(entries);
+																			}}
+																		/>
+																	</label>
+																</div>
+															{/if}
 														</div>
 													{/each}
 													<button
@@ -543,19 +697,25 @@
 							<OutcomesEditor
 								outcomes={$frameworkStore.outcomes_definition ?? []}
 								onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
+								activeLanguage={$activeLanguageStore}
 							/>
 
 							<!-- Implementation groups -->
 							<ImplementationGroupsEditor
-								groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => ({
-									ref_id: (g as Record<string, string>).ref_id ?? '',
-									name: (g as Record<string, string>).name ?? '',
-									description: (g as Record<string, string>).description ?? '',
-									default_selected:
-										((g as Record<string, unknown>).default_selected as boolean) ?? false
-								}))}
+								groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => {
+									const rec = g as Record<string, unknown>;
+									return {
+										ref_id: (rec.ref_id as string) ?? '',
+										name: (rec.name as string) ?? '',
+										description: (rec.description as string) ?? '',
+										default_selected: (rec.default_selected as boolean) ?? false,
+										translations:
+											(rec.translations as Record<string, Record<string, string>>) ?? null
+									};
+								})}
 								onupdate={(groups) =>
 									builder.updateFramework({ implementation_groups_definition: groups })}
+								activeLanguage={$activeLanguageStore}
 							/>
 
 							<!-- Field Visibility -->
@@ -580,6 +740,71 @@
 										</select>
 									</div>
 								{/each}
+							</div>
+
+							<!-- Languages -->
+							<div class="space-y-1.5">
+								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+									>Languages</span
+								>
+								<p class="text-xs text-gray-400">
+									Set the base language and add target languages for translation.
+								</p>
+								<div class="flex items-center gap-2 py-1">
+									<span class="text-sm text-gray-600 w-24">Base language</span>
+									<select
+										value={$frameworkStore.locale ?? 'en'}
+										class="text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+										onchange={(e) => builder.updateFramework({ locale: e.currentTarget.value })}
+									>
+										{#each frameworkLocales as code}
+											<option value={code}>{localeLabel(code)}</option>
+										{/each}
+									</select>
+								</div>
+								<div class="space-y-1">
+									<span class="text-xs text-gray-500">Target languages</span>
+									<div class="flex flex-wrap gap-1.5">
+										{#each $frameworkStore.available_languages ?? [] as lang}
+											<span
+												class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200"
+											>
+												{localeLabel(lang)}
+												<button
+													type="button"
+													class="text-blue-400 hover:text-red-500 transition-colors"
+													onclick={() => builder.removeLanguage(lang)}
+												>
+													<i class="fa-solid fa-times text-[9px]"></i>
+												</button>
+											</span>
+										{/each}
+									</div>
+									{#if addableLocales.length > 0}
+										<div class="flex items-center gap-1.5 mt-1">
+											<select
+												bind:value={newLangCode}
+												class="text-xs border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+											>
+												<option value="">Add a language...</option>
+												{#each addableLocales as code}
+													<option value={code}>{localeLabel(code)}</option>
+												{/each}
+											</select>
+											<button
+												type="button"
+												class="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:opacity-40"
+												disabled={!newLangCode}
+												onclick={() => {
+													builder.addLanguage(newLangCode);
+													newLangCode = '';
+												}}
+											>
+												<i class="fa-solid fa-plus mr-0.5"></i>Add
+											</button>
+										</div>
+									{/if}
+								</div>
 							</div>
 						</div>
 					{/if}

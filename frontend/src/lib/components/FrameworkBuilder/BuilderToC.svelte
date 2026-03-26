@@ -2,11 +2,14 @@
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
 
+	import type { BuilderRequirement } from './builder-state';
+
 	const builder = getBuilderContext();
 	const {
 		sections: sectionsStore,
 		activeSection: activeSectionStore,
-		isScrolling: isScrollingStore
+		isScrolling: isScrollingStore,
+		activeLanguage: activeLanguageStore
 	} = builder;
 
 	let collapsed = $state(false);
@@ -50,6 +53,21 @@
 
 		return () => mq.removeEventListener('change', handler);
 	});
+
+	/** Check if a section has any untranslated items for the active language */
+	function hasUntranslated(reqs: BuilderRequirement[], lang: string): boolean {
+		for (const r of reqs) {
+			if (r.node.name && !r.node.translations?.[lang]?.name) return true;
+			for (const bq of r.questions) {
+				if (bq.question.text && !bq.question.translations?.[lang]?.text) return true;
+				for (const c of bq.question.choices) {
+					if (c.value && !c.translations?.[lang]?.value) return true;
+				}
+			}
+			if (r.children.length > 0 && hasUntranslated(r.children, lang)) return true;
+		}
+		return false;
+	}
 
 	/** Count all requirements (including nested children) in a section */
 	function countRequirements(reqs: { children: { children: unknown[] }[] }[]): number {
@@ -275,6 +293,11 @@
 					<span class="truncate flex-1"
 						>{section.node.ref_id || section.node.name || 'Untitled'}</span
 					>
+					{#if $activeLanguageStore && hasUntranslated(section.requirements, $activeLanguageStore)}
+						<span class="text-amber-500 text-[8px] flex-shrink-0" title="Has untranslated items"
+							>&#9679;</span
+						>
+					{/if}
 					<span class="text-[10px] text-gray-400 ml-1 tabular-nums flex-shrink-0"
 						>{countRequirements(section.requirements)}</span
 					>

@@ -11,6 +11,9 @@ export interface DraftJSON {
 		name: string;
 		description: string | null;
 		annotation?: string | null;
+		locale?: string;
+		translations?: Record<string, Record<string, string>>;
+		available_languages?: string[];
 		min_score: number;
 		max_score: number;
 		scores_definition: Record<string, unknown> | null;

@@ -8827,6 +8827,7 @@ class FrameworkViewSet(BaseModelViewSet):
             "importance",
             "display_mode",
             "folder_id",
+            "translations",
         ]
         question_fields = [
             "id",
@@ -8841,6 +8842,7 @@ class FrameworkViewSet(BaseModelViewSet):
             "weight",
             "requirement_node_id",
             "folder_id",
+            "translations",
         ]
         choice_fields = [
             "id",
@@ -8856,6 +8858,7 @@ class FrameworkViewSet(BaseModelViewSet):
             "select_implementation_groups",
             "question_id",
             "folder_id",
+            "translations",
         ]
 
         nodes = list(
@@ -8884,10 +8887,22 @@ class FrameworkViewSet(BaseModelViewSet):
         stringify_uuids(questions)
         stringify_uuids(choices)
 
+        # Compute available_languages from existing translations
+        available_languages = set()
+        for record in nodes + questions + choices:
+            translations = record.get("translations")
+            if translations and isinstance(translations, dict):
+                available_languages.update(translations.keys())
+        if framework.translations and isinstance(framework.translations, dict):
+            available_languages.update(framework.translations.keys())
+
         draft = {
             "framework_meta": {
                 "name": framework.name,
                 "description": framework.description or "",
+                "locale": framework.locale or "en",
+                "translations": framework.translations or {},
+                "available_languages": sorted(available_languages),
                 "min_score": framework.min_score,
                 "max_score": framework.max_score,
                 "scores_definition": framework.scores_definition,
@@ -9018,6 +9033,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         importance=data.get("importance", "undefined"),
                         display_mode=data.get("display_mode", "default"),
                         folder_id=data.get("folder_id") or framework.folder_id,
+                        translations=data.get("translations"),
                     )
                     nodes_to_update.append(node)
                 RequirementNode.objects.bulk_update(
@@ -9037,6 +9053,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         "importance",
                         "display_mode",
                         "folder_id",
+                        "translations",
                     ],
                 )
 
@@ -9058,6 +9075,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         weight=data.get("weight", 1),
                         requirement_node_id=uuid.UUID(data["requirement_node_id"]),
                         folder_id=data.get("folder_id") or framework.folder_id,
+                        translations=data.get("translations"),
                     )
                     questions_to_update.append(question)
                 Question.objects.bulk_update(
@@ -9074,6 +9092,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         "weight",
                         "requirement_node_id",
                         "folder_id",
+                        "translations",
                     ],
                 )
 
@@ -9098,6 +9117,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         ),
                         question_id=uuid.UUID(data["question_id"]),
                         folder_id=data.get("folder_id") or framework.folder_id,
+                        translations=data.get("translations"),
                     )
                     choices_to_update.append(choice)
                 QuestionChoice.objects.bulk_update(
@@ -9115,6 +9135,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         "select_implementation_groups",
                         "question_id",
                         "folder_id",
+                        "translations",
                     ],
                 )
 
@@ -9142,6 +9163,7 @@ class FrameworkViewSet(BaseModelViewSet):
                             importance=data.get("importance", "undefined"),
                             display_mode=data.get("display_mode", "default"),
                             folder_id=data.get("folder_id") or framework.folder_id,
+                            translations=data.get("translations"),
                         )
                     )
                 RequirementNode.objects.bulk_create(new_nodes)
@@ -9165,6 +9187,7 @@ class FrameworkViewSet(BaseModelViewSet):
                             weight=data.get("weight", 1),
                             requirement_node_id=uuid.UUID(data["requirement_node_id"]),
                             folder_id=data.get("folder_id") or framework.folder_id,
+                            translations=data.get("translations"),
                         )
                     )
                 Question.objects.bulk_create(new_questions)
@@ -9191,6 +9214,7 @@ class FrameworkViewSet(BaseModelViewSet):
                             ),
                             question_id=uuid.UUID(data["question_id"]),
                             folder_id=data.get("folder_id") or framework.folder_id,
+                            translations=data.get("translations"),
                         )
                     )
                 QuestionChoice.objects.bulk_create(new_choices)
@@ -9215,6 +9239,10 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework.field_visibility = meta.get(
                     "field_visibility", framework.field_visibility
                 )
+                framework.locale = meta.get("locale", framework.locale)
+                framework.translations = meta.get(
+                    "translations", framework.translations
+                )
 
             # --- 7. Snapshot history, bump version, clear draft ---
             history = list(framework.editing_history or [])
@@ -9237,6 +9265,8 @@ class FrameworkViewSet(BaseModelViewSet):
                     "implementation_groups_definition",
                     "outcomes_definition",
                     "field_visibility",
+                    "locale",
+                    "translations",
                     "editing_draft",
                     "editing_version",
                     "editing_history",

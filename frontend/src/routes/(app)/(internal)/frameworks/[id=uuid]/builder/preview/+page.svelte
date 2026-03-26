@@ -5,10 +5,12 @@
 	import {
 		hydrateDraft,
 		buildTree,
+		getTranslation,
 		type RequirementNode,
 		type BuilderQuestion,
 		type BuilderRequirement,
-		type BuilderSection
+		type BuilderSection,
+		type Translations
 	} from '$lib/components/FrameworkBuilder/builder-state';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
@@ -29,6 +31,8 @@
 	let error = $state<string | null>(null);
 	let sections = $state<BuilderSection[]>([]);
 	let igDefs = $state<Array<{ ref_id: string; name: string; description?: string }>>([]);
+	let availableLanguages = $state<string[]>([]);
+	let previewLanguage = $state<string | null>(null);
 	let selectedGroups = $state<Set<string>>(new Set());
 	let currentIndex = $state(0);
 	let answers: Record<string, any> = $state({});
@@ -46,6 +50,7 @@
 				frameworkPatch.implementation_groups_definition ??
 				data.framework.implementation_groups_definition;
 			igDefs = Array.isArray(igSource) ? (igSource as typeof igDefs) : [];
+			availableLanguages = frameworkPatch.available_languages ?? [];
 		} catch (e) {
 			error = (e as Error).message;
 		} finally {
@@ -107,11 +112,11 @@
 				bq.question.urn,
 				{
 					type: bq.question.type,
-					text: bq.question.text || '',
+					text: t(bq.question.translations, 'text', bq.question.text) || '',
 					choices: bq.question.choices.map((c) => ({
 						urn: c.urn,
-						value: c.value || '',
-						description: c.description,
+						value: t(c.translations, 'value', c.value) || '',
+						description: t(c.translations, 'description', c.description),
 						color: c.color,
 						add_score: c.add_score,
 						compute_result: c.compute_result,
@@ -128,6 +133,18 @@
 
 	function getNavItemNode(item: NavItem): RequirementNode {
 		return item.type === 'splash' ? item.data : item.data.node;
+	}
+
+	/** Get display text for a node field, applying translation if preview language is set */
+	function t(
+		translations: Translations | null | undefined,
+		field: string,
+		fallback: string | null
+	): string {
+		if (previewLanguage && translations?.[previewLanguage]?.[field]) {
+			return translations[previewLanguage][field];
+		}
+		return fallback ?? '';
 	}
 
 	// --- Derived ---
@@ -172,6 +189,22 @@
 		</span>
 
 		<span class="text-sm text-gray-600 truncate">{data.framework.name}</span>
+
+		{#if availableLanguages.length > 0}
+			<div class="ml-auto flex items-center gap-1.5 shrink-0">
+				<i class="fa-solid fa-language text-gray-400 text-xs"></i>
+				<select
+					value={previewLanguage ?? ''}
+					class="text-xs border border-gray-200 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-white cursor-pointer"
+					onchange={(e) => (previewLanguage = e.currentTarget.value || null)}
+				>
+					<option value="">Base language</option>
+					{#each availableLanguages as lang}
+						<option value={lang}>{lang.toUpperCase()}</option>
+					{/each}
+				</select>
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -236,11 +269,13 @@
 					{#if node.name}
 						<div class="px-6 py-4 border-b border-purple-100 flex items-center gap-2">
 							<i class="fa-solid fa-display text-purple-400"></i>
-							<span class="text-lg font-semibold text-gray-800">{node.name}</span>
+							<span class="text-lg font-semibold text-gray-800"
+								>{t(node.translations, 'name', node.name)}</span
+							>
 						</div>
 					{/if}
 					<div class="px-6 py-5">
-						<MarkdownRenderer content={node.description} />
+						<MarkdownRenderer content={t(node.translations, 'description', node.description)} />
 					</div>
 				</div>
 			{:else if currentItem.type === 'requirement'}
@@ -250,16 +285,17 @@
 				{@const hasQuestions = Object.keys(questionsDict).length > 0}
 				<div class="card bg-white shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 space-y-4">
 					<h3 class="text-xl font-semibold text-orange-600">
-						{node.ref_id ? `${node.ref_id} - ` : ''}{node.name || 'Untitled'}
+						{node.ref_id ? `${node.ref_id} - ` : ''}{t(node.translations, 'name', node.name) ||
+							'Untitled'}
 					</h3>
 					{#if node.description}
 						<div class="card w-full font-light text-lg p-4 preset-tonal-primary">
-							<MarkdownRenderer content={node.description} />
+							<MarkdownRenderer content={t(node.translations, 'description', node.description)} />
 						</div>
 					{/if}
 					{#if node.annotation}
 						<div class="card p-4 preset-tonal-secondary text-sm">
-							<MarkdownRenderer content={node.annotation} />
+							<MarkdownRenderer content={t(node.translations, 'annotation', node.annotation)} />
 						</div>
 					{/if}
 					{#if hasQuestions}

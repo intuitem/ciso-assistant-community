@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { getBuilderContext, type BuilderSection } from './builder-state';
+	import {
+		getBuilderContext,
+		getTranslation,
+		withTranslation,
+		type BuilderSection
+	} from './builder-state';
 	import RequirementBlock from './RequirementBlock.svelte';
 	import SplashScreenBlock from './SplashScreenBlock.svelte';
 
@@ -12,7 +17,7 @@
 	let { section, sectionIndex }: Props = $props();
 
 	const builder = getBuilderContext();
-	const { errors: errorsStore } = builder;
+	const { errors: errorsStore, activeLanguage: activeLanguageStore } = builder;
 	let confirmDelete = $state(false);
 	let collapsed = $state(section.collapsed);
 
@@ -63,13 +68,40 @@
 			onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 		/>
 
-		<input
-			type="text"
-			value={section.node.name ?? ''}
-			placeholder="Section name"
-			class="flex-1 text-xl font-semibold bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
-			onblur={(e) => saveField('name', e.currentTarget.value || null)}
-		/>
+		{#if $activeLanguageStore}
+			<div class="flex-1 grid grid-cols-2 gap-3">
+				<input
+					type="text"
+					value={section.node.name ?? ''}
+					readonly
+					class="text-xl font-semibold bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
+				/>
+				<input
+					type="text"
+					value={getTranslation(section.node.translations, $activeLanguageStore, 'name')}
+					placeholder="Translate section name..."
+					class="text-xl font-semibold bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+					onblur={(e) =>
+						saveField(
+							'translations',
+							withTranslation(
+								section.node.translations,
+								$activeLanguageStore!,
+								'name',
+								e.currentTarget.value
+							)
+						)}
+				/>
+			</div>
+		{:else}
+			<input
+				type="text"
+				value={section.node.name ?? ''}
+				placeholder="Section name"
+				class="flex-1 text-xl font-semibold bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+				onblur={(e) => saveField('name', e.currentTarget.value || null)}
+			/>
+		{/if}
 
 		<button
 			type="button"

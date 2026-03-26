@@ -10,6 +10,8 @@ import {
 
 // --- Types ---
 
+export type Translations = Record<string, Record<string, string>>;
+
 export interface QuestionChoice {
 	id: string;
 	urn: string | null;
@@ -22,6 +24,7 @@ export interface QuestionChoice {
 	description: string | null;
 	color: string | null;
 	select_implementation_groups: string[] | null;
+	translations?: Translations | null;
 	folder: { id: string; str: string } | string;
 	question: string;
 }
@@ -37,6 +40,7 @@ export interface Question {
 	depends_on: Record<string, unknown> | null;
 	order: number;
 	weight: number;
+	translations?: Translations | null;
 	folder: { id: string; str: string } | string;
 	requirement_node: string;
 	choices: QuestionChoice[];
@@ -57,6 +61,7 @@ export interface RequirementNode {
 	weight: number;
 	importance: string;
 	display_mode: 'default' | 'splash';
+	translations?: Translations | null;
 	framework: string | { id: string };
 	folder: { id: string; str: string } | string;
 }
@@ -66,6 +71,7 @@ export interface OutcomeRule {
 	annotation: string;
 	color: string | null;
 	expression: string;
+	translations?: Translations | null;
 }
 
 export interface ImplementationGroup {
@@ -73,6 +79,7 @@ export interface ImplementationGroup {
 	name: string;
 	description: string;
 	default_selected?: boolean;
+	translations?: Translations | null;
 }
 
 export interface Framework {
@@ -88,6 +95,9 @@ export interface Framework {
 	implementation_groups_definition: Record<string, unknown>[] | null;
 	outcomes_definition: OutcomeRule[] | null;
 	field_visibility: Record<string, string>;
+	locale?: string;
+	translations?: Translations | null;
+	available_languages?: string[];
 	urn: string | null;
 }
 
@@ -176,6 +186,28 @@ function extractRequirementNodeId(rn: string | { id: string }): string {
 	return typeof rn === 'string' ? rn : rn.id;
 }
 
+/** Get a translated field value */
+export function getTranslation(
+	translations: Translations | null | undefined,
+	lang: string,
+	field: string
+): string {
+	return translations?.[lang]?.[field] ?? '';
+}
+
+/** Return a new translations dict with one field updated */
+export function withTranslation(
+	translations: Translations | null | undefined,
+	lang: string,
+	field: string,
+	value: string
+): Translations {
+	const current = translations ?? {};
+	const langDict = { ...(current[lang] ?? {}), [field]: value };
+	if (!value) delete langDict[field];
+	return { ...current, [lang]: langDict };
+}
+
 /**
  * Serialize the current builder state into a flat DraftJSON for persistence.
  */
@@ -202,7 +234,8 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 				weight: n.weight,
 				importance: n.importance,
 				display_mode: n.display_mode,
-				folder_id: extractFolderId(n.folder)
+				folder_id: extractFolderId(n.folder),
+				translations: n.translations ?? null
 			});
 			for (const bq of req.questions) {
 				const q = bq.question;
@@ -218,7 +251,8 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 					order: q.order,
 					weight: q.weight,
 					requirement_node_id: extractRequirementNodeId(q.requirement_node),
-					folder_id: extractFolderId(q.folder)
+					folder_id: extractFolderId(q.folder),
+					translations: q.translations ?? null
 				});
 				for (const c of q.choices) {
 					choices.push({
@@ -234,7 +268,8 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 						color: c.color,
 						select_implementation_groups: c.select_implementation_groups,
 						question_id: typeof c.question === 'string' ? c.question : c.question,
-						folder_id: extractFolderId(c.folder)
+						folder_id: extractFolderId(c.folder),
+						translations: c.translations ?? null
 					});
 				}
 			}
@@ -259,7 +294,8 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 			weight: n.weight,
 			importance: n.importance,
 			display_mode: n.display_mode,
-			folder_id: extractFolderId(n.folder)
+			folder_id: extractFolderId(n.folder),
+			translations: n.translations ?? null
 		});
 		collectFromRequirements(sec.requirements);
 	}
@@ -269,6 +305,9 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 			name: fw.name,
 			description: fw.description,
 			annotation: fw.annotation,
+			locale: fw.locale,
+			translations: fw.translations ?? {},
+			available_languages: fw.available_languages ?? [],
 			min_score: fw.min_score,
 			max_score: fw.max_score,
 			scores_definition: fw.scores_definition,
@@ -299,6 +338,9 @@ export function hydrateDraft(
 		name: meta.name,
 		description: meta.description,
 		annotation: meta.annotation ?? null,
+		locale: meta.locale ?? 'en',
+		translations: meta.translations ?? {},
+		available_languages: meta.available_languages ?? [],
 		min_score: meta.min_score,
 		max_score: meta.max_score,
 		scores_definition: meta.scores_definition,
@@ -324,6 +366,7 @@ export function hydrateDraft(
 			description: (c.description ?? null) as string | null,
 			color: (c.color ?? null) as string | null,
 			select_implementation_groups: (c.select_implementation_groups ?? null) as string[] | null,
+			translations: (c.translations ?? null) as Translations | null,
 			folder: (c.folder_id ?? c.folder ?? '') as string,
 			question: qId
 		});
@@ -343,6 +386,7 @@ export function hydrateDraft(
 			depends_on: (q.depends_on ?? null) as Record<string, unknown> | null,
 			order: (q.order ?? 0) as number,
 			weight: (q.weight ?? 1) as number,
+			translations: (q.translations ?? null) as Translations | null,
 			folder: (q.folder_id ?? q.folder ?? '') as string,
 			requirement_node: nodeId,
 			choices: (choicesByQuestion.get(qId) ?? []).sort((a, b) => a.order - b.order)
@@ -364,6 +408,7 @@ export function hydrateDraft(
 		weight: (n.weight ?? 1) as number,
 		importance: (n.importance ?? '') as string,
 		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
+		translations: (n.translations ?? null) as Translations | null,
 		framework: (n.framework ?? frameworkId) as string,
 		folder: (n.folder_id ?? n.folder ?? '') as string
 	}));
@@ -402,6 +447,12 @@ export interface BuilderStore {
 	reorderQuestions: (reqNodeId: string, fromIndex: number, toIndex: number) => void;
 	reorderChoices: (reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) => void;
 	updateFramework: (patch: Record<string, unknown>) => void;
+	activeLanguage: Writable<string | null>;
+	setActiveLanguage: (lang: string | null) => void;
+	getTranslationProgress: (lang: string) => { translated: number; total: number };
+	copyFromBase: (lang: string) => void;
+	addLanguage: (lang: string) => void;
+	removeLanguage: (lang: string) => void;
 	flushDraft: () => Promise<void>;
 	publish: () => Promise<void>;
 	discard: () => Promise<void>;
@@ -502,6 +553,7 @@ export function createBuilderState(
 	const draftMarkedDirty = editingDraft && (editingDraft as any)._dirty === true;
 	const unpublished = writable(!!draftMarkedDirty);
 	const isScrolling = writable(false);
+	const activeLanguage = writable<string | null>(null);
 
 	function markDirty() {
 		unsaved.set(true);
@@ -1032,6 +1084,139 @@ export function createBuilderState(
 		markDirty();
 	}
 
+	function setActiveLanguage(lang: string | null) {
+		activeLanguage.set(lang);
+	}
+
+	function addLanguage(lang: string) {
+		const code = lang.trim().toLowerCase();
+		if (!code) return;
+		framework.update((f) => {
+			const langs = new Set(f.available_languages ?? []);
+			langs.add(code);
+			return { ...f, available_languages: [...langs].sort() };
+		});
+		markDirty();
+	}
+
+	function removeLanguage(lang: string) {
+		framework.update((f) => ({
+			...f,
+			available_languages: (f.available_languages ?? []).filter((l) => l !== lang)
+		}));
+		// Deselect if currently active
+		const currentLang = get(activeLanguage);
+		if (currentLang === lang) activeLanguage.set(null);
+		markDirty();
+	}
+
+	function getTranslationProgress(lang: string): { translated: number; total: number } {
+		let total = 0;
+		let translated = 0;
+		const secs = get(sections);
+
+		function checkNode(node: RequirementNode) {
+			if (node.name) {
+				total++;
+				if (node.translations?.[lang]?.name) translated++;
+			}
+		}
+
+		function walkReqs(reqs: BuilderRequirement[]) {
+			for (const req of reqs) {
+				checkNode(req.node);
+				for (const bq of req.questions) {
+					if (bq.question.text) {
+						total++;
+						if (bq.question.translations?.[lang]?.text) translated++;
+					}
+					for (const c of bq.question.choices) {
+						if (c.value) {
+							total++;
+							if (c.translations?.[lang]?.value) translated++;
+						}
+					}
+				}
+				walkReqs(req.children);
+			}
+		}
+
+		for (const sec of secs) {
+			checkNode(sec.node);
+			walkReqs(sec.requirements);
+		}
+		return { translated, total };
+	}
+
+	function copyFromBase(lang: string) {
+		sections.update((secs) =>
+			secs.map((sec) => ({
+				...sec,
+				node: copyNodeTranslations(sec.node, lang),
+				requirements: copyReqTranslations(sec.requirements, lang)
+			}))
+		);
+		markDirty();
+	}
+
+	function copyNodeTranslations(node: RequirementNode, lang: string): RequirementNode {
+		const fields: Record<string, string> = {};
+		if (node.name) fields.name = node.name;
+		if (node.description) fields.description = node.description;
+		if (node.annotation) fields.annotation = node.annotation;
+		if (node.typical_evidence) fields.typical_evidence = node.typical_evidence;
+		if (Object.keys(fields).length === 0) return node;
+		const existing = node.translations?.[lang] ?? {};
+		// Only copy fields that are not already translated
+		const merged: Record<string, string> = { ...fields };
+		for (const [k, v] of Object.entries(existing)) {
+			if (v) merged[k] = v;
+		}
+		return { ...node, translations: { ...(node.translations ?? {}), [lang]: merged } };
+	}
+
+	function copyReqTranslations(reqs: BuilderRequirement[], lang: string): BuilderRequirement[] {
+		return reqs.map((req) => ({
+			...req,
+			node: copyNodeTranslations(req.node, lang),
+			questions: req.questions.map((bq) => ({
+				...bq,
+				question: copyQuestionTranslations(bq.question, lang)
+			})),
+			children: copyReqTranslations(req.children, lang)
+		}));
+	}
+
+	function copyQuestionTranslations(q: Question, lang: string): Question {
+		const fields: Record<string, string> = {};
+		if (q.text) fields.text = q.text;
+		if (Object.keys(fields).length === 0 && q.choices.length === 0) return q;
+		const existing = q.translations?.[lang] ?? {};
+		const merged: Record<string, string> = { ...fields };
+		for (const [k, v] of Object.entries(existing)) {
+			if (v) merged[k] = v;
+		}
+		return {
+			...q,
+			translations:
+				Object.keys(merged).length > 0
+					? { ...(q.translations ?? {}), [lang]: merged }
+					: q.translations,
+			choices: q.choices.map((c) => {
+				const cFields: Record<string, string> = {};
+				if (c.value) cFields.value = c.value;
+				if (c.description) cFields.description = c.description;
+				if (Object.keys(cFields).length === 0) return c;
+				const cExisting = c.translations?.[lang] ?? {};
+				const cMerged: Record<string, string> = { ...cFields };
+				for (const [k, v] of Object.entries(cExisting)) {
+					if (v) cMerged[k] = v;
+				}
+				return { ...c, translations: { ...(c.translations ?? {}), [lang]: cMerged } };
+			})
+		};
+	}
+
 	return {
 		framework,
 		sections,
@@ -1059,6 +1244,12 @@ export function createBuilderState(
 		reorderQuestions,
 		reorderChoices,
 		updateFramework: doUpdateFramework,
+		activeLanguage,
+		setActiveLanguage,
+		getTranslationProgress,
+		copyFromBase,
+		addLanguage,
+		removeLanguage,
 		flushDraft,
 		publish,
 		discard,

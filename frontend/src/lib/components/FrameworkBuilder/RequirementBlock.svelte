@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { getBuilderContext, type BuilderRequirement } from './builder-state';
+	import {
+		getBuilderContext,
+		getTranslation,
+		withTranslation,
+		type BuilderRequirement
+	} from './builder-state';
 	import QuestionEditor from './QuestionEditor.svelte';
 
 	interface Props {
@@ -9,7 +14,11 @@
 	let { requirement }: Props = $props();
 
 	const builder = getBuilderContext();
-	const { framework: frameworkStore, errors: errorsStore } = builder;
+	const {
+		framework: frameworkStore,
+		errors: errorsStore,
+		activeLanguage: activeLanguageStore
+	} = builder;
 	let confirmDelete = $state(false);
 	let urnCopied = $state(false);
 
@@ -77,57 +86,162 @@
 				<i class="fa-solid fa-grip-vertical text-xs"></i>
 			</span>
 			<div class="flex-1 min-w-0 space-y-1">
-				<div class="flex items-center gap-2">
-					<input
-						type="text"
-						value={requirement.node.ref_id ?? ''}
-						placeholder="Ref ID"
-						class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
-						onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
-					/>
-					<input
-						type="text"
-						value={requirement.node.name ?? ''}
-						placeholder={requirement.node.description
-							? requirement.node.description.slice(0, 60) +
-								(requirement.node.description.length > 60 ? '...' : '')
-							: 'Requirement name'}
-						class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
-						onblur={(e) => saveField('name', e.currentTarget.value || null)}
-					/>
-				</div>
-				{#if requirement.node.urn}
-					<button
-						type="button"
-						class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
-						onclick={() => {
-							navigator.clipboard.writeText(requirement.node.urn ?? '');
-							urnCopied = true;
-							setTimeout(() => (urnCopied = false), 1500);
-						}}
-					>
-						<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"></i>
-						{#if urnCopied}
-							<span class="text-green-500">Copied!</span>
-						{:else}
-							{requirement.node.urn}
-						{/if}
-					</button>
+				{#if $activeLanguageStore}
+					{@const lang = $activeLanguageStore}
+					<div class="flex items-center gap-2">
+						<input
+							type="text"
+							value={requirement.node.ref_id ?? ''}
+							placeholder="Ref ID"
+							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
+							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
+						/>
+					</div>
+					<div class="grid grid-cols-2 gap-3">
+						<input
+							type="text"
+							value={requirement.node.name ?? ''}
+							readonly
+							class="text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
+						/>
+						<input
+							type="text"
+							value={getTranslation(requirement.node.translations, lang, 'name')}
+							placeholder="Translate name..."
+							class="text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+							onblur={(e) =>
+								saveField(
+									'translations',
+									withTranslation(
+										requirement.node.translations,
+										lang,
+										'name',
+										e.currentTarget.value
+									)
+								)}
+						/>
+					</div>
+					{#if requirement.node.urn}
+						<button
+							type="button"
+							class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+							onclick={() => {
+								navigator.clipboard.writeText(requirement.node.urn ?? '');
+								urnCopied = true;
+								setTimeout(() => (urnCopied = false), 1500);
+							}}
+						>
+							<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
+							></i>
+							{#if urnCopied}
+								<span class="text-green-500">Copied!</span>
+							{:else}
+								{requirement.node.urn}
+							{/if}
+						</button>
+					{/if}
+					<div class="grid grid-cols-2 gap-3">
+						<textarea
+							value={requirement.node.description ?? ''}
+							readonly
+							rows="1"
+							class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
+						></textarea>
+						<textarea
+							value={getTranslation(requirement.node.translations, lang, 'description')}
+							placeholder="Translate description..."
+							rows="1"
+							class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+							onblur={(e) =>
+								saveField(
+									'translations',
+									withTranslation(
+										requirement.node.translations,
+										lang,
+										'description',
+										e.currentTarget.value
+									)
+								)}
+						></textarea>
+					</div>
+					<div class="grid grid-cols-2 gap-3">
+						<textarea
+							value={requirement.node.typical_evidence ?? ''}
+							readonly
+							rows="1"
+							class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
+						></textarea>
+						<textarea
+							value={getTranslation(requirement.node.translations, lang, 'typical_evidence')}
+							placeholder="Translate typical evidence..."
+							rows="1"
+							class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+							onblur={(e) =>
+								saveField(
+									'translations',
+									withTranslation(
+										requirement.node.translations,
+										lang,
+										'typical_evidence',
+										e.currentTarget.value
+									)
+								)}
+						></textarea>
+					</div>
+				{:else}
+					<div class="flex items-center gap-2">
+						<input
+							type="text"
+							value={requirement.node.ref_id ?? ''}
+							placeholder="Ref ID"
+							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
+							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
+						/>
+						<input
+							type="text"
+							value={requirement.node.name ?? ''}
+							placeholder={requirement.node.description
+								? requirement.node.description.slice(0, 60) +
+									(requirement.node.description.length > 60 ? '...' : '')
+								: 'Requirement name'}
+							class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+							onblur={(e) => saveField('name', e.currentTarget.value || null)}
+						/>
+					</div>
+					{#if requirement.node.urn}
+						<button
+							type="button"
+							class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+							onclick={() => {
+								navigator.clipboard.writeText(requirement.node.urn ?? '');
+								urnCopied = true;
+								setTimeout(() => (urnCopied = false), 1500);
+							}}
+						>
+							<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
+							></i>
+							{#if urnCopied}
+								<span class="text-green-500">Copied!</span>
+							{:else}
+								{requirement.node.urn}
+							{/if}
+						</button>
+					{/if}
+					<textarea
+						value={requirement.node.description ?? ''}
+						placeholder="Description (optional)"
+						rows="1"
+						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+						onblur={(e) => saveField('description', e.currentTarget.value || null)}
+					></textarea>
+					<textarea
+						value={requirement.node.typical_evidence ?? ''}
+						placeholder="Typical evidence (optional)"
+						rows="1"
+						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+						onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
+					></textarea>
 				{/if}
-				<textarea
-					value={requirement.node.description ?? ''}
-					placeholder="Description (optional)"
-					rows="1"
-					class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-					onblur={(e) => saveField('description', e.currentTarget.value || null)}
-				></textarea>
-				<textarea
-					value={requirement.node.typical_evidence ?? ''}
-					placeholder="Typical evidence (optional)"
-					rows="1"
-					class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-					onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
-				></textarea>
 			</div>
 
 			<div class="flex items-center gap-1 shrink-0">

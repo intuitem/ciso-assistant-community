@@ -1,12 +1,13 @@
 <script lang="ts">
-	import type { ImplementationGroup } from './builder-state';
+	import { getTranslation, withTranslation, type ImplementationGroup } from './builder-state';
 
 	interface Props {
 		groups: ImplementationGroup[];
 		onupdate: (groups: ImplementationGroup[]) => void;
+		activeLanguage?: string | null;
 	}
 
-	let { groups, onupdate }: Props = $props();
+	let { groups, onupdate, activeLanguage = null }: Props = $props();
 
 	let items: ImplementationGroup[] = $state(groups.map((g) => ({ ...g })));
 	let draggedIndex: number | null = $state(null);
@@ -197,6 +198,53 @@
 						/>
 						<span class="text-xs text-gray-500">Selected by default</span>
 					</label>
+
+					{#if activeLanguage}
+						{@const lang = activeLanguage}
+						<div class="border-t border-gray-200 pt-2 space-y-1.5">
+							<span class="text-[10px] text-blue-500 font-medium uppercase"
+								>{lang.toUpperCase()} translation</span
+							>
+							<div class="grid grid-cols-2 gap-2">
+								<label class="block">
+									<span class="text-xs text-blue-500">Name</span>
+									<input
+										type="text"
+										value={getTranslation(group.translations, lang, 'name')}
+										placeholder="Translate name..."
+										class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+										onblur={(e) => {
+											items[index].translations = withTranslation(
+												items[index].translations,
+												lang,
+												'name',
+												e.currentTarget.value
+											);
+											persist();
+										}}
+									/>
+								</label>
+								<label class="block">
+									<span class="text-xs text-blue-500">Description</span>
+									<input
+										type="text"
+										value={getTranslation(group.translations, lang, 'description')}
+										placeholder="Translate description..."
+										class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+										onblur={(e) => {
+											items[index].translations = withTranslation(
+												items[index].translations,
+												lang,
+												'description',
+												e.currentTarget.value
+											);
+											persist();
+										}}
+									/>
+								</label>
+							</div>
+						</div>
+					{/if}
 				</div>
 			{/if}
 		</div>
