@@ -287,9 +287,9 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
         advanced_settings["x509cert"] = cert_pem.decode("utf-8")
 
         # Re-injects the dict into the application configuration
-        settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
-        settings.value["settings"]["advanced"] = advanced_settings
-        settings.save()
+        sso_settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+        sso_settings.value["settings"]["advanced"] = advanced_settings
+        sso_settings.save()
 
         return Response(
             {
