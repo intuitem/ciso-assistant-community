@@ -53,6 +53,13 @@ test('compliance assessments scoring is working properly', async ({
 		testObjectsData.complianceAssessmentsPage.build.name
 	);
 
+	// Enable scoring on the compliance assessment
+	await page.getByTestId('edit-button').click();
+	await page.getByText('More').click();
+	await page.getByTestId('form-input-scoring-enabled').check();
+	await page.getByTestId('save-button').click();
+	await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+
 	// Click on the ID.AM-1 tree view item
 	const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
 		'ID - Identify',
@@ -61,10 +68,6 @@ test('compliance assessments scoring is working properly', async ({
 	await IDAM1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('form-input-is-scored').click();
-	if (!page.getByTestId('progress-ring-svg').isVisible()) {
-		await page.getByTestId('form-input-is-scored').click();
-	}
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '1');
 
 	const IDAM1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
@@ -97,10 +100,6 @@ test('compliance assessments scoring is working properly', async ({
 	await IDAM2TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('form-input-is-scored').click();
-	if (!page.getByTestId('progress-ring-svg').isVisible()) {
-		await page.getByTestId('form-input-is-scored').click();
-	}
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '1');
 
 	const IDAM2SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
@@ -133,10 +132,6 @@ test('compliance assessments scoring is working properly', async ({
 	await IDBE1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('form-input-is-scored').click();
-	if (!page.getByTestId('progress-ring-svg').isVisible()) {
-		await page.getByTestId('form-input-is-scored').click();
-	}
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '1');
 
 	const IDBE1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
@@ -169,10 +164,6 @@ test('compliance assessments scoring is working properly', async ({
 	await PRAC1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('form-input-is-scored').click();
-	if (!page.getByTestId('progress-ring-svg').isVisible()) {
-		await page.getByTestId('form-input-is-scored').click();
-	}
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '1');
 
 	const PRAC1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
