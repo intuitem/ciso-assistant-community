@@ -230,7 +230,7 @@
 						/>
 					</div>
 					{@const scoredSections = sections.filter(
-						(s: any) => s.score !== null && s.scored_count > 0
+						(s: any) => s.implementation_score !== null && s.scored_count > 0
 					)}
 					{#if data.compliance_assessment.scoring_enabled && scoredSections.length > 0}
 						{@const isSum = sectionData.score_calculation_method === 'sum'}
@@ -243,12 +243,12 @@
 								<div class="h-[400px]">
 									<RadarChart
 										name="section_scores_radar"
-										title={m.score()}
+										title={m.implementationScore()}
 										labels={scoredSections.map((s: any) => ({
 											name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
 											max: isSum ? baseMax * (s.total_weight || 1) : baseMax
 										}))}
-										values={scoredSections.map((s: any) => s.score)}
+										values={scoredSections.map((s: any) => s.implementation_score)}
 										height="h-full"
 									/>
 								</div>
@@ -279,7 +279,10 @@
 									<tr class="text-[11px] uppercase tracking-wider text-slate-400">
 										<th class="pb-2 pr-4 text-left font-medium">{m.section()}</th>
 										<th class="pb-2 pr-4 text-right font-medium">{m.assessable()}</th>
-										<th class="pb-2 pr-4 text-right font-medium">{m.score()}</th>
+										{#if data.compliance_assessment.show_documentation_score}
+											<th class="pb-2 pr-4 text-right font-medium">{m.maturity()}</th>
+										{/if}
+										<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
 										{#if data.compliance_assessment.show_documentation_score}
 											<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
 										{/if}
@@ -294,11 +297,23 @@
 											<td class="py-2.5 pr-4 text-right tabular-nums text-slate-500"
 												>{section.total_assessable}</td
 											>
+											{#if data.compliance_assessment.show_documentation_score}
+												<td class="py-2.5 pr-4 text-right">
+													{#if section.maturity_score !== null}
+														<span
+															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
+															>{section.maturity_score}</span
+														>
+													{:else}
+														<span class="text-slate-300">&mdash;</span>
+													{/if}
+												</td>
+											{/if}
 											<td class="py-2.5 pr-4 text-right">
-												{#if section.score !== null}
+												{#if section.implementation_score !== null}
 													<span
 														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-														>{section.score}</span
+														>{section.implementation_score}</span
 													>
 												{:else}
 													<span class="text-slate-300">&mdash;</span>
@@ -651,7 +666,10 @@
 									<th class="pb-2 pr-4 text-left font-medium">{m.name()}</th>
 									<th class="pb-2 pr-4 text-right font-medium">{m.assessable()}</th>
 									<th class="pb-2 pr-4 text-right font-medium">{m.progress()}</th>
-									<th class="pb-2 pr-4 text-right font-medium">{m.score()}</th>
+									{#if data.compliance_assessment.show_documentation_score}
+										<th class="pb-2 pr-4 text-right font-medium">{m.maturity()}</th>
+									{/if}
+									<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
 									{#if data.compliance_assessment.show_documentation_score}
 										<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
 									{/if}
@@ -675,11 +693,23 @@
 												<span class="tabular-nums">{group.progress_percent}%</span>
 											</div>
 										</td>
+										{#if data.compliance_assessment.show_documentation_score}
+											<td class="py-2.5 pr-4 text-right">
+												{#if group.maturity_score !== null}
+													<span
+														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
+														>{group.maturity_score}</span
+													>
+												{:else}
+													<span class="text-slate-300">&mdash;</span>
+												{/if}
+											</td>
+										{/if}
 										<td class="py-2.5 pr-4 text-right">
-											{#if group.score !== null}
+											{#if group.implementation_score !== null}
 												<span
 													class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-													>{group.score}</span
+													>{group.implementation_score}</span
 												>
 											{:else}
 												<span class="text-slate-300">&mdash;</span>

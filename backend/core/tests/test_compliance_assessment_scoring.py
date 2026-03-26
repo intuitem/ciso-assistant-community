@@ -159,108 +159,97 @@ class TestScoringCalculationMethods:
         AVG: weighted average = Σ(score × weight) / Σ(weight)
 
         Scores: A1=80 (w=1), A2=60 (w=1), B1=40 (w=1), B2=100 (w=3)
-        = (80×1 + 60×1 + 40×1 + 100×3) / (1+1+1+3)
-        = (80 + 60 + 40 + 300) / 6
-        = 480 / 6 = 80.0
+        = (80 + 60 + 40 + 300) / 6 = 80.0
         """
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.save()
 
-        assert ca.get_global_score() == 80.0
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 80.0
+        assert scores["documentation_score"] is None  # doc scoring not enabled
+        assert scores["maturity_score"] == 80.0  # same as impl when doc off
 
     def test_sum_returns_weighted_sum(self, scoring_setup):
         """
         SUM: weighted sum = Σ(score × weight)
-
-        Scores: A1=80 (w=1), A2=60 (w=1), B1=40 (w=1), B2=100 (w=3)
         = 80 + 60 + 40 + 300 = 480.0
         """
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
         ca.save()
 
-        assert ca.get_global_score() == 480.0
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 480.0
 
     def test_avg_of_avg_returns_average_of_group_averages(self, scoring_setup):
         """
         AVG_OF_AVG: average of per-parent weighted averages.
 
         Section A: (80×1 + 60×1) / (1+1) = 70.0
-        Section B: (40×1 + 100×3) / (1+3) = 340/4 = 85.0
+        Section B: (40×1 + 100×3) / (1+3) = 85.0
         Average of averages: (70 + 85) / 2 = 77.5
         """
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
         ca.save()
 
-        assert ca.get_global_score() == 77.5
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 77.5
 
     def test_avg_of_avg_gives_equal_weight_to_sections(self, scoring_setup):
         """
         AVG_OF_AVG should give equal weight to each section, regardless of
-        how many requirements it has. Contrast with AVG which is dominated
-        by the heavily-weighted B2 requirement.
+        how many requirements it has.
         """
         ca = scoring_setup["ca"]
 
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.save()
-        avg_score = ca.get_global_score()
+        avg_score = ca.get_global_score()["implementation_score"]
 
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
         ca.save()
-        avg_of_avg_score = ca.get_global_score()
+        avg_of_avg_score = ca.get_global_score()["implementation_score"]
 
-        # These should differ because B2 has weight=3 and score=100,
-        # which pulls AVG up more than AVG_OF_AVG
         assert avg_score != avg_of_avg_score
         assert avg_score == 80.0
         assert avg_of_avg_score == 77.5
 
     def test_not_applicable_excluded_from_all_methods(self, scoring_setup):
-        """Requirements with NOT_APPLICABLE result should be excluded from all methods."""
+        """Requirements with NOT_APPLICABLE result should be excluded."""
         ca = scoring_setup["ca"]
         ra_b2 = scoring_setup["ra_b2"]
 
-        # Mark B2 (score=100, weight=3) as not applicable
         ra_b2.result = RequirementAssessment.Result.NOT_APPLICABLE
         ra_b2.save()
 
-        # AVG: (80 + 60 + 40) / 3 = 60.0
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.save()
-        assert ca.get_global_score() == 60.0
+        assert ca.get_global_score()["implementation_score"] == 60.0
 
-        # SUM: 80 + 60 + 40 = 180.0
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
         ca.save()
-        assert ca.get_global_score() == 180.0
+        assert ca.get_global_score()["implementation_score"] == 180.0
 
-        # AVG_OF_AVG: Section A = (80+60)/2 = 70, Section B = 40/1 = 40
-        # Average = (70 + 40) / 2 = 55.0
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
         ca.save()
-        assert ca.get_global_score() == 55.0
+        assert ca.get_global_score()["implementation_score"] == 55.0
 
     def test_unscored_excluded_from_all_methods(self, scoring_setup):
-        """Requirements with is_scored=False should be excluded from all methods."""
+        """Requirements with is_scored=False should be excluded."""
         ca = scoring_setup["ca"]
         ra_a2 = scoring_setup["ra_a2"]
 
-        # Mark A2 (score=60, weight=1) as unscored
         RequirementAssessment.objects.filter(pk=ra_a2.pk).update(is_scored=False)
 
-        # AVG without A2: (80×1 + 40×1 + 100×3) / (1+1+3) = 420/5 = 84.0
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.save()
-        assert ca.get_global_score() == 84.0
+        assert ca.get_global_score()["implementation_score"] == 84.0
 
-        # AVG_OF_AVG without A2: Section A = 80/1 = 80, Section B = (40+300)/4 = 85
-        # Average = (80 + 85) / 2 = 82.5
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
         ca.save()
-        assert ca.get_global_score() == 82.5
+        assert ca.get_global_score()["implementation_score"] == 82.5
 
     def test_no_scored_requirements_returns_minus_one(self, scoring_setup):
         """All methods should return -1 when there are no scored requirements."""
@@ -277,7 +266,9 @@ class TestScoringCalculationMethods:
         ]:
             ca.score_calculation_method = method
             ca.save()
-            assert ca.get_global_score() == -1, f"Expected -1 for method {method}"
+            scores = ca.get_global_score()
+            assert scores["implementation_score"] == -1, f"Expected -1 for {method}"
+            assert scores["maturity_score"] == -1
 
 
 @pytest.mark.django_db
@@ -297,9 +288,7 @@ class TestTotalMaxScore:
         assert ca.get_total_max_score() == 100
 
     def test_sum_max_score(self, scoring_setup):
-        """
-        SUM max: max_score × Σ(weight) = 100 × (1+1+1+3) = 600
-        """
+        """SUM max: max_score × Σ(weight) = 100 × (1+1+1+3) = 600"""
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
         ca.save()
@@ -307,51 +296,129 @@ class TestTotalMaxScore:
 
 
 @pytest.mark.django_db
-class TestDocumentationScore:
-    """Tests that documentation_score is included when show_documentation_score is on."""
+class TestThreeLayerScoring:
+    """Tests for the three-layer scoring: implementation, documentation, maturity."""
 
-    def test_avg_with_documentation_score(self, scoring_setup):
+    def _set_doc_scores(self, scoring_setup):
+        """Helper to set documentation scores on all RAs."""
+        scoring_setup["ra_a1"].documentation_score = 90
+        scoring_setup["ra_a1"].save()
+        scoring_setup["ra_a2"].documentation_score = 70
+        scoring_setup["ra_a2"].save()
+        scoring_setup["ra_b1"].documentation_score = 50
+        scoring_setup["ra_b1"].save()
+        scoring_setup["ra_b2"].documentation_score = 80
+        scoring_setup["ra_b2"].save()
+
+    def test_without_doc_score_maturity_equals_implementation(self, scoring_setup):
+        """When doc scoring is off, maturity_score == implementation_score."""
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["documentation_score"] is None
+        assert scores["maturity_score"] == scores["implementation_score"]
+
+    def test_avg_three_layers(self, scoring_setup):
         """
-        With documentation scores, each RA contributes both score and
-        documentation_score with the same weight.
+        AVG with doc scoring: implementation and documentation computed independently.
+
+        Implementation: (80+60+40+300)/6 = 80.0
+        Documentation:  (90+70+50+80×3)/6 = (90+70+50+240)/6 = 450/6 = 75.0
+        Maturity: (80.0 + 75.0) / 2 = 77.5
+        """
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.show_documentation_score = True
+        ca.save()
+        self._set_doc_scores(scoring_setup)
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 80.0
+        assert scores["documentation_score"] == 75.0
+        assert scores["maturity_score"] == 77.5
+
+    def test_sum_three_layers(self, scoring_setup):
+        """
+        SUM with doc scoring: each layer summed independently.
+
+        Implementation: 80+60+40+300 = 480
+        Documentation:  90+70+50+240 = 450
+        Maturity: (480 + 450) / 2 = 465.0
+        """
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
+        ca.show_documentation_score = True
+        ca.save()
+        self._set_doc_scores(scoring_setup)
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 480.0
+        assert scores["documentation_score"] == 450.0
+        assert scores["maturity_score"] == 465.0
+
+    def test_avg_of_avg_three_layers(self, scoring_setup):
+        """
+        AVG_OF_AVG with doc scoring: each layer grouped independently.
+
+        Implementation:
+          Section A: (80+60)/2 = 70, Section B: (40+300)/4 = 85
+          Average: (70+85)/2 = 77.5
+
+        Documentation:
+          Section A: (90+70)/2 = 80, Section B: (50+240)/4 = 72.5
+          Average: (80+72.5)/2 = 76.2  (truncated from 76.25)
+
+        Maturity: (77.5 + 76.2) / 2 = 76.85 → truncated to 76.8
+        """
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.show_documentation_score = True
+        ca.save()
+        self._set_doc_scores(scoring_setup)
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 77.5
+        assert scores["documentation_score"] == 76.2
+        assert scores["maturity_score"] == 76.8
+
+    def test_doc_score_null_treated_as_zero(self, scoring_setup):
+        """
+        When doc scoring is enabled but documentation_score is null on some RAs,
+        those null values should be treated as 0 in the computation.
         """
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.show_documentation_score = True
         ca.save()
 
-        # Set documentation scores
-        scoring_setup["ra_a1"].documentation_score = 90
+        # Only set doc score on A1, leave others null
+        scoring_setup["ra_a1"].documentation_score = 60
         scoring_setup["ra_a1"].save()
-        scoring_setup["ra_a2"].documentation_score = 70
-        scoring_setup["ra_a2"].save()
-        scoring_setup["ra_b1"].documentation_score = 50
-        scoring_setup["ra_b1"].save()
-        scoring_setup["ra_b2"].documentation_score = 80
-        scoring_setup["ra_b2"].save()
 
-        # Weighted scores: (80+90)×1 + (60+70)×1 + (40+50)×1 + (100+80)×3
-        # Weights: 1+1 + 1+1 + 1+1 + 3+3 = 12
-        # Total: 170 + 130 + 90 + 540 = 930
-        # Average: 930 / 12 = 77.5
-        assert ca.get_global_score() == 77.5
+        scores = ca.get_global_score()
+        # Implementation: 80.0 (unchanged)
+        assert scores["implementation_score"] == 80.0
+        # Documentation: (60×1 + 0×1 + 0×1 + 0×3) / 6 = 10.0
+        assert scores["documentation_score"] == 10.0
+        # Maturity: (80 + 10) / 2 = 45.0
+        assert scores["maturity_score"] == 45.0
 
-    def test_avg_of_avg_with_documentation_score(self, scoring_setup):
+    def test_implementation_score_unchanged_by_doc_toggle(self, scoring_setup):
+        """
+        Enabling documentation scoring should NOT change the implementation score.
+        This is the key difference from the old blended approach.
+        """
         ca = scoring_setup["ca"]
-        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.save()
+        self._set_doc_scores(scoring_setup)
+
+        impl_without_doc = ca.get_global_score()["implementation_score"]
+
         ca.show_documentation_score = True
         ca.save()
 
-        scoring_setup["ra_a1"].documentation_score = 90
-        scoring_setup["ra_a1"].save()
-        scoring_setup["ra_a2"].documentation_score = 70
-        scoring_setup["ra_a2"].save()
-        scoring_setup["ra_b1"].documentation_score = 50
-        scoring_setup["ra_b1"].save()
-        scoring_setup["ra_b2"].documentation_score = 80
-        scoring_setup["ra_b2"].save()
-
-        # Section A: (80+90)×1 + (60+70)×1 = 300, weights = 4, avg = 75.0
-        # Section B: (40+50)×1 + (100+80)×3 = 630, weights = 8, avg = 78.75
-        # Average of averages: (75.0 + 78.75) / 2 = 76.875 → truncated to 76.8
-        assert ca.get_global_score() == 76.8
+        impl_with_doc = ca.get_global_score()["implementation_score"]
+        assert impl_without_doc == impl_with_doc == 80.0

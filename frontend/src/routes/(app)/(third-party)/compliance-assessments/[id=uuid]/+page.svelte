@@ -616,13 +616,16 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				{#if data.global_score && data.global_score.score >= 0}
+				{#if data.global_score && data.global_score.maturity_score >= 0}
 					<div class="w-1/4">
 						<RingProgress
 							name="global_maturity"
-							value={data.global_score.score}
+							value={data.global_score.maturity_score}
 							max={data.global_score.total_max_score}
-							color={getScoreHexColor(data.global_score.score, data.global_score.total_max_score)}
+							color={getScoreHexColor(
+								data.global_score.maturity_score,
+								data.global_score.total_max_score
+							)}
 							strokeWidth={35}
 							fontSize={36}
 							title={m.maturity()}

@@ -6092,7 +6092,7 @@ class ComplianceAssessment(Assessment):
                 "per_status": per_status,
                 "per_result": per_result,
                 "progress_perc": self.progress,
-                "score": self.get_global_score(),
+                "score": self.get_global_score()["maturity_score"],
             },
         }
 
@@ -6290,20 +6290,62 @@ class ComplianceAssessment(Assessment):
 
         return changes
 
+    def _compute_score_for_field(self, requirement_assessments, ig, score_field):
+        """
+        Compute a single score value from the given field using the current
+        score_calculation_method (AVG, SUM, or AVG_OF_AVG).
+
+        Returns the computed score, or -1 if no scored requirements exist.
+        """
+        if self.score_calculation_method == self.CalculationMethod.AVG_OF_AVG:
+            groups = defaultdict(lambda: {"weighted_score": 0, "total_weight": 0})
+            for ras in requirement_assessments:
+                if not ig or (ig & set(ras.requirement.implementation_groups or [])):
+                    parent_key = ras.requirement.parent_urn or ras.requirement.urn
+                    weight = ras.requirement.weight if ras.requirement.weight else 1
+                    groups[parent_key]["weighted_score"] += (
+                        getattr(ras, score_field) or 0
+                    ) * weight
+                    groups[parent_key]["total_weight"] += weight
+
+            group_averages = [
+                g["weighted_score"] / g["total_weight"]
+                for g in groups.values()
+                if g["total_weight"] > 0
+            ]
+            if not group_averages:
+                return -1
+            return int(sum(group_averages) / len(group_averages) * 10) / 10
+
+        weighted_score = 0
+        total_weight = 0
+        for ras in requirement_assessments:
+            if not ig or (ig & set(ras.requirement.implementation_groups or [])):
+                weight = ras.requirement.weight if ras.requirement.weight else 1
+                weighted_score += (getattr(ras, score_field) or 0) * weight
+                total_weight += weight
+
+        if total_weight == 0:
+            return -1
+
+        if self.score_calculation_method == self.CalculationMethod.SUM:
+            return int(weighted_score * 10) / 10
+        # We use int(x * 10) / 10 instead of round() so that the python
+        # backend outputs the same result as the javascript frontend.
+        return int(weighted_score / total_weight * 10) / 10
+
     def get_global_score(self):
         """
-        Calculate the global score based on the score_calculation_method.
+        Calculate scores as three independent layers:
+        - implementation_score: computed from the 'score' field
+        - documentation_score: computed from the 'documentation_score' field
+          (only when show_documentation_score is enabled)
+        - maturity_score: average of the enabled layers
 
-        For AVG (average): Returns weighted average = Σ(score × weight) / Σ(weight)
-        For SUM: Returns weighted sum = Σ(score × weight)
-        For AVG_OF_AVG (average of averages): Groups requirement assessments by their
-            parent requirement node, computes the weighted average per group, then
-            returns the average of those group averages.
-
-        When show_documentation_score is enabled, documentation scores are included
-        in the calculation with the same weight as the main score.
+        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG).
+        Returns a dict with all three values.
         """
-        requirement_assessments_scored = (
+        requirement_assessments_scored = list(
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
@@ -6316,57 +6358,28 @@ class ComplianceAssessment(Assessment):
             else None
         )
 
-        if self.score_calculation_method == self.CalculationMethod.AVG_OF_AVG:
-            # Group by parent_urn, compute weighted average per group, then average
-            groups = defaultdict(lambda: {"weighted_score": 0, "total_weight": 0})
-            for ras in requirement_assessments_scored:
-                if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
-                    parent_key = ras.requirement.parent_urn or ras.requirement.urn
-                    weight = ras.requirement.weight if ras.requirement.weight else 1
-                    groups[parent_key]["weighted_score"] += (ras.score or 0) * weight
-                    groups[parent_key]["total_weight"] += weight
-                    if self.show_documentation_score:
-                        groups[parent_key]["weighted_score"] += (
-                            ras.documentation_score or 0
-                        ) * weight
-                        groups[parent_key]["total_weight"] += weight
+        impl_score = self._compute_score_for_field(
+            requirement_assessments_scored, ig, "score"
+        )
 
-            group_averages = []
-            for group in groups.values():
-                if group["total_weight"] > 0:
-                    group_averages.append(
-                        group["weighted_score"] / group["total_weight"]
-                    )
+        doc_score = None
+        if self.show_documentation_score:
+            doc_score = self._compute_score_for_field(
+                requirement_assessments_scored, ig, "documentation_score"
+            )
 
-            if not group_averages:
-                return -1
-
-            global_score = sum(group_averages) / len(group_averages)
-            return int(global_score * 10) / 10
-
-        weighted_score = 0
-        total_weight = 0
-
-        for ras in requirement_assessments_scored:
-            if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
-                weight = ras.requirement.weight if ras.requirement.weight else 1
-                weighted_score += (ras.score or 0) * weight
-                total_weight += weight
-                if self.show_documentation_score:
-                    weighted_score += (ras.documentation_score or 0) * weight
-                    total_weight += weight
-
-        if total_weight == 0:
-            return -1
-
-        if self.score_calculation_method == self.CalculationMethod.SUM:
-            # For SUM, return the weighted sum directly
-            return int(weighted_score * 10) / 10
+        # Maturity is the average of the enabled layers (ignore -1 / None)
+        enabled = [s for s in [impl_score, doc_score] if s is not None and s != -1]
+        if enabled:
+            maturity_score = int(sum(enabled) / len(enabled) * 10) / 10
         else:
-            # For AVG (default), return weighted average
-            global_score = weighted_score / total_weight
-            # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
-            return int(global_score * 10) / 10
+            maturity_score = impl_score  # -1 if nothing scored
+
+        return {
+            "implementation_score": impl_score,
+            "documentation_score": doc_score,
+            "maturity_score": maturity_score,
+        }
 
     def get_total_max_score(self):
         """
