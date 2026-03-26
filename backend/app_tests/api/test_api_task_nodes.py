@@ -272,7 +272,9 @@ class TestReschedulingPreservation:
 
         authenticated_client.get(_calendar_url(start, end))
 
-        node = TaskNode.objects.filter(task_template=template).earliest("scheduled_date")
+        node = TaskNode.objects.filter(task_template=template).earliest(
+            "scheduled_date"
+        )
         new_due = node.scheduled_date + timedelta(days=3)
         node.due_date = new_due
         node.save(update_fields=["due_date"])
