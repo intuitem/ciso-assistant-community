@@ -2367,6 +2367,8 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 assessable_ras = RequirementAssessment.objects.filter(
                     compliance_assessment=updated_instance,
                     requirement__assessable=True,
+                ).exclude(
+                    result=RequirementAssessment.Result.NOT_APPLICABLE,
                 )
                 if updated_instance.scoring_enabled:
                     # Turn on: set is_scored=True, initialize score to min_score

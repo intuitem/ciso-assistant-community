@@ -3,6 +3,44 @@
 from django.db import migrations, models
 
 
+def backfill_scoring_enabled(apps, schema_editor):
+    """
+    Preserve prior scoring state for existing assessments:
+    1. Set scoring_enabled=True on CAs that have at least one scored RA.
+    2. For those CAs, set is_scored=True and score=min_score on assessable
+       RAs that don't already have a score — excluding NOT_APPLICABLE ones.
+    This mirrors the serializer toggle logic so the state is consistent.
+    """
+    ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
+    RequirementAssessment = apps.get_model("core", "RequirementAssessment")
+
+    # Find CAs that were already using scoring
+    scored_ca_ids = set(
+        RequirementAssessment.objects.filter(is_scored=True)
+        .values_list("compliance_assessment_id", flat=True)
+        .distinct()
+    )
+    if not scored_ca_ids:
+        return
+
+    # Enable scoring on those CAs
+    ComplianceAssessment.objects.filter(id__in=scored_ca_ids).update(
+        scoring_enabled=True
+    )
+
+    # For each scored CA, bring unscored assessable RAs (except NOT_APPLICABLE)
+    # up to the same state the serializer toggle would produce
+    for ca in ComplianceAssessment.objects.filter(id__in=scored_ca_ids):
+        unscored_ras = RequirementAssessment.objects.filter(
+            compliance_assessment=ca,
+            requirement__assessable=True,
+            is_scored=False,
+        ).exclude(result="not_applicable")
+
+        unscored_ras.update(is_scored=True)
+        unscored_ras.filter(score__isnull=True).update(score=ca.min_score or 0)
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0150_add_editable_mixin_to_riskmatrix"),
@@ -13,6 +51,10 @@ class Migration(migrations.Migration):
             model_name="complianceassessment",
             name="scoring_enabled",
             field=models.BooleanField(default=False),
+        ),
+        migrations.RunPython(
+            backfill_scoring_enabled,
+            reverse_code=migrations.RunPython.noop,
         ),
         migrations.AlterField(
             model_name="complianceassessment",
