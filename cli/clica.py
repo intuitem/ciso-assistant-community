@@ -264,7 +264,7 @@ DATA_WIZARD_COMMANDS = [
             "Import assets from CSV/Excel.\n"
             "\nRequired columns: name\n"
             "Optional columns: ref_id, description, type (primary/support), "
-            "domain, business_value, observation, reference_link (or link), "
+            "domain, business_value, localisation (or location), observation, reference_link (or link), "
             "security_objectives (or security_capabilities for support assets), "
             "disaster_recovery_objectives (or recovery_capabilities for support assets), "
             "parent_assets, "

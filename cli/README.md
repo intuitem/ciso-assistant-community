@@ -149,6 +149,8 @@ python clica.py import-assets \
   --folder "Global"
 ```
 
+For assets, the import file can also include a `localisation` column (or `location` as an alias).
+
 ### File Upload Commands
 
 #### `upload-attachment`

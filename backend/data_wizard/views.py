@@ -580,6 +580,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
 
     SERIALIZER_CLASS = AssetWriteSerializer
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "localisation": ("localisation", "location"),
         "reference_link": ("reference_link", "link"),
         "filtering_labels": ("filtering_labels", "labels", "étiquette", "label"),
     }
@@ -619,6 +620,8 @@ class AssetRecordConsumer(RecordConsumer[list]):
             "folder": domain,
             "description": record.get("description", ""),
             "business_value": record.get("business_value", ""),
+            "localisation": record.get("localisation", "")
+            or record.get("location", ""),
             "reference_link": record.get("reference_link", "")
             or record.get("link", ""),
             "observation": record.get("observation", ""),
