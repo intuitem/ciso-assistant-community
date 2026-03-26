@@ -54,12 +54,11 @@ test('compliance assessments scoring is working properly', async ({
 	);
 
 	// Enable scoring on the compliance assessment
-	const detailUrl = page.url();
 	await page.getByTestId('edit-button').click();
 	await page.getByText('More').click();
 	await page.getByTestId('form-input-scoring-enabled').check();
 	await page.getByTestId('save-button').click();
-	await page.waitForURL(detailUrl);
+	await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 
 	// Click on the ID.AM-1 tree view item
 	const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
