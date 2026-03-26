@@ -334,3 +334,48 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 	return { score: totalScore, result };
 }
+
+const DEFAULT_FIELD_VISIBILITY: Record<string, string> = {
+	result: 'auditor',
+	status: 'auditor',
+	score: 'auditor',
+	is_scored: 'auditor',
+	documentation_score: 'auditor',
+	observation: 'everyone',
+	answers: 'everyone',
+	evidences: 'everyone',
+	applied_controls: 'auditor',
+	security_exceptions: 'auditor'
+};
+
+/**
+ * Resolve effective visibility for a field using CA override > Framework override > default.
+ * Returns 'everyone', 'auditor', or 'hidden'.
+ */
+export function resolveFieldVisibility(
+	framework: Record<string, any> | null | undefined,
+	complianceAssessment: Record<string, any> | null | undefined,
+	fieldName: string
+): string {
+	const caVis = complianceAssessment?.field_visibility?.[fieldName];
+	if (caVis) return caVis;
+	const fwVis = framework?.field_visibility?.[fieldName];
+	if (fwVis) return fwVis;
+	return DEFAULT_FIELD_VISIBILITY[fieldName] ?? 'auditor';
+}
+
+/**
+ * Check if a field is visible for the given viewer role.
+ * viewerRole: 'respondent' or 'auditor'
+ */
+export function isFieldVisible(
+	framework: Record<string, any> | null | undefined,
+	complianceAssessment: Record<string, any> | null | undefined,
+	fieldName: string,
+	viewerRole: 'respondent' | 'auditor' = 'auditor'
+): boolean {
+	const vis = resolveFieldVisibility(framework, complianceAssessment, fieldName);
+	if (vis === 'hidden') return false;
+	if (vis === 'auditor' && viewerRole === 'respondent') return false;
+	return true;
+}

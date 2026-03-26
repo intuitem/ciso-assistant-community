@@ -22,7 +22,8 @@ export const load = (async ({ fetch, params }) => {
 	const assignment = {
 		id: assignmentResult.id,
 		status: assignmentResult.status,
-		events: assignmentResult.events ?? []
+		events: assignmentResult.events ?? [],
+		actor: assignmentResult.actor ?? []
 	};
 
 	// Derive the compliance assessment from the assignment
@@ -138,6 +139,7 @@ export const load = (async ({ fetch, params }) => {
 		measureModel,
 		evidenceModel,
 		assignment,
+		viewerRole: tableMode.viewer_role ?? 'respondent',
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;

@@ -21,7 +21,7 @@
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue, isFieldVisible } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Accordion, Progress, Switch } from '@skeletonlabs/skeleton-svelte';
@@ -78,6 +78,23 @@
 
 	let isReadOnly = $derived(
 		complianceAssessment.is_locked || complianceAssessment.status === 'in_review'
+	);
+
+	// Field visibility based on viewer role
+	const viewerRole: 'respondent' | 'auditor' = $derived(
+		page.data.user.is_third_party ? 'respondent' : 'auditor'
+	);
+	const fw = $derived(complianceAssessment.framework);
+	const showResult = $derived(isFieldVisible(fw, complianceAssessment, 'result', viewerRole));
+	const showScore = $derived(isFieldVisible(fw, complianceAssessment, 'score', viewerRole));
+	const showObservation = $derived(
+		isFieldVisible(fw, complianceAssessment, 'observation', viewerRole)
+	);
+	const showAppliedControls = $derived(
+		isFieldVisible(fw, complianceAssessment, 'applied_controls', viewerRole)
+	);
+	const showEvidences = $derived(
+		isFieldVisible(fw, complianceAssessment, 'evidences', viewerRole)
 	);
 
 	const hasQuestions = $derived(
@@ -583,7 +600,7 @@
 										action="{actionPath}?/updateRequirementAssessment"
 										method="post"
 									>
-										{#if !questionnaireMode}
+										{#if !questionnaireMode && showResult}
 											<div class="flex flex-row w-full space-x-2 my-4">
 												{#if complianceAssessment.progress_status_enabled}
 													<div class="flex flex-col items-center w-1/2">
@@ -668,7 +685,7 @@
 												? 'pointer-events-none opacity-60'
 												: ''}"
 										>
-											{#if !shallow}
+											{#if showScore && !shallow}
 												{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 													<div class="flex flex-row items-center space-x-4">
 														<span class="font-medium">{m.score()}</span>
@@ -835,6 +852,7 @@
 												value={accordionItems[requirementAssessment.id]}
 												onValueChange={(e) => (accordionItems[requirementAssessment.id] = e.value)}
 											>
+												{#if showObservation}
 												{#if shallow}
 													{#if requirementAssessment.observation}
 														<MarkdownRenderer
@@ -874,7 +892,9 @@
 														</Accordion.ItemContent>
 													</Accordion.Item>
 												{/if}
+												{/if}
 
+												{#if showAppliedControls}
 												{#if requirementAssessment.applied_controls.length === 0 && shallow}
 													<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
 												{:else}
@@ -948,7 +968,9 @@
 														</Accordion.ItemContent>
 													</Accordion.Item>
 												{/if}
+												{/if}
 
+												{#if showEvidences}
 												{#if requirementAssessment.evidences.length === 0 && shallow}
 													<p class="text-gray-400 italic" data-testid="no-evidence">
 														{m.noEvidences()}
@@ -1024,6 +1046,7 @@
 															</div>
 														</Accordion.ItemContent>
 													</Accordion.Item>
+												{/if}
 												{/if}
 											</Accordion>
 										</div>

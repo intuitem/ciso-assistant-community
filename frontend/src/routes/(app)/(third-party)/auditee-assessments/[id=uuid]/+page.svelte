@@ -18,7 +18,7 @@
 	} from '$lib/components/Modals/stores';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import { complianceResultColorMap, complianceResultTailwindColorMap } from '$lib/utils/constants';
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue, isFieldVisible } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
@@ -44,12 +44,24 @@
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
 
+	// Field visibility based on viewer role (respondent if assigned actor, auditor otherwise)
+	const fw = $derived(complianceAssessment.framework);
+	const viewerRole = $derived((data.viewerRole ?? 'respondent') as 'respondent' | 'auditor');
+	const showResult = $derived(isFieldVisible(fw, complianceAssessment, 'result', viewerRole));
+	const showScore = $derived(isFieldVisible(fw, complianceAssessment, 'score', viewerRole));
+	const showObservation = $derived(isFieldVisible(fw, complianceAssessment, 'observation', viewerRole));
+	const showAppliedControls = $derived(isFieldVisible(fw, complianceAssessment, 'applied_controls', viewerRole));
+	const showEvidences = $derived(isFieldVisible(fw, complianceAssessment, 'evidences', viewerRole));
+
 	// Single assignment — the URL param (params.id) IS the assignment ID
 	let assignment = $derived(data.assignment);
 	let assignmentStatus = $derived(assignment?.status ?? null);
 
+	let isAuditor = $derived(viewerRole === 'auditor');
+
 	let isReadOnly = $derived(
-		complianceAssessment.is_locked ||
+		isAuditor ||
+			complianceAssessment.is_locked ||
 			complianceAssessment.status === 'in_review' ||
 			assignmentStatus === 'draft' ||
 			assignmentStatus === 'submitted' ||
@@ -57,7 +69,8 @@
 	);
 
 	let canSubmit = $derived(
-		assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested'
+		!isAuditor &&
+			(assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested')
 	);
 
 	// Get latest observation from the most recent changes_requested event
@@ -606,8 +619,10 @@
 			</div>
 		</div>
 
-		<!-- Assignment status banners -->
-		{#if assignmentStatus === 'submitted'}
+		<!-- Assignment status banners (respondent only) -->
+		{#if isAuditor}
+			<!-- Auditors see nothing here -->
+		{:else if assignmentStatus === 'submitted'}
 			<div
 				class="bg-white border border-blue-200 border-l-[3px] border-l-blue-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
@@ -805,6 +820,7 @@
 							{/if}
 
 							<!-- Result -->
+							{#if showResult || Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
 							<div class="flex flex-col items-center w-full my-2">
 								<p class="flex items-center font-semibold text-purple-600 italic">
 									{m.result()}
@@ -836,8 +852,10 @@
 									/>
 								{/if}
 							</div>
+							{/if}
 
 							<!-- Score -->
+							{#if showScore}
 							<div
 								class="flex flex-col w-full place-items-center {isReadOnly
 									? 'pointer-events-none opacity-60'
@@ -925,12 +943,14 @@
 									{/if}
 								{/if}
 							</div>
+							{/if}
 
 							<Accordion
 								value={accordionItems[requirementAssessment.id]}
 								onValueChange={(e) => (accordionItems[requirementAssessment.id] = e.value)}
 							>
 								<!-- Applied Controls -->
+								{#if showAppliedControls}
 								<Accordion.Item value="appliedControl">
 									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 										<p class="flex flex-1 items-center space-x-2 text-left">
@@ -987,8 +1007,10 @@
 										</div>
 									</Accordion.ItemContent>
 								</Accordion.Item>
+								{/if}
 
 								<!-- Evidence -->
+								{#if showEvidences}
 								<Accordion.Item value="evidence">
 									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 										<p class="flex flex-1 items-center space-x-2 text-left">
@@ -1051,8 +1073,10 @@
 										</div>
 									</Accordion.ItemContent>
 								</Accordion.Item>
+								{/if}
 
 								<!-- Observation -->
+								{#if showObservation}
 								<Accordion.Item value="observation">
 									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 										<p class="flex flex-1 text-left">{m.observation()}</p>
@@ -1081,6 +1105,7 @@
 										/>
 									</Accordion.ItemContent>
 								</Accordion.Item>
+								{/if}
 							</Accordion>
 						</form>
 					{/key}

@@ -5,6 +5,7 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { isFieldVisible } from '$lib/utils/helpers';
 
 	interface Props {
 		data: PageData;
@@ -14,6 +15,24 @@
 
 	let isReadOnly = $derived(
 		data.compliance_assessment.is_locked || data.compliance_assessment.status === 'in_review'
+	);
+
+	// Field visibility for auditor role
+	const fw = $derived(data.compliance_assessment.framework);
+	const complianceAssessment = $derived(data.compliance_assessment);
+	const showResult = $derived(isFieldVisible(fw, complianceAssessment, 'result', 'auditor'));
+	const showScore = $derived(isFieldVisible(fw, complianceAssessment, 'score', 'auditor'));
+	const showObservation = $derived(
+		isFieldVisible(fw, complianceAssessment, 'observation', 'auditor')
+	);
+	const showAppliedControls = $derived(
+		isFieldVisible(fw, complianceAssessment, 'applied_controls', 'auditor')
+	);
+	const showEvidences = $derived(
+		isFieldVisible(fw, complianceAssessment, 'evidences', 'auditor')
+	);
+	const showSecurityExceptions = $derived(
+		isFieldVisible(fw, complianceAssessment, 'security_exceptions', 'auditor')
 	);
 
 	const possible_options = [
@@ -406,30 +425,34 @@
 			<div class="flash-controls">
 				{#if currentRequirementAssessment}
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
-						<RadioGroup
-							possibleOptions={possible_options}
-							initialValue={currentRequirementAssessment.result}
-							classes="w-full"
-							colorMap={complianceResultTailwindColorMap}
-							disabled={isReadOnly}
-							field="result"
-							onChange={(newValue) => {
-								const newResult = result === newValue ? 'not_assessed' : newValue;
-								updateResult(newResult);
-							}}
-							key="id"
-							labelKey="label"
-						/>
+						{#if showResult}
+							<RadioGroup
+								possibleOptions={possible_options}
+								initialValue={currentRequirementAssessment.result}
+								classes="w-full"
+								colorMap={complianceResultTailwindColorMap}
+								disabled={isReadOnly}
+								field="result"
+								onChange={(newValue) => {
+									const newResult = result === newValue ? 'not_assessed' : newValue;
+									updateResult(newResult);
+								}}
+								key="id"
+								labelKey="label"
+							/>
+						{/if}
 					</form>
 
-					<textarea
-						class="observation-textarea"
-						rows="2"
-						placeholder="{m.observation()}..."
-						value={observation}
-						disabled={isReadOnly}
-						oninput={(e) => handleObservationInput(e.currentTarget.value)}
-					></textarea>
+					{#if showObservation}
+						<textarea
+							class="observation-textarea"
+							rows="2"
+							placeholder="{m.observation()}..."
+							value={observation}
+							disabled={isReadOnly}
+							oninput={(e) => handleObservationInput(e.currentTarget.value)}
+						></textarea>
+					{/if}
 				{/if}
 
 				<div class="nav-row">
