@@ -2237,6 +2237,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         source="get_selected_implementation_groups"
     )
     progress = serializers.SerializerMethodField()
+    answers_progress = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
@@ -2271,6 +2272,11 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
                 ]
             )
         return int((assessed / total) * 100) if total else 0
+
+    def get_answers_progress(self, obj):
+        if not obj.has_questions:
+            return None
+        return obj.answers_progress
 
     class Meta:
         model = ComplianceAssessment

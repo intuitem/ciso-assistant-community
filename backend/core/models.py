@@ -6739,7 +6739,7 @@ class ComplianceAssessment(Assessment):
         if ig is not None:
             ig_filter = Q()
             for group in ig:
-                ig_filter |= Q(requirement__implementation_groups__contains=[group])
+                ig_filter |= Q(requirement__implementation_groups__icontains=group)
             qs = qs.filter(ig_filter)
 
         weighted_score = 0
@@ -7005,7 +7005,7 @@ class ComplianceAssessment(Assessment):
         if ig is not None:
             ig_filter = Q()
             for group in ig:
-                ig_filter |= Q(requirement__implementation_groups__contains=[group])
+                ig_filter |= Q(requirement__implementation_groups__icontains=group)
             requirements = requirements.filter(ig_filter)
 
         count_by_result = {

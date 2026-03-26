@@ -11275,6 +11275,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             total = ras.count()
             done = ras.exclude(result="not_assessed").count()
 
+            # Use question-based progress when framework has questions
+            has_questions = Question.objects.filter(
+                requirement_node__framework=ca.framework
+            ).exists() if ca.framework else False
+
+            if has_questions:
+                total_q = 0
+                answered_q = 0
+                for ra in ras.prefetch_related(
+                    "answers", "answers__question", "answers__selected_choices",
+                    "requirement__questions", "requirement__questions__choices",
+                ):
+                    v, a = ra.get_visible_questions_counts()
+                    total_q += v
+                    answered_q += a
+                progress_percent = round(answered_q / total_q * 100) if total_q > 0 else 0
+            else:
+                progress_percent = round(done / total * 100) if total > 0 else 0
+
             actor_names = ", ".join(str(a) for a in assignment.actor.all())
 
             dashboard_data.append(
@@ -11289,7 +11308,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "actor": actor_names,
                     "total_requirements": total,
                     "assessed_requirements": done,
-                    "progress_percent": round(done / total * 100) if total > 0 else 0,
+                    "progress_percent": progress_percent,
                 }
             )
 
@@ -15605,10 +15624,31 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             requirements_objects, many=True
         ).data
 
+        # Compute per-RA question counts for question-based progress
+        question_counts = {}
+        total_visible_questions = 0
+        total_answered_questions = 0
+        for ra in requirement_assessments_objects:
+            visible, answered = ra.get_visible_questions_counts()
+            question_counts[str(ra.id)] = {
+                "visible_questions": visible,
+                "answered_questions": answered,
+            }
+            total_visible_questions += visible
+            total_answered_questions += answered
+
+        for ra_data in requirement_assessments:
+            ra_id = str(ra_data["id"])
+            if ra_id in question_counts:
+                ra_data["visible_questions"] = question_counts[ra_id]["visible_questions"]
+                ra_data["answered_questions"] = question_counts[ra_id]["answered_questions"]
+
         return Response(
             {
                 "requirements": requirements,
                 "requirement_assessments": requirement_assessments,
+                "total_visible_questions": total_visible_questions,
+                "total_answered_questions": total_answered_questions,
             },
             status=status.HTTP_200_OK,
         )

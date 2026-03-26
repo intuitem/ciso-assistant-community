@@ -505,3 +505,38 @@ class TestUpdateSelectedImplementationGroups:
 
         assert "advanced" in d["ca"].selected_implementation_groups
         assert "base" in d["ca"].selected_implementation_groups
+
+
+@pytest.mark.django_db
+class TestIGFilteringSQLiteCompat:
+    """Regression: __contains on JSONField fails on SQLite.
+
+    get_global_score() and get_requirements_result_count() must work
+    on both PostgreSQL and SQLite when selected_implementation_groups is set.
+    """
+
+    def test_get_global_score_with_selected_ig(self, dynamic_framework_setup):
+        d = dynamic_framework_setup
+        d["ca"].selected_implementation_groups = ["base"]
+        d["ca"].save()
+        # Must not raise NotSupportedError on SQLite
+        score = d["ca"].get_global_score()
+        assert score is not None
+
+    def test_get_requirements_result_count_with_selected_ig(
+        self, dynamic_framework_setup
+    ):
+        d = dynamic_framework_setup
+        d["ca"].selected_implementation_groups = ["base"]
+        d["ca"].save()
+        # Must not raise NotSupportedError on SQLite
+        result_count = d["ca"].get_requirements_result_count()
+        assert isinstance(result_count, list)
+
+    def test_upsert_daily_metrics_with_selected_ig(self, dynamic_framework_setup):
+        d = dynamic_framework_setup
+        d["ca"].selected_implementation_groups = ["base"]
+        d["ca"].save()
+        # save() calls upsert_daily_metrics() internally — must not crash
+        d["ca"].refresh_from_db()
+        assert d["ca"].selected_implementation_groups == ["base"]
