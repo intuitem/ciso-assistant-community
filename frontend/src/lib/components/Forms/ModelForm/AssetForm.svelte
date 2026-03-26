@@ -331,6 +331,13 @@
 			label={m.overriddenChildrenCapabilities()}
 			helpText={m.overriddenChildrenCapabilitiesHelpText()}
 		/>
+		<TextField
+			{form}
+			field="localisation"
+			label={m.localisation()}
+			cacheLock={cacheLocks['localisation']}
+			bind:cachedValue={formDataCache['localisation']}
+		/>
 	{/if}
 	<AutocompleteSelect
 		{form}

@@ -551,6 +551,10 @@ msgstr "Propriétaire"
 msgid "Observation"
 msgstr "Observation"
 
+#: core/models.py:2682
+msgid "Localisation"
+msgstr "Localisation"
+
 #: core/models.py:2175
 msgid "DORA Licensed Activity"
 msgstr ""

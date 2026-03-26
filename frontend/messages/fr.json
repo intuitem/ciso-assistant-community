@@ -282,6 +282,7 @@
 	"expiryDate": "Date d'expiration",
 	"validationDeadline": "Date limite de validation",
 	"link": "Lien",
+	"localisation": "Localisation",
 	"createdAt": "Créé le",
 	"updatedAt": "Mis à jour le",
 	"lastRefresh": "Dernier rafraîchissement",

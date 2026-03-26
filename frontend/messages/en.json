@@ -291,6 +291,7 @@
 	"expiryDate": "Expiry date",
 	"validationDeadline": "Validation deadline",
 	"link": "Link",
+	"localisation": "Localisation",
 	"createdAt": "Created at",
 	"updatedAt": "Updated at",
 	"acceptedAt": "Accepted at",
