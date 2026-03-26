@@ -2251,6 +2251,14 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
     outcomes_definition = models.JSONField(
         default=list, blank=True, verbose_name=_("Outcomes definition")
     )
+    field_visibility = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Field visibility"),
+        help_text=_(
+            "Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'."
+        ),
+    )
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -6435,6 +6443,15 @@ class ComplianceAssessment(Assessment):
 
     extended_result_enabled = models.BooleanField(default=False)
     progress_status_enabled = models.BooleanField(default=True)
+
+    field_visibility = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Field visibility"),
+        help_text=_(
+            "Override visibility per field for this assessment. Overrides framework defaults."
+        ),
+    )
 
     score_calculation_method = models.CharField(
         max_length=100,

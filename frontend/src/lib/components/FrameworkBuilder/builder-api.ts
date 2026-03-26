@@ -16,6 +16,7 @@ export interface DraftJSON {
 		scores_definition: Record<string, unknown> | null;
 		implementation_groups_definition: Record<string, unknown>[] | null;
 		outcomes_definition: Record<string, unknown>[] | null;
+		field_visibility?: Record<string, string>;
 	};
 	nodes: Record<string, unknown>[];
 	questions: Record<string, unknown>[];

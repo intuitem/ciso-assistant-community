@@ -87,6 +87,7 @@ export interface Framework {
 	scores_definition: Record<string, unknown> | null;
 	implementation_groups_definition: Record<string, unknown>[] | null;
 	outcomes_definition: OutcomeRule[] | null;
+	field_visibility: Record<string, string>;
 	urn: string | null;
 }
 
@@ -272,7 +273,8 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 			max_score: fw.max_score,
 			scores_definition: fw.scores_definition,
 			implementation_groups_definition: fw.implementation_groups_definition,
-			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null
+			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
+			field_visibility: fw.field_visibility
 		},
 		nodes,
 		questions,
@@ -301,7 +303,8 @@ export function hydrateDraft(
 		max_score: meta.max_score,
 		scores_definition: meta.scores_definition,
 		implementation_groups_definition: meta.implementation_groups_definition,
-		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null
+		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
+		field_visibility: meta.field_visibility ?? {}
 	};
 
 	// Build a lookup from question_id to choices

@@ -1031,3 +1031,69 @@ def get_auditee_filtered_folder_ids(user) -> set:
         for fid, role_ids in folder_roles.items()
         if auditee_role_id in role_ids and role_ids.isdisjoint(higher_role_ids)
     }
+
+
+# --- Field Visibility ---
+
+DEFAULT_FIELD_VISIBILITY = {
+    "result": "auditor",
+    "status": "auditor",
+    "score": "auditor",
+    "is_scored": "auditor",
+    "documentation_score": "auditor",
+    "observation": "everyone",
+    "answers": "everyone",
+    "evidences": "everyone",
+    "applied_controls": "auditor",
+    "security_exceptions": "auditor",
+}
+
+
+def resolve_field_visibility(framework, compliance_assessment, field_name):
+    """Resolve the visibility level for a field using the three-tier cascade.
+
+    Priority: CA override > Framework override > Code default > "auditor" (safe fallback).
+
+    Returns: "everyone", "auditor", or "hidden"
+    """
+    # Tier 1: CA-level override (highest priority)
+    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    if field_name in ca_overrides:
+        return ca_overrides[field_name]
+
+    # Tier 2: Framework-level override
+    fw_overrides = getattr(framework, "field_visibility", None) or {}
+    if field_name in fw_overrides:
+        return fw_overrides[field_name]
+
+    # Tier 3: Code-level default
+    return DEFAULT_FIELD_VISIBILITY.get(field_name, "auditor")
+
+
+def get_visible_fields(framework, compliance_assessment, viewer_role="auditor"):
+    """Get the set of field names visible to the given role.
+
+    viewer_role: "respondent" or "auditor"
+
+    Returns a set of field names that should be included in the response.
+    """
+    all_fields = set(DEFAULT_FIELD_VISIBILITY.keys())
+
+    # Also include any fields mentioned in overrides
+    fw_overrides = getattr(framework, "field_visibility", None) or {}
+    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    all_fields.update(fw_overrides.keys())
+    all_fields.update(ca_overrides.keys())
+
+    visible = set()
+    for field in all_fields:
+        visibility = resolve_field_visibility(framework, compliance_assessment, field)
+        if visibility == "hidden":
+            continue  # hidden from everyone
+        if visibility == "everyone":
+            visible.add(field)
+        elif visibility == "auditor" and viewer_role == "auditor":
+            visible.add(field)
+        # "auditor" + viewer_role="respondent" -> not visible
+
+    return visible

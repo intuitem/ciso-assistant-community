@@ -2515,6 +2515,42 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
         return build_answers_dict(obj.answers.all())
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        viewer_role = self.context.get("viewer_role", "auditor")
+        framework = getattr(instance, "compliance_assessment", None)
+        ca = framework  # compliance_assessment
+        framework = getattr(ca, "framework", None) if ca else None
+
+        if framework and ca:
+            from core.utils import (
+                DEFAULT_FIELD_VISIBILITY,
+                get_visible_fields,
+                resolve_field_visibility,
+            )
+
+            if viewer_role == "auditor":
+                # Auditors see everything except "hidden" fields
+                for field_name in list(data.keys()):
+                    if field_name in DEFAULT_FIELD_VISIBILITY:
+                        vis = resolve_field_visibility(framework, ca, field_name)
+                        if vis == "hidden":
+                            data.pop(field_name, None)
+            else:
+                # Respondents only see "everyone" fields
+                visible = get_visible_fields(framework, ca, viewer_role="respondent")
+                # Only strip fields that are in DEFAULT_FIELD_VISIBILITY
+                # Don't strip structural fields like 'id', 'requirement', 'compliance_assessment'
+                for field_name in list(data.keys()):
+                    if (
+                        field_name in DEFAULT_FIELD_VISIBILITY
+                        and field_name not in visible
+                    ):
+                        data.pop(field_name, None)
+
+        return data
+
     class Meta:
         model = RequirementAssessment
         fields = "__all__"

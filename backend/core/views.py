@@ -8893,6 +8893,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "scores_definition": framework.scores_definition,
                 "implementation_groups_definition": framework.implementation_groups_definition,
                 "outcomes_definition": framework.outcomes_definition,
+                "field_visibility": framework.field_visibility or {},
             },
             "nodes": nodes,
             "questions": questions,
@@ -9211,6 +9212,9 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework.outcomes_definition = meta.get(
                     "outcomes_definition", framework.outcomes_definition
                 )
+                framework.field_visibility = meta.get(
+                    "field_visibility", framework.field_visibility
+                )
 
             # --- 7. Snapshot history, bump version, clear draft ---
             history = list(framework.editing_history or [])
@@ -9232,6 +9236,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "scores_definition",
                     "implementation_groups_definition",
                     "outcomes_definition",
+                    "field_visibility",
                     "editing_draft",
                     "editing_version",
                     "editing_history",
@@ -9432,7 +9437,9 @@ class RequirementViewSet(BaseModelViewSet):
             requirement=requirement, id__in=viewable_objects
         ).prefetch_related("folder", "compliance_assessment__perimeter")
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
-            requirement_assessments, many=True
+            requirement_assessments,
+            many=True,
+            context={"viewer_role": "auditor"},
         ).data
 
         # Group by Domain and Perimeter
@@ -11105,8 +11112,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
+        # Determine viewer role based on auditee status
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        is_auditee = bool(
+            auditee_folders and compliance_assessment.folder_id in auditee_folders
+        )
+        viewer_role = "respondent" if is_auditee else "auditor"
+
         requirement_assessments = RequirementAssessmentReadSerializer(
-            requirement_assessments_objects, many=True
+            requirement_assessments_objects,
+            many=True,
+            context={"viewer_role": viewer_role},
         ).data
         requirements = RequirementNodeReadSerializer(
             requirements_objects, many=True
@@ -15562,7 +15578,9 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                     req._parent_requirement_obj = parent
 
         requirement_assessments = RequirementAssessmentReadSerializer(
-            requirement_assessments_objects, many=True
+            requirement_assessments_objects,
+            many=True,
+            context={"viewer_role": "respondent"},
         ).data
         requirements = RequirementNodeReadSerializer(
             requirements_objects, many=True
