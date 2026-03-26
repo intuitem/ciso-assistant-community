@@ -384,6 +384,7 @@ export interface BuilderStore {
 	hasPendingFlush: Writable<boolean>;
 	unsaved: Writable<boolean>;
 	unpublished: Writable<boolean>;
+	isScrolling: Writable<boolean>;
 	addSection: (afterIndex?: number) => void;
 	deleteSection: (sectionIndex: number) => void;
 	addRequirement: (parentNodeId: string, parentUrn: string) => void;
@@ -500,6 +501,7 @@ export function createBuilderState(
 	// Check if the draft was marked dirty by a prior save-draft call
 	const draftMarkedDirty = editingDraft && (editingDraft as any)._dirty === true;
 	const unpublished = writable(!!draftMarkedDirty);
+	const isScrolling = writable(false);
 
 	function markDirty() {
 		unsaved.set(true);
@@ -1039,6 +1041,7 @@ export function createBuilderState(
 		hasPendingFlush,
 		unsaved,
 		unpublished,
+		isScrolling,
 		addSection,
 		deleteSection,
 		addRequirement,

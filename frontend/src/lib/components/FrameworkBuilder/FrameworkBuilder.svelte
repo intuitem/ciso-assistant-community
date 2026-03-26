@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import {
 		createBuilderState,
@@ -10,6 +10,7 @@
 	} from './builder-state';
 	import type { DraftJSON } from './builder-api';
 	import BuilderMinimap from './BuilderMinimap.svelte';
+	import BuilderToC from './BuilderToC.svelte';
 	import SectionBlock from './SectionBlock.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
@@ -243,13 +244,19 @@
 		}
 	}
 
-	// IntersectionObserver for minimap active section
+	// IntersectionObserver for ToC active section tracking
+	let observer: IntersectionObserver | null = null;
+
 	onMount(() => {
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		window.addEventListener('keydown', handleKeydown);
 
-		const observer = new IntersectionObserver(
+		observer = new IntersectionObserver(
 			(entries) => {
+				let isScrolling = false;
+				builder.isScrolling.subscribe((v) => (isScrolling = v))();
+				if (isScrolling) return;
+
 				for (const entry of entries) {
 					if (entry.isIntersecting) {
 						const id = (entry.target as HTMLElement).dataset.sectionId;
@@ -261,9 +268,20 @@
 		);
 
 		const elements = document.querySelectorAll('[data-section-id]');
-		elements.forEach((el) => observer.observe(el));
+		elements.forEach((el) => observer!.observe(el));
 
-		return () => observer.disconnect();
+		return () => observer?.disconnect();
+	});
+
+	// Re-observe when sections change (e.g., section added/removed)
+	$effect(() => {
+		const _ = $sectionsStore;
+		if (!observer) return;
+		tick().then(() => {
+			observer!.disconnect();
+			const elements = document.querySelectorAll('[data-section-id]');
+			elements.forEach((el) => observer!.observe(el));
+		});
 	});
 
 	onDestroy(() => {
@@ -278,354 +296,363 @@
 <div class="card !p-0 bg-white shadow-lg overflow-visible">
 	<BuilderMinimap frameworkId={framework.id} />
 
-	<div class="max-w-3xl mx-auto px-6 py-8 space-y-8">
-		<!-- Framework metadata -->
-		<div class="space-y-2">
-			<input
-				type="text"
-				value={$frameworkStore.name}
-				placeholder="Framework name"
-				class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
-				onblur={(e) => {
-					builder.updateFramework({ name: e.currentTarget.value });
-				}}
-			/>
-			<textarea
-				value={$frameworkStore.description ?? ''}
-				placeholder="Framework description (optional)"
-				rows="2"
-				class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
-				onblur={(e) => {
-					builder.updateFramework({ description: e.currentTarget.value || null });
-				}}
-			></textarea>
-			{#if $frameworkStore.urn}
-				<button
-					type="button"
-					class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
-					onclick={() => {
-						navigator.clipboard.writeText($frameworkStore.urn ?? '');
-						urnCopied = true;
-						setTimeout(() => (urnCopied = false), 1500);
-					}}
-				>
-					<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"></i>
-					{#if urnCopied}
-						<span class="text-green-500">Copied!</span>
-					{:else}
-						{$frameworkStore.urn}
-					{/if}
-				</button>
-			{/if}
-			{#if $errorsStore.has('framework')}
-				<p class="text-xs text-red-600">{$errorsStore.get('framework')}</p>
-			{/if}
-		</div>
+	<div class="flex">
+		<BuilderToC />
 
-		<!-- Framework Settings (collapsed by default) -->
-		<div class="border border-gray-200 rounded-lg overflow-hidden">
-			<button
-				type="button"
-				class="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
-				onclick={() => (showSettings = !showSettings)}
-			>
-				<div class="flex items-center gap-2">
-					<i
-						class="fa-solid {showSettings
-							? 'fa-chevron-down'
-							: 'fa-chevron-right'} text-[10px] text-gray-400"
-					></i>
-					<span class="text-xs font-semibold text-gray-600 uppercase tracking-wider"
-						>Framework Settings</span
-					>
-					{#if !showSettings}
-						<span class="text-xs text-gray-400">{settingsSummary}</span>
-					{/if}
-				</div>
-				<i class="fa-solid fa-gear text-xs text-gray-400"></i>
-			</button>
-			{#if showSettings}
-				<div class="px-4 py-4 space-y-6 border-t border-gray-200">
-					<!-- Annotation -->
-					<div>
-						<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>Annotation</span
-						>
-						<textarea
-							value={$frameworkStore.annotation ?? ''}
-							placeholder="Framework annotation (optional guidance text)"
-							rows="2"
-							class="mt-1 w-full text-sm text-gray-500 bg-transparent border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-							onblur={(e) => {
-								builder.updateFramework({ annotation: e.currentTarget.value || null });
-							}}
-						></textarea>
-					</div>
-
-					<!-- Scoring settings -->
-					<div class="space-y-1.5">
+		<div class="flex-1 min-w-0">
+			<div class="max-w-3xl mx-auto px-6 py-8 space-y-8">
+				<!-- Framework metadata -->
+				<div class="space-y-2" data-framework-metadata>
+					<input
+						type="text"
+						value={$frameworkStore.name}
+						placeholder="Framework name"
+						class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
+						onblur={(e) => {
+							builder.updateFramework({ name: e.currentTarget.value });
+						}}
+					/>
+					<textarea
+						value={$frameworkStore.description ?? ''}
+						placeholder="Framework description (optional)"
+						rows="2"
+						class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+						onblur={(e) => {
+							builder.updateFramework({ description: e.currentTarget.value || null });
+						}}
+					></textarea>
+					{#if $frameworkStore.urn}
 						<button
 							type="button"
-							class="flex items-center gap-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
-							onclick={() => (showScoringSettings = !showScoringSettings)}
+							class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+							onclick={() => {
+								navigator.clipboard.writeText($frameworkStore.urn ?? '');
+								urnCopied = true;
+								setTimeout(() => (urnCopied = false), 1500);
+							}}
 						>
-							<i
-								class="fa-solid {showScoringSettings
-									? 'fa-chevron-down'
-									: 'fa-chevron-right'} text-[9px]"
+							<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
-							Scoring settings
+							{#if urnCopied}
+								<span class="text-green-500">Copied!</span>
+							{:else}
+								{$frameworkStore.urn}
+							{/if}
 						</button>
-						{#if showScoringSettings}
-							<div class="border border-gray-200 rounded-lg bg-gray-50/50 px-3 py-3 space-y-3">
-								<div class="grid grid-cols-3 gap-3">
-									<label class="block">
-										<span class="text-xs text-gray-500">Min score</span>
-										<input
-											type="number"
-											value={$frameworkStore.min_score}
-											class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-											onblur={(e) => {
-												builder.updateFramework({
-													min_score: parseInt(e.currentTarget.value) || 0
-												});
-											}}
-										/>
-									</label>
-									<label class="block">
-										<span class="text-xs text-gray-500">Max score</span>
-										<input
-											type="number"
-											value={$frameworkStore.max_score}
-											class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-											onblur={(e) => {
-												builder.updateFramework({
-													max_score: parseInt(e.currentTarget.value) || 100
-												});
-											}}
-										/>
-									</label>
-									<label class="block">
-										<span class="text-xs text-gray-500">Aggregation</span>
-										<select
-											value={getAggregation()}
-											class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
-											onchange={(e) => setAggregation(e.currentTarget.value)}
-										>
-											<option value="average">Average</option>
-											<option value="sum">Sum</option>
-										</select>
-									</label>
-								</div>
-								<p class="text-xs text-gray-400">
-									<strong>Average</strong> divides total score by number of questions.
-									<strong>Sum</strong> adds all scores directly. Use Sum for binary (0/1) scoring.
-								</p>
+					{/if}
+					{#if $errorsStore.has('framework')}
+						<p class="text-xs text-red-600">{$errorsStore.get('framework')}</p>
+					{/if}
+				</div>
 
-								<!-- Scale entries editor -->
-								<div class="border-t border-gray-200 pt-3 space-y-2">
-									<button
-										type="button"
-										class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
-										onclick={() => (showScalesEditor = !showScalesEditor)}
-									>
-										<i
-											class="fa-solid {showScalesEditor
-												? 'fa-chevron-down'
-												: 'fa-chevron-right'} text-[9px]"
-										></i>
-										Score scale ({getScaleEntries().length}
-										{getScaleEntries().length === 1 ? 'level' : 'levels'})
-									</button>
-									{#if showScalesEditor}
-										{@const scaleEntries = getScaleEntries()}
-										<div class="space-y-1.5">
-											{#each scaleEntries as entry, idx}
-												<div
-													class="flex items-start gap-2 bg-white border border-gray-200 rounded px-2 py-1.5"
+				<!-- Framework Settings (collapsed by default) -->
+				<div class="border border-gray-200 rounded-lg overflow-hidden">
+					<button
+						type="button"
+						class="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+						onclick={() => (showSettings = !showSettings)}
+					>
+						<div class="flex items-center gap-2">
+							<i
+								class="fa-solid {showSettings
+									? 'fa-chevron-down'
+									: 'fa-chevron-right'} text-[10px] text-gray-400"
+							></i>
+							<span class="text-xs font-semibold text-gray-600 uppercase tracking-wider"
+								>Framework Settings</span
+							>
+							{#if !showSettings}
+								<span class="text-xs text-gray-400">{settingsSummary}</span>
+							{/if}
+						</div>
+						<i class="fa-solid fa-gear text-xs text-gray-400"></i>
+					</button>
+					{#if showSettings}
+						<div class="px-4 py-4 space-y-6 border-t border-gray-200">
+							<!-- Annotation -->
+							<div>
+								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+									>Annotation</span
+								>
+								<textarea
+									value={$frameworkStore.annotation ?? ''}
+									placeholder="Framework annotation (optional guidance text)"
+									rows="2"
+									class="mt-1 w-full text-sm text-gray-500 bg-transparent border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									onblur={(e) => {
+										builder.updateFramework({ annotation: e.currentTarget.value || null });
+									}}
+								></textarea>
+							</div>
+
+							<!-- Scoring settings -->
+							<div class="space-y-1.5">
+								<button
+									type="button"
+									class="flex items-center gap-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
+									onclick={() => (showScoringSettings = !showScoringSettings)}
+								>
+									<i
+										class="fa-solid {showScoringSettings
+											? 'fa-chevron-down'
+											: 'fa-chevron-right'} text-[9px]"
+									></i>
+									Scoring settings
+								</button>
+								{#if showScoringSettings}
+									<div class="border border-gray-200 rounded-lg bg-gray-50/50 px-3 py-3 space-y-3">
+										<div class="grid grid-cols-3 gap-3">
+											<label class="block">
+												<span class="text-xs text-gray-500">Min score</span>
+												<input
+													type="number"
+													value={$frameworkStore.min_score}
+													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+													onblur={(e) => {
+														builder.updateFramework({
+															min_score: parseInt(e.currentTarget.value) || 0
+														});
+													}}
+												/>
+											</label>
+											<label class="block">
+												<span class="text-xs text-gray-500">Max score</span>
+												<input
+													type="number"
+													value={$frameworkStore.max_score}
+													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+													onblur={(e) => {
+														builder.updateFramework({
+															max_score: parseInt(e.currentTarget.value) || 100
+														});
+													}}
+												/>
+											</label>
+											<label class="block">
+												<span class="text-xs text-gray-500">Aggregation</span>
+												<select
+													value={getAggregation()}
+													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+													onchange={(e) => setAggregation(e.currentTarget.value)}
 												>
-													<label class="block w-16 shrink-0">
-														<span class="text-[10px] text-gray-400">Score</span>
-														<input
-															type="number"
-															value={entry.score}
-															class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-															onblur={(e) => {
-																const entries = getScaleEntries();
-																entries[idx].score = parseInt(e.currentTarget.value) || 0;
-																setScaleEntries(entries);
-															}}
-														/>
-													</label>
-													<label class="block flex-1 min-w-0">
-														<span class="text-[10px] text-gray-400">Name</span>
-														<input
-															type="text"
-															value={entry.name}
-															placeholder="e.g. Partial"
-															class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-															onblur={(e) => {
-																const entries = getScaleEntries();
-																entries[idx].name = e.currentTarget.value;
-																setScaleEntries(entries);
-															}}
-														/>
-													</label>
-													<label class="block flex-1 min-w-0">
-														<span class="text-[10px] text-gray-400">Description</span>
-														<input
-															type="text"
-															value={entry.description}
-															placeholder="Optional"
-															class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-															onblur={(e) => {
-																const entries = getScaleEntries();
-																entries[idx].description = e.currentTarget.value;
-																setScaleEntries(entries);
-															}}
-														/>
-													</label>
+													<option value="average">Average</option>
+													<option value="sum">Sum</option>
+												</select>
+											</label>
+										</div>
+										<p class="text-xs text-gray-400">
+											<strong>Average</strong> divides total score by number of questions.
+											<strong>Sum</strong> adds all scores directly. Use Sum for binary (0/1) scoring.
+										</p>
+
+										<!-- Scale entries editor -->
+										<div class="border-t border-gray-200 pt-3 space-y-2">
+											<button
+												type="button"
+												class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+												onclick={() => (showScalesEditor = !showScalesEditor)}
+											>
+												<i
+													class="fa-solid {showScalesEditor
+														? 'fa-chevron-down'
+														: 'fa-chevron-right'} text-[9px]"
+												></i>
+												Score scale ({getScaleEntries().length}
+												{getScaleEntries().length === 1 ? 'level' : 'levels'})
+											</button>
+											{#if showScalesEditor}
+												{@const scaleEntries = getScaleEntries()}
+												<div class="space-y-1.5">
+													{#each scaleEntries as entry, idx}
+														<div
+															class="flex items-start gap-2 bg-white border border-gray-200 rounded px-2 py-1.5"
+														>
+															<label class="block w-16 shrink-0">
+																<span class="text-[10px] text-gray-400">Score</span>
+																<input
+																	type="number"
+																	value={entry.score}
+																	class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																	onblur={(e) => {
+																		const entries = getScaleEntries();
+																		entries[idx].score = parseInt(e.currentTarget.value) || 0;
+																		setScaleEntries(entries);
+																	}}
+																/>
+															</label>
+															<label class="block flex-1 min-w-0">
+																<span class="text-[10px] text-gray-400">Name</span>
+																<input
+																	type="text"
+																	value={entry.name}
+																	placeholder="e.g. Partial"
+																	class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																	onblur={(e) => {
+																		const entries = getScaleEntries();
+																		entries[idx].name = e.currentTarget.value;
+																		setScaleEntries(entries);
+																	}}
+																/>
+															</label>
+															<label class="block flex-1 min-w-0">
+																<span class="text-[10px] text-gray-400">Description</span>
+																<input
+																	type="text"
+																	value={entry.description}
+																	placeholder="Optional"
+																	class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																	onblur={(e) => {
+																		const entries = getScaleEntries();
+																		entries[idx].description = e.currentTarget.value;
+																		setScaleEntries(entries);
+																	}}
+																/>
+															</label>
+															<button
+																type="button"
+																class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
+																onclick={() => {
+																	const entries = getScaleEntries();
+																	entries.splice(idx, 1);
+																	setScaleEntries(entries);
+																}}
+															>
+																<i class="fa-solid fa-trash"></i>
+															</button>
+														</div>
+													{/each}
 													<button
 														type="button"
-														class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
+														class="text-xs text-blue-600 hover:text-blue-700 font-medium"
 														onclick={() => {
 															const entries = getScaleEntries();
-															entries.splice(idx, 1);
+															entries.push({ score: 0, name: '', description: '' });
 															setScaleEntries(entries);
 														}}
 													>
-														<i class="fa-solid fa-trash"></i>
+														<i class="fa-solid fa-plus mr-1"></i>Add scale level
 													</button>
 												</div>
-											{/each}
-											<button
-												type="button"
-												class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-												onclick={() => {
-													const entries = getScaleEntries();
-													entries.push({ score: 0, name: '', description: '' });
-													setScaleEntries(entries);
-												}}
-											>
-												<i class="fa-solid fa-plus mr-1"></i>Add scale level
-											</button>
+											{/if}
 										</div>
-									{/if}
-								</div>
+									</div>
+								{/if}
 							</div>
-						{/if}
-					</div>
 
-					<!-- Outcome rules -->
-					<OutcomesEditor
-						outcomes={$frameworkStore.outcomes_definition ?? []}
-						onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
-					/>
+							<!-- Outcome rules -->
+							<OutcomesEditor
+								outcomes={$frameworkStore.outcomes_definition ?? []}
+								onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
+							/>
 
-					<!-- Implementation groups -->
-					<ImplementationGroupsEditor
-						groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => ({
-							ref_id: (g as Record<string, string>).ref_id ?? '',
-							name: (g as Record<string, string>).name ?? '',
-							description: (g as Record<string, string>).description ?? '',
-							default_selected:
-								((g as Record<string, unknown>).default_selected as boolean) ?? false
-						}))}
-						onupdate={(groups) =>
-							builder.updateFramework({ implementation_groups_definition: groups })}
-					/>
+							<!-- Implementation groups -->
+							<ImplementationGroupsEditor
+								groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => ({
+									ref_id: (g as Record<string, string>).ref_id ?? '',
+									name: (g as Record<string, string>).name ?? '',
+									description: (g as Record<string, string>).description ?? '',
+									default_selected:
+										((g as Record<string, unknown>).default_selected as boolean) ?? false
+								}))}
+								onupdate={(groups) =>
+									builder.updateFramework({ implementation_groups_definition: groups })}
+							/>
 
-					<!-- Field Visibility -->
-					<div class="space-y-1.5">
-						<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>Field Visibility</span
-						>
-						<p class="text-xs text-gray-400">
-							Control which fields are visible to respondents vs auditors.
-						</p>
-						{#each CONFIGURABLE_FIELDS as field}
-							<div class="flex items-center justify-between py-1">
-								<span class="text-sm text-gray-600">{FIELD_LABELS[field]}</span>
-								<select
-									value={getFieldVisibility(field)}
-									class="text-xs border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
-									onchange={(e) => setFieldVisibility(field, e.currentTarget.value)}
+							<!-- Field Visibility -->
+							<div class="space-y-1.5">
+								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+									>Field Visibility</span
 								>
-									<option value="everyone">Everyone</option>
-									<option value="auditor">Auditor only</option>
-									<option value="hidden">Hidden</option>
-								</select>
+								<p class="text-xs text-gray-400">
+									Control which fields are visible to respondents vs auditors.
+								</p>
+								{#each CONFIGURABLE_FIELDS as field}
+									<div class="flex items-center justify-between py-1">
+										<span class="text-sm text-gray-600">{FIELD_LABELS[field]}</span>
+										<select
+											value={getFieldVisibility(field)}
+											class="text-xs border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+											onchange={(e) => setFieldVisibility(field, e.currentTarget.value)}
+										>
+											<option value="everyone">Everyone</option>
+											<option value="auditor">Auditor only</option>
+											<option value="hidden">Hidden</option>
+										</select>
+									</div>
+								{/each}
 							</div>
-						{/each}
+						</div>
+					{/if}
+				</div>
+
+				<hr class="border-surface-200" />
+				<!-- Sections -->
+				{#each $sectionsStore as section, sectionIndex (`section-${sectionIndex}-${section.node.id}`)}
+					<!-- Add section button between sections -->
+					{#if sectionIndex > 0}
+						<button
+							type="button"
+							class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-300 hover:text-gray-500 hover:border-gray-300 transition-colors opacity-0 hover:opacity-100"
+							onclick={() => builder.addSection(sectionIndex - 1)}
+						>
+							<i class="fa-solid fa-plus mr-1"></i>Insert section
+						</button>
+					{/if}
+
+					<div
+						class:opacity-50={draggedSectionIndex === sectionIndex}
+						draggable="true"
+						onmousedown={(e) => (lastMousedownTarget = e.target)}
+						ondragstart={(e) => handleSectionDragStart(e, sectionIndex)}
+						ondragover={handleSectionDragOver}
+						ondrop={(e) => handleSectionDrop(e, sectionIndex)}
+						ondragend={handleSectionDragEnd}
+						role="listitem"
+					>
+						<SectionBlock {section} {sectionIndex} />
 					</div>
-				</div>
-			{/if}
-		</div>
+				{/each}
 
-		<hr class="border-surface-200" />
-		<!-- Sections -->
-		{#each $sectionsStore as section, sectionIndex (section.node.id)}
-			<!-- Add section button between sections -->
-			{#if sectionIndex > 0}
+				<!-- Add section at bottom -->
 				<button
 					type="button"
-					class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-300 hover:text-gray-500 hover:border-gray-300 transition-colors opacity-0 hover:opacity-100"
-					onclick={() => builder.addSection(sectionIndex - 1)}
-				>
-					<i class="fa-solid fa-plus mr-1"></i>Insert section
-				</button>
-			{/if}
-
-			<div
-				class:opacity-50={draggedSectionIndex === sectionIndex}
-				draggable="true"
-				onmousedown={(e) => (lastMousedownTarget = e.target)}
-				ondragstart={(e) => handleSectionDragStart(e, sectionIndex)}
-				ondragover={handleSectionDragOver}
-				ondrop={(e) => handleSectionDrop(e, sectionIndex)}
-				ondragend={handleSectionDragEnd}
-				role="listitem"
-			>
-				<SectionBlock {section} {sectionIndex} />
-			</div>
-		{/each}
-
-		<!-- Add section at bottom -->
-		<button
-			type="button"
-			class="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
-			onclick={() => builder.addSection()}
-		>
-			<i class="fa-solid fa-plus mr-1"></i>Add section
-		</button>
-
-		<!-- Empty state -->
-		{#if $sectionsStore.length === 0}
-			<div class="text-center py-16">
-				<div
-					class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center"
-				>
-					<i class="fa-solid fa-layer-group text-2xl text-gray-400"></i>
-				</div>
-				<h3 class="text-lg font-medium text-gray-600 mb-1">No sections yet</h3>
-				<p class="text-sm text-gray-400 mb-4">Start building your framework by adding a section.</p>
-				<button
-					type="button"
-					class="btn preset-filled-primary-500 px-6"
+					class="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
 					onclick={() => builder.addSection()}
 				>
-					<i class="fa-solid fa-plus mr-2"></i>Add first section
+					<i class="fa-solid fa-plus mr-1"></i>Add section
 				</button>
-			</div>
-		{/if}
 
-		<!-- Global errors -->
-		{#each [...$errorsStore.entries()] as [key, message] (key)}
-			{#if key.startsWith('add-') || key.startsWith('reorder-') || key === 'save-draft' || key === 'publish' || key === 'discard'}
-				<div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
-					{message}
-				</div>
-			{/if}
-		{/each}
+				<!-- Empty state -->
+				{#if $sectionsStore.length === 0}
+					<div class="text-center py-16">
+						<div
+							class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center"
+						>
+							<i class="fa-solid fa-layer-group text-2xl text-gray-400"></i>
+						</div>
+						<h3 class="text-lg font-medium text-gray-600 mb-1">No sections yet</h3>
+						<p class="text-sm text-gray-400 mb-4">
+							Start building your framework by adding a section.
+						</p>
+						<button
+							type="button"
+							class="btn preset-filled-primary-500 px-6"
+							onclick={() => builder.addSection()}
+						>
+							<i class="fa-solid fa-plus mr-2"></i>Add first section
+						</button>
+					</div>
+				{/if}
+
+				<!-- Global errors -->
+				{#each [...$errorsStore.entries()] as [key, message] (key)}
+					{#if key.startsWith('add-') || key.startsWith('reorder-') || key === 'save-draft' || key === 'publish' || key === 'discard'}
+						<div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
+							{message}
+						</div>
+					{/if}
+				{/each}
+			</div>
+		</div>
 	</div>
 </div>

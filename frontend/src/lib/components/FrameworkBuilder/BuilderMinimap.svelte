@@ -10,8 +10,6 @@
 
 	const builder = getBuilderContext();
 	const {
-		sections: sectionsStore,
-		activeSection: activeSectionStore,
 		saving: savingStore,
 		errors: errorsStore,
 		unsaved: unsavedStore,
@@ -31,14 +29,6 @@
 			topOffset = appBar.getBoundingClientRect().height;
 		}
 	});
-
-	function scrollToSection(sectionId: string) {
-		const el = document.querySelector(`[data-section-id="${sectionId}"]`);
-		if (el) {
-			el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-			activeSectionStore.set(sectionId);
-		}
-	}
 
 	async function handlePublish() {
 		publishing = true;
@@ -73,7 +63,7 @@
 	class="sticky z-40 bg-white border-b border-gray-200 shadow-sm rounded-t-lg"
 	style="top: {topOffset}px"
 >
-	<div class="flex items-center gap-3 py-2 px-4 overflow-x-auto">
+	<div class="flex items-center gap-3 py-2 px-4">
 		<a
 			href="/frameworks/{frameworkId}"
 			class="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0"
@@ -112,24 +102,6 @@
 				<i class="fa-solid fa-eye text-[10px]"></i>
 				Preview
 			</a>
-		{/if}
-
-		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
-
-		{#each $sectionsStore as section (section.node.id)}
-			<button
-				type="button"
-				class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors {$activeSectionStore ===
-				section.node.id
-					? 'bg-blue-600 text-white'
-					: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
-				onclick={() => scrollToSection(section.node.id)}
-			>
-				{section.node.ref_id || section.node.name || 'Untitled'}
-			</button>
-		{/each}
-		{#if $sectionsStore.length === 0}
-			<span class="text-xs text-gray-400">No sections yet</span>
 		{/if}
 
 		<!-- Spacer -->
