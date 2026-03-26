@@ -47,6 +47,7 @@ from uuid import UUID
 from itertools import chain, cycle
 import django_filters as df
 
+import magic
 import shutil
 from pathlib import Path
 import humanize
@@ -8933,6 +8934,30 @@ class FrameworkViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if not isinstance(editing_draft, dict):
+            return Response(
+                {"error": "editing_draft must be a JSON object."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        required_keys = {"framework_meta", "nodes", "questions", "choices"}
+        missing = required_keys - set(editing_draft.keys())
+        if missing:
+            return Response(
+                {"error": f"editing_draft missing required keys: {missing}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        for list_key in ("nodes", "questions", "choices"):
+            if not isinstance(editing_draft.get(list_key), list):
+                return Response(
+                    {"error": f"editing_draft.{list_key} must be a list."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        if not isinstance(editing_draft.get("framework_meta"), dict):
+            return Response(
+                {"error": "editing_draft.framework_meta must be an object."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         framework.editing_draft = editing_draft
         framework.save(update_fields=["editing_draft", "updated_at"])
         return Response({"status": "draft_saved"})
@@ -8951,9 +8976,17 @@ class FrameworkViewSet(BaseModelViewSet):
         draft = framework.editing_draft
         try:
             self._reconcile_draft(framework, draft)
-        except Exception as e:
+        except ValueError as e:
             return Response(
-                {"error": f"Failed to publish draft: {str(e)}"},
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to publish draft for framework %s", framework.id
+            )
+            return Response(
+                {"error": "Failed to publish draft. Please try again."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -9001,17 +9034,16 @@ class FrameworkViewSet(BaseModelViewSet):
             if nodes_to_delete:
                 RequirementNode.objects.filter(id__in=nodes_to_delete).delete()
 
-            # --- 4. UPDATE existing entities (bulk_update with ALL fields) ---
+            # --- 4. Build lookup dicts from draft data ---
             existing_node_ids = db_node_ids & draft_node_ids
             existing_question_ids = db_question_ids & draft_question_ids
             existing_choice_ids = db_choice_ids & draft_choice_ids
 
-            # Build lookup dicts from draft data
             draft_node_map = {n["id"]: n for n in draft_nodes}
             draft_question_map = {q["id"]: q for q in draft_questions}
             draft_choice_map = {c["id"]: c for c in draft_choices}
 
-            # Update nodes
+            # --- 5. UPDATE+CREATE nodes ---
             if existing_node_ids:
                 nodes_to_update = []
                 for node_id in existing_node_ids:
@@ -9032,7 +9064,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         weight=data.get("weight", 1),
                         importance=data.get("importance", "undefined"),
                         display_mode=data.get("display_mode", "default"),
-                        folder_id=data.get("folder_id") or framework.folder_id,
+                        folder_id=framework.folder_id,
                         translations=data.get("translations"),
                     )
                     nodes_to_update.append(node)
@@ -9057,89 +9089,6 @@ class FrameworkViewSet(BaseModelViewSet):
                     ],
                 )
 
-            # Update questions
-            if existing_question_ids:
-                questions_to_update = []
-                for question_id in existing_question_ids:
-                    data = draft_question_map[str(question_id)]
-                    question = Question(
-                        id=question_id,
-                        urn=data.get("urn"),
-                        ref_id=data.get("ref_id") or None,
-                        text=data.get("text") or None,
-                        annotation=data.get("annotation") or None,
-                        type=data.get("type", "text"),
-                        config=data.get("config"),
-                        depends_on=data.get("depends_on"),
-                        order=data.get("order", 0),
-                        weight=data.get("weight", 1),
-                        requirement_node_id=uuid.UUID(data["requirement_node_id"]),
-                        folder_id=data.get("folder_id") or framework.folder_id,
-                        translations=data.get("translations"),
-                    )
-                    questions_to_update.append(question)
-                Question.objects.bulk_update(
-                    questions_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "text",
-                        "annotation",
-                        "type",
-                        "config",
-                        "depends_on",
-                        "order",
-                        "weight",
-                        "requirement_node_id",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
-
-            # Update choices
-            if existing_choice_ids:
-                choices_to_update = []
-                for choice_id in existing_choice_ids:
-                    data = draft_choice_map[str(choice_id)]
-                    choice = QuestionChoice(
-                        id=choice_id,
-                        urn=data.get("urn") or None,
-                        ref_id=data.get("ref_id") or None,
-                        value=data.get("value") or None,
-                        annotation=data.get("annotation") or None,
-                        add_score=data.get("add_score"),
-                        compute_result=data.get("compute_result") or None,
-                        order=data.get("order", 0),
-                        description=data.get("description") or None,
-                        color=data.get("color") or None,
-                        select_implementation_groups=data.get(
-                            "select_implementation_groups"
-                        ),
-                        question_id=uuid.UUID(data["question_id"]),
-                        folder_id=data.get("folder_id") or framework.folder_id,
-                        translations=data.get("translations"),
-                    )
-                    choices_to_update.append(choice)
-                QuestionChoice.objects.bulk_update(
-                    choices_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "value",
-                        "annotation",
-                        "add_score",
-                        "compute_result",
-                        "order",
-                        "description",
-                        "color",
-                        "select_implementation_groups",
-                        "question_id",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
-
-            # --- 5. CREATE new entities (nodes → questions → choices for FK safety) ---
             new_node_ids = draft_node_ids - db_node_ids
             if new_node_ids:
                 new_nodes = []
@@ -9162,17 +9111,73 @@ class FrameworkViewSet(BaseModelViewSet):
                             weight=data.get("weight", 1),
                             importance=data.get("importance", "undefined"),
                             display_mode=data.get("display_mode", "default"),
-                            folder_id=data.get("folder_id") or framework.folder_id,
+                            folder_id=framework.folder_id,
                             translations=data.get("translations"),
                         )
                     )
                 RequirementNode.objects.bulk_create(new_nodes)
+
+            # Validate FK references using actual DB state
+            valid_node_ids = set(
+                RequirementNode.objects.filter(framework=framework).values_list(
+                    "id", flat=True
+                )
+            )
+
+            # --- 6. UPDATE+CREATE questions (with FK validation) ---
+            if existing_question_ids:
+                questions_to_update = []
+                for question_id in existing_question_ids:
+                    data = draft_question_map[str(question_id)]
+                    req_node_id = uuid.UUID(data["requirement_node_id"])
+                    if req_node_id not in valid_node_ids:
+                        raise ValueError(
+                            "Question references requirement_node not in this framework."
+                        )
+                    question = Question(
+                        id=question_id,
+                        urn=data.get("urn"),
+                        ref_id=data.get("ref_id") or None,
+                        text=data.get("text") or None,
+                        annotation=data.get("annotation") or None,
+                        type=data.get("type", "text"),
+                        config=data.get("config"),
+                        depends_on=data.get("depends_on"),
+                        order=data.get("order", 0),
+                        weight=data.get("weight", 1),
+                        requirement_node_id=req_node_id,
+                        folder_id=framework.folder_id,
+                        translations=data.get("translations"),
+                    )
+                    questions_to_update.append(question)
+                Question.objects.bulk_update(
+                    questions_to_update,
+                    [
+                        "urn",
+                        "ref_id",
+                        "text",
+                        "annotation",
+                        "type",
+                        "config",
+                        "depends_on",
+                        "order",
+                        "weight",
+                        "requirement_node_id",
+                        "folder_id",
+                        "translations",
+                    ],
+                )
 
             new_question_ids = draft_question_ids - db_question_ids
             if new_question_ids:
                 new_questions = []
                 for question_id in new_question_ids:
                     data = draft_question_map[str(question_id)]
+                    req_node_id = uuid.UUID(data["requirement_node_id"])
+                    if req_node_id not in valid_node_ids:
+                        raise ValueError(
+                            "Question references requirement_node not in this framework."
+                        )
                     new_questions.append(
                         Question(
                             id=question_id,
@@ -9185,18 +9190,78 @@ class FrameworkViewSet(BaseModelViewSet):
                             depends_on=data.get("depends_on"),
                             order=data.get("order", 0),
                             weight=data.get("weight", 1),
-                            requirement_node_id=uuid.UUID(data["requirement_node_id"]),
-                            folder_id=data.get("folder_id") or framework.folder_id,
+                            requirement_node_id=req_node_id,
+                            folder_id=framework.folder_id,
                             translations=data.get("translations"),
                         )
                     )
                 Question.objects.bulk_create(new_questions)
+
+            # Validate FK references using actual DB state
+            valid_question_ids = set(
+                Question.objects.filter(
+                    requirement_node__framework=framework
+                ).values_list("id", flat=True)
+            )
+
+            # --- 7. UPDATE+CREATE choices (with FK validation) ---
+            if existing_choice_ids:
+                choices_to_update = []
+                for choice_id in existing_choice_ids:
+                    data = draft_choice_map[str(choice_id)]
+                    q_id = uuid.UUID(data["question_id"])
+                    if q_id not in valid_question_ids:
+                        raise ValueError(
+                            "Choice references question not in this framework."
+                        )
+                    choice = QuestionChoice(
+                        id=choice_id,
+                        urn=data.get("urn") or None,
+                        ref_id=data.get("ref_id") or None,
+                        value=data.get("value") or None,
+                        annotation=data.get("annotation") or None,
+                        add_score=data.get("add_score"),
+                        compute_result=data.get("compute_result") or None,
+                        order=data.get("order", 0),
+                        description=data.get("description") or None,
+                        color=data.get("color") or None,
+                        select_implementation_groups=data.get(
+                            "select_implementation_groups"
+                        ),
+                        question_id=q_id,
+                        folder_id=framework.folder_id,
+                        translations=data.get("translations"),
+                    )
+                    choices_to_update.append(choice)
+                QuestionChoice.objects.bulk_update(
+                    choices_to_update,
+                    [
+                        "urn",
+                        "ref_id",
+                        "value",
+                        "annotation",
+                        "add_score",
+                        "compute_result",
+                        "order",
+                        "description",
+                        "color",
+                        "select_implementation_groups",
+                        "question_id",
+                        "folder_id",
+                        "translations",
+                    ],
+                )
 
             new_choice_ids = draft_choice_ids - db_choice_ids
             if new_choice_ids:
                 new_choices = []
                 for choice_id in new_choice_ids:
                     data = draft_choice_map[str(choice_id)]
+                    q_id = uuid.UUID(data["question_id"])
+                    if q_id not in valid_question_ids:
+                        raise ValueError(
+                            "Choice references question not in this framework."
+                        )
                     new_choices.append(
                         QuestionChoice(
                             id=choice_id,
@@ -9212,14 +9277,14 @@ class FrameworkViewSet(BaseModelViewSet):
                             select_implementation_groups=data.get(
                                 "select_implementation_groups"
                             ),
-                            question_id=uuid.UUID(data["question_id"]),
-                            folder_id=data.get("folder_id") or framework.folder_id,
+                            question_id=q_id,
+                            folder_id=framework.folder_id,
                             translations=data.get("translations"),
                         )
                     )
                 QuestionChoice.objects.bulk_create(new_choices)
 
-            # --- 6. Update framework metadata from draft ---
+            # --- 8. Update framework metadata from draft ---
             meta = draft.get("framework_meta", {})
             if meta:
                 framework.name = meta.get("name", framework.name)
@@ -9244,7 +9309,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "translations", framework.translations
                 )
 
-            # --- 7. Snapshot history, bump version, clear draft ---
+            # --- 9. Snapshot history, bump version, clear draft ---
             history = list(framework.editing_history or [])
             history.append(
                 {
@@ -9311,12 +9376,34 @@ class FrameworkViewSet(BaseModelViewSet):
                 {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        real_mime = magic.from_buffer(uploaded_file.read(2048), mime=True)
+        uploaded_file.seek(0)
+        if real_mime not in ALLOWED_IMAGE_TYPES:
+            return Response(
+                {"error": f"File content is {real_mime}, not an allowed image type."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         attachment = RequirementNodeAttachment(
             framework=framework,
             file=uploaded_file,
             uploaded_by=request.user,
             folder=framework.folder,
         )
+        try:
+            attachment.full_clean()
+        except ValidationError as e:
+            messages = []
+            if hasattr(e, "message_dict"):
+                for field_messages in e.message_dict.values():
+                    messages.extend(field_messages)
+            elif hasattr(e, "messages"):
+                messages = e.messages
+            else:
+                messages = [str(e.message)]
+            return Response(
+                {"error": " ".join(messages)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         attachment.save()
         return Response(
             {"id": str(attachment.id)},
@@ -9345,7 +9432,8 @@ class FrameworkViewSet(BaseModelViewSet):
             mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
         )
         response = HttpResponse(attachment.file.read(), content_type=content_type)
-        response["Content-Disposition"] = f'inline; filename="{attachment.file.name}"'
+        safe_name = os.path.basename(attachment.file.name)
+        response["Content-Disposition"] = f'inline; filename="{safe_name}"'
         return response
 
 
@@ -9401,6 +9489,13 @@ class RequirementViewSet(BaseModelViewSet):
                 {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        real_mime = magic.from_buffer(uploaded_file.read(2048), mime=True)
+        uploaded_file.seek(0)
+        if real_mime not in ALLOWED_IMAGE_TYPES:
+            return Response(
+                {"error": f"File content is {real_mime}, not an allowed image type."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         attachment = RequirementNodeAttachment(
             requirement_node=requirement_node,
             file=uploaded_file,
@@ -9452,7 +9547,8 @@ class RequirementViewSet(BaseModelViewSet):
             mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
         )
         response = HttpResponse(attachment.file.read(), content_type=content_type)
-        response["Content-Disposition"] = f'inline; filename="{attachment.file.name}"'
+        safe_name = os.path.basename(attachment.file.name)
+        response["Content-Disposition"] = f'inline; filename="{safe_name}"'
         return response
 
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
