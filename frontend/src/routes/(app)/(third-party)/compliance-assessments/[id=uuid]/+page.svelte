@@ -222,6 +222,7 @@
 					canEditRequirementAssessment,
 					hasParentNode,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
 					selectedStatus
@@ -236,6 +237,7 @@
 					score: node.score,
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
+					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score,
 					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
@@ -615,13 +617,16 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				{#if data.global_score && data.global_score.score >= 0}
+				{#if data.global_score && data.global_score.maturity_score >= 0}
 					<div class="w-1/4">
 						<RingProgress
 							name="global_maturity"
-							value={data.global_score.score}
+							value={data.global_score.maturity_score}
 							max={data.global_score.total_max_score}
-							color={getScoreHexColor(data.global_score.score, data.global_score.total_max_score)}
+							color={getScoreHexColor(
+								data.global_score.maturity_score,
+								data.global_score.total_max_score
+							)}
 							strokeWidth={35}
 							fontSize={36}
 							title={m.maturity()}

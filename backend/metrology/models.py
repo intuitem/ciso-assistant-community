@@ -506,7 +506,7 @@ class BuiltinMetricSample(AbstractBaseModel):
 
         return {
             "progress": assessment.progress,
-            "score": assessment.get_global_score(),
+            "score": assessment.get_global_score()["maturity_score"],
             "total_requirements": total,
             "status_breakdown": status_breakdown,
             "result_breakdown": result_breakdown,
