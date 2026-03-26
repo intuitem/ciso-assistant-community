@@ -2337,6 +2337,21 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
 
+        old_scoring_enabled = instance.scoring_enabled
+
+        # Enabling documentation score implies scoring must be on
+        if validated_data.get("show_documentation_score") and not validated_data.get(
+            "scoring_enabled", instance.scoring_enabled
+        ):
+            validated_data["scoring_enabled"] = True
+
+        # Disabling scoring implies documentation score must be off
+        if (
+            "scoring_enabled" in validated_data
+            and not validated_data["scoring_enabled"]
+        ):
+            validated_data["show_documentation_score"] = False
+
         with transaction.atomic():
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
@@ -2346,6 +2361,25 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 RequirementAssessment.objects.filter(
                     compliance_assessment=updated_instance
                 ).update(folder=updated_instance.folder)
+
+            # Toggle is_scored on all requirement assessments when scoring_enabled changes
+            if updated_instance.scoring_enabled != old_scoring_enabled:
+                assessable_ras = RequirementAssessment.objects.filter(
+                    compliance_assessment=updated_instance,
+                    requirement__assessable=True,
+                ).exclude(
+                    result=RequirementAssessment.Result.NOT_APPLICABLE,
+                )
+                if updated_instance.scoring_enabled:
+                    # Turn on: set is_scored=True, initialize score to min_score
+                    # only for RAs that don't already have a score
+                    assessable_ras.update(is_scored=True)
+                    assessable_ras.filter(score__isnull=True).update(
+                        score=updated_instance.min_score or 0
+                    )
+                else:
+                    # Turn off: only flip is_scored, preserve existing scores
+                    assessable_ras.update(is_scored=False)
 
             # Determine newly assigned authors
             new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
@@ -2413,6 +2447,8 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "scores_definition",
+            "scoring_enabled",
+            "score_calculation_method",
             "created_at",
             "updated_at",
         ]
