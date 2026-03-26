@@ -416,7 +416,6 @@
 					onclick={(_) => {
 						modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/accept');
 					}}
-					onkeydown={(_) => modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/accept')}
 					class="btn preset-filled-success-500"
 				>
 					<i class="fas fa-check mr-2"></i> {m.validate()}</button
@@ -425,7 +424,6 @@
 					onclick={(_) => {
 						modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/reject');
 					}}
-					onkeydown={(_) => modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/reject')}
 					class="btn preset-filled-error-500"
 				>
 					<i class="fas fa-xmark mr-2"></i> {m.reject()}</button
@@ -445,7 +443,6 @@
 						onclick={(_) => {
 							modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/revoke');
 						}}
-						onkeydown={(_) => modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/revoke')}
 						class="btn preset-filled-error-500"
 					>
 						<i class="fas fa-xmark mr-2"></i> {m.revoke()}</button
