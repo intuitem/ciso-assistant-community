@@ -92,6 +92,14 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 			testObjectsData.complianceAssessmentsPage.dependency
 		);
 
+		// Enable scoring on the compliance assessment
+		const detailUrl = page.url();
+		await page.getByTestId('edit-button').click();
+		await page.getByText('More').click();
+		await page.getByTestId('form-input-scoring-enabled').check();
+		await page.getByTestId('save-button').click();
+		await page.waitForURL(detailUrl);
+
 		// Click on the ID.AM-1 tree view item
 		const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
 			'ID - Identify',
@@ -100,10 +108,6 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await IDAM1TreeViewItem.content.click();
 
 		await page.waitForURL('/requirement-assessments/**');
-		await page.getByTestId('form-input-is-scored').click();
-		if (!(await page.getByTestId('progress-ring-svg').isVisible())) {
-			await page.getByTestId('form-input-is-scored').click();
-		}
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '1');
 
 		const slider = page.getByTestId('range-slider-input');
