@@ -1512,7 +1512,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				}
 			}
 		],
-		selectFields: [{ field: 'quotation_method' }]
+		selectFields: [{ field: 'status' }, { field: 'quotation_method' }]
 	},
 	'feared-events': {
 		endpointUrl: 'ebios-rm/feared-events',
