@@ -1,3 +1,4 @@
+import type { Locator } from '@playwright/test';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
@@ -139,6 +140,16 @@ test('user can create representatives, solutions and entity assessments inside e
 		await complianceAssessmentsPage.hasTitle(entityAssessment.name);
 	});
 
+	await test.step('send questionnaire to third party representatives', async () => {
+		await page.goBack(); // back to entity assessment detail
+		await entityAssessmentsPage.hasUrl();
+		await page.getByText(m.sendQuestionnaire()).click();
+		await page.getByRole('button', { name: m.submit() }).click();
+		await entityAssessmentsPage.isToastVisible(
+			m.mailSuccessfullySent() + /.+/.source
+		);
+	});
+
 	await test.step('check that third parties overview was updated', async () => {
 		await page.goto('/analytics/tprm');
 		await page.locator('body[data-hydrated="true"]').waitFor();
@@ -210,8 +221,8 @@ test('third-party representative can set their password', async ({ sideBar, mail
 
 		await setLoginPage.login('third-party@tests.com', vars.thirdPartyUser.password);
 
-		// third party user lands on compliance assessments page
-		await expect(setLoginPage.page).toHaveURL('/compliance-assessments');
+		// third party user lands on auditee dashboard page
+		await expect(setLoginPage.page).toHaveURL('/auditee-dashboard');
 
 		// logout to prevent sessions conflicts
 		const passwordPageSideBar = new SideBar(setPasswordPage);
@@ -221,98 +232,62 @@ test('third-party representative can set their password', async ({ sideBar, mail
 
 test('third-party representative can fill their assigned audit', async ({
 	thirdPartyAuthenticatedPage,
-	complianceAssessmentsPage,
 	page
 }) => {
-	await test.step('third party representative can open their assigned audit', async () => {
-		await complianceAssessmentsPage.hasUrl();
-		await complianceAssessmentsPage.hasTitle('Audits');
-		await complianceAssessmentsPage.viewItemDetail(entityAssessment.name);
+	await test.step('third party representative lands on auditee dashboard', async () => {
+		await expect(page).toHaveURL('/auditee-dashboard');
 	});
 
-	await test.step('third party respondent can answer questions in table mode', async () => {
-		await test.step('third party respondent can open table mode', async () => {
-			await page.getByTestId('table-mode-button').click();
-			await expect(page.getByTestId('requirement-assessments')).toBeVisible();
-		});
+	await test.step('third party representative can open their assigned audit', async () => {
+		await expect(page.getByText(entityAssessment.name)).toBeVisible();
+		await page.getByRole('link', { name: m.startAssessment() }).first().click();
+		await page.waitForURL('/auditee-assessments/**');
+	});
 
-		const assessableRequirements = page
-			.getByRole('listitem')
-			.filter({ has: page.getByRole('button', { name: /.*Observation.*/ }) });
+	await test.step('third party respondent can fill questionnaire', async () => {
+		const clickAndPause = async (locator: Locator) => {
+			await locator.click();
+			await page.waitForTimeout(1000); // workaround flakiness due to overlapping calls
+		};
 
-		await test.step('third party respondent can fill questionnaire', async () => {
-			await expect(assessableRequirements).not.toHaveCount(0);
+		// Fill first requirement and navigate to next ones
+		await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
+		await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
+		await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
 
-			const clickAndPause = async (locator: Locator) => {
-				await locator.click();
-				await page.waitForTimeout(1000); // workaround flakiness due to overlapping calls
-			};
+		await page.getByRole('button', { name: m.next() }).click();
+		await page.waitForTimeout(500);
 
-			await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
-			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
-			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
-			await clickAndPause(page.getByRole('button', { name: 'Yes' }).nth(3));
-			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(4));
-			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(5));
-		});
+		await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
+		await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
+		await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
+	});
 
-		await test.step('third party respondent can create evidence', async () => {
-			await assessableRequirements
-				.first()
-				.getByRole('button', { name: /.*Evidence.*/ })
-				.click();
-			await assessableRequirements.first().getByTestId('create-evidence-button').click();
-			await page.getByTestId('form-input-name').click();
-			await page.getByTestId('form-input-name').fill('tp-evidence');
-			await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
-			let objectCreatedToast = complianceAssessmentsPage.isToastVisible(
-				'The evidence object has been successfully created' + /.+/.source
-			);
-			await page.getByTestId('save-button').click();
-			await objectCreatedToast;
-		});
+	await test.step('third party respondent can create evidence', async () => {
+		// Go back to first requirement
+		await page.getByRole('button', { name: m.previous() }).click();
+		await page.waitForTimeout(500);
 
-		await test.step('check that evidence count was updated', async () => {
-			await expect(assessableRequirements.first().getByTestId('evidence-count')).toContainText('1');
-		});
+		await page.getByTestId('create-evidence-button').click();
+		await page.getByTestId('form-input-name').click();
+		await page.getByTestId('form-input-name').fill('tp-evidence');
+		await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
+		let objectCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
+			'The evidence object has been successfully created' + /.+/.source
+		);
+		await page.getByTestId('save-button').click();
+		await objectCreatedToast;
+	});
 
-		await test.step('check that selected evidences were updated', async () => {
-			await assessableRequirements.first().getByTestId('select-evidence-button').click();
-			await expect(page.getByTestId('modal-title')).toBeVisible();
-			await expect(page.getByRole('option').first()).toContainText(/.*tp-evidence.*/);
-			await page.getByTestId('cancel-button').click();
-		});
+	await test.step('check that evidence count was updated', async () => {
+		await expect(page.getByTestId('evidence-count').first()).toContainText('1');
+	});
 
-		await test.step('check modified requirement assessment', async () => {
-			await page.getByTestId('back-to-audit').click();
-
-			await complianceAssessmentsPage.hasUrl();
-			await complianceAssessmentsPage.hasTitle(entityAssessment.name);
-			const editedRequirementAssessment = await complianceAssessmentsPage.itemDetail.treeViewItem(
-				'AC.L1-3.1.1 - Authorized Access Control',
-				['AC - ACCESS CONTROL']
-			);
-			editedRequirementAssessment.content.click();
-			await page.waitForURL('/requirement-assessments/**');
-			await expect(page.getByRole('button', { name: 'Yes' }).first()).toHaveClass(
-				/.*preset-filled.*/
-			);
-			await expect(page.getByRole('button', { name: 'No' }).nth(1)).toHaveClass(
-				/.*preset-filled.*/
-			);
-			await expect(page.getByRole('button', { name: 'N/A' }).nth(2)).toHaveClass(
-				/.*preset-filled.*/
-			);
-			await expect(page.getByRole('button', { name: 'Yes' }).nth(3)).toHaveClass(
-				/.*preset-filled.*/
-			);
-			await expect(page.getByRole('button', { name: 'No' }).nth(4)).toHaveClass(
-				/.*preset-filled.*/
-			);
-			await expect(page.getByRole('button', { name: 'N/A' }).nth(5)).toHaveClass(
-				/.*preset-filled.*/
-			);
-		});
+	await test.step('check that selected evidences were updated', async () => {
+		await page.getByTestId('select-evidence-button').click();
+		await expect(page.getByTestId('modal-title')).toBeVisible();
+		await expect(page.getByRole('option').first()).toContainText(/.*tp-evidence.*/);
+		await page.getByTestId('cancel-button').click();
 	});
 });
 

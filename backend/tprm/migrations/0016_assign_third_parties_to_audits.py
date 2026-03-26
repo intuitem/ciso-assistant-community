@@ -27,9 +27,7 @@ def assign_third_parties_to_existing_audits(apps, schema_editor):
             continue
 
         # Check if an assignment already exists for this audit
-        if RequirementAssignment.objects.filter(
-            compliance_assessment=audit
-        ).exists():
+        if RequirementAssignment.objects.filter(compliance_assessment=audit).exists():
             continue
 
         assignment = RequirementAssignment.objects.create(
@@ -42,7 +40,6 @@ def assign_third_parties_to_existing_audits(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tprm", "0015_contract_dora_exclude_and_more"),
         ("core", "0150_add_editable_mixin_to_riskmatrix"),
