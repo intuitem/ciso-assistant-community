@@ -10101,8 +10101,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ).select_related("requirement"),
                 ),
             )
-        else:
-            # Detail/other views: full prefetches for the read serializer
+        elif self.action == "retrieve":
+            # Detail view only: full prefetches for the read serializer
             qs = qs.select_related(
                 "framework__library",  # For framework.has_update property
                 "perimeter__folder",  # FieldsRelatedField(["id", "folder"]) optimization
@@ -10114,13 +10114,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "reviewers",  # ManyToManyField from Assessment parent class
                 Prefetch(
                     "requirement_assessments",
-                    queryset=RequirementAssessment.objects.select_related("requirement"),
+                    queryset=RequirementAssessment.objects.select_related(
+                        "requirement"
+                    ),
                 ),
                 Prefetch(
                     "validationflow_set",
                     queryset=ValidationFlow.objects.select_related("approver"),
                 ),
             )
+        # Custom detail actions (tree, global_score, donut_data, etc.)
+        # use lightweight querysets — they don't need full prefetches.
 
         qs = qs.annotate(
             total_requirements=Count(

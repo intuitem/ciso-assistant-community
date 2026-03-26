@@ -483,3 +483,95 @@ class TestScoring:
         # total_score = 5*1 + 3*1 = 8, total_weight = 1+1 = 2, mean = 8/2 = 4
         assert ra.score == 4
         assert ra.result == "compliant"
+
+
+@pytest.mark.django_db
+class TestGlobalScoreQueryPerformance:
+    """Regression tests ensuring get_global_score uses select_related to avoid N+1 queries."""
+
+    def test_global_score_bounded_queries(self, scoring_setup):
+        """get_global_score() should use a bounded number of queries regardless of RA count."""
+        from django.test.utils import override_settings
+
+        data = scoring_setup
+        ca = data["ca"]
+        folder = data["folder"]
+        fw = data["framework"]
+
+        # Create multiple requirement nodes and assessments
+        for i in range(20):
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"urn:test:perf:req:{i:03d}",
+                ref_id=f"PERF-{i}",
+                assessable=True,
+                folder=folder,
+                is_published=True,
+            )
+            ra = RequirementAssessment.objects.create(
+                compliance_assessment=ca,
+                requirement=rn,
+                folder=folder,
+                score=50,
+                result=RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                is_scored=True,
+            )
+
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+
+        # get_global_score should use select_related("requirement"),
+        # producing a constant number of queries (not scaling with RA count)
+        with CaptureQueriesContext(connection) as ctx:
+            score = ca.get_global_score()
+
+        # With select_related, we expect 1 query (the main SELECT with JOIN).
+        # Without it, we'd see 1 + N queries (1 base + 1 per RA for requirement).
+        # Allow up to 3 queries for safety margin (e.g. if implementation changes slightly).
+        assert len(ctx.captured_queries) <= 3, (
+            f"get_global_score() produced {len(ctx.captured_queries)} queries "
+            f"(expected <=3). Likely missing select_related. "
+            f"Queries: {[q['sql'][:100] for q in ctx.captured_queries]}"
+        )
+        assert score != -1  # Sanity check: score was actually computed
+
+    def test_total_max_score_bounded_queries(self, scoring_setup):
+        """get_total_max_score() should use a bounded number of queries."""
+        data = scoring_setup
+        ca = data["ca"]
+        folder = data["folder"]
+        fw = data["framework"]
+
+        # Set SUM mode so the method actually queries RAs
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
+        ca.save()
+
+        for i in range(20):
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"urn:test:perf2:req:{i:03d}",
+                ref_id=f"PERF2-{i}",
+                assessable=True,
+                folder=folder,
+                is_published=True,
+            )
+            RequirementAssessment.objects.create(
+                compliance_assessment=ca,
+                requirement=rn,
+                folder=folder,
+                score=50,
+                result=RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                is_scored=True,
+            )
+
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+
+        with CaptureQueriesContext(connection) as ctx:
+            max_score = ca.get_total_max_score()
+
+        assert len(ctx.captured_queries) <= 3, (
+            f"get_total_max_score() produced {len(ctx.captured_queries)} queries "
+            f"(expected <=3). Likely missing select_related. "
+            f"Queries: {[q['sql'][:100] for q in ctx.captured_queries]}"
+        )
