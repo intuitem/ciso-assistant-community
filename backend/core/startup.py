@@ -1250,6 +1250,12 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     "view_folder",
+    "view_requirementassignment",
+    "transition_requirementassignment",
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
 ]
 
 AUDITEE_PERMISSIONS_LIST = [

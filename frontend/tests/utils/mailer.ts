@@ -78,4 +78,9 @@ export class Mailer {
 	async getLastEmail() {
 		return new Email(this.emails.first());
 	}
+
+	async getEmailBySubject(subject: string) {
+		const email = this.emails.filter({ hasText: subject }).first();
+		return new Email(email);
+	}
 }

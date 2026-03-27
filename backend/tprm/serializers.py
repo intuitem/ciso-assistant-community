@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from django.conf import settings
-from core.models import ComplianceAssessment, Framework
+from core.models import ComplianceAssessment, Framework, RequirementAssignment
 
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
@@ -198,6 +198,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
                 audit.authors.set([rep.actor for rep in representatives])
+                self._create_requirement_assignment(audit, representatives)
                 instance.compliance_assessment = audit
                 instance.save()
         else:
@@ -207,6 +208,21 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 representatives = instance.representatives.all()
                 audit.authors.set([rep.actor for rep in representatives])
             instance.save()
+
+    def _create_requirement_assignment(self, audit, representatives):
+        """Create a RequirementAssignment linking all requirement assessments to representative actors."""
+        actors = [rep.actor for rep in representatives if hasattr(rep, "actor")]
+        if not actors:
+            return
+        requirement_assessments = audit.requirement_assessments.all()
+        if not requirement_assessments.exists():
+            return
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=audit,
+            folder=audit.folder,
+        )
+        assignment.actor.set(actors)
+        assignment.requirement_assessments.set(requirement_assessments)
 
     def _assign_third_party_respondents(
         self,
