@@ -18,7 +18,12 @@
 	} from '$lib/components/Modals/stores';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import { complianceResultColorMap, complianceResultTailwindColorMap } from '$lib/utils/constants';
-	import { displayScoreColor, formatScoreValue, isFieldVisible } from '$lib/utils/helpers';
+	import {
+		displayScoreColor,
+		formatScoreValue,
+		isFieldVisible,
+		resolveFieldVisibility
+	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
@@ -63,14 +68,31 @@
 
 	let isAuditor = $derived(viewerRole === 'auditor');
 
-	let isReadOnly = $derived(
-		isAuditor ||
-			complianceAssessment.is_locked ||
-			complianceAssessment.status === 'in_review' ||
-			assignmentStatus === 'draft' ||
-			assignmentStatus === 'submitted' ||
-			assignmentStatus === 'closed'
-	);
+	function isFieldEditable(fieldName: string): boolean {
+		if (complianceAssessment.is_locked || complianceAssessment.status === 'in_review') return false;
+		const vis = resolveFieldVisibility(fw, complianceAssessment, fieldName);
+		if (vis === 'hidden') return false;
+		if (isAuditor) {
+			// Auditor can edit auditor-owned fields
+			return vis === 'auditor';
+		} else {
+			// Respondent can edit everyone-visible fields (when assignment status allows)
+			if (
+				assignmentStatus === 'draft' ||
+				assignmentStatus === 'submitted' ||
+				assignmentStatus === 'closed'
+			)
+				return false;
+			return vis === 'everyone';
+		}
+	}
+
+	const canEditResult = $derived(isFieldEditable('result'));
+	const canEditScore = $derived(isFieldEditable('score'));
+	const canEditObservation = $derived(isFieldEditable('observation'));
+	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
+	const canEditEvidences = $derived(isFieldEditable('evidences'));
+	const canEditAnswers = $derived(isFieldEditable('answers'));
 
 	let canSubmit = $derived(
 		!isAuditor && (assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested')
@@ -813,7 +835,7 @@
 										questions={requirement.questions}
 										initialValue={requirementAssessment.answers}
 										field="answers"
-										disabled={isReadOnly}
+										disabled={!canEditAnswers}
 										onChange={(urn, newAnswer) => {
 											requirementAssessment.answers[urn] = newAnswer;
 											update(requirementAssessment, 'answers', requirementAssessment.answers);
@@ -844,7 +866,7 @@
 											labelKey="label"
 											field="result"
 											colorMap={complianceResultTailwindColorMap}
-											disabled={isReadOnly}
+											disabled={!canEditResult}
 											initialValue={requirementAssessment.result}
 											onChange={(newValue) => {
 												const newResult =
@@ -860,7 +882,7 @@
 							<!-- Score -->
 							{#if showScore}
 								<div
-									class="flex flex-col w-full place-items-center {isReadOnly
+									class="flex flex-col w-full place-items-center {!canEditScore
 										? 'pointer-events-none opacity-60'
 										: ''}"
 								>
@@ -906,14 +928,14 @@
 												requirementAssessment.score = newScore;
 												updateScore(requirementAssessment);
 											}}
-											disabled={!requirementAssessment.is_scored}
+											disabled={!canEditScore || !requirementAssessment.is_scored}
 										>
 											{#snippet left()}
 												<div>
 													<Checkbox
 														form={isScoredForms[requirementAssessment.id]}
 														field="is_scored"
-														disabled={isReadOnly}
+														disabled={!canEditScore}
 														label={''}
 														helpText={m.scoringHelpText()}
 														checkboxComponent="switch"
@@ -941,7 +963,7 @@
 													requirementAssessment.documentation_score = newScore;
 													updateScore(requirementAssessment);
 												}}
-												disabled={!requirementAssessment.is_scored}
+												disabled={!canEditScore || !requirementAssessment.is_scored}
 											/>
 										{/if}
 									{/if}
@@ -979,7 +1001,7 @@
 											>
 										</Accordion.ItemTrigger>
 										<Accordion.ItemContent>
-											{#if !isReadOnly}
+											{#if canEditAppliedControls}
 												<div class="flex flex-row space-x-2 items-center">
 													<button
 														class="btn preset-filled-primary-500 self-start"
@@ -1039,7 +1061,7 @@
 											>
 										</Accordion.ItemTrigger>
 										<Accordion.ItemContent>
-											{#if !isReadOnly}
+											{#if canEditEvidences}
 												<div class="flex flex-row space-x-2 items-center">
 													<button
 														class="btn preset-filled-primary-500 self-start"
@@ -1101,7 +1123,7 @@
 										<Accordion.ItemContent>
 											<TableMarkdownField
 												bind:value={requirementAssessment.observation}
-												disabled={isReadOnly}
+												disabled={!canEditObservation}
 												onSave={async (newValue) => {
 													await update(requirementAssessment, 'observation');
 													requirementAssessment.observationBuffer = newValue;

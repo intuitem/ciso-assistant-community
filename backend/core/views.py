@@ -8982,9 +8982,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception:
-            logger.exception(
-                "Failed to publish draft for framework %s", framework.id
-            )
+            logger.exception("Failed to publish draft for framework %s", framework.id)
             return Response(
                 {"error": "Failed to publish draft. Please try again."},
                 status=status.HTTP_400_BAD_REQUEST,

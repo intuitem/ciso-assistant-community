@@ -42,7 +42,9 @@ PDF_CONTENT = b"%PDF-1.4 fake pdf content"
 def _upload_file(client, url, content, filename, content_type):
     f = io.BytesIO(content)
     f.name = filename
-    return client.post(url, {"file": f}, format="multipart", HTTP_CONTENT_TYPE=content_type)
+    return client.post(
+        url, {"file": f}, format="multipart", HTTP_CONTENT_TYPE=content_type
+    )
 
 
 # --- Fixtures ---
@@ -106,7 +108,9 @@ class TestFrameworkBuilderSecurity:
 
     # --- Finding 1: MIME validation ---
 
-    def test_upload_image_rejects_fake_mime(self, authenticated_client, framework_with_node):
+    def test_upload_image_rejects_fake_mime(
+        self, authenticated_client, framework_with_node
+    ):
         """Upload file with image/png content-type but PDF content → 400."""
         fw, rn, folder = framework_with_node
         url = reverse("frameworks-upload-image", args=[fw.id])
@@ -115,7 +119,9 @@ class TestFrameworkBuilderSecurity:
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         uploaded = SimpleUploadedFile("evil.png", PDF_CONTENT, content_type="image/png")
-        response = authenticated_client.post(url, {"file": uploaded}, format="multipart")
+        response = authenticated_client.post(
+            url, {"file": uploaded}, format="multipart"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "not an allowed image type" in response.data["error"]
 
@@ -126,18 +132,24 @@ class TestFrameworkBuilderSecurity:
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         uploaded = SimpleUploadedFile("test.png", REAL_PNG, content_type="image/png")
-        response = authenticated_client.post(url, {"file": uploaded}, format="multipart")
+        response = authenticated_client.post(
+            url, {"file": uploaded}, format="multipart"
+        )
         assert response.status_code == status.HTTP_201_CREATED
         assert "id" in response.data
 
-    def test_upload_disallowed_extension_rejected(self, authenticated_client, framework_with_node):
+    def test_upload_disallowed_extension_rejected(
+        self, authenticated_client, framework_with_node
+    ):
         """Framework upload_image runs full_clean → disallowed extension rejected."""
         fw, rn, folder = framework_with_node
         url = reverse("frameworks-upload-image", args=[fw.id])
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         uploaded = SimpleUploadedFile("test.exe", REAL_PNG, content_type="image/png")
-        response = authenticated_client.post(url, {"file": uploaded}, format="multipart")
+        response = authenticated_client.post(
+            url, {"file": uploaded}, format="multipart"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_serve_image_basename_only(self, authenticated_client, framework_with_node):
@@ -147,7 +159,9 @@ class TestFrameworkBuilderSecurity:
 
         uploaded = SimpleUploadedFile("safe.png", REAL_PNG, content_type="image/png")
         upload_url = reverse("frameworks-upload-image", args=[fw.id])
-        resp = authenticated_client.post(upload_url, {"file": uploaded}, format="multipart")
+        resp = authenticated_client.post(
+            upload_url, {"file": uploaded}, format="multipart"
+        )
         assert resp.status_code == status.HTTP_201_CREATED
         att_id = resp.data["id"]
 
@@ -160,14 +174,18 @@ class TestFrameworkBuilderSecurity:
 
     # --- Finding 1: RequirementNode upload_image MIME validation ---
 
-    def test_requirement_upload_rejects_fake_mime(self, authenticated_client, framework_with_node):
+    def test_requirement_upload_rejects_fake_mime(
+        self, authenticated_client, framework_with_node
+    ):
         """RequirementNode upload_image rejects fake MIME."""
         fw, rn, folder = framework_with_node
         url = reverse("requirement-nodes-upload-image", args=[rn.id])
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         uploaded = SimpleUploadedFile("evil.png", PDF_CONTENT, content_type="image/png")
-        response = authenticated_client.post(url, {"file": uploaded}, format="multipart")
+        response = authenticated_client.post(
+            url, {"file": uploaded}, format="multipart"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "not an allowed image type" in response.data["error"]
 
@@ -326,7 +344,9 @@ class TestFrameworkBuilderSecurity:
 
     # --- Finding 4: save_draft schema validation ---
 
-    def test_save_draft_rejects_missing_nodes(self, authenticated_client, framework_with_node):
+    def test_save_draft_rejects_missing_nodes(
+        self, authenticated_client, framework_with_node
+    ):
         """save_draft rejects draft missing required 'nodes' key."""
         fw, rn, folder = framework_with_node
 
@@ -342,7 +362,9 @@ class TestFrameworkBuilderSecurity:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "missing required keys" in response.data["error"]
 
-    def test_save_draft_rejects_non_dict(self, authenticated_client, framework_with_node):
+    def test_save_draft_rejects_non_dict(
+        self, authenticated_client, framework_with_node
+    ):
         """save_draft rejects non-dict editing_draft."""
         fw, rn, folder = framework_with_node
 
