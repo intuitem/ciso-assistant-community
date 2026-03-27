@@ -69,9 +69,7 @@
 	$effect(() => {
 		if (selectedComplianceAssessment !== lastAutoSelectedCA) {
 			lastAutoSelectedCA = selectedComplianceAssessment;
-			selectedImplementationGroups = implementationGroups.map(
-				(g: { ref_id: string }) => g.ref_id
-			);
+			selectedImplementationGroups = implementationGroups.map((g: { ref_id: string }) => g.ref_id);
 		}
 	});
 
@@ -143,7 +141,11 @@
 					<option value={ca.id}>
 						{ca.name}
 						{ca.framework?.str ? `(${ca.framework.str})` : ''}
-						{ca.perimeter?.str ? `— ${ca.perimeter.str}` : ca.folder?.str ? `— ${ca.folder.str}` : ''}
+						{ca.perimeter?.str
+							? `— ${ca.perimeter.str}`
+							: ca.folder?.str
+								? `— ${ca.folder.str}`
+								: ''}
 					</option>
 				{/each}
 			</select>

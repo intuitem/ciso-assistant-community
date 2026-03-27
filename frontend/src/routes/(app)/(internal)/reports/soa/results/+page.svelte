@@ -194,13 +194,17 @@
 							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 								{m.treatment()}
 							</th>
-							<th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider">
+							<th
+								class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider"
+							>
 								{m.currentLevel()}
 							</th>
 							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 								{m.implementation()}
 							</th>
-							<th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider">
+							<th
+								class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider"
+							>
 								{m.residualLevel()}
 							</th>
 						</tr>
@@ -208,7 +212,11 @@
 					<tbody>
 						{#each riskScenarios as rs, i}
 							{@const treatmentBadge = getTreatmentBadge(rs.treatment)}
-							<tr class="border-b border-gray-200 transition-colors {i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">
+							<tr
+								class="border-b border-gray-200 transition-colors {i % 2 === 0
+									? 'bg-white'
+									: 'bg-slate-50'}"
+							>
 								<!-- Ref -->
 								<td class="px-3 py-2.5 text-xs font-mono text-gray-600 align-top">
 									{rs.ref_id || ''}
