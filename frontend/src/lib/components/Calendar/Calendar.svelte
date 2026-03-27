@@ -30,6 +30,15 @@
 	export const selectedDay = writable<{ day: number; month: number; year: number } | null>(null);
 	export const showSidePanel = writable(false);
 
+	// Reset side panel when navigating to a different month
+	$effect(() => {
+		// Track month and year to trigger on navigation
+		void month;
+		void year;
+		$selectedDay = null;
+		$showSidePanel = false;
+	});
+
 	function closePanel() {
 		$showSidePanel = false;
 	}
