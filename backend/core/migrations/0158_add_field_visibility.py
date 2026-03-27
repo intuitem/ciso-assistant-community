@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0156_requirementnodeattachment_nullable_node_add_framework"),
+        ("core", "0157_requirementnodeattachment_nullable_node_add_framework"),
     ]
 
     operations = [

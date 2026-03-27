@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0155_add_editable_mixin_to_framework"),
+        ("core", "0156_add_editable_mixin_to_framework"),
     ]
 
     operations = [

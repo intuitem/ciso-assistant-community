@@ -16,7 +16,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0150_add_editable_mixin_to_riskmatrix"),
+        ("core", "0151_complianceassessment_scoring_enabled_and_more"),
         ("iam", "0021_fix_auditee_iam_groups"),
     ]
 

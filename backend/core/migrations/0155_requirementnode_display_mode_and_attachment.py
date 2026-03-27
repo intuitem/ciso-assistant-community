@@ -10,7 +10,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0153_questionnaire_cleanup"),
+        ("core", "0154_questionnaire_cleanup"),
         ("iam", "0021_fix_auditee_iam_groups"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

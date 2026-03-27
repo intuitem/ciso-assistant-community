@@ -6484,7 +6484,7 @@ class ComplianceAssessment(Assessment):
                 "per_status": per_status,
                 "per_result": per_result,
                 "progress_perc": self.progress,
-                "score": self.get_global_score()["maturity_score"],
+                "score": score["maturity_score"],
             },
         }
 
@@ -6499,7 +6499,7 @@ class ComplianceAssessment(Assessment):
             self,
             precomputed_metrics={
                 "progress": progress,
-                "score": score,
+                "score": score["maturity_score"],
                 "total_requirements": total,
                 "status_breakdown": per_status,
                 "result_breakdown": per_result,

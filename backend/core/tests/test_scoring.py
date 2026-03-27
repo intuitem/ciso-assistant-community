@@ -533,7 +533,9 @@ class TestGlobalScoreQueryPerformance:
             f"(expected <=3). Likely missing select_related. "
             f"Queries: {[q['sql'][:100] for q in ctx.captured_queries]}"
         )
-        assert score != -1  # Sanity check: score was actually computed
+        assert (
+            score["maturity_score"] != -1
+        )  # Sanity check: score was actually computed
 
     def test_total_max_score_bounded_queries(self, scoring_setup):
         """get_total_max_score() should use a bounded number of queries."""

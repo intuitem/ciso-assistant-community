@@ -9,7 +9,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0152_migrate_questions_answers_data"),
+        ("core", "0153_migrate_questions_answers_data"),
     ]
 
     operations = [
