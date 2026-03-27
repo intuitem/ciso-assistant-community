@@ -5,7 +5,7 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { isFieldVisible } from '$lib/utils/helpers';
+	import { getFieldVisibility } from '$lib/utils/helpers';
 
 	interface Props {
 		data: PageData;
@@ -18,20 +18,12 @@
 	);
 
 	// Field visibility for auditor role
-	const fw = $derived(data.compliance_assessment.framework);
 	const complianceAssessment = $derived(data.compliance_assessment);
-	const showResult = $derived(isFieldVisible(fw, complianceAssessment, 'result', 'auditor'));
-	const showScore = $derived(isFieldVisible(fw, complianceAssessment, 'score', 'auditor'));
-	const showObservation = $derived(
-		isFieldVisible(fw, complianceAssessment, 'observation', 'auditor')
+	const fieldVis = $derived(
+		getFieldVisibility(complianceAssessment.framework, complianceAssessment, 'auditor')
 	);
-	const showAppliedControls = $derived(
-		isFieldVisible(fw, complianceAssessment, 'applied_controls', 'auditor')
-	);
-	const showEvidences = $derived(isFieldVisible(fw, complianceAssessment, 'evidences', 'auditor'));
-	const showSecurityExceptions = $derived(
-		isFieldVisible(fw, complianceAssessment, 'security_exceptions', 'auditor')
-	);
+	const showResult = $derived(fieldVis.showResult);
+	const showObservation = $derived(fieldVis.showObservation);
 
 	const possible_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
@@ -43,6 +35,13 @@
 
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
+	);
+
+	// URN-keyed hashmap for O(1) parent lookup
+	const requirementsByUrn = Object.fromEntries(
+		data.requirements
+			.filter((r: Record<string, any>) => r.urn)
+			.map((r: Record<string, any>) => [r.urn, r])
 	);
 
 	// Build unified navigation: assessable items + splash nodes, ordered by order_id
@@ -93,9 +92,7 @@
 			: currentSplashNode
 	);
 	let parent = $derived(
-		requirement
-			? data.requirements.find((req: Record<string, any>) => req.urn === requirement.parent_urn)
-			: null
+		requirement?.parent_urn ? (requirementsByUrn[requirement.parent_urn] ?? null) : null
 	);
 
 	let title = $derived(

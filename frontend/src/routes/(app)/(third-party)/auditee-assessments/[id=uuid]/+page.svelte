@@ -8,6 +8,7 @@
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
@@ -21,7 +22,9 @@
 	import {
 		displayScoreColor,
 		formatScoreValue,
-		isFieldVisible,
+		getFieldVisibility,
+		hasComputedResult,
+		hasComputedScore,
 		resolveFieldVisibility
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -52,15 +55,12 @@
 	// Field visibility based on viewer role (respondent if assigned actor, auditor otherwise)
 	const fw = $derived(complianceAssessment.framework);
 	const viewerRole = $derived((data.viewerRole ?? 'respondent') as 'respondent' | 'auditor');
-	const showResult = $derived(isFieldVisible(fw, complianceAssessment, 'result', viewerRole));
-	const showScore = $derived(isFieldVisible(fw, complianceAssessment, 'score', viewerRole));
-	const showObservation = $derived(
-		isFieldVisible(fw, complianceAssessment, 'observation', viewerRole)
-	);
-	const showAppliedControls = $derived(
-		isFieldVisible(fw, complianceAssessment, 'applied_controls', viewerRole)
-	);
-	const showEvidences = $derived(isFieldVisible(fw, complianceAssessment, 'evidences', viewerRole));
+	const fieldVis = $derived(getFieldVisibility(fw, complianceAssessment, viewerRole));
+	const showResult = $derived(fieldVis.showResult);
+	const showScore = $derived(fieldVis.showScore);
+	const showObservation = $derived(fieldVis.showObservation);
+	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showEvidences = $derived(fieldVis.showEvidences);
 
 	// Single assignment — the URL param (params.id) IS the assignment ID
 	let assignment = $derived(data.assignment);
@@ -794,20 +794,12 @@
 
 		<!-- Current item: splash screen or requirement assessment -->
 		{#if currentSplashNode}
-			<div
+			<SplashCard
+				name={currentSplashNode.name}
+				description={currentSplashNode.description}
 				id="current-requirement"
-				class="card bg-white shadow-md border-l-4 border-l-purple-400 overflow-hidden"
-			>
-				{#if currentSplashNode.name}
-					<div class="px-6 py-4 border-b border-purple-100 flex items-center gap-2">
-						<i class="fa-solid fa-display text-purple-400"></i>
-						<span class="text-lg font-semibold text-gray-800">{currentSplashNode.name}</span>
-					</div>
-				{/if}
-				<div class="px-6 py-5">
-					<MarkdownRenderer content={currentSplashNode.description} />
-				</div>
-			</div>
+				class="card bg-white shadow-md"
+			/>
 		{:else if currentSectionNode}
 			<div
 				id="current-requirement"
@@ -901,12 +893,12 @@
 							{/if}
 
 							<!-- Result -->
-							{#if showResult || Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
+							{#if showResult || hasComputedResult(requirement.questions)}
 								<div class="flex flex-col items-center w-full my-2">
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
 									</p>
-									{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
+									{#if hasComputedResult(requirement.questions)}
 										<span
 											class="badge text-sm font-semibold"
 											style="background-color: {complianceResultColorMap[
@@ -942,7 +934,7 @@
 										? 'pointer-events-none opacity-60'
 										: ''}"
 								>
-									{#if complianceAssessment.scoring_enabled && Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
+									{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
 										<div class="flex flex-row items-center space-x-4">
 											<span class="font-medium">{m.score()}</span>
 											<div class="shrink-0 relative">

@@ -13,6 +13,7 @@
 		type Translations
 	} from '$lib/components/FrameworkBuilder/builder-state';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 
 	interface Props {
@@ -265,19 +266,11 @@
 		{:else if currentItem}
 			{#if currentItem.type === 'splash'}
 				{@const node = currentItem.data}
-				<div class="card bg-white shadow-md border-l-4 border-l-purple-400 overflow-hidden">
-					{#if node.name}
-						<div class="px-6 py-4 border-b border-purple-100 flex items-center gap-2">
-							<i class="fa-solid fa-display text-purple-400"></i>
-							<span class="text-lg font-semibold text-gray-800"
-								>{t(node.translations, 'name', node.name)}</span
-							>
-						</div>
-					{/if}
-					<div class="px-6 py-5">
-						<MarkdownRenderer content={t(node.translations, 'description', node.description)} />
-					</div>
-				</div>
+				<SplashCard
+					name={t(node.translations, 'name', node.name)}
+					description={t(node.translations, 'description', node.description)}
+					class="card bg-white shadow-md"
+				/>
 			{:else if currentItem.type === 'requirement'}
 				{@const node = currentItem.data.node}
 				{@const questions = currentItem.data.questions}
