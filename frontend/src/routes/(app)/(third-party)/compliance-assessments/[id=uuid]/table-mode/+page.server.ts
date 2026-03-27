@@ -74,8 +74,12 @@ export const load = (async ({ fetch, params }) => {
 				folder: requirementAssessment.folder.id,
 				requirement: requirementAssessment.requirement.id,
 				compliance_assessment: requirementAssessment.compliance_assessment.id,
-				evidences: requirementAssessment.evidences.map((evidence) => evidence.id),
-				applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				...(requirementAssessment.evidences !== undefined && {
+					evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
+				}),
+				...(requirementAssessment.applied_controls !== undefined && {
+					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				})
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
