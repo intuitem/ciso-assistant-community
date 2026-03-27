@@ -1,7 +1,7 @@
-"""Data migration: questionnaire data.
+"""Data migration: backfill scoring + migrate JSON → relational models.
 
-1. Migrate RequirementNode.questions_json → Question + QuestionChoice rows
-2. Deduplicate QuestionChoice (question, ref_id) before unique constraint
+1. Backfill scoring_enabled on existing ComplianceAssessments
+2. Migrate RequirementNode.questions_json → Question + QuestionChoice rows
 3. Migrate RequirementAssessment.answers_json → Answer rows
 4. Populate Answer.selected_choices M2M from Answer.value for choice-type questions
 5. Normalize scores_definition from list to dict format
@@ -25,6 +25,44 @@ TYPE_MAPPING = {
 }
 
 BATCH_SIZE = 1000
+
+
+def backfill_scoring_enabled(apps, schema_editor):
+    """
+    Preserve prior scoring state for existing assessments:
+    1. Set scoring_enabled=True on CAs that have at least one scored RA.
+    2. For those CAs, set is_scored=True and score=min_score on assessable
+       RAs that don't already have a score — excluding NOT_APPLICABLE ones.
+    This mirrors the serializer toggle logic so the state is consistent.
+    """
+    ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
+    RequirementAssessment = apps.get_model("core", "RequirementAssessment")
+
+    # Find CAs that were already using scoring
+    scored_ca_ids = set(
+        RequirementAssessment.objects.filter(is_scored=True)
+        .values_list("compliance_assessment_id", flat=True)
+        .distinct()
+    )
+    if not scored_ca_ids:
+        return
+
+    # Enable scoring on those CAs
+    ComplianceAssessment.objects.filter(id__in=scored_ca_ids).update(
+        scoring_enabled=True
+    )
+
+    # For each scored CA, bring unscored assessable RAs (except NOT_APPLICABLE)
+    # up to the same state the serializer toggle would produce
+    for ca in ComplianceAssessment.objects.filter(id__in=scored_ca_ids):
+        unscored_ras = RequirementAssessment.objects.filter(
+            compliance_assessment=ca,
+            requirement__assessable=True,
+            is_scored=False,
+        ).exclude(result="not_applicable")
+
+        unscored_ras.update(is_scored=True)
+        unscored_ras.filter(score__isnull=True).update(score=ca.min_score or 0)
 
 
 def migrate_forward(apps, schema_editor):
@@ -316,11 +354,10 @@ def migrate_forward(apps, schema_editor):
 
 
 def migrate_backward(apps, schema_editor):
-    """Reverse: delete all Question/QuestionChoice/Answer rows, reset framework status."""
+    """Reverse: delete all Question/QuestionChoice/Answer rows."""
     Answer = apps.get_model("core", "Answer")
     Question = apps.get_model("core", "Question")
     QuestionChoice = apps.get_model("core", "QuestionChoice")
-    Framework = apps.get_model("core", "Framework")
 
     Answer.objects.all().delete()
     QuestionChoice.objects.all().delete()
@@ -329,9 +366,13 @@ def migrate_backward(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0152_framework_status_question_questionchoice_answer"),
+        ("core", "0151_questionnaire_schema"),
     ]
 
     operations = [
+        migrations.RunPython(
+            backfill_scoring_enabled,
+            reverse_code=migrations.RunPython.noop,
+        ),
         migrations.RunPython(migrate_forward, migrate_backward),
     ]

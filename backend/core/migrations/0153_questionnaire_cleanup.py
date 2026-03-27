@@ -1,7 +1,7 @@
 """Remove old JSON fields after data migration.
 
 RequirementNode.questions_json and RequirementAssessment.answers_json
-have been migrated to the Question/QuestionChoice/Answer models in 0144.
+have been migrated to the Question/QuestionChoice/Answer models.
 """
 
 from django.db import migrations
@@ -9,7 +9,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0153_migrate_questions_answers_data"),
+        ("core", "0152_questionnaire_data"),
     ]
 
     operations = [

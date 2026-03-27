@@ -1,27 +1,53 @@
-"""Schema migration: questionnaire models.
+"""Schema migration: questionnaire models and framework editing.
 
-- Rename old JSON fields (questions → questions_json, answers → answers_json)
-- Add outcomes_definition field
-- Add ComplianceAssessment.computed_outcome field
-- Create Question, QuestionChoice, Answer models
-- Answer includes selected_choices M2M to QuestionChoice
-- QuestionChoice has unique_together on (question, urn)
+Combines schema operations from the iterative questionnaire branch:
+- ComplianceAssessment scoring_enabled + score_calculation_method
+- Rename JSON fields (questions → questions_json, answers → answers_json)
+- Question, QuestionChoice, Answer models
+- RequirementNode display_mode
+- RequirementNodeAttachment model (with nullable requirement_node + framework FK)
+- Framework editing_draft/editing_version/editing_history
+- Field visibility on ComplianceAssessment and Framework
+- RequirementNode verbose_name options
 """
 
+import core.validators
 import django.db.models.deletion
 import iam.models
 import uuid
+from django.conf import settings
 from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0151_complianceassessment_scoring_enabled_and_more"),
+        ("core", "0150_add_editable_mixin_to_riskmatrix"),
         ("iam", "0021_fix_auditee_iam_groups"),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
-        # Rename old JSON fields before creating models whose FKs use the same related_names
+        # --- scoring ---
+        migrations.AddField(
+            model_name="complianceassessment",
+            name="scoring_enabled",
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AlterField(
+            model_name="complianceassessment",
+            name="score_calculation_method",
+            field=models.CharField(
+                choices=[
+                    ("average", "Average"),
+                    ("sum", "Sum"),
+                    ("average_of_averages", "Average of averages"),
+                ],
+                default="average",
+                max_length=100,
+                verbose_name="Score Calculation Method",
+            ),
+        ),
+        # --- rename old JSON fields ---
         migrations.RenameField(
             model_name="requirementnode",
             old_name="questions",
@@ -32,6 +58,7 @@ class Migration(migrations.Migration):
             old_name="answers",
             new_name="answers_json",
         ),
+        # --- outcomes ---
         migrations.AddField(
             model_name="complianceassessment",
             name="computed_outcome",
@@ -44,6 +71,7 @@ class Migration(migrations.Migration):
                 blank=True, default=list, verbose_name="Outcomes definition"
             ),
         ),
+        # --- Question model ---
         migrations.CreateModel(
             name="Question",
             fields=[
@@ -146,6 +174,7 @@ class Migration(migrations.Migration):
                 "ordering": ["order"],
             },
         ),
+        # --- QuestionChoice model ---
         migrations.CreateModel(
             name="QuestionChoice",
             fields=[
@@ -262,6 +291,7 @@ class Migration(migrations.Migration):
                 "unique_together": {("question", "urn")},
             },
         ),
+        # --- Answer model ---
         migrations.CreateModel(
             name="Answer",
             fields=[
@@ -331,6 +361,161 @@ class Migration(migrations.Migration):
                 "verbose_name": "Answer",
                 "verbose_name_plural": "Answers",
                 "unique_together": {("requirement_assessment", "question")},
+            },
+        ),
+        # --- display_mode ---
+        migrations.AddField(
+            model_name="requirementnode",
+            name="display_mode",
+            field=models.CharField(
+                choices=[("default", "Default"), ("splash", "Splash screen")],
+                default="default",
+                max_length=20,
+                verbose_name="Display mode",
+            ),
+        ),
+        # --- RequirementNodeAttachment (with nullable requirement_node + framework FK) ---
+        migrations.CreateModel(
+            name="RequirementNodeAttachment",
+            fields=[
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                (
+                    "file",
+                    models.FileField(
+                        upload_to="",
+                        validators=[
+                            core.validators.validate_file_size,
+                            core.validators.validate_file_name,
+                        ],
+                        verbose_name="File",
+                    ),
+                ),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
+                (
+                    "framework",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="image_attachments",
+                        to="core.framework",
+                        verbose_name="Framework",
+                    ),
+                ),
+                (
+                    "requirement_node",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="attachments",
+                        to="core.requirementnode",
+                        verbose_name="Requirement node",
+                    ),
+                ),
+                (
+                    "uploaded_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="requirement_node_attachments",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Uploaded by",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Requirement node attachment",
+                "verbose_name_plural": "Requirement node attachments",
+            },
+        ),
+        # --- framework editing ---
+        migrations.AddField(
+            model_name="framework",
+            name="editing_draft",
+            field=models.JSONField(
+                blank=True,
+                default=None,
+                help_text="Work-in-progress definition. Null when no active draft.",
+                null=True,
+                verbose_name="Editing draft",
+            ),
+        ),
+        migrations.AddField(
+            model_name="framework",
+            name="editing_version",
+            field=models.IntegerField(
+                default=1,
+                help_text="Incremented on each publish.",
+                verbose_name="Editing version",
+            ),
+        ),
+        migrations.AddField(
+            model_name="framework",
+            name="editing_history",
+            field=models.JSONField(
+                blank=True,
+                default=list,
+                help_text="Snapshots of previous published definitions.",
+                verbose_name="Editing history",
+            ),
+        ),
+        # --- field visibility ---
+        migrations.AddField(
+            model_name="complianceassessment",
+            name="field_visibility",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="Override visibility per field for this assessment. Overrides framework defaults.",
+                verbose_name="Field visibility",
+            ),
+        ),
+        migrations.AddField(
+            model_name="framework",
+            name="field_visibility",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'.",
+                verbose_name="Field visibility",
+            ),
+        ),
+        # --- RequirementNode options ---
+        migrations.AlterModelOptions(
+            name="requirementnode",
+            options={
+                "verbose_name": "RequirementNode",
+                "verbose_name_plural": "RequirementNodes",
             },
         ),
     ]
