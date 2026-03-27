@@ -206,7 +206,7 @@
 						/>
 					{:else if question.type === 'boolean'}
 						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
-							{#each [{ value: true, label: m.yes() }, { value: false, label: m.no() }, { value: null, label: m.notApplicable() }] as option}
+							{#each [{ value: true, label: m.yes() }, { value: false, label: m.no() }] as option}
 								{@const selected = internalAnswers[urn] === option.value}
 								<button
 									type="button"
