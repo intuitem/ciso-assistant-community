@@ -17,9 +17,31 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	const complianceData = await complianceRes.json();
 	const riskData = await riskRes.json();
+	const complianceAssessments = complianceData.results ?? complianceData;
+
+	// Fetch implementation_groups_definition for each unique framework
+	const frameworkIds = [
+		...new Set(
+			complianceAssessments.map((ca: Record<string, any>) => ca.framework?.id).filter(Boolean)
+		)
+	];
+
+	const frameworkGroupsMap: Record<string, any[]> = {};
+	if (frameworkIds.length > 0) {
+		const frameworkResponses = await Promise.all(
+			frameworkIds.map((id: string) => fetch(`${BASE_API_URL}/frameworks/${id}/`))
+		);
+		for (const res of frameworkResponses) {
+			if (res.ok) {
+				const fw = await res.json();
+				frameworkGroupsMap[fw.id] = fw.implementation_groups_definition || [];
+			}
+		}
+	}
 
 	return {
-		complianceAssessments: complianceData.results ?? complianceData,
-		riskAssessments: riskData.results ?? riskData
+		complianceAssessments,
+		riskAssessments: riskData.results ?? riskData,
+		frameworkGroupsMap
 	};
 };

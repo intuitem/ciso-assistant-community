@@ -34,6 +34,10 @@
 		}
 	}
 
+	function exportPDF() {
+		window.print();
+	}
+
 	function getTreatmentBadge(treatment: string): { label: string; classes: string } {
 		switch (treatment) {
 			case 'mitigate':
@@ -52,11 +56,11 @@
 
 <div class="space-y-6">
 	<!-- Header -->
-	<div class="flex items-start justify-between">
+	<div class="flex items-start justify-between print:mb-2">
 		<div class="flex items-center gap-3">
 			<a
 				href="/reports/soa"
-				class="text-gray-500 hover:text-gray-700 transition-colors"
+				class="text-gray-500 hover:text-gray-700 transition-colors no-print"
 				title={m.backToSelection()}
 			>
 				<i class="fas fa-arrow-left text-lg"></i>
@@ -80,6 +84,14 @@
 							{metadata.framework.ref_id || metadata.framework.name}
 						</span>
 					{/if}
+					{#if metadata.selected_implementation_group}
+						<span
+							class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200"
+						>
+							<i class="fas fa-layer-group mr-1.5"></i>
+							{metadata.selected_implementation_group}
+						</span>
+					{/if}
 					{#if metadata.risk_assessments?.length > 0}
 						{#each metadata.risk_assessments as raName}
 							<span
@@ -93,45 +105,54 @@
 				</div>
 			</div>
 		</div>
+		<button
+			onclick={exportPDF}
+			class="no-print flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+		>
+			<i class="fas fa-file-pdf"></i>
+			PDF
+		</button>
 	</div>
 
 	<!-- SoA Table -->
-	<div class="bg-white card border border-gray-200 overflow-hidden">
+	<div
+		class="bg-white card border border-gray-200 overflow-hidden print:border-none print:shadow-none"
+	>
 		<div class="overflow-x-auto">
-			<table class="w-full table-fixed">
+			<table class="w-full table-fixed border-collapse">
 				<colgroup>
 					<col class="w-[8%]" /><!-- Ref -->
 					<col class="w-[22%]" /><!-- Requirement -->
-					<col class="w-[8%]" /><!-- Applicable -->
-					<col class="w-[12%]" /><!-- Result -->
+					<col class="w-[7%]" /><!-- Applicable -->
+					<col class="w-[11%]" /><!-- Result -->
 					<col class="w-[22%]" /><!-- Observation -->
-					<col class="w-[28%]" /><!-- Implementation -->
+					<col class="w-[30%]" /><!-- Implementation -->
 				</colgroup>
-				<thead>
-					<tr class="bg-gray-100 border-b border-gray-200">
-						<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+				<thead class="sticky top-0 z-10 print:static">
+					<tr class="bg-gray-800 text-white border-b-2 border-gray-900">
+						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 							Ref
 						</th>
-						<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 							{m.requirement()}
 						</th>
-						<th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+						<th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider">
 							{m.applicable()}
 						</th>
-						<th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+						<th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider">
 							{m.result()}
 						</th>
-						<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 							{m.observation()}
 						</th>
-						<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 							{m.implementation()}
 						</th>
 					</tr>
 				</thead>
 				<tbody>
-					{#each treeEntries as [nodeId, node]}
-						<SoaTreeSection {nodeId} {node} depth={0} />
+					{#each treeEntries as [nodeId, node], i}
+						<SoaTreeSection {nodeId} {node} depth={0} index={i} />
 					{/each}
 				</tbody>
 			</table>
@@ -140,7 +161,9 @@
 
 	<!-- Risk Scenarios Section -->
 	{#if riskScenarios.length > 0}
-		<div class="bg-white card border border-gray-200 overflow-hidden">
+		<div
+			class="bg-white card border border-gray-200 overflow-hidden print:break-before-page print:border-none print:shadow-none"
+		>
 			<div class="px-4 py-3 bg-red-50 border-b border-red-200">
 				<div class="flex items-center gap-2">
 					<i class="fas fa-shield-halved text-red-600"></i>
@@ -159,19 +182,29 @@
 					</colgroup>
 					<thead>
 						<tr class="bg-gray-100 border-b border-gray-200">
-							<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+							<th
+								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+							>
 								Ref
 							</th>
-							<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+							<th
+								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+							>
 								{m.riskScenarios()}
 							</th>
-							<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+							<th
+								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+							>
 								{m.treatment()}
 							</th>
-							<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+							<th
+								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+							>
 								{m.residualRisk()}
 							</th>
-							<th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+							<th
+								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+							>
 								{m.implementation()}
 							</th>
 						</tr>
@@ -243,3 +276,44 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	@media print {
+		:global(.no-print),
+		:global(nav),
+		:global(aside),
+		:global(header),
+		:global(footer),
+		:global(.sidebar),
+		:global(#shell-header),
+		:global(#page-header),
+		:global(.app-bar),
+		:global(.app-rail) {
+			display: none !important;
+		}
+
+		:global(body) {
+			print-color-adjust: exact;
+			-webkit-print-color-adjust: exact;
+		}
+
+		@page {
+			size: A3 landscape;
+			margin: 1.5cm 1cm;
+		}
+
+		:global(main) {
+			padding: 0 !important;
+			margin: 0 !important;
+			max-width: none !important;
+		}
+
+		table {
+			font-size: 9pt;
+		}
+
+		th {
+			font-size: 8pt;
+		}
+	}
+</style>

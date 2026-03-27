@@ -12,18 +12,19 @@
 
 	let { data }: Props = $props();
 
-	function loadSaved(): { compliance: string; risk: string[] } {
-		if (!browser) return { compliance: '', risk: [] };
+	function loadSaved(): { compliance: string; risk: string[]; group: string } {
+		if (!browser) return { compliance: '', risk: [], group: '' };
 		try {
 			const saved = localStorage.getItem(STORAGE_KEY);
 			if (saved) return JSON.parse(saved);
 		} catch {}
-		return { compliance: '', risk: [] };
+		return { compliance: '', risk: [], group: '' };
 	}
 
 	const saved = loadSaved();
 	let selectedComplianceAssessment: string = $state(saved.compliance);
 	let selectedRiskAssessments: string[] = $state(saved.risk);
+	let selectedImplementationGroup: string = $state(saved.group);
 
 	function toggleRiskAssessment(id: string) {
 		if (selectedRiskAssessments.includes(id)) {
@@ -33,6 +34,29 @@
 		}
 	}
 
+	// Derive implementation groups from the selected CA's framework
+	const implementationGroups = $derived.by(() => {
+		const ca = data.complianceAssessments.find(
+			(c: Record<string, any>) => c.id === selectedComplianceAssessment
+		);
+		if (!ca?.framework?.id) return [];
+		return data.frameworkGroupsMap?.[ca.framework.id] || [];
+	});
+
+	// Auto-select "SoA" group when groups change
+	$effect(() => {
+		if (implementationGroups.length > 0) {
+			const soaGroup = implementationGroups.find(
+				(g: { ref_id: string }) => g.ref_id === 'SoA' || g.ref_id === 'soa'
+			);
+			if (soaGroup && !selectedImplementationGroup) {
+				selectedImplementationGroup = soaGroup.ref_id;
+			}
+		} else {
+			selectedImplementationGroup = '';
+		}
+	});
+
 	function handleGenerate() {
 		if (!selectedComplianceAssessment) return;
 		if (browser) {
@@ -40,7 +64,8 @@
 				STORAGE_KEY,
 				JSON.stringify({
 					compliance: selectedComplianceAssessment,
-					risk: selectedRiskAssessments
+					risk: selectedRiskAssessments,
+					group: selectedImplementationGroup
 				})
 			);
 		}
@@ -48,6 +73,9 @@
 		params.set('compliance_assessment', selectedComplianceAssessment);
 		if (selectedRiskAssessments.length > 0) {
 			params.set('risk_assessments', selectedRiskAssessments.join(','));
+		}
+		if (selectedImplementationGroup) {
+			params.set('implementation_group', selectedImplementationGroup);
 		}
 		goto(`/reports/soa/results?${params.toString()}`);
 	}
@@ -127,6 +155,39 @@
 					{/if}
 				</div>
 			{/if}
+
+			<!-- Implementation Group Selector -->
+			{#if implementationGroups.length > 0}
+				<div class="mt-4 pt-4 border-t border-gray-100">
+					<label class="block text-sm font-medium text-gray-700 mb-2">
+						{m.soaScope()}
+					</label>
+					<div class="flex flex-wrap gap-2">
+						<button
+							type="button"
+							onclick={() => (selectedImplementationGroup = '')}
+							class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
+								{selectedImplementationGroup === ''
+								? 'bg-blue-600 text-white border-blue-600'
+								: 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'}"
+						>
+							{m.allRequirements()}
+						</button>
+						{#each implementationGroups as group}
+							<button
+								type="button"
+								onclick={() => (selectedImplementationGroup = group.ref_id)}
+								class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
+									{selectedImplementationGroup === group.ref_id
+									? 'bg-blue-600 text-white border-blue-600'
+									: 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'}"
+							>
+								{group.name}
+							</button>
+						{/each}
+					</div>
+				</div>
+			{/if}
 		{/if}
 	</div>
 
@@ -141,8 +202,8 @@
 			<div>
 				<h2 class="text-lg font-semibold text-gray-900">{m.soaSelectRisk()}</h2>
 				<p class="text-xs text-gray-500 mt-0.5">
-					Selecting risk assessments will enrich the SoA with linked risk scenarios and
-					treatment decisions
+					Selecting risk assessments will enrich the SoA with linked risk scenarios and treatment
+					decisions
 				</p>
 			</div>
 		</div>
@@ -171,9 +232,7 @@
 							{/if}
 						</div>
 						{#if ra.perimeter?.str}
-							<span
-								class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded flex-shrink-0"
-							>
+							<span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded flex-shrink-0">
 								{ra.perimeter.str}
 							</span>
 						{/if}

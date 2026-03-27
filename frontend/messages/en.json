@@ -3917,5 +3917,7 @@
 	"riskTreatmentControlsDescription": "Applied controls identified through risk assessment scenarios",
 	"linkedRiskScenarios": "Linked risk scenarios",
 	"control": "Control",
-	"noRiskControls": "No risk treatment controls found"
+	"noRiskControls": "No risk treatment controls found",
+	"soaScope": "Scope",
+	"allRequirements": "All requirements"
 }

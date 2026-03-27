@@ -3880,5 +3880,7 @@
 	"riskTreatmentControlsDescription": "Mesures de sécurité identifiées à travers les scénarios de risques",
 	"linkedRiskScenarios": "Scénarios de risques liés",
 	"control": "Mesure",
-	"noRiskControls": "Aucune mesure de traitement des risques trouvée"
+	"noRiskControls": "Aucune mesure de traitement des risques trouvée",
+	"soaScope": "Périmètre",
+	"allRequirements": "Toutes les exigences"
 }

@@ -10256,6 +10256,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         implementation_groups = compliance_assessment.selected_implementation_groups
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
 
+        # Optionally filter by a specific implementation group (e.g., "SoA" for Annex A)
+        requested_group = request.query_params.get("implementation_group", "")
+        if requested_group:
+            tree = filter_graph_by_implementation_groups(tree, {requested_group})
+
         # Build ra_id → RequirementAssessment lookup with prefetched applied_controls
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment
@@ -10390,8 +10395,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "id": str(_framework.id),
                         "name": _framework.name,
                         "ref_id": _framework.ref_id or "",
+                        "implementation_groups_definition": _framework.implementation_groups_definition,
                     },
                     "risk_assessments": risk_assessment_names,
+                    "selected_implementation_group": requested_group or None,
                 },
             }
         )
