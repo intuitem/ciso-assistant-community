@@ -1399,9 +1399,7 @@ export function createBuilderState(
 		return {
 			...q,
 			translations:
-				Object.keys(merged).length > 0
-					? { ...q.translations, [lang]: merged }
-					: q.translations,
+				Object.keys(merged).length > 0 ? { ...q.translations, [lang]: merged } : q.translations,
 			choices: q.choices.map((c) => {
 				const cFields: Record<string, string> = {};
 				if (c.value) cFields.value = c.value;

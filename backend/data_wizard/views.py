@@ -2688,11 +2688,10 @@ class LoadFileView(APIView):
 
                             # Build answers from the "answers" cell
                             answers_cell = record.get("answers")
-                            questions_dict = build_questions_dict(ReqNode) if ReqNode else None
-                            if (
-                                answers_cell not in (None, "")
-                                and questions_dict
-                            ):
+                            questions_dict = (
+                                build_questions_dict(ReqNode) if ReqNode else None
+                            )
+                            if answers_cell not in (None, "") and questions_dict:
                                 text_to_question = {}
                                 for q_urn, qdef in questions_dict.items():
                                     q_text = qdef.get("text", "")

@@ -82,7 +82,7 @@
 										{@const itemHref = `/loaded-libraries/${value.id}`}
 										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 									{:else if key === 'scores_definition'}
-										{@const entries = Array.isArray(value) ? value : value?.scale ?? []}
+										{@const entries = Array.isArray(value) ? value : (value?.scale ?? [])}
 										{#each entries as definition}
 											<div>
 												{definition.score}.
