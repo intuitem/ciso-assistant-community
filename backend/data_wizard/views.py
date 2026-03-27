@@ -7,6 +7,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
 
+from metrology.models import MetricDefinition, MetricInstance
+from core.base_models import AbstractBaseModel
+
 from .serializers import LoadFileSerializer
 from core.models import (
     Actor,
@@ -46,6 +49,7 @@ from core.serializers import (
     IncidentWriteSerializer,
     VulnerabilityWriteSerializer,
 )
+from metrology.serializers import MetricInstanceWriteSerializer
 from ebios_rm.models import (
     EbiosRMStudy,
     FearedEvent,
@@ -90,8 +94,9 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from datetime import datetime
-from typing import Optional, Final, ClassVar
-from dataclasses import dataclass, field
+from types import MappingProxyType
+from typing import Optional, Final, ClassVar, Any, Iterable, Callable, Mapping, Hashable
+from dataclasses import dataclass, field, KW_ONLY
 from abc import ABC, abstractmethod
 import enum
 
@@ -252,7 +257,7 @@ def _parse_recovery_objectives(raw: str) -> dict:
     return result
 
 
-def _resolve_filtering_labels(value) -> list[UUID]:
+def _resolve_filtering_labels(value, ctx: BaseContext) -> list[UUID]:
     """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
 
     Labels that do not yet exist are created on the fly.
@@ -261,18 +266,62 @@ def _resolve_filtering_labels(value) -> list[UUID]:
         return []
     separator = "|" if "|" in value else ","
     label_names = [name.strip() for name in value.split(separator) if name.strip()]
-    label_ids: list[UUID] = []
+    label_ids: set[UUID] = set()
+
+    viewable_name_to_ids = ctx.get_viewable_object_ids(FilteringLabel, ["label"])
+    viewable_ids = list(viewable_name_to_ids.values())
+    base_query = FilteringLabel.objects.filter(id__in=viewable_ids)
+
     for label_name in label_names:
-        label = FilteringLabel.objects.filter(label=label_name).first()
-        if label is None:
+        label = base_query.filter(label=label_name).first()
+        if label is not None:
+            label_ids.add(label.id)
+        else:
             try:
                 label = FilteringLabel(label=label_name)
                 label.full_clean()
                 label.save()
+                label_ids.add(label.id)
             except Exception:
                 logging.error(f"Failed to save label: {value}")
-        label_ids.append(label.id)
-    return label_ids
+
+    return list(label_ids)
+
+
+def _resolve_owners(record_value: Any, ctx: BaseContext) -> list[UUID]:
+    """Resolve semicolon-separated user emails or team names to Actor IDs.
+
+    Each entry is matched first as a user email, then as a team name.
+    Unresolvable entries are silently skipped.
+    """
+    if not isinstance(record_value, str) or record_value == "":
+        return []
+
+    ACTOR_SEPARATOR: Final[str] = ";"
+
+    actor_entries = [entry.strip() for entry in record_value.split(ACTOR_SEPARATOR) if entry.strip()]
+    actor_id_set = set()
+    actor_ids = []
+
+    viewable_name_to_ids = ctx.get_viewable_object_ids(Actor, ["user"])
+    viewable_ids = list(viewable_name_to_ids.values())
+    base_query = Actor.objects.filter(id__in=viewable_ids)
+
+    for entry in actor_entries:
+        # Try matching as user email first
+        actor = Actor.objects.filter(user__email__iexact=entry).first()
+        if actor is None:
+            # Try matching as team name
+            actor = Actor.objects.filter(team__name__iexact=entry).first()
+        if actor is not None and actor.id not in actor_ids:
+            actor_id_set.add(actor.id)
+            actor_ids.append(actor.id)
+        else:
+            logger.warning(
+                "Could not resolve an owner reference to a user email or team name during Applied Control import; skipping."
+            )
+
+    return actor_ids
 
 
 class RecordFileType(enum.StrEnum):
@@ -319,6 +368,7 @@ class ModelType(enum.StrEnum):
     INCIDENT = "Incident"
     VULNERABILITY = "Vulnerability"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
+    METRIC_INSTANCE = "MetricInstance"
 
     @staticmethod
     def from_string(model_type: str) -> Optional["ModelType"]:
@@ -331,8 +381,8 @@ class ModelType(enum.StrEnum):
 
 @dataclass(frozen=True)
 class Error:
-    record: dict
     error: str
+    record: dict
     is_warning: bool = False
 
     def to_dict(self) -> dict:
@@ -385,7 +435,7 @@ class Result:
         }
 
 
-@dataclass(frozen=True)
+@dataclass
 class BaseContext:
     request: HttpRequest
     folders_map: dict[str, UUID] = field(default_factory=dict)
@@ -394,39 +444,483 @@ class BaseContext:
     matrix_id: Optional[str] = None
     framework_id: Optional[str] = None
     on_conflict: ConflictMode = ConflictMode.STOP
+    viewable_object_ids: dict[
+        type[AbstractBaseModel],
+        dict[tuple[Hashable, ...], UUID]
+    ] = field(default_factory=dict)
+    """
+    Cache viewable object ids as calling `RoleAssignment.get_accessible_object_ids` for each newly processed record is expensive.
+
+    Caching object ids can lead to minor data inconsistencies where a stale object id would be kept in cache even if another user delete the object while the data-wizard processes records.
+
+    This is acceptable as the underlying RDBMS would protect us from setting invalid foreign keys anyway.
+    """
+
+    def get_viewable_object_ids(self, model: type[AbstractBaseModel], primary_field_names: list[str] = ["name"]) -> dict[tuple[Hashable, ...], UUID]:
+        """
+        The field set of `model` represented by `primary_field_names` MUST be unique per-object.
+
+        Return a hashmap where:
+        - The key is the tuple of values mapped to the keys of `primary_field_names`.
+        - The value is objet associated to this field combination.
+
+        **WARNING:** All string values in the return dict key tuples are lowercased.
+        """
+
+        cached_obj_name_to_ids = self.viewable_object_ids.get(model, None)
+        if cached_obj_name_to_ids is not None:
+            return cached_obj_name_to_ids
+
+        (viewable_object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, model
+        )
+        obj_name_to_ids: dict[tuple[Hashable, ...], UUID] = {}
+
+        for obj in model.objects.filter(id__in=viewable_object_ids):
+            map_key: list[Hashable] = []
+
+            for primary_field_name in primary_field_names:
+                value = getattr(obj, primary_field_name)
+                if isinstance(value, str):
+                    value = value.lower()
+
+                map_key.append(value)
+
+            obj_name_to_ids[tuple(map_key)] = obj.id
+
+        self.viewable_object_ids[model] = obj_name_to_ids
+        return obj_name_to_ids
+
+class _UnsetClass(): pass
+UNSET: Final[_UnsetClass] = _UnsetClass()
+"""
+Represent an unset value.
+"""
+UNSET_INT: Final[int] = -1
+
+type Unset[T] = T | _UnsetClass
+"""
+Represent a type which is either `T` or the `UNSET` constant.
+
+This type act exactly as `typing.Optional` with `None` being replaced by `Unset`.
+
+The purpose of this type is to replace `typing.Optional[T]` when `T` being `None` may be an actual valid value for `T`.
+"""
+
+class ParseResult[IN, OUT]:
+    """
+    Represent a Result which is either:
+    - An `input`: If the parsing didn't finish nor failed.
+    - A `result`: If the parsing finished successfully.
+    - An `error`: If the parsing failed.
+    """
+    def __init__(self, input: Unset[IN] = UNSET, result: Unset[OUT] = UNSET, error: Unset[Error] = UNSET):
+        self._input = input
+        self._result = result
+        self._error = error
+
+    def is_unset(self) -> bool:
+        return self._input is UNSET and self._result is UNSET and self._error is UNSET
+
+    def is_ready(self) -> bool:
+        return self._result is not UNSET or self._error is not UNSET
+
+    def is_error(self) -> bool:
+        """Return `True` if this `ParseResult` is an error."""
+        return self._error is not UNSET
+
+    def error(self) -> Error:
+        """
+        Return the underlying error.
+
+        **WARNING:** This function should only be called if `is_error()` is `True`.
+        """
+        return self._error
+
+    def input(self) -> IN:
+        """
+        Return the input value passed to the parser.
+
+        **WARNING:** This function should only be called if `is_error()` is `False` and `is_ready()` is also `False`.
+        """
+        return self._input
+
+    def result(self) -> OUT:
+        """
+        Return the parsed output.
+
+        **WARNING:** This function should only be called if `is_error()` is `False` and `is_ready()` is `True`.
+        """
+        return self._result
+
+def _assert(condition: bool, error_msg: str):
+    """Safe wrapper for `assert {condition}, {error_msg}`."""
+    if not condition:
+        raise AssertionError(error_msg)
+
+@dataclass(frozen=True)
+class Field[IN, OUT](ABC):
+    """
+    Base class for all field classes which instances will be used by the `RecordConsumer.FIELDS` class variable.
+
+    The `IN` generic parameter represents the expected record value type for this field.
+    The `OUT` generic parameter represents the type of the value which will be passed to the caller `RecordConsumer.SERIALIZER_CLASS` for this field.
+    """
+
+    # --- Class Variables --- #
+
+    INPUT_TYPES: ClassVar[tuple[type, ...] | type] = object
+    """
+    The `INPUT_TYPES` class variable MUST be defined for each `Field` derived class.
+
+    Any input value which doesn't match the types declared in `INPUT_TYPES` will be rejected.
+
+    `INPUT_TYPES` must represent the types matched by the `IN` generic type.
+
+    Note that field accepting `None` as an input MUST use `type(None)` instead of `None` as None isn't a type by itself.
+
+    **WARNING:** A nullable field (`field.null == True`) MUST add `type(None)` to its `INPUT_TYPES` to work as expected.
+    """
+
+    # --- Dataclass Fields --- #
+
+    name: str
+    """
+    Represents 2 things:
+
+    - The name of the record key which will be checked (if `self.required` is `True`).
+    - The name of this field which will be used when calling `self.SERIALIZER_CLASS` at object creation/update.
+    """
+    # Using KW_ONLY force all remaining arguments (including derived classe ones) to be keyword only.
+    # This is required for letting field classes have argument with no default value.
+    _: KW_ONLY
+    required: bool = False
+    """
+    If `True` an error will be returned when the record doesn't include the `self.name` key.
+    """
+    null: bool = False
+    """
+    If `True`, unset or `None` values passed to this field will result in a `None` value being passed to the the `self.SERIALIZER_CLASS` at object creation.
+    """
+
+    @abstractmethod
+    def get_value(self, record: dict[str, Any], ctx: BaseContext) -> ParseResult[Optional[IN], Optional[OUT]]:
+        """
+        Take the entire `record` and underlying `BaseContext` (`ctx`) of the caller `RecordConsumer` as an input.
+
+        Return the value which will be passed to the caller `RecordConsumer.SERIALIZER_CLASS` via the `self.name` serializer field name.
+        """
+        pass
+
+    def error(self, error_msg: str, record: dict) -> ParseResult[Optional[IN], Optional[OUT]]:
+        """Return a failed parsing result."""
+        return ParseResult(error=Error(error_msg, record))
+
+    def success(self,
+        input: Unset[Optional[IN]] = UNSET,
+        result: Unset[Optional[OUT]] = UNSET
+    ) -> ParseResult[Optional[IN], Optional[OUT]]:
+        """
+        Return either:
+
+        - A successfull parsing result (if `result is not UNSET`)
+        - A successfull ongoing parsing result (if `input is not UNSET`)
+        - A successfull parsing result with an unset value (if both `result` and `input` are `UNSET`)
+        """
+        return ParseResult(input=input, result=result)
+
+    def can_early_return(self, record: dict[str, Any]) -> ParseResult[Optional[IN], Optional[OUT]]:
+        """
+        Check if the `get_value(...)` method can return early.
+
+        An early return will occur if:
+        - The `field.name` isn't found in the `record`
+        - The field value for this record is `None` and the field is nullable
+
+        If `ParseResult.is_ready()` is `True`, the caller can return this result immediately.
+        """
+
+        if self.name not in record and self.required:
+            return self.error(f"Required field {self.name!r} not set for record: {record}", record)
+
+        value = record.get(self.name)
+
+        if value is None:
+            if self.null:
+                return self.success(result=None)
+
+        if not isinstance(value, self.INPUT_TYPES):
+            return self.error(f"Field {self.name!r} with invalid type {type(value).__qualname__} was passed, valid types for this field are: {self.INPUT_TYPES}", record)
+
+        return self.success(input=value)
+
+@dataclass(frozen=True)
+class CharField(Field[str, str]):
+    INPUT_TYPES = (str, type(None))
+
+    blank: bool = False
+    min_length: int = UNSET_INT
+    max_length: int = UNSET_INT
+    choices: Optional[frozenset[str]] = None
+    """Choices MUST be lowercased."""
+
+    def __post_init__(self):
+        _assert(self.min_length > 0 or self.min_length == UNSET_INT, f"Invalid min_length {self.min_length}")
+        _assert(self.max_length > 0 or self.max_length == UNSET_INT, f"Invalid max_length {self.max_length}")
+
+    def get_value(self, record: dict[str, Any], ctx) -> ParseResult[Optional[str], Optional[str]]:
+        early_return_result = self.can_early_return(record)
+        if early_return_result.is_ready():
+            return early_return_result
+
+        value = early_return_result.input()
+        if value is None:
+            return self.success()
+
+        if value == "" and not self.blank:
+            return self.error(f"Field {self.name!r} can't be an empty string.", record)
+
+        length = len(value)
+
+        if length < self.min_length and self.min_length != UNSET_INT:
+            return self.error(f"Value for field {self.name!r} is too short (current length={length}) the length must be at least {self.min_length}.", record)
+
+        if length > self.max_length and self.min_length != UNSET_INT:
+            return self.error(f"Value for field {self.name!r} is too long (current length={length}) the length must be at most {self.max_length}.", record)
+
+        if self.choices is not None:
+            value = value.strip().lower()
+            if value not in self.choices:
+                return self.error(f"Field {self.name!r} has choice {value!r}, valid choices are: {self.choices!r}", record)
+
+        return self.success(result=value)
+
+@dataclass(frozen=True)
+class FloatField(Field[str | int | float, float]):
+    INPUT_TYPES = (str, int, float, type(None))
+
+    min: float = float("-inf")
+    max: float = float("inf")
+
+    def get_value(self, record: dict[str, Any], ctx) -> ParseResult[Optional[str | int | float], Optional[float]]:
+        early_return_result = self.can_early_return(record)
+        if early_return_result.is_ready():
+            return early_return_result
+
+        value = early_return_result.input()
+        if value is None:
+            return self.success()
+
+        if isinstance(value, str):
+            value = value.strip().lower()
+
+            if value == "":
+                return self.success()
+
+            try:
+                value = float(value)
+            except Exception:
+                return self.error(f"Invalid float for field {self.name!r}: {value!r}", record)
+
+        if value < self.min:
+            return self.error(f"Value for field {self.name!r} is too low, value {value!r} must be higher or equal to {self.min}.", record)
+
+        if value > self.max:
+            return self.error(f"Value for field {self.name!r} is too big, value {value!r} must be lower or equal to {self.min}.", record)
+
+        return self.success(result=value)
+
+@dataclass(frozen=True)
+class ForeignKey(Field[str, UUID]):
+    INPUT_TYPES = (str, type(None))
+
+    model: type[AbstractBaseModel]
+
+    def __post_init__(self):
+        field_names = {field.name for field in self.model._meta.fields}
+        _assert("name" in field_names, f"The model {self.model.__qualname__} can't be used as a data_wizard.views.ForeignKey model as it doesn't have a 'name' field!")
+
+    def get_value(self, record: dict[str, Any], ctx: BaseContext) -> ParseResult[Optional[str], Optional[UUID]]:
+        early_return_result = self.can_early_return(record)
+        if early_return_result.is_ready():
+            return early_return_result
+
+        obj_name = early_return_result.input()
+        if obj_name in (None, ""):
+            if self.null:
+                return self.success(result=None)
+            else:
+                return self.error(f"The ForeignKey for field {self.name!r} must be set!", record)
+
+        (viewable_object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), ctx.request.user, self.model
+        )
+
+        obj_name = obj_name.strip()
+
+        obj = self.model.objects.filter(name__iexact=obj_name, id__in=viewable_object_ids).first()
+        if obj is None:
+            return self.error(f"Error for field {self.name!r}, {self.model.__qualname__} object with name {obj_name!r}: {obj_name!r} not found.", record)
+
+        return self.success(result=obj.id)
+
+@dataclass(frozen=True)
+class ManyToManyField(Field[str, list[UUID]]):
+    INPUT_TYPES = (str, type(None))
+
+    # The model field will have to be changed to type[AbstractBaseModel] once a default generic implementation working for most possible AbstractBaseModel is implemented.
+    model: type[FilteringLabel | Actor]
+    blank: bool = False
+
+    def __post_init__(self):
+        # This __post_init__ will have to be removed once the model field is changed to type[AbstractBaseModel].
+        SUPPORTED_MODELS: set[type[AbstractBaseModel]] = {FilteringLabel, Actor}
+
+        _assert(self.model in SUPPORTED_MODELS, f"The {self.model.__qualname__} model isn't support by the data_wizard.views.ManyToManyField class for now.")
+        _assert(self.null is False, "The null parameter can't be True for a ManyToManyField!")
+
+    def get_value(self, record: dict[str, Any], ctx: BaseContext) -> ParseResult[Optional[str], Optional[list[UUID]]]:
+        early_return_result = self.can_early_return(record)
+        if early_return_result.is_ready():
+            return early_return_result
+
+        value = early_return_result.input() or ""
+        value = value.strip()
+
+        if value == "":
+            if self.blank:
+                return self.error(f"The ManyToManyField for field {self.name!r} can't be empty!", record)
+            else:
+                return self.success()
+
+        RESOLVE_FUNCTIONS: Mapping[
+            type[AbstractBaseModel],
+            Callable[[str, BaseContext], list[UUID]]
+        ] = MappingProxyType({
+            FilteringLabel: _resolve_filtering_labels,
+            Actor: _resolve_owners,
+        })
+        resolve_function = RESOLVE_FUNCTIONS[self.model]
+
+        obj_ids = resolve_function(value, ctx)
+
+        if self.blank and len(obj_ids) == 0:
+            return self.error(f"The ManyToManyField for field {self.name!r} can't be empty!", record)
+
+        return self.success(result=obj_ids)
 
 
-class RecordConsumer[Context](ABC):
+class FolderField(Field[str, UUID]):
+    INPUT_TYPES = (str, type(None))
+
+    def get_value(self, record: dict[str, Any], ctx: BaseContext) -> ParseResult[Optional[str], Optional[UUID]]:
+        early_return_result = self.can_early_return(record)
+        if early_return_result.is_ready():
+            return early_return_result
+
+        domain_name = early_return_result.input()
+        domain = None
+        if domain_name is not None:
+            domain = ctx.folders_map.get(domain_name.lower(), ctx.folder_id)
+
+        default_domain = UUID(ctx.folder_id) if ctx.folder_id else None
+        if domain is None:
+            domain = default_domain
+
+        if domain is None:
+            return self.error(f"Not domain passed to field: {self.name!r}", record)
+
+        try:
+            if not isinstance(domain, UUID):
+                domain = UUID(domain)
+        except Exception:
+            return self.error(f"Invalid domain UUID {domain!r}!", record)
+
+        return self.success(result=domain)
+
+class RecordConsumer[Context=None](ABC):
     SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
     # Maps record_data keys to possible source record keys when they differ.
     # Override in subclasses that use alternative/aliased column names.
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {}
 
+    FIELDS: ClassVar[list[Field[Any, Any]]] = []
+
     def __init__(self, base_context: BaseContext):
-        self.request = base_context.request
-        self.folders_map = base_context.folders_map
-        self.folder_id = base_context.folder_id
-        self.perimeter_id = base_context.perimeter_id
-        self.matrix_id = base_context.matrix_id
-        self.framework_id = base_context.framework_id
-        self.on_conflict = base_context.on_conflict
+        self.base_context = base_context
+
+    @property
+    def request(self) -> HttpRequest:
+        return self.base_context.request
+
+    @property
+    def folders_map(self) -> dict[str, UUID]:
+        return self.base_context.folders_map
+
+    @property
+    def folder_id(self) -> Optional[str]:
+        return self.base_context.folder_id
+
+    @property
+    def perimeter_id(self) -> Optional[str]:
+        return self.base_context.perimeter_id
+
+    @property
+    def matrix_id(self) -> Optional[str]:
+        return self.base_context.matrix_id
+
+    @property
+    def framework_id(self) -> Optional[str]:
+        return self.base_context.framework_id
+
+    @property
+    def on_conflict(self) -> ConflictMode:
+        return self.base_context.on_conflict
 
     def __init_subclass__(cls):
         provided_class = getattr(cls, "SERIALIZER_CLASS", None)
         is_defined = provided_class is not None
         is_serializer = is_defined and issubclass(provided_class, BaseModelSerializer)
 
-        assert is_serializer, f"Invalid serializer for class {cls.__name__}"
+        _assert(is_serializer, f"Invalid serializer for class {cls.__name__}")
 
-    @abstractmethod
+        direct_base_class = cls.__mro__[1]
+        _assert(direct_base_class is RecordConsumer, f"The {direct_base_class.__name__} class must directly inherit from the RecordConsumer class!")
+
+        field_name_set = set()
+        cleaned_fields = []
+
+        # If we have cls.FIELDS = [..., Field1, ..., Field2, ...] AND Field1.name == Field2.name THEN Field2 will override Field1 (meaning Field1 will be ignored).
+        for field in reversed(cls.FIELDS):
+            if field.name not in field_name_set:
+                cleaned_fields.append(field)
+                field_name_set.add(field.name)
+
+        cls.FIELDS = list(reversed(cleaned_fields))
+
     def create_context(self) -> tuple[Context, Optional[Error]]:
-        pass
+        """
+        Return an updatable `RecordConsumer`-specific `Context` which will live during the whole `self.process_records` call.
 
-    @abstractmethod
+        This context will be passed to each `self.prepare_create(...)`, to give additional context to the prepare_create process when required.
+
+        Each `RecordConsumer` derived class can create their own context based on what they need to keep track off while processing records. 
+        """
+        return None, None
+
     def prepare_create(
-        self, record: dict, context: Context
+        self, record: dict, initial_data: dict, context: Context
     ) -> tuple[dict, Optional[Error]]:
-        pass
+        """
+        Prepare the data to be passed to the serializer, arguments:
+
+        - `record` the original CSV/Excel row `dict` created by the user.
+        - `initial_data` initial object data generated based on the fields described in the `self.FIELDS` class variable.
+        - `context` an updatable `RecordConsumer`-specific `Context` used to give additional context informations to this function.
+
+        Return the object `dict` which will be passed to the `self.SERIALIZER_CLASS` at object creation/update.
+        """
+        return initial_data, None
 
     def find_existing(self, record_data: dict):
         """Find an existing record matching this data based on the model's fields_to_check."""
@@ -477,6 +971,11 @@ class RecordConsumer[Context](ABC):
         return update_data
 
     def process_records(self, records: list[dict]) -> Result:
+        """
+        Process user records (CSV/Excel rows) to create/update the objects the represent.
+
+        Return a `Result` which is the record processing feedback (success/skipped count, error messages etc...).
+        """
         results = Result()
 
         context, error = self.create_context()
@@ -491,7 +990,34 @@ class RecordConsumer[Context](ABC):
         viewable_ids = set(viewable_ids)
 
         for record in records:
-            record_data, error = self.prepare_create(record, context)
+            initial_data = {}
+            error = None
+
+            for field in self.FIELDS:
+                parse_result = field.get_value(record, self.base_context)
+
+                if parse_result.is_error():
+                    error = parse_result.error()
+                    break
+
+                field_value = parse_result.result()
+                if parse_result.is_unset():
+                    continue
+
+                initial_data[field.name] = field_value
+
+            if error is not None:
+                if error.is_warning:
+                    results.warnings.append(error)
+                else:
+                    results.add_error(error)
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
+
+            record_data, error = self.prepare_create(record, initial_data, context)
+
             if error is not None:
                 if error.is_warning:
                     results.warnings.append(error)
@@ -518,7 +1044,7 @@ class RecordConsumer[Context](ABC):
                         continue
                     case ConflictMode.STOP:
                         results.add_error(
-                            Error(record=record, error="Record already exists")
+                            Error("Record already exists", record)
                         )
                         results.stopped = True
                         break
@@ -535,12 +1061,12 @@ class RecordConsumer[Context](ABC):
                                 serializer.save()
                                 results.add_updated()
                             except Exception as e:
-                                results.add_error(Error(record=record, error=str(e)))
+                                results.add_error(Error(str(e), record))
                         else:
                             results.add_error(
                                 Error(
-                                    record=record,
-                                    error=str(serializer.errors),
+                                    str(serializer.errors),
+                                    record,
                                 )
                             )
                         continue
@@ -553,12 +1079,12 @@ class RecordConsumer[Context](ABC):
                     serializer.save()
                     results.add_created()
                 except Exception as e:
-                    results.add_error(Error(record=record, error=str(e)))
+                    results.add_error(Error(str(e), record))
                     if self.on_conflict == ConflictMode.STOP:
                         results.stopped = True
                         break
             else:
-                results.add_error(Error(record=record, error=str(serializer.errors)))
+                results.add_error(Error(str(serializer.errors), record))
                 if self.on_conflict == ConflictMode.STOP:
                     results.stopped = True
                     break
@@ -593,7 +1119,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
         return _get_security_objective_scale(), None
 
     def prepare_create(
-        self, record: dict, context: list
+        self, record: dict, initial_data: dict, context: list
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -602,7 +1128,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         # Map type field
         asset_type = record.get("type", "SP")
@@ -629,7 +1155,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
             or record.get("étiquette")
             or record.get("label")
         )
-        filtering_labels = _resolve_filtering_labels(raw_labels)
+        filtering_labels = _resolve_filtering_labels(raw_labels, self.base_context)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -667,8 +1193,8 @@ class AssetRecordConsumer(RecordConsumer[list]):
 
         if parse_warning_msgs:
             return data, Error(
-                record=record,
-                error="; ".join(parse_warning_msgs),
+                "; ".join(parse_warning_msgs),
+                record,
                 is_warning=True,
             )
         return data, None
@@ -755,7 +1281,7 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -764,7 +1290,7 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         # Parse priority
         priority = record.get("priority")
@@ -829,7 +1355,7 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         if reference_control_id:
             data["reference_control"] = reference_control_id
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -837,37 +1363,9 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         # Always set data["owner"] when the column is present, even if blank,
         # so that UPDATE mode can clear the M2M instead of silently preserving it.
         if "owner" in record:
-            data["owner"] = self._resolve_owners(record.get("owner"))
+            data["owner"] = _resolve_owners(record.get("owner"), self.base_context)
 
         return data, None
-
-    @staticmethod
-    def _resolve_owners(value) -> list:
-        """Resolve semicolon-separated user emails or team names to Actor IDs.
-
-        Each entry is matched first as a user email, then as a team name.
-        Unresolvable entries are silently skipped.
-        """
-        if not value or not isinstance(value, str):
-            return []
-
-        entries = [entry.strip() for entry in value.split(";") if entry.strip()]
-        actor_ids = []
-
-        for entry in entries:
-            # Try matching as user email first
-            actor = Actor.objects.filter(user__email__iexact=entry).first()
-            if actor is None:
-                # Try matching as team name
-                actor = Actor.objects.filter(team__name__iexact=entry).first()
-            if actor is not None:
-                actor_ids.append(actor.id)
-            else:
-                logger.warning(
-                    "Could not resolve an owner reference to a user email or team name during Applied Control import; skipping."
-                )
-
-        return actor_ids
 
 
 class EvidenceRecordConsumer(RecordConsumer[None]):
@@ -877,7 +1375,7 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -886,7 +1384,7 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         data = {
             "name": name,
@@ -895,7 +1393,7 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
             "folder": domain,
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -915,11 +1413,11 @@ class UserRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         email = record.get("email")
         if email is None:
-            return {}, Error(record=record, error="email field is mandatory")
+            return {}, Error("email field is mandatory", record)
 
         return {
             "email": email,
@@ -935,7 +1433,7 @@ class PerimeterRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -944,7 +1442,7 @@ class PerimeterRecordConsumer(RecordConsumer[None]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         return {
             "name": name,
@@ -962,7 +1460,7 @@ class ThreatRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -971,7 +1469,7 @@ class ThreatRecordConsumer(RecordConsumer[None]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         return {
             "name": name,
@@ -1007,7 +1505,7 @@ class ReferenceControlRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -1016,7 +1514,7 @@ class ReferenceControlRecordConsumer(RecordConsumer[None]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         category = None
         if record.get("category", ""):
@@ -1087,17 +1585,17 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                 return FindingsAssessmentContext(
                     findings_assessment=findings_assessment
                 ), None
-            return None, Error(record=assessment_data, error=str(serializer.errors))
+            return None, Error(str(serializer.errors), assessment_data)
 
         except Exception as e:
-            return None, Error(record={}, error=str(e))
+            return None, Error(str(e), {})
 
     def prepare_create(
-        self, record: dict, context: FindingsAssessmentContext
+        self, record: dict, initial_data: dict, context: FindingsAssessmentContext
     ) -> tuple[dict, Optional[Error]]:
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
@@ -1113,7 +1611,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         if isinstance(priority, int) and not (1 <= priority <= 4):
             priority = None
 
-        filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
+        filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
 
         finding_data = {
             "name": name,
@@ -1146,7 +1644,7 @@ class PolicyRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -1155,7 +1653,7 @@ class PolicyRecordConsumer(RecordConsumer[None]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         priority = record.get("priority")
         if isinstance(priority, (int, float)):
@@ -1179,7 +1677,7 @@ class PolicyRecordConsumer(RecordConsumer[None]):
             "effort": record.get("effort"),
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -1216,7 +1714,7 @@ class SecurityExceptionRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -1225,7 +1723,7 @@ class SecurityExceptionRecordConsumer(RecordConsumer[None]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         # Map severity
         record_severity = record.get("severity")
@@ -1294,7 +1792,7 @@ class IncidentRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -1303,7 +1801,7 @@ class IncidentRecordConsumer(RecordConsumer[None]):
 
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         # Map severity
         record_severity = record.get("severity")
@@ -1342,7 +1840,7 @@ class IncidentRecordConsumer(RecordConsumer[None]):
             "reported_at": _parse_datetime(record.get("reported_at")),
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -1377,7 +1875,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
         return None, None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         name = record.get("name")
         if not name:
@@ -1457,7 +1955,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             "security_exceptions": security_exceptions,
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -1519,8 +2017,8 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
 
             if perimeter is None:
                 return None, Error(
-                    record=record,
-                    error=f"Unknown perimeter '{perimeter_value}'",
+                    f"Unknown perimeter '{perimeter_value}'",
+                    record,
                 )
 
             return perimeter, None
@@ -1529,8 +2027,8 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
             perimeter = Perimeter.objects.filter(id=self.perimeter_id).first()
             if perimeter is None:
                 return None, Error(
-                    record=record,
-                    error=f"Perimeter with ID '{self.perimeter_id}' does not exist",
+                    f"Perimeter with ID '{self.perimeter_id}' does not exist",
+                    record,
                 )
             return perimeter, None
 
@@ -1544,8 +2042,8 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
             risk_matrix = RiskMatrix.objects.filter(id=self.matrix_id).first()
             if risk_matrix is None:
                 return None, Error(
-                    record=record,
-                    error=f"Risk matrix with ID '{self.matrix_id}' does not exist",
+                    f"Risk matrix with ID '{self.matrix_id}' does not exist",
+                    record
                 )
             return risk_matrix, None
 
@@ -1573,20 +2071,20 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
 
             if risk_matrix is None:
                 return None, Error(
-                    record=record,
-                    error=f"Unknown risk matrix '{matrix_value}'",
+                    f"Unknown risk matrix '{matrix_value}'",
+                    record,
                 )
 
             return risk_matrix, None
 
-        return None, Error(record=record, error="Risk matrix is mandatory")
+        return None, Error("Risk matrix is mandatory", record)
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         name = record.get("name")
         if not name:
-            return {}, Error(record=record, error="Name field is mandatory")
+            return {}, Error("Name field is mandatory", record)
 
         perimeter, error = self._resolve_perimeter(record)
         if error is not None:
@@ -1605,7 +2103,7 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
             domain = perimeter.folder.id
 
         if not domain:
-            return {}, Error(record=record, error="Folder is mandatory")
+            return {}, Error("Folder is mandatory", record)
 
         return {
             "name": name,
@@ -1657,7 +2155,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
         bia_value = record.get("bia") or record.get("bia_name")
 
         if not bia_value:
-            return None, Error(record=record, error="BIA is mandatory")
+            return None, Error("BIA is mandatory", record)
 
         try:
             bia_uuid = UUID(str(bia_value))
@@ -1670,7 +2168,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
         bia = BusinessImpactAnalysis.objects.filter(name__iexact=bia_value).first()
 
         if bia is None:
-            return None, Error(record=record, error=f"Unknown BIA '{bia_value}'")
+            return None, Error(f"Unknown BIA '{bia_value}'", record)
 
         return bia, None
 
@@ -1682,7 +2180,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
         )
 
         if not asset_value:
-            return None, Error(record=record, error="Asset is mandatory")
+            return None, Error("Asset is mandatory", record)
 
         try:
             asset_uuid = UUID(str(asset_value))
@@ -1697,7 +2195,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
             asset = Asset.objects.filter(name__iexact=asset_value).first()
 
         if asset is None:
-            return None, Error(record=record, error=f"Unknown asset '{asset_value}'")
+            return None, Error(f"Unknown asset '{asset_value}'", record)
 
         return asset, None
 
@@ -1735,8 +2233,8 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
                 control = AppliedControl.objects.filter(name__iexact=item).first()
             if control is None:
                 return [], Error(
-                    record=record,
-                    error=f"Unknown applied control '{item}'",
+                    f"Unknown applied control '{item}'",
+                    record,
                 )
             resolved.append(control.id)
         return resolved, None
@@ -1759,8 +2257,8 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
                 evidence = Evidence.objects.filter(name__iexact=item).first()
             if evidence is None:
                 return [], Error(
-                    record=record,
-                    error=f"Unknown evidence '{item}'",
+                    f"Unknown evidence '{item}'",
+                    record,
                 )
             resolved.append(evidence.id)
         return resolved, None
@@ -1773,7 +2271,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
         return AssetAssessment.objects.filter(bia_id=bia_id, asset_id=asset_id).first()
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         bia, error = self._resolve_bia(record)
         if error:
@@ -1832,7 +2330,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
         bia_value = record.get("bia") or record.get("bia_name")
 
         if not bia_value:
-            return None, Error(record=record, error="BIA is mandatory")
+            return None, Error("BIA is mandatory", record)
 
         try:
             bia_uuid = UUID(str(bia_value))
@@ -1845,7 +2343,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
         bia = BusinessImpactAnalysis.objects.filter(name__iexact=bia_value).first()
 
         if bia is None:
-            return None, Error(record=record, error=f"Unknown BIA '{bia_value}'")
+            return None, Error(f"Unknown BIA '{bia_value}'", record)
 
         return bia, None
 
@@ -1857,7 +2355,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
         )
 
         if not asset_value:
-            return None, Error(record=record, error="Asset is mandatory")
+            return None, Error("Asset is mandatory", record)
 
         try:
             asset_uuid = UUID(str(asset_value))
@@ -1872,7 +2370,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
             asset = Asset.objects.filter(name__iexact=asset_value).first()
 
         if asset is None:
-            return None, Error(record=record, error=f"Unknown asset '{asset_value}'")
+            return None, Error(f"Unknown asset '{asset_value}'", record)
 
         return asset, None
 
@@ -1926,8 +2424,8 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
                 ).first()
             if qualification is None:
                 return [], Error(
-                    record=record,
-                    error=f"Unknown qualification '{item}'",
+                    f"Unknown qualification '{item}'",
+                    record,
                 )
             resolved.append(qualification.id)
         return resolved, None
@@ -1942,7 +2440,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
         ).first()
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, initial_data: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
         asset_assessment, error = self._resolve_asset_assessment(record)
         if error:
@@ -1950,13 +2448,13 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
 
         point_in_time = record.get("point_in_time")
         if point_in_time in (None, ""):
-            return {}, Error(record=record, error="point_in_time is mandatory")
+            return {}, Error("point_in_time is mandatory", record)
         try:
             point_in_time = int(float(point_in_time))
         except (ValueError, TypeError):
             return {}, Error(
-                record=record,
-                error=f"Invalid point_in_time '{point_in_time}'",
+                f"Invalid point_in_time '{point_in_time}'",
+                record,
             )
 
         quali_impact = record.get("quali_impact")
@@ -1967,8 +2465,8 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
                 quali_impact_value = int(float(quali_impact))
             except (ValueError, TypeError):
                 return {}, Error(
-                    record=record,
-                    error=f"Invalid quali_impact '{quali_impact}'",
+                    f"Invalid quali_impact '{quali_impact}'",
+                    record,
                 )
 
         if quali_impact_value != -1:
@@ -1977,11 +2475,11 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
             n_impacts = len(impacts)
             if n_impacts > 0 and not (0 <= quali_impact_value < n_impacts):
                 return {}, Error(
-                    record=record,
-                    error=(
+                    (
                         f"quali_impact {quali_impact_value} is out of range "
                         f"[0, {n_impacts - 1}] for matrix '{risk_matrix.name}'"
                     ),
+                    record,
                 )
 
         quanti_impact = record.get("quanti_impact")
@@ -1992,8 +2490,8 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
                 quanti_impact_value = float(quanti_impact)
             except (ValueError, TypeError):
                 return {}, Error(
-                    record=record,
-                    error=f"Invalid quanti_impact '{quanti_impact}'",
+                    f"Invalid quanti_impact '{quanti_impact}'",
+                    record,
                 )
 
         qualifications, error = self._resolve_qualifications(
@@ -2013,6 +2511,33 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
             "justification": record.get("justification", ""),
         }, None
 
+
+def format_choices(choices: Iterable[str]) -> frozenset[str]:
+    return frozenset(str(choice).lower() for choice in choices)
+
+class FieldCollection:
+    """Provide a namespace for field mixins, analogous to Django abstract models."""
+
+    NameDescriptionMixin = [
+        CharField("name", required=True, max_length=200),
+        CharField("description", blank=True, null=True),
+    ]
+    FilteringLabelMixin = [ManyToManyField("filtering_labels", FilteringLabel)]
+    FolderMixin = [FolderField("folder")]
+
+class MetricInstanceRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = MetricInstanceWriteSerializer
+
+    FIELDS = [
+        *FieldCollection.NameDescriptionMixin,
+        *FieldCollection.FilteringLabelMixin,
+        CharField("ref_id", blank=True),
+        FloatField("target_value", null=True),
+        CharField("collection_frequency", max_length=20, null=True, blank=True, choices=format_choices(MetricInstance.Frequency)),
+        CharField("status", max_length=20, choices=format_choices(MetricInstance.Status)),
+        ForeignKey("metric_definition", MetricDefinition),
+        ManyToManyField("owner", Actor),
+    ]
 
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
@@ -2083,10 +2608,14 @@ class LoadFileView(APIView):
                     if is_excel:
                         df = normalize_datetime_columns(
                             pd.read_excel(record_file)
-                        ).fillna("")
+                        )
                     else:
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file).fillna("")
+                        df = pd.read_csv(record_file)
+
+                    df.fillna("", inplace=True)
+                    # This protects float fields from receiving infinity float values.
+                    df.replace([float("inf"), float("-inf")], None, inplace=True)
 
                     base_context = BaseContext(
                         request,
@@ -2175,6 +2704,12 @@ class LoadFileView(APIView):
                         case ModelType.BUSINESS_IMPACT_ANALYSIS:
                             res = (
                                 BusinessImpactAnalysisRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.METRIC_INSTANCE:
+                            res = (
+                                MetricInstanceRecordConsumer(base_context)
                                 .process_records(records)
                                 .to_dict()
                             )
@@ -3917,7 +4452,8 @@ class LoadFileView(APIView):
 
             # Link filtering labels
             filtering_label_ids = _resolve_filtering_labels(
-                record.get("filtering_labels")
+                record.get("filtering_labels"),
+                self.base_context
             )
             if filtering_label_ids:
                 risk_scenario.filtering_labels.set(filtering_label_ids)

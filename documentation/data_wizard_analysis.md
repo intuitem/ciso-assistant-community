@@ -26,6 +26,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `Policy` | Single sheet CSV/Excel | **Supported** |
 | `SecurityException` | Single sheet CSV/Excel | **Supported** |
 | `Incident` | Single sheet CSV/Excel | **Supported** |
+| `MetricInstance` | Single sheet CSV/Excel | **Supported** |
 | `TPRM` | Multi-sheet Excel (Entities, Solutions, Contracts) | **Supported** |
 | `EbiosRMStudyARM` | Multi-sheet Excel (ARM format) | **Supported** |
 | `EbiosRMStudyExcel` | Multi-sheet Excel (Native export format) | **Supported** |
@@ -448,7 +449,44 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
-### 17. TPRM (Multi-sheet Import)
+### 17. Metric instances (`MetricInstanceRecordConsumer`)
+
+| Field | Type | Required | Note |
+|-------|------|---------|-------|
+| `ref_id`      | string | No  ||
+| `name`        | string | **Yes** ||
+| `description` | string | No  ||
+| `status`      | string | No  | The list of the possible statuses below |
+| `filtering_labels` | list | No | List of labels, newline-separated |
+| `metric_definition` | string | **Yes** | Name of the associated metric instance |
+| `owner` | string | No | Email of the owners separated by ";" |
+| `target_value` | float | No ||
+| `collection_frequency` | string | No | The list of the possible collection frequencies below |
+
+**Missing Fields from Model:**
+| Field | Type | Priority |
+|-------|------|----------|
+| `evidences` | M2M Evidence | Medium |
+| `objectives` | M2M Evidence | Medium |
+
+**Metric's status**
+* draft
+* active
+* stale
+* deprecated
+
+**Metric collection's frequency**
+* realtime
+* hourly
+* daily
+* weekly
+* monthly
+* quarterly
+* yearly
+
+---
+
+### 18. TPRM (Multi-sheet Import)
 
 #### Entities Sheet
 
@@ -534,7 +572,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
-### 18. EbiosRMStudyARM (ARM Format Import)
+### 19. EbiosRMStudyARM (ARM Format Import)
 
 **Creates the following objects:**
 - EbiosRMStudy (name, description, risk_matrix, folder)
@@ -551,7 +589,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
-### 19. EbiosRMStudyExcel (Native Export Format Import)
+### 20. EbiosRMStudyExcel (Native Export Format Import)
 
 **Additional objects created beyond ARM:**
 - OperationalScenarios
@@ -560,7 +598,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 ---
 
 
-### 20. Vulnerability
+### 21. Vulnerability
 
 | Field | Type | Required | Note |
 |-------|------|---------|-------|
