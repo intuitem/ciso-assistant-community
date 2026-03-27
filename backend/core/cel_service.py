@@ -135,12 +135,12 @@ def evaluate_outcomes(compliance_assessment) -> None:
     cel_context = {k: _python_to_cel(v) for k, v in context.items()}
 
     computed = None
+    env = celpy.Environment()
     for rule in outcomes_def:
         expression = rule.get("expression", "")
         if not expression:
             continue
         try:
-            env = celpy.Environment()
             ast = env.compile(expression)
             prog = env.program(ast)
             result = prog.evaluate(cel_context)
