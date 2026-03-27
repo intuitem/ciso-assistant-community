@@ -886,7 +886,7 @@
 										? 'pointer-events-none opacity-60'
 										: ''}"
 								>
-									{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
+									{#if complianceAssessment.scoring_enabled && Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 										<div class="flex flex-row items-center space-x-4">
 											<span class="font-medium">{m.score()}</span>
 											<div class="shrink-0 relative">
@@ -913,7 +913,7 @@
 												</Progress>
 											</div>
 										</div>
-									{:else if requirementAssessment.result !== 'not_applicable'}
+									{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
 										<Score
 											form={scoreForms[requirementAssessment.id]}
 											min_score={complianceAssessment.min_score}

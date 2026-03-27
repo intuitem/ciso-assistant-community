@@ -683,7 +683,7 @@
 												? 'pointer-events-none opacity-60'
 												: ''}"
 										>
-											{#if showScore && !shallow}
+											{#if showScore && !shallow && complianceAssessment.scoring_enabled}
 												{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 													<div class="flex flex-row items-center space-x-4">
 														<span class="font-medium">{m.score()}</span>
@@ -767,7 +767,7 @@
 														/>
 													{/if}
 												{/if}
-											{:else if complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
+											{:else if complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
 												<div class="flex flex-row items-center space-x-2 w-full">
 													<span>{m.implementationScoreResult()}</span>
 													<div class="relative">
@@ -818,7 +818,7 @@
 														</Progress>
 													</div>
 												</div>
-											{:else if requirementAssessment.is_scored}
+											{:else if complianceAssessment.scoring_enabled && requirementAssessment.is_scored}
 												<div class="flex flex-row items-center space-x-2 w-full">
 													<span>{m.scoreResult()}</span>
 													<div class="relative">
