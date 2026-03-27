@@ -2,15 +2,13 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-async function proxyRequest(
+/** Proxy a JSON request to the backend API, returning the response as-is. */
+async function proxyFetch(
 	fetch: typeof globalThis.fetch,
+	url: string,
 	method: string,
-	endpoint: string,
-	id?: string,
 	payload?: unknown
 ) {
-	const url = id ? `${BASE_API_URL}/${endpoint}/${id}/` : `${BASE_API_URL}/${endpoint}/`;
-
 	const res = await fetch(url, {
 		method,
 		headers: { 'Content-Type': 'application/json' },
@@ -32,34 +30,12 @@ async function proxyRequest(
 	});
 }
 
-/** Proxy a draft action (start-editing, publish-draft, discard-draft, save-draft) */
-async function proxyDraftAction(
-	fetch: typeof globalThis.fetch,
-	frameworkId: string,
-	action: string,
-	method: string,
-	payload?: unknown
-) {
-	const url = `${BASE_API_URL}/frameworks/${frameworkId}/${action}/`;
-	const res = await fetch(url, {
-		method,
-		headers: { 'Content-Type': 'application/json' },
-		...(payload !== undefined ? { body: JSON.stringify(payload) } : {})
-	});
+function entityUrl(endpoint: string, id?: string): string {
+	return id ? `${BASE_API_URL}/${endpoint}/${id}/` : `${BASE_API_URL}/${endpoint}/`;
+}
 
-	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
-	}
-
-	if (res.status === 204) {
-		return new Response(null, { status: 204 });
-	}
-
-	const data = await res.json();
-	return new Response(JSON.stringify(data), {
-		status: res.status,
-		headers: { 'Content-Type': 'application/json' }
-	});
+function draftActionUrl(frameworkId: string, action: string): string {
+	return `${BASE_API_URL}/frameworks/${frameworkId}/${action}/`;
 }
 
 export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
@@ -86,18 +62,18 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 
 	// Draft workflow actions (sent via _action in body)
 	if (body._action === 'start-editing') {
-		return proxyDraftAction(fetch, params.id, 'start-editing', 'POST');
+		return proxyFetch(fetch, draftActionUrl(params.id, 'start-editing'), 'POST');
 	}
 	if (body._action === 'publish-draft') {
-		return proxyDraftAction(fetch, params.id, 'publish-draft', 'POST');
+		return proxyFetch(fetch, draftActionUrl(params.id, 'publish-draft'), 'POST');
 	}
 	if (body._action === 'discard-draft') {
-		return proxyDraftAction(fetch, params.id, 'discard-draft', 'POST');
+		return proxyFetch(fetch, draftActionUrl(params.id, 'discard-draft'), 'POST');
 	}
 
 	// Legacy: generic entity creation
 	const { endpoint, payload } = body;
-	return proxyRequest(fetch, 'POST', endpoint, undefined, payload);
+	return proxyFetch(fetch, entityUrl(endpoint), 'POST', payload);
 };
 
 export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
@@ -105,14 +81,14 @@ export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 
 	// Draft workflow: save-draft
 	if (body._action === 'save-draft') {
-		return proxyDraftAction(fetch, params.id, 'save-draft', 'PATCH', {
+		return proxyFetch(fetch, draftActionUrl(params.id, 'save-draft'), 'PATCH', {
 			editing_draft: body.editing_draft
 		});
 	}
 
 	// Legacy: generic entity update
 	const { endpoint, id, payload } = body;
-	return proxyRequest(fetch, 'PATCH', endpoint, id, payload);
+	return proxyFetch(fetch, entityUrl(endpoint, id), 'PATCH', payload);
 };
 
 export const GET: RequestHandler = async ({ fetch, url, params }) => {
@@ -143,5 +119,5 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 
 export const DELETE: RequestHandler = async ({ fetch, request }) => {
 	const { endpoint, id } = await request.json();
-	return proxyRequest(fetch, 'DELETE', endpoint, id);
+	return proxyFetch(fetch, entityUrl(endpoint, id), 'DELETE');
 };
