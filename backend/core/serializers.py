@@ -6,7 +6,7 @@ from django.db import models, transaction
 from django.db.models import F
 from django.utils import timezone
 
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from django.conf import settings
 from core.models import *
 from core.serializer_fields import (
     FieldsRelatedField,
@@ -232,10 +232,39 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     json_definition = serializers.JSONField(source="get_json_translated")
     library = FieldsRelatedField(["name", "id"])
+    has_editing_draft = serializers.SerializerMethodField()
+    editing_languages = serializers.SerializerMethodField()
+
+    def get_has_editing_draft(self, obj):
+        return obj.editing_draft is not None
+
+    def get_editing_languages(self, obj):
+        """Return list of language codes available in the draft or published translations."""
+        langs = set()
+        # Base locale
+        if obj.locale:
+            langs.add(obj.locale)
+        # From model translations (published)
+        if obj.translations and isinstance(obj.translations, dict):
+            langs.update(obj.translations.keys())
+        # From editing_draft level translations + _meta
+        if obj.editing_draft and isinstance(obj.editing_draft, dict):
+            meta = obj.editing_draft.get("_meta", {})
+            if isinstance(meta.get("translations"), dict):
+                langs.update(meta["translations"].keys())
+            for category in ("probability", "impact", "risk"):
+                levels = obj.editing_draft.get(category, [])
+                if isinstance(levels, list):
+                    for level in levels:
+                        if isinstance(level, dict) and isinstance(
+                            level.get("translations"), dict
+                        ):
+                            langs.update(level["translations"].keys())
+        return sorted(langs) if langs else [obj.locale or "en"]
 
     class Meta:
         model = RiskMatrix
-        exclude = ["translations"]
+        exclude = ["translations", "editing_draft", "editing_history"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -1551,7 +1580,7 @@ class UserWriteSerializer(BaseModelSerializer):
         return email
 
     def create(self, validated_data):
-        send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+        send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
@@ -2308,6 +2337,21 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
 
+        old_scoring_enabled = instance.scoring_enabled
+
+        # Enabling documentation score implies scoring must be on
+        if validated_data.get("show_documentation_score") and not validated_data.get(
+            "scoring_enabled", instance.scoring_enabled
+        ):
+            validated_data["scoring_enabled"] = True
+
+        # Disabling scoring implies documentation score must be off
+        if (
+            "scoring_enabled" in validated_data
+            and not validated_data["scoring_enabled"]
+        ):
+            validated_data["show_documentation_score"] = False
+
         with transaction.atomic():
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
@@ -2317,6 +2361,25 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 RequirementAssessment.objects.filter(
                     compliance_assessment=updated_instance
                 ).update(folder=updated_instance.folder)
+
+            # Toggle is_scored on all requirement assessments when scoring_enabled changes
+            if updated_instance.scoring_enabled != old_scoring_enabled:
+                assessable_ras = RequirementAssessment.objects.filter(
+                    compliance_assessment=updated_instance,
+                    requirement__assessable=True,
+                ).exclude(
+                    result=RequirementAssessment.Result.NOT_APPLICABLE,
+                )
+                if updated_instance.scoring_enabled:
+                    # Turn on: set is_scored=True, initialize score to min_score
+                    # only for RAs that don't already have a score
+                    assessable_ras.update(is_scored=True)
+                    assessable_ras.filter(score__isnull=True).update(
+                        score=updated_instance.min_score or 0
+                    )
+                else:
+                    # Turn off: only flip is_scored, preserve existing scores
+                    assessable_ras.update(is_scored=False)
 
             # Determine newly assigned authors
             new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
@@ -2384,6 +2447,8 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "scores_definition",
+            "scoring_enabled",
+            "score_calculation_method",
             "created_at",
             "updated_at",
         ]

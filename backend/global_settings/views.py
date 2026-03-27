@@ -2,7 +2,6 @@ from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
 from core.serializers import SerializerFactory
@@ -16,7 +15,6 @@ from .serializers import (
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
 )
-from django.conf import settings
 from django.db import transaction
 from .models import GlobalSettings
 import structlog
@@ -263,12 +261,12 @@ def get_sso_info(request):
     """
     API endpoint that returns the CSRF token.
     """
-    settings = SSOSettings.objects.get()
-    sp_entity_id = settings.settings["sp"].get("entity_id")
-    callback_url = CISO_ASSISTANT_URL + "/"
+    sso_settings = SSOSettings.objects.get()
+    sp_entity_id = sso_settings.settings["sp"].get("entity_id")
+    callback_url = settings.CISO_ASSISTANT_URL + "/"
     return Response(
         {
-            "is_enabled": settings.is_enabled,
+            "is_enabled": sso_settings.is_enabled,
             "sp_entity_id": sp_entity_id,
             "callback_url": callback_url,
         }

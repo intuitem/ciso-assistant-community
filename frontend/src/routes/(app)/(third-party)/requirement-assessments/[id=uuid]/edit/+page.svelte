@@ -24,7 +24,7 @@
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import {
@@ -734,7 +734,7 @@
 							helpText={m.extendedResultHelpText()}
 						/>
 					{/if}
-					{#if computedScore !== null}
+					{#if page.data.compliance_assessment_score.scoring_enabled && computedScore !== null}
 						<div class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.score()}</span>
 							<div class="shrink-0 relative">
@@ -761,7 +761,7 @@
 								</Progress>
 							</div>
 						</div>
-					{:else if data.result !== 'not_applicable'}
+					{:else if page.data.compliance_assessment_score.scoring_enabled && data.result !== 'not_applicable'}
 						<div class="flex flex-col">
 							<Score
 								{form}

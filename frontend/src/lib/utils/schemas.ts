@@ -1,5 +1,12 @@
 // schema for the validation of forms
-import { z, type AnyZodObject } from 'zod';
+import { z } from 'zod';
+
+// Zod v4 removed AnyZodObject — split into two purpose-specific types:
+// FormDataShape: for SuperValidated<T> consumers (form data records)
+// ZodSchema: for actual Zod schema instances (SCHEMA_MAP, typed schema exports)
+export type FormDataShape = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ZodSchema = z.ZodObject<any>;
 import * as m from '$paraglide/messages';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -51,7 +58,7 @@ const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 type Literal = z.infer<typeof literalSchema>;
 type Json = Literal | { [key: string]: Json } | Json[];
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
-	z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)])
+	z.union([literalSchema, z.array(jsonSchema), z.record(z.string(), jsonSchema)])
 );
 
 export const quickStartSchema = z.object({
@@ -67,11 +74,11 @@ export const loginSchema = z
 	.object({
 		username: z
 			.string({
-				required_error: 'Email is required'
+				error: 'Email is required'
 			})
 			.email(),
 		password: z.string({
-			required_error: 'Password is required'
+			error: 'Password is required'
 		})
 	})
 	.required();
@@ -79,7 +86,7 @@ export const loginSchema = z
 export const emailSchema = z
 	.object({
 		email: z.string({
-			required_error: 'Email is required'
+			error: 'Email is required'
 		})
 	})
 	.required();
@@ -87,7 +94,7 @@ export const emailSchema = z
 // Utility functions for commonly used schema structures
 const nameSchema = z
 	.string({
-		required_error: 'Name is required'
+		error: 'Name is required'
 	})
 	.min(1);
 
@@ -142,8 +149,8 @@ export const RiskAssessmentSchema = z.object({
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
 	risk_tolerance: z.number().optional().default(-1),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
@@ -198,9 +205,9 @@ export const AppliedControlSchema = z.object({
 	objectives: z.string().optional().array().optional(),
 	requirement_assessments: z.string().optional().array().optional(),
 	assets: z.string().optional().array().optional(),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -252,7 +259,7 @@ export const PolicySchema = AppliedControlSchema.omit({ category: true });
 export const RiskAcceptanceSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
-	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	justification: z.string().optional().nullable(),
 	approver: z.string().optional().nullable(),
 	risk_scenarios: z.array(z.string())
@@ -262,7 +269,7 @@ export const ValidationFlowSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	status: z.string().default('submitted'),
-	validation_deadline: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	validation_deadline: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	request_notes: z.string().optional().nullable(),
 	approver: z.string(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional(),
@@ -407,7 +414,7 @@ export const UserEditSchema = z.object({
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
-		.union([z.literal('').transform(() => null), z.string().date()])
+		.union([z.literal('').transform(() => null), z.iso.date()])
 		.nullish()
 		.refine(
 			(val) => {
@@ -427,7 +434,7 @@ export const UserCreateSchema = z.object({
 	email: z.string().email(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
-		.union([z.literal('').transform(() => null), z.string().date()])
+		.union([z.literal('').transform(() => null), z.iso.date()])
 		.nullish()
 		.refine(
 			(val) => {
@@ -469,12 +476,13 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
+	scoring_enabled: z.boolean().optional().default(false),
 	show_documentation_score: z.boolean().optional().default(false),
 	extended_result_enabled: z.boolean().optional().default(false),
 	progress_status_enabled: z.boolean().optional().default(true),
 	score_calculation_method: z.string().optional().default('average'),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	baseline: z.string().optional().nullable(),
@@ -495,8 +503,8 @@ export const CampaignSchema = z.object({
 		.optional(),
 	perimeters: z.array(z.string()),
 	status: z.string().optional().nullable(),
-	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	folder: z.string()
 });
 
@@ -521,7 +529,7 @@ export const EvidenceSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	owner: z.string().optional().array().optional(),
 	status: z.string().optional().default('draft'),
-	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const EvidenceRevisionSchema = z.object({
@@ -670,7 +678,7 @@ export const EntitiesSchema = z.object({
 		})
 		.optional(),
 	relationship: z.string().optional().array().optional(),
-	legal_identifiers: z.record(z.string()).optional(),
+	legal_identifiers: z.record(z.string(), z.string()).optional(),
 	country: z.string().nullish(),
 	currency: z.string().nullish(),
 	dora_entity_type: z.string().nullish(),
@@ -694,8 +702,8 @@ export const EntityAssessmentSchema = z.object({
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	representatives: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
@@ -756,8 +764,8 @@ export const contractSchema = z.object({
 	evidences: z.array(z.string().optional()).optional(),
 	solutions: z.array(z.string().optional()).optional(),
 	status: z.string().optional().default('draft'),
-	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	end_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	ref_id: z.string().optional(),
 	dora_contractual_arrangement: z.string().default('eba_CO:x1'),
 	currency: z.string().optional(),
@@ -791,8 +799,8 @@ export const BusinessImpactAnalysisSchema = z.object({
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	is_locked: z.boolean().optional().default(false)
@@ -957,10 +965,10 @@ export const organisationObjectiveSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	is_active: z.boolean().optional().default(true),
-	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	closing_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	closing_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const OrganisationObjectiveDuplicateSchema = z.object({
@@ -977,8 +985,8 @@ export const organisationIssueSchema = z.object({
 	origin: z.string().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	objectives: z.string().uuid().optional().array().optional(),
-	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	expiration_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const quantitativeRiskStudySchema = z.object({
@@ -1015,8 +1023,8 @@ export const quantitativeRiskStudySchema = z.object({
 	// 	points: { point1: { probability: 0.99, acceptable_loss: 1 }, point2: { probability: 0.01 } }
 	// }),
 	loss_threshold: z.number().optional().nullable(),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	folder: z.string()
 });
 
@@ -1059,6 +1067,7 @@ export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	quotation_method: z.string().optional().default('express'),
+	status: z.string().optional().default('planned'),
 	ref_id: z.string().optional().default(''),
 	risk_matrix: z.string(),
 	authors: z.array(z.string().optional()).optional(),
@@ -1155,7 +1164,7 @@ export const SecurityExceptionSchema = z.object({
 	approver: z.string().optional().nullable(),
 	severity: z.number().default(-1).optional(),
 	status: z.string().default('draft'),
-	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	expiration_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
@@ -1176,8 +1185,8 @@ export const FindingSchema = z.object({
 	priority: z.number().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	observation: z.string().optional().nullable()
 });
 
@@ -1188,8 +1197,8 @@ export const FindingsAssessmentSchema = z.object({
 	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
@@ -1409,9 +1418,9 @@ export const AccreditationSchema = z.object({
 	authority_name: z.string().optional(),
 	status: z.string().uuid(),
 	author: z.string().uuid().optional().nullable(),
-	commission_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	commission_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	duration_months: z.coerce.number().int().min(1).optional().nullable(),
-	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	linked_collection: z.string().uuid().optional().nullable(),
 	checklist: z.string().uuid().optional().nullable(),
 	decision_evidence: z.array(z.string().uuid().optional()).optional(),
@@ -1449,7 +1458,7 @@ export const MetricInstanceSchema = z.object({
 
 export const CustomMetricSampleSchema = z.object({
 	metric_instance: z.string().uuid(),
-	timestamp: z.string().datetime(),
+	timestamp: z.iso.datetime(),
 	value: jsonSchema,
 	observation: z.string().optional().nullable(),
 	evidence_revision: z.string().uuid().optional().nullable()
@@ -1516,7 +1525,7 @@ export const DocumentRevisionSchema = z.object({
 	reviewer_comments: z.string().optional().nullable()
 });
 
-const SCHEMA_MAP: Record<string, AnyZodObject> = {
+const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
 	perimeters: PerimeterSchema,

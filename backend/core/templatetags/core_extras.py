@@ -2,7 +2,7 @@ import os
 from django import template
 from django.utils.safestring import mark_safe
 
-from ciso_assistant.settings import VERSION, BUILD, DEBUG
+from django.conf import settings
 from core.utils import COUNTRY_FLAGS, LANGUAGES
 from core.models import RequirementAssessment
 from core.helpers import color_css_class
@@ -12,12 +12,12 @@ register = template.Library()
 
 @register.simple_tag()
 def app_version():
-    return VERSION
+    return settings.VERSION
 
 
 @register.simple_tag()
 def app_build():
-    return f"{BUILD} (dev)" if DEBUG else BUILD
+    return f"{settings.BUILD} (dev)" if settings.DEBUG else settings.BUILD
 
 
 @register.simple_tag()

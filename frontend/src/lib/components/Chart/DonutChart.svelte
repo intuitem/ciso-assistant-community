@@ -44,7 +44,11 @@
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
-		const filteredValues = values.filter((item) => item.value > 0);
+		const filteredEntries = values
+			.map((item, i) => ({ item, color: colors[i] }))
+			.filter((entry) => entry.item.value > 0);
+		const filteredValues = filteredEntries.map((entry) => entry.item);
+		const filteredColors = filteredEntries.map((entry) => entry.color);
 		// specify chart configuration item and data
 		let option = {
 			tooltip: {
@@ -108,7 +112,7 @@
 								// Calculate the total value
 								const total =
 									params.data.value +
-									values
+									filteredValues
 										.filter((item) => item.name !== params.data.name)
 										.reduce((sum, item) => sum + item.value, 0);
 
@@ -137,7 +141,7 @@
 						length2: 5
 					},
 					data: filteredValues,
-					color: colors
+					color: filteredColors
 				}
 			]
 		};

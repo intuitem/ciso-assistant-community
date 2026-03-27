@@ -9,7 +9,7 @@
 	import { m } from '$paraglide/messages';
 	import { onMount, tick } from 'svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 	import ListSelector from '$lib/components/Forms/ListSelector.svelte';
 	import { SHOW_PAYLOAD_FORMAT, SHOW_TARGET_DOMAINS } from './constants';

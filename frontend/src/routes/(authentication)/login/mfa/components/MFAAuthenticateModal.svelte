@@ -1,6 +1,6 @@
 <script lang="ts">
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { mfaAuthenticateSchema } from '../utils/schemas';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';

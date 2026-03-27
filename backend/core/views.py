@@ -2,10 +2,12 @@ from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
+import copy
 import csv
 import json
 import mimetypes
 import re
+import yaml
 from django_filters.filterset import filterset_factory
 from django_filters.utils import try_dbfield
 import regex
@@ -44,10 +46,6 @@ import pytz
 from uuid import UUID
 from itertools import chain, cycle
 import django_filters as df
-from ciso_assistant.settings import (
-    EMAIL_HOST,
-    EMAIL_HOST_RESCUE,
-)
 
 import shutil
 from pathlib import Path
@@ -141,7 +139,9 @@ from ebios_rm.models import (
     AttackPath,
 )
 
-from tprm.models import Entity
+from tprm.models import Entity, Solution, Contract
+from privacy.models import Processing, DataBreach, RightRequest
+from resilience.models import BusinessImpactAnalysis
 
 from .models import *
 from .serializers import *
@@ -2379,7 +2379,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
         options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
             _choices = {}
-            for i, risk in enumerate(matrix.json_definition["risk"]):
+            for i, risk in enumerate(matrix.json_definition.get("risk", [])):
                 translations = risk.get("translations")
                 if not isinstance(translations, dict):
                     translations = {}
@@ -2471,6 +2471,462 @@ class RiskMatrixViewSet(BaseModelViewSet):
             my_map[item.folder.name].update({item.name: item.id})
 
         return Response(my_map)
+
+    # --- Visual Matrix Editor actions ---
+
+    def _check_change_permission(self, request, matrix):
+        """Check that the user has change_riskmatrix permission on the matrix's folder."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_riskmatrix"),
+            folder=matrix.folder,
+        ):
+            raise PermissionDenied({"error": "Permission denied."})
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        """Copy json_definition into editing_draft to begin editing."""
+        matrix = self.get_object()
+        self._check_change_permission(request, matrix)
+        if matrix.urn:
+            return Response(
+                {
+                    "error": "Library matrices cannot be edited directly. Use Clone instead."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if matrix.editing_draft is not None:
+            return Response(
+                {"status": "already_editing", "editing_draft": matrix.editing_draft}
+            )
+        draft = copy.deepcopy(matrix.json_definition)
+        # Include current metadata in the draft
+        meta = {
+            "name": matrix.name,
+            "description": matrix.description or "",
+            "provider": matrix.provider or "",
+            "locale": matrix.locale or "en",
+            "folder": str(matrix.folder_id),
+        }
+        if matrix.translations:
+            meta["translations"] = copy.deepcopy(matrix.translations)
+        draft["_meta"] = meta
+        matrix.editing_draft = draft
+        matrix.save(update_fields=["editing_draft", "updated_at"])
+        return Response(
+            {"status": "editing_started", "editing_draft": matrix.editing_draft}
+        )
+
+    @action(detail=True, methods=["patch"], url_path="save-draft")
+    def save_draft(self, request, pk=None):
+        """Update editing_draft with current WIP. Metadata stays draft-scoped until publish."""
+        matrix = self.get_object()
+        self._check_change_permission(request, matrix)
+        editing_draft = request.data.get("editing_draft")
+        if editing_draft is None:
+            return Response(
+                {"error": "editing_draft is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Store metadata inside editing_draft so it stays draft-scoped
+        meta = {}
+        for field in ("name", "description", "provider", "locale", "folder"):
+            if field in request.data:
+                meta[field] = request.data[field]
+        if request.data.get("metaTranslations"):
+            meta["translations"] = request.data["metaTranslations"]
+        if meta:
+            editing_draft["_meta"] = meta
+
+        matrix.editing_draft = editing_draft
+        matrix.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_saved"})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft")
+    def publish_draft(self, request, pk=None):
+        """Publish editing_draft → json_definition, snapshot history, bump version."""
+        matrix = self.get_object()
+        self._check_change_permission(request, matrix)
+        if matrix.editing_draft is None:
+            return Response(
+                {"error": "No active draft to publish."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        errors = self._validate_json_definition(matrix.editing_draft)
+        if errors:
+            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Snapshot current live definition into history (only if it has real content)
+        if matrix.json_definition and matrix.json_definition.get("grid"):
+            history = list(matrix.editing_history or [])
+            history.append(
+                {
+                    "version": matrix.editing_version,
+                    "definition": copy.deepcopy(matrix.json_definition),
+                    "published_at": timezone.now().isoformat(),
+                }
+            )
+            matrix.editing_history = history
+
+        # Extract draft metadata and clean it from the definition
+        draft_data = copy.deepcopy(matrix.editing_draft)
+        meta = draft_data.pop("_meta", {})
+
+        # Swap draft → live
+        matrix.json_definition = draft_data
+        matrix.editing_draft = None
+        matrix.editing_version += 1
+        matrix.is_enabled = True
+
+        # Apply draft metadata to the model
+        update_fields = [
+            "json_definition",
+            "editing_draft",
+            "editing_version",
+            "editing_history",
+            "is_enabled",
+            "updated_at",
+        ]
+        for field in ("name", "description", "provider", "locale"):
+            if field in meta:
+                setattr(matrix, field, meta[field])
+                update_fields.append(field)
+        if "folder" in meta:
+            matrix.folder_id = meta["folder"]
+            update_fields.append("folder_id")
+        if "translations" in meta:
+            matrix.translations = meta["translations"]
+            update_fields.append("translations")
+
+        matrix.save(update_fields=update_fields)
+        return Response(
+            {"status": "published", "editing_version": matrix.editing_version}
+        )
+
+    @action(detail=True, methods=["post"], url_path="discard-draft")
+    def discard_draft(self, request, pk=None):
+        """Discard editing_draft without affecting json_definition."""
+        matrix = self.get_object()
+        self._check_change_permission(request, matrix)
+        matrix.editing_draft = None
+        matrix.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_discarded"})
+
+    @action(detail=False, methods=["post"], url_path="create-draft")
+    def create_draft(self, request):
+        """Create a new unpublished RiskMatrix with an editing_draft for the visual editor."""
+        folder_id = request.data.get("folder")
+        try:
+            folder = (
+                Folder.objects.get(id=folder_id)
+                if folder_id
+                else Folder.get_root_folder()
+            )
+        except Folder.DoesNotExist:
+            return Response(
+                {"error": "Invalid folder."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        matrix = RiskMatrix.objects.create(
+            name=request.data.get("name", "Untitled Matrix"),
+            description=request.data.get("description", ""),
+            folder=folder,
+            json_definition={},
+            editing_draft=request.data.get("editing_draft", {}),
+            is_enabled=False,
+        )
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "status": "draft_created",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="create-draft-from")
+    def create_draft_from(self, request, pk=None):
+        """Clone an existing matrix into a new unpublished RiskMatrix with editing_draft."""
+
+        source = self.get_object()
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=source.folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        matrix = RiskMatrix.objects.create(
+            name=f"{source.name} (copy)",
+            description=source.description or "",
+            folder=source.folder,
+            json_definition={},
+            editing_draft=copy.deepcopy(source.json_definition),
+            is_enabled=False,
+            locale=source.locale,
+            default_locale=source.default_locale,
+            provider=source.provider or "",
+            translations=copy.deepcopy(source.translations)
+            if source.translations
+            else {},
+        )
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "status": "draft_created_from",
+                "editing_draft": matrix.editing_draft,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["get"], url_path="export-yaml")
+    def export_yaml(self, request, pk=None):
+        """Export a matrix as a library-compatible YAML file."""
+        matrix = self.get_object()
+        # Use editing_draft if present (WIP), otherwise published json_definition
+        definition = matrix.editing_draft or matrix.json_definition
+        if not definition or not definition.get("grid"):
+            return Response(
+                {"error": "No matrix definition to export."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        ref_id = (matrix.name or "untitled").lower().replace(" ", "-").replace("_", "-")
+        ref_id = "".join(c for c in ref_id if c.isalnum() or c == "-")
+
+        library_data = {
+            "urn": f"urn:custom:risk:library:risk-matrix-{ref_id}",
+            "locale": matrix.locale or "en",
+            "ref_id": ref_id,
+            "name": matrix.name,
+            "description": matrix.description or "",
+            "version": matrix.editing_version,
+            "provider": matrix.provider or "custom",
+            "packager": "custom",
+            "objects": {
+                "risk_matrix": [
+                    {
+                        "urn": f"urn:custom:risk:matrix:{ref_id}",
+                        "ref_id": ref_id,
+                        "name": matrix.name,
+                        "description": matrix.description or "",
+                        **definition,
+                    }
+                ]
+            },
+        }
+
+        # Add translations if present
+        if matrix.translations:
+            library_data["translations"] = matrix.translations
+            library_data["objects"]["risk_matrix"][0]["translations"] = (
+                matrix.translations
+            )
+
+        yaml_content = yaml.dump(
+            library_data, allow_unicode=True, default_flow_style=False, sort_keys=False
+        )
+
+        response = HttpResponse(yaml_content, content_type="application/x-yaml")
+        response["Content-Disposition"] = (
+            f'attachment; filename="risk-matrix-{ref_id}.yaml"'
+        )
+        return response
+
+    @action(detail=False, methods=["post"], url_path="import-yaml")
+    def import_yaml(self, request):
+        """Import a library YAML file and create a new draft matrix from it."""
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response(
+                {"error": "No file provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            content = uploaded_file.read()
+            library_data = yaml.safe_load(content)
+        except yaml.YAMLError:
+            return Response(
+                {"error": "Invalid YAML file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not isinstance(library_data, dict):
+            return Response(
+                {"error": "YAML must be a dictionary."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Extract matrix definition
+        matrix_def = None
+        matrix_meta = {}
+        risk_matrix_obj = library_data.get("objects", {}).get("risk_matrix")
+        if isinstance(risk_matrix_obj, list) and risk_matrix_obj:
+            first = risk_matrix_obj[0]
+            if isinstance(first, dict):
+                matrix_def = first
+                matrix_meta = {
+                    "name": library_data.get(
+                        "name", matrix_def.get("name", "Imported Matrix")
+                    ),
+                    "description": library_data.get(
+                        "description", matrix_def.get("description", "")
+                    ),
+                    "provider": library_data.get("provider", ""),
+                    "locale": library_data.get("locale", "en"),
+                }
+        elif all(k in library_data for k in ("probability", "impact", "risk", "grid")):
+            # Direct matrix definition (not wrapped in library structure)
+            matrix_def = library_data
+            matrix_meta = {
+                "name": library_data.get("name", "Imported Matrix"),
+                "description": library_data.get("description", ""),
+                "provider": library_data.get("provider", ""),
+                "locale": library_data.get("locale", "en"),
+            }
+
+        if not isinstance(matrix_def, dict) or "grid" not in matrix_def:
+            return Response(
+                {"error": "No valid matrix definition found in file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Extract only the matrix fields
+        editing_draft = {}
+        for key in ("probability", "impact", "risk", "grid", "strength_of_knowledge"):
+            if key in matrix_def:
+                editing_draft[key] = matrix_def[key]
+
+        folder_id = request.data.get("folder")
+        try:
+            folder = (
+                Folder.objects.get(id=folder_id)
+                if folder_id
+                else Folder.get_root_folder()
+            )
+        except Folder.DoesNotExist:
+            return Response(
+                {"error": "Invalid folder."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        matrix = RiskMatrix.objects.create(
+            name=matrix_meta["name"],
+            description=matrix_meta["description"],
+            provider=matrix_meta["provider"],
+            locale=matrix_meta["locale"],
+            folder=folder,
+            json_definition={},
+            editing_draft=editing_draft,
+            is_enabled=False,
+            translations=library_data.get("translations", {}),
+        )
+
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "editing_draft": matrix.editing_draft,
+                "status": "imported",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @staticmethod
+    def _validate_json_definition(json_def) -> list[str]:
+        """Validate the matrix JSON definition before publishing.
+
+        Defensive against malformed payloads — returns errors instead of raising.
+        """
+        errors = []
+
+        if not isinstance(json_def, dict):
+            return ["Matrix definition must be a JSON object."]
+
+        probability = json_def.get("probability")
+        impact = json_def.get("impact")
+        risk = json_def.get("risk")
+        grid = json_def.get("grid")
+
+        if not isinstance(probability, list):
+            return ["'probability' must be a list."]
+        if not isinstance(impact, list):
+            return ["'impact' must be a list."]
+        if not isinstance(risk, list):
+            return ["'risk' must be a list."]
+        if not isinstance(grid, list):
+            return ["'grid' must be a list."]
+
+        if len(probability) < 2:
+            errors.append("At least 2 probability levels are required.")
+        if len(impact) < 2:
+            errors.append("At least 2 impact levels are required.")
+        if len(risk) < 2:
+            errors.append("At least 2 risk levels are required.")
+
+        if len(grid) != len(probability):
+            errors.append(
+                f"Grid has {len(grid)} rows but there are {len(probability)} probability levels."
+            )
+
+        for i, row in enumerate(grid):
+            if not isinstance(row, list):
+                errors.append(f"Grid row {i} is not a list.")
+                continue
+            if len(row) != len(impact):
+                errors.append(
+                    f"Grid row {i} has {len(row)} columns but there are {len(impact)} impact levels."
+                )
+            for j, val in enumerate(row):
+                if not isinstance(val, int) or val < 0 or val >= len(risk):
+                    errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
+
+        for category_name, levels in [
+            ("probability", probability),
+            ("impact", impact),
+            ("risk", risk),
+        ]:
+            for k, level in enumerate(levels):
+                if not isinstance(level, dict):
+                    errors.append(f"{category_name}[{k}] is not a valid object.")
+                    continue
+                if not level.get("name"):
+                    errors.append(f"{category_name}[{k}] is missing a name.")
+                if not level.get("hexcolor"):
+                    errors.append(
+                        f"{category_name}[{k}] is missing a color (hexcolor)."
+                    )
+
+        return errors
 
 
 class VulnerabilityViewSet(BaseModelViewSet):
@@ -4976,30 +5432,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
 
 class ActionPlanList(generics.ListAPIView):
-    filterset_fields = {
-        "folder": ["exact"],
-        "status": ["exact"],
-        "category": ["exact"],
-        "csf_function": ["exact"],
-        "priority": ["exact"],
-        "reference_control": ["exact"],
-        "effort": ["exact"],
-        "control_impact": ["exact"],
-        "filtering_labels": ["exact"],
-        "risk_scenarios": ["exact"],
-        "risk_scenarios_e": ["exact"],
-        "requirement_assessments": ["exact"],
-        "evidences": ["exact"],
-        "objectives": ["exact"],
-        "assets": ["exact"],
-        "stakeholders": ["exact"],
-        "progress_field": ["exact"],
-        "security_exceptions": ["exact"],
-        "owner": ["exact"],
-        "findings": ["exact"],
-        "eta": ["exact", "lte", "gte", "lt", "gt"],
-    }
     search_fields = ["name", "description", "ref_id"]
+    filterset_class = AppliedControlFilterSet
 
     filter_backends = [
         DjangoFilterBackend,
@@ -5865,7 +6299,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 if not RoleAssignment.is_access_allowed(
                     risk_acceptance.get("approver"),
                     Permission.objects.get(codename="approve_riskacceptance"),
-                    scenario.risk_assessment.perimeter.folder,
+                    scenario.risk_assessment.folder,
                 ):
                     raise ValidationError(
                         "The approver is not allowed to approve this risk acceptance"
@@ -9401,7 +9835,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     )
     def mailing(self, request, pk):
         instance = self.get_object()
-        if EMAIL_HOST or EMAIL_HOST_RESCUE:
+        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
             for author in instance.authors.all():
                 try:
                     specific = author.specific
@@ -9715,15 +10149,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
+        scores = compliance_assessment.get_global_score()
         return Response(
             {
-                "score": compliance_assessment.get_global_score(),
+                **scores,
                 "max_score": compliance_assessment.max_score,
                 "min_score": compliance_assessment.min_score,
                 "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": get_referential_translation(
                     compliance_assessment.framework, "scores_definition", get_language()
                 ),
+                "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,
             }
@@ -10221,7 +10657,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "created_at": base_audit.created_at,
                 "updated_at": base_audit.updated_at,
                 "observation": base_audit.observation,
-                "global_score": base_audit.get_global_score(),
+                "global_score": base_audit.get_global_score()["maturity_score"],
                 "max_score": base_audit.max_score,
                 "total_max_score": base_audit.get_total_max_score(),
                 "score_calculation_method": base_audit.score_calculation_method,
@@ -10243,7 +10679,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "created_at": compare_audit.created_at,
                 "updated_at": compare_audit.updated_at,
                 "observation": compare_audit.observation,
-                "global_score": compare_audit.get_global_score(),
+                "global_score": compare_audit.get_global_score()["maturity_score"],
                 "max_score": compare_audit.max_score,
                 "total_max_score": compare_audit.get_total_max_score(),
                 "score_calculation_method": compare_audit.score_calculation_method,
@@ -10542,14 +10978,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 or node.ref_id
                 or str(node.id)
             )
+            # Compute maturity as average of enabled layers
+            enabled_scores = [
+                s for s in [section_score, section_doc_score] if s is not None
+            ]
+            section_maturity = (
+                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
+                if enabled_scores
+                else None
+            )
+
             sections.append(
                 {
                     "ref_id": node.ref_id,
                     "name": node_name,
                     "total_assessable": len(assessable_list),
                     "results": dict(results),
-                    "score": section_score,
+                    "implementation_score": section_score,
                     "documentation_score": section_doc_score,
+                    "maturity_score": section_maturity,
                     "scored_count": scored_count,
                     "total_weight": total_weight,
                 }
@@ -10929,8 +11376,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "total_assessable": 0,
                         "results": {},
                         "progress_percent": 0,
-                        "score": None,
+                        "implementation_score": None,
                         "documentation_score": None,
+                        "maturity_score": None,
                         "scored_count": 0,
                     }
                 )
@@ -10981,6 +11429,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     else None
                 )
 
+            enabled_scores = [
+                s for s in [group_score, group_doc_score] if s is not None
+            ]
+            group_maturity = (
+                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
+                if enabled_scores
+                else None
+            )
+
             groups.append(
                 {
                     "ref_id": group_ref_id,
@@ -10990,8 +11447,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "progress_percent": round(assessed / total * 100)
                     if total > 0
                     else 0,
-                    "score": group_score,
+                    "implementation_score": group_score,
                     "documentation_score": group_doc_score,
+                    "maturity_score": group_maturity,
                     "scored_count": scored_count,
                 }
             )
@@ -14300,3 +14758,282 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
+
+
+# ---------------------------------------------------------------------------
+# Universal Search
+# ---------------------------------------------------------------------------
+
+
+def _search_entry(model, slug, *, ref_id=False, limit=200, extra_search=None):
+    """Helper to build a search config entry."""
+    return {
+        "model": model,
+        "slug": slug,
+        "ref_id": ref_id,
+        "limit": limit,
+        # Additional fields to search on (icontains) beyond name/description/ref_id.
+        # These are ORM lookup paths, e.g. "framework__name" for a FK join.
+        "extra_search": extra_search or [],
+    }
+
+
+SEARCHABLE_MODELS = [
+    # limit: per-model cap on broad fetch. Large tables (RequirementNode,
+    # ReferenceControl) get a tighter limit to avoid starving smaller models.
+    # extra_search: additional fields to query via icontains for this model.
+    # --- Organization ---
+    _search_entry(Folder, "folders"),
+    _search_entry(Perimeter, "perimeters", ref_id=True),
+    # --- Catalog ---
+    _search_entry(Framework, "frameworks", ref_id=True),
+    _search_entry(Threat, "threats", ref_id=True, limit=100, extra_search=["provider"]),
+    _search_entry(ReferenceControl, "reference-controls", ref_id=True, limit=100),
+    _search_entry(RiskMatrix, "risk-matrices", ref_id=True, limit=50),
+    _search_entry(RequirementNode, "requirement-nodes", ref_id=True, limit=100),
+    # --- Assets ---
+    _search_entry(Asset, "assets", ref_id=True),
+    _search_entry(Vulnerability, "vulnerabilities", ref_id=True, limit=100),
+    # --- Operations ---
+    _search_entry(AppliedControl, "applied-controls", ref_id=True),
+    _search_entry(Policy, "policies", ref_id=True),
+    _search_entry(Incident, "incidents", ref_id=True),
+    _search_entry(Finding, "findings", ref_id=True),
+    _search_entry(SecurityException, "security-exceptions", ref_id=True),
+    _search_entry(TaskTemplate, "task-templates", ref_id=True, limit=100),
+    _search_entry(Evidence, "evidences"),
+    # --- Governance ---
+    _search_entry(RiskAcceptance, "risk-acceptances"),
+    # --- Risk ---
+    _search_entry(RiskAssessment, "risk-assessments", ref_id=True),
+    _search_entry(
+        RiskScenario,
+        "risk-scenarios",
+        ref_id=True,
+        extra_search=["risk_assessment__name"],
+    ),
+    # --- Compliance ---
+    _search_entry(
+        ComplianceAssessment,
+        "compliance-assessments",
+        ref_id=True,
+        extra_search=["framework__name"],
+    ),
+    # --- TPRM ---
+    _search_entry(Entity, "entities", ref_id=True),
+    _search_entry(Solution, "solutions", extra_search=["provider_entity__name"]),
+    _search_entry(Contract, "contracts", ref_id=True),
+    # --- EBIOS RM ---
+    _search_entry(EbiosRMStudy, "ebios-rm"),
+    _search_entry(FearedEvent, "feared-events"),
+    _search_entry(StrategicScenario, "strategic-scenarios"),
+    _search_entry(AttackPath, "attack-paths"),
+    # --- Privacy ---
+    _search_entry(Processing, "processings", ref_id=True),
+    _search_entry(DataBreach, "data-breaches", ref_id=True),
+    _search_entry(RightRequest, "right-requests", ref_id=True),
+    # --- Resilience ---
+    _search_entry(BusinessImpactAnalysis, "business-impact-analysis"),
+]
+
+
+_ACCENT_MAP = {
+    "a": "[aàáâãäåæ]",
+    "e": "[eèéêë]",
+    "i": "[iìíîï]",
+    "o": "[oòóôõöø]",
+    "u": "[uùúûü]",
+    "c": "[cç]",
+    "n": "[nñ]",
+    "y": "[yýÿ]",
+    "s": "[sß]",
+}
+
+
+def _accent_regex(word: str) -> str:
+    """Convert a word to a regex pattern that matches accented variants.
+
+    E.g. "referentiel" -> "r[eèéêë]f[eèéêë]r[eèéêë][nñ]t[iìíîï][eèéêë]l"
+    Works on both SQLite and PostgreSQL with __iregex.
+    """
+    return "".join(_ACCENT_MAP.get(c, re.escape(c)) for c in word.lower())
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def global_search(request):
+    """
+    Universal fuzzy search across all searchable models.
+
+    GET /api/search/?q=firewall+policy&type=applied-controls,assets
+    """
+    from rapidfuzz import fuzz
+
+    EMPTY_RESPONSE = {"results": [], "query": "", "count": 0, "total_candidates": 0}
+
+    # Cap query length to avoid excessive icontains processing across all models.
+    # 200 chars is far beyond any realistic search; words capped at 20 since each
+    # word generates 2-3 Q objects per model (~1000+ total at the limit).
+    # Minimum 2 chars to avoid single-character fan-out (e.g. q=a matching everything).
+    query = request.query_params.get("q", "").strip()[:200]
+    if len(query) < 2:
+        return Response(EMPTY_RESPONSE)
+
+    type_filter = request.query_params.get("type", "")
+    allowed_types = set(type_filter.split(",")) if type_filter else None
+
+    words = query.split()[:20]
+    # Build prefix set for typo-tolerant broad fetch (first 3 chars of each word)
+    prefixes = {w[:3].lower() for w in words if len(w) >= 3}
+
+    candidates = []
+
+    for entry in SEARCHABLE_MODELS:
+        model_class = entry["model"]
+        url_slug = entry["slug"]
+        has_ref_id = entry["ref_id"]
+        max_per_model = entry["limit"]
+        extra_search = entry["extra_search"]
+
+        if allowed_types and url_slug not in allowed_types:
+            continue
+
+        # Permission-aware queryset
+        accessible_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, model_class
+        )[0]
+        qs = model_class.objects.filter(id__in=accessible_ids)
+
+        # ComplianceAssessment has extra auditee scoping: users with only the
+        # auditee role in a folder can only see assessments where they have a
+        # requirement assignment. Mirror the logic from ComplianceAssessmentViewSet.
+        if model_class is ComplianceAssessment:
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if auditee_folders:
+                user_actors = Actor.get_all_for_user(request.user)
+                qs = qs.filter(
+                    ~Q(folder_id__in=auditee_folders)
+                    | Q(requirement_assignments__actor__in=user_actors)
+                ).distinct()
+
+        # Build Q filter for each word on searchable fields.
+        # Uses iregex with accent-folding character classes so that e.g.
+        # "referentiel" matches "RÉFÉRENTIEL" on SQLite (whose LIKE is
+        # ASCII-only and can't fold accents).
+        field_names = {f.name for f in model_class._meta.get_fields()}
+        searchable = ["name", "description"]
+        if has_ref_id:
+            searchable.append("ref_id")
+        # Models with i18n translations store localized names/descriptions in a
+        # JSONField. Searching it catches all translated variants at once.
+        if "translations" in field_names:
+            searchable.append("translations")
+        searchable.extend(extra_search)
+
+        q_filter = Q()
+        for word in words:
+            pattern = _accent_regex(word)
+            word_q = Q()
+            for field in searchable:
+                word_q |= Q(**{f"{field}__iregex": pattern})
+            q_filter |= word_q
+
+        # Also add prefix-based matching for typo tolerance (name + ref_id only)
+        for prefix in prefixes:
+            prefix_pattern = _accent_regex(prefix)
+            prefix_q = Q(**{"name__iregex": prefix_pattern})
+            if has_ref_id:
+                prefix_q |= Q(**{"ref_id__iregex": prefix_pattern})
+            q_filter |= prefix_q
+
+        # Detect optional display fields present on this model (reuses field_names from above)
+        extra_fields = []
+        if has_ref_id:
+            extra_fields.append("ref_id")
+        if "folder" in field_names:
+            extra_fields.append("folder__name")
+        if "provider_entity" in field_names:
+            extra_fields.append("provider_entity__name")
+        if model_class is RequirementNode:
+            extra_fields.append("framework_id")
+
+        results = qs.filter(q_filter).values(
+            "id",
+            "name",
+            "description",
+            *extra_fields,
+        )[:max_per_model]
+
+        for row in results:
+            candidates.append(
+                {
+                    "type": url_slug,
+                    "id": str(row["id"]),
+                    "name": row["name"] or "",
+                    "ref_id": row.get("ref_id", "") or "",
+                    "description": row.get("description") or "",
+                    "folder": row.get("folder__name", "") or "",
+                    "provider": row.get("provider_entity__name", "") or "",
+                    "framework_id": str(row["framework_id"])
+                    if row.get("framework_id")
+                    else None,
+                }
+            )
+
+    # Strip accents/diacritics for accent-insensitive matching and scoring.
+    # SQLite's LIKE is only ASCII case-insensitive, and rapidfuzz treats
+    # accented chars as distinct — normalizing levels the playing field.
+    import unicodedata
+
+    def strip_accents(s: str) -> str:
+        return "".join(
+            c
+            for c in unicodedata.normalize("NFD", s)
+            if unicodedata.category(c) != "Mn"
+        ).lower()
+
+    query_norm = strip_accents(query)
+
+    # Score and rank with rapidfuzz
+    for candidate in candidates:
+        name_norm = strip_accents(candidate["name"])
+        ref_norm = strip_accents(candidate["ref_id"])
+        desc_norm = strip_accents(candidate["description"])
+
+        # Fuzzy scores (on normalized strings for accent-insensitive comparison)
+        name_score = fuzz.WRatio(query_norm, name_norm)
+        ref_score = fuzz.WRatio(query_norm, ref_norm) if ref_norm else 0
+        desc_score = fuzz.partial_ratio(query_norm, desc_norm) * 0.4
+
+        # Substring bonus: literal match in name or ref_id should rank very
+        # high. WRatio penalizes long names unfairly (e.g. "recyf" vs
+        # "RECYF : REFERENTIEL CYBER France..." scores only 24).
+        substring_bonus = 0
+        if query_norm in name_norm:
+            substring_bonus = 95 if name_norm.startswith(query_norm) else 90
+        if query_norm in ref_norm:
+            substring_bonus = max(substring_bonus, 95)
+
+        candidate["score"] = max(name_score, ref_score, desc_score, substring_bonus)
+
+    # Sort by score descending, return top 50
+    candidates.sort(key=lambda c: c["score"], reverse=True)
+    top_results = candidates[:50]
+
+    # Build final response: add URLs and truncate descriptions for the wire
+    for r in top_results:
+        if r["type"] == "requirement-nodes" and r.get("framework_id"):
+            # Link to parent framework (no standalone requirement detail page yet)
+            r["url"] = f"/frameworks/{r['framework_id']}"
+        else:
+            r["url"] = f"/{r['type']}/{r['id']}"
+        r["description"] = r["description"][:200]
+
+    return Response(
+        {
+            "results": top_results,
+            "query": query,
+            "count": len(top_results),
+            "total_candidates": len(candidates),
+        }
+    )
