@@ -1266,7 +1266,7 @@
 	"chatScrollToBottom": "New messages",
 	"chatRetry": "Retry",
 	"chatNoConversations": "No conversations yet",
-	"chatDisclaimer": "AI can make mistakes. Your data never leaves your infrastructure.",
+	"chatDisclaimer": "AI can make mistakes. Data is sent only to your configured AI provider.",
 	"timeline": "Timeline",
 	"timelineEntries": "Timeline",
 	"graph": "Graph",
