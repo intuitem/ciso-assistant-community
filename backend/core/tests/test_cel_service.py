@@ -67,16 +67,19 @@ def cel_setup(db):
         min_score=0,
         max_score=100,
     )
-    ra1 = RequirementAssessment.objects.create(
+    RequirementAssessment.objects.create(
         compliance_assessment=ca,
         requirement=rn1,
         folder=folder,
     )
-    ra2 = RequirementAssessment.objects.create(
+    RequirementAssessment.objects.create(
         compliance_assessment=ca,
         requirement=rn2,
         folder=folder,
     )
+    # Re-fetch so from_db sets _loaded_cel_values for change detection
+    ra1 = RequirementAssessment.objects.get(compliance_assessment=ca, requirement=rn1)
+    ra2 = RequirementAssessment.objects.get(compliance_assessment=ca, requirement=rn2)
     return {
         "framework": fw,
         "ca": ca,
