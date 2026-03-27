@@ -8517,6 +8517,10 @@ class FrameworkFilter(GenericFilterSet):
         fields = ["provider"]
 
 
+class DraftValidationError(Exception):
+    """Raised when a framework draft fails controlled validation checks."""
+
+
 class FrameworkViewSet(BaseModelViewSet):
     """
     API endpoint that allows frameworks to be viewed or edited.
@@ -9036,14 +9040,14 @@ class FrameworkViewSet(BaseModelViewSet):
         draft = framework.editing_draft
         try:
             self._reconcile_draft(framework, draft)
-        except ValueError as e:
+        except DraftValidationError as e:
             logger.warning(
-                "Validation error while publishing draft for framework %s",
-                framework.id,
-                exc_info=e,
+                "Validation error while publishing draft",
+                framework_id=str(framework.id),
+                error=str(e),
             )
             return Response(
-                {"error": "Invalid draft data."},
+                {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception:
@@ -9194,7 +9198,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     data = draft_question_map[str(question_id)]
                     req_node_id = uuid.UUID(data["requirement_node_id"])
                     if req_node_id not in valid_node_ids:
-                        raise ValueError(
+                        raise DraftValidationError(
                             "Question references requirement_node not in this framework."
                         )
                     question = Question(
@@ -9238,7 +9242,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     data = draft_question_map[str(question_id)]
                     req_node_id = uuid.UUID(data["requirement_node_id"])
                     if req_node_id not in valid_node_ids:
-                        raise ValueError(
+                        raise DraftValidationError(
                             "Question references requirement_node not in this framework."
                         )
                     new_questions.append(
@@ -9274,7 +9278,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     data = draft_choice_map[str(choice_id)]
                     q_id = uuid.UUID(data["question_id"])
                     if q_id not in valid_question_ids:
-                        raise ValueError(
+                        raise DraftValidationError(
                             "Choice references question not in this framework."
                         )
                     choice = QuestionChoice(
@@ -9322,7 +9326,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     data = draft_choice_map[str(choice_id)]
                     q_id = uuid.UUID(data["question_id"])
                     if q_id not in valid_question_ids:
-                        raise ValueError(
+                        raise DraftValidationError(
                             "Choice references question not in this framework."
                         )
                     new_choices.append(
