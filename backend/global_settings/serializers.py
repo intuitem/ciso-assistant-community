@@ -60,7 +60,21 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         write_only=True, required=False, default=1.0
     )
 
+    def to_representation(self, instance):
+        """Never expose sensitive keys in GET responses (same pattern as integrations)."""
+        ret = super().to_representation(instance)
+        if "value" in ret and isinstance(ret["value"], dict):
+            ret["value"].pop("openai_api_key", None)
+        return ret
+
     def update(self, instance, validated_data):
+        # Preserve existing API key if not provided in the update
+        if "value" in validated_data and isinstance(validated_data["value"], dict):
+            if not validated_data["value"].get("openai_api_key") and instance.value:
+                existing_key = instance.value.get("openai_api_key")
+                if existing_key:
+                    validated_data["value"]["openai_api_key"] = existing_key
+
         # Track old currency value for potential propagation
         old_currency = instance.value.get("currency") if instance.value else None
 

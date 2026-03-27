@@ -35,7 +35,14 @@ FEARED_EVENT_SCHEMA = {
 }
 ROTO_SCHEMA = {
     "required": ["risk_origin", "target_objective"],
-    "types": {"motivation": int, "resources": int, "activity": int},
+    "types": {
+        "risk_origin": str,
+        "target_objective": str,
+        "motivation": int,
+        "resources": int,
+        "activity": int,
+        "feared_event_names": list,
+    },
 }
 STRATEGIC_SCENARIO_SCHEMA = {
     "required": ["name", "roto_index"],
@@ -459,6 +466,7 @@ class EbiosRMAssistWorkflow(Workflow):
                     yield self._token(
                         "I couldn't generate RoTo couples. The LLM may be unavailable."
                     )
+                    return
 
         all_rotos = self._get_all_rotos(study)
 
@@ -481,6 +489,7 @@ class EbiosRMAssistWorkflow(Workflow):
                     yield self._token(
                         "I couldn't generate strategic scenarios. The LLM may be unavailable."
                     )
+                    return
 
         all_strategic_scenarios = self._get_all_strategic_scenarios(study)
 
@@ -503,6 +512,7 @@ class EbiosRMAssistWorkflow(Workflow):
                     yield self._token(
                         "I couldn't generate attack paths. The LLM may be unavailable."
                     )
+                    return
 
         all_attack_paths = self._get_all_attack_paths(study)
 

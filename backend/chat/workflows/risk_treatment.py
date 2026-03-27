@@ -140,7 +140,9 @@ class RiskTreatmentWorkflow(Workflow):
                     )
                 },
                 "existing_controls": [
-                    str(c) for c in scenario.existing_applied_controls.all()
+                    str(c)
+                    for c in list(scenario.applied_controls.all())
+                    + list(scenario.existing_applied_controls.all())
                 ],
             }
         except Exception as e:
@@ -151,7 +153,10 @@ class RiskTreatmentWorkflow(Workflow):
         """Search for controls relevant to the scenario's threats and assets."""
         AppliedControl = apps.get_model("core", "AppliedControl")
 
+        already_attached = scenario_info.get("existing_control_ids", set())
         qs = AppliedControl.objects.filter(folder_id__in=ctx.accessible_folder_ids)
+        if already_attached:
+            qs = qs.exclude(id__in=already_attached)
 
         # Build search from threats + assets + scenario description
         search_terms = []

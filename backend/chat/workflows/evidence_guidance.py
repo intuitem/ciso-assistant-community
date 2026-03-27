@@ -146,7 +146,10 @@ class EvidenceGuidanceWorkflow(Workflow):
         """Search for evidences that might be relevant."""
         Evidence = apps.get_model("core", "Evidence")
 
+        already_attached = context_info.get("existing_evidence_ids", set())
         qs = Evidence.objects.filter(folder_id__in=ctx.accessible_folder_ids)
+        if already_attached:
+            qs = qs.exclude(id__in=already_attached)
 
         # Search based on requirement text + control names
         search_terms = []

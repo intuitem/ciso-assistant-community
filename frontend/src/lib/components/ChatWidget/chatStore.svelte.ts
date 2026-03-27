@@ -406,11 +406,14 @@ async function streamResponse(userMessage: string) {
 		isStreaming = false;
 		abortController = null;
 		if (error instanceof DOMException && error.name === 'AbortError') {
-			// Append a note that the response was stopped
-			const lastMsg = messages[messages.length - 1];
-			if (lastMsg?.role === 'assistant' && lastMsg.content) {
-				lastMsg.content += '\n\n*— stopped*';
-				messages = [...messages];
+			// Only modify messages if we're still in the same session
+			// (avoids tainting messages after switchToSession/startNewSession)
+			if (sessionId === sid) {
+				const lastMsg = messages[messages.length - 1];
+				if (lastMsg?.role === 'assistant' && lastMsg.content) {
+					lastMsg.content += '\n\n*— stopped*';
+					messages = [...messages];
+				}
 			}
 			saveState();
 			return;
