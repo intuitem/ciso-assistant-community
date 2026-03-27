@@ -85,11 +85,15 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `reference_control` | No | Lookup by ref_id (also accepts `reference_control_ref_id`) |
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 | `observation` | No | Free text |
+| `amortization_period` | No | Integer (1-50) |
+| `build_fixed_cost` | No | Integer |
+| `build_people_days` | No | Integer |
+| `run_fixed_cost` | No | Integer |
+| `run_people_days` | No | Integer |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `cost` | JSONField | Medium (complex structure) |
 | `owner` | M2M Actor | Medium |
 | `evidences` | M2M | Medium |
 | `assets` | M2M | Medium |

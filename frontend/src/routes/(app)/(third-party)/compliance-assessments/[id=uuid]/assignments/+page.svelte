@@ -12,6 +12,7 @@
 	import TreeViewItemContentSimple from './TreeViewItemContentSimple.svelte';
 	import TreeViewItemLeadSimple from './TreeViewItemLeadSimple.svelte';
 	import { complianceResultColorMap } from '$lib/utils/constants';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -504,24 +505,6 @@
 		$checkedNodesStore = new Set();
 	}
 
-	function expandAll() {
-		function getAllNodeIds(nodes: TreeViewNode[]): string[] {
-			const ids: string[] = [];
-			for (const node of nodes) {
-				if (node.children && node.children.length > 0) {
-					ids.push(node.id);
-					ids.push(...getAllNodeIds(node.children));
-				}
-			}
-			return ids;
-		}
-		expandedNodes = getAllNodeIds(treeViewNodes);
-	}
-
-	function collapseAll() {
-		expandedNodes = [];
-	}
-
 	// Helper to format actor display string
 	function formatActors(actors: Array<{ str: string; type?: string }>): string {
 		return actors.map((a) => a.str).join(', ');
@@ -744,14 +727,7 @@
 					</button>
 				{/if}
 				<div class="flex-1"></div>
-				<button class="btn btn-sm preset-ghost-surface" onclick={expandAll}>
-					<i class="fa-solid fa-expand mr-1"></i>
-					{m.expandAll()}
-				</button>
-				<button class="btn btn-sm preset-ghost-surface" onclick={collapseAll}>
-					<i class="fa-solid fa-compress mr-1"></i>
-					{m.collapseAll()}
-				</button>
+				<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
 			</div>
 
 			<!-- Implementation Groups quick-select -->
