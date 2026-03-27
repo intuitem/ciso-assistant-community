@@ -186,10 +186,11 @@
 		)
 	);
 
-	// --- Navigation items: assessable items + splash screen nodes ---
+	// --- Navigation items: assessable items + splash screen nodes + section headers ---
 	type NavItem =
 		| { type: 'assessment'; data: (typeof requirementAssessments)[0] }
-		| { type: 'splash'; data: Record<string, any> };
+		| { type: 'splash'; data: Record<string, any> }
+		| { type: 'section'; data: Record<string, any> };
 
 	const assessmentNavItems: NavItem[] = $derived(
 		requirementAssessments
@@ -203,8 +204,8 @@
 			.map((r: Record<string, any>) => ({ type: 'splash' as const, data: r }))
 	);
 
-	const navItems: NavItem[] = $derived(
-		[...assessmentNavItems, ...splashNavItems].sort((a, b) => {
+	const navItems: NavItem[] = $derived.by(() => {
+		const sorted = [...assessmentNavItems, ...splashNavItems].sort((a, b) => {
 			const orderA =
 				a.type === 'assessment'
 					? (requirementHashmap[a.data.requirement?.id]?.order_id ?? 0)
@@ -214,8 +215,29 @@
 					? (requirementHashmap[b.data.requirement?.id]?.order_id ?? 0)
 					: (b.data.order_id ?? 0);
 			return orderA - orderB;
-		})
-	);
+		});
+
+		// Insert section headers before groups of items sharing the same parent
+		const seenParents = new Set<string>();
+		const items: NavItem[] = [];
+		for (const item of sorted) {
+			const parentUrn =
+				item.type === 'assessment'
+					? requirementHashmap[item.data.requirement?.id]?.parent_requirement
+					: item.data.parent_requirement;
+			if (parentUrn && !seenParents.has(parentUrn)) {
+				seenParents.add(parentUrn);
+				const parentNode = data.requirements.find(
+					(r: Record<string, any>) => r.id === parentUrn || r.urn === parentUrn
+				);
+				if (parentNode && parentNode.display_mode !== 'splash' && !parentNode.assessable) {
+					items.push({ type: 'section', data: parentNode });
+				}
+			}
+			items.push(item);
+		}
+		return items;
+	});
 
 	const assessableItems = $derived(
 		navItems.filter((item): item is NavItem & { type: 'assessment' } => item.type === 'assessment')
@@ -226,6 +248,9 @@
 	const currentItem = $derived(currentNavItem?.type === 'assessment' ? currentNavItem.data : null);
 	const currentSplashNode = $derived(
 		currentNavItem?.type === 'splash' ? currentNavItem.data : null
+	);
+	const currentSectionNode = $derived(
+		currentNavItem?.type === 'section' ? currentNavItem.data : null
 	);
 
 	function goTo(index: number) {
@@ -457,6 +482,14 @@
 					result: '__splash__'
 				};
 			}
+			if (item.type === 'section') {
+				return {
+					index,
+					id: item.data.id,
+					title: item.data.name || 'Section',
+					result: '__section__'
+				};
+			}
 			const req = item.data.requirement;
 			const refId = req?.ref_id ?? '';
 			const name = req?.name ?? '';
@@ -562,24 +595,35 @@
 			</div>
 			<nav class="p-2 space-y-0.5">
 				{#each filteredTocSections as section}
-					<button
-						class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
-							{section.index === currentIndex
-							? 'bg-primary-100 text-primary-800 font-semibold'
-							: 'text-gray-600 hover:bg-gray-100'}"
-						onclick={() => goTo(section.index)}
-						title={section.title}
-					>
-						<span
-							class="inline-block w-2 h-2 rounded-full flex-shrink-0"
-							style="background-color: {section.result === '__splash__'
-								? '#a855f7'
-								: useQuestionProgress
-									? section.questionColor
-									: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
-						></span>
-						<span class="truncate">{section.title}</span>
-					</button>
+					{#if section.result === '__section__'}
+						<button
+							class="w-full text-left px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-400 mt-2 truncate
+								{section.index === currentIndex ? 'text-primary-700' : ''}"
+							onclick={() => goTo(section.index)}
+							title={section.title}
+						>
+							<span class="truncate">{section.title}</span>
+						</button>
+					{:else}
+						<button
+							class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
+								{section.index === currentIndex
+								? 'bg-primary-100 text-primary-800 font-semibold'
+								: 'text-gray-600 hover:bg-gray-100'}"
+							onclick={() => goTo(section.index)}
+							title={section.title}
+						>
+							<span
+								class="inline-block w-2 h-2 rounded-full flex-shrink-0"
+								style="background-color: {section.result === '__splash__'
+									? '#a855f7'
+									: useQuestionProgress
+										? section.questionColor
+										: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
+							></span>
+							<span class="truncate">{section.title}</span>
+						</button>
+					{/if}
 				{/each}
 			</nav>
 		{/if}
@@ -763,6 +807,18 @@
 				<div class="px-6 py-5">
 					<MarkdownRenderer content={currentSplashNode.description} />
 				</div>
+			</div>
+		{:else if currentSectionNode}
+			<div
+				id="current-requirement"
+				class="card bg-gray-50 shadow-sm border-l-4 border-l-gray-400 px-6 py-3"
+			>
+				<h3 class="text-lg font-semibold text-gray-700">{currentSectionNode.name}</h3>
+				{#if currentSectionNode.description}
+					<div class="mt-2">
+						<MarkdownRenderer content={currentSectionNode.description} />
+					</div>
+				{/if}
 			</div>
 		{:else if currentItem}
 			{@const requirementAssessment = currentItem}
