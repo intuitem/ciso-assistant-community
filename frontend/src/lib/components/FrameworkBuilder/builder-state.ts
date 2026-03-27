@@ -208,6 +208,28 @@ export function withTranslation(
 	return { ...current, [lang]: langDict };
 }
 
+/** Serialize a single RequirementNode into its flat persistence shape. */
+function serializeNode(n: RequirementNode): Record<string, unknown> {
+	return {
+		id: n.id,
+		urn: n.urn,
+		ref_id: n.ref_id,
+		name: n.name,
+		description: n.description,
+		annotation: n.annotation,
+		parent_urn: n.parent_urn,
+		order_id: n.order_id,
+		assessable: n.assessable,
+		implementation_groups: n.implementation_groups,
+		typical_evidence: n.typical_evidence,
+		weight: n.weight,
+		importance: n.importance,
+		display_mode: n.display_mode,
+		folder_id: extractFolderId(n.folder),
+		translations: n.translations ?? null
+	};
+}
+
 /**
  * Serialize the current builder state into a flat DraftJSON for persistence.
  */
@@ -218,25 +240,7 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 
 	function collectFromRequirements(reqs: BuilderRequirement[]) {
 		for (const req of reqs) {
-			const n = req.node;
-			nodes.push({
-				id: n.id,
-				urn: n.urn,
-				ref_id: n.ref_id,
-				name: n.name,
-				description: n.description,
-				annotation: n.annotation,
-				parent_urn: n.parent_urn,
-				order_id: n.order_id,
-				assessable: n.assessable,
-				implementation_groups: n.implementation_groups,
-				typical_evidence: n.typical_evidence,
-				weight: n.weight,
-				importance: n.importance,
-				display_mode: n.display_mode,
-				folder_id: extractFolderId(n.folder),
-				translations: n.translations ?? null
-			});
+			nodes.push(serializeNode(req.node));
 			for (const bq of req.questions) {
 				const q = bq.question;
 				questions.push({
@@ -278,25 +282,7 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 	}
 
 	for (const sec of sections) {
-		const n = sec.node;
-		nodes.push({
-			id: n.id,
-			urn: n.urn,
-			ref_id: n.ref_id,
-			name: n.name,
-			description: n.description,
-			annotation: n.annotation,
-			parent_urn: n.parent_urn,
-			order_id: n.order_id,
-			assessable: n.assessable,
-			implementation_groups: n.implementation_groups,
-			typical_evidence: n.typical_evidence,
-			weight: n.weight,
-			importance: n.importance,
-			display_mode: n.display_mode,
-			folder_id: extractFolderId(n.folder),
-			translations: n.translations ?? null
-		});
+		nodes.push(serializeNode(sec.node));
 		collectFromRequirements(sec.requirements);
 	}
 

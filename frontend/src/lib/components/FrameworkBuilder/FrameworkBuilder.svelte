@@ -11,7 +11,8 @@
 		type Question
 	} from './builder-state';
 	import type { DraftJSON } from './builder-api';
-	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+	import { localeLabel, createCopyHandler, createHandleGatedDragHandlers } from './builder-utils';
+	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
@@ -43,19 +44,6 @@
 		evidences: 'Evidences',
 		applied_controls: 'Applied Controls',
 		security_exceptions: 'Security Exceptions'
-	};
-
-	const DEFAULT_FIELD_VISIBILITY: Record<string, string> = {
-		result: 'auditor',
-		status: 'auditor',
-		score: 'auditor',
-		is_scored: 'auditor',
-		documentation_score: 'auditor',
-		observation: 'everyone',
-		answers: 'everyone',
-		evidences: 'everyone',
-		applied_controls: 'auditor',
-		security_exceptions: 'auditor'
 	};
 
 	function getFieldVisibility(field: string): string {
@@ -97,16 +85,6 @@
 		activeLanguage: activeLanguageStore
 	} = builder;
 
-	const localeMapTyped = LOCALE_MAP as Record<string, { name: string; flag: string }>;
-	const defaultLabels = defaultLangLabels as Record<string, string>;
-	const langNames = language as Record<string, string>;
-
-	function localeLabel(code: string): string {
-		const entry = localeMapTyped[code];
-		if (!entry) return code.toUpperCase();
-		return `${defaultLabels[code]} (${langNames[entry.name]})`;
-	}
-
 	/** Languages in which this framework has content (base + translated) */
 	let frameworkLocales = $derived([
 		...new Set([$frameworkStore.locale ?? 'en', ...($frameworkStore.available_languages ?? [])])
@@ -121,7 +99,7 @@
 		)
 	);
 
-	let urnCopied = $state(false);
+	const urnCopy = createCopyHandler();
 	let showSettings = $state(false);
 	let showScoringSettings = $state(false);
 	let showScalesEditor = $state(false);
@@ -169,6 +147,9 @@
 		return [];
 	}
 
+	// Cache scale entries so the template reads a single derived instead of calling getScaleEntries() ~11 times
+	let scaleEntries = $derived(getScaleEntries());
+
 	function setScaleEntries(entries: ScaleEntry[]) {
 		const def = $frameworkStore.scores_definition;
 		if (entries.length === 0) {
@@ -213,31 +194,9 @@
 	}
 
 	// Drag state for sections
-	let draggedSectionIndex: number | null = $state(null);
-	let lastMousedownTarget: EventTarget | null = null;
-
-	function handleSectionDragStart(e: DragEvent, index: number) {
-		if (!(lastMousedownTarget as HTMLElement)?.closest('[data-drag-handle]')) {
-			e.preventDefault();
-			return;
-		}
-		draggedSectionIndex = index;
-	}
-
-	function handleSectionDragOver(e: DragEvent) {
-		e.preventDefault();
-	}
-
-	function handleSectionDrop(e: DragEvent, dropIndex: number) {
-		e.preventDefault();
-		if (draggedSectionIndex === null || draggedSectionIndex === dropIndex) return;
-		builder.reorderSections(draggedSectionIndex, dropIndex);
-		draggedSectionIndex = null;
-	}
-
-	function handleSectionDragEnd() {
-		draggedSectionIndex = null;
-	}
+	const sectionDrag = createHandleGatedDragHandlers((from, to) =>
+		builder.reorderSections(from, to)
+	);
 
 	// --- Navigation guards ---
 
@@ -309,10 +268,16 @@
 		return () => observer?.disconnect();
 	});
 
+	// Track only section IDs so the observer reconnects on structural changes, not content edits
+	let sectionIds = $derived($sectionsStore.map((s) => s.node.id).join(','));
+	let prevSectionIds = '';
+
 	// Re-observe when sections change (e.g., section added/removed)
 	$effect(() => {
-		const _ = $sectionsStore;
+		const ids = sectionIds;
 		if (!observer) return;
+		if (ids === prevSectionIds) return;
+		prevSectionIds = ids;
 		tick().then(() => {
 			observer!.disconnect();
 			const elements = document.querySelectorAll('[data-section-id]');
@@ -424,15 +389,11 @@
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
-							onclick={() => {
-								navigator.clipboard.writeText($frameworkStore.urn ?? '');
-								urnCopied = true;
-								setTimeout(() => (urnCopied = false), 1500);
-							}}
+							onclick={() => urnCopy.copy($frameworkStore.urn ?? '')}
 						>
-							<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
+							<i class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
-							{#if urnCopied}
+							{#if urnCopy.copied}
 								<span class="text-green-500">Copied!</span>
 							{:else}
 								{$frameworkStore.urn}
@@ -556,11 +517,10 @@
 														? 'fa-chevron-down'
 														: 'fa-chevron-right'} text-[9px]"
 												></i>
-												Score scale ({getScaleEntries().length}
-												{getScaleEntries().length === 1 ? 'level' : 'levels'})
+												Score scale ({scaleEntries.length}
+												{scaleEntries.length === 1 ? 'level' : 'levels'})
 											</button>
 											{#if showScalesEditor}
-												{@const scaleEntries = getScaleEntries()}
 												<div class="space-y-1.5">
 													{#each scaleEntries as entry, idx}
 														<div
@@ -574,7 +534,7 @@
 																		value={entry.score}
 																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
-																			const entries = getScaleEntries();
+																			const entries = [...scaleEntries];
 																			entries[idx].score = parseInt(e.currentTarget.value) || 0;
 																			setScaleEntries(entries);
 																		}}
@@ -588,7 +548,7 @@
 																		placeholder="e.g. Partial"
 																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
-																			const entries = getScaleEntries();
+																			const entries = [...scaleEntries];
 																			entries[idx].name = e.currentTarget.value;
 																			setScaleEntries(entries);
 																		}}
@@ -602,7 +562,7 @@
 																		placeholder="Optional"
 																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
-																			const entries = getScaleEntries();
+																			const entries = [...scaleEntries];
 																			entries[idx].description = e.currentTarget.value;
 																			setScaleEntries(entries);
 																		}}
@@ -612,7 +572,7 @@
 																	type="button"
 																	class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
 																	onclick={() => {
-																		const entries = getScaleEntries();
+																		const entries = [...scaleEntries];
 																		entries.splice(idx, 1);
 																		setScaleEntries(entries);
 																	}}
@@ -635,7 +595,7 @@
 																			placeholder="Translate name..."
 																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
-																				const entries = getScaleEntries();
+																				const entries = [...scaleEntries];
 																				entries[idx].translations = withTranslation(
 																					entries[idx].translations,
 																					lang,
@@ -660,7 +620,7 @@
 																			placeholder="Translate description..."
 																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
-																				const entries = getScaleEntries();
+																				const entries = [...scaleEntries];
 																				entries[idx].translations = withTranslation(
 																					entries[idx].translations,
 																					lang,
@@ -679,7 +639,7 @@
 														type="button"
 														class="text-xs text-blue-600 hover:text-blue-700 font-medium"
 														onclick={() => {
-															const entries = getScaleEntries();
+															const entries = [...scaleEntries];
 															entries.push({ score: 0, name: '', description: '' });
 															setScaleEntries(entries);
 														}}
@@ -825,13 +785,13 @@
 					{/if}
 
 					<div
-						class:opacity-50={draggedSectionIndex === sectionIndex}
+						class:opacity-50={sectionDrag.draggedIndex === sectionIndex}
 						draggable="true"
-						onmousedown={(e) => (lastMousedownTarget = e.target)}
-						ondragstart={(e) => handleSectionDragStart(e, sectionIndex)}
-						ondragover={handleSectionDragOver}
-						ondrop={(e) => handleSectionDrop(e, sectionIndex)}
-						ondragend={handleSectionDragEnd}
+						onmousedown={sectionDrag.recordMousedown}
+						ondragstart={(e) => sectionDrag.handleDragStart(e, sectionIndex)}
+						ondragover={sectionDrag.handleDragOver}
+						ondrop={(e) => sectionDrag.handleDrop(e, sectionIndex)}
+						ondragend={sectionDrag.handleDragEnd}
 						role="listitem"
 					>
 						<SectionBlock {section} {sectionIndex} />
