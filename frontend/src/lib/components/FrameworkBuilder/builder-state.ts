@@ -203,7 +203,7 @@ export function withTranslation(
 	value: string
 ): Translations {
 	const current = translations ?? {};
-	const langDict = { ...(current[lang] ?? {}), [field]: value };
+	const langDict = { ...current[lang], [field]: value };
 	if (!value) delete langDict[field];
 	return { ...current, [lang]: langDict };
 }
@@ -1103,7 +1103,7 @@ export function createBuilderState(
 		if (newLocale === oldLocale) return;
 
 		// --- Swap framework meta fields ---
-		const fwTrans = { ...(fw.translations ?? {}) };
+		const fwTrans = { ...fw.translations };
 		// Demote current base fields into translations[oldLocale]
 		const demoted: Record<string, string> = {};
 		if (fw.name) demoted.name = fw.name;
@@ -1173,7 +1173,7 @@ export function createBuilderState(
 		oldLocale: string,
 		newLocale: string
 	): RequirementNode {
-		const trans = { ...(node.translations ?? {}) };
+		const trans = { ...node.translations };
 		// Demote current base fields
 		const demoted: Record<string, string> = {};
 		if (node.name) demoted.name = node.name;
@@ -1196,7 +1196,7 @@ export function createBuilderState(
 
 	/** Swap base ↔ translation fields on a Question */
 	function swapQuestionFields(q: Question, oldLocale: string, newLocale: string): Question {
-		const trans = { ...(q.translations ?? {}) };
+		const trans = { ...q.translations };
 		const demoted: Record<string, string> = {};
 		if (q.text) demoted.text = q.text;
 		trans[oldLocale] = demoted;
@@ -1216,7 +1216,7 @@ export function createBuilderState(
 		oldLocale: string,
 		newLocale: string
 	): QuestionChoice {
-		const trans = { ...(c.translations ?? {}) };
+		const trans = { ...c.translations };
 		const demoted: Record<string, string> = {};
 		if (c.value) demoted.value = c.value;
 		if (c.description) demoted.description = c.description;
@@ -1293,7 +1293,7 @@ export function createBuilderState(
 		newLocale: string,
 		fields: string[]
 	): Record<string, unknown> {
-		const trans = { ...((entry.translations as Record<string, Record<string, string>>) ?? {}) };
+		const trans = { ...(entry.translations as Record<string, Record<string, string>>) };
 		// Demote current base fields
 		const demoted: Record<string, string> = {};
 		for (const f of fields) {
@@ -1372,7 +1372,7 @@ export function createBuilderState(
 		for (const [k, v] of Object.entries(existing)) {
 			if (v) merged[k] = v;
 		}
-		return { ...node, translations: { ...(node.translations ?? {}), [lang]: merged } };
+		return { ...node, translations: { ...node.translations, [lang]: merged } };
 	}
 
 	function copyReqTranslations(reqs: BuilderRequirement[], lang: string): BuilderRequirement[] {
@@ -1400,7 +1400,7 @@ export function createBuilderState(
 			...q,
 			translations:
 				Object.keys(merged).length > 0
-					? { ...(q.translations ?? {}), [lang]: merged }
+					? { ...q.translations, [lang]: merged }
 					: q.translations,
 			choices: q.choices.map((c) => {
 				const cFields: Record<string, string> = {};
@@ -1412,7 +1412,7 @@ export function createBuilderState(
 				for (const [k, v] of Object.entries(cExisting)) {
 					if (v) cMerged[k] = v;
 				}
-				return { ...c, translations: { ...(c.translations ?? {}), [lang]: cMerged } };
+				return { ...c, translations: { ...c.translations, [lang]: cMerged } };
 			})
 		};
 	}
