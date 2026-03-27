@@ -117,10 +117,9 @@ def _create_questions_from_data(requirement_node, questions_data):
         )
 
         for c_order, choice in enumerate(q_data.get("choices", [])):
-            c_urn = choice.get("urn", "")
-            c_parts = c_urn.split(":")
-            c_ref_id = c_parts[-1] if c_parts else c_urn
-            c_ref_id = c_ref_id or None  # Allow multiple NULL ref_ids
+            c_urn = choice.get("urn") or None
+            c_parts = c_urn.split(":") if c_urn else []
+            c_ref_id = c_parts[-1] if c_parts else None
 
             # Convert compute_result bool to string
             compute_result = choice.get("compute_result")
