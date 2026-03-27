@@ -10230,6 +10230,173 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
+    def soa(self, request, pk):
+        """Returns the requirement tree enriched with applied controls and
+        optionally linked risk scenarios, for Statement of Applicability generation."""
+        compliance_assessment = self.get_object()
+        _framework = compliance_assessment.framework
+
+        # Build the base tree (same as tree() endpoint)
+        requirement_assessments = list(
+            compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True
+            )
+        )
+        requirement_nodes = list(
+            RequirementNode.objects.filter(framework=_framework)
+            .select_related("framework")
+            .prefetch_related("reference_controls", "threats")
+            .all(),
+        )
+        tree = get_sorted_requirement_nodes(
+            requirement_nodes,
+            requirement_assessments,
+            _framework.max_score,
+        )
+        implementation_groups = compliance_assessment.selected_implementation_groups
+        tree = filter_graph_by_implementation_groups(tree, implementation_groups)
+
+        # Build ra_id → RequirementAssessment lookup with prefetched applied_controls
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        ).prefetch_related("applied_controls")
+        ra_lookup = {str(ra.id): ra for ra in ras}
+
+        # Collect all applied control IDs
+        ac_ids = set()
+        for ra in ras:
+            for ac in ra.applied_controls.all():
+                ac_ids.add(ac.id)
+
+        # Optionally fetch risk scenarios linked through applied controls
+        ac_to_risk_scenarios = None
+        risk_assessment_ids_param = request.query_params.get("risk_assessment_ids", "")
+        risk_assessment_ids = [
+            uid.strip() for uid in risk_assessment_ids_param.split(",") if uid.strip()
+        ]
+
+        risk_assessment_names = []
+        if risk_assessment_ids and ac_ids:
+            risk_scenarios = (
+                RiskScenario.objects.filter(
+                    Q(applied_controls__id__in=ac_ids)
+                    | Q(existing_applied_controls__id__in=ac_ids),
+                    risk_assessment__id__in=risk_assessment_ids,
+                )
+                .select_related("risk_assessment")
+                .prefetch_related(
+                    "threats", "assets", "applied_controls", "existing_applied_controls"
+                )
+                .distinct()
+            )
+
+            ac_to_risk_scenarios = defaultdict(list)
+            for rs in risk_scenarios:
+                rs_data = {
+                    "id": str(rs.id),
+                    "name": rs.name,
+                    "ref_id": rs.ref_id or "",
+                    "treatment": rs.treatment,
+                    "residual_level": rs.residual_level,
+                    "threats": [
+                        {"id": str(t.id), "name": t.name} for t in rs.threats.all()
+                    ],
+                    "assets": [
+                        {"id": str(a.id), "name": a.name} for a in rs.assets.all()
+                    ],
+                }
+                for ac in rs.applied_controls.all():
+                    if ac.id in ac_ids:
+                        ac_to_risk_scenarios[str(ac.id)].append(rs_data)
+                for ac in rs.existing_applied_controls.all():
+                    if ac.id in ac_ids:
+                        ac_to_risk_scenarios[str(ac.id)].append(rs_data)
+
+            risk_assessment_names = list(
+                RiskAssessment.objects.filter(id__in=risk_assessment_ids).values_list(
+                    "name", flat=True
+                )
+            )
+
+        tree = enrich_tree_for_soa(tree, ra_lookup, ac_to_risk_scenarios)
+
+        # Build risk scenarios section: each scenario with its aggregated controls.
+        risk_scenarios_list = []
+        if risk_assessment_ids:
+            all_risk_scenarios = (
+                RiskScenario.objects.filter(
+                    risk_assessment__id__in=risk_assessment_ids,
+                )
+                .select_related("risk_assessment")
+                .prefetch_related(
+                    "threats",
+                    "assets",
+                    "applied_controls",
+                    "existing_applied_controls",
+                )
+                .distinct()
+            )
+
+            for rs in all_risk_scenarios:
+                # Deduplicate controls across applied + existing
+                controls_seen = set()
+                controls = []
+                for ac in list(rs.applied_controls.all()) + list(
+                    rs.existing_applied_controls.all()
+                ):
+                    if ac.id not in controls_seen:
+                        controls_seen.add(ac.id)
+                        controls.append(
+                            {
+                                "id": str(ac.id),
+                                "name": ac.name,
+                                "ref_id": ac.ref_id or "",
+                                "status": ac.status,
+                                "category": ac.category or "",
+                            }
+                        )
+
+                risk_scenarios_list.append(
+                    {
+                        "id": str(rs.id),
+                        "name": rs.name,
+                        "ref_id": rs.ref_id or "",
+                        "treatment": rs.treatment,
+                        "residual_level": rs.residual_level,
+                        "threats": [
+                            {"id": str(t.id), "name": t.name} for t in rs.threats.all()
+                        ],
+                        "assets": [
+                            {"id": str(a.id), "name": a.name} for a in rs.assets.all()
+                        ],
+                        "applied_controls": controls,
+                    }
+                )
+
+        return Response(
+            {
+                "tree": tree,
+                "risk_scenarios": risk_scenarios_list,
+                "metadata": {
+                    "compliance_assessment": {
+                        "id": str(compliance_assessment.id),
+                        "name": compliance_assessment.name,
+                        "status": compliance_assessment.status,
+                        "perimeter": str(compliance_assessment.perimeter)
+                        if compliance_assessment.perimeter
+                        else None,
+                    },
+                    "framework": {
+                        "id": str(_framework.id),
+                        "name": _framework.name,
+                        "ref_id": _framework.ref_id or "",
+                    },
+                    "risk_assessments": risk_assessment_names,
+                },
+            }
+        )
+
+    @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk):
         """Returns the list of requirement assessments for the different audit modes"""
         assessable = str(
