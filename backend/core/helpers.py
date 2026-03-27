@@ -303,6 +303,7 @@ def get_sorted_requirement_nodes(
                 if req_as and req_as.result is not None
                 else None,
                 "node_content": node.display_long,
+                "display_mode": node.display_mode,
                 "style": "node",
                 "assessable": node.assessable,
                 "description": get_referential_translation(node, "description"),

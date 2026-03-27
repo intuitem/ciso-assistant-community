@@ -11117,7 +11117,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         _framework = compliance_assessment.framework
         requirement_assessments = list(
             compliance_assessment.get_requirement_assessments(
-                include_non_assessable=True, lightweight=True
+                include_non_assessable=True,
+                lightweight=True,
+                skip_ig_filter=_framework.is_dynamic(),
             )
         )
         # Auditee filtering: scope to assigned requirements only

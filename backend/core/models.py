@@ -6936,7 +6936,10 @@ class ComplianceAssessment(Assessment):
         return bool(selected_groups & requirement_groups)
 
     def get_requirement_assessments(
-        self, include_non_assessable: bool, lightweight: bool = False
+        self,
+        include_non_assessable: bool,
+        lightweight: bool = False,
+        skip_ig_filter: bool = False,
     ):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
@@ -6975,7 +6978,7 @@ class ComplianceAssessment(Assessment):
 
         requirements = base_queryset.order_by("requirement__order_id")
 
-        if not self.selected_implementation_groups:
+        if skip_ig_filter or not self.selected_implementation_groups:
             return requirements
 
         selected_implementation_groups_set = set(self.selected_implementation_groups)
