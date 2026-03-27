@@ -234,7 +234,7 @@ class LicenseStatusView(APIView):
     def get(self, request):
         expiry_date_str = settings.LICENSE_EXPIRATION
 
-        if not expiry_date_str or expiry_date_str == "unset":
+        if expiry_date_str == "unset":
             return Response(
                 {"status": "active", "message": "No expiration date set"},
                 status=status.HTTP_400_BAD_REQUEST,
