@@ -1484,7 +1484,9 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
             }
             data["cost"] = cost
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
+        filtering_labels = _resolve_filtering_labels(
+            record.get("filtering_labels"), self.base_context
+        )
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
