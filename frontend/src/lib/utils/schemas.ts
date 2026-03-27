@@ -303,6 +303,8 @@ export const AssetSchema = z.object({
 	...NameDescriptionMixin,
 	type: z.string().default('PR'),
 	folder: z.string(),
+	localisation: z.string().optional().nullable(),
+	homologation_status: z.string().optional(),
 	asset_class: z.string().optional(),
 	parent_assets: z.string().optional().array().optional(),
 	support_assets: z.string().optional().array().optional(),

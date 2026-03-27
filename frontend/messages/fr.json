@@ -1025,6 +1025,7 @@
 	"associatedObjects": "Objets associés",
 	"noAssociatedObjects": "Aucun objet associé dans cette collection",
 	"accreditationStatus": "Statut d'homologation",
+	"homologationStatus": "Statut d'homologation",
 	"accreditationCategory": "Catégorie d'homologation",
 	"accreditationAuthority": "Autorité d'homologation",
 	"authorityName": "Nom personnalisé pour l'autorité",

@@ -1094,6 +1094,7 @@
 	"associatedObjects": "Associated objects",
 	"noAssociatedObjects": "No associated objects in this collection",
 	"accreditationStatus": "Accreditation status",
+	"homologationStatus": "Homologation status",
 	"accreditationCategory": "Accreditation category",
 	"entity": "Entity",
 	"entities": "Entities",

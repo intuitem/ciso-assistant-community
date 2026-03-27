@@ -129,6 +129,21 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const ASSET_HOMOLOGATION_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		options: [
+			{ label: 'homologue', value: 'homologue' },
+			{ label: 'a_revoir', value: 'a_revoir' },
+			{ label: 'expire', value: 'expire' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'homologationStatus',
+		multiple: true
+	}
+};
+
 export const LIBRARY_LABELS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1554,6 +1569,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'type',
+			'localisation',
+			'homologationStatus',
 			'securityObjectives',
 			'disasterRecoveryObjectives',
 			'owner',
@@ -1564,6 +1581,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'type',
+			'localisation',
+			'homologation_status',
 			'security_objectives',
 			'disaster_recovery_objectives',
 			'owner',
@@ -1573,6 +1592,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
+			homologation_status: ASSET_HOMOLOGATION_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER,
 			asset_class: ASSET_CLASS_FILTER,
 			is_business_function: ASSET_IS_BUSINESS_FUNCTION_FILTER

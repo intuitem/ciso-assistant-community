@@ -1625,6 +1625,7 @@ class ThreatViewSet(BaseModelViewSet):
 class AssetFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
+    homologation_status = df.CharFilter(method="filter_homologation_status")
 
     exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
@@ -1645,6 +1646,54 @@ class AssetFilter(GenericFilterSet):
         ancestors = value.ancestors_plus_self()
         return queryset.exclude(id__in=[ancestor.id for ancestor in ancestors])
 
+    def filter_homologation_status(self, queryset, name, value):
+        # MVP: homologation status is represented by filtering labels.
+        # Supported markers: homologue, a_revoir, expire.
+        raw_values = []
+        if self.request:
+            raw_values = self.request.query_params.getlist(name)
+        if not raw_values and value:
+            raw_values = [value]
+
+        normalized_markers = set()
+        aliases = {
+            "homologue": "homologue",
+            "homologe": "homologue",
+            "accredited": "homologue",
+            "a_revoir": "a_revoir",
+            "a revoir": "a_revoir",
+            "to_review": "a_revoir",
+            "review": "a_revoir",
+            "expire": "expire",
+            "expired": "expire",
+        }
+
+        for raw in raw_values:
+            for item in str(raw).split(","):
+                marker = item.strip().lower()
+                if not marker:
+                    continue
+                normalized_markers.add(aliases.get(marker, marker))
+
+        if not normalized_markers:
+            return queryset
+
+        marker_to_labels = {
+            "homologue": ["homologue", "homologuee", "homologuees", "homologue"],
+            "a_revoir": ["a_revoir", "a revoir", "a-revoir"],
+            "expire": ["expire", "expiree", "expirees", "expired"],
+        }
+
+        labels_q = Q()
+        for marker in normalized_markers:
+            for label in marker_to_labels.get(marker, [marker]):
+                labels_q |= Q(filtering_labels__label__iexact=label)
+
+        if not labels_q:
+            return queryset
+
+        return queryset.filter(labels_q).distinct()
+
     class Meta:
         model = Asset
         fields = [
@@ -1664,6 +1713,7 @@ class AssetFilter(GenericFilterSet):
             "dora_criticality_assessment",
             "dora_discontinuing_impact",
             "organisation_objectives",
+            "homologation_status",
         ]
 
 
@@ -1679,8 +1729,137 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
-    search_fields = ["name", "description", "ref_id", "folder__name"]
+    search_fields = ["name", "description", "ref_id", "localisation", "folder__name"]
     ordering = ["folder__name", "name"]
+
+    HOMOLOGATION_STATUS_VALUES = {"homologue", "a_revoir", "expire"}
+    HOMOLOGATION_STATUS_ALIASES = {
+        "homologue": "homologue",
+        "homologe": "homologue",
+        "accredited": "homologue",
+        "a_revoir": "a_revoir",
+        "a revoir": "a_revoir",
+        "a-revoir": "a_revoir",
+        "to_review": "a_revoir",
+        "review": "a_revoir",
+        "expire": "expire",
+        "expired": "expire",
+        "expiree": "expire",
+        "expirees": "expire",
+    }
+
+    @staticmethod
+    def _normalize_homologation_status(value: object) -> str:
+        if value is None:
+            return ""
+        marker = str(value).strip().lower()
+        return AssetViewSet.HOMOLOGATION_STATUS_ALIASES.get(marker, marker)
+
+    @staticmethod
+    def _coerce_to_list(value: object) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return [str(v).strip() for v in value if str(v).strip()]
+        if isinstance(value, tuple):
+            return [str(v).strip() for v in value if str(v).strip()]
+        if isinstance(value, str):
+            raw = value.strip()
+            if not raw:
+                return []
+            if raw.startswith("[") and raw.endswith("]"):
+                try:
+                    parsed = json.loads(raw)
+                    if isinstance(parsed, list):
+                        return [str(v).strip() for v in parsed if str(v).strip()]
+                except json.JSONDecodeError:
+                    pass
+            return [item.strip() for item in raw.split(",") if item.strip()]
+        return [str(value).strip()]
+
+    def _apply_homologation_status(self, request: Request) -> None:
+        if not hasattr(request, "data"):
+            return
+
+        has_field = "homologation_status" in request.data
+        status_raw = request.data.get("homologation_status") if has_field else None
+
+        if hasattr(request.data, "_mutable"):
+            request.data._mutable = True
+        if has_field:
+            request.data.pop("homologation_status", None)
+
+        normalized_status = self._normalize_homologation_status(status_raw)
+        if not normalized_status:
+            return
+
+        if normalized_status not in self.HOMOLOGATION_STATUS_VALUES:
+            return
+
+        labels = self._coerce_to_list(request.data.get("filtering_labels"))
+
+        # If labels are not part of payload on update, preserve existing labels.
+        if not labels and self.action in {"update", "partial_update"}:
+            labels = [
+                str(label_id)
+                for label_id in self.get_object().filtering_labels.values_list(
+                    "id", flat=True
+                )
+            ]
+
+        # Resolve UUID labels to their textual value so we can remove existing
+        # homologation markers regardless of whether labels are passed as IDs or names.
+        uuid_to_label = {}
+        label_ids = []
+        for label in labels:
+            try:
+                label_ids.append(uuid.UUID(str(label), version=4))
+            except (TypeError, ValueError):
+                continue
+
+        if label_ids:
+            uuid_to_label = {
+                str(item.id): item.label
+                for item in FilteringLabel.objects.filter(id__in=label_ids)
+            }
+
+        filtered_labels = []
+        for label in labels:
+            label_name = uuid_to_label.get(str(label), str(label))
+            if (
+                self._normalize_homologation_status(label_name)
+                not in self.HOMOLOGATION_STATUS_VALUES
+            ):
+                filtered_labels.append(label)
+
+        # Reuse existing status label in the same folder scope to avoid duplicate
+        # creation errors from the generic label processor.
+        folder_id = request.data.get("folder")
+        if not folder_id and self.action in {"update", "partial_update"}:
+            folder_id = str(self.get_object().folder_id)
+
+        status_label = FilteringLabel.objects.filter(
+            label__iexact=normalized_status,
+            folder_id=folder_id,
+        ).first()
+        if status_label:
+            filtered_labels.append(str(status_label.id))
+        else:
+            filtered_labels.append(normalized_status)
+
+        request.data["filtering_labels"] = filtered_labels
+
+    def create(self, request: Request, *args, **kwargs) -> Response:
+        self._apply_homologation_status(request)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request: Request, *args, **kwargs) -> Response:
+        self._apply_homologation_status(request)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request: Request, *args, **kwargs) -> Response:
+        self._apply_homologation_status(request)
+        return super().partial_update(request, *args, **kwargs)
 
     def get_queryset(self) -> models.query.QuerySet:
         qs = super().get_queryset().select_related("asset_class", "folder")

@@ -76,6 +76,12 @@
 	});
 
 	const securityObjectiveOptions: Option[] = reducedSecurityObjectiveMap.map(createOption);
+	const homologationStatusOptions = [
+		{ label: 'non_defini', value: '' },
+		{ label: 'homologue', value: 'homologue' },
+		{ label: 'a_revoir', value: 'a_revoir' },
+		{ label: 'expire', value: 'expire' }
+	];
 
 	// Dynamic configuration based on asset type
 	const typeConfig = $derived.by(() => {
@@ -358,6 +364,14 @@
 		helpText={m.observationHelpText()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+	/>
+	<Select
+		{form}
+		field="homologation_status"
+		options={homologationStatusOptions}
+		label={m.homologationStatus()}
+		cacheLock={cacheLocks['homologation_status']}
+		bind:cachedValue={formDataCache['homologation_status']}
 	/>
 	<AutocompleteSelect
 		multiple

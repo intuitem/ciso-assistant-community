@@ -655,6 +655,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     recovery_capabilities = serializers.SerializerMethodField()
     security_objectives_comparison = serializers.SerializerMethodField()
     recovery_objectives_comparison = serializers.SerializerMethodField()
+    homologation_status = serializers.SerializerMethodField()
 
     def get_children_assets(self, obj):
         """
@@ -725,6 +726,26 @@ class AssetReadSerializer(AssetWriteSerializer):
         Gets comparison of recovery objectives vs capabilities with verdict.
         """
         return obj.get_recovery_objectives_comparison()
+
+    def get_homologation_status(self, obj):
+        """
+        Derives an homologation status from asset filtering labels.
+        Priority order: expire > a_revoir > homologue.
+        """
+        labels = {
+            str(label).strip().lower()
+            for label in obj.filtering_labels.values_list("label", flat=True)
+            if label
+        }
+
+        if labels & {"expire", "expired", "expiree", "expirees"}:
+            return "expire"
+        if labels & {"a_revoir", "a revoir", "a-revoir", "to_review", "review"}:
+            return "a_revoir"
+        if labels & {"homologue", "homologuee", "homologuees", "homologe", "accredited"}:
+            return "homologue"
+
+        return "non_defini"
 
 
 class AssetAutocompleteSerializer(BaseModelSerializer):
