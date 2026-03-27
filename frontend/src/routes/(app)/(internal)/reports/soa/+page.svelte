@@ -63,8 +63,8 @@
 		return data.frameworkGroupsMap?.[ca.framework.id] || [];
 	});
 
-	// Select all groups by default when CA changes
-	let lastAutoSelectedCA: string = $state('');
+	// Select all groups by default when CA changes (skip on initial load if restoring saved state)
+	let lastAutoSelectedCA: string = $state(saved.compliance);
 
 	$effect(() => {
 		if (selectedComplianceAssessment !== lastAutoSelectedCA) {
