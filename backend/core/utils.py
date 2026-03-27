@@ -843,6 +843,39 @@ def build_answers_dict(answers_qs):
     return result
 
 
+def _build_answer_context(questions_qs, answers_qs):
+    """Build lookup dicts used for question visibility and score computation.
+
+    Returns (selected_choice_pks_by_qid, answers_by_urn, questions_by_urn, has_answer_by_qid).
+    """
+    from core.models import Question
+
+    selected_choice_pks_by_qid = {}
+    answers_by_urn = {}
+    questions_by_urn = {}
+    has_answer_by_qid = {}
+
+    for a in answers_qs:
+        q_type = a.question.type
+        if q_type in (
+            Question.Type.UNIQUE_CHOICE,
+            Question.Type.MULTIPLE_CHOICE,
+        ):
+            pks = {c.id for c in a.selected_choices.all()}
+            selected_choice_pks_by_qid[a.question_id] = pks
+            has_answer_by_qid[a.question_id] = len(pks) > 0
+        else:
+            has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
+
+        if a.question.urn:
+            answers_by_urn[a.question.urn] = a.get_choice_urns() or a.value
+
+    for q in questions_qs:
+        questions_by_urn[q.urn] = q
+
+    return selected_choice_pks_by_qid, answers_by_urn, questions_by_urn, has_answer_by_qid
+
+
 def update_selected_implementation_groups(compliance_assessment):
     """Recalculate selected IGs based on all visible answers in the assessment."""
     from core.models import Answer, Question
@@ -869,25 +902,9 @@ def update_selected_implementation_groups(compliance_assessment):
             continue
 
         answers_qs = ra.answers.all()
-        answers_by_urn = {}
-        selected_choice_pks_by_qid = {}
-        has_answer_by_qid = {}
-        questions_by_urn = {}
-        for q in questions_qs:
-            questions_by_urn[q.urn] = q
-        for a in answers_qs:
-            if a.question.type in (
-                Question.Type.UNIQUE_CHOICE,
-                Question.Type.MULTIPLE_CHOICE,
-            ):
-                pks = {c.id for c in a.selected_choices.all()}
-                selected_choice_pks_by_qid[a.question_id] = pks
-                has_answer_by_qid[a.question_id] = len(pks) > 0
-            else:
-                has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
-            # For depends_on resolution, pass URN strings
-            if a.question.urn:
-                answers_by_urn[a.question.urn] = a.get_choice_urns() or a.value
+        selected_choice_pks_by_qid, answers_by_urn, questions_by_urn, has_answer_by_qid = (
+            _build_answer_context(questions_qs, answers_qs)
+        )
 
         for question in questions_qs:
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):

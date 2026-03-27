@@ -60,6 +60,7 @@ from .utils import (
     sha256,
     update_selected_implementation_groups,
     _is_question_visible,
+    _build_answer_context,
 )
 from .validators import (
     validate_file_name,
@@ -70,6 +71,28 @@ from . import dora
 from collections import defaultdict, deque
 
 logger = get_logger(__name__)
+
+
+def _defer_once(conn_attr: str, key, callback):
+    """Schedule *callback* via on_commit, deduplicating by *key* per transaction.
+
+    Attaches a pending-set to the DB connection under *conn_attr* so that only
+    the first call per *key* in a given transaction actually registers the
+    on_commit hook.
+    """
+    conn = transaction.get_connection()
+    pending = getattr(conn, conn_attr, None)
+    if pending is None:
+        pending = set()
+        setattr(conn, conn_attr, pending)
+    if key not in pending:
+        pending.add(key)
+
+        def _on_commit(k=key, p=pending, cb=callback):
+            p.discard(k)
+            cb()
+
+        transaction.on_commit(_on_commit)
 
 
 URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
@@ -2507,7 +2530,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         return result if result else None
 
     class Meta:
-        ordering = ["order_id"]
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
 
@@ -6804,7 +6826,6 @@ class ComplianceAssessment(Assessment):
             .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
-            .select_related("requirement")
         )
         ig = (
             set(self.selected_implementation_groups)
@@ -7075,10 +7096,14 @@ class ComplianceAssessment(Assessment):
         )
 
         if ig is not None:
-            ig_filter = Q()
-            for group in ig:
-                ig_filter |= Q(requirement__implementation_groups__icontains=group)
-            requirements = requirements.filter(ig_filter)
+            # Python-side set intersection for DB portability (no icontains on JSON)
+            matching_node_ids = [
+                ra.requirement_id
+                for ra in requirements.select_related("requirement")
+                if ra.requirement.implementation_groups
+                and ig & set(ra.requirement.implementation_groups)
+            ]
+            requirements = requirements.filter(requirement_id__in=matching_node_ids)
 
         count_by_result = {
             row["result"]: row["count"]
@@ -7542,6 +7567,10 @@ class ComplianceAssessment(Assessment):
 
     @property
     def has_questions(self) -> bool:
+        # Use annotation if available (avoids N+1 on list views)
+        annotated = getattr(self, "_has_questions", None)
+        if annotated is not None:
+            return annotated
         return Question.objects.filter(
             requirement_node__framework=self.framework
         ).exists()
@@ -7777,19 +7806,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         # Defer metrics to on_commit, deduplicated per CA per transaction
         ca = self.compliance_assessment
-        conn = transaction.get_connection()
-        pending = getattr(conn, "_pending_metrics_updates", None)
-        if pending is None:
-            pending = set()
-            conn._pending_metrics_updates = pending
-        if ca.pk not in pending:
-            pending.add(ca.pk)
-
-            def _do_metrics_update(ca_ref=ca, pending_ref=pending):
-                pending_ref.discard(ca_ref.pk)
-                ca_ref.upsert_daily_metrics()
-
-            transaction.on_commit(_do_metrics_update)
+        _defer_once("_pending_metrics_updates", ca.pk, ca.upsert_daily_metrics)
 
     def get_visible_questions_counts(self) -> tuple[int, int]:
         """Return (visible_questions_count, answered_visible_questions_count) for this assessment."""
@@ -7798,29 +7815,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         answers_qs = self.answers.all()
 
         # Build lookup for answered questions and their values
-        selected_choice_pks_by_qid = {}
-        answers_by_urn = {}
-        questions_by_urn = {}
-        has_answer_by_qid = {}
-
-        for a in answers_qs:
-            q_type = a.question.type
-            if q_type in (
-                Question.Type.UNIQUE_CHOICE,
-                Question.Type.MULTIPLE_CHOICE,
-            ):
-                pks = {c.id for c in a.selected_choices.all()}
-                selected_choice_pks_by_qid[a.question_id] = pks
-                has_answer_by_qid[a.question_id] = len(pks) > 0
-            else:
-                has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
-
-            # For depends_on resolution, pass URN strings
-            if a.question.urn:
-                answers_by_urn[a.question.urn] = a.get_choice_urns() or a.value
-
-        for q in questions_qs:
-            questions_by_urn[q.urn] = q
+        _, answers_by_urn, questions_by_urn, has_answer_by_qid = _build_answer_context(
+            questions_qs, answers_qs
+        )
 
         visible_questions = 0
         answered_visible_questions = 0
@@ -7848,29 +7845,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         )
 
         # Build lookup: question_id → set of selected choice PKs
-        selected_choice_pks_by_qid = {}
-        answers_by_urn = {}
-        questions_by_urn = {}
-        has_answer_by_qid = {}
-
-        for a in answers_qs:
-            q_type = a.question.type
-            if q_type in (
-                Question.Type.UNIQUE_CHOICE,
-                Question.Type.MULTIPLE_CHOICE,
-            ):
-                pks = {c.id for c in a.selected_choices.all()}
-                selected_choice_pks_by_qid[a.question_id] = pks
-                has_answer_by_qid[a.question_id] = len(pks) > 0
-            else:
-                has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
-
-            # For depends_on resolution, pass URN strings
-            if a.question.urn:
-                answers_by_urn[a.question.urn] = a.get_choice_urns() or a.value
-
-        for q in questions_qs:
-            questions_by_urn[q.urn] = q
+        selected_choice_pks_by_qid, answers_by_urn, questions_by_urn, has_answer_by_qid = (
+            _build_answer_context(questions_qs, answers_qs)
+        )
 
         total_score = 0
         total_weight = 0
@@ -7954,35 +7931,29 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
 
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._loaded_cel_values = {
+            f: getattr(instance, f) for f in cls._CEL_RELEVANT_FIELDS if f in field_names
+        }
+        return instance
+
     def _get_cel_relevant_changed_fields(self) -> set[str]:
-        if not self.pk:
-            return set()
-        old = (
-            RequirementAssessment.objects.filter(pk=self.pk)
-            .values("score", "result", "status")
-            .first()
-        )
+        old = getattr(self, "_loaded_cel_values", None)
         if old is None:
             return set()
-        return {f for f in self._CEL_RELEVANT_FIELDS if getattr(self, f) != old[f]}
+        return {f for f in self._CEL_RELEVANT_FIELDS if getattr(self, f) != old.get(f)}
 
     def _defer_cel_evaluation(self):
         ca = self.compliance_assessment
-        conn = transaction.get_connection()
-        pending = getattr(conn, "_pending_cel_evaluations", None)
-        if pending is None:
-            pending = set()
-            conn._pending_cel_evaluations = pending
-        if ca.pk not in pending:
-            pending.add(ca.pk)
 
-            def _do_cel_evaluation(ca_ref=ca, pending_ref=pending):
-                pending_ref.discard(ca_ref.pk)
-                from core.cel_service import evaluate_outcomes
+        def _run():
+            from core.cel_service import evaluate_outcomes
 
-                evaluate_outcomes(ca_ref)
+            evaluate_outcomes(ca)
 
-            transaction.on_commit(_do_cel_evaluation)
+        _defer_once("_pending_cel_evaluations", ca.pk, _run)
 
     def save(self, *args, **kwargs) -> None:
         update_fields = kwargs.get("update_fields")
@@ -8136,19 +8107,11 @@ class Answer(AbstractBaseModel, FolderMixin):
         # If framework is dynamic, trigger IG update (deduplicated per transaction)
         if self.requirement_assessment.compliance_assessment.framework.is_dynamic():
             ca = self.requirement_assessment.compliance_assessment
-            conn = transaction.get_connection()
-            pending = getattr(conn, "_pending_ig_updates", None)
-            if pending is None:
-                pending = set()
-                conn._pending_ig_updates = pending
-            if ca.pk not in pending:
-                pending.add(ca.pk)
-
-                def _do_ig_update(ca_ref=ca, pending_ref=pending):
-                    pending_ref.discard(ca_ref.pk)
-                    update_selected_implementation_groups(ca_ref)
-
-                transaction.on_commit(_do_ig_update)
+            _defer_once(
+                "_pending_ig_updates",
+                ca.pk,
+                lambda ca_ref=ca: update_selected_implementation_groups(ca_ref),
+            )
 
 
 class FindingsAssessment(Assessment):

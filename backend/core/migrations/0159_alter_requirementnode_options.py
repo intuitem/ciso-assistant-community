@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
         migrations.AlterModelOptions(
             name="requirementnode",
             options={
-                "ordering": ["order_id"],
                 "verbose_name": "RequirementNode",
                 "verbose_name_plural": "RequirementNodes",
             },
