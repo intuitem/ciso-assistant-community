@@ -10286,6 +10286,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         risk_assessment_names = []
         if risk_assessment_ids and ac_ids:
+            # Filter risk assessment IDs by IAM boundaries
+            viewable_ra_ids = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, RiskAssessment
+            )[0]
+            risk_assessment_ids = [
+                uid
+                for uid in risk_assessment_ids
+                if uid in {str(i) for i in viewable_ra_ids}
+            ]
+
             risk_scenarios = (
                 RiskScenario.objects.filter(
                     Q(applied_controls__id__in=ac_ids)
