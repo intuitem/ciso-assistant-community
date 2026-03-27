@@ -9037,8 +9037,13 @@ class FrameworkViewSet(BaseModelViewSet):
         try:
             self._reconcile_draft(framework, draft)
         except ValueError as e:
+            logger.warning(
+                "Validation error while publishing draft for framework %s",
+                framework.id,
+                exc_info=e,
+            )
             return Response(
-                {"error": str(e)},
+                {"error": "Invalid draft data."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception:
