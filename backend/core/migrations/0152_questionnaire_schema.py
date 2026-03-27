@@ -1,7 +1,6 @@
 """Schema migration: questionnaire models and framework editing.
 
 Combines schema operations from the iterative questionnaire branch:
-- ComplianceAssessment scoring_enabled + score_calculation_method
 - Rename JSON fields (questions → questions_json, answers → answers_json)
 - Question, QuestionChoice, Answer models
 - RequirementNode display_mode
@@ -21,32 +20,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0150_add_editable_mixin_to_riskmatrix"),
+        ("core", "0151_complianceassessment_scoring_enabled_and_more"),
         ("iam", "0021_fix_auditee_iam_groups"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
-        # --- scoring ---
-        migrations.AddField(
-            model_name="complianceassessment",
-            name="scoring_enabled",
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AlterField(
-            model_name="complianceassessment",
-            name="score_calculation_method",
-            field=models.CharField(
-                choices=[
-                    ("average", "Average"),
-                    ("sum", "Sum"),
-                    ("average_of_averages", "Average of averages"),
-                ],
-                default="average",
-                max_length=100,
-                verbose_name="Score Calculation Method",
-            ),
-        ),
         # --- rename old JSON fields ---
         migrations.RenameField(
             model_name="requirementnode",
