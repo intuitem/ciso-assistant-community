@@ -11156,6 +11156,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "reference_controls", "threats", "questions", "questions__choices"
             )
+            .order_by("order_id")
             .all(),
         )
         nodes_by_urn = {node.urn: node for node in requirement_nodes}
@@ -11213,6 +11214,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "reference_controls", "threats", "questions", "questions__choices"
             )
+            .order_by("order_id")
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
@@ -15718,6 +15720,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "reference_controls", "threats", "questions", "questions__choices"
             )
+            .order_by("order_id")
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:

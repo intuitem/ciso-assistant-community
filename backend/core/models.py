@@ -2507,6 +2507,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         return result if result else None
 
     class Meta:
+        ordering = ["order_id"]
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
 
