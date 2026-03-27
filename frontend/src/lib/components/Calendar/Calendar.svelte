@@ -146,6 +146,7 @@
 		<div class="flex items-center justify-between bg-surface-50 rounded-lg px-6 py-3">
 			<a
 				href={prevMonth(year, month)}
+				aria-label={m.previous()}
 				class="text-surface-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-surface-100"
 			>
 				<i class="fas fa-chevron-left"></i>
@@ -160,6 +161,7 @@
 			{/key}
 			<a
 				href={nextMonth(year, month)}
+				aria-label={m.next()}
 				class="text-surface-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-surface-100"
 			>
 				<i class="fas fa-chevron-right"></i>
@@ -174,6 +176,7 @@
 					{visibleCategories[key]
 						? 'border-surface-200 bg-surface-100 text-surface-700'
 						: 'border-surface-200 bg-transparent text-surface-400 line-through opacity-50'}"
+					aria-pressed={visibleCategories[key]}
 					onclick={() => toggleCategory(key)}
 				>
 					<span class="inline-block w-2.5 h-2.5 rounded-full {cat.dotClass}"></span>
@@ -245,6 +248,7 @@
 				</h2>
 				<button
 					onclick={closePanel}
+					aria-label={m.close()}
 					class="text-surface-400 hover:text-surface-600 transition-colors p-1 rounded-lg hover:bg-surface-100"
 				>
 					<i class="fas fa-times"></i>

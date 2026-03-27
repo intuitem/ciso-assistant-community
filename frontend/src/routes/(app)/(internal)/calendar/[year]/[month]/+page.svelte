@@ -13,13 +13,18 @@
 	let year = $derived(parseInt(page.params.year));
 	let month = $derived(parseInt(page.params.month));
 
+	// Parse YYYY-MM-DD as local date (not UTC) to avoid day-shift west of UTC
+	function localDate(dateStr: string): Date {
+		return new Date(dateStr + 'T00:00:00');
+	}
+
 	function createCalendarEvents(): CalendarEvent[] {
 		const events: CalendarEvent[] = [
 			...(data.appliedControls ?? [])
 				.filter((c: any) => c.eta)
 				.map((control: any) => ({
 					label: control.name,
-					date: new Date(control.eta),
+					date: localDate(control.eta),
 					link: `/applied-controls/${control.id}`,
 					users: control.owner ?? [],
 					category: 'appliedControl' as const,
@@ -29,7 +34,7 @@
 				.filter((ra: any) => ra.expiry_date)
 				.map((ra: any) => ({
 					label: ra.name,
-					date: new Date(ra.expiry_date),
+					date: localDate(ra.expiry_date),
 					link: `/risk-acceptances/${ra.id}`,
 					users: ra.approver ? [ra.approver] : [],
 					category: 'riskAcceptance' as const,
@@ -39,7 +44,7 @@
 				.filter((a: any) => a.due_date)
 				.map((audit: any) => ({
 					label: audit.name,
-					date: new Date(audit.due_date),
+					date: localDate(audit.due_date),
 					link: `/compliance-assessments/${audit.id}`,
 					users: audit.authors ?? [],
 					category: 'audit' as const,
@@ -49,7 +54,7 @@
 				.filter((t: any) => t.due_date)
 				.map((task: any) => ({
 					label: task.name,
-					date: new Date(task.due_date),
+					date: localDate(task.due_date),
 					link: !task.is_recurrent
 						? `/task-templates/${task.task_template.id}`
 						: `/task-nodes/${task.id}`,
@@ -61,7 +66,7 @@
 				.filter((c: any) => c.end_date)
 				.map((contract: any) => ({
 					label: contract.name,
-					date: new Date(contract.end_date),
+					date: localDate(contract.end_date),
 					link: `/contracts/${contract.id}`,
 					users: contract.owner ? [contract.owner] : [],
 					category: 'contract' as const,
@@ -71,7 +76,7 @@
 				.filter((se: any) => se.expiration_date)
 				.map((se: any) => ({
 					label: se.name,
-					date: new Date(se.expiration_date),
+					date: localDate(se.expiration_date),
 					link: `/security-exceptions/${se.id}`,
 					users: se.owners ?? [],
 					category: 'securityException' as const,
@@ -81,7 +86,7 @@
 				.filter((f: any) => f.due_date)
 				.map((finding: any) => ({
 					label: finding.name,
-					date: new Date(finding.due_date),
+					date: localDate(finding.due_date),
 					link: `/findings/${finding.id}`,
 					users: finding.owner ? [finding.owner] : [],
 					category: 'finding' as const,
@@ -91,7 +96,7 @@
 				.filter((ra: any) => ra.due_date)
 				.map((ra: any) => ({
 					label: ra.name,
-					date: new Date(ra.due_date),
+					date: localDate(ra.due_date),
 					link: `/risk-assessments/${ra.id}`,
 					users: ra.authors ?? [],
 					category: 'riskAssessment' as const,
