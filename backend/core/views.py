@@ -182,6 +182,86 @@ MAPPING_MAX_DEPTH = 3
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
+ALLOWED_IMAGE_TYPES = {
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "image/webp",
+}
+
+
+def _validate_and_upload_image(request, attachment_kwargs, *, include_url=False):
+    """Shared image upload logic for Framework and RequirementNode viewsets.
+
+    Returns a Response (success or error).
+    """
+    uploaded_file = request.FILES.get("file") or request.data.get("file")
+    if not uploaded_file:
+        return Response(
+            {"error": "No file provided."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    content_type = (uploaded_file.content_type or "").lower()
+    if content_type not in ALLOWED_IMAGE_TYPES:
+        return Response(
+            {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    real_mime = magic.from_buffer(uploaded_file.read(2048), mime=True)
+    uploaded_file.seek(0)
+    if real_mime not in ALLOWED_IMAGE_TYPES:
+        return Response(
+            {"error": f"File content is {real_mime}, not an allowed image type."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    from core.models import RequirementNodeAttachment
+
+    attachment = RequirementNodeAttachment(
+        file=uploaded_file,
+        uploaded_by=request.user,
+        **attachment_kwargs,
+    )
+    try:
+        attachment.full_clean()
+    except ValidationError as e:
+        messages = []
+        if hasattr(e, "message_dict"):
+            for field_messages in e.message_dict.values():
+                messages.extend(field_messages)
+        elif hasattr(e, "messages"):
+            messages = e.messages
+        else:
+            messages = [str(e.message)]
+        return Response(
+            {"error": " ".join(messages)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    attachment.save()
+    data = {"id": str(attachment.id)}
+    if include_url:
+        data["url"] = f"/requirement-node-attachments/{attachment.id}/file/"
+    return Response(data, status=status.HTTP_201_CREATED)
+
+
+def _serve_attachment(attachment_filter):
+    """Shared image serve logic. Returns a Response."""
+    from core.models import RequirementNodeAttachment
+
+    try:
+        attachment = RequirementNodeAttachment.objects.get(**attachment_filter)
+    except RequirementNodeAttachment.DoesNotExist:
+        return Response(
+            {"error": "Attachment not found."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    content_type = (
+        mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
+    )
+    response = HttpResponse(attachment.file.read(), content_type=content_type)
+    safe_name = os.path.basename(attachment.file.name)
+    response["Content-Disposition"] = f'inline; filename="{safe_name}"'
+    return response
+
 
 class NullableChoiceFilter(df.MultipleChoiceFilter):
     """
@@ -8526,7 +8606,7 @@ class FrameworkViewSet(BaseModelViewSet):
 
         # Map old URNs to new URNs for parent_urn remapping
         urn_map = {}
-        nodes = RequirementNode.objects.filter(framework=source).order_by("order_id")
+        nodes = RequirementNode.objects.filter(framework=source).order_by(F("order_id").asc(nulls_last=True))
         for node in nodes:
             old_urn = node.urn
             new_urn = f"urn:intuitem:risk:req_node:{uuid.uuid4()}" if old_urn else None
@@ -9334,56 +9414,8 @@ class FrameworkViewSet(BaseModelViewSet):
         """Upload an image to this framework (for splash screen markdown in draft mode)."""
         framework = self.get_object()
         self._check_change_permission(request, framework)
-        uploaded_file = request.FILES.get("file") or request.data.get("file")
-        if not uploaded_file:
-            return Response(
-                {"error": "No file provided."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        ALLOWED_IMAGE_TYPES = {
-            "image/png",
-            "image/jpeg",
-            "image/gif",
-            "image/webp",
-        }
-        content_type = (uploaded_file.content_type or "").lower()
-        if content_type not in ALLOWED_IMAGE_TYPES:
-            return Response(
-                {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        real_mime = magic.from_buffer(uploaded_file.read(2048), mime=True)
-        uploaded_file.seek(0)
-        if real_mime not in ALLOWED_IMAGE_TYPES:
-            return Response(
-                {"error": f"File content is {real_mime}, not an allowed image type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        attachment = RequirementNodeAttachment(
-            framework=framework,
-            file=uploaded_file,
-            uploaded_by=request.user,
-            folder=framework.folder,
-        )
-        try:
-            attachment.full_clean()
-        except ValidationError as e:
-            messages = []
-            if hasattr(e, "message_dict"):
-                for field_messages in e.message_dict.values():
-                    messages.extend(field_messages)
-            elif hasattr(e, "messages"):
-                messages = e.messages
-            else:
-                messages = [str(e.message)]
-            return Response(
-                {"error": " ".join(messages)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        attachment.save()
-        return Response(
-            {"id": str(attachment.id)},
-            status=status.HTTP_201_CREATED,
+        return _validate_and_upload_image(
+            request, {"framework": framework, "folder": framework.folder}
         )
 
     @action(
@@ -9394,6 +9426,9 @@ class FrameworkViewSet(BaseModelViewSet):
     def serve_image(self, request, pk=None, attachment_id=None):
         """Serve an image attachment belonging to this framework."""
         framework = self.get_object()
+        # Match attachments on the framework directly or on its requirement nodes
+        from core.models import RequirementNodeAttachment
+
         try:
             attachment = RequirementNodeAttachment.objects.get(
                 Q(framework=framework) | Q(requirement_node__framework=framework),
@@ -9447,58 +9482,10 @@ class RequirementViewSet(BaseModelViewSet):
     def upload_image(self, request, pk=None):
         """Upload an image file and attach it to this requirement node."""
         requirement_node = self.get_object()
-        uploaded_file = request.FILES.get("file") or request.data.get("file")
-        if not uploaded_file:
-            return Response(
-                {"error": "No file provided."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        ALLOWED_IMAGE_TYPES = {
-            "image/png",
-            "image/jpeg",
-            "image/gif",
-            "image/webp",
-        }
-        content_type = (uploaded_file.content_type or "").lower()
-        if content_type not in ALLOWED_IMAGE_TYPES:
-            return Response(
-                {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        real_mime = magic.from_buffer(uploaded_file.read(2048), mime=True)
-        uploaded_file.seek(0)
-        if real_mime not in ALLOWED_IMAGE_TYPES:
-            return Response(
-                {"error": f"File content is {real_mime}, not an allowed image type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        attachment = RequirementNodeAttachment(
-            requirement_node=requirement_node,
-            file=uploaded_file,
-            uploaded_by=request.user,
-        )
-        try:
-            attachment.full_clean()
-        except ValidationError as e:
-            messages = []
-            if hasattr(e, "message_dict"):
-                for field_messages in e.message_dict.values():
-                    messages.extend(field_messages)
-            elif hasattr(e, "messages"):
-                messages = e.messages
-            else:
-                messages = [str(e.message)]
-            return Response(
-                {"error": " ".join(messages)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        attachment.save()
-        return Response(
-            {
-                "id": str(attachment.id),
-                "url": f"/requirement-node-attachments/{attachment.id}/file/",
-            },
-            status=status.HTTP_201_CREATED,
+        return _validate_and_upload_image(
+            request,
+            {"requirement_node": requirement_node},
+            include_url=True,
         )
 
     @action(
@@ -9509,23 +9496,9 @@ class RequirementViewSet(BaseModelViewSet):
     def serve_image(self, request, pk=None, attachment_id=None):
         """Serve an image attachment belonging to this requirement node."""
         requirement_node = self.get_object()
-        try:
-            attachment = RequirementNodeAttachment.objects.get(
-                pk=attachment_id,
-                requirement_node=requirement_node,
-            )
-        except RequirementNodeAttachment.DoesNotExist:
-            return Response(
-                {"error": "Attachment not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        content_type = (
-            mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
+        return _serve_attachment(
+            {"pk": attachment_id, "requirement_node": requirement_node}
         )
-        response = HttpResponse(attachment.file.read(), content_type=content_type)
-        safe_name = os.path.basename(attachment.file.name)
-        response["Content-Disposition"] = f'inline; filename="{safe_name}"'
-        return response
 
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
     def inspect_requirement(self, request, pk):
@@ -10182,6 +10155,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
+        from core.models import Question
+
         qs = (
             super()
             .get_queryset()
@@ -10190,6 +10165,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "framework",  # Displayed in table
                 "perimeter",  # Displayed in table
+            )
+            .annotate(
+                _has_questions=Exists(
+                    Question.objects.filter(
+                        requirement_node__framework=OuterRef("framework")
+                    )
+                )
             )
         )
 
@@ -11156,7 +11138,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "reference_controls", "threats", "questions", "questions__choices"
             )
-            .order_by("order_id")
             .all(),
         )
         nodes_by_urn = {node.urn: node for node in requirement_nodes}
@@ -11214,7 +11195,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "reference_controls", "threats", "questions", "questions__choices"
             )
-            .order_by("order_id")
+            .order_by(F("order_id").asc(nulls_last=True))
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
@@ -11245,6 +11226,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements_list = {
             "requirements": requirements,
             "requirement_assessments": requirement_assessments,
+            "viewer_role": viewer_role,
         }
         return Response(requirements_list, status=status.HTTP_200_OK)
 
@@ -15720,7 +15702,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "reference_controls", "threats", "questions", "questions__choices"
             )
-            .order_by("order_id")
+            .order_by(F("order_id").asc(nulls_last=True))
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
