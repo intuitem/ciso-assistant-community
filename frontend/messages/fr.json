@@ -255,6 +255,7 @@
 	"residualLevel": "Niveau résiduel",
 	"riskMatrix": "Matrice de risque",
 	"riskMatrixColon": "Matrice des risques :",
+	"riskMatrixEmpty": "La définition de la matrice de risque est incomplète, probablement parce qu'elle est encore en brouillon. Utilisez l'éditeur de matrice pour définir les niveaux de probabilité, d'impact et de risque.",
 	"riskOptionHelper": "Vous pouvez consulter la définition de vos niveaux en cliquant sur la matrice ci-dessus (s'ouvre dans un nouvel onglet)",
 	"perimeter": "Périmètre",
 	"folder": "Domaine",

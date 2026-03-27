@@ -2379,7 +2379,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
         options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
             _choices = {}
-            for i, risk in enumerate(matrix.json_definition["risk"]):
+            for i, risk in enumerate(matrix.json_definition.get("risk", [])):
                 translations = risk.get("translations")
                 if not isinstance(translations, dict):
                     translations = {}
