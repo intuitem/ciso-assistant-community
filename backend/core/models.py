@@ -115,57 +115,70 @@ def _create_questions_from_data(requirement_node, questions_data):
     """
     from core.models import Question, QuestionChoice
 
+    questions_to_create = []
+    choices_data_per_question = []  # parallel list: choices data for each question
+
     for order, (q_urn, q_data) in enumerate(questions_data.items()):
         raw_type = q_data.get("type", "text")
         q_type = "unique_choice" if raw_type == "single_choice" else raw_type
-        # Extract ref_id: strip the framework-specific URN prefix
         parts = q_urn.split(":")
         q_ref_id = parts[-1] if parts else q_urn
-
         question_text = q_data.get("text", "")
-        question = Question.objects.create(
-            requirement_node=requirement_node,
-            urn=q_urn,
-            ref_id=q_ref_id,
-            text=question_text,
-            annotation=q_data.get("annotation", question_text),
-            type=q_type,
-            config=q_data.get("config"),
-            depends_on=q_data.get("depends_on"),
-            order=order,
-            weight=q_data.get("weight", 1),
-            folder=requirement_node.folder,
-            is_published=True,
-            translations=q_data.get("translations"),
-        )
 
-        for c_order, choice in enumerate(q_data.get("choices", [])):
+        questions_to_create.append(
+            Question(
+                requirement_node=requirement_node,
+                urn=q_urn,
+                ref_id=q_ref_id,
+                text=question_text,
+                annotation=q_data.get("annotation", question_text),
+                type=q_type,
+                config=q_data.get("config"),
+                depends_on=q_data.get("depends_on"),
+                order=order,
+                weight=q_data.get("weight", 1),
+                folder=requirement_node.folder,
+                is_published=True,
+                translations=q_data.get("translations"),
+            )
+        )
+        choices_data_per_question.append(q_data.get("choices", []))
+
+    created_questions = Question.objects.bulk_create(questions_to_create)
+
+    choices_to_create = []
+    for question, choices_data in zip(created_questions, choices_data_per_question):
+        for c_order, choice in enumerate(choices_data):
             c_urn = choice.get("urn") or None
             c_parts = c_urn.split(":") if c_urn else []
             c_ref_id = c_parts[-1] if c_parts else None
-
-            # Convert compute_result bool to string
             compute_result = choice.get("compute_result")
             if compute_result is not None:
                 compute_result = str(compute_result).lower()
-
             choice_value = choice.get("value", "")
-            QuestionChoice.objects.create(
-                question=question,
-                urn=c_urn,
-                ref_id=c_ref_id,
-                value=choice_value,
-                annotation=choice.get("annotation", choice_value),
-                add_score=choice.get("add_score"),
-                compute_result=compute_result,
-                order=c_order,
-                description=choice.get("description"),
-                color=choice.get("color"),
-                select_implementation_groups=choice.get("select_implementation_groups"),
-                folder=requirement_node.folder,
-                is_published=True,
-                translations=choice.get("translations"),
+            choices_to_create.append(
+                QuestionChoice(
+                    question=question,
+                    urn=c_urn,
+                    ref_id=c_ref_id,
+                    value=choice_value,
+                    annotation=choice.get("annotation", choice_value),
+                    add_score=choice.get("add_score"),
+                    compute_result=compute_result,
+                    order=c_order,
+                    description=choice.get("description"),
+                    color=choice.get("color"),
+                    select_implementation_groups=choice.get(
+                        "select_implementation_groups"
+                    ),
+                    folder=requirement_node.folder,
+                    is_published=True,
+                    translations=choice.get("translations"),
+                )
             )
+
+    if choices_to_create:
+        QuestionChoice.objects.bulk_create(choices_to_create)
 
 
 def _sync_questions_from_data(requirement_node, questions_data):
@@ -1089,6 +1102,17 @@ class LibraryUpdater:
                     if questions is not None:
                         _sync_questions_from_data(requirement_node_object, questions)
 
+                    # Pre-fetch questions for this node once (used by all RAs below)
+                    _cached_new_questions = (
+                        list(
+                            Question.objects.filter(
+                                requirement_node=requirement_node_object
+                            ).prefetch_related("choices")
+                        )
+                        if questions is not None
+                        else []
+                    )
+
                     # update answers or score for each ra for the current requirement_node, when relevant
                     for ra in existing_requirement_assessment_objects.get(urn, []):
                         if (
@@ -1181,9 +1205,7 @@ class LibraryUpdater:
                                 requirement_assessment=ra
                             ).select_related("question")
                         }
-                        new_questions = Question.objects.filter(
-                            requirement_node=requirement_node_object
-                        ).prefetch_related("choices")
+                        new_questions = _cached_new_questions
 
                         ra_changed = False
                         for q in new_questions:
@@ -2353,14 +2375,16 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return node_dict
 
     def is_dynamic(self) -> bool:
-        return (
-            QuestionChoice.objects.filter(
-                question__requirement_node__framework=self,
-                select_implementation_groups__isnull=False,
+        if not hasattr(self, "_is_dynamic_cache"):
+            self._is_dynamic_cache = (
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=self,
+                    select_implementation_groups__isnull=False,
+                )
+                .exclude(select_implementation_groups=[])
+                .exists()
             )
-            .exclude(select_implementation_groups=[])
-            .exists()
-        )
+        return self._is_dynamic_cache
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
@@ -6511,7 +6535,7 @@ class ComplianceAssessment(Assessment):
                 "total": total,
                 "per_status": per_status,
                 "per_result": per_result,
-                "progress_perc": self.progress,
+                "progress_perc": progress,
                 "score": score["maturity_score"],
             },
         }

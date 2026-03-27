@@ -9510,9 +9510,29 @@ class RequirementViewSet(BaseModelViewSet):
             user=request.user,
             object_type=RequirementAssessment,
         )
-        requirement_assessments = RequirementAssessment.objects.filter(
-            requirement=requirement, id__in=viewable_objects
-        ).prefetch_related("folder", "compliance_assessment__perimeter")
+        requirement_assessments = (
+            RequirementAssessment.objects.filter(
+                requirement=requirement, id__in=viewable_objects
+            )
+            .select_related(
+                "requirement",
+                "compliance_assessment",
+                "compliance_assessment__framework",
+                "compliance_assessment__perimeter",
+                "compliance_assessment__perimeter__folder",
+            )
+            .prefetch_related(
+                "folder",
+                "answers",
+                "answers__question",
+                "answers__selected_choices",
+                "requirement__questions",
+                "requirement__questions__choices",
+                "evidences",
+                "applied_controls",
+                "security_exceptions",
+            )
+        )
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments,
             many=True,
@@ -12489,6 +12509,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "folder",
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "compliance_assessment",  # Displayed in table and serialized
+                "compliance_assessment__framework",  # Needed by to_representation field visibility
                 "compliance_assessment__perimeter",  # perimeter field uses compliance_assessment.perimeter
                 "compliance_assessment__perimeter__folder",  # Nested FieldsRelatedField optimization
                 "requirement",  # Used for name (__str__), description, assessable in table
@@ -12500,6 +12521,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "answers",  # Reverse FK from Answer, used by get_answers() in read serializer
                 "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
+                "requirement__questions",  # Needed by FilteredNodeSerializer.questions
+                "requirement__questions__choices",  # Needed by build_questions_dict()
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
