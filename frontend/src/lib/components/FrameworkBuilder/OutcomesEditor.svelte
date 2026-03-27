@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { getTranslation, withTranslation, type OutcomeRule } from './builder-state';
+	import { createDragHandlers } from './builder-utils';
+	import ConfirmAction from './ConfirmAction.svelte';
 
 	interface Props {
 		outcomes: OutcomeRule[];
@@ -10,9 +12,7 @@
 	let { outcomes, onupdate, activeLanguage = null }: Props = $props();
 
 	let rules: OutcomeRule[] = $state(outcomes.map((r) => ({ ...r })));
-	let draggedIndex: number | null = $state(null);
 	let expandedIndex: number | null = $state(null);
-	let confirmDeleteIndex: number | null = $state(null);
 	let showCelRef: boolean = $state(false);
 
 	// Sync from parent when outcomes prop changes (e.g. after reload)
@@ -32,33 +32,17 @@
 
 	function deleteRule(index: number) {
 		rules = rules.filter((_, i) => i !== index);
-		confirmDeleteIndex = null;
 		if (expandedIndex === index) expandedIndex = null;
 		persist();
 	}
 
-	function handleDragStart(index: number) {
-		draggedIndex = index;
-	}
-
-	function handleDragOver(e: DragEvent) {
-		e.preventDefault();
-	}
-
-	function handleDrop(e: DragEvent, dropIndex: number) {
-		e.preventDefault();
-		if (draggedIndex === null || draggedIndex === dropIndex) return;
+	const drag = createDragHandlers((from, to) => {
 		const copy = [...rules];
-		const [moved] = copy.splice(draggedIndex, 1);
-		copy.splice(dropIndex, 0, moved);
+		const [moved] = copy.splice(from, 1);
+		copy.splice(to, 0, moved);
 		rules = copy;
-		draggedIndex = null;
 		persist();
-	}
-
-	function handleDragEnd() {
-		draggedIndex = null;
-	}
+	});
 </script>
 
 <div class="space-y-1.5">
@@ -75,14 +59,14 @@
 
 	{#each rules as rule, index (index)}
 		<div
-			class="border border-gray-200 rounded-lg bg-gray-50/50 transition-all {draggedIndex === index
+			class="border border-gray-200 rounded-lg bg-gray-50/50 transition-all {drag.draggedIndex === index
 				? 'opacity-50'
 				: ''}"
 			draggable="true"
-			ondragstart={() => handleDragStart(index)}
-			ondragover={handleDragOver}
-			ondrop={(e) => handleDrop(e, index)}
-			ondragend={handleDragEnd}
+			ondragstart={() => drag.handleDragStart(index)}
+			ondragover={drag.handleDragOver}
+			ondrop={(e) => drag.handleDrop(e, index)}
+			ondragend={drag.handleDragEnd}
 			role="listitem"
 		>
 			<!-- Collapsed row -->
@@ -118,30 +102,7 @@
 					<i class="fa-solid {expandedIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
 				</button>
 
-				{#if confirmDeleteIndex === index}
-					<button
-						type="button"
-						class="text-xs text-red-600 font-medium"
-						onclick={() => deleteRule(index)}
-					>
-						Confirm
-					</button>
-					<button
-						type="button"
-						class="text-xs text-gray-500"
-						onclick={() => (confirmDeleteIndex = null)}
-					>
-						Cancel
-					</button>
-				{:else}
-					<button
-						type="button"
-						class="text-gray-300 hover:text-red-500 text-xs transition-colors"
-						onclick={() => (confirmDeleteIndex = index)}
-					>
-						<i class="fa-solid fa-trash"></i>
-					</button>
-				{/if}
+				<ConfirmAction onconfirm={() => deleteRule(index)} />
 			</div>
 
 			<!-- Expanded details -->

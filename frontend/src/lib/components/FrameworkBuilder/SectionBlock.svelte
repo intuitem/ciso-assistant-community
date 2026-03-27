@@ -6,6 +6,8 @@
 		withTranslation,
 		type BuilderSection
 	} from './builder-state';
+	import { createHandleGatedDragHandlers } from './builder-utils';
+	import ConfirmAction from './ConfirmAction.svelte';
 	import RequirementBlock from './RequirementBlock.svelte';
 	import SplashScreenBlock from './SplashScreenBlock.svelte';
 
@@ -18,38 +20,15 @@
 
 	const builder = getBuilderContext();
 	const { errors: errorsStore, activeLanguage: activeLanguageStore } = builder;
-	let confirmDelete = $state(false);
 	let collapsed = $state(section.collapsed);
 
 	// Drag state for requirements within this section
-	let draggedReqIndex: number | null = $state(null);
-	let lastMousedownTarget: EventTarget | null = null;
+	const reqDrag = createHandleGatedDragHandlers((from, to) =>
+		builder.reorderRequirements(section.node.id, from, to)
+	);
 
 	async function saveField(field: string, value: unknown) {
 		await builder.updateNode(section.node.id, { [field]: value });
-	}
-
-	function handleReqDragStart(e: DragEvent, index: number) {
-		if (!(lastMousedownTarget as HTMLElement)?.closest('[data-drag-handle]')) {
-			e.preventDefault();
-			return;
-		}
-		draggedReqIndex = index;
-	}
-
-	function handleReqDragOver(e: DragEvent) {
-		e.preventDefault();
-	}
-
-	function handleReqDrop(e: DragEvent, dropIndex: number) {
-		e.preventDefault();
-		if (draggedReqIndex === null || draggedReqIndex === dropIndex) return;
-		builder.reorderRequirements(section.node.id, draggedReqIndex, dropIndex);
-		draggedReqIndex = null;
-	}
-
-	function handleReqDragEnd() {
-		draggedReqIndex = null;
 	}
 </script>
 
@@ -111,34 +90,13 @@
 			<i class="fa-solid {collapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-sm"></i>
 		</button>
 
-		{#if confirmDelete}
-			<span class="text-xs text-red-600 font-medium">Delete section and all contents?</span>
-			<button
-				type="button"
-				class="text-xs text-red-600 font-medium px-2 py-1 rounded bg-red-50 hover:bg-red-100"
-				onclick={() => {
-					builder.deleteSection(sectionIndex);
-					confirmDelete = false;
-				}}
-			>
-				Delete
-			</button>
-			<button
-				type="button"
-				class="text-xs text-gray-500 px-2 py-1"
-				onclick={() => (confirmDelete = false)}
-			>
-				Cancel
-			</button>
-		{:else}
-			<button
-				type="button"
-				class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
-				onclick={() => (confirmDelete = true)}
-			>
-				<i class="fa-solid fa-trash text-sm"></i>
-			</button>
-		{/if}
+		<ConfirmAction
+			message="Delete section and all contents?"
+			onconfirm={() => builder.deleteSection(sectionIndex)}
+			confirmLabel="Delete"
+			triggerClass="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
+			confirmClass="text-xs text-red-600 font-medium px-2 py-1 rounded bg-red-50 hover:bg-red-100"
+		/>
 	</div>
 
 	{#if $errorsStore.has(`node-${section.node.id}`)}
@@ -152,13 +110,13 @@
 		<div transition:slide={{ duration: 200 }} class="space-y-4 ml-4">
 			{#each section.requirements as req, reqIndex (req.node.id)}
 				<div
-					class:opacity-50={draggedReqIndex === reqIndex}
+					class:opacity-50={reqDrag.draggedIndex === reqIndex}
 					draggable="true"
-					onmousedown={(e) => (lastMousedownTarget = e.target)}
-					ondragstart={(e) => handleReqDragStart(e, reqIndex)}
-					ondragover={handleReqDragOver}
-					ondrop={(e) => handleReqDrop(e, reqIndex)}
-					ondragend={handleReqDragEnd}
+					onmousedown={reqDrag.recordMousedown}
+					ondragstart={(e) => reqDrag.handleDragStart(e, reqIndex)}
+					ondragover={reqDrag.handleDragOver}
+					ondrop={(e) => reqDrag.handleDrop(e, reqIndex)}
+					ondragend={reqDrag.handleDragEnd}
 					role="listitem"
 				>
 					{#if req.node.display_mode === 'splash'}

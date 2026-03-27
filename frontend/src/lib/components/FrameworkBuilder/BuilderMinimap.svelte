@@ -1,17 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
-	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
-
-	const localeMapTyped = LOCALE_MAP as Record<string, { name: string; flag: string }>;
-	const defaultLabels = defaultLangLabels as Record<string, string>;
-	const langNames = language as Record<string, string>;
-
-	function localeLabel(code: string): string {
-		const entry = localeMapTyped[code];
-		if (!entry) return code.toUpperCase();
-		return `${defaultLabels[code]} (${langNames[entry.name]})`;
-	}
+	import { localeLabel } from './builder-utils';
 
 	interface Props {
 		frameworkId: string;

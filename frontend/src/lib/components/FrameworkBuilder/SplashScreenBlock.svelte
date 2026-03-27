@@ -5,6 +5,8 @@
 		withTranslation,
 		type BuilderRequirement
 	} from './builder-state';
+	import { createCopyHandler } from './builder-utils';
+	import ConfirmAction from './ConfirmAction.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
@@ -15,8 +17,7 @@
 
 	const builder = getBuilderContext();
 	const { errors: errorsStore, activeLanguage: activeLanguageStore } = builder;
-	let confirmDelete = $state(false);
-	let urnCopied = $state(false);
+	const urnCopy = createCopyHandler();
 	let mode: 'edit' | 'preview' = $state('edit');
 	let uploading = $state(false);
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
@@ -214,14 +215,10 @@
 				<button
 					type="button"
 					class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
-					onclick={() => {
-						navigator.clipboard.writeText(requirement.node.urn ?? '');
-						urnCopied = true;
-						setTimeout(() => (urnCopied = false), 1500);
-					}}
+					onclick={() => urnCopy.copy(requirement.node.urn ?? '')}
 				>
-					<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"></i>
-					{#if urnCopied}
+					<i class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"></i>
+					{#if urnCopy.copied}
 						<span class="text-green-500">Copied!</span>
 					{:else}
 						{requirement.node.urn}
@@ -231,33 +228,12 @@
 		</div>
 
 		<div class="flex items-center gap-1 shrink-0">
-			{#if confirmDelete}
-				<button
-					type="button"
-					class="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50"
-					onclick={() => {
-						builder.deleteRequirement(requirement.node.id);
-						confirmDelete = false;
-					}}
-				>
-					Delete
-				</button>
-				<button
-					type="button"
-					class="text-xs text-gray-500 px-2 py-0.5"
-					onclick={() => (confirmDelete = false)}
-				>
-					Cancel
-				</button>
-			{:else}
-				<button
-					type="button"
-					class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
-					onclick={() => (confirmDelete = true)}
-				>
-					<i class="fa-solid fa-trash text-xs"></i>
-				</button>
-			{/if}
+			<ConfirmAction
+				onconfirm={() => builder.deleteRequirement(requirement.node.id)}
+				confirmLabel="Delete"
+				triggerClass="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
+				confirmClass="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50"
+			/>
 		</div>
 	</div>
 

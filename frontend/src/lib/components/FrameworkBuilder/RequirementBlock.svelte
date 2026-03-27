@@ -5,6 +5,8 @@
 		withTranslation,
 		type BuilderRequirement
 	} from './builder-state';
+	import { createCopyHandler, createHandleGatedDragHandlers } from './builder-utils';
+	import ConfirmAction from './ConfirmAction.svelte';
 	import QuestionEditor from './QuestionEditor.svelte';
 
 	interface Props {
@@ -19,8 +21,7 @@
 		errors: errorsStore,
 		activeLanguage: activeLanguageStore
 	} = builder;
-	let confirmDelete = $state(false);
-	let urnCopied = $state(false);
+	const urnCopy = createCopyHandler();
 
 	const depthColors = [
 		'border-l-blue-400',
@@ -37,28 +38,9 @@
 	const allQuestions = $derived(requirement.questions.map((q) => q.question));
 
 	// Drag state for children
-	let draggedChildIndex: number | null = $state(null);
-	let lastMousedownTarget: EventTarget | null = null;
-
-	function handleChildDragStart(e: DragEvent, index: number) {
-		if (!(lastMousedownTarget as HTMLElement)?.closest('[data-drag-handle]')) {
-			e.preventDefault();
-			return;
-		}
-		draggedChildIndex = index;
-	}
-	function handleChildDragOver(e: DragEvent) {
-		e.preventDefault();
-	}
-	function handleChildDrop(e: DragEvent, dropIndex: number) {
-		e.preventDefault();
-		if (draggedChildIndex === null || draggedChildIndex === dropIndex) return;
-		builder.reorderRequirements(requirement.node.id, draggedChildIndex, dropIndex);
-		draggedChildIndex = null;
-	}
-	function handleChildDragEnd() {
-		draggedChildIndex = null;
-	}
+	const childDrag = createHandleGatedDragHandlers((from, to) =>
+		builder.reorderRequirements(requirement.node.id, from, to)
+	);
 </script>
 
 <div style="margin-left: {Math.min(requirement.depth, 3) * 16}px">
@@ -125,15 +107,11 @@
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
-							onclick={() => {
-								navigator.clipboard.writeText(requirement.node.urn ?? '');
-								urnCopied = true;
-								setTimeout(() => (urnCopied = false), 1500);
-							}}
+							onclick={() => urnCopy.copy(requirement.node.urn ?? '')}
 						>
-							<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
+							<i class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
-							{#if urnCopied}
+							{#if urnCopy.copied}
 								<span class="text-green-500">Copied!</span>
 							{:else}
 								{requirement.node.urn}
@@ -212,15 +190,11 @@
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
-							onclick={() => {
-								navigator.clipboard.writeText(requirement.node.urn ?? '');
-								urnCopied = true;
-								setTimeout(() => (urnCopied = false), 1500);
-							}}
+							onclick={() => urnCopy.copy(requirement.node.urn ?? '')}
 						>
-							<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
+							<i class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
-							{#if urnCopied}
+							{#if urnCopy.copied}
 								<span class="text-green-500">Copied!</span>
 							{:else}
 								{requirement.node.urn}
@@ -257,33 +231,12 @@
 					/>
 					Assessable
 				</label>
-				{#if confirmDelete}
-					<button
-						type="button"
-						class="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50"
-						onclick={() => {
-							builder.deleteRequirement(requirement.node.id);
-							confirmDelete = false;
-						}}
-					>
-						Delete
-					</button>
-					<button
-						type="button"
-						class="text-xs text-gray-500 px-2 py-0.5"
-						onclick={() => (confirmDelete = false)}
-					>
-						Cancel
-					</button>
-				{:else}
-					<button
-						type="button"
-						class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
-						onclick={() => (confirmDelete = true)}
-					>
-						<i class="fa-solid fa-trash text-xs"></i>
-					</button>
-				{/if}
+				<ConfirmAction
+						onconfirm={() => builder.deleteRequirement(requirement.node.id)}
+						confirmLabel="Delete"
+						triggerClass="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
+						confirmClass="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50"
+					/>
 			</div>
 		</div>
 
@@ -352,13 +305,13 @@
 		<div class="space-y-3 mt-2">
 			{#each requirement.children as child, childIndex (child.node.id)}
 				<div
-					class:opacity-50={draggedChildIndex === childIndex}
+					class:opacity-50={childDrag.draggedIndex === childIndex}
 					draggable="true"
-					onmousedown={(e) => (lastMousedownTarget = e.target)}
-					ondragstart={(e) => handleChildDragStart(e, childIndex)}
-					ondragover={handleChildDragOver}
-					ondrop={(e) => handleChildDrop(e, childIndex)}
-					ondragend={handleChildDragEnd}
+					onmousedown={childDrag.recordMousedown}
+					ondragstart={(e) => childDrag.handleDragStart(e, childIndex)}
+					ondragover={childDrag.handleDragOver}
+					ondrop={(e) => childDrag.handleDrop(e, childIndex)}
+					ondragend={childDrag.handleDragEnd}
 					role="listitem"
 				>
 					<svelte:self requirement={child} />

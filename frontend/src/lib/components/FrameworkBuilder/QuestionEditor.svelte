@@ -9,6 +9,8 @@
 	import TypeSelector from './TypeSelector.svelte';
 	import ChoiceListEditor from './ChoiceListEditor.svelte';
 	import DependsOnEditor from './DependsOnEditor.svelte';
+	import { TYPE_ICONS, TYPE_COLORS } from './builder-utils';
+	import ConfirmAction from './ConfirmAction.svelte';
 
 	interface Props {
 		question: Question;
@@ -27,25 +29,6 @@
 	} = builder;
 
 	let expanded = $state(false);
-	let confirmDelete = $state(false);
-
-	const typeIcons: Record<string, string> = {
-		text: 'fa-font',
-		number: 'fa-hashtag',
-		boolean: 'fa-toggle-on',
-		unique_choice: 'fa-circle-dot',
-		multiple_choice: 'fa-square-check',
-		date: 'fa-calendar'
-	};
-
-	const typeColors: Record<string, string> = {
-		text: 'text-blue-600 bg-blue-50',
-		number: 'text-emerald-600 bg-emerald-50',
-		boolean: 'text-green-600 bg-green-50',
-		unique_choice: 'text-violet-600 bg-violet-50',
-		multiple_choice: 'text-purple-600 bg-purple-50',
-		date: 'text-amber-600 bg-amber-50'
-	};
 
 	const isChoiceType = $derived(
 		question.type === 'unique_choice' || question.type === 'multiple_choice'
@@ -93,10 +76,10 @@
 				<i class="fa-solid fa-grip-vertical text-xs"></i>
 			</span>
 			<span
-				class="w-6 h-6 rounded flex items-center justify-center {typeColors[question.type] ??
+				class="w-6 h-6 rounded flex items-center justify-center {TYPE_COLORS[question.type] ??
 					'text-gray-400 bg-gray-100'}"
 			>
-				<i class="fa-solid {typeIcons[question.type] ?? 'fa-question'} text-xs"></i>
+				<i class="fa-solid {TYPE_ICONS[question.type] ?? 'fa-question'} text-xs"></i>
 			</span>
 			<span class="flex-1 text-sm text-gray-700 truncate">
 				{#if $activeLanguageStore}
@@ -118,7 +101,7 @@
 				</span>
 			{/if}
 			<span
-				class="text-xs font-medium px-2 py-0.5 rounded {typeColors[question.type] ??
+				class="text-xs font-medium px-2 py-0.5 rounded {TYPE_COLORS[question.type] ??
 					'text-gray-400 bg-gray-100'}"
 			>
 				{question.type.replace('_', ' ')}
@@ -135,34 +118,13 @@
 			<div class="flex items-center justify-between">
 				<TypeSelector currentType={question.type} onselect={changeType} />
 				<div class="flex items-center gap-2">
-					{#if confirmDelete}
-						<span class="text-xs text-red-600 font-medium">Delete this question?</span>
-						<button
-							type="button"
-							class="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50 hover:bg-red-100"
-							onclick={() => {
-								builder.deleteQuestion(reqNodeId, qIndex);
-								confirmDelete = false;
-							}}
-						>
-							Yes
-						</button>
-						<button
-							type="button"
-							class="text-xs text-gray-500 px-2 py-0.5"
-							onclick={() => (confirmDelete = false)}
-						>
-							No
-						</button>
-					{:else}
-						<button
-							type="button"
-							class="text-gray-300 hover:text-red-500 transition-colors"
-							onclick={() => (confirmDelete = true)}
-						>
-							<i class="fa-solid fa-trash text-xs"></i>
-						</button>
-					{/if}
+					<ConfirmAction
+						message="Delete this question?"
+						onconfirm={() => builder.deleteQuestion(reqNodeId, qIndex)}
+						confirmLabel="Yes"
+						triggerClass="text-gray-300 hover:text-red-500 transition-colors"
+						confirmClass="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50 hover:bg-red-100"
+					/>
 					<button
 						type="button"
 						class="text-gray-400 hover:text-gray-600"

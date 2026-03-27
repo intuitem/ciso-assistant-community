@@ -5,6 +5,8 @@
 		withTranslation,
 		type QuestionChoice
 	} from './builder-state';
+	import { createDragHandlers } from './builder-utils';
+	import ConfirmAction from './ConfirmAction.svelte';
 
 	interface Props {
 		choices: QuestionChoice[];
@@ -26,31 +28,13 @@
 
 	const builder = getBuilderContext();
 	const { errors: errorsStore, activeLanguage: activeLanguageStore } = builder;
-	let draggedIndex: number | null = $state(null);
+	const drag = createDragHandlers((from, to) =>
+		builder.reorderChoices(reqNodeId, qIndex, from, to)
+	);
 	let expandedIndex: number | null = $state(null);
-	let confirmDeleteIndex: number | null = $state(null);
 
 	async function saveField(choiceId: string, field: string, value: unknown) {
 		await builder.updateChoice(choiceId, { [field]: value });
-	}
-
-	function handleDragStart(index: number) {
-		draggedIndex = index;
-	}
-
-	function handleDragOver(e: DragEvent) {
-		e.preventDefault();
-	}
-
-	function handleDrop(e: DragEvent, dropIndex: number) {
-		e.preventDefault();
-		if (draggedIndex === null || draggedIndex === dropIndex) return;
-		builder.reorderChoices(reqNodeId, qIndex, draggedIndex, dropIndex);
-		draggedIndex = null;
-	}
-
-	function handleDragEnd() {
-		draggedIndex = null;
 	}
 </script>
 
@@ -68,14 +52,14 @@
 
 	{#each choices as choice, index (choice.id)}
 		<div
-			class="border border-gray-200 rounded-lg bg-gray-50/50 transition-all {draggedIndex === index
+			class="border border-gray-200 rounded-lg bg-gray-50/50 transition-all {drag.draggedIndex === index
 				? 'opacity-50'
 				: ''}"
 			draggable="true"
-			ondragstart={() => handleDragStart(index)}
-			ondragover={handleDragOver}
-			ondrop={(e) => handleDrop(e, index)}
-			ondragend={handleDragEnd}
+			ondragstart={() => drag.handleDragStart(index)}
+			ondragover={drag.handleDragOver}
+			ondrop={(e) => drag.handleDrop(e, index)}
+			ondragend={drag.handleDragEnd}
 			role="listitem"
 		>
 			<!-- Collapsed row -->
@@ -132,33 +116,7 @@
 					<i class="fa-solid {expandedIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
 				</button>
 
-				{#if confirmDeleteIndex === index}
-					<button
-						type="button"
-						class="text-xs text-red-600 font-medium"
-						onclick={() => {
-							builder.deleteChoice(reqNodeId, qIndex, index);
-							confirmDeleteIndex = null;
-						}}
-					>
-						Confirm
-					</button>
-					<button
-						type="button"
-						class="text-xs text-gray-500"
-						onclick={() => (confirmDeleteIndex = null)}
-					>
-						Cancel
-					</button>
-				{:else}
-					<button
-						type="button"
-						class="text-gray-300 hover:text-red-500 text-xs transition-colors"
-						onclick={() => (confirmDeleteIndex = index)}
-					>
-						<i class="fa-solid fa-trash"></i>
-					</button>
-				{/if}
+				<ConfirmAction onconfirm={() => builder.deleteChoice(reqNodeId, qIndex, index)} />
 			</div>
 
 			<!-- Expanded details -->
