@@ -312,6 +312,7 @@ class TestScoringExtended:
         # No crash; results list empty -> not_assessed is persisted
         assert d["ra"].result == "not_assessed"
         assert d["ra"].is_scored is False
+        assert d["ra"].score is None
 
     def test_score_only_no_result_fields(self, scoring_setup):
         """Choices with add_score but compute_result=None -> only score+is_scored saved."""
@@ -359,6 +360,7 @@ class TestScoringExtended:
 
         assert d["ra"].result == "compliant"
         assert d["ra"].is_scored is False
+        assert d["ra"].score is None
 
 
 @pytest.mark.django_db

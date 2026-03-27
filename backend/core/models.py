@@ -7845,12 +7845,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         is_result_computed = True
                         results.append(is_compute_result_truthy(choice.compute_result))
 
-        if aggregation == "mean" and total_weight > 0:
-            computed_score = total_score / total_weight
+        if is_score_computed:
+            if aggregation == "mean" and total_weight > 0:
+                computed_score = total_score / total_weight
+            else:
+                computed_score = total_score
+            new_score = max(min(int(computed_score), max_score), min_score)
         else:
-            computed_score = total_score
-
-        new_score = max(min(int(computed_score), max_score), min_score)
+            new_score = None
         new_is_scored = is_score_computed
 
         # Determine overall result
