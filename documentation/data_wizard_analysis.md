@@ -633,7 +633,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 * high
 * critical
 
-### 21. BusinessImpactAnalysis (Multi-sheet Import)
+### 22. BusinessImpactAnalysis (Multi-sheet Import)
 
 **Behavior:** Creates a `BusinessImpactAnalysis` object plus `AssetAssessment` and `EscalationThreshold` child objects from a three-sheet workbook produced by the BIA export.
 
