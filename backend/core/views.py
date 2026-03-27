@@ -2379,7 +2379,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
         options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
             _choices = {}
-            for i, risk in enumerate(matrix.json_definition["risk"]):
+            for i, risk in enumerate(matrix.json_definition.get("risk", [])):
                 translations = risk.get("translations")
                 if not isinstance(translations, dict):
                     translations = {}
@@ -5432,30 +5432,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
 
 class ActionPlanList(generics.ListAPIView):
-    filterset_fields = {
-        "folder": ["exact"],
-        "status": ["exact"],
-        "category": ["exact"],
-        "csf_function": ["exact"],
-        "priority": ["exact"],
-        "reference_control": ["exact"],
-        "effort": ["exact"],
-        "control_impact": ["exact"],
-        "filtering_labels": ["exact"],
-        "risk_scenarios": ["exact"],
-        "risk_scenarios_e": ["exact"],
-        "requirement_assessments": ["exact"],
-        "evidences": ["exact"],
-        "objectives": ["exact"],
-        "assets": ["exact"],
-        "stakeholders": ["exact"],
-        "progress_field": ["exact"],
-        "security_exceptions": ["exact"],
-        "owner": ["exact"],
-        "findings": ["exact"],
-        "eta": ["exact", "lte", "gte", "lt", "gt"],
-    }
     search_fields = ["name", "description", "ref_id"]
+    filterset_class = AppliedControlFilterSet
 
     filter_backends = [
         DjangoFilterBackend,
@@ -6321,7 +6299,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 if not RoleAssignment.is_access_allowed(
                     risk_acceptance.get("approver"),
                     Permission.objects.get(codename="approve_riskacceptance"),
-                    scenario.risk_assessment.perimeter.folder,
+                    scenario.risk_assessment.folder,
                 ):
                     raise ValidationError(
                         "The approver is not allowed to approve this risk acceptance"
@@ -10171,15 +10149,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
+        scores = compliance_assessment.get_global_score()
         return Response(
             {
-                "score": compliance_assessment.get_global_score(),
+                **scores,
                 "max_score": compliance_assessment.max_score,
                 "min_score": compliance_assessment.min_score,
                 "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": get_referential_translation(
                     compliance_assessment.framework, "scores_definition", get_language()
                 ),
+                "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,
             }
@@ -10677,7 +10657,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "created_at": base_audit.created_at,
                 "updated_at": base_audit.updated_at,
                 "observation": base_audit.observation,
-                "global_score": base_audit.get_global_score(),
+                "global_score": base_audit.get_global_score()["maturity_score"],
                 "max_score": base_audit.max_score,
                 "total_max_score": base_audit.get_total_max_score(),
                 "score_calculation_method": base_audit.score_calculation_method,
@@ -10699,7 +10679,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "created_at": compare_audit.created_at,
                 "updated_at": compare_audit.updated_at,
                 "observation": compare_audit.observation,
-                "global_score": compare_audit.get_global_score(),
+                "global_score": compare_audit.get_global_score()["maturity_score"],
                 "max_score": compare_audit.max_score,
                 "total_max_score": compare_audit.get_total_max_score(),
                 "score_calculation_method": compare_audit.score_calculation_method,
@@ -10998,14 +10978,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 or node.ref_id
                 or str(node.id)
             )
+            # Compute maturity as average of enabled layers
+            enabled_scores = [
+                s for s in [section_score, section_doc_score] if s is not None
+            ]
+            section_maturity = (
+                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
+                if enabled_scores
+                else None
+            )
+
             sections.append(
                 {
                     "ref_id": node.ref_id,
                     "name": node_name,
                     "total_assessable": len(assessable_list),
                     "results": dict(results),
-                    "score": section_score,
+                    "implementation_score": section_score,
                     "documentation_score": section_doc_score,
+                    "maturity_score": section_maturity,
                     "scored_count": scored_count,
                     "total_weight": total_weight,
                 }
@@ -11385,8 +11376,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "total_assessable": 0,
                         "results": {},
                         "progress_percent": 0,
-                        "score": None,
+                        "implementation_score": None,
                         "documentation_score": None,
+                        "maturity_score": None,
                         "scored_count": 0,
                     }
                 )
@@ -11437,6 +11429,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     else None
                 )
 
+            enabled_scores = [
+                s for s in [group_score, group_doc_score] if s is not None
+            ]
+            group_maturity = (
+                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
+                if enabled_scores
+                else None
+            )
+
             groups.append(
                 {
                     "ref_id": group_ref_id,
@@ -11446,8 +11447,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "progress_percent": round(assessed / total * 100)
                     if total > 0
                     else 0,
-                    "score": group_score,
+                    "implementation_score": group_score,
                     "documentation_score": group_doc_score,
+                    "maturity_score": group_maturity,
                     "scored_count": scored_count,
                 }
             )

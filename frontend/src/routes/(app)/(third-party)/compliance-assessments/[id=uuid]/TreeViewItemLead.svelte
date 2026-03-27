@@ -12,6 +12,7 @@
 		score: number | null;
 		documentationScore: number | null;
 		isScored: boolean;
+		scoringEnabled?: boolean;
 		showDocumentationScore: boolean;
 		max_score: number;
 		progressStatusEnabled?: boolean;
@@ -29,6 +30,7 @@
 		score,
 		documentationScore,
 		isScored,
+		scoringEnabled = false,
 		showDocumentationScore,
 		max_score,
 		progressStatusEnabled = true,
@@ -59,7 +61,7 @@
 				{leadExtendedResult}
 			</span>
 		{/if}
-		{#if resultI18n !== 'notApplicable' && isScored}
+		{#if scoringEnabled && resultI18n !== 'notApplicable' && isScored}
 			<div class="relative">
 				<Progress
 					value={(score * 100) / max_score}
