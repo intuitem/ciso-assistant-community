@@ -554,6 +554,7 @@
 				</button>
 			{/if}
 		</div>
+		<p class="mt-1.5 text-center text-[10px] text-gray-400">{m.chatDisclaimer()}</p>
 	</div>
 {/snippet}
 

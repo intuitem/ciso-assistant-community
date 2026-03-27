@@ -3791,7 +3791,7 @@
 	"searchEllipsis": "Rechercher...",
 	"commandPaletteOpen": "ouvrir",
 	"commandPaletteActions": "Actions",
-	"openAssistant": "Chat Assistant IA",
+	"openAssistant": "Moteur IA (Chat)",
 	"searchPagesAndActions": "Rechercher des pages et actions...",
 	"matrixEditor": "Éditeur de matrice",
 	"matrixEditorDescription": "Créez et modifiez visuellement des matrices de risques avec un éditeur interactif",
@@ -3886,7 +3886,7 @@
 	"chatActionRiskAssessmentOverviewPrompt": "Résume les scénarios de risque de cette évaluation",
 	"chatActionAssistStudy": "Assister l'étude",
 	"chatActionAssistStudyPrompt": "Aide-moi à mener cette étude EBIOS RM",
-	"chatSubtitle": "Assistance IA",
+	"chatSubtitle": "Moteur IA",
 	"chatPlaceholder": "Posez votre question...",
 	"chatThought": "Réflexion",
 	"chatThinking": "Réflexion en cours...",
@@ -3902,5 +3902,6 @@
 	"chatQuickActions": "Actions rapides",
 	"chatScrollToBottom": "Nouveaux messages",
 	"chatRetry": "Réessayer",
-	"chatNoConversations": "Aucune conversation"
+	"chatNoConversations": "Aucune conversation",
+	"chatDisclaimer": "L'IA peut se tromper. Vos données ne quittent jamais votre infrastructure."
 }
