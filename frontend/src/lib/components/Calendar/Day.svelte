@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { stopPropagation } from 'svelte/legacy';
-
-	import { fly } from 'svelte/transition';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import { m } from '$paraglide/messages';
+	import { CALENDAR_CATEGORIES, type CalendarEvent, type CalendarCategory } from './types';
 
 	interface Props {
 		day: number;
 		month: number;
 		year: number;
-		info: any[];
+		info: CalendarEvent[];
 		selectedDay: any;
 		showSidePanel: any;
+		categories: typeof CALENDAR_CATEGORIES;
 	}
 
-	let { day, month, year, info, selectedDay, showSidePanel }: Props = $props();
+	let { day, month, year, info, selectedDay, showSidePanel, categories }: Props = $props();
 
 	const today = new Date();
-	const MAX_ITEMS = 3;
+	const MAX_DOTS_PER_CATEGORY = 5;
 
 	let isToday = $derived(
 		day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear()
@@ -37,78 +37,115 @@
 		)
 	);
 
-	let visibleItems = $derived(dayInfo.slice(0, MAX_ITEMS));
+	let totalCount = $derived(dayInfo.length);
 
-	let extraItemsCount = $derived(Math.max(0, dayInfo.length - MAX_ITEMS));
+	let dotsByCategory = $derived.by(() => {
+		const counts: Record<string, number> = {};
+		for (const item of dayInfo) {
+			counts[item.category] = (counts[item.category] || 0) + 1;
+		}
+		return counts;
+	});
+
+	let heatBg = $derived.by(() => {
+		if (totalCount === 0 || isPast) return '';
+		if (totalCount <= 2) return 'bg-primary-50/50';
+		if (totalCount <= 5) return 'bg-primary-50';
+		return 'bg-primary-100/70';
+	});
+
+	const categoryLabelMap: Record<string, () => string> = {
+		appliedControl: m.appliedControls,
+		riskAcceptance: m.riskAcceptances,
+		audit: m.complianceAssessments,
+		task: m.tasks,
+		contract: m.contracts,
+		securityException: m.securityExceptions,
+		finding: m.findings,
+		riskAssessment: m.riskAssessments
+	};
 
 	function openSidePanel() {
 		selectedDay.set({ day, month, year });
 		showSidePanel.set(true);
 	}
 
-	function truncateLabel(label: string, maxLength: number): string {
-		if (label.length <= maxLength) {
-			return label;
-		}
-		return label.slice(0, maxLength) + '...';
-	}
+	let isSelected = $derived(
+		$selectedDay?.day === day && $selectedDay?.month === month && $selectedDay?.year === year
+	);
+
+	let cellClass = $derived(
+		`flex flex-col items-start p-1.5 rounded-lg text-sm min-h-20 w-full h-full border transition-all cursor-pointer hover:bg-surface-100 ${
+			isPast
+				? totalCount > 0
+					? 'bg-surface-100 text-surface-400 border-surface-200'
+					: 'bg-surface-50 text-surface-400 border-surface-100'
+				: totalCount > 0
+					? `border-surface-200 ${heatBg}`
+					: 'border-surface-200 bg-white'
+		} ${isSelected ? 'ring-2 ring-primary-400' : ''}`
+	);
 </script>
 
-{#key month}
-	<button
-		in:fly={{ delay: 100, duration: 300 }}
-		class="flex flex-col p-1 rounded-md text-sm h-32 max-h-32 border
-		       {isPast
-			? 'bg-gray-300 text-gray-500 cursor-pointer hover:bg-gray-400'
-			: 'border-gray-200 bg-white cursor-pointer hover:bg-gray-100'}
-		       {isToday ? 'border-gray-200 cursor-pointer hover:bg-gray-100' : ''}"
-		onclick={openSidePanel}
-	>
+{#snippet dayContent()}
+	<!-- Day number + count -->
+	<div class="flex items-center justify-between w-full mb-1">
 		<span
-			class={isToday ? 'font-bold bg-primary-500 w-fit text-white rounded-full py-0.5 px-1' : ''}
-			>{day}</span
+			class={isToday
+				? 'font-bold bg-primary-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs'
+				: 'text-xs text-surface-600'}
 		>
-
-		{#if dayInfo.length > 0}
-			<div class="flex flex-col justify-center h-full w-full space-y-1">
-				{#each visibleItems as item}
-					<span
-						class="flex justify-center cursor-pointer unstyled px-1 rounded-md border-l-2
-						{item.color === 'primary'
-							? 'hover:bg-primary-200 text-primary-700 bg-primary-50 border-l-primary-500'
-							: ''}
-						{item.color === 'secondary'
-							? 'hover:bg-green-200 text-green-700 bg-green-50 border-l-green-500'
-							: ''}
-						{item.color === 'tertiary'
-							? 'hover:bg-tertiary-200 text-tertiary-700 bg-tertiary-50 border-l-tertiary-500'
-							: ''}
-						{item.color === 'warning'
-							? 'hover:bg-yellow-200 text-yellow-700 bg-yellow-50 border-l-yellow-500'
-							: ''}
-						"
-					>
-						<Anchor href={item.link} stopPropagation={true}>
-							{#if $showSidePanel}
-								{truncateLabel(item.label, 15)}
-							{:else}
-								{truncateLabel(item.label, 25)}
-							{/if}
-						</Anchor>
-					</span>
-				{/each}
-
-				{#if extraItemsCount > 0}
-					<button
-						class="flex justify-center font-bold unstyled hover:bg-primary-200 text-primary-700 bg-primary-50 px-1 rounded-md"
-						onclick={stopPropagation(() => {
-							openSidePanel();
-						})}
-					>
-						+{extraItemsCount}
-					</button>
-				{/if}
-			</div>
+			{day}
+		</span>
+		{#if totalCount > 0}
+			<span class="text-[10px] font-semibold text-surface-400">
+				{totalCount}
+			</span>
 		{/if}
-	</button>
-{/key}
+	</div>
+
+	<!-- Colored dots -->
+	{#if totalCount > 0}
+		<div class="flex flex-wrap gap-[3px] mt-auto">
+			{#each Object.entries(dotsByCategory) as [catKey, count]}
+				{@const cat = categories[catKey as CalendarCategory]}
+				{#each Array(Math.min(count, MAX_DOTS_PER_CATEGORY)) as _}
+					<span class="w-2 h-2 rounded-full {cat.dotClass}"></span>
+				{/each}
+				{#if count > MAX_DOTS_PER_CATEGORY}
+					<span class="text-[8px] leading-none text-surface-400 self-center">
+						+{count - MAX_DOTS_PER_CATEGORY}
+					</span>
+				{/if}
+			{/each}
+		</div>
+	{/if}
+{/snippet}
+
+<div class="min-h-20">
+	{#if totalCount > 0}
+		<Tooltip openDelay={300} closeDelay={100} positioning={{ placement: 'top' }}>
+			<Tooltip.Trigger class={cellClass} onclick={openSidePanel}>
+				{@render dayContent()}
+			</Tooltip.Trigger>
+			<Tooltip.Positioner class="!z-50">
+				<Tooltip.Content>
+					<div class="bg-surface-900 text-white p-2.5 rounded-lg shadow-xl text-xs space-y-1">
+						{#each Object.entries(dotsByCategory) as [catKey, count]}
+							{@const cat = categories[catKey as CalendarCategory]}
+							<div class="flex items-center gap-2">
+								<span class="w-2 h-2 rounded-full {cat.dotClass}"></span>
+								<span>{categoryLabelMap[catKey]?.() ?? catKey}:</span>
+								<span class="font-semibold">{count}</span>
+							</div>
+						{/each}
+					</div>
+				</Tooltip.Content>
+			</Tooltip.Positioner>
+		</Tooltip>
+	{:else}
+		<button class={cellClass} onclick={openSidePanel}>
+			{@render dayContent()}
+		</button>
+	{/if}
+</div>
