@@ -1810,9 +1810,16 @@ class FrameworkReadSerializer(ReferentialSerializer):
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
     has_editing_draft = serializers.SerializerMethodField()
+    scores_definition = serializers.SerializerMethodField()
 
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
+
+    def get_scores_definition(self, obj):
+        sd = obj.scores_definition
+        if isinstance(sd, dict) and "scale" in sd:
+            return sd["scale"]
+        return sd
 
     class Meta:
         model = Framework
@@ -2277,6 +2284,14 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         if not obj.has_questions:
             return None
         return obj.answers_progress
+
+    scores_definition = serializers.SerializerMethodField()
+
+    def get_scores_definition(self, obj):
+        sd = obj.scores_definition
+        if isinstance(sd, dict) and "scale" in sd:
+            return sd["scale"]
+        return sd
 
     class Meta:
         model = ComplianceAssessment
