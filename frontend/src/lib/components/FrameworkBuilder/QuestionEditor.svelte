@@ -9,7 +9,7 @@
 	import TypeSelector from './TypeSelector.svelte';
 	import ChoiceListEditor from './ChoiceListEditor.svelte';
 	import DependsOnEditor from './DependsOnEditor.svelte';
-	import { TYPE_ICONS, TYPE_COLORS } from './builder-utils';
+	import { TYPE_ICONS, TYPE_COLORS } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 
 	interface Props {

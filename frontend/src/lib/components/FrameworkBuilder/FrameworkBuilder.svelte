@@ -11,7 +11,11 @@
 		type Question
 	} from './builder-state';
 	import type { DraftJSON } from './builder-api';
-	import { localeLabel, createCopyHandler, createHandleGatedDragHandlers } from './builder-utils';
+	import {
+		localeLabel,
+		createCopyHandler,
+		createHandleGatedDragHandlers
+	} from './builder-utils.svelte';
 	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import BuilderMinimap from './BuilderMinimap.svelte';

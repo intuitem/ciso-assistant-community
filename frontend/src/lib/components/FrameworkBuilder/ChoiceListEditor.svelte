@@ -5,7 +5,7 @@
 		withTranslation,
 		type QuestionChoice
 	} from './builder-state';
-	import { createDragHandlers } from './builder-utils';
+	import { createDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 
 	interface Props {

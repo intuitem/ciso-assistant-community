@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { QUESTION_TYPES } from './builder-utils';
+	import { QUESTION_TYPES } from './builder-utils.svelte';
 
 	interface Props {
 		currentType: string;

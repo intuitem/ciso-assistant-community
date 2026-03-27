@@ -6,7 +6,7 @@
 		withTranslation,
 		type BuilderSection
 	} from './builder-state';
-	import { createHandleGatedDragHandlers } from './builder-utils';
+	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import RequirementBlock from './RequirementBlock.svelte';
 	import SplashScreenBlock from './SplashScreenBlock.svelte';

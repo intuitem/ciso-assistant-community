@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
-	import { localeLabel } from './builder-utils';
+	import { localeLabel } from './builder-utils.svelte';
 
 	interface Props {
 		frameworkId: string;

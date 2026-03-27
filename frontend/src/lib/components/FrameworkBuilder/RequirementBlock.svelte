@@ -5,7 +5,7 @@
 		withTranslation,
 		type BuilderRequirement
 	} from './builder-state';
-	import { createCopyHandler, createHandleGatedDragHandlers } from './builder-utils';
+	import { createCopyHandler, createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import QuestionEditor from './QuestionEditor.svelte';
 

@@ -5,7 +5,7 @@
 		withTranslation,
 		type BuilderRequirement
 	} from './builder-state';
-	import { createCopyHandler } from './builder-utils';
+	import { createCopyHandler } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
