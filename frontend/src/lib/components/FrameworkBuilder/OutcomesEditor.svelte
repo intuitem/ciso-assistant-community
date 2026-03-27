@@ -59,7 +59,8 @@
 
 	{#each rules as rule, index (index)}
 		<div
-			class="border border-gray-200 rounded-lg bg-gray-50/50 transition-all {drag.draggedIndex === index
+			class="border border-gray-200 rounded-lg bg-gray-50/50 transition-all {drag.draggedIndex ===
+			index
 				? 'opacity-50'
 				: ''}"
 			draggable="true"

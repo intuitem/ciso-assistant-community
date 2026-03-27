@@ -8606,7 +8606,9 @@ class FrameworkViewSet(BaseModelViewSet):
 
         # Map old URNs to new URNs for parent_urn remapping
         urn_map = {}
-        nodes = RequirementNode.objects.filter(framework=source).order_by(F("order_id").asc(nulls_last=True))
+        nodes = RequirementNode.objects.filter(framework=source).order_by(
+            F("order_id").asc(nulls_last=True)
+        )
         for node in nodes:
             old_urn = node.urn
             new_urn = f"urn:intuitem:risk:req_node:{uuid.uuid4()}" if old_urn else None

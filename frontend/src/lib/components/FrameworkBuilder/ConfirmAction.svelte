@@ -37,19 +37,11 @@
 	>
 		{confirmLabel}
 	</button>
-	<button
-		type="button"
-		class="text-xs text-gray-500"
-		onclick={() => (active = false)}
-	>
+	<button type="button" class="text-xs text-gray-500" onclick={() => (active = false)}>
 		Cancel
 	</button>
 {:else}
-	<button
-		type="button"
-		class={triggerClass}
-		onclick={() => (active = true)}
-	>
+	<button type="button" class={triggerClass} onclick={() => (active = true)}>
 		<i class="fa-solid fa-trash"></i>
 	</button>
 {/if}

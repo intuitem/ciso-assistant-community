@@ -873,7 +873,12 @@ def _build_answer_context(questions_qs, answers_qs):
     for q in questions_qs:
         questions_by_urn[q.urn] = q
 
-    return selected_choice_pks_by_qid, answers_by_urn, questions_by_urn, has_answer_by_qid
+    return (
+        selected_choice_pks_by_qid,
+        answers_by_urn,
+        questions_by_urn,
+        has_answer_by_qid,
+    )
 
 
 def update_selected_implementation_groups(compliance_assessment):
@@ -902,9 +907,12 @@ def update_selected_implementation_groups(compliance_assessment):
             continue
 
         answers_qs = ra.answers.all()
-        selected_choice_pks_by_qid, answers_by_urn, questions_by_urn, has_answer_by_qid = (
-            _build_answer_context(questions_qs, answers_qs)
-        )
+        (
+            selected_choice_pks_by_qid,
+            answers_by_urn,
+            questions_by_urn,
+            has_answer_by_qid,
+        ) = _build_answer_context(questions_qs, answers_qs)
 
         for question in questions_qs:
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):

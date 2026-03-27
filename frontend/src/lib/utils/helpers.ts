@@ -422,9 +422,7 @@ export function getFieldVisibility(
 /**
  * Check whether any question in a questions object has choices with `compute_result` defined.
  */
-export function hasComputedResult(
-	questions: Record<string, any> | null | undefined
-): boolean {
+export function hasComputedResult(questions: Record<string, any> | null | undefined): boolean {
 	if (!questions) return false;
 	return Object.values(questions).some(
 		(question: any) =>
@@ -436,9 +434,7 @@ export function hasComputedResult(
 /**
  * Check whether any question in a questions object has choices with `add_score` defined.
  */
-export function hasComputedScore(
-	questions: Record<string, any> | null | undefined
-): boolean {
+export function hasComputedScore(questions: Record<string, any> | null | undefined): boolean {
 	if (!questions) return false;
 	return Object.values(questions).some(
 		(question: any) =>

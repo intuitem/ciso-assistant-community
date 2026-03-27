@@ -7845,9 +7845,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         )
 
         # Build lookup: question_id → set of selected choice PKs
-        selected_choice_pks_by_qid, answers_by_urn, questions_by_urn, has_answer_by_qid = (
-            _build_answer_context(questions_qs, answers_qs)
-        )
+        (
+            selected_choice_pks_by_qid,
+            answers_by_urn,
+            questions_by_urn,
+            has_answer_by_qid,
+        ) = _build_answer_context(questions_qs, answers_qs)
 
         total_score = 0
         total_weight = 0
@@ -7935,7 +7938,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     def from_db(cls, db, field_names, values):
         instance = super().from_db(db, field_names, values)
         instance._loaded_cel_values = {
-            f: getattr(instance, f) for f in cls._CEL_RELEVANT_FIELDS if f in field_names
+            f: getattr(instance, f)
+            for f in cls._CEL_RELEVANT_FIELDS
+            if f in field_names
         }
         return instance
 

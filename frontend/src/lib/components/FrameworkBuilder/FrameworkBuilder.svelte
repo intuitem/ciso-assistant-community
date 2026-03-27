@@ -391,7 +391,8 @@
 							class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
 							onclick={() => urnCopy.copy($frameworkStore.urn ?? '')}
 						>
-							<i class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
+							<i
+								class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
 							{#if urnCopy.copied}
 								<span class="text-green-500">Copied!</span>

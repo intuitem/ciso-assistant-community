@@ -432,7 +432,8 @@
 						<div class="my-4">
 							<SplashCard
 								name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
-								description={requirementAssessment.description ?? requirementAssessment.requirement?.description}
+								description={requirementAssessment.description ??
+									requirementAssessment.requirement?.description}
 								id="requirement-{requirementAssessment.id}"
 							/>
 						</div>
