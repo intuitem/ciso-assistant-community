@@ -11175,6 +11175,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             _framework.max_score,
         )
         implementation_groups = compliance_assessment.selected_implementation_groups
+        if compliance_assessment.framework.is_dynamic():
+            implementation_groups = None
         return Response(
             filter_graph_by_implementation_groups(tree, implementation_groups)
         )
@@ -15713,7 +15715,9 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
