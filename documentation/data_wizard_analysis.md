@@ -489,7 +489,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `description` | string | No  ||
 | `status`      | string | No  | The list of the possible statuses below |
 | `filtering_labels` | list | No | List of labels, newline-separated |
-| `metric_definition` | string | **Yes** | Name of the associated metric instance |
+| `metric_definition` | string | **Yes** | Name of the associated metric definition |
 | `owner` | string | No | Email of the owners separated by ";" |
 | `target_value` | float | No ||
 | `collection_frequency` | string | No | The list of the possible collection frequencies below |
