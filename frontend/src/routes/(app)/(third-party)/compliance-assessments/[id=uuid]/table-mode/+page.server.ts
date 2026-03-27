@@ -118,6 +118,7 @@ export const load = (async ({ fetch, params }) => {
 		requirements,
 		measureModel,
 		evidenceModel,
+		viewerRole: tableMode.viewer_role ?? 'auditor',
 		title: m.tableMode()
 	};
 }) satisfies PageServerLoad;

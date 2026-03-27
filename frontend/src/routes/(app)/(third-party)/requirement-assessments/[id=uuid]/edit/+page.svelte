@@ -12,7 +12,7 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getSecureRedirect, isFieldVisible } from '$lib/utils/helpers';
+	import { getSecureRedirect, getFieldVisibility } from '$lib/utils/helpers';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
@@ -246,25 +246,17 @@
 	// Field visibility
 	const fw = data.requirementAssessment.compliance_assessment.framework;
 	const complianceAssessment = data.requirementAssessment.compliance_assessment;
-	const viewerRole: 'respondent' | 'auditor' = page.data.user.is_third_party
-		? 'respondent'
-		: 'auditor';
-	const showResult = isFieldVisible(fw, complianceAssessment, 'result', viewerRole);
-	const showScore = isFieldVisible(fw, complianceAssessment, 'score', viewerRole);
-	const showObservation = isFieldVisible(fw, complianceAssessment, 'observation', viewerRole);
-	const showAppliedControls = isFieldVisible(
-		fw,
-		complianceAssessment,
-		'applied_controls',
-		viewerRole
-	);
-	const showEvidences = isFieldVisible(fw, complianceAssessment, 'evidences', viewerRole);
-	const showSecurityExceptions = isFieldVisible(
-		fw,
-		complianceAssessment,
-		'security_exceptions',
-		viewerRole
-	);
+	const viewerRole: 'respondent' | 'auditor' = (data.viewerRole ?? 'auditor') as
+		| 'respondent'
+		| 'auditor';
+	const {
+		showResult,
+		showScore,
+		showObservation,
+		showAppliedControls,
+		showEvidences,
+		showSecurityExceptions
+	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
 
 	let group = $state(page.data.user.is_third_party ? 'evidences' : 'applied_controls');
 

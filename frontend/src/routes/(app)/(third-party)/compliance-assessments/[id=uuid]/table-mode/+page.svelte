@@ -7,6 +7,7 @@
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
@@ -21,7 +22,13 @@
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { displayScoreColor, formatScoreValue, isFieldVisible } from '$lib/utils/helpers';
+	import {
+		displayScoreColor,
+		formatScoreValue,
+		getFieldVisibility,
+		hasComputedResult,
+		hasComputedScore
+	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Accordion, Progress, Switch } from '@skeletonlabs/skeleton-svelte';
@@ -80,20 +87,18 @@
 		complianceAssessment.is_locked || complianceAssessment.status === 'in_review'
 	);
 
-	// Field visibility based on viewer role
+	// Field visibility based on viewer role (server-computed from actor membership)
 	const viewerRole: 'respondent' | 'auditor' = $derived(
-		page.data.user.is_third_party ? 'respondent' : 'auditor'
+		(data.viewerRole ?? 'auditor') as 'respondent' | 'auditor'
 	);
-	const fw = $derived(complianceAssessment.framework);
-	const showResult = $derived(isFieldVisible(fw, complianceAssessment, 'result', viewerRole));
-	const showScore = $derived(isFieldVisible(fw, complianceAssessment, 'score', viewerRole));
-	const showObservation = $derived(
-		isFieldVisible(fw, complianceAssessment, 'observation', viewerRole)
+	const fieldVis = $derived(
+		getFieldVisibility(complianceAssessment.framework, complianceAssessment, viewerRole)
 	);
-	const showAppliedControls = $derived(
-		isFieldVisible(fw, complianceAssessment, 'applied_controls', viewerRole)
-	);
-	const showEvidences = $derived(isFieldVisible(fw, complianceAssessment, 'evidences', viewerRole));
+	const showResult = $derived(fieldVis.showResult);
+	const showScore = $derived(fieldVis.showScore);
+	const showObservation = $derived(fieldVis.showObservation);
+	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showEvidences = $derived(fieldVis.showEvidences);
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -425,25 +430,11 @@
 					{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
 						<!-- Splash screen node: full-width markdown block -->
 						<div class="my-4">
-							<div
-								class="border-l-4 border-purple-400 rounded-xl shadow-sm bg-white overflow-hidden"
+							<SplashCard
+								name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
+								description={requirementAssessment.description ?? requirementAssessment.requirement?.description}
 								id="requirement-{requirementAssessment.id}"
-							>
-								{#if requirementAssessment.name || requirementAssessment.requirement?.name}
-									<div class="px-6 py-4 border-b border-purple-100 flex items-center gap-2">
-										<i class="fa-solid fa-display text-purple-400"></i>
-										<span class="text-lg font-semibold text-gray-800">
-											{requirementAssessment.name ?? requirementAssessment.requirement?.name}
-										</span>
-									</div>
-								{/if}
-								<div class="px-6 py-5">
-									<MarkdownRenderer
-										content={requirementAssessment.description ??
-											requirementAssessment.requirement?.description}
-									/>
-								</div>
-							</div>
+							/>
 						</div>
 					{:else}
 						<span
@@ -630,7 +621,7 @@
 													<p class="flex items-center font-semibold text-purple-600 italic">
 														{m.result()}
 													</p>
-													{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
+													{#if hasComputedResult(requirementAssessment.requirement.questions)}
 														<span
 															class="badge text-sm font-semibold"
 															style="background-color: {complianceResultColorMap[
@@ -684,7 +675,7 @@
 												: ''}"
 										>
 											{#if showScore && !shallow && complianceAssessment.scoring_enabled}
-												{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
+												{#if hasComputedScore(requirementAssessment.requirement.questions)}
 													<div class="flex flex-row items-center space-x-4">
 														<span class="font-medium">{m.score()}</span>
 														<div class="shrink-0 relative">
