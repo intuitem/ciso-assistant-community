@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import type { PageData } from './$types';
 
 	const STORAGE_KEY = 'soa_selection';
@@ -11,6 +12,9 @@
 	}
 
 	let { data }: Props = $props();
+
+	// URL param takes priority over saved state
+	const caFromUrl = browser ? page.url.searchParams.get('ca') : null;
 
 	function loadSaved(): { compliance: string; risk: string[]; groups: string[] } {
 		if (!browser) return { compliance: '', risk: [], groups: [] };
@@ -22,7 +26,7 @@
 	}
 
 	const saved = loadSaved();
-	let selectedComplianceAssessment: string = $state(saved.compliance);
+	let selectedComplianceAssessment: string = $state(caFromUrl || saved.compliance);
 	let selectedRiskAssessments: string[] = $state(saved.risk);
 	let selectedImplementationGroups: string[] = $state(saved.groups ?? []);
 
@@ -63,13 +67,22 @@
 		return data.frameworkGroupsMap?.[ca.framework.id] || [];
 	});
 
-	// Select all groups by default when CA changes (skip on initial load if restoring saved state)
-	let lastAutoSelectedCA: string = $state(saved.compliance);
+	// Select all groups by default when CA changes (skip on initial load if restoring saved state without URL override)
+	let lastAutoSelectedCA: string = $state(caFromUrl ? '' : saved.compliance);
 
 	$effect(() => {
 		if (selectedComplianceAssessment !== lastAutoSelectedCA) {
 			lastAutoSelectedCA = selectedComplianceAssessment;
-			selectedImplementationGroups = implementationGroups.map((g: { ref_id: string }) => g.ref_id);
+			const soaGroup = implementationGroups.find(
+				(g: { ref_id: string }) => g.ref_id === 'SoA' || g.ref_id === 'soa'
+			);
+			if (soaGroup) {
+				selectedImplementationGroups = [soaGroup.ref_id];
+			} else {
+				selectedImplementationGroups = implementationGroups.map(
+					(g: { ref_id: string }) => g.ref_id
+				);
+			}
 		}
 	});
 

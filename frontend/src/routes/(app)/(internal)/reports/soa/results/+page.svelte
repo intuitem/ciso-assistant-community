@@ -197,14 +197,16 @@
 									{ac.reference_control?.ref_id || ''}
 								</td>
 								<!-- Reference Control -->
-								<td class="px-3 py-2 text-sm text-gray-900 align-top overflow-hidden">
+								<td class="px-3 py-2 text-sm align-top overflow-hidden">
 									{#if ac.reference_control}
-										<div class="font-medium">{ac.reference_control.name}</div>
+										<div class="font-medium text-gray-900">{ac.reference_control.name}</div>
 										{#if ac.reference_control.description}
 											<div class="text-xs text-gray-500 mt-0.5">
 												{ac.reference_control.description}
 											</div>
 										{/if}
+									{:else}
+										<span class="text-xs text-gray-300 italic">--</span>
 									{/if}
 								</td>
 								<!-- Justification -->
