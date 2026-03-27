@@ -33,13 +33,13 @@
 
 	const { value } = form ? formFieldProxy(form, field) : {};
 
-	let internalAnswers = $state(value ? $value : initialValue);
+	let internalAnswers = $state(value ? $value : structuredClone(initialValue));
 	let questionBuffers = $state<Record<string, string>>({});
 
 	// Initialize buffers for text questions
 	$effect(() => {
 		Object.entries(questions).forEach(([urn, question]) => {
-			if (question.type === 'text' && !(urn in questionBuffers)) {
+			if ((question.type === 'text' || question.type === 'number') && !(urn in questionBuffers)) {
 				questionBuffers[urn] = internalAnswers[urn] || '';
 			}
 		});
@@ -106,6 +106,12 @@
 							<p class="text-primary-500 font-semibold">
 								{question.choices.find((choice) => choice.urn === internalAnswers[urn]).value}
 							</p>
+						{:else if internalAnswers[urn] === true}
+							<p class="text-primary-500 font-semibold">{m.yes()}</p>
+						{:else if internalAnswers[urn] === false}
+							<p class="text-primary-500 font-semibold">{m.no()}</p>
+						{:else if internalAnswers[urn] != null}
+							<p class="text-primary-500 font-semibold">{internalAnswers[urn]}</p>
 						{:else}
 							<p class="text-gray-400 italic">{m.noAnswer()}</p>
 						{/if}
@@ -198,6 +204,51 @@
 							bind:value={internalAnswers[urn]}
 							onchange={(e) => onChange(urn, internalAnswers[urn])}
 						/>
+					{:else if question.type === 'boolean'}
+						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+							{#each [{ value: true, label: m.yes() }, { value: false, label: m.no() }, { value: null, label: m.notApplicable() }] as option}
+								{@const selected = internalAnswers[urn] === option.value}
+								<button
+									type="button"
+									name="question"
+									{disabled}
+									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
+										{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
+										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
+									onclick={() => {
+										internalAnswers[urn] =
+											internalAnswers[urn] === option.value ? null : option.value;
+										onChange(urn, internalAnswers[urn]);
+									}}
+								>
+									{option.label}
+								</button>
+							{/each}
+						</div>
+					{:else if question.type === 'number'}
+						{#if form}
+							<input
+								type="number"
+								class="input {_class}"
+								{disabled}
+								bind:value={internalAnswers[urn]}
+								onchange={() => onChange(urn, internalAnswers[urn])}
+							/>
+						{:else}
+							<div>
+								<input
+									type="number"
+									class="input {_class}"
+									{disabled}
+									bind:value={questionBuffers[urn]}
+									onchange={() => {
+										const val = questionBuffers[urn] === '' ? null : Number(questionBuffers[urn]);
+										internalAnswers[urn] = val;
+										onChange(urn, val);
+									}}
+								/>
+							</div>
+						{/if}
 					{:else if question.type === 'text'}
 						{#if form}
 							<textarea
