@@ -164,7 +164,7 @@
 		<!-- Implementation -->
 		<td class="px-3 py-2 align-top">
 			{#if uniqueAppliedControls.length > 0}
-				<div class="flex flex-col gap-1">
+				<div class="flex flex-col gap-2.5">
 					{#each uniqueAppliedControls as ac}
 						{@const statusBadge = getStatusBadge(ac.status)}
 						<Anchor

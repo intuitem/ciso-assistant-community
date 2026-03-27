@@ -12,19 +12,39 @@
 
 	let { data }: Props = $props();
 
-	function loadSaved(): { compliance: string; risk: string[]; group: string } {
-		if (!browser) return { compliance: '', risk: [], group: '' };
+	function loadSaved(): { compliance: string; risk: string[]; groups: string[] } {
+		if (!browser) return { compliance: '', risk: [], groups: [] };
 		try {
 			const saved = localStorage.getItem(STORAGE_KEY);
 			if (saved) return JSON.parse(saved);
 		} catch {}
-		return { compliance: '', risk: [], group: '' };
+		return { compliance: '', risk: [], groups: [] };
 	}
 
 	const saved = loadSaved();
 	let selectedComplianceAssessment: string = $state(saved.compliance);
 	let selectedRiskAssessments: string[] = $state(saved.risk);
-	let selectedImplementationGroup: string = $state(saved.group);
+	let selectedImplementationGroups: string[] = $state(saved.groups ?? []);
+
+	const statusLabels: Record<string, () => string> = {
+		planned: m.planned,
+		in_progress: m.inProgress,
+		in_review: m.inReview,
+		done: m.done,
+		deprecated: m.deprecated
+	};
+
+	function translateStatus(status: string): string {
+		return statusLabels[status]?.() ?? status;
+	}
+
+	function toggleImplementationGroup(refId: string) {
+		if (selectedImplementationGroups.includes(refId)) {
+			selectedImplementationGroups = selectedImplementationGroups.filter((g) => g !== refId);
+		} else {
+			selectedImplementationGroups = [...selectedImplementationGroups, refId];
+		}
+	}
 
 	function toggleRiskAssessment(id: string) {
 		if (selectedRiskAssessments.includes(id)) {
@@ -43,17 +63,15 @@
 		return data.frameworkGroupsMap?.[ca.framework.id] || [];
 	});
 
-	// Auto-select "SoA" group when groups change
+	// Select all groups by default when CA changes
+	let lastAutoSelectedCA: string = $state('');
+
 	$effect(() => {
-		if (implementationGroups.length > 0) {
-			const soaGroup = implementationGroups.find(
-				(g: { ref_id: string }) => g.ref_id === 'SoA' || g.ref_id === 'soa'
+		if (selectedComplianceAssessment !== lastAutoSelectedCA) {
+			lastAutoSelectedCA = selectedComplianceAssessment;
+			selectedImplementationGroups = implementationGroups.map(
+				(g: { ref_id: string }) => g.ref_id
 			);
-			if (soaGroup && !selectedImplementationGroup) {
-				selectedImplementationGroup = soaGroup.ref_id;
-			}
-		} else {
-			selectedImplementationGroup = '';
 		}
 	});
 
@@ -65,7 +83,7 @@
 				JSON.stringify({
 					compliance: selectedComplianceAssessment,
 					risk: selectedRiskAssessments,
-					group: selectedImplementationGroup
+					groups: selectedImplementationGroups
 				})
 			);
 		}
@@ -74,8 +92,11 @@
 		if (selectedRiskAssessments.length > 0) {
 			params.set('risk_assessments', selectedRiskAssessments.join(','));
 		}
-		if (selectedImplementationGroup) {
-			params.set('implementation_group', selectedImplementationGroup);
+		if (
+			selectedImplementationGroups.length > 0 &&
+			selectedImplementationGroups.length < implementationGroups.length
+		) {
+			params.set('implementation_groups', selectedImplementationGroups.join(','));
 		}
 		goto(`/reports/soa/results?${params.toString()}`);
 	}
@@ -122,7 +143,7 @@
 					<option value={ca.id}>
 						{ca.name}
 						{ca.framework?.str ? `(${ca.framework.str})` : ''}
-						{ca.perimeter?.str ? `— ${ca.perimeter.str}` : ''}
+						{ca.perimeter?.str ? `— ${ca.perimeter.str}` : ca.folder?.str ? `— ${ca.folder.str}` : ''}
 					</option>
 				{/each}
 			</select>
@@ -144,43 +165,41 @@
 							<i class="fas fa-crosshairs mr-1.5"></i>
 							{selectedComplianceData.perimeter.str}
 						</span>
+					{:else if selectedComplianceData.folder?.str}
+						<span
+							class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200"
+						>
+							<i class="fas fa-folder mr-1.5"></i>
+							{selectedComplianceData.folder.str}
+						</span>
 					{/if}
 					{#if selectedComplianceData.status}
 						<span
 							class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200"
 						>
 							<i class="fas fa-info-circle mr-1.5"></i>
-							{selectedComplianceData.status}
+							{translateStatus(selectedComplianceData.status)}
 						</span>
 					{/if}
 				</div>
 			{/if}
 
-			<!-- Implementation Group Selector -->
-			{#if implementationGroups.length > 0}
+			<!-- Implementation Group Toggles -->
+			{#if implementationGroups.length > 1}
 				<div class="mt-4 pt-4 border-t border-gray-100">
 					<label class="block text-sm font-medium text-gray-700 mb-2">
-						{m.soaScope()}
+						{m.implementationGroups()}
 					</label>
 					<div class="flex flex-wrap gap-2">
-						<button
-							type="button"
-							onclick={() => (selectedImplementationGroup = '')}
-							class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
-								{selectedImplementationGroup === ''
-								? 'bg-blue-600 text-white border-blue-600'
-								: 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'}"
-						>
-							{m.allRequirements()}
-						</button>
 						{#each implementationGroups as group}
+							{@const isSelected = selectedImplementationGroups.includes(group.ref_id)}
 							<button
 								type="button"
-								onclick={() => (selectedImplementationGroup = group.ref_id)}
+								onclick={() => toggleImplementationGroup(group.ref_id)}
 								class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
-									{selectedImplementationGroup === group.ref_id
+									{isSelected
 									? 'bg-blue-600 text-white border-blue-600'
-									: 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'}"
+									: 'bg-white text-gray-400 border-gray-300 hover:border-gray-400 line-through'}"
 							>
 								{group.name}
 							</button>

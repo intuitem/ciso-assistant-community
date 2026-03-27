@@ -10253,13 +10253,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             requirement_assessments,
             _framework.max_score,
         )
-        implementation_groups = compliance_assessment.selected_implementation_groups
-        tree = filter_graph_by_implementation_groups(tree, implementation_groups)
-
-        # Optionally filter by a specific implementation group (e.g., "SoA" for Annex A)
-        requested_group = request.query_params.get("implementation_group", "")
-        if requested_group:
-            tree = filter_graph_by_implementation_groups(tree, {requested_group})
+        # Filter by implementation groups from the report selection page (if provided),
+        # otherwise fall back to the compliance assessment's own selected groups.
+        requested_groups_param = request.query_params.get("implementation_groups", "")
+        requested_groups = {
+            g.strip() for g in requested_groups_param.split(",") if g.strip()
+        }
+        if requested_groups:
+            tree = filter_graph_by_implementation_groups(tree, requested_groups)
+        else:
+            implementation_groups = compliance_assessment.selected_implementation_groups
+            tree = filter_graph_by_implementation_groups(tree, implementation_groups)
 
         # Build ra_id → RequirementAssessment lookup with prefetched applied_controls
         ras = RequirementAssessment.objects.filter(
@@ -10332,7 +10336,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 RiskScenario.objects.filter(
                     risk_assessment__id__in=risk_assessment_ids,
                 )
-                .select_related("risk_assessment")
+                .select_related("risk_assessment", "risk_assessment__risk_matrix")
                 .prefetch_related(
                     "threats",
                     "assets",
@@ -10367,7 +10371,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "name": rs.name,
                         "ref_id": rs.ref_id or "",
                         "treatment": rs.treatment,
-                        "residual_level": rs.residual_level,
+                        "current_risk": rs.get_current_risk(),
+                        "residual_risk": rs.get_residual_risk(),
                         "threats": [
                             {"id": str(t.id), "name": t.name} for t in rs.threats.all()
                         ],
@@ -10398,7 +10403,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "implementation_groups_definition": _framework.implementation_groups_definition,
                     },
                     "risk_assessments": risk_assessment_names,
-                    "selected_implementation_group": requested_group or None,
+                    "selected_implementation_groups": list(requested_groups)
+                    if requested_groups
+                    else None,
                 },
             }
         )

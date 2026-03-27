@@ -84,13 +84,15 @@
 							{metadata.framework.ref_id || metadata.framework.name}
 						</span>
 					{/if}
-					{#if metadata.selected_implementation_group}
-						<span
-							class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200"
-						>
-							<i class="fas fa-layer-group mr-1.5"></i>
-							{metadata.selected_implementation_group}
-						</span>
+					{#if metadata.selected_implementation_groups?.length > 0}
+						{#each metadata.selected_implementation_groups as group}
+							<span
+								class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200"
+							>
+								<i class="fas fa-layer-group mr-1.5"></i>
+								{group}
+							</span>
+						{/each}
 					{/if}
 					{#if metadata.risk_assessments?.length > 0}
 						{#each metadata.risk_assessments as raName}
@@ -172,55 +174,55 @@
 				<p class="text-xs text-gray-600 mt-1 ml-7">{m.riskTreatmentControlsDescription()}</p>
 			</div>
 			<div class="overflow-x-auto">
-				<table class="w-full table-fixed">
+				<table class="w-full table-fixed border-collapse">
 					<colgroup>
 						<col class="w-[8%]" /><!-- Ref -->
-						<col class="w-[22%]" /><!-- Risk Scenario -->
-						<col class="w-[12%]" /><!-- Treatment -->
-						<col class="w-[12%]" /><!-- Residual Risk -->
-						<col class="w-[46%]" /><!-- Applied Controls -->
+						<col class="w-[20%]" /><!-- Risk Scenario -->
+						<col class="w-[10%]" /><!-- Treatment -->
+						<col class="w-[10%]" /><!-- Current Level -->
+						<col class="w-[36%]" /><!-- Implementation -->
+						<col class="w-[10%]" /><!-- Residual Risk -->
 					</colgroup>
-					<thead>
-						<tr class="bg-gray-100 border-b border-gray-200">
-							<th
-								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-							>
+					<thead class="sticky top-0 z-10 print:static">
+						<tr class="bg-gray-800 text-white border-b-2 border-gray-900">
+							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 								Ref
 							</th>
-							<th
-								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-							>
+							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 								{m.riskScenarios()}
 							</th>
-							<th
-								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-							>
+							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 								{m.treatment()}
 							</th>
-							<th
-								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-							>
-								{m.residualRisk()}
+							<th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider">
+								{m.currentLevel()}
 							</th>
-							<th
-								class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-							>
+							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 								{m.implementation()}
+							</th>
+							<th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider">
+								{m.residualLevel()}
 							</th>
 						</tr>
 					</thead>
 					<tbody>
-						{#each riskScenarios as rs}
+						{#each riskScenarios as rs, i}
 							{@const treatmentBadge = getTreatmentBadge(rs.treatment)}
-							<tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+							<tr class="border-b border-gray-200 transition-colors {i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">
 								<!-- Ref -->
-								<td class="px-3 py-2.5 text-sm font-mono text-gray-600 align-top">
+								<td class="px-3 py-2.5 text-xs font-mono text-gray-600 align-top">
 									{rs.ref_id || ''}
 								</td>
 								<!-- Risk Scenario -->
 								<td class="px-3 py-2.5 align-top">
-									<div class="text-sm font-medium text-gray-900 break-words">{rs.name}</div>
-									{#if rs.threats.length > 0}
+									<Anchor
+										breadcrumbAction="push"
+										href="/risk-scenarios/{rs.id}?next={encodeURIComponent(returnUrl)}"
+										class="text-sm font-medium text-gray-900 break-words hover:underline"
+									>
+										{rs.name}
+									</Anchor>
+									{#if rs.threats?.length > 0}
 										<div class="text-xs text-gray-500 mt-0.5">
 											{rs.threats.map((t: Record<string, string>) => t.name).join(', ')}
 										</div>
@@ -234,18 +236,23 @@
 										{treatmentBadge.label}
 									</span>
 								</td>
-								<!-- Residual Risk -->
-								<td class="px-3 py-2.5 align-top">
-									{#if rs.residual_level != null && rs.residual_level >= 0}
-										<span class="text-sm text-gray-700">{rs.residual_level}</span>
+								<!-- Current Level -->
+								<td class="px-3 py-2.5 text-center align-top">
+									{#if rs.current_risk?.name && rs.current_risk.name !== '--'}
+										<span
+											class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold text-white print:border print:border-gray-400"
+											style="background-color: {rs.current_risk.hexcolor || '#6b7280'}"
+										>
+											{rs.current_risk.name}
+										</span>
 									{:else}
 										<span class="text-xs text-gray-400">--</span>
 									{/if}
 								</td>
-								<!-- Applied Controls -->
+								<!-- Implementation -->
 								<td class="px-3 py-2.5 align-top">
-									{#if rs.applied_controls && rs.applied_controls.length > 0}
-										<div class="flex flex-col gap-1.5">
+									{#if rs.applied_controls?.length > 0}
+										<div class="flex flex-col gap-2.5">
 											{#each rs.applied_controls as ac}
 												{@const statusBadge = getStatusBadge(ac.status)}
 												<Anchor
@@ -264,6 +271,19 @@
 												</Anchor>
 											{/each}
 										</div>
+									{:else}
+										<span class="text-xs text-gray-400">--</span>
+									{/if}
+								</td>
+								<!-- Residual Risk -->
+								<td class="px-3 py-2.5 text-center align-top">
+									{#if rs.residual_risk?.name && rs.residual_risk.name !== '--'}
+										<span
+											class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold text-white print:border print:border-gray-400"
+											style="background-color: {rs.residual_risk.hexcolor || '#6b7280'}"
+										>
+											{rs.residual_risk.name}
+										</span>
 									{:else}
 										<span class="text-xs text-gray-400">--</span>
 									{/if}

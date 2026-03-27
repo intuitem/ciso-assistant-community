@@ -9,14 +9,14 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	}
 
 	const riskAssessments = url.searchParams.get('risk_assessments') || '';
-	const implementationGroup = url.searchParams.get('implementation_group') || '';
+	const implementationGroups = url.searchParams.get('implementation_groups') || '';
 
 	const params = new URLSearchParams();
 	if (riskAssessments) {
 		params.set('risk_assessment_ids', riskAssessments);
 	}
-	if (implementationGroup) {
-		params.set('implementation_group', implementationGroup);
+	if (implementationGroups) {
+		params.set('implementation_groups', implementationGroups);
 	}
 
 	const queryString = params.toString();
