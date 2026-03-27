@@ -7699,8 +7699,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         ).exists()
 
     def trigger_compliance_assessment_update_hooks(self):
-        self.compliance_assessment.updated_at = timezone.now()
-        self.compliance_assessment.save(update_fields=["updated_at"])
+        ComplianceAssessment.objects.filter(pk=self.compliance_assessment_id).update(
+            updated_at=timezone.now()
+        )
 
         # Defer metrics to on_commit, deduplicated per CA per transaction
         ca = self.compliance_assessment
@@ -8056,10 +8057,9 @@ class Answer(AbstractBaseModel, FolderMixin):
         super().save(*args, **kwargs)
 
         # Update parent compliance assessment timestamp
-        self.requirement_assessment.compliance_assessment.updated_at = timezone.now()
-        self.requirement_assessment.compliance_assessment.save(
-            update_fields=["updated_at"]
-        )
+        ComplianceAssessment.objects.filter(
+            pk=self.requirement_assessment.compliance_assessment_id
+        ).update(updated_at=timezone.now())
 
         # If framework is dynamic, trigger IG update (deduplicated per transaction)
         if self.requirement_assessment.compliance_assessment.framework.is_dynamic():
