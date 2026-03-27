@@ -1,16 +1,19 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { error, json, type NumericRange } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
 
-export const load = (async ({ fetch }) => {
+/** Create a new framework and return its id/name as JSON */
+export const POST: RequestHandler = async ({ fetch }) => {
+	// Fetch root folder
 	const foldersRes = await fetch(`${BASE_API_URL}/folders/?content_type=GL`);
 	const folders = await foldersRes.json();
 	const rootFolder = (folders.results ?? folders)[0];
 
 	if (!rootFolder) {
-		throw redirect(302, '/frameworks');
+		error(400, { message: 'No root folder found' });
 	}
 
+	// Create framework
 	const res = await fetch(`${BASE_API_URL}/frameworks/`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -26,9 +29,10 @@ export const load = (async ({ fetch }) => {
 	});
 
 	if (!res.ok) {
-		throw redirect(302, '/frameworks');
+		const data = await res.json();
+		error(res.status as NumericRange<400, 599>, data);
 	}
 
 	const framework = await res.json();
-	throw redirect(302, `/frameworks/${framework.id}/builder/`);
-}) satisfies PageServerLoad;
+	return json({ id: framework.id, name: framework.name });
+};
