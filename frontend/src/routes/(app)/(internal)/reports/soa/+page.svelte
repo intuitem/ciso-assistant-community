@@ -74,7 +74,7 @@
 		if (selectedComplianceAssessment !== lastAutoSelectedCA) {
 			lastAutoSelectedCA = selectedComplianceAssessment;
 			const soaGroup = implementationGroups.find(
-				(g: { ref_id: string }) => g.ref_id === 'SoA' || g.ref_id === 'soa'
+				(g: { ref_id: string }) => g.ref_id.toLowerCase() === 'soa'
 			);
 			if (soaGroup) {
 				selectedImplementationGroups = [soaGroup.ref_id];
@@ -236,8 +236,7 @@
 			<div>
 				<h2 class="text-lg font-semibold text-gray-900">{m.soaSelectRisk()}</h2>
 				<p class="text-xs text-gray-500 mt-0.5">
-					Selecting risk assessments will enrich the SoA with linked risk scenarios and treatment
-					decisions
+					{m.soaSelectRiskDescription()}
 				</p>
 			</div>
 		</div>

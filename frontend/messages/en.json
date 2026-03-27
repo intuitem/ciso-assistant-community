@@ -3982,5 +3982,6 @@
 	"soaScope": "Scope",
 	"allRequirements": "All requirements",
 	"removeLanguageConfirm": "Remove {lang} translations?",
-	"riskCoverage": "Risk coverage"
+	"riskCoverage": "Risk coverage",
+	"soaSelectRiskDescription": "Selecting risk assessments will enrich the SoA with linked risk scenarios and treatment decisions"
 }

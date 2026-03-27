@@ -117,7 +117,7 @@
 				<thead class="sticky top-0 z-10 print:static">
 					<tr class="bg-gray-800 text-white border-b-2 border-gray-900">
 						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
-							Ref
+							{m.ref()}
 						</th>
 						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 							{m.referenceControl()}

@@ -10242,6 +10242,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=True
             )
         )
+        # Auditee filtering: scope to assigned requirements only
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+            requirement_assessments = [
+                ra for ra in requirement_assessments if ra.id in ra_ids
+            ]
+
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
@@ -10260,10 +10274,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             g.strip() for g in requested_groups_param.split(",") if g.strip()
         }
         if requested_groups:
-            tree = filter_graph_by_implementation_groups(tree, requested_groups)
+            effective_groups = requested_groups
         else:
-            implementation_groups = compliance_assessment.selected_implementation_groups
-            tree = filter_graph_by_implementation_groups(tree, implementation_groups)
+            effective_groups = compliance_assessment.selected_implementation_groups
+        tree = filter_graph_by_implementation_groups(tree, effective_groups)
 
         # Build ra_id → RequirementAssessment lookup with prefetched applied_controls
         ras = RequirementAssessment.objects.filter(
@@ -10284,9 +10298,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             uid.strip() for uid in risk_assessment_ids_param.split(",") if uid.strip()
         ]
 
-        risk_assessment_names = []
-        if risk_assessment_ids and ac_ids:
-            # Filter risk assessment IDs by IAM boundaries
+        # Filter risk assessment IDs by IAM boundaries before any use
+        if risk_assessment_ids:
             viewable_ra_ids = RoleAssignment.get_accessible_object_ids(
                 Folder.get_root_folder(), request.user, RiskAssessment
             )[0]
@@ -10296,6 +10309,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 if uid in {str(i) for i in viewable_ra_ids}
             ]
 
+        risk_assessment_names = []
+        if risk_assessment_ids and ac_ids:
             risk_scenarios = (
                 RiskScenario.objects.filter(
                     Q(applied_controls__id__in=ac_ids)
@@ -10417,8 +10432,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "implementation_groups_definition": _framework.implementation_groups_definition,
                     },
                     "risk_assessments": risk_assessment_names,
-                    "selected_implementation_groups": list(requested_groups)
-                    if requested_groups
+                    "selected_implementation_groups": list(effective_groups)
+                    if effective_groups
                     else None,
                 },
             }
