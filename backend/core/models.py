@@ -2126,7 +2126,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         obj = super().save(*args, **kwargs)
 
         if self.urn not in engine.frameworks:
-            transaction.on_commit(lambda: engine.load_frameworks())
+            transaction.on_commit(engine.reload_cache)
 
         return obj
 
