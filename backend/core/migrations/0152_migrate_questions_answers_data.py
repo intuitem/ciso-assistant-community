@@ -77,6 +77,7 @@ def migrate_forward(apps, schema_editor):
                 text=q_data.get("text", ""),
                 annotation=q_data.get("annotation", q_data.get("text", "")),
                 type=q_type,
+                config=q_data.get("config"),
                 depends_on=q_data.get("depends_on"),
                 order=order,
                 weight=q_data.get("weight", 1),
