@@ -25,33 +25,6 @@
 	);
 	const isNotApplicable = $derived(node.selected === false || node.result === 'not_applicable');
 
-	function getResultBadge(result: string | null): { label: string; classes: string } {
-		switch (result) {
-			case 'compliant':
-				return { label: m.compliant(), classes: 'bg-green-100 text-green-800 border-green-200' };
-			case 'partially_compliant':
-				return {
-					label: m.partiallyCompliant(),
-					classes: 'bg-yellow-100 text-yellow-800 border-yellow-200'
-				};
-			case 'non_compliant':
-				return {
-					label: m.nonCompliant(),
-					classes: 'bg-red-100 text-red-800 border-red-200'
-				};
-			case 'not_applicable':
-				return {
-					label: m.notApplicable(),
-					classes: 'bg-gray-100 text-gray-500 border-gray-200'
-				};
-			default:
-				return {
-					label: m.notAssessed(),
-					classes: 'bg-gray-50 text-gray-400 border-gray-200'
-				};
-		}
-	}
-
 	function getStatusBadge(status: string): { label: string; classes: string } {
 		switch (status) {
 			case 'active':
@@ -135,17 +108,6 @@
 				</span>
 			{/if}
 		</td>
-		<!-- Result -->
-		<td class="px-3 py-2 text-center align-top">
-			{#if true}
-				{@const badge = getResultBadge(node.result)}
-				<span
-					class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border {badge.classes}"
-				>
-					{badge.label}
-				</span>
-			{/if}
-		</td>
 		<!-- Observation -->
 		<td
 			class="px-3 py-2 text-sm align-top overflow-hidden {isNotApplicable
@@ -191,7 +153,7 @@
 {:else if hasChildren}
 	<!-- Section header -->
 	<tr class="{sectionStyles} print:break-inside-avoid print:break-after-avoid">
-		<td colspan={6} class="px-3 py-2">
+		<td colspan={5} class="px-3 py-2">
 			<button
 				onclick={() => (expanded = !expanded)}
 				class="flex items-center gap-2.5 w-full text-left"

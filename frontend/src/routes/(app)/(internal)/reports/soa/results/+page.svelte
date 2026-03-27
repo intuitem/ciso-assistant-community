@@ -14,7 +14,7 @@
 	const tree = $derived(data.soaData.tree || {});
 	const metadata = $derived(data.soaData.metadata || {});
 	const treeEntries = $derived(Object.entries(tree));
-	const riskScenarios = $derived(data.soaData.risk_scenarios || []);
+	const additionalControls = $derived(data.soaData.additional_controls || []);
 	const returnUrl = $derived(page.url.pathname + page.url.search);
 
 	function getStatusBadge(status: string): { label: string; classes: string } {
@@ -36,21 +36,6 @@
 
 	function exportPDF() {
 		window.print();
-	}
-
-	function getTreatmentBadge(treatment: string): { label: string; classes: string } {
-		switch (treatment) {
-			case 'mitigate':
-				return { label: m.mitigate(), classes: 'bg-blue-50 text-blue-700' };
-			case 'accept':
-				return { label: m.accept(), classes: 'bg-green-50 text-green-700' };
-			case 'avoid':
-				return { label: m.avoid(), classes: 'bg-red-50 text-red-700' };
-			case 'transfer':
-				return { label: m.transfer(), classes: 'bg-purple-50 text-purple-700' };
-			default:
-				return { label: treatment || m.open(), classes: 'bg-gray-50 text-gray-600' };
-		}
 	}
 </script>
 
@@ -126,9 +111,8 @@
 					<col class="w-[8%]" /><!-- Ref -->
 					<col class="w-[22%]" /><!-- Requirement -->
 					<col class="w-[7%]" /><!-- Applicable -->
-					<col class="w-[11%]" /><!-- Result -->
-					<col class="w-[22%]" /><!-- Observation -->
-					<col class="w-[30%]" /><!-- Implementation -->
+					<col class="w-[25%]" /><!-- Observation -->
+					<col class="w-[38%]" /><!-- Implementation -->
 				</colgroup>
 				<thead class="sticky top-0 z-10 print:static">
 					<tr class="bg-gray-800 text-white border-b-2 border-gray-900">
@@ -136,16 +120,13 @@
 							Ref
 						</th>
 						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
-							{m.requirement()}
+							{m.referenceControl()}
 						</th>
 						<th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider">
 							{m.applicable()}
 						</th>
-						<th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider">
-							{m.result()}
-						</th>
 						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
-							{m.observation()}
+							{m.justification()}
 						</th>
 						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 							{m.implementation()}
@@ -161,15 +142,15 @@
 		</div>
 	</div>
 
-	<!-- Risk Scenarios Section -->
-	{#if riskScenarios.length > 0}
+	<!-- Additional Controls from Risk Treatment -->
+	{#if additionalControls.length > 0}
 		<div
 			class="bg-white card border border-gray-200 overflow-hidden print:break-before-page print:border-none print:shadow-none"
 		>
 			<div class="px-4 py-3 bg-red-50 border-b border-red-200">
 				<div class="flex items-center gap-2">
 					<i class="fas fa-shield-halved text-red-600"></i>
-					<h2 class="text-lg font-semibold text-gray-900">{m.riskTreatmentControls()}</h2>
+					<h2 class="text-lg font-semibold text-gray-900">{m.additionalControls()}</h2>
 				</div>
 				<p class="text-xs text-gray-600 mt-1 ml-7">{m.riskTreatmentControlsDescription()}</p>
 			</div>
@@ -177,11 +158,10 @@
 				<table class="w-full table-fixed border-collapse">
 					<colgroup>
 						<col class="w-[8%]" /><!-- Ref -->
-						<col class="w-[20%]" /><!-- Risk Scenario -->
-						<col class="w-[10%]" /><!-- Treatment -->
-						<col class="w-[10%]" /><!-- Current Level -->
-						<col class="w-[36%]" /><!-- Implementation -->
-						<col class="w-[10%]" /><!-- Residual Risk -->
+						<col class="w-[22%]" /><!-- Reference Control -->
+						<col class="w-[25%]" /><!-- Justification -->
+						<col class="w-[10%]" /><!-- Risk Coverage -->
+						<col class="w-[35%]" /><!-- Implementation -->
 					</colgroup>
 					<thead class="sticky top-0 z-10 print:static">
 						<tr class="bg-gray-800 text-white border-b-2 border-gray-900">
@@ -189,112 +169,74 @@
 								Ref
 							</th>
 							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
-								{m.riskScenarios()}
+								{m.referenceControl()}
 							</th>
 							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
-								{m.treatment()}
+								{m.justification()}
 							</th>
 							<th
 								class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider"
 							>
-								{m.currentLevel()}
+								{m.riskCoverage()}
 							</th>
 							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 								{m.implementation()}
 							</th>
-							<th
-								class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider"
-							>
-								{m.residualLevel()}
-							</th>
 						</tr>
 					</thead>
 					<tbody>
-						{#each riskScenarios as rs, i}
-							{@const treatmentBadge = getTreatmentBadge(rs.treatment)}
+						{#each additionalControls as ac, i}
+							{@const statusBadge = getStatusBadge(ac.status)}
 							<tr
 								class="border-b border-gray-200 transition-colors {i % 2 === 0
 									? 'bg-white'
 									: 'bg-slate-50'}"
 							>
 								<!-- Ref -->
-								<td class="px-3 py-2.5 text-xs font-mono text-gray-600 align-top">
-									{rs.ref_id || ''}
+								<td class="px-3 py-2 text-xs font-mono text-gray-600 align-top">
+									{ac.reference_control?.ref_id || ''}
 								</td>
-								<!-- Risk Scenario -->
-								<td class="px-3 py-2.5 align-top">
-									<Anchor
-										breadcrumbAction="push"
-										href="/risk-scenarios/{rs.id}?next={encodeURIComponent(returnUrl)}"
-										class="text-sm font-medium text-gray-900 break-words hover:underline"
-									>
-										{rs.name}
-									</Anchor>
-									{#if rs.threats?.length > 0}
-										<div class="text-xs text-gray-500 mt-0.5">
-											{rs.threats.map((t: Record<string, string>) => t.name).join(', ')}
-										</div>
+								<!-- Reference Control -->
+								<td class="px-3 py-2 text-sm text-gray-900 align-top overflow-hidden">
+									{#if ac.reference_control}
+										<div class="font-medium">{ac.reference_control.name}</div>
+										{#if ac.reference_control.description}
+											<div class="text-xs text-gray-500 mt-0.5">
+												{ac.reference_control.description}
+											</div>
+										{/if}
 									{/if}
 								</td>
-								<!-- Treatment -->
-								<td class="px-3 py-2.5 align-top">
-									<span
-										class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {treatmentBadge.classes}"
-									>
-										{treatmentBadge.label}
-									</span>
+								<!-- Justification -->
+								<td class="px-3 py-2 text-sm text-gray-600 align-top overflow-hidden">
+									<span class="break-words">{ac.observation || ''}</span>
 								</td>
-								<!-- Current Level -->
-								<td class="px-3 py-2.5 text-center align-top">
-									{#if rs.current_risk?.name && rs.current_risk.name !== '--'}
-										<span
-											class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold text-white print:border print:border-gray-400"
-											style="background-color: {rs.current_risk.hexcolor || '#6b7280'}"
-										>
-											{rs.current_risk.name}
+								<!-- Risk Coverage -->
+								<td class="px-3 py-2 text-center align-top">
+									{#if ac.risk_scenarios?.length > 0}
+										<span class="text-sm font-semibold text-gray-700">
+											{ac.risk_scenarios.length}
 										</span>
 									{:else}
 										<span class="text-xs text-gray-400">--</span>
 									{/if}
 								</td>
 								<!-- Implementation -->
-								<td class="px-3 py-2.5 align-top">
-									{#if rs.applied_controls?.length > 0}
-										<div class="flex flex-col gap-2.5">
-											{#each rs.applied_controls as ac}
-												{@const statusBadge = getStatusBadge(ac.status)}
-												<Anchor
-													breadcrumbAction="push"
-													href="/applied-controls/{ac.id}?next={encodeURIComponent(returnUrl)}"
-													class="flex items-start gap-1.5 hover:underline"
-												>
-													<span
-														class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap flex-shrink-0 {statusBadge.classes}"
-													>
-														{statusBadge.label}
-													</span>
-													<span class="text-xs text-gray-700 break-words">
-														{ac.ref_id ? `${ac.ref_id} ` : ''}{ac.name}
-													</span>
-												</Anchor>
-											{/each}
-										</div>
-									{:else}
-										<span class="text-xs text-gray-400">--</span>
-									{/if}
-								</td>
-								<!-- Residual Risk -->
-								<td class="px-3 py-2.5 text-center align-top">
-									{#if rs.residual_risk?.name && rs.residual_risk.name !== '--'}
+								<td class="px-3 py-2 align-top">
+									<Anchor
+										breadcrumbAction="push"
+										href="/applied-controls/{ac.id}?next={encodeURIComponent(returnUrl)}"
+										class="flex items-start gap-1.5 hover:underline"
+									>
 										<span
-											class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold text-white print:border print:border-gray-400"
-											style="background-color: {rs.residual_risk.hexcolor || '#6b7280'}"
+											class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap flex-shrink-0 {statusBadge.classes}"
 										>
-											{rs.residual_risk.name}
+											{statusBadge.label}
 										</span>
-									{:else}
-										<span class="text-xs text-gray-400">--</span>
-									{/if}
+										<span class="text-xs text-gray-700 break-words">
+											{ac.ref_id ? `${ac.ref_id} ` : ''}{ac.name}
+										</span>
+									</Anchor>
 								</td>
 							</tr>
 						{/each}

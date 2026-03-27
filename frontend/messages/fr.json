@@ -3924,5 +3924,6 @@
 	"chatScrollToBottom": "Nouveaux messages",
 	"chatRetry": "Réessayer",
 	"chatNoConversations": "Aucune conversation",
-	"chatDisclaimer": "L'IA peut se tromper. Les données sont envoyées uniquement à votre fournisseur IA configuré."
+	"chatDisclaimer": "L'IA peut se tromper. Les données sont envoyées uniquement à votre fournisseur IA configuré.",
+	"riskCoverage": "Couverture des risques"
 }

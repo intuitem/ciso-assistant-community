@@ -10339,8 +10339,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         tree = enrich_tree_for_soa(tree, ra_lookup, ac_to_risk_scenarios)
 
-        # Build risk scenarios section: each scenario with its aggregated controls.
-        risk_scenarios_list = []
+        # Build additional controls section: controls from risk scenarios,
+        # grouped by control with linked risk scenario details.
+        additional_controls = []
         if risk_assessment_ids:
             all_risk_scenarios = (
                 RiskScenario.objects.filter(
@@ -10349,54 +10350,57 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 .select_related("risk_assessment", "risk_assessment__risk_matrix")
                 .prefetch_related(
                     "threats",
-                    "assets",
                     "applied_controls",
+                    "applied_controls__reference_control",
                     "existing_applied_controls",
+                    "existing_applied_controls__reference_control",
                 )
                 .distinct()
             )
 
+            controls_map = {}
             for rs in all_risk_scenarios:
-                # Deduplicate controls across applied + existing
-                controls_seen = set()
-                controls = []
+                rs_data = {
+                    "id": str(rs.id),
+                    "name": rs.name,
+                    "ref_id": rs.ref_id or "",
+                    "treatment": rs.treatment,
+                    "current_risk": rs.get_current_risk(),
+                    "residual_risk": rs.get_residual_risk(),
+                }
                 for ac in list(rs.applied_controls.all()) + list(
                     rs.existing_applied_controls.all()
                 ):
-                    if ac.id not in controls_seen:
-                        controls_seen.add(ac.id)
-                        controls.append(
-                            {
-                                "id": str(ac.id),
-                                "name": ac.name,
-                                "ref_id": ac.ref_id or "",
-                                "status": ac.status,
-                                "category": ac.category or "",
+                    ac_key = str(ac.id)
+                    if ac_key not in controls_map:
+                        rc = ac.reference_control
+                        controls_map[ac_key] = {
+                            "id": ac_key,
+                            "name": ac.name,
+                            "description": ac.description or "",
+                            "ref_id": ac.ref_id or "",
+                            "status": ac.status,
+                            "category": ac.category or "",
+                            "observation": ac.observation or "",
+                            "reference_control": {
+                                "ref_id": rc.ref_id or "",
+                                "name": rc.name or "",
+                                "description": rc.description or "",
                             }
-                        )
+                            if rc
+                            else None,
+                            "risk_scenarios": {},
+                        }
+                    controls_map[ac_key]["risk_scenarios"][rs_data["id"]] = rs_data
 
-                risk_scenarios_list.append(
-                    {
-                        "id": str(rs.id),
-                        "name": rs.name,
-                        "ref_id": rs.ref_id or "",
-                        "treatment": rs.treatment,
-                        "current_risk": rs.get_current_risk(),
-                        "residual_risk": rs.get_residual_risk(),
-                        "threats": [
-                            {"id": str(t.id), "name": t.name} for t in rs.threats.all()
-                        ],
-                        "assets": [
-                            {"id": str(a.id), "name": a.name} for a in rs.assets.all()
-                        ],
-                        "applied_controls": controls,
-                    }
-                )
+            for ac_data in controls_map.values():
+                ac_data["risk_scenarios"] = list(ac_data["risk_scenarios"].values())
+            additional_controls = list(controls_map.values())
 
         return Response(
             {
                 "tree": tree,
-                "risk_scenarios": risk_scenarios_list,
+                "additional_controls": additional_controls,
                 "metadata": {
                     "compliance_assessment": {
                         "id": str(compliance_assessment.id),
