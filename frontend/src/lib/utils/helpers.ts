@@ -338,7 +338,7 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	return { score: totalScore, result };
 }
 
-const DEFAULT_FIELD_VISIBILITY: Record<string, string> = {
+export const DEFAULT_FIELD_VISIBILITY: Record<string, string> = {
 	result: 'auditor',
 	status: 'auditor',
 	score: 'auditor',
@@ -381,4 +381,68 @@ export function isFieldVisible(
 	if (vis === 'hidden') return false;
 	if (vis === 'auditor' && viewerRole === 'respondent') return false;
 	return true;
+}
+
+/**
+ * Return visibility flags for all standard assessment fields at once.
+ * Avoids repeating 5-6 individual `isFieldVisible()` calls across route files.
+ */
+export function getFieldVisibility(
+	framework: Record<string, any> | null | undefined,
+	complianceAssessment: Record<string, any> | null | undefined,
+	viewerRole: 'respondent' | 'auditor' = 'auditor'
+): {
+	showResult: boolean;
+	showScore: boolean;
+	showObservation: boolean;
+	showAppliedControls: boolean;
+	showEvidences: boolean;
+	showSecurityExceptions: boolean;
+} {
+	return {
+		showResult: isFieldVisible(framework, complianceAssessment, 'result', viewerRole),
+		showScore: isFieldVisible(framework, complianceAssessment, 'score', viewerRole),
+		showObservation: isFieldVisible(framework, complianceAssessment, 'observation', viewerRole),
+		showAppliedControls: isFieldVisible(
+			framework,
+			complianceAssessment,
+			'applied_controls',
+			viewerRole
+		),
+		showEvidences: isFieldVisible(framework, complianceAssessment, 'evidences', viewerRole),
+		showSecurityExceptions: isFieldVisible(
+			framework,
+			complianceAssessment,
+			'security_exceptions',
+			viewerRole
+		)
+	};
+}
+
+/**
+ * Check whether any question in a questions object has choices with `compute_result` defined.
+ */
+export function hasComputedResult(
+	questions: Record<string, any> | null | undefined
+): boolean {
+	if (!questions) return false;
+	return Object.values(questions).some(
+		(question: any) =>
+			Array.isArray(question.choices) &&
+			question.choices.some((choice: any) => choice.compute_result !== undefined)
+	);
+}
+
+/**
+ * Check whether any question in a questions object has choices with `add_score` defined.
+ */
+export function hasComputedScore(
+	questions: Record<string, any> | null | undefined
+): boolean {
+	if (!questions) return false;
+	return Object.values(questions).some(
+		(question: any) =>
+			Array.isArray(question.choices) &&
+			question.choices.some((choice: any) => choice.add_score !== undefined)
+	);
 }
