@@ -1,7 +1,7 @@
 import { nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { loadValidationFlowFormData } from '$lib/utils/load';
+import { loadValidationFlowFormData, formatSelectFieldData } from '$lib/utils/load';
 import { ComplianceAssessmentSchema } from '$lib/utils/schemas';
 import { error, redirect, type Actions } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -76,12 +76,8 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 			const url = `${BASE_API_URL}/compliance-assessments/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
