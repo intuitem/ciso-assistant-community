@@ -299,7 +299,9 @@ def _resolve_owners(record_value: Any, ctx: BaseContext) -> list[UUID]:
 
     ACTOR_SEPARATOR: Final[str] = ";"
 
-    actor_entries = [entry.strip() for entry in record_value.split(ACTOR_SEPARATOR) if entry.strip()]
+    actor_entries = [
+        entry.strip() for entry in record_value.split(ACTOR_SEPARATOR) if entry.strip()
+    ]
     actor_id_set = set()
     actor_ids = []
 
@@ -445,8 +447,7 @@ class BaseContext:
     framework_id: Optional[str] = None
     on_conflict: ConflictMode = ConflictMode.STOP
     viewable_object_ids: dict[
-        type[AbstractBaseModel],
-        dict[tuple[Hashable, ...], UUID]
+        type[AbstractBaseModel], dict[tuple[Hashable, ...], UUID]
     ] = field(default_factory=dict)
     """
     Cache viewable object ids as calling `RoleAssignment.get_accessible_object_ids` for each newly processed record is expensive.
@@ -456,7 +457,9 @@ class BaseContext:
     This is acceptable as the underlying RDBMS would protect us from setting invalid foreign keys anyway.
     """
 
-    def get_viewable_object_ids(self, model: type[AbstractBaseModel], primary_field_names: list[str] = ["name"]) -> dict[tuple[Hashable, ...], UUID]:
+    def get_viewable_object_ids(
+        self, model: type[AbstractBaseModel], primary_field_names: list[str] = ["name"]
+    ) -> dict[tuple[Hashable, ...], UUID]:
         """
         The field set of `model` represented by `primary_field_names` MUST be unique per-object.
 
@@ -491,7 +494,11 @@ class BaseContext:
         self.viewable_object_ids[model] = obj_name_to_ids
         return obj_name_to_ids
 
-class _UnsetClass(): pass
+
+class _UnsetClass:
+    pass
+
+
 UNSET: Final[_UnsetClass] = _UnsetClass()
 """
 Represent an unset value.
@@ -507,6 +514,7 @@ This type act exactly as `typing.Optional` with `None` being replaced by `Unset`
 The purpose of this type is to replace `typing.Optional[T]` when `T` being `None` may be an actual valid value for `T`.
 """
 
+
 class ParseResult[IN, OUT]:
     """
     Represent a Result which is either:
@@ -514,7 +522,13 @@ class ParseResult[IN, OUT]:
     - A `result`: If the parsing finished successfully.
     - An `error`: If the parsing failed.
     """
-    def __init__(self, input: Unset[IN] = UNSET, result: Unset[OUT] = UNSET, error: Unset[Error] = UNSET):
+
+    def __init__(
+        self,
+        input: Unset[IN] = UNSET,
+        result: Unset[OUT] = UNSET,
+        error: Unset[Error] = UNSET,
+    ):
         self._input = input
         self._result = result
         self._error = error
@@ -553,10 +567,12 @@ class ParseResult[IN, OUT]:
         """
         return self._result
 
+
 def _assert(condition: bool, error_msg: str):
     """Safe wrapper for `assert {condition}, {error_msg}`."""
     if not condition:
         raise AssertionError(error_msg)
+
 
 @dataclass(frozen=True)
 class Field[IN, OUT](ABC):
@@ -604,7 +620,9 @@ class Field[IN, OUT](ABC):
     """
 
     @abstractmethod
-    def get_value(self, record: dict[str, Any], ctx: BaseContext) -> ParseResult[Optional[IN], Optional[OUT]]:
+    def get_value(
+        self, record: dict[str, Any], ctx: BaseContext
+    ) -> ParseResult[Optional[IN], Optional[OUT]]:
         """
         Take the entire `record` and underlying `BaseContext` (`ctx`) of the caller `RecordConsumer` as an input.
 
@@ -612,13 +630,14 @@ class Field[IN, OUT](ABC):
         """
         pass
 
-    def error(self, error_msg: str, record: dict) -> ParseResult[Optional[IN], Optional[OUT]]:
+    def error(
+        self, error_msg: str, record: dict
+    ) -> ParseResult[Optional[IN], Optional[OUT]]:
         """Return a failed parsing result."""
         return ParseResult(error=Error(error_msg, record))
 
-    def success(self,
-        input: Unset[Optional[IN]] = UNSET,
-        result: Unset[Optional[OUT]] = UNSET
+    def success(
+        self, input: Unset[Optional[IN]] = UNSET, result: Unset[Optional[OUT]] = UNSET
     ) -> ParseResult[Optional[IN], Optional[OUT]]:
         """
         Return either:
@@ -629,7 +648,9 @@ class Field[IN, OUT](ABC):
         """
         return ParseResult(input=input, result=result)
 
-    def can_early_return(self, record: dict[str, Any]) -> ParseResult[Optional[IN], Optional[OUT]]:
+    def can_early_return(
+        self, record: dict[str, Any]
+    ) -> ParseResult[Optional[IN], Optional[OUT]]:
         """
         Check if the `get_value(...)` method can return early.
 
@@ -641,7 +662,9 @@ class Field[IN, OUT](ABC):
         """
 
         if self.name not in record and self.required:
-            return self.error(f"Required field {self.name!r} not set for record: {record}", record)
+            return self.error(
+                f"Required field {self.name!r} not set for record: {record}", record
+            )
 
         value = record.get(self.name)
 
@@ -650,9 +673,13 @@ class Field[IN, OUT](ABC):
                 return self.success(result=None)
 
         if not isinstance(value, self.INPUT_TYPES):
-            return self.error(f"Field {self.name!r} with invalid type {type(value).__qualname__} was passed, valid types for this field are: {self.INPUT_TYPES}", record)
+            return self.error(
+                f"Field {self.name!r} with invalid type {type(value).__qualname__} was passed, valid types for this field are: {self.INPUT_TYPES}",
+                record,
+            )
 
         return self.success(input=value)
+
 
 @dataclass(frozen=True)
 class CharField(Field[str, str]):
@@ -665,10 +692,18 @@ class CharField(Field[str, str]):
     """Choices MUST be lowercased."""
 
     def __post_init__(self):
-        _assert(self.min_length > 0 or self.min_length == UNSET_INT, f"Invalid min_length {self.min_length}")
-        _assert(self.max_length > 0 or self.max_length == UNSET_INT, f"Invalid max_length {self.max_length}")
+        _assert(
+            self.min_length > 0 or self.min_length == UNSET_INT,
+            f"Invalid min_length {self.min_length}",
+        )
+        _assert(
+            self.max_length > 0 or self.max_length == UNSET_INT,
+            f"Invalid max_length {self.max_length}",
+        )
 
-    def get_value(self, record: dict[str, Any], ctx) -> ParseResult[Optional[str], Optional[str]]:
+    def get_value(
+        self, record: dict[str, Any], ctx
+    ) -> ParseResult[Optional[str], Optional[str]]:
         early_return_result = self.can_early_return(record)
         if early_return_result.is_ready():
             return early_return_result
@@ -683,17 +718,27 @@ class CharField(Field[str, str]):
         length = len(value)
 
         if length < self.min_length and self.min_length != UNSET_INT:
-            return self.error(f"Value for field {self.name!r} is too short (current length={length}) the length must be at least {self.min_length}.", record)
+            return self.error(
+                f"Value for field {self.name!r} is too short (current length={length}) the length must be at least {self.min_length}.",
+                record,
+            )
 
         if length > self.max_length and self.min_length != UNSET_INT:
-            return self.error(f"Value for field {self.name!r} is too long (current length={length}) the length must be at most {self.max_length}.", record)
+            return self.error(
+                f"Value for field {self.name!r} is too long (current length={length}) the length must be at most {self.max_length}.",
+                record,
+            )
 
         if self.choices is not None:
             value = value.strip().lower()
             if value not in self.choices:
-                return self.error(f"Field {self.name!r} has choice {value!r}, valid choices are: {self.choices!r}", record)
+                return self.error(
+                    f"Field {self.name!r} has choice {value!r}, valid choices are: {self.choices!r}",
+                    record,
+                )
 
         return self.success(result=value)
+
 
 @dataclass(frozen=True)
 class FloatField(Field[str | int | float, float]):
@@ -702,7 +747,9 @@ class FloatField(Field[str | int | float, float]):
     min: float = float("-inf")
     max: float = float("inf")
 
-    def get_value(self, record: dict[str, Any], ctx) -> ParseResult[Optional[str | int | float], Optional[float]]:
+    def get_value(
+        self, record: dict[str, Any], ctx
+    ) -> ParseResult[Optional[str | int | float], Optional[float]]:
         early_return_result = self.can_early_return(record)
         if early_return_result.is_ready():
             return early_return_result
@@ -720,15 +767,24 @@ class FloatField(Field[str | int | float, float]):
             try:
                 value = float(value)
             except Exception:
-                return self.error(f"Invalid float for field {self.name!r}: {value!r}", record)
+                return self.error(
+                    f"Invalid float for field {self.name!r}: {value!r}", record
+                )
 
         if value < self.min:
-            return self.error(f"Value for field {self.name!r} is too low, value {value!r} must be higher or equal to {self.min}.", record)
+            return self.error(
+                f"Value for field {self.name!r} is too low, value {value!r} must be higher or equal to {self.min}.",
+                record,
+            )
 
         if value > self.max:
-            return self.error(f"Value for field {self.name!r} is too big, value {value!r} must be lower or equal to {self.min}.", record)
+            return self.error(
+                f"Value for field {self.name!r} is too big, value {value!r} must be lower or equal to {self.min}.",
+                record,
+            )
 
         return self.success(result=value)
+
 
 @dataclass(frozen=True)
 class ForeignKey(Field[str, UUID]):
@@ -738,9 +794,14 @@ class ForeignKey(Field[str, UUID]):
 
     def __post_init__(self):
         field_names = {field.name for field in self.model._meta.fields}
-        _assert("name" in field_names, f"The model {self.model.__qualname__} can't be used as a data_wizard.views.ForeignKey model as it doesn't have a 'name' field!")
+        _assert(
+            "name" in field_names,
+            f"The model {self.model.__qualname__} can't be used as a data_wizard.views.ForeignKey model as it doesn't have a 'name' field!",
+        )
 
-    def get_value(self, record: dict[str, Any], ctx: BaseContext) -> ParseResult[Optional[str], Optional[UUID]]:
+    def get_value(
+        self, record: dict[str, Any], ctx: BaseContext
+    ) -> ParseResult[Optional[str], Optional[UUID]]:
         early_return_result = self.can_early_return(record)
         if early_return_result.is_ready():
             return early_return_result
@@ -750,7 +811,9 @@ class ForeignKey(Field[str, UUID]):
             if self.null:
                 return self.success(result=None)
             else:
-                return self.error(f"The ForeignKey for field {self.name!r} must be set!", record)
+                return self.error(
+                    f"The ForeignKey for field {self.name!r} must be set!", record
+                )
 
         (viewable_object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), ctx.request.user, self.model
@@ -758,11 +821,17 @@ class ForeignKey(Field[str, UUID]):
 
         obj_name = obj_name.strip()
 
-        obj = self.model.objects.filter(name__iexact=obj_name, id__in=viewable_object_ids).first()
+        obj = self.model.objects.filter(
+            name__iexact=obj_name, id__in=viewable_object_ids
+        ).first()
         if obj is None:
-            return self.error(f"Error for field {self.name!r}, {self.model.__qualname__} object with name {obj_name!r}: {obj_name!r} not found.", record)
+            return self.error(
+                f"Error for field {self.name!r}, {self.model.__qualname__} object with name {obj_name!r}: {obj_name!r} not found.",
+                record,
+            )
 
         return self.success(result=obj.id)
+
 
 @dataclass(frozen=True)
 class ManyToManyField(Field[str, list[UUID]]):
@@ -776,10 +845,18 @@ class ManyToManyField(Field[str, list[UUID]]):
         # This __post_init__ will have to be removed once the model field is changed to type[AbstractBaseModel].
         SUPPORTED_MODELS: set[type[AbstractBaseModel]] = {FilteringLabel, Actor}
 
-        _assert(self.model in SUPPORTED_MODELS, f"The {self.model.__qualname__} model isn't support by the data_wizard.views.ManyToManyField class for now.")
-        _assert(self.null is False, "The null parameter can't be True for a ManyToManyField!")
+        _assert(
+            self.model in SUPPORTED_MODELS,
+            f"The {self.model.__qualname__} model isn't support by the data_wizard.views.ManyToManyField class for now.",
+        )
+        _assert(
+            self.null is False,
+            "The null parameter can't be True for a ManyToManyField!",
+        )
 
-    def get_value(self, record: dict[str, Any], ctx: BaseContext) -> ParseResult[Optional[str], Optional[list[UUID]]]:
+    def get_value(
+        self, record: dict[str, Any], ctx: BaseContext
+    ) -> ParseResult[Optional[str], Optional[list[UUID]]]:
         early_return_result = self.can_early_return(record)
         if early_return_result.is_ready():
             return early_return_result
@@ -789,23 +866,29 @@ class ManyToManyField(Field[str, list[UUID]]):
 
         if value == "":
             if self.blank:
-                return self.error(f"The ManyToManyField for field {self.name!r} can't be empty!", record)
+                return self.error(
+                    f"The ManyToManyField for field {self.name!r} can't be empty!",
+                    record,
+                )
             else:
                 return self.success()
 
         RESOLVE_FUNCTIONS: Mapping[
-            type[AbstractBaseModel],
-            Callable[[str, BaseContext], list[UUID]]
-        ] = MappingProxyType({
-            FilteringLabel: _resolve_filtering_labels,
-            Actor: _resolve_owners,
-        })
+            type[AbstractBaseModel], Callable[[str, BaseContext], list[UUID]]
+        ] = MappingProxyType(
+            {
+                FilteringLabel: _resolve_filtering_labels,
+                Actor: _resolve_owners,
+            }
+        )
         resolve_function = RESOLVE_FUNCTIONS[self.model]
 
         obj_ids = resolve_function(value, ctx)
 
         if self.blank and len(obj_ids) == 0:
-            return self.error(f"The ManyToManyField for field {self.name!r} can't be empty!", record)
+            return self.error(
+                f"The ManyToManyField for field {self.name!r} can't be empty!", record
+            )
 
         return self.success(result=obj_ids)
 
@@ -813,7 +896,9 @@ class ManyToManyField(Field[str, list[UUID]]):
 class FolderField(Field[str, UUID]):
     INPUT_TYPES = (str, type(None))
 
-    def get_value(self, record: dict[str, Any], ctx: BaseContext) -> ParseResult[Optional[str], Optional[UUID]]:
+    def get_value(
+        self, record: dict[str, Any], ctx: BaseContext
+    ) -> ParseResult[Optional[str], Optional[UUID]]:
         early_return_result = self.can_early_return(record)
         if early_return_result.is_ready():
             return early_return_result
@@ -838,7 +923,8 @@ class FolderField(Field[str, UUID]):
 
         return self.success(result=domain)
 
-class RecordConsumer[Context=None](ABC):
+
+class RecordConsumer[Context = None](ABC):
     SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
     # Maps record_data keys to possible source record keys when they differ.
     # Override in subclasses that use alternative/aliased column names.
@@ -885,7 +971,10 @@ class RecordConsumer[Context=None](ABC):
         _assert(is_serializer, f"Invalid serializer for class {cls.__name__}")
 
         direct_base_class = cls.__mro__[1]
-        _assert(direct_base_class is RecordConsumer, f"The {direct_base_class.__name__} class must directly inherit from the RecordConsumer class!")
+        _assert(
+            direct_base_class is RecordConsumer,
+            f"The {direct_base_class.__name__} class must directly inherit from the RecordConsumer class!",
+        )
 
         field_name_set = set()
         cleaned_fields = []
@@ -904,7 +993,7 @@ class RecordConsumer[Context=None](ABC):
 
         This context will be passed to each `self.prepare_create(...)`, to give additional context to the prepare_create process when required.
 
-        Each `RecordConsumer` derived class can create their own context based on what they need to keep track off while processing records. 
+        Each `RecordConsumer` derived class can create their own context based on what they need to keep track off while processing records.
         """
         return None, None
 
@@ -1043,9 +1132,7 @@ class RecordConsumer[Context=None](ABC):
                         results.add_skipped()
                         continue
                     case ConflictMode.STOP:
-                        results.add_error(
-                            Error("Record already exists", record)
-                        )
+                        results.add_error(Error("Record already exists", record))
                         results.stopped = True
                         break
                     case ConflictMode.UPDATE:
@@ -1355,7 +1442,9 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         if reference_control_id:
             data["reference_control"] = reference_control_id
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
+        filtering_labels = _resolve_filtering_labels(
+            record.get("filtering_labels"), self.base_context
+        )
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -1393,7 +1482,9 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
             "folder": domain,
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
+        filtering_labels = _resolve_filtering_labels(
+            record.get("filtering_labels"), self.base_context
+        )
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -1611,7 +1702,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         if isinstance(priority, int) and not (1 <= priority <= 4):
             priority = None
 
-        filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
+        filtering_label_ids = _resolve_filtering_labels(
+            record.get("filtering_labels"), self.base_context
+        )
 
         finding_data = {
             "name": name,
@@ -1677,7 +1770,9 @@ class PolicyRecordConsumer(RecordConsumer[None]):
             "effort": record.get("effort"),
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
+        filtering_labels = _resolve_filtering_labels(
+            record.get("filtering_labels"), self.base_context
+        )
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -1840,7 +1935,9 @@ class IncidentRecordConsumer(RecordConsumer[None]):
             "reported_at": _parse_datetime(record.get("reported_at")),
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
+        filtering_labels = _resolve_filtering_labels(
+            record.get("filtering_labels"), self.base_context
+        )
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -1955,7 +2052,9 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             "security_exceptions": security_exceptions,
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"), self.base_context)
+        filtering_labels = _resolve_filtering_labels(
+            record.get("filtering_labels"), self.base_context
+        )
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
@@ -2042,8 +2141,7 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
             risk_matrix = RiskMatrix.objects.filter(id=self.matrix_id).first()
             if risk_matrix is None:
                 return None, Error(
-                    f"Risk matrix with ID '{self.matrix_id}' does not exist",
-                    record
+                    f"Risk matrix with ID '{self.matrix_id}' does not exist", record
                 )
             return risk_matrix, None
 
@@ -2515,6 +2613,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
 def format_choices(choices: Iterable[str]) -> frozenset[str]:
     return frozenset(str(choice).lower() for choice in choices)
 
+
 class FieldCollection:
     """Provide a namespace for field mixins, analogous to Django abstract models."""
 
@@ -2525,6 +2624,7 @@ class FieldCollection:
     FilteringLabelMixin = [ManyToManyField("filtering_labels", FilteringLabel)]
     FolderMixin = [FolderField("folder")]
 
+
 class MetricInstanceRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = MetricInstanceWriteSerializer
 
@@ -2533,11 +2633,20 @@ class MetricInstanceRecordConsumer(RecordConsumer[None]):
         *FieldCollection.FilteringLabelMixin,
         CharField("ref_id", blank=True),
         FloatField("target_value", null=True),
-        CharField("collection_frequency", max_length=20, null=True, blank=True, choices=format_choices(MetricInstance.Frequency)),
-        CharField("status", max_length=20, choices=format_choices(MetricInstance.Status)),
+        CharField(
+            "collection_frequency",
+            max_length=20,
+            null=True,
+            blank=True,
+            choices=format_choices(MetricInstance.Frequency),
+        ),
+        CharField(
+            "status", max_length=20, choices=format_choices(MetricInstance.Status)
+        ),
         ForeignKey("metric_definition", MetricDefinition),
         ManyToManyField("owner", Actor),
     ]
+
 
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
@@ -2606,9 +2715,7 @@ class LoadFileView(APIView):
                 case _:
                     is_excel = is_excel_file(record_file)
                     if is_excel:
-                        df = normalize_datetime_columns(
-                            pd.read_excel(record_file)
-                        )
+                        df = normalize_datetime_columns(pd.read_excel(record_file))
                     else:
                         file_type = RecordFileType.CSV
                         df = pd.read_csv(record_file)
@@ -4452,8 +4559,7 @@ class LoadFileView(APIView):
 
             # Link filtering labels
             filtering_label_ids = _resolve_filtering_labels(
-                record.get("filtering_labels"),
-                self.base_context
+                record.get("filtering_labels"), self.base_context
             )
             if filtering_label_ids:
                 risk_scenario.filtering_labels.set(filtering_label_ids)
