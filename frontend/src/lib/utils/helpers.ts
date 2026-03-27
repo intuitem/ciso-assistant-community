@@ -81,6 +81,9 @@ export function formatScoreValue(value: number, max_score: number, fullDonut = f
 	} else if (fullDonut) {
 		return 100;
 	}
+	if (!max_score) {
+		return 0;
+	}
 	return (value * 100) / max_score;
 }
 
