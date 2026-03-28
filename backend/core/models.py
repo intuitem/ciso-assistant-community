@@ -7753,14 +7753,22 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         return {}
 
     def create_applied_controls_from_suggestions(
-        self, *, dry_run: bool = False
+        self,
+        *,
+        dry_run: bool = False,
+        selected_reference_control_ids: list | None = None,
     ) -> list[AppliedControl]:
         applied_controls: list[AppliedControl] = []
         if not self.compliance_assessment.requirement_matches_selected_groups(
             self.requirement
         ):
             return applied_controls
-        for reference_control in self.requirement.reference_controls.all():
+        reference_controls = self.requirement.reference_controls.all()
+        if selected_reference_control_ids is not None:
+            reference_controls = reference_controls.filter(
+                id__in=selected_reference_control_ids
+            )
+        for reference_control in reference_controls:
             try:
                 applied_control = AppliedControl.objects.filter(
                     folder=self.folder,

@@ -38,6 +38,7 @@
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
 	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
@@ -394,64 +395,69 @@
 	}
 	let createAppliedControlsLoading = $state(false);
 
-	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
-		let previewItems: string[] = [];
+	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
+		let previewItems: { id: string; label: string }[] = [];
 		try {
 			const previewResponse = await fetch(
 				`/compliance-assessments/${id}/suggestions/applied-controls?dry_run=true`
 			);
 			if (previewResponse.ok) {
 				const previewData: any[] = await previewResponse.json();
-				previewItems = previewData.map(
-					(control) =>
-						control?.name ||
-						control?.reference_control?.str ||
-						control?.reference_control?.name ||
-						control?.ref_id ||
-						''
-				);
+				const seen = new Set<string>();
+				previewItems = previewData
+					.map((control) => ({
+						id: control?.reference_control?.id ?? control?.id ?? crypto.randomUUID(),
+						label:
+							control?.name ||
+							control?.reference_control?.str ||
+							control?.reference_control?.name ||
+							control?.ref_id ||
+							''
+					}))
+					.filter((item) => {
+						if (seen.has(item.id)) return false;
+						seen.add(item.id);
+						return true;
+					});
 			} else {
 				throw new Error(await previewResponse.text());
 			}
 		} catch (error) {
 			console.error('Unable to fetch suggested controls preview', error);
 			previewItems = data.compliance_assessment.framework.reference_controls.map(
-				(control) =>
-					control?.name ||
-					control?.reference_control?.str ||
-					control?.reference_control?.name ||
-					control?.ref_id ||
-					''
+				(control: any) => ({
+					id: control?.id ?? crypto.randomUUID(),
+					label:
+						control?.name ||
+						control?.reference_control?.str ||
+						control?.reference_control?.name ||
+						control?.ref_id ||
+						''
+				})
 			);
 		}
 
+		if (previewItems.length === 0) return;
+
 		const modalComponent: ModalComponent = {
-			ref: ConfirmModal,
+			ref: SuggestControlsModal,
 			props: {
-				_form: data.form,
-				id: id,
-				debug: false,
-				URLModel: 'compliance-assessments',
-				formAction: action,
-				bodyComponent: List,
-				bodyProps: {
-					items: previewItems,
-					message: m.theFollowingControlsWillBeAddedColon()
-				}
+				items: previewItems,
+				endpoint: `/compliance-assessments/${id}/suggestions/applied-controls`
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
 				count: previewItems.length
 			}),
-			response: (r: boolean) => {
-				createAppliedControlsLoading = r;
+			response: () => {
+				createAppliedControlsLoading = false;
 			}
 		};
+		createAppliedControlsLoading = true;
 		modalStore.trigger(modal);
 	}
 

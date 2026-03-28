@@ -24,6 +24,7 @@
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { superForm } from 'sveltekit-superforms';
@@ -142,65 +143,70 @@
 
 	let createAppliedControlsLoading = $state(false);
 
-	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
-		let previewItems: string[] = [];
+	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
+		let previewItems: { id: string; label: string }[] = [];
 		try {
 			const previewResponse = await fetch(
 				`/requirement-assessments/${id}/suggestions/applied-controls?dry_run=true`
 			);
 			if (previewResponse.ok) {
 				const previewData: any[] = await previewResponse.json();
-				previewItems = previewData.map(
-					(control) =>
+				previewItems = previewData.map((control) => ({
+					id: control?.reference_control?.id ?? control?.id ?? crypto.randomUUID(),
+					label:
 						control?.name ||
 						control?.reference_control?.str ||
 						control?.reference_control?.name ||
 						control?.ref_id ||
 						''
-				);
+				}));
 			} else {
 				throw new Error(await previewResponse.text());
 			}
 		} catch (error) {
 			console.error('Unable to fetch suggested controls preview', error);
-			previewItems = reference_controls.map(
-				(control) =>
+			previewItems = reference_controls.map((control) => ({
+				id: control?.id ?? crypto.randomUUID(),
+				label:
 					control?.name ||
 					control?.reference_control?.str ||
 					control?.reference_control?.name ||
 					control?.ref_id ||
 					''
-			);
+			}));
 		}
 
+		if (previewItems.length === 0) return;
+
 		const modalComponent: ModalComponent = {
-			ref: ConfirmModal,
+			ref: SuggestControlsModal,
 			props: {
-				_form: data.form,
-				id: id,
-				debug: false,
-				URLModel: 'requirement-assessments',
-				formAction: action,
-				bodyComponent: List,
-				bodyProps: {
-					items: previewItems,
-					message: m.theFollowingControlsWillBeAddedColon()
-				}
+				items: previewItems,
+				endpoint: `/requirement-assessments/${id}/suggestions/applied-controls`
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: previewItems.length,
-				message: m.theFollowingControlsWillBeAddedColon()
+				count: previewItems.length
 			}),
-			response: (r: boolean) => {
-				createAppliedControlsLoading = r;
+			response: (r: string[] | false | undefined) => {
+				createAppliedControlsLoading = false;
+				if (Array.isArray(r) && r.length > 0) {
+					refreshKey = !refreshKey;
+					requirementAssessmentForm.form.update(
+						(current: Record<string, any>) => ({
+							...current,
+							applied_controls: [...current.applied_controls, ...r]
+						}),
+						{ taint: false }
+					);
+				}
 			}
 		};
+		createAppliedControlsLoading = true;
 		modalStore.trigger(modal);
 	}
 
