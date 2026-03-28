@@ -23,7 +23,7 @@
 	// Groups defined by category key prefixes/ranges, labels fetched from backend
 	const groupDefinitions: { label: string; keys: string[] }[] = [
 		{
-			label: 'Basic Identity Information',
+			label: 'pd_group_basic_identity',
 			keys: [
 				'privacy_basic_identity',
 				'privacy_name',
@@ -33,11 +33,11 @@
 			]
 		},
 		{
-			label: 'Contact Information',
+			label: 'pd_group_contact',
 			keys: ['privacy_contact_details', 'privacy_address', 'privacy_email', 'privacy_phone_number']
 		},
 		{
-			label: 'Financial Information',
+			label: 'pd_group_financial',
 			keys: [
 				'privacy_financial_data',
 				'privacy_bank_account',
@@ -47,7 +47,7 @@
 			]
 		},
 		{
-			label: 'Sensitive Personal Data',
+			label: 'pd_group_sensitive',
 			keys: [
 				'privacy_health_data',
 				'privacy_genetic_data',
@@ -61,7 +61,7 @@
 			]
 		},
 		{
-			label: 'Digital Behavior and Activities',
+			label: 'pd_group_digital_behavior',
 			keys: [
 				'privacy_browsing_history',
 				'privacy_search_history',
@@ -72,7 +72,7 @@
 			]
 		},
 		{
-			label: 'Professional Data',
+			label: 'pd_group_professional',
 			keys: [
 				'privacy_employment_details',
 				'privacy_education_history',
@@ -81,11 +81,11 @@
 			]
 		},
 		{
-			label: 'Social Relationships',
+			label: 'pd_group_social',
 			keys: ['privacy_family_details', 'privacy_social_network', 'privacy_lifestyle_information']
 		},
 		{
-			label: 'Communication Data',
+			label: 'pd_group_communication',
 			keys: [
 				'privacy_correspondence',
 				'privacy_messaging_content',
@@ -93,7 +93,7 @@
 			]
 		},
 		{
-			label: 'Government / Official Data',
+			label: 'pd_group_government',
 			keys: [
 				'privacy_government_identifiers',
 				'privacy_tax_information',
@@ -103,15 +103,15 @@
 			]
 		},
 		{
-			label: 'Legal Data',
+			label: 'pd_group_legal',
 			keys: ['privacy_legal_records', 'privacy_criminal_records', 'privacy_judicial_data']
 		},
 		{
-			label: 'Preferences and Opinions',
+			label: 'pd_group_preferences',
 			keys: ['privacy_preferences', 'privacy_opinions', 'privacy_feedback']
 		},
 		{
-			label: 'Other Types',
+			label: 'pd_group_other',
 			keys: [
 				'privacy_images_photos',
 				'privacy_voice_recordings',
@@ -311,7 +311,7 @@
 										onchange={() => toggleGroup(group)}
 										class="checkbox"
 									/>
-									<span>{group.label}</span>
+									<span>{safeTranslate(group.label)}</span>
 								</label>
 								<!-- Category items -->
 								{#each group.categories as category}
@@ -324,7 +324,7 @@
 											onchange={() => toggleCategory(category.value)}
 											class="checkbox"
 										/>
-										<span class="text-sm">{category.label}</span>
+										<span class="text-sm">{safeTranslate(category.value)}</span>
 									</label>
 								{/each}
 							</div>
@@ -358,7 +358,7 @@
 						>
 							<option value="">--</option>
 							{#each deletionPolicyOptions as option}
-								<option value={option.value}>{option.label}</option>
+								<option value={option.value}>{safeTranslate(option.value)}</option>
 							{/each}
 						</select>
 					</div>
