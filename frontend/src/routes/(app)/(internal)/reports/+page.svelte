@@ -31,6 +31,15 @@
 			category: 'compliance',
 			href: '/reports/dora-roi',
 			tags: ['DORA', 'Regulation', 'Entities', 'Beta']
+		},
+		{
+			id: 'soa',
+			title: m.statementOfApplicability(),
+			description: m.soaDescription(),
+			icon: 'fa-solid fa-clipboard-check',
+			category: 'compliance',
+			href: '/reports/soa',
+			tags: ['ISO 27001', 'Compliance', 'Controls']
 		}
 	];
 
