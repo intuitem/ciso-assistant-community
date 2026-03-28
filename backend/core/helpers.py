@@ -1776,12 +1776,17 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
         threat_folders[row["threats__name"]][row["folder__name"]] += row["count"]
 
     tree = []
-    for threat_name, folders in sorted(threat_folders.items()):
-        children = [
-            {"name": folder_name, "value": count}
-            for folder_name, count in sorted(folders.items())
-        ]
+    for threat_name, folders in threat_folders.items():
+        children = sorted(
+            [
+                {"name": folder_name, "value": count}
+                for folder_name, count in folders.items()
+            ],
+            key=lambda x: x["value"],
+            reverse=True,
+        )
         tree.append({"name": threat_name, "children": children})
+    tree.sort(key=lambda x: sum(c["value"] for c in x["children"]), reverse=True)
 
     return {"labels": labels, "values": values, "tree": tree}
 
