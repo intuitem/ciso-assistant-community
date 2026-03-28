@@ -12110,20 +12110,33 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         }
         if request.method == "GET":
             dry_run = True
-        if request.method == "GET":
-            dry_run = True
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_appliedcontrol"),
             folder=compliance_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
+        selected_reference_control_ids = None
+        if request.method == "POST" and request.data:
+            raw = request.data.get("selected_reference_control_ids")
+            if raw is not None:
+                if not isinstance(raw, list) or not all(
+                    isinstance(i, str) for i in raw
+                ):
+                    return Response(
+                        {
+                            "selected_reference_control_ids": "Must be a list of strings."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                selected_reference_control_ids = raw
         requirement_assessments = compliance_assessment.requirement_assessments.all()
         controls = []
         for requirement_assessment in requirement_assessments:
             controls.append(
                 requirement_assessment.create_applied_controls_from_suggestions(
-                    dry_run=dry_run
+                    dry_run=dry_run,
+                    selected_reference_control_ids=selected_reference_control_ids,
                 )
             )
         return Response(
@@ -12991,8 +13004,23 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             folder=requirement_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
+        selected_reference_control_ids = None
+        if request.method == "POST" and request.data:
+            raw = request.data.get("selected_reference_control_ids")
+            if raw is not None:
+                if not isinstance(raw, list) or not all(
+                    isinstance(i, str) for i in raw
+                ):
+                    return Response(
+                        {
+                            "selected_reference_control_ids": "Must be a list of strings."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                selected_reference_control_ids = raw
         controls = requirement_assessment.create_applied_controls_from_suggestions(
-            dry_run=dry_run
+            dry_run=dry_run,
+            selected_reference_control_ids=selected_reference_control_ids,
         )
         return Response(
             AppliedControlReadSerializer(controls, many=True).data,
