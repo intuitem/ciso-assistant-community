@@ -8521,6 +8521,10 @@ class FrameworkFilter(GenericFilterSet):
 class DraftValidationError(Exception):
     """Raised when a framework draft fails controlled validation checks."""
 
+    def __init__(self, message: str):
+        self.user_message = message
+        super().__init__(message)
+
 
 class FrameworkViewSet(BaseModelViewSet):
     """
@@ -9048,7 +9052,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 error=str(e),
             )
             return Response(
-                {"error": str(e)},
+                {"error": e.user_message},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception:
