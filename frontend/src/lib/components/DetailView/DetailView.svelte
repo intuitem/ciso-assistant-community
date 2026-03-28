@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
+	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
@@ -208,6 +209,23 @@
 			type: 'component',
 			component: modalComponent,
 			title: safeTranslate(addExisting.label ?? 'selectExisting')
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
+		if (!field.batchCreate) return;
+		const modalComponent: ModalComponent = {
+			ref: BatchCreatePersonalDataModal,
+			props: {
+				processingId: parentId,
+				urlModel: field.urlModel
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(field.batchCreate.label ?? 'batchCreate')
 		};
 		modalStore.trigger(modal);
 	}
@@ -882,6 +900,20 @@
 												<i class="fa-solid fa-hand-pointer"></i>
 											</button>
 										</span>
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
 										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
@@ -893,6 +925,20 @@
 											</button>
 										</span>
 									{:else}
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
 											data-testid="add-button"

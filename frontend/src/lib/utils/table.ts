@@ -2054,7 +2054,9 @@ export const listViewFields = {
 		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
-			category: PERSONAL_DATA_CATEGORY_FILTER
+			category: PERSONAL_DATA_CATEGORY_FILTER,
+			deletion_policy: { hide: true } as ListViewFilterConfig,
+			is_sensitive: { hide: true } as ListViewFilterConfig
 		}
 	},
 	'data-subjects': {
@@ -2071,7 +2073,10 @@ export const listViewFields = {
 	},
 	'data-transfers': {
 		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
-		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link'],
+		filters: {
+			transfer_mechanism: { hide: true } as ListViewFilterConfig
+		}
 	},
 	'ebios-rm': {
 		head: ['name', 'description', 'domain', 'status', 'quotationMethod', 'createdAt', 'updatedAt'],
@@ -3157,6 +3162,33 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'data-transfers': [
+		{
+			type: 'change_field',
+			label: 'changeTransferMechanism',
+			icon: 'fa-solid fa-right-left',
+			field: 'transfer_mechanism',
+			optionsEndpoint: 'data-transfers/transfer_mechanism'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'personal-data': [
+		{
+			type: 'change_field',
+			label: 'changeDeletionPolicy',
+			icon: 'fa-solid fa-clock-rotate-left',
+			field: 'deletion_policy',
+			optionsEndpoint: 'personal-data/deletion_policy'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsSensitive',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'is_sensitive',
+			optionsEndpoint: 'personal-data/is_sensitive'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	processings: [
 		{
 			type: 'change_field',
