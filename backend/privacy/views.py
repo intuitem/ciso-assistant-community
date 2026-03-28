@@ -102,6 +102,10 @@ class PersonalDataViewSet(BaseModelViewSet):
     def deletion_policy(self, request):
         return Response(dict(PersonalData.DELETION_POLICY_CHOICES))
 
+    @action(detail=False, name="Get is_sensitive choices")
+    def is_sensitive(self, request):
+        return Response({"true": "Yes", "false": "No"})
+
     @action(detail=False, methods=["post"], url_path="batch-create")
     def batch_create(self, request):
         """
