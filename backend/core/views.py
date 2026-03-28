@@ -3236,6 +3236,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "authors": ["exact"],
             "reviewers": ["exact"],
             "genericcollection": ["exact"],
+            "due_date": ["exact", "year", "month"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -13228,6 +13229,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "severity",
         "status",
         "genericcollection",
+        "expiration_date",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -13837,6 +13839,7 @@ class FindingViewSet(BaseModelViewSet):
         "filtering_labels",
         "applied_controls",
         "evidences",
+        "due_date",
     ]
     ordering = ["ref_id"]
 
