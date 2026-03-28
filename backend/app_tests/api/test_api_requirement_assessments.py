@@ -139,7 +139,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "urn": RequirementNode.objects.all()[0].urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
                     "name": RequirementNode.objects.all()[0].name,
-                    "questions": RequirementNode.objects.all()[0].questions,
+                    "questions": None,
                     "description": RequirementNode.objects.all()[0].description,
                     "typical_evidence": RequirementNode.objects.all()[
                         0
@@ -154,6 +154,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
+                    "display_mode": RequirementNode.objects.all()[0].display_mode,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -288,7 +289,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "urn": RequirementNode.objects.all()[0].urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
                     "name": RequirementNode.objects.all()[0].name,
-                    "questions": RequirementNode.objects.all()[0].questions,
+                    "questions": None,
                     "description": RequirementNode.objects.all()[0].description,
                     "typical_evidence": RequirementNode.objects.all()[
                         0
@@ -303,6 +304,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
+                    "display_mode": RequirementNode.objects.all()[0].display_mode,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"

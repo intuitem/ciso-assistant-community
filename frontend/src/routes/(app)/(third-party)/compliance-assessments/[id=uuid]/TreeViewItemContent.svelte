@@ -176,6 +176,14 @@
 	);
 
 	export const getBadgeStyles = (answers: any, questions: any) => {
+		if (!answers) {
+			return {
+				backgroundColor: '#fca5a5',
+				color: darkenColor('#fca5a5', 0.6),
+				answeredCount: 0,
+				totalCount: Object.keys(questions || {}).length
+			};
+		}
 		const visibleQuestions = Object.entries(questions || {}).filter(([_, q]) =>
 			isQuestionVisible(q, answers)
 		);

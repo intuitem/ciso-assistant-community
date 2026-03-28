@@ -1837,5 +1837,9 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Ταξινόμηση Α → Ω",
-	"sortDescending": "Ταξινόμηση Ω → Α"
+	"sortDescending": "Ταξινόμηση Ω → Α",
+	"confirmModalMessagePlural": "Είστε σίγουροι; Αυτή η ενέργεια θα επηρεάσει μόνιμα τα ακόλουθα αντικείμενα",
+	"syncAppliedControlsMessage": "Οι εφαρμοζόμενοι έλεγχοι που χρησιμοποιούν αυτόν τον πρότυπο έλεγχο θα συγχρονιστούν με αυτόν. Λάβετε υπόψη ότι αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+	"syncToAppliedControl": "Συγχρονισμός με τον εφαρμοζόμενο έλεγχο",
+	"syncToReferenceControl": "Συγχρονισμός με τον πρότυπο έλεγχο"
 }

@@ -555,7 +555,7 @@
 							<div class="h-56">
 								<BarChart
 									name="threats_overview"
-									labels={sorted.map((t: any) => t.name)}
+									labels={sorted.map((t: any) => safeTranslate(t.name))}
 									values={sorted.map((t: any) => t.value)}
 									horizontal={true}
 									title={safeTranslate('affectedRequirements')}

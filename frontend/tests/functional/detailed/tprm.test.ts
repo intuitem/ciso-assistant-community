@@ -254,6 +254,7 @@ test('third-party representative can fill their assigned audit', async ({
 			await clickAndPause(page.getByRole('button', { name: 'Yes' }).nth(3));
 			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(4));
 			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(5));
+			await page.waitForLoadState('networkidle');
 		});
 
 		await test.step('third party respondent can create evidence', async () => {
