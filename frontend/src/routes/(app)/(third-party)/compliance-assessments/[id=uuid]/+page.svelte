@@ -753,6 +753,11 @@
 										>... {m.asZIP()}</a
 									>
 									{#if !page.data.user.is_third_party}
+										<a
+											href="/reports/soa?ca={data.compliance_assessment.id}"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.statementOfApplicability()}</a
+										>
 										<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 										<a
 											href="/compliance-assessments/{data.compliance_assessment
