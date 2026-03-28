@@ -37,7 +37,9 @@
 		</Anchor>
 		<div>
 			<h1 class="text-xl font-bold text-gray-900">{m.analytics()}</h1>
-			<p class="text-sm text-gray-500">{data.risk_assessment.name} - {data.risk_assessment.version}</p>
+			<p class="text-sm text-gray-500">
+				{data.risk_assessment.name} - {data.risk_assessment.version}
+			</p>
 		</div>
 	</div>
 
@@ -50,7 +52,7 @@
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 			<!-- Threat Radar / Bar -->
 			<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">{safeTranslate('threatsBreakdown')}</h3>
+				<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.threatsBreakdown()}</h3>
 				{#if analytics.threats?.labels?.length > 0}
 					{#if analytics.threats.labels.length <= 10}
 						<div class="h-80">
@@ -61,8 +63,10 @@
 							/>
 						</div>
 					{:else}
-						{@const threatLabels = [...analytics.threats.labels].reverse().map((l) => safeTranslate(l.name))}
-					{@const threatValues = [...analytics.threats.values].reverse()}
+						{@const threatLabels = [...analytics.threats.labels]
+							.reverse()
+							.map((l) => safeTranslate(l.name))}
+						{@const threatValues = [...analytics.threats.values].reverse()}
 						<div class="overflow-y-auto max-h-80">
 							<div style="height: {Math.max(224, threatLabels.length * 28)}px">
 								<BarChart
@@ -83,7 +87,7 @@
 
 			<!-- Treatment Distribution -->
 			<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">{safeTranslate('treatmentDistribution')}</h3>
+				<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.treatmentDistribution()}</h3>
 				{#if analytics.treatment?.labels?.length > 0}
 					{@const treatmentValues = analytics.treatment.labels.map((label, i) => ({
 						name: label,
@@ -130,7 +134,7 @@
 
 			<!-- Assets at Risk -->
 			<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">{safeTranslate('assetsAtRisk')}</h3>
+				<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.assetsAtRisk()}</h3>
 				{#if analytics.assets?.labels?.length > 0}
 					<div class="h-80">
 						<BarChart
@@ -147,7 +151,6 @@
 				{/if}
 			</div>
 		</div>
-
 	{:catch}
 		<div class="text-red-500 text-center py-12">
 			<p>{m.anErrorOccurred()}</p>
