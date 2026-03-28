@@ -272,6 +272,20 @@ class PersonalData(NameDescriptionFolderMixin):
     is_sensitive = models.BooleanField(default=False)
     assets = models.ManyToManyField(Asset, blank=True, related_name="personal_data")
 
+    # GDPR Article 9 special categories + Article 10 criminal data
+    SENSITIVE_CATEGORIES = {
+        "privacy_health_data",
+        "privacy_genetic_data",
+        "privacy_biometric_data",
+        "privacy_racial_ethnic_origin",
+        "privacy_political_opinions",
+        "privacy_religious_beliefs",
+        "privacy_trade_union_membership",
+        "privacy_sexual_orientation",
+        "privacy_sex_life_data",
+        "privacy_criminal_records",
+    }
+
     fields_to_check = ["name", "category", "processing"]
 
     def __str__(self):
@@ -279,6 +293,8 @@ class PersonalData(NameDescriptionFolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
+        if self.category in self.SENSITIVE_CATEGORIES:
+            self.is_sensitive = True
         super().save(*args, **kwargs)
 
         # Update the processing's sensitive data flag if needed
