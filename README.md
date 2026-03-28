@@ -136,6 +136,10 @@ Here is an illustration of the **decoupling** principle and its advantages:
 
 Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
+## Setting up the local AI engine 
+
+Read more here: [AI engine](backend/chat/README.md)
+
 ## Supported frameworks 🐙
 
 1. ISO 27001:2013 & 27001:2022 🌐
