@@ -138,8 +138,21 @@ class PersonalDataViewSet(BaseModelViewSet):
             )
 
         try:
-            processing = Processing.objects.get(id=uuid.UUID(str(processing_id)))
-        except (ValueError, AttributeError, Processing.DoesNotExist):
+            processing_uuid = uuid.UUID(str(processing_id))
+        except (ValueError, AttributeError):
+            return Response(
+                {"error": "Invalid processing ID"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Processing
+        )
+        try:
+            processing = Processing.objects.filter(id__in=viewable_ids).get(
+                id=processing_uuid
+            )
+        except Processing.DoesNotExist:
             return Response(
                 {"error": "Processing not found"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -183,23 +196,20 @@ class PersonalDataViewSet(BaseModelViewSet):
                     )
                 continue
 
-            try:
-                pd = PersonalData.objects.create(
-                    processing=processing,
-                    category=category,
-                    retention=retention,
-                    deletion_policy=deletion_policy,
-                    is_sensitive=is_sensitive,
-                )
-                created_items.append(
-                    {
-                        "id": str(pd.id),
-                        "category": pd.category,
-                        "name": str(pd),
-                    }
-                )
-            except Exception as e:
-                errors.append({"category": category, "error": str(e)})
+            pd = PersonalData.objects.create(
+                processing=processing,
+                category=category,
+                retention=retention,
+                deletion_policy=deletion_policy,
+                is_sensitive=is_sensitive,
+            )
+            created_items.append(
+                {
+                    "id": str(pd.id),
+                    "category": pd.category,
+                    "name": str(pd),
+                }
+            )
 
         return Response(
             {
