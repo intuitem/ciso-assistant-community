@@ -47,6 +47,7 @@ from uuid import UUID
 from itertools import chain, cycle
 import django_filters as df
 
+import magic
 import shutil
 from pathlib import Path
 import humanize
@@ -100,6 +101,8 @@ from rest_framework.decorators import (
 )
 from rest_framework.parsers import (
     FileUploadParser,
+    FormParser,
+    MultiPartParser,
 )
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
@@ -124,6 +127,8 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
+    build_answers_dict,
+    build_questions_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
     _generate_occurrences,
@@ -177,6 +182,86 @@ MAPPING_MAX_DEPTH = 3
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
+
+ALLOWED_IMAGE_TYPES = {
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "image/webp",
+}
+
+
+def _validate_and_upload_image(request, attachment_kwargs, *, include_url=False):
+    """Shared image upload logic for Framework and RequirementNode viewsets.
+
+    Returns a Response (success or error).
+    """
+    uploaded_file = request.FILES.get("file") or request.data.get("file")
+    if not uploaded_file:
+        return Response(
+            {"error": "No file provided."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    content_type = (uploaded_file.content_type or "").lower()
+    if content_type not in ALLOWED_IMAGE_TYPES:
+        return Response(
+            {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    real_mime = magic.from_buffer(uploaded_file.read(2048), mime=True)
+    uploaded_file.seek(0)
+    if real_mime not in ALLOWED_IMAGE_TYPES:
+        return Response(
+            {"error": f"File content is {real_mime}, not an allowed image type."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    from core.models import RequirementNodeAttachment
+
+    attachment = RequirementNodeAttachment(
+        file=uploaded_file,
+        uploaded_by=request.user,
+        **attachment_kwargs,
+    )
+    try:
+        attachment.full_clean()
+    except ValidationError as e:
+        messages = []
+        if hasattr(e, "message_dict"):
+            for field_messages in e.message_dict.values():
+                messages.extend(field_messages)
+        elif hasattr(e, "messages"):
+            messages = e.messages
+        else:
+            messages = [str(e.message)]
+        return Response(
+            {"error": " ".join(messages)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    attachment.save()
+    data = {"id": str(attachment.id)}
+    if include_url:
+        data["url"] = f"/requirement-node-attachments/{attachment.id}/file/"
+    return Response(data, status=status.HTTP_201_CREATED)
+
+
+def _serve_attachment(attachment_filter):
+    """Shared image serve logic. Returns a Response."""
+    from core.models import RequirementNodeAttachment
+
+    try:
+        attachment = RequirementNodeAttachment.objects.get(**attachment_filter)
+    except RequirementNodeAttachment.DoesNotExist:
+        return Response(
+            {"error": "Attachment not found."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    content_type = (
+        mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
+    )
+    response = HttpResponse(attachment.file.read(), content_type=content_type)
+    safe_name = os.path.basename(attachment.file.name)
+    response["Content-Disposition"] = f'inline; filename="{safe_name}"'
+    return response
 
 
 class NullableChoiceFilter(df.MultipleChoiceFilter):
@@ -1570,6 +1655,7 @@ class ThreatViewSet(BaseModelViewSet):
         "library",
         "risk_scenarios",
         "filtering_labels",
+        "urn",
     ]
     search_fields = ["name", "provider", "description"]
 
@@ -2326,6 +2412,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "provider",
         "findings",
         "filtering_labels",
+        "urn",
     ]
     search_fields = ["name", "description", "provider", "ref_id"]
 
@@ -3219,6 +3306,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "authors": ["exact"],
             "reviewers": ["exact"],
             "genericcollection": ["exact"],
+            "due_date": ["exact", "year", "month"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -7944,6 +8032,7 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["compliance_assessment"] = ComplianceAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["compliance_assessment"])
                 )
+                _fields.pop("answers", None)
                 many_to_many_map_ids.update(
                     {
                         "applied_controls": get_mapped_ids(
@@ -7954,6 +8043,24 @@ class FolderViewSet(BaseModelViewSet):
                         ),
                     }
                 )
+
+            case "answer":
+                _fields["requirement_assessment"] = RequirementAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["requirement_assessment"])
+                )
+                question = Question.objects.get(urn=_fields.get("question"))
+                # Validate question belongs to the requirement
+                ra = _fields["requirement_assessment"]
+                if question.requirement_node_id != ra.requirement_id:
+                    raise ValidationError(
+                        f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
+                    )
+                _fields["question"] = question
+
+                # Store M2M urns for post-create
+                choice_urns = _fields.pop("selected_choices_urns", None)
+                if choice_urns:
+                    many_to_many_map_ids["selected_choices_urns"] = choice_urns
 
             case "vulnerability":
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
@@ -8230,6 +8337,43 @@ class FolderViewSet(BaseModelViewSet):
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
 
+            case "answer":
+                if urns := many_to_many_map_ids.get("selected_choices_urns"):
+                    if obj.question.type not in (
+                        Question.Type.UNIQUE_CHOICE,
+                        Question.Type.MULTIPLE_CHOICE,
+                    ):
+                        logger.warning(
+                            "Answer import: choice identifiers (selected_choices_ref_ids/selected_choices_urns) "
+                            "provided for non-choice question %s",
+                            obj.question.urn,
+                        )
+                    else:
+                        choices = list(
+                            QuestionChoice.objects.filter(
+                                question=obj.question, urn__in=urns
+                            )
+                        )
+                        found_urns = {c.urn for c in choices}
+                        missing = set(urns) - found_urns
+                        if missing:
+                            logger.warning(
+                                "Answer import: could not resolve choice urns %s "
+                                "for question %s",
+                                missing,
+                                obj.question.urn,
+                            )
+                        if (
+                            obj.question.type == Question.Type.UNIQUE_CHOICE
+                            and len(choices) > 1
+                        ):
+                            logger.warning(
+                                "Answer import: multiple choices provided for "
+                                "unique_choice question %s, keeping only first",
+                                obj.question.urn,
+                            )
+                            choices = choices[:1]
+                        obj.selected_choices.set(choices)
             case "entity":
                 if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                     obj.relationship.set(relationship_ids)
@@ -8479,6 +8623,10 @@ class FrameworkFilter(GenericFilterSet):
         fields = ["provider"]
 
 
+class DraftValidationError(Exception):
+    """Raised when a framework draft fails controlled validation checks."""
+
+
 class FrameworkViewSet(BaseModelViewSet):
     """
     API endpoint that allows frameworks to be viewed or edited.
@@ -8491,13 +8639,13 @@ class FrameworkViewSet(BaseModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset().prefetch_related("requirement_nodes")
 
-        # Annotate if the framework is dynamic (any question uses implementation groups)
+        # Annotate if the framework is dynamic (any question choice uses implementation groups)
         qs = qs.annotate(
             is_dynamic=Exists(
-                RequirementNode.objects.filter(
-                    framework=OuterRef("pk"),
-                    questions__icontains="select_implementation_groups",
-                )
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=OuterRef("pk"),
+                    select_implementation_groups__isnull=False,
+                ).exclude(select_implementation_groups=[])
             )
         )
 
@@ -8522,11 +8670,130 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(),
+                RequirementNode.objects.filter(framework=_framework)
+                .prefetch_related("questions", "questions__choices")
+                .all(),
                 None,
                 _framework.max_score,
             )
         )
+
+    @action(detail=True, methods=["post"], name="Duplicate framework")
+    def duplicate(self, request, pk):
+        """Deep-clone a framework with all requirement nodes, questions, and choices."""
+        import uuid
+
+        source = self.get_object()  # checks read permission
+        folder_id = request.data.get("folder", source.folder_id)
+        folder = Folder.objects.get(id=folder_id)
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_framework"),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {
+                    "folder": "You do not have permission to create frameworks in this folder"
+                }
+            )
+
+        # Clone framework
+        new_framework = Framework.objects.create(
+            name=request.data.get("name", f"{source.name} (copy)"),
+            description=source.description,
+            annotation=source.annotation,
+            folder_id=folder_id,
+            min_score=source.min_score,
+            max_score=source.max_score,
+            scores_definition=source.scores_definition,
+            implementation_groups_definition=source.implementation_groups_definition,
+            outcomes_definition=source.outcomes_definition,
+            locale=source.locale,
+            default_locale=source.default_locale,
+            provider=source.provider,
+        )
+
+        # Map old URNs to new URNs for parent_urn remapping
+        urn_map = {}
+        nodes = RequirementNode.objects.filter(framework=source).order_by(
+            F("order_id").asc(nulls_last=True)
+        )
+        for node in nodes:
+            old_urn = node.urn
+            new_urn = f"urn:intuitem:risk:req_node:{uuid.uuid4()}" if old_urn else None
+            urn_map[old_urn] = new_urn
+
+        # Clone requirement nodes
+        node_id_map = {}  # old node id -> new node id
+        for node in nodes:
+            old_id = node.id
+            new_node = RequirementNode.objects.create(
+                urn=urn_map.get(node.urn),
+                ref_id=node.ref_id,
+                name=node.name,
+                description=node.description,
+                annotation=node.annotation,
+                framework=new_framework,
+                parent_urn=urn_map.get(node.parent_urn, node.parent_urn),
+                order_id=node.order_id,
+                assessable=node.assessable,
+                implementation_groups=node.implementation_groups,
+                typical_evidence=node.typical_evidence,
+                weight=node.weight,
+                importance=node.importance,
+                folder_id=folder_id,
+                locale=node.locale,
+                default_locale=node.default_locale,
+                translations=node.translations,
+            )
+            node_id_map[old_id] = new_node.id
+
+        # Clone questions and choices
+        questions = (
+            Question.objects.filter(requirement_node__framework=source)
+            .prefetch_related("choices")
+            .order_by("order")
+        )
+        for q in questions:
+            new_req_node_id = node_id_map.get(q.requirement_node_id)
+            if not new_req_node_id:
+                continue
+            new_question = Question.objects.create(
+                urn=f"urn:intuitem:risk:question:{uuid.uuid4()}",
+                ref_id=q.ref_id,
+                text=q.text,
+                annotation=q.annotation,
+                type=q.type,
+                config=q.config,
+                depends_on=q.depends_on,
+                order=q.order,
+                weight=q.weight,
+                requirement_node_id=new_req_node_id,
+                folder_id=folder_id,
+                translations=q.translations,
+            )
+            for choice in q.choices.all():
+                QuestionChoice.objects.create(
+                    urn=f"urn:intuitem:risk:choice:{uuid.uuid4()}"
+                    if choice.urn
+                    else None,
+                    ref_id=choice.ref_id,
+                    value=choice.value,
+                    annotation=choice.annotation,
+                    add_score=choice.add_score,
+                    compute_result=choice.compute_result,
+                    order=choice.order,
+                    description=choice.description,
+                    color=choice.color,
+                    select_implementation_groups=choice.select_implementation_groups,
+                    question=new_question,
+                    folder_id=folder_id,
+                    translations=choice.translations,
+                )
+
+        serializer = FrameworkReadSerializer(new_framework)
+        return Response(serializer.data, status=201)
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
@@ -8585,8 +8852,13 @@ class FrameworkViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], name="Framework as an Excel template")
     def excel_template(self, request, pk):
         fwk = Framework.objects.get(id=pk)
-        req_nodes = RequirementNode.objects.filter(framework=fwk).order_by("urn")
-        has_questions = any(rn.questions for rn in req_nodes)
+        req_nodes = list(
+            RequirementNode.objects.filter(framework=fwk)
+            .prefetch_related("questions__choices")
+            .order_by("urn")
+        )
+        questions_by_node = {rn.id: build_questions_dict(rn) for rn in req_nodes}
+        has_questions = any(questions_by_node.values())
         entries = []
 
         for rn in req_nodes:
@@ -8603,9 +8875,10 @@ class FrameworkViewSet(BaseModelViewSet):
             }
 
             if has_questions:
-                if rn.questions:
+                q_dict = questions_by_node.get(rn.id)
+                if q_dict:
                     lines = []
-                    for q_urn, question in rn.questions.items():
+                    for q_urn, question in q_dict.items():
                         q_text = question.get("text", "")
                         if not q_text:
                             continue
@@ -8677,6 +8950,620 @@ class FrameworkViewSet(BaseModelViewSet):
 
         return response
 
+    # --- Framework Builder Draft actions ---
+
+    def _check_change_permission(self, request, framework):
+        """Check that the user has change_framework permission on the framework's folder."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_framework"),
+            folder=framework.folder,
+        ):
+            raise PermissionDenied({"error": "Permission denied."})
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        """Serialize the framework tree into editing_draft to begin editing."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        if framework.urn:
+            return Response(
+                {
+                    "error": "Library frameworks cannot be edited directly. Use Duplicate instead."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if framework.editing_draft is not None:
+            return Response(
+                {
+                    "status": "already_editing",
+                    "editing_draft": framework.editing_draft,
+                }
+            )
+
+        # Serialize current tree to plain dicts
+        node_fields = [
+            "id",
+            "urn",
+            "ref_id",
+            "name",
+            "description",
+            "annotation",
+            "parent_urn",
+            "order_id",
+            "assessable",
+            "implementation_groups",
+            "typical_evidence",
+            "weight",
+            "importance",
+            "display_mode",
+            "folder_id",
+            "translations",
+        ]
+        question_fields = [
+            "id",
+            "urn",
+            "ref_id",
+            "text",
+            "annotation",
+            "type",
+            "config",
+            "depends_on",
+            "order",
+            "weight",
+            "requirement_node_id",
+            "folder_id",
+            "translations",
+        ]
+        choice_fields = [
+            "id",
+            "urn",
+            "ref_id",
+            "value",
+            "annotation",
+            "add_score",
+            "compute_result",
+            "order",
+            "description",
+            "color",
+            "select_implementation_groups",
+            "question_id",
+            "folder_id",
+            "translations",
+        ]
+
+        nodes = list(
+            RequirementNode.objects.filter(framework=framework).values(*node_fields)
+        )
+        questions = list(
+            Question.objects.filter(requirement_node__framework=framework).values(
+                *question_fields
+            )
+        )
+        choices = list(
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework
+            ).values(*choice_fields)
+        )
+
+        # Convert UUID fields to strings for JSON serialization
+        def stringify_uuids(records):
+            for record in records:
+                for key, value in record.items():
+                    if isinstance(value, uuid.UUID):
+                        record[key] = str(value)
+            return records
+
+        stringify_uuids(nodes)
+        stringify_uuids(questions)
+        stringify_uuids(choices)
+
+        # Compute available_languages from existing translations
+        available_languages = set()
+        for record in nodes + questions + choices:
+            translations = record.get("translations")
+            if translations and isinstance(translations, dict):
+                available_languages.update(translations.keys())
+        if framework.translations and isinstance(framework.translations, dict):
+            available_languages.update(framework.translations.keys())
+
+        draft = {
+            "framework_meta": {
+                "name": framework.name,
+                "description": framework.description or "",
+                "locale": framework.locale or "en",
+                "translations": framework.translations or {},
+                "available_languages": sorted(available_languages),
+                "min_score": framework.min_score,
+                "max_score": framework.max_score,
+                "scores_definition": framework.scores_definition,
+                "implementation_groups_definition": framework.implementation_groups_definition,
+                "outcomes_definition": framework.outcomes_definition,
+                "field_visibility": framework.field_visibility or {},
+            },
+            "nodes": nodes,
+            "questions": questions,
+            "choices": choices,
+        }
+
+        framework.editing_draft = draft
+        framework.save(update_fields=["editing_draft", "updated_at"])
+        return Response(
+            {"status": "editing_started", "editing_draft": framework.editing_draft}
+        )
+
+    @action(detail=True, methods=["patch"], url_path="save-draft")
+    def save_draft(self, request, pk=None):
+        """Update editing_draft with the current WIP from the frontend."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        editing_draft = request.data.get("editing_draft")
+        if editing_draft is None:
+            return Response(
+                {"error": "editing_draft is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not isinstance(editing_draft, dict):
+            return Response(
+                {"error": "editing_draft must be a JSON object."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        required_keys = {"framework_meta", "nodes", "questions", "choices"}
+        missing = required_keys - set(editing_draft.keys())
+        if missing:
+            return Response(
+                {"error": f"editing_draft missing required keys: {missing}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        for list_key in ("nodes", "questions", "choices"):
+            if not isinstance(editing_draft.get(list_key), list):
+                return Response(
+                    {"error": f"editing_draft.{list_key} must be a list."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        if not isinstance(editing_draft.get("framework_meta"), dict):
+            return Response(
+                {"error": "editing_draft.framework_meta must be an object."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        framework.editing_draft = editing_draft
+        framework.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_saved"})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft")
+    def publish_draft(self, request, pk=None):
+        """Publish editing_draft → relational DB, snapshot history, bump version."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        if framework.editing_draft is None:
+            return Response(
+                {"error": "No active draft to publish."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        draft = framework.editing_draft
+        try:
+            self._reconcile_draft(framework, draft)
+        except DraftValidationError as e:
+            logger.warning(
+                "Validation error while publishing draft",
+                framework_id=str(framework.id),
+                error=str(e),
+            )
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
+            logger.exception("Failed to publish draft for framework %s", framework.id)
+            return Response(
+                {"error": "Failed to publish draft. Please try again."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response({"status": "draft_published"})
+
+    def _reconcile_draft(self, framework, draft):
+        """Reconcile the draft JSON into the relational DB within a transaction."""
+        with transaction.atomic():
+            # --- 1. Collect existing DB IDs ---
+            db_node_ids = set(
+                RequirementNode.objects.filter(framework=framework).values_list(
+                    "id", flat=True
+                )
+            )
+            db_question_ids = set(
+                Question.objects.filter(
+                    requirement_node__framework=framework
+                ).values_list("id", flat=True)
+            )
+            db_choice_ids = set(
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=framework
+                ).values_list("id", flat=True)
+            )
+
+            # --- 2. Collect draft IDs ---
+            draft_nodes = draft.get("nodes", [])
+            draft_questions = draft.get("questions", [])
+            draft_choices = draft.get("choices", [])
+
+            draft_node_ids = {uuid.UUID(n["id"]) for n in draft_nodes}
+            draft_question_ids = {uuid.UUID(q["id"]) for q in draft_questions}
+            draft_choice_ids = {uuid.UUID(c["id"]) for c in draft_choices}
+
+            # --- 3. DELETE (choices → questions → nodes for FK safety) ---
+            choices_to_delete = db_choice_ids - draft_choice_ids
+            if choices_to_delete:
+                QuestionChoice.objects.filter(id__in=choices_to_delete).delete()
+
+            questions_to_delete = db_question_ids - draft_question_ids
+            if questions_to_delete:
+                Question.objects.filter(id__in=questions_to_delete).delete()
+
+            nodes_to_delete = db_node_ids - draft_node_ids
+            if nodes_to_delete:
+                RequirementNode.objects.filter(id__in=nodes_to_delete).delete()
+
+            # --- 4. Build lookup dicts from draft data ---
+            existing_node_ids = db_node_ids & draft_node_ids
+            existing_question_ids = db_question_ids & draft_question_ids
+            existing_choice_ids = db_choice_ids & draft_choice_ids
+
+            draft_node_map = {n["id"]: n for n in draft_nodes}
+            draft_question_map = {q["id"]: q for q in draft_questions}
+            draft_choice_map = {c["id"]: c for c in draft_choices}
+
+            # --- 5. UPDATE+CREATE nodes ---
+            if existing_node_ids:
+                nodes_to_update = []
+                for node_id in existing_node_ids:
+                    data = draft_node_map[str(node_id)]
+                    node = RequirementNode(
+                        id=node_id,
+                        framework=framework,
+                        urn=data.get("urn") or None,
+                        ref_id=data.get("ref_id") or None,
+                        name=data.get("name") or None,
+                        description=data.get("description") or None,
+                        annotation=data.get("annotation") or None,
+                        parent_urn=data.get("parent_urn") or None,
+                        order_id=data.get("order_id"),
+                        assessable=data.get("assessable", False),
+                        implementation_groups=data.get("implementation_groups"),
+                        typical_evidence=data.get("typical_evidence") or None,
+                        weight=data.get("weight", 1),
+                        importance=data.get("importance", "undefined"),
+                        display_mode=data.get("display_mode", "default"),
+                        folder_id=framework.folder_id,
+                        translations=data.get("translations"),
+                    )
+                    nodes_to_update.append(node)
+                RequirementNode.objects.bulk_update(
+                    nodes_to_update,
+                    [
+                        "urn",
+                        "ref_id",
+                        "name",
+                        "description",
+                        "annotation",
+                        "parent_urn",
+                        "order_id",
+                        "assessable",
+                        "implementation_groups",
+                        "typical_evidence",
+                        "weight",
+                        "importance",
+                        "display_mode",
+                        "folder_id",
+                        "translations",
+                    ],
+                )
+
+            new_node_ids = draft_node_ids - db_node_ids
+            if new_node_ids:
+                new_nodes = []
+                for node_id in new_node_ids:
+                    data = draft_node_map[str(node_id)]
+                    new_nodes.append(
+                        RequirementNode(
+                            id=node_id,
+                            framework=framework,
+                            urn=data.get("urn") or None,
+                            ref_id=data.get("ref_id") or None,
+                            name=data.get("name") or None,
+                            description=data.get("description") or None,
+                            annotation=data.get("annotation") or None,
+                            parent_urn=data.get("parent_urn") or None,
+                            order_id=data.get("order_id"),
+                            assessable=data.get("assessable", False),
+                            implementation_groups=data.get("implementation_groups"),
+                            typical_evidence=data.get("typical_evidence") or None,
+                            weight=data.get("weight", 1),
+                            importance=data.get("importance", "undefined"),
+                            display_mode=data.get("display_mode", "default"),
+                            folder_id=framework.folder_id,
+                            translations=data.get("translations"),
+                        )
+                    )
+                RequirementNode.objects.bulk_create(new_nodes)
+
+            # Validate FK references using actual DB state
+            valid_node_ids = set(
+                RequirementNode.objects.filter(framework=framework).values_list(
+                    "id", flat=True
+                )
+            )
+
+            # --- 6. UPDATE+CREATE questions (with FK validation) ---
+            if existing_question_ids:
+                questions_to_update = []
+                for question_id in existing_question_ids:
+                    data = draft_question_map[str(question_id)]
+                    req_node_id = uuid.UUID(data["requirement_node_id"])
+                    if req_node_id not in valid_node_ids:
+                        raise DraftValidationError(
+                            "Question references requirement_node not in this framework."
+                        )
+                    question = Question(
+                        id=question_id,
+                        urn=data.get("urn"),
+                        ref_id=data.get("ref_id") or None,
+                        text=data.get("text") or None,
+                        annotation=data.get("annotation") or None,
+                        type=data.get("type", "text"),
+                        config=data.get("config"),
+                        depends_on=data.get("depends_on"),
+                        order=data.get("order", 0),
+                        weight=data.get("weight", 1),
+                        requirement_node_id=req_node_id,
+                        folder_id=framework.folder_id,
+                        translations=data.get("translations"),
+                    )
+                    questions_to_update.append(question)
+                Question.objects.bulk_update(
+                    questions_to_update,
+                    [
+                        "urn",
+                        "ref_id",
+                        "text",
+                        "annotation",
+                        "type",
+                        "config",
+                        "depends_on",
+                        "order",
+                        "weight",
+                        "requirement_node_id",
+                        "folder_id",
+                        "translations",
+                    ],
+                )
+
+            new_question_ids = draft_question_ids - db_question_ids
+            if new_question_ids:
+                new_questions = []
+                for question_id in new_question_ids:
+                    data = draft_question_map[str(question_id)]
+                    req_node_id = uuid.UUID(data["requirement_node_id"])
+                    if req_node_id not in valid_node_ids:
+                        raise DraftValidationError(
+                            "Question references requirement_node not in this framework."
+                        )
+                    new_questions.append(
+                        Question(
+                            id=question_id,
+                            urn=data.get("urn"),
+                            ref_id=data.get("ref_id") or None,
+                            text=data.get("text") or None,
+                            annotation=data.get("annotation") or None,
+                            type=data.get("type", "text"),
+                            config=data.get("config"),
+                            depends_on=data.get("depends_on"),
+                            order=data.get("order", 0),
+                            weight=data.get("weight", 1),
+                            requirement_node_id=req_node_id,
+                            folder_id=framework.folder_id,
+                            translations=data.get("translations"),
+                        )
+                    )
+                Question.objects.bulk_create(new_questions)
+
+            # Validate FK references using actual DB state
+            valid_question_ids = set(
+                Question.objects.filter(
+                    requirement_node__framework=framework
+                ).values_list("id", flat=True)
+            )
+
+            # --- 7. UPDATE+CREATE choices (with FK validation) ---
+            if existing_choice_ids:
+                choices_to_update = []
+                for choice_id in existing_choice_ids:
+                    data = draft_choice_map[str(choice_id)]
+                    q_id = uuid.UUID(data["question_id"])
+                    if q_id not in valid_question_ids:
+                        raise DraftValidationError(
+                            "Choice references question not in this framework."
+                        )
+                    choice = QuestionChoice(
+                        id=choice_id,
+                        urn=data.get("urn") or None,
+                        ref_id=data.get("ref_id") or None,
+                        value=data.get("value") or None,
+                        annotation=data.get("annotation") or None,
+                        add_score=data.get("add_score"),
+                        compute_result=data.get("compute_result") or None,
+                        order=data.get("order", 0),
+                        description=data.get("description") or None,
+                        color=data.get("color") or None,
+                        select_implementation_groups=data.get(
+                            "select_implementation_groups"
+                        ),
+                        question_id=q_id,
+                        folder_id=framework.folder_id,
+                        translations=data.get("translations"),
+                    )
+                    choices_to_update.append(choice)
+                QuestionChoice.objects.bulk_update(
+                    choices_to_update,
+                    [
+                        "urn",
+                        "ref_id",
+                        "value",
+                        "annotation",
+                        "add_score",
+                        "compute_result",
+                        "order",
+                        "description",
+                        "color",
+                        "select_implementation_groups",
+                        "question_id",
+                        "folder_id",
+                        "translations",
+                    ],
+                )
+
+            new_choice_ids = draft_choice_ids - db_choice_ids
+            if new_choice_ids:
+                new_choices = []
+                for choice_id in new_choice_ids:
+                    data = draft_choice_map[str(choice_id)]
+                    q_id = uuid.UUID(data["question_id"])
+                    if q_id not in valid_question_ids:
+                        raise DraftValidationError(
+                            "Choice references question not in this framework."
+                        )
+                    new_choices.append(
+                        QuestionChoice(
+                            id=choice_id,
+                            urn=data.get("urn") or None,
+                            ref_id=data.get("ref_id") or None,
+                            value=data.get("value") or None,
+                            annotation=data.get("annotation") or None,
+                            add_score=data.get("add_score"),
+                            compute_result=data.get("compute_result") or None,
+                            order=data.get("order", 0),
+                            description=data.get("description") or None,
+                            color=data.get("color") or None,
+                            select_implementation_groups=data.get(
+                                "select_implementation_groups"
+                            ),
+                            question_id=q_id,
+                            folder_id=framework.folder_id,
+                            translations=data.get("translations"),
+                        )
+                    )
+                QuestionChoice.objects.bulk_create(new_choices)
+
+            # --- 8. Update framework metadata from draft ---
+            meta = draft.get("framework_meta", {})
+            if meta:
+                framework.name = meta.get("name", framework.name)
+                framework.description = meta.get("description", framework.description)
+                framework.min_score = meta.get("min_score", framework.min_score)
+                framework.max_score = meta.get("max_score", framework.max_score)
+                framework.scores_definition = meta.get(
+                    "scores_definition", framework.scores_definition
+                )
+                framework.implementation_groups_definition = meta.get(
+                    "implementation_groups_definition",
+                    framework.implementation_groups_definition,
+                )
+                framework.outcomes_definition = meta.get(
+                    "outcomes_definition", framework.outcomes_definition
+                )
+                framework.field_visibility = meta.get(
+                    "field_visibility", framework.field_visibility
+                )
+                framework.locale = meta.get("locale", framework.locale)
+                framework.translations = meta.get(
+                    "translations", framework.translations
+                )
+
+            # --- 9. Snapshot history, bump version, clear draft ---
+            history = list(framework.editing_history or [])
+            history.append(
+                {
+                    "version": framework.editing_version,
+                    "published_at": timezone.now().isoformat(),
+                }
+            )
+            framework.editing_history = history
+            framework.editing_version = framework.editing_version + 1
+            framework.editing_draft = None
+            framework.save(
+                update_fields=[
+                    "name",
+                    "description",
+                    "min_score",
+                    "max_score",
+                    "scores_definition",
+                    "implementation_groups_definition",
+                    "outcomes_definition",
+                    "field_visibility",
+                    "locale",
+                    "translations",
+                    "editing_draft",
+                    "editing_version",
+                    "editing_history",
+                    "updated_at",
+                ]
+            )
+
+    @action(detail=True, methods=["post"], url_path="discard-draft")
+    def discard_draft(self, request, pk=None):
+        """Discard editing_draft without affecting relational data."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        framework.editing_draft = None
+        framework.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_discarded"})
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="upload-image",
+        parser_classes=[MultiPartParser, FormParser, FileUploadParser],
+    )
+    def upload_image(self, request, pk=None):
+        """Upload an image to this framework (for splash screen markdown in draft mode)."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        return _validate_and_upload_image(
+            request, {"framework": framework, "folder": framework.folder}
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"serve-image/(?P<attachment_id>[0-9a-f-]+)",
+    )
+    def serve_image(self, request, pk=None, attachment_id=None):
+        """Serve an image attachment belonging to this framework."""
+        framework = self.get_object()
+        # Match attachments on the framework directly or on its requirement nodes
+        from core.models import RequirementNodeAttachment
+
+        try:
+            attachment = RequirementNodeAttachment.objects.get(
+                Q(framework=framework) | Q(requirement_node__framework=framework),
+                pk=attachment_id,
+            )
+        except RequirementNodeAttachment.DoesNotExist:
+            return Response(
+                {"error": "Attachment not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        content_type = (
+            mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
+        )
+        response = HttpResponse(attachment.file.read(), content_type=content_type)
+        safe_name = os.path.basename(attachment.file.name)
+        response["Content-Disposition"] = f'inline; filename="{safe_name}"'
+        return response
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """
@@ -8703,6 +9590,33 @@ class RequirementViewSet(BaseModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="upload-image",
+        parser_classes=[MultiPartParser, FormParser, FileUploadParser],
+    )
+    def upload_image(self, request, pk=None):
+        """Upload an image file and attach it to this requirement node."""
+        requirement_node = self.get_object()
+        return _validate_and_upload_image(
+            request,
+            {"requirement_node": requirement_node},
+            include_url=True,
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"serve-image/(?P<attachment_id>[0-9a-f-]+)",
+    )
+    def serve_image(self, request, pk=None, attachment_id=None):
+        """Serve an image attachment belonging to this requirement node."""
+        requirement_node = self.get_object()
+        return _serve_attachment(
+            {"pk": attachment_id, "requirement_node": requirement_node}
+        )
+
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
     def inspect_requirement(self, request, pk):
         requirement = RequirementNode.objects.get(id=pk)
@@ -8711,11 +9625,33 @@ class RequirementViewSet(BaseModelViewSet):
             user=request.user,
             object_type=RequirementAssessment,
         )
-        requirement_assessments = RequirementAssessment.objects.filter(
-            requirement=requirement, id__in=viewable_objects
-        ).prefetch_related("folder", "compliance_assessment__perimeter")
+        requirement_assessments = (
+            RequirementAssessment.objects.filter(
+                requirement=requirement, id__in=viewable_objects
+            )
+            .select_related(
+                "requirement",
+                "compliance_assessment",
+                "compliance_assessment__framework",
+                "compliance_assessment__perimeter",
+                "compliance_assessment__perimeter__folder",
+            )
+            .prefetch_related(
+                "folder",
+                "answers",
+                "answers__question",
+                "answers__selected_choices",
+                "requirement__questions",
+                "requirement__questions__choices",
+                "evidences",
+                "applied_controls",
+                "security_exceptions",
+            )
+        )
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
-            requirement_assessments, many=True
+            requirement_assessments,
+            many=True,
+            context={"viewer_role": "auditor"},
         ).data
 
         # Group by Domain and Perimeter
@@ -9356,6 +10292,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
+        from core.models import Question
+
         qs = (
             super()
             .get_queryset()
@@ -9364,6 +10302,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "framework",  # Displayed in table
                 "perimeter",  # Displayed in table
+            )
+            .annotate(
+                _has_questions=Exists(
+                    Question.objects.filter(
+                        requirement_node__framework=OuterRef("framework")
+                    )
+                )
             )
         )
 
@@ -9377,8 +10322,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ).select_related("requirement"),
                 ),
             )
-        else:
-            # Detail/other views: full prefetches for the read serializer
+        elif self.action == "retrieve":
+            # Detail view only: full prefetches for the read serializer
             qs = qs.select_related(
                 "framework__library",  # For framework.has_update property
                 "perimeter__folder",  # FieldsRelatedField(["id", "folder"]) optimization
@@ -9388,12 +10333,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
-                "requirement_assessments",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.select_related(
+                        "requirement"
+                    ),
+                ),
                 Prefetch(
                     "validationflow_set",
                     queryset=ValidationFlow.objects.select_related("approver"),
                 ),
             )
+        # Custom detail actions (tree, global_score, donut_data, etc.)
+        # use lightweight querysets — they don't need full prefetches.
 
         qs = qs.annotate(
             total_requirements=Count(
@@ -9558,10 +10510,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         req_node_ids = [req.requirement.id for req in requirement_assessments]
         req_nodes = {
             node.id: node
-            for node in RequirementNode.objects.filter(id__in=req_node_ids)
+            for node in RequirementNode.objects.filter(
+                id__in=req_node_ids
+            ).prefetch_related("questions__choices")
         }
+        questions_by_node = {
+            node_id: build_questions_dict(node) for node_id, node in req_nodes.items()
+        }
+        has_questions = any(questions_by_node.values())
 
-        has_questions = any(rn.questions for rn in req_nodes.values())
+        # Pre-build answers dicts for all requirement assessments
+        answers_by_req = {}
+        for req in requirement_assessments:
+            answers_by_req[req.id] = build_answers_dict(req.answers.all())
 
         for req in requirement_assessments:
             req_node = req_nodes.get(req.requirement.id)
@@ -9588,10 +10549,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 entry["score"] = req.score
 
             if has_questions:
-                if req_node.questions:
-                    answers = req.answers or {}
+                q_dict = questions_by_node.get(req_node.id)
+                if q_dict:
+                    answers = answers_by_req.get(req.id, {})
                     lines = []
-                    for q_urn, question in req_node.questions.items():
+                    for q_urn, question in q_dict.items():
                         q_text = question.get("text", "")
                         if not q_text:
                             continue
@@ -9971,23 +10933,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def update_requirement(self, request, pk):
         compliance_assessment = get_object_or_404(self.get_queryset(), pk=pk)
 
-        viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
+        _, changeable_objects, _ = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
             object_type=ComplianceAssessment,
         )
-        if compliance_assessment.id not in viewable_objects:
+        if compliance_assessment.id not in changeable_objects:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
-            ref_id = request.data.get("ref_id")
+            urn = request.data.get("urn")
             result = request.data.get("result")
             observation = request.data.get("observation")
             score = request.data.get("score")
             status_value = request.data.get("status")
 
-            if not all([ref_id, result]):
+            if not all([urn, result]):
                 return Response(
-                    {"error": "ref_id and result are required fields"},
+                    {"error": "urn and result are required fields"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             # validate if result value is valid choice
@@ -10040,12 +11002,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             # Find the requirement assessment to update
             requirement_assessment = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment, requirement__ref_id=ref_id
+                compliance_assessment=compliance_assessment, requirement__urn=urn
             ).first()
 
             if not requirement_assessment:
                 return Response(
-                    {"error": f"Requirement with ref_id {ref_id} not found"},
+                    {"error": f"Requirement with urn {urn} not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
@@ -10070,7 +11032,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             response_data = {
                 "message": "Requirement updated successfully",
-                "ref_id": ref_id,
+                "urn": urn,
                 "result": result,
             }
 
@@ -10090,7 +11052,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         except RequirementAssessment.DoesNotExist:
             return Response(
-                {"error": f"Requirement with ref_id {ref_id} not found"},
+                {"error": f"Requirement with urn {urn} not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except ValidationError:
@@ -10290,7 +11252,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         _framework = compliance_assessment.framework
         requirement_assessments = list(
             compliance_assessment.get_requirement_assessments(
-                include_non_assessable=True
+                include_non_assessable=True,
+                lightweight=True,
+                skip_ig_filter=_framework.is_dynamic(),
             )
         )
         # Auditee filtering: scope to assigned requirements only
@@ -10310,7 +11274,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
             .all(),
         )
         nodes_by_urn = {node.urn: node for node in requirement_nodes}
@@ -10330,6 +11296,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             _framework.max_score,
         )
         implementation_groups = compliance_assessment.selected_implementation_groups
+        if compliance_assessment.framework.is_dynamic():
+            implementation_groups = None
         return Response(
             filter_graph_by_implementation_groups(tree, implementation_groups)
         )
@@ -10363,7 +11331,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
+            .order_by(F("order_id").asc(nulls_last=True))
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
@@ -10376,8 +11347,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
+        # Determine viewer role based on auditee status
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        is_auditee = bool(
+            auditee_folders and compliance_assessment.folder_id in auditee_folders
+        )
+        viewer_role = "respondent" if is_auditee else "auditor"
+
         requirement_assessments = RequirementAssessmentReadSerializer(
-            requirement_assessments_objects, many=True
+            requirement_assessments_objects,
+            many=True,
+            context={"viewer_role": viewer_role},
         ).data
         requirements = RequirementNodeReadSerializer(
             requirements_objects, many=True
@@ -10385,6 +11365,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements_list = {
             "requirements": requirements,
             "requirement_assessments": requirement_assessments,
+            "viewer_role": viewer_role,
         }
         return Response(requirements_list, status=status.HTTP_200_OK)
 
@@ -10493,6 +11474,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             total = ras.count()
             done = ras.exclude(result="not_assessed").count()
 
+            # Use question-based progress when framework has questions
+            has_questions = (
+                Question.objects.filter(
+                    requirement_node__framework=ca.framework
+                ).exists()
+                if ca.framework
+                else False
+            )
+
+            if has_questions:
+                total_q = 0
+                answered_q = 0
+                for ra in ras.prefetch_related(
+                    "answers",
+                    "answers__question",
+                    "answers__selected_choices",
+                    "requirement__questions",
+                    "requirement__questions__choices",
+                ):
+                    v, a = ra.get_visible_questions_counts()
+                    total_q += v
+                    answered_q += a
+                progress_percent = (
+                    round(answered_q / total_q * 100) if total_q > 0 else 0
+                )
+            else:
+                progress_percent = round(done / total * 100) if total > 0 else 0
+
             actor_names = ", ".join(str(a) for a in assignment.actor.all())
 
             dashboard_data.append(
@@ -10507,7 +11516,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "actor": actor_names,
                     "total_requirements": total,
                     "assessed_requirements": done,
-                    "progress_percent": round(done / total * 100) if total > 0 else 0,
+                    "progress_percent": progress_percent,
                 }
             )
 
@@ -11591,7 +12600,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "compliance_assessment",
         "applied_controls",
         "security_exceptions",
-        "requirement__ref_id",
+        "requirement__urn",
         "result",
         "extended_result",
         "compliance_assessment__ref_id",
@@ -11603,7 +12612,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     search_fields = [
         "requirement__name",
         "requirement__description",
-        "requirement__ref_id",
+        "requirement__urn",
     ]
 
     def get_queryset(self):
@@ -11615,6 +12624,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "folder",
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "compliance_assessment",  # Displayed in table and serialized
+                "compliance_assessment__framework",  # Needed by to_representation field visibility
                 "compliance_assessment__perimeter",  # perimeter field uses compliance_assessment.perimeter
                 "compliance_assessment__perimeter__folder",  # Nested FieldsRelatedField optimization
                 "requirement",  # Used for name (__str__), description, assessable in table
@@ -11623,6 +12633,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "answers",  # Reverse FK from Answer, used by get_answers() in read serializer
+                "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
+                "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
+                "requirement__questions",  # Needed by FilteredNodeSerializer.questions
+                "requirement__questions__choices",  # Needed by build_questions_dict()
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
@@ -11635,9 +12650,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         return qs
 
     def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        cache.clear()
-        return response
+        return super().update(request, *args, **kwargs)
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
@@ -12154,6 +13167,27 @@ def generate_html(
             p = req.parent_urn
             req = None if not (p) else node_per_urn[p]
 
+    # Pre-fetch all assessments, answers, and questions to avoid N+1 queries
+    # in the recursive traversal.
+    assessments_prefetched = assessments.select_related("requirement").prefetch_related(
+        "answers__question",
+        "answers__selected_choices",
+        "evidences",
+        "applied_controls__evidences",
+    )
+    assessment_by_urn = {a.requirement.urn: a for a in assessments_prefetched}
+
+    # Pre-build answers and questions dicts keyed by requirement URN
+    answers_dict_by_urn = {}
+    for a in assessments_prefetched:
+        answers_dict_by_urn[a.requirement.urn] = build_answers_dict(a.answers.all())
+
+    questions_dict_by_urn = {}
+    for node in requirement_nodes.prefetch_related("questions__choices"):
+        qd = build_questions_dict(node)
+        if qd:
+            questions_dict_by_urn[node.urn] = qd
+
     def generate_data_rec(requirement_node: RequirementNode):
         selected_evidences = []
         children_nodes = [
@@ -12175,13 +13209,16 @@ def generate_html(
         node_data["bar_graph"] = True if children_nodes else False
 
         if requirement_node.assessable:
-            assessment = RequirementAssessment.objects.filter(
-                requirement__urn=requirement_node.urn,
-                compliance_assessment=compliance_assessment,
-            ).first()
+            assessment = assessment_by_urn.get(requirement_node.urn)
 
             if assessment:
                 node_data["assessments"] = assessment
+                node_data["answers_dict"] = answers_dict_by_urn.get(
+                    requirement_node.urn, {}
+                )
+                node_data["questions_dict"] = questions_dict_by_urn.get(
+                    requirement_node.urn, {}
+                )
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
                 node_data["result_color_class"] = color_css_class(assessment.result)
@@ -12297,6 +13334,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "severity",
         "status",
         "genericcollection",
+        "expiration_date",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -12906,6 +13944,7 @@ class FindingViewSet(BaseModelViewSet):
         "filtering_labels",
         "applied_controls",
         "evidences",
+        "due_date",
     ]
     ordering = ["ref_id"]
 
@@ -14670,12 +15709,10 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         ("draft", "in_progress"): {"reviewer_only": True},
         ("in_progress", "submitted"): {
             "actor_only": True,
-            "check_completion": True,
             "observation": "clear",
         },
         ("changes_requested", "submitted"): {
             "actor_only": True,
-            "check_completion": True,
             "observation": "clear",
         },
         ("submitted", "closed"): {
@@ -14738,20 +15775,6 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
-        # Completion check: all assessable requirements must be assessed
-        if config.get("check_completion"):
-            unassessed_count = assignment.requirement_assessments.filter(
-                requirement__assessable=True, result="not_assessed"
-            ).count()
-            if unassessed_count > 0:
-                return Response(
-                    {
-                        "error": f"{unassessed_count} requirement(s) have not been assessed yet.",
-                        "unassessed_count": unassessed_count,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
         # Handle reviewer_observation (stored as event_notes)
         obs_rule = config.get("observation")
         observation = request.data.get("reviewer_observation")
@@ -14797,6 +15820,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         assignment = self.get_object()
         compliance_assessment = assignment.compliance_assessment
 
+        # Determine viewer role: respondent if user is an assigned actor, auditor otherwise
+        user_actors = Actor.get_all_for_user(request.user)
+        is_assigned_actor = assignment.actor.filter(
+            id__in=[a.id for a in user_actors]
+        ).exists()
+        viewer_role = "respondent" if is_assigned_actor else "auditor"
+
         assigned_ra_ids = set(
             assignment.requirement_assessments.values_list("id", flat=True)
         )
@@ -14813,7 +15843,10 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
+            .order_by(F("order_id").asc(nulls_last=True))
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
@@ -14828,16 +15861,44 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                     req._parent_requirement_obj = parent
 
         requirement_assessments = RequirementAssessmentReadSerializer(
-            requirement_assessments_objects, many=True
+            requirement_assessments_objects,
+            many=True,
+            context={"viewer_role": viewer_role},
         ).data
         requirements = RequirementNodeReadSerializer(
             requirements_objects, many=True
         ).data
 
+        # Compute per-RA question counts for question-based progress
+        question_counts = {}
+        total_visible_questions = 0
+        total_answered_questions = 0
+        for ra in requirement_assessments_objects:
+            visible, answered = ra.get_visible_questions_counts()
+            question_counts[str(ra.id)] = {
+                "visible_questions": visible,
+                "answered_questions": answered,
+            }
+            total_visible_questions += visible
+            total_answered_questions += answered
+
+        for ra_data in requirement_assessments:
+            ra_id = str(ra_data["id"])
+            if ra_id in question_counts:
+                ra_data["visible_questions"] = question_counts[ra_id][
+                    "visible_questions"
+                ]
+                ra_data["answered_questions"] = question_counts[ra_id][
+                    "answered_questions"
+                ]
+
         return Response(
             {
                 "requirements": requirements,
                 "requirement_assessments": requirement_assessments,
+                "total_visible_questions": total_visible_questions,
+                "total_answered_questions": total_answered_questions,
+                "viewer_role": viewer_role,
             },
             status=status.HTTP_200_OK,
         )
@@ -14863,6 +15924,74 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
+
+
+class QuestionViewSet(BaseModelViewSet):
+    """API endpoint for Question CRUD."""
+
+    model = Question
+    search_fields = ["text", "annotation"]
+    filterset_fields = [
+        "requirement_node",
+        "type",
+        "urn",
+    ]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("requirement_node", "requirement_node__framework", "folder")
+            .prefetch_related("choices")
+        )
+        # Allow filtering by framework
+        framework_id = self.request.query_params.get("framework")
+        if framework_id:
+            qs = qs.filter(requirement_node__framework_id=framework_id)
+        return qs
+
+
+class QuestionChoiceViewSet(BaseModelViewSet):
+    """API endpoint for QuestionChoice CRUD."""
+
+    model = QuestionChoice
+    search_fields = ["value", "description"]
+    filterset_fields = [
+        "question",
+        "urn",
+    ]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("question", "folder")
+
+
+class AnswerViewSet(BaseModelViewSet):
+    """API endpoint for Answer CRUD."""
+
+    model = Answer
+    search_fields = []
+    filterset_fields = [
+        "requirement_assessment",
+        "question",
+    ]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "requirement_assessment",
+                "requirement_assessment__compliance_assessment",
+                "question",
+                "folder",
+            )
+            .prefetch_related("selected_choices")
+        )
+        # Allow filtering by compliance assessment
+        ca_id = self.request.query_params.get("compliance_assessment")
+        if ca_id:
+            qs = qs.filter(requirement_assessment__compliance_assessment_id=ca_id)
+        return qs
 
 
 # ---------------------------------------------------------------------------

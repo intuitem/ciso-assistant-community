@@ -509,6 +509,29 @@
 		</div>
 	{/if}
 
+	{#if compliance_assessment.computed_outcome}
+		<div
+			class="flex items-center gap-2 px-4 py-3 rounded-lg border"
+			style="background-color: {compliance_assessment.computed_outcome.color ??
+				'#6b7280'}10; border-color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}30"
+		>
+			{#if compliance_assessment.computed_outcome.color}
+				<span
+					class="w-3 h-3 rounded-full shrink-0"
+					style="background-color: {compliance_assessment.computed_outcome.color}"
+				></span>
+			{/if}
+			<span
+				class="text-sm font-semibold"
+				style="color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}"
+				>{compliance_assessment.computed_outcome.annotation ??
+					compliance_assessment.computed_outcome.label ??
+					compliance_assessment.computed_outcome.ref_id ??
+					compliance_assessment.computed_outcome.result}</span
+			>
+		</div>
+	{/if}
+
 	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
@@ -674,6 +697,18 @@
 					</div>
 				{/if}
 			{/key}
+			{#if data.compliance_assessment.answers_progress != null}
+				<div class="flex items-center gap-2 text-sm text-gray-600 mt-2">
+					<i class="fa-solid fa-clipboard-question text-primary-500"></i>
+					<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
+					<div class="flex-1 bg-gray-200 rounded-full h-1.5 max-w-32">
+						<div
+							class="h-1.5 rounded-full bg-primary-400 transition-all"
+							style="width: {data.compliance_assessment.answers_progress}%;"
+						></div>
+					</div>
+				</div>
+			{/if}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
 					<Popover
