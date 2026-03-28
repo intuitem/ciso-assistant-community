@@ -4480,6 +4480,75 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @action(detail=True, methods=["get"], url_path="risk_analytics")
+    def risk_analytics(self, request, pk=None):
+        """Analytics data for a single risk assessment."""
+        from collections import defaultdict
+
+        risk_assessment = self.get_object()
+        scenarios = RiskScenario.objects.filter(
+            risk_assessment=risk_assessment
+        ).prefetch_related("threats", "assets", "applied_controls")
+
+        # 1. Threats radar: count scenarios per threat
+        threat_counts = defaultdict(int)
+        for scenario in scenarios:
+            for threat in scenario.threats.all():
+                threat_counts[threat.name] += 1
+
+        sorted_threats = sorted(threat_counts.items(), key=lambda x: x[1], reverse=True)
+        max_threat = max(threat_counts.values(), default=0)
+        threats_data = {
+            "labels": [{"name": name, "max": max_threat} for name, _ in sorted_threats],
+            "values": [count for _, count in sorted_threats],
+        }
+
+        # 2. Treatment distribution (skip empty treatments)
+        treatment_counts = defaultdict(int)
+        for scenario in scenarios:
+            if scenario.treatment:
+                treatment_counts[scenario.treatment] += 1
+        sorted_treatments = sorted(
+            treatment_counts.items(), key=lambda x: x[1], reverse=True
+        )
+        treatment_data = {
+            "labels": [t for t, _ in sorted_treatments],
+            "values": [c for _, c in sorted_treatments],
+        }
+
+        # 3. Strength of knowledge distribution (exclude undefined/--)
+        sok_label_map = {0: "low", 1: "medium", 2: "high"}
+        sok_counts = defaultdict(int)
+        for scenario in scenarios:
+            if scenario.strength_of_knowledge >= 0:
+                sok_counts[scenario.strength_of_knowledge] += 1
+        sorted_sok = sorted(sok_counts.items(), key=lambda x: x[0])
+        sok_data = {
+            "labels": [sok_label_map.get(k, str(k)) for k, _ in sorted_sok],
+            "values": [c for _, c in sorted_sok],
+        }
+
+        # 4. Assets at risk: count scenarios per asset, sorted
+        asset_counts = defaultdict(int)
+        for scenario in scenarios:
+            for asset in scenario.assets.all():
+                asset_counts[asset.name] += 1
+        sorted_assets = sorted(asset_counts.items(), key=lambda x: x[1], reverse=True)
+        assets_data = {
+            "labels": [name for name, _ in sorted_assets],
+            "values": [count for _, count in sorted_assets],
+        }
+
+        return Response(
+            {
+                "threats": threats_data,
+                "treatment": treatment_data,
+                "strength_of_knowledge": sok_data,
+                "assets": assets_data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
 
 def convert_date_to_timestamp(date):
     """

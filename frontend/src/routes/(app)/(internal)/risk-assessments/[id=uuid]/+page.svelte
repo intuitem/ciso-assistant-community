@@ -363,6 +363,12 @@
 					class="btn preset-filled-primary-500"
 					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
+				<Anchor
+					label={m.analytics()}
+					href="/risk-assessments/{risk_assessment.id}/analytics"
+					class="btn preset-filled-primary-500"
+					><i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}</Anchor
+				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
 					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
