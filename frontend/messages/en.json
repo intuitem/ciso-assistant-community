@@ -1415,6 +1415,7 @@
 	"evidenceStatusDistribution": "Evidence status",
 	"threatsOverview": "Threats Overview",
 	"threatsBreakdown": "Threats breakdown",
+	"riskLevelsOverTime": "Current risk level over time",
 	"uniqueThreats": "Unique threats",
 	"affectedRequirements": "Affected requirements",
 	"exceptionsOverview": "Exceptions Overview",

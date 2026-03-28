@@ -4549,6 +4549,58 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @action(detail=True, methods=["get"], url_path="risk_timeline")
+    def risk_timeline(self, request, pk=None):
+        """Returns risk metrics over time from BuiltinMetricSample snapshots."""
+        from django.contrib.contenttypes.models import ContentType
+        from metrology.models import BuiltinMetricSample
+
+        risk_assessment = self.get_object()
+        content_type = ContentType.objects.get_for_model(risk_assessment)
+
+        # Extract risk level colors from the matrix
+        risk_level_colors = {}
+        if risk_assessment.risk_matrix:
+            try:
+                risk_levels = risk_assessment.risk_matrix.risk or []
+                for level in risk_levels:
+                    risk_level_colors[level.get("name", "")] = level.get(
+                        "hexcolor", "#6b7280"
+                    )
+            except (KeyError, TypeError, AttributeError):
+                pass
+
+        samples = (
+            BuiltinMetricSample.objects.filter(
+                content_type=content_type,
+                object_id=risk_assessment.id,
+            )
+            .order_by("date")
+            .values("date", "metrics")
+        )
+
+        timeline = []
+        for sample in samples:
+            metrics = sample["metrics"]
+            timeline.append(
+                {
+                    "date": sample["date"].isoformat(),
+                    "total_scenarios": metrics.get("total_scenarios", 0),
+                    "current_level_breakdown": metrics.get(
+                        "current_level_breakdown", {}
+                    ),
+                    "residual_level_breakdown": metrics.get(
+                        "residual_level_breakdown", {}
+                    ),
+                    "treatment_breakdown": metrics.get("treatment_breakdown", {}),
+                }
+            )
+
+        return Response(
+            {"timeline": timeline, "risk_level_colors": risk_level_colors},
+            status=status.HTTP_200_OK,
+        )
+
 
 def convert_date_to_timestamp(date):
     """

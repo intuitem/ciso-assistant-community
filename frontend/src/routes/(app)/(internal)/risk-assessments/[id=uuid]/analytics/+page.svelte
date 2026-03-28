@@ -23,6 +23,77 @@
 		medium: '#fbbf24',
 		high: '#34d399'
 	};
+
+	function initTimelineChart(
+		el: HTMLElement,
+		params: { timeline: any[]; colors: Record<string, string> }
+	) {
+		let chart: any;
+		let resizeHandler: (() => void) | null = null;
+
+		import('echarts').then((echarts) => {
+			if (!el.isConnected) return;
+			chart = echarts.init(el, null, { renderer: 'svg' });
+
+			const { timeline, colors } = params;
+			const dates = timeline.map((t: any) => t.date);
+
+			// Collect all risk level names across all snapshots
+			const levelSet = new Set<string>();
+			for (const t of timeline) {
+				for (const key of Object.keys(t.current_level_breakdown || {})) {
+					levelSet.add(key);
+				}
+			}
+			const levelNames = [...levelSet];
+
+			const series = levelNames.map((level) => ({
+				name: safeTranslate(level),
+				type: 'line' as const,
+				stack: 'risk',
+				smooth: true,
+				showSymbol: false,
+				areaStyle: { opacity: 0.6 },
+				lineStyle: { width: 1.5 },
+				emphasis: { focus: 'series' as const },
+				data: timeline.map((t: any) => t.current_level_breakdown?.[level] || 0),
+				itemStyle: { color: colors[level] ?? '#6b7280' }
+			}));
+
+			chart.setOption({
+				tooltip: {
+					trigger: 'axis',
+					backgroundColor: '#1e293b',
+					borderColor: '#334155',
+					textStyle: { color: '#f1f5f9', fontSize: 12 }
+				},
+				legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
+				grid: { left: 45, right: 16, top: 36, bottom: 28 },
+				xAxis: {
+					type: 'category',
+					data: dates,
+					axisLine: { lineStyle: { color: '#e2e8f0' } },
+					axisLabel: { color: '#94a3b8', fontSize: 10 }
+				},
+				yAxis: {
+					type: 'value',
+					splitLine: { lineStyle: { color: '#f1f5f9' } },
+					axisLabel: { color: '#94a3b8', fontSize: 10 }
+				},
+				series
+			});
+
+			resizeHandler = () => chart.resize();
+			window.addEventListener('resize', resizeHandler);
+		});
+
+		return {
+			destroy() {
+				if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+				if (chart) chart.dispose();
+			}
+		};
+	}
 </script>
 
 <div class="space-y-6 p-6">
@@ -42,6 +113,42 @@
 			</p>
 		</div>
 	</div>
+
+	<!-- Risk Levels Over Time -->
+	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+			<span
+				class="flex items-center justify-center w-7 h-7 rounded-md bg-violet-50 text-violet-500"
+			>
+				<i class="fa-solid fa-timeline text-xs"></i>
+			</span>
+			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+				{m.riskLevelsOverTime()}
+			</h2>
+		</div>
+		<div class="p-6">
+			{#await data.stream.timeline}
+				<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
+			{:then timelineData}
+				{#if timelineData.timeline && timelineData.timeline.length > 1}
+					<div
+						class="h-72"
+						use:initTimelineChart={{
+							timeline: timelineData.timeline,
+							colors: timelineData.risk_level_colors ?? {}
+						}}
+					></div>
+				{:else}
+					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+						<i class="fa-solid fa-chart-area text-3xl mb-2 opacity-30"></i>
+						<p class="text-sm">{m.nothingToShowYet()}</p>
+					</div>
+				{/if}
+			{:catch}
+				<p class="text-red-500 text-center py-8 text-sm">{m.anErrorOccurred()}</p>
+			{/await}
+		</div>
+	</section>
 
 	{#await data.stream.analytics}
 		<div class="flex items-center justify-center py-20">

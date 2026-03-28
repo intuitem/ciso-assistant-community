@@ -3,32 +3,33 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, params, parent }) => {
 	const parentData = await parent();
-	const endpoint = `${BASE_API_URL}/risk-assessments/${params.id}/risk_analytics/`;
+	const baseEndpoint = `${BASE_API_URL}/risk-assessments/${params.id}`;
 
-	const analyticsPromise = fetch(endpoint)
+	const analyticsPromise = fetch(`${baseEndpoint}/risk_analytics/`)
 		.then((res) => {
-			if (!res.ok) {
-				console.error(`risk_analytics failed: ${res.status} ${res.statusText}`);
-				throw new Error(`API error: ${res.status}`);
-			}
+			if (!res.ok) throw new Error(`API error: ${res.status}`);
 			return res.json();
 		})
-		.catch((err) => {
-			console.error('risk_analytics fetch error:', err);
-			return {
-				threats: { labels: [], values: [] },
-				treatment: { labels: [], values: [] },
-				strength_of_knowledge: { labels: [], values: [] },
-				assets: { labels: [], values: [] },
-				risk_reduction: []
-			};
-		});
+		.catch(() => ({
+			threats: { labels: [], values: [] },
+			treatment: { labels: [], values: [] },
+			strength_of_knowledge: { labels: [], values: [] },
+			assets: { labels: [], values: [] }
+		}));
+
+	const timelinePromise = fetch(`${baseEndpoint}/risk_timeline/`)
+		.then((res) => {
+			if (!res.ok) throw new Error(`API error: ${res.status}`);
+			return res.json();
+		})
+		.catch(() => ({ timeline: [] }));
 
 	return {
 		risk_assessment: parentData.risk_assessment,
 		title: 'Analytics',
 		stream: {
-			analytics: analyticsPromise
+			analytics: analyticsPromise,
+			timeline: timelinePromise
 		}
 	};
 };

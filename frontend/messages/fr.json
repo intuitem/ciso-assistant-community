@@ -1300,6 +1300,7 @@
 	"evidenceStatusDistribution": "Statut des preuves",
 	"threatsOverview": "Vue d'ensemble des menaces",
 	"threatsBreakdown": "Répartition des menaces",
+	"riskLevelsOverTime": "Niveau de risque courant dans le temps",
 	"uniqueThreats": "Menaces uniques",
 	"affectedRequirements": "Exigences concernées",
 	"exceptionsOverview": "Vue d'ensemble des dérogations",
