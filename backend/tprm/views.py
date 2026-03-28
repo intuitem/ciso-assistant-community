@@ -936,6 +936,7 @@ class ContractViewSet(BaseModelViewSet):
         "governing_law_country",
         "notice_period_entity",
         "notice_period_provider",
+        "end_date",
     ]
 
     @action(detail=False, name="Get status choices")
