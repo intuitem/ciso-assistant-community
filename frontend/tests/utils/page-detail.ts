@@ -92,9 +92,12 @@ export class PageDetail extends BasePage {
 					}
 
 					if (this.form.fields.get(key)?.type === FormFieldType.CHECKBOX) {
-						await expect
-							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-value'))
-							.toHaveText(values[key] ? '✅' : '❌');
+						const fieldValue = this.page.getByTestId(key.replaceAll('_', '-') + '-field-value');
+						if (values[key]) {
+							await expect.soft(fieldValue.locator('i.fa-solid.fa-circle')).toBeVisible();
+						} else {
+							await expect.soft(fieldValue.locator('i.fa-regular.fa-circle')).toBeVisible();
+						}
 					} else if (this.form.fields.get(key)?.type === FormFieldType.DATE) {
 						const displayedValue = await this.page
 							.getByTestId(key.replaceAll('_', '-') + '-field-value')
