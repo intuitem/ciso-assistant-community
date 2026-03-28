@@ -582,17 +582,27 @@
 					{:then [threatsCount, qualificationsCount, risksCountPerLevel]}
 						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 							{#if threatsCount?.results?.labels?.length > 0}
+								{@const paired = (threatsCount?.results?.labels ?? [])
+									.map((l, i) => ({
+										label: safeTranslate(l.name),
+										value: (threatsCount?.results?.values ?? [])[i] ?? 0
+									}))
+									.sort((a, b) => a.value - b.value)}
+								{@const sortedLabels = paired.map((p) => p.label)}
+								{@const sortedValues = paired.map((p) => p.value)}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
 									<h3 class="text-lg font-semibold text-gray-900 mb-2">
 										{m.threatRadarChart()}
 									</h3>
-									<div class="h-96">
-										<RadarChart
-											name="threatRadar"
-											title=""
-											labels={threatsCount?.results?.labels ?? []}
-											values={threatsCount?.results?.values ?? []}
-										/>
+									<div class="overflow-y-auto max-h-[500px]">
+										<div style="height: {Math.max(224, sortedLabels.length * 28)}px">
+											<BarChart
+												name="threatRadar"
+												labels={sortedLabels}
+												values={sortedValues}
+												horizontal={true}
+											/>
+										</div>
 									</div>
 								</div>
 							{:else}
@@ -603,18 +613,28 @@
 								</div>
 							{/if}
 							{#if qualificationsCount?.results?.labels?.length > 0}
+								{@const qPaired = (qualificationsCount?.results?.labels ?? [])
+									.map((l, i) => ({
+										label: safeTranslate(l),
+										value: (qualificationsCount?.results?.values ?? [])[i] ?? 0
+									}))
+									.sort((a, b) => a.value - b.value)}
+								{@const qLabels = qPaired.map((p) => p.label)}
+								{@const qValues = qPaired.map((p) => p.value)}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 									<h3 class="text-lg font-semibold text-gray-900 mb-4">
 										{m.qualificationsChartTitle()}
 									</h3>
-									<div class="h-80">
-										<BarChart
-											name="qualificationsBar"
-											title=""
-											labels={localizeChartLabels(qualificationsCount?.results?.labels ?? [])}
-											values={qualificationsCount?.results?.values ?? []}
-											horizontal={true}
-										/>
+									<div class="overflow-y-auto max-h-[500px]">
+										<div style="height: {Math.max(224, qLabels.length * 28)}px">
+											<BarChart
+												name="qualificationsBar"
+												title=""
+												labels={qLabels}
+												values={qValues}
+												horizontal={true}
+											/>
+										</div>
 									</div>
 								</div>
 							{:else}

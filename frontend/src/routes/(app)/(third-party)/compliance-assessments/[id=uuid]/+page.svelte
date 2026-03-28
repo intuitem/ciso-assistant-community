@@ -1157,18 +1157,24 @@
 {#if threatDialogOpen}
 	<dialog
 		bind:this={dialogElement}
-		class="card p-4 bg-white shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
+		class="fixed inset-0 m-auto w-[90vw] max-w-5xl h-[85vh] rounded-2xl bg-white shadow-2xl border border-gray-200 p-0 overflow-hidden backdrop:bg-black/40"
 		onclose={() => (threatDialogOpen = false)}
 	>
-		<div class="flex justify-between items-center mb-4">
-			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
-			<button class="btn btn-sm preset-filled-error-500" onclick={closeThreatsDialog}>
+		<div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+			<h3 class="text-lg font-bold text-gray-900">{m.potentialThreats()}</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+				onclick={closeThreatsDialog}
+			>
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>
-
-		<div class="threats-content">
-			<ForceCirclePacking data={data.threats.graph} name="threats_graph" height="h-[600px]" />
+		<div class="p-4 h-[calc(85vh-64px)] overflow-auto">
+			<ForceCirclePacking
+				data={data.threats.graph}
+				name="threats_graph"
+				height="h-[calc(85vh-120px)]"
+			/>
 		</div>
 	</dialog>
 {/if}

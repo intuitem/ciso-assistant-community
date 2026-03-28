@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type * as echarts from 'echarts';
 	const symbolSizeOffset = 10;
 	interface Props {
@@ -42,6 +43,15 @@
 	const chart_id = `${name}_div`;
 	let resizeTimeout: ReturnType<typeof setTimeout>;
 
+	// Translate node names
+	const translatedData = $derived({
+		...data,
+		nodes: (data.nodes ?? []).map((node: any) => ({
+			...node,
+			name: safeTranslate(node.name)
+		}))
+	});
+
 	const getChartOptions = () => ({
 		tooltip: {
 			formatter: function (params: any) {
@@ -49,9 +59,14 @@
 				let tooltipContent = `<div style="font-style:italic; font-weight: bold;">${data.name}</div>`;
 
 				if (data.items && Array.isArray(data.items)) {
+					const formattedItems = data.items
+						.map((item: any) =>
+							typeof item === 'object' ? `${item.name} (${safeTranslate(item.result)})` : item
+						)
+						.join('<br>');
 					tooltipContent += `<div style="margin-top: 5px; border-top: 1px solid #ddd; padding-top: 5px;">
-						<strong>Resulting from:</strong>
-						<div style="white-space: pre-line; margin-top: 3px;">${data.items.join('<br>')}</div>
+						<strong>${safeTranslate('resultingFrom')}:</strong>
+						<div style="white-space: pre-line; margin-top: 3px;">${formattedItems}</div>
 					</div>`;
 				}
 
@@ -69,7 +84,6 @@
 		},
 		title: {
 			text: title,
-			subtext: 'Force layout',
 			top: '30',
 			left: 'right'
 		},
@@ -90,11 +104,13 @@
 				label: {
 					position: 'right',
 					formatter: '{b}',
-					show: false
+					show: true,
+					fontSize: 11,
+					color: '#374151'
 				},
 				draggable: true,
 				roam: true,
-				data: data.nodes.map(function (node, idx) {
+				data: translatedData.nodes.map(function (node, idx) {
 					node.id = idx;
 					return node;
 				}),
@@ -118,9 +134,9 @@
 				force: {
 					layoutAnimation: true,
 					initLayout: initLayout,
-					gravity: 2,
-					repulsion: 50,
-					friction: 0.1
+					gravity: 0.5,
+					repulsion: 120,
+					friction: 0.2
 				},
 				labelLayout: {
 					hideOverlap: true
@@ -154,7 +170,9 @@
 		if (!query.trim()) return;
 
 		const normalizedQuery = query.toLowerCase().trim();
-		const node = data.nodes.find((n) => n.name.toLowerCase().includes(normalizedQuery));
+		const node = translatedData.nodes.find((n: any) =>
+			n.name.toLowerCase().includes(normalizedQuery)
+		);
 
 		if (node && node.id !== undefined) {
 			handleNodeEmphasis(node.id);

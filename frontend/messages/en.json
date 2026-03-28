@@ -286,6 +286,7 @@
 	"rowCount": "Showing {start} to {end} of {total}",
 	"status": "Status",
 	"result": "Result",
+	"resultingFrom": "Resulting from",
 	"effort": "Effort",
 	"cost": "Cost",
 	"impact": "Impact",

@@ -12069,7 +12069,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "name": th["name"],
                     "value": len(th["requirement_assessments"]),
                     "items": [
-                        f"{ra['requirement_name']} ({ra['result']})"
+                        {
+                            "name": ra["requirement_name"],
+                            "result": ra["result"],
+                        }
                         for ra in th["requirement_assessments"]
                     ],
                 }
