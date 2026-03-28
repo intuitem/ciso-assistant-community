@@ -1657,5 +1657,9 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Сортувати А → Я",
-	"sortDescending": "Сортувати Я → А"
+	"sortDescending": "Сортувати Я → А",
+	"confirmModalMessagePlural": "Ви впевнені? Ця дія назавжди вплине на наступні об'єкти",
+	"syncAppliedControlsMessage": "Застосовані контролі, що використовують цей типовий контроль, будуть синхронізовані з ним. Зверніть увагу, що цю дію неможливо скасувати.",
+	"syncToAppliedControl": "Синхронізувати із застосованим контролем",
+	"syncToReferenceControl": "Синхронізувати з типовим контролем"
 }

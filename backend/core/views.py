@@ -16,7 +16,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Final
 import time
 from django.db.models import (
     F,
@@ -39,7 +39,7 @@ from django.db.models import (
     QuerySet,
     Prefetch,
 )
-from django.db.models.functions import Greatest, Coalesce
+from django.db.models.functions import Coalesce
 
 from collections import defaultdict
 import pytz
@@ -76,10 +76,11 @@ from django.core.cache import cache
 
 
 from django.apps import apps
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import AnonymousUser, Permission
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.core.files.storage import default_storage
+from django.contrib.auth.base_user import AbstractBaseUser
 
 from django.db import models, transaction
 from django.forms import ValidationError
@@ -2433,6 +2434,75 @@ class ReferenceControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get function choices")
     def csf_function(self, request):
         return Response(dict(ReferenceControl.CSF_FUNCTION))
+
+    @staticmethod
+    def _get_syncable_applied_controls(
+        reference_control: ReferenceControl, user: AbstractBaseUser | AnonymousUser
+    ) -> list[AppliedControl]:
+        """Return the list of syncable `AppliedControl` objects (meaning they are currently unsynced) the `User` can synchronize (based on his permissions)."""
+
+        _, changeable_applied_controls, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, AppliedControl
+        )
+
+        syncable_applied_controls = (
+            reference_control.get_unsynced_applied_controls_queryset().filter(
+                id__in=changeable_applied_controls,
+            )
+        )
+        return list(syncable_applied_controls)
+
+    @action(detail=True, methods=["get"], url_path="syncable-applied-controls")
+    def syncable_applied_controls(self, request, pk):
+        reference_control = self.get_object()
+        syncable_applied_controls = self._get_syncable_applied_controls(
+            reference_control, request.user
+        )
+
+        return Response(
+            [
+                {"id": applied_control.id, "name": applied_control.name}
+                for applied_control in syncable_applied_controls
+            ]
+        )
+
+    @action(detail=True, methods=["post"], url_path="sync-applied-controls")
+    def sync_applied_controls(self, request, pk):
+        reference_control = self.get_object()
+        syncable_applied_controls = self._get_syncable_applied_controls(
+            reference_control, request.user
+        )
+
+        FIELDS_TO_SYNC: Final[list[str]] = [
+            "category",
+            "csf_function",
+        ]
+
+        for syncable_applied_control in syncable_applied_controls:
+            for field_to_sync in FIELDS_TO_SYNC:
+                reference_control_value = getattr(reference_control, field_to_sync)
+
+                setattr(
+                    syncable_applied_control, field_to_sync, reference_control_value
+                )
+
+        AppliedControl.objects.bulk_update(
+            syncable_applied_controls, FIELDS_TO_SYNC, batch_size=100
+        )
+
+        skip_sync = all(
+            field_to_sync not in AppliedControl.INTEGRATION_SYNCABLE_FIELDS
+            for field_to_sync in FIELDS_TO_SYNC
+        )
+        for applied_control in syncable_applied_controls:
+            applied_control.save(skip_sync=skip_sync)
+
+        return Response(
+            [
+                {"id": applied_control.id, "name": applied_control.name}
+                for applied_control in syncable_applied_controls
+            ]
+        )
 
 
 class RiskMatrixViewSet(BaseModelViewSet):
@@ -5648,6 +5718,41 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             sunburst_data.append(function_node)
 
         return Response({"results": sunburst_data})
+
+    @action(detail=True, methods=["post"], url_path="sync-to-reference-control")
+    def sync_applied_controls(self, request, pk):
+        dry_run = request.query_params.get("dry_run", True)
+        if dry_run == "false":
+            dry_run = False
+
+        applied_control = self.get_object()
+        reference_control = applied_control.reference_control
+        changes: list[tuple[str, str]] = []  # List of (old_value, new_value) tuples.
+
+        FIELDS_TO_SYNC: Final[list[str]] = [
+            "category",
+            "csf_function",
+        ]
+
+        for field_to_sync in FIELDS_TO_SYNC:
+            reference_control_value = getattr(reference_control, field_to_sync)
+
+            applied_control_value = getattr(applied_control, field_to_sync)
+            if reference_control_value != applied_control_value:
+                changes.append((reference_control_value, applied_control_value))
+
+            setattr(applied_control, field_to_sync, reference_control_value)
+
+        if dry_run:
+            return Response(changes)
+
+        skip_sync = all(
+            field_to_sync not in AppliedControl.INTEGRATION_SYNCABLE_FIELDS
+            for field_to_sync in FIELDS_TO_SYNC
+        )
+        applied_control.save(update_fields=FIELDS_TO_SYNC, skip_sync=skip_sync)
+
+        return Response(changes)
 
 
 class ActionPlanList(generics.ListAPIView):
