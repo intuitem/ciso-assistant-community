@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
 	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
@@ -34,6 +35,21 @@
 
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
+
+	let threatTreemapExpanded = $state(false);
+	let threatTreemapDialog: HTMLDialogElement | undefined = $state();
+	let threatTreeData: any[] = $state([]);
+
+	function openThreatTreemap(tree: any[]) {
+		threatTreeData = tree;
+		threatTreemapExpanded = true;
+		setTimeout(() => threatTreemapDialog?.showModal(), 0);
+	}
+
+	function closeThreatTreemap() {
+		threatTreemapExpanded = false;
+		threatTreemapDialog?.close();
+	}
 
 	function localizeChartLabels(labels: string[]): string[] {
 		return labels.map((label) => safeTranslate(label));
@@ -581,17 +597,25 @@
 						</div>
 					{:then [threatsCount, qualificationsCount, risksCountPerLevel]}
 						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-							{#if threatsCount?.results?.labels?.length > 0}
+							{#if threatsCount?.results?.tree?.length > 0}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-									<h3 class="text-lg font-semibold text-gray-900 mb-2">
-										{m.threatRadarChart()}
-									</h3>
+									<div class="flex items-center justify-between mb-2">
+										<h3 class="text-lg font-semibold text-gray-900">
+											{m.threatsBreakdown()}
+										</h3>
+										<button
+											class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+											onclick={() => openThreatTreemap(threatsCount.results.tree)}
+											title="Expand"
+										>
+											<i class="fa-solid fa-expand text-sm"></i>
+										</button>
+									</div>
 									<div class="h-96">
-										<RadarChart
-											name="threatRadar"
-											title=""
-											labels={threatsCount?.results?.labels ?? []}
-											values={threatsCount?.results?.values ?? []}
+										<TreemapChart
+											name="threatTreemap"
+											tree={threatsCount.results.tree}
+											translate={true}
 										/>
 									</div>
 								</div>
@@ -603,18 +627,28 @@
 								</div>
 							{/if}
 							{#if qualificationsCount?.results?.labels?.length > 0}
+								{@const qPaired = (qualificationsCount?.results?.labels ?? [])
+									.map((l, i) => ({
+										label: safeTranslate(l),
+										value: (qualificationsCount?.results?.values ?? [])[i] ?? 0
+									}))
+									.sort((a, b) => a.value - b.value)}
+								{@const qLabels = qPaired.map((p) => p.label)}
+								{@const qValues = qPaired.map((p) => p.value)}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 									<h3 class="text-lg font-semibold text-gray-900 mb-4">
 										{m.qualificationsChartTitle()}
 									</h3>
-									<div class="h-80">
-										<BarChart
-											name="qualificationsBar"
-											title=""
-											labels={localizeChartLabels(qualificationsCount?.results?.labels ?? [])}
-											values={qualificationsCount?.results?.values ?? []}
-											horizontal={true}
-										/>
+									<div class="overflow-y-auto max-h-[500px]">
+										<div style="height: {Math.max(224, qLabels.length * 28)}px">
+											<BarChart
+												name="qualificationsBar"
+												title=""
+												labels={qLabels}
+												values={qValues}
+												horizontal={true}
+											/>
+										</div>
 									</div>
 								</div>
 							{:else}
@@ -1102,3 +1136,24 @@
 		</div>
 	{/key}
 </Tabs>
+
+{#if threatTreemapExpanded}
+	<dialog
+		bind:this={threatTreemapDialog}
+		class="fixed inset-0 m-auto w-[92vw] max-w-7xl h-[88vh] rounded-2xl bg-white shadow-2xl border border-gray-200 p-0 overflow-hidden backdrop:bg-black/40"
+		onclose={() => (threatTreemapExpanded = false)}
+	>
+		<div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+			<h3 class="text-lg font-bold text-gray-900">{m.threatsBreakdown()}</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+				onclick={closeThreatTreemap}
+			>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+		<div class="p-4 h-[calc(88vh-64px)]">
+			<TreemapChart name="threatTreemapExpanded" tree={threatTreeData} translate={true} />
+		</div>
+	</dialog>
+{/if}
