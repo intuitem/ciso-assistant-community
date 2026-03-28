@@ -4486,14 +4486,24 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         from collections import defaultdict
 
         risk_assessment = self.get_object()
+        scoped_folder = risk_assessment.folder
+
+        # Get IAM-visible IDs for related objects
+        visible_threat_ids = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, Threat
+        )[0]
+        visible_asset_ids = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, Asset
+        )[0]
+
         scenarios = RiskScenario.objects.filter(
             risk_assessment=risk_assessment
         ).prefetch_related("threats", "assets", "applied_controls")
 
-        # 1. Threats radar: count scenarios per threat
-        threat_counts = defaultdict(int)
+        # 1. Threats breakdown: count scenarios per visible threat
+        threat_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
-            for threat in scenario.threats.all():
+            for threat in scenario.threats.filter(id__in=visible_threat_ids):
                 threat_counts[threat.name] += 1
 
         sorted_threats = sorted(threat_counts.items(), key=lambda x: x[1], reverse=True)
@@ -4504,7 +4514,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         }
 
         # 2. Treatment distribution (skip empty treatments)
-        treatment_counts = defaultdict(int)
+        treatment_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
             if scenario.treatment:
                 treatment_counts[scenario.treatment] += 1
@@ -4518,7 +4528,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
         # 3. Strength of knowledge distribution (exclude undefined/--)
         sok_label_map = {0: "low", 1: "medium", 2: "high"}
-        sok_counts = defaultdict(int)
+        sok_counts: dict[int, int] = defaultdict(int)
         for scenario in scenarios:
             if scenario.strength_of_knowledge >= 0:
                 sok_counts[scenario.strength_of_knowledge] += 1
@@ -4528,10 +4538,10 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             "values": [c for _, c in sorted_sok],
         }
 
-        # 4. Assets at risk: count scenarios per asset, sorted
-        asset_counts = defaultdict(int)
+        # 4. Assets at risk: count scenarios per visible asset, sorted
+        asset_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
-            for asset in scenario.assets.all():
+            for asset in scenario.assets.filter(id__in=visible_asset_ids):
                 asset_counts[asset.name] += 1
         sorted_assets = sorted(asset_counts.items(), key=lambda x: x[1], reverse=True)
         assets_data = {

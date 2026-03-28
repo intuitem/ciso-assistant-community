@@ -43,6 +43,14 @@
 	const chart_id = `${name}_div`;
 	let resizeTimeout: ReturnType<typeof setTimeout>;
 
+	function escapeHtml(str: string): string {
+		return str
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
+	}
+
 	// Translate node names
 	const translatedData = $derived({
 		...data,
@@ -56,16 +64,18 @@
 		tooltip: {
 			formatter: function (params: any) {
 				const data = params.data;
-				let tooltipContent = `<div style="font-style:italic; font-weight: bold;">${data.name}</div>`;
+				let tooltipContent = `<div style="font-style:italic; font-weight: bold;">${escapeHtml(data.name)}</div>`;
 
 				if (data.items && Array.isArray(data.items)) {
 					const formattedItems = data.items
 						.map((item: any) =>
-							typeof item === 'object' ? `${item.name} (${safeTranslate(item.result)})` : item
+							typeof item === 'object'
+								? `${escapeHtml(item.name)} (${escapeHtml(safeTranslate(item.result))})`
+								: escapeHtml(String(item))
 						)
 						.join('<br>');
 					tooltipContent += `<div style="margin-top: 5px; border-top: 1px solid #ddd; padding-top: 5px;">
-						<strong>${safeTranslate('resultingFrom')}:</strong>
+						<strong>${escapeHtml(safeTranslate('resultingFrom'))}:</strong>
 						<div style="white-space: pre-line; margin-top: 3px;">${formattedItems}</div>
 					</div>`;
 				}

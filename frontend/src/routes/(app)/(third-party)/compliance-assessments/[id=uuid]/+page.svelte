@@ -1158,12 +1158,16 @@
 	<dialog
 		bind:this={dialogElement}
 		class="fixed inset-0 m-auto w-[90vw] max-w-5xl h-[85vh] rounded-2xl bg-white shadow-2xl border border-gray-200 p-0 overflow-hidden backdrop:bg-black/40"
+		aria-labelledby="threats-dialog-title"
 		onclose={() => (threatDialogOpen = false)}
 	>
 		<div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
-			<h3 class="text-lg font-bold text-gray-900">{m.potentialThreats()}</h3>
+			<h3 id="threats-dialog-title" class="text-lg font-bold text-gray-900">
+				{m.potentialThreats()}
+			</h3>
 			<button
 				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+				aria-label="Close"
 				onclick={closeThreatsDialog}
 			>
 				<i class="fa-solid fa-times"></i>
