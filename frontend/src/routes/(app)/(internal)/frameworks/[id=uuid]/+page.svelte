@@ -82,7 +82,8 @@
 										{@const itemHref = `/loaded-libraries/${value.id}`}
 										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 									{:else if key === 'scores_definition'}
-										{#each Object.entries(value) as [key, definition]}
+										{@const entries = Array.isArray(value) ? value : (value?.scale ?? [])}
+										{#each entries as definition}
 											<div>
 												{definition.score}.
 												{definition.name}{definition.description
@@ -140,7 +141,7 @@
 				{/each}
 			</div>
 		</div>
-		<div class="">
+		<div class="flex flex-col gap-2">
 			<a
 				class="btn preset-filled-primary-500"
 				href="/frameworks/{data.framework.id}/excel-template/">Download Excel template</a
