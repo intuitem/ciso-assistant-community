@@ -398,6 +398,58 @@ def filter_graph_by_implementation_groups(
     return filtered_graph
 
 
+def enrich_tree_for_soa(
+    tree: dict,
+    ra_lookup: dict,
+    ac_to_risk_scenarios: dict | None = None,
+) -> dict:
+    """
+    Walk the requirement tree and enrich each assessed leaf node with:
+    - selected (applicability boolean)
+    - observation
+    - applied_controls (list of dicts with id, name, ref_id, status, category, eta)
+    - risk_scenarios (list of dicts per applied control, if ac_to_risk_scenarios provided)
+    """
+
+    def _enrich_node(node: dict):
+        ra_id = node.get("ra_id")
+        if ra_id and ra_id in ra_lookup:
+            ra = ra_lookup[ra_id]
+            node["selected"] = ra.selected
+            node["observation"] = ra.observation or ""
+
+            controls = []
+            node_risk_scenarios = {}
+            for ac in ra.applied_controls.all():
+                ac_data = {
+                    "id": str(ac.id),
+                    "name": ac.name,
+                    "ref_id": ac.ref_id or "",
+                    "status": ac.status,
+                    "category": ac.category or "",
+                    "eta": str(ac.eta) if ac.eta else None,
+                }
+                controls.append(ac_data)
+                if ac_to_risk_scenarios and str(ac.id) in ac_to_risk_scenarios:
+                    for rs in ac_to_risk_scenarios[str(ac.id)]:
+                        node_risk_scenarios[rs["id"]] = rs
+            node["applied_controls"] = controls
+            node["risk_scenarios"] = list(node_risk_scenarios.values())
+        else:
+            node["selected"] = None
+            node["observation"] = None
+            node["applied_controls"] = []
+            node["risk_scenarios"] = []
+
+        for child in node.get("children", {}).values():
+            _enrich_node(child)
+
+    for node in tree.values():
+        _enrich_node(node)
+
+    return tree
+
+
 def get_parsed_matrices(
     user: User, risk_assessments: list | None = None, folder_id=None
 ):
