@@ -107,6 +107,7 @@
 		urn: string;
 		parent_urn?: string;
 		node_content: string;
+		display_mode?: string;
 		assessable: boolean;
 		style: string;
 		children?: Record<string, Node>;
@@ -267,43 +268,45 @@
 		nodes: [string, Node][],
 		hasParentNode: boolean = false
 	): TreeViewNode[] {
-		return nodes.map(([id, node]) => {
-			const nodeId = node.ra_id || id;
-			const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
-			const isAssigned = node.ra_id ? assignedRequirementIds.has(node.ra_id) : false;
+		return nodes
+			.filter(([_, node]) => node.display_mode !== 'splash')
+			.map(([id, node]) => {
+				const nodeId = node.ra_id || id;
+				const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
+				const isAssigned = node.ra_id ? assignedRequirementIds.has(node.ra_id) : false;
 
-			// Get all assessable descendant IDs for batch selection
-			const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
+				// Get all assessable descendant IDs for batch selection
+				const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
 
-			// For section nodes, get aggregated assignment info
-			const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
+				// For section nodes, get aggregated assignment info
+				const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
 
-			return {
-				id: nodeId,
-				content: TreeViewItemContentSimple,
-				contentProps: {
-					name: node.name,
-					urn: node.urn,
-					node_content: node.node_content,
-					assessable: node.assessable,
-					hasParentNode,
-					assignmentInfo,
-					isAssigned,
-					nodeId: nodeId,
-					childrenIds: childrenIds,
-					sectionAssignments
-				},
-				lead: TreeViewItemLeadSimple,
-				leadProps: {
-					assessable: node.assessable,
-					result: node.result,
-					resultColor: complianceResultColorMap[node.result || 'not_assessed'],
-					isAssigned,
-					assignmentInfo
-				},
-				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
-			};
-		});
+				return {
+					id: nodeId,
+					content: TreeViewItemContentSimple,
+					contentProps: {
+						name: node.name,
+						urn: node.urn,
+						node_content: node.node_content,
+						assessable: node.assessable,
+						hasParentNode,
+						assignmentInfo,
+						isAssigned,
+						nodeId: nodeId,
+						childrenIds: childrenIds,
+						sectionAssignments
+					},
+					lead: TreeViewItemLeadSimple,
+					leadProps: {
+						assessable: node.assessable,
+						result: node.result,
+						resultColor: complianceResultColorMap[node.result || 'not_assessed'],
+						isAssigned,
+						assignmentInfo
+					},
+					children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
+				};
+			});
 	}
 
 	let treeViewNodes = $derived(transformToTreeView(Object.entries(data.tree)));
