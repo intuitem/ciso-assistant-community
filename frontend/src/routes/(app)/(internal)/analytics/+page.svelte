@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
 	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
@@ -581,28 +582,17 @@
 						</div>
 					{:then [threatsCount, qualificationsCount, risksCountPerLevel]}
 						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-							{#if threatsCount?.results?.labels?.length > 0}
-								{@const paired = (threatsCount?.results?.labels ?? [])
-									.map((l, i) => ({
-										label: safeTranslate(l.name),
-										value: (threatsCount?.results?.values ?? [])[i] ?? 0
-									}))
-									.sort((a, b) => a.value - b.value)}
-								{@const sortedLabels = paired.map((p) => p.label)}
-								{@const sortedValues = paired.map((p) => p.value)}
+							{#if threatsCount?.results?.tree?.length > 0}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
 									<h3 class="text-lg font-semibold text-gray-900 mb-2">
 										{m.threatRadarChart()}
 									</h3>
-									<div class="overflow-y-auto max-h-[500px]">
-										<div style="height: {Math.max(224, sortedLabels.length * 28)}px">
-											<BarChart
-												name="threatRadar"
-												labels={sortedLabels}
-												values={sortedValues}
-												horizontal={true}
-											/>
-										</div>
+									<div class="h-96">
+										<TreemapChart
+											name="threatTreemap"
+											tree={threatsCount.results.tree}
+											translate={true}
+										/>
 									</div>
 								</div>
 							{:else}
