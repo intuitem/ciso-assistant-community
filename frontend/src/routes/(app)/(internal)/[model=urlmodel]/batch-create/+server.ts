@@ -8,12 +8,13 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const baseUrl = `${BASE_API_URL}/${model.endpointUrl ? model.endpointUrl : params.model}`;
 
 	// Fetch options needed for batch creation (e.g. category, deletion_policy)
+	const allowedOptions = new Set(['category', 'deletion_policy']);
 	const optionsField = url.searchParams.get('options');
-	if (!optionsField) {
-		error(400, { message: 'options parameter is required' });
+	if (!optionsField || !allowedOptions.has(optionsField)) {
+		error(400, { message: 'Invalid or missing options parameter' });
 	}
 
-	const endpoint = `${baseUrl}/${optionsField}/`;
+	const endpoint = `${baseUrl}/${encodeURIComponent(optionsField)}/`;
 	const res = await fetch(endpoint);
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());

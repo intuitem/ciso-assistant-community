@@ -131,11 +131,14 @@ class PersonalDataViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not categories:
+        if not isinstance(categories, list) or not categories:
             return Response(
                 {"error": "categories is required and must be a non-empty list"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # Deduplicate while preserving order
+        categories = list(dict.fromkeys(categories))
 
         try:
             processing_uuid = uuid.UUID(str(processing_id))
