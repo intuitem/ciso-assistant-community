@@ -1729,6 +1729,8 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
 
 
 def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
+    from collections import defaultdict
+
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
@@ -1760,7 +1762,33 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
     for label in labels:
         label["max"] = max_offset
 
-    return {"labels": labels, "values": values}
+    # Build threat-grouped treemap: threat → folders with scenario counts
+    threat_folders = defaultdict(lambda: defaultdict(int))
+    threat_scenarios = (
+        RiskScenario.objects.filter(
+            id__in=viewable_scenarios,
+            threats__id__in=object_ids_view,
+        )
+        .values("threats__name", "folder__name")
+        .annotate(count=Count("id"))
+    )
+    for row in threat_scenarios:
+        threat_folders[row["threats__name"]][row["folder__name"]] += row["count"]
+
+    tree = []
+    for threat_name, folders in threat_folders.items():
+        children = sorted(
+            [
+                {"name": folder_name, "value": count}
+                for folder_name, count in folders.items()
+            ],
+            key=lambda x: x["value"],
+            reverse=True,
+        )
+        tree.append({"name": threat_name, "children": children})
+    tree.sort(key=lambda x: sum(c["value"] for c in x["children"]), reverse=True)
+
+    return {"labels": labels, "values": values, "tree": tree}
 
 
 def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]:

@@ -4480,6 +4480,137 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @action(detail=True, methods=["get"], url_path="risk_analytics")
+    def risk_analytics(self, request, pk=None):
+        """Analytics data for a single risk assessment."""
+        from collections import defaultdict
+
+        risk_assessment = self.get_object()
+        scoped_folder = risk_assessment.folder
+
+        # Get IAM-visible IDs for related objects
+        visible_threat_ids = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, Threat
+        )[0]
+        visible_asset_ids = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, Asset
+        )[0]
+
+        scenarios = RiskScenario.objects.filter(
+            risk_assessment=risk_assessment
+        ).prefetch_related("threats", "assets", "applied_controls")
+
+        # 1. Threats breakdown: count scenarios per visible threat
+        threat_counts: dict[str, int] = defaultdict(int)
+        for scenario in scenarios:
+            for threat in scenario.threats.filter(id__in=visible_threat_ids):
+                threat_counts[threat.name] += 1
+
+        sorted_threats = sorted(threat_counts.items(), key=lambda x: x[1], reverse=True)
+        max_threat = max(threat_counts.values(), default=0)
+        threats_data = {
+            "labels": [{"name": name, "max": max_threat} for name, _ in sorted_threats],
+            "values": [count for _, count in sorted_threats],
+        }
+
+        # 2. Treatment distribution (skip empty treatments)
+        treatment_counts: dict[str, int] = defaultdict(int)
+        for scenario in scenarios:
+            if scenario.treatment:
+                treatment_counts[scenario.treatment] += 1
+        sorted_treatments = sorted(
+            treatment_counts.items(), key=lambda x: x[1], reverse=True
+        )
+        treatment_data = {
+            "labels": [t for t, _ in sorted_treatments],
+            "values": [c for _, c in sorted_treatments],
+        }
+
+        # 3. Strength of knowledge distribution (exclude undefined/--)
+        sok_label_map = {0: "low", 1: "medium", 2: "high"}
+        sok_counts: dict[int, int] = defaultdict(int)
+        for scenario in scenarios:
+            if scenario.strength_of_knowledge >= 0:
+                sok_counts[scenario.strength_of_knowledge] += 1
+        sorted_sok = sorted(sok_counts.items(), key=lambda x: x[0])
+        sok_data = {
+            "labels": [sok_label_map.get(k, str(k)) for k, _ in sorted_sok],
+            "values": [c for _, c in sorted_sok],
+        }
+
+        # 4. Assets at risk: count scenarios per visible asset, sorted
+        asset_counts: dict[str, int] = defaultdict(int)
+        for scenario in scenarios:
+            for asset in scenario.assets.filter(id__in=visible_asset_ids):
+                asset_counts[asset.name] += 1
+        sorted_assets = sorted(asset_counts.items(), key=lambda x: x[1], reverse=True)
+        assets_data = {
+            "labels": [name for name, _ in sorted_assets],
+            "values": [count for _, count in sorted_assets],
+        }
+
+        return Response(
+            {
+                "threats": threats_data,
+                "treatment": treatment_data,
+                "strength_of_knowledge": sok_data,
+                "assets": assets_data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=["get"], url_path="risk_timeline")
+    def risk_timeline(self, request, pk=None):
+        """Returns risk metrics over time from BuiltinMetricSample snapshots."""
+        from django.contrib.contenttypes.models import ContentType
+        from metrology.models import BuiltinMetricSample
+
+        risk_assessment = self.get_object()
+        content_type = ContentType.objects.get_for_model(risk_assessment)
+
+        # Extract risk level colors from the matrix
+        risk_level_colors = {}
+        if risk_assessment.risk_matrix:
+            try:
+                risk_levels = risk_assessment.risk_matrix.risk or []
+                for level in risk_levels:
+                    risk_level_colors[level.get("name", "")] = level.get(
+                        "hexcolor", "#6b7280"
+                    )
+            except (KeyError, TypeError, AttributeError):
+                pass
+
+        samples = (
+            BuiltinMetricSample.objects.filter(
+                content_type=content_type,
+                object_id=risk_assessment.id,
+            )
+            .order_by("date")
+            .values("date", "metrics")
+        )
+
+        timeline = []
+        for sample in samples:
+            metrics = sample["metrics"]
+            timeline.append(
+                {
+                    "date": sample["date"].isoformat(),
+                    "total_scenarios": metrics.get("total_scenarios", 0),
+                    "current_level_breakdown": metrics.get(
+                        "current_level_breakdown", {}
+                    ),
+                    "residual_level_breakdown": metrics.get(
+                        "residual_level_breakdown", {}
+                    ),
+                    "treatment_breakdown": metrics.get("treatment_breakdown", {}),
+                }
+            )
+
+        return Response(
+            {"timeline": timeline, "risk_level_colors": risk_level_colors},
+            status=status.HTTP_200_OK,
+        )
+
 
 def convert_date_to_timestamp(date):
     """
@@ -12073,7 +12204,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "name": th["name"],
                     "value": len(th["requirement_assessments"]),
                     "items": [
-                        f"{ra['requirement_name']} ({ra['result']})"
+                        {
+                            "name": ra["requirement_name"],
+                            "result": ra["result"],
+                        }
                         for ra in th["requirement_assessments"]
                     ],
                 }
