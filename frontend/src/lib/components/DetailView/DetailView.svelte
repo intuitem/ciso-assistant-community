@@ -7,6 +7,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
@@ -686,6 +687,9 @@
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
 												<MarkdownRenderer content={value} />
+											{:else if typeof value === 'boolean'}
+												{@const bd = booleanDisplay(value, key, data.urlModel)}
+												<i class="{bd.icon} {bd.colorClass}"></i>
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
