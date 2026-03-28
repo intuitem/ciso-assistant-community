@@ -923,6 +923,9 @@
 														{:else if [true, false].includes(value)}
 															{@const bd = booleanDisplay(value, key, URLModel)}
 															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
+														{:else if value === 'YES' || value === 'NO'}
+															{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
+															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
 														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
 																>{safeTranslate('percentageDisplay', { number: value })}</span
