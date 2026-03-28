@@ -74,8 +74,15 @@
 			<SelectableList {items} bind:selectedIds message={m.theFollowingControlsWillBeAddedColon()} />
 		</div>
 		<footer class="flex justify-end gap-2">
-			<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}
-				>{m.cancel()}</button
+			<button
+				type="button"
+				class="btn {parent.buttonNeutral}"
+				onclick={() => {
+					if ($modalStore[0]) {
+						$modalStore[0].response?.(false);
+					}
+					parent.onClose();
+				}}>{m.cancel()}</button
 			>
 			<button
 				class="btn preset-filled-primary-500"

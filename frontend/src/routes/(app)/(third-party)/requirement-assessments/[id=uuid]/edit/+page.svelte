@@ -151,8 +151,26 @@
 			);
 			if (previewResponse.ok) {
 				const previewData: any[] = await previewResponse.json();
-				previewItems = previewData.map((control) => ({
-					id: control?.reference_control?.id ?? control?.id ?? crypto.randomUUID(),
+				previewItems = previewData
+					.filter((control) => control?.reference_control?.id)
+					.map((control) => ({
+						id: control.reference_control.id as string,
+						label:
+							control?.name ||
+							control?.reference_control?.str ||
+							control?.reference_control?.name ||
+							control?.ref_id ||
+							''
+					}));
+			} else {
+				throw new Error(await previewResponse.text());
+			}
+		} catch (error) {
+			console.error('Unable to fetch suggested controls preview', error);
+			previewItems = reference_controls
+				.filter((control) => control?.id)
+				.map((control) => ({
+					id: control.id as string,
 					label:
 						control?.name ||
 						control?.reference_control?.str ||
@@ -160,20 +178,6 @@
 						control?.ref_id ||
 						''
 				}));
-			} else {
-				throw new Error(await previewResponse.text());
-			}
-		} catch (error) {
-			console.error('Unable to fetch suggested controls preview', error);
-			previewItems = reference_controls.map((control) => ({
-				id: control?.id ?? crypto.randomUUID(),
-				label:
-					control?.name ||
-					control?.reference_control?.str ||
-					control?.reference_control?.name ||
-					control?.ref_id ||
-					''
-			}));
 		}
 
 		if (previewItems.length === 0) return;

@@ -12118,9 +12118,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
         selected_reference_control_ids = None
         if request.method == "POST" and request.data:
-            selected_reference_control_ids = request.data.get(
-                "selected_reference_control_ids"
-            )
+            raw = request.data.get("selected_reference_control_ids")
+            if raw is not None:
+                if not isinstance(raw, list) or not all(
+                    isinstance(i, str) for i in raw
+                ):
+                    return Response(
+                        {
+                            "selected_reference_control_ids": "Must be a list of strings."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                selected_reference_control_ids = raw
         requirement_assessments = compliance_assessment.requirement_assessments.all()
         controls = []
         for requirement_assessment in requirement_assessments:
@@ -12997,9 +13006,18 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
         selected_reference_control_ids = None
         if request.method == "POST" and request.data:
-            selected_reference_control_ids = request.data.get(
-                "selected_reference_control_ids"
-            )
+            raw = request.data.get("selected_reference_control_ids")
+            if raw is not None:
+                if not isinstance(raw, list) or not all(
+                    isinstance(i, str) for i in raw
+                ):
+                    return Response(
+                        {
+                            "selected_reference_control_ids": "Must be a list of strings."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                selected_reference_control_ids = raw
         controls = requirement_assessment.create_applied_controls_from_suggestions(
             dry_run=dry_run,
             selected_reference_control_ids=selected_reference_control_ids,

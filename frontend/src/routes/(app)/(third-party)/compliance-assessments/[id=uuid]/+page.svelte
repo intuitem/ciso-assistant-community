@@ -405,8 +405,9 @@
 				const previewData: any[] = await previewResponse.json();
 				const seen = new Set<string>();
 				previewItems = previewData
+					.filter((control) => control?.reference_control?.id)
 					.map((control) => ({
-						id: control?.reference_control?.id ?? control?.id ?? crypto.randomUUID(),
+						id: control.reference_control.id as string,
 						label:
 							control?.name ||
 							control?.reference_control?.str ||
@@ -424,17 +425,17 @@
 			}
 		} catch (error) {
 			console.error('Unable to fetch suggested controls preview', error);
-			previewItems = data.compliance_assessment.framework.reference_controls.map(
-				(control: any) => ({
-					id: control?.id ?? crypto.randomUUID(),
+			previewItems = data.compliance_assessment.framework.reference_controls
+				.filter((control: any) => control?.id)
+				.map((control: any) => ({
+					id: control.id as string,
 					label:
 						control?.name ||
 						control?.reference_control?.str ||
 						control?.reference_control?.name ||
 						control?.ref_id ||
 						''
-				})
-			);
+				}));
 		}
 
 		if (previewItems.length === 0) return;
