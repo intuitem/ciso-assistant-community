@@ -21,6 +21,7 @@ const POLARITY_MAP: Map<string, BooleanPolarity> = new Map([
 	['is_active', 'warning_when_false'],
 	['is_visible', 'warning_when_false'],
 	['is_business_function', 'warning'],
+	['is_intragroup', 'warning'],
 	['dpia_required', 'warning'],
 	['has_sensitive_personal_data', 'warning'],
 	['recovery_documented', 'warning_when_false'],
