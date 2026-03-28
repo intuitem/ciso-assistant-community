@@ -3693,7 +3693,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             "ETA",
             "Expiry date",
             "Effort",
-            "Impact",
+            "Control impact",
             "Cost",
             "Assigned to",
             "Covered scenarios",
@@ -4687,7 +4687,10 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "expiry_date": {"source": "expiry_date", "label": "expiry_date"},
             "priority": {"source": "priority", "label": "priority"},
             "effort": {"source": "get_effort_display", "label": "effort"},
-            "impact": {"source": "get_control_impact_display", "label": "impact"},
+            "control_impact": {
+                "source": "get_control_impact_display",
+                "label": "control_impact",
+            },
             "cost_currency": {
                 "source": "cost",
                 "label": "cost_currency",
@@ -6299,7 +6302,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         else:
             return super().update(request, *args, **kwargs)
 
-    @action(detail=False, name="Get acceptances to review")
+    @action(detail=False, name="Get ac  ceptances to review")
     def to_review(self, request):
         acceptances = acceptances_to_review(request.user)
 
@@ -10632,7 +10635,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "ETA",
                 "Expiry date",
                 "Effort",
-                "Impact",
+                "Control impact",
                 "Cost",
                 "Covered requirements",
             ]
@@ -10680,7 +10683,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         serializer = ComplianceAssessmentActionPlanSerializer(
             queryset, many=True, context={"pk": pk}
         )
-
         entries = []
         for item in serializer.data:
             entry = {
@@ -10693,7 +10695,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "eta": item.get("eta"),
                 "expiry_date": item.get("expiry_date"),
                 "effort": item.get("effort"),
-                "impact": item.get("control_impact"),
+                "control_impact": item.get("control_impact"),
                 "cost": item.get("annual_cost"),
                 "covered_requirements": "\n".join(
                     [ra.get("str") for ra in item.get("requirement_assessments")]

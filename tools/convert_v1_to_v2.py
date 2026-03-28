@@ -208,7 +208,6 @@ def build_converted_workbook(input_path: str) -> Workbook:
         if src_ws is not None:
             copy_sheet_dimensions(src_ws, ws_out)
         for r_idx, row in enumerate(rows, 1):
-            # print(f"coucou {r_idx}")
             for c_idx, cell in enumerate(row, 1):
                 if isinstance(cell, Cell):
                     new_cell = ws_out.cell(row=r_idx, column=c_idx, value=cell.value)
