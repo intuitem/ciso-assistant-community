@@ -2055,8 +2055,8 @@ export const listViewFields = {
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER,
-			deletion_policy: { component: AutocompleteSelect, hide: true },
-			is_sensitive: { component: AutocompleteSelect, hide: true }
+			deletion_policy: { hide: true } as ListViewFilterConfig,
+			is_sensitive: { hide: true } as ListViewFilterConfig
 		}
 	},
 	'data-subjects': {
@@ -2075,7 +2075,7 @@ export const listViewFields = {
 		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
 		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link'],
 		filters: {
-			transfer_mechanism: { component: AutocompleteSelect, hide: true }
+			transfer_mechanism: { hide: true } as ListViewFilterConfig
 		}
 	},
 	'ebios-rm': {
