@@ -435,13 +435,14 @@ class BuiltinMetricSample(AbstractBaseModel):
         return f"{self.content_type.model} {self.object_id} - {self.date}"
 
     @classmethod
-    def update_or_create_snapshot(cls, obj, date=None):
+    def update_or_create_snapshot(cls, obj, date=None, precomputed_metrics=None):
         """
         Update or create a daily metric snapshot for the given object.
 
         Args:
             obj: The model instance (ComplianceAssessment, RiskAssessment, etc.)
             date: Optional date for the snapshot. Defaults to today.
+            precomputed_metrics: Optional pre-computed metrics dict to skip recomputation.
 
         Returns:
             Tuple of (BuiltinMetricSample, created)
@@ -452,7 +453,11 @@ class BuiltinMetricSample(AbstractBaseModel):
             date = now().date()
 
         content_type = ContentType.objects.get_for_model(obj)
-        metrics = cls.compute_metrics(obj)
+        metrics = (
+            precomputed_metrics
+            if precomputed_metrics is not None
+            else cls.compute_metrics(obj)
+        )
 
         return cls.objects.update_or_create(
             content_type=content_type,
