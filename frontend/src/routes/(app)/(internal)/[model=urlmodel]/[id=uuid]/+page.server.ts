@@ -126,7 +126,14 @@ export const actions: Actions = {
 	},
 	reject: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
-		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+		const schema =
+			params.model == 'risk-acceptances'
+				? z.object({
+						urlmodel: z.string(),
+						id: z.string().uuid(),
+						justification: z.string().optional()
+					})
+				: z.object({ urlmodel: z.string(), id: z.string().uuid() });
 		const rejectForm = await superValidate(formData, zod(schema));
 
 		const urlmodel = rejectForm.data.urlmodel;
@@ -137,9 +144,19 @@ export const actions: Actions = {
 			return fail(400, { form: rejectForm });
 		}
 
-		const requestInitOptions: RequestInit = {
-			method: 'POST'
-		};
+		const requestInitOptions: RequestInit =
+			params.model === 'risk-acceptances'
+				? {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							justification: rejectForm.data.justification
+						})
+					}
+				: {
+						method: 'POST'
+					};
+
 		const res = await fetch(endpoint, requestInitOptions);
 		if (!res.ok) {
 			const response = await res.json();
@@ -229,7 +246,16 @@ export const actions: Actions = {
 	},
 	accept: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
-		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+
+		const schema =
+			params.model == 'risk-acceptances'
+				? z.object({
+						urlmodel: z.string(),
+						id: z.string().uuid(),
+						justification: z.string().optional()
+					})
+				: z.object({ urlmodel: z.string(), id: z.string().uuid() });
+
 		const acceptForm = await superValidate(formData, zod(schema));
 
 		const urlmodel = acceptForm.data.urlmodel;
@@ -240,9 +266,19 @@ export const actions: Actions = {
 			return fail(400, { form: acceptForm });
 		}
 
-		const requestInitOptions: RequestInit = {
-			method: 'POST'
-		};
+		const requestInitOptions: RequestInit =
+			params.model === 'risk-acceptances'
+				? {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							justification: acceptForm.data.justification
+						})
+					}
+				: {
+						method: 'POST'
+					};
+
 		const res = await fetch(endpoint, requestInitOptions);
 		if (!res.ok) {
 			const response = await res.json();
@@ -263,7 +299,15 @@ export const actions: Actions = {
 	},
 	revoke: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
-		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+		const schema =
+			params.model == 'risk-acceptances'
+				? z.object({
+						urlmodel: z.string(),
+						id: z.string().uuid(),
+						justification: z.string().optional()
+					})
+				: z.object({ urlmodel: z.string(), id: z.string().uuid() });
+
 		const revokeForm = await superValidate(formData, zod(schema));
 
 		const urlmodel = revokeForm.data.urlmodel;
@@ -274,9 +318,19 @@ export const actions: Actions = {
 			return fail(400, { form: revokeForm });
 		}
 
-		const requestInitOptions: RequestInit = {
-			method: 'POST'
-		};
+		const requestInitOptions: RequestInit =
+			params.model === 'risk-acceptances'
+				? {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							justification: revokeForm.data.justification
+						})
+					}
+				: {
+						method: 'POST'
+					};
+
 		const res = await fetch(endpoint, requestInitOptions);
 		if (!res.ok) {
 			const response = await res.json();

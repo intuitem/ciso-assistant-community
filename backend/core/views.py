@@ -6340,7 +6340,11 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can accept the risk acceptance"}
             )
-        self.get_object().set_state("accepted")
+
+        acceptance = self.get_object()
+        acceptance.set_state("accepted")
+        acceptance.justification = request.data.get("justification", "")
+        acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
@@ -6354,6 +6358,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can reject the risk acceptance"}
             )
+
         self.get_object().set_state("rejected")
         return Response({"results": "state updated to rejected"})
 
@@ -6368,7 +6373,10 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can revoke the risk acceptance"}
             )
-        self.get_object().set_state("revoked")
+        acceptance = self.get_object()
+        acceptance.set_state("revoked")
+        acceptance.justification = request.data.get("justification", "")
+        acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
