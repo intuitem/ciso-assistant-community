@@ -44,6 +44,7 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "--": "#CCC",
     "to_do": "#BFDBFE",
     "active": "#46D39A",
+    "degraded": "#F97316",
     "deprecated": "#E55759",
     "in_progress": "#5470c6",
     "in_review": "#BBF7D0",
@@ -595,6 +596,7 @@ def applied_control_per_status(user: User):
         AppliedControl.Status.ACTIVE: "#46D39A",
         AppliedControl.Status.IN_PROGRESS: "#392F5A",
         AppliedControl.Status.ON_HOLD: "#F4D06F",
+        AppliedControl.Status.DEGRADED: "#F97316",
         AppliedControl.Status.DEPRECATED: "#E55759",
     }
     (
@@ -1277,6 +1279,7 @@ def get_metrics(user: User, folder_id):
             "in_progress": viewable_controls.filter(status="in_progress").count(),
             "on_hold": viewable_controls.filter(status="on_hold").count(),
             "active": viewable_controls.filter(status="active").count(),
+            "degraded": viewable_controls.filter(status="degraded").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
             "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
             "eta_missed": missed_eta_count,
