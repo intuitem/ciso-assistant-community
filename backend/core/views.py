@@ -147,7 +147,7 @@ from ebios_rm.models import (
 
 from tprm.models import Entity, Solution, Contract
 from privacy.models import Processing, DataBreach, RightRequest
-from resilience.models import BusinessImpactAnalysis
+from resilience.models import AssetAssessment, BusinessImpactAnalysis
 
 from .models import *
 from .serializers import *
@@ -4694,6 +4694,26 @@ def convert_date_to_timestamp(date):
     return None
 
 
+APPLIED_CONTROL_LINKED_FIELDS = [
+    ("requirement_assessments", "Requirement Assessments"),
+    ("risk_scenarios", "Risk Scenarios"),
+    ("risk_scenarios_e", "Risk Scenarios (existing)"),
+    ("findings", "Findings"),
+    ("vulnerabilities", "Vulnerabilities"),
+    ("stakeholders", "Stakeholders"),
+    ("processings", "Processings"),
+    ("data_breaches_remediated", "Data Breaches"),
+    ("quantitative_risk_hypotheses_existing", "CRQ Hypotheses (existing)"),
+    ("quantitative_risk_hypotheses_added", "CRQ Hypotheses (added)"),
+    ("quantitative_risk_hypotheses_removed", "CRQ Hypotheses (removed)"),
+    ("assetassessment", "Asset Assessments"),
+    ("task_templates", "Task Templates"),
+    ("comments", "Comments"),
+]
+
+APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
+
+
 class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
@@ -4718,6 +4738,11 @@ class AppliedControlFilterSet(GenericFilterSet):
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
     is_assigned = df.BooleanFilter(method="filter_is_assigned")
+    linked_models = df.MultipleChoiceFilter(
+        choices=[("--", "--")] + APPLIED_CONTROL_LINKED_FIELDS,
+        method="filter_linked_models",
+        label="Linked models",
+    )
     # Nullable choice filters that support filtering for unset values using "--"
     category = NullableChoiceFilter(choices=AppliedControl.CATEGORY)
     csf_function = NullableChoiceFilter(choices=AppliedControl.CSF_FUNCTION)
@@ -4809,6 +4834,43 @@ class AppliedControlFilterSet(GenericFilterSet):
             return queryset.filter(owner__isnull=False).distinct()
         else:
             return queryset.filter(owner__isnull=True)
+
+    def filter_linked_models(self, queryset, name, value):
+        """
+        Filter applied controls by linked model types.
+        Usage: ?linked_models=risk_scenarios&linked_models=findings
+        Use "--" to filter for orphan controls (no links to any model).
+        """
+        if not value:
+            return queryset
+
+        has_orphan = "--" in value
+        real_types = [v for v in value if v != "--"]
+
+        if has_orphan and not real_types:
+            # Only orphans requested
+            has_any = Q()
+            for field in APPLIED_CONTROL_LINKED_FIELD_NAMES:
+                has_any |= Q(**{f"{field}__isnull": False})
+            return queryset.exclude(has_any).distinct()
+
+        if has_orphan and real_types:
+            # Orphans OR specific types (union)
+            has_any = Q()
+            for field in APPLIED_CONTROL_LINKED_FIELD_NAMES:
+                has_any |= Q(**{f"{field}__isnull": False})
+            orphan_qs = queryset.exclude(has_any)
+
+            type_q = Q()
+            for model_type in real_types:
+                type_q |= Q(**{f"{model_type}__isnull": False})
+            return (orphan_qs | queryset.filter(type_q)).distinct()
+
+        # Only specific types requested — OR logic (show controls linked to ANY selected type)
+        type_q = Q()
+        for model_type in real_types:
+            type_q |= Q(**{f"{model_type}__isnull": False})
+        return queryset.filter(type_q).distinct()
 
     class Meta:
         model = AppliedControl
@@ -4950,6 +5012,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     def get_queryset(self):
         """Optimize queries by prefetching related objects used in the table view and serializer"""
+        from crq.models import QuantitativeRiskHypothesis
+
         qs = (
             super()
             .get_queryset()
@@ -4960,14 +5024,44 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         )
         if self.action == "autocomplete":
             return qs
-        return qs.select_related("reference_control").prefetch_related(
-            "owner",
-            "filtering_labels__folder",  # FieldsRelatedField includes folder
-            "findings",  # Used for findings_count
-            "evidences",  # Serialized as FieldsRelatedField
-            "objectives",  # ManyToManyField to OrganisationObjective
-            "assets",  # ManyToManyField used in table
-            "security_exceptions",  # Serialized as FieldsRelatedField
+
+        # Annotate with Exists() for each reverse relation to power linked_models
+        m2m_through_fields = {
+            "has_requirement_assessments": RequirementAssessment.applied_controls.through,
+            "has_risk_scenarios": RiskScenario.applied_controls.through,
+            "has_risk_scenarios_e": RiskScenario.existing_applied_controls.through,
+            "has_findings": Finding.applied_controls.through,
+            "has_vulnerabilities": Vulnerability.applied_controls.through,
+            "has_stakeholders": Stakeholder.applied_controls.through,
+            "has_processings": Processing.associated_controls.through,
+            "has_data_breaches_remediated": DataBreach.remediation_measures.through,
+            "has_quantitative_risk_hypotheses_existing": QuantitativeRiskHypothesis.existing_applied_controls.through,
+            "has_quantitative_risk_hypotheses_added": QuantitativeRiskHypothesis.added_applied_controls.through,
+            "has_quantitative_risk_hypotheses_removed": QuantitativeRiskHypothesis.removed_applied_controls.through,
+            "has_assetassessment": AssetAssessment.associated_controls.through,
+            "has_task_templates": TaskTemplate.applied_controls.through,
+        }
+        annotations = {
+            alias: Exists(through.objects.filter(appliedcontrol_id=OuterRef("pk")))
+            for alias, through in m2m_through_fields.items()
+        }
+        # Comment uses a ForeignKey, not M2M
+        annotations["has_comments"] = Exists(
+            Comment.objects.filter(applied_control_id=OuterRef("pk"))
+        )
+
+        return (
+            qs.select_related("reference_control")
+            .prefetch_related(
+                "owner",
+                "filtering_labels__folder",  # FieldsRelatedField includes folder
+                "findings",  # Used for findings_count
+                "evidences",  # Serialized as FieldsRelatedField
+                "objectives",  # ManyToManyField to OrganisationObjective
+                "assets",  # ManyToManyField used in table
+                "security_exceptions",  # Serialized as FieldsRelatedField
+            )
+            .annotate(**annotations)
         )
 
     @action(detail=False, name="Lightweight autocomplete search")
@@ -5057,6 +5151,17 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         except Exception:
             logger.error("Error creating SyncMapping", exc_info=True)
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get linked models choices")
+    def linked_models(self, request):
+        """Return available model types that can be linked to applied controls"""
+        choices = [{"value": "--", "label": "--"}]
+        choices += [
+            {"value": key, "label": label}
+            for key, label in APPLIED_CONTROL_LINKED_FIELDS
+        ]
+        return Response(choices)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")

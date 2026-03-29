@@ -1244,6 +1244,48 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     state = serializers.SerializerMethodField()
     findings_count = serializers.IntegerField(source="findings.count")
     is_assigned = serializers.BooleanField(read_only=True)
+    linked_models = serializers.SerializerMethodField()
+
+    def get_linked_models(self, obj):
+        linked = []
+        field_map = [
+            ("requirement_assessments", "has_requirement_assessments"),
+            ("risk_scenarios", "has_risk_scenarios"),
+            ("risk_scenarios_e", "has_risk_scenarios_e"),
+            ("findings", "has_findings"),
+            ("vulnerabilities", "has_vulnerabilities"),
+            ("stakeholders", "has_stakeholders"),
+            ("processings", "has_processings"),
+            ("data_breaches_remediated", "has_data_breaches_remediated"),
+            (
+                "quantitative_risk_hypotheses_existing",
+                "has_quantitative_risk_hypotheses_existing",
+            ),
+            (
+                "quantitative_risk_hypotheses_added",
+                "has_quantitative_risk_hypotheses_added",
+            ),
+            (
+                "quantitative_risk_hypotheses_removed",
+                "has_quantitative_risk_hypotheses_removed",
+            ),
+            ("assetassessment", "has_assetassessment"),
+            ("task_templates", "has_task_templates"),
+            ("comments", "has_comments"),
+        ]
+        prefetched = getattr(obj, "_prefetched_objects_cache", {})
+        for field_name, flag_name in field_map:
+            annotated_value = getattr(obj, flag_name, None)
+            if annotated_value is not None:
+                has_items = annotated_value
+            elif field_name in prefetched:
+                has_items = bool(prefetched[field_name])
+            else:
+                manager = getattr(obj, field_name, None)
+                has_items = bool(manager and manager.exists())
+            if has_items:
+                linked.append(field_name)
+        return linked
 
     def get_state(self, obj):
         if not obj.eta:
