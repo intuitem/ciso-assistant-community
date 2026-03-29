@@ -139,6 +139,11 @@
 											href="/applied-controls/?status=active"
 										/>
 										<SimpleCard
+											count={metrics.controls?.degraded}
+											label={m.sumpageDegraded()}
+											href="/applied-controls/?status=degraded"
+										/>
+										<SimpleCard
 											count={metrics.controls?.deprecated}
 											label={m.sumpageDeprecated()}
 											href="/applied-controls/?status=deprecated"
@@ -161,7 +166,7 @@
 										<SimpleCard
 											count={metrics.controls?.p1}
 											label={m.sumpageP1()}
-											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
+											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=degraded&status=on_hold&status=in_progress&status=--"
 											emphasis={true}
 										/>
 										<SimpleCard
