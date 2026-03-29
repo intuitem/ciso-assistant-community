@@ -4777,6 +4777,7 @@ class AppliedControl(
         IN_PROGRESS = "in_progress", _("In progress")
         ON_HOLD = "on_hold", _("On hold")
         ACTIVE = "active", _("Active")
+        DEGRADED = "degraded", _("Degraded")
         DEPRECATED = "deprecated", _("Deprecated")
         UNDEFINED = "--", _("Undefined")
 
