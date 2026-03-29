@@ -1318,6 +1318,7 @@
 	"sumpageToDo": "to do",
 	"sumpageInProgress": "in progress",
 	"sumpageOnHold": "on hold",
+	"sumpageDegraded": "degraded",
 	"sumpageP1": "Pending P1",
 	"sumpageEtaMissed": "Missed ETA",
 	"sumpageActiveAudits": "Active audits",

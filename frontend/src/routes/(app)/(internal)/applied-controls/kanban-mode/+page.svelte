@@ -18,11 +18,22 @@
 		{
 			id: 'in_progress',
 			label: m.inProgress(),
+			color: 'bg-violet-50',
+			borderColor: 'border-violet-300'
+		},
+		{
+			id: 'on_hold',
+			label: m.onHold(),
 			color: 'bg-yellow-50',
 			borderColor: 'border-yellow-300'
 		},
-		{ id: 'on_hold', label: m.onHold(), color: 'bg-orange-50', borderColor: 'border-orange-300' },
 		{ id: 'active', label: m.active(), color: 'bg-green-50', borderColor: 'border-green-300' },
+		{
+			id: 'degraded',
+			label: m.degraded(),
+			color: 'bg-orange-50',
+			borderColor: 'border-orange-300'
+		},
 		{
 			id: 'deprecated',
 			label: m.deprecated(),

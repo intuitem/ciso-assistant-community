@@ -1194,6 +1194,7 @@
 	"sumpageToDo": "A faire",
 	"sumpageInProgress": "En cours",
 	"sumpageOnHold": "Bloqué",
+	"sumpageDegraded": "dégradé",
 	"sumpageP1": "P1 en attente",
 	"sumpageEtaMissed": "ETA raté",
 	"sumpageActiveAudits": "Audits actifs",
