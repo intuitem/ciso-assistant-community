@@ -52,23 +52,19 @@
 	let dryRunData: [string, string][] = $derived(data.dryRunData);
 </script>
 
-{#if dryRunData.length > 0}
-	<DetailView {data}>
-		{#snippet widgets()}
+<DetailView {data}>
+	{#snippet actions()}
+		{#if dryRunData.length > 0}
 			<button
-				class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+				class="btn preset-filled-primary-500 h-fit"
 				data-testid="sync-to-actions-button"
 				onclick={async () => {
 					await modalConfirmSyncAppliedControls();
 				}}
 			>
-				<span class="mr-2">
-					<i class="fa-solid fa-arrows-rotate mr-2"></i>
-				</span>
+				<i class="fa-solid fa-arrows-rotate mr-2"></i>
 				{m.syncToReferenceControl()}
 			</button>
-		{/snippet}
-	</DetailView>
-{:else}
-	<DetailView {data} />
-{/if}
+		{/if}
+	{/snippet}
+</DetailView>
