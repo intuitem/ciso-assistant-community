@@ -4837,9 +4837,8 @@ class AppliedControlFilterSet(GenericFilterSet):
 
     def filter_linked_models(self, queryset, name, value):
         """
-        Filter applied controls by linked model types.
-        Usage: ?linked_models=risk_scenarios&linked_models=findings
-        Use "--" to filter for orphan controls (no links to any model).
+        Filter applied controls by linked model types (OR logic).
+        Use "--" to include orphan controls (no links to any model).
         """
         if not value:
             return queryset
@@ -4847,30 +4846,15 @@ class AppliedControlFilterSet(GenericFilterSet):
         has_orphan = "--" in value
         real_types = [v for v in value if v != "--"]
 
-        if has_orphan and not real_types:
-            # Only orphans requested
-            has_any = Q()
-            for field in APPLIED_CONTROL_LINKED_FIELD_NAMES:
-                has_any |= Q(**{f"{field}__isnull": False})
-            return queryset.exclude(has_any).distinct()
-
-        if has_orphan and real_types:
-            # Orphans OR specific types (union)
-            has_any = Q()
-            for field in APPLIED_CONTROL_LINKED_FIELD_NAMES:
-                has_any |= Q(**{f"{field}__isnull": False})
-            orphan_qs = queryset.exclude(has_any)
-
-            type_q = Q()
-            for model_type in real_types:
-                type_q |= Q(**{f"{model_type}__isnull": False})
-            return (orphan_qs | queryset.filter(type_q)).distinct()
-
-        # Only specific types requested — OR logic (show controls linked to ANY selected type)
-        type_q = Q()
+        q = Q()
         for model_type in real_types:
-            type_q |= Q(**{f"{model_type}__isnull": False})
-        return queryset.filter(type_q).distinct()
+            q |= Q(**{f"{model_type}__isnull": False})
+        if has_orphan:
+            has_any = Q()
+            for field in APPLIED_CONTROL_LINKED_FIELD_NAMES:
+                has_any |= Q(**{f"{field}__isnull": False})
+            q |= ~has_any
+        return queryset.filter(q).distinct()
 
     class Meta:
         model = AppliedControl
