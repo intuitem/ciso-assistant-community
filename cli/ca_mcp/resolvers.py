@@ -433,7 +433,7 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
         return vulnerability_name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request("/vulnerabilities/", params={"search": vulnerability_name_or_id})
+    res = make_get_request("/vulnerabilities/", params={"name": vulnerability_name_or_id})
 
     if res.status_code != 200:
         raise ValueError(
