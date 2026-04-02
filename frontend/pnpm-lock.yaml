@@ -15,7 +15,7 @@ overrides:
   cookie: ^1.1.1
   tar: ^7.5.11
   lodash: ^4.17.23
-  lodash-es: ^4.17.23
+  lodash-es: ^4.18.1
   minimatch: ^10.2.3
   ajv: ^6.14.0
   rollup: ^4.59.0
@@ -2673,8 +2673,8 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
-  lodash-es@4.17.23:
-    resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
+  lodash-es@4.18.1:
+    resolution: {integrity: sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==}
 
   lodash.castarray@4.4.0:
     resolution: {integrity: sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==}
@@ -4753,11 +4753,11 @@ snapshots:
   '@unovis/dagre-layout@0.8.8-2':
     dependencies:
       '@unovis/graphlibrary': 2.2.0-2
-      lodash-es: 4.17.23
+      lodash-es: 4.18.1
 
   '@unovis/graphlibrary@2.2.0-2':
     dependencies:
-      lodash-es: 4.17.23
+      lodash-es: 4.18.1
 
   '@unovis/svelte@1.6.4(@unovis/ts@1.6.4)(svelte@5.53.5)':
     dependencies:
@@ -6280,7 +6280,7 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  lodash-es@4.17.23: {}
+  lodash-es@4.18.1: {}
 
   lodash.castarray@4.4.0: {}
 
