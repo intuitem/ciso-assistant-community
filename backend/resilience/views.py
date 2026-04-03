@@ -18,7 +18,12 @@ from django.views.decorators.cache import cache_page
 
 from iam.models import RoleAssignment, Folder
 from core.models import Asset
-from .models import BusinessImpactAnalysis, AssetAssessment, EscalationThreshold
+from .models import (
+    BusinessImpactAnalysis,
+    AssetAssessment,
+    EscalationThreshold,
+    DoraIncidentReport,
+)
 
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
@@ -554,3 +559,53 @@ class EscalationThresholdViewSet(BaseModelViewSet):
         )
         choices = undefined_choice | impact_choices
         return Response(choices)
+
+
+class DoraIncidentReportViewSet(BaseModelViewSet):
+    model = DoraIncidentReport
+    filterset_fields = ["incident", "incident_submission", "folder"]
+    search_fields = ["incident__name", "incident_description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get submission type choices")
+    def incident_submission(self, request):
+        return Response(dict(DoraIncidentReport.SubmissionType.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get incident discovery choices")
+    def incident_discovery(self, request):
+        from core.dora import DORA_IR_INCIDENT_DISCOVERY_CHOICES
+
+        return Response(dict(DORA_IR_INCIDENT_DISCOVERY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get report currency choices")
+    def report_currency(self, request):
+        from core.dora import DORA_IR_CURRENCY_CHOICES
+
+        return Response(dict(DORA_IR_CURRENCY_CHOICES))
+
+    @action(detail=True, methods=["get"], name="Export DORA IR JSON")
+    def export_json(self, request, pk):
+        from resilience.dora_ir_export import build_dora_ir_json
+
+        report = self.get_object()
+        data = build_dora_ir_json(report)
+        from django.http import JsonResponse
+        from django.utils.text import slugify
+
+        response = JsonResponse(data, json_dumps_params={"indent": 2})
+        safe_name = slugify(report.incident.name) or "dora-ir"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_dora_ir.json"'
+        )
+        return response
+
+    @action(detail=True, methods=["get"], name="Validate DORA IR")
+    def validate_report(self, request, pk):
+        from resilience.dora_ir_export import build_dora_ir_json, validate_dora_ir
+
+        report = self.get_object()
+        data = build_dora_ir_json(report)
+        errors = validate_dora_ir(data)
+        return Response({"valid": len(errors) == 0, "errors": errors})

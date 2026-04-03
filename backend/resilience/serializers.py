@@ -4,6 +4,7 @@ from .models import (
     BusinessImpactAnalysis,
     EscalationThreshold,
     AssetAssessment,
+    DoraIncidentReport,
 )
 
 from rest_framework import serializers
@@ -132,4 +133,32 @@ class EscalationThresholdWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError({"bia": "mandatory"})
         validated_data["folder"] = bia.folder
 
+        return super().create(validated_data)
+
+
+class DoraIncidentReportReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+    incident = FieldsRelatedField(["id", "name", "ref_id", "status", "severity"])
+    submitting_entity = FieldsRelatedField(["id", "name"])
+    ultimate_parent_entity = FieldsRelatedField(["id", "name"])
+    affected_entities = FieldsRelatedField(["id", "name"], many=True)
+    folder = FieldsRelatedField()
+    incident_submission = serializers.CharField(
+        source="get_incident_submission_display", read_only=True
+    )
+
+    class Meta:
+        model = DoraIncidentReport
+        exclude = []
+
+
+class DoraIncidentReportWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DoraIncidentReport
+        exclude = ["created_at", "updated_at"]
+
+    def create(self, validated_data):
+        incident = validated_data.get("incident")
+        if incident and not validated_data.get("folder"):
+            validated_data["folder"] = incident.folder
         return super().create(validated_data)
