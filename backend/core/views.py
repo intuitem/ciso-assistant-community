@@ -8866,10 +8866,28 @@ class FrameworkViewSet(BaseModelViewSet):
         nodes = RequirementNode.objects.filter(framework=source).order_by(
             F("order_id").asc(nulls_last=True)
         )
+
+        # Compute positional ref_ids for nodes that don't have one
+        child_counter = {}  # parent_urn -> next child number
+        computed_ref_ids = {}  # node urn -> computed ref_id
+        for node in nodes:
+            if node.ref_id:
+                computed_ref_ids[node.urn] = node.ref_id
+            else:
+                parent = node.parent_urn
+                if parent not in child_counter:
+                    child_counter[parent] = 1
+                idx = child_counter[parent]
+                child_counter[parent] = idx + 1
+                parent_ref = computed_ref_ids.get(parent)
+                computed_ref_ids[node.urn] = (
+                    f"{parent_ref}.{idx}" if parent_ref else str(idx)
+                )
+
         for node in nodes:
             old_urn = node.urn
             if old_urn:
-                ref_id = node.ref_id or str(uuid.uuid4())[:8]
+                ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
                 new_urn = f"urn:intuitem:risk:req_node:{fw_slug}:{ref_id}"
                 urn_map[old_urn] = new_urn
             else:
@@ -8906,11 +8924,22 @@ class FrameworkViewSet(BaseModelViewSet):
             .prefetch_related("choices")
             .order_by("order")
         )
+        q_counter = {}  # req_node_id -> next question number
         for q in questions:
             new_req_node_id = node_id_map.get(q.requirement_node_id)
             if not new_req_node_id:
                 continue
-            q_ref_id = q.ref_id or str(uuid.uuid4())[:8]
+            # Compute positional ref_id for questions without one
+            if q.ref_id:
+                q_ref_id = q.ref_id
+            else:
+                req_node = q.requirement_node
+                parent_ref = computed_ref_ids.get(req_node.urn, "")
+                if q.requirement_node_id not in q_counter:
+                    q_counter[q.requirement_node_id] = 1
+                q_idx = q_counter[q.requirement_node_id]
+                q_counter[q.requirement_node_id] = q_idx + 1
+                q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
             new_question = Question.objects.create(
                 urn=f"urn:intuitem:risk:question:{fw_slug}:{q_ref_id}",
                 ref_id=q.ref_id,
@@ -8925,8 +8954,13 @@ class FrameworkViewSet(BaseModelViewSet):
                 folder_id=folder_id,
                 translations=q.translations,
             )
+            c_counter = 0
             for choice in q.choices.all():
-                c_ref_id = choice.ref_id or str(uuid.uuid4())[:8]
+                c_counter += 1
+                if choice.ref_id:
+                    c_ref_id = choice.ref_id
+                else:
+                    c_ref_id = f"{q_ref_id}-c{c_counter}"
                 QuestionChoice.objects.create(
                     urn=f"urn:intuitem:risk:question_choice:{fw_slug}:{c_ref_id}"
                     if choice.urn
