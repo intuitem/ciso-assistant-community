@@ -2,7 +2,12 @@
 
 ## Recommended Method: Multi-File EBIOS Package Import
 
-Use this method when your data is split across several JSON files in one folder (for example on `E:/`).
+Use this method when your data is split across several JSON files in one folder.
+
+Future-proof workflow:
+
+- Drop all JSON files in `cli/upload/`
+- Run the importer without `--input-dir`
 
 ### Step 1 - Go to CLI folder
 
@@ -16,14 +21,23 @@ cd C:\Users\Godmod\Documents\ciso-assistant-community\cli
 C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-### Step 3 - Run the package importer
+### Step 3 - Put your JSON files in the upload folder
+
+Expected folder:
+
+```powershell
+C:\Users\Godmod\Documents\ciso-assistant-community\cli\upload
+```
+
+### Step 4 - Run the package importer
 
 ```powershell
 C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py `
-	--input-dir E:/ `
 	--folder "Global" `
 	--matrix "4x4 risk matrix from EBIOS-RM"
 ```
+
+Optional: use another folder with `--input-dir`.
 
 ### What is imported
 
@@ -40,7 +54,6 @@ Example (workshop 2/3/4 replay only):
 
 ```powershell
 C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py `
-	--input-dir E:/ `
 	--folder "Global" `
 	--matrix "4x4 risk matrix from EBIOS-RM" `
 	--extras-only --skip-feared-events

@@ -209,12 +209,11 @@ Notes:
 
 ### Import A Multi-File EBIOS JSON Package
 
-If your EBIOS content is split across several JSON files (for example `assets.json`, `risk_sources.json`, `threats.json`, `risk_scenarios.json`, `ro_to_pairs.json`, `stakeholders.json`, `strategic_scenarios.json`, `operational_scenarios.json`), use:
+If your EBIOS content is split across several JSON files (for example `assets.json`, `risk_sources.json`, `threats.json`, `risk_scenarios.json`, `ro_to_pairs.json`, `stakeholders.json`, `strategic_scenarios.json`, `operational_scenarios.json`), drop them in `cli/upload/` and run:
 
 ```powershell
 cd C:\Users\Godmod\Documents\ciso-assistant-community\cli
 C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py `
-  --input-dir E:/ `
   --folder "Global" `
   --matrix "4x4 risk matrix from EBIOS-RM"
 ```
@@ -236,11 +235,12 @@ Example rerun for workshop 2/3/4 only:
 
 ```powershell
 C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py `
-  --input-dir E:/ `
   --folder "Global" `
   --matrix "4x4 risk matrix from EBIOS-RM" `
   --extras-only --skip-feared-events
 ```
+
+Optional: if needed, override the input location with `--input-dir`.
 
 ### File Upload Commands
 

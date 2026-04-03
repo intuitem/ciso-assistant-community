@@ -23,7 +23,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_INPUT_DIR = Path("E:/")
+DEFAULT_INPUT_DIR = ROOT / "upload"
 
 
 def load_env(path: Path) -> dict[str, str]:

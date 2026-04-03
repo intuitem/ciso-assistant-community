@@ -1,0 +1,7 @@
+# Copy-paste to run (PowerShell)
+
+cd C:\Users\Godmod\Documents\ciso-assistant-community\cli
+C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py --folder "Global" --matrix "4x4 risk matrix from EBIOS-RM"
+
+# Workshop 2/3/4 replay only
+C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py --folder "Global" --matrix "4x4 risk matrix from EBIOS-RM" --extras-only --skip-feared-events
