@@ -722,7 +722,7 @@
 										class="text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
 										onchange={(e) => builder.setBaseLocale(e.currentTarget.value)}
 									>
-										{#each frameworkLocales as code}
+										{#each supportedLocales as code}
 											<option value={code}>{localeLabel(code)}</option>
 										{/each}
 									</select>
@@ -823,6 +823,10 @@
 						<h3 class="text-lg font-medium text-gray-600 mb-1">No sections yet</h3>
 						<p class="text-sm text-gray-400 mb-4">
 							Start building your framework by adding a section.
+						</p>
+						<p class="text-xs text-gray-400 mb-4 max-w-md mx-auto">
+							Sections group your requirements into chapters or domains. Each section becomes a
+							top-level category in assessments.
 						</p>
 						<button
 							type="button"

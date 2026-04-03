@@ -9302,6 +9302,39 @@ class FrameworkViewSet(BaseModelViewSet):
 
     def _reconcile_draft(self, framework, draft):
         """Reconcile the draft JSON into the relational DB within a transaction."""
+        # --- 0. Pre-validate draft field lengths ---
+        draft_nodes = draft.get("nodes", [])
+        draft_questions = draft.get("questions", [])
+        draft_choices = draft.get("choices", [])
+
+        fw_meta = draft.get("framework_meta", {})
+        fw_name = fw_meta.get("name", "")
+        if not fw_name or not fw_name.strip():
+            raise DraftValidationError("Framework name is required.")
+        if len(fw_name) > 200:
+            raise DraftValidationError(
+                f"Framework name is {len(fw_name)} characters (max 200)."
+            )
+
+        for node in draft_nodes:
+            label = node.get("ref_id") or f"position {node.get('order_id', '?')}"
+            name = node.get("name") or ""
+            ref_id = node.get("ref_id") or ""
+            urn = node.get("urn") or ""
+
+            if len(name) > 200:
+                raise DraftValidationError(
+                    f"Requirement '{label}': name is {len(name)} characters (max 200)."
+                )
+            if len(ref_id) > 100:
+                raise DraftValidationError(
+                    f"Requirement '{label}': ref_id is {len(ref_id)} characters (max 100)."
+                )
+            if len(urn) > 255:
+                raise DraftValidationError(
+                    f"Requirement '{label}': URN is {len(urn)} characters (max 255)."
+                )
+
         with transaction.atomic():
             # --- 1. Collect existing DB IDs ---
             db_node_ids = set(
@@ -9321,9 +9354,6 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
             # --- 2. Collect draft IDs ---
-            draft_nodes = draft.get("nodes", [])
-            draft_questions = draft.get("questions", [])
-            draft_choices = draft.get("choices", [])
 
             draft_node_ids = {uuid.UUID(n["id"]) for n in draft_nodes}
             draft_question_ids = {uuid.UUID(q["id"]) for q in draft_questions}

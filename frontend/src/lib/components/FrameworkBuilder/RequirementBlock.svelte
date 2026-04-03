@@ -41,6 +41,15 @@
 	const childDrag = createHandleGatedDragHandlers((from, to) =>
 		builder.reorderRequirements(requirement.node.id, from, to)
 	);
+
+	/** Auto-grow a textarea to fit its content */
+	function autoGrow(el: HTMLTextAreaElement) {
+		el.style.height = 'auto';
+		el.style.height = Math.max(40, el.scrollHeight) + 'px';
+	}
+
+	/** Name length for live character counter */
+	let nameLength = $derived((requirement.node.name ?? '').length);
 </script>
 
 <div style="margin-left: {Math.min(requirement.depth, 3) * 16}px">
@@ -80,17 +89,42 @@
 						/>
 					</div>
 					<div class="grid grid-cols-2 gap-3">
+						<textarea
+							value={requirement.node.description ?? ''}
+							readonly
+							rows="2"
+							class="w-full text-sm text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
+						></textarea>
+						<textarea
+							value={getTranslation(requirement.node.translations, lang, 'description')}
+							placeholder="Translate description..."
+							rows="2"
+							class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+							onblur={(e) =>
+								saveField(
+									'translations',
+									withTranslation(
+										requirement.node.translations,
+										lang,
+										'description',
+										e.currentTarget.value
+									)
+								)}
+							oninput={(e) => autoGrow(e.currentTarget)}
+						></textarea>
+					</div>
+					<div class="grid grid-cols-2 gap-3">
 						<input
 							type="text"
 							value={requirement.node.name ?? ''}
 							readonly
-							class="text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
+							class="text-xs text-gray-400 bg-transparent border-0 border-b border-transparent py-0.5 cursor-default"
 						/>
 						<input
 							type="text"
 							value={getTranslation(requirement.node.translations, lang, 'name')}
-							placeholder="Translate name..."
-							class="text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+							placeholder="Translate short title..."
+							class="text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
 							onblur={(e) =>
 								saveField(
 									'translations',
@@ -121,30 +155,6 @@
 					{/if}
 					<div class="grid grid-cols-2 gap-3">
 						<textarea
-							value={requirement.node.description ?? ''}
-							readonly
-							rows="1"
-							class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
-						></textarea>
-						<textarea
-							value={getTranslation(requirement.node.translations, lang, 'description')}
-							placeholder="Translate description..."
-							rows="1"
-							class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-							onblur={(e) =>
-								saveField(
-									'translations',
-									withTranslation(
-										requirement.node.translations,
-										lang,
-										'description',
-										e.currentTarget.value
-									)
-								)}
-						></textarea>
-					</div>
-					<div class="grid grid-cols-2 gap-3">
-						<textarea
 							value={requirement.node.typical_evidence ?? ''}
 							readonly
 							rows="1"
@@ -165,6 +175,7 @@
 										e.currentTarget.value
 									)
 								)}
+							oninput={(e) => autoGrow(e.currentTarget)}
 						></textarea>
 					</div>
 				{:else}
@@ -176,16 +187,32 @@
 							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
 							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 						/>
+					</div>
+					<textarea
+						value={requirement.node.description ?? ''}
+						placeholder="Requirement content"
+						rows="2"
+						class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+						onblur={(e) => saveField('description', e.currentTarget.value || null)}
+						oninput={(e) => autoGrow(e.currentTarget)}
+					></textarea>
+					<div class="relative">
 						<input
 							type="text"
 							value={requirement.node.name ?? ''}
-							placeholder={requirement.node.description
-								? requirement.node.description.slice(0, 60) +
-									(requirement.node.description.length > 60 ? '...' : '')
-								: 'Requirement name'}
-							class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+							placeholder="Short title (optional, max 200 chars)"
+							class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
 							onblur={(e) => saveField('name', e.currentTarget.value || null)}
 						/>
+						{#if nameLength > 0}
+							<span
+								class="absolute right-0 top-0 text-[10px] {nameLength > 180
+									? 'text-red-500 font-medium'
+									: 'text-gray-300'}"
+							>
+								{nameLength}/200
+							</span>
+						{/if}
 					</div>
 					{#if requirement.node.urn}
 						<button
@@ -204,18 +231,12 @@
 						</button>
 					{/if}
 					<textarea
-						value={requirement.node.description ?? ''}
-						placeholder="Description (optional)"
-						rows="1"
-						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-						onblur={(e) => saveField('description', e.currentTarget.value || null)}
-					></textarea>
-					<textarea
 						value={requirement.node.typical_evidence ?? ''}
 						placeholder="Typical evidence (optional)"
 						rows="1"
 						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 						onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
+						oninput={(e) => autoGrow(e.currentTarget)}
 					></textarea>
 				{/if}
 			</div>

@@ -377,3 +377,44 @@ class TestFrameworkBuilderSecurity:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "must be a JSON object" in response.data["error"]
+
+    # --- Field length validation ---
+
+    def test_publish_rejects_node_name_over_200_chars(
+        self, authenticated_client, framework_with_node
+    ):
+        """publish_draft rejects a node with name > 200 chars via DraftValidationError."""
+        fw, rn, folder = framework_with_node
+        node_id = str(rn.id)
+
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        long_name = "A" * 201
+
+        draft = {
+            "framework_meta": {"name": fw.name},
+            "nodes": [
+                {
+                    "id": node_id,
+                    "urn": rn.urn,
+                    "ref_id": rn.ref_id,
+                    "name": long_name,
+                    "assessable": True,
+                    "order_id": 0,
+                    "weight": 1,
+                    "importance": "undefined",
+                    "display_mode": "default",
+                }
+            ],
+            "questions": [],
+            "choices": [],
+        }
+
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name is 201 characters (max 200)" in response.data["error"]
