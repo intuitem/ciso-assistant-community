@@ -37,7 +37,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		data: PageData;
@@ -182,6 +182,15 @@
 	});
 
 	let exportPopupOpen = $state(false);
+
+	let activeTab = $state('timeline');
+
+	// DORA reports fetched server-side, sorted by creation date (newest first)
+	const doraRows: any[] = $derived(
+		[...(data.doraReports ?? [])].sort(
+			(a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		)
+	);
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -325,12 +334,28 @@
 	</DetailView>
 
 	<div class="card shadow-lg bg-white p-4 space-y-2">
-		<div class="flex flex-row justify-between items-center mb-4">
-			<h1 class="text-xl font-bold">{m.timeline()}</h1>
-			<Search {handler} />
-			<RowsPerPage {handler} />
-		</div>
-		<ol class="relative border-s border-primary-500 dark:border-primary-700">
+		<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)}>
+			<Tabs.List>
+				<Tabs.Trigger value="timeline">
+					<i class="fa-solid fa-timeline mr-2"></i>{m.timeline()}
+				</Tabs.Trigger>
+				<Tabs.Trigger value="dora-reports">
+					<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
+					{#if doraRows.length > 0}
+						<span class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700">
+							{doraRows.length}
+						</span>
+					{/if}
+				</Tabs.Trigger>
+				<Tabs.Indicator />
+			</Tabs.List>
+
+			<Tabs.Content value="timeline" class="pt-4">
+				<div class="flex flex-row justify-between items-center mb-4">
+					<Search {handler} />
+					<RowsPerPage {handler} />
+				</div>
+				<ol class="relative border-s border-primary-500 dark:border-primary-700">
 			{#each $rows as row, rowIndex}
 				{@const meta = row?.meta ?? row}
 				{@const actionsURLModel = 'timeline-entries'}
@@ -407,5 +432,45 @@
 				<Pagination {handler} />
 			{/if}
 		</footer>
+			</Tabs.Content>
+
+			<Tabs.Content value="dora-reports" class="pt-4">
+				{#if doraRows.length > 0}
+					<table class="w-full text-sm">
+						<thead>
+							<tr class="border-b text-left text-gray-500">
+								<th class="py-2 px-3">{m.incidentSubmission()}</th>
+								<th class="py-2 px-3">{safeTranslate('createdAt')}</th>
+								<th class="py-2 px-3">{safeTranslate('updatedAt')}</th>
+								<th class="py-2 px-3"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each doraRows as report}
+								<tr class="border-b hover:bg-gray-50">
+									<td class="py-2 px-3">
+										<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+											{safeTranslate(report.incident_submission)}
+										</span>
+									</td>
+									<td class="py-2 px-3">{formatDateOrDateTime(report.created_at, getLocale())}</td>
+									<td class="py-2 px-3">{formatDateOrDateTime(report.updated_at, getLocale())}</td>
+									<td class="py-2 px-3 text-right">
+										<a
+											href="/dora-incident-reports/{report.id}"
+											class="text-primary-500 hover:underline text-sm"
+										>
+											<i class="fa-solid fa-arrow-right mr-1"></i>{m.open()}
+										</a>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				{:else}
+					<p class="text-gray-500 text-sm italic py-4">{m.noResultFound()}</p>
+				{/if}
+			</Tabs.Content>
+		</Tabs>
 	</div>
 </div>

@@ -80,6 +80,21 @@ export const load: PageServerLoad = async (event) => {
 	data['evidenceModel'] = evidenceModel;
 	data['evidenceCreateForm'] = evidenceCreateForm;
 
+	// Fetch DORA incident reports for this incident
+	let doraReports: any[] = [];
+	try {
+		const doraRes = await event.fetch(
+			`${BASE_API_URL}/resilience/dora-incident-reports/?incident=${event.params.id}`
+		);
+		if (doraRes.ok) {
+			const doraData = await doraRes.json();
+			doraReports = doraData.results ?? doraData ?? [];
+		}
+	} catch {
+		// DORA reports fetch is optional
+	}
+	data['doraReports'] = doraReports;
+
 	return data;
 };
 

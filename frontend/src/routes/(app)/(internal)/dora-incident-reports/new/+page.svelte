@@ -16,4 +16,5 @@
 	mode={data.mode}
 	formAction={data.formAction}
 	incidentRef={data.incidentRef}
+	userOptions={data.userOptions}
 />

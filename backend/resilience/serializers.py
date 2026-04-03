@@ -157,6 +157,40 @@ class DoraIncidentReportWriteSerializer(BaseModelSerializer):
         model = DoraIncidentReport
         exclude = ["created_at", "updated_at"]
 
+    # Submission types that can only exist once per incident
+    UNIQUE_SUBMISSION_TYPES = [
+        "initial_notification",
+        "final_report",
+        "major_incident_reclassified_as_non-major",
+    ]
+
+    def validate(self, attrs):
+        incident = attrs.get("incident") or (
+            self.instance.incident if self.instance else None
+        )
+        submission_type = attrs.get("incident_submission") or (
+            self.instance.incident_submission if self.instance else None
+        )
+
+        if incident and submission_type in self.UNIQUE_SUBMISSION_TYPES:
+            existing = DoraIncidentReport.objects.filter(
+                incident=incident,
+                incident_submission=submission_type,
+            )
+            # Exclude current instance on update
+            if self.instance:
+                existing = existing.exclude(pk=self.instance.pk)
+            if existing.exists():
+                labels = dict(DoraIncidentReport.SubmissionType.choices)
+                label = labels.get(submission_type, submission_type)
+                raise serializers.ValidationError(
+                    {
+                        "incident_submission": f"A '{label}' report already exists for this incident."
+                    }
+                )
+
+        return super().validate(attrs)
+
     def create(self, validated_data):
         incident = validated_data.get("incident")
         if incident and not validated_data.get("folder"):

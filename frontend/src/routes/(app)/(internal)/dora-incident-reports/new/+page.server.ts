@@ -31,12 +31,29 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 	};
 	let incidentRef: { id: string; name: string } | null = null;
 
-	// Submission type progression
-	const NEXT_SUBMISSION: Record<string, string> = {
-		initial_notification: 'intermediate_report',
-		intermediate_report: 'final_report',
-		final_report: 'final_report'
-	};
+	// Submission type progression: initial → intermediate (multiple allowed) → final
+	const SUBMISSION_PROGRESSION = [
+		'initial_notification',
+		'intermediate_report',
+		'final_report'
+	];
+
+	function getNextSubmissionType(
+		currentType: string,
+		existingTypes: string[]
+	): string {
+		const currentIndex = SUBMISSION_PROGRESSION.indexOf(currentType);
+		// Try advancing to the next type
+		for (let i = currentIndex + 1; i < SUBMISSION_PROGRESSION.length; i++) {
+			const candidate = SUBMISSION_PROGRESSION[i];
+			// intermediate_report allows multiples, others are unique
+			if (candidate === 'intermediate_report' || !existingTypes.includes(candidate)) {
+				return candidate;
+			}
+		}
+		// Default: intermediate_report (always allowed)
+		return 'intermediate_report';
+	}
 
 	if (fromReportId) {
 		// ── Continue from previous report: copy all data, advance submission type ──
@@ -44,6 +61,23 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 			const prev = await fetch(
 				`${BASE_API_URL}/${ENDPOINT}/${fromReportId}/object/`
 			).then((r) => r.json());
+
+			// Fetch existing report types for this incident
+			let existingTypes: string[] = [];
+			if (prev.incident) {
+				try {
+					const existingRes = await fetch(
+						`${BASE_API_URL}/${ENDPOINT}/?incident=${prev.incident}`
+					);
+					if (existingRes.ok) {
+						const existingData = await existingRes.json();
+						const reports = existingData.results ?? existingData ?? [];
+						existingTypes = reports.map((r: any) => r.incident_submission);
+					}
+				} catch {
+					// Continue without existing types
+				}
+			}
 
 			// Copy all fields from previous report
 			const {
@@ -55,7 +89,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 
 			prefillData = {
 				...prevData,
-				incident_submission: NEXT_SUBMISSION[prev.incident_submission] || 'intermediate_report'
+				incident_submission: getNextSubmissionType(prev.incident_submission, existingTypes)
 			};
 
 			// Resolve incident name for the back link
@@ -156,12 +190,30 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 		fetchChoices(fetch, `${base}/info_duration_service_downtime_actual_or_estimate/`)
 	]);
 
+	// Fetch users for contact fill helper
+	let userOptions: { id: string; label: string; email: string }[] = [];
+	try {
+		const usersRes = await fetch(`${BASE_API_URL}/users/`);
+		if (usersRes.ok) {
+			const usersData = await usersRes.json();
+			const results = usersData.results ?? usersData ?? [];
+			userOptions = results.map((u: any) => ({
+				id: u.id,
+				label: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email,
+				email: u.email || ''
+			}));
+		}
+	} catch {
+		// Optional
+	}
+
 	return {
 		form,
 		model,
 		mode: 'create' as const,
 		formAction: '?/create',
 		incidentRef,
+		userOptions,
 		selectOptions: {
 			incident_submission: submissionChoices,
 			report_currency: currencyChoices,

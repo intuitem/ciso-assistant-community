@@ -22,11 +22,30 @@
 		mode: 'create' | 'edit';
 		formAction: string;
 		incidentRef?: { id: string; name: string } | null;
+		reportId?: string | null;
+		validation?: { valid: boolean; errors: string[] } | null;
+		userOptions?: { id: string; label: string; email: string }[];
 	}
 
-	let { form, selectOptions, allChoices, mode, formAction, incidentRef = null }: Props = $props();
+	let {
+		form,
+		selectOptions,
+		allChoices,
+		mode,
+		formAction,
+		incidentRef = null,
+		reportId = null,
+		validation = null,
+		userOptions = []
+	}: Props = $props();
 
 	const schema = modelSchema('dora-incident-reports');
+
+	const canProgress =
+		mode === 'edit' &&
+		!['final_report', 'major_incident_reclassified_as_non-major'].includes(
+			form.data?.incident_submission || ''
+		);
 
 	const _form = superForm(form, {
 		dataType: 'json',
@@ -37,7 +56,9 @@
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto',
 		onUpdated: async ({ form: updatedForm }) => {
-			if (updatedForm.message?.redirect) {
+			// In create mode: redirect to the new report's all-in-one page
+			// In edit mode: stay on page (no redirect)
+			if (mode === 'create' && updatedForm.message?.redirect) {
 				goto(getSecureRedirect(updatedForm.message.redirect));
 			}
 		}
@@ -141,6 +162,14 @@
 		(incidentType.threatTechniques || []).includes('other')
 	);
 	let hasOtherAuthority = $derived(reportingAuthorities.includes('other'));
+
+	// Fill contact fields from a selected user
+	function fillContact(prefix: 'primary' | 'secondary', userId: string) {
+		const user = userOptions.find((u) => u.id === userId);
+		if (!user) return;
+		$formData[`${prefix}_contact_name`] = user.label;
+		$formData[`${prefix}_contact_email`] = user.email;
+	}
 </script>
 
 <div class="max-w-5xl mx-auto p-4">
@@ -156,9 +185,37 @@
 			</Anchor>
 		</div>
 	{/if}
-	<h1 class="text-2xl font-bold mb-6">
+	<h1 class="text-2xl font-bold mb-4">
 		{mode === 'create' ? safeTranslate('add-doraIncidentReport') : m.edit()}
 	</h1>
+
+	{#if validation && mode === 'edit'}
+		<div class="mb-6">
+			{#if validation.valid}
+				<div class="flex items-center space-x-2 text-green-700 bg-green-50 p-3 rounded-md">
+					<i class="fa-solid fa-check-circle text-lg"></i>
+					<span class="font-medium">{m.schemaValid()}</span>
+				</div>
+			{:else}
+				<div class="bg-amber-50 p-3 rounded-md space-y-2">
+					<div class="flex items-center space-x-2 text-amber-700">
+						<i class="fa-solid fa-triangle-exclamation text-lg"></i>
+						<span class="font-medium">{m.schemaInvalid()}</span>
+					</div>
+					{#if validation.errors && validation.errors.length > 0}
+						<ul class="list-disc list-inside text-sm text-amber-800 space-y-1 ml-2">
+							{#each validation.errors.slice(0, 10) as error}
+								<li class="font-mono text-xs">{error}</li>
+							{/each}
+							{#if validation.errors.length > 10}
+								<li class="italic">... and {validation.errors.length - 10} more</li>
+							{/if}
+						</ul>
+					{/if}
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	<SuperForm
 		class="flex flex-col space-y-6"
@@ -239,7 +296,21 @@
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
 					<div class="space-y-3">
-						<h3 class="font-medium text-sm text-gray-600">{m.doraPrimaryContact()}</h3>
+						<div class="flex items-center justify-between">
+							<h3 class="font-medium text-sm text-gray-600">{m.doraPrimaryContact()}</h3>
+							<select
+								class="select text-xs w-auto max-w-48"
+								onchange={(e) => {
+									fillContact('primary', e.currentTarget.value);
+									e.currentTarget.value = '';
+								}}
+							>
+								<option value="">{safeTranslate('fillFromUser')}</option>
+								{#each userOptions as user}
+									<option value={user.id}>{user.label}</option>
+								{/each}
+							</select>
+						</div>
 						<TextField form={_form} field="primary_contact_name" label={m.primaryContactName()} />
 						<TextField
 							form={_form}
@@ -254,7 +325,21 @@
 						/>
 					</div>
 					<div class="space-y-3">
-						<h3 class="font-medium text-sm text-gray-600">{m.doraSecondaryContact()}</h3>
+						<div class="flex items-center justify-between">
+							<h3 class="font-medium text-sm text-gray-600">{m.doraSecondaryContact()}</h3>
+							<select
+								class="select text-xs w-auto max-w-48"
+								onchange={(e) => {
+									fillContact('secondary', e.currentTarget.value);
+									e.currentTarget.value = '';
+								}}
+							>
+								<option value="">{safeTranslate('fillFromUser')}</option>
+								{#each userOptions as user}
+									<option value={user.id}>{user.label}</option>
+								{/each}
+							</select>
+						</div>
 						<TextField
 							form={_form}
 							field="secondary_contact_name"
@@ -835,18 +920,47 @@
 
 			<!-- Sticky Footer -->
 			<div
-				class="sticky bottom-0 z-10 bg-white border-t p-4 flex justify-end space-x-4 shadow-lg rounded-t-lg"
+				class="sticky bottom-0 z-10 bg-white border-t p-4 flex justify-between items-center shadow-lg rounded-t-lg"
 			>
-				<button
-					type="button"
-					class="btn preset-filled-tertiary-500 font-semibold px-8"
-					onclick={cancel}
-				>
-					{m.cancel()}
-				</button>
-				<button type="submit" class="btn preset-filled-primary-500 font-semibold px-8">
-					{m.save()}
-				</button>
+				<div class="flex space-x-3">
+					{#if mode === 'edit' && reportId}
+						{#if validation?.valid}
+							<a
+								href="/dora-incident-reports/{reportId}/export/json"
+								class="btn preset-filled-primary-500 font-semibold px-6"
+							>
+								<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}
+							</a>
+						{:else}
+							<span
+								class="btn preset-filled-surface-500 font-semibold px-6 opacity-50 cursor-not-allowed"
+								title={m.schemaInvalid()}
+							>
+								<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}
+							</span>
+						{/if}
+						{#if canProgress}
+							<a
+								href="/dora-incident-reports/new?from={reportId}"
+								class="btn preset-filled-secondary-500 font-semibold px-6"
+							>
+								<i class="fa-solid fa-arrow-right mr-2"></i>{m.nextSubmission()}
+							</a>
+						{/if}
+					{/if}
+				</div>
+				<div class="flex space-x-3">
+					<button
+						type="button"
+						class="btn preset-filled-tertiary-500 font-semibold px-8"
+						onclick={cancel}
+					>
+						{m.cancel()}
+					</button>
+					<button type="submit" class="btn preset-filled-primary-500 font-semibold px-8">
+						{m.save()}
+					</button>
+				</div>
 			</div>
 		{/snippet}
 	</SuperForm>
