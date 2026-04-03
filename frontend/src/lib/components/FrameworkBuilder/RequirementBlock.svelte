@@ -48,6 +48,17 @@
 		el.style.height = Math.max(40, el.scrollHeight) + 'px';
 	}
 
+	/** Svelte action: auto-grow textarea on mount and on input */
+	function autogrowAction(el: HTMLTextAreaElement) {
+		autoGrow(el);
+		el.addEventListener('input', () => autoGrow(el));
+		return {
+			destroy() {
+				el.removeEventListener('input', () => autoGrow(el));
+			}
+		};
+	}
+
 	/** Name length for live character counter */
 	let nameLength = $derived((requirement.node.name ?? '').length);
 </script>
@@ -132,13 +143,15 @@
 						<textarea
 							value={requirement.node.description ?? ''}
 							readonly
-							rows="1"
+							rows="3"
+							use:autogrowAction
 							class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
 						></textarea>
 						<textarea
 							value={getTranslation(requirement.node.translations, lang, 'description')}
 							placeholder="Translate description..."
-							rows="1"
+							rows="3"
+							use:autogrowAction
 							class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 							onblur={(e) =>
 								saveField(
@@ -150,20 +163,21 @@
 										e.currentTarget.value
 									)
 								)}
-							oninput={(e) => autoGrow(e.currentTarget)}
 						></textarea>
 					</div>
 					<div class="grid grid-cols-2 gap-3">
 						<textarea
 							value={requirement.node.typical_evidence ?? ''}
 							readonly
-							rows="1"
+							rows="2"
+							use:autogrowAction
 							class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
 						></textarea>
 						<textarea
 							value={getTranslation(requirement.node.translations, lang, 'typical_evidence')}
 							placeholder="Translate typical evidence..."
-							rows="1"
+							rows="2"
+							use:autogrowAction
 							class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 							onblur={(e) =>
 								saveField(
@@ -175,7 +189,6 @@
 										e.currentTarget.value
 									)
 								)}
-							oninput={(e) => autoGrow(e.currentTarget)}
 						></textarea>
 					</div>
 				{:else}
@@ -228,18 +241,18 @@
 					<textarea
 						value={requirement.node.description ?? ''}
 						placeholder="Description (optional)"
-						rows="1"
+						rows="3"
+						use:autogrowAction
 						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 						onblur={(e) => saveField('description', e.currentTarget.value || null)}
-						oninput={(e) => autoGrow(e.currentTarget)}
 					></textarea>
 					<textarea
 						value={requirement.node.typical_evidence ?? ''}
 						placeholder="Typical evidence (optional)"
-						rows="1"
+						rows="2"
+						use:autogrowAction
 						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 						onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
-						oninput={(e) => autoGrow(e.currentTarget)}
 					></textarea>
 				{/if}
 			</div>
