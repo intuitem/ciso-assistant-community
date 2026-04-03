@@ -8813,6 +8813,14 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
 
+    @staticmethod
+    def _slugify_framework_name(name, framework_id):
+        """Slugify a framework name for URN namespacing, with UUID fallback."""
+        slug = slugify(name, allow_unicode=False)[:60]
+        if not slug:
+            slug = str(framework_id)[:8]
+        return slug
+
     @action(detail=True, methods=["post"], name="Duplicate framework")
     def duplicate(self, request, pk):
         """Deep-clone a framework with all requirement nodes, questions, and choices."""
@@ -8834,8 +8842,9 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
         # Clone framework
+        new_name = request.data.get("name", f"{source.name} (copy)")
         new_framework = Framework.objects.create(
-            name=request.data.get("name", f"{source.name} (copy)"),
+            name=new_name,
             description=source.description,
             annotation=source.annotation,
             folder_id=folder_id,
@@ -8849,6 +8858,9 @@ class FrameworkViewSet(BaseModelViewSet):
             provider=source.provider,
         )
 
+        # Use readable slug-based URNs instead of UUIDs
+        fw_slug = self._slugify_framework_name(new_name, new_framework.id)
+
         # Map old URNs to new URNs for parent_urn remapping
         urn_map = {}
         nodes = RequirementNode.objects.filter(framework=source).order_by(
@@ -8856,8 +8868,12 @@ class FrameworkViewSet(BaseModelViewSet):
         )
         for node in nodes:
             old_urn = node.urn
-            new_urn = f"urn:intuitem:risk:req_node:{uuid.uuid4()}" if old_urn else None
-            urn_map[old_urn] = new_urn
+            if old_urn:
+                ref_id = node.ref_id or str(uuid.uuid4())[:8]
+                new_urn = f"urn:intuitem:risk:req_node:{fw_slug}:{ref_id}"
+                urn_map[old_urn] = new_urn
+            else:
+                urn_map[old_urn] = None
 
         # Clone requirement nodes
         node_id_map = {}  # old node id -> new node id
@@ -8894,8 +8910,9 @@ class FrameworkViewSet(BaseModelViewSet):
             new_req_node_id = node_id_map.get(q.requirement_node_id)
             if not new_req_node_id:
                 continue
+            q_ref_id = q.ref_id or str(uuid.uuid4())[:8]
             new_question = Question.objects.create(
-                urn=f"urn:intuitem:risk:question:{uuid.uuid4()}",
+                urn=f"urn:intuitem:risk:question:{fw_slug}:{q_ref_id}",
                 ref_id=q.ref_id,
                 text=q.text,
                 annotation=q.annotation,
@@ -8909,8 +8926,9 @@ class FrameworkViewSet(BaseModelViewSet):
                 translations=q.translations,
             )
             for choice in q.choices.all():
+                c_ref_id = choice.ref_id or str(uuid.uuid4())[:8]
                 QuestionChoice.objects.create(
-                    urn=f"urn:intuitem:risk:choice:{uuid.uuid4()}"
+                    urn=f"urn:intuitem:risk:question_choice:{fw_slug}:{c_ref_id}"
                     if choice.urn
                     else None,
                     ref_id=choice.ref_id,
@@ -9280,7 +9298,7 @@ class FrameworkViewSet(BaseModelViewSet):
 
         draft = framework.editing_draft
         try:
-            self._reconcile_draft(framework, draft)
+            warnings = self._reconcile_draft(framework, draft)
         except DraftValidationError as e:
             logger.warning(
                 "Validation error while publishing draft",
@@ -9298,10 +9316,17 @@ class FrameworkViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        return Response({"status": "draft_published"})
+        response_data = {"status": "draft_published"}
+        if warnings:
+            response_data["warnings"] = warnings
+        return Response(response_data)
 
     def _reconcile_draft(self, framework, draft):
-        """Reconcile the draft JSON into the relational DB within a transaction."""
+        """Reconcile the draft JSON into the relational DB within a transaction.
+
+        Returns a dict with optional 'warnings' key if URN disambiguation was needed.
+        """
+        warnings = []
         with transaction.atomic():
             # --- 1. Collect existing DB IDs ---
             db_node_ids = set(
@@ -9328,6 +9353,112 @@ class FrameworkViewSet(BaseModelViewSet):
             draft_node_ids = {uuid.UUID(n["id"]) for n in draft_nodes}
             draft_question_ids = {uuid.UUID(q["id"]) for q in draft_questions}
             draft_choice_ids = {uuid.UUID(c["id"]) for c in draft_choices}
+
+            # --- 2b. URN collision pre-check for new items ---
+            new_node_id_set = draft_node_ids - db_node_ids
+            new_question_id_set = draft_question_ids - db_question_ids
+
+            new_node_urns = {
+                n.get("urn")
+                for n in draft_nodes
+                if uuid.UUID(n["id"]) in new_node_id_set and n.get("urn")
+            }
+            new_question_urns = {
+                q.get("urn")
+                for q in draft_questions
+                if uuid.UUID(q["id"]) in new_question_id_set and q.get("urn")
+            }
+
+            if new_node_urns or new_question_urns:
+                node_collisions = set()
+                question_collisions = set()
+                if new_node_urns:
+                    node_collisions = set(
+                        RequirementNode.objects.filter(urn__in=new_node_urns)
+                        .exclude(framework=framework)
+                        .values_list("urn", flat=True)
+                    )
+                if new_question_urns:
+                    question_collisions = set(
+                        Question.objects.filter(urn__in=new_question_urns)
+                        .exclude(requirement_node__framework=framework)
+                        .values_list("urn", flat=True)
+                    )
+
+                if node_collisions or question_collisions:
+                    # Disambiguate: detect current slug from colliding URNs and
+                    # rewrite all draft URNs with a new slug suffix
+                    all_collisions = node_collisions | question_collisions
+                    # Extract the slug from the first colliding URN
+                    sample_urn = next(iter(all_collisions))
+                    parts = sample_urn.split(":")
+                    # URN format: urn:intuitem:risk:{type}:{slug}:{ref_id}
+                    current_slug = parts[4] if len(parts) >= 6 else ""
+
+                    new_slug = None
+                    for attempt in range(2, 12):
+                        candidate = f"{current_slug}-{attempt}"
+                        # Rewrite all URNs with the candidate slug
+                        candidate_node_urns = set()
+                        for n in draft_nodes:
+                            urn = n.get("urn")
+                            if urn and current_slug in urn:
+                                candidate_node_urns.add(
+                                    urn.replace(f":{current_slug}:", f":{candidate}:")
+                                )
+                        candidate_q_urns = set()
+                        for q in draft_questions:
+                            urn = q.get("urn")
+                            if urn and current_slug in urn:
+                                candidate_q_urns.add(
+                                    urn.replace(f":{current_slug}:", f":{candidate}:")
+                                )
+                        # Check if the candidate URNs also collide
+                        still_collides = False
+                        if candidate_node_urns:
+                            if (
+                                RequirementNode.objects.filter(
+                                    urn__in=candidate_node_urns
+                                )
+                                .exclude(framework=framework)
+                                .exists()
+                            ):
+                                still_collides = True
+                        if not still_collides and candidate_q_urns:
+                            if (
+                                Question.objects.filter(urn__in=candidate_q_urns)
+                                .exclude(requirement_node__framework=framework)
+                                .exists()
+                            ):
+                                still_collides = True
+                        if not still_collides:
+                            new_slug = candidate
+                            break
+
+                    if new_slug:
+                        # Rewrite all draft URNs and parent_urn references
+                        for n in draft_nodes:
+                            if n.get("urn") and current_slug in n["urn"]:
+                                n["urn"] = n["urn"].replace(
+                                    f":{current_slug}:", f":{new_slug}:"
+                                )
+                            if n.get("parent_urn") and current_slug in n["parent_urn"]:
+                                n["parent_urn"] = n["parent_urn"].replace(
+                                    f":{current_slug}:", f":{new_slug}:"
+                                )
+                        for q in draft_questions:
+                            if q.get("urn") and current_slug in q["urn"]:
+                                q["urn"] = q["urn"].replace(
+                                    f":{current_slug}:", f":{new_slug}:"
+                                )
+                        for c in draft_choices:
+                            if c.get("urn") and current_slug in c["urn"]:
+                                c["urn"] = c["urn"].replace(
+                                    f":{current_slug}:", f":{new_slug}:"
+                                )
+                        warnings.append(
+                            f"URN namespace collision detected, disambiguated to '{new_slug}'"
+                        )
 
             # --- 3. DELETE (choices → questions → nodes for FK safety) ---
             choices_to_delete = db_choice_ids - draft_choice_ids
@@ -9646,6 +9777,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "updated_at",
                 ]
             )
+        return warnings
 
     @action(detail=True, methods=["post"], url_path="discard-draft")
     def discard_draft(self, request, pk=None):
