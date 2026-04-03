@@ -405,7 +405,7 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
         max_length=50, blank=True
     )
 
-    fields_to_check = ["incident"]
+    fields_to_check = []
 
     class Meta:
         verbose_name = "DORA incident report"

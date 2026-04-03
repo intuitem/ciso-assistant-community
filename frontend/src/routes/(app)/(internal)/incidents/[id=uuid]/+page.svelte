@@ -215,6 +215,12 @@
 						</Popover.Content>
 					</Popover.Positioner>
 				</Popover>
+				<a
+					href="/dora-incident-reports/new?incident={data.data.id}"
+					class="btn preset-filled-secondary-500 w-full"
+				>
+					<i class="fa-solid fa-file-shield mr-2"></i>{m.generateDoraReport()}
+				</a>
 			</div>
 		{/snippet}
 		{#snippet widgets()}

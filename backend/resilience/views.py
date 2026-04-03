@@ -566,6 +566,24 @@ class DoraIncidentReportViewSet(BaseModelViewSet):
     filterset_fields = ["incident", "incident_submission", "folder"]
     search_fields = ["incident__name", "incident_description"]
 
+    @action(detail=False, name="Get main entity data for pre-fill")
+    def main_entity(self, request):
+        from tprm.models import Entity
+
+        entity = Entity.get_main_entity()
+        if not entity:
+            return Response({})
+        return Response(
+            {
+                "id": str(entity.id),
+                "name": entity.name,
+                "currency": entity.currency,
+                "dora_competent_authority": entity.dora_competent_authority,
+                "dora_entity_type": entity.dora_entity_type,
+                "legal_identifiers": entity.legal_identifiers or {},
+            }
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get submission type choices")
     def incident_submission(self, request):
@@ -584,6 +602,66 @@ class DoraIncidentReportViewSet(BaseModelViewSet):
         from core.dora import DORA_IR_CURRENCY_CHOICES
 
         return Response(dict(DORA_IR_CURRENCY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get classification criterion choices")
+    def classification_criterion(self, request):
+        from core.dora import DORA_IR_CLASSIFICATION_CRITERION_CHOICES
+
+        return Response(dict(DORA_IR_CLASSIFICATION_CRITERION_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get incident classification choices")
+    def incident_classification(self, request):
+        from core.dora import DORA_IR_INCIDENT_CLASSIFICATION_CHOICES
+
+        return Response(dict(DORA_IR_INCIDENT_CLASSIFICATION_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get threat techniques choices")
+    def threat_techniques(self, request):
+        from core.dora import DORA_IR_THREAT_TECHNIQUES_CHOICES
+
+        return Response(dict(DORA_IR_THREAT_TECHNIQUES_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get root cause high-level choices")
+    def root_cause_hl(self, request):
+        from core.dora import DORA_IR_ROOT_CAUSE_HL_CHOICES
+
+        return Response(dict(DORA_IR_ROOT_CAUSE_HL_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get root cause detailed choices")
+    def root_cause_detailed(self, request):
+        from core.dora import DORA_IR_ROOT_CAUSE_DETAILED_CHOICES
+
+        return Response(dict(DORA_IR_ROOT_CAUSE_DETAILED_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get root cause additional choices")
+    def root_cause_additional(self, request):
+        from core.dora import DORA_IR_ROOT_CAUSE_ADDITIONAL_CHOICES
+
+        return Response(dict(DORA_IR_ROOT_CAUSE_ADDITIONAL_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get reporting authority choices")
+    def reporting_authority(self, request):
+        from core.dora import DORA_IR_REPORTING_AUTHORITY_CHOICES
+
+        return Response(dict(DORA_IR_REPORTING_AUTHORITY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get downtime info actual/estimate choices")
+    def info_duration_service_downtime_actual_or_estimate(self, request):
+        choices = [
+            ("actual_figures", "Actual figures"),
+            ("estimates", "Estimates"),
+            ("actual_figures_and_estimates", "Actual figures and estimates"),
+            ("no_information_available", "No information available"),
+        ]
+        return Response(dict(choices))
 
     @action(detail=True, methods=["get"], name="Export DORA IR JSON")
     def export_json(self, request, pk):
