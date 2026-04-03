@@ -11352,15 +11352,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
         scores = compliance_assessment.get_global_score()
+        sd = compliance_assessment.framework.scores_definition
+        if isinstance(sd, dict) and "scale" in sd:
+            sd = sd["scale"]
+        scores_definition = get_referential_translation(
+            {"scores_definition": sd}, "scores_definition", get_language()
+        )
         return Response(
             {
                 **scores,
                 "max_score": compliance_assessment.max_score,
                 "min_score": compliance_assessment.min_score,
                 "total_max_score": compliance_assessment.get_total_max_score(),
-                "scores_definition": get_referential_translation(
-                    compliance_assessment.framework, "scores_definition", get_language()
-                ),
+                "scores_definition": scores_definition,
                 "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,
