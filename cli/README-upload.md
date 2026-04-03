@@ -1,5 +1,69 @@
 # Upload Assets From CSV And Replay JSON Bundle
 
+## Recommended Method: Multi-File EBIOS Package Import
+
+Use this method when your data is split across several JSON files in one folder (for example on `E:/`).
+
+### Step 1 - Go to CLI folder
+
+```powershell
+cd C:\Users\Godmod\Documents\ciso-assistant-community\cli
+```
+
+### Step 2 - Install dependencies in your venv
+
+```powershell
+C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+### Step 3 - Run the package importer
+
+```powershell
+C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py `
+	--input-dir E:/ `
+	--folder "Global" `
+	--matrix "4x4 risk matrix from EBIOS-RM"
+```
+
+### What is imported
+
+- Core data via Data Wizard: assets, threats, controls, risk scenarios
+- EBIOS RM: study, feared events, RO/TO, stakeholders, strategic scenarios, attack paths, operational scenarios
+
+### Replay modes
+
+- `--extras-only`: re-import workshop 2/3/4 objects only
+- `--skip-extras`: import core objects only
+- `--skip-feared-events`: keep feared events untouched
+
+Example (workshop 2/3/4 replay only):
+
+```powershell
+C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py `
+	--input-dir E:/ `
+	--folder "Global" `
+	--matrix "4x4 risk matrix from EBIOS-RM" `
+	--extras-only --skip-feared-events
+```
+
+### Troubleshooting
+
+- If terminology errors appear for `ro_to.risk_origin` or `entity.relationship`, rerun with the same command: the importer now creates visible fallback terms as needed.
+- If feared events already exist and conflict, rerun with `--skip-feared-events`.
+- Ensure `.clica.env` is present and valid (`TOKEN`, `API_URL`, `VERIFY_CERTIFICATE`).
+
+### Known Limitations And Replay Policy
+
+- Scope of this importer: workshop 1 to 4 objects only (core assets/threats/controls/risk scenarios + EBIOS study, feared events, RO/TO, stakeholders, strategic and operational scenarios).
+- Terminology behavior: if required visible terms are missing for `ro_to.risk_origin` or `entity.relationship`, importer-specific visible terms can be created to unblock the run.
+- Rerun safety: preferred rerun mode after a first successful load is `--extras-only --skip-feared-events` to avoid duplicate conflicts on feared events.
+- Idempotency model: most objects are upserted (update-or-create) using references or stable keys; however, malformed or duplicated source refs can still produce conflicts.
+- Input contract: JSON files are expected as arrays and must keep stable `ref_id` values across reruns.
+- Recommended production sequence:
+	1. Initial load with full command.
+	2. Iterative workshop updates with `--extras-only --skip-feared-events`.
+	3. Full replay only when source package structure has changed significantly.
+
 ## Replay A Full JSON Bundle
 
 If your source of truth is a single JSON bundle instead of a CSV, use the dedicated orchestrator from the `cli/` folder.

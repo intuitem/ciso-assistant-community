@@ -207,6 +207,41 @@ Notes:
 - Existing records are updated in place.
 - `feared_events` are imported through the EBIOS RM API, not through standard Data Wizard import.
 
+### Import A Multi-File EBIOS JSON Package
+
+If your EBIOS content is split across several JSON files (for example `assets.json`, `risk_sources.json`, `threats.json`, `risk_scenarios.json`, `ro_to_pairs.json`, `stakeholders.json`, `strategic_scenarios.json`, `operational_scenarios.json`), use:
+
+```powershell
+cd C:\Users\Godmod\Documents\ciso-assistant-community\cli
+C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py `
+  --input-dir E:/ `
+  --folder "Global" `
+  --matrix "4x4 risk matrix from EBIOS-RM"
+```
+
+What this orchestrator does:
+
+- Loads and validates the multi-file package from `--input-dir`
+- Builds `risk_bundle_fixed.json` for replayability
+- Runs Data Wizard imports for assets, threats, controls, and risk assessment scenarios
+- Upserts EBIOS RM objects: study, feared events, RO/TO pairs, stakeholders, strategic scenarios, attack paths, and operational scenarios
+
+Useful rerun modes:
+
+- `--extras-only`: replay only EBIOS workshop 2/3/4 objects (RO/TO to operational scenarios)
+- `--skip-extras`: replay only core Data Wizard imports
+- `--skip-feared-events`: skip feared event upsert when those are already loaded
+
+Example rerun for workshop 2/3/4 only:
+
+```powershell
+C:\Users\Godmod\Documents\ciso-assistant-community\.venv\Scripts\python.exe .\import_ebios_json_package.py `
+  --input-dir E:/ `
+  --folder "Global" `
+  --matrix "4x4 risk matrix from EBIOS-RM" `
+  --extras-only --skip-feared-events
+```
+
 ### File Upload Commands
 
 #### `upload-attachment`
