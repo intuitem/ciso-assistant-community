@@ -1,4 +1,30 @@
-# Upload Assets From CSV
+# Upload Assets From CSV And Replay JSON Bundle
+
+## Replay A Full JSON Bundle
+
+If your source of truth is a single JSON bundle instead of a CSV, use the dedicated orchestrator from the `cli/` folder.
+
+```powershell
+cd C:\Users\Godmod\Documents\ciso-assistant-community\cli
+C:\Users\Godmod\AppData\Local\Programs\Python\Python312\python.exe -m pip install -r requirements.txt
+C:\Users\Godmod\AppData\Local\Programs\Python\Python312\python.exe .\import_complete_json_bundle.py --input "E:\asset threat scenario control.txt"
+```
+
+This single command chain will:
+
+- normalize the JSON into `risk_bundle_fixed.json`
+- import `risk_sources`
+- import EBIOS RM `feared_events`
+- generate the intermediate CSV files
+- import assets, threats, controls, and risk assessment scenarios
+
+If `risk_bundle_fixed.json` already exists in `cli/`, you can simply rerun:
+
+```powershell
+C:\Users\Godmod\AppData\Local\Programs\Python\Python312\python.exe .\import_complete_json_bundle.py
+```
+
+---
 
 This guide explains how to import many assets into CISO Assistant from a CSV file using the CLI.
 

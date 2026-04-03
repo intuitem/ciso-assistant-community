@@ -32,6 +32,7 @@ must already exist as Folders in CISO Assistant before import.
 import csv
 import sys
 import argparse
+import re
 from pathlib import Path
 
 
@@ -80,6 +81,21 @@ OUT_COLS = [
     "parent_assets",
     "labels",
 ]
+
+
+def detect_delimiter(lines: list[str]) -> str:
+    """Detect CSV delimiter from a short sample, fallback to comma."""
+    sample = "\n".join(lines[:30])
+    try:
+        dialect = csv.Sniffer().sniff(sample, delimiters=",;\t|")
+        return dialect.delimiter
+    except csv.Error:
+        return ","
+
+
+def sanitize_csv_line(line: str) -> str:
+    """Repair malformed closing quotes like '"value"" ,' from legacy exports."""
+    return re.sub(r'"([^"\r\n]*)""(?=,|;|\t|\||$)', r'"\1"', line)
 
 
 def map_severity(value: str) -> int | None:
@@ -248,10 +264,44 @@ def convert(input_path: Path, output_path: Path, encoding: str, override_domain:
 
     try:
         with open(input_path, encoding=encoding, newline="", errors="replace") as f:
-            rows = list(csv.DictReader(f))
+            raw_lines = f.read().splitlines()
     except FileNotFoundError:
         print(f"Error: file not found: {input_path}", file=sys.stderr)
         sys.exit(1)
+
+    if not raw_lines:
+        print("Warning: source file is empty.", file=sys.stderr)
+        sys.exit(1)
+
+    delimiter = detect_delimiter(raw_lines)
+
+    # Parse row-by-row so malformed quotes on one line never corrupt the next lines.
+    try:
+        headers = next(csv.reader([raw_lines[0]], delimiter=delimiter))
+    except (csv.Error, StopIteration):
+        print("Error: unable to parse CSV header.", file=sys.stderr)
+        sys.exit(1)
+
+    rows = []
+    parse_errors = 0
+    for line_no, raw_line in enumerate(raw_lines[1:], start=2):
+        if not raw_line.strip():
+            continue
+
+        fixed_line = sanitize_csv_line(raw_line)
+        try:
+            values = next(csv.reader([fixed_line], delimiter=delimiter))
+        except csv.Error:
+            parse_errors += 1
+            continue
+
+        if len(values) < len(headers):
+            values.extend([""] * (len(headers) - len(values)))
+        elif len(values) > len(headers):
+            # Preserve extra commas by folding the overflow into the last column.
+            values = values[:len(headers) - 1] + [delimiter.join(values[len(headers) - 1:])]
+
+        rows.append(dict(zip(headers, values)))
 
     if not rows:
         print("Warning: source file is empty or has no data rows.", file=sys.stderr)
@@ -259,8 +309,11 @@ def convert(input_path: Path, output_path: Path, encoding: str, override_domain:
 
     # Show detected columns for debugging
     first_row = rows[0]
+    print(f"Detected delimiter: {repr(delimiter)}")
     print(f"Detected columns: {list(first_row.keys())}")
     print(f"Processing {len(rows)} source rows...")
+    if parse_errors:
+        print(f"Skipped {parse_errors} unparsable rows due to malformed CSV quoting.")
 
     out_rows = []
     skipped = 0

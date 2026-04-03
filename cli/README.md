@@ -151,6 +151,62 @@ python clica.py import-assets \
 
 For assets, the import file can also include a `localisation` column (or `location` as an alias).
 
+### Replay A Complete JSON Risk Bundle
+
+If you already have a single JSON file containing `assets`, `risk_sources`, `threats`, `feared_events`, `risk_scenarios`, and `controls`, use the bundled orchestrator instead of importing each object manually.
+
+What the script does:
+
+- Repairs and normalizes the source JSON into `risk_bundle_fixed.json`
+- Imports `risk_sources` as Teams
+- Creates or updates the EBIOS RM study and imports `feared_events`
+- Generates `bundle_assets.csv`, `bundle_threats.csv`, `bundle_controls.csv`, and `bundle_risk_assessment.csv`
+- Imports assets, threats, applied controls, and risk assessment scenarios with `--on-conflict update`
+
+Recommended replay sequence:
+
+```powershell
+cd C:\Users\Godmod\Documents\ciso-assistant-community\cli
+C:\Users\Godmod\AppData\Local\Programs\Python\Python312\python.exe -m pip install -r requirements.txt
+C:\Users\Godmod\AppData\Local\Programs\Python\Python312\python.exe .\import_complete_json_bundle.py --input "E:\asset threat scenario control.txt"
+```
+
+If your bundle is already available as `risk_bundle_fixed.json` in the `cli/` folder, you can replay without `--input`:
+
+```powershell
+C:\Users\Godmod\AppData\Local\Programs\Python\Python312\python.exe .\import_complete_json_bundle.py
+```
+
+Optional parameters:
+
+- `--folder "Global"`
+- `--perimeter "Global Perimeter"`
+- `--matrix "4x4 risk matrix from EBIOS-RM"`
+
+Example with explicit options:
+
+```powershell
+C:\Users\Godmod\AppData\Local\Programs\Python\Python312\python.exe .\import_complete_json_bundle.py \
+  --input "E:\asset threat scenario control.txt" \
+  --folder "Global" \
+  --perimeter "Global Perimeter" \
+  --matrix "4x4 risk matrix from EBIOS-RM"
+```
+
+Expected generated files:
+
+- `risk_bundle_fixed.json`: normalized source bundle reused by helper scripts
+- `bundle_assets.csv`
+- `bundle_threats.csv`
+- `bundle_controls.csv`
+- `bundle_risk_assessment.csv`
+
+Notes:
+
+- The script expects `.clica.env` to be configured first.
+- Existing records are updated in place.
+- `feared_events` are imported through the EBIOS RM API, not through standard Data Wizard import.
+
 ### File Upload Commands
 
 #### `upload-attachment`
