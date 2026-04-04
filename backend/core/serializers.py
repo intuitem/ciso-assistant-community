@@ -1244,6 +1244,16 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     state = serializers.SerializerMethodField()
     findings_count = serializers.IntegerField(source="findings.count")
     is_assigned = serializers.BooleanField(read_only=True)
+    linked_models = serializers.SerializerMethodField()
+
+    def get_linked_models(self, obj):
+        from core.views import APPLIED_CONTROL_LINKED_FIELD_NAMES
+
+        return [
+            name
+            for name in APPLIED_CONTROL_LINKED_FIELD_NAMES
+            if getattr(obj, f"has_{name}", False)
+        ]
 
     def get_state(self, obj):
         if not obj.eta:

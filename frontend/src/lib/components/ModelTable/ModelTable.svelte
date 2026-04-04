@@ -564,6 +564,7 @@
 	// Helper function to convert linked_models snake_case to camelCase for translation
 	const convertLinkedModelName = (snakeCaseName: string): string => {
 		const mapping: Record<string, string> = {
+			// Validation flows
 			compliance_assessments: 'complianceAssessments',
 			risk_assessments: 'riskAssessments',
 			business_impact_analysis: 'businessImpactAnalysis',
@@ -573,7 +574,22 @@
 			findings_assessments: 'findingsAssessments',
 			evidences: 'evidences',
 			security_exceptions: 'securityExceptions',
-			policies: 'policies'
+			policies: 'policies',
+			// Applied controls
+			requirement_assessments: 'requirementAssessments',
+			risk_scenarios: 'riskScenarios',
+			risk_scenarios_e: 'riskScenariosExisting',
+			findings: 'findings',
+			vulnerabilities: 'vulnerabilities',
+			stakeholders: 'stakeholders',
+			processings: 'processings',
+			data_breaches_remediated: 'dataBreaches',
+			quantitative_risk_hypotheses_existing: 'crqHypothesesExisting',
+			quantitative_risk_hypotheses_added: 'crqHypothesesAdded',
+			quantitative_risk_hypotheses_removed: 'crqHypothesesRemoved',
+			assetassessment: 'assetAssessments',
+			task_templates: 'taskTemplates',
+			comments: 'comments'
 		};
 		return mapping[snakeCaseName] || snakeCaseName;
 	};
