@@ -26,6 +26,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `Policy` | Single sheet CSV/Excel | **Supported** |
 | `SecurityException` | Single sheet CSV/Excel | **Supported** |
 | `Incident` | Single sheet CSV/Excel | **Supported** |
+| `MetricInstance` | Single sheet CSV/Excel | **Supported** |
 | `TPRM` | Multi-sheet Excel (Entities, Solutions, Contracts) | **Supported** |
 | `EbiosRMStudyARM` | Multi-sheet Excel (ARM format) | **Supported** |
 | `EbiosRMStudyExcel` | Multi-sheet Excel (Native export format) | **Supported** |
@@ -38,6 +39,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 ### 1. Asset (`AssetRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `ref_id` | No | Reference ID |
@@ -52,6 +54,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `owner` | M2M Actor | Medium |
@@ -65,6 +68,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 ### 2. AppliedControl (`AppliedControlRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `ref_id` | No | Reference ID |
@@ -91,6 +95,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `run_people_days` | No | Integer |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `owner` | M2M Actor | Medium |
@@ -102,6 +107,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 ### 3. Evidence (`EvidenceRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | **Yes** | Evidence name |
@@ -111,6 +117,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `attachment` | FileField | Medium |
@@ -123,6 +130,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 ### 4. User (`UserRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `email` | **Yes** | User email |
@@ -130,6 +138,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `last_name` | No | |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `is_active` | BooleanField | High |
@@ -142,6 +151,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 ### 5. Perimeter (`PerimeterRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | **Yes** | Perimeter name |
@@ -151,6 +161,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `status` | No | |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `reference_link` | URLField | Medium |
@@ -161,6 +172,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 ### 6. Threat (`ThreatRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | **Yes** | Threat name |
@@ -169,6 +181,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `ref_id` | No | Reference ID |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `annotation` | TextField | Medium |
@@ -181,6 +194,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 ### 7. ReferenceControl (`ReferenceControlRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | **Yes** | Control name |
@@ -191,6 +205,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `function` | No | Maps to `csf_function`: govern, identify, protect, detect, respond, recover |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `annotation` | TextField | Medium |
@@ -218,6 +233,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `observation` | No | Free text |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `owner` | M2M Actor | High |
@@ -304,6 +320,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 ### 11. ElementaryAction
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | **Yes** | Action name |
@@ -314,6 +331,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 | `icon` | No | Mapped: server, computer, cloud, file, etc. |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `threat` | FK Threat | Medium |
@@ -323,6 +341,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 ### 12. Processing (Privacy)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | **Yes** | Processing name |
@@ -337,6 +356,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 | `labels` | No | Maps to `filtering_labels`, comma-separated |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `author` | FK User | Medium |
@@ -352,6 +372,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 ### 13. Folder
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | **Yes** | Folder name |
@@ -359,6 +380,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 | `domain` | No | Maps to `parent_folder` (name lookup) |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `content_type` | CharField | Low |
@@ -372,6 +394,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 Policy is a proxy model of AppliedControl with `category='policy'`.
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `ref_id` | No | Reference ID |
@@ -388,6 +411,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `owner` | M2M Actor | High |
@@ -401,6 +425,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 ### 15. SecurityException (`SecurityExceptionRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `ref_id` | No | Reference ID |
@@ -413,6 +438,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `observation` | No | Text observations |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `owners` | M2M Actor | High |
@@ -427,6 +453,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 ### 16. Incident (`IncidentRecordConsumer`)
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `ref_id` | No | Reference ID |
@@ -441,6 +468,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | `owners` | M2M Actor | High |
@@ -452,11 +480,50 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
-### 17. TPRM (Multi-sheet Import)
+### 17. Metric instances (`MetricInstanceRecordConsumer`)
+
+| Field | Type | Required | Note |
+|-------|------|---------|-------|
+| `ref_id`      | string | No  ||
+| `name`        | string | **Yes** ||
+| `description` | string | No  ||
+| `status`      | string | No  | The list of the possible statuses below |
+| `filtering_labels` | list | No | List of labels, newline-separated |
+| `metric_definition` | string | **Yes** | Name of the associated metric definition |
+| `owner` | string | No | Email of the owners separated by ";" |
+| `target_value` | float | No ||
+| `collection_frequency` | string | No | The list of the possible collection frequencies below |
+
+**Missing Fields from Model:**
+
+| Field | Type | Priority |
+|-------|------|----------|
+| `evidences` | M2M Evidence | Medium |
+| `objectives` | M2M Evidence | Medium |
+
+**Metric's status**
+* draft
+* active
+* stale
+* deprecated
+
+**Metric collection's frequency**
+* realtime
+* hourly
+* daily
+* weekly
+* monthly
+* quarterly
+* yearly
+
+---
+
+### 18. TPRM (Multi-sheet Import)
 
 #### Entities Sheet
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `ref_id` | **Yes** | Reference ID |
@@ -489,6 +556,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 #### Solutions Sheet
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `ref_id` | **Yes** | Reference ID |
@@ -512,6 +580,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 #### Contracts Sheet
 
 **Supported Fields:**
+
 | Field | Required | Notes |
 |-------|----------|-------|
 | `ref_id` | **Yes** | Reference ID |
@@ -538,7 +607,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
-### 18. EbiosRMStudyARM (ARM Format Import)
+### 19. EbiosRMStudyARM (ARM Format Import)
 
 **Creates the following objects:**
 - EbiosRMStudy (name, description, risk_matrix, folder)
@@ -555,7 +624,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
-### 19. EbiosRMStudyExcel (Native Export Format Import)
+### 20. EbiosRMStudyExcel (Native Export Format Import)
 
 **Additional objects created beyond ARM:**
 - OperationalScenarios
@@ -564,7 +633,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 ---
 
 
-### 20. Vulnerability
+### 21. Vulnerability
 
 | Field | Type | Required | Note |
 |-------|------|---------|-------|
@@ -595,7 +664,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 * high
 * critical
 
-### 21. BusinessImpactAnalysis (Multi-sheet Import)
+### 22. BusinessImpactAnalysis (Multi-sheet Import)
 
 **Behavior:** Creates a `BusinessImpactAnalysis` object plus `AssetAssessment` and `EscalationThreshold` child objects from a three-sheet workbook produced by the BIA export.
 
