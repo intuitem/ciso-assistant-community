@@ -319,7 +319,7 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
     # -- Report metadata --
     incident = models.ForeignKey(
         "core.Incident",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="dora_reports",
     )
     incident_submission = models.CharField(
@@ -411,6 +411,9 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
     )
 
     is_submitted = models.BooleanField(default=False, verbose_name=_("Submitted"))
+    submitted_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Submitted at")
+    )
 
     fields_to_check = []
 
@@ -424,6 +427,11 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         if self.incident_id:
             self.folder = self.incident.folder
+        # Auto-set submitted_at on first submission
+        if self.is_submitted and not self.submitted_at:
+            from django.utils import timezone
+
+            self.submitted_at = timezone.now()
         super().save(*args, **kwargs)
 
 
