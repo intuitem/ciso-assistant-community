@@ -342,7 +342,9 @@
 				<Tabs.Trigger value="dora-reports">
 					<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
 					{#if doraRows.length > 0}
-						<span class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700">
+						<span
+							class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700"
+						>
 							{doraRows.length}
 						</span>
 					{/if}
@@ -356,82 +358,85 @@
 					<RowsPerPage {handler} />
 				</div>
 				<ol class="relative border-s border-primary-500 dark:border-primary-700">
-			{#each $rows as row, rowIndex}
-				{@const meta = row?.meta ?? row}
-				{@const actionsURLModel = 'timeline-entries'}
-				<li class="ms-4">
-					<div
-						class="absolute w-3 h-3 bg-primary-500 rounded-full mt-1.5 -start-1.5 border border-white dark:border-primary-900 dark:bg-primary-700"
-					></div>
-					<div class="flex flex-col">
-						<div class="flex flex-row items-center space-x-3 mb-1">
-							<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
-								{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta?.author
-										?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
-							>
-							<TableRowActions
-								baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
-								deleteForm={data.relatedModels['timeline-entries'].deleteForm}
-								model={model.info}
-								URLModel={actionsURLModel}
-								detailURL={`/${actionsURLModel}/${meta.id}`}
-								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
-								{row}
-								identifierField={'id'}
-								preventDelete={preventDelete(row)}
-							></TableRowActions>
-							{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
-								<span class="text-xs italic text-gray-500 dark:text-gray-400">
-									({m.edited()})
-								</span>
-							{/if}
-						</div>
-						<div class="flex mb-2">
-							<span class="text-xs font-mono bg-violet-700 text-white py-1 px-2 rounded-sm mr-1"
-								>{safeTranslate(meta.entry_type)}</span
-							>
-							<a
-								href={`/${actionsURLModel}/${meta.id}`}
-								class="font-semibold capitalize"
-								data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
-							>
-						</div>
-						<div class="py-1 mb-2">
-							{#if meta.observation}
-								<MarkdownRenderer content={meta.observation} class="bg-primary-50 rounded-lg p-2" />
-							{:else}
-								<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
-							{/if}
-						</div>
-						{#if meta.evidences && meta.evidences.length > 0}
-							<div class="mb-2">
-								<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
-								<div class="flex flex-wrap gap-1">
-									{#each meta.evidences as evidence}
-										<a
-											href={`/evidences/${evidence.id}`}
-											class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
-											title={evidence.str}
-										>
-											<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
-											<span class="truncate">{evidence.str}</span>
-										</a>
-									{/each}
+					{#each $rows as row, rowIndex}
+						{@const meta = row?.meta ?? row}
+						{@const actionsURLModel = 'timeline-entries'}
+						<li class="ms-4">
+							<div
+								class="absolute w-3 h-3 bg-primary-500 rounded-full mt-1.5 -start-1.5 border border-white dark:border-primary-900 dark:bg-primary-700"
+							></div>
+							<div class="flex flex-col">
+								<div class="flex flex-row items-center space-x-3 mb-1">
+									<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
+										{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta
+												?.author?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
+									>
+									<TableRowActions
+										baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
+										deleteForm={data.relatedModels['timeline-entries'].deleteForm}
+										model={model.info}
+										URLModel={actionsURLModel}
+										detailURL={`/${actionsURLModel}/${meta.id}`}
+										editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
+										{row}
+										identifierField={'id'}
+										preventDelete={preventDelete(row)}
+									></TableRowActions>
+									{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
+										<span class="text-xs italic text-gray-500 dark:text-gray-400">
+											({m.edited()})
+										</span>
+									{/if}
 								</div>
+								<div class="flex mb-2">
+									<span class="text-xs font-mono bg-violet-700 text-white py-1 px-2 rounded-sm mr-1"
+										>{safeTranslate(meta.entry_type)}</span
+									>
+									<a
+										href={`/${actionsURLModel}/${meta.id}`}
+										class="font-semibold capitalize"
+										data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
+									>
+								</div>
+								<div class="py-1 mb-2">
+									{#if meta.observation}
+										<MarkdownRenderer
+											content={meta.observation}
+											class="bg-primary-50 rounded-lg p-2"
+										/>
+									{:else}
+										<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
+									{/if}
+								</div>
+								{#if meta.evidences && meta.evidences.length > 0}
+									<div class="mb-2">
+										<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
+										<div class="flex flex-wrap gap-1">
+											{#each meta.evidences as evidence}
+												<a
+													href={`/evidences/${evidence.id}`}
+													class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
+													title={evidence.str}
+												>
+													<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
+													<span class="truncate">{evidence.str}</span>
+												</a>
+											{/each}
+										</div>
+									</div>
+								{/if}
 							</div>
-						{/if}
-					</div>
-				</li>
-			{/each}
-		</ol>
-		<footer class="flex justify-between items-center space-x-8 p-2">
-			{#if pagination}
-				<RowCount {handler} />
-			{/if}
-			{#if pagination}
-				<Pagination {handler} />
-			{/if}
-		</footer>
+						</li>
+					{/each}
+				</ol>
+				<footer class="flex justify-between items-center space-x-8 p-2">
+					{#if pagination}
+						<RowCount {handler} />
+					{/if}
+					{#if pagination}
+						<Pagination {handler} />
+					{/if}
+				</footer>
 			</Tabs.Content>
 
 			<Tabs.Content value="dora-reports" class="pt-4">

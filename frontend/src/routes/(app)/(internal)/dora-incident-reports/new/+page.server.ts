@@ -32,16 +32,9 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 	let incidentRef: { id: string; name: string } | null = null;
 
 	// Submission type progression: initial → intermediate (multiple allowed) → final
-	const SUBMISSION_PROGRESSION = [
-		'initial_notification',
-		'intermediate_report',
-		'final_report'
-	];
+	const SUBMISSION_PROGRESSION = ['initial_notification', 'intermediate_report', 'final_report'];
 
-	function getNextSubmissionType(
-		currentType: string,
-		existingTypes: string[]
-	): string {
+	function getNextSubmissionType(currentType: string, existingTypes: string[]): string {
 		const currentIndex = SUBMISSION_PROGRESSION.indexOf(currentType);
 		// Try advancing to the next type
 		for (let i = currentIndex + 1; i < SUBMISSION_PROGRESSION.length; i++) {
@@ -58,17 +51,15 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 	if (fromReportId) {
 		// ── Continue from previous report: copy all data, advance submission type ──
 		try {
-			const prev = await fetch(
-				`${BASE_API_URL}/${ENDPOINT}/${fromReportId}/object/`
-			).then((r) => r.json());
+			const prev = await fetch(`${BASE_API_URL}/${ENDPOINT}/${fromReportId}/object/`).then((r) =>
+				r.json()
+			);
 
 			// Fetch existing report types for this incident
 			let existingTypes: string[] = [];
 			if (prev.incident) {
 				try {
-					const existingRes = await fetch(
-						`${BASE_API_URL}/${ENDPOINT}/?incident=${prev.incident}`
-					);
+					const existingRes = await fetch(`${BASE_API_URL}/${ENDPOINT}/?incident=${prev.incident}`);
 					if (existingRes.ok) {
 						const existingData = await existingRes.json();
 						const reports = existingData.results ?? existingData ?? [];
@@ -80,12 +71,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 			}
 
 			// Copy all fields from previous report
-			const {
-				id: _id,
-				created_at: _ca,
-				updated_at: _ua,
-				...prevData
-			} = prev;
+			const { id: _id, created_at: _ca, updated_at: _ua, ...prevData } = prev;
 
 			prefillData = {
 				...prevData,
@@ -95,8 +81,8 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 			// Resolve incident name for the back link
 			if (prev.incident) {
 				try {
-					const inc = await fetch(`${BASE_API_URL}/incidents/${prev.incident}/`).then(
-						(r) => r.json()
+					const inc = await fetch(`${BASE_API_URL}/incidents/${prev.incident}/`).then((r) =>
+						r.json()
 					);
 					incidentRef = { id: prev.incident, name: inc.name || inc.str || prev.incident };
 				} catch {
@@ -113,9 +99,9 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 
 		// Fetch main entity (the reporting organization)
 		try {
-			const mainEntity = await fetch(
-				`${BASE_API_URL}/${ENDPOINT}/main_entity/`
-			).then((r) => r.json());
+			const mainEntity = await fetch(`${BASE_API_URL}/${ENDPOINT}/main_entity/`).then((r) =>
+				r.json()
+			);
 
 			if (mainEntity.id) {
 				prefillData.submitting_entity = mainEntity.id;
@@ -137,8 +123,8 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 
 		if (incidentId) {
 			try {
-				const incident = await fetch(`${BASE_API_URL}/incidents/${incidentId}/`).then(
-					(r) => r.json()
+				const incident = await fetch(`${BASE_API_URL}/incidents/${incidentId}/`).then((r) =>
+					r.json()
 				);
 
 				prefillData.incident = incidentId;
@@ -148,9 +134,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 				incidentRef = { id: incidentId, name: incident.name || incident.str || incidentId };
 
 				// Incident's linked entities are the affected entities
-				const entityIds: string[] = (incident.entities || []).map(
-					(e: any) => e.id ?? e
-				);
+				const entityIds: string[] = (incident.entities || []).map((e: any) => e.id ?? e);
 				if (entityIds.length > 0) {
 					prefillData.affected_entities = entityIds;
 				}

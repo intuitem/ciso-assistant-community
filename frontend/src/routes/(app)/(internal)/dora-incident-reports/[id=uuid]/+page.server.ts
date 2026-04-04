@@ -34,8 +34,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	let incidentRef: { id: string; name: string } | null = null;
 	if (object.incident) {
 		try {
-			const inc = await fetch(`${BASE_API_URL}/incidents/${object.incident}/`).then(
-				(r) => r.json()
+			const inc = await fetch(`${BASE_API_URL}/incidents/${object.incident}/`).then((r) =>
+				r.json()
 			);
 			incidentRef = { id: object.incident, name: inc.name || inc.str || object.incident };
 		} catch {
@@ -46,9 +46,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	// Fetch validation status
 	let validation = { valid: false, errors: [] as string[] };
 	try {
-		const res = await fetch(
-			`${BASE_API_URL}/${ENDPOINT}/${params.id}/validate_report/`
-		);
+		const res = await fetch(`${BASE_API_URL}/${ENDPOINT}/${params.id}/validate_report/`);
 		if (res.ok) {
 			validation = await res.json();
 		}

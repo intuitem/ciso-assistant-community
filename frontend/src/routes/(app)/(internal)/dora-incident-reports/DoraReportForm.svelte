@@ -89,9 +89,7 @@
 	);
 	let serviceImpact = $derived(impactAssessment.serviceImpact);
 	let affectedAssets = $derived(impactAssessment.affectedAssets);
-	let rootCauseHl: string[] = $state(
-		initCopy($formData.root_cause_hl_classification || [])
-	);
+	let rootCauseHl: string[] = $state(initCopy($formData.root_cause_hl_classification || []));
 	let rootCauseDetailed: string[] = $state(
 		initCopy($formData.root_causes_detailed_classification || [])
 	);
@@ -158,9 +156,7 @@
 	let hasOtherClassification = $derived(
 		(incidentType.incidentClassification || []).includes('other')
 	);
-	let hasOtherTechnique = $derived(
-		(incidentType.threatTechniques || []).includes('other')
-	);
+	let hasOtherTechnique = $derived((incidentType.threatTechniques || []).includes('other'));
 	let hasOtherAuthority = $derived(reportingAuthorities.includes('other'));
 
 	// Fill contact fields from a selected user
@@ -318,11 +314,7 @@
 							label={m.primaryContactEmail()}
 							type="email"
 						/>
-						<TextField
-							form={_form}
-							field="primary_contact_phone"
-							label={m.primaryContactPhone()}
-						/>
+						<TextField form={_form} field="primary_contact_phone" label={m.primaryContactPhone()} />
 					</div>
 					<div class="space-y-3">
 						<div class="flex items-center justify-between">
@@ -366,11 +358,7 @@
 					<i class="fa-solid fa-circle-info mr-2"></i>{m.doraIncidentDetails()}
 				</h2>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<TextField
-						form={_form}
-						field="financial_entity_code"
-						label={m.financialEntityCode()}
-					/>
+					<TextField form={_form} field="financial_entity_code" label={m.financialEntityCode()} />
 					<TextField
 						form={_form}
 						field="competent_authority_code"
@@ -401,11 +389,7 @@
 						placeholder="HHH:MM:SS"
 					/>
 				</div>
-				<MarkdownField
-					form={_form}
-					field="incident_description"
-					label={m.incidentDescription()}
-				/>
+				<MarkdownField form={_form} field="incident_description" label={m.incidentDescription()} />
 				<TextField
 					form={_form}
 					field="originates_from_third_party_provider"
@@ -518,10 +502,7 @@
 				{#each classificationTypes as criterion, index}
 					<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
 						<div class="flex justify-between items-center">
-							<select
-								bind:value={criterion.classificationCriterion}
-								class="select w-full max-w-md"
-							>
+							<select bind:value={criterion.classificationCriterion} class="select w-full max-w-md">
 								<option value="">--</option>
 								{#each allChoices.classificationCriterion as choice}
 									<option value={choice.value}>{choice.label}</option>
@@ -623,9 +604,7 @@
 					>
 					<div class="flex flex-wrap gap-2">
 						{#each allChoices.rootCauseDetailed as choice}
-							<label
-								class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md"
-							>
+							<label class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md">
 								<input
 									type="checkbox"
 									checked={rootCauseDetailed.includes(choice.value)}
@@ -645,9 +624,7 @@
 					>
 					<div class="flex flex-wrap gap-2">
 						{#each allChoices.rootCauseAdditional as choice}
-							<label
-								class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md"
-							>
+							<label class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md">
 								<input
 									type="checkbox"
 									checked={rootCauseAdditional.includes(choice.value)}
@@ -689,9 +666,7 @@
 						bind:checked={impactAssessment.hasImpactOnRelevantClients}
 						class="rounded"
 					/>
-					<span class="text-sm font-medium"
-						>{safeTranslate('hasImpactOnRelevantClients')}</span
-					>
+					<span class="text-sm font-medium">{safeTranslate('hasImpactOnRelevantClients')}</span>
 				</label>
 
 				<div>
@@ -878,10 +853,7 @@
 									type="checkbox"
 									checked={reportingAuthorities.includes(choice.value)}
 									onchange={() =>
-										(reportingAuthorities = toggleArrayValue(
-											reportingAuthorities,
-											choice.value
-										))}
+										(reportingAuthorities = toggleArrayValue(reportingAuthorities, choice.value))}
 									class="rounded"
 								/>
 								<span>{choice.label}</span>
