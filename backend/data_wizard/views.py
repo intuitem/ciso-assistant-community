@@ -613,6 +613,16 @@ class AssetRecordConsumer(RecordConsumer[list]):
                 asset_type.lower().strip(), asset_type.upper()
             )
 
+        record_is_business_function = record.get("is_business_function", False)
+        is_business_function = False
+        if isinstance(record_is_business_function, str):
+            is_business_function = record_is_business_function.strip().lower() in [
+                "true",
+                "yes",
+            ]
+        elif isinstance(record_is_business_function, bool):
+            is_business_function = record_is_business_function
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
@@ -623,6 +633,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
             "reference_link": record.get("reference_link", "")
             or record.get("link", ""),
             "observation": record.get("observation", ""),
+            "is_business_function": is_business_function,
         }
 
         raw_labels = (

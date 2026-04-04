@@ -2208,6 +2208,10 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "label": "observation",
                 "escape": True,
             },
+            "is_business_function": {
+                "source": "is_business_function",
+                "label": "Is a business function ?",
+            },
         },
         "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
