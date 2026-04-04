@@ -14,7 +14,6 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: any;
 		object?: any;
 		debug?: boolean;
 	}
@@ -25,7 +24,6 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {},
 		object = {},
 		debug = false
 	}: Props = $props();
@@ -107,12 +105,12 @@
 		cacheLock={cacheLocks['time_range']}
 		bind:cachedValue={formDataCache['time_range']}
 		label={m.timeRange()}
+		disableDoubleDash={true}
 	/>
 </div>
 
 <!-- Aggregation hidden for now -->
 <input type="hidden" name="aggregation" value={formDataCache['aggregation'] || 'none'} />
-
 <Checkbox
 	{form}
 	field="show_target"
