@@ -95,21 +95,21 @@
 		return {
 			...defaults,
 			...existing,
-			serviceImpact: { ...defaults.serviceImpact, ...(existing.serviceImpact || {}) },
+			serviceImpact: { ...defaults.serviceImpact, ...existing.serviceImpact },
 			affectedAssets: {
 				...defaults.affectedAssets,
-				...(existing.affectedAssets || {}),
+				...existing.affectedAssets,
 				affectedClients: {
 					...defaults.affectedAssets.affectedClients,
-					...(existing.affectedAssets?.affectedClients || {})
+					...existing.affectedAssets?.affectedClients
 				},
 				affectedFinancialCounterparts: {
 					...defaults.affectedAssets.affectedFinancialCounterparts,
-					...(existing.affectedAssets?.affectedFinancialCounterparts || {})
+					...existing.affectedAssets?.affectedFinancialCounterparts
 				},
 				affectedTransactions: {
 					...defaults.affectedAssets.affectedTransactions,
-					...(existing.affectedAssets?.affectedTransactions || {})
+					...existing.affectedAssets?.affectedTransactions
 				}
 			}
 		};
