@@ -49,6 +49,7 @@
 	const schema = modelSchema('dora-incident-reports');
 
 	const isSubmitted = form.data?.is_submitted === true;
+	let showValidationErrors = $state(false);
 
 	const canProgress =
 		mode === 'edit' &&
@@ -197,47 +198,76 @@
 </script>
 
 <div class="max-w-5xl mx-auto p-4">
-	{#if incidentRef}
-		<div class="flex items-center gap-2 mb-4 text-sm">
-			<i class="fa-solid fa-arrow-left text-gray-400"></i>
-			<Anchor
-				class="anchor font-semibold hover:text-primary-500"
-				href="/incidents/{incidentRef.id}"
-				prefixCrumbs={[{ label: safeTranslate('incidents'), href: '/incidents' }]}
-			>
-				<i class="fa-solid fa-bolt mr-1"></i>{incidentRef.name}
-			</Anchor>
-		</div>
-	{/if}
-	<h1 class="text-2xl font-bold mb-4">
-		{mode === 'create' ? safeTranslate('add-doraIncidentReport') : m.edit()}
-	</h1>
-
-	{#if validation && mode === 'edit'}
-		<div class="mb-6">
-			{#if validation.valid}
-				<div class="flex items-center space-x-2 text-green-700 bg-green-50 p-3 rounded-md">
-					<i class="fa-solid fa-check-circle text-lg"></i>
-					<span class="font-medium">{m.schemaValid()}</span>
-				</div>
-			{:else}
-				<div class="bg-amber-50 p-3 rounded-md space-y-2">
-					<div class="flex items-center space-x-2 text-amber-700">
-						<i class="fa-solid fa-triangle-exclamation text-lg"></i>
-						<span class="font-medium">{m.schemaInvalid()}</span>
-					</div>
-					{#if validation.errors && validation.errors.length > 0}
-						<ul class="list-disc list-inside text-sm text-amber-800 space-y-1 ml-2">
-							{#each validation.errors.slice(0, 10) as error}
-								<li class="font-mono text-xs">{error}</li>
-							{/each}
-							{#if validation.errors.length > 10}
-								<li class="italic">... and {validation.errors.length - 10} more</li>
-							{/if}
-						</ul>
-					{/if}
+	<!-- Header bar -->
+	<div class="flex items-center justify-between mb-6">
+		<div>
+			{#if incidentRef}
+				<div class="flex items-center gap-2 text-sm mb-1">
+					<Anchor
+						class="text-gray-500 hover:text-primary-500 transition-colors"
+						href="/incidents/{incidentRef.id}"
+						prefixCrumbs={[{ label: safeTranslate('incidents'), href: '/incidents' }]}
+					>
+						<i class="fa-solid fa-arrow-left mr-1"></i>{incidentRef.name}
+					</Anchor>
 				</div>
 			{/if}
+			<h1 class="text-2xl font-bold text-gray-900">
+				{mode === 'create' ? safeTranslate('add-doraIncidentReport') : m.doraIncidentReport()}
+			</h1>
+		</div>
+		{#if validation && mode === 'edit'}
+			<div class="flex-shrink-0">
+				{#if validation.valid}
+					<span
+						class="inline-flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-full text-sm font-medium"
+					>
+						<i class="fa-solid fa-check-circle"></i>{m.schemaValid()}
+					</span>
+				{:else}
+					<button
+						class="inline-flex items-center gap-2 bg-amber-50 text-amber-700 border border-amber-200 px-4 py-2 rounded-full text-sm font-medium hover:bg-amber-100 transition-colors"
+						onclick={() => (showValidationErrors = !showValidationErrors)}
+					>
+						<i class="fa-solid fa-triangle-exclamation"></i>{m.schemaInvalid()}
+						<span class="bg-amber-200 text-amber-800 rounded-full px-2 py-0.5 text-xs"
+							>{validation.errors?.length || 0}</span
+						>
+						<i class="fa-solid fa-chevron-{showValidationErrors ? 'up' : 'down'} text-xs ml-1"></i>
+					</button>
+				{/if}
+			</div>
+		{/if}
+	</div>
+
+	{#if showValidationErrors && validation && !validation.valid}
+		<div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-2 space-y-2">
+			<div class="flex items-center justify-between">
+				<span class="text-sm font-semibold text-amber-800">{m.schemaInvalid()}</span>
+				<button
+					class="text-amber-600 hover:text-amber-800 text-xs"
+					onclick={() => (showValidationErrors = false)}
+				>
+					<i class="fa-solid fa-xmark"></i>
+				</button>
+			</div>
+			<ul class="space-y-1">
+				{#each validation.errors as error}
+					<li class="text-sm text-amber-800 flex items-start gap-2">
+						<i class="fa-solid fa-circle text-[4px] mt-2 flex-shrink-0 text-amber-400"></i>
+						<span class="font-mono text-xs">{error}</span>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	{/if}
+
+	{#if isSubmitted}
+		<div
+			class="flex items-center gap-3 bg-blue-50 border border-blue-200 text-blue-800 px-5 py-3 rounded-lg mb-6"
+		>
+			<i class="fa-solid fa-lock text-lg"></i>
+			<span class="font-medium">{m.submittedReport()}</span>
 		</div>
 	{/if}
 
@@ -252,9 +282,10 @@
 		{#snippet children({ form: formCtx })}
 			<fieldset disabled={isSubmitted} class="flex flex-col space-y-6">
 				<!-- Section 1: Report Metadata -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-file-lines mr-2"></i>{m.doraReportMetadata()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">1</span>
+						<i class="fa-solid fa-file-lines"></i>{m.doraReportMetadata()}
 					</h2>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<AutocompleteSelect
@@ -288,9 +319,10 @@
 				</div>
 
 				<!-- Section 2: Entities & Contacts -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-building mr-2"></i>{m.doraEntitiesAndContacts()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">2</span>
+						<i class="fa-solid fa-building"></i>{m.doraEntitiesAndContacts()}
 					</h2>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<AutocompleteSelect
@@ -386,9 +418,10 @@
 				</div>
 
 				<!-- Section 3: Incident Details -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-circle-info mr-2"></i>{m.doraIncidentDetails()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">3</span>
+						<i class="fa-solid fa-circle-info"></i>{m.doraIncidentDetails()}
 					</h2>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField form={_form} field="financial_entity_code" label={m.financialEntityCode()} />
@@ -436,9 +469,10 @@
 				</div>
 
 				<!-- Section 4: Incident Type -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-tag mr-2"></i>{m.doraIncidentType()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">4</span>
+						<i class="fa-solid fa-tag"></i>{m.doraIncidentType()}
 					</h2>
 					<fieldset class="space-y-2">
 						<legend class="text-sm font-medium text-gray-700 mb-1"
@@ -532,9 +566,10 @@
 				</div>
 
 				<!-- Section 5: Classification Criteria -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-list-check mr-2"></i>{m.doraClassificationCriteria()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">5</span>
+						<i class="fa-solid fa-list-check"></i>{m.doraClassificationCriteria()}
 					</h2>
 					{#each classificationTypes as criterion, index}
 						<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
@@ -614,9 +649,10 @@
 				</div>
 
 				<!-- Section 6: Root Cause Analysis -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-magnifying-glass mr-2"></i>{m.doraRootCauseAnalysis()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">6</span>
+						<i class="fa-solid fa-magnifying-glass"></i>{m.doraRootCauseAnalysis()}
 					</h2>
 
 					<fieldset class="space-y-2">
@@ -695,9 +731,10 @@
 				</div>
 
 				<!-- Section 7: Impact Assessment -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-chart-bar mr-2"></i>{m.doraImpactAssessment()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">7</span>
+						<i class="fa-solid fa-chart-bar"></i>{m.doraImpactAssessment()}
 					</h2>
 
 					<label class="flex items-center space-x-2">
@@ -850,9 +887,10 @@
 				</div>
 
 				<!-- Section 8: Resolution & Financial -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-coins mr-2"></i>{m.doraResolutionAndFinancial()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">8</span>
+						<i class="fa-solid fa-coins"></i>{m.doraResolutionAndFinancial()}
 					</h2>
 					<MarkdownField
 						form={_form}
@@ -886,9 +924,10 @@
 				</div>
 
 				<!-- Section 9: Reporting & Recurring -->
-				<div class="card bg-white shadow-md p-6 space-y-4">
-					<h2 class="text-lg font-semibold border-b pb-2">
-						<i class="fa-solid fa-bullhorn mr-2"></i>{m.doraReportingAndRecurring()}
+				<div class="dora-section">
+					<h2 class="dora-section-header">
+						<span class="dora-step">9</span>
+						<i class="fa-solid fa-bullhorn"></i>{m.doraReportingAndRecurring()}
 					</h2>
 
 					<fieldset class="space-y-2">
@@ -941,13 +980,12 @@
 			</fieldset>
 
 			<!-- Sticky Footer -->
-			<div class="sticky bottom-0 z-10 bg-white border-t p-4 shadow-lg rounded-t-lg space-y-3">
+			<div
+				class="sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t border-gray-200 px-6 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+			>
 				{#if isSubmitted}
 					<div class="flex items-center justify-between">
-						<div class="flex items-center space-x-2 text-blue-700 bg-blue-50 px-4 py-2 rounded-md">
-							<i class="fa-solid fa-lock text-lg"></i>
-							<span class="font-medium">{m.submittedReport()}</span>
-						</div>
+						<div></div>
 						<div class="flex space-x-3">
 							{#if validation?.valid}
 								<a
@@ -1023,3 +1061,53 @@
 		{/snippet}
 	</SuperForm>
 </div>
+
+<style>
+	.dora-section {
+		background: white;
+		border-radius: 0.75rem;
+		box-shadow:
+			0 1px 3px rgba(0, 0, 0, 0.06),
+			0 1px 2px rgba(0, 0, 0, 0.04);
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		border-left: 4px solid rgb(99, 102, 241);
+		transition: box-shadow 0.15s ease;
+	}
+	.dora-section:hover {
+		box-shadow:
+			0 4px 12px rgba(0, 0, 0, 0.08),
+			0 2px 4px rgba(0, 0, 0, 0.04);
+	}
+	.dora-section-header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.8rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: rgb(49, 46, 129);
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid rgb(224, 231, 255);
+	}
+	.dora-step {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border-radius: 9999px;
+		background: rgb(79, 70, 229);
+		color: white;
+		font-size: 0.7rem;
+		font-weight: 700;
+		flex-shrink: 0;
+	}
+	.dora-section-header i {
+		color: rgb(129, 140, 248);
+		font-size: 0.85rem;
+	}
+</style>

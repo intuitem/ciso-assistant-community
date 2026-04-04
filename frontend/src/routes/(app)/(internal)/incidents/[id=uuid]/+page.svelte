@@ -497,13 +497,7 @@
 									</td>
 									<td class="py-2 px-3">{formatDateOrDateTime(report.created_at, getLocale())}</td>
 									<td class="py-2 px-3">{formatDateOrDateTime(report.updated_at, getLocale())}</td>
-									<td class="py-2 px-3 text-right space-x-2">
-										<a
-											href="/dora-incident-reports/{report.id}"
-											class="text-primary-500 hover:underline text-sm"
-										>
-											<i class="fa-solid fa-arrow-right mr-1"></i>{m.open()}
-										</a>
+									<td class="py-2 px-3 text-right">
 										{#if !report.is_submitted}
 											<button
 												type="button"
