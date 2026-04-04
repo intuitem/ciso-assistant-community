@@ -14536,6 +14536,33 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 ),
             },
             "link": {"source": "link", "label": "link", "escape": True},
+            "occurred_at": {
+                "source": "occurred_at",
+                "label": "occurred_at",
+                "format": lambda dt: (
+                    dt.replace(tzinfo=None)
+                    if dt and hasattr(dt, "tzinfo") and dt.tzinfo
+                    else dt
+                ),
+            },
+            "resolved_at": {
+                "source": "resolved_at",
+                "label": "resolved_at",
+                "format": lambda dt: (
+                    dt.replace(tzinfo=None)
+                    if dt and hasattr(dt, "tzinfo") and dt.tzinfo
+                    else dt
+                ),
+            },
+            "resolution": {
+                "source": "resolution",
+                "label": "resolution",
+                "escape": True,
+            },
+            "is_bcp_activated": {
+                "source": "is_bcp_activated",
+                "label": "is_bcp_activated",
+            },
             "labels": {
                 "source": "filtering_labels",
                 "label": "labels",
@@ -14690,8 +14717,18 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         if incident.entities.exists():
             md_content += f"- **Related Entities**: {', '.join([entity.name for entity in incident.entities.all()])}\n"
 
+        md_content += f"- **Reported At**: {incident.reported_at.strftime('%Y-%m-%d %H:%M:%S') if incident.reported_at else 'N/A'}\n"
+        md_content += f"- **Occurred At**: {incident.occurred_at.strftime('%Y-%m-%d %H:%M:%S') if incident.occurred_at else 'N/A'}\n"
+        md_content += f"- **Resolved At**: {incident.resolved_at.strftime('%Y-%m-%d %H:%M:%S') if incident.resolved_at else 'N/A'}\n"
+        if incident.is_bcp_activated is not None:
+            md_content += (
+                f"- **BCP Activated**: {'Yes' if incident.is_bcp_activated else 'No'}\n"
+            )
         md_content += f"- **Created**: {incident.created_at.strftime('%Y-%m-%d %H:%M:%S') if incident.created_at else 'N/A'}\n"
-        md_content += f"- **Last Updated**: {incident.updated_at.strftime('%Y-%m-%d %H:%M:%S') if incident.updated_at else 'N/A'}\n\n"
+        md_content += f"- **Last Updated**: {incident.updated_at.strftime('%Y-%m-%d %H:%M:%S') if incident.updated_at else 'N/A'}\n"
+        if incident.resolution:
+            md_content += f"\n### Resolution\n\n{incident.resolution}\n"
+        md_content += "\n"
 
         # Affected Assets
         if incident.assets.exists():
