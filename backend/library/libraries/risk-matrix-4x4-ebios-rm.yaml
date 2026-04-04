@@ -102,7 +102,7 @@ objects:
       translations:
         fr:
           name: Important
-          description: "Forte dégradation des performances de l’activité, avec d’éventuellen impacts significatifs sur la sécurité des personnes et des biens."
+          description: "Forte dégradation des performances de l’activité, avec d’éventuels impacts significatifs sur la sécurité des personnes et des biens."
         de:
           name: Erheblich
           description: Starke Beeinträchtigung der Leistungsfähigkeit der Tätigkeit mit möglichen erheblichen Auswirkungen auf die Sicherheit von Personen und Sachwerten.
