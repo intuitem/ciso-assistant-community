@@ -409,6 +409,88 @@ export function hydrateDraft(
 	return { frameworkPatch, nodes, questions };
 }
 
+// --- Pre-publish validation (exported for testing) ---
+
+export interface ValidationError {
+	key: string;
+	message: string;
+}
+
+/**
+ * Validate framework and nodes before publishing.
+ * Returns an array of validation errors (empty if valid).
+ */
+export function validateDraft(fw: Framework, allSections: BuilderSection[]): ValidationError[] {
+	const errors: ValidationError[] = [];
+
+	// Validate framework name
+	if (!fw.name || fw.name.trim().length === 0) {
+		errors.push({ key: 'publish', message: 'Framework name is required.' });
+	} else if (fw.name.length > 200) {
+		errors.push({
+			key: 'publish',
+			message: `Framework name is ${fw.name.length} characters (max 200).`
+		});
+	}
+
+	// Validate each node recursively
+	function validateNodes(reqs: BuilderRequirement[]) {
+		for (const req of reqs) {
+			const n = req.node;
+
+			if (n.name && n.name.length > 200) {
+				errors.push({
+					key: `node-${n.id}`,
+					message: `Name exceeds 200 characters (${n.name.length}/200). Move long text to the description field.`
+				});
+			}
+			if (n.ref_id && n.ref_id.length > 100) {
+				const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
+				errors.push({
+					key: `node-${n.id}`,
+					message: `Requirement '${label}': ref_id is ${n.ref_id.length} characters (max 100).`
+				});
+			}
+			if (n.urn && n.urn.length > 255) {
+				const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
+				errors.push({
+					key: `node-${n.id}`,
+					message: `Requirement '${label}': URN is ${n.urn.length} characters (max 255).`
+				});
+			}
+
+			validateNodes(req.children);
+		}
+	}
+
+	for (const sec of allSections) {
+		const sn = sec.node;
+		if (sn.name && sn.name.length > 200) {
+			errors.push({
+				key: `node-${sn.id}`,
+				message: `Name exceeds 200 characters (${sn.name.length}/200). Move long text to the description field.`
+			});
+		}
+		if (sn.ref_id && sn.ref_id.length > 100) {
+			const label = sn.ref_id ?? `position ${sn.order_id ?? '?'}`;
+			errors.push({
+				key: `node-${sn.id}`,
+				message: `Section '${label}': ref_id is ${sn.ref_id.length} characters (max 100).`
+			});
+		}
+		if (sn.urn && sn.urn.length > 255) {
+			const label = sn.ref_id ?? `position ${sn.order_id ?? '?'}`;
+			errors.push({
+				key: `node-${sn.id}`,
+				message: `Section '${label}': URN is ${sn.urn.length} characters (max 255).`
+			});
+		}
+		validateNodes(sec.requirements);
+	}
+
+	return errors;
+}
+
 // --- State ---
 
 const CONTEXT_KEY = 'framework-builder';
@@ -613,8 +695,32 @@ export function createBuilderState(
 		}
 	}
 
+	/** Validate all nodes and framework before publish. Returns true if valid. */
+	function validateBeforePublish(): boolean {
+		const validationErrors = validateDraft(get(framework), get(sections));
+		for (const err of validationErrors) {
+			setError(err.key, err.message);
+		}
+		return validationErrors.length === 0;
+	}
+
 	async function publish() {
 		await flushDraft();
+
+		// Clear previous node-level validation errors
+		errors.update((m) => {
+			const next = new Map(m);
+			for (const key of next.keys()) {
+				if (key.startsWith('node-')) next.delete(key);
+			}
+			return next;
+		});
+		clearError('publish');
+
+		if (!validateBeforePublish()) {
+			return;
+		}
+
 		try {
 			await apiPublishDraft(frameworkId);
 			clearError('publish');
