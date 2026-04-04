@@ -387,7 +387,6 @@ ANALYST_PERMISSIONS_LIST = [
     "add_doraincidentreport",
     "view_doraincidentreport",
     "change_doraincidentreport",
-    "delete_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # campaigns,

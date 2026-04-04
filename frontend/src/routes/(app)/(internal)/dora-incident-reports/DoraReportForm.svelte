@@ -250,7 +250,7 @@
 		action={formAction}
 	>
 		{#snippet children({ form: formCtx })}
-			<fieldset disabled={isSubmitted}>
+			<fieldset disabled={isSubmitted} class="flex flex-col space-y-6">
 				<!-- Section 1: Report Metadata -->
 				<div class="card bg-white shadow-md p-6 space-y-4">
 					<h2 class="text-lg font-semibold border-b pb-2">
