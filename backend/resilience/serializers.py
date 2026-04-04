@@ -193,6 +193,6 @@ class DoraIncidentReportWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         incident = validated_data.get("incident")
-        if incident and not validated_data.get("folder"):
+        if incident:
             validated_data["folder"] = incident.folder
         return super().create(validated_data)

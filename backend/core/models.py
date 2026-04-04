@@ -4583,7 +4583,7 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     resolved_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("Resolved at")
     )
-    resolution = models.TextField(blank=True, verbose_name=_("Resolution"))
+    resolution = models.TextField(null=True, blank=True, verbose_name=_("Resolution"))
     is_bcp_activated = models.BooleanField(
         null=True, blank=True, verbose_name=_("BCP activated")
     )

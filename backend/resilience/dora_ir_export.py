@@ -177,8 +177,14 @@ def build_dora_ir_json(report) -> dict:
         "incidentResolutionVsPlannedImplementation": report.incident_resolution_vs_planned,
         "assessmentOfRiskToCriticalFunctions": report.assessment_of_risk_to_critical_functions,
         "informationRelevantToResolutionAuthorities": report.information_relevant_to_resolution_authorities,
-        "financialRecoveriesAmount": report.financial_recoveries_amount,
-        "grossAmountIndirectDirectCosts": report.gross_amount_indirect_direct_costs,
+        "financialRecoveriesAmount": float(report.financial_recoveries_amount)
+        if report.financial_recoveries_amount is not None
+        else None,
+        "grossAmountIndirectDirectCosts": float(
+            report.gross_amount_indirect_direct_costs
+        )
+        if report.gross_amount_indirect_direct_costs is not None
+        else None,
         "recurringNonMajorIncidentsDescription": report.recurring_non_major_incidents_description,
         "recurringIncidentDate": _format_datetime(report.recurring_incident_date),
     }
@@ -223,7 +229,8 @@ def validate_dora_ir(data: dict) -> list[str]:
     except FileNotFoundError:
         return [f"Schema file not found at {SCHEMA_PATH}"]
 
-    validator = jsonschema.Draft202012Validator(schema)
+    format_checker = jsonschema.FormatChecker()
+    validator = jsonschema.Draft202012Validator(schema, format_checker=format_checker)
     errors = sorted(validator.iter_errors(data), key=lambda e: list(e.path))
     return [
         f"{'.'.join(str(p) for p in error.absolute_path) or '(root)'}: {error.message}"

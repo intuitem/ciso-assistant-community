@@ -3804,6 +3804,29 @@ class IncidentWriteSerializer(BaseModelSerializer):
         model = Incident
         exclude = ["created_at", "updated_at"]
 
+    def validate(self, attrs):
+        # Merge with existing instance values for partial updates
+        occurred_at = attrs.get(
+            "occurred_at", getattr(self.instance, "occurred_at", None)
+        )
+        reported_at = attrs.get(
+            "reported_at", getattr(self.instance, "reported_at", None)
+        )
+        resolved_at = attrs.get(
+            "resolved_at", getattr(self.instance, "resolved_at", None)
+        )
+
+        if occurred_at and reported_at and reported_at < occurred_at:
+            raise serializers.ValidationError(
+                {"reported_at": "Reported date cannot be before occurrence date."}
+            )
+        if resolved_at and occurred_at and resolved_at < occurred_at:
+            raise serializers.ValidationError(
+                {"resolved_at": "Resolution date cannot be before occurrence date."}
+            )
+
+        return super().validate(attrs)
+
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id
         with transaction.atomic():

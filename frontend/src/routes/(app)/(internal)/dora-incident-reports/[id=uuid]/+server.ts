@@ -8,9 +8,8 @@ const URL_MODEL = 'dora-incident-reports';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const model = getModelInfo(URL_MODEL);
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${params.id}/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
-	}`;
+	const search = url.searchParams.toString();
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${params.id}/${search ? '?' + search : ''}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

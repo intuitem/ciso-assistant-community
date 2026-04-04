@@ -388,8 +388,12 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
     information_relevant_to_resolution_authorities = models.TextField(blank=True)
 
     # -- Financial --
-    financial_recoveries_amount = models.FloatField(null=True, blank=True)
-    gross_amount_indirect_direct_costs = models.FloatField(null=True, blank=True)
+    financial_recoveries_amount = models.DecimalField(
+        max_digits=19, decimal_places=2, null=True, blank=True
+    )
+    gross_amount_indirect_direct_costs = models.DecimalField(
+        max_digits=19, decimal_places=2, null=True, blank=True
+    )
 
     # -- Recurring incident --
     recurring_non_major_incidents_description = models.TextField(blank=True)
@@ -415,7 +419,7 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
         return f"DORA IR ({self.get_incident_submission_display()}) — {self.incident}"
 
     def save(self, *args, **kwargs):
-        if not self.folder_id and self.incident_id:
+        if self.incident_id:
             self.folder = self.incident.folder
         super().save(*args, **kwargs)
 
