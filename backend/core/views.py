@@ -1744,6 +1744,7 @@ class AssetFilter(GenericFilterSet):
             "risk_scenarios",
             "security_exceptions",
             "applied_controls",
+            "vulnerabilities",
             "filtering_labels",
             "personal_data",
             "is_business_function",
@@ -6186,6 +6187,7 @@ class RiskScenarioFilter(GenericFilterSet):
             "existing_applied_controls": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
+            "vulnerabilities": ["exact"],
             "qualifications": ["exact"],
             "filtering_labels": ["exact"],
         }
