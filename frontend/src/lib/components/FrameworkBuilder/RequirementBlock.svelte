@@ -50,11 +50,12 @@
 
 	/** Svelte action: auto-grow textarea on mount and on input */
 	function autogrowAction(el: HTMLTextAreaElement) {
+		const handler = () => autoGrow(el);
 		autoGrow(el);
-		el.addEventListener('input', () => autoGrow(el));
+		el.addEventListener('input', handler);
 		return {
 			destroy() {
-				el.removeEventListener('input', () => autoGrow(el));
+				el.removeEventListener('input', handler);
 			}
 		};
 	}
