@@ -1,10 +1,11 @@
-"""Tests for framework builder security hardening."""
+"""Tests for framework builder security hardening and URN generation."""
 
 import io
 import uuid
 
 import pytest
 from django.urls import reverse
+from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -377,3 +378,267 @@ class TestFrameworkBuilderSecurity:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "must be a JSON object" in response.data["error"]
+
+
+# --- Fixtures for URN generation tests ---
+
+
+@pytest.fixture
+def framework_with_tree(app_config):
+    """Create a framework with nodes, questions, and choices for duplication tests."""
+    folder = Folder.get_root_folder()
+    fw = Framework.objects.create(
+        name="My SOC2 Framework",
+        folder=folder,
+        is_published=True,
+    )
+    sec = RequirementNode.objects.create(
+        framework=fw,
+        urn="urn:test:req_node:section1",
+        ref_id="1",
+        name="Section 1",
+        assessable=False,
+        folder=folder,
+        is_published=True,
+    )
+    req = RequirementNode.objects.create(
+        framework=fw,
+        urn="urn:test:req_node:req1",
+        ref_id="1.1",
+        name="Requirement 1.1",
+        parent_urn="urn:test:req_node:section1",
+        assessable=True,
+        folder=folder,
+        is_published=True,
+    )
+    q = Question.objects.create(
+        requirement_node=req,
+        urn="urn:test:question:q1",
+        ref_id="1.1-q1",
+        text="Test question",
+        type=Question.Type.UNIQUE_CHOICE,
+        folder=folder,
+        is_published=True,
+    )
+    c = QuestionChoice.objects.create(
+        question=q,
+        urn="urn:test:choice:c1",
+        ref_id="1.1-q1-c1",
+        value="Yes",
+        folder=folder,
+        is_published=True,
+    )
+    return fw, sec, req, q, c, folder
+
+
+# --- URN Generation tests ---
+
+
+@pytest.mark.django_db
+class TestFrameworkBuilderURNGeneration:
+    """Tests for readable URN generation in duplicate and publish flows."""
+
+    def test_duplicate_urn_format(self, authenticated_client, framework_with_tree):
+        """Duplicated framework nodes get slug-based URNs, not UUIDs."""
+        fw, sec, req, q, c, folder = framework_with_tree
+        url = reverse("frameworks-duplicate", args=[fw.id])
+        response = authenticated_client.post(
+            url, {"name": "My SOC2 Copy"}, format="json"
+        )
+        assert response.status_code == 201
+        new_fw_id = response.data["id"]
+
+        nodes = RequirementNode.objects.filter(framework_id=new_fw_id)
+        for node in nodes:
+            assert node.urn is not None
+            assert "my-soc2-copy" in node.urn
+            assert "req_node" in node.urn
+            # Should NOT contain a UUID pattern
+            try:
+                # Extract the part after the last colon (ref_id portion)
+                parts = node.urn.split(":")
+                uuid.UUID(parts[-1])
+                # If parsing as UUID succeeds, that's wrong
+                assert False, f"URN contains UUID: {node.urn}"
+            except ValueError:
+                pass  # Good, it's not a UUID
+
+    def test_duplicate_choice_prefix(self, authenticated_client, framework_with_tree):
+        """Duplicated choices use 'question_choice:' prefix, not 'choice:'."""
+        fw, sec, req, q, c, folder = framework_with_tree
+        url = reverse("frameworks-duplicate", args=[fw.id])
+        response = authenticated_client.post(
+            url, {"name": "Choice Prefix Test"}, format="json"
+        )
+        assert response.status_code == 201
+        new_fw_id = response.data["id"]
+
+        choices = QuestionChoice.objects.filter(
+            question__requirement_node__framework_id=new_fw_id
+        )
+        for choice in choices:
+            if choice.urn:
+                assert "question_choice:" in choice.urn
+                assert "choice:" not in choice.urn.replace("question_choice:", "")
+
+    def test_duplicate_ref_id_preservation(
+        self, authenticated_client, framework_with_tree
+    ):
+        """Duplicated framework preserves original ref_ids."""
+        fw, sec, req, q, c, folder = framework_with_tree
+        url = reverse("frameworks-duplicate", args=[fw.id])
+        response = authenticated_client.post(
+            url, {"name": "Ref ID Test"}, format="json"
+        )
+        assert response.status_code == 201
+        new_fw_id = response.data["id"]
+
+        new_nodes = RequirementNode.objects.filter(framework_id=new_fw_id).order_by(
+            "order_id"
+        )
+        assert new_nodes[0].ref_id == "1"
+        assert new_nodes[1].ref_id == "1.1"
+
+        new_questions = Question.objects.filter(
+            requirement_node__framework_id=new_fw_id
+        )
+        assert new_questions[0].ref_id == "1.1-q1"
+
+    def test_reconcile_draft_no_collision(
+        self, authenticated_client, framework_with_node
+    ):
+        """Publishing a draft with unique URNs succeeds without warnings."""
+        fw, rn, folder = framework_with_node
+        node_id = str(rn.id)
+        new_node_id = str(uuid.uuid4())
+
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        draft = {
+            "framework_meta": {"name": fw.name},
+            "nodes": [
+                {
+                    "id": node_id,
+                    "urn": rn.urn,
+                    "ref_id": rn.ref_id,
+                    "assessable": True,
+                    "order_id": 0,
+                    "weight": 1,
+                    "importance": "undefined",
+                    "display_mode": "default",
+                },
+                {
+                    "id": new_node_id,
+                    "urn": f"urn:intuitem:risk:req_node:unique-test-slug:{uuid.uuid4().hex[:8]}",
+                    "ref_id": "2",
+                    "assessable": False,
+                    "order_id": 100,
+                    "weight": 1,
+                    "importance": "undefined",
+                    "display_mode": "default",
+                },
+            ],
+            "questions": [],
+            "choices": [],
+        }
+
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == 200
+        assert "warnings" not in response.data
+
+    def test_reconcile_draft_collision_disambiguation(
+        self, authenticated_client, framework_with_node
+    ):
+        """Publishing a draft with colliding URNs triggers disambiguation."""
+        fw, rn, folder = framework_with_node
+        node_id = str(rn.id)
+        new_node_id = str(uuid.uuid4())
+
+        # Create a conflicting node in another framework with a standard-format URN
+        fw_other = Framework.objects.create(
+            name="Conflict FW",
+            folder=folder,
+            is_published=True,
+        )
+        colliding_urn = "urn:intuitem:risk:req_node:my-slug:2"
+        RequirementNode.objects.create(
+            framework=fw_other,
+            urn=colliding_urn,
+            ref_id="2",
+            assessable=False,
+            folder=folder,
+            is_published=True,
+        )
+
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        draft = {
+            "framework_meta": {"name": fw.name},
+            "nodes": [
+                {
+                    "id": node_id,
+                    "urn": rn.urn,
+                    "ref_id": rn.ref_id,
+                    "assessable": True,
+                    "order_id": 0,
+                    "weight": 1,
+                    "importance": "undefined",
+                    "display_mode": "default",
+                },
+                {
+                    "id": new_node_id,
+                    "urn": colliding_urn,
+                    "ref_id": "2",
+                    "assessable": False,
+                    "order_id": 100,
+                    "weight": 1,
+                    "importance": "undefined",
+                    "display_mode": "default",
+                },
+            ],
+            "questions": [],
+            "choices": [],
+        }
+
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == 200
+        assert "warnings" in response.data
+        assert any("disambiguated" in w for w in response.data["warnings"])
+
+        # Verify the new node got a disambiguated URN
+        new_node = RequirementNode.objects.get(id=new_node_id)
+        assert new_node.urn != colliding_urn
+        assert "my-slug-2" in new_node.urn
+
+    def test_slug_parity_with_frontend(self, app_config):
+        """Backend slugify produces the same results as the frontend slugifyFrameworkName."""
+        # Shared test fixtures matching frontend tests
+        test_cases = [
+            ("My Custom SOC2 Framework!", "my-custom-soc2-framework"),
+            ("Cadre de Conformit\u00e9 ISO", "cadre-de-conformite-iso"),
+        ]
+        for name, expected in test_cases:
+            result = slugify(name, allow_unicode=False)[:60]
+            assert result == expected, (
+                f"Slug mismatch for '{name}': got '{result}', expected '{expected}'"
+            )
+
+        # CJK should produce empty slug (frontend falls back to UUID)
+        result = slugify(
+            "\u60c5\u5831\u30bb\u30ad\u30e5\u30ea\u30c6\u30a3", allow_unicode=False
+        )
+        assert result == "", f"CJK should produce empty slug, got '{result}'"
+
+        # Empty string should produce empty slug
+        result = slugify("", allow_unicode=False)
+        assert result == ""

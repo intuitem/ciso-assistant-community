@@ -118,6 +118,91 @@ export interface BuilderSection {
 	collapsed: boolean;
 }
 
+// --- URN / ref_id generation utilities ---
+
+/**
+ * Slugify a framework name into a URL-safe namespace for URNs.
+ * Uses NFKD normalization to strip accents, then ASCII-only filtering.
+ * Falls back to first 8 chars of frameworkId for CJK-only names.
+ */
+export function slugifyFrameworkName(name: string, frameworkId: string): string {
+	const normalized = name
+		.normalize('NFKD')
+		.replace(/[\u0300-\u036f]/g, '') // strip combining diacritical marks
+		.replace(/[^\x00-\x7F]/g, ''); // strip non-ASCII
+	let slug = normalized
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/-{2,}/g, '-')
+		.replace(/^-+|-+$/g, '');
+	if (slug.length > 60) slug = slug.slice(0, 60).replace(/-+$/, '');
+	if (!slug) slug = frameworkId.slice(0, 8);
+	return slug;
+}
+
+/**
+ * Compute a ref_id for a new item based on its siblings and parent.
+ * Uses max(existing numeric last segments) + 1 to avoid reusing deleted IDs.
+ */
+export function computeRefId(
+	siblingRefIds: (string | null)[],
+	parentRefId: string | null,
+	type: 'section' | 'requirement' | 'question' | 'choice'
+): string {
+	const separator = type === 'question' ? '-q' : type === 'choice' ? '-c' : '.';
+	const prefix =
+		type === 'section'
+			? ''
+			: parentRefId
+				? `${parentRefId}${separator}`
+				: `${separator === '.' ? '' : ''}`;
+
+	// Extract numeric last segments from sibling ref_ids
+	const nums: number[] = [];
+	for (const refId of siblingRefIds) {
+		if (!refId) continue;
+		let lastPart: string;
+		if (type === 'question') {
+			const match = refId.match(/-q(\d+)$/);
+			if (match) nums.push(parseInt(match[1], 10));
+			continue;
+		} else if (type === 'choice') {
+			const match = refId.match(/-c(\d+)$/);
+			if (match) nums.push(parseInt(match[1], 10));
+			continue;
+		} else {
+			// section or requirement: take the last dot-segment
+			const parts = refId.split('.');
+			lastPart = parts[parts.length - 1];
+		}
+		const n = parseInt(lastPart, 10);
+		if (!isNaN(n)) nums.push(n);
+	}
+
+	const next =
+		nums.length > 0
+			? Math.max(...nums) + 1
+			: siblingRefIds.length > 0
+				? siblingRefIds.length + 1
+				: 1;
+
+	if (type === 'section') return String(next);
+	if (parentRefId) return `${parentRefId}${separator}${next}`;
+	// Fallback when parent has no ref_id
+	return `${next}`;
+}
+
+/**
+ * Generate a URN for a framework item.
+ */
+export function generateUrn(
+	type: 'req_node' | 'question' | 'question_choice',
+	slug: string,
+	refId: string
+): string {
+	return `urn:intuitem:risk:${type}:${slug}:${refId}`;
+}
+
 // --- Recursive helpers ---
 
 /** Recursively map over a requirement tree, applying fn to each requirement */
@@ -522,6 +607,8 @@ export function createBuilderState(
 	const folderId =
 		typeof frameworkData.folder === 'string' ? frameworkData.folder : frameworkData.folder.id;
 	const frameworkId = frameworkData.id;
+	// Cache the slug at session start so all new items use a consistent namespace
+	const fwSlug = slugifyFrameworkName(frameworkData.name, frameworkId);
 
 	// If we have a draft, hydrate from it; otherwise use relational data
 	let initialNodes = nodes;
@@ -658,11 +745,13 @@ export function createBuilderState(
 			afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : currentSections.length * 100;
 
 		const newId = crypto.randomUUID();
-		const newUrn = `urn:intuitem:risk:req_node:${newId}`;
+		const siblingRefIds = currentSections.map((s) => s.node.ref_id);
+		const refId = computeRefId(siblingRefIds, null, 'section');
+		const newUrn = generateUrn('req_node', fwSlug, refId);
 		const newNode: RequirementNode = {
 			id: newId,
 			urn: newUrn,
-			ref_id: null,
+			ref_id: refId,
 			name: 'New Section',
 			description: null,
 			annotation: null,
@@ -697,19 +786,19 @@ export function createBuilderState(
 	// --- Requirement CRUD (node ID-based) ---
 
 	function addSplashScreen(parentNodeId: string, parentUrn: string) {
-		const siblings = (() => {
-			for (const sec of get(sections)) {
-				if (sec.node.id === parentNodeId) return sec.requirements;
-			}
-			return [];
-		})();
+		const parentSection = get(sections).find((s) => s.node.id === parentNodeId);
+		const siblings = parentSection ? parentSection.requirements : [];
 		const order = siblings.length * 100;
+
+		const parentRefId = parentSection?.node.ref_id ?? null;
+		const siblingRefIds = siblings.map((r) => r.node.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'requirement');
 
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: `urn:intuitem:risk:req_node:${newId}`,
-			ref_id: null,
+			urn: generateUrn('req_node', fwSlug, refId),
+			ref_id: refId,
 			name: 'New Splash Screen',
 			description: null,
 			annotation: null,
@@ -751,11 +840,18 @@ export function createBuilderState(
 		const parentDepth = parentReq ? parentReq.depth : -1;
 		const order = siblings.length * 100;
 
+		// Compute ref_id from parent and siblings
+		const parentRefId = parentReq
+			? parentReq.node.ref_id
+			: (get(sections).find((s) => s.node.id === parentNodeId)?.node.ref_id ?? null);
+		const siblingRefIds = siblings.map((r) => r.node.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'requirement');
+
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: `urn:intuitem:risk:req_node:${newId}`,
-			ref_id: null,
+			urn: generateUrn('req_node', fwSlug, refId),
+			ref_id: refId,
 			name: 'New Requirement',
 			description: null,
 			annotation: null,
@@ -829,12 +925,16 @@ export function createBuilderState(
 		if (!req) return;
 		const order = req.questions.length * 100;
 		const newId = crypto.randomUUID();
-		const urn = `urn:intuitem:risk:question:${newId}`;
+
+		const parentRefId = req.node.ref_id ?? null;
+		const siblingRefIds = req.questions.map((bq) => bq.question.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'question');
+		const urn = generateUrn('question', fwSlug, refId);
 
 		const newQuestion: Question = {
 			id: newId,
 			urn,
-			ref_id: null,
+			ref_id: refId,
 			text: '',
 			annotation: null,
 			type,
@@ -894,10 +994,14 @@ export function createBuilderState(
 		const order = q.question.choices.length * 100;
 		const newId = crypto.randomUUID();
 
+		const parentRefId = q.question.ref_id ?? null;
+		const siblingRefIds = q.question.choices.map((c) => c.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'choice');
+
 		const newChoice: QuestionChoice = {
 			id: newId,
-			urn: `urn:intuitem:risk:question_choice:${newId}`,
-			ref_id: null,
+			urn: generateUrn('question_choice', fwSlug, refId),
+			ref_id: refId,
 			value: '',
 			annotation: null,
 			add_score: null,
