@@ -3824,6 +3824,10 @@ class IncidentWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {"resolved_at": "Resolution date cannot be before occurrence date."}
             )
+        if resolved_at and reported_at and resolved_at < reported_at:
+            raise serializers.ValidationError(
+                {"resolved_at": "Resolution date cannot be before reported date."}
+            )
 
         return super().validate(attrs)
 

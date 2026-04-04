@@ -143,7 +143,7 @@ class DoraIncidentReportReadSerializer(BaseModelSerializer):
     ultimate_parent_entity = FieldsRelatedField(["id", "name"])
     affected_entities = FieldsRelatedField(["id", "name"], many=True)
     folder = FieldsRelatedField()
-    incident_submission = serializers.CharField(
+    incident_submission_display = serializers.CharField(
         source="get_incident_submission_display", read_only=True
     )
 
