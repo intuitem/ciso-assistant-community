@@ -255,16 +255,16 @@
 
 		chart.setOption(option);
 
-		// Handle resize
-		const resizeHandler = function () {
-			chart.resize();
-		};
+		// Use ResizeObserver to handle container size changes (including initial flex layout)
+		const container = document.getElementById(chart_id);
+		const resizeObserver = new ResizeObserver(() => {
+			chart?.resize();
+		});
+		if (container) resizeObserver.observe(container);
 
-		window.addEventListener('resize', resizeHandler);
-
-		// Clean up event listener on component unmount
+		// Clean up on component unmount
 		return () => {
-			window.removeEventListener('resize', resizeHandler);
+			resizeObserver.disconnect();
 			chart?.dispose();
 		};
 	});
@@ -282,15 +282,15 @@
 	});
 </script>
 
-<div class="flex-2">
-	<div id={chart_id} class="{width} {height} {classesContainer}"></div>
+<div class="flex flex-col {width} {classesContainer}">
+	<div id={chart_id} class="w-full {height}"></div>
 	{#if data.not_displayed > 0}
-		<div class="text-center">
-			⚠️ {data.not_displayed} items are not displayed as they are lacking data.
+		<div class="text-center text-sm text-surface-600 py-1">
+			{data.not_displayed} items are not displayed as they are lacking data.
 		</div>
 	{/if}
-	<div class="m-10 no-print">
-		<label class="mb-2 inline-flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+	<div class="flex items-center justify-center py-2 no-print">
+		<label class="inline-flex cursor-pointer items-center gap-2 text-sm text-surface-600">
 			<input type="checkbox" class="checkbox" bind:checked={showStakeholderLabels} />
 			<span>{m.showStakeholdersName()}</span>
 		</label>

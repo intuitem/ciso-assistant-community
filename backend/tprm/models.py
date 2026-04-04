@@ -495,6 +495,11 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Is intragroup"),
         help_text=_("Whether this is an intragroup contract"),
     )
+    dora_exclude = models.BooleanField(
+        default=False,
+        verbose_name=_("Exclude from DORA"),
+        help_text=_("Exclude this contract from DORA RoI reporting"),
+    )
     overarching_contract = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,

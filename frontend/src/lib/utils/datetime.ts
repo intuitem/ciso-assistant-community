@@ -1,10 +1,10 @@
-export function formatDateOrDateTime(isoString: string, locale = 'en-US'): string {
+export function formatDateOrDateTime(isoString: string, locale = 'en'): string {
 	if (typeof isoString !== 'string') {
 		return isoString;
 	}
-	const hasTime = isoString.includes('T');
 
 	const date = new Date(isoString);
+	const hasTime = isoString.includes('T');
 
 	if (hasTime) {
 		return date.toLocaleString(locale);

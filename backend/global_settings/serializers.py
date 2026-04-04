@@ -1,3 +1,4 @@
+from django.conf import settings as django_settings
 from rest_framework import serializers
 
 from .models import GlobalSettings
@@ -21,6 +22,16 @@ GENERAL_SETTINGS_KEYS = [
     "builtin_metrics_retention_days",
     "allow_assignments_to_entities",
     "enforce_mfa",
+    "default_language",
+    "llm_provider",
+    "ollama_base_url",
+    "ollama_model",
+    "ollama_embed_model",
+    "embedding_backend",
+    "chat_system_prompt",
+    "openai_api_base",
+    "openai_model",
+    "openai_api_key",
 ]
 
 
@@ -49,7 +60,21 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         write_only=True, required=False, default=1.0
     )
 
+    def to_representation(self, instance):
+        """Never expose sensitive keys in GET responses (same pattern as integrations)."""
+        ret = super().to_representation(instance)
+        if "value" in ret and isinstance(ret["value"], dict):
+            ret["value"].pop("openai_api_key", None)
+        return ret
+
     def update(self, instance, validated_data):
+        # Preserve existing API key if not provided in the update
+        if "value" in validated_data and isinstance(validated_data["value"], dict):
+            if not validated_data["value"].get("openai_api_key") and instance.value:
+                existing_key = instance.value.get("openai_api_key")
+                if existing_key:
+                    validated_data["value"]["openai_api_key"] = existing_key
+
         # Track old currency value for potential propagation
         old_currency = instance.value.get("currency") if instance.value else None
 
@@ -69,6 +94,14 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {
                             "builtin_metrics_retention_days": "Retention days must be at least 1"
+                        }
+                    )
+            if key == "default_language":
+                valid_codes = [code for code, _ in django_settings.LANGUAGES]
+                if value not in valid_codes:
+                    raise serializers.ValidationError(
+                        {
+                            "default_language": f"Invalid language. Must be one of: {valid_codes}"
                         }
                     )
             setattr(instance, "value", validated_data["value"])
@@ -232,6 +265,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True
     )
+    chat_mode = serializers.BooleanField(
+        source="value.chat_mode", required=False, default=False
+    )
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=False
     )
@@ -240,6 +276,12 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     comments = serializers.BooleanField(
         source="value.comments", required=False, default=True
+    )
+    journeys = serializers.BooleanField(
+        source="value.journeys", required=False, default=True
+    )
+    policy_documents = serializers.BooleanField(
+        source="value.policy_documents", required=False, default=True
     )
 
     class Meta:
@@ -254,6 +296,14 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "is_published",
         ]
         read_only_fields = ["name"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        from django.conf import settings
+
+        if not getattr(settings, "ENABLE_CHAT", False):
+            fields.pop("chat_mode", None)
+        return fields
 
     def update(self, instance, validated_data):
         """

@@ -7,8 +7,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.14"
-django = "^6.0.2"
+django = "^6.0.3"
 python-dotenv = "^1.0.1"
+markdown = "^3.10.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.2"

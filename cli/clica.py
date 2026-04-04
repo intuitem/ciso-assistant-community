@@ -260,7 +260,16 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_assets",
         "model_type": "Asset",
-        "help": "Import assets using the Data Wizard backend.",
+        "help": (
+            "Import assets from CSV/Excel.\n"
+            "\nRequired columns: name\n"
+            "Optional columns: ref_id, description, type (primary/support), "
+            "domain, business_value, observation, reference_link (or link), "
+            "security_objectives (or security_capabilities for support assets), "
+            "disaster_recovery_objectives (or recovery_capabilities for support assets), "
+            "parent_assets, "
+            "labels (or filtering_labels / étiquette / label)\n"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -427,6 +436,27 @@ DATA_WIZARD_COMMANDS = [
         "requires_perimeter": False,
         "requires_framework": False,
         "requires_matrix": True,
+    },
+    {
+        "command": "import_vulnerabilities",
+        "model_type": "Vulnerability",
+        "help": "Import vulnerabilities using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_bia",
+        "model_type": "BusinessImpactAnalysis",
+        "help": "Import business impact analyses (multi-sheet Excel) using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "show_folder_option": True,
+        "show_perimeter_option": True,
+        "show_matrix_option": True,
     },
 ]
 

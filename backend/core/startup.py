@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db.models.signals import post_migrate
 from structlog import get_logger
 
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, FORCE_CREATE_ADMIN
+from django.conf import settings
 from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
@@ -18,6 +18,9 @@ READER_PERMISSIONS_LIST = [
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
+    "view_manageddocument",
+    "view_documentrevision",
+    "view_documentattachment",
     "view_folder",
     "view_framework",
     "view_loadedlibrary",
@@ -30,6 +33,9 @@ READER_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "view_requirementmappingset",
     "view_requirementnode",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -99,6 +105,16 @@ READER_PERMISSIONS_LIST = [
     # integrations
     "view_syncmapping",
     "view_filteringlabel",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "view_indexeddocument",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -121,8 +137,14 @@ APPROVER_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "view_requirementnode",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
     "view_evidence",
     "view_evidencerevision",
+    "view_manageddocument",
+    "view_documentrevision",
+    "view_documentattachment",
     "view_framework",
     "view_storedlibrary",
     "view_loadedlibrary",
@@ -177,6 +199,16 @@ APPROVER_PERMISSIONS_LIST = [
     "view_accreditation",
     # integrations
     "view_syncmapping",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "view_indexeddocument",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -208,6 +240,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_vulnerability",
     "change_representative",
     "change_requirementassessment",
+    "add_answer",
+    "change_answer",
     "add_requirementassignment",
     "change_requirementassignment",
     "delete_requirementassignment",
@@ -257,6 +291,9 @@ ANALYST_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "view_requirementmappingset",
     "view_requirementnode",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -409,6 +446,20 @@ ANALYST_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -450,6 +501,22 @@ ANALYST_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -484,6 +551,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_referencecontrol",
     "change_representative",
     "change_requirementassessment",
+    "add_answer",
+    "change_answer",
     "add_requirementassignment",
     "change_requirementassignment",
     "delete_requirementassignment",
@@ -529,7 +598,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_entityassessment",
     "view_evidence",
     "view_folder",
+    "add_framework",
     "view_framework",
+    "change_framework",
+    "delete_framework",
     "view_loadedlibrary",
     "view_policy",
     "view_perimeter",
@@ -539,6 +611,18 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "view_requirementmappingset",
     "view_requirementnode",
+    "add_requirementnode",
+    "change_requirementnode",
+    "delete_requirementnode",
+    "view_question",
+    "add_question",
+    "change_question",
+    "delete_question",
+    "view_questionchoice",
+    "add_questionchoice",
+    "change_questionchoice",
+    "delete_questionchoice",
+    "view_answer",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -709,6 +793,20 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -755,6 +853,22 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -838,6 +952,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "add_answer",
+    "change_answer",
     "add_requirementassignment",
     "change_requirementassignment",
     "delete_requirementassignment",
@@ -852,10 +968,37 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_framework",
     "view_framework",
+    "change_framework",
     "delete_framework",
     "view_requirementnode",
+    "add_requirementnode",
+    "change_requirementnode",
+    "delete_requirementnode",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
+    "add_question",
+    "change_question",
+    "delete_question",
+    "add_questionchoice",
+    "change_questionchoice",
+    "delete_questionchoice",
     "view_storedlibrary",
     "add_storedlibrary",
     "delete_storedlibrary",
@@ -866,6 +1009,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "restore",
     "view_globalsettings",
     "change_globalsettings",
+    "view_customemailtemplate",
+    "add_customemailtemplate",
+    "change_customemailtemplate",
+    "delete_customemailtemplate",
+    "view_customwordtemplate",
+    "add_customwordtemplate",
+    "change_customwordtemplate",
+    "delete_customwordtemplate",
     "view_ssosettings",
     "change_ssosettings",
     "view_requirementmappingset",
@@ -1109,12 +1260,35 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_webhookendpoint",
     "change_webhookendpoint",
     "delete_webhookendpoint",
+    "view_webhookeventtype",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "change_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
+    "add_answer",
+    "change_answer",
     "view_evidence",
     "add_evidence",
     "change_evidence",
@@ -1130,6 +1304,11 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
+    "add_answer",
+    "change_answer",
     "view_evidence",
     "add_evidence",
     "change_evidence",
@@ -1399,16 +1578,18 @@ def startup(sender: AppConfig, **kwargs):
     )
     if (
         User.objects.filter(user_groups=administrators).distinct().count() == 0
-        or FORCE_CREATE_ADMIN
+        or settings.FORCE_CREATE_ADMIN
     ):
         # if superuser defined and does not exist, then create it
         if (
-            CISO_ASSISTANT_SUPERUSER_EMAIL
-            and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+            settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+            and not User.objects.filter(
+                email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+            ).exists()
         ):
             try:
                 User.objects.create_superuser(
-                    email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+                    email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
                 )
             except Exception as e:
                 logger.error("Error creating superuser", exc_info=True)
@@ -1433,10 +1614,10 @@ def startup(sender: AppConfig, **kwargs):
         "enforce_mfa": False,
     }
     try:
-        settings, _ = GlobalSettings.objects.get_or_create(
+        global_settings, _ = GlobalSettings.objects.get_or_create(
             name="general", defaults={"value": default_settings}
         )
-        current_value = settings.value or {}
+        current_value = global_settings.value or {}
 
         ebios_radar_max = current_value.get("ebios_radar_max")
 
@@ -1449,13 +1630,22 @@ def startup(sender: AppConfig, **kwargs):
             # Finally force-reset the invalid ebios_radar_max to default
             updated_value = {**default_settings, **current_value}
             updated_value["ebios_radar_max"] = default_settings["ebios_radar_max"]
-            settings.value = updated_value
-            settings.save()
+            global_settings.value = updated_value
+            global_settings.save()
             logger.info(
                 "Global settings have been reset to defaults due to invalid ebios_radar_max."
             )
     except Exception as e:
         logger.error(f"Failed to reset global settings: {e}")
+
+    # Pre-warm the chat knowledge graph (reads YAML files, no DB needed)
+    if getattr(settings, "ENABLE_CHAT", False):
+        try:
+            from chat.knowledge_graph import get_graph
+
+            get_graph()
+        except Exception as e:
+            logger.debug("knowledge_graph_prewarm_skipped", error=e)
 
 
 class CoreConfig(AppConfig):

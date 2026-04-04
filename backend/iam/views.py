@@ -26,7 +26,7 @@ from rest_framework.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
@@ -239,6 +239,7 @@ class CurrentUserView(views.APIView):
             "is_auditee": request.user.is_auditee,
             "is_admin": request.user.is_admin(),
             "is_local": request.user.is_local,
+            "is_sso": request.user.is_sso,
             "accessible_domains": [str(f) for f in accessible_domains],
             "domain_permissions": domain_permissions,
             "root_folder_id": Folder.get_root_folder().id,
@@ -282,7 +283,7 @@ class PasswordResetView(views.APIView):
     def post(self, request):
         email = request.data["email"]  # type: ignore
         associated_user = User.objects.filter(email__iexact=email).first()
-        if EMAIL_HOST or EMAIL_HOST_RESCUE:
+        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
             if associated_user is not None and associated_user.is_local:
                 try:
                     logger.info(

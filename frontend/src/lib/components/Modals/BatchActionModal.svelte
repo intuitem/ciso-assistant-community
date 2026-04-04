@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { onMount } from 'svelte';
+
+	function translateOption(option: { label: string; value: string }): string {
+		return unsafeTranslate(option.value) || safeTranslate(option.label);
+	}
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -39,7 +43,9 @@
 
 	const filteredOptions = $derived(
 		searchQuery.trim()
-			? options.filter((o) => o.label.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+			? options.filter((o) =>
+					translateOption(o).toLowerCase().includes(searchQuery.trim().toLowerCase())
+				)
 			: options
 	);
 
@@ -150,7 +156,7 @@
 									<span
 										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 text-xs"
 									>
-										{safeTranslate(opt.label)}
+										{translateOption(opt)}
 										<button
 											type="button"
 											class="hover:text-primary-600"
@@ -174,7 +180,7 @@
 									onchange={() => toggleValue(option.value)}
 									class="checkbox"
 								/>
-								<span class="text-sm">{safeTranslate(option.label)}</span>
+								<span class="text-sm">{translateOption(option)}</span>
 							</label>
 						{/each}
 						{#if filteredOptions.length === 0}
@@ -191,7 +197,7 @@
 				>
 					<option value="" disabled>--</option>
 					{#each options as option}
-						<option value={option.value}>{safeTranslate(option.label)}</option>
+						<option value={option.value}>{translateOption(option)}</option>
 					{/each}
 				</select>
 			{/if}
