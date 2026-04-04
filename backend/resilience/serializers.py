@@ -165,6 +165,15 @@ class DoraIncidentReportWriteSerializer(BaseModelSerializer):
     ]
 
     def validate(self, attrs):
+        # Prevent edits to submitted reports (except toggling is_submitted itself)
+        if self.instance and self.instance.is_submitted:
+            allowed_fields = {"is_submitted"}
+            changed_fields = set(attrs.keys()) - allowed_fields
+            if changed_fields:
+                raise serializers.ValidationError(
+                    "This report has been submitted and cannot be modified."
+                )
+
         incident = attrs.get("incident") or (
             self.instance.incident if self.instance else None
         )

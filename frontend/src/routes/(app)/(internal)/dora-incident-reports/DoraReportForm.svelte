@@ -5,6 +5,11 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import {
+		getModalStore,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { modelSchema } from '$lib/utils/schemas';
@@ -41,11 +46,14 @@
 
 	const schema = modelSchema('dora-incident-reports');
 
+	const isSubmitted = form.data?.is_submitted === true;
+
 	const canProgress =
 		mode === 'edit' &&
 		!['final_report', 'major_incident_reclassified_as_non-major'].includes(
 			form.data?.incident_submission || ''
 		);
+
 
 	const _form = superForm(form, {
 		dataType: 'json',
@@ -159,6 +167,30 @@
 	let hasOtherTechnique = $derived((incidentType.threatTechniques || []).includes('other'));
 	let hasOtherAuthority = $derived(reportingAuthorities.includes('other'));
 
+	const modalStore: ModalStore = getModalStore();
+
+	function modalMarkSubmitted(): void {
+		const modal: ModalSettings = {
+			type: 'prompt',
+			title: m.markAsSubmitted(),
+			body: m.confirmYes(),
+			value: '',
+			valueAttr: {
+				type: 'text',
+				placeholder: m.confirmYesPlaceHolder(),
+				required: true
+			},
+			response: async (value: string | false) => {
+				if (value !== false && value.trim().toLowerCase() === m.yes().toLowerCase()) {
+					// Submit the form programmatically
+					const form = document.getElementById('mark-submitted-form') as HTMLFormElement;
+					if (form) form.requestSubmit();
+				}
+			}
+		};
+		modalStore.trigger(modal);
+	}
+
 	// Fill contact fields from a selected user
 	function fillContact(prefix: 'primary' | 'secondary', userId: string) {
 		const user = userOptions.find((u) => u.id === userId);
@@ -222,6 +254,7 @@
 		action={formAction}
 	>
 		{#snippet children({ form: formCtx })}
+			<fieldset disabled={isSubmitted}>
 			<!-- Section 1: Report Metadata -->
 			<div class="card bg-white shadow-md p-6 space-y-4">
 				<h2 class="text-lg font-semibold border-b pb-2">
@@ -890,50 +923,97 @@
 				/>
 			</div>
 
+			</fieldset>
+
 			<!-- Sticky Footer -->
 			<div
-				class="sticky bottom-0 z-10 bg-white border-t p-4 flex justify-between items-center shadow-lg rounded-t-lg"
+				class="sticky bottom-0 z-10 bg-white border-t p-4 shadow-lg rounded-t-lg space-y-3"
 			>
-				<div class="flex space-x-3">
-					{#if mode === 'edit' && reportId}
-						{#if validation?.valid}
-							<a
-								href="/dora-incident-reports/{reportId}/export/json"
-								class="btn preset-filled-primary-500 font-semibold px-6"
+				{#if isSubmitted}
+					<div class="flex items-center justify-between">
+						<div class="flex items-center space-x-2 text-blue-700 bg-blue-50 px-4 py-2 rounded-md">
+							<i class="fa-solid fa-lock text-lg"></i>
+							<span class="font-medium">{m.submittedReport()}</span>
+						</div>
+						<div class="flex space-x-3">
+							{#if validation?.valid}
+								<a
+									href="/dora-incident-reports/{reportId}/export/json"
+									class="btn preset-filled-primary-500 font-semibold px-6"
+								>
+									<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}
+								</a>
+							{/if}
+							{#if canProgress}
+								<a
+									href="/dora-incident-reports/new?from={reportId}"
+									class="btn preset-filled-secondary-500 font-semibold px-6"
+								>
+									<i class="fa-solid fa-arrow-right mr-2"></i>{m.nextSubmission()}
+								</a>
+							{/if}
+						</div>
+					</div>
+				{:else}
+					<div class="flex justify-between items-center">
+						<div class="flex space-x-3">
+							{#if mode === 'edit' && reportId}
+								{#if validation?.valid}
+									<a
+										href="/dora-incident-reports/{reportId}/export/json"
+										class="btn preset-filled-primary-500 font-semibold px-6"
+									>
+										<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}
+									</a>
+								{:else}
+									<span
+										class="btn preset-filled-surface-500 font-semibold px-6 opacity-50 cursor-not-allowed"
+										title={m.schemaInvalid()}
+									>
+										<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}
+									</span>
+								{/if}
+								{#if canProgress}
+									<a
+										href="/dora-incident-reports/new?from={reportId}"
+										class="btn preset-filled-secondary-500 font-semibold px-6"
+									>
+										<i class="fa-solid fa-arrow-right mr-2"></i>{m.nextSubmission()}
+									</a>
+								{/if}
+							{/if}
+						</div>
+						<div class="flex space-x-3">
+							{#if mode === 'edit' && reportId && !isSubmitted}
+								<button
+									type="button"
+									class="btn preset-filled-warning-500 font-semibold px-6"
+									onclick={modalMarkSubmitted}
+								>
+									<i class="fa-solid fa-lock mr-2"></i>{m.markAsSubmitted()}
+								</button>
+							{/if}
+							<button
+								type="button"
+								class="btn preset-filled-tertiary-500 font-semibold px-8"
+								onclick={cancel}
 							>
-								<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}
-							</a>
-						{:else}
-							<span
-								class="btn preset-filled-surface-500 font-semibold px-6 opacity-50 cursor-not-allowed"
-								title={m.schemaInvalid()}
-							>
-								<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}
-							</span>
-						{/if}
-						{#if canProgress}
-							<a
-								href="/dora-incident-reports/new?from={reportId}"
-								class="btn preset-filled-secondary-500 font-semibold px-6"
-							>
-								<i class="fa-solid fa-arrow-right mr-2"></i>{m.nextSubmission()}
-							</a>
-						{/if}
-					{/if}
-				</div>
-				<div class="flex space-x-3">
-					<button
-						type="button"
-						class="btn preset-filled-tertiary-500 font-semibold px-8"
-						onclick={cancel}
-					>
-						{m.cancel()}
-					</button>
-					<button type="submit" class="btn preset-filled-primary-500 font-semibold px-8">
-						{m.save()}
-					</button>
-				</div>
+								{m.cancel()}
+							</button>
+							<button type="submit" class="btn preset-filled-primary-500 font-semibold px-8">
+								{m.save()}
+							</button>
+						</div>
+					</div>
+				{/if}
+
 			</div>
 		{/snippet}
 	</SuperForm>
+
+	{#if mode === 'edit' && reportId}
+		<form id="mark-submitted-form" method="POST" action="?/markSubmitted" hidden>
+			<input type="hidden" name="id" value={reportId} />
+		</form>
+	{/if}
 </div>

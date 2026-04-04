@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.utils.translation import gettext_lazy as _
 from django.db.models import (
     BooleanField,
     CharField,
@@ -408,6 +409,8 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
     info_duration_service_downtime_actual_or_estimate = models.CharField(
         max_length=50, blank=True
     )
+
+    is_submitted = models.BooleanField(default=False, verbose_name=_("Submitted"))
 
     fields_to_check = []
 

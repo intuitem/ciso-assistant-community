@@ -116,5 +116,8 @@ export const actions: Actions = {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
 		if (result.form) return { form: result.form, newEvidence: result.form.message.object.id };
 		else return result;
+	},
+	deleteDoraReport: async (event) => {
+		return nestedDeleteFormAction({ event });
 	}
 };

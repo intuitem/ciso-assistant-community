@@ -4,7 +4,6 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { defaultWriteFormAction } from '$lib/utils/actions';
-import { nestedDeleteFormAction } from '$lib/utils/actions';
 import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -135,7 +134,19 @@ export const actions: Actions = {
 			action: 'edit'
 		});
 	},
-	delete: async (event) => {
-		return nestedDeleteFormAction({ event });
+	markSubmitted: async ({ fetch, params }) => {
+		const endpoint = `${BASE_API_URL}/${ENDPOINT}/${params.id}/`;
+		const res = await fetch(endpoint, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ is_submitted: true })
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			return { error: error.detail || 'Failed to mark as submitted' };
+		}
+		// Redirect to same page to reload with submitted state
+		const { redirect } = await import('@sveltejs/kit');
+		redirect(303, `/dora-incident-reports/${params.id}`);
 	}
 };

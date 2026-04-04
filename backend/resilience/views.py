@@ -566,6 +566,15 @@ class DoraIncidentReportViewSet(BaseModelViewSet):
     filterset_fields = ["incident", "incident_submission", "folder"]
     search_fields = ["incident__name", "incident_description"]
 
+    def perform_destroy(self, instance):
+        if instance.is_submitted:
+            from rest_framework.exceptions import PermissionDenied
+
+            raise PermissionDenied(
+                "This report has been submitted and cannot be deleted."
+            )
+        super().perform_destroy(instance)
+
     @action(detail=False, name="Get main entity data for pre-fill")
     def main_entity(self, request):
         from tprm.models import Entity

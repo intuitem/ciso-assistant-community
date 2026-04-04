@@ -26,6 +26,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
@@ -182,6 +183,26 @@
 	});
 
 	let exportPopupOpen = $state(false);
+
+	function modalDeleteDoraReport(reportId: string, reportName: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: { id: reportId, urlmodel: 'dora-incident-reports' },
+				id: reportId,
+				debug: false,
+				URLModel: 'dora-incident-reports',
+				formAction: '?/deleteDoraReport'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${reportName}?`
+		};
+		modalStore.trigger(modal);
+	}
 
 	let activeTab = $state('timeline');
 
@@ -452,21 +473,50 @@
 						</thead>
 						<tbody>
 							{#each doraRows as report}
-								<tr class="border-b hover:bg-gray-50">
+								<tr
+									class="border-b hover:bg-gray-50 cursor-pointer"
+									onclick={(e) => {
+										if (!(e.target as HTMLElement).closest('button')) {
+											window.location.href = `/dora-incident-reports/${report.id}`;
+										}
+									}}
+								>
 									<td class="py-2 px-3">
 										<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
 											{safeTranslate(report.incident_submission)}
 										</span>
+										{#if report.is_submitted}
+											<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded ml-1">
+												<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
+											</span>
+										{:else}
+											<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-1">
+												{m.draft()}
+											</span>
+										{/if}
 									</td>
 									<td class="py-2 px-3">{formatDateOrDateTime(report.created_at, getLocale())}</td>
 									<td class="py-2 px-3">{formatDateOrDateTime(report.updated_at, getLocale())}</td>
-									<td class="py-2 px-3 text-right">
+									<td class="py-2 px-3 text-right space-x-2">
 										<a
 											href="/dora-incident-reports/{report.id}"
 											class="text-primary-500 hover:underline text-sm"
 										>
 											<i class="fa-solid fa-arrow-right mr-1"></i>{m.open()}
 										</a>
+										{#if !report.is_submitted}
+											<button
+												type="button"
+												class="text-red-500 hover:text-red-700 text-sm"
+												onclick={() =>
+													modalDeleteDoraReport(
+														report.id,
+														safeTranslate(report.incident_submission)
+													)}
+											>
+												<i class="fa-solid fa-trash"></i>
+											</button>
+										{/if}
 									</td>
 								</tr>
 							{/each}

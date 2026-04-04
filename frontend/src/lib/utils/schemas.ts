@@ -1302,7 +1302,8 @@ export const DoraIncidentReportSchema = z.object({
 	impact_assessment: z.any().optional(),
 	reporting_to_other_authorities: z.any().optional(),
 	reporting_to_other_authorities_other: z.string().optional().default(''),
-	info_duration_service_downtime_actual_or_estimate: z.string().optional().default('')
+	info_duration_service_downtime_actual_or_estimate: z.string().optional().default(''),
+	is_submitted: z.boolean().optional().default(false)
 });
 
 export const TimelineEntrySchema = z.object({

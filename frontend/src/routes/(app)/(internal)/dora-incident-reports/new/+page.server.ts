@@ -71,7 +71,13 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 			}
 
 			// Copy all fields from previous report
-			const { id: _id, created_at: _ca, updated_at: _ua, ...prevData } = prev;
+			const {
+				id: _id,
+				created_at: _ca,
+				updated_at: _ua,
+				is_submitted: _is,
+				...prevData
+			} = prev;
 
 			prefillData = {
 				...prevData,
