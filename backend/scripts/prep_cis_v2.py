@@ -32,6 +32,42 @@ URN_PREFIX_SHEET_BASE = "urn_prefix"
 
 REFERENCE_CONTROL_PREFIX_ID = "cis"
 
+CIS_FRAMEWORK_SHEET_NAMES = ("contrôles v8", "controls v8")
+CIS_LANGUAGES = {"contrôles v8": "fr", "controls v8": "en"}
+
+CIS_COPYRIGHT_SHEET_NAMES = (
+    "License for Use",
+    "License dutilisation",
+    "License d'utilisation",
+)
+
+IG_DESCRIPTIONS = {
+    "IG1": {
+        "en": "Minimum standard of information security for all enterprises.",
+        "fr": "Standard minimum de sécurité de l'information pour toutes les entreprises.",
+    },
+    "IG2": {
+        "en": "For enterprises managing IT infrastructure of multiple departments with differing risk profiles.",
+        "fr": "Pour les entreprises gérant une infrastructure IT pour plusieurs départements avec des profils de risque différents.",
+    },
+    "IG3": {
+        "en": "To secure sensitive and confidential data.",
+        "fr": "Pour sécuriser les données sensibles et confidentielles.",
+    },
+}
+
+CSF_FUNCTION_TRANSLATIONS = {
+    "govern": ["gouverner"],
+    "identify": ["identifier"],
+    "protect": ["protéger"],
+    "detect": ["détecter"],
+    "respond": ["répondre"],
+    "recover": ["rétablir"],
+}
+
+# Default language
+current_cis_language = "en"
+
 
 def slugify_packager(packager_name: str) -> str:
     """Lowercase the packager name and keep only safe characters for URNs."""
@@ -47,7 +83,35 @@ def safe_strip(value, lower: bool = False) -> str:
     return text.lower() if lower else text
 
 
-def parse_controls_sheet(sheet) -> Tuple[List[dict], List[dict]]:
+def normalize_csf_function(value: str, lang: str = "en") -> str:
+    """
+    Normalize the CSF function to its English keyword.
+    - If lang == "en": returns the lowercased value as-is.
+    - Otherwise: maps localized values back to English using CSF_FUNCTION_TRANSLATIONS.
+    """
+    raw = safe_strip(value, lower=True)
+    if not raw:
+        return ""
+
+    # If already one of the official English keywords, keep it
+    if raw in CSF_FUNCTION_TRANSLATIONS:
+        return raw
+
+    if lang == "en":
+        return raw
+
+    # Reverse-lookup: localized -> English
+    for en_key, translations in CSF_FUNCTION_TRANSLATIONS.items():
+        if raw == en_key:
+            return en_key
+        if raw in (t.lower() for t in translations):
+            return en_key
+
+    # Unknown value: keep raw (or return "" if you prefer strictness)
+    return raw
+
+
+def parse_controls_sheet(sheet, lang: str = "en") -> Tuple[List[dict], List[dict]]:
     """
     Extract framework rows and reference controls from the CIS Controls worksheet.
     """
@@ -99,7 +163,7 @@ def parse_controls_sheet(sheet) -> Tuple[List[dict], List[dict]]:
             {
                 "ref_id": safeguard_ref,
                 "name": safe_strip(title) or safeguard_ref,
-                "csf_function": safe_strip(sf, lower=True),
+                "csf_function": normalize_csf_function(sf, lang=lang),
                 "description": safe_strip(description),
             }
         )
@@ -120,7 +184,10 @@ def build_v2_workbook(
     reference_controls: List[dict],
     library_copyright: str,
     output_filename: str,
+    cis_language: str = "en",
 ) -> None:
+    lang = cis_language if cis_language in CIS_LANGUAGES.values() else "en"
+
     packager_slug = slugify_packager(packager)
     library_urn = f"urn:{packager_slug}:risk:library:{LIBRARY_SLUG}"
     framework_urn = f"urn:{packager_slug}:risk:framework:{LIBRARY_SLUG}"
@@ -135,7 +202,7 @@ def build_v2_workbook(
     ws_library.append(["type", "library"])
     ws_library.append(["urn", library_urn])
     ws_library.append(["version", "1"])
-    ws_library.append(["locale", "en"])
+    ws_library.append(["locale", cis_language])
     ws_library.append(["ref_id", LIBRARY_REF_ID])
     ws_library.append(["name", LIBRARY_NAME])
     ws_library.append(["description", LIBRARY_DESCRIPTION])
@@ -187,21 +254,9 @@ def build_v2_workbook(
 
     ws_impl_content = wb.create_sheet(f"{IMPLEMENTATION_GROUPS_SHEET_BASE}_content")
     ws_impl_content.append(["ref_id", "name", "description"])
-    ws_impl_content.append(
-        [
-            "IG1",
-            "IG1",
-            "Minimum standard of information security for all enterprises.",
-        ]
-    )
-    ws_impl_content.append(
-        [
-            "IG2",
-            "IG2",
-            "For enterprises managing IT infrastructure of multiple departments with differing risk profiles.",
-        ]
-    )
-    ws_impl_content.append(["IG3", "IG3", "To secure sensitive and confidential data."])
+    ws_impl_content.append(["IG1", "IG1", IG_DESCRIPTIONS["IG1"][lang]])
+    ws_impl_content.append(["IG2", "IG2", IG_DESCRIPTIONS["IG2"][lang]])
+    ws_impl_content.append(["IG3", "IG3", IG_DESCRIPTIONS["IG3"][lang]])
 
     # reference_controls sheets
     ws_ref_meta = wb.create_sheet(f"{REFERENCE_CONTROLS_SHEET_BASE}_meta")
@@ -238,7 +293,9 @@ def main():
         description="Convert CIS Controls official Excel file to a CISO Assistant v2 Excel file.",
     )
     parser.add_argument("filename", help="Path to the CIS Controls Excel file")
-    parser.add_argument("--packager", help="Name of the packager entity")
+    parser.add_argument(
+        "-p", "--packager", required=True, help="Name of the packager entity"
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -271,14 +328,28 @@ def main():
     for sheet in workbook.worksheets:
         title = sheet.title
         print(f'⌛ Parsing tab "{title}"...')
-        if title == "License for Use":
+
+        if title in CIS_COPYRIGHT_SHEET_NAMES:
             library_copyright = extract_library_copyright(sheet)
-        elif title.lower().startswith("controls v"):
-            fw_rows, ref_ctrls = parse_controls_sheet(sheet)
-            framework_rows.extend(fw_rows)
-            reference_controls.extend(ref_ctrls)
+
         else:
-            print(f'⏩ Ignored tab: "{title}"')
+            # In order to retrieve the matched element in order to set  right language for IGs
+            matched_prefix = next(
+                (
+                    prefix
+                    for prefix in CIS_FRAMEWORK_SHEET_NAMES
+                    if title.strip().lower().startswith(prefix)
+                ),
+                None,
+            )
+
+            if matched_prefix:
+                current_cis_language = CIS_LANGUAGES.get(matched_prefix, "en")
+                fw_rows, ref_ctrls = parse_controls_sheet(sheet, current_cis_language)
+                framework_rows.extend(fw_rows)
+                reference_controls.extend(ref_ctrls)
+            else:
+                print(f'⏩ Ignored tab: "{title}"')
 
     if not framework_rows:
         print("❌ [ERROR] No controls were extracted from the workbook.")
@@ -298,6 +369,7 @@ def main():
             reference_controls,
             library_copyright,
             args.output,
+            current_cis_language,
         )
     except PermissionError:
         print(
