@@ -168,6 +168,98 @@
 	let hasOtherTechnique = $derived((incidentType.threatTechniques || []).includes('other'));
 	let hasOtherAuthority = $derived(reportingAuthorities.includes('other'));
 
+	// Map validation error paths to form section IDs
+	// Errors look like: "incident: 'incidentDescription' is a required property"
+	// or: "incident.financialEntityCode: '' is too short"
+	// or: "(root): 'classificationTypes' is a required property"
+	function getErrorSection(error: string): string | null {
+		const e = error.toLowerCase();
+
+		// Section 1: Metadata
+		if (e.includes('incidentsubmission') || e.includes('reportcurrency')) return 'dora-section-1';
+
+		// Section 2: Entities & Contacts
+		if (
+			e.includes('submittingentity') ||
+			e.includes('affectedentity') ||
+			e.includes('ultimateparent') ||
+			e.includes('contact')
+		)
+			return 'dora-section-2';
+
+		// Section 4: Incident Type (check before general incident)
+		if (
+			e.includes('incidenttype') ||
+			e.includes('incidentclassification') ||
+			e.includes('threattechniques') ||
+			e.includes('indicatorsofcompromise')
+		)
+			return 'dora-section-4';
+
+		// Section 5: Classification Criteria
+		if (e.includes('classificationtypes') || e.includes('classificationcriterion'))
+			return 'dora-section-5';
+
+		// Section 6: Root Cause
+		if (e.includes('rootcause')) return 'dora-section-6';
+
+		// Section 7: Impact Assessment
+		if (
+			e.includes('impactassessment') ||
+			e.includes('serviceimpact') ||
+			e.includes('affectedassets') ||
+			e.includes('affectedclients') ||
+			e.includes('affectedfinancial') ||
+			e.includes('affectedtransaction') ||
+			e.includes('infrastructure')
+		)
+			return 'dora-section-7';
+
+		// Section 8: Resolution & Financial
+		if (
+			e.includes('resolution') ||
+			e.includes('financialrecoveries') ||
+			e.includes('grossamount') ||
+			e.includes('criticalfunctions')
+		)
+			return 'dora-section-8';
+
+		// Section 9: Reporting & Recurring
+		if (e.includes('reportingtoother') || e.includes('recurring') || e.includes('downtimeactual'))
+			return 'dora-section-9';
+
+		// Section 3: Incident Details (catch-all for incident.*)
+		if (e.includes('incident')) return 'dora-section-3';
+
+		return null;
+	}
+
+	function scrollToError(error: string) {
+		const sectionId = getErrorSection(error);
+		if (sectionId) {
+			const el = document.getElementById(sectionId);
+			if (el) {
+				el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				// Brief highlight
+				el.classList.add('ring-2', 'ring-amber-400', 'ring-offset-2');
+				setTimeout(() => el.classList.remove('ring-2', 'ring-amber-400', 'ring-offset-2'), 2000);
+			}
+		}
+	}
+
+	// Group detailed root causes by category prefix (e.g., "Malicious actions — X" → group "Malicious actions")
+	const detailedGroups = (() => {
+		const groups = new Map<string, { value: string; label: string; shortLabel: string }[]>();
+		for (const choice of allChoices.rootCauseDetailed) {
+			const parts = choice.label.split(' — ');
+			const group = parts.length > 1 ? parts[0] : 'Other';
+			const label = parts.length > 1 ? parts[1] : choice.label;
+			if (!groups.has(group)) groups.set(group, []);
+			groups.get(group)!.push({ ...choice, shortLabel: label });
+		}
+		return [...groups.entries()];
+	})();
+
 	const modalStore: ModalStore = getModalStore();
 
 	function modalMarkSubmitted(): void {
@@ -253,9 +345,21 @@
 			</div>
 			<ul class="space-y-1">
 				{#each validation.errors as error}
-					<li class="text-sm text-amber-800 flex items-start gap-2">
-						<i class="fa-solid fa-circle text-[4px] mt-2 flex-shrink-0 text-amber-400"></i>
-						<span class="font-mono text-xs">{error}</span>
+					<li>
+						<button
+							type="button"
+							class="w-full text-left flex items-start gap-2 px-2 py-1 rounded hover:bg-amber-100 transition-colors group"
+							onclick={() => scrollToError(error)}
+						>
+							{#if getErrorSection(error)}
+								<i
+									class="fa-solid fa-arrow-right text-[10px] mt-1.5 flex-shrink-0 text-amber-400 group-hover:text-amber-600 transition-colors"
+								></i>
+							{:else}
+								<i class="fa-solid fa-circle text-[4px] mt-2 flex-shrink-0 text-amber-400"></i>
+							{/if}
+							<span class="font-mono text-xs text-amber-800">{error}</span>
+						</button>
 					</li>
 				{/each}
 			</ul>
@@ -282,7 +386,7 @@
 		{#snippet children({ form: formCtx })}
 			<fieldset disabled={isSubmitted} class="flex flex-col space-y-6">
 				<!-- Section 1: Report Metadata -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-1">
 					<h2 class="dora-section-header">
 						<span class="dora-step">1</span>
 						<i class="fa-solid fa-file-lines"></i>{m.doraReportMetadata()}
@@ -319,7 +423,7 @@
 				</div>
 
 				<!-- Section 2: Entities & Contacts -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-2">
 					<h2 class="dora-section-header">
 						<span class="dora-step">2</span>
 						<i class="fa-solid fa-building"></i>{m.doraEntitiesAndContacts()}
@@ -418,7 +522,7 @@
 				</div>
 
 				<!-- Section 3: Incident Details -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-3">
 					<h2 class="dora-section-header">
 						<span class="dora-step">3</span>
 						<i class="fa-solid fa-circle-info"></i>{m.doraIncidentDetails()}
@@ -469,7 +573,7 @@
 				</div>
 
 				<!-- Section 4: Incident Type -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-4">
 					<h2 class="dora-section-header">
 						<span class="dora-step">4</span>
 						<i class="fa-solid fa-tag"></i>{m.doraIncidentType()}
@@ -566,7 +670,7 @@
 				</div>
 
 				<!-- Section 5: Classification Criteria -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-5">
 					<h2 class="dora-section-header">
 						<span class="dora-step">5</span>
 						<i class="fa-solid fa-list-check"></i>{m.doraClassificationCriteria()}
@@ -649,7 +753,7 @@
 				</div>
 
 				<!-- Section 6: Root Cause Analysis -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-6">
 					<h2 class="dora-section-header">
 						<span class="dora-step">6</span>
 						<i class="fa-solid fa-magnifying-glass"></i>{m.doraRootCauseAnalysis()}
@@ -674,24 +778,37 @@
 						</div>
 					</fieldset>
 
-					<fieldset class="space-y-2">
+					<fieldset class="space-y-3">
 						<legend class="text-sm font-medium text-gray-700 mb-1"
 							>{m.rootCausesDetailedClassification()}</legend
 						>
-						<div class="flex flex-wrap gap-2">
-							{#each allChoices.rootCauseDetailed as choice}
-								<label class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md">
-									<input
-										type="checkbox"
-										checked={rootCauseDetailed.includes(choice.value)}
-										onchange={() =>
-											(rootCauseDetailed = toggleArrayValue(rootCauseDetailed, choice.value))}
-										class="rounded"
-									/>
-									<span>{choice.label}</span>
-								</label>
-							{/each}
-						</div>
+						{#each detailedGroups as [groupName, choices]}
+							<div class="border border-gray-200 rounded-lg overflow-hidden">
+								<div
+									class="bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600 uppercase tracking-wide"
+								>
+									{groupName}
+								</div>
+								<div class="px-3 py-2 flex flex-wrap gap-2">
+									{#each choices as choice}
+										<label
+											class="flex items-center gap-1.5 text-xs bg-white border border-gray-200 px-2.5 py-1.5 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+											class:!bg-indigo-50={rootCauseDetailed.includes(choice.value)}
+											class:!border-indigo-300={rootCauseDetailed.includes(choice.value)}
+										>
+											<input
+												type="checkbox"
+												checked={rootCauseDetailed.includes(choice.value)}
+												onchange={() =>
+													(rootCauseDetailed = toggleArrayValue(rootCauseDetailed, choice.value))}
+												class="rounded"
+											/>
+											<span>{choice.shortLabel}</span>
+										</label>
+									{/each}
+								</div>
+							</div>
+						{/each}
 					</fieldset>
 
 					<fieldset class="space-y-2">
@@ -700,7 +817,11 @@
 						>
 						<div class="flex flex-wrap gap-2">
 							{#each allChoices.rootCauseAdditional as choice}
-								<label class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md">
+								<label
+									class="flex items-center gap-1.5 text-xs bg-white border border-gray-200 px-2.5 py-1.5 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+									class:!bg-indigo-50={rootCauseAdditional.includes(choice.value)}
+									class:!border-indigo-300={rootCauseAdditional.includes(choice.value)}
+								>
 									<input
 										type="checkbox"
 										checked={rootCauseAdditional.includes(choice.value)}
@@ -731,7 +852,7 @@
 				</div>
 
 				<!-- Section 7: Impact Assessment -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-7">
 					<h2 class="dora-section-header">
 						<span class="dora-step">7</span>
 						<i class="fa-solid fa-chart-bar"></i>{m.doraImpactAssessment()}
@@ -887,7 +1008,7 @@
 				</div>
 
 				<!-- Section 8: Resolution & Financial -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-8">
 					<h2 class="dora-section-header">
 						<span class="dora-step">8</span>
 						<i class="fa-solid fa-coins"></i>{m.doraResolutionAndFinancial()}
@@ -924,7 +1045,7 @@
 				</div>
 
 				<!-- Section 9: Reporting & Recurring -->
-				<div class="dora-section">
+				<div class="dora-section" id="dora-section-9">
 					<h2 class="dora-section-header">
 						<span class="dora-step">9</span>
 						<i class="fa-solid fa-bullhorn"></i>{m.doraReportingAndRecurring()}
