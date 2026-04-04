@@ -754,32 +754,41 @@
 					<!-- Affected Assets -->
 					<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
 						<h3 class="font-medium text-sm">{m.doraAffectedAssets()}</h3>
-						{#each [{ key: 'affectedClients', label: 'Affected clients' }, { key: 'affectedFinancialCounterparts', label: 'Affected financial counterparts' }, { key: 'affectedTransactions', label: 'Affected transactions' }] as item}
-							<div class="grid grid-cols-3 gap-4 items-end">
-								<span class="text-sm font-medium">{item.label}</span>
-								<div>
-									<label class="text-xs text-gray-500" for="{item.key}-number">Number</label>
-									<input
-										id="{item.key}-number"
-										type="number"
-										bind:value={affectedAssets[item.key].number}
-										class="input w-full"
-									/>
-								</div>
-								<div>
-									<label class="text-xs text-gray-500" for="{item.key}-pct">Percentage (%)</label>
-									<input
-										id="{item.key}-pct"
-										type="number"
-										step="0.01"
-										min="0"
-										max="100"
-										bind:value={affectedAssets[item.key].percentage}
-										class="input w-full"
-									/>
-								</div>
-							</div>
-						{/each}
+						<table class="w-full text-sm">
+							<thead>
+								<tr class="text-left text-xs text-gray-500">
+									<th class="py-1 pr-4"></th>
+									<th class="py-1 px-2">{m.number()}</th>
+									<th class="py-1 px-2">{m.percentage()}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each [{ key: 'affectedClients', label: m.affectedClientsLabel() }, { key: 'affectedFinancialCounterparts', label: m.affectedFinancialCounterpartsLabel() }, { key: 'affectedTransactions', label: m.affectedTransactionsLabel() }] as item}
+									<tr>
+										<td class="py-2 pr-4 font-medium whitespace-nowrap">{item.label}</td>
+										<td class="py-2 px-2">
+											<input
+												id="{item.key}-number"
+												type="number"
+												bind:value={affectedAssets[item.key].number}
+												class="input w-full"
+											/>
+										</td>
+										<td class="py-2 px-2">
+											<input
+												id="{item.key}-pct"
+												type="number"
+												step="0.01"
+												min="0"
+												max="100"
+												bind:value={affectedAssets[item.key].percentage}
+												class="input w-full"
+											/>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
 						<div class="grid grid-cols-2 gap-4">
 							<div>
 								<label class="text-sm text-gray-700" for="txValue"
@@ -818,9 +827,9 @@
 								class="select w-full mt-1"
 							>
 								<option value="">--</option>
-								<option value="yes">Yes</option>
-								<option value="no">No</option>
-								<option value="information_not_available">Information not available</option>
+								<option value="yes">{m.yes()}</option>
+								<option value="no">{m.no()}</option>
+								<option value="information_not_available">{m.informationNotAvailable()}</option>
 							</select>
 						</div>
 					</div>
