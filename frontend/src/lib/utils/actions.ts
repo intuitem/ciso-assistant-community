@@ -8,7 +8,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { getSecureRedirect } from './helpers';
 
@@ -86,7 +86,11 @@ export async function handleErrorResponse({
 		return message(form, { error: res.error || res.detail });
 	}
 	Object.entries(res).forEach(([key, value]) => {
-		setError(form, key, safeTranslate(value));
+		if (Array.isArray(value)) {
+			value.forEach((item: string) => setError(form, key, safeTranslate(item)));
+		} else {
+			setError(form, key, safeTranslate(value));
+		}
 	});
 	return message(form, { status: response.status });
 }
@@ -188,7 +192,6 @@ export async function nestedWriteFormAction({
 	redirectToWrittenObject = false
 }: {
 	event: RequestEvent;
-
 	action: FormAction;
 	redirectToWrittenObject: boolean;
 }) {

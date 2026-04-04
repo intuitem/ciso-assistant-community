@@ -1,5 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
+	import Checkbox from '../Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
@@ -56,6 +58,13 @@
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 />
+<Checkbox
+	{form}
+	field="is_active"
+	label={m.isActive()}
+	cacheLock={cacheLocks['is_active']}
+	bind:cachedValue={formDataCache['is_active']}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -65,6 +74,14 @@
 	cacheLock={cacheLocks['issues']}
 	bind:cachedValue={formDataCache['issues']}
 	label={m.organisationIssues()}
+/>
+<TextField
+	type="date"
+	{form}
+	field="start_date"
+	label={m.startDate()}
+	cacheLock={cacheLocks['start_date']}
+	bind:cachedValue={formDataCache['start_date']}
 />
 <TextField
 	type="date"
@@ -105,6 +122,15 @@
 		cacheLock={cacheLocks['due_date']}
 		bind:cachedValue={formDataCache['due_date']}
 	/>
+	<TextField
+		type="date"
+		{form}
+		field="closing_date"
+		label={m.closingDate()}
+		helpText={m.closingDateHelpText()}
+		cacheLock={cacheLocks['closing_date']}
+		bind:cachedValue={formDataCache['closing_date']}
+	/>
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -144,9 +170,8 @@
 		bind:cachedValue={formDataCache['observation']}
 	/>
 </Dropdown>
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

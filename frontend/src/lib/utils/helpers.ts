@@ -81,6 +81,9 @@ export function formatScoreValue(value: number, max_score: number, fullDonut = f
 	} else if (fullDonut) {
 		return 100;
 	}
+	if (!max_score) {
+		return 0;
+	}
 	return (value * 100) / max_score;
 }
 
@@ -333,4 +336,109 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	}
 
 	return { score: totalScore, result };
+}
+
+export const DEFAULT_FIELD_VISIBILITY: Record<string, string> = {
+	result: 'auditor',
+	status: 'auditor',
+	score: 'auditor',
+	is_scored: 'auditor',
+	documentation_score: 'auditor',
+	observation: 'everyone',
+	answers: 'everyone',
+	evidences: 'everyone',
+	applied_controls: 'auditor',
+	security_exceptions: 'auditor'
+};
+
+/**
+ * Resolve effective visibility for a field using CA override > Framework override > default.
+ * Returns 'everyone', 'auditor', or 'hidden'.
+ */
+export function resolveFieldVisibility(
+	framework: Record<string, any> | null | undefined,
+	complianceAssessment: Record<string, any> | null | undefined,
+	fieldName: string
+): string {
+	const caVis = complianceAssessment?.field_visibility?.[fieldName];
+	if (caVis) return caVis;
+	const fwVis = framework?.field_visibility?.[fieldName];
+	if (fwVis) return fwVis;
+	return DEFAULT_FIELD_VISIBILITY[fieldName] ?? 'auditor';
+}
+
+/**
+ * Check if a field is visible for the given viewer role.
+ * viewerRole: 'respondent' or 'auditor'
+ */
+export function isFieldVisible(
+	framework: Record<string, any> | null | undefined,
+	complianceAssessment: Record<string, any> | null | undefined,
+	fieldName: string,
+	viewerRole: 'respondent' | 'auditor' = 'auditor'
+): boolean {
+	const vis = resolveFieldVisibility(framework, complianceAssessment, fieldName);
+	if (vis === 'hidden') return false;
+	if (vis === 'auditor' && viewerRole === 'respondent') return false;
+	return true;
+}
+
+/**
+ * Return visibility flags for all standard assessment fields at once.
+ * Avoids repeating 5-6 individual `isFieldVisible()` calls across route files.
+ */
+export function getFieldVisibility(
+	framework: Record<string, any> | null | undefined,
+	complianceAssessment: Record<string, any> | null | undefined,
+	viewerRole: 'respondent' | 'auditor' = 'auditor'
+): {
+	showResult: boolean;
+	showScore: boolean;
+	showObservation: boolean;
+	showAppliedControls: boolean;
+	showEvidences: boolean;
+	showSecurityExceptions: boolean;
+} {
+	return {
+		showResult: isFieldVisible(framework, complianceAssessment, 'result', viewerRole),
+		showScore: isFieldVisible(framework, complianceAssessment, 'score', viewerRole),
+		showObservation: isFieldVisible(framework, complianceAssessment, 'observation', viewerRole),
+		showAppliedControls: isFieldVisible(
+			framework,
+			complianceAssessment,
+			'applied_controls',
+			viewerRole
+		),
+		showEvidences: isFieldVisible(framework, complianceAssessment, 'evidences', viewerRole),
+		showSecurityExceptions: isFieldVisible(
+			framework,
+			complianceAssessment,
+			'security_exceptions',
+			viewerRole
+		)
+	};
+}
+
+/**
+ * Check whether any question in a questions object has choices with `compute_result` defined.
+ */
+export function hasComputedResult(questions: Record<string, any> | null | undefined): boolean {
+	if (!questions) return false;
+	return Object.values(questions).some(
+		(question: any) =>
+			Array.isArray(question.choices) &&
+			question.choices.some((choice: any) => choice.compute_result !== undefined)
+	);
+}
+
+/**
+ * Check whether any question in a questions object has choices with `add_score` defined.
+ */
+export function hasComputedScore(questions: Record<string, any> | null | undefined): boolean {
+	if (!questions) return false;
+	return Object.values(questions).some(
+		(question: any) =>
+			Array.isArray(question.choices) &&
+			question.choices.some((choice: any) => choice.add_score !== undefined)
+	);
 }

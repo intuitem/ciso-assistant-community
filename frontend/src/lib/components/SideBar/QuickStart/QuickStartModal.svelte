@@ -4,7 +4,7 @@
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 	import * as m from '$paraglide/messages';
 	import TextField from '$lib/components/Forms/TextField.svelte';

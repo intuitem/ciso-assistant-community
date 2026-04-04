@@ -3,7 +3,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { activateTOTPSchema } from '../(internal)/my-profile/settings/mfa/utils/schemas';
 
 	let { data } = $props();

@@ -7,9 +7,17 @@
 		href?: string;
 		emphasis?: boolean;
 		customClass?: string;
+		raw?: boolean;
 	}
 
-	let { count = '0', label, href = '#', emphasis = false, customClass = '' }: Props = $props();
+	let {
+		count = '0',
+		label,
+		href = '#',
+		emphasis = false,
+		customClass = '',
+		raw = false
+	}: Props = $props();
 
 	// Enhanced emphasis styling
 	const emphasisClasses = emphasis
@@ -30,6 +38,9 @@
 		// Convert to string first to handle both string and number inputs
 		const countStr = String(count);
 
+		// Skip formatting when value is already pre-formatted (e.g. currency strings)
+		if (raw) return countStr;
+
 		// If it already contains % or /, return as-is since it's already formatted
 		if (countStr.includes('%') || countStr.includes('/')) {
 			return countStr;
@@ -49,7 +60,7 @@
 			{formattedCount()}
 		</div>
 		<div
-			class="text-xs font-medium text-gray-600 capitalize group-hover:text-violet-700 transition-colors duration-200"
+			class="text-xs font-medium text-gray-600 group-hover:text-violet-700 transition-colors duration-200"
 		>
 			{label}
 		</div>

@@ -4,7 +4,7 @@ import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { error, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
@@ -22,7 +22,8 @@ export const load = (async ({ fetch, params }) => {
 	const assignment = {
 		id: assignmentResult.id,
 		status: assignmentResult.status,
-		events: assignmentResult.events ?? []
+		events: assignmentResult.events ?? [],
+		actor: assignmentResult.actor ?? []
 	};
 
 	// Derive the compliance assessment from the assignment
@@ -44,9 +45,12 @@ export const load = (async ({ fetch, params }) => {
 	}
 	const tableMode = await tableModeRes.json();
 
-	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
-	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
-	compliance_assessment.framework = framework;
+	const frameworkId = compliance_assessment.framework?.id;
+	if (frameworkId) {
+		const frameworkEndpoint = `${BASE_API_URL}/frameworks/${frameworkId}/`;
+		const framework = await fetch(frameworkEndpoint).then((res) => res.json());
+		compliance_assessment.framework = framework;
+	}
 
 	const measureModel = getModelInfo('applied-controls');
 	const measureCreateSchema = modelSchema('applied-controls');
@@ -95,8 +99,12 @@ export const load = (async ({ fetch, params }) => {
 				folder: requirementAssessment.folder.id,
 				requirement: requirementAssessment.requirement.id,
 				compliance_assessment: requirementAssessment.compliance_assessment.id,
-				evidences: requirementAssessment.evidences.map((evidence) => evidence.id),
-				applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				...(requirementAssessment.evidences !== undefined && {
+					evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
+				}),
+				...(requirementAssessment.applied_controls !== undefined && {
+					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				})
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
@@ -135,6 +143,7 @@ export const load = (async ({ fetch, params }) => {
 		measureModel,
 		evidenceModel,
 		assignment,
+		viewerRole: tableMode.viewer_role ?? 'respondent',
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;

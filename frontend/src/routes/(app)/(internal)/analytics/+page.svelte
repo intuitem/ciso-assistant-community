@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
 	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
@@ -34,6 +35,21 @@
 
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
+
+	let threatTreemapExpanded = $state(false);
+	let threatTreemapDialog: HTMLDialogElement | undefined = $state();
+	let threatTreeData: any[] = $state([]);
+
+	function openThreatTreemap(tree: any[]) {
+		threatTreeData = tree;
+		threatTreemapExpanded = true;
+		setTimeout(() => threatTreemapDialog?.showModal(), 0);
+	}
+
+	function closeThreatTreemap() {
+		threatTreemapExpanded = false;
+		threatTreemapDialog?.close();
+	}
 
 	function localizeChartLabels(labels: string[]): string[] {
 		return labels.map((label) => safeTranslate(label));
@@ -104,214 +120,241 @@
 						<LoadingSpinner />
 					</div>
 				{:then metrics}
-					<section id="summary" class="space-y-6">
-						<!-- Controls + CSF Functions Row -->
-						<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-							<!-- Controls Section (3/5 of width) -->
-							<div class="xl:col-span-3">
-								<CardGroup title={m.sumpageSectionControls()} icon="fa-solid fa-shield-halved">
-									<SimpleCard
-										count={metrics.controls.total}
-										label={m.sumpageTotal()}
-										href="/applied-controls/"
-										emphasis={true}
-									/>
-									<SimpleCard
-										count={metrics.controls.active}
-										label={m.sumpageActive()}
-										href="/applied-controls/?status=active"
-									/>
-									<SimpleCard
-										count={metrics.controls.deprecated}
-										label={m.sumpageDeprecated()}
-										href="/applied-controls/?status=deprecated"
-									/>
-									<SimpleCard
-										count={metrics.controls.to_do}
-										label={m.sumpageToDo()}
-										href="/applied-controls/?status=to_do"
-									/>
-									<SimpleCard
-										count={metrics.controls.in_progress}
-										label={m.sumpageInProgress()}
-										href="/applied-controls/?status=in_progress"
-									/>
-									<SimpleCard
-										count={metrics.controls.on_hold}
-										label={m.sumpageOnHold()}
-										href="/applied-controls/?status=on_hold"
-									/>
-									<SimpleCard
-										count={metrics.controls.p1}
-										label={m.sumpageP1()}
-										href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
-										emphasis={true}
-									/>
-									<SimpleCard
-										count={metrics.controls.eta_missed}
-										label={m.sumpageEtaMissed()}
-										href="/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte={new Date()
-											.toISOString()
-											.split('T')[0]}"
-										emphasis={true}
-									/>
-								</CardGroup>
-							</div>
-
-							<!-- CSF Functions Chart (2/5 of width) -->
-							<div class="xl:col-span-2">
-								<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
-									<NightingaleChart name="nightingale" values={metrics.csf_functions} />
+					{#if metrics}
+						<section id="summary" class="space-y-6">
+							<!-- Controls + CSF Functions Row -->
+							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+								<!-- Controls Section (3/5 of width) -->
+								<div class="xl:col-span-3">
+									<CardGroup title={m.sumpageSectionControls()} icon="fa-solid fa-shield-halved">
+										<SimpleCard
+											count={metrics.controls?.total}
+											label={m.sumpageTotal()}
+											href="/applied-controls/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count={metrics.controls?.active}
+											label={m.sumpageActive()}
+											href="/applied-controls/?status=active"
+										/>
+										<SimpleCard
+											count={metrics.controls?.degraded}
+											label={m.sumpageDegraded()}
+											href="/applied-controls/?status=degraded"
+										/>
+										<SimpleCard
+											count={metrics.controls?.deprecated}
+											label={m.sumpageDeprecated()}
+											href="/applied-controls/?status=deprecated"
+										/>
+										<SimpleCard
+											count={metrics.controls?.to_do}
+											label={m.sumpageToDo()}
+											href="/applied-controls/?status=to_do"
+										/>
+										<SimpleCard
+											count={metrics.controls?.in_progress}
+											label={m.sumpageInProgress()}
+											href="/applied-controls/?status=in_progress"
+										/>
+										<SimpleCard
+											count={metrics.controls?.on_hold}
+											label={m.sumpageOnHold()}
+											href="/applied-controls/?status=on_hold"
+										/>
+										<SimpleCard
+											count={metrics.controls?.p1}
+											label={m.sumpageP1()}
+											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=degraded&status=on_hold&status=in_progress&status=--"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count={metrics.controls?.eta_missed}
+											label={m.sumpageEtaMissed()}
+											href="/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte={new Date()
+												.toISOString()
+												.split('T')[0]}"
+											emphasis={true}
+										/>
+									</CardGroup>
 								</div>
-							</div>
-						</div>
-						<!-- Compliance + Audits Chart Row -->
-						<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-							<!-- Compliance Section (2/5 of width) -->
-							<div class="xl:col-span-2">
-								<CardGroup
-									title={m.sumpageSectionCompliance()}
-									icon="fa-solid fa-list-check"
-									maxColumns={3}
-								>
-									<SimpleCard
-										count={metrics.compliance.used_frameworks}
-										label={m.usedFrameworks()}
-										href="/frameworks/"
-										emphasis={true}
-									/>
-									<SimpleCard
-										count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
-										label={m.sumpageActiveAudits()}
-										href="/compliance-assessments/"
-										emphasis={true}
-									/>
-									{#await data.stream.auditsMetrics}
-										<SimpleCard
-											count="..."
-											label={m.sumpageAvgProgress()}
-											href="/compliance-assessments/"
-										/>
-									{:then auditsMetrics}
-										<SimpleCard
-											count="{auditsMetrics?.progress_avg ?? 0}%"
-											label={m.sumpageAvgProgress()}
-											href="/compliance-assessments/"
-										/>
-									{:catch}
-										<SimpleCard
-											count="-"
-											label={m.sumpageAvgProgress()}
-											href="/compliance-assessments/"
-										/>
-									{/await}
-									<SimpleCard
-										count={metrics.compliance.non_compliant_items}
-										label={m.sumpageNonCompliantItems()}
-										href="#"
-									/>
-									<SimpleCard
-										count={metrics.compliance.evidences}
-										label={m.sumpageEvidences()}
-										href="/evidences/"
-									/>
-									<SimpleCard
-										count={metrics.compliance.expired_evidences}
-										label={m.sumpageExpiredEvidences()}
-										href="/evidences/?status=expired"
-										emphasis={true}
-									/>
-								</CardGroup>
-							</div>
 
-							<!-- Audits Chart (3/5 of width) -->
-							<div class="xl:col-span-3">
-								{#await data.stream.auditsMetrics}
-									<div
-										class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center"
-									>
-										<LoadingSpinner />
-									</div>
-								{:then auditsMetrics}
-									<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
-										{#if auditsMetrics?.audits_stats}
-											<StackedBarsNormalized
-												names={auditsMetrics.audits_stats.names}
-												data={auditsMetrics.audits_stats.data}
-												uuids={auditsMetrics.audits_stats.uuids}
-												title={m.recentlyUpdatedAudits()}
-											/>
+								<!-- CSF Functions Chart (2/5 of width) -->
+								<div class="xl:col-span-2">
+									<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+										{#if metrics.csf_functions}
+											<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 										{/if}
 									</div>
-								{:catch}
-									<div
-										class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center text-red-500"
+								</div>
+							</div>
+							<!-- Compliance + Audits Chart Row -->
+							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+								<!-- Compliance Section (2/5 of width) -->
+								<div class="xl:col-span-2">
+									<CardGroup
+										title={m.sumpageSectionCompliance()}
+										icon="fa-solid fa-list-check"
+										maxColumns={3}
 									>
-										<p>Error loading audits data</p>
-									</div>
-								{/await}
-							</div>
-						</div>
-						<!-- Risk Section + Charts Row -->
-						<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-							<!-- Risk Cards (2/5 of width) -->
-							<div class="xl:col-span-2">
-								<CardGroup title={m.sumpageSectionRisk()} icon="fa-solid fa-biohazard">
-									<SimpleCard
-										count={metrics.risk.assessments}
-										label={m.sumpageAssessments()}
-										href="/risk-assessments/"
-										emphasis={true}
-									/>
-									<SimpleCard
-										count={metrics.risk.scenarios}
-										label={m.sumpageScenarios()}
-										href="/risk-scenarios/"
-									/>
-									<SimpleCard
-										count={metrics.risk.threats}
-										label={m.sumpageMappedThreats()}
-										href="/analytics?tab=risk"
-									/>
-									<SimpleCard
-										count={metrics.risk.acceptances}
-										label={m.sumpageRiskAccepted()}
-										href="/risk-acceptances"
-									/>
-								</CardGroup>
-							</div>
+										<SimpleCard
+											count={metrics.compliance?.used_frameworks}
+											label={m.usedFrameworks()}
+											href="/frameworks/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count="{metrics.compliance?.active_audits}/{metrics.compliance?.audits}"
+											label={m.sumpageActiveAudits()}
+											href="/compliance-assessments/"
+											emphasis={true}
+										/>
+										{#await data.stream.auditsMetrics}
+											<SimpleCard
+												count="..."
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{:then auditsMetrics}
+											{#if auditsMetrics}
+												<SimpleCard
+													count="{auditsMetrics.progress_avg}%"
+													label={m.sumpageAvgProgress()}
+													href="/compliance-assessments/"
+												/>
+											{:else}
+												<SimpleCard
+													count="-"
+													label={m.sumpageAvgProgress()}
+													href="/compliance-assessments/"
+												/>
+											{/if}
+										{:catch}
+											<SimpleCard
+												count="-"
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{/await}
+										<SimpleCard
+											count={metrics.compliance?.non_compliant_items}
+											label={m.sumpageNonCompliantItems()}
+											href="#"
+										/>
+										<SimpleCard
+											count={metrics.compliance?.evidences}
+											label={m.sumpageEvidences()}
+											href="/evidences/"
+										/>
+										<SimpleCard
+											count={metrics.compliance?.expired_evidences}
+											label={m.sumpageExpiredEvidences()}
+											href="/evidences/?status=expired"
+											emphasis={true}
+										/>
+									</CardGroup>
+								</div>
 
-							<!-- Risk Charts (3/5 of width) -->
-							<div class="xl:col-span-3">
-								{#await data.stream.risksCountPerLevel}
-									<div class="flex items-center justify-center h-80">
-										<LoadingSpinner />
-									</div>
-								{:then risksCountPerLevel}
-									<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-										<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
-											<HalfDonutChart
-												name="current_h"
-												title={m.sumpageTitleCurrentRisks()}
-												values={risksCountPerLevel.current}
-												colors={risksCountPerLevel.current.map((object) => object.color)}
-											/>
+								<!-- Audits Chart (3/5 of width) -->
+								<div class="xl:col-span-3">
+									{#await data.stream.auditsMetrics}
+										<div
+											class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center"
+										>
+											<LoadingSpinner />
 										</div>
-										<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
-											<HalfDonutChart
-												name="residual_h"
-												title={m.sumpageTitleResidualRisks()}
-												values={risksCountPerLevel.residual}
-												colors={risksCountPerLevel.residual.map((object) => object.color)}
-											/>
+									{:then auditsMetrics}
+										<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
+											{#if auditsMetrics?.audits_stats?.data?.length > 0}
+												<StackedBarsNormalized
+													names={auditsMetrics.audits_stats.names}
+													data={auditsMetrics.audits_stats.data}
+													uuids={auditsMetrics.audits_stats.uuids}
+													title={m.recentlyUpdatedAudits()}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-gray-500">
+													<p>{m.nothingToShowYet()}</p>
+												</div>
+											{/if}
 										</div>
-									</div>
-								{:catch}
-									<div class="text-red-500">Error loading risk level data</div>
-								{/await}
+									{:catch}
+										<div
+											class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center text-red-500"
+										>
+											<p>Error loading audits data</p>
+										</div>
+									{/await}
+								</div>
 							</div>
+							<!-- Risk Section + Charts Row -->
+							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+								<!-- Risk Cards (2/5 of width) -->
+								<div class="xl:col-span-2">
+									<CardGroup title={m.sumpageSectionRisk()} icon="fa-solid fa-biohazard">
+										<SimpleCard
+											count={metrics.risk?.assessments}
+											label={m.sumpageAssessments()}
+											href="/risk-assessments/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count={metrics.risk?.scenarios}
+											label={m.sumpageScenarios()}
+											href="/risk-scenarios/"
+										/>
+										<SimpleCard
+											count={metrics.risk?.threats}
+											label={m.sumpageMappedThreats()}
+											href="/analytics?tab=risk"
+										/>
+										<SimpleCard
+											count={metrics.risk?.acceptances}
+											label={m.sumpageRiskAccepted()}
+											href="/risk-acceptances"
+										/>
+									</CardGroup>
+								</div>
+
+								<!-- Risk Charts (3/5 of width) -->
+								<div class="xl:col-span-3">
+									{#await data.stream.risksCountPerLevel}
+										<div class="flex items-center justify-center h-80">
+											<LoadingSpinner />
+										</div>
+									{:then risksCountPerLevel}
+										<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+											<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+												<HalfDonutChart
+													name="current_h"
+													title={m.sumpageTitleCurrentRisks()}
+													values={risksCountPerLevel?.current ?? []}
+													colors={(risksCountPerLevel?.current ?? []).map((object) => object.color)}
+												/>
+											</div>
+											<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+												<HalfDonutChart
+													name="residual_h"
+													title={m.sumpageTitleResidualRisks()}
+													values={risksCountPerLevel?.residual ?? []}
+													colors={(risksCountPerLevel?.residual ?? []).map(
+														(object) => object.color
+													)}
+												/>
+											</div>
+										</div>
+									{:catch}
+										<div class="text-red-500">Error loading risk level data</div>
+									{/await}
+								</div>
+							</div>
+						</section>
+					{:else}
+						<div class="col-span-3 lg:col-span-1">
+							<p class="text-red-500">Error loading metrics</p>
 						</div>
-					</section>
+					{/if}
 				{:catch error}
 					<div class="col-span-3 lg:col-span-1">
 						<p class="text-red-500">Error loading metrics</p>
@@ -325,51 +368,57 @@
 						<LoadingSpinner />
 					</div>
 				{:then counters}
-					<section id="stats" class="mb-6">
-						<span class="text-xl font-extrabold">{m.statistics()}</span>
-						<div
-							class="flex justify-between flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4"
-						>
-							<CounterCard
-								count={counters.domains}
-								label={m.domains()}
-								faIcon="fa-solid fa-sitemap"
-								href="/folders"
-							/>
-							<CounterCard
-								count={counters.frameworks}
-								label={m.frameworks()}
-								faIcon="fa-solid fa-book"
-								href="/frameworks"
-							/>
-							<CounterCard
-								count={counters.applied_controls}
-								label={m.appliedControls()}
-								faIcon="fa-solid fa-fire-extinguisher"
-								href="/applied-controls"
-							/>
-							<CounterCard
-								count={counters.policies}
-								label={m.policies()}
-								faIcon="fa-solid fa-file-alt"
-								href="/policies"
-							/>
-							<CounterCard
-								count={counters.exceptions}
-								label={m.securityExceptions()}
-								faIcon="fa-solid fa-circle-exclamation"
-								href="/security-exceptions"
-							/>
-							<CounterCard
-								count={counters.risk_acceptances}
-								label={m.riskAcceptances()}
-								faIcon="fa-solid fa-signature"
-								href="/risk-acceptances"
-							/>
+					{#if counters}
+						<section id="stats" class="mb-6">
+							<span class="text-xl font-extrabold">{m.statistics()}</span>
+							<div
+								class="flex justify-between flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4"
+							>
+								<CounterCard
+									count={counters.domains}
+									label={m.domains()}
+									faIcon="fa-solid fa-sitemap"
+									href="/folders"
+								/>
+								<CounterCard
+									count={counters.frameworks}
+									label={m.frameworks()}
+									faIcon="fa-solid fa-book"
+									href="/frameworks"
+								/>
+								<CounterCard
+									count={counters.applied_controls}
+									label={m.appliedControls()}
+									faIcon="fa-solid fa-fire-extinguisher"
+									href="/applied-controls"
+								/>
+								<CounterCard
+									count={counters.policies}
+									label={m.policies()}
+									faIcon="fa-solid fa-file-alt"
+									href="/policies"
+								/>
+								<CounterCard
+									count={counters.exceptions}
+									label={m.securityExceptions()}
+									faIcon="fa-solid fa-circle-exclamation"
+									href="/security-exceptions"
+								/>
+								<CounterCard
+									count={counters.risk_acceptances}
+									label={m.riskAcceptances()}
+									faIcon="fa-solid fa-signature"
+									href="/risk-acceptances"
+								/>
+							</div>
+						</section>
+					{:else}
+						<div class="col-span-3 lg:col-span-1">
+							<p class="text-red-500">Error loading counters</p>
 						</div>
-					</section>
+					{/if}
 				{:catch}
-					<div>Data load eror</div>
+					<div>Data load error</div>
 				{/await}
 				{#await data.stream.combinedAssessmentsStatus}
 					<div class="col-span-3 lg:col-span-1">
@@ -382,13 +431,13 @@
 							<GroupedBarChart
 								name="combined_assessments_status"
 								title={m.assessmentsPerStatus()}
-								categories={combinedAssessmentsStatus.status_labels.map((label) =>
+								categories={combinedAssessmentsStatus?.status_labels?.map((label) =>
 									safeTranslate(label)
-								)}
-								series={combinedAssessmentsStatus.series.map((s) => ({
+								) ?? []}
+								series={combinedAssessmentsStatus?.series?.map((s) => ({
 									name: safeTranslate(s.name),
 									data: s.data
-								}))}
+								})) ?? []}
 								height="h-80"
 							/>
 						</section>
@@ -524,12 +573,12 @@
 								{m.securityExceptionFlow()}
 							</h3>
 							<div class="h-80">
-								{#if operationsAnalytics.exception_sankey.nodes.length > 0}
+								{#if operationsAnalytics?.exception_sankey?.nodes?.length > 0}
 									<ExceptionSankeyChart
 										name="exception_sankey"
 										title=""
-										nodes={operationsAnalytics.exception_sankey.nodes}
-										links={operationsAnalytics.exception_sankey.links}
+										nodes={operationsAnalytics?.exception_sankey?.nodes ?? []}
+										links={operationsAnalytics?.exception_sankey?.links ?? []}
 									/>
 								{:else}
 									<div class="flex items-center justify-center h-full text-gray-500">
@@ -553,17 +602,25 @@
 						</div>
 					{:then [threatsCount, qualificationsCount, risksCountPerLevel]}
 						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-							{#if threatsCount.results.labels.length > 0}
+							{#if threatsCount?.results?.tree?.length > 0}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-									<h3 class="text-lg font-semibold text-gray-900 mb-2">
-										{m.threatRadarChart()}
-									</h3>
+									<div class="flex items-center justify-between mb-2">
+										<h3 class="text-lg font-semibold text-gray-900">
+											{m.threatsBreakdown()}
+										</h3>
+										<button
+											class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+											onclick={() => openThreatTreemap(threatsCount.results.tree)}
+											title="Expand"
+										>
+											<i class="fa-solid fa-expand text-sm"></i>
+										</button>
+									</div>
 									<div class="h-96">
-										<RadarChart
-											name="threatRadar"
-											title=""
-											labels={threatsCount.results.labels}
-											values={threatsCount.results.values}
+										<TreemapChart
+											name="threatTreemap"
+											tree={threatsCount.results.tree}
+											translate={true}
 										/>
 									</div>
 								</div>
@@ -574,19 +631,29 @@
 									<p class="text-gray-500">{m.noThreatsMapped()}</p>
 								</div>
 							{/if}
-							{#if qualificationsCount.results.labels.length > 0}
+							{#if qualificationsCount?.results?.labels?.length > 0}
+								{@const qPaired = (qualificationsCount?.results?.labels ?? [])
+									.map((l, i) => ({
+										label: safeTranslate(l),
+										value: (qualificationsCount?.results?.values ?? [])[i] ?? 0
+									}))
+									.sort((a, b) => a.value - b.value)}
+								{@const qLabels = qPaired.map((p) => p.label)}
+								{@const qValues = qPaired.map((p) => p.value)}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 									<h3 class="text-lg font-semibold text-gray-900 mb-4">
 										{m.qualificationsChartTitle()}
 									</h3>
-									<div class="h-80">
-										<BarChart
-											name="qualificationsBar"
-											title=""
-											labels={localizeChartLabels(qualificationsCount.results.labels)}
-											values={qualificationsCount.results.values}
-											horizontal={true}
-										/>
+									<div class="overflow-y-auto max-h-[500px]">
+										<div style="height: {Math.max(224, qLabels.length * 28)}px">
+											<BarChart
+												name="qualificationsBar"
+												title=""
+												labels={qLabels}
+												values={qValues}
+												horizontal={true}
+											/>
+										</div>
 									</div>
 								</div>
 							{:else}
@@ -606,8 +673,8 @@
 										<DonutChart
 											s_label={m.inherentRisk()}
 											name="inherent_risk_level"
-											values={risksCountPerLevel.inherent}
-											colors={risksCountPerLevel.inherent?.map((object) => object.color)}
+											values={risksCountPerLevel?.inherent ?? []}
+											colors={(risksCountPerLevel?.inherent ?? []).map((object) => object.color)}
 										/>
 									</div>
 								{/if}
@@ -617,8 +684,8 @@
 									<DonutChart
 										s_label={cur_rsk_label}
 										name="current_risk_level"
-										values={risksCountPerLevel.current}
-										colors={risksCountPerLevel.current?.map((object) => object.color)}
+										values={risksCountPerLevel?.current ?? []}
+										colors={(risksCountPerLevel?.current ?? []).map((object) => object.color)}
 									/>
 								</div>
 								<div class="h-96 flex-col grow lg:flex-1">
@@ -627,8 +694,8 @@
 									<DonutChart
 										s_label={rsd_rsk_label}
 										name="residual_risk_level"
-										values={risksCountPerLevel.residual}
-										colors={risksCountPerLevel.residual?.map((object) => object.color)}
+										values={risksCountPerLevel?.residual ?? []}
+										colors={(risksCountPerLevel?.residual ?? []).map((object) => object.color)}
 									/>
 								</div>
 							</div>
@@ -941,19 +1008,19 @@
 								<div class="xl:col-span-1">
 									<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
 										<SimpleCard
-											count={operationsAnalytics.summary_stats.total_incidents}
+											count={operationsAnalytics?.summary_stats?.total_incidents ?? 0}
 											label={m.totalIncidents()}
 											href="/incidents/"
 											emphasis={true}
 										/>
 										<SimpleCard
-											count={operationsAnalytics.summary_stats.incidents_this_month}
+											count={operationsAnalytics?.summary_stats?.incidents_this_month ?? 0}
 											label={m.incidentsThisMonth()}
 											href="/incidents/"
 											emphasis={true}
 										/>
 										<SimpleCard
-											count={operationsAnalytics.summary_stats.open_incidents}
+											count={operationsAnalytics?.summary_stats?.open_incidents ?? 0}
 											label={m.openIncidents()}
 											href="/incidents/?status=new&status=ongoing&status=resolved"
 											emphasis={true}
@@ -972,7 +1039,7 @@
 									<div class="h-80">
 										<DonutChart
 											name="incident_severity"
-											values={operationsAnalytics.severity_breakdown}
+											values={operationsAnalytics?.severity_breakdown ?? []}
 										/>
 									</div>
 								</div>
@@ -983,12 +1050,12 @@
 										{m.incidentQualificationsRadar()}
 									</h3>
 									<div class="h-80">
-										{#if operationsAnalytics.qualifications_breakdown.labels.length > 0}
+										{#if operationsAnalytics?.qualifications_breakdown?.labels?.length > 0}
 											<RadarChart
 												name="incident_qualifications"
 												title=""
-												labels={operationsAnalytics.qualifications_breakdown.labels}
-												values={operationsAnalytics.qualifications_breakdown.values}
+												labels={operationsAnalytics?.qualifications_breakdown?.labels ?? []}
+												values={operationsAnalytics?.qualifications_breakdown?.values ?? []}
 											/>
 										{:else}
 											<div class="flex items-center justify-center h-full text-gray-500">
@@ -1011,9 +1078,10 @@
 											<IncidentMonthlyChart
 												name="incident_monthly"
 												title=""
-												months={operationsAnalytics.monthly_metrics.months}
-												monthlyCount={operationsAnalytics.monthly_metrics.monthly_counts}
-												cumulativeCount={operationsAnalytics.monthly_metrics.cumulative_counts}
+												months={operationsAnalytics?.monthly_metrics?.months ?? []}
+												monthlyCount={operationsAnalytics?.monthly_metrics?.monthly_counts ?? []}
+												cumulativeCount={operationsAnalytics?.monthly_metrics?.cumulative_counts ??
+													[]}
 											/>
 										</div>
 									</div>
@@ -1028,7 +1096,7 @@
 										<div class="h-80">
 											<DonutChart
 												name="incident_detection"
-												values={operationsAnalytics.incident_detection_breakdown}
+												values={operationsAnalytics?.incident_detection_breakdown ?? []}
 												colors={['#3B82F6', '#EF4444']}
 											/>
 										</div>
@@ -1073,3 +1141,24 @@
 		</div>
 	{/key}
 </Tabs>
+
+{#if threatTreemapExpanded}
+	<dialog
+		bind:this={threatTreemapDialog}
+		class="fixed inset-0 m-auto w-[92vw] max-w-7xl h-[88vh] rounded-2xl bg-white shadow-2xl border border-gray-200 p-0 overflow-hidden backdrop:bg-black/40"
+		onclose={() => (threatTreemapExpanded = false)}
+	>
+		<div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+			<h3 class="text-lg font-bold text-gray-900">{m.threatsBreakdown()}</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+				onclick={closeThreatTreemap}
+			>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+		<div class="p-4 h-[calc(88vh-64px)]">
+			<TreemapChart name="threatTreemapExpanded" tree={threatTreeData} translate={true} />
+		</div>
+	</dialog>
+{/if}

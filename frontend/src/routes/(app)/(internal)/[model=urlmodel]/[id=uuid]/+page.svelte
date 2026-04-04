@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import type { PageData, ActionData } from './$types';
 	import { m } from '$paraglide/messages';
 
@@ -10,6 +11,19 @@
 
 	let { data, form }: Props = $props();
 </script>
+
+{#if data.model.name === 'fearedevent'}
+	<div class="flex items-center justify-between mb-4">
+		<Anchor
+			breadcrumbAction="push"
+			href={`/ebios-rm/${data.data.ebios_rm_study.id}`}
+			class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+		>
+			<i class="fa-solid fa-arrow-left"></i>
+			<p>{m.goBackToEbiosRmStudy()}</p>
+		</Anchor>
+	</div>
+{/if}
 
 <DetailView {data} />
 
