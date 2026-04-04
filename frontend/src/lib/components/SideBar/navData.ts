@@ -147,12 +147,6 @@ export const navData = {
 						'view_assetassessment',
 						'view_escalationthreshold'
 					]
-				},
-				{
-					name: 'doraIncidentReports',
-					fa_icon: 'fa-solid fa-file-shield',
-					href: '/dora-incident-reports',
-					permissions: ['view_doraincidentreport']
 				}
 			]
 		},

@@ -145,8 +145,6 @@ export const actions: Actions = {
 			const error = await res.json();
 			return { error: error.detail || 'Failed to mark as submitted' };
 		}
-		// Redirect to same page to reload with submitted state
-		const { redirect } = await import('@sveltejs/kit');
-		redirect(303, `/dora-incident-reports/${params.id}`);
+		return { submitted: true };
 	}
 };

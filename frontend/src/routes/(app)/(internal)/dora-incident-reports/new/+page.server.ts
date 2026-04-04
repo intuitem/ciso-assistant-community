@@ -32,7 +32,12 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 	let incidentRef: { id: string; name: string } | null = null;
 
 	// Submission type progression: initial → intermediate (multiple allowed) → final
-	const SUBMISSION_PROGRESSION = ['initial_notification', 'intermediate_report', 'final_report'];
+	const SUBMISSION_PROGRESSION = [
+		'initial_notification',
+		'intermediate_report',
+		'final_report',
+		'major_incident_reclassified_as_non-major'
+	];
 
 	function getNextSubmissionType(currentType: string, existingTypes: string[]): string {
 		const currentIndex = SUBMISSION_PROGRESSION.indexOf(currentType);
@@ -71,13 +76,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 			}
 
 			// Copy all fields from previous report
-			const {
-				id: _id,
-				created_at: _ca,
-				updated_at: _ua,
-				is_submitted: _is,
-				...prevData
-			} = prev;
+			const { id: _id, created_at: _ca, updated_at: _ua, is_submitted: _is, ...prevData } = prev;
 
 			prefillData = {
 				...prevData,

@@ -5,8 +5,10 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
+		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
@@ -50,10 +52,8 @@
 
 	const canProgress =
 		mode === 'edit' &&
-		!['final_report', 'major_incident_reclassified_as_non-major'].includes(
-			form.data?.incident_submission || ''
-		);
-
+		validation?.valid &&
+		form.data?.incident_submission !== 'major_incident_reclassified_as_non-major';
 
 	const _form = superForm(form, {
 		dataType: 'json',
@@ -170,23 +170,19 @@
 	const modalStore: ModalStore = getModalStore();
 
 	function modalMarkSubmitted(): void {
-		const modal: ModalSettings = {
-			type: 'prompt',
-			title: m.markAsSubmitted(),
-			body: m.confirmYes(),
-			value: '',
-			valueAttr: {
-				type: 'text',
-				placeholder: m.confirmYesPlaceHolder(),
-				required: true
-			},
-			response: async (value: string | false) => {
-				if (value !== false && value.trim().toLowerCase() === m.yes().toLowerCase()) {
-					// Submit the form programmatically
-					const form = document.getElementById('mark-submitted-form') as HTMLFormElement;
-					if (form) form.requestSubmit();
-				}
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: {
+				_form: { id: reportId },
+				formAction: '?/markSubmitted',
+				bodyComponent: undefined
 			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.markAsSubmitted(),
+			body: m.submittedReport()
 		};
 		modalStore.trigger(modal);
 	}
@@ -255,239 +251,208 @@
 	>
 		{#snippet children({ form: formCtx })}
 			<fieldset disabled={isSubmitted}>
-			<!-- Section 1: Report Metadata -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-file-lines mr-2"></i>{m.doraReportMetadata()}
-				</h2>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<AutocompleteSelect
-						form={_form}
-						optionsEndpoint="incidents"
-						field="incident"
-						label={m.incident()}
-						hidden={!!$formData.incident}
-					/>
-					<AutocompleteSelect
-						form={_form}
-						optionsEndpoint="folders"
-						optionsUrlParams="content_type=DO&content_type=GL"
-						field="folder"
-						label={m.domain()}
-						hidden={!!$formData.folder}
-					/>
-					<Select
-						form={_form}
-						options={selectOptions.incident_submission}
-						field="incident_submission"
-						label={m.incidentSubmission()}
-					/>
-					<Select
-						form={_form}
-						options={selectOptions.report_currency}
-						field="report_currency"
-						label={m.reportCurrency()}
-					/>
+				<!-- Section 1: Report Metadata -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-file-lines mr-2"></i>{m.doraReportMetadata()}
+					</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<AutocompleteSelect
+							form={_form}
+							optionsEndpoint="incidents"
+							field="incident"
+							label={m.incident()}
+							hidden={!!$formData.incident}
+						/>
+						<AutocompleteSelect
+							form={_form}
+							optionsEndpoint="folders"
+							optionsUrlParams="content_type=DO&content_type=GL"
+							field="folder"
+							label={m.domain()}
+							hidden={!!$formData.folder}
+						/>
+						<Select
+							form={_form}
+							options={selectOptions.incident_submission}
+							field="incident_submission"
+							label={m.incidentSubmission()}
+						/>
+						<Select
+							form={_form}
+							options={selectOptions.report_currency}
+							field="report_currency"
+							label={m.reportCurrency()}
+						/>
+					</div>
 				</div>
-			</div>
 
-			<!-- Section 2: Entities & Contacts -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-building mr-2"></i>{m.doraEntitiesAndContacts()}
-				</h2>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<!-- Section 2: Entities & Contacts -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-building mr-2"></i>{m.doraEntitiesAndContacts()}
+					</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<AutocompleteSelect
+							form={_form}
+							optionsEndpoint="entities"
+							optionsExtraFields={[['folder', 'str']]}
+							field="submitting_entity"
+							label={m.submittingEntity()}
+							nullable
+						/>
+						<AutocompleteSelect
+							form={_form}
+							optionsEndpoint="entities"
+							optionsExtraFields={[['folder', 'str']]}
+							field="ultimate_parent_entity"
+							label={m.ultimateParentEntity()}
+							nullable
+						/>
+					</div>
 					<AutocompleteSelect
 						form={_form}
 						optionsEndpoint="entities"
 						optionsExtraFields={[['folder', 'str']]}
-						field="submitting_entity"
-						label={m.submittingEntity()}
-						nullable
+						field="affected_entities"
+						label={m.affectedEntities()}
+						multiple
 					/>
-					<AutocompleteSelect
-						form={_form}
-						optionsEndpoint="entities"
-						optionsExtraFields={[['folder', 'str']]}
-						field="ultimate_parent_entity"
-						label={m.ultimateParentEntity()}
-						nullable
-					/>
-				</div>
-				<AutocompleteSelect
-					form={_form}
-					optionsEndpoint="entities"
-					optionsExtraFields={[['folder', 'str']]}
-					field="affected_entities"
-					label={m.affectedEntities()}
-					multiple
-				/>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-					<div class="space-y-3">
-						<div class="flex items-center justify-between">
-							<h3 class="font-medium text-sm text-gray-600">{m.doraPrimaryContact()}</h3>
-							<select
-								class="select text-xs w-auto max-w-48"
-								onchange={(e) => {
-									fillContact('primary', e.currentTarget.value);
-									e.currentTarget.value = '';
-								}}
-							>
-								<option value="">{safeTranslate('fillFromUser')}</option>
-								{#each userOptions as user}
-									<option value={user.id}>{user.label}</option>
-								{/each}
-							</select>
-						</div>
-						<TextField form={_form} field="primary_contact_name" label={m.primaryContactName()} />
-						<TextField
-							form={_form}
-							field="primary_contact_email"
-							label={m.primaryContactEmail()}
-							type="email"
-						/>
-						<TextField form={_form} field="primary_contact_phone" label={m.primaryContactPhone()} />
-					</div>
-					<div class="space-y-3">
-						<div class="flex items-center justify-between">
-							<h3 class="font-medium text-sm text-gray-600">{m.doraSecondaryContact()}</h3>
-							<select
-								class="select text-xs w-auto max-w-48"
-								onchange={(e) => {
-									fillContact('secondary', e.currentTarget.value);
-									e.currentTarget.value = '';
-								}}
-							>
-								<option value="">{safeTranslate('fillFromUser')}</option>
-								{#each userOptions as user}
-									<option value={user.id}>{user.label}</option>
-								{/each}
-							</select>
-						</div>
-						<TextField
-							form={_form}
-							field="secondary_contact_name"
-							label={m.secondaryContactName()}
-						/>
-						<TextField
-							form={_form}
-							field="secondary_contact_email"
-							label={m.secondaryContactEmail()}
-							type="email"
-						/>
-						<TextField
-							form={_form}
-							field="secondary_contact_phone"
-							label={m.secondaryContactPhone()}
-						/>
-					</div>
-				</div>
-			</div>
-
-			<!-- Section 3: Incident Details -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-circle-info mr-2"></i>{m.doraIncidentDetails()}
-				</h2>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<TextField form={_form} field="financial_entity_code" label={m.financialEntityCode()} />
-					<TextField
-						form={_form}
-						field="competent_authority_code"
-						label={m.competentAuthorityCode()}
-					/>
-					<TextField
-						form={_form}
-						field="detection_date_time"
-						label={m.detectionDateTime()}
-						type="datetime-local"
-					/>
-					<TextField
-						form={_form}
-						field="classification_date_time"
-						label={m.classificationDateTime()}
-						type="datetime-local"
-					/>
-					<Select
-						form={_form}
-						options={selectOptions.incident_discovery}
-						field="incident_discovery"
-						label={m.incidentDiscovery()}
-					/>
-					<TextField
-						form={_form}
-						field="incident_duration"
-						label={m.incidentDuration()}
-						placeholder="HHH:MM:SS"
-					/>
-				</div>
-				<MarkdownField form={_form} field="incident_description" label={m.incidentDescription()} />
-				<TextField
-					form={_form}
-					field="originates_from_third_party_provider"
-					label={m.originatesFromThirdPartyProvider()}
-				/>
-				<MarkdownField form={_form} field="other_information" label={m.otherInformation()} />
-			</div>
-
-			<!-- Section 4: Incident Type -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-tag mr-2"></i>{m.doraIncidentType()}
-				</h2>
-				<fieldset class="space-y-2">
-					<legend class="text-sm font-medium text-gray-700 mb-1"
-						>{m.incidentType()} — {m.incidentSubmission()}</legend
-					>
-					<div class="flex flex-wrap gap-3">
-						{#each allChoices.incidentClassification as choice}
-							<label class="flex items-center space-x-2 text-sm">
-								<input
-									type="checkbox"
-									checked={(incidentType.incidentClassification || []).includes(choice.value)}
-									onchange={() => {
-										incidentType.incidentClassification = toggleArrayValue(
-											incidentType.incidentClassification || [],
-											choice.value
-										);
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+						<div class="space-y-3">
+							<div class="flex items-center justify-between">
+								<h3 class="font-medium text-sm text-gray-600">{m.doraPrimaryContact()}</h3>
+								<select
+									class="select text-xs w-auto max-w-48"
+									onchange={(e) => {
+										fillContact('primary', e.currentTarget.value);
+										e.currentTarget.value = '';
 									}}
-									class="rounded"
-								/>
-								<span>{choice.label}</span>
-							</label>
-						{/each}
+								>
+									<option value="">{safeTranslate('fillFromUser')}</option>
+									{#each userOptions as user}
+										<option value={user.id}>{user.label}</option>
+									{/each}
+								</select>
+							</div>
+							<TextField form={_form} field="primary_contact_name" label={m.primaryContactName()} />
+							<TextField
+								form={_form}
+								field="primary_contact_email"
+								label={m.primaryContactEmail()}
+								type="email"
+							/>
+							<TextField
+								form={_form}
+								field="primary_contact_phone"
+								label={m.primaryContactPhone()}
+							/>
+						</div>
+						<div class="space-y-3">
+							<div class="flex items-center justify-between">
+								<h3 class="font-medium text-sm text-gray-600">{m.doraSecondaryContact()}</h3>
+								<select
+									class="select text-xs w-auto max-w-48"
+									onchange={(e) => {
+										fillContact('secondary', e.currentTarget.value);
+										e.currentTarget.value = '';
+									}}
+								>
+									<option value="">{safeTranslate('fillFromUser')}</option>
+									{#each userOptions as user}
+										<option value={user.id}>{user.label}</option>
+									{/each}
+								</select>
+							</div>
+							<TextField
+								form={_form}
+								field="secondary_contact_name"
+								label={m.secondaryContactName()}
+							/>
+							<TextField
+								form={_form}
+								field="secondary_contact_email"
+								label={m.secondaryContactEmail()}
+								type="email"
+							/>
+							<TextField
+								form={_form}
+								field="secondary_contact_phone"
+								label={m.secondaryContactPhone()}
+							/>
+						</div>
 					</div>
-				</fieldset>
+				</div>
 
-				{#if hasOtherClassification}
-					<div>
-						<label class="text-sm font-medium text-gray-700" for="otherIncidentClassification"
-							>{m.otherInformation()}</label
-						>
-						<input
-							id="otherIncidentClassification"
-							type="text"
-							bind:value={incidentType.otherIncidentClassification}
-							class="input w-full mt-1"
+				<!-- Section 3: Incident Details -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-circle-info mr-2"></i>{m.doraIncidentDetails()}
+					</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<TextField form={_form} field="financial_entity_code" label={m.financialEntityCode()} />
+						<TextField
+							form={_form}
+							field="competent_authority_code"
+							label={m.competentAuthorityCode()}
+						/>
+						<TextField
+							form={_form}
+							field="detection_date_time"
+							label={m.detectionDateTime()}
+							type="datetime-local"
+						/>
+						<TextField
+							form={_form}
+							field="classification_date_time"
+							label={m.classificationDateTime()}
+							type="datetime-local"
+						/>
+						<Select
+							form={_form}
+							options={selectOptions.incident_discovery}
+							field="incident_discovery"
+							label={m.incidentDiscovery()}
+						/>
+						<TextField
+							form={_form}
+							field="incident_duration"
+							label={m.incidentDuration()}
+							placeholder="HHH:MM:SS"
 						/>
 					</div>
-				{/if}
+					<MarkdownField
+						form={_form}
+						field="incident_description"
+						label={m.incidentDescription()}
+					/>
+					<TextField
+						form={_form}
+						field="originates_from_third_party_provider"
+						label={m.originatesFromThirdPartyProvider()}
+					/>
+					<MarkdownField form={_form} field="other_information" label={m.otherInformation()} />
+				</div>
 
-				{#if isCyberIncident}
-					<fieldset class="space-y-2 mt-4">
+				<!-- Section 4: Incident Type -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-tag mr-2"></i>{m.doraIncidentType()}
+					</h2>
+					<fieldset class="space-y-2">
 						<legend class="text-sm font-medium text-gray-700 mb-1"
-							>{safeTranslate('threatTechniques')}</legend
+							>{m.incidentType()} — {m.incidentSubmission()}</legend
 						>
 						<div class="flex flex-wrap gap-3">
-							{#each allChoices.threatTechniques as choice}
+							{#each allChoices.incidentClassification as choice}
 								<label class="flex items-center space-x-2 text-sm">
 									<input
 										type="checkbox"
-										checked={(incidentType.threatTechniques || []).includes(choice.value)}
+										checked={(incidentType.incidentClassification || []).includes(choice.value)}
 										onchange={() => {
-											incidentType.threatTechniques = toggleArrayValue(
-												incidentType.threatTechniques || [],
+											incidentType.incidentClassification = toggleArrayValue(
+												incidentType.incidentClassification || [],
 												choice.value
 											);
 										}}
@@ -499,436 +464,475 @@
 						</div>
 					</fieldset>
 
-					{#if hasOtherTechnique}
+					{#if hasOtherClassification}
 						<div>
-							<label class="text-sm font-medium text-gray-700" for="otherThreatTechniques"
+							<label class="text-sm font-medium text-gray-700" for="otherIncidentClassification"
 								>{m.otherInformation()}</label
 							>
 							<input
-								id="otherThreatTechniques"
+								id="otherIncidentClassification"
 								type="text"
-								bind:value={incidentType.otherThreatTechniques}
+								bind:value={incidentType.otherIncidentClassification}
 								class="input w-full mt-1"
 							/>
 						</div>
 					{/if}
 
-					<div>
-						<label class="text-sm font-medium text-gray-700" for="ioc"
-							>{safeTranslate('indicatorsOfCompromise')}</label
-						>
-						<textarea
-							id="ioc"
-							bind:value={incidentType.indicatorsOfCompromise}
-							class="textarea w-full mt-1"
-							rows="3"
-						></textarea>
-					</div>
-				{/if}
-			</div>
-
-			<!-- Section 5: Classification Criteria -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-list-check mr-2"></i>{m.doraClassificationCriteria()}
-				</h2>
-				{#each classificationTypes as criterion, index}
-					<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
-						<div class="flex justify-between items-center">
-							<select bind:value={criterion.classificationCriterion} class="select w-full max-w-md">
-								<option value="">--</option>
-								{#each allChoices.classificationCriterion as choice}
-									<option value={choice.value}>{choice.label}</option>
-								{/each}
-							</select>
-							<button
-								type="button"
-								class="btn btn-sm preset-filled-error-500 ml-2"
-								onclick={() => removeClassificationCriterion(index)}
+					{#if isCyberIncident}
+						<fieldset class="space-y-2 mt-4">
+							<legend class="text-sm font-medium text-gray-700 mb-1"
+								>{safeTranslate('threatTechniques')}</legend
 							>
-								<i class="fa-solid fa-trash mr-1"></i>{m.removeCriterion()}
-							</button>
-						</div>
+							<div class="flex flex-wrap gap-3">
+								{#each allChoices.threatTechniques as choice}
+									<label class="flex items-center space-x-2 text-sm">
+										<input
+											type="checkbox"
+											checked={(incidentType.threatTechniques || []).includes(choice.value)}
+											onchange={() => {
+												incidentType.threatTechniques = toggleArrayValue(
+													incidentType.threatTechniques || [],
+													choice.value
+												);
+											}}
+											class="rounded"
+										/>
+										<span>{choice.label}</span>
+									</label>
+								{/each}
+							</div>
+						</fieldset>
 
-						{#if criterion.classificationCriterion === 'geographical_spread'}
+						{#if hasOtherTechnique}
 							<div>
-								<label class="text-sm font-medium text-gray-700"
-									>{safeTranslate('memberStatesImpactTypeDescription')}</label
-								>
-								<textarea
-									bind:value={criterion.memberStatesImpactTypeDescription}
-									class="textarea w-full mt-1"
-									rows="2"
-								></textarea>
-							</div>
-						{:else if criterion.classificationCriterion === 'data_losses'}
-							<div>
-								<label class="text-sm font-medium text-gray-700"
-									>{safeTranslate('dataLossesDescription')}</label
-								>
-								<textarea
-									bind:value={criterion.dataLossesDescription}
-									class="textarea w-full mt-1"
-									rows="2"
-								></textarea>
-							</div>
-						{:else if criterion.classificationCriterion === 'reputational_impact'}
-							<div>
-								<label class="text-sm font-medium text-gray-700"
-									>{safeTranslate('reputationalImpactDescription')}</label
-								>
-								<textarea
-									bind:value={criterion.reputationalImpactDescription}
-									class="textarea w-full mt-1"
-									rows="2"
-								></textarea>
-							</div>
-						{:else if criterion.classificationCriterion === 'economic_impact'}
-							<div>
-								<label class="text-sm font-medium text-gray-700"
-									>{safeTranslate('economicImpactMaterialityThreshold')}</label
+								<label class="text-sm font-medium text-gray-700" for="otherThreatTechniques"
+									>{m.otherInformation()}</label
 								>
 								<input
+									id="otherThreatTechniques"
 									type="text"
-									bind:value={criterion.economicImpactMaterialityThreshold}
+									bind:value={incidentType.otherThreatTechniques}
 									class="input w-full mt-1"
 								/>
 							</div>
 						{/if}
-					</div>
-				{/each}
-				<button
-					type="button"
-					class="btn preset-filled-secondary-500"
-					onclick={addClassificationCriterion}
-				>
-					<i class="fa-solid fa-plus mr-2"></i>{m.addCriterion()}
-				</button>
-			</div>
 
-			<!-- Section 6: Root Cause Analysis -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-magnifying-glass mr-2"></i>{m.doraRootCauseAnalysis()}
-				</h2>
-
-				<fieldset class="space-y-2">
-					<legend class="text-sm font-medium text-gray-700 mb-1"
-						>{m.rootCauseHlClassification()}</legend
-					>
-					<div class="flex flex-wrap gap-3">
-						{#each allChoices.rootCauseHl as choice}
-							<label class="flex items-center space-x-2 text-sm">
-								<input
-									type="checkbox"
-									checked={rootCauseHl.includes(choice.value)}
-									onchange={() => (rootCauseHl = toggleArrayValue(rootCauseHl, choice.value))}
-									class="rounded"
-								/>
-								<span>{choice.label}</span>
-							</label>
-						{/each}
-					</div>
-				</fieldset>
-
-				<fieldset class="space-y-2">
-					<legend class="text-sm font-medium text-gray-700 mb-1"
-						>{m.rootCausesDetailedClassification()}</legend
-					>
-					<div class="flex flex-wrap gap-2">
-						{#each allChoices.rootCauseDetailed as choice}
-							<label class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md">
-								<input
-									type="checkbox"
-									checked={rootCauseDetailed.includes(choice.value)}
-									onchange={() =>
-										(rootCauseDetailed = toggleArrayValue(rootCauseDetailed, choice.value))}
-									class="rounded"
-								/>
-								<span>{choice.label}</span>
-							</label>
-						{/each}
-					</div>
-				</fieldset>
-
-				<fieldset class="space-y-2">
-					<legend class="text-sm font-medium text-gray-700 mb-1"
-						>{m.rootCausesAdditionalClassification()}</legend
-					>
-					<div class="flex flex-wrap gap-2">
-						{#each allChoices.rootCauseAdditional as choice}
-							<label class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md">
-								<input
-									type="checkbox"
-									checked={rootCauseAdditional.includes(choice.value)}
-									onchange={() =>
-										(rootCauseAdditional = toggleArrayValue(rootCauseAdditional, choice.value))}
-									class="rounded"
-								/>
-								<span>{choice.label}</span>
-							</label>
-						{/each}
-					</div>
-				</fieldset>
-
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<TextField form={_form} field="root_causes_other" label={m.rootCausesOther()} />
-					<TextField
-						form={_form}
-						field="root_cause_addressing_date_time"
-						label={m.rootCauseAddressingDateTime()}
-						type="datetime-local"
-					/>
-				</div>
-				<MarkdownField
-					form={_form}
-					field="root_causes_information"
-					label={m.rootCausesInformation()}
-				/>
-			</div>
-
-			<!-- Section 7: Impact Assessment -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-chart-bar mr-2"></i>{m.doraImpactAssessment()}
-				</h2>
-
-				<label class="flex items-center space-x-2">
-					<input
-						type="checkbox"
-						bind:checked={impactAssessment.hasImpactOnRelevantClients}
-						class="rounded"
-					/>
-					<span class="text-sm font-medium">{safeTranslate('hasImpactOnRelevantClients')}</span>
-				</label>
-
-				<div>
-					<label class="text-sm font-medium text-gray-700" for="criticalServicesAffected"
-						>{safeTranslate('criticalServicesAffected')}</label
-					>
-					<input
-						id="criticalServicesAffected"
-						type="text"
-						bind:value={impactAssessment.criticalServicesAffected}
-						class="input w-full mt-1"
-					/>
-				</div>
-
-				<!-- Service Impact -->
-				<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
-					<h3 class="font-medium text-sm">{m.doraServiceImpact()}</h3>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
-							<label class="text-sm text-gray-700" for="serviceDowntime"
-								>{safeTranslate('serviceDowntime')}</label
+							<label class="text-sm font-medium text-gray-700" for="ioc"
+								>{safeTranslate('indicatorsOfCompromise')}</label
 							>
-							<input
-								id="serviceDowntime"
-								type="text"
-								placeholder="HH:MM:SS"
-								bind:value={serviceImpact.serviceDowntime}
-								class="input w-full mt-1"
-							/>
+							<textarea
+								id="ioc"
+								bind:value={incidentType.indicatorsOfCompromise}
+								class="textarea w-full mt-1"
+								rows="3"
+							></textarea>
 						</div>
-						<div>
-							<label class="text-sm text-gray-700" for="serviceRestoration"
-								>{safeTranslate('serviceRestorationDateTime')}</label
-							>
-							<input
-								id="serviceRestoration"
-								type="datetime-local"
-								bind:value={serviceImpact.serviceRestorationDateTime}
-								class="input w-full mt-1"
-							/>
-						</div>
-					</div>
+					{/if}
 				</div>
 
-				<!-- Affected Assets -->
-				<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
-					<h3 class="font-medium text-sm">{m.doraAffectedAssets()}</h3>
-					{#each [{ key: 'affectedClients', label: 'Affected clients' }, { key: 'affectedFinancialCounterparts', label: 'Affected financial counterparts' }, { key: 'affectedTransactions', label: 'Affected transactions' }] as item}
-						<div class="grid grid-cols-3 gap-4 items-end">
-							<span class="text-sm font-medium">{item.label}</span>
-							<div>
-								<label class="text-xs text-gray-500" for="{item.key}-number">Number</label>
-								<input
-									id="{item.key}-number"
-									type="number"
-									bind:value={affectedAssets[item.key].number}
-									class="input w-full"
-								/>
+				<!-- Section 5: Classification Criteria -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-list-check mr-2"></i>{m.doraClassificationCriteria()}
+					</h2>
+					{#each classificationTypes as criterion, index}
+						<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
+							<div class="flex justify-between items-center">
+								<select
+									bind:value={criterion.classificationCriterion}
+									class="select w-full max-w-md"
+								>
+									<option value="">--</option>
+									{#each allChoices.classificationCriterion as choice}
+										<option value={choice.value}>{choice.label}</option>
+									{/each}
+								</select>
+								<button
+									type="button"
+									class="btn btn-sm preset-filled-error-500 ml-2"
+									onclick={() => removeClassificationCriterion(index)}
+								>
+									<i class="fa-solid fa-trash mr-1"></i>{m.removeCriterion()}
+								</button>
 							</div>
-							<div>
-								<label class="text-xs text-gray-500" for="{item.key}-pct">Percentage (%)</label>
-								<input
-									id="{item.key}-pct"
-									type="number"
-									step="0.01"
-									min="0"
-									max="100"
-									bind:value={affectedAssets[item.key].percentage}
-									class="input w-full"
-								/>
-							</div>
+
+							{#if criterion.classificationCriterion === 'geographical_spread'}
+								<div>
+									<label class="text-sm font-medium text-gray-700"
+										>{safeTranslate('memberStatesImpactTypeDescription')}</label
+									>
+									<textarea
+										bind:value={criterion.memberStatesImpactTypeDescription}
+										class="textarea w-full mt-1"
+										rows="2"
+									></textarea>
+								</div>
+							{:else if criterion.classificationCriterion === 'data_losses'}
+								<div>
+									<label class="text-sm font-medium text-gray-700"
+										>{safeTranslate('dataLossesDescription')}</label
+									>
+									<textarea
+										bind:value={criterion.dataLossesDescription}
+										class="textarea w-full mt-1"
+										rows="2"
+									></textarea>
+								</div>
+							{:else if criterion.classificationCriterion === 'reputational_impact'}
+								<div>
+									<label class="text-sm font-medium text-gray-700"
+										>{safeTranslate('reputationalImpactDescription')}</label
+									>
+									<textarea
+										bind:value={criterion.reputationalImpactDescription}
+										class="textarea w-full mt-1"
+										rows="2"
+									></textarea>
+								</div>
+							{:else if criterion.classificationCriterion === 'economic_impact'}
+								<div>
+									<label class="text-sm font-medium text-gray-700"
+										>{safeTranslate('economicImpactMaterialityThreshold')}</label
+									>
+									<input
+										type="text"
+										bind:value={criterion.economicImpactMaterialityThreshold}
+										class="input w-full mt-1"
+									/>
+								</div>
+							{/if}
 						</div>
 					{/each}
-					<div class="grid grid-cols-2 gap-4">
-						<div>
-							<label class="text-sm text-gray-700" for="txValue"
-								>{safeTranslate('valueOfAffectedTransactions')}</label
-							>
-							<input
-								id="txValue"
-								type="number"
-								step="0.01"
-								bind:value={affectedAssets.valueOfAffectedTransactions}
-								class="input w-full mt-1"
-							/>
-						</div>
-					</div>
+					<button
+						type="button"
+						class="btn preset-filled-secondary-500"
+						onclick={addClassificationCriterion}
+					>
+						<i class="fa-solid fa-plus mr-2"></i>{m.addCriterion()}
+					</button>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<!-- Section 6: Root Cause Analysis -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-magnifying-glass mr-2"></i>{m.doraRootCauseAnalysis()}
+					</h2>
+
+					<fieldset class="space-y-2">
+						<legend class="text-sm font-medium text-gray-700 mb-1"
+							>{m.rootCauseHlClassification()}</legend
+						>
+						<div class="flex flex-wrap gap-3">
+							{#each allChoices.rootCauseHl as choice}
+								<label class="flex items-center space-x-2 text-sm">
+									<input
+										type="checkbox"
+										checked={rootCauseHl.includes(choice.value)}
+										onchange={() => (rootCauseHl = toggleArrayValue(rootCauseHl, choice.value))}
+										class="rounded"
+									/>
+									<span>{choice.label}</span>
+								</label>
+							{/each}
+						</div>
+					</fieldset>
+
+					<fieldset class="space-y-2">
+						<legend class="text-sm font-medium text-gray-700 mb-1"
+							>{m.rootCausesDetailedClassification()}</legend
+						>
+						<div class="flex flex-wrap gap-2">
+							{#each allChoices.rootCauseDetailed as choice}
+								<label class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md">
+									<input
+										type="checkbox"
+										checked={rootCauseDetailed.includes(choice.value)}
+										onchange={() =>
+											(rootCauseDetailed = toggleArrayValue(rootCauseDetailed, choice.value))}
+										class="rounded"
+									/>
+									<span>{choice.label}</span>
+								</label>
+							{/each}
+						</div>
+					</fieldset>
+
+					<fieldset class="space-y-2">
+						<legend class="text-sm font-medium text-gray-700 mb-1"
+							>{m.rootCausesAdditionalClassification()}</legend
+						>
+						<div class="flex flex-wrap gap-2">
+							{#each allChoices.rootCauseAdditional as choice}
+								<label class="flex items-center space-x-1 text-xs bg-gray-100 px-2 py-1 rounded-md">
+									<input
+										type="checkbox"
+										checked={rootCauseAdditional.includes(choice.value)}
+										onchange={() =>
+											(rootCauseAdditional = toggleArrayValue(rootCauseAdditional, choice.value))}
+										class="rounded"
+									/>
+									<span>{choice.label}</span>
+								</label>
+							{/each}
+						</div>
+					</fieldset>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<TextField form={_form} field="root_causes_other" label={m.rootCausesOther()} />
+						<TextField
+							form={_form}
+							field="root_cause_addressing_date_time"
+							label={m.rootCauseAddressingDateTime()}
+							type="datetime-local"
+						/>
+					</div>
+					<MarkdownField
+						form={_form}
+						field="root_causes_information"
+						label={m.rootCausesInformation()}
+					/>
+				</div>
+
+				<!-- Section 7: Impact Assessment -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-chart-bar mr-2"></i>{m.doraImpactAssessment()}
+					</h2>
+
+					<label class="flex items-center space-x-2">
+						<input
+							type="checkbox"
+							bind:checked={impactAssessment.hasImpactOnRelevantClients}
+							class="rounded"
+						/>
+						<span class="text-sm font-medium">{safeTranslate('hasImpactOnRelevantClients')}</span>
+					</label>
+
 					<div>
-						<label class="text-sm text-gray-700" for="affectedFunctionalAreas"
-							>{safeTranslate('affectedFunctionalAreas')}</label
+						<label class="text-sm font-medium text-gray-700" for="criticalServicesAffected"
+							>{safeTranslate('criticalServicesAffected')}</label
 						>
 						<input
-							id="affectedFunctionalAreas"
+							id="criticalServicesAffected"
 							type="text"
-							bind:value={impactAssessment.affectedFunctionalAreas}
+							bind:value={impactAssessment.criticalServicesAffected}
 							class="input w-full mt-1"
 						/>
 					</div>
-					<div>
-						<label class="text-sm text-gray-700" for="infraComponents"
-							>{safeTranslate('isAffectedInfrastructureComponents')}</label
-						>
-						<select
-							id="infraComponents"
-							bind:value={impactAssessment.isAffectedInfrastructureComponents}
-							class="select w-full mt-1"
-						>
-							<option value="">--</option>
-							<option value="yes">Yes</option>
-							<option value="no">No</option>
-							<option value="information_not_available">Information not available</option>
-						</select>
-					</div>
-				</div>
 
-				{#if impactAssessment.isAffectedInfrastructureComponents === 'yes'}
-					<div>
-						<label class="text-sm text-gray-700" for="infraDesc"
-							>{safeTranslate('affectedInfrastructureComponents')}</label
-						>
-						<textarea
-							id="infraDesc"
-							bind:value={impactAssessment.affectedInfrastructureComponents}
-							class="textarea w-full mt-1"
-							rows="2"
-						></textarea>
-					</div>
-				{/if}
-			</div>
-
-			<!-- Section 8: Resolution & Financial -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-coins mr-2"></i>{m.doraResolutionAndFinancial()}
-				</h2>
-				<MarkdownField
-					form={_form}
-					field="incident_resolution_vs_planned"
-					label={m.incidentResolutionVsPlanned()}
-				/>
-				<MarkdownField
-					form={_form}
-					field="assessment_of_risk_to_critical_functions"
-					label={m.assessmentOfRiskToCriticalFunctions()}
-				/>
-				<MarkdownField
-					form={_form}
-					field="information_relevant_to_resolution_authorities"
-					label={m.informationRelevantToResolutionAuthorities()}
-				/>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<TextField
-						form={_form}
-						field="financial_recoveries_amount"
-						label={m.financialRecoveriesAmount()}
-						type="number"
-					/>
-					<TextField
-						form={_form}
-						field="gross_amount_indirect_direct_costs"
-						label={m.grossAmountIndirectDirectCosts()}
-						type="number"
-					/>
-				</div>
-			</div>
-
-			<!-- Section 9: Reporting & Recurring -->
-			<div class="card bg-white shadow-md p-6 space-y-4">
-				<h2 class="text-lg font-semibold border-b pb-2">
-					<i class="fa-solid fa-bullhorn mr-2"></i>{m.doraReportingAndRecurring()}
-				</h2>
-
-				<fieldset class="space-y-2">
-					<legend class="text-sm font-medium text-gray-700 mb-1"
-						>{m.reportingToOtherAuthorities()}</legend
-					>
-					<div class="flex flex-wrap gap-3">
-						{#each allChoices.reportingAuthority as choice}
-							<label class="flex items-center space-x-2 text-sm">
+					<!-- Service Impact -->
+					<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
+						<h3 class="font-medium text-sm">{m.doraServiceImpact()}</h3>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div>
+								<label class="text-sm text-gray-700" for="serviceDowntime"
+									>{safeTranslate('serviceDowntime')}</label
+								>
 								<input
-									type="checkbox"
-									checked={reportingAuthorities.includes(choice.value)}
-									onchange={() =>
-										(reportingAuthorities = toggleArrayValue(reportingAuthorities, choice.value))}
-									class="rounded"
+									id="serviceDowntime"
+									type="text"
+									placeholder="HH:MM:SS"
+									bind:value={serviceImpact.serviceDowntime}
+									class="input w-full mt-1"
 								/>
-								<span>{choice.label}</span>
-							</label>
-						{/each}
+							</div>
+							<div>
+								<label class="text-sm text-gray-700" for="serviceRestoration"
+									>{safeTranslate('serviceRestorationDateTime')}</label
+								>
+								<input
+									id="serviceRestoration"
+									type="datetime-local"
+									bind:value={serviceImpact.serviceRestorationDateTime}
+									class="input w-full mt-1"
+								/>
+							</div>
+						</div>
 					</div>
-				</fieldset>
 
-				{#if hasOtherAuthority}
+					<!-- Affected Assets -->
+					<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
+						<h3 class="font-medium text-sm">{m.doraAffectedAssets()}</h3>
+						{#each [{ key: 'affectedClients', label: 'Affected clients' }, { key: 'affectedFinancialCounterparts', label: 'Affected financial counterparts' }, { key: 'affectedTransactions', label: 'Affected transactions' }] as item}
+							<div class="grid grid-cols-3 gap-4 items-end">
+								<span class="text-sm font-medium">{item.label}</span>
+								<div>
+									<label class="text-xs text-gray-500" for="{item.key}-number">Number</label>
+									<input
+										id="{item.key}-number"
+										type="number"
+										bind:value={affectedAssets[item.key].number}
+										class="input w-full"
+									/>
+								</div>
+								<div>
+									<label class="text-xs text-gray-500" for="{item.key}-pct">Percentage (%)</label>
+									<input
+										id="{item.key}-pct"
+										type="number"
+										step="0.01"
+										min="0"
+										max="100"
+										bind:value={affectedAssets[item.key].percentage}
+										class="input w-full"
+									/>
+								</div>
+							</div>
+						{/each}
+						<div class="grid grid-cols-2 gap-4">
+							<div>
+								<label class="text-sm text-gray-700" for="txValue"
+									>{safeTranslate('valueOfAffectedTransactions')}</label
+								>
+								<input
+									id="txValue"
+									type="number"
+									step="0.01"
+									bind:value={affectedAssets.valueOfAffectedTransactions}
+									class="input w-full mt-1"
+								/>
+							</div>
+						</div>
+					</div>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label class="text-sm text-gray-700" for="affectedFunctionalAreas"
+								>{safeTranslate('affectedFunctionalAreas')}</label
+							>
+							<input
+								id="affectedFunctionalAreas"
+								type="text"
+								bind:value={impactAssessment.affectedFunctionalAreas}
+								class="input w-full mt-1"
+							/>
+						</div>
+						<div>
+							<label class="text-sm text-gray-700" for="infraComponents"
+								>{safeTranslate('isAffectedInfrastructureComponents')}</label
+							>
+							<select
+								id="infraComponents"
+								bind:value={impactAssessment.isAffectedInfrastructureComponents}
+								class="select w-full mt-1"
+							>
+								<option value="">--</option>
+								<option value="yes">Yes</option>
+								<option value="no">No</option>
+								<option value="information_not_available">Information not available</option>
+							</select>
+						</div>
+					</div>
+
+					{#if impactAssessment.isAffectedInfrastructureComponents === 'yes'}
+						<div>
+							<label class="text-sm text-gray-700" for="infraDesc"
+								>{safeTranslate('affectedInfrastructureComponents')}</label
+							>
+							<textarea
+								id="infraDesc"
+								bind:value={impactAssessment.affectedInfrastructureComponents}
+								class="textarea w-full mt-1"
+								rows="2"
+							></textarea>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Section 8: Resolution & Financial -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-coins mr-2"></i>{m.doraResolutionAndFinancial()}
+					</h2>
+					<MarkdownField
+						form={_form}
+						field="incident_resolution_vs_planned"
+						label={m.incidentResolutionVsPlanned()}
+					/>
+					<MarkdownField
+						form={_form}
+						field="assessment_of_risk_to_critical_functions"
+						label={m.assessmentOfRiskToCriticalFunctions()}
+					/>
+					<MarkdownField
+						form={_form}
+						field="information_relevant_to_resolution_authorities"
+						label={m.informationRelevantToResolutionAuthorities()}
+					/>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<TextField
+							form={_form}
+							field="financial_recoveries_amount"
+							label={m.financialRecoveriesAmount()}
+							type="number"
+						/>
+						<TextField
+							form={_form}
+							field="gross_amount_indirect_direct_costs"
+							label={m.grossAmountIndirectDirectCosts()}
+							type="number"
+						/>
+					</div>
+				</div>
+
+				<!-- Section 9: Reporting & Recurring -->
+				<div class="card bg-white shadow-md p-6 space-y-4">
+					<h2 class="text-lg font-semibold border-b pb-2">
+						<i class="fa-solid fa-bullhorn mr-2"></i>{m.doraReportingAndRecurring()}
+					</h2>
+
+					<fieldset class="space-y-2">
+						<legend class="text-sm font-medium text-gray-700 mb-1"
+							>{m.reportingToOtherAuthorities()}</legend
+						>
+						<div class="flex flex-wrap gap-3">
+							{#each allChoices.reportingAuthority as choice}
+								<label class="flex items-center space-x-2 text-sm">
+									<input
+										type="checkbox"
+										checked={reportingAuthorities.includes(choice.value)}
+										onchange={() =>
+											(reportingAuthorities = toggleArrayValue(reportingAuthorities, choice.value))}
+										class="rounded"
+									/>
+									<span>{choice.label}</span>
+								</label>
+							{/each}
+						</div>
+					</fieldset>
+
+					{#if hasOtherAuthority}
+						<TextField
+							form={_form}
+							field="reporting_to_other_authorities_other"
+							label={m.reportingToOtherAuthoritiesOther()}
+						/>
+					{/if}
+
+					<Select
+						form={_form}
+						options={allChoices.downtimeInfo}
+						field="info_duration_service_downtime_actual_or_estimate"
+						label={m.infoDurationServiceDowntimeActualOrEstimate()}
+					/>
+
+					<MarkdownField
+						form={_form}
+						field="recurring_non_major_incidents_description"
+						label={m.recurringNonMajorIncidentsDescription()}
+					/>
 					<TextField
 						form={_form}
-						field="reporting_to_other_authorities_other"
-						label={m.reportingToOtherAuthoritiesOther()}
+						field="recurring_incident_date"
+						label={m.recurringIncidentDate()}
+						type="datetime-local"
 					/>
-				{/if}
-
-				<Select
-					form={_form}
-					options={allChoices.downtimeInfo}
-					field="info_duration_service_downtime_actual_or_estimate"
-					label={m.infoDurationServiceDowntimeActualOrEstimate()}
-				/>
-
-				<MarkdownField
-					form={_form}
-					field="recurring_non_major_incidents_description"
-					label={m.recurringNonMajorIncidentsDescription()}
-				/>
-				<TextField
-					form={_form}
-					field="recurring_incident_date"
-					label={m.recurringIncidentDate()}
-					type="datetime-local"
-				/>
-			</div>
-
+				</div>
 			</fieldset>
 
 			<!-- Sticky Footer -->
-			<div
-				class="sticky bottom-0 z-10 bg-white border-t p-4 shadow-lg rounded-t-lg space-y-3"
-			>
+			<div class="sticky bottom-0 z-10 bg-white border-t p-4 shadow-lg rounded-t-lg space-y-3">
 				{#if isSubmitted}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-2 text-blue-700 bg-blue-50 px-4 py-2 rounded-md">
@@ -984,7 +988,7 @@
 							{/if}
 						</div>
 						<div class="flex space-x-3">
-							{#if mode === 'edit' && reportId && !isSubmitted}
+							{#if mode === 'edit' && reportId && !isSubmitted && validation?.valid}
 								<button
 									type="button"
 									class="btn preset-filled-warning-500 font-semibold px-6"
@@ -1006,14 +1010,7 @@
 						</div>
 					</div>
 				{/if}
-
 			</div>
 		{/snippet}
 	</SuperForm>
-
-	{#if mode === 'edit' && reportId}
-		<form id="mark-submitted-form" method="POST" action="?/markSubmitted" hidden>
-			<input type="hidden" name="id" value={reportId} />
-		</form>
-	{/if}
 </div>

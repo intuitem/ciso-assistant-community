@@ -26,7 +26,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
@@ -186,13 +186,13 @@
 
 	function modalDeleteDoraReport(reportId: string, reportName: string): void {
 		const modalComponent: ModalComponent = {
-			ref: ConfirmModal,
+			ref: PromptConfirmModal,
 			props: {
 				_form: { id: reportId, urlmodel: 'dora-incident-reports' },
 				id: reportId,
-				debug: false,
 				URLModel: 'dora-incident-reports',
-				formAction: '?/deleteDoraReport'
+				formAction: '?/deleteDoraReport',
+				bodyComponent: undefined
 			}
 		};
 		const modal: ModalSettings = {
