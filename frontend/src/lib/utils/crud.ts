@@ -510,7 +510,21 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
-		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
+		filters: [{ field: 'folder' }, { field: 'filtering_labels' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'vulnerabilities',
+				urlModel: 'assets',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			}
+		]
 	},
 	'filtering-labels': {
 		name: 'filteringlabel',
