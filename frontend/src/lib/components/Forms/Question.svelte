@@ -33,7 +33,7 @@
 
 	const { value } = form ? formFieldProxy(form, field) : {};
 
-	let internalAnswers = $state(value ? $value : structuredClone(initialValue));
+	let internalAnswers = $state(value ? $value : $state.snapshot(initialValue));
 	let questionBuffers = $state<Record<string, string>>({});
 
 	// Initialize buffers for text questions
