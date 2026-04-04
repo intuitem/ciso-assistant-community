@@ -1652,7 +1652,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
         {
             "name": "accreditation_authority",
-            "translations": {"fr": "autorité d’accréditation"},
+            "translations": {"fr": "autorité d’homologation"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
