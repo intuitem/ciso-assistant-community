@@ -476,6 +476,7 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
+	scoring_enabled: z.boolean().optional().default(false),
 	show_documentation_score: z.boolean().optional().default(false),
 	extended_result_enabled: z.boolean().optional().default(false),
 	progress_status_enabled: z.boolean().optional().default(true),
@@ -563,7 +564,16 @@ export const GeneralSettingsSchema = z.object({
 	show_warning_external_links: z.boolean().default(true).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
-	default_language: z.string().default('en').optional()
+	default_language: z.string().default('en').optional(),
+	llm_provider: z.string().default('ollama').optional(),
+	ollama_base_url: z.string().default('http://localhost:11434').optional(),
+	ollama_model: z.string().default('mistral').optional(),
+	ollama_embed_model: z.string().default('snowflake-arctic-embed2').optional(),
+	embedding_backend: z.string().default('sentence-transformers').optional(),
+	chat_system_prompt: z.string().default('').optional(),
+	openai_api_base: z.string().default('http://localhost:1234/v1').optional(),
+	openai_model: z.string().default('').optional(),
+	openai_api_key: z.string().default('').optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -598,6 +608,7 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
+	chat_mode: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
@@ -1066,6 +1077,7 @@ export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	quotation_method: z.string().optional().default('express'),
+	status: z.string().optional().default('planned'),
 	ref_id: z.string().optional().default(''),
 	risk_matrix: z.string(),
 	authors: z.array(z.string().optional()).optional(),

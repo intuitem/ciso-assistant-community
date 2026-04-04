@@ -4,7 +4,7 @@ ref_id: risk-matrix-5x5-iso27005
 name: 5x5 ISO-27005
 description: 5x5 matrix from ISO 27005 Annex A
 copyright: ISO
-version: 5
+version: 6
 publication_date: 2025-02-21
 provider: intuitem
 packager: intuitem
@@ -18,6 +18,9 @@ translations:
   de:
     name: 5x5-Risikomatrix nach ISO 27005
     description: 5x5-Matrix gemäß ISO 27005, Anhang A
+  es:
+    name: Matriz 5x5 ISO-27005
+    description: Matriz 5x5 descrita en la norma ISO-27005 anexo A
 objects:
   risk_matrix:
   - urn: urn:intuitem:risk:matrix:5x5-iso27005
@@ -39,6 +42,9 @@ objects:
         de:
           name: 1 - unwahrscheinlich
           description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist sehr gering.
+        es:
+          name: 1 - Improbable
+          description: "La probabilidad del escenario de riesgo es muy baja"          
     - id: 1
       abbreviation: '2'
       name: 2 - rather unlikely
@@ -53,6 +59,9 @@ objects:
         de:
           name: 2 - eher unwahrscheinlich
           description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist gering.
+        es:
+          name: 2 - Poco Probable
+          description: "La probabilidad del escenario de riesgo es baja"
     - id: 2
       abbreviation: '3'
       name: 3 - likely
@@ -67,6 +76,9 @@ objects:
         de:
           name: 3 - wahrscheinlich
           description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist signifikant.
+        es:
+          name: 3 - Probable
+          description: "La probabilidad del escenario de riesgo es significativa"          
     - id: 3
       abbreviation: '4'
       name: 4 - very likely
@@ -81,6 +93,9 @@ objects:
         de:
           name: 4 - sehr wahrscheinlich
           description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist hoch.
+        es:
+          name: 4 - Muy Probable
+          description: "La probabilidad del escenario de riesgo es alta"          
     - id: 4
       abbreviation: '5'
       name: 5 - almost certain
@@ -95,6 +110,9 @@ objects:
         de:
           name: 5 - nahezu sicher
           description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist sehr hoch.
+        es:
+          name: 5 - Casi Seguro
+          description: "La probabilidad del escenario de riesgo es muy alta"          
     impact:
     - id: 0
       abbreviation: '1'
@@ -110,6 +128,9 @@ objects:
         de:
           name: 1 - geringfügig
           description: Vernachlässigbare Auswirkungen auf die Organisation.
+        es:
+          name: 1 - Leve
+          description: "Consecuencias insignificantes para la organizaci\xf3n"          
     - id: 1
       abbreviation: '2'
       name: 2 - significant
@@ -124,6 +145,9 @@ objects:
         de:
           name: 2 - bedeutend
           description: Signifikante, jedoch begrenzte Auswirkungen auf die Organisation.
+        es:
+          name: 2 - Significativo
+          description: "Consecuencias significativas pero limitadas para la organizaci\xf3n"          
     - id: 2
       abbreviation: '3'
       name: 3 - serious
@@ -138,6 +162,9 @@ objects:
         de:
           name: 3 - erheblich
           description: Erhebliche Auswirkungen auf die Organisation.
+        es:
+          name: 3 - Grave
+          description: "Consecuencias sustanciales para la organizaci\xf3n"          
     - id: 3
       abbreviation: '4'
       name: 4 - critical
@@ -152,6 +179,9 @@ objects:
         de:
           name: 4 - kritisch
           description: Desaströse Auswirkungen auf die Organisation.
+        es:
+          name: "4 - Cr\xedtico"
+          description: "Consecuencias desastrosas para la organizaci\xf3n"          
     - id: 4
       abbreviation: '5'
       name: 5 - catastrophic
@@ -166,6 +196,9 @@ objects:
         de:
           name: 5 - katastrophal
           description: Sektorale oder regulatorische Auswirkungen über die Organisation hinaus.
+        es:
+          name: "5 - Catastr\xf3fico"
+          description: "Consecuencias sectoriales o regulatorias m\xe1s all\xe1 de la organizaci\xf3n"          
     risk:
     - id: 0
       abbreviation: '1'
@@ -181,6 +214,9 @@ objects:
         de:
           name: 1 - sehr gering
           description: Sehr geringes, akzeptables Risiko.
+        es:
+          name: 1 - Muy Bajo
+          description: Muy bajo - Riesgo aceptable          
       hexcolor: '#D3FF4E'
     - id: 1
       abbreviation: '2'
@@ -196,6 +232,9 @@ objects:
         de:
           name: 2 - gering
           description: Geringes, akzeptables Risiko.
+        es:
+          name: 2 - Bajo
+          description: Bajo - Riesgo aceptable          
       hexcolor: '#02A45A'
     - id: 2
       abbreviation: '3'
@@ -211,6 +250,9 @@ objects:
         de:
           name: 3 - mittel
           description: Tolerierbares Risiko.
+        es:
+          name: 3 - Medio
+          description: Medio - Riesgo tolerable          
       hexcolor: '#FFA600'
     - id: 3
       abbreviation: '4'
@@ -226,6 +268,9 @@ objects:
         de:
           name: 4 - hoch
           description: Hohes, inakzeptables Risiko.
+        es:
+          name: 4 - Alto
+          description: Alto - Riesgo inaceptable          
       hexcolor: '#FF1A00'
     - id: 4
       abbreviation: '5'
@@ -241,6 +286,9 @@ objects:
         de:
           name: 5 - sehr hoch
           description: Sehr hohes, inakzeptables Risiko.
+        es:
+          name: 5 - Muy Alto
+          description: Muy Alto - Riesgo inaceptable          
       hexcolor: '#C00000'
     grid:
     - - 0
@@ -278,3 +326,6 @@ objects:
       de:
         name: 5x5-Risikomatrix nach ISO 27005
         description: 5x5-Matrix gemäß ISO 27005, Anhang A
+      es:
+        name: Matriz 5x5 ISO-27005
+        description: Matriz 5x5 descrita en la norma ISO-27005 anexo A        

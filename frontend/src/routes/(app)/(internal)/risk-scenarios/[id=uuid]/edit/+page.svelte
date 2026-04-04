@@ -117,19 +117,26 @@
 
 <div>
 	<SuperForm
-		class="flex flex-col space-y-3"
+		class="flex flex-col space-y-4"
 		data={data.form}
 		dataType="json"
 		{_form}
 		validators={zod(schema)}
 		action="?/updateRiskScenario&next={next}"
 	>
-		<div class="flex flex-row space-x-2">
-			<div class="card p-2 bg-white shadow-lg w-1/2">
-				<div class="flex justify-between p-2">
+		<!-- ── Context Bar ── -->
+		<div class="flex flex-col sm:flex-row gap-3">
+			<div class="card px-5 py-3 bg-white shadow-lg flex-1">
+				<div class="flex items-center gap-2 mb-2">
+					<i class="fa-solid fa-layer-group text-xs text-indigo-400"></i>
+					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+						>{m.scope()}</span
+					>
+				</div>
+				<div class="flex flex-wrap gap-x-6 gap-y-1">
 					{#if data.scenario.risk_assessment.perimeter}
 						<div>
-							<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
+							<p class="text-xs text-gray-400">{m.perimeter()}</p>
 							<Anchor
 								class="anchor text-sm font-semibold"
 								href="/perimeters/{data.scenario.perimeter.id}"
@@ -138,7 +145,7 @@
 						</div>
 					{/if}
 					<div>
-						<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
+						<p class="text-xs text-gray-400">{m.riskAssessment()}</p>
 						<Anchor
 							class="anchor text-sm font-semibold"
 							href="/risk-assessments/{data.scenario.risk_assessment.id}"
@@ -146,7 +153,7 @@
 						>
 					</div>
 					<div>
-						<p class="text-sm font-semibold text-gray-400">{m.riskMatrix()}</p>
+						<p class="text-xs text-gray-400">{m.riskMatrix()}</p>
 						<Anchor
 							class="anchor text-sm font-semibold"
 							href="/risk-matrices/{data.scenario.risk_matrix.id}"
@@ -156,12 +163,17 @@
 					</div>
 				</div>
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
-				<div class="flex flex-row justify-between items-stretch">
-					<div class=" px-2 w-2/3">
+			<div class="card px-5 py-3 bg-white shadow-lg flex-1">
+				<div class="flex items-center gap-2 mb-2">
+					<i class="fa-solid fa-user-gear text-xs text-indigo-400"></i>
+					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+						>{m.ownership()}</span
+					>
+				</div>
+				<div class="flex flex-row items-stretch gap-4">
+					<div class="flex-1">
 						<AutocompleteSelect
 							form={_form}
-							baseClass="flex-1"
 							multiple
 							optionsEndpoint="actors"
 							optionsLabelField="str"
@@ -173,9 +185,8 @@
 							label={m.owner()}
 						/>
 					</div>
-					<div class="w-1/3">
+					<div class="w-48">
 						<Select
-							class="flex-1"
 							form={_form}
 							options={data.treatmentChoices}
 							field="treatment"
@@ -186,66 +197,88 @@
 			</div>
 		</div>
 
-		<div class="flex flex-row space-x-2 min-h-72">
-			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-5/12">
-				<span class="flex flex-row space-x-2">
-					<TextField form={_form} field="ref_id" label={m.refId()} />
-					<TextField form={_form} field="name" label={m.name()} classesContainer="w-full" />
-				</span>
+		<!-- ── Identity & Relations ── -->
+		<div class="flex flex-col lg:flex-row gap-3">
+			<div class="card px-5 py-4 bg-white shadow-lg lg:w-5/12 space-y-3">
+				<div class="flex items-center gap-2 mb-1">
+					<i class="fa-solid fa-fingerprint text-xs text-indigo-400"></i>
+					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+						>{m.identification()}</span
+					>
+				</div>
+				<div class="flex gap-3">
+					<div class="w-28 shrink-0">
+						<TextField form={_form} field="ref_id" label={m.refId()} />
+					</div>
+					<div class="flex-1">
+						<TextField form={_form} field="name" label={m.name()} classesContainer="w-full" />
+					</div>
+				</div>
 				<MarkdownField form={_form} field="description" rows={6} label={m.description()} />
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-auto">
-				<AutocompleteSelect
-					multiple
-					form={_form}
-					optionsEndpoint="assets"
-					lazy
-					optionsLabelField="auto"
-					optionsExtraFields={[['folder', 'str']]}
-					optionsInfoFields={{
-						fields: [
-							{
-								field: 'type'
-							}
-						],
-						classes: 'text-blue-500'
-					}}
-					field="assets"
-					optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
-					label={m.assets()}
-				/>
-				<AutocompleteSelect
-					form={_form}
-					multiple
-					optionsEndpoint="threats"
-					optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
-					optionsExtraFields={[['folder', 'str']]}
-					optionsLabelField="auto"
-					field="threats"
-					label={m.threats()}
-				/>
-				<AutocompleteSelect
-					multiple
-					form={_form}
-					optionsEndpoint="vulnerabilities"
-					optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
-					optionsExtraFields={[['folder', 'str']]}
-					field="vulnerabilities"
-					label={m.vulnerabilities()}
-				/>
-				<AutocompleteSelect
-					multiple
-					form={_form}
-					optionsEndpoint="security-exceptions"
-					optionsExtraFields={[['folder', 'str']]}
-					field="security_exceptions"
-					label={m.securityExceptions()}
-				/>
+			<div class="card px-5 py-4 bg-white shadow-lg lg:w-7/12 max-h-[26rem] overflow-y-auto">
+				<div class="flex items-center gap-2 mb-3">
+					<i class="fa-solid fa-diagram-project text-xs text-indigo-400"></i>
+					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+						>{m.associatedObjects()}</span
+					>
+				</div>
+				<div class="space-y-2">
+					<AutocompleteSelect
+						multiple
+						form={_form}
+						optionsEndpoint="assets"
+						lazy
+						optionsLabelField="auto"
+						optionsExtraFields={[['folder', 'str']]}
+						optionsInfoFields={{
+							fields: [{ field: 'type' }],
+							classes: 'text-blue-500'
+						}}
+						field="assets"
+						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
+						label={m.assets()}
+					/>
+					<AutocompleteSelect
+						form={_form}
+						multiple
+						optionsEndpoint="threats"
+						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
+						optionsExtraFields={[['folder', 'str']]}
+						optionsLabelField="auto"
+						field="threats"
+						label={m.threats()}
+					/>
+					<AutocompleteSelect
+						multiple
+						form={_form}
+						optionsEndpoint="vulnerabilities"
+						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
+						optionsExtraFields={[['folder', 'str']]}
+						field="vulnerabilities"
+						label={m.vulnerabilities()}
+					/>
+					<AutocompleteSelect
+						multiple
+						form={_form}
+						optionsEndpoint="security-exceptions"
+						optionsExtraFields={[['folder', 'str']]}
+						field="security_exceptions"
+						label={m.securityExceptions()}
+					/>
+				</div>
 			</div>
 		</div>
 
-		<div class="flex flex-row space-x-2">
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+		<!-- ── Risk Origin & Antecedent Scenarios ── -->
+		<div class="flex flex-col sm:flex-row gap-3">
+			<div class="card px-5 py-4 bg-white shadow-lg flex-1">
+				<div class="flex items-center gap-2 mb-2">
+					<i class="fa-solid fa-crosshairs text-xs text-indigo-400"></i>
+					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+						>{m.riskOrigin()}</span
+					>
+				</div>
 				<AutocompleteSelect
 					form={_form}
 					nullable
@@ -256,7 +289,13 @@
 					helpText={m.riskOriginHelpText()}
 				/>
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+			<div class="card px-5 py-4 bg-white shadow-lg flex-1">
+				<div class="flex items-center gap-2 mb-2">
+					<i class="fa-solid fa-timeline text-xs text-indigo-400"></i>
+					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+						>{m.antecedentScenarios()}</span
+					>
+				</div>
 				<AutocompleteSelect
 					form={_form}
 					multiple
@@ -276,86 +315,108 @@
 
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
-		{#if page.data?.featureflags?.inherent_risk}
-			<div class="card px-4 py-2 bg-white shadow-lg">
-				<h4 class="h4 font-black mb-2">{m.inherentRisk()}</h4>
-				<div class="flex flex-row space-x-8 justify-between">
-					<div class="flex w-1/2">
-						<div class="flex flex-row space-x-4 my-auto">
-							<div class="min-w-36">
-								<Select
-									form={_form}
-									options={data.probabilityChoices}
-									color_map={probabilityColorMap}
-									field="inherent_proba"
-									label={m.inherentProba()}
-								/>
-							</div>
-							<i class="fa-solid fa-xmark mt-8"></i>
-							<div class="min-w-36">
-								<Select
-									form={_form}
-									options={data.impactChoices}
-									color_map={impactColorMap}
-									field="inherent_impact"
-									label={m.inherentImpact()}
-								/>
-							</div>
-							<i class="fa-solid fa-equals mt-8"></i>
-							<div class="min-w-38">
-								<RiskLevel
-									form={_form}
-									field="inherent_risk_level"
-									label={m.inherentRiskLevel()}
-									riskMatrix={data.riskMatrix}
-									probabilityField="inherent_proba"
-									impactField="inherent_impact"
-									helpText={m.inherentRiskLevelHelpText()}
-								/>
-							</div>
+		<!-- ── Risk Assessment Flow ── -->
+		<div class="space-y-0">
+			{#if page.data?.featureflags?.inherent_risk}
+				<!-- Inherent Risk -->
+				<div
+					class="card px-5 pt-4 pb-14 bg-white shadow-lg border-l-4 border-l-orange-400 rounded-b-none"
+				>
+					<div class="flex items-center gap-2 mb-3">
+						<i class="fa-solid fa-fire text-sm text-orange-400"></i>
+						<h4 class="text-base font-bold text-gray-800">{m.inherentRisk()}</h4>
+						<span class="text-xs text-gray-400 ml-1">{m.riskOptionHelper()}</span>
+					</div>
+					<div class="flex items-center gap-4 flex-wrap">
+						<div class="min-w-36">
+							<Select
+								form={_form}
+								options={data.probabilityChoices}
+								color_map={probabilityColorMap}
+								field="inherent_proba"
+								label={m.inherentProba()}
+							/>
+						</div>
+						<span
+							class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+							>&times;</span
+						>
+						<div class="min-w-36">
+							<Select
+								form={_form}
+								options={data.impactChoices}
+								color_map={impactColorMap}
+								field="inherent_impact"
+								label={m.inherentImpact()}
+							/>
+						</div>
+						<span
+							class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+							>=</span
+						>
+						<div>
+							<RiskLevel
+								form={_form}
+								field="inherent_risk_level"
+								label={m.inherentRiskLevel()}
+								riskMatrix={data.riskMatrix}
+								probabilityField="inherent_proba"
+								impactField="inherent_impact"
+								helpText={m.inherentRiskLevelHelpText()}
+							/>
 						</div>
 					</div>
 				</div>
-			</div>
-		{/if}
+				<!-- Flow connector -->
+				<div class="flex items-center pl-6 -my-px">
+					<div class="w-0.5 h-5 bg-gray-300"></div>
+					<i class="fa-solid fa-chevron-down text-[10px] text-gray-300 -ml-[5px] mt-3"></i>
+				</div>
+			{/if}
 
-		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-black mb-2">{m.currentRisk()}</h4>
-			<div class="flex flex-row space-x-8 justify-between">
-				<div class="w-1/2">
-					<div class="flex mb-2">
-						<div class="w-full mr-2">
-							{#key refreshKey}
-								<AutocompleteSelect
-									multiple
-									form={_form}
-									optionsEndpoint="applied-controls"
-									optionsExtraFields={[['folder', 'str']]}
-									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
-									field="existing_applied_controls"
-									label={m.existingControls()}
-									helpText={m.existingControlsHelper()}
-								/>
-							{/key}
-						</div>
-						<div class="flex items-center justify-center">
-							<div class="">
-								<button
-									class="btn bg-gray-300 h-10 w-10"
-									onclick={(_) => modalMeasureCreateForm('existing_applied_controls')}
-									type="button"><i class="fa-solid fa-plus text-sm"></i></button
-								>
+			<!-- Current Risk -->
+			<div
+				class="card px-5 pt-4 pb-14 bg-white shadow-lg border-l-4 border-l-amber-400 {page.data
+					?.featureflags?.inherent_risk
+					? 'rounded-none'
+					: 'rounded-b-none'}"
+			>
+				<div class="flex items-center gap-2 mb-3">
+					<i class="fa-solid fa-gauge-high text-sm text-amber-500"></i>
+					<h4 class="text-base font-bold text-gray-800">{m.currentRisk()}</h4>
+				</div>
+				<div class="flex flex-col xl:flex-row xl:items-center gap-6">
+					<!-- Existing controls -->
+					<div class="xl:w-1/2">
+						<div class="flex items-center gap-2">
+							<div class="flex-1">
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										form={_form}
+										optionsEndpoint="applied-controls"
+										optionsExtraFields={[['folder', 'str']]}
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', page.data.scenario.folder.id]
+										]}
+										field="existing_applied_controls"
+										label={m.existingControls()}
+										helpText={m.existingControlsHelper()}
+									/>
+								{/key}
 							</div>
+							<button
+								class="btn preset-tonal-primary shrink-0 h-10 w-10"
+								onclick={(_) => modalMeasureCreateForm('existing_applied_controls')}
+								type="button"
+							>
+								<i class="fa-solid fa-plus text-sm"></i>
+							</button>
 						</div>
 					</div>
-				</div>
-				<div class="flex w-1/2">
-					<div>
-						<div class="text-xs text-slate-500 mb-4">
-							<i class="fa-solid fa-circle-info"></i>
-							{m.riskOptionHelper()}
-						</div>
-						<div class="flex flex-row space-x-4 my-auto">
+					<!-- Risk equation -->
+					<div class="xl:w-1/2">
+						<div class="flex items-center gap-4 flex-wrap">
 							<div class="min-w-36">
 								<Select
 									form={_form}
@@ -365,7 +426,10 @@
 									label={m.currentProba()}
 								/>
 							</div>
-							<i class="fa-solid fa-xmark mt-8"></i>
+							<span
+								class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+								>&times;</span
+							>
 							<div class="min-w-36">
 								<Select
 									form={_form}
@@ -375,8 +439,11 @@
 									label={m.currentImpact()}
 								/>
 							</div>
-							<i class="fa-solid fa-equals mt-8"></i>
-							<div class="min-w-38">
+							<span
+								class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+								>=</span
+							>
+							<div>
 								<RiskLevel
 									form={_form}
 									field="current_risk_level"
@@ -391,125 +458,156 @@
 					</div>
 				</div>
 			</div>
-		</div>
 
-		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-black mb-2">{m.residualRisk()}</h4>
-			<div class="flex flex-row space-x-8">
-				<div class="w-1/2">
-					<div class="flex">
-						<div class="w-full mr-2">
-							{#key refreshKey}
-								<AutocompleteSelect
-									multiple
-									form={_form}
-									optionsEndpoint="applied-controls"
-									optionsExtraFields={[['folder', 'str']]}
-									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
-									field="applied_controls"
-									label={m.extraAppliedControls()}
-									helpText={m.extraControlsHelper()}
-								/>
-							{/key}
+			<!-- Flow connector -->
+			<div class="flex items-center pl-6 -my-px">
+				<div class="w-0.5 h-5 bg-gray-300"></div>
+				<i class="fa-solid fa-chevron-down text-[10px] text-gray-300 -ml-[5px] mt-3"></i>
+			</div>
+
+			<!-- Residual Risk -->
+			<div
+				class="card px-5 pt-4 pb-14 bg-white shadow-lg border-l-4 border-l-emerald-400 rounded-t-none"
+			>
+				<div class="flex items-center gap-2 mb-3">
+					<i class="fa-solid fa-shield-halved text-sm text-emerald-500"></i>
+					<h4 class="text-base font-bold text-gray-800">{m.residualRisk()}</h4>
+				</div>
+				<div class="flex flex-col xl:flex-row xl:items-center gap-6">
+					<!-- Extra controls -->
+					<div class="xl:w-1/2">
+						<div class="flex items-center gap-2">
+							<div class="flex-1">
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										form={_form}
+										optionsEndpoint="applied-controls"
+										optionsExtraFields={[['folder', 'str']]}
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', page.data.scenario.folder.id]
+										]}
+										field="applied_controls"
+										label={m.extraAppliedControls()}
+										helpText={m.extraControlsHelper()}
+									/>
+								{/key}
+							</div>
+							<button
+								class="btn preset-tonal-primary shrink-0 h-10 w-10"
+								onclick={(_) => modalMeasureCreateForm('applied_controls')}
+								type="button"
+							>
+								<i class="fa-solid fa-plus text-sm"></i>
+							</button>
 						</div>
-						<div class="flex items-center justify-center">
-							<div class="">
-								<button
-									class="btn bg-gray-300 h-10 w-10"
-									onclick={(_) => modalMeasureCreateForm('applied_controls')}
-									type="button"><i class="fa-solid fa-plus text-sm"></i></button
-								>
+					</div>
+					<!-- Risk equation -->
+					<div class="xl:w-1/2">
+						<div class="flex items-center gap-4 flex-wrap">
+							<div class="min-w-36">
+								<Select
+									form={_form}
+									options={data.probabilityChoices}
+									color_map={probabilityColorMap}
+									field="residual_proba"
+									label={m.residualProba()}
+								/>
+							</div>
+							<span
+								class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+								>&times;</span
+							>
+							<div class="min-w-36">
+								<Select
+									form={_form}
+									options={data.impactChoices}
+									color_map={impactColorMap}
+									field="residual_impact"
+									label={m.residualImpact()}
+								/>
+							</div>
+							<span
+								class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+								>=</span
+							>
+							<div>
+								<RiskLevel
+									form={_form}
+									field="residual_risk_level"
+									label={m.residualRiskLevel()}
+									riskMatrix={data.riskMatrix}
+									probabilityField="residual_proba"
+									impactField="residual_impact"
+									helpText={m.residualRiskLevelHelpText()}
+								/>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div class="flex w-1/2">
-					<div class="flex flex-row space-x-4 my-auto">
-						<div class="min-w-36">
-							<Select
-								form={_form}
-								options={data.probabilityChoices}
-								color_map={probabilityColorMap}
-								field="residual_proba"
-								label={m.residualProba()}
-							/>
-						</div>
-						<i class="fa-solid fa-xmark mt-8"></i>
-						<div class="min-w-36">
-							<Select
-								form={_form}
-								options={data.impactChoices}
-								color_map={impactColorMap}
-								field="residual_impact"
-								label={m.residualImpact()}
-							/>
-						</div>
-						<i class="fa-solid fa-equals mt-8"></i>
-						<div class="min-w-38">
-							<RiskLevel
-								form={_form}
-								field="current_risk_level"
-								label={m.residualRiskLevel()}
-								riskMatrix={data.riskMatrix}
-								probabilityField="residual_proba"
-								impactField="residual_impact"
-								helpText={m.residualRiskLevelHelpText()}
-							/>
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
 
-		<div class="card px-4 py-2 bg-white shadow-lg">
-			<div class="flex space-x-4 mb-1">
-				<div class="w-1/2">
-					<AutocompleteSelect
-						form={_form}
-						multiple
-						optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
-						field="qualifications"
-						label={m.qualifications()}
-						optionsLabelField="translated_name"
-						baseClass="flex-1"
-					/>
-				</div>
-				<div class="w-1/2">
-					<Select
-						form={_form}
-						options={strengthOfKnowledgeFormChoices}
-						field="strength_of_knowledge"
-						label={m.strengthOfKnowledge()}
-						class="flex-1"
-					/>
-				</div>
+		<!-- ── Assessment Details ── -->
+		<div class="card px-5 py-4 bg-white shadow-lg">
+			<div class="flex items-center gap-2 mb-3">
+				<i class="fa-solid fa-clipboard-check text-xs text-indigo-400"></i>
+				<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+					>{m.assessmentDetails()}</span
+				>
 			</div>
-			<MarkdownField form={_form} field="justification" label={m.justification()} />
-			<AutocompleteSelect
-				multiple
-				form={_form}
-				createFromSelection={true}
-				optionsEndpoint="filtering-labels"
-				optionsLabelField="label"
-				field="filtering_labels"
-				helpText={m.labelsHelpText()}
-				label={m.labels()}
-				translateOptions={false}
-				allowUserOptions="append"
-			/>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+				<AutocompleteSelect
+					form={_form}
+					multiple
+					optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
+					field="qualifications"
+					label={m.qualifications()}
+					optionsLabelField="translated_name"
+				/>
+				<Select
+					form={_form}
+					options={strengthOfKnowledgeFormChoices}
+					field="strength_of_knowledge"
+					label={m.strengthOfKnowledge()}
+				/>
+			</div>
+			<div class="mt-3">
+				<MarkdownField form={_form} field="justification" label={m.justification()} />
+			</div>
+			<div class="mt-3">
+				<AutocompleteSelect
+					multiple
+					form={_form}
+					createFromSelection={true}
+					optionsEndpoint="filtering-labels"
+					optionsLabelField="label"
+					field="filtering_labels"
+					helpText={m.labelsHelpText()}
+					label={m.labels()}
+					translateOptions={false}
+					allowUserOptions="append"
+				/>
+			</div>
 		</div>
+
+		<!-- ── Sticky Footer ── -->
 		<div
-			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+			class="flex flex-row justify-between gap-4 sticky bottom-0 bg-white/80 backdrop-blur-md pt-3 pb-3 px-1 -mx-1 border-t border-gray-200 z-10"
 		>
 			<button
-				class="btn bg-gray-400 text-white font-semibold w-full"
+				class="btn preset-tonal-surface font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				onclick={cancel}>{m.cancel()}</button
+				onclick={cancel}
 			>
-			<button class="btn preset-filled-primary-500 font-semibold w-full" data-testid="save-button"
-				>{m.save()}</button
-			>
+				<i class="fa-solid fa-xmark mr-1.5 text-sm"></i>
+				{m.cancel()}
+			</button>
+			<button class="btn preset-filled-primary-500 font-semibold w-full" data-testid="save-button">
+				<i class="fa-solid fa-check mr-1.5 text-sm"></i>
+				{m.save()}
+			</button>
 		</div>
 	</SuperForm>
 </div>

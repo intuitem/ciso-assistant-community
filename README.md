@@ -136,6 +136,10 @@ Here is an illustration of the **decoupling** principle and its advantages:
 
 Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
+## Setting up the local AI engine 
+
+Read more here: [AI engine](backend/chat/README.md)
+
 ## Supported frameworks 🐙
 
 1. ISO 27001:2013 & 27001:2022 🌐
@@ -276,6 +280,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 24. RBI Master Direction 2023 - india 🏦🇮🇳
 25. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
 26. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
+27. Prestataire d'audit de sécurité des systèmes d'information (PASSI) 🇫🇷
 
 <br/>
 
@@ -402,7 +407,8 @@ export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
-export EMAIL_USE_TLS=True
+export EMAIL_USE_TLS=True  # true for STARTTLS
+export EMAIL_USE_SSL=False # true for SMTPS
 ```
 
 **Other variables**
@@ -441,6 +447,7 @@ export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
+export EMAIL_USE_SSL_RESCUE=False
 
 # You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initialization
 export CISO_SUPERUSER_EMAIL=<XXX>
@@ -652,6 +659,8 @@ Set DJANGO_DEBUG=False for security reason.
 20. TR: Turkish
 21. HR: Croatian
 22. ZH: Chinese (Simplified)
+23. LT: Lithuanian
+24. KO: Korean
 
 ## Contributors 🤝
 
