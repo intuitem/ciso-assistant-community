@@ -911,6 +911,7 @@
 	"progress": "Progress",
 	"back": "Back",
 	"backToTable": "Back to table",
+	"backToWorkshop": "Atgal į „Ebios RM“ tyrimą / ekosistemą",
 	"duplicate": "Duplicate",
 	"duplicateRiskAssessment": "Duplicate the risk assessment",
 	"duplicateAppliedControl": "Duplicate the applied control",
@@ -3407,5 +3408,9 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Rikiuoti A → Z",
-	"sortDescending": "Rikiuoti Z → A"
+	"sortDescending": "Rikiuoti Z → A",
+	"confirmModalMessagePlural": "Ar tikrai? Šis veiksmas visam laikui paveiks šiuos objektus",
+	"syncAppliedControlsMessage": "Taikomos kontrolės, naudojančios šią referencinę kontrolę, bus su ja sinchronizuotos. Atkreipkite dėmesį, kad šio veiksmo negalima atšaukti.",
+	"syncToAppliedControl": "Sinchronizuoti su taikoma kontrole",
+	"syncToReferenceControl": "Sinchronizuoti su referencine kontrole"
 }

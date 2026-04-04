@@ -736,6 +736,7 @@
 	"maturity": "Érettség",
 	"progress": "Előrehaladás",
 	"back": "Vissza",
+	"backToWorkshop": "Vissza az Ebios RM tanulmányhoz / ökoszisztémához",
 	"duplicate": "Duplikálás",
 	"duplicateRiskAssessment": "Kockázatértékelés duplikálása",
 	"duplicateAppliedControl": "Alkalmazott kontroll duplikálása",
@@ -1137,5 +1138,9 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Rendezés A → Z",
-	"sortDescending": "Rendezés Z → A"
+	"sortDescending": "Rendezés Z → A",
+	"confirmModalMessagePlural": "Biztos benne? Ez a művelet véglegesen érinti a következő objektumokat",
+	"syncAppliedControlsMessage": "Azok az alkalmazott kontrollok, amelyek ezt a referencia kontrollt használják, szinkronizálva lesznek vele. Kérjük, vegye figyelembe, hogy ez nem vonható vissza.",
+	"syncToAppliedControl": "Szinkronizálás az alkalmazott kontrollal",
+	"syncToReferenceControl": "Szinkronizálás a referencia kontrollal"
 }

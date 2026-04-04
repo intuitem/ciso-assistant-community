@@ -124,6 +124,9 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 		};
 		lazy?: boolean; // Enable lazy loading for large option sets (e.g., assets)
 	};
+	batchCreate?: {
+		label?: string; // i18n key for button title (defaults to 'batchCreate')
+	};
 }
 
 interface Field {
@@ -313,12 +316,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'reference_control' },
 			{ field: 'category' },
-			{ field: 'csf_function' },
+			{ field: 'status' },
 			{ field: 'priority' },
 			{ field: 'effort' },
 			{ field: 'control_impact' },
 			{ field: 'annual_cost_display' },
-			{ field: 'status' },
+			{ field: 'csf_function' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'eta', type: 'date' },
@@ -507,7 +510,21 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
-		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
+		filters: [{ field: 'folder' }, { field: 'filtering_labels' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'vulnerabilities',
+				urlModel: 'assets',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			}
+		]
 	},
 	'filtering-labels': {
 		name: 'filteringlabel',
@@ -1281,7 +1298,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'processing', urlModel: 'personal-data' },
+			{
+				field: 'processing',
+				urlModel: 'personal-data',
+				batchCreate: {
+					label: 'batchCreatePersonalData'
+				}
+			},
 			{ field: 'processing', urlModel: 'data-subjects' },
 			{ field: 'processing', urlModel: 'purposes' },
 			{ field: 'processing', urlModel: 'data-recipients' },
@@ -1512,7 +1535,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				}
 			}
 		],
-		selectFields: [{ field: 'quotation_method' }]
+		selectFields: [{ field: 'status' }, { field: 'quotation_method' }]
 	},
 	'feared-events': {
 		endpointUrl: 'ebios-rm/feared-events',

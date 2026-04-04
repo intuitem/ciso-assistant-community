@@ -781,6 +781,7 @@
 	"maturity": "Olgunluk",
 	"progress": "İlerleme",
 	"back": "Geri",
+	"backToWorkshop": "Ebios RM çalışmasına / ekosisteme geri dön",
 	"duplicate": "Çoğalt",
 	"duplicateRiskAssessment": "Risk değerlendirmesini çoğalt",
 	"duplicateAppliedControl": "Uygulanan kontrolü çoğalt",
@@ -1874,5 +1875,9 @@
 	"serverConfigurationError": "Sunucu yapılandırma hatası",
 	"libraryLoadFailed": "Kütüphane yükleme hatası",
 	"sortAscending": "Sırala A → Z",
-	"sortDescending": "Sırala Z → A"
+	"sortDescending": "Sırala Z → A",
+	"confirmModalMessagePlural": "Emin misiniz? Bu eylem aşağıdaki nesneleri kalıcı olarak etkileyecektir",
+	"syncAppliedControlsMessage": "Bu referans kontrolü kullanan uygulanan kontroller onunla senkronize edilecektir. Lütfen bunun geri alınamayacağını unutmayın.",
+	"syncToAppliedControl": "Uygulanan kontrol ile senkronize et",
+	"syncToReferenceControl": "Referans kontrol ile senkronize et"
 }
