@@ -81,20 +81,46 @@
 		return JSON.parse(JSON.stringify(val));
 	}
 
-	let incidentType: Record<string, any> = $state(initCopy($formData.incident_type || {}));
-	let classificationTypes: Record<string, any>[] = $state(
-		initCopy($formData.classification_types || [])
-	);
-	let impactAssessment: Record<string, any> = $state(
-		initCopy({
+	// Deep merge defaults with existing data (ensures nested keys always exist)
+	function initImpactAssessment(data: any): Record<string, any> {
+		const defaults = {
 			serviceImpact: {},
 			affectedAssets: {
 				affectedClients: {},
 				affectedFinancialCounterparts: {},
 				affectedTransactions: {}
-			},
-			...$formData.impact_assessment
-		})
+			}
+		};
+		const existing = initCopy(data || {});
+		return {
+			...defaults,
+			...existing,
+			serviceImpact: { ...defaults.serviceImpact, ...(existing.serviceImpact || {}) },
+			affectedAssets: {
+				...defaults.affectedAssets,
+				...(existing.affectedAssets || {}),
+				affectedClients: {
+					...defaults.affectedAssets.affectedClients,
+					...(existing.affectedAssets?.affectedClients || {})
+				},
+				affectedFinancialCounterparts: {
+					...defaults.affectedAssets.affectedFinancialCounterparts,
+					...(existing.affectedAssets?.affectedFinancialCounterparts || {})
+				},
+				affectedTransactions: {
+					...defaults.affectedAssets.affectedTransactions,
+					...(existing.affectedAssets?.affectedTransactions || {})
+				}
+			}
+		};
+	}
+
+	let incidentType: Record<string, any> = $state(initCopy($formData.incident_type || {}));
+	let classificationTypes: Record<string, any>[] = $state(
+		initCopy($formData.classification_types || [])
+	);
+	let impactAssessment: Record<string, any> = $state(
+		initImpactAssessment($formData.impact_assessment)
 	);
 	let serviceImpact = $derived(impactAssessment.serviceImpact);
 	let affectedAssets = $derived(impactAssessment.affectedAssets);
@@ -167,6 +193,35 @@
 	);
 	let hasOtherTechnique = $derived((incidentType.threatTechniques || []).includes('other'));
 	let hasOtherAuthority = $derived(reportingAuthorities.includes('other'));
+
+	// Clear dependent values when controlling option is turned off
+	$effect(() => {
+		if (!isCyberIncident) {
+			delete incidentType.threatTechniques;
+			delete incidentType.otherThreatTechniques;
+			delete incidentType.indicatorsOfCompromise;
+		}
+	});
+	$effect(() => {
+		if (!hasOtherClassification) {
+			delete incidentType.otherIncidentClassification;
+		}
+	});
+	$effect(() => {
+		if (!hasOtherTechnique) {
+			delete incidentType.otherThreatTechniques;
+		}
+	});
+	$effect(() => {
+		if (!hasOtherAuthority) {
+			$formData.reporting_to_other_authorities_other = '';
+		}
+	});
+	$effect(() => {
+		if (impactAssessment.isAffectedInfrastructureComponents !== 'yes') {
+			delete impactAssessment.affectedInfrastructureComponents;
+		}
+	});
 
 	// Map validation error paths to form section IDs
 	// Errors look like: "incident: 'incidentDescription' is a required property"
