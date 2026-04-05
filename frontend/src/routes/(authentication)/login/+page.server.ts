@@ -186,7 +186,13 @@ export const actions: Actions = {
 			body: JSON.stringify({ credential })
 		};
 
-		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
+		let response;
+		try {
+			const res = await event.fetch(endpoint, requestInitOptions);
+			response = await res.json();
+		} catch {
+			return fail(502, { error: 'WebAuthn authentication failed' });
+		}
 
 		if (response.status !== 200) {
 			console.error('Could not authenticate using WebAuthn', response);

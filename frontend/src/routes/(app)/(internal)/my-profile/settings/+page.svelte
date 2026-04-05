@@ -261,6 +261,7 @@
 												<button
 													onclick={() => modalConfirmRemoveWebAuthn(credential.id)}
 													class="cursor-pointer hover:text-primary-500"
+													aria-label={m.removeSecurityKey()}
 												>
 													<i class="fa-solid fa-trash"></i>
 												</button>
