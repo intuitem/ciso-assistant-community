@@ -22,7 +22,7 @@ interface AuthenticationFlow {
 		| 'mfa_reauthenticate';
 	provider?: Record<string, string>;
 	is_pending: boolean;
-	types: 'totp' | 'recovery_codes';
+	types: ('totp' | 'recovery_codes' | 'webauthn')[];
 }
 
 export const load: PageServerLoad = async ({ fetch, request, locals }) => {
@@ -163,5 +163,47 @@ export const actions: Actions = {
 		});
 
 		return { form };
+	},
+	mfaAuthenticateWebAuthn: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const credentialJson = formData.get('credential');
+		if (!credentialJson || typeof credentialJson !== 'string') {
+			return fail(400, { error: 'Missing credential' });
+		}
+
+		const credential = JSON.parse(credentialJson);
+
+		const endpoint = `${ALLAUTH_API_URL}/auth/webauthn/authenticate`;
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify({ credential })
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
+
+		if (response.status !== 200) {
+			console.error('Could not authenticate using WebAuthn', response);
+			return fail(response.status, { error: 'WebAuthn authentication failed' });
+		}
+
+		event.cookies.set('token', response.meta.access_token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+
+		event.cookies.set('allauth_session_token', response.meta.session_token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+
+		const next = event.url.searchParams.get('next');
+		const secureNext = getSecureRedirect(next) || '/';
+		redirect(302, secureNext);
 	}
 };

@@ -1,7 +1,7 @@
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { activateTOTPSchema } from './mfa/utils/schemas';
+import { activateTOTPSchema, registerWebAuthnSchema } from './mfa/utils/schemas';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -41,7 +41,21 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
+	const webauthnCredentials = Array.isArray(authenticators)
+		? authenticators.filter((auth: { type: string }) => auth.type === 'webauthn')
+		: [];
+
+	let webauthnCreationOptions = null;
+	if (Array.isArray(authenticators) && authenticators.some((auth: { type: string }) => auth.type === 'totp')) {
+		const webauthnEndpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
+		const webauthnResponse = await event.fetch(webauthnEndpoint).then((res) => res.json());
+		if (webauthnResponse.status === 200) {
+			webauthnCreationOptions = webauthnResponse.data?.creation_options ?? null;
+		}
+	}
+
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
+	const registerWebAuthnForm = await superValidate(zod(registerWebAuthnSchema));
 
 	const personalAccessTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
 	const personalAccessTokensResponse = await event.fetch(personalAccessTokensEndpoint);
@@ -58,6 +72,9 @@ export const load: PageServerLoad = async (event) => {
 		totp,
 		activateTOTPForm,
 		recoveryCodes,
+		webauthnCredentials,
+		webauthnCreationOptions,
+		registerWebAuthnForm,
 		personalAccessTokens,
 		personalAccessTokenCreateForm,
 		personalAccessTokenDeleteForm,
@@ -182,6 +199,67 @@ export const actions: Actions = {
 
 		const data = await response.json();
 		return message(form, { status: response.status, data });
+	},
+	registerWebAuthn: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(formData, zod(registerWebAuthnSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const credentialJson = formData.get('credential');
+		if (!credentialJson || typeof credentialJson !== 'string') {
+			return fail(400, { error: 'Missing credential' });
+		}
+
+		const credential = JSON.parse(credentialJson);
+
+		const endpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify({ name: form.data.name, credential })
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
+
+		if (response.status !== 200) {
+			console.error('Could not register WebAuthn credential', response);
+			if (Object.hasOwn(response, 'errors')) {
+				response.errors.forEach((error: { param: string; message: string }) => {
+					setError(form, error.param as any, error.message);
+				});
+			}
+			return fail(response.status, { form });
+		}
+
+		setFlash({ type: 'success', message: m.successfullyAddedSecurityKey() }, event);
+		return { form };
+	},
+	removeWebAuthn: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(
+			formData,
+			zod(z.object({ id: z.number() }))
+		);
+		if (!form.valid) return fail(400, { form });
+
+		const endpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
+		const requestInitOptions: RequestInit = {
+			method: 'DELETE',
+			body: JSON.stringify({ authenticators: [form.data.id] })
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
+
+		if (response.status !== 200) {
+			console.error('Could not remove WebAuthn credential', response);
+			return fail(response.status, { error: 'Could not remove WebAuthn credential' });
+		}
+
+		setFlash({ type: 'success', message: m.successfullyRemovedSecurityKey() }, event);
+		return { form };
 	},
 	deletePAT: async (event) => {
 		const formData = await event.request.formData();
