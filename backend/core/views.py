@@ -344,12 +344,7 @@ def escape_excel_formula(value):
     if value is None:
         return ""
     s = str(value)
-    if not s:
-        return ""
-    stripped = s.lstrip(" \t\r\n")
-    if stripped and stripped[0] in ("=", "+", "-", "@"):
-        return "'" + s
-    return s
+    return "'" + s if s and s[0] in "=" else s
 
 
 def create_xlsx_response(entries, filename, wrap_columns=None):
@@ -456,9 +451,8 @@ class ExportMixin:
         if format_func:
             value = format_func(value)
 
-        if isinstance(value, str):
-            if field_config.get("escape", True):
-                value = escape_excel_formula(value)
+        if field_config.get("escape") and value:
+            value = escape_excel_formula(value)
 
         return value if value is not None else ""
 
@@ -1033,7 +1027,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         # Experimental: process evidences on TaskTemplate update
-
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
             request.data["evidences"] = self._process_evidences(
@@ -1054,6 +1047,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     if hasattr(request.data, "_mutable"):
                         request.data._mutable = True
                     request.data["filtering_labels"] = self._process_labels(labels)
+            else:
+                # Field is missing entirely - add empty list to clear labels
+                # Make request.data mutable if needed (e.g., for multipart/form-data)
+                if hasattr(request.data, "_mutable"):
+                    request.data._mutable = True
+                # Use setlist() for QueryDict to properly set an empty list
+                if hasattr(request.data, "setlist"):
+                    request.data.setlist("filtering_labels", [])
+                else:
+                    request.data["filtering_labels"] = []
 
         return super().update(request, *args, **kwargs)
 
@@ -1751,7 +1754,6 @@ class AssetFilter(GenericFilterSet):
             "dora_licenced_activity",
             "dora_criticality_assessment",
             "dora_discontinuing_impact",
-            "organisation_objectives",
         ]
 
 
@@ -1767,7 +1769,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
-    search_fields = ["name", "description", "ref_id", "folder__name"]
+    search_fields = ["name", "description", "ref_id"]
     ordering = ["folder__name", "name"]
 
     def get_queryset(self) -> models.query.QuerySet:
@@ -2167,20 +2169,6 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "format": lambda objs: ",".join(i["str"] for i in objs),
                 "escape": True,
             },
-            "security_capabilities": {
-                "source": "get_security_capabilities_display",
-                "label": "security_capabilities",
-                "format": lambda objs: ",".join(
-                    f"{k}: {v}" for obj in objs for k, v in obj.items()
-                ),
-                "escape": True,
-            },
-            "recovery_capabilities": {
-                "source": "get_recovery_capabilities_display",
-                "label": "recovery_capabilities",
-                "format": lambda objs: ",".join(i["str"] for i in objs),
-                "escape": True,
-            },
             "link": {"source": "reference_link", "label": "link", "escape": True},
             "owners": {
                 "source": "owner",
@@ -2212,12 +2200,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
         "select_related": ["folder", "asset_class"],
-        "prefetch_related": [
-            "owner",
-            "parent_assets",
-            "overridden_children_capabilities",
-            "filtering_labels",
-        ],
+        "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
     }
 
     @action(detail=False, methods=["post"], url_path="batch-create")
@@ -4151,81 +4134,82 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer_class=RiskAssessmentDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = RiskAssessmentDuplicateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
 
-        if UUID(pk) in object_ids_view:
-            risk_assessment = self.get_object()
-
-            perimeter = data.get("perimeter")
-            folder = data.get("folder")
-
-            duplicate_risk_assessment = RiskAssessment.objects.create(
-                name=data.get("name"),
-                description=data.get("description"),
-                perimeter=perimeter,
-                folder=folder,
-                version=data.get("version"),
-                risk_matrix=risk_assessment.risk_matrix,
-                ref_id=data.get("ref_id"),
-                eta=risk_assessment.eta,
-                due_date=risk_assessment.due_date,
-                status=risk_assessment.status,
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-            duplicate_risk_assessment.authors.set(risk_assessment.authors.all())
-            duplicate_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
+        risk_assessment = self.get_object()
+        data = request.data.copy()
 
-            for scenario in risk_assessment.risk_scenarios.all():
-                duplicate_scenario = RiskScenario.objects.create(
-                    risk_assessment=duplicate_risk_assessment,
-                    name=scenario.name,
-                    description=scenario.description,
-                    treatment=scenario.treatment,
-                    current_proba=scenario.current_proba,
-                    current_impact=scenario.current_impact,
-                    residual_proba=scenario.residual_proba,
-                    residual_impact=scenario.residual_impact,
-                    strength_of_knowledge=scenario.strength_of_knowledge,
-                    justification=scenario.justification,
-                    ref_id=scenario.ref_id,
+        if not data.get("risk_matrix"):
+            data["risk_matrix"] = str(risk_assessment.risk_matrix.id)
+
+        duplicated_risk_assessment_serializer = RiskAssessmentWriteSerializer(
+            data=data, context={"request": request}
+        )
+        if not duplicated_risk_assessment_serializer.is_valid():
+            error = str(duplicated_risk_assessment_serializer.errors)
+            return Response({"results": error}, status=status.HTTP_400_BAD_REQUEST)
+
+        duplicated_risk_assessment = duplicated_risk_assessment_serializer.save()
+
+        FIELDS_TO_COPY: Final[list[str]] = ["risk_matrix", "eta", "due_date", "status"]
+        for field_name in FIELDS_TO_COPY:
+            field_value = getattr(risk_assessment, field_name)
+            setattr(duplicated_risk_assessment, field_name, field_value)
+
+        duplicated_risk_assessment.save()
+
+        duplicated_risk_assessment.authors.set(risk_assessment.authors.all())
+        duplicated_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
+
+        for scenario in risk_assessment.risk_scenarios.all():
+            duplicated_scenario = RiskScenario.objects.create(
+                risk_assessment=duplicated_risk_assessment,
+                name=scenario.name,
+                description=scenario.description,
+                treatment=scenario.treatment,
+                current_proba=scenario.current_proba,
+                current_impact=scenario.current_impact,
+                residual_proba=scenario.residual_proba,
+                residual_impact=scenario.residual_impact,
+                inherent_proba=scenario.inherent_proba,
+                inherent_impact=scenario.inherent_impact,
+                inherent_level=scenario.inherent_level,
+                strength_of_knowledge=scenario.strength_of_knowledge,
+                justification=scenario.justification,
+                ref_id=scenario.ref_id,
+            )
+
+            duplicated_scenario.qualifications.set(scenario.qualifications.all())
+
+            for field in [
+                "applied_controls",
+                "threats",
+                "assets",
+                "existing_applied_controls",
+            ]:
+                duplicate_related_objects(
+                    scenario,
+                    duplicated_scenario,
+                    duplicated_risk_assessment.folder,
+                    field,
                 )
 
-                duplicate_scenario.qualifications.set(scenario.qualifications.all())
+            if duplicated_risk_assessment.folder in [risk_assessment.folder] + [
+                folder for folder in risk_assessment.folder.get_sub_folders()
+            ]:
+                duplicated_scenario.owner.set(scenario.owner.all())
 
-                for field in [
-                    "applied_controls",
-                    "threats",
-                    "assets",
-                    "existing_applied_controls",
-                ]:
-                    duplicate_related_objects(
-                        scenario,
-                        duplicate_scenario,
-                        duplicate_risk_assessment.folder,
-                        field,
-                    )
+            duplicated_scenario.save()
 
-                if duplicate_risk_assessment.folder in [risk_assessment.folder] + [
-                    folder for folder in risk_assessment.folder.get_sub_folders()
-                ]:
-                    duplicate_scenario.owner.set(scenario.owner.all())
-
-                duplicate_scenario.save()
-
-            duplicate_risk_assessment.save()
-            return Response(
-                {
-                    "results": RiskAssessmentReadSerializer(
-                        duplicate_risk_assessment
-                    ).data
-                }
-            )
+        duplicated_risk_assessment.save()
+        return Response({"results": "risk assessment duplicated"})
 
     @action(
         detail=True,
@@ -4951,43 +4935,24 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     def get_queryset(self):
         """Optimize queries by prefetching related objects used in the table view and serializer"""
-        qs = (
+        return (
             super()
             .get_queryset()
             .select_related(
                 "folder",
                 "folder__parent_folder",  # For get_folder_full_path() optimization
+                "reference_control",
+            )
+            .prefetch_related(
+                "owner",
+                "filtering_labels__folder",  # FieldsRelatedField includes folder
+                "findings",  # Used for findings_count
+                "evidences",  # Serialized as FieldsRelatedField
+                "objectives",  # ManyToManyField to OrganisationObjective
+                "assets",  # ManyToManyField used in table
+                "security_exceptions",  # Serialized as FieldsRelatedField
             )
         )
-        if self.action == "autocomplete":
-            return qs
-        return qs.select_related("reference_control").prefetch_related(
-            "owner",
-            "filtering_labels__folder",  # FieldsRelatedField includes folder
-            "findings",  # Used for findings_count
-            "evidences",  # Serialized as FieldsRelatedField
-            "objectives",  # ManyToManyField to OrganisationObjective
-            "assets",  # ManyToManyField used in table
-            "security_exceptions",  # Serialized as FieldsRelatedField
-        )
-
-    @action(detail=False, name="Lightweight autocomplete search")
-    def autocomplete(self, request):
-        """Minimal endpoint for autocomplete selects."""
-        from core.serializers import AppliedControlAutocompleteSerializer
-
-        qs = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(qs)
-        objects = page if page is not None else qs
-        serializer = AppliedControlAutocompleteSerializer(objects, many=True)
-        data = serializer.data
-        field_models = self._get_fieldsrelated_map(serializer)
-        if field_models:
-            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
-            data = self._filter_related_fields(data, field_models, allowed_ids)
-        if page is not None:
-            return self.get_paginated_response(data)
-        return Response(data)
 
     def perform_create(self, serializer):
         create_remote_object = serializer.validated_data.pop(
@@ -5157,83 +5122,52 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def get_controls_info(self, request):
-        folder_id = request.query_params.get("folder", None)
-        scoped_folder = (
-            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
-        )
-
-        (view_ac_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, AppliedControl
-        )
-        (view_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, ComplianceAssessment
-        )
-        (view_ra_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, RiskAssessment
-        )
-
-        ac_qs = AppliedControl.objects.filter(id__in=view_ac_ids).only("id", "name")
-        ca_qs = ComplianceAssessment.objects.filter(id__in=view_ca_ids).only(
-            "id", "name"
-        )
-        ra_qs = RiskAssessment.objects.filter(id__in=view_ra_ids).only("id", "name")
-
-        ac_ids = list(ac_qs.values_list("id", flat=True))
-        ca_ids = set(ca_qs.values_list("id", flat=True))
-        ra_ids = set(ra_qs.values_list("id", flat=True))
-
-        audit_rows = (
-            RequirementAssessment.objects.filter(
-                compliance_assessment_id__in=ca_ids, applied_controls__id__in=ac_ids
-            )
-            .values("compliance_assessment_id", "applied_controls")
-            .annotate(coverage=Count("id"))
-        )
-
-        risk_rows = (
-            RiskScenario.objects.filter(
-                risk_assessment_id__in=ra_ids, applied_controls__id__in=ac_ids
-            )
-            .values("risk_assessment_id", "applied_controls")
-            .annotate(coverage=Count("id"))
-        )
-
-        links = []
-        used_audit_ids = set()
-        used_ra_ids = set()
-
-        ac_counter = {ac_id: 0 for ac_id in ac_ids}
-
-        for row in audit_rows:
-            ca_id = row["compliance_assessment_id"]
-            ac_id = row["applied_controls"]
-            cov = row["coverage"]
-            links.append({"source": ca_id, "target": ac_id, "coverage": cov})
-            used_audit_ids.add(ca_id)
-            ac_counter[ac_id] = ac_counter.get(ac_id, 0) + cov
-
-        for row in risk_rows:
-            ra_id = row["risk_assessment_id"]
-            ac_id = row["applied_controls"]
-            cov = row["coverage"]
-            links.append({"source": ra_id, "target": ac_id, "coverage": cov})
-            used_ra_ids.add(ra_id)
-            ac_counter[ac_id] = ac_counter.get(ac_id, 0) + cov
-
-        nodes = []
-
-        for ac in ac_qs:
+        nodes = list()
+        links = list()
+        for ac in AppliedControl.objects.all():
+            related_items_count = 0
+            for ca in ComplianceAssessment.objects.filter(
+                requirement_assessments__applied_controls=ac
+            ).distinct():
+                audit_coverage = (
+                    RequirementAssessment.objects.filter(compliance_assessment=ca)
+                    .filter(applied_controls=ac)
+                    .count()
+                )
+                related_items_count += audit_coverage
+                links.append(
+                    {
+                        "source": ca.id,
+                        "target": ac.id,
+                        "coverage": audit_coverage,
+                    }
+                )
+            for ra in RiskAssessment.objects.filter(
+                risk_scenarios__applied_controls=ac
+            ).distinct():
+                risk_coverage = (
+                    RiskScenario.objects.filter(risk_assessment=ra)
+                    .filter(applied_controls=ac)
+                    .count()
+                )
+                related_items_count += risk_coverage
+                links.append(
+                    {
+                        "source": ra.id,
+                        "target": ac.id,
+                        "coverage": risk_coverage,
+                    }
+                )
             nodes.append(
                 {
                     "id": ac.id,
                     "label": ac.name,
                     "shape": "hexagon",
-                    "counter": ac_counter.get(ac.id, 0),
+                    "counter": related_items_count,
                     "color": "#47e845",
                 }
             )
-
-        for audit in ca_qs.filter(id__in=used_audit_ids):
+        for audit in ComplianceAssessment.objects.all():
             nodes.append(
                 {
                     "id": audit.id,
@@ -5242,13 +5176,21 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                     "color": "#5D4595",
                 }
             )
-
-        for ra in ra_qs.filter(id__in=used_ra_ids):
+        for ra in RiskAssessment.objects.all():
             nodes.append(
-                {"id": ra.id, "label": ra.name, "shape": "square", "color": "#E6499F"}
+                {
+                    "id": ra.id,
+                    "label": ra.name,
+                    "shape": "square",
+                    "color": "#E6499F",
+                }
             )
-
-        return Response({"nodes": nodes, "links": links})
+        return Response(
+            {
+                "nodes": nodes,
+                "links": links,
+            }
+        )
 
     @action(detail=False, name="Get priority chart data")
     def priority_chart_data(self, request):
@@ -5461,51 +5403,61 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         serializer_class=AppliedControlDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = AppliedControlDuplicateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, AppliedControl
         )
         if UUID(pk) not in object_ids_view:
             return Response(
-                {"results": "applied control not found"},
+                {"results": "applied control duplicated"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         applied_control = self.get_object()
-        new_folder = data["folder"]
-        duplicate_applied_control = AppliedControl.objects.create(
-            reference_control=applied_control.reference_control,
-            name=data["name"],
-            description=data["description"],
-            folder=new_folder,
-            ref_id=applied_control.ref_id,
-            category=applied_control.category,
-            csf_function=applied_control.csf_function,
-            priority=applied_control.priority,
-            status=applied_control.status,
-            start_date=applied_control.start_date,
-            eta=applied_control.eta,
-            expiry_date=applied_control.expiry_date,
-            link=applied_control.link,
-            effort=applied_control.effort,
-            cost=applied_control.cost,
-            progress_field=applied_control.progress_field,
+        data = request.data
+        new_folder = Folder.objects.get(id=data["folder"])
+
+        duplicated_applied_control_serializer = AppliedControlWriteSerializer(
+            data=data, context={"request": request}
         )
-        duplicate_applied_control.owner.set(applied_control.owner.all())
-        duplicate_applied_control.filtering_labels.set(
+        if not duplicated_applied_control_serializer.is_valid():
+            error = str(duplicated_applied_control_serializer.errors)
+            return Response({"results": error}, status=status.HTTP_400_BAD_REQUEST)
+
+        duplicated_applied_control = duplicated_applied_control_serializer.save()
+
+        FIELDS_TO_COPY: Final[list[str]] = [
+            "reference_control",
+            "ref_id",
+            "category",
+            "csf_function",
+            "priority",
+            "status",
+            "start_date",
+            "eta",
+            "expiry_date",
+            "link",
+            "effort",
+            "cost",
+            "progress_field",
+        ]
+        for field_name in FIELDS_TO_COPY:
+            field_value = getattr(applied_control, field_name)
+            setattr(duplicated_applied_control, field_name, field_value)
+
+        duplicated_applied_control.save(skip_sync=True)
+
+        duplicated_applied_control.owner.set(applied_control.owner.all())
+        duplicated_applied_control.filtering_labels.set(
             applied_control.filtering_labels.all()
         )
-        if data["duplicate_evidences"]:
+        if data.get("duplicate_evidences"):
             duplicate_related_objects(
-                applied_control, duplicate_applied_control, new_folder, "evidences"
+                applied_control, duplicated_applied_control, new_folder, "evidences"
             )
-            duplicate_applied_control.save()
+            duplicated_applied_control.save(skip_sync=True)
 
         return Response(
-            {"results": AppliedControlReadSerializer(duplicate_applied_control).data}
+            {"results": AppliedControlReadSerializer(duplicated_applied_control).data}
         )
 
     @action(detail=False, methods=["get"])
@@ -5774,122 +5726,6 @@ class ActionPlanList(generics.ListAPIView):
         return context
 
 
-class ActionPlanBudgetOverview:
-    """Mixin that computes budget aggregation over an applied controls queryset."""
-
-    @staticmethod
-    def _safe_float(value, default=0):
-        """Coerce a JSON-sourced value to float, returning default on failure."""
-        try:
-            return float(value)
-        except (TypeError, ValueError):
-            return default
-
-    @staticmethod
-    def _compute_annual_cost(ctrl, daily_rate):
-        """Compute annual cost without per-control GlobalSettings lookup."""
-        if not ctrl.cost:
-            return 0
-        _f = ActionPlanBudgetOverview._safe_float
-        build_cost = ctrl.cost.get("build", {})
-        run_cost = ctrl.cost.get("run", {})
-        amortization_period = _f(ctrl.cost.get("amortization_period", 1), 1) or 1
-        annual_cost = 0
-        build_fixed = _f(build_cost.get("fixed_cost", 0))
-        build_people = _f(build_cost.get("people_days", 0))
-        if build_fixed > 0:
-            annual_cost += build_fixed / amortization_period
-        if build_people > 0:
-            annual_cost += (build_people * daily_rate) / amortization_period
-        run_fixed = _f(run_cost.get("fixed_cost", 0))
-        run_people = _f(run_cost.get("people_days", 0))
-        if run_fixed > 0:
-            annual_cost += run_fixed
-        if run_people > 0:
-            annual_cost += run_people * daily_rate
-        return annual_cost
-
-    @staticmethod
-    def compute_budget_overview(queryset):
-        from core.utils import get_global_currency, format_currency
-        from global_settings.models import GlobalSettings
-
-        # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
-        _f = ActionPlanBudgetOverview._safe_float
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        daily_rate = _f(
-            general_settings.value.get("daily_rate", 500) if general_settings else 500,
-            500,
-        )
-
-        currency = get_global_currency()
-        fmt = lambda v: format_currency(v, currency)
-
-        controls = list(queryset)
-        count = len(controls)
-        by_status: dict = {}
-        by_priority: dict = {}
-        by_category: dict = {}
-        total_annual_cost = 0.0
-        count_with_cost = 0
-
-        for ctrl in controls:
-            cost = ActionPlanBudgetOverview._compute_annual_cost(ctrl, daily_rate)
-            if cost > 0:
-                count_with_cost += 1
-            total_annual_cost += cost
-
-            # by status — use raw value as key, display value for frontend
-            s = ctrl.status or "_unset"
-            status_label = ctrl.get_status_display() if ctrl.status else "not_set"
-            bucket = by_status.setdefault(
-                s, {"status": status_label, "count": 0, "total": 0.0}
-            )
-            bucket["count"] += 1
-            bucket["total"] += cost
-
-            # by priority
-            p = ctrl.priority if ctrl.priority is not None else "_unset"
-            priority_label = (
-                ctrl.get_priority_display() if ctrl.priority is not None else "not_set"
-            )
-            bucket = by_priority.setdefault(
-                p,
-                {"priority": priority_label, "count": 0, "total": 0.0},
-            )
-            bucket["count"] += 1
-            bucket["total"] += cost
-
-            # by category
-            c = ctrl.category or "_unset"
-            category_label = ctrl.get_category_display() if ctrl.category else "not_set"
-            bucket = by_category.setdefault(
-                c,
-                {"category": category_label, "count": 0, "total": 0.0},
-            )
-            bucket["count"] += 1
-            bucket["total"] += cost
-
-        # Pre-format totals with proper currency position
-        for bucket in by_status.values():
-            bucket["total_display"] = fmt(bucket["total"])
-        for bucket in by_priority.values():
-            bucket["total_display"] = fmt(bucket["total"])
-        for bucket in by_category.values():
-            bucket["total_display"] = fmt(bucket["total"])
-
-        return {
-            "count": count,
-            "count_with_cost": count_with_cost,
-            "total_annual_cost": round(total_annual_cost, 2),
-            "total_annual_cost_display": fmt(round(total_annual_cost, 2)),
-            "currency": currency,
-            "by_status": [v for v in by_status.values() if v["count"] > 0],
-            "by_priority": [v for v in by_priority.values() if v["count"] > 0],
-            "by_category": [v for v in by_category.values() if v["count"] > 0],
-        }
-
-
 class UserRolesOnFolderList(generics.ListAPIView):
     filterset_fields = {}
     search_fields = ["email"]
@@ -6078,22 +5914,6 @@ class RiskAssessmentActionPlanList(ActionPlanList):
             AppliedControl,
         )
         return qs.filter(id__in=viewable_controls)
-
-
-class ComplianceAssessmentActionPlanBudgetOverview(
-    ActionPlanBudgetOverview, ComplianceAssessmentActionPlanList
-):
-    def get(self, request, *args, **kwargs):
-        qs = self.filter_queryset(self.get_queryset())
-        return Response(self.compute_budget_overview(qs))
-
-
-class RiskAssessmentActionPlanBudgetOverview(
-    ActionPlanBudgetOverview, RiskAssessmentActionPlanList
-):
-    def get(self, request, *args, **kwargs):
-        qs = self.filter_queryset(self.get_queryset())
-        return Response(self.compute_budget_overview(qs))
 
 
 class PolicyViewSet(AppliedControlViewSet):
@@ -7192,15 +7012,7 @@ class FolderViewSet(BaseModelViewSet):
                 entry.update({"children": folder_content})
             folders_list.append(entry)
 
-        root_folder = Folder.get_root_folder()
-        return Response(
-            {
-                "name": root_folder.name,
-                "uuid": str(root_folder.id),
-                "content_type": root_folder.content_type,
-                "children": folders_list,
-            }
-        )
+        return Response({"name": "Global", "children": folders_list})
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -8574,8 +8386,7 @@ class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request) -> Response:
-        prefs = request.user.get_preferences()
-        return Response(prefs, status=status.HTTP_200_OK)
+        return Response(request.user.preferences, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
         new_language = request.data.get("lang")
@@ -8589,10 +8400,8 @@ class UserPreferencesView(APIView):
                 {"error": "This language doesn't exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        prefs = request.user.get_preferences()
-        prefs["lang"] = new_language
-        request.user.preferences = prefs
-        request.user.save(update_fields=["preferences"])
+        request.user.preferences["lang"] = new_language
+        request.user.save()
         return Response({}, status=status.HTTP_200_OK)
 
 
@@ -10141,126 +9950,10 @@ class QuickStartView(APIView):
             return Response(objects, status=status.HTTP_201_CREATED)
 
 
-class PresetJourneyViewSet(BaseModelViewSet):
-    model = PresetJourney
-    filterset_fields = ["folder"]
-    search_fields = ["name", "description"]
-
-    @action(detail=True, methods=["get"])
-    def dashboard(self, request, pk=None):
-        journey = self.get_object()
-        from core.serializers import (
-            PresetJourneyReadSerializer,
-            PresetJourneyStepReadSerializer,
-        )
-
-        steps = PresetJourneyStepReadSerializer(journey.steps.all(), many=True).data
-        stats = self._compute_stats(journey)
-        journey_data = PresetJourneyReadSerializer(journey).data
-        return Response(
-            {
-                "journey": journey_data,
-                "steps": steps,
-                "stats": stats,
-            }
-        )
-
-    @action(detail=True, methods=["post"])
-    def rename(self, request, pk=None):
-        journey = self.get_object()
-        name = request.data.get("name", "").strip()
-        if not name:
-            return Response(
-                {"detail": "Name is required."}, status=status.HTTP_400_BAD_REQUEST
-            )
-        journey.name = name
-        journey.save(update_fields=["name"])
-        from core.serializers import PresetJourneyReadSerializer
-
-        return Response(PresetJourneyReadSerializer(journey).data)
-
-    @action(detail=True, methods=["post"])
-    def upgrade(self, request, pk=None):
-        journey = self.get_object()
-        stored_lib = (
-            StoredLibrary.objects.filter(urn=journey.urn).order_by("-version").first()
-        )
-        if not stored_lib or stored_lib.version <= journey.version:
-            return Response({"detail": "Already up to date."})
-        from library.preset_executor import PresetExecutor
-
-        apply_feature_flags = RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="change_globalsettings"),
-            folder=Folder.get_root_folder(),
-        )
-
-        executor = PresetExecutor(stored_lib, request.user, request)
-        executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
-        from core.serializers import PresetJourneyReadSerializer
-
-        return Response(PresetJourneyReadSerializer(journey).data)
-
-    def _compute_stats(self, journey):
-        folder = journey.folder
-        steps = journey.steps.all()
-        total_steps = steps.count()
-        completed_steps = steps.filter(
-            status__in=[PresetJourneyStep.Status.DONE, PresetJourneyStep.Status.SKIPPED]
-        ).count()
-
-        stats = {
-            "total_steps": total_steps,
-            "completed_steps": completed_steps,
-            "progress_percent": (
-                round(completed_steps / total_steps * 100) if total_steps > 0 else 0
-            ),
-            "assets": Asset.objects.filter(folder=folder).count(),
-            "risk_scenarios": RiskScenario.objects.filter(
-                risk_assessment__folder=folder
-            ).count(),
-            "applied_controls": AppliedControl.objects.filter(folder=folder).count(),
-        }
-
-        # Compliance progress per compliance assessment in object_refs
-        compliance_stats = {}
-        readable_ca_qs = ComplianceAssessment.objects.all()
-        for ref_name, obj_id in (journey.object_refs or {}).items():
-            try:
-                ca = readable_ca_qs.get(id=obj_id, folder=folder)
-                total_ra = ca.requirement_assessments.count()
-                assessed_ra = ca.requirement_assessments.exclude(status="to_do").count()
-                compliance_stats[ref_name] = {
-                    "name": ca.name,
-                    "total": total_ra,
-                    "assessed": assessed_ra,
-                    "percent": (
-                        round(assessed_ra / total_ra * 100) if total_ra > 0 else 0
-                    ),
-                }
-            except (ComplianceAssessment.DoesNotExist, ValueError):
-                continue
-        stats["compliance"] = compliance_stats
-        return stats
-
-
-class PresetJourneyStepViewSet(BaseModelViewSet):
-    model = PresetJourneyStep
-    filterset_fields = ["journey", "status"]
-    search_fields = ["title", "description"]
-
-
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = [
-        "folder",
-        "status",
-        "health",
-        "issues",
-        "assigned_to",
-        "is_active",
-    ]
+    filterset_fields = ["folder", "status", "health", "issues", "assigned_to"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -10272,56 +9965,6 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
     @action(detail=False, name="Get health choices")
     def health(self, request):
         return Response(dict(OrganisationObjective.Health.choices))
-
-    @action(detail=False, name="Get is_active choices")
-    def is_active(self, request):
-        return Response({"true": str(_("Yes")), "false": str(_("No"))})
-
-    @action(
-        detail=True,
-        name="Duplicate organisation objective",
-        methods=["post"],
-        serializer_class=OrganisationObjectiveDuplicateSerializer,
-    )
-    def duplicate(self, request, pk):
-        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, OrganisationObjective
-        )
-        if UUID(pk) not in object_ids_view:
-            return Response(
-                {"results": "organisation objective not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        new_folder = data["folder"]
-        objective = self.get_object()
-        duplicate_objective = OrganisationObjective.objects.create(
-            name=data["name"],
-            description=data["description"],
-            folder=new_folder,
-            ref_id=objective.ref_id,
-            observation=objective.observation,
-            status=objective.status,
-            health=objective.health,
-            is_active=objective.is_active,
-            start_date=objective.start_date,
-            eta=objective.eta,
-            due_date=objective.due_date,
-            closing_date=objective.closing_date,
-        )
-        duplicate_objective.issues.set(objective.issues.all())
-        duplicate_objective.assets.set(objective.assets.all())
-        duplicate_objective.tasks.set(objective.tasks.all())
-        duplicate_objective.assigned_to.set(objective.assigned_to.all())
-        duplicate_objective.metrics.set(objective.metrics.all())
-
-        return Response(
-            {"results": OrganisationObjectiveReadSerializer(duplicate_objective).data}
-        )
 
 
 class OrganisationIssueViewSet(BaseModelViewSet):
@@ -10787,32 +10430,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             lang = request.user.preferences.get("lang")
             if lang not in ["fr", "en"]:
                 lang = "en"
-
-        # Check for custom Word template override
-        doc = None
-        try:
-            custom = CustomWordTemplate.objects.filter(
-                template_key="audit_report",
-                language=lang,
-                is_active=True,
-            ).first()
-            if custom and custom.file:
-                custom.file.open("rb")
-                doc = DocxTemplate(io.BytesIO(custom.file.read()))
-        except Exception as e:
-            logger.warning(
-                "Failed to load custom Word template, falling back to default",
-                exc_info=e,
-            )
-
-        if doc is None:
-            template_path = (
-                Path(__file__).resolve().parent
-                / "templates"
-                / "core"
-                / f"audit_report_template_{lang}.docx"
-            )
-            doc = DocxTemplate(template_path)
+        template_path = (
+            Path(settings.BASE_DIR)
+            / "core"
+            / "templates"
+            / "core"
+            / f"audit_report_template_{lang}.docx"
+        )
+        doc = DocxTemplate(template_path)
         _framework = self.get_object().framework
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
@@ -11246,12 +10871,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "score",
                         "is_scored",
                         "documentation_score",
-                        "mapping_inference",
                     ]:
-                        value = source.get(field)
-                        if value is not None:
-                            setattr(req, field, value)
-                    requirement_assessments_to_update.append(req)
+                        if field in source and source[field] is not None:
+                            setattr(req, field, source[field])
+                        requirement_assessments_to_update.append(req)
 
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
@@ -11262,7 +10885,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "score",
                         "is_scored",
                         "documentation_score",
-                        "mapping_inference",
                     ],
                     batch_size=500,
                 )
@@ -15091,7 +14713,6 @@ class TaskTemplateFilter(GenericFilterSet):
             "last_occurrence_status",
             "next_occurrence_status",
             "evidences",
-            "objectives",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -15399,11 +15020,6 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
-        today = timezone.localdate()
-        task_templates = list(task_templates)
-        task_templates_by_id = {
-            str(template.id): template for template in task_templates
-        }
         tasks_list = []
         for template in task_templates:
             if not template.is_recurrent:
@@ -15412,7 +15028,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 tasks_list.append(_create_task_dict(template, template.task_date))
                 continue
 
-            start_date_param = start or template.task_date or today
+            start_date_param = start or template.task_date or datetime.now().date()
             end_date_param = end or template.schedule.get("end_date")
 
             if not end_date_param:
@@ -15443,24 +15059,17 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 )
                 | (
                     Q(due_date__gte=start_date, due_date__lte=end_date)
-                    & (
-                        Q(scheduled_date__isnull=True)
-                        | ~Q(due_date=F("scheduled_date"))
-                    )
+                    & ~Q(due_date=F("scheduled_date"))
                 )
             )
             generated_scheduled_dates = {t["due_date"] for t in tasks}
             for node in existing_nodes:
-                if node.due_date != node.scheduled_date:
-                    # Always preserve user-rescheduled nodes
-                    node.to_delete = False
-                    node.save(update_fields=["to_delete"])
-                    if node.due_date and start_date <= node.due_date <= end_date:
-                        tasks_list.append(TaskNodeReadSerializer(node).data)
-                elif node.scheduled_date not in generated_scheduled_dates:
-                    effective_date = node.due_date or node.scheduled_date
-                    if effective_date and effective_date < today:
-                        # Preserve past nodes whose slot was removed
+                if node.scheduled_date not in generated_scheduled_dates:
+                    if (
+                        node.due_date != node.scheduled_date
+                        or node.due_date < datetime.now().date()
+                    ):
+                        # Preserve nodes manually rescheduled or in the past
                         node.to_delete = False
                         node.save(update_fields=["to_delete"])
                         tasks_list.append(TaskNodeReadSerializer(node).data)
@@ -15477,14 +15086,25 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        # Build a set of (template_id, date) identifiers for virtual tasks to materialize.
-        # Every virtual task in the calendar range gets a DB record so it is
-        # clickable/editable in the UI.
-        # NOTE: All virtual tasks in the range are materialized. Currently the
-        # calendar UI fetches one month at a time; if that changes, consider
-        # adding an upper bound here.
+        current_date = datetime.now().date()
+
+        # Separate past and future tasks, limit future to next 10
+        past_tasks = [
+            task
+            for task in sorted_tasks
+            if _parse_due_date(task["due_date"]) <= current_date
+        ]
+        next_tasks = [
+            task
+            for task in sorted_tasks
+            if _parse_due_date(task["due_date"]) > current_date
+        ]
+
+        # Build a set of (template_id, date) identifiers for virtual tasks to materialize
+        # Only virtual tasks (from _generate_occurrences) need to be materialized;
+        # existing TaskNodes from the DB are already persisted.
         tasks_to_process_ids = set()
-        for task in sorted_tasks:
+        for task in past_tasks + next_tasks[:10]:
             if not task.get("virtual"):
                 continue
             template_id = task.get("task_template")
@@ -15493,11 +15113,6 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 tasks_to_process_ids.add((template_id, task_date))
 
         processed_tasks_identifiers = set()
-        materialized_node_ids = {
-            str(task["id"])
-            for task in tasks_list
-            if task and not task.get("virtual") and task.get("id")
-        }
 
         for i in range(len(tasks_list)):
             task = tasks_list[i]
@@ -15518,58 +15133,33 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                task_template = task_templates_by_id[str(task_template_id)]
-
-                # Check if a node already exists for this recurrence slot
-                rescheduled_node = TaskNode.objects.filter(
-                    task_template=task_template,
-                    scheduled_date=task_date,
-                ).first()
-                if rescheduled_node:
-                    if rescheduled_node.due_date != task_date:
-                        # Node was rescheduled — already preserved in
-                        # the existing_nodes loop, drop the virtual entry.
-                        tasks_list[i] = None
-                        continue
-                    task_node = rescheduled_node
-                else:
-                    try:
-                        task_node, created = TaskNode.objects.get_or_create(
-                            task_template=task_template,
-                            due_date=task_date,
-                            defaults={
-                                "scheduled_date": task_date,
-                                "status": "pending",
-                                "folder": task_template.folder,
-                            },
-                        )
-                    except IntegrityError:
-                        existing_node = TaskNode.objects.filter(
-                            task_template=task_template,
-                            due_date=task_date,
-                        ).first()
-                        if not existing_node:
-                            tasks_list[i] = None
-                            continue
-                        task_node = existing_node
-                if str(task_node.id) in materialized_node_ids:
-                    tasks_list[i] = None
+                task_template = self.get_queryset().get(id=task_template_id)
+                try:
+                    task_node, created = TaskNode.objects.get_or_create(
+                        task_template=task_template,
+                        scheduled_date=task_date,
+                        defaults={
+                            "due_date": task_date,
+                            "status": "pending",
+                            "folder": task_template.folder,
+                        },
+                    )
+                except IntegrityError:
+                    # Another node for this template already has this due_date
+                    # (e.g. a rescheduled occurrence). Skip materialization.
                     continue
-                materialized_node_ids.add(str(task_node.id))
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
 
-        return [task for task in tasks_list if task is not None]
+        return tasks_list
 
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
             with transaction.atomic():
-                today = timezone.localdate()
                 # Soft-delete future TaskNode instances for re-evaluation.
-                TaskNode.objects.filter(task_template=task_template).filter(
-                    Q(scheduled_date__gte=today)
-                    | Q(scheduled_date__isnull=True, due_date__gte=today)
+                TaskNode.objects.filter(
+                    task_template=task_template, scheduled_date__gte=date.today()
                 ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
@@ -15587,11 +15177,10 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     if end_date_param:
                         end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
                     else:
-                        end_date = today + delta
+                        end_date = datetime.now().date() + delta
                     # Ensure end_date is not before the calculated delta
-                    min_end_date = today + delta
-                    if end_date < min_end_date:
-                        end_date = min_end_date
+                    if end_date < datetime.now().date() + delta:
+                        end_date = datetime.now().date() + delta
                 else:
                     end_date = start_date
                 # Generate the task nodes
@@ -15601,23 +15190,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     end=end_date,
                 )
 
-                # garbage-collect — only delete untouched nodes
-                TaskNode.objects.filter(
-                    to_delete=True,
-                    task_template=task_template,
-                    status="pending",
-                    due_date=F("scheduled_date"),
-                ).filter(
-                    Q(observation__isnull=True) | Q(observation=""),
-                ).exclude(
-                    evidences__isnull=False,
-                ).exclude(
-                    evidence_revisions__isnull=False,
-                ).delete()
-                # Clear to_delete on surviving nodes
-                TaskNode.objects.filter(
-                    to_delete=True, task_template=task_template
-                ).update(to_delete=False)
+                # garbage-collect
+                TaskNode.objects.filter(to_delete=True).delete()
 
     @action(
         detail=False,
