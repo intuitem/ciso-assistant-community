@@ -210,7 +210,12 @@ export const actions: Actions = {
 			return fail(400, { error: 'Missing credential' });
 		}
 
-		const credential = JSON.parse(credentialJson);
+		let credential;
+		try {
+			credential = JSON.parse(credentialJson);
+		} catch {
+			return fail(400, { error: 'Invalid credential' });
+		}
 
 		const endpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
 		const requestInitOptions: RequestInit = {
