@@ -1242,7 +1242,68 @@ export const IncidentSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
-	entities: z.string().uuid().optional().array().optional()
+	entities: z.string().uuid().optional().array().optional(),
+	occurred_at: z
+		.string()
+		.datetime({ local: true })
+		.refine((val) => !val || new Date(val) <= new Date(), {
+			message: m.timestampCannotBeInTheFuture()
+		})
+		.optional(),
+	resolved_at: z
+		.string()
+		.datetime({ local: true })
+		.refine((val) => !val || new Date(val) <= new Date(), {
+			message: m.timestampCannotBeInTheFuture()
+		})
+		.optional(),
+	resolution: z.string().optional().default(''),
+	is_bcp_activated: z.boolean().optional().nullable()
+});
+
+export const DoraIncidentReportSchema = z.object({
+	incident: z.string(),
+	incident_submission: z.string(),
+	report_currency: z.string().optional().default(''),
+	folder: z.string(),
+	submitting_entity: z.string().optional().nullable(),
+	ultimate_parent_entity: z.string().optional().nullable(),
+	affected_entities: z.string().uuid().optional().array().optional(),
+	primary_contact_name: z.string().optional().default(''),
+	primary_contact_email: z.string().optional().default(''),
+	primary_contact_phone: z.string().optional().default(''),
+	secondary_contact_name: z.string().optional().default(''),
+	secondary_contact_email: z.string().optional().default(''),
+	secondary_contact_phone: z.string().optional().default(''),
+	financial_entity_code: z.string().optional().default(''),
+	detection_date_time: z.string().datetime({ local: true }).optional().nullable(),
+	classification_date_time: z.string().datetime({ local: true }).optional().nullable(),
+	incident_description: z.string().optional().default(''),
+	other_information: z.string().optional().default(''),
+	incident_duration: z.string().optional().default(''),
+	originates_from_third_party_provider: z.string().optional().default(''),
+	incident_discovery: z.string().optional().default(''),
+	competent_authority_code: z.string().optional().default(''),
+	classification_types: z.any().optional(),
+	incident_type: z.any().optional(),
+	root_cause_hl_classification: z.any().optional(),
+	root_causes_detailed_classification: z.any().optional(),
+	root_causes_additional_classification: z.any().optional(),
+	root_causes_other: z.string().optional().default(''),
+	root_causes_information: z.string().optional().default(''),
+	root_cause_addressing_date_time: z.string().datetime({ local: true }).optional().nullable(),
+	incident_resolution_vs_planned: z.string().optional().default(''),
+	assessment_of_risk_to_critical_functions: z.string().optional().default(''),
+	information_relevant_to_resolution_authorities: z.string().optional().default(''),
+	financial_recoveries_amount: z.number().optional().nullable(),
+	gross_amount_indirect_direct_costs: z.number().optional().nullable(),
+	recurring_non_major_incidents_description: z.string().optional().default(''),
+	recurring_incident_date: z.string().datetime({ local: true }).optional().nullable(),
+	impact_assessment: z.any().optional(),
+	reporting_to_other_authorities: z.any().optional(),
+	reporting_to_other_authorities_other: z.string().optional().default(''),
+	info_duration_service_downtime_actual_or_estimate: z.string().optional().default(''),
+	is_submitted: z.boolean().optional().default(false)
 });
 
 export const TimelineEntrySchema = z.object({
@@ -1591,6 +1652,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'findings-assessments': FindingsAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
+	'dora-incident-reports': DoraIncidentReportSchema,
 	'task-templates': TaskTemplateSchema,
 	'task-nodes': TaskNodeSchema,
 	'elementary-actions': ElementaryActionSchema,

@@ -115,6 +115,7 @@ export const URL_MODEL = [
 	'business-impact-analysis',
 	'escalation-thresholds',
 	'asset-assessments',
+	'dora-incident-reports',
 	'asset-class',
 	'asset-capabilities',
 	// campaigns,
