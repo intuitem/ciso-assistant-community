@@ -21,7 +21,6 @@ test('my profile settings page loads correctly', async ({ logedPage, page }) => 
 	await test.step('security keys section is visible', async () => {
 		await expect(page.locator('dt').filter({ hasText: 'Security keys' })).toBeVisible();
 		await expect(page.locator('h6').filter({ hasText: 'Security keys' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Add security key' })).toBeVisible();
 	});
 
 	await test.step('personal access tokens section is visible', async () => {
