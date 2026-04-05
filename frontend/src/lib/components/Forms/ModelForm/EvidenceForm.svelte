@@ -74,7 +74,8 @@
 {/if}
 <FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL&content_type=EN&writable=add_evidence"
+	contentTypes={['DO', 'GL', 'EN']}
+	writable="add_evidence"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

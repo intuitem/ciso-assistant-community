@@ -26,7 +26,7 @@
 
 <FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_threat"
+	writable="add_threat"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

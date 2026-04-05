@@ -87,7 +87,7 @@
 {#key folderKey}
 	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_entityassessment"
+		writable="add_entityassessment"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

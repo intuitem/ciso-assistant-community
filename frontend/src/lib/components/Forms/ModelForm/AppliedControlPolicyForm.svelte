@@ -446,7 +446,7 @@
 
 <FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_appliedcontrol"
+	writable="add_appliedcontrol"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

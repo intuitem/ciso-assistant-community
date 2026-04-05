@@ -160,8 +160,7 @@
 
 	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_genericcollection"
-		pathField="path"
+		writable="add_genericcollection"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

@@ -49,7 +49,7 @@
 {/if}
 <FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_riskacceptance"
+	writable="add_riskacceptance"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

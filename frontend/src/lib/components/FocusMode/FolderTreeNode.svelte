@@ -16,6 +16,10 @@
 		depth?: number;
 		contentTypes?: string[];
 		ancestors?: string[];
+		/** When provided, only folders whose uuid is in this set are selectable. */
+		writableIds?: Set<string> | undefined;
+		/** When non-null, only folders whose uuid is in this set are visible. */
+		visibleIds?: Set<string> | null;
 	}
 
 	let {
@@ -25,7 +29,9 @@
 		onSelect,
 		depth = 0,
 		contentTypes = ['DO', 'GL'],
-		ancestors = []
+		ancestors = [],
+		writableIds = undefined,
+		visibleIds = null
 	}: Props = $props();
 
 	const sortedChildren = $derived.by(() => {
@@ -38,10 +44,17 @@
 	const hasChildren = $derived((node.children ?? []).length > 0);
 	let isExpanded = $state(false);
 	const isSelected = $derived(node.uuid !== null && focusId === String(node.uuid));
-	// Node is selectable if it has a uuid
-	const isSelectable = $derived(!!node.uuid);
-	// Whether this node should be shown at all
-	const isVisible = $derived(!node.content_type || contentTypes.includes(node.content_type));
+	// Node is selectable if it has a uuid, and — when a writable filter is
+	// active — only if it's in the writable set.
+	const isSelectable = $derived(
+		!!node.uuid && (!writableIds || writableIds.has(String(node.uuid)))
+	);
+	// Whether this node should be shown at all. Filtered by content type and,
+	// when a writable filter is active, by the ancestor-inclusive visible set.
+	const isVisible = $derived(
+		(!node.content_type || contentTypes.includes(node.content_type)) &&
+			(!visibleIds || (node.uuid !== null && visibleIds.has(String(node.uuid))))
+	);
 
 	// Auto-expand if the selected node is somewhere in this subtree
 	const subtreeHasFocus = $derived.by(() => {
@@ -91,7 +104,11 @@
 				role="option"
 				aria-selected={isSelected}
 				class="flex-1 flex items-center gap-1.5 px-1.5 py-1 text-left rounded text-sm min-w-0 transition-colors
-				{isSelected ? 'bg-indigo-100 text-indigo-700' : 'text-slate-700 hover:bg-indigo-50 cursor-pointer'}"
+				{isSelected
+					? 'bg-indigo-100 text-indigo-700'
+					: isSelectable
+						? 'text-slate-700 hover:bg-indigo-50 cursor-pointer'
+						: 'text-slate-400 cursor-not-allowed'}"
 				title={node.name}
 				onclick={(e) => {
 					e.stopPropagation();
@@ -120,6 +137,8 @@
 						{focusId}
 						{onSelect}
 						{contentTypes}
+						{writableIds}
+						{visibleIds}
 						depth={depth + 1}
 						ancestors={[...ancestors, node.name]}
 					/>

@@ -138,7 +138,7 @@
 {#key folderKey}
 	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_complianceassessment"
+		writable="add_complianceassessment"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		contentTypes={['DO', 'GL', 'EN']}

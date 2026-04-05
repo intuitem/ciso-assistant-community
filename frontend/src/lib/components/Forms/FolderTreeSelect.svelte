@@ -31,6 +31,14 @@
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
 		 */
 		contentTypes?: string[];
+		/**
+		 * Permission codename (e.g. "add_asset"). When set, only folders where
+		 * the current user has that permission are selectable. Non-writable
+		 * folders are hidden unless they are ancestors of a writable folder,
+		 * in which case they are shown as non-selectable branches so the
+		 * hierarchy remains navigable.
+		 */
+		writable?: string;
 	}
 
 	let {
@@ -49,12 +57,35 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
-		contentTypes = ['DO', 'GL']
+		contentTypes = ['DO', 'GL'],
+		writable = undefined
 	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
+	// Set of folder UUIDs the user can write to when `writable` is set.
+	// `undefined` means either no filter is requested or the fetch is in flight.
+	let writableIds = $state<Set<string> | undefined>(undefined);
+
 	let orgTree = $state<TreeNode | undefined>(undefined);
+
+	// Set of UUIDs that should remain visible in the tree: either writable
+	// themselves or an ancestor of a writable folder. `null` means no filter.
+	const visibleIds = $derived.by<Set<string> | null>(() => {
+		if (!writable || !writableIds || !orgTree) return null;
+		const visible = new Set<string>();
+		function visit(n: TreeNode): boolean {
+			let keep = false;
+			for (const c of n.children ?? []) {
+				if (visit(c)) keep = true;
+			}
+			if (n.uuid && writableIds!.has(String(n.uuid))) keep = true;
+			if (keep && n.uuid) visible.add(String(n.uuid));
+			return keep;
+		}
+		visit(orgTree);
+		return visible;
+	});
 	let isOpen = $state(false);
 	let searchQuery = $state('');
 	let searchInputEl = $state<HTMLInputElement | null>(null);
@@ -115,7 +146,14 @@
 		const results: SearchResult[] = [];
 		function visit(n: TreeNode, ancestors: string[]) {
 			const selectable = !n.content_type || contentTypes.includes(n.content_type);
-			if (selectable && n.uuid !== excludedId && n.uuid && n.name.toLowerCase().includes(q)) {
+			const isWritable = !writableIds || (n.uuid && writableIds.has(String(n.uuid)));
+			if (
+				selectable &&
+				isWritable &&
+				n.uuid !== excludedId &&
+				n.uuid &&
+				n.name.toLowerCase().includes(q)
+			) {
 				results.push({ node: n, path: ancestors });
 			}
 			(n.children ?? []).forEach((c) => visit(c, [...ancestors, n.name]));
@@ -205,7 +243,7 @@
 
 		isLoading = true;
 		const includeEnclaves = contentTypes.includes('EN');
-		fetch(
+		const orgTreePromise = fetch(
 			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}`
 		)
 			.then((res) => {
@@ -214,8 +252,20 @@
 			.then((data) => {
 				if (data) orgTree = data;
 			})
-			.catch((e) => console.error('FolderTreeSelect: failed to fetch org_tree', e))
-			.finally(() => (isLoading = false));
+			.catch((e) => console.error('FolderTreeSelect: failed to fetch org_tree', e));
+
+		const writablePromise = writable
+			? fetch(`/folders/?writable=${encodeURIComponent(writable)}`)
+					.then((res) => (res.ok ? res.json() : null))
+					.then((data) => {
+						if (!data) return;
+						const items = Array.isArray(data) ? data : (data.results ?? []);
+						writableIds = new Set(items.map((f: any) => String(f.id)));
+					})
+					.catch((e) => console.error('FolderTreeSelect: failed to fetch writable folders', e))
+			: Promise.resolve();
+
+		Promise.all([orgTreePromise, writablePromise]).finally(() => (isLoading = false));
 
 		// Cache lock resolves when a cached value is available (create + caching=true).
 		// In edit mode this promise may never resolve, so keep it independent.
@@ -403,6 +453,8 @@
 								{node}
 								{sortAsc}
 								{contentTypes}
+								{writableIds}
+								{visibleIds}
 								focusId={$value ? String($value) : null}
 								onSelect={handleSelect}
 								depth={0}

@@ -85,7 +85,7 @@
 <HiddenInput {form} field="requirement_assessments" />
 <FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_securityexception"
+	writable="add_securityexception"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

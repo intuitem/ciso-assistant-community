@@ -68,7 +68,7 @@
 />
 <FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_evidencerevision"
+	writable="add_evidencerevision"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
@@ -77,7 +77,7 @@
 <!-- {#if !(initialData.applied_controls || initialData.requirement_assessments || initialData.evidence)}
 	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_evidencerevision"
+		writable="add_evidencerevision"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

@@ -67,7 +67,7 @@
 {:else}
 	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_folder"
+		writable="add_folder"
 		field="parent_folder"
 		optionsSelf={object}
 		cacheLock={cacheLocks['parent_folder']}
