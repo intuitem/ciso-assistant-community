@@ -1,7 +1,10 @@
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { activateTOTPSchema } from '../(internal)/my-profile/settings/mfa/utils/schemas';
+import {
+	activateTOTPSchema,
+	registerWebAuthnSchema
+} from '../(internal)/my-profile/settings/mfa/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { safeTranslate } from '$lib/utils/i18n';
@@ -16,7 +19,10 @@ export const load: PageServerLoad = async (event) => {
 
 	if (authenticatorsResponse.status === 200) {
 		const authenticators = authenticatorsResponse.data;
-		if (Array.isArray(authenticators) && authenticators.find((auth) => auth.type === 'totp')) {
+		if (
+			Array.isArray(authenticators) &&
+			authenticators.some((auth) => auth.type === 'totp' || auth.type === 'webauthn')
+		) {
 			redirect(302, '/');
 		}
 	}
@@ -25,11 +31,21 @@ export const load: PageServerLoad = async (event) => {
 	const totpResponse = await event.fetch(totpEndpoint).then((res) => res.json());
 	const totp = totpResponse.meta;
 
+	let webauthnCreationOptions = null;
+	const webauthnEndpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
+	const webauthnResponse = await event.fetch(webauthnEndpoint).then((res) => res.json());
+	if (webauthnResponse.status === 200) {
+		webauthnCreationOptions = webauthnResponse.data?.creation_options ?? null;
+	}
+
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
+	const registerWebAuthnForm = await superValidate(zod(registerWebAuthnSchema));
 
 	return {
 		totp,
 		activateTOTPForm,
+		webauthnCreationOptions,
+		registerWebAuthnForm,
 		title: m.setupMfa()
 	};
 };
@@ -74,6 +90,41 @@ export const actions: Actions = {
 		}
 
 		setFlash({ type: 'success', message: m.successfullyActivatedTOTP() }, event);
+		redirect(302, '/');
+	},
+	registerWebAuthn: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(formData, zod(registerWebAuthnSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const credentialJson = formData.get('credential');
+		if (!credentialJson || typeof credentialJson !== 'string') {
+			return fail(400, { error: 'Missing credential' });
+		}
+
+		const credential = JSON.parse(credentialJson);
+
+		const endpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify({ name: form.data.name, credential })
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
+
+		if (response.status !== 200) {
+			console.error('Could not register WebAuthn credential', response);
+			if (Object.hasOwn(response, 'errors')) {
+				response.errors.forEach((error: { param: string; message: string }) => {
+					setError(form, error.param as any, error.message);
+				});
+			}
+			return fail(response.status, { form });
+		}
+
+		setFlash({ type: 'success', message: m.successfullyAddedSecurityKey() }, event);
 		redirect(302, '/');
 	}
 };

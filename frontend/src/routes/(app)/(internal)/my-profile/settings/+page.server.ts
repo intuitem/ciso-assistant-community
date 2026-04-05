@@ -46,12 +46,10 @@ export const load: PageServerLoad = async (event) => {
 		: [];
 
 	let webauthnCreationOptions = null;
-	if (Array.isArray(authenticators) && authenticators.some((auth: { type: string }) => auth.type === 'totp')) {
-		const webauthnEndpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
-		const webauthnResponse = await event.fetch(webauthnEndpoint).then((res) => res.json());
-		if (webauthnResponse.status === 200) {
-			webauthnCreationOptions = webauthnResponse.data?.creation_options ?? null;
-		}
+	const webauthnEndpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
+	const webauthnResponse = await event.fetch(webauthnEndpoint).then((res) => res.json());
+	if (webauthnResponse.status === 200) {
+		webauthnCreationOptions = webauthnResponse.data?.creation_options ?? null;
 	}
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
@@ -239,10 +237,7 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		if (!formData) return fail(400, { error: 'No form data' });
 
-		const form = await superValidate(
-			formData,
-			zod(z.object({ id: z.number() }))
-		);
+		const form = await superValidate(formData, zod(z.object({ id: z.number() })));
 		if (!form.valid) return fail(400, { form });
 
 		const endpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;

@@ -161,16 +161,12 @@
 				</SuperForm>
 			{/if}
 			<div class="flex flex-wrap gap-2 justify-center">
-				{#if mode !== 'totp'}
-					<button
-						type="button"
-						onclick={() => (mode = 'totp')}
-						class="btn hover:underline text-sm"
-					>
+				{#if mode !== 'totp' && mfaTypes.includes('totp')}
+					<button type="button" onclick={() => (mode = 'totp')} class="btn hover:underline text-sm">
 						{m.loginUsingTOTP()}
 					</button>
 				{/if}
-				{#if mode !== 'recovery_code'}
+				{#if mode !== 'recovery_code' && mfaTypes.includes('recovery_codes')}
 					<button
 						type="button"
 						onclick={() => (mode = 'recovery_code')}

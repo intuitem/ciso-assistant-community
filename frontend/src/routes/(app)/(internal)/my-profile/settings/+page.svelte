@@ -157,7 +157,9 @@
 		modalStore.trigger(modal);
 	}
 
-	let hasTOTP = $derived(data.authenticators.some((auth: { type: string }) => auth.type === 'totp'));
+	let hasTOTP = $derived(
+		data.authenticators.some((auth: { type: string }) => auth.type === 'totp')
+	);
 	run(() => {
 		$recoveryCodes =
 			form && Object.hasOwn(form, 'recoveryCodes') ? form.recoveryCodes : data.recoveryCodes;
@@ -269,7 +271,7 @@
 									<p class="text-sm text-surface-600">{m.noSecurityKeysRegistered()}</p>
 								{/if}
 								<div class="flex flex-wrap gap-2">
-									{#if hasTOTP && data.webauthnCreationOptions}
+									{#if data.webauthnCreationOptions}
 										<button
 											class="btn preset-outlined-surface-500 w-fit"
 											onclick={() => modalRegisterWebAuthn()}

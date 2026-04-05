@@ -77,7 +77,11 @@
 				<p class="text-sm text-error-500">{error}</p>
 			{/if}
 			<footer class="flex justify-end gap-2">
-				<button type="button" class="btn preset-outlined-surface-500" onclick={() => modalStore.close()}>
+				<button
+					type="button"
+					class="btn preset-outlined-surface-500"
+					onclick={() => modalStore.close()}
+				>
 					{m.cancel()}
 				</button>
 				<button
