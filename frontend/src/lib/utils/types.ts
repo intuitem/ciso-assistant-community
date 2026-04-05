@@ -19,6 +19,7 @@ export interface User {
 	is_auditee: boolean;
 	is_admin: boolean;
 	is_local: boolean;
+	is_sso: boolean;
 	is_superuser: boolean;
 	has_mfa_enabled: boolean;
 	accessible_domains: string[];
@@ -114,6 +115,7 @@ export const URL_MODEL = [
 	'business-impact-analysis',
 	'escalation-thresholds',
 	'asset-assessments',
+	'dora-incident-reports',
 	'asset-class',
 	'asset-capabilities',
 	// campaigns,
@@ -140,7 +142,10 @@ export const URL_MODEL = [
 	'dashboards',
 	'dashboard-widgets',
 	'dashboard-text-widgets',
-	'dashboard-builtin-widgets'
+	'dashboard-builtin-widgets',
+	// policy documents
+	'managed-documents',
+	'document-revisions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

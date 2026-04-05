@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -60,11 +61,10 @@
 	}
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_metricdefinition"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}

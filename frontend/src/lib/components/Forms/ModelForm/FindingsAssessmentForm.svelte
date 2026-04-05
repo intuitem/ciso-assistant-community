@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -72,7 +73,7 @@
 </script>
 
 {#key folderKey}
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
 		optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_findingsassessment"
 		field="folder"

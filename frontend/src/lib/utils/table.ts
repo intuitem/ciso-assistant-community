@@ -1263,14 +1263,22 @@ export const listViewFields = {
 		body: ['label']
 	},
 	'risk-matrices': {
-		head: ['name', 'description', 'provider', 'domain'],
-		body: ['name', 'description', 'provider', 'folder'],
+		head: ['name', 'description', 'provider', 'domain', 'isEnabled'],
+		body: ['name', 'description', 'provider', 'folder', 'is_enabled'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'risk-matrices/provider' }
+			},
+			is_enabled: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'isEnabled',
+					options: YES_NO_OPTIONS,
+					multiple: false
+				}
 			}
 		}
 	},
@@ -1338,6 +1346,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
@@ -1351,6 +1360,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
@@ -1365,6 +1375,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			treatment: TREATMENT_FILTER,
 			risk_assessment: RISK_ASSESSMENT_FILTER,
+			owner: OWNER_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
@@ -1429,8 +1440,10 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csfFunction',
 			'eta',
@@ -1443,8 +1456,10 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csf_function',
 			'eta',
@@ -1457,6 +1472,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
+			assets: ASSET_FILTER,
 			category: APPLIED_CONTROL_CATEGORY_FILTER,
 			csf_function: APPLIED_CONTROL_CSF_FUNCTION_FILTER,
 			priority: PRIORITY_FILTER,
@@ -1689,6 +1705,14 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'document-revisions': {
+		head: ['versionNumber', 'status', 'author', 'changeSummary', 'createdAt'],
+		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
+	},
+	'managed-documents': {
+		head: ['name', 'documentType', 'policy', 'locale', 'domain'],
+		body: ['name', 'document_type', 'policy', 'locale', 'folder']
+	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],
@@ -1882,6 +1906,27 @@ export const listViewFields = {
 		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'impactOn', 'justification'],
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
+	'dora-incident-reports': {
+		head: [
+			'incident',
+			'incidentSubmission',
+			'reportCurrency',
+			'submittingEntity',
+			'folder',
+			'createdAt'
+		],
+		body: [
+			'incident',
+			'incident_submission',
+			'report_currency',
+			'submitting_entity',
+			'folder',
+			'created_at'
+		],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	processings: {
 		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
@@ -2030,7 +2075,9 @@ export const listViewFields = {
 		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
-			category: PERSONAL_DATA_CATEGORY_FILTER
+			category: PERSONAL_DATA_CATEGORY_FILTER,
+			deletion_policy: { hide: true } as ListViewFilterConfig,
+			is_sensitive: { hide: true } as ListViewFilterConfig
 		}
 	},
 	'data-subjects': {
@@ -2047,11 +2094,22 @@ export const listViewFields = {
 	},
 	'data-transfers': {
 		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
-		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link'],
+		filters: {
+			transfer_mechanism: { hide: true } as ListViewFilterConfig
+		}
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
-		body: ['name', 'description', 'folder', 'quotation_method', 'created_at', 'updated_at'],
+		head: ['name', 'description', 'domain', 'status', 'quotationMethod', 'createdAt', 'updatedAt'],
+		body: [
+			'name',
+			'description',
+			'folder',
+			'status',
+			'quotation_method',
+			'created_at',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
@@ -2329,12 +2387,37 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['refId', 'name', 'domain', 'status', 'health', 'eta', 'dueDate', 'assignee'],
-		body: ['ref_id', 'name', 'folder', 'status', 'health', 'eta', 'due_date', 'assigned_to'],
+		head: [
+			'refId',
+			'name',
+			'domain',
+			'status',
+			'health',
+			'isActive',
+			'startDate',
+			'eta',
+			'dueDate',
+			'closingDate',
+			'assignee'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'folder',
+			'status',
+			'health',
+			'is_active',
+			'start_date',
+			'eta',
+			'due_date',
+			'closing_date',
+			'assigned_to'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
-			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER,
+			is_active: USER_IS_ACTIVE_FILTER
 		}
 	},
 	'organisation-issues': {
@@ -2954,6 +3037,20 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'status',
 			optionsEndpoint: 'organisation-objectives/status'
 		},
+		{
+			type: 'change_field',
+			label: 'changeHealth',
+			icon: 'fa-solid fa-heart-pulse',
+			field: 'health',
+			optionsEndpoint: 'organisation-objectives/health'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'organisation-objectives/is_active'
+		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'task-templates': [
@@ -3086,6 +3183,33 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'data-transfers': [
+		{
+			type: 'change_field',
+			label: 'changeTransferMechanism',
+			icon: 'fa-solid fa-right-left',
+			field: 'transfer_mechanism',
+			optionsEndpoint: 'data-transfers/transfer_mechanism'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'personal-data': [
+		{
+			type: 'change_field',
+			label: 'changeDeletionPolicy',
+			icon: 'fa-solid fa-clock-rotate-left',
+			field: 'deletion_policy',
+			optionsEndpoint: 'personal-data/deletion_policy'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsSensitive',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'is_sensitive',
+			optionsEndpoint: 'personal-data/is_sensitive'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	processings: [
 		{
 			type: 'change_field',

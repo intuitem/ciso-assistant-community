@@ -2,10 +2,12 @@
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
+	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
@@ -75,8 +77,12 @@
 			'validation_deadline',
 			'timestamp',
 			'reported_at',
+			'occurred_at',
+			'resolved_at',
 			'due_date',
-			'start_date'
+			'start_date',
+			'closing_date',
+			'commission_date'
 		],
 		widgets,
 		actions,
@@ -210,6 +216,23 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
+		if (!field.batchCreate) return;
+		const modalComponent: ModalComponent = {
+			ref: BatchCreatePersonalDataModal,
+			props: {
+				processingId: parentId,
+				urlModel: field.urlModel
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(field.batchCreate.label ?? 'batchCreate')
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalConfirm(id: string, name: string, action: string): void {
 		const urlModel = getModelInfo('risk-acceptances').urlModel;
 		const modalComponent: ModalComponent = {
@@ -232,7 +255,7 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalAppliedControlDuplicateForm(): void {
+	function modalDuplicateForm(titleKey: () => string): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -247,7 +270,7 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: m.duplicateAppliedControl()
+			title: titleKey()
 		};
 		modalStore.trigger(modal);
 	}
@@ -379,7 +402,7 @@
 				{m.riskAcceptanceNotYetSubmittedMessage()}
 			</div>
 		</div>
-	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver?.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
@@ -414,7 +437,7 @@
 			<div class="text-green-900">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
-			{#if page.data.user.id === data.data.approver.id}
+			{#if page.data.user.id === data.data.approver?.id}
 				<div class="ml-auto whitespace-nowrap">
 					<button
 						onclick={(_) => {
@@ -432,6 +455,17 @@
 
 	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
+		{#if data.urlModel === 'stakeholders' && data.data?.ebios_rm_study?.id}
+			<div class="mb-4 p-3">
+				<Anchor
+					href={'/ebios-rm/' + data.data.ebios_rm_study.id + '/workshop-3/ecosystem'}
+					class="anchor text-sm"
+				>
+					<i class="fa-solid fa-arrow-left"></i>
+					{m.backToWorkshop()} : {m.ebiosWs3_1()}
+				</Anchor>
+			</div>
+		{/if}
 		{#each data.data?.sync_mappings as syncMapping}
 			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 				<h3 class="font-semibold text-secondary-800 mb-2">
@@ -655,6 +689,9 @@
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
 												<MarkdownRenderer content={value} />
+											{:else if typeof value === 'boolean'}
+												{@const bd = booleanDisplay(value, key, data.urlModel)}
+												<i class="{bd.icon} {bd.colorClass}"></i>
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
@@ -774,7 +811,17 @@
 				{#if data.urlModel === 'applied-controls'}
 					<button
 						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-						onclick={(_) => modalAppliedControlDuplicateForm()}
+						onclick={(_) => modalDuplicateForm(m.duplicateAppliedControl)}
+						data-testid="duplicate-button"
+					>
+						<i class="fa-solid fa-copy mr-2"></i>
+						{m.duplicate()}</button
+					>
+				{/if}
+				{#if data.urlModel === 'organisation-objectives'}
+					<button
+						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+						onclick={(_) => modalDuplicateForm(m.duplicateOrganisationObjective)}
 						data-testid="duplicate-button"
 					>
 						<i class="fa-solid fa-copy mr-2"></i>
@@ -788,7 +835,7 @@
 </div>
 
 {#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white py-6">
+	<div class="card shadow-lg mt-8 bg-white px-2 py-6">
 		<Tabs
 			value={group}
 			onValueChange={(e) => (group = e.value)}
@@ -797,19 +844,28 @@
 		>
 			<Tabs.List class="shrink-0 gap-3">
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Trigger value={urlmodel} class="justify-start" data-testid="tabs-control">
+					<Tabs.Trigger
+						value={urlmodel}
+						class="justify-between w-full rounded-md px-3 py-2 transition-colors
+			       aria-[selected=true]:!bg-gray-200
+			       "
+						data-testid="tabs-control"
+					>
 						{safeTranslate(model.info.localNamePlural)}
 						{#if model.count !== undefined && model.count > 0}
-							<span class="badge preset-tonal-secondary">{model.count}</span>
+							<span
+								class="ml-2 rounded-full px-2 py-0.5 text-xs
+						   preset-tonal-secondary text-gray-700"
+							>
+								{model.count}
+							</span>
 						{/if}
 					</Tabs.Trigger>
 				{/each}
-				<Tabs.Indicator />
 			</Tabs.List>
 			{#each relatedModels as [urlmodel, model]}
 				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
 					{#key urlmodel}
-						<div class="py-2"></div>
 						{@const field = data.model.reverseForeignKeyFields.find(
 							(item) => item.urlModel === urlmodel
 						)}
@@ -850,6 +906,20 @@
 												<i class="fa-solid fa-hand-pointer"></i>
 											</button>
 										</span>
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
 										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
@@ -861,6 +931,20 @@
 											</button>
 										</span>
 									{:else}
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
 											data-testid="add-button"

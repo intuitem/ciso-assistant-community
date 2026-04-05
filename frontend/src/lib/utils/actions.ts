@@ -8,7 +8,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { getSecureRedirect } from './helpers';
 

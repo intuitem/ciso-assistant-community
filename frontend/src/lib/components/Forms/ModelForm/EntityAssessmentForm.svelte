@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -84,7 +85,7 @@
 </script>
 
 {#key folderKey}
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
 		optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_entityassessment"
 		field="folder"

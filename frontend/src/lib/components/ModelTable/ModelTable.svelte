@@ -5,6 +5,7 @@
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
+	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
@@ -23,6 +24,7 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isDark } from '$lib/utils/helpers';
 	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
+	import { tableFilterStates } from '$lib/utils/stores';
 	import BatchActionBar from './BatchActionBar.svelte';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
@@ -31,8 +33,9 @@
 	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { z, type AnyZodObject } from 'zod';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
@@ -81,7 +84,7 @@
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
-		deleteForm?: SuperValidated<AnyZodObject>;
+		deleteForm?: SuperValidated<FormDataShape>;
 		URLModel?: urlModel;
 		baseEndpoint?: string;
 		detailQueryParameter?: string;
@@ -306,12 +309,25 @@
 
 	const filters = source?.filters ?? tableFilters;
 	const filteredFields = Object.keys(filters);
+	// Only persist filters on standalone list pages, not embedded sub-tables
+	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
+	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
+	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
+	// Check if any filter-related URL params exist
+	const hasUrlFilterParams = filteredFields.some(
+		(field) => page.url.searchParams.getAll(field).length > 0
+	);
 	const filterValues: { [key: string]: any } = $state(
 		Object.fromEntries(
 			filteredFields.map((field: string) => {
 				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
+				if (urlValues.length > 0) return [field, urlValues];
+				// Restore persisted filters only when no URL filter params exist at all
+				if (!hasUrlFilterParams && field in storedFilters) {
+					return [field, storedFilters[field] ?? []];
+				}
 				const defaultValue = defaultFilters[field] || [];
-				return [field, urlValues.length > 0 ? urlValues : defaultValue];
+				return [field, defaultValue];
 			})
 		)
 	);
@@ -343,6 +359,10 @@
 			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
+		// Persist all filter values (including empty) so cleared defaults stay cleared
+		if (isStandaloneTable) {
+			$tableFilterStates[filterStoreKey] = { ...filterValues };
+		}
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
@@ -901,7 +921,11 @@
 														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
 															{formatDateOrDateTime(value, getLocale())}
 														{:else if [true, false].includes(value)}
-															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+															{@const bd = booleanDisplay(value, key, URLModel)}
+															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
+														{:else if value === 'YES' || value === 'NO'}
+															{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
+															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
 														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
 																>{safeTranslate('percentageDisplay', { number: value })}</span

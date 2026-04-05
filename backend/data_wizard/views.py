@@ -1,5 +1,6 @@
 import io
 import logging
+import re
 import pandas as pd
 from rest_framework import status
 from rest_framework.views import APIView
@@ -7,8 +8,11 @@ from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
 
 from .serializers import LoadFileSerializer
+from core.utils import build_questions_dict
 from core.models import (
+    Actor,
     Asset,
+    Evidence,
     Folder,
     Perimeter,
     RequirementAssessment,
@@ -20,6 +24,7 @@ from core.models import (
     Policy,
     SecurityException,
     Incident,
+    Vulnerability,
 )
 from core.serializers import (
     BaseModelSerializer,
@@ -40,6 +45,7 @@ from core.serializers import (
     PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
     IncidentWriteSerializer,
+    VulnerabilityWriteSerializer,
 )
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -67,10 +73,21 @@ from tprm.serializers import (
     SolutionWriteSerializer,
     ContractWriteSerializer,
 )
+from resilience.models import (
+    BusinessImpactAnalysis,
+    AssetAssessment,
+    EscalationThreshold,
+)
+from resilience.serializers import (
+    BusinessImpactAnalysisWriteSerializer,
+    AssetAssessmentWriteSerializer,
+    EscalationThresholdWriteSerializer,
+)
 from privacy.models import Processing, ProcessingNature
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
+from core.utils import get_global_currency
 from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
@@ -144,6 +161,99 @@ def _parse_datetime(value) -> Optional[str]:
     return value
 
 
+def _parse_time_to_seconds(s: str) -> int | None:
+    """Parse a time string like '4h', '2h30m', '24h10s', '01m30s' to seconds."""
+    if not s:
+        return None
+    s = s.strip()
+    try:
+        return int(s)
+    except ValueError:
+        pass
+    m = re.fullmatch(r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?", s)
+    if not m or not any(m.groups()):
+        return None
+    h, mn, sc = (int(x) if x else 0 for x in m.groups())
+    return h * 3600 + mn * 60 + sc
+
+
+def _get_security_objective_scale() -> list:
+    """Return the active security-objective scale from GlobalSettings."""
+    from global_settings.models import GlobalSettings
+
+    settings = GlobalSettings.objects.filter(name="general").first()
+    scale_key = (
+        settings.value.get("security_objective_scale", "1-4") if settings else "1-4"
+    )
+    return Asset.SECURITY_OBJECTIVES_SCALES[scale_key]
+
+
+def _reverse_scale_value(display_val: str, scale: list) -> int | None:
+    """Map a display value back to its raw 0-based index.
+
+    The scale list maps raw index → display value.  We need the reverse:
+    find the *first* index whose display value matches.
+    Supports both numeric scales (1-4, 0-3, …) and string scales (FIPS-199).
+    """
+    # Try numeric comparison first
+    try:
+        numeric = int(display_val)
+        for idx, sv in enumerate(scale):
+            if isinstance(sv, (int, float)) and int(sv) == numeric:
+                return idx
+    except (ValueError, TypeError):
+        pass
+
+    # Fall back to case-insensitive string comparison (e.g. FIPS-199)
+    display_lower = display_val.strip().lower()
+    for idx, sv in enumerate(scale):
+        if str(sv).lower() == display_lower:
+            return idx
+
+    return None
+
+
+def _parse_security_objectives(raw: str, scale: list | None = None) -> dict:
+    """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}.
+
+    Values in the input are *display* values (scale-mapped).  They are
+    reverse-mapped back to the raw 0-based index before storage so that
+    an export → import round-trip is lossless.
+    """
+    result = {}
+    if not raw:
+        return result
+    if scale is None:
+        scale = _get_security_objective_scale()
+    for part in str(raw).split(","):
+        part = part.strip()
+        if ":" not in part:
+            continue
+        key, _, val = part.partition(":")
+        key = key.strip()
+        v = _reverse_scale_value(val.strip(), scale)
+        if v is not None and 0 <= v <= 4:
+            result[key] = {"value": v, "is_enabled": True}
+    return result
+
+
+def _parse_recovery_objectives(raw: str) -> dict:
+    """Parse 'rto: 4h,rpo: 5h,mtd: 6h' → {key: {"value": seconds}}."""
+    result = {}
+    if not raw:
+        return result
+    for part in str(raw).split(","):
+        part = part.strip()
+        if ":" not in part:
+            continue
+        key, _, val = part.partition(":")
+        key = key.strip()
+        secs = _parse_time_to_seconds(val.strip())
+        if secs is not None and secs >= 0:
+            result[key] = {"value": secs}
+    return result
+
+
 def _resolve_filtering_labels(value) -> list[UUID]:
     """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
 
@@ -162,7 +272,7 @@ def _resolve_filtering_labels(value) -> list[UUID]:
                 label.full_clean()
                 label.save()
             except Exception:
-                continue
+                logging.error(f"Failed to save label: {value}")
         label_ids.append(label.id)
     return label_ids
 
@@ -209,6 +319,8 @@ class ModelType(enum.StrEnum):
     POLICY = "Policy"
     SECURITY_EXCEPTION = "SecurityException"
     INCIDENT = "Incident"
+    VULNERABILITY = "Vulnerability"
+    BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
 
     @staticmethod
     def from_string(model_type: str) -> Optional["ModelType"]:
@@ -223,6 +335,7 @@ class ModelType(enum.StrEnum):
 class Error:
     record: dict
     error: str
+    is_warning: bool = False
 
     def to_dict(self) -> dict:
         return {"record": self.record, "error": self.error}
@@ -234,7 +347,9 @@ class Result:
     updated: int = 0
     skipped: int = 0
     failed: int = 0
+    stopped: bool = False
     errors: list[Error] = field(default_factory=list)
+    warnings: list[Error] = field(default_factory=list)
     details: dict = field(default_factory=dict)
 
     @property
@@ -261,7 +376,13 @@ class Result:
             "updated": self.updated,
             "skipped": self.skipped,
             "failed": self.failed,
+            "stopped": self.stopped,
             "errors": [error.to_dict() for error in self.errors],
+            **(
+                {"warnings": [w.to_dict() for w in self.warnings]}
+                if self.warnings
+                else {}
+            ),
             **({"details": self.details} if self.details else {}),
         }
 
@@ -348,6 +469,10 @@ class RecordConsumer[Context](ABC):
                 update_data[key] = value
                 continue
             source_keys = self.SOURCE_KEY_MAP.get(key, (key,))
+            # For M2M owner, propagate even when blank so UPDATE mode clears stale owners.
+            if key == "owner" and any(sk in record for sk in source_keys):
+                update_data[key] = value
+                continue
             if any(record.get(sk) not in (None, "") for sk in source_keys):
                 update_data[key] = value
 
@@ -370,10 +495,14 @@ class RecordConsumer[Context](ABC):
         for record in records:
             record_data, error = self.prepare_create(record, context)
             if error is not None:
-                results.add_error(error)
-                if self.on_conflict == ConflictMode.STOP:
-                    break
-                continue
+                if error.is_warning:
+                    results.warnings.append(error)
+                else:
+                    results.add_error(error)
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
 
             existing = None
             internal_id = record.get("internal_id")
@@ -393,6 +522,7 @@ class RecordConsumer[Context](ABC):
                         results.add_error(
                             Error(record=record, error="Record already exists")
                         )
+                        results.stopped = True
                         break
                     case ConflictMode.UPDATE:
                         update_data = self._build_update_data(record, record_data)
@@ -427,10 +557,12 @@ class RecordConsumer[Context](ABC):
                 except Exception as e:
                     results.add_error(Error(record=record, error=str(e)))
                     if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
                         break
             else:
                 results.add_error(Error(record=record, error=str(serializer.errors)))
                 if self.on_conflict == ConflictMode.STOP:
+                    results.stopped = True
                     break
 
         logger.info(
@@ -441,7 +573,7 @@ class RecordConsumer[Context](ABC):
         return results
 
 
-class AssetRecordConsumer(RecordConsumer[None]):
+class AssetRecordConsumer(RecordConsumer[list]):
     """
     Consumer for importing Asset records.
     Supports parent_assets linking via ref_id in a second pass.
@@ -450,6 +582,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = AssetWriteSerializer
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
         "reference_link": ("reference_link", "link"),
+        "filtering_labels": ("filtering_labels", "labels", "étiquette", "label"),
     }
     TYPE_MAP: Final[dict[str, str]] = {
         "primary": "PR",
@@ -459,10 +592,10 @@ class AssetRecordConsumer(RecordConsumer[None]):
     }
 
     def create_context(self):
-        return None, None
+        return _get_security_objective_scale(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: list
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -492,10 +625,54 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "observation": record.get("observation", ""),
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        raw_labels = (
+            record.get("filtering_labels")
+            or record.get("labels")
+            or record.get("étiquette")
+            or record.get("label")
+        )
+        filtering_labels = _resolve_filtering_labels(raw_labels)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
+        # Accept both export column names and native field names for support assets
+        raw_sec = record.get("security_objectives") or record.get(
+            "security_capabilities", ""
+        )
+        raw_rec = record.get("disaster_recovery_objectives") or record.get(
+            "recovery_capabilities", ""
+        )
+
+        sec_objectives = _parse_security_objectives(raw_sec, scale=context)
+        rec_objectives = _parse_recovery_objectives(raw_rec)
+
+        parse_warning_msgs = []
+        if raw_sec and not sec_objectives:
+            parse_warning_msgs.append(
+                f"Could not parse security_objectives: '{raw_sec}'"
+            )
+        if raw_rec and not rec_objectives:
+            parse_warning_msgs.append(
+                f"Could not parse disaster_recovery_objectives: '{raw_rec}'"
+            )
+
+        if asset_type == "PR":
+            if sec_objectives:
+                data["security_objectives"] = {"objectives": sec_objectives}
+            if rec_objectives:
+                data["disaster_recovery_objectives"] = {"objectives": rec_objectives}
+        else:  # SP (support)
+            if sec_objectives:
+                data["security_capabilities"] = {"objectives": sec_objectives}
+            if rec_objectives:
+                data["recovery_capabilities"] = {"objectives": rec_objectives}
+
+        if parse_warning_msgs:
+            return data, Error(
+                record=record,
+                error="; ".join(parse_warning_msgs),
+                is_warning=True,
+            )
         return data, None
 
     def process_records(self, records: list[dict]) -> Result:
@@ -541,16 +718,23 @@ class AssetRecordConsumer(RecordConsumer[None]):
         return results
 
 
-class AppliedControlRecordConsumer(RecordConsumer[None]):
+@dataclass(frozen=True)
+class AppliedControlContext:
+    currency: str = field(default_factory=get_global_currency)
+
+
+class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
     """
     Consumer for importing AppliedControl records.
-    Supports reference_control linking via ref_id.
+    Supports reference_control linking via ref_id and owner resolution
+    by user email or team name.
     """
 
     SERIALIZER_CLASS = AppliedControlWriteSerializer
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
         "control_impact": ("control_impact", "impact"),
         "reference_control": ("reference_control", "reference_control_ref_id"),
+        "owner": ("owner",),
     }
     IMPACT_MAP: Final[dict[str, int]] = {
         "very low": 1,
@@ -573,12 +757,21 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "extralarge": "XL",
         "xl": "XL",
     }
+    COST_KEYS: Final[frozenset[str]] = frozenset(
+        {
+            "amortization_period",
+            "build_fixed_cost",
+            "build_people_days",
+            "run_fixed_cost",
+            "run_people_days",
+        }
+    )
 
-    def create_context(self):
-        return None, None
+    def create_context(self) -> tuple[AppliedControlContext, Optional[Error]]:
+        return AppliedControlContext(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: AppliedControlContext
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -631,15 +824,23 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             if ref_control:
                 reference_control_id = ref_control.id
 
+        csf_function = record.get("csf_function", "govern")
+        if isinstance(csf_function, str):
+            csf_function = csf_function.lower()
+
+        category = record.get("category", "")
+        if isinstance(category, str):
+            category = category.lower()
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
-            "category": record.get("category", ""),
+            "category": category,
             "folder": domain,
             "status": record.get("status", "to_do"),
             "priority": priority,
-            "csf_function": record.get("csf_function", "govern"),
+            "csf_function": csf_function,
             "effort": effort,
             "control_impact": control_impact,
             "link": record.get("link", ""),
@@ -652,11 +853,64 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         if reference_control_id:
             data["reference_control"] = reference_control_id
 
+        has_cost_related_key = any(
+            key in self.COST_KEYS and record.get(key) not in (None, "")
+            for key in record.keys()
+        )
+        if has_cost_related_key:
+            cost = {
+                "currency": context.currency,
+                "amortization_period": int(record.get("amortization_period") or 1),
+                "build": {
+                    "fixed_cost": int(record.get("build_fixed_cost") or 0),
+                    "people_days": int(record.get("build_people_days") or 0),
+                },
+                "run": {
+                    "fixed_cost": int(record.get("run_fixed_cost") or 0),
+                    "people_days": int(record.get("run_people_days") or 0),
+                },
+            }
+            data["cost"] = cost
+
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
+        # Resolve owner field (semicolon-separated user emails or team names).
+        # Always set data["owner"] when the column is present, even if blank,
+        # so that UPDATE mode can clear the M2M instead of silently preserving it.
+        if "owner" in record:
+            data["owner"] = self._resolve_owners(record.get("owner"))
+
         return data, None
+
+    @staticmethod
+    def _resolve_owners(value) -> list:
+        """Resolve semicolon-separated user emails or team names to Actor IDs.
+
+        Each entry is matched first as a user email, then as a team name.
+        Unresolvable entries are silently skipped.
+        """
+        if not value or not isinstance(value, str):
+            return []
+
+        entries = [entry.strip() for entry in value.split(";") if entry.strip()]
+        actor_ids = []
+
+        for entry in entries:
+            # Try matching as user email first
+            actor = Actor.objects.filter(user__email__iexact=entry).first()
+            if actor is None:
+                # Try matching as team name
+                actor = Actor.objects.filter(team__name__iexact=entry).first()
+            if actor is not None:
+                actor_ids.append(actor.id)
+            else:
+                logger.warning(
+                    "Could not resolve an owner reference to a user email or team name during Applied Control import; skipping."
+                )
+
+        return actor_ids
 
 
 class EvidenceRecordConsumer(RecordConsumer[None]):
@@ -1138,6 +1392,671 @@ class IncidentRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
+class VulnerabilityRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Vulnerability records.
+    """
+
+    SERIALIZER_CLASS = VulnerabilityWriteSerializer
+    SEVERITY_MAP: Final[dict[str, int]] = {
+        "undefined": -1,
+        "info": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "critical": 4,
+    }
+    STATUS_MAP: Final[dict[str, str]] = {
+        "undefined": "--",
+        "potential": "potential",
+        "exploitable": "exploitable",
+        "mitigated": "mitigated",
+        "fixed": "fixed",
+        "not exploitable": "not_exploitable",
+        "unaffected": "unaffected",
+    }
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        folder_id = self.folder_id
+
+        raw_severity = record.get("severity")
+        if isinstance(raw_severity, str):
+            severity = self.SEVERITY_MAP.get(raw_severity.lower().strip(), -1)
+        elif isinstance(raw_severity, int) and -1 <= raw_severity <= 4:
+            severity = raw_severity
+        else:
+            severity = -1
+
+        raw_status = record.get("status")
+        if isinstance(raw_status, str):
+            status = self.STATUS_MAP.get(raw_status.lower().strip(), "--")
+        else:
+            status = "--"
+
+        applied_controls = []
+        for ap_name in (record.get("applied_controls") or "").splitlines():
+            ap_name = ap_name.strip()
+            if not ap_name:
+                continue
+            obj = AppliedControl.objects.filter(
+                name=ap_name, folder_id=folder_id
+            ).first()
+            if obj:
+                applied_controls.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No applied control named '{ap_name}' found in folder",
+                )
+
+        assets = []
+        for asset_name in (record.get("assets") or "").splitlines():
+            asset_name = asset_name.strip()
+            if not asset_name:
+                continue
+            obj = Asset.objects.filter(name=asset_name, folder_id=folder_id).first()
+            if obj:
+                assets.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No asset named '{asset_name}' found in folder",
+                )
+
+        security_exceptions = []
+        for se_name in (record.get("security_exceptions") or "").splitlines():
+            se_name = se_name.strip()
+            if not se_name:
+                continue
+            obj = SecurityException.objects.filter(
+                name=se_name, folder_id=folder_id
+            ).first()
+            if obj:
+                security_exceptions.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No security exception named '{se_name}' found in folder",
+                )
+
+        data = {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "status": status,
+            "severity": severity,
+            "folder": folder_id,
+            "applied_controls": applied_controls,
+            "assets": assets,
+            "security_exceptions": security_exceptions,
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
+
+    def find_existing(self, record_data: dict):
+        folder_id = record_data.get("folder")
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = Vulnerability.objects.filter(
+                ref_id=ref_id, folder_id=folder_id
+            ).first()
+            if existing:
+                return existing
+        return Vulnerability.objects.filter(
+            name=record_data.get("name"), folder_id=folder_id
+        ).first()
+
+
+class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = BusinessImpactAnalysisWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "perimeter": ("perimeter", "perimeter_ref_id", "perimeter_name"),
+        "risk_matrix": (
+            "risk_matrix",
+            "risk_matrix_ref_id",
+            "risk_matrix_name",
+            "matrix",
+        ),
+        "bia": ("bia", "bia_name"),
+    }
+
+    def create_context(self):
+        return None, None
+
+    def _resolve_perimeter(
+        self, record: dict
+    ) -> tuple[Optional[Perimeter], Optional[Error]]:
+        perimeter_value = (
+            record.get("perimeter")
+            or record.get("perimeter_ref_id")
+            or record.get("perimeter_name")
+        )
+
+        if perimeter_value:
+            try:
+                perimeter_uuid = UUID(str(perimeter_value))
+                perimeter = Perimeter.objects.filter(id=perimeter_uuid).first()
+                if perimeter:
+                    return perimeter, None
+            except (ValueError, TypeError):
+                pass
+
+            perimeter = Perimeter.objects.filter(ref_id=perimeter_value).first()
+            if perimeter is None:
+                perimeter = Perimeter.objects.filter(
+                    name__iexact=perimeter_value
+                ).first()
+
+            if perimeter is None:
+                return None, Error(
+                    record=record,
+                    error=f"Unknown perimeter '{perimeter_value}'",
+                )
+
+            return perimeter, None
+
+        if self.perimeter_id:
+            perimeter = Perimeter.objects.filter(id=self.perimeter_id).first()
+            if perimeter is None:
+                return None, Error(
+                    record=record,
+                    error=f"Perimeter with ID '{self.perimeter_id}' does not exist",
+                )
+            return perimeter, None
+
+        return None, None
+
+    def _resolve_risk_matrix(
+        self, record: dict
+    ) -> tuple[Optional[RiskMatrix], Optional[Error]]:
+        # Form-selected matrix takes priority over whatever is in the file.
+        if self.matrix_id:
+            risk_matrix = RiskMatrix.objects.filter(id=self.matrix_id).first()
+            if risk_matrix is None:
+                return None, Error(
+                    record=record,
+                    error=f"Risk matrix with ID '{self.matrix_id}' does not exist",
+                )
+            return risk_matrix, None
+
+        matrix_value = (
+            record.get("risk_matrix")
+            or record.get("risk_matrix_ref_id")
+            or record.get("risk_matrix_name")
+            or record.get("matrix")
+        )
+
+        if matrix_value:
+            try:
+                matrix_uuid = UUID(str(matrix_value))
+                risk_matrix = RiskMatrix.objects.filter(id=matrix_uuid).first()
+                if risk_matrix:
+                    return risk_matrix, None
+            except (ValueError, TypeError):
+                pass
+
+            risk_matrix = RiskMatrix.objects.filter(ref_id=matrix_value).first()
+            if risk_matrix is None:
+                risk_matrix = RiskMatrix.objects.filter(
+                    name__iexact=matrix_value
+                ).first()
+
+            if risk_matrix is None:
+                return None, Error(
+                    record=record,
+                    error=f"Unknown risk matrix '{matrix_value}'",
+                )
+
+            return risk_matrix, None
+
+        return None, Error(record=record, error="Risk matrix is mandatory")
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        perimeter, error = self._resolve_perimeter(record)
+        if error is not None:
+            return {}, error
+
+        risk_matrix, error = self._resolve_risk_matrix(record)
+        if error is not None:
+            return {}, error
+
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        if perimeter is not None:
+            domain = perimeter.folder.id
+
+        if not domain:
+            return {}, Error(record=record, error="Folder is mandatory")
+
+        return {
+            "name": name,
+            "description": record.get("description", ""),
+            "perimeter": perimeter.id if perimeter else None,
+            "risk_matrix": risk_matrix.id,
+            "folder": domain,
+            "version": record.get("version", "1.0"),
+            "status": record.get("status", "planned"),
+            "observation": record.get("observation", ""),
+            "eta": _parse_date(record.get("eta")),
+            "due_date": _parse_date(record.get("due_date")),
+        }, None
+
+
+class AssetAssessmentRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = AssetAssessmentWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "bia": ("bia", "bia_name"),
+        "asset": ("asset", "asset_ref_id", "asset_name"),
+    }
+
+    def create_context(self):
+        return None, None
+
+    @staticmethod
+    def _split_values(value: object) -> list[str]:
+        if isinstance(value, list):
+            return [str(v).strip() for v in value if str(v).strip()]
+        if isinstance(value, str):
+            return [v.strip() for v in value.split(",") if v.strip()]
+        return []
+
+    @staticmethod
+    def _parse_bool(value: object) -> bool:
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return False
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            return value.strip().lower() in {"true", "yes", "y", "1"}
+        return False
+
+    def _resolve_bia(
+        self, record: dict
+    ) -> tuple[Optional[BusinessImpactAnalysis], Optional[Error]]:
+        bia_value = record.get("bia") or record.get("bia_name")
+
+        if not bia_value:
+            return None, Error(record=record, error="BIA is mandatory")
+
+        try:
+            bia_uuid = UUID(str(bia_value))
+            bia = BusinessImpactAnalysis.objects.filter(id=bia_uuid).first()
+            if bia:
+                return bia, None
+        except (ValueError, TypeError):
+            pass
+
+        bia = BusinessImpactAnalysis.objects.filter(name__iexact=bia_value).first()
+
+        if bia is None:
+            return None, Error(record=record, error=f"Unknown BIA '{bia_value}'")
+
+        return bia, None
+
+    def _resolve_asset(self, record: dict) -> tuple[Optional[Asset], Optional[Error]]:
+        asset_value = (
+            record.get("asset")
+            or record.get("asset_ref_id")
+            or record.get("asset_name")
+        )
+
+        if not asset_value:
+            return None, Error(record=record, error="Asset is mandatory")
+
+        try:
+            asset_uuid = UUID(str(asset_value))
+            asset = Asset.objects.filter(id=asset_uuid).first()
+            if asset:
+                return asset, None
+        except (ValueError, TypeError):
+            pass
+
+        asset = Asset.objects.filter(ref_id=asset_value).first()
+        if asset is None:
+            asset = Asset.objects.filter(name__iexact=asset_value).first()
+
+        if asset is None:
+            return None, Error(record=record, error=f"Unknown asset '{asset_value}'")
+
+        return asset, None
+
+    def _resolve_assets_list(
+        self, values: object, record: dict
+    ) -> tuple[list[UUID], Optional[Error]]:
+        items = self._split_values(values)
+        if not items:
+            return [], None
+        resolved = []
+        for item in items:
+            asset, error = self._resolve_asset({**record, "asset": item})
+            if error:
+                return [], error
+            resolved.append(asset.id)
+        return resolved, None
+
+    def _resolve_applied_controls_list(
+        self, values: object, record: dict
+    ) -> tuple[list[UUID], Optional[Error]]:
+        items = self._split_values(values)
+        if not items:
+            return [], None
+        resolved = []
+        for item in items:
+            try:
+                control_uuid = UUID(str(item))
+                control = AppliedControl.objects.filter(id=control_uuid).first()
+            except (ValueError, TypeError):
+                control = None
+
+            if control is None:
+                control = AppliedControl.objects.filter(ref_id=item).first()
+            if control is None:
+                control = AppliedControl.objects.filter(name__iexact=item).first()
+            if control is None:
+                return [], Error(
+                    record=record,
+                    error=f"Unknown applied control '{item}'",
+                )
+            resolved.append(control.id)
+        return resolved, None
+
+    def _resolve_evidences_list(
+        self, values: object, record: dict
+    ) -> tuple[list[UUID], Optional[Error]]:
+        items = self._split_values(values)
+        if not items:
+            return [], None
+        resolved = []
+        for item in items:
+            try:
+                evidence_uuid = UUID(str(item))
+                evidence = Evidence.objects.filter(id=evidence_uuid).first()
+            except (ValueError, TypeError):
+                evidence = None
+
+            if evidence is None:
+                evidence = Evidence.objects.filter(name__iexact=item).first()
+            if evidence is None:
+                return [], Error(
+                    record=record,
+                    error=f"Unknown evidence '{item}'",
+                )
+            resolved.append(evidence.id)
+        return resolved, None
+
+    def find_existing(self, record_data: dict):
+        bia_id = record_data.get("bia")
+        asset_id = record_data.get("asset")
+        if not bia_id or not asset_id:
+            return None
+        return AssetAssessment.objects.filter(bia_id=bia_id, asset_id=asset_id).first()
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        bia, error = self._resolve_bia(record)
+        if error:
+            return {}, error
+
+        asset, error = self._resolve_asset(record)
+        if error:
+            return {}, error
+
+        dependencies, error = self._resolve_assets_list(
+            record.get("dependencies"), record
+        )
+        if error:
+            return {}, error
+
+        associated_controls, error = self._resolve_applied_controls_list(
+            record.get("associated_controls"), record
+        )
+        if error:
+            return {}, error
+
+        evidences, error = self._resolve_evidences_list(record.get("evidences"), record)
+        if error:
+            return {}, error
+
+        return {
+            "bia": bia.id,
+            "asset": asset.id,
+            "folder": bia.folder_id,
+            "recovery_documented": self._parse_bool(record.get("recovery_documented")),
+            "recovery_tested": self._parse_bool(record.get("recovery_tested")),
+            "recovery_targets_met": self._parse_bool(
+                record.get("recovery_targets_met")
+            ),
+            "dependencies": dependencies,
+            "associated_controls": associated_controls,
+            "evidences": evidences,
+            "observation": record.get("observation", ""),
+        }, None
+
+
+class EscalationThresholdRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = EscalationThresholdWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "bia": ("bia", "bia_name"),
+        "asset": ("asset", "asset_ref_id", "asset_name"),
+        "asset_assessment": ("asset_assessment",),
+    }
+
+    def create_context(self):
+        return None, None
+
+    def _resolve_bia(
+        self, record: dict
+    ) -> tuple[Optional[BusinessImpactAnalysis], Optional[Error]]:
+        bia_value = record.get("bia") or record.get("bia_name")
+
+        if not bia_value:
+            return None, Error(record=record, error="BIA is mandatory")
+
+        try:
+            bia_uuid = UUID(str(bia_value))
+            bia = BusinessImpactAnalysis.objects.filter(id=bia_uuid).first()
+            if bia:
+                return bia, None
+        except (ValueError, TypeError):
+            pass
+
+        bia = BusinessImpactAnalysis.objects.filter(name__iexact=bia_value).first()
+
+        if bia is None:
+            return None, Error(record=record, error=f"Unknown BIA '{bia_value}'")
+
+        return bia, None
+
+    def _resolve_asset(self, record: dict) -> tuple[Optional[Asset], Optional[Error]]:
+        asset_value = (
+            record.get("asset")
+            or record.get("asset_ref_id")
+            or record.get("asset_name")
+        )
+
+        if not asset_value:
+            return None, Error(record=record, error="Asset is mandatory")
+
+        try:
+            asset_uuid = UUID(str(asset_value))
+            asset = Asset.objects.filter(id=asset_uuid).first()
+            if asset:
+                return asset, None
+        except (ValueError, TypeError):
+            pass
+
+        asset = Asset.objects.filter(ref_id=asset_value).first()
+        if asset is None:
+            asset = Asset.objects.filter(name__iexact=asset_value).first()
+
+        if asset is None:
+            return None, Error(record=record, error=f"Unknown asset '{asset_value}'")
+
+        return asset, None
+
+    def _resolve_asset_assessment(
+        self, record: dict
+    ) -> tuple[Optional[AssetAssessment], Optional[Error]]:
+        asset_assessment_value = record.get("asset_assessment")
+
+        if asset_assessment_value:
+            try:
+                assessment_uuid = UUID(str(asset_assessment_value))
+                assessment = AssetAssessment.objects.filter(id=assessment_uuid).first()
+                if assessment:
+                    return assessment, None
+            except (ValueError, TypeError):
+                pass
+
+        bia, error = self._resolve_bia(record)
+        if error:
+            return None, error
+
+        asset, error = self._resolve_asset(record)
+        if error:
+            return None, error
+
+        assessment, _ = AssetAssessment.objects.get_or_create(
+            bia=bia,
+            asset=asset,
+            defaults={"folder": bia.folder},
+        )
+        return assessment, None
+
+    def _resolve_qualifications(
+        self, value: object, record: dict
+    ) -> tuple[list[UUID], Optional[Error]]:
+        items = AssetAssessmentRecordConsumer._split_values(value)
+        if not items:
+            return [], None
+
+        resolved = []
+        for item in items:
+            qualification = Terminology.objects.filter(
+                field_path=Terminology.FieldPath.QUALIFICATIONS,
+                name__iexact=item,
+                is_visible=True,
+            ).first()
+            if qualification is None:
+                qualification = Terminology.objects.filter(
+                    field_path=Terminology.FieldPath.QUALIFICATIONS,
+                    ref_id=item,
+                ).first()
+            if qualification is None:
+                return [], Error(
+                    record=record,
+                    error=f"Unknown qualification '{item}'",
+                )
+            resolved.append(qualification.id)
+        return resolved, None
+
+    def find_existing(self, record_data: dict):
+        asset_assessment_id = record_data.get("asset_assessment")
+        point_in_time = record_data.get("point_in_time")
+        if not asset_assessment_id or point_in_time is None:
+            return None
+        return EscalationThreshold.objects.filter(
+            asset_assessment_id=asset_assessment_id, point_in_time=point_in_time
+        ).first()
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        asset_assessment, error = self._resolve_asset_assessment(record)
+        if error:
+            return {}, error
+
+        point_in_time = record.get("point_in_time")
+        if point_in_time in (None, ""):
+            return {}, Error(record=record, error="point_in_time is mandatory")
+        try:
+            point_in_time = int(float(point_in_time))
+        except (ValueError, TypeError):
+            return {}, Error(
+                record=record,
+                error=f"Invalid point_in_time '{point_in_time}'",
+            )
+
+        quali_impact = record.get("quali_impact")
+        if quali_impact in (None, ""):
+            quali_impact_value = -1
+        else:
+            try:
+                quali_impact_value = int(float(quali_impact))
+            except (ValueError, TypeError):
+                return {}, Error(
+                    record=record,
+                    error=f"Invalid quali_impact '{quali_impact}'",
+                )
+
+        if quali_impact_value != -1:
+            risk_matrix = asset_assessment.bia.risk_matrix
+            impacts = risk_matrix.impact if risk_matrix else []
+            n_impacts = len(impacts)
+            if n_impacts > 0 and not (0 <= quali_impact_value < n_impacts):
+                return {}, Error(
+                    record=record,
+                    error=(
+                        f"quali_impact {quali_impact_value} is out of range "
+                        f"[0, {n_impacts - 1}] for matrix '{risk_matrix.name}'"
+                    ),
+                )
+
+        quanti_impact = record.get("quanti_impact")
+        if quanti_impact in (None, ""):
+            quanti_impact_value = 0
+        else:
+            try:
+                quanti_impact_value = float(quanti_impact)
+            except (ValueError, TypeError):
+                return {}, Error(
+                    record=record,
+                    error=f"Invalid quanti_impact '{quanti_impact}'",
+                )
+
+        qualifications, error = self._resolve_qualifications(
+            record.get("qualifications"), record
+        )
+        if error:
+            return {}, error
+
+        return {
+            "asset_assessment": asset_assessment.id,
+            "folder": asset_assessment.bia.folder_id,
+            "point_in_time": point_in_time,
+            "quali_impact": quali_impact_value,
+            "quanti_impact": quanti_impact_value,
+            "quanti_impact_unit": record.get("quanti_impact_unit") or "currency",
+            "qualifications": qualifications,
+            "justification": record.get("justification", ""),
+        }, None
+
+
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
@@ -1190,6 +2109,17 @@ class LoadFileView(APIView):
                 case ModelType.EBIOS_RM_STUDY_EXCEL:
                     res = self._process_ebios_rm_study_excel(
                         request, record_file, folder_id, matrix_id, on_conflict
+                    )
+                # Special handling for BIA multi-sheet import (assessments + thresholds)
+                case ModelType.BUSINESS_IMPACT_ANALYSIS:
+                    res = self._process_bia_excel(
+                        request,
+                        record_file,
+                        folders_map,
+                        folder_id,
+                        perimeter_id,
+                        matrix_id,
+                        on_conflict,
                     )
                 case _:
                     is_excel = is_excel_file(record_file)
@@ -1279,6 +2209,18 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.VULNERABILITY:
+                            res = (
+                                VulnerabilityRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.BUSINESS_IMPACT_ANALYSIS:
+                            res = (
+                                BusinessImpactAnalysisRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case _:
                             res = self.process_data(
                                 request,
@@ -1313,7 +2255,6 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         folders_map = get_accessible_folders_map(request.user)
-
         # Dispatch to appropriate handler
         match model_type:
             case ModelType.COMPLIANCE_ASSESSMENT:
@@ -1747,13 +2688,12 @@ class LoadFileView(APIView):
 
                             # Build answers from the "answers" cell
                             answers_cell = record.get("answers")
-                            if (
-                                answers_cell not in (None, "")
-                                and ReqNode
-                                and ReqNode.questions
-                            ):
+                            questions_dict = (
+                                build_questions_dict(ReqNode) if ReqNode else None
+                            )
+                            if answers_cell not in (None, "") and questions_dict:
                                 text_to_question = {}
-                                for q_urn, qdef in ReqNode.questions.items():
+                                for q_urn, qdef in questions_dict.items():
                                     q_text = qdef.get("text", "")
                                     if q_text:
                                         text_to_question[q_text] = (
@@ -1761,7 +2701,7 @@ class LoadFileView(APIView):
                                             qdef,
                                         )
 
-                                answers = requirement_assessment.answers or {}
+                                answers = {}
                                 has_any_answer = False
 
                                 for line in str(answers_cell).split("\n"):
@@ -1880,6 +2820,155 @@ class LoadFileView(APIView):
             )
 
         return results
+
+    def _process_bia_excel(
+        self,
+        request,
+        excel_file: io.BytesIO,
+        folders_map,
+        folder_id,
+        perimeter_id,
+        matrix_id,
+        on_conflict=ConflictMode.STOP,
+    ):
+        try:
+            excel_data = pd.ExcelFile(excel_file)
+            sheet_names = excel_data.sheet_names
+
+            if len(sheet_names) == 1:
+                # Single-sheet file: treat it as a Summary-only import.
+                df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name=sheet_names[0])
+                ).fillna("")
+                records = df.to_dict(orient="records")
+                base_context = BaseContext(
+                    request,
+                    folders_map=folders_map,
+                    folder_id=folder_id,
+                    perimeter_id=perimeter_id,
+                    matrix_id=matrix_id,
+                    framework_id=None,
+                    on_conflict=on_conflict,
+                )
+                return (
+                    BusinessImpactAnalysisRecordConsumer(base_context)
+                    .process_records(records)
+                    .to_dict()
+                )
+
+            if "Summary" not in sheet_names:
+                return {
+                    "error": (
+                        "Invalid BIA workbook: expected a 'Summary' sheet but only found: "
+                        + ", ".join(sheet_names)
+                    )
+                }
+
+            overall_results = {
+                "bia": {"successful": 0, "failed": 0, "errors": []},
+                "asset_assessments": {"successful": 0, "failed": 0, "errors": []},
+                "escalation_thresholds": {"successful": 0, "failed": 0, "errors": []},
+            }
+
+            summary_df = normalize_datetime_columns(
+                pd.read_excel(excel_file, sheet_name="Summary")
+            ).fillna("")
+            summary_records = summary_df.to_dict(orient="records")
+
+            base_context = BaseContext(
+                request,
+                folders_map=folders_map,
+                folder_id=folder_id,
+                perimeter_id=perimeter_id,
+                matrix_id=matrix_id,
+                framework_id=None,
+                on_conflict=on_conflict,
+            )
+
+            bia_results = (
+                BusinessImpactAnalysisRecordConsumer(base_context)
+                .process_records(summary_records)
+                .to_dict()
+            )
+            overall_results["bia"] = bia_results
+            if bia_results.get("stopped"):
+                return overall_results
+
+            def _inject_bia_hint(records: list[dict], bia_value: str) -> list[dict]:
+                for record in records:
+                    if not record.get("bia") and not record.get("bia_name"):
+                        record["bia_name"] = bia_value
+                return records
+
+            for sheet_name in sheet_names:
+                if sheet_name == "Summary":
+                    continue
+
+                is_threshold_sheet = sheet_name.lower().endswith(" - thresholds")
+                base_name = (
+                    sheet_name[: -len(" - thresholds")]
+                    if is_threshold_sheet
+                    else sheet_name
+                )
+
+                sheet_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name=sheet_name)
+                ).fillna("")
+                sheet_records = sheet_df.to_dict(orient="records")
+
+                sheet_records = _inject_bia_hint(sheet_records, base_name)
+
+                if is_threshold_sheet:
+                    thresholds_result = (
+                        EscalationThresholdRecordConsumer(base_context)
+                        .process_records(sheet_records)
+                        .to_dict()
+                    )
+                    overall_results["escalation_thresholds"]["successful"] += (
+                        thresholds_result.get("successful", 0)
+                    )
+                    overall_results["escalation_thresholds"]["failed"] += (
+                        thresholds_result.get("failed", 0)
+                    )
+                    overall_results["escalation_thresholds"]["errors"].extend(
+                        thresholds_result.get("errors", [])
+                    )
+                    if thresholds_result.get("stopped"):
+                        overall_results["escalation_thresholds"]["stopped"] = True
+                        return overall_results
+                else:
+                    assessments_result = (
+                        AssetAssessmentRecordConsumer(base_context)
+                        .process_records(sheet_records)
+                        .to_dict()
+                    )
+                    overall_results["asset_assessments"]["successful"] += (
+                        assessments_result.get("successful", 0)
+                    )
+                    overall_results["asset_assessments"]["failed"] += (
+                        assessments_result.get("failed", 0)
+                    )
+                    overall_results["asset_assessments"]["errors"].extend(
+                        assessments_result.get("errors", [])
+                    )
+                    if assessments_result.get("stopped"):
+                        overall_results["asset_assessments"]["stopped"] = True
+                        return overall_results
+
+            return overall_results
+        except Exception as e:
+            logger.error(f"Error processing BIA Excel file: {str(e)}")
+            return {
+                "bia": {
+                    "successful": 0,
+                    "failed": 1,
+                    "errors": [
+                        {"error": f"Failed to process BIA Excel file: {str(e)}"}
+                    ],
+                },
+                "asset_assessments": {"successful": 0, "failed": 0, "errors": []},
+                "escalation_thresholds": {"successful": 0, "failed": 0, "errors": []},
+            }
 
     def _process_tprm_file(
         self,

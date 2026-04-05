@@ -39,6 +39,11 @@
 		{ id: 'Perimeter', label: m.perimeters(), description: '' },
 		{ id: 'ComplianceAssessment', label: m.complianceAssessment(), description: '' },
 		{
+			id: 'BusinessImpactAnalysis',
+			label: m.businessImpactAnalysis(),
+			description: m.businessImpactAnalysisDescription()
+		},
+		{
 			id: 'FindingsAssessment',
 			label: m.findingsAssessment(),
 			description: m.dataWizardFindingsAssessmentDescription()
@@ -53,6 +58,7 @@
 			label: m.elementaryActions(),
 			description: m.dataWizardElementaryActionDescription()
 		},
+		{ id: 'Vulnerability', label: m.vulnerabilities(), description: '' },
 		{ id: 'ReferenceControl', label: m.referenceControls(), description: '' },
 		{ id: 'Threat', label: m.threats(), description: '' },
 		{ id: 'Processing', label: m.processings(), description: '' },
@@ -99,6 +105,7 @@
 	// Determine if domain selection should be disabled
 	let isDomainDisabled = $derived(
 		selectedModel === 'ComplianceAssessment' ||
+			selectedModel === 'BusinessImpactAnalysis' ||
 			selectedModel === 'FindingsAssessment' ||
 			selectedModel === 'RiskAssessment' ||
 			selectedModel === 'User' ||
@@ -109,6 +116,7 @@
 
 	let isMatrixDisabled = $derived(
 		selectedModel !== 'RiskAssessment' &&
+			selectedModel !== 'BusinessImpactAnalysis' &&
 			selectedModel !== 'EbiosRMStudyARM' &&
 			selectedModel !== 'EbiosRMStudyExcel'
 	);
@@ -129,7 +137,8 @@
 		'Incident',
 		'TPRM',
 		'EbiosRMStudyARM',
-		'EbiosRMStudyExcel'
+		'EbiosRMStudyExcel',
+		'Vulnerability'
 	];
 
 	// Determine if perimeter selection should be disabled

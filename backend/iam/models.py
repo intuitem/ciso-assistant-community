@@ -14,7 +14,7 @@ from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, Prefetch, QuerySet
 from knox.models import AuthToken
@@ -36,20 +36,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import send_mail, get_connection, EmailMessage
+from django.core.mail import get_connection, EmailMessage
 from django.core.validators import validate_email
-from ciso_assistant.settings import (
-    CISO_ASSISTANT_URL,
-    EMAIL_HOST,
-    EMAIL_HOST_USER,
-    EMAIL_HOST_USER_RESCUE,
-    EMAIL_HOST_PASSWORD_RESCUE,
-    EMAIL_HOST_RESCUE,
-    EMAIL_PORT,
-    EMAIL_PORT_RESCUE,
-    EMAIL_USE_TLS,
-    EMAIL_USE_TLS_RESCUE,
-)
 from django.conf import settings
 
 import structlog
@@ -87,6 +75,7 @@ ALLOWED_PERMISSION_APPS = (
     "crq",
     "pmbok",
     "iam",
+    "global_settings",
 )
 
 IGNORED_PERMISSION_MODELS = (
@@ -263,6 +252,7 @@ class Folder(NameDescriptionMixin):
             ["provider_entity", "folder"],
             ["solution", "provider_entity", "folder"],
             ["processing", "folder"],
+            ["journey", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -507,6 +497,21 @@ class UserManager(BaseUserManager):
             user.password = make_password(password)
         else:
             user.set_unusable_password()
+        # Set default language from general settings
+        try:
+            from global_settings.models import GlobalSettings
+
+            general = GlobalSettings.objects.filter(name="general").first()
+            if general and isinstance(general.value, dict):
+                default_lang = general.value.get("default_language", "en")
+            else:
+                default_lang = "en"
+        except Exception:
+            default_lang = "en"
+        if not isinstance(user.preferences, dict):
+            user.preferences = {}
+        user.preferences["lang"] = default_lang
+
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
         if initial_group:
@@ -546,7 +551,7 @@ class UserManager(BaseUserManager):
         return self._create_user(
             email=email,
             password=password,
-            mailing=bool(EMAIL_HOST or EMAIL_HOST_RESCUE),
+            mailing=bool(settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE),
             initial_group=None,
             **extra_fields,
         )
@@ -560,7 +565,9 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool((not password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)),
+            mailing=bool(
+                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
+            ),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -676,31 +683,114 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_emails(self) -> list[str]:
         return [self.email]
 
+    def get_preferences(self) -> dict:
+        """
+        Return normalized user preferences, backfilling defaults in memory.
+        Ensures the returned dict always has a 'lang' key.
+        Does not persist changes — callers that need to save must do so explicitly.
+        """
+        prefs = self.preferences
+        if not isinstance(prefs, dict):
+            prefs = {}
+            self.preferences = prefs
+        valid_langs = {code for code, _ in settings.LANGUAGES}
+        if not isinstance(prefs.get("lang"), str) or prefs["lang"] not in valid_langs:
+            try:
+                from global_settings.models import GlobalSettings
+
+                general = GlobalSettings.objects.filter(name="general").first()
+                default_lang = (
+                    general.value.get("default_language", "en")
+                    if general and isinstance(general.value, dict)
+                    else "en"
+                )
+            except Exception:
+                default_lang = "en"
+            prefs["lang"] = default_lang
+        return prefs
+
+    # Maps Django HTML template names to YAML template keys
+    _TEMPLATE_KEY_MAP = {
+        "registration/first_connexion_email.html": "welcome",
+        "registration/first_connexion_email_sso.html": "welcome_sso",
+        "registration/password_reset_email.html": "password_reset",
+        "tprm/third_party_email.html": "questionnaire_assignment",
+    }
+
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
-        Sending a mail to a user for password resetting or creation
+        Sending a mail to a user for password resetting or creation.
+        Tries the YAML-based template system first (supports custom overrides),
+        falls back to the legacy Django HTML templates.
         """
+        user_lang = self.get_preferences().get("lang", "en")
+        uid = urlsafe_base64_encode(force_bytes(self.pk))
+        token = default_token_generator.make_token(self)
+
+        # Build context for the YAML template system
+        context = {
+            "set_password_url": f"{settings.CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
+            "reset_password_url": f"{settings.CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
+            "questionnaire_url": f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}/table-mode"
+            if object
+            else settings.CISO_ASSISTANT_URL,
+        }
+
+        # Try YAML template system (supports custom overrides and Markdown)
+        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
+        if template_key:
+            try:
+                from core.email_utils import render_email_template
+
+                rendered = render_email_template(
+                    template_key, context, locale=user_lang
+                )
+                if rendered:
+                    subject = rendered["subject"]
+                    body = rendered["body"]
+                    html_body = rendered.get("html_body")
+                    return self._send_email(subject, body, html_body)
+            except Exception as e:
+                logger.warning(
+                    "YAML template rendering failed, falling back to Django template",
+                    template_key=template_key,
+                    exc_info=e,
+                )
+
+        # Fallback to legacy Django HTML templates
         header = {
             "email": self.email,
-            "root_url": CISO_ASSISTANT_URL,
-            "uid": urlsafe_base64_encode(force_bytes(self.pk)),
+            "root_url": settings.CISO_ASSISTANT_URL,
+            "uid": uid,
             "user": self,
-            "token": default_token_generator.make_token(self),
+            "token": token,
             "protocol": "https",
             "pk": str(pk) if pk else None,
             "object": object,
             "object_id": object_id,
         }
-        email = render_to_string(email_template_name, header)
+        with translation_override(user_lang):
+            email = render_to_string(email_template_name, header)
+            subject = str(subject)
+
+        self._send_email(subject, email, email)
+
+    def _send_email(self, subject, body, html_body=None):
+        """Send an email with primary/rescue server fallback."""
         try:
-            send_mail(
-                subject=subject,
-                message=email,
-                from_email=None,
-                recipient_list=[self.email],
-                fail_silently=False,
-                html_message=email,
-            )
+            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+            with get_connection(ssl_context=ssl_context) as connection:
+                msg = EmailMessage(
+                    subject=subject,
+                    body=body,
+                    from_email=None,
+                    to=[self.email],
+                    connection=connection,
+                )
+                if html_body:
+                    msg.content_subtype = "html"
+                    msg.body = html_body
+                msg.send()
             logger.info(
                 "Email sent successfully", recipient=self.email, subject=subject
             )
@@ -710,27 +800,33 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 recipient=self.email,
                 subject=subject,
                 error=str(primary_exception),
-                email_host=EMAIL_HOST,
-                email_port=EMAIL_PORT,
-                email_host_user=EMAIL_HOST_USER,
-                email_use_tls=EMAIL_USE_TLS,
+                email_host=settings.EMAIL_HOST,
+                email_port=settings.EMAIL_PORT,
+                email_host_user=settings.EMAIL_HOST_USER,
+                email_use_tls=settings.EMAIL_USE_TLS,
             )
-            if EMAIL_HOST_RESCUE:
+            if settings.EMAIL_HOST_RESCUE:
                 try:
                     with get_connection(
-                        host=EMAIL_HOST_RESCUE,
-                        port=EMAIL_PORT_RESCUE,
-                        username=EMAIL_HOST_USER_RESCUE,
-                        password=EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                        host=settings.EMAIL_HOST_RESCUE,
+                        port=settings.EMAIL_PORT_RESCUE,
+                        username=settings.EMAIL_HOST_USER_RESCUE,
+                        password=settings.EMAIL_HOST_PASSWORD_RESCUE,
+                        use_tls=settings.EMAIL_USE_TLS_RESCUE,
+                        use_ssl=settings.EMAIL_USE_SSL_RESCUE,
+                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
                     ) as new_connection:
-                        EmailMessage(
+                        msg = EmailMessage(
                             subject=subject,
-                            body=email,
+                            body=body,
                             from_email=None,
                             to=[self.email],
                             connection=new_connection,
-                        ).send()
+                        )
+                        if html_body:
+                            msg.content_subtype = "html"
+                            msg.body = html_body
+                        msg.send()
                     logger.info(
                         "Email sent via rescue server",
                         recipient=self.email,
@@ -742,10 +838,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         recipient=self.email,
                         subject=subject,
                         error=str(rescue_exception),
-                        email_host=EMAIL_HOST_RESCUE,
-                        email_port=EMAIL_PORT_RESCUE,
-                        email_username=EMAIL_HOST_USER_RESCUE,
-                        email_use_tls=EMAIL_USE_TLS_RESCUE,
+                        email_host=settings.EMAIL_HOST_RESCUE,
+                        email_port=settings.EMAIL_PORT_RESCUE,
+                        email_username=settings.EMAIL_HOST_USER_RESCUE,
+                        email_use_tls=settings.EMAIL_USE_TLS_RESCUE,
                     )
                     raise rescue_exception
             else:
@@ -801,7 +897,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return self.user_groups.filter(name="BI-UG-ADM").exists()
 
     # Permissions that grant write access but do not consume a license seat
-    NON_SEAT_PERMISSIONS = {"change_validationflow"}
+    NON_SEAT_PERMISSIONS = {
+        "change_validationflow",
+        "add_chatsession",
+        "change_chatsession",
+        "delete_chatsession",
+    }
 
     @property
     def is_editor(self) -> bool:
@@ -840,6 +941,15 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             for user in cls.objects.all()
             if user.is_editor and not user.is_third_party
         ]
+
+    @property
+    def is_sso(self) -> bool:
+        """
+        Indicates whether the user has a linked SSO (social) account.
+        """
+        from allauth.socialaccount.models import SocialAccount
+
+        return SocialAccount.objects.filter(user=self).exists()
 
     def has_mfa_enabled(self) -> bool:
         """
@@ -1197,6 +1307,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_iter = object_type.objects.filter(
                     provider_entity__folder_id__in=folder_ids
                 ).values_list("id", "provider_entity__folder_id")
+            elif hasattr(object_type, "journey"):
+                objects_iter = object_type.objects.filter(
+                    journey__folder_id__in=folder_ids
+                ).values_list("id", "journey__folder_id")
             else:
                 raise NotImplementedError("type not supported")
 
