@@ -32,10 +32,15 @@ export const load: PageServerLoad = async (event) => {
 	const totp = totpResponse.meta;
 
 	let webauthnCreationOptions = null;
-	const webauthnEndpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
-	const webauthnResponse = await event.fetch(webauthnEndpoint).then((res) => res.json());
-	if (webauthnResponse.status === 200) {
-		webauthnCreationOptions = webauthnResponse.data?.creation_options ?? null;
+	try {
+		const webauthnEndpoint = `${ALLAUTH_API_URL}/account/authenticators/webauthn`;
+		const webauthnRes = await event.fetch(webauthnEndpoint);
+		if (webauthnRes.ok) {
+			const webauthnData = await webauthnRes.json();
+			webauthnCreationOptions = webauthnData.data?.creation_options ?? null;
+		}
+	} catch {
+		console.error('Could not fetch WebAuthn creation options');
 	}
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
