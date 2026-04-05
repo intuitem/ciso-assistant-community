@@ -14,16 +14,44 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'users';
 	const model = getModelInfo(URLModel);
 	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
+	const readEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
-	const object = await fetch(objectEndpoint).then((res) => res.json());
+	const [object, readObject] = await Promise.all([
+		fetch(objectEndpoint).then((res) => res.json()),
+		fetch(readEndpoint).then((res) => res.json())
+	]);
 	const schema = UserEditSchema;
 	const form = await superValidate(object, zod(schema));
 
-	return { form, model, object, title: m.edit() };
+	return {
+		form,
+		model,
+		object: { ...object, has_mfa_enabled: readObject.has_mfa_enabled },
+		title: m.edit()
+	};
 };
 
 export const actions: Actions = {
-	default: async (event) => {
+	resetMFA: async (event) => {
+		const endpoint = `${BASE_API_URL}/iam/reset-mfa/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST',
+			body: JSON.stringify({ user: event.params.id })
+		});
+
+		if (!res.ok) {
+			const response = await res.json();
+			setFlash(
+				{ type: 'error', message: safeTranslate(response.error ?? 'mfaResetFailed') },
+				event
+			);
+			return fail(res.status);
+		}
+
+		setFlash({ type: 'success', message: m.mfaSuccessfullyReset() }, event);
+		return {};
+	},
+	updateUser: async (event) => {
 		const schema = UserEditSchema;
 		const endpoint = `${BASE_API_URL}/users/${event.params.id}/`;
 		const form = await superValidate(event.request, zod(schema));

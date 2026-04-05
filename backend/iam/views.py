@@ -30,11 +30,13 @@ from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
+from core.permissions import IsAdministrator
 from .models import Folder, PersonalAccessToken, Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
     PersonalAccessTokenReadSerializer,
+    ResetMFASerializer,
     ResetPasswordConfirmSerializer,
     SetPasswordSerializer,
 )
@@ -447,6 +449,27 @@ class SetPasswordView(views.APIView):
                 )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class ResetMFAView(views.APIView):
+    """
+    An endpoint for resetting MFA for a user as an administrator.
+    """
+
+    permission_classes = (permissions.IsAuthenticated, IsAdministrator)
+
+    serializer_class = ResetMFASerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = ResetMFASerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        from allauth.mfa.models import Authenticator
+
+        user = serializer.validated_data["user"]
+        Authenticator.objects.filter(user=user).delete()
+        logger.info("MFA reset by admin", admin=self.request.user, target_user=user)
+        return Response(status=status.HTTP_200_OK)
 
 
 class RevokeOtherSessionsView(views.APIView):

@@ -91,6 +91,14 @@ class SetPasswordSerializer(serializers.Serializer):
         return data
 
 
+class ResetMFASerializer(serializers.Serializer):
+    """
+    Serializer for resetting MFA for a user (admin action).
+    """
+
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+
 class ResetPasswordConfirmSerializer(serializers.Serializer):
     """
     Serializer for password reset endpoint.
