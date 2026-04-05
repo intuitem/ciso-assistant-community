@@ -4584,6 +4584,17 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
     is_published = models.BooleanField(_("published"), default=True)
 
+    occurred_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Occurred at")
+    )
+    resolved_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Resolved at")
+    )
+    resolution = models.TextField(null=True, blank=True, verbose_name=_("Resolution"))
+    is_bcp_activated = models.BooleanField(
+        null=True, blank=True, verbose_name=_("BCP activated")
+    )
+
     fields_to_check = ["name", "ref_id"]
 
     class Meta:

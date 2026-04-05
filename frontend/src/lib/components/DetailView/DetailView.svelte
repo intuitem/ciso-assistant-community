@@ -77,6 +77,8 @@
 			'validation_deadline',
 			'timestamp',
 			'reported_at',
+			'occurred_at',
+			'resolved_at',
 			'due_date',
 			'start_date',
 			'closing_date',

@@ -1260,6 +1260,55 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at' }
 		]
 	},
+	'dora-incident-reports': {
+		endpointUrl: 'resilience/dora-incident-reports',
+		name: 'doraincidentreport',
+		localName: 'doraIncidentReport',
+		localNamePlural: 'doraIncidentReports',
+		verboseName: 'DORA incident report',
+		verboseNamePlural: 'DORA incident reports',
+		foreignKeyFields: [
+			{
+				field: 'folder',
+				urlModel: 'folders',
+				urlParams: 'content_type=DO&content_type=GL'
+			},
+			{ field: 'incident', urlModel: 'incidents' },
+			{ field: 'submitting_entity', urlModel: 'entities' },
+			{ field: 'ultimate_parent_entity', urlModel: 'entities' },
+			{ field: 'affected_entities', urlModel: 'entities' }
+		],
+		selectFields: [
+			{ field: 'incident_submission' },
+			{ field: 'report_currency' },
+			{ field: 'incident_discovery' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'incident' },
+			{ field: 'incident_submission' },
+			{ field: 'report_currency' },
+			{ field: 'submitting_entity' },
+			{ field: 'affected_entities' },
+			{ field: 'ultimate_parent_entity' },
+			{ field: 'primary_contact_name' },
+			{ field: 'primary_contact_email' },
+			{ field: 'primary_contact_phone' },
+			{ field: 'secondary_contact_name' },
+			{ field: 'secondary_contact_email' },
+			{ field: 'secondary_contact_phone' },
+			{ field: 'financial_entity_code' },
+			{ field: 'detection_date_time' },
+			{ field: 'classification_date_time' },
+			{ field: 'incident_description' },
+			{ field: 'incident_discovery' },
+			{ field: 'competent_authority_code' },
+			{ field: 'incident_duration' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		]
+	},
 	processings: {
 		endpointUrl: 'privacy/processings',
 		name: 'processing',
@@ -1953,7 +2002,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entities', urlModel: 'entities' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
+		reverseForeignKeyFields: [
+			{ field: 'incident', urlModel: 'timeline-entries' },
+			{ field: 'incident', urlModel: 'dora-incident-reports' }
+		],
 		selectFields: [
 			{ field: 'severity', valueType: 'number' },
 			{ field: 'status' },
@@ -1973,6 +2025,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets' },
 			{ field: 'owners' },
 			{ field: 'entities' },
+			{ field: 'occurred_at' },
+			{ field: 'resolved_at' },
+			{ field: 'resolution' },
+			{ field: 'is_bcp_activated' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
 			{ field: 'link' },

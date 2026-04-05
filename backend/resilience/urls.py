@@ -5,6 +5,7 @@ from .views import (
     BusinessImpactAnalysisViewSet,
     AssetAssessmentViewSet,
     EscalationThresholdViewSet,
+    DoraIncidentReportViewSet,
 )
 
 router = DefaultRouter()
@@ -20,6 +21,12 @@ router.register(
     r"escalation-thresholds",
     EscalationThresholdViewSet,
     basename="escalation-thresholds",
+)
+
+router.register(
+    r"dora-incident-reports",
+    DoraIncidentReportViewSet,
+    basename="dora-incident-reports",
 )
 
 urlpatterns = [
