@@ -2850,6 +2850,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'applied-controls/priority'
 		},
 		{
+			type: 'change_field',
+			label: 'changeCsfFunction',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'csf_function',
+			optionsEndpoint: 'applied-controls/csf_function'
+		},
+		{
 			type: 'change_m2m',
 			label: 'changeOwner',
 			icon: 'fa-solid fa-user-pen',
