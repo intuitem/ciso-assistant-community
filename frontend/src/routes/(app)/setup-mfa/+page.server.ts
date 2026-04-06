@@ -122,10 +122,16 @@ export const actions: Actions = {
 			body: JSON.stringify({ name: form.data.name, credential })
 		};
 
-		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
+		let response;
+		try {
+			const res = await event.fetch(endpoint, requestInitOptions);
+			response = await res.json();
+		} catch {
+			return fail(502, { error: 'Could not register WebAuthn credential' });
+		}
 
 		if (response.status !== 200) {
-			console.error('Could not register WebAuthn credential', response);
+			console.error('Could not register WebAuthn credential');
 			if (Object.hasOwn(response, 'errors')) {
 				response.errors.forEach((error: { param: string; message: string }) => {
 					setError(form, error.param as any, error.message);

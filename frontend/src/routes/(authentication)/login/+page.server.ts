@@ -195,7 +195,7 @@ export const actions: Actions = {
 		}
 
 		if (response.status !== 200) {
-			console.error('Could not authenticate using WebAuthn', response);
+			console.error('Could not authenticate using WebAuthn');
 			return fail(response.status, { error: 'WebAuthn authentication failed' });
 		}
 
