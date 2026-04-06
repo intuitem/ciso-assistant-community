@@ -15794,10 +15794,99 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             ).data
         )
 
+    @staticmethod
+    def _generate_buckets(start_date, end_date, granularity):
+        """Generate time buckets for the given date range and granularity.
+
+        Returns a list of dicts with key, label, start, end for each bucket.
+        """
+        buckets = []
+        if granularity == "weekly":
+            # Start from Monday of the week containing start_date
+            current = start_date - timedelta(days=start_date.weekday())
+            while current <= end_date:
+                week_end = current + timedelta(days=6)
+                iso_year, iso_week, _ = current.isocalendar()
+                key = f"{iso_year}-W{iso_week:02d}"
+                label = f"W{iso_week:02d}"
+                buckets.append(
+                    {
+                        "key": key,
+                        "label": label,
+                        "start": current.isoformat(),
+                        "end": min(week_end, end_date).isoformat(),
+                    }
+                )
+                current += timedelta(weeks=1)
+        else:
+            # Monthly buckets
+            current = date(start_date.year, start_date.month, 1)
+            while current <= end_date:
+                if current.month == 12:
+                    month_end = date(current.year, 12, 31)
+                else:
+                    month_end = date(current.year, current.month + 1, 1) - timedelta(
+                        days=1
+                    )
+                key = f"{current.year}-{current.month:02d}"
+                buckets.append(
+                    {
+                        "key": key,
+                        "label": key,
+                        "start": current.isoformat(),
+                        "end": min(month_end, end_date).isoformat(),
+                    }
+                )
+                if current.month == 12:
+                    current = date(current.year + 1, 1, 1)
+                else:
+                    current = date(current.year, current.month + 1, 1)
+        return buckets
+
+    @staticmethod
+    def _aggregate_status(nodes):
+        """Aggregate status from a list of task nodes.
+
+        Returns (status_string, list_of_node_ids).
+        Cancelled nodes are handled: if all cancelled -> "cancelled",
+        otherwise cancelled nodes are excluded from aggregation.
+        """
+        if not nodes:
+            return None, []
+
+        node_ids = [str(n.id) for n in nodes]
+        statuses = [n.status for n in nodes]
+
+        # If all cancelled
+        if all(s == "cancelled" for s in statuses):
+            return "cancelled", node_ids
+
+        # Filter out cancelled for aggregation
+        active_statuses = [s for s in statuses if s != "cancelled"]
+        if not active_statuses:
+            return "cancelled", node_ids
+
+        if all(s == "completed" for s in active_statuses):
+            return "completed", node_ids
+        elif "in_progress" in active_statuses or "completed" in active_statuses:
+            return "in_progress", node_ids
+        elif "pending" in active_statuses:
+            return "pending", node_ids
+        else:
+            return active_statuses[0], node_ids
+
+    @staticmethod
+    def _assign_node_to_bucket_key(node_date, granularity):
+        """Return the bucket key for a given date."""
+        if granularity == "weekly":
+            iso_year, iso_week, _ = node_date.isocalendar()
+            return f"{iso_year}-W{iso_week:02d}"
+        else:
+            return f"{node_date.year}-{node_date.month:02d}"
+
     @action(detail=False, name="Yearly tasks review")
     def yearly_review(self, request):
         """Get recurrent task templates grouped by folder for yearly review."""
-        # Get date range from query params or use current year
         current_year = timezone.now().year
 
         try:
@@ -15806,111 +15895,119 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             end_month = int(request.query_params.get("end_month", 12))
             end_year = int(request.query_params.get("end_year", current_year))
         except ValueError:
-            # Default to current year if any parsing fails
             start_month, start_year = 1, current_year
             end_month, end_year = 12, current_year
+
+        granularity = request.query_params.get("granularity", "monthly")
+        if granularity not in ("monthly", "weekly"):
+            granularity = "monthly"
 
         # Validate month values
         start_month = max(1, min(12, start_month))
         end_month = max(1, min(12, end_month))
 
         year_start = date(start_year, start_month, 1)
-        # Get last day of end_month
         if end_month == 12:
             year_end = date(end_year, 12, 31)
         else:
             year_end = date(end_year, end_month + 1, 1) - timedelta(days=1)
 
-        # Get folder filter from query params
-        folder_id = request.query_params.get("folder")
+        # Cap weekly view to 1 year
+        if granularity == "weekly":
+            max_end = year_start + timedelta(days=365)
+            if year_end > max_end:
+                year_end = max_end
 
-        # Get all viewable recurrent task templates
+        # Generate bucket metadata
+        buckets = self._generate_buckets(year_start, year_end, granularity)
+        bucket_keys = [b["key"] for b in buckets]
+
+        # Build queryset with filters
+        folder_filter = request.query_params.get("folder")
+        assigned_to_filter = request.query_params.get("assigned_to")
+        applied_controls_filter = request.query_params.get("applied_controls")
+        status_filter = request.query_params.get("status")
+
         queryset = self.get_queryset().filter(
             is_recurrent=True,
             enabled=True,
         )
 
-        # Apply folder filter if provided
-        if folder_id:
-            queryset = queryset.filter(folder_id=folder_id)
+        if folder_filter:
+            queryset = queryset.filter(folder_id=folder_filter)
+        if assigned_to_filter:
+            queryset = queryset.filter(assigned_to__id=assigned_to_filter)
+        if applied_controls_filter:
+            queryset = queryset.filter(
+                applied_controls__id=applied_controls_filter
+            ).distinct()
+
+        # Prefetch task nodes for the date range (fixes N+1)
+        filtered_nodes_qs = TaskNode.objects.filter(
+            due_date__gte=year_start, due_date__lte=year_end
+        ).order_by("due_date")
 
         task_templates = queryset.select_related("folder").prefetch_related(
-            "assigned_to"
+            "assigned_to",
+            "applied_controls",
+            Prefetch(
+                "tasknode_set",
+                queryset=filtered_nodes_qs,
+                to_attr="filtered_nodes",
+            ),
         )
 
         # Group by folder
-        folders_dict = defaultdict(list)
+        folders_dict = {}
         for template in task_templates:
-            folder_id = str(template.folder.id)
-            folder_name = str(template.folder)
+            tpl_folder_id = str(template.folder.id)
+            tpl_folder_name = str(template.folder)
 
-            # Use TaskTemplateReadSerializer for proper serialization
             template_data = TaskTemplateReadSerializer(template).data
-            # Add schedule field (excluded by default in read serializer)
             template_data["schedule"] = template.schedule
 
-            # Get TaskNodes for this template in the current year
-            task_nodes = TaskNode.objects.filter(
-                task_template=template, due_date__gte=year_start, due_date__lte=year_end
-            ).values("due_date", "status")
+            # Group prefetched nodes by bucket
+            nodes_by_bucket = defaultdict(list)
+            for node in template.filtered_nodes:
+                if node.due_date:
+                    key = self._assign_node_to_bucket_key(node.due_date, granularity)
+                    nodes_by_bucket[key].append(node)
 
-            # Group by month and determine status
-            monthly_status = {}
-            # Generate list of (year, month) tuples for the date range
-            months_in_range = []
-            current = date(start_year, start_month, 1)
-            end = date(end_year, end_month, 1)
-            while current <= end:
-                months_in_range.append((current.year, current.month))
-                if current.month == 12:
-                    current = date(current.year + 1, 1, 1)
-                else:
-                    current = date(current.year, current.month + 1, 1)
+            # Build bucket_status for each bucket
+            bucket_status = {}
+            has_any_matching_status = False
+            for key in bucket_keys:
+                bucket_nodes = nodes_by_bucket.get(key, [])
+                status, node_ids = self._aggregate_status(bucket_nodes)
+                bucket_status[key] = {
+                    "status": status,
+                    "node_ids": node_ids,
+                }
+                if status and (not status_filter or status == status_filter):
+                    has_any_matching_status = True
 
-            for year, month in months_in_range:
-                # Create a unique key for year-month combination
-                key = f"{year}-{month:02d}"
-                month_nodes = [
-                    node
-                    for node in task_nodes
-                    if node["due_date"].year == year and node["due_date"].month == month
-                ]
+            # Post-aggregation status filter: skip templates with no matching buckets
+            if status_filter and not has_any_matching_status:
+                continue
 
-                if not month_nodes:
-                    monthly_status[key] = None
-                else:
-                    # Simple aggregation logic
-                    statuses = [node["status"] for node in month_nodes]
-                    # If all completed, show completed (green)
-                    if all(s == "completed" for s in statuses):
-                        monthly_status[key] = "completed"
-                    # If any in_progress or mix of statuses, show in_progress (orange)
-                    elif "in_progress" in statuses or "completed" in statuses:
-                        monthly_status[key] = "in_progress"
-                    # If all pending, show pending (red)
-                    elif "pending" in statuses:
-                        monthly_status[key] = "pending"
-                    else:
-                        monthly_status[key] = statuses[0] if statuses else None
+            template_data["bucket_status"] = bucket_status
 
-            template_data["monthly_status"] = monthly_status
-
-            if folder_id not in folders_dict:
-                folders_dict[folder_id] = {
-                    "folder_id": folder_id,
-                    "folder_name": folder_name,
+            if tpl_folder_id not in folders_dict:
+                folders_dict[tpl_folder_id] = {
+                    "folder_id": tpl_folder_id,
+                    "folder_name": tpl_folder_name,
                     "tasks": [],
                 }
-            folders_dict[folder_id]["tasks"].append(template_data)
+            folders_dict[tpl_folder_id]["tasks"].append(template_data)
 
-        # Convert to list and sort by folder name
         result = list(folders_dict.values())
         result.sort(key=lambda x: x["folder_name"])
 
-        # Include date range metadata in response
         return Response(
             {
                 "folders": result,
+                "granularity": granularity,
+                "buckets": buckets,
                 "start_month": start_month,
                 "start_year": start_year,
                 "end_month": end_month,
