@@ -4051,7 +4051,7 @@
 	"chatRetry": "Réessayer",
 	"chatNoConversations": "Aucune conversation",
 	"chatDisclaimer": "L'IA peut se tromper. Les données sont envoyées uniquement à votre fournisseur IA configuré.",
-	"syncToAppliedControl": "Synchroniser avec la mesure appliquée",
+	"syncToAppliedControl": "Synchroniser les mesures appliquées associées",
 	"syncToReferenceControl": "Synchroniser avec la mesure de référence",
 	"riskCoverage": "Couverture des risques",
 	"soaSelectRiskDescription": "La s\u00e9lection d\u2019analyses de risques enrichira la DdA avec les sc\u00e9narios de risques et les d\u00e9cisions de traitement associ\u00e9s"
