@@ -170,7 +170,7 @@
 				onclick={() => (filtersExpanded = !filtersExpanded)}
 			>
 				<i class="fa-solid fa-sliders text-[10px]"></i>
-				<span>Filters</span>
+				<span>{m.filters()}</span>
 				{#if activeFilterCount > 0}
 					<span
 						class="inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full bg-violet-600 text-white"
@@ -372,7 +372,7 @@
 						<h2 class="text-base font-semibold text-gray-800">{folder.folder_name}</h2>
 						<span class="text-xs text-gray-400"
 							>{folder.tasks.length}
-							{folder.tasks.length === 1 ? 'task' : 'tasks'}</span
+							{m.tasks().toLowerCase()}</span
 						>
 					</div>
 
@@ -480,8 +480,8 @@
 														class:h-7={!compactMode}
 														class:h-4={compactMode}
 														title={nodeIds.length > 1
-															? `${nodeIds.length} task nodes`
-															: 'View task node'}
+															? `${nodeIds.length} ${m.taskNodes().toLowerCase()}`
+															: m.viewTaskNode()}
 													>
 														{#if nodeIds.length > 1 && !compactMode}
 															<span class="text-[10px] font-medium text-gray-500"

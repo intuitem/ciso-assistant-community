@@ -15804,17 +15804,25 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         if granularity == "weekly":
             # Start from Monday of the week containing start_date
             current = start_date - timedelta(days=start_date.weekday())
+            spans_multiple_years = start_date.year != end_date.year
             while current <= end_date:
                 week_end = current + timedelta(days=6)
                 iso_year, iso_week, _ = current.isocalendar()
                 key = f"{iso_year}-W{iso_week:02d}"
-                label = f"W{iso_week:02d}"
+                label = (
+                    f"W{iso_week:02d} '{iso_year % 100}"
+                    if spans_multiple_years
+                    else f"W{iso_week:02d}"
+                )
+                # Clamp bucket boundaries to the requested date range
+                bucket_start = max(current, start_date)
+                bucket_end = min(week_end, end_date)
                 buckets.append(
                     {
                         "key": key,
                         "label": label,
-                        "start": current.isoformat(),
-                        "end": min(week_end, end_date).isoformat(),
+                        "start": bucket_start.isoformat(),
+                        "end": bucket_end.isoformat(),
                     }
                 )
                 current += timedelta(weeks=1)
