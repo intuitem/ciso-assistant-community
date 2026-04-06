@@ -15575,11 +15575,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 start_date = task_template.task_date
                 if task_template.is_recurrent:
                     if task_template.schedule["frequency"] == "DAILY":
-                        delta = rd.relativedelta(months=2)
+                        delta = rd.relativedelta(months=3)
                     elif task_template.schedule["frequency"] == "WEEKLY":
-                        delta = rd.relativedelta(months=4)
+                        delta = rd.relativedelta(weeks=52)
                     elif task_template.schedule["frequency"] == "MONTHLY":
-                        delta = rd.relativedelta(years=1)
+                        delta = rd.relativedelta(years=2)
                     elif task_template.schedule["frequency"] == "YEARLY":
                         delta = rd.relativedelta(years=5)
 
