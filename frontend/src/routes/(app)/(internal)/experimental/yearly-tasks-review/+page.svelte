@@ -14,8 +14,8 @@
 
 	// View settings
 	let compactMode = $state(false);
+	let filtersExpanded = $state(true);
 
-	// Function to get translated short month names
 	function getMonthName(monthIndex: number): string {
 		const monthNames = [
 			m.januaryShort(),
@@ -34,18 +34,15 @@
 		return monthNames[monthIndex];
 	}
 
-	// Convert month/year to YYYY-MM format for month input
 	function toMonthFormat(year: number, month: number): string {
 		return `${year}-${String(month).padStart(2, '0')}`;
 	}
 
-	// Parse YYYY-MM format to month and year
 	function parseMonthFormat(value: string): { year: number; month: number } {
 		const [year, month] = value.split('-').map(Number);
 		return { year, month };
 	}
 
-	// Get bucket label — for monthly, use translated month name
 	function getBucketLabel(bucket: { key: string; label: string }): string {
 		if (data.granularity === 'monthly') {
 			const parts = bucket.key.split('-');
@@ -63,7 +60,6 @@
 	let selectedAppliedControls = $state(data.selectedAppliedControls || '');
 	let selectedStatus = $state(data.selectedStatus || '');
 
-	// Derived values for display
 	let startFormatted = $derived.by(() => {
 		const { year, month } = parseMonthFormat(startPeriod);
 		return { year, month, label: getMonthName(month - 1) };
@@ -75,12 +71,21 @@
 	});
 
 	function getStatusColor(status: string | null): string {
-		if (!status) return 'bg-white';
-		if (status === 'completed') return 'bg-green-200';
-		if (status === 'in_progress') return 'bg-orange-200';
-		if (status === 'pending') return 'bg-red-200';
-		if (status === 'cancelled') return 'bg-gray-200';
-		return 'bg-white';
+		if (!status) return 'bg-white border border-dashed border-gray-200';
+		if (status === 'completed') return 'bg-green-100 border border-green-300';
+		if (status === 'in_progress') return 'bg-violet-100 border border-violet-300';
+		if (status === 'pending') return 'bg-red-100 border border-red-300';
+		if (status === 'cancelled') return 'bg-gray-100 border border-gray-300';
+		return 'bg-white border border-dashed border-gray-200';
+	}
+
+	function getStatusDot(status: string | null): string {
+		if (!status) return 'bg-gray-200';
+		if (status === 'completed') return 'bg-green-500';
+		if (status === 'in_progress') return 'bg-violet-500';
+		if (status === 'pending') return 'bg-red-500';
+		if (status === 'cancelled') return 'bg-gray-400';
+		return 'bg-gray-200';
 	}
 
 	function applyFilters() {
@@ -110,210 +115,286 @@
 		selectedStatus = '';
 		goto('/experimental/yearly-tasks-review');
 	}
+
+	// Count active filters
+	let activeFilterCount = $derived(
+		[selectedFolder, selectedAssignedTo, selectedAppliedControls, selectedStatus].filter(Boolean)
+			.length
+	);
 </script>
 
-<div class="bg-white p-8 space-y-6">
-	<!-- Header -->
-	<div class="flex items-center justify-between">
+<div class="space-y-5 p-6">
+	<!-- Header bar -->
+	<div class="flex items-start justify-between gap-4">
 		<div>
-			<h1 class="text-3xl font-bold mb-2">
+			<h1
+				class="text-2xl font-bold bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+			>
 				{m.yearlyTasksReview()}
 			</h1>
-			<p class="text-gray-600">
+			<p class="text-sm text-slate-500 mt-1">
 				{startFormatted.label}
 				{startFormatted.year}
 				{m.periodTo()}
 				{endFormatted.label}
 				{endFormatted.year}
 				{#if data.granularity === 'weekly'}
-					<span class="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full"
+					<span
+						class="ml-1.5 inline-flex items-center text-[10px] font-bold uppercase tracking-wider bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded"
 						>{m.weekly()}</span
 					>
 				{/if}
 			</p>
 		</div>
-		<!-- Compact mode toggle -->
-		<button
-			type="button"
-			class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border transition-colors
-				{compactMode
-				? 'bg-primary-100 border-primary-300 text-primary-700'
-				: 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}"
-			onclick={() => (compactMode = !compactMode)}
-			title={compactMode ? m.detailedView() : m.compactView()}
-		>
-			<i class="fa-solid {compactMode ? 'fa-expand' : 'fa-compress'} text-xs"></i>
-			<span>{compactMode ? m.detailedView() : m.compactView()}</span>
-		</button>
-	</div>
-
-	<!-- Filters -->
-	<div class="bg-gray-50 p-4 rounded-lg border">
-		<div class="flex gap-4 items-end flex-wrap">
-			<!-- Start Period -->
-			<div class="min-w-[140px]">
-				<label for="start-period-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					{m.startPeriod()}
-				</label>
-				<input
-					id="start-period-filter"
-					type="month"
-					bind:value={startPeriod}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				/>
-			</div>
-
-			<!-- End Period -->
-			<div class="min-w-[140px]">
-				<label for="end-period-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					{m.endPeriod()}
-				</label>
-				<input
-					id="end-period-filter"
-					type="month"
-					bind:value={endPeriod}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				/>
-			</div>
-
-			<!-- Granularity -->
-			<div class="min-w-[120px]">
-				<label for="granularity-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					{m.granularity()}
-				</label>
-				<select
-					id="granularity-filter"
-					bind:value={selectedGranularity}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					<option value="monthly">{m.monthly()}</option>
-					<option value="weekly">{m.weekly()}</option>
-				</select>
-			</div>
-
-			<!-- Folder Filter -->
-			<div class="min-w-[160px]">
-				<label for="folder-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					{m.folder()}
-				</label>
-				<select
-					id="folder-filter"
-					bind:value={selectedFolder}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					<option value="">{m.allFolders()}</option>
-					{#each data.allFolders as folder}
-						<option value={folder.id}>{folder.name}</option>
-					{/each}
-				</select>
-			</div>
-
-			<!-- Assigned To Filter -->
-			<div class="min-w-[160px]">
-				<label for="assigned-to-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					{m.assignedTo()}
-				</label>
-				<select
-					id="assigned-to-filter"
-					bind:value={selectedAssignedTo}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					<option value="">{m.allActors()}</option>
-					{#each data.allActors as actor}
-						<option value={actor.id}>{actor.str || actor.name}</option>
-					{/each}
-				</select>
-			</div>
-
-			<!-- Applied Controls Filter -->
-			<div class="min-w-[160px]">
-				<label for="applied-controls-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					{m.appliedControls()}
-				</label>
-				<select
-					id="applied-controls-filter"
-					bind:value={selectedAppliedControls}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					<option value="">{m.allAppliedControls()}</option>
-					{#each data.allAppliedControls as control}
-						<option value={control.id}>{control.str || control.name}</option>
-					{/each}
-				</select>
-			</div>
-
-			<!-- Status Filter -->
-			<div class="min-w-[130px]">
-				<label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					{m.aggregatedStatus()}
-				</label>
-				<select
-					id="status-filter"
-					bind:value={selectedStatus}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					<option value="">{m.allStatuses()}</option>
-					<option value="completed">{m.completed()}</option>
-					<option value="in_progress">{m.inProgress()}</option>
-					<option value="pending">{m.pending()}</option>
-					<option value="cancelled">{m.cancelled()}</option>
-				</select>
-			</div>
-
-			<!-- Action Buttons -->
-			<div class="flex gap-2">
-				<button
-					onclick={applyFilters}
-					class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					{m.refresh()}
-				</button>
-				<button
-					onclick={resetFilters}
-					class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
-				>
-					{m.reset()}
-				</button>
-			</div>
+		<div class="flex items-center gap-2">
+			<!-- Compact toggle -->
+			<button
+				type="button"
+				class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150
+					{compactMode
+					? 'bg-violet-50 border-violet-300 text-violet-700'
+					: 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'}"
+				onclick={() => (compactMode = !compactMode)}
+				title={compactMode ? m.detailedView() : m.compactView()}
+			>
+				<i class="fa-solid {compactMode ? 'fa-expand' : 'fa-compress'} text-[10px]"></i>
+				<span>{compactMode ? m.detailedView() : m.compactView()}</span>
+			</button>
+			<!-- Filter toggle -->
+			<button
+				type="button"
+				class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150
+					{filtersExpanded
+					? 'bg-violet-50 border-violet-300 text-violet-700'
+					: 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'}"
+				onclick={() => (filtersExpanded = !filtersExpanded)}
+			>
+				<i class="fa-solid fa-sliders text-[10px]"></i>
+				<span>Filters</span>
+				{#if activeFilterCount > 0}
+					<span
+						class="inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full bg-violet-600 text-white"
+						>{activeFilterCount}</span
+					>
+				{/if}
+			</button>
 		</div>
 	</div>
 
-	<!-- Loading overlay -->
-	{#if $navigating}
-		<div class="flex items-center justify-center py-16">
-			<div class="flex items-center gap-3 text-gray-500">
-				<i class="fa-solid fa-spinner fa-spin text-xl"></i>
-				<span class="text-sm">{m.loading()}...</span>
+	<!-- Collapsible Filters -->
+	{#if filtersExpanded}
+		<div class="bg-gray-50/80 border border-gray-200 rounded-xl p-4 transition-all duration-200">
+			<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 items-end">
+				<!-- Start Period -->
+				<div>
+					<label
+						for="start-period-filter"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+					>
+						{m.startPeriod()}
+					</label>
+					<input
+						id="start-period-filter"
+						type="month"
+						bind:value={startPeriod}
+						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+					/>
+				</div>
+
+				<!-- End Period -->
+				<div>
+					<label
+						for="end-period-filter"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+					>
+						{m.endPeriod()}
+					</label>
+					<input
+						id="end-period-filter"
+						type="month"
+						bind:value={endPeriod}
+						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+					/>
+				</div>
+
+				<!-- Granularity -->
+				<div>
+					<label
+						for="granularity-filter"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+					>
+						{m.granularity()}
+					</label>
+					<select
+						id="granularity-filter"
+						bind:value={selectedGranularity}
+						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+					>
+						<option value="monthly">{m.monthly()}</option>
+						<option value="weekly">{m.weekly()}</option>
+					</select>
+				</div>
+
+				<!-- Folder -->
+				<div>
+					<label
+						for="folder-filter"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+					>
+						{m.folder()}
+					</label>
+					<select
+						id="folder-filter"
+						bind:value={selectedFolder}
+						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+					>
+						<option value="">{m.allFolders()}</option>
+						{#each data.allFolders as folder}
+							<option value={folder.id}>{folder.name}</option>
+						{/each}
+					</select>
+				</div>
+
+				<!-- Assigned To -->
+				<div>
+					<label
+						for="assigned-to-filter"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+					>
+						{m.assignedTo()}
+					</label>
+					<select
+						id="assigned-to-filter"
+						bind:value={selectedAssignedTo}
+						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+					>
+						<option value="">{m.allActors()}</option>
+						{#each data.allActors as actor}
+							<option value={actor.id}>{actor.str || actor.name}</option>
+						{/each}
+					</select>
+				</div>
+
+				<!-- Applied Controls -->
+				<div>
+					<label
+						for="applied-controls-filter"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+					>
+						{m.appliedControls()}
+					</label>
+					<select
+						id="applied-controls-filter"
+						bind:value={selectedAppliedControls}
+						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+					>
+						<option value="">{m.allAppliedControls()}</option>
+						{#each data.allAppliedControls as control}
+							<option value={control.id}>{control.str || control.name}</option>
+						{/each}
+					</select>
+				</div>
+
+				<!-- Status -->
+				<div>
+					<label
+						for="status-filter"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+					>
+						{m.aggregatedStatus()}
+					</label>
+					<select
+						id="status-filter"
+						bind:value={selectedStatus}
+						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+					>
+						<option value="">{m.allStatuses()}</option>
+						<option value="completed">{m.completed()}</option>
+						<option value="in_progress">{m.inProgress()}</option>
+						<option value="pending">{m.pending()}</option>
+						<option value="cancelled">{m.cancelled()}</option>
+					</select>
+				</div>
+
+				<!-- Actions -->
+				<div class="flex gap-2">
+					<button
+						onclick={applyFilters}
+						class="flex-1 px-3 py-1.5 text-sm font-medium bg-violet-600 text-white rounded-lg hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1 transition-all duration-150"
+					>
+						{m.refresh()}
+					</button>
+					<button
+						onclick={resetFilters}
+						class="px-3 py-1.5 text-sm text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-150"
+						title={m.reset()}
+					>
+						<i class="fa-solid fa-rotate-left text-xs"></i>
+					</button>
+				</div>
 			</div>
+		</div>
+	{/if}
+
+	<!-- Loading state -->
+	{#if $navigating}
+		<div class="space-y-6">
+			{#each [1, 2] as _}
+				<div class="border border-gray-200 rounded-xl overflow-hidden animate-pulse">
+					<div class="bg-gray-100 px-6 py-3 border-b">
+						<div class="h-5 w-40 bg-gray-200 rounded"></div>
+					</div>
+					<div class="p-4 space-y-3">
+						{#each [1, 2, 3] as __}
+							<div class="flex gap-3 items-center">
+								<div class="h-4 w-32 bg-gray-100 rounded"></div>
+								<div class="flex-1 flex gap-2">
+									{#each [1, 2, 3, 4, 5, 6] as ___}
+										<div class="h-6 flex-1 bg-gray-50 rounded"></div>
+									{/each}
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/each}
 		</div>
 	{:else}
 		<!-- Data tables -->
-		<div class="space-y-8">
+		<div class="space-y-6">
 			{#each data.folders as folder}
-				<div class="border rounded-lg overflow-hidden">
-					<div class="bg-gray-100 px-6 py-3 border-b">
-						<h2 class="text-xl font-semibold">{folder.folder_name}</h2>
+				<div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+					<!-- Folder header with accent -->
+					<div
+						class="px-5 py-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex items-center gap-3"
+					>
+						<div class="w-1 h-5 rounded-full bg-violet-500"></div>
+						<h2 class="text-base font-semibold text-gray-800">{folder.folder_name}</h2>
+						<span class="text-xs text-gray-400"
+							>{folder.tasks.length}
+							{folder.tasks.length === 1 ? 'task' : 'tasks'}</span
+						>
 					</div>
 
 					<div class="overflow-x-auto overflow-y-auto max-h-[70vh]">
 						<table class="w-full text-sm">
 							<thead class="sticky top-0 z-20">
-								<tr class="border-b bg-gray-50">
+								<tr class="bg-gray-50/95 backdrop-blur-sm border-b border-gray-200">
 									<th
-										class="px-4 py-3 text-left font-semibold sticky left-0 bg-gray-50 z-30"
-										class:min-w-[200px]={!compactMode}
+										class="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 sticky left-0 bg-gray-50/95 backdrop-blur-sm z-30"
+										class:min-w-[220px]={!compactMode}
 										class:min-w-[100px]={compactMode}
 									>
 										{m.tasks()}
 									</th>
 									{#each data.buckets as bucket}
 										<th
-											class="px-2 py-3 text-center font-semibold w-16"
+											class="px-1 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 w-14"
 											title={data.granularity === 'weekly' ? `${bucket.start} — ${bucket.end}` : ''}
 										>
 											{getBucketLabel(bucket)}
 											{#if data.buckets.length > 12 || startFormatted.year !== endFormatted.year}
-												<div class="text-xs text-gray-500">
+												<div class="text-[10px] text-gray-300 font-normal normal-case">
 													{bucket.key.split('-')[0]}
 												</div>
 											{/if}
@@ -321,20 +402,19 @@
 									{/each}
 								</tr>
 							</thead>
-							<tbody>
-								{#each folder.tasks as task}
-									<tr class="border-b hover:bg-gray-50">
+							<tbody class="divide-y divide-gray-100">
+								{#each folder.tasks as task, i}
+									<tr class="hover:bg-violet-50/30 transition-colors duration-100">
 										<td
-											class="px-4 sticky left-0 bg-white z-10"
-											class:py-3={!compactMode}
-											class:py-1={compactMode}
+											class="px-4 sticky left-0 z-10 bg-white"
+											class:py-2.5={!compactMode}
+											class:py-1.5={compactMode}
 										>
 											{#if compactMode}
-												<!-- Compact: ref_id badge only, or truncated name -->
 												{#if task.ref_id}
 													<a
 														href="/task-templates/{task.id}"
-														class="text-xs bg-slate-200 p-1 rounded hover:bg-slate-300"
+														class="inline-block text-[11px] font-mono font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded hover:bg-violet-100 hover:text-violet-700 transition-colors"
 														title={task.name}
 													>
 														{task.ref_id}
@@ -342,36 +422,43 @@
 												{:else}
 													<a
 														href="/task-templates/{task.id}"
-														class="text-xs text-blue-600 hover:underline truncate block max-w-[120px]"
+														class="text-xs text-gray-700 hover:text-violet-600 truncate block max-w-[120px] transition-colors"
 														title={task.name}
 													>
 														{task.name}
 													</a>
 												{/if}
 											{:else}
-												<!-- Detailed view -->
-												{#if task.ref_id}
-													<span class="text-xs bg-slate-200 p-1 rounded">{task.ref_id}</span>
-												{/if}
-												<a
-													href="/task-templates/{task.id}"
-													class="font-medium text-blue-600 hover:text-blue-800 hover:underline"
-												>
-													{task.name}
-												</a>
-												{#if task.assigned_to && task.assigned_to.length > 0}
-													<div class="text-xs text-gray-500 mt-1">
-														{task.assigned_to.map((user: { str: string }) => user.str).join(', ')}
+												<div class="flex flex-col gap-0.5">
+													<div class="flex items-center gap-2">
+														{#if task.ref_id}
+															<span
+																class="inline-block text-[10px] font-mono font-medium bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded shrink-0"
+																>{task.ref_id}</span
+															>
+														{/if}
+														<a
+															href="/task-templates/{task.id}"
+															class="font-medium text-sm text-gray-800 hover:text-violet-600 transition-colors"
+														>
+															{task.name}
+														</a>
 													</div>
-												{/if}
-												{#if task.applied_controls && task.applied_controls.length > 0}
-													<div class="text-xs text-gray-700 mt-2">
-														<span class="font-medium">{m.appliedControls()}:</span>
-														{task.applied_controls
-															.map((control: { str: string }) => control.str)
-															.join(', ')}
-													</div>
-												{/if}
+													{#if task.assigned_to && task.assigned_to.length > 0}
+														<div class="text-[11px] text-gray-400 flex items-center gap-1">
+															<i class="fa-solid fa-user text-[9px]"></i>
+															{task.assigned_to.map((user: { str: string }) => user.str).join(', ')}
+														</div>
+													{/if}
+													{#if task.applied_controls && task.applied_controls.length > 0}
+														<div class="text-[11px] text-gray-400 flex items-center gap-1">
+															<i class="fa-solid fa-shield-halved text-[9px]"></i>
+															{task.applied_controls
+																.map((control: { str: string }) => control.str)
+																.join(', ')}
+														</div>
+													{/if}
+												</div>
 											{/if}
 										</td>
 										{#each data.buckets as bucket}
@@ -380,31 +467,33 @@
 											{@const nodeIds = bucketData?.node_ids ?? []}
 											{@const firstNodeId = nodeIds.length > 0 ? nodeIds[0] : null}
 											<td
-												class="px-2 text-center border-l"
-												class:py-3={!compactMode}
-												class:py-1={compactMode}
+												class="px-1 text-center"
+												class:py-2.5={!compactMode}
+												class:py-1.5={compactMode}
 											>
 												{#if firstNodeId}
 													<a
 														href="/task-nodes/{firstNodeId}"
-														class="flex items-center justify-center w-full rounded {getStatusColor(
+														class="flex items-center justify-center w-full rounded-md {getStatusColor(
 															status
-														)}"
-														class:h-8={!compactMode}
-														class:h-5={compactMode}
+														)} hover:opacity-80 transition-opacity"
+														class:h-7={!compactMode}
+														class:h-4={compactMode}
 														title={nodeIds.length > 1
 															? `${nodeIds.length} task nodes`
 															: 'View task node'}
 													>
-														{#if nodeIds.length > 1}
-															<span class="text-xs text-gray-600">{nodeIds.length}</span>
+														{#if nodeIds.length > 1 && !compactMode}
+															<span class="text-[10px] font-medium text-gray-500"
+																>{nodeIds.length}</span
+															>
 														{/if}
 													</a>
 												{:else}
 													<div
-														class="w-full rounded {getStatusColor(status)}"
-														class:h-8={!compactMode}
-														class:h-5={compactMode}
+														class="w-full rounded-md {getStatusColor(status)}"
+														class:h-7={!compactMode}
+														class:h-4={compactMode}
 													></div>
 												{/if}
 											</td>
@@ -416,30 +505,37 @@
 					</div>
 				</div>
 			{:else}
-				<div class="text-center py-12 text-gray-500">{m.noRecurrentTasksFound()}</div>
+				<div
+					class="text-center py-16 text-gray-400 border border-dashed border-gray-200 rounded-xl"
+				>
+					<i class="fa-solid fa-calendar-xmark text-3xl mb-3 text-gray-300"></i>
+					<p>{m.noRecurrentTasksFound()}</p>
+				</div>
 			{/each}
 		</div>
 
-		<!-- Legend -->
-		<div class="flex gap-6 justify-center text-sm">
-			<div class="flex items-center gap-2">
-				<div class="w-6 h-6 bg-green-200 rounded border"></div>
+		<!-- Legend — pinned at bottom -->
+		<div
+			class="flex items-center gap-5 justify-center text-xs text-gray-500 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl px-5 py-2.5"
+		>
+			<div class="flex items-center gap-1.5">
+				<div class="w-3 h-3 rounded-sm bg-green-100 border border-green-300"></div>
 				<span>{m.completed()}</span>
 			</div>
-			<div class="flex items-center gap-2">
-				<div class="w-6 h-6 bg-orange-200 rounded border"></div>
+			<div class="flex items-center gap-1.5">
+				<div class="w-3 h-3 rounded-sm bg-violet-100 border border-violet-300"></div>
 				<span>{m.inProgress()}</span>
 			</div>
-			<div class="flex items-center gap-2">
-				<div class="w-6 h-6 bg-red-200 rounded border"></div>
+			<div class="flex items-center gap-1.5">
+				<div class="w-3 h-3 rounded-sm bg-red-100 border border-red-300"></div>
 				<span>{m.pending()}</span>
 			</div>
-			<div class="flex items-center gap-2">
-				<div class="w-6 h-6 bg-gray-200 rounded border"></div>
+			<div class="flex items-center gap-1.5">
+				<div class="w-3 h-3 rounded-sm bg-gray-100 border border-gray-300"></div>
 				<span>{m.cancelled()}</span>
 			</div>
-			<div class="flex items-center gap-2">
-				<div class="w-6 h-6 bg-white rounded border"></div>
+			<div class="flex items-center gap-1.5">
+				<div class="w-3 h-3 rounded-sm bg-white border border-dashed border-gray-200"></div>
 				<span>{m.noData()}</span>
 			</div>
 		</div>
