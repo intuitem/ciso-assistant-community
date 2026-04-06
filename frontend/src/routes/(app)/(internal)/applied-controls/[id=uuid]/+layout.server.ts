@@ -16,7 +16,7 @@ export const load: LayoutServerLoad = async (event) => {
 	});
 
 	// Duplicate form for applied controls
-	const appliedControlSchema = modelSchema('applied-controls');
+	const appliedControlSchema = modelSchema('applied-controls_duplicate');
 	const appliedControl = data.data;
 	const initialDataDuplicate = {
 		name: appliedControl.name,
