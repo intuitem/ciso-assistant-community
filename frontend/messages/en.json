@@ -4100,7 +4100,7 @@
 	"untitledMatrix": "Untitled Matrix",
 	"closeEditor": "Close editor",
 	"removeLanguageConfirm": "Remove {lang} translations?",
-	"syncToAppliedControl": "Sync to applied control",
+	"syncToAppliedControl": "Sync associated applied controls",
 	"syncToReferenceControl": "Sync to reference control",
 	"statementOfApplicability": "Statement of Applicability",
 	"soaDescription": "Generate a Statement of Applicability from a compliance assessment and optionally enrich it with risk assessment data",
