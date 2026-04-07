@@ -1170,60 +1170,21 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         )
                     obj.delete()
 
-                elif action_type == "add_m2m":
-                    # Additive M2M: append values without removing existing ones
-                    new_ids = value if isinstance(value, list) else [value]
+                elif action_type in ("add_m2m", "remove_m2m"):
+                    ids_to_modify = value if isinstance(value, list) else [value]
                     m2m_field = getattr(obj, field_name)
-                    existing_ids = list(m2m_field.values_list("id", flat=True))
-                    merged_ids = list(
-                        {str(i) for i in existing_ids} | {str(i) for i in new_ids}
-                    )
-                    data = {field_name: merged_ids}
-                    serializer = serializer_class(
-                        obj,
-                        data=data,
-                        partial=True,
-                        context=self.get_serializer_context(),
-                    )
-                    if not serializer.is_valid():
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": serializer.errors,
-                            }
+                    if action_type == "add_m2m":
+                        m2m_field.add(*ids_to_modify)
+                    else:
+                        m2m_field.remove(*ids_to_modify)
+                    try:
+                        dispatch_webhook_event(obj, "updated")
+                    except Exception:
+                        logger.error(
+                            "Webhook dispatch failed on batch %s",
+                            action_type,
+                            exc_info=True,
                         )
-                        continue
-                    self.perform_update(serializer)
-
-                elif action_type == "remove_m2m":
-                    # Subtractive M2M: remove specified values, keep the rest
-                    remove_ids = {
-                        str(i) for i in (value if isinstance(value, list) else [value])
-                    }
-                    m2m_field = getattr(obj, field_name)
-                    remaining_ids = [
-                        str(i)
-                        for i in m2m_field.values_list("id", flat=True)
-                        if str(i) not in remove_ids
-                    ]
-                    data = {field_name: remaining_ids}
-                    serializer = serializer_class(
-                        obj,
-                        data=data,
-                        partial=True,
-                        context=self.get_serializer_context(),
-                    )
-                    if not serializer.is_valid():
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": serializer.errors,
-                            }
-                        )
-                        continue
-                    self.perform_update(serializer)
 
                 else:
                     # Build data dict for the serializer
