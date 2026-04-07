@@ -2825,12 +2825,20 @@ export const contextMenuActions = {
 
 // Batch action configuration
 export interface BatchActionConfig {
-	type: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
+	type:
+		| 'delete'
+		| 'change_field'
+		| 'change_m2m'
+		| 'add_m2m'
+		| 'remove_m2m'
+		| 'change_folder'
+		| 'group';
 	label: string;
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
 	multiSelect?: boolean;
+	children?: BatchActionConfig[];
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
@@ -2863,6 +2871,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'owner',
 			optionsEndpoint: 'actors',
 			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
 		},
 		{
 			type: 'change_folder',
@@ -3009,6 +3040,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'owner',
 			optionsEndpoint: 'actors',
 			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
 		},
 		{
 			type: 'change_folder',
