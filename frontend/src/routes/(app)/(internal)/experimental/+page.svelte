@@ -43,4 +43,10 @@
 		link="/experimental/framework-builder"
 		tags={['frameworks', 'builder', 'editor']}
 	/>
+	<Article
+		title="Gantt Chart"
+		desc="Timeline view of applied controls, audits, and risk assessments with swimlanes by domain"
+		link="/experimental/gantt"
+		tags={['planning', 'timeline', 'controls', 'audits']}
+	/>
 </div>
