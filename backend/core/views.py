@@ -9036,6 +9036,161 @@ class FrameworkViewSet(BaseModelViewSet):
         )
         return Response({p: p for p in providers})
 
+    @action(detail=True, methods=["get"], url_path="export-yaml")
+    def export_yaml(self, request, pk=None):
+        """Export a framework as a library-compatible YAML file."""
+        framework = self.get_object()
+
+        slug = self._slugify_framework_name(framework.name, framework.id)
+
+        # Query all nodes ordered by DFS order
+        nodes = list(
+            RequirementNode.objects.filter(framework=framework)
+            .prefetch_related("questions", "questions__choices")
+            .order_by(F("order_id").asc(nulls_last=True))
+        )
+
+        if not nodes:
+            return Response(
+                {"error": "No requirement nodes to export."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Build depth map from parent_urn relationships
+        depth_map = {}
+        urn_set = {n.urn for n in nodes if n.urn}
+        for node in nodes:
+            if not node.parent_urn or node.parent_urn not in urn_set:
+                depth_map[node.urn] = 1
+            else:
+                parent_depth = depth_map.get(node.parent_urn, 0)
+                depth_map[node.urn] = parent_depth + 1
+
+        # Build requirement_nodes list
+        requirement_nodes_list = []
+        for node in nodes:
+            node_data = {
+                "urn": node.urn,
+                "assessable": node.assessable,
+                "depth": depth_map.get(node.urn, 1),
+            }
+            if node.ref_id:
+                node_data["ref_id"] = node.ref_id
+            if node.name:
+                node_data["name"] = node.name
+            if node.description:
+                node_data["description"] = node.description
+            if node.annotation:
+                node_data["annotation"] = node.annotation
+            if node.parent_urn:
+                node_data["parent_urn"] = node.parent_urn
+            if node.implementation_groups:
+                node_data["implementation_groups"] = node.implementation_groups
+            if node.typical_evidence:
+                node_data["typical_evidence"] = node.typical_evidence
+            if node.display_mode and node.display_mode != "default":
+                node_data["display_mode"] = node.display_mode
+            if node.weight and node.weight != 1:
+                node_data["weight"] = node.weight
+            if node.translations:
+                node_data["translations"] = node.translations
+
+            # Build questions dict keyed by URN
+            node_questions = node.questions.order_by("order")
+            questions_dict = {}
+            for q in node_questions:
+                q_data = {"type": q.type, "text": q.text}
+                if q.annotation:
+                    q_data["annotation"] = q.annotation
+                if q.weight and q.weight != 1:
+                    q_data["weight"] = q.weight
+                if q.depends_on:
+                    q_data["depends_on"] = q.depends_on
+                if q.translations:
+                    q_data["translations"] = q.translations
+
+                # Choices
+                choices = list(q.choices.order_by("order"))
+                if choices:
+                    q_data["choices"] = []
+                    for c in choices:
+                        c_data = {"value": c.value}
+                        if c.urn:
+                            c_data["urn"] = c.urn
+                        if c.description:
+                            c_data["description"] = c.description
+                        if c.add_score is not None:
+                            c_data["add_score"] = c.add_score
+                        if c.compute_result:
+                            c_data["compute_result"] = c.compute_result
+                        if c.color:
+                            c_data["color"] = c.color
+                        if c.select_implementation_groups:
+                            c_data["select_implementation_groups"] = (
+                                c.select_implementation_groups
+                            )
+                        if c.translations:
+                            c_data["translations"] = c.translations
+                        q_data["choices"].append(c_data)
+
+                questions_dict[q.urn] = q_data
+
+            if questions_dict:
+                node_data["questions"] = questions_dict
+
+            requirement_nodes_list.append(node_data)
+
+        # Build framework object
+        framework_obj = {
+            "urn": f"urn:custom:risk:framework:{slug}",
+            "ref_id": slug,
+            "name": framework.name,
+            "description": framework.description or "",
+        }
+        if framework.min_score != 0:
+            framework_obj["min_score"] = framework.min_score
+        if framework.max_score != 100:
+            framework_obj["max_score"] = framework.max_score
+        if framework.scores_definition:
+            framework_obj["scores_definition"] = framework.scores_definition
+        if framework.implementation_groups_definition:
+            framework_obj["implementation_groups_definition"] = (
+                framework.implementation_groups_definition
+            )
+        if framework.outcomes_definition:
+            framework_obj["outcomes_definition"] = framework.outcomes_definition
+
+        framework_obj["requirement_nodes"] = requirement_nodes_list
+
+        library_data = {
+            "urn": f"urn:custom:risk:library:{slug}",
+            "locale": framework.locale or "en",
+            "ref_id": slug,
+            "name": framework.name,
+            "description": framework.description or "",
+            "version": 1,
+            "provider": framework.provider or "custom",
+            "packager": "custom",
+            "objects": {
+                "framework": framework_obj,
+            },
+        }
+
+        # Add translations if present
+        if framework.translations:
+            library_data["translations"] = framework.translations
+
+        yaml_content = yaml.dump(
+            library_data,
+            allow_unicode=True,
+            default_flow_style=False,
+            sort_keys=False,
+        )
+
+        response = HttpResponse(yaml_content, content_type="application/x-yaml")
+        response["Content-Disposition"] = f'attachment; filename="{slug}.yaml"'
+        return response
+
     @action(detail=True, methods=["get"], name="Framework as an Excel template")
     def excel_template(self, request, pk):
         fwk = Framework.objects.get(id=pk)

@@ -4,6 +4,7 @@ import io
 import uuid
 
 import pytest
+import yaml
 from django.urls import reverse
 from django.utils.text import slugify
 from rest_framework import status
@@ -683,3 +684,92 @@ class TestFrameworkBuilderURNGeneration:
         # Empty string should produce empty slug
         result = slugify("", allow_unicode=False)
         assert result == ""
+
+
+# --- YAML Export tests ---
+
+
+@pytest.mark.django_db
+class TestFrameworkExportYaml:
+    """Tests for the export-yaml endpoint on FrameworkViewSet."""
+
+    def test_export_yaml_basic(self, authenticated_client, framework_with_tree):
+        """Export produces valid YAML with correct structure."""
+        fw, sec, req, q, c, folder = framework_with_tree
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+
+        assert response.status_code == 200
+        assert response["Content-Type"] == "application/x-yaml"
+        assert "attachment" in response["Content-Disposition"]
+        assert ".yaml" in response["Content-Disposition"]
+
+        data = yaml.safe_load(response.content)
+
+        # Library-level fields
+        assert "urn:custom:risk:library:" in data["urn"]
+        assert data["name"] == fw.name
+        assert data["version"] == 1
+        assert data["packager"] == "custom"
+
+        # Framework object
+        fw_obj = data["objects"]["framework"]
+        assert "urn:custom:risk:framework:" in fw_obj["urn"]
+        assert fw_obj["name"] == fw.name
+
+        # Requirement nodes
+        nodes = fw_obj["requirement_nodes"]
+        assert len(nodes) == 2  # sec + req
+
+        # assessable MUST be present on every node (both true and false)
+        for node in nodes:
+            assert "assessable" in node, f"assessable missing on node {node.get('urn')}"
+
+        # field_visibility must NOT be present anywhere
+        assert "field_visibility" not in str(data)
+
+        # Check parent/child depth
+        section_node = next(n for n in nodes if n["urn"] == sec.urn)
+        req_node = next(n for n in nodes if n["urn"] == req.urn)
+        assert section_node["depth"] == 1
+        assert req_node["depth"] == 2
+        assert section_node["assessable"] is False
+        assert req_node["assessable"] is True
+
+    def test_export_yaml_questions_dict_keyed_by_urn(
+        self, authenticated_client, framework_with_tree
+    ):
+        """Questions are exported as a dict keyed by URN, not a list."""
+        fw, sec, req, q, c, folder = framework_with_tree
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+        data = yaml.safe_load(response.content)
+
+        nodes = data["objects"]["framework"]["requirement_nodes"]
+        req_node = next(n for n in nodes if n.get("questions"))
+
+        questions = req_node["questions"]
+        assert isinstance(questions, dict)
+        assert q.urn in questions
+
+        q_data = questions[q.urn]
+        assert q_data["type"] == "unique_choice"
+        assert q_data["text"] == "Test question"
+
+        # Choices should be a list
+        assert "choices" in q_data
+        assert isinstance(q_data["choices"], list)
+        assert len(q_data["choices"]) == 1
+        assert q_data["choices"][0]["value"] == "Yes"
+
+    def test_export_yaml_empty_framework(self, authenticated_client, app_config):
+        """Export of a framework with no nodes returns 400."""
+        folder = Folder.get_root_folder()
+        empty_fw = Framework.objects.create(
+            name="Empty Framework",
+            folder=folder,
+            is_published=True,
+        )
+        url = reverse("frameworks-export-yaml", args=[empty_fw.id])
+        response = authenticated_client.get(url)
+        assert response.status_code == 400

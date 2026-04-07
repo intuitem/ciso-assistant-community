@@ -113,6 +113,22 @@
 			</a>
 		{/if}
 
+		<!-- Export YAML button -->
+		<a
+			href="/frameworks/{frameworkId}/builder?_action=export-yaml"
+			class="shrink-0 text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1 flex items-center gap-1"
+			download
+			title={$unpublishedStore
+				? "Unpublished changes won't be included. Publish first to export latest edits."
+				: 'Export framework as YAML library file'}
+		>
+			<i class="fa-solid fa-file-export text-[10px]"></i>
+			Export YAML
+			{#if $unpublishedStore}
+				<i class="fa-solid fa-triangle-exclamation text-amber-500 text-[10px]"></i>
+			{/if}
+		</a>
+
 		<!-- Language selector -->
 		{#if ($frameworkStore.available_languages ?? []).length > 0}
 			<div class="h-4 w-px bg-gray-200 shrink-0"></div>

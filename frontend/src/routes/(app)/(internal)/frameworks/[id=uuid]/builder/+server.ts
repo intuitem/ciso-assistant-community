@@ -114,6 +114,22 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 		});
 	}
 
+	if (action === 'export-yaml') {
+		const apiUrl = `${BASE_API_URL}/frameworks/${params.id}/export-yaml/`;
+		const res = await fetch(apiUrl);
+		if (!res.ok) {
+			return new Response(null, { status: res.status });
+		}
+		const body = await res.arrayBuffer();
+		return new Response(body, {
+			status: 200,
+			headers: {
+				'Content-Type': res.headers.get('Content-Type') || 'application/x-yaml',
+				'Content-Disposition': res.headers.get('Content-Disposition') || ''
+			}
+		});
+	}
+
 	return new Response(null, { status: 404 });
 };
 
