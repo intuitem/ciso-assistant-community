@@ -56,11 +56,6 @@ def country_name(country_code):
     return LANGUAGES.get(country_code, "Unknown")
 
 
-@register.filter(name="isinstance")
-def isinstance_filter(val, instance_type):
-    return isinstance(val, eval(instance_type))
-
-
 @register.filter(name="is_list")
 def is_list(val):
     return isinstance(val, list)

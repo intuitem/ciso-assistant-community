@@ -48,7 +48,13 @@ RUN apt-get update && apt-get install -y \
 
 COPY backend/pyproject.toml backend/poetry.lock ./
 RUN poetry install --no-root \
-  && rm -rf $POETRY_CACHE_DIR
+  && .venv/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-deps \
+  && .venv/bin/pip uninstall -y cuda-bindings cuda-pathfinder cuda-toolkit \
+     nvidia-cublas nvidia-cuda-cupti nvidia-cuda-nvrtc nvidia-cuda-runtime \
+     nvidia-cudnn-cu13 nvidia-cufft nvidia-cufile nvidia-curand nvidia-cusolver \
+     nvidia-cusparse nvidia-cusparselt-cu13 nvidia-nccl-cu13 nvidia-nvjitlink \
+     nvidia-nvshmem-cu13 nvidia-nvtx triton 2>/dev/null; \
+  rm -rf $POETRY_CACHE_DIR /root/.cache/pip
 
 COPY backend /code/
 COPY enterprise/backend/enterprise_core /code/enterprise_core

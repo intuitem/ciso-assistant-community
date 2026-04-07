@@ -127,10 +127,17 @@ ENABLE_SANDBOX = os.environ.get("ENABLE_SANDBOX", "False").strip().lower() in (
     "yes",
 )
 
+ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
 LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
+logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -246,6 +253,7 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "chat",
     "doc_management",
     "core",
     "cal",
@@ -507,9 +515,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # SQLIte file can be changed, useful for tests
 SQLITE_FILE = os.environ.get("SQLITE_FILE", BASE_DIR / "db/ciso-assistant.sqlite3")
-LIBRARIES_PATH = library_path = (
-    BASE_DIR.parent.parent / "backend" / "library" / "libraries"
-)
+_lib_path = BASE_DIR / "library/libraries"
+if not _lib_path.is_dir():
+    _lib_path = BASE_DIR.parent.parent / "backend" / "library" / "libraries"
+LIBRARIES_PATH = library_path = _lib_path
 
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {

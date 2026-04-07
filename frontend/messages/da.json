@@ -745,6 +745,7 @@
 	"maturity": "Modenhed",
 	"progress": "Fremskridt",
 	"back": "Tilbage",
+	"backToWorkshop": "Tilbage til Ebios RM-studiet / økosystemet",
 	"duplicate": "Duplikér",
 	"duplicateRiskAssessment": "Duplikér risikovurderingen",
 	"duplicateAppliedControl": "Duplikér den anvendte kontrol",
@@ -1419,5 +1420,9 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Sorter A → Z",
-	"sortDescending": "Sorter Z → A"
+	"sortDescending": "Sorter Z → A",
+	"confirmModalMessagePlural": "Er du sikker? Denne handling vil permanent påvirke følgende objekter",
+	"syncAppliedControlsMessage": "De anvendte kontroller, der bruger denne referencekontrol, vil blive synkroniseret med den. Bemærk venligst, at dette ikke kan fortrydes.",
+	"syncToAppliedControl": "Synkroniser med anvendt kontrol",
+	"syncToReferenceControl": "Synkroniser med referencekontrol"
 }

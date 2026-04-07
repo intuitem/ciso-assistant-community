@@ -21,7 +21,7 @@ from statistics import mean
 import math
 
 from .models import *
-from .utils import camel_case
+from .utils import build_answers_dict, build_questions_dict, camel_case
 
 DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
 
@@ -44,6 +44,7 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "--": "#CCC",
     "to_do": "#BFDBFE",
     "active": "#46D39A",
+    "degraded": "#F97316",
     "deprecated": "#E55759",
     "in_progress": "#5470c6",
     "in_review": "#BBF7D0",
@@ -294,8 +295,8 @@ def get_sorted_requirement_nodes(
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
                 "weight": node.weight if node.weight else 1,
-                "questions": node.questions,
-                "answers": req_as.answers if req_as else None,
+                "questions": build_questions_dict(node),
+                "answers": build_answers_dict(req_as.answers.all()) if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
@@ -303,6 +304,7 @@ def get_sorted_requirement_nodes(
                 if req_as and req_as.result is not None
                 else None,
                 "node_content": node.display_long,
+                "display_mode": node.display_mode,
                 "style": "node",
                 "assessable": node.assessable,
                 "description": get_referential_translation(node, "description"),
@@ -337,8 +339,10 @@ def get_sorted_requirement_nodes(
                     else None,
                     "max_score": max_score if child_req_as else None,
                     "weight": child.weight if child.weight else 1,
-                    "questions": child.questions,
-                    "answers": child_req_as.answers if child_req_as else None,
+                    "questions": build_questions_dict(child),
+                    "answers": build_answers_dict(child_req_as.answers.all())
+                    if child_req_as
+                    else None,
                     "mapping_inference": child_req_as.mapping_inference
                     if child_req_as
                     else None,
@@ -393,6 +397,58 @@ def filter_graph_by_implementation_groups(
             filtered_graph[key] = value
 
     return filtered_graph
+
+
+def enrich_tree_for_soa(
+    tree: dict,
+    ra_lookup: dict,
+    ac_to_risk_scenarios: dict | None = None,
+) -> dict:
+    """
+    Walk the requirement tree and enrich each assessed leaf node with:
+    - selected (applicability boolean)
+    - observation
+    - applied_controls (list of dicts with id, name, ref_id, status, category, eta)
+    - risk_scenarios (list of dicts per applied control, if ac_to_risk_scenarios provided)
+    """
+
+    def _enrich_node(node: dict):
+        ra_id = node.get("ra_id")
+        if ra_id and ra_id in ra_lookup:
+            ra = ra_lookup[ra_id]
+            node["selected"] = ra.selected
+            node["observation"] = ra.observation or ""
+
+            controls = []
+            node_risk_scenarios = {}
+            for ac in ra.applied_controls.all():
+                ac_data = {
+                    "id": str(ac.id),
+                    "name": ac.name,
+                    "ref_id": ac.ref_id or "",
+                    "status": ac.status,
+                    "category": ac.category or "",
+                    "eta": str(ac.eta) if ac.eta else None,
+                }
+                controls.append(ac_data)
+                if ac_to_risk_scenarios and str(ac.id) in ac_to_risk_scenarios:
+                    for rs in ac_to_risk_scenarios[str(ac.id)]:
+                        node_risk_scenarios[rs["id"]] = rs
+            node["applied_controls"] = controls
+            node["risk_scenarios"] = list(node_risk_scenarios.values())
+        else:
+            node["selected"] = None
+            node["observation"] = None
+            node["applied_controls"] = []
+            node["risk_scenarios"] = []
+
+        for child in node.get("children", {}).values():
+            _enrich_node(child)
+
+    for node in tree.values():
+        _enrich_node(node)
+
+    return tree
 
 
 def get_parsed_matrices(
@@ -540,6 +596,7 @@ def applied_control_per_status(user: User):
         AppliedControl.Status.ACTIVE: "#46D39A",
         AppliedControl.Status.IN_PROGRESS: "#392F5A",
         AppliedControl.Status.ON_HOLD: "#F4D06F",
+        AppliedControl.Status.DEGRADED: "#F97316",
         AppliedControl.Status.DEPRECATED: "#E55759",
     }
     (
@@ -1222,6 +1279,7 @@ def get_metrics(user: User, folder_id):
             "in_progress": viewable_controls.filter(status="in_progress").count(),
             "on_hold": viewable_controls.filter(status="on_hold").count(),
             "active": viewable_controls.filter(status="active").count(),
+            "degraded": viewable_controls.filter(status="degraded").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
             "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
             "eta_missed": missed_eta_count,
@@ -1674,6 +1732,8 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
 
 
 def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
+    from collections import defaultdict
+
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
@@ -1705,7 +1765,33 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
     for label in labels:
         label["max"] = max_offset
 
-    return {"labels": labels, "values": values}
+    # Build threat-grouped treemap: threat → folders with scenario counts
+    threat_folders = defaultdict(lambda: defaultdict(int))
+    threat_scenarios = (
+        RiskScenario.objects.filter(
+            id__in=viewable_scenarios,
+            threats__id__in=object_ids_view,
+        )
+        .values("threats__name", "folder__name")
+        .annotate(count=Count("id"))
+    )
+    for row in threat_scenarios:
+        threat_folders[row["threats__name"]][row["folder__name"]] += row["count"]
+
+    tree = []
+    for threat_name, folders in threat_folders.items():
+        children = sorted(
+            [
+                {"name": folder_name, "value": count}
+                for folder_name, count in folders.items()
+            ],
+            key=lambda x: x["value"],
+            reverse=True,
+        )
+        tree.append({"name": threat_name, "children": children})
+    tree.sort(key=lambda x: sum(c["value"] for c in x["children"]), reverse=True)
+
+    return {"labels": labels, "values": values, "tree": tree}
 
 
 def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
