@@ -4121,5 +4121,6 @@
 	"loadingTimelineData": "Loading timeline data…",
 	"objectsWithNoDateNotShown": "{count} object(s) with no date information not shown.",
 	"noItemsToDisplayAdjustFilters": "No items to display. Adjust your filters or add dates to your objects.",
-	"failedToLoadTimelineData": "Failed to load timeline data. Please try again."
+	"failedToLoadTimelineData": "Failed to load timeline data. Please try again.",
+	"useCreationDateAsStart": "Use creation date as start"
 }

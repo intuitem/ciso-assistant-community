@@ -8,7 +8,7 @@
 		name: string;
 		startDate: Date | null;
 		endDate: Date | null;
-		progress: number; // 0-100
+		progress: number; // 0-100, -1 means no progress tracking
 		type: 'bar' | 'milestone';
 		category: string; // e.g. 'appliedControls', 'complianceAssessments'
 		categoryLabel: string;
@@ -456,7 +456,19 @@
 										stroke-width="1"
 									/>
 									<!-- Progress fill -->
-									{#if item.progress > 0}
+									{#if item.progress < 0}
+										<!-- No progress tracking: fill entire bar -->
+										<rect
+											x={x1}
+											y={barY}
+											width={barWidth}
+											height={BAR_HEIGHT}
+											rx="4"
+											ry="4"
+											fill={item.color}
+											opacity="0.7"
+										/>
+									{:else if item.progress > 0}
 										{@const fillWidth = Math.max(2, (barWidth * item.progress) / 100)}
 										<rect
 											x={x1}
@@ -469,8 +481,8 @@
 											opacity="0.7"
 										/>
 									{/if}
-									<!-- Progress text inside bar if wide enough -->
-									{#if barWidth > 40}
+									<!-- Progress text inside bar if wide enough and has tracking -->
+									{#if item.progress >= 0 && barWidth > 40}
 										<text
 											x={x1 + barWidth / 2}
 											y={cy + 4}
@@ -521,7 +533,9 @@
 				<div class="mt-1">
 					{formatDate(tooltip.item.startDate)} &rarr; {formatDate(tooltip.item.endDate)}
 				</div>
-				<div class="mt-0.5">{m.progress()}: {tooltip.item.progress}%</div>
+				{#if tooltip.item.progress >= 0}
+					<div class="mt-0.5">{m.progress()}: {tooltip.item.progress}%</div>
+				{/if}
 			{/if}
 		</div>
 	{/if}

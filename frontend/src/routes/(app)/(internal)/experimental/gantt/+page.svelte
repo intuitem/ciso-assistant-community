@@ -13,32 +13,27 @@
 		{
 			key: 'appliedControls',
 			label: m.appliedControls(),
-			color: '#6366f1', // indigo
-			urlPrefix: 'applied-controls'
+			color: '#6366f1' // indigo
 		},
 		{
 			key: 'complianceAssessments',
 			label: m.complianceAssessments(),
-			color: '#0ea5e9', // sky
-			urlPrefix: 'compliance-assessments'
+			color: '#0ea5e9' // sky
 		},
 		{
 			key: 'riskAssessments',
 			label: m.riskAssessments(),
-			color: '#f97316', // orange
-			urlPrefix: 'risk-assessments'
+			color: '#f97316' // orange
 		},
 		{
 			key: 'businessImpactAnalyses',
 			label: m.businessImpactAnalysis(),
-			color: '#14b8a6', // teal
-			urlPrefix: 'business-impact-analysis'
+			color: '#14b8a6' // teal
 		},
 		{
 			key: 'findingsAssessments',
 			label: m.findingsAssessments(),
-			color: '#ef4444', // red
-			urlPrefix: 'findings-assessments'
+			color: '#ef4444' // red
 		}
 	] as const;
 
@@ -54,6 +49,7 @@
 	let enabledCategories = $state<Set<CategoryKey>>(new Set(CATEGORIES.map((c) => c.key)));
 	let selectedFolders = $state<Set<string>>(new Set());
 	let zoom = $state<'weekly' | 'monthly' | 'yearly'>('monthly');
+	let useCreatedAtAsStart = $state(false);
 
 	const ZOOM_LEVELS = [
 		{ value: 'weekly', label: m.weekly() },
@@ -87,6 +83,13 @@
 		let noDateCount = 0;
 
 		const catConfig = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
+		// Parse any date/datetime string to a Date at midnight UTC (no timezone drift)
+		const parseDate = (v: string | null | undefined): Date | null => {
+			if (!v) return null;
+			// Take only the YYYY-MM-DD part to avoid timezone issues
+			const d = new Date(v.substring(0, 10) + 'T00:00:00');
+			return isNaN(d.getTime()) ? null : d;
+		};
 		const getOwners = (obj: any): string[] =>
 			(obj.owner ?? obj.owners ?? obj.authors ?? [])
 				.map((o: any) => o.str ?? o.name ?? '')
@@ -97,8 +100,8 @@
 			for (const ac of sourceData.appliedControls) {
 				const folderId = ac.folder?.id ?? ac.folder;
 				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
-				const start = ac.start_date ? new Date(ac.start_date) : null;
-				const eta = ac.eta ? new Date(ac.eta) : null;
+				const start = parseDate(ac.start_date);
+				const eta = parseDate(ac.eta);
 				if (!start && !eta) {
 					noDateCount++;
 					continue;
@@ -133,19 +136,19 @@
 				key: 'riskAssessments' as CategoryKey,
 				data: sourceData.riskAssessments,
 				hrefPrefix: '/risk-assessments',
-				getProgress: (_: any) => 0
+				getProgress: (_: any) => -1
 			},
 			{
 				key: 'businessImpactAnalyses' as CategoryKey,
 				data: sourceData.businessImpactAnalyses,
 				hrefPrefix: '/business-impact-analysis',
-				getProgress: (_: any) => 0
+				getProgress: (_: any) => -1
 			},
 			{
 				key: 'findingsAssessments' as CategoryKey,
 				data: sourceData.findingsAssessments,
 				hrefPrefix: '/findings-assessments',
-				getProgress: (_: any) => 0
+				getProgress: (_: any) => -1
 			}
 		];
 
@@ -154,18 +157,22 @@
 			for (const obj of data) {
 				const folderId = obj.folder?.id ?? obj.folder;
 				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
-				const date = obj.eta ? new Date(obj.eta) : obj.due_date ? new Date(obj.due_date) : null;
+				const date = parseDate(obj.eta) ?? parseDate(obj.due_date);
 				if (!date) {
 					noDateCount++;
 					continue;
 				}
+				const createdAt = useCreatedAtAsStart ? parseDate(obj.created_at) : null;
+				// Only use created_at as start if it's before the target date
+				const startDate = createdAt && createdAt < date ? createdAt : null;
+				const hasRange = startDate !== null;
 				items.push({
 					id: obj.id,
 					name: obj.name ?? obj.str ?? '(unnamed)',
-					startDate: null,
+					startDate,
 					endDate: date,
 					progress: getProgress(obj),
-					type: 'milestone',
+					type: hasRange ? 'bar' : 'milestone',
 					category: key,
 					categoryLabel: catConfig[key].label,
 					folder: folderMap.get(folderId) ?? 'Unknown',
@@ -223,6 +230,16 @@
 				</button>
 			{/each}
 		</div>
+
+		<!-- Creation date as start toggle -->
+		<label class="flex items-center gap-1.5 cursor-pointer">
+			<input
+				type="checkbox"
+				bind:checked={useCreatedAtAsStart}
+				class="w-3.5 h-3.5 rounded border-surface-300 text-primary-600"
+			/>
+			<span class="text-xs text-surface-500">{m.useCreationDateAsStart()}</span>
+		</label>
 	</div>
 
 	<!-- Await streamed data -->
@@ -236,10 +253,10 @@
 		{@const ganttItems = result.items}
 		{@const noDateCount = result.noDateCount}
 		{@const availableFolders = (() => {
-			const ids = new Set();
+			const ids = new Set<string>();
 			for (const item of ganttItems) ids.add(item.folderId);
 			return Array.from(ids)
-				.map((id) => ({ id, name: folderMap.get(id as string) ?? 'Unknown' }))
+				.map((id) => ({ id, name: folderMap.get(id) ?? 'Unknown' }))
 				.sort((a, b) => a.name.localeCompare(b.name));
 		})()}
 
@@ -251,13 +268,13 @@
 					{#each availableFolders as folder}
 						<button
 							class="px-2 py-0.5 text-xs rounded-md border transition-colors {selectedFolders.has(
-								folder.id as string
+								folder.id
 							)
 								? 'bg-primary-100 border-primary-400 text-primary-700'
 								: selectedFolders.size === 0
 									? 'bg-surface-50 border-surface-200 text-surface-600'
 									: 'bg-white border-surface-200 text-surface-400'}"
-							onclick={() => toggleFolder(folder.id as string)}
+							onclick={() => toggleFolder(folder.id)}
 						>
 							{folder.name}
 						</button>

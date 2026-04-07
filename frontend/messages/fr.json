@@ -4064,5 +4064,6 @@
 	"loadingTimelineData": "Chargement des données du planning…",
 	"objectsWithNoDateNotShown": "{count} objet(s) sans information de date non affiché(s).",
 	"noItemsToDisplayAdjustFilters": "Aucun élément à afficher. Ajustez vos filtres ou ajoutez des dates à vos objets.",
-	"failedToLoadTimelineData": "Échec du chargement des données du planning. Veuillez réessayer."
+	"failedToLoadTimelineData": "Échec du chargement des données du planning. Veuillez réessayer.",
+	"useCreationDateAsStart": "Utiliser la date de création comme début"
 }
