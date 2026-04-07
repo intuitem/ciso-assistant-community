@@ -1,0 +1,2351 @@
+urn: urn:intuitem:risk:library:nist-csf-2.0-journey
+locale: en
+ref_id: NIST-CSF-2.0-Journey
+name: NIST CSF 2.0 — Journey Threat and Control Library
+description:
+  Threat and reference control library supporting the NIST CSF 2.0 organisational
+  journey preset. Defines eight threat scenarios aligned to all six CSF 2.0 Functions
+  (Govern, Identify, Protect, Detect, Respond, Recover) and twenty reference controls
+  mapped to NIST CSF 2.0 subcategories. Draws on NIST SP 800-30 Rev.1 and MITRE ATT&CK.
+copyright:
+  Threat scenarios and reference controls are original content informed by 
+  NIST SP 800-30 Rev.1, NIST CSF 2.0, and MITRE ATT&CK. NIST CSF 2.0 framework content 
+  is public domain per NIST policy. MITRE ATT&CK is used under CC BY 4.0.
+  Packaged for use with the intuitem/CISO Assistant platform.
+version: 1
+publication_date: "2025-03-23"
+provider: NIST CSF
+packager: Paul Flatt
+translations:
+  fr:
+    name: NIST CSF 2.0 — Bibliothèque de menaces et de contrôles du parcours
+    description:
+      Bibliothèque de menaces et de contrôles de référence supportant le preset de
+      parcours NIST CSF 2.0. Définit huit scénarios de menaces et vingt contrôles
+      de référence alignés sur les sous-catégories du CSF 2.0.
+
+objects:
+
+  # =================================================================
+  # THREATS
+  # =================================================================
+  threats:
+
+    - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-govern
+      ref_id: T-GV-01
+      name: Inadequate Cybersecurity Governance and Accountability
+      description:
+        Absence of defined cybersecurity roles, executive accountability, documented policies,
+        or an organisational risk management strategy results in uncoordinated security decisions
+        and unmanaged enterprise risk. Security investments become misaligned with business
+        objectives, compliance obligations are missed, and incident response authority is unclear.
+        This threat underpins failures across all other CSF functions.
+      annotation: |-
+        Establish a cybersecurity governance charter defining roles, responsibilities, and
+        accountability (e.g. CISO, risk owner, asset owners). Document an organisational
+        cybersecurity policy and risk appetite statement approved at executive or board level.
+        Align cybersecurity strategy to business objectives and legal/regulatory obligations.
+        Conduct periodic governance reviews at least annually.
+      translations:
+        fr:
+          name: Gouvernance cybersécurité insuffisante
+          description:
+            L'absence de rôles, politiques ou responsabilités exécutives définis entraîne des
+            décisions de sécurité non coordonnées et une gestion des risques insuffisante.
+          annotation: |-
+            Établir une charte de gouvernance définissant les rôles et responsabilités.
+            Documenter une politique de cybersécurité approuvée au niveau exécutif ou du conseil.
+            Conduire des revues de gouvernance au moins annuellement.
+
+    - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-identify
+      ref_id: T-ID-01
+      name: Unknown or Unmanaged Assets Exploited
+      description:
+        Attackers target shadow IT, unmanaged endpoints, undocumented cloud instances, or legacy
+        systems that fall outside the organisation's asset inventory, vulnerability management,
+        and patch management processes. Without comprehensive asset visibility the organisation
+        cannot assess exposure, apply controls, or respond effectively to incidents involving
+        untracked resources. Commonly exploited via internet-facing services, forgotten VPNs,
+        and unmanaged SaaS accounts.
+      annotation: |-
+        Maintain a comprehensive asset inventory covering hardware, software, cloud resources,
+        data, and third-party dependencies (aligned to ID.AM). Integrate discovery tooling
+        (e.g. network scanning, cloud asset management) to identify unmanaged assets. Assign
+        asset owners and define criticality ratings. Include shadow IT discovery as part of
+        periodic risk assessments.
+      translations:
+        fr:
+          name: Actifs inconnus ou non gérés exploités
+          description:
+            Des attaquants ciblent le shadow IT, les appareils non gérés ou les systèmes non
+            documentés hors de la visibilité de l'organisation.
+          annotation: |-
+            Maintenir un inventaire complet des actifs. Intégrer des outils de découverte pour
+            identifier les actifs non gérés. Assigner des propriétaires d'actifs et définir
+            des niveaux de criticité.
+
+    - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-protect-phishing
+      ref_id: T-PR-01
+      name: Credential Theft via Phishing or Social Engineering
+      description:
+        An employee or privileged user is deceived into disclosing credentials, approving
+        fraudulent MFA prompts (MFA fatigue), or executing malicious payloads through phishing
+        emails, spear-phishing, smishing, or voice-based social engineering. Compromised
+        credentials provide attackers with authenticated access to email, collaboration
+        platforms, business applications, and identity systems — often bypassing perimeter
+        controls entirely.
+      annotation: |-
+        Enforce phishing-resistant MFA (e.g. FIDO2/passkeys) for all users, prioritising
+        privileged and remote access accounts. Deploy email filtering with anti-phishing
+        controls (DMARC, DKIM, SPF). Conduct regular phishing simulation exercises and
+        role-based security awareness training. Implement Conditional Access policies to
+        restrict access from unmanaged devices and unusual locations. Monitor identity logs
+        for impossible travel and anomalous sign-in patterns.
+      translations:
+        fr:
+          name: Vol d'identifiants par hameçonnage ou ingénierie sociale
+          description:
+            Un employé divulgue ses identifiants via un email d'hameçonnage ou une attaque
+            d'ingénierie sociale, accordant un accès non autorisé aux systèmes métier.
+          annotation: |-
+            Appliquer une MFA résistante au hameçonnage. Déployer des contrôles anti-hameçonnage
+            pour la messagerie (DMARC, DKIM, SPF). Conduire des simulations de phishing et des
+            formations de sensibilisation basées sur les rôles.
+
+    - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-protect-vuln
+      ref_id: T-PR-02
+      name: Exploitation of Unpatched Software or Systems
+      description:
+        Attackers exploit publicly known vulnerabilities (CVEs) in unpatched operating systems,
+        business applications, network devices, or internet-facing services to achieve initial
+        access, privilege escalation, or lateral movement. Exploitation may be opportunistic
+        via automated scanning or targeted. Unpatched vulnerabilities in internet-exposed assets
+        are among the most common initial access vectors in ransomware and data breach incidents.
+      annotation: |-
+        Establish a vulnerability management programme with defined patch timelines based on
+        criticality (e.g. critical CVEs within 48 hours, high within 14 days). Prioritise
+        internet-facing and privileged systems. Use automated vulnerability scanning tools and
+        integrate with threat intelligence feeds to identify actively exploited CVEs. Apply
+        application allowlisting and system hardening baselines to reduce exploitable attack
+        surface.
+      translations:
+        fr:
+          name: Exploitation de logiciels ou systèmes non mis à jour
+          description:
+            Des attaquants exploitent des vulnérabilités connues dans des systèmes, applications
+            ou équipements réseau non corrigés pour obtenir un accès initial ou élever leurs
+            privilèges.
+          annotation: |-
+            Établir un programme de gestion des vulnérabilités avec des délais de correction
+            définis selon la criticité. Utiliser des outils d'analyse automatisés et des flux
+            de renseignement sur les menaces pour identifier les CVE activement exploitées.
+
+    - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-protect-supplychain
+      ref_id: T-PR-03
+      name: Supply Chain or Third-Party Compromise
+      description:
+        A trusted vendor, managed service provider (MSP), SaaS platform, or software supplier
+        is compromised, providing attackers with a legitimate and trusted pathway into the
+        organisation's systems, data, or networks. Supply chain attacks may exploit software
+        update mechanisms, shared remote access credentials, or API integrations. MSP-delivered
+        tooling with broad administrative access represents a particularly high-risk vector.
+      annotation: |-
+        Maintain a register of critical suppliers and third-party dependencies with associated
+        risk ratings. Conduct supplier security assessments proportional to access level and
+        criticality. Apply least-privilege principles to all third-party access and avoid
+        standing privileged access for vendors. Monitor third-party connections and review
+        supplier incident notification obligations in contracts. Subscribe to software vendor
+        security advisories and respond to supply chain compromise notifications promptly.
+      translations:
+        fr:
+          name: Compromission de la chaîne d'approvisionnement ou d'un tiers
+          description:
+            Un fournisseur ou prestataire de confiance est compromis, offrant aux attaquants
+            un accès aux systèmes ou données de l'organisation via une voie de confiance.
+          annotation: |-
+            Maintenir un registre des fournisseurs critiques avec des évaluations de risque.
+            Appliquer le principe du moindre privilège pour tous les accès tiers. Surveiller
+            les connexions tierces et examiner les obligations de notification dans les contrats.
+
+    - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-detect-lateral
+      ref_id: T-DE-01
+      name: Undetected Intrusion and Lateral Movement
+      description:
+        An attacker who has achieved initial access maintains persistent presence and moves
+        laterally across internal systems for an extended period — often weeks or months —
+        without triggering detection. During this dwell time the attacker escalates privileges,
+        maps the environment, establishes additional persistence mechanisms, and exfiltrates
+        data. Insufficient logging coverage, lack of centralised log correlation, or absence
+        of behavioural detection significantly increase dwell time and breach impact.
+      annotation: |-
+        Deploy centralised log aggregation and SIEM/XDR capabilities with detection rules
+        covering authentication anomalies, unusual internal access patterns, and known lateral
+        movement techniques. Ensure comprehensive logging of endpoint, identity, network, and
+        cloud activity with sufficient retention (minimum 12 months recommended). Implement
+        network segmentation to limit blast radius. Conduct periodic threat hunting exercises
+        and validate detection coverage against MITRE ATT&CK techniques relevant to your sector.
+      translations:
+        fr:
+          name: Intrusion non détectée et mouvement latéral
+          description:
+            Un attaquant maintient un accès persistant et se déplace latéralement sans déclencher
+            de détection, escaladant ses privilèges et exfiltrant des données critiques.
+          annotation: |-
+            Déployer une agrégation centralisée des journaux et des capacités SIEM/XDR avec
+            des règles de détection couvrant les anomalies d'authentification et les techniques
+            de mouvement latéral connues. Mettre en œuvre la segmentation réseau.
+
+    - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-respond-ransomware
+      ref_id: T-RS-01
+      name: Ransomware Deployment and Business Disruption
+      description:
+        Ransomware is deployed across endpoints, servers, and shared storage systems following
+        an initial compromise — typically via phishing, exploitation of unpatched vulnerabilities,
+        or compromised remote access. Ransomware encrypts critical business data, may exfiltrate
+        sensitive information for double-extortion, and causes significant operational disruption.
+        Without a tested incident response plan and resilient backups, recovery may take days to
+        weeks and incur substantial financial and reputational damage.
+      annotation: |-
+        Develop, document, and test an Incident Response Plan covering ransomware scenarios
+        including containment, eradication, and communication playbooks. Ensure executive and
+        legal escalation paths are pre-defined. Maintain offline or immutable backups of all
+        critical systems and data, tested against defined RTO/RPO. Implement anti-ransomware
+        controls including EDR, application control, and protected backup access. Register with
+        relevant national cybersecurity agencies (e.g. CERT NZ, ACSC) for incident reporting
+        obligations.
+      translations:
+        fr:
+          name: Déploiement de rançongiciel et perturbation de l'activité
+          description:
+            Un rançongiciel est déployé sur les postes et le stockage partagé, chiffrant les
+            données critiques et provoquant une perturbation opérationnelle majeure avec risque
+            de perte permanente de données.
+          annotation: |-
+            Développer et tester un Plan de Réponse aux Incidents couvrant les scénarios de
+            rançongiciel. Maintenir des sauvegardes hors ligne ou immuables testées contre les
+            RTO/RPO définis. Mettre en œuvre des contrôles EDR et de contrôle des applications.
+
+    - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-recover-bcdr
+      ref_id: T-RC-01
+      name: Failure to Recover from a Significant Cyber Incident
+      description:
+        Inadequate, untested, or undocumented backup and recovery procedures result in extended
+        downtime, permanent data loss, or failed restoration following a significant cyber
+        incident. Recovery failures may stem from backups not isolated from ransomware
+        encryption, missing recovery runbooks, undefined RTO/RPO, lack of tested Business
+        Continuity Plans, or insufficient personnel trained to execute recovery procedures
+        under incident conditions.
+      annotation: |-
+        Define and document RTO and RPO targets for all critical systems and data assets.
+        Implement a 3-2-1 backup strategy (three copies, two media types, one offsite/offline).
+        Test backup restoration procedures at least annually and after significant infrastructure
+        changes. Develop and maintain Business Continuity and Disaster Recovery plans covering
+        cyber incident scenarios. Conduct tabletop exercises simulating ransomware or destructive
+        attack recovery. Ensure recovery procedures are accessible offline in the event of a
+        network-wide incident.
+      translations:
+        fr:
+          name: Incapacité à se remettre d'un incident cyber majeur
+          description:
+            Des sauvegardes, procédures de reprise ou plans de continuité inadéquats ou non
+            testés entraînent une indisponibilité prolongée et une perte permanente de données
+            suite à un incident cyber majeur.
+          annotation: |-
+            Définir les RTO et RPO pour tous les actifs critiques. Mettre en œuvre une stratégie
+            de sauvegarde 3-2-1. Tester les procédures de restauration au moins annuellement.
+            Conduire des exercices sur table simulant la reprise après un incident de rançongiciel.
+
+  # =================================================================
+  # FRAMEWORK — NIST CSF 2.0 with reference control mappings
+  # =================================================================
+  framework:
+    urn: urn:intuitem:risk:framework:nist-csf-2.0-journey
+    ref_id: NIST-CSF-2.0-journey
+    name: NIST CSF v2.0 — Journey
+    description: NIST Cybersecurity Framework 2.0 with mapped reference controls for the organisational journey preset
+    min_score: 1
+    max_score: 4
+    scores_definition:
+      - score: 1
+        name: Partial
+        description:
+          Application of the organizational cybersecurity risk strategy is managed
+          in an ad hoc manner. There is limited awareness of cybersecurity risks
+          at the organizational level.
+      - score: 2
+        name: Risk Informed
+        description:
+          Risk management practices are approved by management but may not be
+          established as organization-wide policy. There is an awareness of
+          cybersecurity risks at the organizational level but an organization-wide
+          approach to managing cybersecurity risks has not been established.
+      - score: 3
+        name: Repeatable
+        description:
+          The organization's risk management practices are formally approved and
+          expressed as policy. Organizational cybersecurity practices are regularly
+          updated based on the application of risk management processes to changes
+          in business requirements, threats, and the technological landscape.
+      - score: 4
+        name: Adaptive
+        description:
+          There is an organization-wide approach to managing cybersecurity risks
+          that uses risk-informed policies, processes, and procedures to address
+          potential cybersecurity events. The organization adapts its cybersecurity
+          practices based on previous and current cybersecurity activities, including
+          lessons learned and predictive indicators.
+
+    requirement_nodes:
+
+      # ---------------------------------------------------------------
+      # GOVERN (GV)
+      # ---------------------------------------------------------------
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv
+        assessable: false
+        depth: 1
+        ref_id: GV
+        name: GOVERN
+        description:
+          The organization's cybersecurity risk management strategy, expectations,
+          and policy are established, communicated, and monitored.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv
+        ref_id: GV.OC
+        name: Organizational Context
+        description:
+          The circumstances surrounding the organization's cybersecurity risk
+          management decisions are understood.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc
+        ref_id: GV.OC-01
+        description:
+          The organizational mission is understood and informs cybersecurity
+          risk management.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc
+        ref_id: GV.OC-02
+        description:
+          Internal and external stakeholders are understood, and their needs
+          and expectations regarding cybersecurity risk management are understood
+          and considered.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc
+        ref_id: GV.OC-03
+        description:
+          Legal, regulatory, and contractual requirements regarding cybersecurity
+          are understood and managed.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc
+        ref_id: GV.OC-04
+        description:
+          Critical objectives, capabilities, and services that stakeholders
+          depend on or expect from the organization are understood and communicated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc
+        ref_id: GV.OC-05
+        description:
+          Outcomes, capabilities, and services that the organization depends
+          on are understood and communicated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv
+        ref_id: GV.RM
+        name: Risk Management Strategy
+        description:
+          The organization's priorities, constraints, risk tolerance and appetite
+          statements, and assumptions are established, communicated, and used
+          to support operational risk decisions.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
+        ref_id: GV.RM-01
+        description:
+          Risk management objectives are established and agreed to by
+          organizational stakeholders.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
+        ref_id: GV.RM-02
+        description:
+          Risk appetite and risk tolerance statements are established,
+          communicated, and maintained.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
+        ref_id: GV.RM-03
+        description:
+          Cybersecurity risk management activities and outcomes are included
+          in enterprise risk management processes.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
+        ref_id: GV.RM-04
+        description:
+          Strategic direction that describes appropriate risk response options
+          is established and communicated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
+        ref_id: GV.RM-05
+        description:
+          Lines of communication across the organization are established for
+          cybersecurity risks, including risks from suppliers and other third
+          parties.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
+        ref_id: GV.RM-06
+        description:
+          A standardized method for calculating, documenting, categorizing,
+          and prioritizing cybersecurity risks is established and communicated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-07
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
+        ref_id: GV.RM-07
+        description:
+          Strategic opportunities (i.e., positive risks) are characterized
+          and are included in organizational cybersecurity risk discussions.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv
+        ref_id: GV.RR
+        name: Roles, Responsibilities, and Authorities
+        description:
+          Cybersecurity roles, responsibilities, and authorities to foster
+          accountability, performance assessment, and continuous improvement
+          are established and communicated.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr
+        ref_id: GV.RR-01
+        description:
+          Organizational leadership is responsible and accountable for
+          cybersecurity risk and fosters a culture that is risk-aware, ethical,
+          and continually improving.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr
+        ref_id: GV.RR-02
+        description:
+          Roles, responsibilities, and authorities related to cybersecurity
+          risk management are established, communicated, understood, and
+          enforced.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr
+        ref_id: GV.RR-03
+        description:
+          Adequate resources are allocated commensurate with the cybersecurity
+          risk strategy, roles, responsibilities, and policies.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr
+        ref_id: GV.RR-04
+        description:
+          Cybersecurity is included in human resources practices.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.po
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv
+        ref_id: GV.PO
+        name: Policy
+        description:
+          Organizational cybersecurity policy is established, communicated,
+          and enforced.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.po-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.po
+        ref_id: GV.PO-01
+        description:
+          Policy for managing cybersecurity risks is established based on
+          organizational context, cybersecurity strategy, and priorities and
+          is communicated and enforced.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.po-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.po
+        ref_id: GV.PO-02
+        description:
+          Policy for managing cybersecurity risks is reviewed, updated,
+          communicated, and enforced to reflect changes in requirements,
+          threats, technology, and organizational mission.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv
+        ref_id: GV.OV
+        name: Oversight
+        description:
+          Results of organization-wide cybersecurity risk management activities
+          and performance are used to inform, improve, and adjust the risk
+          management strategy.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov
+        ref_id: GV.OV-01
+        description:
+          Cybersecurity risk management strategy outcomes are reviewed to
+          inform and adjust strategy and direction.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov
+        ref_id: GV.OV-02
+        description:
+          The cybersecurity risk management strategy is reviewed and adjusted
+          to ensure coverage of organizational requirements and risks.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov
+        ref_id: GV.OV-03
+        description:
+          Organizational cybersecurity risk management performance is evaluated
+          and reviewed for adjustments needed.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv
+        ref_id: GV.SC
+        name: Cybersecurity Supply Chain Risk Management
+        description:
+          Cyber supply chain risk management processes are identified,
+          established, managed, monitored, and improved by organizational
+          stakeholders.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-01
+        description:
+          A cybersecurity supply chain risk management program, strategy,
+          objectives, policies, and processes are established and agreed to
+          by organizational stakeholders.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-02
+        description:
+          Cybersecurity roles and responsibilities for suppliers, customers,
+          and partners are established, communicated, and coordinated
+          internally and externally.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-03
+        description:
+          Cybersecurity supply chain risk management is integrated into
+          cybersecurity and enterprise risk management, risk assessment,
+          and improvement processes.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-04
+        description:
+          Suppliers are known and prioritized by criticality.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-05
+        description:
+          Requirements to address cybersecurity risks in supply chains are
+          established, prioritized, and integrated into contracts and other
+          types of agreements with suppliers and other relevant third parties.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-06
+        description:
+          Planning and due diligence are performed to reduce risks before
+          entering into formal supplier or other third-party relationships.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-07
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-07
+        description:
+          The risks posed by a supplier, their products and services, and
+          other third parties are understood, recorded, prioritized, assessed,
+          responded to, and monitored over the course of the relationship.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-08
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-08
+        description:
+          Relevant suppliers and other third parties are included in incident
+          planning, response, and recovery activities.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-09
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-09
+        description:
+          Supply chain security practices are integrated into cybersecurity
+          and enterprise risk management programs, and their performance is
+          monitored throughout the technology product and service life cycle.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-10
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
+        ref_id: GV.SC-10
+        description:
+          Cybersecurity supply chain risk management plans include provisions
+          for activities that occur after the conclusion of a partnership or
+          service agreement.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      # ---------------------------------------------------------------
+      # IDENTIFY (ID)
+      # ---------------------------------------------------------------
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id
+        assessable: false
+        depth: 1
+        ref_id: ID
+        name: IDENTIFY
+        description:
+          The organization's current cybersecurity risks are understood.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id
+        ref_id: ID.AM
+        name: Asset Management
+        description:
+          Assets that enable the organization to achieve business purposes
+          are identified and managed consistent with their relative importance
+          to organizational objectives and the organization's risk strategy.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
+        ref_id: ID.AM-01
+        description:
+          Inventories of hardware managed by the organization are maintained.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
+        ref_id: ID.AM-02
+        description:
+          Inventories of software, services, and systems managed by the
+          organization are maintained.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
+        ref_id: ID.AM-03
+        description:
+          Representations of the organization's authorized network communication
+          and internal and external network data flows are maintained.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
+        ref_id: ID.AM-04
+        description:
+          Inventories of services provided by suppliers are maintained.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
+        ref_id: ID.AM-05
+        description:
+          Assets are prioritized based on classification, criticality,
+          resources, and impact on the mission.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-07
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
+        ref_id: ID.AM-07
+        description:
+          Inventories of data and corresponding metadata for designated
+          data types are maintained.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-08
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
+        ref_id: ID.AM-08
+        description:
+          Systems, hardware, software, services, and data are managed
+          throughout their life cycles.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id
+        ref_id: ID.RA
+        name: Risk Assessment
+        description:
+          The cybersecurity risk to the organization, assets, and individuals
+          is understood by the organization.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-01
+        description:
+          Vulnerabilities in assets are identified, validated, and recorded.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-02
+        description:
+          Cyber threat intelligence is received from information sharing
+          forums and sources.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-03
+        description:
+          Internal and external threats to the organization are identified
+          and recorded.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-04
+        description:
+          Potential impacts and likelihoods of threats exploiting
+          vulnerabilities are identified and recorded.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-05
+        description:
+          Threats, vulnerabilities, likelihoods, and impacts are used to
+          understand inherent risk and inform risk response prioritization.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-06
+        description:
+          Risk responses are chosen, prioritized, planned, tracked,
+          and communicated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-07
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-07
+        description:
+          Changes and exceptions are managed, assessed for risk impact,
+          recorded, and tracked.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-08
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-08
+        description:
+          Processes for receiving, analyzing, and responding to vulnerability
+          disclosures are established.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-09
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-09
+        description:
+          The authenticity and integrity of hardware and software are
+          assessed prior to acquisition and use.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-10
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
+        ref_id: ID.RA-10
+        description:
+          Critical suppliers are assessed prior to acquisition.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id
+        ref_id: ID.IM
+        name: Improvement
+        description:
+          Improvements to organizational cybersecurity risk management
+          processes, procedures and activities are identified across all
+          CSF Functions.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im
+        ref_id: ID.IM-01
+        description:
+          Improvements are identified from evaluations.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im
+        ref_id: ID.IM-02
+        description:
+          Improvements are identified from security tests and exercises,
+          including those done in coordination with suppliers and relevant
+          third parties.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im
+        ref_id: ID.IM-03
+        description:
+          Improvements are identified from execution of operational
+          processes, procedures, and activities.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im
+        ref_id: ID.IM-04
+        description:
+          Incident response plans and other cybersecurity plans that affect
+          operations are established, communicated, maintained, and improved.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+
+      # ---------------------------------------------------------------
+      # PROTECT (PR)
+      # ---------------------------------------------------------------
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr
+        assessable: false
+        depth: 1
+        ref_id: PR
+        name: PROTECT
+        description:
+          Safeguards to manage the organization's cybersecurity risks are used.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr
+        ref_id: PR.AA
+        name: Identity Management, Authentication, and Access Control
+        description:
+          Access to physical and logical assets is limited to authorized users,
+          services, and hardware and managed commensurate with the assessed
+          risk of unauthorized access.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
+        ref_id: PR.AA-01
+        description:
+          Identities and credentials for authorized users, services, and
+          hardware are managed by the organization.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
+        ref_id: PR.AA-02
+        description:
+          Identities are proofed and bound to credentials based on the
+          context of interactions.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
+        ref_id: PR.AA-03
+        description:
+          Users, services, and hardware are authenticated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
+        ref_id: PR.AA-04
+        description:
+          Identity assertions are protected, conveyed, and verified.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
+        ref_id: PR.AA-05
+        description:
+          Access permissions, entitlements, and authorizations are defined
+          in a policy, managed, enforced, and reviewed, and incorporate the
+          principles of least privilege and separation of duties.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
+        ref_id: PR.AA-06
+        description:
+          Physical access to assets is managed, monitored, and enforced
+          commensurate with risk.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.at
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr
+        ref_id: PR.AT
+        name: Awareness and Training
+        description:
+          The organization's personnel are provided with cybersecurity
+          awareness and training so that they can perform their
+          cybersecurity-related tasks.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.at-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.at
+        ref_id: PR.AT-01
+        description:
+          Personnel are provided with awareness and training so that they
+          possess the knowledge and skills to perform general tasks with
+          cybersecurity risks in mind.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.at-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.at
+        ref_id: PR.AT-02
+        description:
+          Individuals in specialized roles are provided with awareness and
+          training so that they possess the knowledge and skills to perform
+          relevant tasks with cybersecurity risks in mind.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr
+        ref_id: PR.DS
+        name: Data Security
+        description:
+          Data are managed consistent with the organization's risk strategy
+          to protect the confidentiality, integrity, and availability of
+          information.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds
+        ref_id: PR.DS-01
+        description:
+          The confidentiality, integrity, and availability of data-at-rest
+          are protected.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds
+        ref_id: PR.DS-02
+        description:
+          The confidentiality, integrity, and availability of data-in-transit
+          are protected.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds-10
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds
+        ref_id: PR.DS-10
+        description:
+          The confidentiality, integrity, and availability of data-in-use
+          are protected.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds-11
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds
+        ref_id: PR.DS-11
+        description:
+          Backups of data are created, protected, maintained, and tested.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr
+        ref_id: PR.PS
+        name: Platform Security
+        description:
+          The hardware, software, and services of physical and virtual
+          platforms are managed consistent with the organization's risk
+          strategy.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
+        ref_id: PR.PS-01
+        description:
+          Configuration management practices are established and applied.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
+        ref_id: PR.PS-02
+        description:
+          Software is maintained, replaced, and removed commensurate with risk.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
+        ref_id: PR.PS-03
+        description:
+          Hardware is maintained, replaced, and removed commensurate with risk.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
+        ref_id: PR.PS-04
+        description:
+          Log records are generated and made available for continuous monitoring.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-08
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
+        ref_id: PR.PS-05
+        description:
+          Installation and execution of unauthorized software are prevented.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
+        ref_id: PR.PS-06
+        description:
+          Secure software development practices are integrated, and their
+          performance is monitored throughout the software development life cycle.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr
+        ref_id: PR.IR
+        name: Technology Infrastructure Resilience
+        description:
+          Security architectures are managed with the organization's risk
+          strategy to protect asset confidentiality, integrity, and availability,
+          and organizational resilience.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir
+        ref_id: PR.IR-01
+        description:
+          Networks and environments are protected from unauthorized logical
+          access and usage.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir
+        ref_id: PR.IR-02
+        description:
+          The organization's technology assets are protected from environmental
+          threats.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir
+        ref_id: PR.IR-03
+        description:
+          Mechanisms are implemented to achieve resilience requirements in
+          normal and adverse situations.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir
+        ref_id: PR.IR-04
+        description:
+          Adequate resource capacity to ensure availability is maintained.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+
+      # ---------------------------------------------------------------
+      # DETECT (DE)
+      # ---------------------------------------------------------------
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de
+        assessable: false
+        depth: 1
+        ref_id: DE
+        name: DETECT
+        description:
+          Possible cybersecurity attacks and compromises are found and analyzed.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de
+        ref_id: DE.CM
+        name: Continuous Monitoring
+        description:
+          Assets are monitored to find anomalies, indicators of compromise,
+          and other potentially adverse events.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm
+        ref_id: DE.CM-01
+        description:
+          Networks and network services are monitored to find potentially
+          adverse events.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm
+        ref_id: DE.CM-02
+        description:
+          The physical environment is monitored to find potentially adverse
+          events.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm
+        ref_id: DE.CM-03
+        description:
+          Personnel activity and technology usage are monitored to find
+          potentially adverse events.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm
+        ref_id: DE.CM-06
+        description:
+          External service provider activities and services are monitored
+          to find potentially adverse events.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-09
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm
+        ref_id: DE.CM-09
+        description:
+          Computing hardware and software, runtime environments, and their
+          data are monitored to find potentially adverse events.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de
+        ref_id: DE.AE
+        name: Adverse Event Analysis
+        description:
+          Anomalies, indicators of compromise, and other potentially adverse
+          events are analyzed to characterize the events and detect cybersecurity
+          incidents.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
+        ref_id: DE.AE-02
+        description:
+          Potentially adverse events are analyzed to better understand
+          associated activities.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
+        ref_id: DE.AE-03
+        description:
+          Information is correlated from multiple sources.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
+        ref_id: DE.AE-04
+        description:
+          The estimated impact and scope of adverse events are understood.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
+        ref_id: DE.AE-06
+        description:
+          Information on adverse events is provided to authorized staff and tools.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-07
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
+        ref_id: DE.AE-07
+        description:
+          Cyber threat intelligence and other contextual information are
+          integrated into the analysis.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-08
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
+        ref_id: DE.AE-08
+        description:
+          Incidents are declared when adverse events meet the defined incident
+          criteria.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+
+      # ---------------------------------------------------------------
+      # RESPOND (RS)
+      # ---------------------------------------------------------------
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs
+        assessable: false
+        depth: 1
+        ref_id: RS
+        name: RESPOND
+        description:
+          Actions regarding a detected cybersecurity incident are taken.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs
+        ref_id: RS.MA
+        name: Incident Management
+        description:
+          Responses to detected cybersecurity incidents are managed.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
+        ref_id: RS.MA-01
+        description:
+          The incident response plan is executed in coordination with relevant
+          third parties once an incident is declared.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
+        ref_id: RS.MA-02
+        description:
+          Incident reports are triaged and validated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
+        ref_id: RS.MA-03
+        description:
+          Incidents are categorized and prioritized.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
+        ref_id: RS.MA-04
+        description:
+          Incidents are escalated or elevated as needed.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
+        ref_id: RS.MA-05
+        description:
+          The criteria for initiating incident recovery are applied.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs
+        ref_id: RS.AN
+        name: Incident Analysis
+        description:
+          Investigations are conducted to ensure effective response and support
+          forensics and recovery activities.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an
+        ref_id: RS.AN-03
+        description:
+          Analysis is performed to establish what has taken place during an
+          incident and the root cause of the incident.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an
+        ref_id: RS.AN-06
+        description:
+          Actions performed during an investigation are recorded, and the
+          records' integrity and provenance are preserved.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an-07
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an
+        ref_id: RS.AN-07
+        description:
+          Incident data and metadata are collected, and their integrity and
+          provenance are preserved.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an-08
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an
+        ref_id: RS.AN-08
+        description:
+          An incident's magnitude is estimated and validated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs
+        ref_id: RS.CO
+        name: Incident Response Reporting and Communication
+        description:
+          Response activities are coordinated with internal and external
+          stakeholders as required by laws, regulations, or policies.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co
+        ref_id: RS.CO-02
+        description:
+          Internal and external stakeholders are notified of incidents.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co
+        ref_id: RS.CO-03
+        description:
+          Information is shared with designated internal and external
+          stakeholders.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs
+        ref_id: RS.MI
+        name: Incident Mitigation
+        description:
+          Activities are performed to prevent expansion of an event and mitigate
+          its effects.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi
+        ref_id: RS.MI-01
+        description:
+          Incidents are contained.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-04
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi
+        ref_id: RS.MI-02
+        description:
+          Incidents are eradicated.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-04
+
+      # ---------------------------------------------------------------
+      # RECOVER (RC)
+      # ---------------------------------------------------------------
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc
+        assessable: false
+        depth: 1
+        ref_id: RC
+        name: RECOVER
+        description:
+          Assets and operations affected by a cybersecurity incident are restored.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc
+        ref_id: RC.RP
+        name: Incident Recovery Plan Execution
+        description:
+          Restoration activities are performed to ensure operational availability
+          of systems and services affected by cybersecurity incidents.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-01
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp
+        ref_id: RC.RP-01
+        description:
+          The recovery portion of the incident response plan is executed once
+          initiated from the incident response process.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-02
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp
+        ref_id: RC.RP-02
+        description:
+          Recovery actions are selected, scoped, prioritized, and performed.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp
+        ref_id: RC.RP-03
+        description:
+          The integrity of backups and other restoration assets is verified
+          before using them for restoration.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-06
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp
+        ref_id: RC.RP-04
+        description:
+          Critical mission functions and cybersecurity risk management are
+          considered to establish post-incident operational norms.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-02
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-05
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp
+        ref_id: RC.RP-05
+        description:
+          The integrity of restored assets is verified, systems and services
+          are restored, and normal operating status is confirmed.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-06
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp
+        ref_id: RC.RP-06
+        description:
+          The end of incident recovery is declared based on criteria, and
+          incident-related documentation is completed.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.co
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc
+        ref_id: RC.CO
+        name: Incident Recovery Communication
+        description:
+          Restoration activities are coordinated with internal and external
+          parties.
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.co-03
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.co
+        ref_id: RC.CO-03
+        description:
+          Recovery activities and progress in restoring operational capabilities
+          are communicated to designated internal and external stakeholders.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-03
+
+      - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.co-04
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.co
+        ref_id: RC.CO-04
+        description:
+          Public updates on incident recovery are shared using approved methods
+          and messaging.
+        reference_controls:
+          - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-03
+  reference_controls:
+
+    # ---------------------------------------------------------------
+    # GOVERN (GV)
+    # ---------------------------------------------------------------
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
+      ref_id: RC.GV-01
+      name: Cybersecurity Governance Charter and Policy
+      category: policy
+      csf_function: govern
+      description:
+        Establish and document a cybersecurity governance charter defining executive
+        accountability, cybersecurity roles and responsibilities, and organisational
+        risk appetite. Approve at board or executive level and review annually.
+        Aligned to GV.OC-01, GV.RR-01, GV.RR-02, GV.PO-01.
+      translations:
+        fr:
+          name: Charte de gouvernance et politique de cybersécurité
+          description:
+            Établir et documenter une charte de gouvernance cybersécurité définissant
+            les responsabilités exécutives, les rôles et l'appétit au risque. Approuver
+            au niveau exécutif ou du conseil et réviser annuellement.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+      ref_id: RC.GV-02
+      name: Risk Appetite and Risk Tolerance Statements
+      category: policy
+      csf_function: govern
+      description:
+        Document and communicate organisational risk appetite and risk tolerance
+        statements for cybersecurity. Translate into measurable thresholds used
+        to prioritise risk response decisions. Aligned to GV.RM-01, GV.RM-02.
+      translations:
+        fr:
+          name: Déclarations d'appétit et de tolérance au risque
+          description:
+            Documenter et communiquer les déclarations d'appétit et de tolérance
+            au risque cybersécurité. Traduire en seuils mesurables pour prioriser
+            les décisions de réponse aux risques.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+      ref_id: RC.GV-03
+      name: Cybersecurity Roles, Responsibilities, and Authorities
+      category: process
+      csf_function: govern
+      description:
+        Document all cybersecurity roles, responsibilities, and authorities in
+        organisational policy. Include performance requirements in personnel descriptions.
+        Establish separation of duties across critical security functions.
+        Aligned to GV.RR-02, GV.RR-03, GV.RR-04.
+      translations:
+        fr:
+          name: Rôles, responsabilités et autorités en cybersécurité
+          description:
+            Documenter tous les rôles, responsabilités et autorités en cybersécurité.
+            Inclure les exigences de performance dans les descriptions de poste.
+            Établir la séparation des tâches pour les fonctions critiques.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+      ref_id: RC.GV-04
+      name: Cybersecurity Policy Lifecycle Management
+      category: process
+      csf_function: govern
+      description:
+        Review and update cybersecurity policies at least annually and when
+        significant changes occur to threats, technology, regulations, or business
+        objectives. Require staff acknowledgement of policy receipt.
+        Aligned to GV.PO-01, GV.PO-02, GV.OV-01, GV.OV-02.
+      translations:
+        fr:
+          name: Gestion du cycle de vie des politiques de cybersécurité
+          description:
+            Réviser et mettre à jour les politiques de cybersécurité au moins
+            annuellement et lors de changements significatifs. Exiger l'accusé
+            réception des politiques par le personnel.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      ref_id: RC.GV-05
+      name: Supply Chain Risk Management Programme
+      category: process
+      csf_function: govern
+      description:
+        Establish a cybersecurity supply chain risk management programme including
+        supplier criticality register, contractual security requirements, and incident
+        notification SLAs. Conduct supplier due diligence proportional to access
+        level and criticality. Aligned to GV.SC-01, GV.SC-02, GV.SC-04, GV.SC-05,
+        GV.SC-06, GV.SC-07.
+      translations:
+        fr:
+          name: Programme de gestion des risques de la chaîne d'approvisionnement
+          description:
+            Établir un programme de gestion des risques de la chaîne d'approvisionnement
+            incluant un registre de criticité des fournisseurs, des exigences contractuelles
+            et des SLA de notification d'incidents.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+      ref_id: RC.GV-06
+      name: Cybersecurity Performance Measurement and Oversight
+      category: process
+      csf_function: govern
+      description:
+        Define and track key performance indicators (KPIs) and key risk indicators
+        (KRIs) for cybersecurity risk management. Report metrics to senior leadership
+        at defined intervals. Conduct periodic governance reviews.
+        Aligned to GV.OV-01, GV.OV-02, GV.OV-03.
+      translations:
+        fr:
+          name: Mesure de performance et surveillance de la cybersécurité
+          description:
+            Définir et suivre des indicateurs clés de performance et de risque
+            pour la gestion des risques cybersécurité. Communiquer les métriques
+            à la direction générale à intervalles définis.
+
+    # ---------------------------------------------------------------
+    # IDENTIFY (ID)
+    # ---------------------------------------------------------------
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+      ref_id: RC.ID-01
+      name: Comprehensive Asset Inventory
+      category: process
+      csf_function: identify
+      description:
+        Maintain regularly updated inventories of all hardware, software, data,
+        services, and third-party dependencies. Include cloud-based resources,
+        IoT and OT assets, and SaaS applications. Assign asset owners and criticality
+        ratings. Aligned to ID.AM-01, ID.AM-02, ID.AM-04, ID.AM-05, ID.AM-07,
+        ID.AM-08.
+      translations:
+        fr:
+          name: Inventaire complet des actifs
+          description:
+            Maintenir des inventaires régulièrement mis à jour de tous les actifs
+            matériels, logiciels, données, services et dépendances tierces. Attribuer
+            des propriétaires d'actifs et des niveaux de criticité.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-id-02
+      ref_id: RC.ID-02
+      name: Network Topology and Data Flow Documentation
+      category: process
+      csf_function: identify
+      description:
+        Maintain accurate documentation of current network topology, authorised
+        communication baselines, and internal and external data flows. Review
+        and update annually or when topology changes. Aligned to ID.AM-03.
+      translations:
+        fr:
+          name: Documentation de la topologie réseau et des flux de données
+          description:
+            Maintenir une documentation précise de la topologie réseau actuelle,
+            des bases de communication autorisées et des flux de données. Réviser
+            annuellement ou lors de changements de topologie.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+      ref_id: RC.ID-03
+      name: Vulnerability Management Programme
+      category: process
+      csf_function: identify
+      description:
+        Implement a vulnerability management programme covering scanning, risk
+        rating, and patch timelines by criticality. Prioritise internet-facing
+        and privileged systems. Apply compensating controls for legacy systems
+        where patching is infeasible. Aligned to ID.RA-01, ID.RA-05, ID.RA-06,
+        ID.RA-07, ID.RA-08.
+      translations:
+        fr:
+          name: Programme de gestion des vulnérabilités
+          description:
+            Mettre en œuvre un programme de gestion des vulnérabilités couvrant
+            l'analyse, la notation des risques et les délais de correction par
+            criticité. Appliquer des contrôles compensatoires pour les systèmes
+            existants.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+      ref_id: RC.ID-04
+      name: Cyber Threat Intelligence Integration
+      category: process
+      csf_function: identify
+      description:
+        Receive and analyse cyber threat intelligence from reputable sources and
+        information sharing forums. Use intelligence to identify current threat
+        actors, TTPs, and new vulnerabilities relevant to the organisation's
+        technology stack. Aligned to ID.RA-02, ID.RA-03.
+      translations:
+        fr:
+          name: Intégration du renseignement sur les cybermenaces
+          description:
+            Recevoir et analyser des renseignements sur les cybermenaces provenant
+            de sources réputées. Utiliser ces renseignements pour identifier les
+            acteurs malveillants actuels et les vulnérabilités pertinentes.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
+      ref_id: RC.ID-05
+      name: Cybersecurity Improvement and Lessons Learned
+      category: process
+      csf_function: identify
+      description:
+        Identify improvements from security assessments, penetration tests, incident
+        post-mortems, tabletop exercises, and operational metrics. Review and update
+        all cybersecurity plans annually. Conduct collaborative lessons learned with
+        critical suppliers. Aligned to ID.IM-01, ID.IM-02, ID.IM-03, ID.IM-04.
+      translations:
+        fr:
+          name: Amélioration de la cybersécurité et retours d'expérience
+          description:
+            Identifier les améliorations à partir des évaluations de sécurité,
+            tests d'intrusion, post-mortems d'incidents et exercices. Réviser
+            et mettre à jour annuellement tous les plans de cybersécurité.
+
+    # ---------------------------------------------------------------
+    # PROTECT (PR)
+    # ---------------------------------------------------------------
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-01
+      ref_id: RC.PR-01
+      name: Multi-Factor Authentication Deployment
+      category: technical
+      csf_function: protect
+      description:
+        Require MFA for all users with remote access, prioritising phishing-resistant
+        methods (FIDO2/passkeys, PKI-based). Enforce MFA for all privileged accounts.
+        Periodically reauthenticate users based on risk context.
+        Aligned to PR.AA-03, PR.AA-05.
+      translations:
+        fr:
+          name: Déploiement de l'authentification multifacteur
+          description:
+            Exiger la MFA pour tous les utilisateurs avec accès distant, en
+            priorisant les méthodes résistantes au hameçonnage. Appliquer la
+            MFA pour tous les comptes privilégiés.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
+      ref_id: RC.PR-02
+      name: Identity and Credential Lifecycle Management
+      category: process
+      csf_function: protect
+      description:
+        Manage provisioning, review, and revocation of user credentials and access
+        rights. Enforce unique credentials per account and service. Disable inactive
+        accounts after a defined period. Revoke all access promptly upon offboarding.
+        Aligned to PR.AA-01, PR.AA-02, PR.AA-05.
+      translations:
+        fr:
+          name: Gestion du cycle de vie des identités et des identifiants
+          description:
+            Gérer l'attribution, la revue et la révocation des identifiants et
+            droits d'accès. Appliquer des identifiants uniques par compte. Désactiver
+            les comptes inactifs et révoquer tous les accès lors du départ.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-03
+      ref_id: RC.PR-03
+      name: Least Privilege and Privileged Account Separation
+      category: process
+      csf_function: protect
+      description:
+        Enforce least privilege for all user accounts, system roles, and processes.
+        Require administrators to maintain separate accounts for privileged and
+        non-privileged activities. Conduct quarterly access reviews.
+        Aligned to PR.AA-05, PR.AA-06.
+      translations:
+        fr:
+          name: Moindre privilège et séparation des comptes privilégiés
+          description:
+            Appliquer le moindre privilège pour tous les comptes utilisateurs
+            et processus système. Exiger des administrateurs de maintenir des
+            comptes séparés pour les activités privilégiées et non privilégiées.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-04
+      ref_id: RC.PR-04
+      name: Security Awareness and Training Programme
+      category: process
+      csf_function: protect
+      description:
+        Provide cybersecurity awareness training to all staff before system access
+        and at least annually thereafter. Include social engineering recognition,
+        phishing simulations, acceptable use, and basic cyber hygiene. Provide
+        role-based training for privileged users and security practitioners.
+        Aligned to PR.AT-01, PR.AT-02.
+      translations:
+        fr:
+          name: Programme de sensibilisation et de formation à la sécurité
+          description:
+            Fournir une formation de sensibilisation à la cybersécurité à tout
+            le personnel avant l'accès aux systèmes et au moins annuellement.
+            Inclure des simulations de phishing et une formation basée sur les rôles.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-05
+      ref_id: RC.PR-05
+      name: Data Protection and Encryption Controls
+      category: technical
+      csf_function: protect
+      description:
+        Use encryption, digital signatures, and cryptographic hashes to protect
+        data confidentiality and integrity in transit and at rest. Prevent plaintext
+        storage of sensitive data and credentials. Enforce full disk encryption
+        on endpoints. Aligned to PR.DS-01, PR.DS-02, PR.DS-10.
+      translations:
+        fr:
+          name: Contrôles de protection des données et de chiffrement
+          description:
+            Utiliser le chiffrement et les signatures numériques pour protéger
+            les données en transit et au repos. Empêcher le stockage en clair des
+            données sensibles. Appliquer le chiffrement complet du disque sur les postes.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-06
+      ref_id: RC.PR-06
+      name: Backup and Recovery Controls
+      category: process
+      csf_function: protect
+      description:
+        Create, protect, and test backups of all critical data and systems. Implement
+        a 3-2-1 backup strategy with offline or immutable copies. Define and validate
+        RTO and RPO targets. Test restoration procedures at least annually.
+        Aligned to PR.DS-11.
+      translations:
+        fr:
+          name: Contrôles de sauvegarde et de reprise
+          description:
+            Créer, protéger et tester les sauvegardes de toutes les données et
+            systèmes critiques. Mettre en œuvre une stratégie 3-2-1 avec des copies
+            hors ligne ou immuables. Définir et valider les RTO et RPO.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+      ref_id: RC.PR-07
+      name: Vulnerability and Patch Management
+      category: technical
+      csf_function: protect
+      description:
+        Perform routine and emergency patching within timelines defined by vulnerability
+        criticality. Establish and enforce security configuration baselines for all
+        platforms. Replace end-of-life software and hardware. Apply allowlisting and
+        restrict unauthorised software installation.
+        Aligned to PR.PS-01, PR.PS-02, PR.PS-03, PR.PS-05.
+      translations:
+        fr:
+          name: Gestion des vulnérabilités et des correctifs
+          description:
+            Appliquer les correctifs selon les délais définis par criticité.
+            Établir des bases de configuration sécurisées. Remplacer les logiciels
+            et matériels en fin de vie. Restreindre l'installation de logiciels non autorisés.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-08
+      ref_id: RC.PR-08
+      name: Security Log Collection and Management
+      category: technical
+      csf_function: protect
+      description:
+        Configure all operating systems, applications, and services to generate log
+        records. Centralise log collection in a SIEM or log management platform with
+        restricted access. Retain logs for a risk-informed duration (minimum 12 months
+        recommended). Aligned to PR.PS-04.
+      translations:
+        fr:
+          name: Collecte et gestion des journaux de sécurité
+          description:
+            Configurer tous les systèmes, applications et services pour générer
+            des journaux. Centraliser la collecte dans un SIEM avec accès restreint.
+            Conserver les journaux pendant une durée adaptée au risque.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+      ref_id: RC.PR-09
+      name: Network Segmentation and Access Controls
+      category: technical
+      csf_function: protect
+      description:
+        Segment organisation networks by trust boundaries and platform type. Restrict
+        traffic between segments to only what is required. Implement zero trust
+        principles to limit lateral movement. Minimise internet-facing assets and
+        harden all external-facing services.
+        Aligned to PR.IR-01, PR.IR-03, PR.IR-04.
+      translations:
+        fr:
+          name: Segmentation réseau et contrôles d'accès
+          description:
+            Segmenter les réseaux de l'organisation selon les périmètres de confiance.
+            Restreindre le trafic entre segments. Appliquer les principes Zero Trust
+            et minimiser les actifs exposés à Internet.
+
+    # ---------------------------------------------------------------
+    # DETECT (DE)
+    # ---------------------------------------------------------------
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+      ref_id: RC.DE-01
+      name: Continuous Monitoring and Anomaly Detection
+      category: technical
+      csf_function: detect
+      description:
+        Deploy SIEM or XDR capabilities with detection rules covering network anomalies,
+        authentication events, endpoint activity, and known threat techniques. Monitor
+        networks, endpoints, identity systems, and cloud activity for indicators of
+        compromise. Use behaviour analytics to detect insider threats.
+        Aligned to DE.CM-01, DE.CM-03, DE.CM-06, DE.CM-09.
+      translations:
+        fr:
+          name: Surveillance continue et détection des anomalies
+          description:
+            Déployer des capacités SIEM ou XDR avec des règles de détection couvrant
+            les anomalies réseau, les événements d'authentification et l'activité des
+            terminaux. Utiliser l'analytique comportementale pour les menaces internes.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+      ref_id: RC.DE-02
+      name: Adverse Event Analysis and Incident Declaration
+      category: process
+      csf_function: detect
+      description:
+        Define adverse event criteria and automated alert escalation processes.
+        Correlate events from multiple log sources to identify patterns. Integrate
+        cyber threat intelligence into log analysis. Declare incidents when events
+        meet defined criteria. Aligned to DE.AE-02, DE.AE-03, DE.AE-04, DE.AE-06,
+        DE.AE-07, DE.AE-08.
+      translations:
+        fr:
+          name: Analyse des événements indésirables et déclaration d'incidents
+          description:
+            Définir des critères d'événements indésirables et des processus d'escalade
+            automatisés. Corréler les événements de plusieurs sources de journaux.
+            Déclarer les incidents lorsque les critères sont atteints.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-de-03
+      ref_id: RC.DE-03
+      name: Malicious Code Detection and Prevention
+      category: technical
+      csf_function: detect
+      description:
+        Implement endpoint detection and response (EDR) or antivirus solutions using
+        both signature-based and behavioural detection mechanisms. Ensure solutions
+        are actively updated and configured for automated scanning of emails, files,
+        and removable media. Aligned to DE.CM-09.
+      translations:
+        fr:
+          name: Détection et prévention du code malveillant
+          description:
+            Mettre en œuvre des solutions EDR ou antivirus utilisant des mécanismes
+            de détection basés sur les signatures et les comportements. S'assurer
+            que les solutions sont actives et configurées pour l'analyse automatisée.
+
+    # ---------------------------------------------------------------
+    # RESPOND (RS)
+    # ---------------------------------------------------------------
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+      ref_id: RC.RS-01
+      name: Incident Response Plan
+      category: process
+      csf_function: respond
+      description:
+        Develop, document, and regularly test an Incident Response Plan covering common
+        scenarios including ransomware, data breach, account compromise, and supply chain
+        incidents. Define escalation paths, containment playbooks, communication procedures,
+        and recovery criteria. Review and drill at least annually.
+        Aligned to RS.MA-01, RS.MA-02, RS.MA-03, RS.MA-04, RS.MA-05.
+      translations:
+        fr:
+          name: Plan de réponse aux incidents
+          description:
+            Développer, documenter et tester régulièrement un Plan de Réponse aux
+            Incidents couvrant les scénarios courants. Définir les procédures d'escalade,
+            les playbooks de confinement et les procédures de communication.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+      ref_id: RC.RS-02
+      name: Incident Analysis and Forensic Evidence Preservation
+      category: process
+      csf_function: respond
+      description:
+        Conduct root cause analysis for all significant incidents. Collect, preserve,
+        and safeguard the integrity of incident data and forensic evidence using defined
+        chain-of-custody procedures. Document all response actions with immutable records.
+        Aligned to RS.AN-03, RS.AN-06, RS.AN-07, RS.AN-08.
+      translations:
+        fr:
+          name: Analyse des incidents et préservation des preuves forensiques
+          description:
+            Conduire une analyse des causes profondes pour tous les incidents
+            significatifs. Collecter et préserver l'intégrité des preuves forensiques
+            selon des procédures de chaîne de custody définies.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+      ref_id: RC.RS-03
+      name: Incident Communication and Notification Procedures
+      category: process
+      csf_function: respond
+      description:
+        Establish internal and external incident communication procedures including
+        stakeholder notification, regulatory reporting obligations, media communications,
+        and supplier coordination. Notify relevant national cybersecurity agencies
+        (e.g. CERT NZ, ACSC) within regulatory timeframes.
+        Aligned to RS.CO-02, RS.CO-03.
+      translations:
+        fr:
+          name: Procédures de communication et de notification en cas d'incident
+          description:
+            Établir des procédures de communication interne et externe incluant
+            la notification des parties prenantes, les obligations de signalement
+            réglementaire et la coordination avec les fournisseurs.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-rs-04
+      ref_id: RC.RS-04
+      name: Incident Containment and Eradication
+      category: technical
+      csf_function: respond
+      description:
+        Implement containment and eradication capabilities for detected incidents
+        including network isolation, account suspension, endpoint quarantine, and removal
+        of malicious artefacts. Allow automated and manual execution of containment
+        actions. Aligned to RS.MI-01, RS.MI-02.
+      translations:
+        fr:
+          name: Confinement et éradication des incidents
+          description:
+            Mettre en œuvre des capacités de confinement et d'éradication pour
+            les incidents détectés, incluant l'isolation réseau, la suspension de
+            compte et la quarantaine des terminaux.
+
+    # ---------------------------------------------------------------
+    # RECOVER (RC)
+    # ---------------------------------------------------------------
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+      ref_id: RC.RC-01
+      name: Incident Recovery Plan Execution
+      category: process
+      csf_function: recover
+      description:
+        Execute recovery procedures to restore affected systems and services following
+        a cybersecurity incident. Validate backup integrity before restoration. Confirm
+        the absence of indicators of compromise in restored assets before returning to
+        production. Document recovery actions and declare end of incident based on
+        defined criteria. Aligned to RC.RP-01, RC.RP-02, RC.RP-03, RC.RP-04, RC.RP-05,
+        RC.RP-06.
+      translations:
+        fr:
+          name: Exécution du plan de reprise après incident
+          description:
+            Exécuter les procédures de reprise pour restaurer les systèmes et
+            services affectés. Valider l'intégrité des sauvegardes avant restauration.
+            Confirmer l'absence d'indicateurs de compromission dans les actifs restaurés.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-rc-02
+      ref_id: RC.RC-02
+      name: Business Continuity and Disaster Recovery Plans
+      category: process
+      csf_function: recover
+      description:
+        Develop, maintain, and test Business Continuity and Disaster Recovery plans
+        covering cyber incident scenarios. Define RTO and RPO for all critical systems.
+        Enable degraded operations capability. Conduct tabletop exercises simulating
+        ransomware and destructive attack recovery at least annually.
+        Aligned to RC.RP-04, RC.CO-03.
+      translations:
+        fr:
+          name: Plans de continuité d'activité et de reprise après sinistre
+          description:
+            Développer, maintenir et tester les plans de continuité d'activité
+            et de reprise après sinistre couvrant les scénarios d'incidents cyber.
+            Définir les RTO et RPO pour tous les systèmes critiques.
+
+    - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-rc-03
+      ref_id: RC.RC-03
+      name: Recovery Communication and Public Updates
+      category: process
+      csf_function: recover
+      description:
+        Communicate recovery activities and restoration progress to designated internal
+        stakeholders, senior leadership, and external parties as required. Share public
+        updates on incident recovery using approved messaging. Follow breach notification
+        obligations where applicable. Aligned to RC.CO-03, RC.CO-04.
+      translations:
+        fr:
+          name: Communication de reprise et mises à jour publiques
+          description:
+            Communiquer les activités de reprise et les progrès de restauration
+            aux parties prenantes désignées. Partager des mises à jour publiques
+            en utilisant des messages approuvés. Respecter les obligations de
+            notification des violations applicables.

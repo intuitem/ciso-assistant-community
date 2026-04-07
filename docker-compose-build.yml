@@ -9,6 +9,7 @@ services:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
+      - QDRANT_URL=http://qdrant:6333
     volumes:
       - ./db:/code/db
 
@@ -24,6 +25,7 @@ services:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=False
+      - QDRANT_URL=http://qdrant:6333
     volumes:
       - ./db:/code/db
     entrypoint:
@@ -46,6 +48,15 @@ services:
     depends_on:
       - backend
 
+  qdrant:
+    container_name: qdrant
+    image: qdrant/qdrant:v1.14.0
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - 6333:6333
+
   caddy:
     container_name: caddy
     image: caddy:2.11.2
@@ -61,3 +72,6 @@ services:
       reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
       }" > Caddyfile && caddy run'
+
+volumes:
+  qdrant_data:

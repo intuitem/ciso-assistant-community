@@ -17,7 +17,6 @@ import importlib
 from django.urls import include, path
 from rest_framework import routers
 
-from ciso_assistant.settings import DEBUG
 from django.conf import settings
 
 router = routers.DefaultRouter()
@@ -123,6 +122,9 @@ router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
+router.register(r"questions", QuestionViewSet, basename="questions")
+router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
+router.register(r"answers", AnswerViewSet, basename="answers")
 router.register(r"preset-journeys", PresetJourneyViewSet, basename="preset-journeys")
 router.register(
     r"preset-journey-steps",
@@ -149,6 +151,7 @@ urlpatterns = [
     path("data-wizard/", include("data_wizard.urls")),
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
+    path("chat/", include("chat.urls")),
     path("ebios-rm/", include("ebios_rm.urls")),
     path("", include("doc_management.urls")),
     path("privacy/", include("privacy.urls")),
@@ -245,7 +248,7 @@ urlpatterns = [
 for index, module in enumerate(MODULES):
     urlpatterns.insert(index, (path(module["path"], include(module["module"]))))
 
-if DEBUG:
+if settings.DEBUG:
     # Browsable API is only available in DEBUG mode
     urlpatterns += [
         path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),

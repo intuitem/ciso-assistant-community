@@ -85,11 +85,15 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `reference_control` | No | Lookup by ref_id (also accepts `reference_control_ref_id`) |
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 | `observation` | No | Free text |
+| `amortization_period` | No | Integer (1-50) |
+| `build_fixed_cost` | No | Integer |
+| `build_people_days` | No | Integer |
+| `run_fixed_cost` | No | Integer |
+| `run_people_days` | No | Integer |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `cost` | JSONField | Medium (complex structure) |
 | `owner` | M2M Actor | Medium |
 | `evidences` | M2M | Medium |
 | `assets` | M2M | Medium |
@@ -560,7 +564,39 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
-### 20. BusinessImpactAnalysis (Multi-sheet Import)
+
+### 20. Vulnerability
+
+| Field | Type | Required | Note |
+|-------|------|---------|-------|
+| `ref_id`      | string | No  ||
+| `name`        | string | **Yes** ||
+| `description` | string | No  ||
+| `status`      | string | No  | The list of the possible statuses below |
+| `severity`    | string | No  | The list of the possible severities below |
+| `filtering_labels` | list | No | List of labels, pipe or comma-separated |
+| `assets`      | list   | No | List of the names of the related assets, newline-separated |
+| `applied_controls` | list | No | List of the names of the related applied controls, newline-separated |
+| `security_exceptions`| list | No | List of the names of the related security exceptions, newline-separated |
+
+**Vulnerability's status**
+* undefined
+* potential
+* exploitable
+* mitigated
+* fixed
+* not exploitable
+* unaffected
+
+**Vulnerability's severity**
+* undefined
+* info
+* low
+* medium
+* high
+* critical
+
+### 21. BusinessImpactAnalysis (Multi-sheet Import)
 
 **Behavior:** Creates a `BusinessImpactAnalysis` object plus `AssetAssessment` and `EscalationThreshold` child objects from a three-sheet workbook produced by the BIA export.
 
@@ -651,7 +687,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | OrganisationIssue | Not supported | Medium |
 | OrganisationObjective | Not supported | Medium |
 | Policy | **Supported** | Done |
-| Vulnerability | **Not supported** | **High** |
 | HistoricalMetric | Not supported | Low |
 | Campaign | Not supported | Medium |
 | RiskAcceptance | **Not supported** | **High** |
@@ -740,7 +775,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 ### High Priority (Core GRC Functionality)
 
 1. **RiskAcceptance** - Risk management workflow completion
-2. **Vulnerability** - Vulnerability tracking
+2. ~~**Vulnerability**~~ - ✅ Now supported
 3. ~~**Incident**~~ - ✅ Now supported
 4. ~~**SecurityException**~~ - ✅ Now supported
 5. ~~**Policy**~~ - ✅ Now supported

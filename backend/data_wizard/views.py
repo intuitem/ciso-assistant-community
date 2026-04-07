@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
 
 from .serializers import LoadFileSerializer
+from core.utils import build_questions_dict
 from core.models import (
     Actor,
     Asset,
@@ -23,6 +24,7 @@ from core.models import (
     Policy,
     SecurityException,
     Incident,
+    Vulnerability,
 )
 from core.serializers import (
     BaseModelSerializer,
@@ -43,6 +45,7 @@ from core.serializers import (
     PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
     IncidentWriteSerializer,
+    VulnerabilityWriteSerializer,
 )
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -84,6 +87,7 @@ from privacy.models import Processing, ProcessingNature
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
+from core.utils import get_global_currency
 from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
@@ -173,23 +177,63 @@ def _parse_time_to_seconds(s: str) -> int | None:
     return h * 3600 + mn * 60 + sc
 
 
-def _parse_security_objectives(raw: str) -> dict:
-    """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}."""
+def _get_security_objective_scale() -> list:
+    """Return the active security-objective scale from GlobalSettings."""
+    from global_settings.models import GlobalSettings
+
+    settings = GlobalSettings.objects.filter(name="general").first()
+    scale_key = (
+        settings.value.get("security_objective_scale", "1-4") if settings else "1-4"
+    )
+    return Asset.SECURITY_OBJECTIVES_SCALES[scale_key]
+
+
+def _reverse_scale_value(display_val: str, scale: list) -> int | None:
+    """Map a display value back to its raw 0-based index.
+
+    The scale list maps raw index → display value.  We need the reverse:
+    find the *first* index whose display value matches.
+    Supports both numeric scales (1-4, 0-3, …) and string scales (FIPS-199).
+    """
+    # Try numeric comparison first
+    try:
+        numeric = int(display_val)
+        for idx, sv in enumerate(scale):
+            if isinstance(sv, (int, float)) and int(sv) == numeric:
+                return idx
+    except (ValueError, TypeError):
+        pass
+
+    # Fall back to case-insensitive string comparison (e.g. FIPS-199)
+    display_lower = display_val.strip().lower()
+    for idx, sv in enumerate(scale):
+        if str(sv).lower() == display_lower:
+            return idx
+
+    return None
+
+
+def _parse_security_objectives(raw: str, scale: list | None = None) -> dict:
+    """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}.
+
+    Values in the input are *display* values (scale-mapped).  They are
+    reverse-mapped back to the raw 0-based index before storage so that
+    an export → import round-trip is lossless.
+    """
     result = {}
     if not raw:
         return result
+    if scale is None:
+        scale = _get_security_objective_scale()
     for part in str(raw).split(","):
         part = part.strip()
         if ":" not in part:
             continue
         key, _, val = part.partition(":")
         key = key.strip()
-        try:
-            v = int(val.strip())
-            if 0 <= v <= 4:
-                result[key] = {"value": v, "is_enabled": True}
-        except (ValueError, TypeError):
-            pass
+        v = _reverse_scale_value(val.strip(), scale)
+        if v is not None and 0 <= v <= 4:
+            result[key] = {"value": v, "is_enabled": True}
     return result
 
 
@@ -228,7 +272,7 @@ def _resolve_filtering_labels(value) -> list[UUID]:
                 label.full_clean()
                 label.save()
             except Exception:
-                continue
+                logging.error(f"Failed to save label: {value}")
         label_ids.append(label.id)
     return label_ids
 
@@ -275,6 +319,7 @@ class ModelType(enum.StrEnum):
     POLICY = "Policy"
     SECURITY_EXCEPTION = "SecurityException"
     INCIDENT = "Incident"
+    VULNERABILITY = "Vulnerability"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
 
     @staticmethod
@@ -528,7 +573,7 @@ class RecordConsumer[Context](ABC):
         return results
 
 
-class AssetRecordConsumer(RecordConsumer[None]):
+class AssetRecordConsumer(RecordConsumer[list]):
     """
     Consumer for importing Asset records.
     Supports parent_assets linking via ref_id in a second pass.
@@ -547,10 +592,10 @@ class AssetRecordConsumer(RecordConsumer[None]):
     }
 
     def create_context(self):
-        return None, None
+        return _get_security_objective_scale(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: list
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -609,7 +654,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "recovery_capabilities", ""
         )
 
-        sec_objectives = _parse_security_objectives(raw_sec)
+        sec_objectives = _parse_security_objectives(raw_sec, scale=context)
         rec_objectives = _parse_recovery_objectives(raw_rec)
 
         parse_warning_msgs = []
@@ -684,7 +729,12 @@ class AssetRecordConsumer(RecordConsumer[None]):
         return results
 
 
-class AppliedControlRecordConsumer(RecordConsumer[None]):
+@dataclass(frozen=True)
+class AppliedControlContext:
+    currency: str = field(default_factory=get_global_currency)
+
+
+class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
     """
     Consumer for importing AppliedControl records.
     Supports reference_control linking via ref_id and owner resolution
@@ -718,12 +768,21 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "extralarge": "XL",
         "xl": "XL",
     }
+    COST_KEYS: Final[frozenset[str]] = frozenset(
+        {
+            "amortization_period",
+            "build_fixed_cost",
+            "build_people_days",
+            "run_fixed_cost",
+            "run_people_days",
+        }
+    )
 
-    def create_context(self):
-        return None, None
+    def create_context(self) -> tuple[AppliedControlContext, Optional[Error]]:
+        return AppliedControlContext(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: AppliedControlContext
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -776,15 +835,23 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             if ref_control:
                 reference_control_id = ref_control.id
 
+        csf_function = record.get("csf_function", "govern")
+        if isinstance(csf_function, str):
+            csf_function = csf_function.lower()
+
+        category = record.get("category", "")
+        if isinstance(category, str):
+            category = category.lower()
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
-            "category": record.get("category", ""),
+            "category": category,
             "folder": domain,
             "status": record.get("status", "to_do"),
             "priority": priority,
-            "csf_function": record.get("csf_function", "govern"),
+            "csf_function": csf_function,
             "effort": effort,
             "control_impact": control_impact,
             "link": record.get("link", ""),
@@ -796,6 +863,25 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
 
         if reference_control_id:
             data["reference_control"] = reference_control_id
+
+        has_cost_related_key = any(
+            key in self.COST_KEYS and record.get(key) not in (None, "")
+            for key in record.keys()
+        )
+        if has_cost_related_key:
+            cost = {
+                "currency": context.currency,
+                "amortization_period": int(record.get("amortization_period") or 1),
+                "build": {
+                    "fixed_cost": int(record.get("build_fixed_cost") or 0),
+                    "people_days": int(record.get("build_people_days") or 0),
+                },
+                "run": {
+                    "fixed_cost": int(record.get("run_fixed_cost") or 0),
+                    "people_days": int(record.get("run_people_days") or 0),
+                },
+            }
+            data["cost"] = cost
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
@@ -1315,6 +1401,134 @@ class IncidentRecordConsumer(RecordConsumer[None]):
             data["filtering_labels"] = filtering_labels
 
         return data, None
+
+
+class VulnerabilityRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Vulnerability records.
+    """
+
+    SERIALIZER_CLASS = VulnerabilityWriteSerializer
+    SEVERITY_MAP: Final[dict[str, int]] = {
+        "undefined": -1,
+        "info": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "critical": 4,
+    }
+    STATUS_MAP: Final[dict[str, str]] = {
+        "undefined": "--",
+        "potential": "potential",
+        "exploitable": "exploitable",
+        "mitigated": "mitigated",
+        "fixed": "fixed",
+        "not exploitable": "not_exploitable",
+        "unaffected": "unaffected",
+    }
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        folder_id = self.folder_id
+
+        raw_severity = record.get("severity")
+        if isinstance(raw_severity, str):
+            severity = self.SEVERITY_MAP.get(raw_severity.lower().strip(), -1)
+        elif isinstance(raw_severity, int) and -1 <= raw_severity <= 4:
+            severity = raw_severity
+        else:
+            severity = -1
+
+        raw_status = record.get("status")
+        if isinstance(raw_status, str):
+            status = self.STATUS_MAP.get(raw_status.lower().strip(), "--")
+        else:
+            status = "--"
+
+        applied_controls = []
+        for ap_name in (record.get("applied_controls") or "").splitlines():
+            ap_name = ap_name.strip()
+            if not ap_name:
+                continue
+            obj = AppliedControl.objects.filter(
+                name=ap_name, folder_id=folder_id
+            ).first()
+            if obj:
+                applied_controls.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No applied control named '{ap_name}' found in folder",
+                )
+
+        assets = []
+        for asset_name in (record.get("assets") or "").splitlines():
+            asset_name = asset_name.strip()
+            if not asset_name:
+                continue
+            obj = Asset.objects.filter(name=asset_name, folder_id=folder_id).first()
+            if obj:
+                assets.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No asset named '{asset_name}' found in folder",
+                )
+
+        security_exceptions = []
+        for se_name in (record.get("security_exceptions") or "").splitlines():
+            se_name = se_name.strip()
+            if not se_name:
+                continue
+            obj = SecurityException.objects.filter(
+                name=se_name, folder_id=folder_id
+            ).first()
+            if obj:
+                security_exceptions.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No security exception named '{se_name}' found in folder",
+                )
+
+        data = {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "status": status,
+            "severity": severity,
+            "folder": folder_id,
+            "applied_controls": applied_controls,
+            "assets": assets,
+            "security_exceptions": security_exceptions,
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
+
+    def find_existing(self, record_data: dict):
+        folder_id = record_data.get("folder")
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = Vulnerability.objects.filter(
+                ref_id=ref_id, folder_id=folder_id
+            ).first()
+            if existing:
+                return existing
+        return Vulnerability.objects.filter(
+            name=record_data.get("name"), folder_id=folder_id
+        ).first()
 
 
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
@@ -2006,6 +2220,12 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.VULNERABILITY:
+                            res = (
+                                VulnerabilityRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case ModelType.BUSINESS_IMPACT_ANALYSIS:
                             res = (
                                 BusinessImpactAnalysisRecordConsumer(base_context)
@@ -2046,7 +2266,6 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         folders_map = get_accessible_folders_map(request.user)
-
         # Dispatch to appropriate handler
         match model_type:
             case ModelType.COMPLIANCE_ASSESSMENT:
@@ -2480,13 +2699,12 @@ class LoadFileView(APIView):
 
                             # Build answers from the "answers" cell
                             answers_cell = record.get("answers")
-                            if (
-                                answers_cell not in (None, "")
-                                and ReqNode
-                                and ReqNode.questions
-                            ):
+                            questions_dict = (
+                                build_questions_dict(ReqNode) if ReqNode else None
+                            )
+                            if answers_cell not in (None, "") and questions_dict:
                                 text_to_question = {}
-                                for q_urn, qdef in ReqNode.questions.items():
+                                for q_urn, qdef in questions_dict.items():
                                     q_text = qdef.get("text", "")
                                     if q_text:
                                         text_to_question[q_text] = (
@@ -2494,7 +2712,7 @@ class LoadFileView(APIView):
                                             qdef,
                                         )
 
-                                answers = requirement_assessment.answers or {}
+                                answers = {}
                                 has_any_answer = False
 
                                 for line in str(answers_cell).split("\n"):
