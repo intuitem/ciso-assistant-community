@@ -27,6 +27,18 @@
 			label: m.riskAssessments(),
 			color: '#f97316', // orange
 			urlPrefix: 'risk-assessments'
+		},
+		{
+			key: 'businessImpactAnalyses',
+			label: m.businessImpactAnalysis(),
+			color: '#14b8a6', // teal
+			urlPrefix: 'business-impact-analysis'
+		},
+		{
+			key: 'findingsAssessments',
+			label: m.findingsAssessments(),
+			color: '#ef4444', // red
+			urlPrefix: 'findings-assessments'
 		}
 	] as const;
 
@@ -68,13 +80,17 @@
 		appliedControls: any[];
 		complianceAssessments: any[];
 		riskAssessments: any[];
+		businessImpactAnalyses: any[];
+		findingsAssessments: any[];
 	}): { items: GanttItem[]; noDateCount: number } {
 		const items: GanttItem[] = [];
 		let noDateCount = 0;
 
 		const catConfig = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
 		const getOwners = (obj: any): string[] =>
-			(obj.owner ?? obj.owners ?? []).map((o: any) => o.str ?? o.name ?? '').filter(Boolean);
+			(obj.owner ?? obj.owners ?? obj.authors ?? [])
+				.map((o: any) => o.str ?? o.name ?? '')
+				.filter(Boolean);
 
 		// Applied Controls: start_date + eta → bar with progress; eta only → milestone
 		if (enabledCategories.has('appliedControls')) {
@@ -105,64 +121,58 @@
 			}
 		}
 
-		// Compliance Assessments: eta + due_date → bar; eta only → milestone
-		if (enabledCategories.has('complianceAssessments')) {
-			for (const ca of sourceData.complianceAssessments) {
-				const folderId = ca.folder?.id ?? ca.folder;
-				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
-				const eta = ca.eta ? new Date(ca.eta) : null;
-				const due = ca.due_date ? new Date(ca.due_date) : null;
-				const start = eta && due ? (eta < due ? eta : due) : null;
-				const end = eta && due ? (eta >= due ? eta : due) : (eta ?? due);
-				if (!start && !end) {
-					noDateCount++;
-					continue;
-				}
-				items.push({
-					id: ca.id,
-					name: ca.name ?? ca.str ?? '(unnamed)',
-					startDate: start,
-					endDate: end,
-					progress: ca.progress ?? 0,
-					type: start && end ? 'bar' : 'milestone',
-					category: 'complianceAssessments',
-					categoryLabel: catConfig.complianceAssessments.label,
-					folder: folderMap.get(folderId) ?? 'Unknown',
-					folderId,
-					href: `/compliance-assessments/${ca.id}`,
-					color: catConfig.complianceAssessments.color,
-					owners: getOwners(ca)
-				});
+		// Assessment-type models: no real start_date, so eta/due_date are milestones
+		const assessmentCategories = [
+			{
+				key: 'complianceAssessments' as CategoryKey,
+				data: sourceData.complianceAssessments,
+				hrefPrefix: '/compliance-assessments',
+				getProgress: (obj: any) => obj.progress ?? 0
+			},
+			{
+				key: 'riskAssessments' as CategoryKey,
+				data: sourceData.riskAssessments,
+				hrefPrefix: '/risk-assessments',
+				getProgress: (_: any) => 0
+			},
+			{
+				key: 'businessImpactAnalyses' as CategoryKey,
+				data: sourceData.businessImpactAnalyses,
+				hrefPrefix: '/business-impact-analysis',
+				getProgress: (_: any) => 0
+			},
+			{
+				key: 'findingsAssessments' as CategoryKey,
+				data: sourceData.findingsAssessments,
+				hrefPrefix: '/findings-assessments',
+				getProgress: (_: any) => 0
 			}
-		}
+		];
 
-		// Risk Assessments: eta + due_date → bar; eta only → milestone
-		if (enabledCategories.has('riskAssessments')) {
-			for (const ra of sourceData.riskAssessments) {
-				const folderId = ra.folder?.id ?? ra.folder;
+		for (const { key, data, hrefPrefix, getProgress } of assessmentCategories) {
+			if (!enabledCategories.has(key)) continue;
+			for (const obj of data) {
+				const folderId = obj.folder?.id ?? obj.folder;
 				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
-				const eta = ra.eta ? new Date(ra.eta) : null;
-				const due = ra.due_date ? new Date(ra.due_date) : null;
-				const start = eta && due ? (eta < due ? eta : due) : null;
-				const end = eta && due ? (eta >= due ? eta : due) : (eta ?? due);
-				if (!start && !end) {
+				const date = obj.eta ? new Date(obj.eta) : obj.due_date ? new Date(obj.due_date) : null;
+				if (!date) {
 					noDateCount++;
 					continue;
 				}
 				items.push({
-					id: ra.id,
-					name: ra.name ?? ra.str ?? '(unnamed)',
-					startDate: start,
-					endDate: end,
-					progress: 0,
-					type: start && end ? 'bar' : 'milestone',
-					category: 'riskAssessments',
-					categoryLabel: catConfig.riskAssessments.label,
+					id: obj.id,
+					name: obj.name ?? obj.str ?? '(unnamed)',
+					startDate: null,
+					endDate: date,
+					progress: getProgress(obj),
+					type: 'milestone',
+					category: key,
+					categoryLabel: catConfig[key].label,
 					folder: folderMap.get(folderId) ?? 'Unknown',
 					folderId,
-					href: `/risk-assessments/${ra.id}`,
-					color: catConfig.riskAssessments.color,
-					owners: getOwners(ra)
+					href: `${hrefPrefix}/${obj.id}`,
+					color: catConfig[key].color,
+					owners: getOwners(obj)
 				});
 			}
 		}

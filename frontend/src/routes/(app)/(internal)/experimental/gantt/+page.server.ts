@@ -16,12 +16,24 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const ganttData = Promise.all([
 		fetchAll(fetch, 'applied-controls'),
 		fetchAll(fetch, 'compliance-assessments'),
-		fetchAll(fetch, 'risk-assessments')
-	]).then(([appliedControls, complianceAssessments, riskAssessments]) => ({
-		appliedControls,
-		complianceAssessments,
-		riskAssessments
-	}));
+		fetchAll(fetch, 'risk-assessments'),
+		fetchAll(fetch, 'business-impact-analysis'),
+		fetchAll(fetch, 'findings-assessments')
+	]).then(
+		([
+			appliedControls,
+			complianceAssessments,
+			riskAssessments,
+			businessImpactAnalyses,
+			findingsAssessments
+		]) => ({
+			appliedControls,
+			complianceAssessments,
+			riskAssessments,
+			businessImpactAnalyses,
+			findingsAssessments
+		})
+	);
 
 	return {
 		folders,

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
 
 	export interface GanttItem {
 		id: string;
@@ -43,7 +44,6 @@
 			.filter((d): d is Date => d !== null);
 		if (dates.length === 0) return new Date();
 		const min = new Date(Math.min(...dates.map((d) => d.getTime())));
-		// week buffer before
 		min.setDate(min.getDate() - 7);
 		return startOfDay(min);
 	});
@@ -58,7 +58,6 @@
 			return d;
 		}
 		const max = new Date(Math.max(...dates.map((d) => d.getTime())));
-		// week buffer after
 		max.setDate(max.getDate() + 7);
 		return startOfDay(max);
 	});
@@ -129,7 +128,7 @@
 		return r;
 	});
 
-	let totalHeight = $derived(HEADER_HEIGHT + rows.length * (ROW_HEIGHT + ROW_GAP) + 20);
+	let bodyHeight = $derived(rows.length * (ROW_HEIGHT + ROW_GAP) + 20);
 
 	// --- Time scale helpers ---
 	function startOfDay(d: Date): Date {
@@ -144,7 +143,6 @@
 
 	let totalDays = $derived(Math.max(1, daysBetween(timelineStart, timelineEnd)));
 
-	// Pixel width per day depends on zoom
 	let dayWidth = $derived.by(() => {
 		switch (zoom) {
 			case 'weekly':
@@ -174,42 +172,54 @@
 		const d = new Date(timelineStart);
 
 		if (zoom === 'weekly') {
-			// Show each Monday, major = 1st of month
-			// Move to next Monday
 			const day = d.getDay();
 			const daysToMonday = day === 0 ? 1 : day === 1 ? 0 : 8 - day;
 			d.setDate(d.getDate() + daysToMonday);
+			let lastMonth = -1;
 
 			while (d <= timelineEnd) {
 				const x = dateToX(d);
+				const month = d.getMonth();
+				const isNewMonth = month !== lastMonth;
 				const isMajor = d.getDate() <= 7;
-				const label = isMajor
-					? d.toLocaleDateString('en', { month: 'short', year: 'numeric' })
-					: d.toLocaleDateString('en', { day: 'numeric', month: 'short' });
+				const label = isNewMonth
+					? d.toLocaleDateString(getLocale(), { month: 'short', year: 'numeric' })
+					: d.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
 				marks.push({ x, label, isMajor });
+				lastMonth = month;
 				d.setDate(d.getDate() + 7);
 			}
 		} else if (zoom === 'monthly') {
-			// Show 1st of each month
 			d.setDate(1);
 			if (d < timelineStart) d.setMonth(d.getMonth() + 1);
+			let lastYear = -1;
 			while (d <= timelineEnd) {
 				const x = dateToX(d);
+				const year = d.getFullYear();
+				const showYear = year !== lastYear;
 				const isMajor = d.getMonth() === 0;
-				const label = isMajor
-					? d.toLocaleDateString('en', { month: 'short', year: 'numeric' })
-					: d.toLocaleDateString('en', { month: 'short' });
+				const label = showYear
+					? d.toLocaleDateString(getLocale(), { month: 'short', year: 'numeric' })
+					: d.toLocaleDateString(getLocale(), { month: 'short' });
 				marks.push({ x, label, isMajor });
+				lastYear = year;
 				d.setMonth(d.getMonth() + 1);
 			}
 		} else {
-			// yearly: show Jan of each year
+			// Always show at least the starting year, even if Jan 1 is before timelineStart
 			d.setMonth(0, 1);
-			if (d < timelineStart) d.setFullYear(d.getFullYear() + 1);
 			while (d <= timelineEnd) {
 				const x = dateToX(d);
-				marks.push({ x, label: d.getFullYear().toString(), isMajor: true });
+				marks.push({ x: Math.max(0, x), label: d.getFullYear().toString(), isMajor: true });
 				d.setFullYear(d.getFullYear() + 1);
+			}
+			// If no marks (timeframe within a single year and Jan 1 is before it), force one
+			if (marks.length === 0) {
+				marks.push({
+					x: 0,
+					label: timelineStart.getFullYear().toString(),
+					isMajor: true
+				});
 			}
 		}
 		return marks;
@@ -232,7 +242,7 @@
 
 	function formatDate(d: Date | null): string {
 		if (!d) return '—';
-		return d.toLocaleDateString('en', { year: 'numeric', month: 'short', day: 'numeric' });
+		return d.toLocaleDateString(getLocale(), { year: 'numeric', month: 'short', day: 'numeric' });
 	}
 
 	// --- Scroll container ref for auto-scroll to today ---
@@ -249,216 +259,236 @@
 </script>
 
 <div class="gantt-wrapper relative">
-	<!-- Label column + scrollable chart area -->
-	<div class="flex overflow-hidden border border-surface-300 rounded-lg">
-		<!-- Fixed label column -->
-		<div
-			class="shrink-0 bg-surface-50 border-r border-surface-300 overflow-hidden"
-			style="width: {LABEL_WIDTH}px"
-		>
-			<!-- Header spacer -->
-			<div
-				class="border-b border-surface-300 bg-surface-100 flex items-end px-2 text-xs font-semibold text-surface-500"
-				style="height: {HEADER_HEIGHT}px"
-			>
-				{m.items()}
-			</div>
-			<!-- Row labels -->
-			{#each rows as row, i}
-				{@const y = i * (ROW_HEIGHT + ROW_GAP)}
+	<div
+		class="border border-surface-300 rounded-lg overflow-auto"
+		style="max-height: 80vh"
+		bind:this={scrollContainer}
+	>
+		<!-- Total width = label column + chart width -->
+		<div style="width: {LABEL_WIDTH + chartWidth}px">
+			<!-- Sticky header row -->
+			<div class="sticky top-0 z-10 flex border-b border-surface-300">
+				<!-- Top-left corner: "Items" label -->
 				<div
-					class="flex items-center overflow-hidden text-ellipsis whitespace-nowrap"
-					style="height: {ROW_HEIGHT}px; margin-top: {ROW_GAP}px; padding-left: {8 +
-						row.depth * 16}px"
-					title={row.label}
+					class="sticky left-0 z-20 shrink-0 bg-surface-100 border-r border-surface-300 flex items-end px-2 text-xs font-semibold text-surface-500"
+					style="width: {LABEL_WIDTH}px; height: {HEADER_HEIGHT}px"
 				>
-					{#if row.kind === 'folder-header'}
-						<span class="text-xs font-bold text-surface-700 uppercase tracking-wide">
-							<i class="fa-solid fa-folder text-primary-500 mr-1"></i>
-							{row.label}
-						</span>
-					{:else if row.kind === 'category-header'}
-						<span class="text-xs font-semibold text-surface-500">
-							{row.label}
-						</span>
-					{:else if row.item}
-						<a
-							href={row.item.href}
-							class="text-xs text-surface-700 hover:text-primary-600 hover:underline truncate"
+					{m.items()}
+				</div>
+				<!-- Date header -->
+				<svg width={chartWidth} height={HEADER_HEIGHT} class="block shrink-0 bg-surface-100">
+					{#each gridMarks as mark}
+						<line
+							x1={mark.x}
+							y1={0}
+							x2={mark.x}
+							y2={HEADER_HEIGHT}
+							stroke={mark.isMajor ? 'var(--color-surface-300)' : 'var(--color-surface-200)'}
+							stroke-width={mark.isMajor ? 1 : 0.5}
+						/>
+						<text
+							x={mark.x + 4}
+							y={HEADER_HEIGHT - 8}
+							class="fill-surface-500"
+							font-size="11"
+							font-family="system-ui, sans-serif"
+						>
+							{mark.label}
+						</text>
+					{/each}
+					{#if todayVisible}
+						<line
+							x1={todayX}
+							y1={0}
+							x2={todayX}
+							y2={HEADER_HEIGHT}
+							stroke="var(--color-error-500)"
+							stroke-width="1.5"
+							stroke-dasharray="4 2"
+						/>
+						<text
+							x={todayX + 4}
+							y={14}
+							fill="var(--color-error-500)"
+							font-size="10"
+							font-weight="bold"
+							font-family="system-ui, sans-serif">{m.today()}</text
+						>
+					{/if}
+				</svg>
+			</div>
+
+			<!-- Body: labels + chart -->
+			<div class="flex">
+				<!-- Sticky label column -->
+				<div
+					class="sticky left-0 z-[5] shrink-0 bg-surface-50 border-r border-surface-300"
+					style="width: {LABEL_WIDTH}px"
+				>
+					{#each rows as row, i}
+						<div
+							class="flex items-center overflow-hidden text-ellipsis whitespace-nowrap"
+							style="height: {ROW_HEIGHT}px; margin-top: {ROW_GAP}px; padding-left: {8 +
+								row.depth * 16}px"
 							title={row.label}
 						>
-							{row.label}
-						</a>
-					{/if}
+							{#if row.kind === 'folder-header'}
+								<span class="text-xs font-bold text-surface-700 uppercase tracking-wide">
+									<i class="fa-solid fa-folder text-primary-500 mr-1"></i>
+									{row.label}
+								</span>
+							{:else if row.kind === 'category-header'}
+								<span class="text-xs font-semibold text-surface-500">
+									{row.label}
+								</span>
+							{:else if row.item}
+								<a
+									href={row.item.href}
+									class="text-xs text-surface-700 hover:text-primary-600 hover:underline truncate"
+									title={row.label}
+								>
+									{row.label}
+								</a>
+							{/if}
+						</div>
+					{/each}
 				</div>
-			{/each}
-		</div>
 
-		<!-- Scrollable chart area -->
-		<div class="flex-1 overflow-x-auto overflow-y-hidden" bind:this={scrollContainer}>
-			<svg
-				width={chartWidth}
-				height={totalHeight}
-				class="block"
-				role="img"
-				aria-label="Gantt chart"
-			>
-				<!-- Header background -->
-				<rect x="0" y="0" width={chartWidth} height={HEADER_HEIGHT} class="fill-surface-100" />
-				<line
-					x1="0"
-					y1={HEADER_HEIGHT}
-					x2={chartWidth}
-					y2={HEADER_HEIGHT}
-					stroke="var(--color-surface-300)"
-					stroke-width="1"
-				/>
-
-				<!-- Grid lines and labels -->
-				{#each gridMarks as mark}
-					<line
-						x1={mark.x}
-						y1={0}
-						x2={mark.x}
-						y2={totalHeight}
-						stroke={mark.isMajor ? 'var(--color-surface-300)' : 'var(--color-surface-200)'}
-						stroke-width={mark.isMajor ? 1 : 0.5}
-					/>
-					<text
-						x={mark.x + 4}
-						y={HEADER_HEIGHT - 8}
-						class="fill-surface-500"
-						font-size="11"
-						font-family="system-ui, sans-serif"
-					>
-						{mark.label}
-					</text>
-				{/each}
-
-				<!-- Today line -->
-				{#if todayVisible}
-					<line
-						x1={todayX}
-						y1={0}
-						x2={todayX}
-						y2={totalHeight}
-						stroke="var(--color-error-500)"
-						stroke-width="1.5"
-						stroke-dasharray="4 2"
-					/>
-					<text
-						x={todayX + 4}
-						y={14}
-						fill="var(--color-error-500)"
-						font-size="10"
-						font-weight="bold"
-						font-family="system-ui, sans-serif">{m.today()}</text
-					>
-				{/if}
-
-				<!-- Row backgrounds -->
-				{#each rows as row, i}
-					{@const y = HEADER_HEIGHT + i * (ROW_HEIGHT + ROW_GAP)}
-					{#if row.kind === 'folder-header'}
-						<rect
-							x="0"
-							{y}
-							width={chartWidth}
-							height={ROW_HEIGHT}
-							fill="var(--color-surface-100)"
-							opacity="0.7"
+				<!-- Chart body SVG -->
+				<svg
+					width={chartWidth}
+					height={bodyHeight}
+					class="block shrink-0"
+					role="img"
+					aria-label="Gantt chart"
+				>
+					<!-- Grid lines (full height) -->
+					{#each gridMarks as mark}
+						<line
+							x1={mark.x}
+							y1={0}
+							x2={mark.x}
+							y2={bodyHeight}
+							stroke={mark.isMajor ? 'var(--color-surface-300)' : 'var(--color-surface-200)'}
+							stroke-width={mark.isMajor ? 1 : 0.5}
 						/>
-					{:else if row.kind === 'item' && i % 2 === 0}
-						<rect
-							x="0"
-							{y}
-							width={chartWidth}
-							height={ROW_HEIGHT}
-							fill="var(--color-surface-50)"
-							opacity="0.5"
+					{/each}
+
+					<!-- Today line -->
+					{#if todayVisible}
+						<line
+							x1={todayX}
+							y1={0}
+							x2={todayX}
+							y2={bodyHeight}
+							stroke="var(--color-error-500)"
+							stroke-width="1.5"
+							stroke-dasharray="4 2"
 						/>
 					{/if}
-				{/each}
 
-				<!-- Bars and milestones -->
-				{#each rows as row, i}
-					{#if row.kind === 'item' && row.item}
-						{@const item = row.item}
-						{@const cy = HEADER_HEIGHT + i * (ROW_HEIGHT + ROW_GAP) + ROW_HEIGHT / 2}
+					<!-- Row backgrounds -->
+					{#each rows as row, i}
+						{@const y = i * (ROW_HEIGHT + ROW_GAP)}
+						{#if row.kind === 'folder-header'}
+							<rect
+								x="0"
+								{y}
+								width={chartWidth}
+								height={ROW_HEIGHT}
+								fill="var(--color-surface-100)"
+								opacity="0.7"
+							/>
+						{:else if row.kind === 'item' && i % 2 === 0}
+							<rect
+								x="0"
+								{y}
+								width={chartWidth}
+								height={ROW_HEIGHT}
+								fill="var(--color-surface-50)"
+								opacity="0.5"
+							/>
+						{/if}
+					{/each}
 
-						{#if item.type === 'milestone'}
-							<!-- Diamond milestone -->
-							{@const mx = dateToX(item.endDate ?? item.startDate ?? new Date())}
-							<g
-								class="cursor-pointer"
-								onmouseenter={(e) => showTooltip(e, item)}
-								onmouseleave={hideTooltip}
-							>
-								<polygon
-									points="{mx},{cy - MILESTONE_RADIUS} {mx + MILESTONE_RADIUS},{cy} {mx},{cy +
-										MILESTONE_RADIUS} {mx - MILESTONE_RADIUS},{cy}"
-									fill={item.color}
-									stroke="white"
-									stroke-width="1"
-								/>
-							</g>
-						{:else}
-							<!-- Bar -->
-							{@const x1 = dateToX(item.startDate!)}
-							{@const x2 = dateToX(item.endDate!)}
-							{@const barWidth = Math.max(MIN_BAR_WIDTH, x2 - x1)}
-							{@const barY = cy - BAR_HEIGHT / 2}
-							<g
-								class="cursor-pointer"
-								onmouseenter={(e) => showTooltip(e, item)}
-								onmouseleave={hideTooltip}
-							>
-								<!-- Background (unfilled) -->
-								<rect
-									x={x1}
-									y={barY}
-									width={barWidth}
-									height={BAR_HEIGHT}
-									rx="4"
-									ry="4"
-									fill={item.color}
-									opacity="0.25"
-									stroke={item.color}
-									stroke-width="1"
-								/>
-								<!-- Progress fill -->
-								{#if item.progress > 0}
-									{@const fillWidth = Math.max(2, (barWidth * item.progress) / 100)}
+					<!-- Bars and milestones -->
+					{#each rows as row, i}
+						{#if row.kind === 'item' && row.item}
+							{@const item = row.item}
+							{@const cy = i * (ROW_HEIGHT + ROW_GAP) + ROW_HEIGHT / 2}
+
+							{#if item.type === 'milestone'}
+								{@const mx = dateToX(item.endDate ?? item.startDate ?? new Date())}
+								<g
+									class="cursor-pointer"
+									onmouseenter={(e) => showTooltip(e, item)}
+									onmouseleave={hideTooltip}
+								>
+									<polygon
+										points="{mx},{cy - MILESTONE_RADIUS} {mx + MILESTONE_RADIUS},{cy} {mx},{cy +
+											MILESTONE_RADIUS} {mx - MILESTONE_RADIUS},{cy}"
+										fill={item.color}
+										stroke="white"
+										stroke-width="1"
+									/>
+								</g>
+							{:else}
+								{@const x1 = dateToX(item.startDate!)}
+								{@const x2 = dateToX(item.endDate!)}
+								{@const barWidth = Math.max(MIN_BAR_WIDTH, x2 - x1)}
+								{@const barY = cy - BAR_HEIGHT / 2}
+								<g
+									class="cursor-pointer"
+									onmouseenter={(e) => showTooltip(e, item)}
+									onmouseleave={hideTooltip}
+								>
+									<!-- Background (unfilled) -->
 									<rect
 										x={x1}
 										y={barY}
-										width={fillWidth}
+										width={barWidth}
 										height={BAR_HEIGHT}
 										rx="4"
 										ry="4"
 										fill={item.color}
-										opacity="0.7"
+										opacity="0.25"
+										stroke={item.color}
+										stroke-width="1"
 									/>
-								{/if}
-								<!-- Progress text inside bar if wide enough -->
-								{#if barWidth > 40}
-									<text
-										x={x1 + barWidth / 2}
-										y={cy + 4}
-										text-anchor="middle"
-										font-size="10"
-										font-weight="600"
-										font-family="system-ui, sans-serif"
-										fill="var(--color-surface-700)"
-									>
-										{item.progress}%
-									</text>
-								{/if}
-							</g>
+									<!-- Progress fill -->
+									{#if item.progress > 0}
+										{@const fillWidth = Math.max(2, (barWidth * item.progress) / 100)}
+										<rect
+											x={x1}
+											y={barY}
+											width={fillWidth}
+											height={BAR_HEIGHT}
+											rx="4"
+											ry="4"
+											fill={item.color}
+											opacity="0.7"
+										/>
+									{/if}
+									<!-- Progress text inside bar if wide enough -->
+									{#if barWidth > 40}
+										<text
+											x={x1 + barWidth / 2}
+											y={cy + 4}
+											text-anchor="middle"
+											font-size="10"
+											font-weight="600"
+											font-family="system-ui, sans-serif"
+											fill="var(--color-surface-700)"
+										>
+											{item.progress}%
+										</text>
+									{/if}
+								</g>
+							{/if}
 						{/if}
-					{/if}
-				{/each}
-			</svg>
+					{/each}
+				</svg>
+			</div>
 		</div>
 	</div>
 

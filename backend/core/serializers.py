@@ -2346,6 +2346,8 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "progress",
             "status",
             "is_locked",
+            "eta",
+            "due_date",
             "created_at",
             "updated_at",
             "path",
