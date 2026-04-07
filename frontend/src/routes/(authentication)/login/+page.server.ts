@@ -65,7 +65,7 @@ export const actions: Actions = {
 		const res = await fetch(endpoint, requestInitOptions).then((res) => res.json());
 
 		if (res.status !== 200) {
-			console.error(res);
+			console.error('Login failed:', res.status);
 			if (res.errors) {
 				res.errors.forEach((error) => {
 					setError(form, error.param, error.code);
@@ -139,7 +139,7 @@ export const actions: Actions = {
 		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
 
 		if (response.status !== 200) {
-			console.error('Could not authenticate using TOTP', response);
+			console.error('Could not authenticate using TOTP:', response.status);
 			if (Object.hasOwn(response, 'errors')) {
 				response.errors.forEach((error) => {
 					setError(form, error.param, error.code);
