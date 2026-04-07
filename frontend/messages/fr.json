@@ -1268,7 +1268,7 @@
 	"generalSettingsUpdated": "Paramètres mis à jour",
 	"labels": "Étiquettes",
 	"addLabel": "Ajouter une étiquette",
-	"labelsHelpText": "Les étiquettes sont utilisées pour catégoriser et filtrer les éléments.",
+	"labelsHelpText": "Les étiquettes sont utilisées pour catégoriser et filtrer les éléments. Saisissez une nouvelle étiquette et appuyez sur Entrée pour la créer.",
 	"filteringLabel": "Étiquette",
 	"filteringLabels": "Étiquettes",
 	"invalidLabel": "L'étiquette doit être alphanumérique et contenir au maximum 36 caractères",

@@ -1435,7 +1435,7 @@
 	"generalSettingsUpdated": "General settings updated",
 	"labels": "Labels",
 	"addLabel": "Add label",
-	"labelsHelpText": "Labels are used to categorize and filter the items.",
+	"labelsHelpText": "Labels are used to categorize and filter the items. Type a new label and press Enter to create it.",
 	"filteringLabel": "Label",
 	"filteringLabels": "Labels",
 	"invalidLabel": "Label must be alphanumeric and contain at most 36 characters",

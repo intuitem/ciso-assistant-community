@@ -454,9 +454,7 @@
 			}
 		}
 
-		// change($value);
 		await onChange($value);
-		// dispatch('cache', selected);
 	}
 
 	function arraysEqual(
@@ -631,6 +629,7 @@
 			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
+			createOptionMsg={allowUserOptions ? null : undefined}
 			duplicates={false}
 			key={JSON.stringify}
 			filterFunc={effectiveLazy ? passthroughFilter : fastFilter}
