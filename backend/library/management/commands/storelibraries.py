@@ -5,7 +5,7 @@ import structlog
 from django.core.management.base import BaseCommand
 from django.db.models import Exists, OuterRef
 
-from ciso_assistant.settings import LIBRARIES_PATH
+from django.conf import settings
 from core.models import StoredLibrary, LoadedLibrary
 
 logger = structlog.getLogger(__name__)
@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         StoredLibrary.__init_class__()
-        path = Path(options.get("path") or LIBRARIES_PATH)
+        path = Path(options.get("path") or settings.LIBRARIES_PATH)
         if path.is_dir():
             library_files = sorted(
                 f for f in path.iterdir() if f.is_file and f.suffix == ".yaml"
@@ -31,12 +31,20 @@ class Command(BaseCommand):
         for fname in library_files:
             # logger.info("Begin library file storage", filename=fname)
             try:
-                library = StoredLibrary.store_library_file(fname, True)
+                library, error = StoredLibrary.store_library_file(fname, True)
                 if library:
                     logger.info(
                         "Successfully stored library",
                         filename=fname,
                         library=library,
+                    )
+                elif error:
+                    if error == "libraryAlreadyLoadedError":
+                        continue
+                    logger.warning(
+                        "Library skipped",
+                        filename=fname,
+                        reason=error,
                     )
             except Exception:
                 logger.error("Invalid library file", filename=fname)

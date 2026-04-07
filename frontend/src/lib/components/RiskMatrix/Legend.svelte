@@ -16,12 +16,12 @@
 </script>
 
 <div class="w-full flex flex-col justify-start mt-4">
-	<h3 class="flex font-semibold p-2 m-2 text-md">{m.riskLevels()}</h3>
+	<h3 class="flex font-semibold pl-6 m-2 text-md">{m.riskLevels()}</h3>
 	<div class="flex justify-start mx-2">
 		<table class="w-auto border-separate" style="border-spacing: 0 4px;">
 			<thead>
 				<tr>
-					<th class="text-left pb-2 px-2 font-semibold">{m.level()}</th>
+					<th class="text-center pb-2 px-2 font-semibold">{m.level()}</th>
 					<th class="text-left pb-2 px-2 font-semibold">{m.description()}</th>
 				</tr>
 			</thead>

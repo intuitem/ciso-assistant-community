@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
 from core.models import (
     Actor,
+    Evidence,
+    EvidenceRevision,
     FilteringLabelMixin,
     I18nObjectMixin,
     LoadedLibrary,
@@ -147,6 +149,13 @@ class MetricInstance(
         help_text=_("Expected frequency for collecting metric samples"),
     )
 
+    evidences = models.ForeignKey(
+        Evidence,
+        on_delete=models.SET_NULL,
+        related_name="metric_instances",
+        blank=True,
+        null=True,
+    )
     fields_to_check = ["ref_id", "name"]
 
     class Meta:
@@ -253,6 +262,15 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         default=dict,
         verbose_name=_("Value"),
         help_text=_("The metric value (format depends on metric definition category)"),
+    )
+
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    evidence_revision = models.ForeignKey(
+        EvidenceRevision,
+        on_delete=models.SET_NULL,
+        related_name="samples",
+        blank=True,
+        null=True,
     )
 
     class Meta:
@@ -417,13 +435,14 @@ class BuiltinMetricSample(AbstractBaseModel):
         return f"{self.content_type.model} {self.object_id} - {self.date}"
 
     @classmethod
-    def update_or_create_snapshot(cls, obj, date=None):
+    def update_or_create_snapshot(cls, obj, date=None, precomputed_metrics=None):
         """
         Update or create a daily metric snapshot for the given object.
 
         Args:
             obj: The model instance (ComplianceAssessment, RiskAssessment, etc.)
             date: Optional date for the snapshot. Defaults to today.
+            precomputed_metrics: Optional pre-computed metrics dict to skip recomputation.
 
         Returns:
             Tuple of (BuiltinMetricSample, created)
@@ -434,7 +453,11 @@ class BuiltinMetricSample(AbstractBaseModel):
             date = now().date()
 
         content_type = ContentType.objects.get_for_model(obj)
-        metrics = cls.compute_metrics(obj)
+        metrics = (
+            precomputed_metrics
+            if precomputed_metrics is not None
+            else cls.compute_metrics(obj)
+        )
 
         return cls.objects.update_or_create(
             content_type=content_type,
@@ -487,8 +510,8 @@ class BuiltinMetricSample(AbstractBaseModel):
         ).count()
 
         return {
-            "progress": assessment.get_progress(),
-            "score": assessment.get_global_score(),
+            "progress": assessment.progress,
+            "score": assessment.get_global_score()["maturity_score"],
             "total_requirements": total,
             "status_breakdown": status_breakdown,
             "result_breakdown": result_breakdown,
@@ -591,7 +614,7 @@ class BuiltinMetricSample(AbstractBaseModel):
     @classmethod
     def _compute_folder_metrics(cls, folder):
         """Compute metrics for a Folder (domain-level aggregations)."""
-        from core.models import AppliedControl, Incident, Severity
+        from core.models import AppliedControl, Incident
         from django.db.models import Count
 
         # Applied controls in this folder
@@ -619,8 +642,8 @@ class BuiltinMetricSample(AbstractBaseModel):
             .annotate(count=Count("id"))
             .values_list("severity", "count")
         )
-        # Convert severity integers to labels
-        severity_labels = {choice[0]: choice[1] for choice in Severity.choices}
+        # Convert severity integers to labels using Incident.Severity
+        severity_labels = {choice[0]: choice[1] for choice in Incident.Severity.choices}
         incidents_severity_breakdown = {
             severity_labels.get(k, str(k)): v
             for k, v in incidents_severity_breakdown.items()

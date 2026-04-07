@@ -1,4 +1,8 @@
+import re
+
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from core.models import Asset
@@ -28,12 +32,14 @@ from core.dora import (
     DORA_SUBSTITUTABILITY_CHOICES,
     DORA_NON_SUBSTITUTABILITY_REASON_CHOICES,
     DORA_BINARY_CHOICES,
+    DORA_YES_NO_ASSESSMENT_CHOICES,
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
 
 import csv
 import io
+import uuid
 import zipfile
 from datetime import datetime
 
@@ -177,7 +183,11 @@ class EntityViewSet(BaseModelViewSet):
         entities_for_b_01_02 = [main_entity] + subsidiaries
 
         # Prepare contract QuerySets
-        contracts = Contract.objects.filter(id__in=viewable_contracts)
+        contracts = (
+            Contract.objects.filter(id__in=viewable_contracts)
+            .exclude(status=Contract.Status.DRAFT)
+            .exclude(dora_exclude=True)
+        )
 
         # Prepare business functions
         business_functions = Asset.objects.filter(
@@ -207,17 +217,31 @@ class EntityViewSet(BaseModelViewSet):
         related_solution_ids = set(related_solutions.values_list("id", flat=True))
         business_function_contracts = contracts.filter(
             solutions__id__in=related_solution_ids
-        )
+        ).distinct()
 
-        # Calculate folder name for the ZIP structure (without .zip extension)
-        lei, _ = dora_export.get_entity_identifier(main_entity, priority=["LEI"])
-        competent_authority = main_entity.dora_competent_authority or "UNKNOWN"
+        # Get export metadata (naming, identifiers)
+        identifier_type = request.query_params.get("identifier_type", None)
+        level = request.query_params.get("level", "IND")
+        naming_convention = request.query_params.get("naming_convention", "nbb")
+        try:
+            export_meta = dora_export.get_dora_export_metadata(
+                main_entity,
+                identifier_type=identifier_type,
+                level=level,
+                naming_convention=naming_convention,
+            )
+        except ValueError:
+            logger.exception("Error generating DORA export metadata")
+            return Response(
+                {
+                    "error": "Error generating DORA export metadata. Please ensure the main entity has the required DORA metadata fields (folder_prefix, entity_id, filename)."
+                },
+                status=HTTP_400_BAD_REQUEST,
+            )
 
-        if lei:
-            base_folder_name = f"LEI_{lei}.CON_{competent_authority}_DOR_DORA_ROI"
-        else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            base_folder_name = f"DORA_ROI_{timestamp}"
+        base_folder_name = export_meta["folder_prefix"]
+        entity_id = export_meta["entity_id"]
+        filename = export_meta["filename"]
 
         # Create zip file in memory
         zip_buffer = io.BytesIO()
@@ -281,7 +305,9 @@ class EntityViewSet(BaseModelViewSet):
             dora_export.generate_filing_indicators(zip_file, base_folder_name)
 
             # Generate parameters.csv
-            dora_export.generate_parameters(zip_file, main_entity, base_folder_name)
+            dora_export.generate_parameters(
+                zip_file, main_entity, base_folder_name, entity_id=entity_id
+            )
 
             # Generate JSON metadata files
             dora_export.generate_report_package_json(zip_file, base_folder_name)
@@ -290,11 +316,9 @@ class EntityViewSet(BaseModelViewSet):
         # Prepare response
         zip_buffer.seek(0)
 
-        # Use the same base folder name for the ZIP filename
-        filename = f"{base_folder_name}.zip"
-
         response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        sanitized_filename = re.sub(r"[^\w.\-]", "_", filename)
+        response["Content-Disposition"] = f'attachment; filename="{sanitized_filename}"'
 
         return response
 
@@ -593,13 +617,13 @@ class EntityViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify folder exists and user has access
-            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
+            try:
+                folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+            except (ValueError, AttributeError, Folder.DoesNotExist):
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            folder = Folder.objects.get(id=folder_id)
 
             # Parse the entities text
             lines = [line.strip() for line in entities_text.split("\n") if line.strip()]
@@ -624,7 +648,7 @@ class EntityViewSet(BaseModelViewSet):
 
                 # Check if entity already exists in the folder
                 existing_entity = Entity.objects.filter(
-                    name=entity_name, folder=folder_id
+                    name=entity_name, folder=folder
                 ).first()
 
                 if existing_entity:
@@ -641,7 +665,7 @@ class EntityViewSet(BaseModelViewSet):
                 # Create new entity using the serializer to respect IAM
                 entity_data = {
                     "name": entity_name,
-                    "folder": folder_id,
+                    "folder": str(folder.id),
                 }
 
                 if ref_id:
@@ -652,7 +676,13 @@ class EntityViewSet(BaseModelViewSet):
                 )
 
                 if serializer.is_valid():
-                    entity = serializer.save()
+                    try:
+                        entity = serializer.save()
+                    except PermissionDenied as e:
+                        return Response(
+                            {"error": e.detail},
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
 
                     created_entities.append(
                         {
@@ -744,10 +774,16 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             object_type=EntityAssessment,
         )
 
-        for ea in EntityAssessment.objects.filter(id__in=viewable_items):
+        for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
+            "folder", "entity"
+        ):
+            # Use entity assessment's folder for grouping
+            folder = ea.folder
             entry = {
                 "entity_assessment_id": ea.id,
                 "provider": ea.entity.name,
+                "folder_id": str(folder.id) if folder else None,
+                "folder_name": folder.name if folder else None,
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0
                 else "-",
@@ -762,7 +798,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment_id": ea.compliance_assessment.id
                 if ea.compliance_assessment
                 else "#",
-                "reviewers": ",".join([re.email for re in ea.reviewers.all()])
+                "reviewers": ",".join([str(re.specific) for re in ea.reviewers.all()])
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",
@@ -779,9 +815,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             entry.update({"completion": completion})
 
             review_progress = (
-                ea.compliance_assessment.get_progress()
-                if ea.compliance_assessment
-                else 0
+                ea.compliance_assessment.progress if ea.compliance_assessment else 0
             )
             entry.update({"review_progress": review_progress})
             assessments_data.append(entry)
@@ -793,13 +827,6 @@ class RepresentativeViewSet(BaseModelViewSet):
     """
     API endpoint that allows representatives to be viewed or edited.
     """
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user:
-            instance.user.delete()
-
-        return super().destroy(request, *args, **kwargs)
 
     model = Representative
     filterset_fields = ["entity", "ref_id", "filtering_labels"]
@@ -874,7 +901,7 @@ class SolutionViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get alternative providers identified choices")
     def dora_alternative_providers_identified(self, request):
-        return Response(dict(DORA_BINARY_CHOICES))
+        return Response(dict(DORA_YES_NO_ASSESSMENT_CHOICES))
 
     def perform_create(self, serializer):
         serializer.save()
@@ -909,6 +936,7 @@ class ContractViewSet(BaseModelViewSet):
         "governing_law_country",
         "notice_period_entity",
         "notice_period_provider",
+        "end_date",
     ]
 
     @action(detail=False, name="Get status choices")

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages';
 	import Checkbox from '../Checkbox.svelte';
@@ -12,7 +13,7 @@
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -40,6 +41,46 @@
 	let is_dynamic = $state(false);
 
 	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
+
+	let selectedFolder = $state<string | undefined>(undefined);
+	let folderKey = $state(0);
+	let isAutoFillingFolder = $state(false);
+
+	function handleFolderChange(folderId: string) {
+		selectedFolder = folderId;
+		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
+		if (!isAutoFillingFolder && form.data?.perimeter) {
+			form.form.update((currentData) => ({
+				...currentData,
+				perimeter: undefined
+			}));
+		}
+		isAutoFillingFolder = false;
+	}
+
+	async function handlePerimeterChange(perimeterId: string) {
+		if (perimeterId && !selectedFolder) {
+			// Fetch perimeter to get its folder and auto-fill
+			try {
+				const response = await fetch(`/perimeters/${perimeterId}`);
+				if (response.ok) {
+					const perimeter = await response.json();
+					if (perimeter.folder?.id) {
+						isAutoFillingFolder = true;
+						selectedFolder = perimeter.folder.id;
+						// Update form data and force folder component to re-render
+						form.form.update((currentData) => ({
+							...currentData,
+							folder: perimeter.folder.id
+						}));
+						folderKey++;
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching perimeter:', error);
+			}
+		}
+	}
 
 	async function handleFrameworkChange(id: string) {
 		if (id) {
@@ -94,15 +135,32 @@
 		hidden
 	/>
 {/if}
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeter"
-	cacheLock={cacheLocks['perimeter']}
-	bind:cachedValue={formDataCache['perimeter']}
-	label={m.perimeter()}
-/>
+{#key folderKey}
+	<FolderTreeSelect
+		{form}
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		contentTypes={['DO', 'GL', 'EN']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.folder()}
+		onChange={handleFolderChange}
+		mount={handleFolderChange}
+	/>
+{/key}
+{#key selectedFolder}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="perimeters"
+		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
+		optionsExtraFields={[['folder', 'str']]}
+		field="perimeter"
+		nullable
+		cacheLock={cacheLocks['perimeter']}
+		bind:cachedValue={formDataCache['perimeter']}
+		label={m.perimeter()}
+		onChange={handlePerimeterChange}
+	/>
+{/key}
 {#if context === 'fromBaseline' && initialData.baseline}
 	<AutocompleteSelect
 		{form}
@@ -155,6 +213,14 @@
 		/>
 	{/key}
 {/if}
+<TextField
+	{form}
+	field="version"
+	label={m.version()}
+	helpText={m.versionHelpText()}
+	cacheLock={cacheLocks['version']}
+	bind:cachedValue={formDataCache['version']}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -168,14 +234,6 @@
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
-/>
-<TextField
-	{form}
-	field="version"
-	label={m.version()}
-	helpText={m.versionHelpText()}
-	cacheLock={cacheLocks['version']}
-	bind:cachedValue={formDataCache['version']}
 />
 <TextField
 	type="date"
@@ -200,11 +258,35 @@
 		{/if}
 		<Checkbox
 			{form}
+			field="scoring_enabled"
+			label={m.scoringEnabled()}
+			helpText={m.scoringEnabledHelpText()}
+			cacheLock={cacheLocks['scoring_enabled']}
+			bind:cachedValue={formDataCache['scoring_enabled']}
+			onChange={(value) => {
+				if (!value) {
+					form.form.update((currentData) => ({
+						...currentData,
+						show_documentation_score: false
+					}));
+				}
+			}}
+		/>
+		<Checkbox
+			{form}
 			field="show_documentation_score"
 			label={m.useDocumentationScore()}
 			helpText={m.useDocumentationScoreHelpText()}
 			cacheLock={cacheLocks['show_documentation_score']}
 			bind:cachedValue={formDataCache['show_documentation_score']}
+			onChange={(value) => {
+				if (value) {
+					form.form.update((currentData) => ({
+						...currentData,
+						scoring_enabled: true
+					}));
+				}
+			}}
 		/>
 		<Checkbox
 			{form}
@@ -242,6 +324,7 @@
 	/>
 	<AutocompleteSelect
 		multiple
+		lazy
 		{form}
 		optionsEndpoint="assets"
 		optionsLabelField="auto"
@@ -312,6 +395,14 @@
 			helpText={m.isLockedHelpText()}
 			cacheLock={cacheLocks['is_locked']}
 			bind:cachedValue={formDataCache['is_locked']}
+		/>
+		<Checkbox
+			{form}
+			field="auto_sync"
+			label={m.autoSync()}
+			helpText={m.autoSyncHelpText()}
+			cacheLock={cacheLocks['auto_sync']}
+			bind:cachedValue={formDataCache['auto_sync']}
 		/>
 	{/if}
 </Dropdown>

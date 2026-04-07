@@ -10,7 +10,7 @@ import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { safeTranslate } from '$lib/utils/i18n';
 
@@ -114,7 +114,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const measureCreateSchema = modelSchema('applied-controls');
 	const initialData = {
-		folder: scenario.perimeter.folder.id
+		folder: scenario.folder?.id ?? scenario.risk_assessment?.folder?.id
 	};
 	const measureCreateForm = await superValidate(initialData, zod(measureCreateSchema), {
 		errors: false

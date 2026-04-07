@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '../TextField.svelte';
 	import MarkdownField from '../MarkdownField.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
@@ -33,7 +34,7 @@
 		{form}
 		multiple
 		optionsEndpoint="compliance-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}
@@ -45,7 +46,7 @@
 		{form}
 		multiple
 		optionsEndpoint="risk-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="risk_assessments"
 		cacheLock={cacheLocks['risk_assessments']}
@@ -93,7 +94,7 @@
 		{form}
 		multiple
 		optionsEndpoint="findings-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="findings_assessments"
 		cacheLock={cacheLocks['findings_assessments']}
@@ -157,10 +158,8 @@
 		label={m.refId()}
 	/>
 
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
-		pathField="path"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
@@ -188,7 +187,7 @@
 			{form}
 			multiple
 			optionsEndpoint="compliance-assessments"
-			optionsExtraFields={[['perimeter', 'str']]}
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="compliance_assessments"
 			cacheLock={cacheLocks['compliance_assessments']}
@@ -200,7 +199,7 @@
 			{form}
 			multiple
 			optionsEndpoint="risk-assessments"
-			optionsExtraFields={[['perimeter', 'str']]}
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="risk_assessments"
 			cacheLock={cacheLocks['risk_assessments']}
@@ -248,7 +247,7 @@
 			{form}
 			multiple
 			optionsEndpoint="findings-assessments"
-			optionsExtraFields={[['perimeter', 'str']]}
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="findings_assessments"
 			cacheLock={cacheLocks['findings_assessments']}

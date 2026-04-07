@@ -15,6 +15,7 @@
 		field: string;
 		helpText?: string;
 		onChange?: (urn: string, newAnswer: any) => void;
+		disabled?: boolean;
 	}
 
 	let {
@@ -26,18 +27,19 @@
 		initialValue = {},
 		field,
 		helpText,
-		onChange = () => {}
+		onChange = () => {},
+		disabled = false
 	}: Props = $props();
 
 	const { value } = form ? formFieldProxy(form, field) : {};
 
-	let internalAnswers = $state(value ? $value : initialValue);
+	let internalAnswers = $state(value ? $value : $state.snapshot(initialValue));
 	let questionBuffers = $state<Record<string, string>>({});
 
 	// Initialize buffers for text questions
 	$effect(() => {
 		Object.entries(questions).forEach(([urn, question]) => {
-			if (question.type === 'text' && !(urn in questionBuffers)) {
+			if ((question.type === 'text' || question.type === 'number') && !(urn in questionBuffers)) {
 				questionBuffers[urn] = internalAnswers[urn] || '';
 			}
 		});
@@ -104,6 +106,12 @@
 							<p class="text-primary-500 font-semibold">
 								{question.choices.find((choice) => choice.urn === internalAnswers[urn]).value}
 							</p>
+						{:else if internalAnswers[urn] === true}
+							<p class="text-primary-500 font-semibold">{m.yes()}</p>
+						{:else if internalAnswers[urn] === false}
+							<p class="text-primary-500 font-semibold">{m.no()}</p>
+						{:else if internalAnswers[urn] != null}
+							<p class="text-primary-500 font-semibold">{internalAnswers[urn]}</p>
 						{:else}
 							<p class="text-gray-400 italic">{m.noAnswer()}</p>
 						{/if}
@@ -114,10 +122,10 @@
 								<button
 									type="button"
 									name="question"
+									{disabled}
 									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
-										{selected
-										? 'preset-filled-primary-500 rounded-base'
-										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
+										{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
+										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
 									style={selected
 										? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
 										: ''}
@@ -133,14 +141,19 @@
 								>
 									{option.value}
 									{#if option.description}
-										<Tooltip
-											positioning={{ placement: 'top' }}
-											triggerBase="underline"
-											contentBase="card preset-filled p-4"
-											openDelay={50}
-										>
-											{#snippet trigger()}<i class="ml-2 fa-solid fa-circle-info"></i>{/snippet}
-											{#snippet content()}{option.description}{/snippet}
+										<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
+											<Tooltip.Trigger>
+												{#snippet child({ props })}
+													<span {...props} class="underline"
+														><i class="ml-2 fa-solid fa-circle-info"></i></span
+													>
+												{/snippet}
+											</Tooltip.Trigger>
+											<Tooltip.Positioner>
+												<Tooltip.Content class="card preset-filled p-4"
+													>{option.description}</Tooltip.Content
+												>
+											</Tooltip.Positioner>
 										</Tooltip>
 									{/if}
 								</button>
@@ -154,10 +167,10 @@
 								<button
 									type="button"
 									name="question"
+									{disabled}
 									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
-										{selected
-										? 'preset-filled-primary-500 rounded-base'
-										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
+										{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
+										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
 									style={selected
 										? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
 										: ''}
@@ -165,14 +178,19 @@
 								>
 									{option.value}
 									{#if option.description}
-										<Tooltip
-											positioning={{ placement: 'top' }}
-											triggerBase="underline"
-											contentBase="card preset-filled p-4"
-											openDelay={50}
-										>
-											{#snippet trigger()}<i class="ml-2 fa-solid fa-circle-info"></i>{/snippet}
-											{#snippet content()}{option.description}{/snippet}
+										<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
+											<Tooltip.Trigger>
+												{#snippet child({ props })}
+													<span {...props} class="underline"
+														><i class="ml-2 fa-solid fa-circle-info"></i></span
+													>
+												{/snippet}
+											</Tooltip.Trigger>
+											<Tooltip.Positioner>
+												<Tooltip.Content class="card preset-filled p-4"
+													>{option.description}</Tooltip.Content
+												>
+											</Tooltip.Positioner>
 										</Tooltip>
 									{/if}
 								</button>
@@ -182,14 +200,61 @@
 						<input
 							type="date"
 							class="input {_class}"
+							{disabled}
 							bind:value={internalAnswers[urn]}
 							onchange={(e) => onChange(urn, internalAnswers[urn])}
 						/>
+					{:else if question.type === 'boolean'}
+						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+							{#each [{ value: true, label: m.yes() }, { value: false, label: m.no() }] as option}
+								{@const selected = internalAnswers[urn] === option.value}
+								<button
+									type="button"
+									name="question"
+									{disabled}
+									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
+										{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
+										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
+									onclick={() => {
+										internalAnswers[urn] =
+											internalAnswers[urn] === option.value ? null : option.value;
+										onChange(urn, internalAnswers[urn]);
+									}}
+								>
+									{option.label}
+								</button>
+							{/each}
+						</div>
+					{:else if question.type === 'number'}
+						{#if form}
+							<input
+								type="number"
+								class="input {_class}"
+								{disabled}
+								bind:value={internalAnswers[urn]}
+								onchange={() => onChange(urn, internalAnswers[urn])}
+							/>
+						{:else}
+							<div>
+								<input
+									type="number"
+									class="input {_class}"
+									{disabled}
+									bind:value={questionBuffers[urn]}
+									onchange={() => {
+										const val = questionBuffers[urn] === '' ? null : Number(questionBuffers[urn]);
+										internalAnswers[urn] = val;
+										onChange(urn, val);
+									}}
+								/>
+							</div>
+						{/if}
 					{:else if question.type === 'text'}
 						{#if form}
 							<textarea
 								placeholder=""
 								class="input w-full {_class}"
+								{disabled}
 								bind:value={internalAnswers[urn]}
 							></textarea>
 						{:else}
@@ -197,9 +262,10 @@
 								<textarea
 									placeholder=""
 									class="input w-full {_class}"
+									{disabled}
 									bind:value={questionBuffers[urn]}
 								></textarea>
-								{#if questionBuffers[urn] !== (internalAnswers[urn] || '')}
+								{#if !disabled && questionBuffers[urn] !== (internalAnswers[urn] || '')}
 									<button
 										class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
 										onclick={() => saveTextAnswer(urn)}

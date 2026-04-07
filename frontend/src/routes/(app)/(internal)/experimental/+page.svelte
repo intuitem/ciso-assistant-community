@@ -6,7 +6,7 @@
 	$pageTitle = 'Experimental';
 </script>
 
-<div class="bg-white grid grid-cols-2 p-4 gap-4">
+<div class="bg-white grid grid-cols-2 p-4 gap-4 card">
 	<Article
 		title={m.requirementsExplorer()}
 		desc={m.visualizeRequirements()}
@@ -30,5 +30,17 @@
 		desc="Review all recurrent tasks grouped by folder for yearly planning"
 		link="/experimental/yearly-tasks-review"
 		tags={['tasks', 'planning', 'review', 'PRO']}
+	/>
+	<Article
+		title={m.matrixEditor()}
+		desc={m.matrixEditorDescription()}
+		link="/experimental/matrix-editor"
+		tags={['risk', 'matrix', 'editor']}
+	/>
+	<Article
+		title="Framework Builder"
+		desc="Create and edit compliance frameworks with a visual builder"
+		link="/experimental/framework-builder"
+		tags={['frameworks', 'builder', 'editor']}
 	/>
 </div>

@@ -6,6 +6,7 @@ from core.serializers import (
     ActionPlanSerializer,
 )
 from core.models import AppliedControl
+from core.utils import get_global_currency
 
 from .models import (
     QuantitativeRiskHypothesis,
@@ -80,6 +81,15 @@ class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
     class Meta:
         model = QuantitativeRiskStudy
         exclude = ["created_at", "updated_at"]
+
+    def validate_risk_tolerance(self, value):
+        """
+        Strip curve_data from incoming risk_tolerance since it should always
+        be computed by the backend based on the points values.
+        """
+        if value and isinstance(value, dict):
+            value.pop("curve_data", None)
+        return value
 
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id
@@ -392,10 +402,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
 
     def get_currency(self, obj):
         """Return currency symbol from global settings"""
-        from global_settings.models import GlobalSettings
-
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        return general_settings.value.get("currency", "€") if general_settings else "€"
+        return get_global_currency()
 
     loss_threshold = serializers.SerializerMethodField()
     loss_threshold_display = serializers.SerializerMethodField()

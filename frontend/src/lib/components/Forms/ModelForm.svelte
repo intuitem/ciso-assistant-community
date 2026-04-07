@@ -84,11 +84,11 @@
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
@@ -98,7 +98,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
-		form: SuperValidated<AnyZodObject>;
+		form: SuperValidated<FormDataShape>;
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		taintedMessage?: string | boolean;
 		model: ModelInfo;
@@ -149,7 +149,7 @@
 			if (nextValue) goto(nextValue);
 		}
 	}
-	let shape = $derived(schema.shape || schema._def.schema.shape);
+	let shape = $derived(schema.shape || schema._def?.schema?.shape);
 	let updated_fields = new Set();
 
 	function makeCacheLock(): CacheLock {
@@ -228,7 +228,7 @@
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
-			if (form.valid) {
+			if (form.valid && !form.message?.error) {
 				if (parent && typeof parent.onConfirm === 'function') {
 					parent.onConfirm();
 				}
@@ -471,7 +471,8 @@
 				{cacheLocks}
 				{formDataCache}
 				{initialData}
-				{data}
+				{object}
+				{context}
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
@@ -721,6 +722,7 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={model.initialData}
+				{object}
 				{context}
 				{...rest}
 			/>
@@ -861,7 +863,9 @@
 				{...rest}
 			/>
 		{/if}
-		<div class="flex flex-row justify-between space-x-4">
+		<div
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+		>
 			{#if closeModal}
 				<button
 					class="btn bg-gray-400 text-white font-semibold w-full"

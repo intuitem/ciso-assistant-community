@@ -8,6 +8,8 @@
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
+	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
+	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
 
 	function deriveInitialTab(): string {
 		if (page.state?.settingsTab) return page.state.settingsTab;
@@ -57,19 +59,15 @@
 	}
 </script>
 
-<Tabs
-	value={group}
-	onValueChange={(e) => handleTabChange(e.value)}
-	active="bg-primary-100 text-primary-800 border-b border-primary-800"
->
-	{#snippet list()}
-		<Tabs.Control value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Control>
-		<Tabs.Control value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Control>
-		<Tabs.Control value="featureFlags"
-			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Control
+<Tabs value={group} onValueChange={(e) => handleTabChange(e.value)}>
+	<Tabs.List>
+		<Tabs.Trigger value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Trigger>
+		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
+		<Tabs.Trigger value="featureFlags"
+			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
 		{#if page.data?.featureflags?.outgoing_webhooks}
-			<Tabs.Control value="webhooks"
+			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
 					><svg width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 						<title>webhook</title>
@@ -79,82 +77,101 @@
 						/>
 					</svg>
 					{m.webhooks()}</span
-				></Tabs.Control
+				></Tabs.Trigger
 			>
 		{/if}
-		<Tabs.Control value="integrations"
-			><i class="fa-solid fa-plug"></i> {m.integrations()}</Tabs.Control
+		<Tabs.Trigger value="emailTemplates"
+			><i class="fa-solid fa-file-lines"></i> {m.templates()}</Tabs.Trigger
 		>
-		<Tabs.Control value="clientSettings"
-			><i class="fa-solid fa-key"></i> {m.clientSettings()}</Tabs.Control
+		<Tabs.Trigger value="integrations"
+			><i class="fa-solid fa-plug"></i> {m.integrations()}</Tabs.Trigger
 		>
-	{/snippet}
+		<Tabs.Trigger value="clientSettings"
+			><i class="fa-solid fa-key"></i> {m.clientSettings()}</Tabs.Trigger
+		>
+		<Tabs.Indicator />
+	</Tabs.List>
 
-	{#snippet content()}
-		<Tabs.Panel value="general">
-			<GeneralSettings {data} />
-		</Tabs.Panel>
-		<Tabs.Panel value="sso">
-			<SSOSettings {data} />
-		</Tabs.Panel>
-		<Tabs.Panel value="featureFlags">
-			<FeatureFlagsSettings {data} />
-		</Tabs.Panel>
-		<Tabs.Panel value="webhooks">
-			<WebhooksSettings {data} allowMultiple />
-		</Tabs.Panel>
-		<Tabs.Panel value="integrations">
-			<div>
-				<span class="text-gray-500">{m.configureIntegrations()}</span>
-				<div class="flow-root">
-					<dl class="divide-y divide-surface-100 text-sm">
-						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-							<dt class="font-medium">{m.itsm()}</dt>
-							<dd class="text-surface-900 sm:col-span-2">
-								<div class="card p-4 bg-inherit flex flex-col space-y-3">
-									<a class="unstyled" href="/settings/integrations/jira">
-										<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
-											<span class="flex flex-row justify-between text-xl">
-												<i class="text-blue-700 fab fa-jira"></i>
-												{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'jira' && integration.configurations?.length)}
-													<i class="fa-solid fa-circle-check text-success-600-400"></i>
-												{/if}
-											</span>
-											<span class="flex flex-row space-x-2">
-												<h6 class="h6 base-font-color">{m.jira()}</h6>
-											</span>
-										</div>
-									</a>
-								</div>
-								<div class="card p-4 bg-inherit flex flex-col space-y-3">
-									<a class="unstyled" href="/settings/integrations/servicenow">
-										<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
-											<span class="flex flex-row justify-between text-xl">
-												<i class="text-green-700 fa-solid fa-o"></i>
-												{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'servicenow' && integration.configurations?.length)}
-													<i class="fa-solid fa-circle-check text-success-600-400"></i>
-												{/if}
-											</span>
-											<span class="flex flex-row space-x-2">
-												<h6 class="h6 base-font-color">{m.serviceNow()}</h6>
-											</span>
-										</div>
-									</a>
-								</div>
+	<Tabs.Content value="general">
+		<GeneralSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="sso">
+		<SSOSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="featureFlags">
+		<FeatureFlagsSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="webhooks">
+		<WebhooksSettings {data} allowMultiple />
+	</Tabs.Content>
+	<Tabs.Content value="emailTemplates">
+		<div class="space-y-8">
+			<section>
+				<h3 class="h4 font-semibold mb-4">
+					<i class="fa-solid fa-file-word mr-2"></i>{m.wordTemplates()}
+				</h3>
+				<WordTemplatesSettings />
+			</section>
+			<hr />
+			<section>
+				<h3 class="h4 font-semibold mb-4">
+					<i class="fa-solid fa-envelope mr-2"></i>{m.emailTemplates()}
+				</h3>
+				<EmailTemplatesSettings />
+			</section>
+		</div>
+	</Tabs.Content>
+	<Tabs.Content value="integrations">
+		<div>
+			<span class="text-gray-500">{m.configureIntegrations()}</span>
+			<div class="flow-root">
+				<dl class="divide-y divide-surface-100 text-sm">
+					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium">{m.itsm()}</dt>
+						<dd class="text-surface-900 sm:col-span-2">
+							<div class="card p-4 bg-inherit flex flex-col space-y-3">
+								<a class="unstyled" href="/settings/integrations/jira">
+									<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+										<span class="flex flex-row justify-between text-xl">
+											<i class="text-blue-700 fab fa-jira"></i>
+											{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'jira' && integration.configurations?.length)}
+												<i class="fa-solid fa-circle-check text-success-600-400"></i>
+											{/if}
+										</span>
+										<span class="flex flex-row space-x-2">
+											<h6 class="h6 base-font-color">{m.jira()}</h6>
+										</span>
+									</div>
+								</a>
+							</div>
+							<div class="card p-4 bg-inherit flex flex-col space-y-3">
+								<a class="unstyled" href="/settings/integrations/servicenow">
+									<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+										<span class="flex flex-row justify-between text-xl">
+											<i class="text-green-700 fa-solid fa-o"></i>
+											{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'servicenow' && integration.configurations?.length)}
+												<i class="fa-solid fa-circle-check text-success-600-400"></i>
+											{/if}
+										</span>
+										<span class="flex flex-row space-x-2">
+											<h6 class="h6 base-font-color">{m.serviceNow()}</h6>
+										</span>
+									</div>
+								</a>
+							</div>
 
-								<hr />
-							</dd>
-						</div>
-					</dl>
-				</div>
-			</div></Tabs.Panel
-		>
-		<Tabs.Panel value="clientSettings" class="p-4">
-			{#if page.state.clientSettings}
-				<ClientSettings data={page.state.clientSettings} />
-			{:else}
-				<p>Loading client settings...</p>
-			{/if}
-		</Tabs.Panel>
-	{/snippet}
+							<hr />
+						</dd>
+					</div>
+				</dl>
+			</div>
+		</div>
+	</Tabs.Content>
+	<Tabs.Content value="clientSettings" class="p-4">
+		{#if page.state.clientSettings}
+			<ClientSettings data={page.state.clientSettings} />
+		{:else}
+			<p>Loading client settings...</p>
+		{/if}
+	</Tabs.Content>
 </Tabs>

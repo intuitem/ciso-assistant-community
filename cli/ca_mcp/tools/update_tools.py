@@ -5,6 +5,7 @@ from ..client import (
     make_patch_request,
     make_delete_request,
     get_paginated_results,
+    fetch_all_results,
 )
 from ..resolvers import (
     resolve_asset_id,
@@ -13,6 +14,7 @@ from ..resolvers import (
     resolve_folder_id,
     resolve_applied_control_id,
     resolve_requirement_assessment_id,
+    resolve_compliance_assessment_id,
     resolve_task_template_id,
 )
 
@@ -22,8 +24,32 @@ async def update_asset(
     name: str = None,
     description: str = None,
     asset_type: str = None,
-    business_value: str = None,
+    ref_id: str = None,
+    observation: str = None,
+    reference_link: str = None,
+    is_published: bool = None,
+    is_business_function: bool = None,
+    folder_id: str = None,
     parent_assets: list = None,
+    support_assets: list = None,
+    applied_controls: list = None,
+    vulnerabilities: list = None,
+    security_exceptions: list = None,
+    filtering_labels: list = None,
+    owner: list = None,
+    dora_licenced_activity: str = None,
+    dora_criticality_assessment: str = None,
+    dora_criticality_justification: str = None,
+    dora_discontinuing_impact: str = None,
+    sec_confidentiality: int = None,
+    sec_confidentiality_enabled: bool = None,
+    sec_integrity: int = None,
+    sec_integrity_enabled: bool = None,
+    sec_availability: int = None,
+    sec_availability_enabled: bool = None,
+    dro_rto: int = None,
+    dro_rpo: int = None,
+    dro_mtd: int = None,
 ) -> str:
     """Update asset properties
 
@@ -31,11 +57,37 @@ async def update_asset(
         asset_id: Asset ID/name
         name: New name
         description: New description
-        asset_type: PR | SP
-        business_value: low | medium | high | very_high
-        parent_assets: List of parent asset IDs/names
+        asset_type: PR (Primary) | SP (Support)
+        ref_id: Reference ID
+        observation: Observation text
+        reference_link: External URL (e.g. Jira ticket)
+        is_published: Published flag
+        is_business_function: Business function flag
+        folder_id: Folder ID/name
+        parent_assets: List of parent asset IDs/names (replaces existing)
+        support_assets: List of support asset UUIDs (replaces existing)
+        applied_controls: List of applied control IDs/names (replaces existing)
+        vulnerabilities: List of vulnerability IDs/names (replaces existing)
+        security_exceptions: List of security exception UUIDs (replaces existing)
+        filtering_labels: List of label UUIDs (replaces existing)
+        owner: List of owner UUIDs (replaces existing)
+        dora_licenced_activity: DORA licensed activity code
+        dora_criticality_assessment: DORA criticality assessment code
+        dora_criticality_justification: DORA criticality justification text
+        dora_discontinuing_impact: DORA discontinuing impact code
+        sec_confidentiality: Confidentiality value 0-4 (0=undefined,1=low,2=med,3=high,4=critical)
+        sec_confidentiality_enabled: Enable confidentiality objective
+        sec_integrity: Integrity value 0-4
+        sec_integrity_enabled: Enable integrity objective
+        sec_availability: Availability value 0-4
+        sec_availability_enabled: Enable availability objective
+        dro_rto: Recovery Time Objective in seconds
+        dro_rpo: Recovery Point Objective in seconds
+        dro_mtd: Maximum Tolerable Downtime in seconds
     """
     try:
+        from ..resolvers import resolve_vulnerability_id
+
         # Resolve asset name to ID if needed
         resolved_asset_id = resolve_asset_id(asset_id)
 
@@ -48,17 +100,96 @@ async def update_asset(
             payload["description"] = description
         if asset_type is not None:
             payload["type"] = asset_type
-        if business_value is not None:
-            payload["business_value"] = business_value
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if observation is not None:
+            payload["observation"] = observation
+        if reference_link is not None:
+            payload["reference_link"] = reference_link
+        if is_published is not None:
+            payload["is_published"] = is_published
+        if is_business_function is not None:
+            payload["is_business_function"] = is_business_function
+        if dora_licenced_activity is not None:
+            payload["dora_licenced_activity"] = dora_licenced_activity
+        if dora_criticality_assessment is not None:
+            payload["dora_criticality_assessment"] = dora_criticality_assessment
+        if dora_criticality_justification is not None:
+            payload["dora_criticality_justification"] = dora_criticality_justification
+        if dora_discontinuing_impact is not None:
+            payload["dora_discontinuing_impact"] = dora_discontinuing_impact
+        if folder_id is not None:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if filtering_labels is not None:
+            payload["filtering_labels"] = filtering_labels
+        if owner is not None:
+            payload["owner"] = owner
+        if security_exceptions is not None:
+            payload["security_exceptions"] = security_exceptions
+        if support_assets is not None:
+            payload["support_assets"] = support_assets
 
-        # Resolve parent asset names to IDs if provided
         if parent_assets is not None:
             resolved_parents = []
             for parent in parent_assets:
-                resolved_parent_id = resolve_asset_id(parent)
-                resolved_parents.append(resolved_parent_id)
-
+                resolved_parents.append(resolve_asset_id(parent))
             payload["parent_assets"] = resolved_parents
+
+        if applied_controls is not None:
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_controls.append(resolve_applied_control_id(control))
+            payload["applied_controls"] = resolved_controls
+
+        if vulnerabilities is not None:
+            resolved_vulns = []
+            for vuln in vulnerabilities:
+                resolved_vulns.append(resolve_vulnerability_id(vuln))
+            payload["vulnerabilities"] = resolved_vulns
+
+        needs_objectives = any(p is not None for p in [
+            sec_confidentiality, sec_confidentiality_enabled,
+            sec_integrity, sec_integrity_enabled,
+            sec_availability, sec_availability_enabled,
+            dro_rto, dro_rpo, dro_mtd,
+        ])
+        if needs_objectives:
+            fetch_res = make_get_request(f"/assets/{resolved_asset_id}/")
+            current_asset = fetch_res.json() if fetch_res.status_code == 200 else {}
+
+            raw_sec = current_asset.get("security_objectives") or {}
+            cur_sec = raw_sec.get("objectives", {}) if isinstance(raw_sec, dict) else {}
+
+            raw_dro = current_asset.get("disaster_recovery_objectives") or {}
+            cur_dro = raw_dro.get("objectives", {}) if isinstance(raw_dro, dict) else {}
+
+            if any(p is not None for p in [
+                sec_confidentiality, sec_confidentiality_enabled,
+                sec_integrity, sec_integrity_enabled,
+                sec_availability, sec_availability_enabled,
+            ]):
+                def _merge_cia(key, new_val, new_enabled):
+                    existing = cur_sec.get(key) or {"value": 0, "is_enabled": False}
+                    return {
+                        "value": new_val if new_val is not None else existing.get("value", 0),
+                        "is_enabled": new_enabled if new_enabled is not None else existing.get("is_enabled", False),
+                    }
+                payload["security_objectives"] = {
+                    "objectives": {
+                        "confidentiality": _merge_cia("confidentiality", sec_confidentiality, sec_confidentiality_enabled),
+                        "integrity": _merge_cia("integrity", sec_integrity, sec_integrity_enabled),
+                        "availability": _merge_cia("availability", sec_availability, sec_availability_enabled),
+                    }
+                }
+
+            if any(p is not None for p in [dro_rto, dro_rpo, dro_mtd]):
+                payload["disaster_recovery_objectives"] = {
+                    "objectives": {
+                        "rto": {"value": dro_rto if dro_rto is not None else (cur_dro.get("rto") or {}).get("value", 0)},
+                        "rpo": {"value": dro_rpo if dro_rpo is not None else (cur_dro.get("rpo") or {}).get("value", 0)},
+                        "mtd": {"value": dro_mtd if dro_mtd is not None else (cur_dro.get("mtd") or {}).get("value", 0)},
+                    }
+                }
 
         if not payload:
             return "Error: No fields provided to update"
@@ -94,6 +225,7 @@ async def update_risk_scenario(
     threats: list = None,
     applied_controls: list = None,
     existing_applied_controls: list = None,
+    vulnerabilities: list = None,
 ) -> str:
     """Update risk scenario properties and ratings
 
@@ -117,6 +249,7 @@ async def update_risk_scenario(
         threats: List of threat IDs/names (replaces existing)
         applied_controls: List of planned control IDs/names (replaces existing)
         existing_applied_controls: List of existing control IDs/names (replaces existing)
+        vulnerabilities: List of vulnerability IDs/names exploited by this scenario (replaces existing)
     """
     try:
         # Resolve risk scenario name to ID if needed
@@ -201,6 +334,15 @@ async def update_risk_scenario(
                 resolved_control_id = resolve_applied_control_id(control)
                 resolved_existing_controls.append(resolved_control_id)
             payload["existing_applied_controls"] = resolved_existing_controls
+
+        # Resolve vulnerability names to IDs if provided
+        if vulnerabilities is not None:
+            from ..resolvers import resolve_vulnerability_id
+
+            resolved_vulnerabilities = []
+            for vuln in vulnerabilities:
+                resolved_vulnerabilities.append(resolve_vulnerability_id(vuln))
+            payload["vulnerabilities"] = resolved_vulnerabilities
 
         if not payload:
             return "Error: No fields provided to update"
@@ -381,6 +523,103 @@ async def update_requirement_assessment(
             )
     except Exception as e:
         return f"Error in update_requirement_assessment: {str(e)}"
+
+
+async def update_requirement_assessments(
+    compliance_assessment_id: str,
+    updates: list,
+) -> str:
+    """Batch update requirement assessments of a compliance assessment. Each update targets a requirement by ref_id and sets its own fields. Ideal for importing audit results from files.
+
+    Before calling, normalize result values to: not_assessed | partially_compliant | non_compliant | compliant | not_applicable.
+    Common mappings: Yes/Oui/Conforme/Implemented/Met/Pass → compliant, No/Non/Non-conforme/Not implemented/Not met/Fail → non_compliant, Partial/In progress → partially_compliant, N/A → not_applicable.
+
+    Args:
+        compliance_assessment_id: Compliance assessment ID or name (required)
+        updates: List of update objects. Each object must have "ref_id" (str) to identify the requirement, plus any fields to update: "result" (not_assessed|partially_compliant|non_compliant|compliant|not_applicable), "status" (to_do|in_progress|in_review|done), "observation" (str), "score" (int), "is_scored" (bool), "eta" (YYYY-MM-DD), "due_date" (YYYY-MM-DD), "selected" (bool).
+    """
+    try:
+        if not updates:
+            return "Error: No updates provided"
+
+        # Resolve compliance assessment
+        resolved_ca_id = resolve_compliance_assessment_id(compliance_assessment_id)
+
+        # Fetch all requirement assessments for this compliance assessment once
+        all_ras, error = fetch_all_results(
+            "/requirement-assessments/",
+            params={"compliance_assessment": resolved_ca_id},
+        )
+        if error:
+            return f"Error fetching requirement assessments: {error}"
+
+        # Build a case-insensitive lookup: ref_id (lowered) → RA id
+        # The actual ref_id lives on the nested requirement object, not on the RA itself
+        ref_id_to_ra = {}
+        for ra in all_ras:
+            req_obj = ra.get("requirement") or {}
+            ref = req_obj.get("ref_id") if isinstance(req_obj, dict) else None
+            if not ref:
+                ref = ra.get("ref_id")
+            if ref:
+                ref_id_to_ra[ref.strip().lower()] = ra["id"]
+
+        succeeded = []
+        failed = []
+        not_found = []
+
+        for update in updates:
+            ref_id = update.get("ref_id")
+            if not ref_id:
+                failed.append("Missing ref_id in update entry")
+                continue
+
+            ra_id = ref_id_to_ra.get(ref_id.strip().lower())
+            if not ra_id:
+                not_found.append(ref_id)
+                continue
+
+            # Build payload from allowed fields
+            payload = {}
+            for field in (
+                "status",
+                "result",
+                "observation",
+                "score",
+                "is_scored",
+                "eta",
+                "due_date",
+                "selected",
+            ):
+                if field in update and update[field] is not None:
+                    payload[field] = update[field]
+
+            if not payload:
+                failed.append(f"{ref_id}: no fields to update")
+                continue
+
+            res = make_patch_request(f"/requirement-assessments/{ra_id}/", payload)
+            if res.status_code == 200:
+                succeeded.append(ref_id)
+            else:
+                failed.append(f"{ref_id}: {res.status_code} - {res.text}")
+
+        # Build response
+        total = len(updates)
+        parts = [
+            f"Processed {total} updates: {len(succeeded)} succeeded, {len(failed)} failed, {len(not_found)} not found"
+        ]
+        if not_found:
+            parts.append(
+                f"\nRef IDs not found in compliance assessment:\n"
+                + ", ".join(not_found)
+            )
+        if failed:
+            parts.append(f"\nFailed:\n" + "\n".join(f"  - {f}" for f in failed))
+
+        return "\n".join(parts)
+    except Exception as e:
+        return f"Error in update_requirement_assessments: {str(e)}"
 
 
 async def update_quantitative_risk_study(
@@ -865,3 +1104,101 @@ async def delete_task_template(task_id: str) -> str:
             return f"Error deleting task template: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in delete_task_template: {str(e)}"
+
+
+async def update_vulnerability(
+    vulnerability_id: str,
+    name: str = None,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    folder_id: str = None,
+    filtering_labels: list = None,
+    applied_controls: list = None,
+    assets: list = None,
+    security_exceptions: list = None,
+) -> str:
+    """Partially update a vulnerability (only provided fields are updated)
+
+    Args:
+        vulnerability_id: Vulnerability UUID or name
+        name: New name
+        description: New description
+        ref_id: Reference ID (e.g. CVE identifier)
+        status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
+        severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
+        folder_id: Folder ID/name
+        filtering_labels: List of label UUIDs
+        applied_controls: List of applied control IDs/names
+        assets: List of asset IDs/names
+        security_exceptions: List of security exception UUIDs
+    """
+    try:
+        from ..resolvers import (
+            resolve_vulnerability_id,
+            resolve_folder_id,
+            resolve_asset_id,
+            resolve_applied_control_id,
+        )
+
+        resolved_id = resolve_vulnerability_id(vulnerability_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if status is not None:
+            payload["status"] = status
+        if severity is not None:
+            payload["severity"] = severity
+        if folder_id is not None:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if filtering_labels is not None:
+            payload["filtering_labels"] = filtering_labels
+        if applied_controls is not None:
+            resolved_controls = [resolve_applied_control_id(c) for c in applied_controls]
+            payload["applied_controls"] = resolved_controls
+        if assets is not None:
+            resolved_assets = [resolve_asset_id(a) for a in assets]
+            payload["assets"] = resolved_assets
+        if security_exceptions is not None:
+            payload["security_exceptions"] = security_exceptions
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/vulnerabilities/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            vuln = res.json()
+            return f"Updated vulnerability: {vuln.get('name')} (ID: {vuln.get('id')})"
+        else:
+            return f"Error updating vulnerability: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_vulnerability: {str(e)}"
+
+
+async def delete_vulnerability(vulnerability_id: str) -> str:
+    """Delete a vulnerability
+
+    Args:
+        vulnerability_id: Vulnerability UUID or name
+    """
+    try:
+        from ..resolvers import resolve_vulnerability_id
+
+        resolved_id = resolve_vulnerability_id(vulnerability_id)
+
+        res = make_delete_request(f"/vulnerabilities/{resolved_id}/")
+
+        if res.status_code == 204:
+            return f"Deleted vulnerability (ID: {resolved_id})"
+        else:
+            return f"Error deleting vulnerability: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in delete_vulnerability: {str(e)}"

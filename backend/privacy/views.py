@@ -1,3 +1,5 @@
+import uuid
+
 from core.constants import COUNTRY_CHOICES
 from core.models import Actor
 from core.serializers import ActorReadSerializer
@@ -7,6 +9,7 @@ from core.views import (
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Count
@@ -98,6 +101,130 @@ class PersonalDataViewSet(BaseModelViewSet):
     @action(detail=False, name="Get deletion policy choices")
     def deletion_policy(self, request):
         return Response(dict(PersonalData.DELETION_POLICY_CHOICES))
+
+    @action(detail=False, name="Get is_sensitive choices")
+    def is_sensitive(self, request):
+        return Response({"true": "Yes", "false": "No"})
+
+    @action(detail=False, methods=["post"], url_path="batch-create")
+    def batch_create(self, request):
+        """
+        Batch create multiple personal data entries for a processing.
+        Expected format:
+        {
+            "processing": "uuid",
+            "categories": ["privacy_name", "privacy_email", ...],
+            "retention": "2 years",
+            "deletion_policy": "privacy_automatic_deletion",
+            "is_sensitive": false
+        }
+        """
+        processing_id = request.data.get("processing")
+        categories = request.data.get("categories", [])
+        retention = request.data.get("retention", "")
+        deletion_policy = request.data.get("deletion_policy", "")
+        is_sensitive = request.data.get("is_sensitive", False)
+
+        if not processing_id:
+            return Response(
+                {"error": "processing is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not isinstance(categories, list) or not categories:
+            return Response(
+                {"error": "categories is required and must be a non-empty list"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Deduplicate while preserving order
+        categories = list(dict.fromkeys(categories))
+
+        try:
+            processing_uuid = uuid.UUID(str(processing_id))
+        except (ValueError, AttributeError):
+            return Response(
+                {"error": "Invalid processing ID"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Processing
+        )
+        try:
+            processing = Processing.objects.filter(id__in=viewable_ids).get(
+                id=processing_uuid
+            )
+        except Processing.DoesNotExist:
+            return Response(
+                {"error": "Processing not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        valid_categories = {c[0] for c in PersonalData.PERSONAL_DATA_CHOICES}
+        valid_deletion_policies = {c[0] for c in PersonalData.DELETION_POLICY_CHOICES}
+
+        if deletion_policy and deletion_policy not in valid_deletion_policies:
+            return Response(
+                {"error": f"Invalid deletion_policy: {deletion_policy}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        existing_categories = set(
+            PersonalData.objects.filter(processing=processing).values_list(
+                "category", flat=True
+            )
+        )
+
+        created_items = []
+        skipped_items = []
+        errors = []
+
+        for category in categories:
+            if category not in valid_categories:
+                errors.append({"category": category, "error": "Invalid category"})
+                continue
+
+            if category in existing_categories:
+                existing = PersonalData.objects.filter(
+                    processing=processing, category=category
+                ).first()
+                if existing:
+                    skipped_items.append(
+                        {
+                            "id": str(existing.id),
+                            "category": existing.category,
+                            "name": str(existing),
+                        }
+                    )
+                continue
+
+            pd = PersonalData.objects.create(
+                processing=processing,
+                category=category,
+                retention=retention,
+                deletion_policy=deletion_policy,
+                is_sensitive=is_sensitive,
+            )
+            created_items.append(
+                {
+                    "id": str(pd.id),
+                    "category": pd.category,
+                    "name": str(pd),
+                }
+            )
+
+        return Response(
+            {
+                "success": True,
+                "created": len(created_items),
+                "skipped": len(skipped_items),
+                "personal_data": created_items,
+                "skipped_personal_data": skipped_items,
+                "errors": errors,
+            },
+            status=status.HTTP_201_CREATED if created_items else status.HTTP_200_OK,
+        )
 
 
 class DataSubjectViewSet(BaseModelViewSet):
@@ -296,30 +423,33 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
             user=request.user,
             object_type=PersonalData,
         )
-        processings_count = Processing.objects.filter(
-            id__in=viewable_processings
-        ).count()
+        (viewable_data_recipients, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataRecipient,
+        )
+        processings_count = len(viewable_processings)
 
         pd_categories = PersonalData.get_categories_count(
             filters={"id__in": viewable_personal_data}
         )
         total_categories = len(pd_categories)
-        # Count distinct entities from data contractors and data transfers
-        contractor_entities = (
-            DataContractor.objects.filter(
-                id__in=viewable_data_contractors, entity__isnull=False
-            )
-            .values_list("entity", flat=True)
-            .distinct()
-        )
-        transfer_entities = (
-            DataTransfer.objects.filter(
-                id__in=viewable_data_transfers, entity__isnull=False
-            )
-            .values_list("entity", flat=True)
-            .distinct()
-        )
-        recipients_count = len(set(list(contractor_entities) + list(transfer_entities)))
+        # Recipients count was previously the sum of distinct entities from data contractors and data transfers
+        # contractor_entities = (
+        #     DataContractor.objects.filter(
+        #         id__in=viewable_data_contractors, entity__isnull=False
+        #     )
+        #     .values_list("entity", flat=True)
+        #     .distinct()
+        # )
+        # transfer_entities = (
+        #     DataTransfer.objects.filter(
+        #         id__in=viewable_data_transfers, entity__isnull=False
+        #     )
+        #     .values_list("entity", flat=True)
+        #     .distinct()
+        # )
+        recipients_count = len(viewable_data_recipients)
 
         open_right_requests_count = (
             RightRequest.objects.filter(id__in=viewable_right_requests)

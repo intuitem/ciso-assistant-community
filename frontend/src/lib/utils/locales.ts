@@ -42,10 +42,12 @@ export const LOCALE_MAP = {
 		flag: '🇷🇴'
 	},
 	hi: {
-		name: 'hindi'
+		name: 'hindi',
+		flag: '🇮🇳'
 	},
 	ur: {
-		name: 'urdu'
+		name: 'urdu',
+		flag: '🇵🇰'
 	},
 	cs: {
 		name: 'czech',
@@ -86,6 +88,14 @@ export const LOCALE_MAP = {
 	zh: {
 		name: 'chinese',
 		flag: '🇨🇳'
+	},
+	lt: {
+		name: 'lithuanian',
+		flag: '🇱🇹'
+	},
+	ko: {
+		name: 'korean',
+		flag: '🇰🇷'
 	}
 };
 
@@ -111,7 +121,9 @@ export const language: any = {
 	greek: m.greek(),
 	turkish: m.turkish(),
 	croatian: m.croatian(),
-	chinese: m.chinese()
+	chinese: m.chinese(),
+	lithuanian: m.lithuanian(),
+	korean: m.korean()
 };
 
 export const defaultLangLabels = {
@@ -136,7 +148,9 @@ export const defaultLangLabels = {
 	el: 'Ελληνικά',
 	tr: 'Türkçe',
 	hr: 'Hrvatski',
-	zh: '简体中文'
+	zh: '简体中文',
+	lt: 'Lietuvių',
+	ko: '한국어'
 };
 
 export function toCamelCase(str: string) {

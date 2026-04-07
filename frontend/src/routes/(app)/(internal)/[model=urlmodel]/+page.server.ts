@@ -9,7 +9,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
 import { fail, superValidate, withFiles, setError, message } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -32,6 +32,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		const url = model.endpointUrl
 			? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
 			: `${BASE_API_URL}/${params.model}/${selectField.field}/`;
+
 		const response = await fetch(url);
 		if (response.ok) {
 			selectOptions[selectField.field] = await response.json().then((data) =>
@@ -64,7 +65,8 @@ export const actions: Actions = {
 			event.params.model === 'entity-assessments' ||
 				event.params.model === 'quantitative-risk-hypotheses' ||
 				event.params.model === 'quantitative-risk-studies' ||
-				event.params.model === 'quantitative-risk-scenarios'
+				event.params.model === 'quantitative-risk-scenarios' ||
+				event.params.model === 'risk-assessments'
 		);
 		return defaultWriteFormAction({
 			event,

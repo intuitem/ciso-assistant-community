@@ -1,6 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from django.conf import settings
 from core.models import ComplianceAssessment, Framework
 
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
@@ -88,6 +88,9 @@ class EntityWriteSerializer(BaseModelSerializer):
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     owned_folders = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    relationship = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=True
+    )
 
     class Meta:
         model = Entity
@@ -106,11 +109,12 @@ class EntityImportExportSerializer(BaseModelSerializer):
             "dora_competent_authority",
             "created_at",
             "updated_at",
+            "relationship",
         ]
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):
-    compliance_assessment = FieldsRelatedField()
+    compliance_assessment = FieldsRelatedField(fields=["id", "name"])
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
@@ -184,7 +188,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
                 enclave = Folder.objects.create(
                     content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.perimeter.name}/{instance.name}",
+                    name=f"{instance.entity.name}/{instance.name}",
                     parent_folder=instance.folder,
                 )
                 audit.folder = enclave
@@ -284,6 +288,10 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 class RepresentativeWriteSerializer(BaseModelSerializer):
     create_user = serializers.BooleanField(default=False)
 
+    def validate_entity(self, value):
+        self._ensure_immutable("entity", value)
+        return value
+
     def _create_or_update_user(self, instance, user):
         if not user:
             return
@@ -291,18 +299,23 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             email=instance.email,
         ).first()
         if not user:
-            send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+            send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
             try:
                 user = User.objects.create_user(
                     email=instance.email,
                     first_name=instance.first_name,
                     last_name=instance.last_name,
+                    is_third_party=True,
+                    keep_local_login=True,
                 )
             except Exception as e:
                 logger.error(e)
                 user = User.objects.filter(email=instance.email).first()
                 if user and send_mail:
-                    user.is_third_party = True
+                    if not user.is_third_party:
+                        raise serializers.ValidationError(
+                            {"email": "errorUserAlreadyExistsAsInternal"}
+                        )
                     user.keep_local_login = True
                     user.save()
                     instance.user = user
@@ -319,8 +332,11 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         {"error": ["An error occurred while creating the user"]}
                     )
-            user.is_third_party = True
-            user.keep_local_login = True
+        if not user.is_third_party:
+            raise serializers.ValidationError(
+                {"email": "errorUserAlreadyExistsAsInternal"}
+            )
+        user.keep_local_login = True
         user.save()
         instance.user = user
         instance.save()
@@ -356,6 +372,10 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
+    def validate_provider_entity(self, value):
+        self._ensure_immutable("provider_entity", value)
+        return value
+
     def to_internal_value(self, data):
         """Convert None to empty string for CharField DORA fields before validation"""
         dora_char_fields = [
@@ -390,6 +410,16 @@ class ContractReadSerializer(BaseModelSerializer):
     solutions = FieldsRelatedField(many=True)
     overarching_contract = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = Contract

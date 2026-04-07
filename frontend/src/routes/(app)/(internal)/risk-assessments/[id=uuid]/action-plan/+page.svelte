@@ -4,6 +4,7 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import ActionPlanBudgetOverview from '$lib/components/DataViz/ActionPlanBudgetOverview.svelte';
 
 	let { data } = $props();
 
@@ -17,6 +18,7 @@
 		owner: 'owner',
 		eta: 'eta',
 		expiry_date: 'expiryDate',
+		control_impact: 'controlImpact',
 		effort: 'effort',
 		annual_cost: 'cost',
 		risk_scenarios: 'matchingScenarios'
@@ -35,12 +37,20 @@
 
 <div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
-		{m.perimeter()}:
-		<a
-			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/perimeters/{data.risk_assessment.perimeter.id}/"
-			>{data.risk_assessment.perimeter.str}</a
-		>
+		{#if data.risk_assessment.perimeter}
+			{m.perimeter()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/perimeters/{data.risk_assessment.perimeter.id}/"
+				>{data.risk_assessment.perimeter.str}</a
+			>
+		{:else}
+			{m.folder()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.str}</a
+			>
+		{/if}
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
@@ -52,6 +62,9 @@
 		>
 	</p>
 </div>
+<ActionPlanBudgetOverview
+	budgetEndpoint={`/risk-assessments/${page.params.id}/action-plan/budget-overview`}
+/>
 <div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
 		<div class="flex-1">
@@ -89,6 +102,7 @@
 				'owner',
 				'eta',
 				'expiry_date',
+				'control_impact',
 				'effort',
 				'annual_cost',
 				'risk_scenarios'

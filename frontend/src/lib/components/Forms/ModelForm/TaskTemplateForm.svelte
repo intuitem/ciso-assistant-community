@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '../TextField.svelte';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
@@ -48,11 +49,9 @@
 	let isScheduleTainted = $derived(scheduleTaintedHandler($scheduleTainted));
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -253,6 +252,7 @@
 	/>
 	<AutocompleteSelect
 		multiple
+		lazy
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
@@ -289,7 +289,7 @@
 		{form}
 		multiple
 		optionsEndpoint="risk-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="str"
 		field="risk_assessments"
 		cacheLock={cacheLocks['risk_assessments']}

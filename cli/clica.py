@@ -197,6 +197,7 @@ def upload_data_wizard_file(
     perimeter: Optional[str],
     framework: Optional[str],
     matrix: Optional[str],
+    on_conflict: str = "stop",
     requires_folder: bool,
     requires_perimeter: bool,
     requires_framework: bool,
@@ -234,6 +235,8 @@ def upload_data_wizard_file(
         headers["X-Framework-Id"] = framework_id
     if matrix_id:
         headers["X-Matrix-Id"] = matrix_id
+    if on_conflict and on_conflict != "stop":
+        headers["X-On-Conflict"] = on_conflict
 
     url = f"{API_URL}/data-wizard/load-file/"
     with open(file_path, "rb") as payload:
@@ -257,7 +260,16 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_assets",
         "model_type": "Asset",
-        "help": "Import assets using the Data Wizard backend.",
+        "help": (
+            "Import assets from CSV/Excel.\n"
+            "\nRequired columns: name\n"
+            "Optional columns: ref_id, description, type (primary/support), "
+            "domain, business_value, observation, reference_link (or link), "
+            "security_objectives (or security_capabilities for support assets), "
+            "disaster_recovery_objectives (or recovery_capabilities for support assets), "
+            "parent_assets, "
+            "labels (or filtering_labels / étiquette / label)\n"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -372,6 +384,33 @@ DATA_WIZARD_COMMANDS = [
         "requires_matrix": False,
     },
     {
+        "command": "import_policies",
+        "model_type": "Policy",
+        "help": "Import policies using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_security_exceptions",
+        "model_type": "SecurityException",
+        "help": "Import security exceptions using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_incidents",
+        "model_type": "Incident",
+        "help": "Import incidents using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
         "command": "import_tprm",
         "model_type": "TPRM",
         "help": "Import third-party records using the Data Wizard backend.",
@@ -397,6 +436,27 @@ DATA_WIZARD_COMMANDS = [
         "requires_perimeter": False,
         "requires_framework": False,
         "requires_matrix": True,
+    },
+    {
+        "command": "import_vulnerabilities",
+        "model_type": "Vulnerability",
+        "help": "Import vulnerabilities using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_bia",
+        "model_type": "BusinessImpactAnalysis",
+        "help": "Import business impact analyses (multi-sheet Excel) using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "show_folder_option": True,
+        "show_perimeter_option": True,
+        "show_matrix_option": True,
     },
 ]
 
@@ -456,12 +516,19 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
         help="Risk matrix name or UUID.",
         hidden=not show_matrix_option,
     )
+    @click.option(
+        "--on-conflict",
+        type=click.Choice(["stop", "skip", "update"], case_sensitive=False),
+        default="stop",
+        help="How to handle existing records: stop (default), skip, or update.",
+    )
     def command(
         file,
         folder,
         perimeter,
         framework,
         matrix,
+        on_conflict,
         _model=model_type,
         _requires_folder=requires_folder,
         _requires_perimeter=requires_perimeter,
@@ -475,6 +542,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
             perimeter=perimeter,
             framework=framework,
             matrix=matrix,
+            on_conflict=on_conflict,
             requires_folder=_requires_folder,
             requires_perimeter=_requires_perimeter,
             requires_framework=_requires_framework,

@@ -20,12 +20,22 @@
 			const lossThreshold = data.lec.loss_threshold;
 
 			const series = data.lec.curves.map((curve: any, index: number) => {
-				// Define specific styling for current risk and risk tolerance curves
+				// Define specific styling for inherent, current risk, and risk tolerance curves
 				let lineStyle: any = { width: 3 };
 				let itemStyle: any = {};
 				let markLine: any = {};
 
-				if (curve.name === m.currentRisk() || curve.name === m.combinedCurrentRisk()) {
+				if (curve.type === 'inherent' || curve.name === m.inherentRisk()) {
+					// Inherent risk: bold orange line
+					lineStyle = {
+						width: 4,
+						color: '#ff9800',
+						type: 'solid'
+					};
+					itemStyle = {
+						color: '#ff9800'
+					};
+				} else if (curve.name === m.currentRisk() || curve.name === m.combinedCurrentRisk()) {
 					// Current risk: bold red line
 					lineStyle = {
 						width: 4,
@@ -67,7 +77,7 @@
 						};
 					}
 				} else if (curve.name === m.riskTolerance()) {
-					// Risk tolerance: dashed orange line
+					// Risk tolerance: dashed green line
 					lineStyle = {
 						width: 3,
 						color: '#7CCF00',

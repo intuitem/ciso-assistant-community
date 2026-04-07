@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Your assignment on '${assessment_name}' has started"
+body: |
+  Hello,
+
+  Your assignment on the following audit has started and is ready for your input:
+
+  - Audit: ${assessment_name}
+  - Framework: ${framework_name}
+  - Due Date: ${due_date}
+
+  Please log in to your CISO Assistant portal to begin your assessment: [Go to CISO Assistant](${ciso_assistant_url}/auditee-dashboard)
+
+  Thank you.

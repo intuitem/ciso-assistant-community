@@ -17,7 +17,6 @@ import importlib
 from django.urls import include, path
 from rest_framework import routers
 
-from ciso_assistant.settings import DEBUG
 from django.conf import settings
 
 router = routers.DefaultRouter()
@@ -86,6 +85,11 @@ router.register(
     RequirementAssessmentViewSet,
     basename="requirement-assessments",
 )
+router.register(
+    r"requirement-assignments",
+    RequirementAssignmentViewSet,
+    basename="requirement-assignments",
+)
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
 router.register(
@@ -114,9 +118,19 @@ router.register(
 router.register(r"findings", FindingViewSet, basename="findings")
 router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
+router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
+router.register(r"questions", QuestionViewSet, basename="questions")
+router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
+router.register(r"answers", AnswerViewSet, basename="answers")
+router.register(r"preset-journeys", PresetJourneyViewSet, basename="preset-journeys")
+router.register(
+    r"preset-journey-steps",
+    PresetJourneyStepViewSet,
+    basename="preset-journey-steps",
+)
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -137,7 +151,9 @@ urlpatterns = [
     path("data-wizard/", include("data_wizard.urls")),
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
+    path("chat/", include("chat.urls")),
     path("ebios-rm/", include("ebios_rm.urls")),
+    path("", include("doc_management.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
@@ -158,6 +174,9 @@ urlpatterns = [
     ),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
+    path(
+        "get_audits_metrics/", get_audits_metrics_view, name="get_audits_metrics_view"
+    ),
     path(
         "get_combined_assessments_status/",
         get_combined_assessments_status_view,
@@ -192,12 +211,20 @@ urlpatterns = [
         ComplianceAssessmentActionPlanList.as_view(),
     ),
     path(
+        "compliance-assessments/<uuid:pk>/action-plan/budget-overview/",
+        ComplianceAssessmentActionPlanBudgetOverview.as_view(),
+    ),
+    path(
         "compliance-assessments/<uuid:pk>/evidences-list/",
         ComplianceAssessmentEvidenceList.as_view(),
     ),
     path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "risk-assessments/<uuid:pk>/action-plan/budget-overview/",
+        RiskAssessmentActionPlanBudgetOverview.as_view(),
     ),
     path(
         "mapping-libraries/",
@@ -208,6 +235,7 @@ urlpatterns = [
         UserRolesOnFolderList.as_view(),
         name="user-perms-on-folder-list",
     ),
+    path("search/", global_search, name="global-search"),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
     path(
@@ -220,7 +248,7 @@ urlpatterns = [
 for index, module in enumerate(MODULES):
     urlpatterns.insert(index, (path(module["path"], include(module["module"]))))
 
-if DEBUG:
+if settings.DEBUG:
     # Browsable API is only available in DEBUG mode
     urlpatterns += [
         path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),

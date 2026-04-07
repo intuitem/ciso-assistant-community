@@ -24,6 +24,10 @@ RISK_SCENARIO_CURRENT_PROBABILITIES = {
     "name": "High",
     "description": "Frequent event",
     "hexcolor": "#FF0000",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Hoch", "description": "Häufiges Ereignis"},
+    },
 }
 
 RISK_SCENARIO_CURRENT_PROBABILITIES2 = {
@@ -32,6 +36,10 @@ RISK_SCENARIO_CURRENT_PROBABILITIES2 = {
     "name": "Medium",
     "description": "Occasional event",
     "hexcolor": "#FFFF00",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Mittel", "description": "Gelegentliches Ereignis"},
+    },
 }
 
 RISK_SCENARIO_CURRENT_IMPACT = {
@@ -40,6 +48,10 @@ RISK_SCENARIO_CURRENT_IMPACT = {
     "name": "High",
     "description": "High impact",
     "hexcolor": "#FF0000",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Hoch", "description": "Hohe Auswirkung"},
+    },
 }
 
 RISK_SCENARIO_CURRENT_IMPACT2 = {
@@ -48,6 +60,10 @@ RISK_SCENARIO_CURRENT_IMPACT2 = {
     "name": "Medium",
     "description": "Medium impact",
     "hexcolor": "#FFFF00",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Mittel", "description": "Mittlere Auswirkung"},
+    },
 }
 
 RISK_SCENARIO_CURRENT_LEVEL = {
@@ -56,6 +72,10 @@ RISK_SCENARIO_CURRENT_LEVEL = {
     "name": "High",
     "description": "unacceptable risk",
     "hexcolor": "#FF0000",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Hoch", "description": "Inakzeptables Risiko"},
+    },
 }
 RISK_SCENARIO_CURRENT_LEVEL2 = {
     "value": 1,
@@ -63,6 +83,13 @@ RISK_SCENARIO_CURRENT_LEVEL2 = {
     "name": "Medium",
     "description": "risk requiring mitigation within 2 years",
     "hexcolor": "#FFFF00",
+    "annotation": None,
+    "translations": {
+        "de": {
+            "name": "Mittel",
+            "description": "Risiko mit Behandlungsbedarf innerhalb von 2 Jahren",
+        },
+    },
 }
 
 RISK_SCENARIO_RESIDUAL_PROBABILITIES = {
@@ -71,6 +98,10 @@ RISK_SCENARIO_RESIDUAL_PROBABILITIES = {
     "name": "Medium",
     "description": "Occasional event",
     "hexcolor": "#FFFF00",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Mittel", "description": "Gelegentliches Ereignis"},
+    },
 }
 RISK_SCENARIO_RESIDUAL_PROBABILITIES2 = {
     "value": 0,
@@ -78,6 +109,10 @@ RISK_SCENARIO_RESIDUAL_PROBABILITIES2 = {
     "name": "Low",
     "description": "Unfrequent event",
     "hexcolor": "#92D050",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Gering", "description": "Seltenes Ereignis"},
+    },
 }
 
 RISK_SCENARIO_RESIDUAL_IMPACT = {
@@ -86,6 +121,10 @@ RISK_SCENARIO_RESIDUAL_IMPACT = {
     "name": "Medium",
     "description": "Medium impact",
     "hexcolor": "#FFFF00",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Mittel", "description": "Mittlere Auswirkung"},
+    },
 }
 
 RISK_SCENARIO_RESIDUAL_IMPACT2 = {
@@ -94,6 +133,10 @@ RISK_SCENARIO_RESIDUAL_IMPACT2 = {
     "name": "Low",
     "description": "Low impact",
     "hexcolor": "#92D050",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Gering", "description": "Geringe Auswirkung"},
+    },
 }
 
 RISK_SCENARIO_RESIDUAL_LEVEL = {
@@ -102,6 +145,13 @@ RISK_SCENARIO_RESIDUAL_LEVEL = {
     "name": "Medium",
     "description": "risk requiring mitigation within 2 years",
     "hexcolor": "#FFFF00",
+    "annotation": None,
+    "translations": {
+        "de": {
+            "name": "Mittel",
+            "description": "Risiko mit Behandlungsbedarf innerhalb von 2 Jahren",
+        },
+    },
 }
 RISK_SCENARIO_RESIDUAL_LEVEL2 = {
     "value": 0,
@@ -109,6 +159,10 @@ RISK_SCENARIO_RESIDUAL_LEVEL2 = {
     "name": "Low",
     "description": "acceptable risk",
     "hexcolor": "#00FF00",
+    "annotation": None,
+    "translations": {
+        "de": {"name": "Gering", "description": "Akzeptables Risiko"},
+    },
 }
 RISK_SCENARIO_TREATMENT_STATUS = ("accept", "accept")
 RISK_SCENARIO_TREATMENT_STATUS2 = ("mitigate", "mitigate")
@@ -350,8 +404,10 @@ class TestRiskScenariosAuthenticated:
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
         threat2 = Threat.objects.create(name="test2", folder=test.folder)
-        asset = Asset.objects.create(name="test", folder=folder)
-        applied_controls = AppliedControl.objects.create(name="test", folder=folder)
+        asset = Asset.objects.create(name="test", folder=test.folder)
+        applied_controls = AppliedControl.objects.create(
+            name="test", folder=test.folder
+        )
 
         EndpointTestsQueries.Auth.update_object(
             test.client,

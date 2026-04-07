@@ -7,8 +7,15 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.db import transaction
 
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, ActionPlanList
-from core.models import AppliedControl
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    ActionPlanList,
+    ActionPlanBudgetOverview,
+)
+from core.models import AppliedControl, Folder
+from core.utils import format_currency as _fmt_currency, get_global_currency
+from iam.models import RoleAssignment
+from rest_framework.exceptions import PermissionDenied
 from global_settings.models import GlobalSettings
 
 from .models import (
@@ -58,11 +65,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()  # type: ignore[unreachable]
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         # Initialize totals
         current_ale_combined = 0
@@ -102,16 +105,8 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
             scenarios_data.append(scenario_data)
 
-        # Format currency helper function
         def format_currency(value):
-            if value >= 1000000000:
-                return f"{currency}{value / 1000000000:.1f}B"
-            elif value >= 1000000:
-                return f"{currency}{value / 1000000:.1f}M"
-            elif value >= 1000:
-                return f"{currency}{value / 1000:.0f}K"
-            else:
-                return f"{currency}{value:,.0f}"
+            return _fmt_currency(value, currency)
 
         return Response(
             {
@@ -162,11 +157,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         curves = []
 
@@ -193,8 +184,35 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                         }
                     )
 
-        # 2. Use cached portfolio simulation for current risk
+        # 2. Use cached portfolio simulation
         portfolio_data = study.get_or_generate_portfolio_simulation()
+
+        # Add inherent portfolio curve if available
+        if portfolio_data.get("inherent") and not portfolio_data["inherent"].get(
+            "error"
+        ):
+            inherent_data = portfolio_data["inherent"]
+            inherent_loss_data = inherent_data.get("loss", [])
+            inherent_probability_data = inherent_data.get("probability", [])
+
+            if inherent_loss_data and inherent_probability_data:
+                combined_inherent_data = [
+                    [float(loss), float(prob)]
+                    for loss, prob in zip(inherent_loss_data, inherent_probability_data)
+                    if loss > 0
+                ]
+                curves.append(
+                    {
+                        "name": "Combined Inherent Risk",
+                        "type": "combined_inherent",
+                        "data": combined_inherent_data,
+                        "study_id": str(study.id),
+                        "study_name": study.name,
+                        "component_scenarios": inherent_data.get("scenarios", []),
+                        "total_scenarios": inherent_data.get("total_scenarios", 0),
+                        "simulation_method": inherent_data.get("method", "cached"),
+                    }
+                )
 
         # Add current portfolio curve if available
         if portfolio_data.get("current") and not portfolio_data["current"].get("error"):
@@ -264,10 +282,24 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         )
 
         # Calculate scenario counts from portfolio data
+        inherent_scenario_count = 0
         current_scenario_count = 0
         residual_scenario_count = 0
+        inherent_threshold_probability = None
         current_threshold_probability = None
         residual_threshold_probability = None
+
+        if portfolio_data.get("inherent") and not portfolio_data["inherent"].get(
+            "error"
+        ):
+            inherent_scenario_count = portfolio_data["inherent"].get(
+                "total_scenarios", 0
+            )
+            # Get threshold probability from metrics if loss threshold is set
+            inherent_metrics = portfolio_data["inherent"].get("metrics", {})
+            inherent_threshold_probability = inherent_metrics.get(
+                "prob_above_threshold"
+            )
 
         if portfolio_data.get("current") and not portfolio_data["current"].get("error"):
             current_scenario_count = portfolio_data["current"].get("total_scenarios", 0)
@@ -295,6 +327,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "currency": currency,
                 "curves": curves,
                 "total_curves": len(curves),
+                "scenarios_with_inherent_data": inherent_scenario_count,
                 "scenarios_with_current_data": current_scenario_count,
                 "scenarios_with_residual_data": residual_scenario_count,
                 "total_scenarios": study.risk_scenarios.count(),
@@ -302,8 +335,12 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "simulation_methods_used": list(simulation_methods_used),
                 "loss_threshold": study.loss_threshold,
                 "loss_threshold_display": study.loss_threshold_display,
+                "inherent_threshold_probability": inherent_threshold_probability,
                 "current_threshold_probability": current_threshold_probability,
                 "residual_threshold_probability": residual_threshold_probability,
+                "inherent_threshold_probability_display": f"{inherent_threshold_probability * 100:.1f}%"
+                if inherent_threshold_probability is not None
+                else None,
                 "current_threshold_probability_display": f"{current_threshold_probability * 100:.1f}%"
                 if current_threshold_probability is not None
                 else None,
@@ -327,11 +364,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         # Get all selected scenarios regardless of status, ordered by priority then ref_id
         selected_scenarios = study.risk_scenarios.filter(is_selected=True).order_by(
@@ -375,6 +408,8 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     for qual in scenario.qualifications.all()
                 ],
                 # ALE insights
+                "inherent_ale": scenario.inherent_ale,
+                "inherent_ale_display": scenario.inherent_ale_display,
                 "current_ale": scenario.current_ale,
                 "current_ale_display": scenario.current_ale_display,
                 "residual_ale": scenario.residual_ale,
@@ -406,14 +441,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
                 # Format risk reduction display
                 def format_currency(value):
-                    if value >= 1000000000:
-                        return f"{value / 1000000000:.1f}B {currency}"
-                    elif value >= 1000000:
-                        return f"{value / 1000000:.1f}M {currency}"
-                    elif value >= 1000:
-                        return f"{value / 1000:.0f}K {currency}"
-                    else:
-                        return f"{value:,.0f} {currency}"
+                    return _fmt_currency(value, currency)
 
                 scenario_info["risk_reduction_display"] = (
                     format_currency(risk_reduction)
@@ -478,6 +506,32 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
             # LEC chart data
             lec_curves = []
+
+            # Inherent hypothesis curve
+            inherent_hypothesis = scenario.hypotheses.filter(
+                risk_stage="inherent"
+            ).first()
+            if inherent_hypothesis and inherent_hypothesis.simulation_data:
+                simulation_data = inherent_hypothesis.simulation_data
+                loss_data = simulation_data.get("loss", [])
+                probability_data = simulation_data.get("probability", [])
+
+                if loss_data and probability_data:
+                    chart_data = [
+                        [loss, prob]
+                        for loss, prob in zip(loss_data, probability_data)
+                        if loss > 0
+                    ]
+                    lec_curves.append(
+                        {
+                            "name": "Inherent Risk",
+                            "type": "inherent",
+                            "data": chart_data,
+                            "hypothesis_id": str(inherent_hypothesis.id),
+                            "hypothesis_name": inherent_hypothesis.name,
+                            "metrics": simulation_data.get("metrics", {}),
+                        }
+                    )
 
             # Current hypothesis curve (reuse the variable from above)
             if current_hypothesis and current_hypothesis.simulation_data:
@@ -589,14 +643,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
         # Format study total treatment cost
         def format_currency(value):
-            if value >= 1000000000:
-                return f"{value / 1000000000:.1f}B {currency}"
-            elif value >= 1000000:
-                return f"{value / 1000000:.1f}M {currency}"
-            elif value >= 1000:
-                return f"{value / 1000:.0f}K {currency}"
-            else:
-                return f"{value:,.0f} {currency}"
+            return _fmt_currency(value, currency)
 
         study_total_treatment_cost_display = (
             format_currency(study_total_treatment_cost)
@@ -668,11 +715,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         scenarios_data = []
 
@@ -775,11 +818,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         scenarios_data = []
 
@@ -1201,11 +1240,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
                         }
                     )
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         # Return the combined curves data
         return Response(
@@ -1386,8 +1421,18 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
         return QuantitativeRiskStudyActionPlanSerializer
 
     def get_queryset(self):
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        study_id = self.kwargs["pk"]
+
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            QuantitativeRiskStudy,
+            study_id,
+        ):
+            raise PermissionDenied()
+
         quantitative_risk_study: QuantitativeRiskStudy = (
-            QuantitativeRiskStudy.objects.get(id=self.kwargs["pk"])
+            QuantitativeRiskStudy.objects.get(id=study_id)
         )
 
         # Get all scenarios for this study
@@ -1399,6 +1444,21 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
         )
 
         # Get all added controls from these selected hypotheses
-        return AppliedControl.objects.filter(
+        qs = AppliedControl.objects.filter(
             quantitative_risk_hypotheses_added__in=hypotheses
         ).distinct()
+
+        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(),
+            self.request.user,
+            AppliedControl,
+        )
+        return qs.filter(id__in=viewable_controls)
+
+
+class QuantitativeRiskStudyActionPlanBudgetOverview(
+    ActionPlanBudgetOverview, QuantitativeRiskStudyActionPlanList
+):
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(self.compute_budget_overview(qs))

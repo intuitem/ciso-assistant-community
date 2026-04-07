@@ -3,6 +3,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
@@ -62,11 +63,9 @@
 		cacheLock={cacheLocks['ref_id']}
 		bind:cachedValue={formDataCache['ref_id']}
 	/>
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO"
 		field="folder"
-		pathField="path"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
@@ -91,6 +90,14 @@
 		placeholder={m.riskAssessmentMatrixHelpText()}
 		helpText={m.ebiosRmMatrixHelpText()}
 	/>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
 {:else if context === 'ebiosRmStudy'}
 	<div
 		class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
@@ -104,6 +111,14 @@
 		>
 			{m.activityOne()}
 		</p>
+		<Select
+			{form}
+			options={model.selectOptions['status']}
+			field="status"
+			label={m.status()}
+			cacheLock={cacheLocks['status']}
+			bind:cachedValue={formDataCache['status']}
+		/>
 		<AutocompleteSelect
 			{form}
 			optionsEndpoint="risk-matrices"

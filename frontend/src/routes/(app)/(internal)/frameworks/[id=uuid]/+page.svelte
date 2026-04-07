@@ -9,12 +9,15 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import FrameworlEquivalence from '$lib/components/FrameworkEquivalence/FrameworlEquivalence.svelte';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	let expandedNodes: string[] = $state([]);
 
 	const tree = data.tree;
 
@@ -44,13 +47,26 @@
 		}
 		return count;
 	}
+
+	const blacklistedKeys: Set<string> = new Set([
+		'id',
+		'created_at',
+		'reference_controls',
+		'has_update'
+	]);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
 		<div class="">
+			<div class="mb-1">
+				{#if data.framework.has_update}
+					<i title={m.updateAvailable()} class="fa-solid fa-circle-up text-success-600-400"></i>
+					<span>{m.updateAvailable()}</span>
+				{/if}
+			</div>
 			<div class="flex flex-col space-y-2">
-				{#each Object.entries(data.framework).filter(([key, _]) => key !== 'id' && key !== 'created_at' && key !== 'reference_controls') as [key, value]}
+				{#each Object.entries(data.framework).filter(([key, _]) => !blacklistedKeys.has(key)) as [key, value]}
 					<div class="flex flex-col">
 						<div class="text-sm font-medium text-gray-800 capitalize-first">
 							{#if key === 'urn'}
@@ -66,7 +82,8 @@
 										{@const itemHref = `/loaded-libraries/${value.id}`}
 										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 									{:else if key === 'scores_definition'}
-										{#each Object.entries(value) as [key, definition]}
+										{@const entries = Array.isArray(value) ? value : (value?.scale ?? [])}
+										{#each entries as definition}
 											<div>
 												{definition.score}.
 												{definition.name}{definition.description
@@ -124,7 +141,7 @@
 				{/each}
 			</div>
 		</div>
-		<div class="">
+		<div class="flex flex-col gap-2">
 			<a
 				class="btn preset-filled-primary-500"
 				href="/frameworks/{data.framework.id}/excel-template/">Download Excel template</a
@@ -133,13 +150,16 @@
 	</div>
 
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<h4 class="h4 flex items-center font-semibold">
-			{m.associatedRequirements()}
-			<span class="badge preset-tonal-primary ml-1">
-				{assessableNodesCount(treeViewNodes)}
-			</span>
-		</h4>
-		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
+		<div class="flex items-center justify-between">
+			<h4 class="h4 flex items-center font-semibold">
+				{m.associatedRequirements()}
+				<span class="badge preset-tonal-primary ml-1">
+					{assessableNodesCount(treeViewNodes)}
+				</span>
+			</h4>
+			<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+		</div>
+		<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 	</div>
 	<!-- EQUIVALENCE WITH OTHER FRAMEWORKS -->
 	<!-- <div class="card px-6 py-4 bg-white flex flex-col shadow-lg">

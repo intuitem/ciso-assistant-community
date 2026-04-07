@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { getModalStore, type ModalStore } from './stores';
 	import type { ModelInfo } from '$lib/utils/types';
 
@@ -16,7 +16,7 @@
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
-		form: SuperValidated<AnyZodObject>;
+		form: SuperValidated<FormDataShape>;
 		model: ModelInfo;
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		formAction?: string;
@@ -25,6 +25,7 @@
 		suggestions?: { [key: string]: any };
 		selectOptions?: Record<string, any>;
 		debug?: boolean;
+		customNameDescription?: boolean;
 	}
 
 	let {
@@ -37,7 +38,8 @@
 		object = {},
 		suggestions = {},
 		selectOptions = {},
-		debug = false
+		debug = false,
+		customNameDescription = true
 	}: Props = $props();
 </script>
 
@@ -58,7 +60,7 @@
 			</div>
 		</div>
 		<ModelForm
-			customNameDescription
+			{customNameDescription}
 			{form}
 			{object}
 			{suggestions}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -46,11 +47,9 @@
 		bind:cachedValue={formDataCache['justification']}
 	/>
 {/if}
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -70,7 +69,7 @@
 	{form}
 	optionsEndpoint="risk-scenarios"
 	optionsExtraFields={[
-		['perimeter', 'str'],
+		['folder', 'str'],
 		['risk_assessment', 'str']
 	]}
 	field="risk_scenarios"

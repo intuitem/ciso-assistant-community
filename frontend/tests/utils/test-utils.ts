@@ -124,6 +124,7 @@ export const test = base.extend<Fixtures>({
 		const aPage = new PageContent(page, '/compliance-assessments', 'Audits', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			//{ name: 'version', type: type.TEXT },
 			//{ name: 'status', type: type.SELECT },
@@ -158,7 +159,11 @@ export const test = base.extend<Fixtures>({
 	},
 
 	foldersPage: async ({ page }, use) => {
-		const fPage = new PageContent(page, '/folders', 'Domains');
+		const fPage = new PageContent(page, '/folders', 'Domains', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'create_iam_groups', type: type.CHECKBOX }
+		]);
 		await use(fPage);
 	},
 
@@ -204,6 +209,7 @@ export const test = base.extend<Fixtures>({
 		const rPage = new PageContent(page, '/risk-assessments', 'Risk assessments', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'version', type: type.TEXT },
 			{ name: 'status', type: type.SELECT },
@@ -304,6 +310,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'status', type: type.SELECT }
 		]);
@@ -326,6 +333,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'status', type: type.SELECT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
@@ -404,6 +412,7 @@ export const test = base.extend<Fixtures>({
 		const ePage = new PageContent(page, '/entity-assessments', 'Entity assessments', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'create_audit', type: type.CHECKBOX },
 			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
@@ -522,7 +531,8 @@ export class TestContent {
 				modelName: 'folder',
 				build: {
 					name: vars.folderName,
-					description: vars.description
+					description: vars.description,
+					create_iam_groups: true
 				},
 				editParams: {
 					name: '',
@@ -666,6 +676,7 @@ export class TestContent {
 				build: {
 					name: vars.assessmentName,
 					description: vars.description,
+					folder: vars.folderName,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					// status: 'Planned',
 					// version: "1.4.2",
@@ -707,6 +718,7 @@ export class TestContent {
 					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					name: vars.riskAssessmentName,
 					description: vars.description,
+					folder: vars.folderName,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					version: vars.riskAssessmentVersion,
 					status: 'Planned',
@@ -729,9 +741,10 @@ export class TestContent {
 				modelName: 'riskscenario',
 				dependency: vars.threat.library,
 				build: {
+					str: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`,
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+					risk_assessment: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					threats: ['Global/' + vars.threat.name, 'Global/' + vars.threat2.name]
 				},
 				editParams: {
@@ -739,7 +752,7 @@ export class TestContent {
 					description: '',
 					treatment: 'Accepted',
 					//TODO add risk_assessment & threats
-					assets: [vars.folderName + '/' + vars.assetName + ' Support'],
+					assets: [vars.assetName],
 					current_proba: 'High',
 					current_impact: 'Medium',
 					applied_controls: [vars.folderName + '/' + vars.appliedControlName],
@@ -759,7 +772,7 @@ export class TestContent {
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
 					risk_scenarios: [
-						`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+						`${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
 					]
 				},
 				editParams: {
@@ -777,6 +790,7 @@ export class TestContent {
 					name: vars.findingsAssessmentName,
 					description: vars.description,
 					ref_id: 'FA.1234',
+					folder: vars.folderName,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					status: 'Planned'
 				},
@@ -814,6 +828,7 @@ export class TestContent {
 				build: {
 					name: vars.biaName,
 					description: vars.description,
+					folder: vars.folderName,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					risk_matrix: vars.matrix.displayName,
 					due_date: '2025-05-01'
@@ -829,7 +844,7 @@ export class TestContent {
 				modelName: 'assetassessment',
 				build: {
 					str: vars.assetName,
-					asset: vars.folderName + '/' + vars.assetName,
+					asset: vars.assetName,
 					bia: vars.biaName
 				}
 			},

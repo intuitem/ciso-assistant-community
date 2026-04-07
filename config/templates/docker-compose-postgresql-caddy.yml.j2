@@ -15,9 +15,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U {{ postgres.user }} -d {{ postgres.name }}"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 150s
 
   backend:
     container_name: backend
@@ -52,6 +52,7 @@ services:
       {% endif %}
     volumes:
       - ./db:/code/db
+    user: "1001:1001"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
       interval: 10s
@@ -126,7 +127,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.10.0
+    image: caddy:2.11.2
     environment:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
     depends_on:
@@ -141,11 +142,11 @@ services:
       - {{ cert_config.cert_path }}:/etc/caddy/cert.pem:ro
       - {{ cert_config.key_path }}:/etc/caddy/key.pem:ro{% endif %}
     command: |
-      sh -c 'echo $$CISO_ASSISTANT_URL "{
-      reverse_proxy /api/* backend:8000
-      reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
-      tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
-      tls internal{% endif %}{% endif %}
+      sh -c 'echo "$$CISO_ASSISTANT_URL {
+        reverse_proxy /api/* backend:8000
+        reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
+        tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
+        tls internal{% endif %}{% endif %}
       }" > Caddyfile && caddy run'
 
   {% if kafka_dispatcher.enabled %}
