@@ -18,20 +18,23 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		fetchAll(fetch, 'compliance-assessments'),
 		fetchAll(fetch, 'risk-assessments'),
 		fetchAll(fetch, 'business-impact-analysis'),
-		fetchAll(fetch, 'findings-assessments')
+		fetchAll(fetch, 'findings-assessments'),
+		fetchAll(fetch, 'security-exceptions')
 	]).then(
 		([
 			appliedControls,
 			complianceAssessments,
 			riskAssessments,
 			businessImpactAnalyses,
-			findingsAssessments
+			findingsAssessments,
+			securityExceptions
 		]) => ({
 			appliedControls,
 			complianceAssessments,
 			riskAssessments,
 			businessImpactAnalyses,
-			findingsAssessments
+			findingsAssessments,
+			securityExceptions
 		})
 	);
 

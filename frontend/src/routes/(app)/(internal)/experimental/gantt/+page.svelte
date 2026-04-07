@@ -34,6 +34,11 @@
 			key: 'findingsAssessments',
 			label: m.findingsAssessments(),
 			color: '#ef4444' // red
+		},
+		{
+			key: 'securityExceptions',
+			label: m.securityExceptions(),
+			color: '#a855f7' // purple
 		}
 	] as const;
 
@@ -78,6 +83,7 @@
 		riskAssessments: any[];
 		businessImpactAnalyses: any[];
 		findingsAssessments: any[];
+		securityExceptions: any[];
 	}): { items: GanttItem[]; noDateCount: number } {
 		const items: GanttItem[] = [];
 		let noDateCount = 0;
@@ -180,6 +186,37 @@
 					href: `${hrefPrefix}/${obj.id}`,
 					color: catConfig[key].color,
 					owners: getOwners(obj)
+				});
+			}
+		}
+
+		// Security Exceptions: expiration_date as milestone, created_at as optional start
+		if (enabledCategories.has('securityExceptions')) {
+			for (const se of sourceData.securityExceptions) {
+				const folderId = se.folder?.id ?? se.folder;
+				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
+				const date = parseDate(se.expiration_date);
+				if (!date) {
+					noDateCount++;
+					continue;
+				}
+				const createdAt = useCreatedAtAsStart ? parseDate(se.created_at) : null;
+				const startDate = createdAt && createdAt < date ? createdAt : null;
+				const hasRange = startDate !== null;
+				items.push({
+					id: se.id,
+					name: se.name ?? se.str ?? '(unnamed)',
+					startDate,
+					endDate: date,
+					progress: -1,
+					type: hasRange ? 'bar' : 'milestone',
+					category: 'securityExceptions',
+					categoryLabel: catConfig.securityExceptions.label,
+					folder: folderMap.get(folderId) ?? 'Unknown',
+					folderId,
+					href: `/security-exceptions/${se.id}`,
+					color: catConfig.securityExceptions.color,
+					owners: getOwners(se)
 				});
 			}
 		}
