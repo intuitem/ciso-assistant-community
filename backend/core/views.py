@@ -1177,6 +1177,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         m2m_field.add(*ids_to_modify)
                     else:
                         m2m_field.remove(*ids_to_modify)
+                    obj.save(update_fields=["updated_at"])
                     try:
                         dispatch_webhook_event(obj, "updated")
                     except Exception:
