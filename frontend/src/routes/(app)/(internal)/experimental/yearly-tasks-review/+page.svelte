@@ -38,8 +38,12 @@
 		return `${year}-${String(month).padStart(2, '0')}`;
 	}
 
-	function parseMonthFormat(value: string): { year: number; month: number } {
+	function parseMonthFormat(value: string): { year: number; month: number } | null {
+		if (!value || !value.includes('-')) return null;
 		const [year, month] = value.split('-').map(Number);
+		if (!year || !month || isNaN(year) || isNaN(month) || month < 1 || month > 12 || year < 1900 || year > 2100) {
+			return null;
+		}
 		return { year, month };
 	}
 
@@ -61,13 +65,23 @@
 	let selectedStatus = $state(data.selectedStatus || '');
 
 	let startFormatted = $derived.by(() => {
-		const { year, month } = parseMonthFormat(startPeriod);
-		return { year, month, label: getMonthName(month - 1) };
+		const parsed = parseMonthFormat(startPeriod);
+		if (!parsed) return { year: data.startYear, month: data.startMonth, label: getMonthName(data.startMonth - 1) };
+		return { year: parsed.year, month: parsed.month, label: getMonthName(parsed.month - 1) };
 	});
 
 	let endFormatted = $derived.by(() => {
-		const { year, month } = parseMonthFormat(endPeriod);
-		return { year, month, label: getMonthName(month - 1) };
+		const parsed = parseMonthFormat(endPeriod);
+		if (!parsed) return { year: data.endYear, month: data.endMonth, label: getMonthName(data.endMonth - 1) };
+		return { year: parsed.year, month: parsed.month, label: getMonthName(parsed.month - 1) };
+	});
+
+	let filtersValid = $derived.by(() => {
+		const start = parseMonthFormat(startPeriod);
+		const end = parseMonthFormat(endPeriod);
+		if (!start || !end) return false;
+		// start must be <= end (equal is fine for single-month/week focus)
+		return start.year < end.year || (start.year === end.year && start.month <= end.month);
 	});
 
 	function getStatusColor(status: string | null): string {
@@ -91,6 +105,7 @@
 	function applyFilters() {
 		const start = parseMonthFormat(startPeriod);
 		const end = parseMonthFormat(endPeriod);
+		if (!start || !end) return;
 		const params = new URLSearchParams();
 		params.set('start_month', start.month.toString());
 		params.set('start_year', start.year.toString());
@@ -320,7 +335,11 @@
 				<div class="flex gap-2">
 					<button
 						onclick={applyFilters}
-						class="flex-1 px-3 py-1.5 text-sm font-medium bg-violet-600 text-white rounded-lg hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1 transition-all duration-150"
+						disabled={!filtersValid}
+						class="flex-1 px-3 py-1.5 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1 transition-all duration-150
+							{filtersValid
+							? 'bg-violet-600 text-white hover:bg-violet-500'
+							: 'bg-gray-300 text-gray-500 cursor-not-allowed'}"
 					>
 						{m.refresh()}
 					</button>
