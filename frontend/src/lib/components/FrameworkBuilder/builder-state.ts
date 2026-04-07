@@ -322,10 +322,17 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 	const nodes: Record<string, unknown>[] = [];
 	const questions: Record<string, unknown>[] = [];
 	const choices: Record<string, unknown>[] = [];
+	let globalOrder = 0;
+
+	function pushNode(n: RequirementNode) {
+		const serialized = serializeNode(n);
+		serialized.order_id = globalOrder++;
+		nodes.push(serialized);
+	}
 
 	function collectFromRequirements(reqs: BuilderRequirement[]) {
 		for (const req of reqs) {
-			nodes.push(serializeNode(req.node));
+			pushNode(req.node);
 			for (const bq of req.questions) {
 				const q = bq.question;
 				questions.push({
@@ -367,7 +374,7 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 	}
 
 	for (const sec of sections) {
-		nodes.push(serializeNode(sec.node));
+		pushNode(sec.node);
 		collectFromRequirements(sec.requirements);
 	}
 
