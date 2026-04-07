@@ -628,6 +628,15 @@ MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
 MFA_PASSKEY_LOGIN_ENABLED = False
 MFA_PASSKEY_SIGNUP_ENABLED = False
 
+# Derive the WebAuthn Relying Party ID from CISO_ASSISTANT_URL so it matches the
+# browser's origin.  Without this, the RP ID defaults to the backend container's
+# hostname (e.g. "backend") which the browser will reject.
+from urllib.parse import urlparse as _urlparse
+
+_parsed_ca_url = _urlparse(CISO_ASSISTANT_URL)
+MFA_WEBAUTHN_RP_ID = _parsed_ca_url.hostname
+MFA_WEBAUTHN_RP_NAME = "CISO Assistant"
+
 if MAIL_DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
