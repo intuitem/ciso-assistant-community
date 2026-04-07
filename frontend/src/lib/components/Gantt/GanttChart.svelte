@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { m } from '$paraglide/messages';
 
 	export interface GanttItem {
 		id: string;
@@ -14,6 +15,7 @@
 		folderId: string;
 		href: string;
 		color: string;
+		owners: string[];
 	}
 
 	type ZoomLevel = 'weekly' | 'monthly' | 'yearly';
@@ -259,7 +261,7 @@
 				class="border-b border-surface-300 bg-surface-100 flex items-end px-2 text-xs font-semibold text-surface-500"
 				style="height: {HEADER_HEIGHT}px"
 			>
-				Items
+				{m.items()}
 			</div>
 			<!-- Row labels -->
 			{#each rows as row, i}
@@ -350,7 +352,7 @@
 						fill="var(--color-error-500)"
 						font-size="10"
 						font-weight="bold"
-						font-family="system-ui, sans-serif">Today</text
+						font-family="system-ui, sans-serif">{m.today()}</text
 					>
 				{/if}
 
@@ -474,6 +476,12 @@
 				></span>
 				{tooltip.item.categoryLabel} &middot; {tooltip.item.folder}
 			</div>
+			{#if tooltip.item.owners.length > 0}
+				<div class="text-surface-500 mt-0.5">
+					<i class="fa-solid fa-user text-[9px] mr-1"></i>
+					{tooltip.item.owners.join(', ')}
+				</div>
+			{/if}
 			{#if tooltip.item.type === 'milestone'}
 				<div class="mt-1">
 					<i class="fa-solid fa-diamond text-[8px] mr-1"></i>
@@ -483,7 +491,7 @@
 				<div class="mt-1">
 					{formatDate(tooltip.item.startDate)} &rarr; {formatDate(tooltip.item.endDate)}
 				</div>
-				<div class="mt-0.5">Progress: {tooltip.item.progress}%</div>
+				<div class="mt-0.5">{m.progress()}: {tooltip.item.progress}%</div>
 			{/if}
 		</div>
 	{/if}

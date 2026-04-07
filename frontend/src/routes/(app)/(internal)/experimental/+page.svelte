@@ -44,8 +44,8 @@
 		tags={['frameworks', 'builder', 'editor']}
 	/>
 	<Article
-		title="Gantt Chart"
-		desc="Timeline view of applied controls, audits, and risk assessments with swimlanes by domain"
+		title={m.ganttChart()}
+		desc={m.ganttChartDescription()}
 		link="/experimental/gantt"
 		tags={['planning', 'timeline', 'controls', 'audits']}
 	/>

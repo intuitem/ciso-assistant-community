@@ -9,17 +9,22 @@ async function fetchAll(fetch: typeof globalThis.fetch, endpoint: string) {
 }
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const [appliedControls, complianceAssessments, riskAssessments, folders] = await Promise.all([
+	// Folders are lightweight — await them so the page shell renders immediately
+	const folders = await fetchAll(fetch, 'folders');
+
+	// Stream the heavy data as a promise so the page can show a spinner
+	const ganttData = Promise.all([
 		fetchAll(fetch, 'applied-controls'),
 		fetchAll(fetch, 'compliance-assessments'),
-		fetchAll(fetch, 'risk-assessments'),
-		fetchAll(fetch, 'folders')
-	]);
-
-	return {
+		fetchAll(fetch, 'risk-assessments')
+	]).then(([appliedControls, complianceAssessments, riskAssessments]) => ({
 		appliedControls,
 		complianceAssessments,
-		riskAssessments,
-		folders
+		riskAssessments
+	}));
+
+	return {
+		folders,
+		ganttData
 	};
 };
