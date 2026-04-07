@@ -55,6 +55,7 @@
 	let selectedFolders = $state<Set<string>>(new Set());
 	let zoom = $state<'weekly' | 'monthly' | 'yearly'>('monthly');
 	let useCreatedAtAsStart = $state(false);
+	let ganttRef: ReturnType<typeof GanttChart> | undefined = $state();
 
 	const ZOOM_LEVELS = [
 		{ value: 'weekly', label: m.weekly() },
@@ -241,6 +242,12 @@
 					{level.label}
 				</button>
 			{/each}
+			<button
+				class="px-3 py-1 text-xs font-medium rounded-md text-error-600 hover:bg-error-50 transition-colors"
+				onclick={() => ganttRef?.scrollToToday()}
+			>
+				<i class="fa-solid fa-crosshairs mr-1"></i>{m.today()}
+			</button>
 		</div>
 
 		<!-- Category toggles -->
@@ -341,7 +348,7 @@
 				<p class="text-sm">{m.noItemsToDisplayAdjustFilters()}</p>
 			</div>
 		{:else}
-			<GanttChart items={ganttItems} {zoom} />
+			<GanttChart bind:this={ganttRef} items={ganttItems} {zoom} />
 		{/if}
 	{:catch}
 		<div

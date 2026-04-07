@@ -248,6 +248,13 @@
 	// --- Scroll container ref for auto-scroll to today ---
 	let scrollContainer: HTMLDivElement | undefined = $state();
 
+	export function scrollToToday() {
+		if (scrollContainer) {
+			const scrollTo = Math.max(0, todayX - scrollContainer.clientWidth / 3);
+			scrollContainer.scrollTo({ left: scrollTo, behavior: 'smooth' });
+		}
+	}
+
 	$effect(() => {
 		if (scrollContainer && todayVisible) {
 			tick().then(() => {
