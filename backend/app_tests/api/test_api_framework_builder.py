@@ -16,6 +16,7 @@ from core.models import (
     Question,
     QuestionChoice,
     RequirementNodeAttachment,
+    StoredLibrary,
 )
 from iam.models import Folder
 
@@ -761,6 +762,276 @@ class TestFrameworkExportYaml:
         assert isinstance(q_data["choices"], list)
         assert len(q_data["choices"]) == 1
         assert q_data["choices"][0]["value"] == "Yes"
+
+    def test_export_yaml_round_trip_importable(
+        self, authenticated_client, framework_with_tree
+    ):
+        """Exported YAML passes the stored-library import validation (dry-run).
+
+        This is the strongest guarantee that the export format stays in sync
+        with what the importer expects. If this test fails, the export is
+        producing YAML that users can't re-import.
+        """
+        fw, sec, req, q, c, folder = framework_with_tree
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+        assert response.status_code == 200
+
+        yaml_bytes = response.content
+        # Dry-run through the actual import path
+        result, error = StoredLibrary.store_library_content(yaml_bytes, dry_run=True)
+        assert error is None, f"Exported YAML failed import validation: {error}"
+        assert result is not None
+        assert result["name"] == fw.name
+
+    def test_export_yaml_nodes_only_no_questions(
+        self, authenticated_client, app_config
+    ):
+        """Framework with only nodes (no questions) round-trips successfully."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Nodes Only FW", folder=folder, is_published=True
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:no-q:1",
+            ref_id="1",
+            name="Section",
+            assessable=False,
+            order_id=0,
+            folder=folder,
+            is_published=True,
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:no-q:1.1",
+            ref_id="1.1",
+            assessable=True,
+            parent_urn="urn:test:req_node:no-q:1",
+            order_id=1,
+            folder=folder,
+            is_published=True,
+        )
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+        assert response.status_code == 200
+        result, error = StoredLibrary.store_library_content(
+            response.content, dry_run=True
+        )
+        assert error is None, f"Round-trip failed: {error}"
+
+    def test_export_yaml_deep_nesting(self, authenticated_client, app_config):
+        """Framework with 4 levels of nesting round-trips successfully."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Deep Nesting FW", folder=folder, is_published=True
+        )
+        urns = []
+        for depth, (ref, parent_idx) in enumerate(
+            [("1", None), ("1.1", 0), ("1.1.1", 1), ("1.1.1.1", 2)]
+        ):
+            urn = f"urn:test:req_node:deep:{ref}"
+            urns.append(urn)
+            RequirementNode.objects.create(
+                framework=fw,
+                urn=urn,
+                ref_id=ref,
+                assessable=(depth > 0),
+                parent_urn=urns[parent_idx] if parent_idx is not None else None,
+                order_id=depth,
+                folder=folder,
+                is_published=True,
+            )
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+        depths = [n["depth"] for n in data["objects"]["framework"]["requirement_nodes"]]
+        assert depths == [1, 2, 3, 4]
+        result, error = StoredLibrary.store_library_content(
+            response.content, dry_run=True
+        )
+        assert error is None, f"Round-trip failed: {error}"
+
+    def test_export_yaml_with_translations(self, authenticated_client, app_config):
+        """Framework with translations round-trips successfully."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Translated FW",
+            folder=folder,
+            locale="en",
+            translations={"fr": {"name": "Cadre traduit", "description": "Desc FR"}},
+            is_published=True,
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:trans:1",
+            ref_id="1",
+            name="Section EN",
+            assessable=False,
+            order_id=0,
+            translations={"fr": {"name": "Section FR"}},
+            folder=folder,
+            is_published=True,
+        )
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+        assert "translations" in data
+        assert "fr" in data["translations"]
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        assert node["translations"]["fr"]["name"] == "Section FR"
+        result, error = StoredLibrary.store_library_content(
+            response.content, dry_run=True
+        )
+        assert error is None, f"Round-trip failed: {error}"
+
+    def test_export_yaml_special_chars_in_name(self, authenticated_client, app_config):
+        """Framework with accented/special characters round-trips successfully."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Cadre de Conformit\u00e9 ISO 27001!",
+            description="R\u00e9f\u00e9rentiel avec des caract\u00e8res sp\u00e9ciaux: <>&\"'",
+            folder=folder,
+            is_published=True,
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:special:1",
+            ref_id="1",
+            name="S\u00e9curit\u00e9 de l'information",
+            description='Contr\u00f4les d\'acc\u00e8s: v\u00e9rifier les "droits"',
+            assessable=True,
+            order_id=0,
+            folder=folder,
+            is_published=True,
+        )
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+        assert response.status_code == 200
+        result, error = StoredLibrary.store_library_content(
+            response.content, dry_run=True
+        )
+        assert error is None, f"Round-trip failed: {error}"
+
+    def test_export_yaml_multiple_question_types(
+        self, authenticated_client, app_config
+    ):
+        """Framework with text, boolean, and multiple_choice questions round-trips."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Multi Question Types", folder=folder, is_published=True
+        )
+        req = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:multi-q:1",
+            ref_id="1",
+            assessable=True,
+            order_id=0,
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=req,
+            urn="urn:test:question:multi-q:1-q1",
+            text="Free text question",
+            type="text",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=req,
+            urn="urn:test:question:multi-q:1-q2",
+            text="Yes or no?",
+            type="boolean",
+            order=100,
+            folder=folder,
+            is_published=True,
+        )
+        mc = Question.objects.create(
+            requirement_node=req,
+            urn="urn:test:question:multi-q:1-q3",
+            text="Select all that apply",
+            type="multiple_choice",
+            order=200,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=mc,
+            urn="urn:test:choice:multi-q:1-q3-c1",
+            value="Option A",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=mc,
+            urn="urn:test:choice:multi-q:1-q3-c2",
+            value="Option B",
+            order=100,
+            folder=folder,
+            is_published=True,
+        )
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+        questions = data["objects"]["framework"]["requirement_nodes"][0]["questions"]
+        types = {q["type"] for q in questions.values()}
+        assert types == {"text", "boolean", "multiple_choice"}
+        result, error = StoredLibrary.store_library_content(
+            response.content, dry_run=True
+        )
+        assert error is None, f"Round-trip failed: {error}"
+
+    def test_export_yaml_with_implementation_groups_and_scores(
+        self, authenticated_client, app_config
+    ):
+        """Framework with scores_definition and implementation_groups round-trips."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Scored FW",
+            folder=folder,
+            min_score=0,
+            max_score=10,
+            scores_definition=[
+                {"score": 0, "name": "Not implemented"},
+                {"score": 5, "name": "Partial"},
+                {"score": 10, "name": "Full"},
+            ],
+            implementation_groups_definition=[
+                {"ref_id": "IG1", "name": "Basic"},
+                {"ref_id": "IG2", "name": "Advanced"},
+            ],
+            is_published=True,
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:scored:1",
+            ref_id="1",
+            assessable=True,
+            implementation_groups=["IG1", "IG2"],
+            order_id=0,
+            folder=folder,
+            is_published=True,
+        )
+        url = reverse("frameworks-export-yaml", args=[fw.id])
+        response = authenticated_client.get(url)
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+        fw_obj = data["objects"]["framework"]
+        assert fw_obj["scores_definition"] is not None
+        assert fw_obj["implementation_groups_definition"] is not None
+        assert data["objects"]["framework"]["requirement_nodes"][0][
+            "implementation_groups"
+        ] == ["IG1", "IG2"]
+        result, error = StoredLibrary.store_library_content(
+            response.content, dry_run=True
+        )
+        assert error is None, f"Round-trip failed: {error}"
 
     def test_export_yaml_empty_framework(self, authenticated_client, app_config):
         """Export of a framework with no nodes returns 400."""
