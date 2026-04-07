@@ -226,10 +226,6 @@
 </script>
 
 <div class="p-6 space-y-4">
-	<div class="flex items-center justify-between">
-		<h2 class="h3 font-bold">{m.ganttChart()}</h2>
-	</div>
-
 	<!-- Toolbar: Zoom + Category filters (always visible) -->
 	<div class="flex flex-wrap items-center gap-4">
 		<!-- Zoom selector -->
