@@ -580,6 +580,7 @@ export const FeatureFlagsSchema = z.object({
 	xrays: z.boolean().optional(),
 	incidents: z.boolean().optional(),
 	tasks: z.boolean().optional(),
+	control_plan: z.boolean().optional(),
 	risk_acceptances: z.boolean().optional(),
 	exceptions: z.boolean().optional(),
 	follow_up: z.boolean().optional(),
