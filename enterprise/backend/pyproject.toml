@@ -20,5 +20,9 @@ dev = ["pytest>=9.0.2,<10"]
 ciso-assistant-community = { path = "../../backend", editable = true }
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["enterprise_core"]
+
