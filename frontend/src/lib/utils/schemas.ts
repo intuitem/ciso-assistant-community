@@ -251,7 +251,7 @@ export const AppliedControlSchema = z.object({
 
 export const AppliedControlDuplicateSchema = z.object({
 	...AppliedControlSchema.shape,
-	duplicate_evidences: z.boolean()
+	duplicate_evidences: z.boolean().optional()
 });
 
 export const PolicySchema = AppliedControlSchema.omit({ category: true });
