@@ -193,7 +193,8 @@ export const load = (async ({ fetch, params }) => {
 		securityExceptionModel,
 		securityExceptionCreateForm,
 		tables,
-		nextRequirementAssessmentId
+		nextRequirementAssessmentId,
+		viewerRole: requirementsListData?.viewer_role ?? 'auditor'
 	};
 }) satisfies PageServerLoad;
 

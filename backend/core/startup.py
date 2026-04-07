@@ -33,6 +33,9 @@ READER_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "view_requirementmappingset",
     "view_requirementnode",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -67,6 +70,7 @@ READER_PERMISSIONS_LIST = [
     "view_businessimpactanalysis",
     "view_assetassessment",
     "view_escalationthreshold",
+    "view_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # privacy,
@@ -105,6 +109,13 @@ READER_PERMISSIONS_LIST = [
     # presets
     "view_presetjourney",
     "view_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "view_indexeddocument",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -127,6 +138,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "view_requirementnode",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
     "view_evidence",
     "view_evidencerevision",
     "view_manageddocument",
@@ -159,6 +173,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_businessimpactanalysis",
     "view_assetassessment",
     "view_escalationthreshold",
+    "view_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # campaigns,
@@ -189,6 +204,13 @@ APPROVER_PERMISSIONS_LIST = [
     # presets
     "view_presetjourney",
     "view_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "view_indexeddocument",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -220,6 +242,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_vulnerability",
     "change_representative",
     "change_requirementassessment",
+    "add_answer",
+    "change_answer",
     "add_requirementassignment",
     "change_requirementassignment",
     "delete_requirementassignment",
@@ -269,6 +293,9 @@ ANALYST_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "view_requirementmappingset",
     "view_requirementnode",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -357,6 +384,9 @@ ANALYST_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    "add_doraincidentreport",
+    "view_doraincidentreport",
+    "change_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # campaigns,
@@ -483,6 +513,15 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -517,6 +556,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_referencecontrol",
     "change_representative",
     "change_requirementassessment",
+    "add_answer",
+    "change_answer",
     "add_requirementassignment",
     "change_requirementassignment",
     "delete_requirementassignment",
@@ -562,7 +603,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_entityassessment",
     "view_evidence",
     "view_folder",
+    "add_framework",
     "view_framework",
+    "change_framework",
+    "delete_framework",
     "view_loadedlibrary",
     "view_policy",
     "view_perimeter",
@@ -572,6 +616,18 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "view_requirementmappingset",
     "view_requirementnode",
+    "add_requirementnode",
+    "change_requirementnode",
+    "delete_requirementnode",
+    "view_question",
+    "add_question",
+    "change_question",
+    "delete_question",
+    "view_questionchoice",
+    "add_questionchoice",
+    "change_questionchoice",
+    "delete_questionchoice",
+    "view_answer",
     "view_riskacceptance",
     "view_riskassessment",
     "view_riskmatrix",
@@ -665,6 +721,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    "add_doraincidentreport",
+    "view_doraincidentreport",
+    "change_doraincidentreport",
+    "delete_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # campaigns,
@@ -809,6 +869,15 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -892,6 +961,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "add_answer",
+    "change_answer",
     "add_requirementassignment",
     "change_requirementassignment",
     "delete_requirementassignment",
@@ -922,8 +993,21 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_documentattachment",
     "add_framework",
     "view_framework",
+    "change_framework",
     "delete_framework",
     "view_requirementnode",
+    "add_requirementnode",
+    "change_requirementnode",
+    "delete_requirementnode",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
+    "add_question",
+    "change_question",
+    "delete_question",
+    "add_questionchoice",
+    "change_questionchoice",
+    "delete_questionchoice",
     "view_storedlibrary",
     "add_storedlibrary",
     "delete_storedlibrary",
@@ -1102,6 +1186,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    "add_doraincidentreport",
+    "view_doraincidentreport",
+    "change_doraincidentreport",
+    "delete_doraincidentreport",
     # campaigns,
     "add_campaign",
     "view_campaign",
@@ -1193,12 +1281,27 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "change_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
+    "add_answer",
+    "change_answer",
     "view_evidence",
     "add_evidence",
     "change_evidence",
@@ -1214,6 +1317,11 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "view_question",
+    "view_questionchoice",
+    "view_answer",
+    "add_answer",
+    "change_answer",
     "view_evidence",
     "add_evidence",
     "change_evidence",
@@ -1542,6 +1650,15 @@ def startup(sender: AppConfig, **kwargs):
             )
     except Exception as e:
         logger.error(f"Failed to reset global settings: {e}")
+
+    # Pre-warm the chat knowledge graph (reads YAML files, no DB needed)
+    if getattr(settings, "ENABLE_CHAT", False):
+        try:
+            from chat.knowledge_graph import get_graph
+
+            get_graph()
+        except Exception as e:
+            logger.debug("knowledge_graph_prewarm_skipped", error=e)
 
 
 class CoreConfig(AppConfig):

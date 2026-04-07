@@ -38,8 +38,10 @@
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
 	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -221,6 +223,7 @@
 					canEditRequirementAssessment,
 					hasParentNode,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
 					selectedStatus
@@ -235,6 +238,7 @@
 					score: node.score,
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
+					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score,
 					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
@@ -360,7 +364,6 @@
 			props: {
 				_form: data.form,
 				id: id,
-				debug: false,
 				URLModel: 'compliance-assessments',
 				formAction: action,
 				bodyComponent: List,
@@ -368,7 +371,7 @@
 					items: Object.values(requirementAssessmentsSync.changes).map(
 						({ str, changes }) =>
 							`${str}: ${changes
-								.map((change) => `${safeTranslate(change.current)} 🠲 ${safeTranslate(change.new)}`)
+								.map((change) => `${safeTranslate(change.current)} ➡️ ${safeTranslate(change.new)}`)
 								.join(' | ')}`
 					),
 					message: m.theFollowingChangesWillBeApplied()
@@ -380,9 +383,7 @@
 			component: modalComponent,
 			// Data
 			title: m.syncToAppliedControls(),
-			body: m.syncToAppliedControlsMessage({
-				count: data.compliance_assessment.framework.reference_controls.length //change this
-			}),
+			body: m.syncToAppliedControlsMessage(),
 			response: (r: boolean) => {
 				syncingToActionsIsLoading = r;
 			}
@@ -391,64 +392,70 @@
 	}
 	let createAppliedControlsLoading = $state(false);
 
-	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
-		let previewItems: string[] = [];
+	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
+		let previewItems: { id: string; label: string }[] = [];
 		try {
 			const previewResponse = await fetch(
 				`/compliance-assessments/${id}/suggestions/applied-controls?dry_run=true`
 			);
 			if (previewResponse.ok) {
 				const previewData: any[] = await previewResponse.json();
-				previewItems = previewData.map(
-					(control) =>
-						control?.name ||
-						control?.reference_control?.str ||
-						control?.reference_control?.name ||
-						control?.ref_id ||
-						''
-				);
+				const seen = new Set<string>();
+				previewItems = previewData
+					.filter((control) => control?.reference_control?.id)
+					.map((control) => ({
+						id: control.reference_control.id as string,
+						label:
+							control?.name ||
+							control?.reference_control?.str ||
+							control?.reference_control?.name ||
+							control?.ref_id ||
+							''
+					}))
+					.filter((item) => {
+						if (seen.has(item.id)) return false;
+						seen.add(item.id);
+						return true;
+					});
 			} else {
 				throw new Error(await previewResponse.text());
 			}
 		} catch (error) {
 			console.error('Unable to fetch suggested controls preview', error);
-			previewItems = data.compliance_assessment.framework.reference_controls.map(
-				(control) =>
-					control?.name ||
-					control?.reference_control?.str ||
-					control?.reference_control?.name ||
-					control?.ref_id ||
-					''
-			);
+			previewItems = data.compliance_assessment.framework.reference_controls
+				.filter((control: any) => control?.id)
+				.map((control: any) => ({
+					id: control.id as string,
+					label:
+						control?.name ||
+						control?.reference_control?.str ||
+						control?.reference_control?.name ||
+						control?.ref_id ||
+						''
+				}));
 		}
 
+		if (previewItems.length === 0) return;
+
 		const modalComponent: ModalComponent = {
-			ref: ConfirmModal,
+			ref: SuggestControlsModal,
 			props: {
-				_form: data.form,
-				id: id,
-				debug: false,
-				URLModel: 'compliance-assessments',
-				formAction: action,
-				bodyComponent: List,
-				bodyProps: {
-					items: previewItems,
-					message: m.theFollowingControlsWillBeAddedColon()
-				}
+				items: previewItems,
+				endpoint: `/compliance-assessments/${id}/suggestions/applied-controls`
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
 				count: previewItems.length
 			}),
-			response: (r: boolean) => {
-				createAppliedControlsLoading = r;
+			response: () => {
+				createAppliedControlsLoading = false;
 			}
 		};
+		createAppliedControlsLoading = true;
 		modalStore.trigger(modal);
 	}
 
@@ -506,6 +513,29 @@
 				<span class="font-medium">{m.lockedAssessment()}</span>
 				<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
 			</div>
+		</div>
+	{/if}
+
+	{#if compliance_assessment.computed_outcome}
+		<div
+			class="flex items-center gap-2 px-4 py-3 rounded-lg border"
+			style="background-color: {compliance_assessment.computed_outcome.color ??
+				'#6b7280'}10; border-color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}30"
+		>
+			{#if compliance_assessment.computed_outcome.color}
+				<span
+					class="w-3 h-3 rounded-full shrink-0"
+					style="background-color: {compliance_assessment.computed_outcome.color}"
+				></span>
+			{/if}
+			<span
+				class="text-sm font-semibold"
+				style="color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}"
+				>{compliance_assessment.computed_outcome.annotation ??
+					compliance_assessment.computed_outcome.label ??
+					compliance_assessment.computed_outcome.ref_id ??
+					compliance_assessment.computed_outcome.result}</span
+			>
 		</div>
 	{/if}
 
@@ -614,13 +644,16 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				{#if data.global_score && data.global_score.score >= 0}
+				{#if data.global_score && data.global_score.maturity_score >= 0}
 					<div class="w-1/4">
 						<RingProgress
 							name="global_maturity"
-							value={data.global_score.score}
+							value={data.global_score.maturity_score}
 							max={data.global_score.total_max_score}
-							color={getScoreHexColor(data.global_score.score, data.global_score.total_max_score)}
+							color={getScoreHexColor(
+								data.global_score.maturity_score,
+								data.global_score.total_max_score
+							)}
 							strokeWidth={35}
 							fontSize={36}
 							title={m.maturity()}
@@ -671,6 +704,18 @@
 					</div>
 				{/if}
 			{/key}
+			{#if data.compliance_assessment.answers_progress != null}
+				<div class="flex items-center gap-2 text-sm text-gray-600 mt-2">
+					<i class="fa-solid fa-clipboard-question text-primary-500"></i>
+					<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
+					<div class="flex-1 bg-gray-200 rounded-full h-1.5 max-w-32">
+						<div
+							class="h-1.5 rounded-full bg-primary-400 transition-all"
+							style="width: {data.compliance_assessment.answers_progress}%;"
+						></div>
+					</div>
+				</div>
+			{/if}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
 					<Popover
@@ -712,6 +757,11 @@
 										>... {m.asZIP()}</a
 									>
 									{#if !page.data.user.is_third_party}
+										<a
+											href="/reports/soa?ca={data.compliance_assessment.id}"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.statementOfApplicability()}</a
+										>
 										<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 										<a
 											href="/compliance-assessments/{data.compliance_assessment
@@ -971,117 +1021,126 @@
 					{/if}
 				</span>
 			</div>
-			<Popover
-				open={filterPopupOpen}
-				onOpenChange={(e) => (filterPopupOpen = e.open)}
-				positioning={{ placement: 'bottom-start' }}
-				autoFocus={false}
-				onPointerDownOutside={() => (filterPopupOpen = false)}
-				closeOnInteractOutside={false}
-			>
-				<Popover.Trigger class="btn preset-filled-primary-500 w-fit">
-					<i class="fa-solid fa-filter mr-2"></i>
-					{m.filters()}
-					{#if filterCount}
-						<span class="text-xs">{filterCount}</span>
-					{/if}
-				</Popover.Trigger>
-				<Popover.Positioner>
-					<Popover.Content
-						class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
-					>
-						<div>
-							<span class="text-sm font-bold">{m.result()}</span>
-							<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-								{#each Object.entries(complianceResultColorMap) as [result, color]}
-									<button
-										type="button"
-										onclick={() => toggleResult(result)}
-										class="px-2 py-1 rounded-md font-bold"
-										style="background-color: {selectedResults.includes(result)
-											? color
-											: 'grey'}; color: {selectedResults.includes(result)
-											? result === 'not_applicable'
-												? 'white'
-												: 'black'
-											: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
-									>
-										{safeTranslate(result)}
-									</button>
-								{/each}
-							</div>
-						</div>
-						{#if data.compliance_assessment.progress_status_enabled}
-							<div>
-								<span class="text-sm font-bold">{m.status()}</span>
-								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-									{#each Object.entries(complianceStatusColorMap) as [status, color]}
-										<button
-											type="button"
-											onclick={() => toggleStatus(status)}
-											class="px-2 py-1 rounded-md font-bold"
-											style="background-color: {selectedStatus.includes(status)
-												? color + '44'
-												: 'grey'}; color: {selectedStatus.includes(status)
-												? darkenColor(color, 0.3)
-												: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
-										>
-											{safeTranslate(status)}
-										</button>
-									{/each}
-								</div>
-							</div>
+			<div class="flex items-center gap-2">
+				{#if treeViewNodes}
+					<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+				{/if}
+				<Popover
+					open={filterPopupOpen}
+					onOpenChange={(e) => (filterPopupOpen = e.open)}
+					positioning={{ placement: 'bottom-start' }}
+					autoFocus={false}
+					onPointerDownOutside={() => (filterPopupOpen = false)}
+					closeOnInteractOutside={false}
+				>
+					<Popover.Trigger class="btn preset-filled-primary-500 w-fit">
+						<i class="fa-solid fa-filter mr-2"></i>
+						{m.filters()}
+						{#if filterCount}
+							<span class="text-xs">{filterCount}</span>
 						{/if}
-						{#if data.compliance_assessment.extended_result_enabled}
+					</Popover.Trigger>
+					<Popover.Positioner>
+						<Popover.Content
+							class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+						>
 							<div>
-								<span class="text-sm font-bold">{m.extendedResult()}</span>
-								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-									{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+								<span class="text-sm font-bold">{m.result()}</span>
+								<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									{#each Object.entries(complianceResultColorMap) as [result, color]}
 										<button
 											type="button"
-											onclick={() => toggleExtendedResult(extendedResult)}
+											onclick={() => toggleResult(result)}
 											class="px-2 py-1 rounded-md font-bold"
-											style="background-color: {selectedExtendedResults.includes(extendedResult)
+											style="background-color: {selectedResults.includes(result)
 												? color
-												: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
-												extendedResult
-											)
-												? 1
-												: 0.3};"
+												: 'grey'}; color: {selectedResults.includes(result)
+												? result === 'not_applicable'
+													? 'white'
+													: 'black'
+												: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
 										>
-											{safeTranslate(extendedResult)}
+											{safeTranslate(result)}
 										</button>
 									{/each}
 								</div>
 							</div>
-						{/if}
-						<div>
-							<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
-							<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
-								<Switch
-									name="questionnaireToggle"
-									class="flex flex-row items-center justify-center"
-									checked={displayOnlyAssessableNodes}
-									onCheckedChange={(e) => {
-										displayOnlyAssessableNodes = e.checked;
-										auditFiltersStore.setDisplayOnlyAssessableNodes(id, e.checked);
-									}}
-								>
-									<Switch.Control>
-										<Switch.Thumb />
-									</Switch.Control>
-									<Switch.HiddenInput />
-									{#if displayOnlyAssessableNodes}
-										<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
-									{:else}
-										<span class="font-bold text-xs text-gray-500">{m.no()}</span>
-									{/if}
-								</Switch>
+							{#if data.compliance_assessment.progress_status_enabled}
+								<div>
+									<span class="text-sm font-bold">{m.status()}</span>
+									<div
+										class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md"
+									>
+										{#each Object.entries(complianceStatusColorMap) as [status, color]}
+											<button
+												type="button"
+												onclick={() => toggleStatus(status)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedStatus.includes(status)
+													? color + '44'
+													: 'grey'}; color: {selectedStatus.includes(status)
+													? darkenColor(color, 0.3)
+													: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+											>
+												{safeTranslate(status)}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+							{#if data.compliance_assessment.extended_result_enabled}
+								<div>
+									<span class="text-sm font-bold">{m.extendedResult()}</span>
+									<div
+										class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md"
+									>
+										{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+											<button
+												type="button"
+												onclick={() => toggleExtendedResult(extendedResult)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedExtendedResults.includes(extendedResult)
+													? color
+													: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+													extendedResult
+												)
+													? 1
+													: 0.3};"
+											>
+												{safeTranslate(extendedResult)}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+							<div>
+								<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+								<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+									<Switch
+										name="questionnaireToggle"
+										class="flex flex-row items-center justify-center"
+										checked={displayOnlyAssessableNodes}
+										onCheckedChange={(e) => {
+											displayOnlyAssessableNodes = e.checked;
+											auditFiltersStore.setDisplayOnlyAssessableNodes(id, e.checked);
+										}}
+									>
+										<Switch.Control>
+											<Switch.Thumb />
+										</Switch.Control>
+										<Switch.HiddenInput />
+										{#if displayOnlyAssessableNodes}
+											<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+										{:else}
+											<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+										{/if}
+									</Switch>
+								</div>
 							</div>
-						</div>
-					</Popover.Content>
-				</Popover.Positioner>
-			</Popover>
+						</Popover.Content>
+					</Popover.Positioner>
+				</Popover>
+			</div>
 		</div>
 
 		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
@@ -1102,18 +1161,28 @@
 {#if threatDialogOpen}
 	<dialog
 		bind:this={dialogElement}
-		class="card p-4 bg-white shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
+		class="fixed inset-0 m-auto w-[90vw] max-w-5xl h-[85vh] rounded-2xl bg-white shadow-2xl border border-gray-200 p-0 overflow-hidden backdrop:bg-black/40"
+		aria-labelledby="threats-dialog-title"
 		onclose={() => (threatDialogOpen = false)}
 	>
-		<div class="flex justify-between items-center mb-4">
-			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
-			<button class="btn btn-sm preset-filled-error-500" onclick={closeThreatsDialog}>
+		<div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+			<h3 id="threats-dialog-title" class="text-lg font-bold text-gray-900">
+				{m.potentialThreats()}
+			</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+				aria-label="Close"
+				onclick={closeThreatsDialog}
+			>
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>
-
-		<div class="threats-content">
-			<ForceCirclePacking data={data.threats.graph} name="threats_graph" height="h-[600px]" />
+		<div class="p-4 h-[calc(85vh-64px)] overflow-auto">
+			<ForceCirclePacking
+				data={data.threats.graph}
+				name="threats_graph"
+				height="h-[calc(85vh-120px)]"
+			/>
 		</div>
 	</dialog>
 {/if}
