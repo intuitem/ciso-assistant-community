@@ -13,6 +13,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - QDRANT_URL=http://qdrant:6333
+
     read_only: true
     cap_drop:
       - ALL
@@ -20,7 +22,6 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-      - QDRANT_URL=http://qdrant:6333
     volumes:
       - ./db:/code/db
     user: "1001:1001"
@@ -41,6 +42,8 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - QDRANT_URL=http://qdrant:6333
+
     read_only: true
     cap_drop:
       - ALL
@@ -48,7 +51,6 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-      - QDRANT_URL=http://qdrant:6333
     volumes:
       - ./db:/code/db
     entrypoint:
