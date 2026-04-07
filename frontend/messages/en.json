@@ -3529,6 +3529,7 @@
 	"campaignsDescription": "Audit campaigns management",
 	"incidentsDescription": "Security incidents and their management",
 	"taskTemplatesDescription": "One-shot or periodic tasks to organise your controls",
+	"controlPlanDescription": "Aggregated view of recurrent tasks completion across time periods",
 	"policiesDescription": "Organizational policies and procedures",
 	"organisationIssuesDescription": "ISO 27001 issues management",
 	"frameworksDescription": "Security and compliance frameworks",

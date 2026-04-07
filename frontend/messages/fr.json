@@ -3361,6 +3361,7 @@
 	"campaignsDescription": "Gestion de campagnes d'audit",
 	"incidentsDescription": "Incidents de sécurité et leur gestion",
 	"taskTemplatesDescription": "Tâches ponctuelles ou périodiques pour organiser vos mesures",
+	"controlPlanDescription": "Vue agrégée de l'avancement des tâches récurrentes sur les périodes",
 	"policiesDescription": "Politiques et procédures organisationnelles",
 	"organisationIssuesDescription": "Gestion des enjeux ISO 27001",
 	"frameworksDescription": "Référentiels de sécurité et de conformité",
