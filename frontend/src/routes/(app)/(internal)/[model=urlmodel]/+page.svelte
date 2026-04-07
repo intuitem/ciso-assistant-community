@@ -9,8 +9,6 @@
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
-
 	import { onMount } from 'svelte';
 	import {
 		getModalStore,
@@ -27,6 +25,20 @@
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
 	let exportPopupOpen = $state(false);
+	let currentFilterSearch = $state(page.url.search);
+
+	function handleFilterChange(filters: Record<string, any>) {
+		const params = new URLSearchParams();
+		for (const [field, values] of Object.entries(filters)) {
+			if (Array.isArray(values)) {
+				for (const v of values) {
+					if (v?.value) params.append(field, v.value);
+				}
+			}
+		}
+		const search = params.toString();
+		currentFilterSearch = search ? `?${search}` : '';
+	}
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -121,10 +133,11 @@
 				{URLModel}
 				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
 				disableDelete={['user-groups'].includes(URLModel)}
+				onFilterChange={handleFilterChange}
 			>
 				{#snippet addButton()}
-					<div>
-						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+					<div class="relative">
+						<div class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
@@ -136,45 +149,25 @@
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
 								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates'].includes(URLModel)}
-									<Popover
-										open={exportPopupOpen}
-										onOpenChange={(e) => (exportPopupOpen = e.open)}
-										triggerBase="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-										contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
-										positioning={{ placement: 'bottom-end' }}
-										zIndex="1000"
+									<button
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										title={m.exportButton()}
+										data-testid="export-button"
+										onclick={() => (exportPopupOpen = !exportPopupOpen)}
 									>
-										{#snippet trigger()}
-											<span title={m.exportButton()} data-testid="export-button">
-												<i class="fa-solid fa-download"></i>
-											</span>
-										{/snippet}
-										{#snippet content()}
-											<div class="flex flex-col">
-												<a
-													href="{URLModel}/export/"
-													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-													>... {m.asCSV()}</a
-												>
-												<a
-													href="{URLModel}/export/xlsx/"
-													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-													>... {m.asXLSX()}</a
-												>
-											</div>
-										{/snippet}
-									</Popover>
+										<i class="fa-solid fa-download"></i>
+									</button>
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
-										href="{URLModel}/flash-mode/{page.url.search}"
+										href="{URLModel}/flash-mode/{currentFilterSearch}"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.flashMode()}
 										aria-label={m.flashMode()}
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
 									<a
-										href="{URLModel}/kanban-mode/{page.url.search}"
+										href="{URLModel}/kanban-mode/{currentFilterSearch}"
 										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
 										title={m.kanbanMode()}
 										aria-label={m.kanbanMode()}
@@ -268,7 +261,31 @@
 									>
 								{/if}
 							{/if}
-						</span>
+						</div>
+						{#if exportPopupOpen}
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div
+								class="fixed inset-0 z-40"
+								onclick={() => (exportPopupOpen = false)}
+								onkeydown={() => {}}
+							></div>
+							<div
+								class="absolute right-0 z-50 mt-1 card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
+							>
+								<div class="flex flex-col">
+									<a
+										href="{URLModel}/export/"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										onclick={() => (exportPopupOpen = false)}>... {m.asCSV()}</a
+									>
+									<a
+										href="{URLModel}/export/xlsx/"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										onclick={() => (exportPopupOpen = false)}>... {m.asXLSX()}</a
+									>
+								</div>
+							</div>
+						{/if}
 					</div>
 				{/snippet}
 				{#snippet badge(key, row)}

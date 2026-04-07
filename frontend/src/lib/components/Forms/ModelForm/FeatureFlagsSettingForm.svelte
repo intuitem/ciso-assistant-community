@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import BackgroundCheckbox from '$lib/components/Forms/BackgroundCheckbox.svelte';
 	import { page } from '$app/state';
+
 	interface Props {
 		form: SuperValidated<any>;
 	}
@@ -85,6 +86,11 @@
 					field: 'validation_flows',
 					label: m.validationFlows(),
 					description: m.validationFlowsDescription()
+				},
+				{
+					field: 'policy_documents',
+					label: m.policyDocumentsFlag(),
+					description: m.policyDocumentsFlagDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
@@ -136,6 +142,21 @@
 					field: 'bia',
 					label: m.businessImpactAnalysis(),
 					description: m.businessImpactAnalysisDescription()
+				},
+				{
+					field: 'campaigns',
+					label: m.campaigns(),
+					description: m.campaignsDescription()
+				},
+				{
+					field: 'auditee_mode',
+					label: m.auditeeMode(),
+					description: m.auditeeModeDescription()
+				},
+				{
+					field: 'advanced_analytics',
+					label: m.advancedAnalytics(),
+					description: m.advancedAnalyticsDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
@@ -190,9 +211,24 @@
 					description: m.webhooksDescription()
 				},
 				{
+					field: 'comments',
+					label: m.comments(),
+					description: m.commentsDescription()
+				},
+				{
+					field: 'journeys',
+					label: m.journeys(),
+					description: m.journeysDescription()
+				},
+				{
 					field: 'experimental',
 					label: m.experimental(),
 					description: m.experimentalFeatures()
+				},
+				{
+					field: 'chat_mode',
+					label: m.chatMode(),
+					description: m.chatModeDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		}

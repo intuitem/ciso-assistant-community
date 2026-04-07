@@ -60,6 +60,7 @@ class AbstractBaseModel(models.Model):
                         models.IntegerField,
                         models.FloatField,
                         models.BooleanField,
+                        models.DateField,
                     ),
                 ):
                     filters[f"{field}__exact"] = field_value
@@ -134,6 +135,42 @@ class NameDescriptionMixin(AbstractBaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class EditableMixin(models.Model):
+    """
+    Mixin for models that support in-place editing with draft isolation.
+
+    - editing_draft: WIP definition (null when no active draft)
+    - editing_version: bumped on each publish
+    - editing_history: list of snapshots [{version, definition, published_at}]
+
+    The model's main content field (e.g. json_definition) is the live/published data.
+    Authors edit via editing_draft. Publishing copies editing_draft → main field,
+    snapshots the previous value into editing_history, and bumps editing_version.
+    """
+
+    editing_draft = models.JSONField(
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name=_("Editing draft"),
+        help_text=_("Work-in-progress definition. Null when no active draft."),
+    )
+    editing_version = models.IntegerField(
+        default=1,
+        verbose_name=_("Editing version"),
+        help_text=_("Incremented on each publish."),
+    )
+    editing_history = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Editing history"),
+        help_text=_("Snapshots of previous published definitions."),
+    )
+
+    class Meta:
+        abstract = True
 
 
 class ETADueDateMixin(models.Model):

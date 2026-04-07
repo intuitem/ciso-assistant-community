@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
 function sanitizeFileName(name: string): string {
 	return name
 		.normalize('NFKC') // Normalize Unicode
-		.replace(/[\x00-\x1F<>:"/\\|?*\u007F'`’‘“”()\[\]{}]/g, '-') // Remove dangerous characters
+		.replace(/[\x00-\x1F<>:"/\\|?*\u007F;'`’‘“”()\[\]{}]/g, '-') // Remove dangerous characters
 		.replace(/\s+/g, '-') // Replace whitespace with dash
 		.replace(/\.+$/g, '') // Remove trailing dots
 		.replace(/^-+|-+$/g, '') // Trim leading/trailing dashes
@@ -44,11 +44,17 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 		return res.blob();
 	});
 
+	// ASCII-safe fallback: strip anything outside printable ASCII
+	const asciiFileName = finalFileName
+		.replace(/[^\x20-\x7E]/g, '-') // strip non-printable / non-ASCII
+		.replace(/[;"%\\]/g, '-') // strip header-delimiter and quoting chars
+		.replace(/-+/g, '-'); // collapse consecutive dashes
+
 	// Return the file with proper headers
 	return new Response(blobData, {
 		headers: {
 			'Content-Type': 'application/zip',
-			'Content-Disposition': `attachment; filename*=utf-8''${urlEncodedFileName}; filename="${finalFileName}"`
+			'Content-Disposition': `attachment; filename="${asciiFileName}"; filename*=utf-8''${urlEncodedFileName}`
 		}
 	});
 };

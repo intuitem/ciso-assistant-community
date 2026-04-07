@@ -8,6 +8,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { ComponentType } from 'svelte';
 	import Legend from './Legend.svelte';
+	import * as m from '$paraglide/messages';
 
 	interface Props {
 		// --- Props ---
@@ -38,10 +39,10 @@
 	}: Props = $props();
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
-	const grid = parsedRiskMatrix.grid;
-	const risk = parsedRiskMatrix.risk;
-	const originalProbabilities = parsedRiskMatrix.probability;
-	const originalImpacts = parsedRiskMatrix.impact;
+	const grid = parsedRiskMatrix.grid ?? [];
+	const risk = parsedRiskMatrix.risk ?? [];
+	const originalProbabilities = parsedRiskMatrix.probability ?? [];
+	const originalImpacts = parsedRiskMatrix.impact ?? [];
 
 	let finalMatrix: ReturnType<typeof buildRiskMatrix> = $state();
 	let finalData: typeof data | undefined = $state();
@@ -50,21 +51,6 @@
 	let rawYAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
 	let yAxisHeaders: typeof rawYAxisHeaders = $state([]);
 	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
-
-	let popupHoverY = $derived(
-		yAxisHeaders.map((_, i) => ({
-			event: 'hover',
-			target: `popup-${matrixName}-y-${i}`,
-			placement: swapAxes ? 'right' : 'bottom'
-		}))
-	);
-	let popupHoverX = $derived(
-		xAxisHeaders.map((_, i) => ({
-			event: 'hover',
-			target: `popup-${matrixName}-x-${i}`,
-			placement: 'bottom'
-		}))
-	);
 
 	let yAxisType = $derived(swapAxes ? 'impact' : 'probability');
 	let xAxisType = $derived(swapAxes ? 'probability' : 'impact');
@@ -114,131 +100,130 @@
 			style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
 			data-testid="x-axis-header-{j}"
 		>
-			<Tooltip
-				open={popupHoverX[j].open}
-				onOpenChange={(e) => (popupHoverX[j].open = e.open)}
-				openDelay={0}
-				closeDelay={100}
-				zIndex="9999"
-			>
-				{#snippet content()}
-					<div
-						class="card bg-black p-4 shadow-lg rounded-sm w-max"
-						style="color: {xHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
-					>
-						<p
-							data-testid="x-header-description"
-							class="font-semibold whitespace-pre-line break-words"
-						>
-							{xHeader.description}
-						</p>
-						<div class="arrow bg-black"></div>
-					</div>
-				{/snippet}
-				{#snippet trigger()}
+			<Tooltip openDelay={0} closeDelay={100}>
+				<Tooltip.Trigger>
 					<span class="font-semibold p-1 break-all" data-testid="x-header-name">{xHeader.name}</span
 					>
 					{#if xHeader.description}
 						<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 					{/if}
-				{/snippet}
+				</Tooltip.Trigger>
+				<Tooltip.Positioner class="!z-50">
+					<Tooltip.Content>
+						<div
+							class="card bg-black p-4 shadow-lg rounded-sm w-max"
+							style="color: {xHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
+						>
+							<p
+								data-testid="x-header-description"
+								class="font-semibold whitespace-pre-line break-words"
+							>
+								{xHeader.description}
+							</p>
+						</div>
+					</Tooltip.Content>
+				</Tooltip.Positioner>
 			</Tooltip>
 		</div>
 	{/each}
 {/snippet}
 
-<div class="flex flex-row items-center">
+{#if grid.length === 0}
 	<div
-		class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto"
-		data-testid="y-label"
+		class="flex items-center justify-center p-8 text-gray-500 italic"
+		data-testid="risk-matrix-empty"
 	>
-		{yAxisLabel}
+		<i class="fa-solid fa-triangle-exclamation mr-2"></i>
+		{m.riskMatrixEmpty()}
 	</div>
-
-	<div class="flex flex-col w-full">
-		{#if flipVertical}
-			<div
-				class="flex font-semibold text-xl items-center justify-center p-2 mt-1"
-				data-testid="x-label-flipped"
-			>
-				{xAxisLabel}
-			</div>
-		{/if}
+{:else}
+	<div class="flex flex-row items-center">
 		<div
-			class="{wrapperClass} grid gap-1 w-full"
-			style="grid-template-columns: auto repeat({xAxisHeaders.length}, minmax(0, 1fr)); grid-template-rows: repeat({yAxisHeaders.length}, minmax(0, 1fr)) auto;"
-			data-testid="risk-matrix"
+			class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto"
+			data-testid="y-label"
 		>
+			{yAxisLabel}
+		</div>
+
+		<div class="flex flex-col w-full">
 			{#if flipVertical}
-				<div></div>
-				{@render xAxisHeadersSnippet()}
-			{/if}
-			{#each finalMatrix as row, i}
-				{@const yHeader = yAxisHeaders[finalMatrix.length - 1 - i]}
 				<div
-					class="flex flex-col items-center min-h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center p-1 {classesCellText(
-						yHeader.hexcolor
-					)}"
-					style="background: {yHeader.hexcolor ?? '#FFFFFF'}"
-					data-testid="y-axis-header-{i}"
+					class="flex font-semibold text-xl items-center justify-center p-2 mt-1"
+					data-testid="x-label-flipped"
 				>
-					<Tooltip
-						open={popupHoverY[i].open}
-						onOpenChange={(e) => (popupHoverY[i].open = e.open)}
-						openDelay={0}
-						closeDelay={100}
-						positioning={{ placement: 'bottom-end' }}
-						zIndex="9999"
-					>
-						{#snippet content()}
-							<div
-								class="card bg-black p-4 shadow-lg rounded-sm w-max"
-								style="color: {yHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
-							>
-								<p
-									data-testid="y-header-description"
-									class="font-semibold whitespace-pre-line break-words"
-								>
-									{yHeader.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
-						{#snippet trigger()}
-							<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
-							{#if yHeader.description}
-								<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
-							{/if}
-						{/snippet}
-					</Tooltip>
+					{xAxisLabel}
 				</div>
+			{/if}
+			<div
+				class="{wrapperClass} grid gap-1 w-full"
+				style="grid-template-columns: auto repeat({xAxisHeaders.length}, minmax(0, 1fr)); grid-template-rows: repeat({yAxisHeaders.length}, minmax(0, 1fr)) auto;"
+				data-testid="risk-matrix"
+			>
+				{#if flipVertical}
+					<div></div>
+					{@render xAxisHeadersSnippet()}
+				{/if}
+				{#each finalMatrix as row, i}
+					{@const yHeader = yAxisHeaders[finalMatrix.length - 1 - i]}
+					<div
+						class="flex flex-col items-center min-h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center p-1 {classesCellText(
+							yHeader.hexcolor
+						)}"
+						style="background: {yHeader.hexcolor ?? '#FFFFFF'}"
+						data-testid="y-axis-header-{i}"
+					>
+						<Tooltip openDelay={0} closeDelay={100} positioning={{ placement: 'bottom-end' }}>
+							<Tooltip.Trigger>
+								<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
+								{#if yHeader.description}
+									<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
+								{/if}
+							</Tooltip.Trigger>
+							<Tooltip.Positioner class="!z-50">
+								<Tooltip.Content>
+									<div
+										class="card bg-black p-4 shadow-lg rounded-sm w-max"
+										style="color: {yHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
+									>
+										<p
+											data-testid="y-header-description"
+											class="font-semibold whitespace-pre-line break-words"
+										>
+											{yHeader.description}
+										</p>
+									</div>
+								</Tooltip.Content>
+							</Tooltip.Positioner>
+						</Tooltip>
+					</div>
 
-				{#each row as cell, j}
-					<Cell
-						{cell}
-						cellData={finalData ? finalData[i]?.[j] : undefined}
-						{dataItemComponent}
-						{useBubbles}
-					/>
+					{#each row as cell, j}
+						<Cell
+							{cell}
+							cellData={finalData ? finalData[i]?.[j] : undefined}
+							{dataItemComponent}
+							{useBubbles}
+						/>
+					{/each}
 				{/each}
-			{/each}
 
+				{#if !flipVertical}
+					<div></div>
+					{@render xAxisHeadersSnippet()}
+				{/if}
+			</div>
 			{#if !flipVertical}
-				<div></div>
-				{@render xAxisHeadersSnippet()}
+				<div
+					class="flex font-semibold text-xl items-center justify-center p-2 mt-1"
+					data-testid="x-label"
+				>
+					{xAxisLabel}
+				</div>
 			{/if}
 		</div>
-		{#if !flipVertical}
-			<div
-				class="flex font-semibold text-xl items-center justify-center p-2 mt-1"
-				data-testid="x-label"
-			>
-				{xAxisLabel}
-			</div>
-		{/if}
 	</div>
-</div>
 
-{#if showRisks}
-	<Legend {parsedRiskMatrix} />
+	{#if showRisks}
+		<Legend {parsedRiskMatrix} />
+	{/if}
 {/if}

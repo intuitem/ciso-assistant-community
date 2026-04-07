@@ -10,7 +10,7 @@
 	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppliedControlSchema } from '$lib/utils/schemas';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
@@ -156,6 +156,7 @@
 		{#key page.data}
 			<AutocompleteSelect
 				multiple
+				lazy
 				{form}
 				optionsEndpoint="applied-controls"
 				optionsExtraFields={[['folder', 'str']]}
@@ -176,6 +177,13 @@
 	{/if}
 </div>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="threats"
+		field="threats"
+		label={m.threats()}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}

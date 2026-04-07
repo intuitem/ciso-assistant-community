@@ -46,7 +46,7 @@ test.describe('General settings', () => {
 
 	test('risk matrices settings', async ({ riskMatricesPage, settingsPage }) => {
 		await test.step('check default matrix disposition', async () => {
-			await page.getByRole('button', { name: ' Risk matrix settings +' }).click();
+			await page.getByRole('button', { name: 'Risk matrix settings' }).click();
 			await expect(page.getByTestId('form-input-risk-matrix-swap-axes')).not.toBeChecked();
 			await expect(page.getByTestId('form-input-risk-matrix-flip-vertical')).not.toBeChecked();
 
@@ -61,7 +61,7 @@ test.describe('General settings', () => {
 			await settingsPage.goto();
 			await settingsPage.hasUrl();
 			await settingsPage.hasTitle();
-			await page.getByRole('button', { name: ' Risk matrix settings +' }).click();
+			await page.getByRole('button', { name: 'Risk matrix settings' }).click();
 			await page.getByTestId('form-input-risk-matrix-swap-axes').check();
 			await page.getByRole('button', { name: 'Save' }).click();
 			const toast = page.getByTestId('toast');
@@ -78,7 +78,7 @@ test.describe('General settings', () => {
 			await settingsPage.goto();
 			await settingsPage.hasUrl();
 			await settingsPage.hasTitle();
-			await page.getByRole('button', { name: ' Risk matrix settings +' }).click();
+			await page.getByRole('button', { name: 'Risk matrix settings' }).click();
 			await page.getByTestId('form-input-risk-matrix-flip-vertical').check();
 			await page.getByRole('button', { name: 'Save' }).click();
 			const toast = page.getByTestId('toast');
@@ -96,8 +96,8 @@ test.describe('General settings', () => {
 			await settingsPage.goto();
 			await settingsPage.hasUrl();
 			await settingsPage.hasTitle();
-			await page.getByRole('button', { name: ' Risk matrix settings +' }).click();
-			await page.getByLabel('Risk matrix settings −').getByText('Ebios RM').click();
+			await page.getByRole('button', { name: 'Risk matrix settings' }).click();
+			await page.getByLabel('Risk matrix settings').getByText('Ebios RM').click();
 			await page.getByRole('button', { name: 'Save' }).click();
 			const toast = page.getByTestId('toast');
 			await expect(toast).toBeVisible();
@@ -107,12 +107,24 @@ test.describe('General settings', () => {
 			await expect(page.getByTestId('y-label')).toHaveText('Severity');
 			await expect(page.getByTestId('x-label-flipped')).toHaveText('Likelihood');
 		});
+
+		await test.step('reset to defaults', async () => {
+			await settingsPage.goto();
+			await settingsPage.hasUrl();
+			await settingsPage.hasTitle();
+			await page.getByRole('button', { name: 'Risk matrix settings' }).click();
+			await page.getByTestId('form-input-risk-matrix-swap-axes').uncheck();
+			await page.getByTestId('form-input-risk-matrix-flip-vertical').uncheck();
+			await page.getByLabel('Risk matrix settings').getByText('ISO 27005').click();
+			await page.getByRole('button', { name: 'Save' }).click();
+			await expect(page.getByTestId('toast')).toBeVisible();
+		});
 	});
 
 	test('assets settings', async ({ assetsPage, settingsPage }) => {
 		await test.step('security targets scales', async () => {
 			await test.step('1-4', async () => {
-				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await expect(page.getByTestId('form-input-security-objective-scale')).toHaveValue('1-4');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -130,7 +142,7 @@ test.describe('General settings', () => {
 			await test.step('0-4', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('0-4');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -146,7 +158,7 @@ test.describe('General settings', () => {
 			await test.step('1-5', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('1-5');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -162,7 +174,7 @@ test.describe('General settings', () => {
 			await test.step('0-3', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('0-3');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -178,7 +190,7 @@ test.describe('General settings', () => {
 			await test.step('FIPS-199', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('FIPS-199');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -192,6 +204,15 @@ test.describe('General settings', () => {
 				);
 				await expect(page.locator('label:nth-child(3) > .text-base').first()).toHaveText('high');
 				await page.getByTestId('cancel-button').click();
+			});
+
+			await test.step('reset to defaults', async () => {
+				await settingsPage.goto();
+				await settingsPage.hasTitle();
+				await page.locator('button[aria-controls$="content:assets"]').click();
+				await page.getByTestId('form-input-security-objective-scale').selectOption('1-4');
+				await page.getByRole('button', { name: 'Save' }).click();
+				await expect(page.getByTestId('toast')).toBeVisible();
 			});
 		});
 	});

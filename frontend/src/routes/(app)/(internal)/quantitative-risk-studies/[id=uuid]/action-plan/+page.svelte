@@ -5,6 +5,7 @@
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import ActionPlanBudgetOverview from '$lib/components/DataViz/ActionPlanBudgetOverview.svelte';
 
 	let { data } = $props();
 
@@ -48,6 +49,10 @@
 		>
 	</p>
 </div>
+
+<ActionPlanBudgetOverview
+	budgetEndpoint={`/quantitative-risk-studies/${page.params.id}/action-plan/budget-overview`}
+/>
 
 <div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">

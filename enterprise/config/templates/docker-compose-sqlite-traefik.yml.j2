@@ -93,6 +93,7 @@ services:
       - XDG_DATA_HOME=/tmp/.local/share
     image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest
     pull_policy: always
+    restart: always
     depends_on:
       backend:
         condition: service_healthy

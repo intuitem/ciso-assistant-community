@@ -2,16 +2,14 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 @import '@skeletonlabs/skeleton';
-@import '@skeletonlabs/skeleton/optional/presets';
 
 /*
   Add your theme import for your theme: "ciso-theme" here
 */
 @import '../ciso-theme.css';
-@source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
+@import '@skeletonlabs/skeleton-svelte';
 
 @source './**/*.{html,js,svelte,ts}';
-@source '../node_modules/.pnpm/@skeletonlabs+skeleton@2.10.3_svelte@5.28.6/node_modules/@skeletonlabs/skeleton/dist/**/*.{html,js,svelte,ts}';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -77,6 +75,23 @@
 	[data-popup] {
 		transition: none;
 	}
+}
+
+/* AutocompleteSelect: collapse overflow chips when chip-max-N class is on outerDiv.
+   Uses position/size instead of display:none to avoid Tailwind v4 @layer !important cascade. */
+.chip-max-1 ul.selected > li:nth-child(n + 3),
+.chip-max-2 ul.selected > li:nth-child(n + 4),
+.chip-max-3 ul.selected > li:nth-child(n + 5),
+.chip-max-4 ul.selected > li:nth-child(n + 6),
+.chip-max-5 ul.selected > li:nth-child(n + 7) {
+	position: absolute !important;
+	width: 0 !important;
+	height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
 }
 
 .hide-scrollbar {

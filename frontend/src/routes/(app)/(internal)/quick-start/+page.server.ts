@@ -3,7 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { quickStartSchema } from '$lib/utils/schemas';
 import { type Actions } from '@sveltejs/kit';
 import { fail, message, setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 
 export const actions: Actions = {
@@ -30,8 +30,8 @@ export const actions: Actions = {
 				response.errors.forEach((error) => {
 					setError(form, error.param, error.code);
 				});
-				return fail(res.status, { form });
 			}
+			return fail(res.status, { form });
 		}
 
 		const response = await res.json();

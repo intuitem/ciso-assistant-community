@@ -11,12 +11,14 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 
 	let { data } = $props();
 	let loading = $state({ form: false, library: '' });
+	let expandedNodes: string[] = $state([]);
 	const showRisks = true;
 
 	interface LibraryObjects {
@@ -132,7 +134,12 @@
 			<div>
 				{#if displayImportButton}
 					{#if loading.form}
-						<ProgressRing size="size-6" meterStroke="stroke-primary-500" />
+						<Progress value={null}>
+							<Progress.Circle class="[--size:--spacing(6)]">
+								<Progress.CircleTrack />
+								<Progress.CircleRange class="stroke-primary-500" />
+							</Progress.Circle>
+						</Progress>
 					{:else}
 						<form
 							method="post"
@@ -288,16 +295,17 @@
 	{/if}
 
 	{#if framework}
-		<h4 class="h4 font-medium">{m.framework()}</h4>
 		{#await data.tree}
 			<span data-testid="loading-field">
 				{m.loading()}...
 			</span>
 		{:then tree}
-			<RecursiveTreeView
-				nodes={transformToTreeView(Object.entries(tree))}
-				hover="hover:bg-initial"
-			/>
+			{@const treeViewNodes = transformToTreeView(Object.entries(tree))}
+			<div class="flex items-center justify-between">
+				<h4 class="h4 font-medium">{m.framework()}</h4>
+				<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+			</div>
+			<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 		{/await}
 	{/if}
 </div>

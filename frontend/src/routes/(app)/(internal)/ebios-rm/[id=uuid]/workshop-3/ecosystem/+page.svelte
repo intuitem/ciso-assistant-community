@@ -61,15 +61,24 @@
 		class="bg-white rounded-md border hover:text-primary-700 text-gray-800"
 		{value}
 		onValueChange={(e) => (value = e.value)}
-		hover="bg-white"
 		collapsible
 	>
 		<Accordion.Item value="summary">
-			{#snippet control()}
-				<i class="fa-solid fa-bullseye"></i>
-				{m.ecosystemRadar()}
-			{/snippet}
-			{#snippet panel()}
+			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+				<i class="fa-solid fa-bullseye mr-2"></i><span class="flex-1 text-left"
+					>{m.ecosystemRadar()}</span
+				>
+
+				<Accordion.ItemIndicator
+					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+						><path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						/></svg
+					></Accordion.ItemIndicator
+				>
+			</Accordion.ItemTrigger>
+			<Accordion.ItemContent>
 				<div class="bg-white flex flex-col space-y-4">
 					<div class="flex w-full h-fit">
 						<EcosystemCircularRadarChart
@@ -90,7 +99,7 @@
 						/>
 					</div>
 				</div>
-			{/snippet}
+			</Accordion.ItemContent>
 		</Accordion.Item>
 	</Accordion>
 	<ModelTable

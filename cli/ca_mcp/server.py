@@ -27,6 +27,8 @@ from .tools.read_tools import (
     get_quantitative_risk_hypotheses,
     get_task_templates,
     get_task_template_details,
+    get_vulnerabilities,
+    get_vulnerability,
 )
 
 from .tools.analysis_tools import (
@@ -55,6 +57,7 @@ from .tools.write_tools import (
     create_quantitative_risk_hypothesis,
     refresh_quantitative_risk_study_simulations,
     create_task_template,
+    create_vulnerability,
 )
 
 from .tools.update_tools import (
@@ -62,11 +65,14 @@ from .tools.update_tools import (
     update_risk_scenario,
     update_applied_control,
     update_requirement_assessment,
+    update_requirement_assessments,
     update_quantitative_risk_study,
     update_quantitative_risk_scenario,
     update_quantitative_risk_hypothesis,
     update_task_template,
     delete_task_template,
+    update_vulnerability,
+    delete_vulnerability,
 )
 
 from .tools.tprm_tools import (
@@ -146,6 +152,8 @@ mcp.tool()(get_quantitative_risk_scenarios)
 mcp.tool()(get_quantitative_risk_hypotheses)
 mcp.tool()(get_task_templates)
 mcp.tool()(get_task_template_details)
+mcp.tool()(get_vulnerabilities)
+mcp.tool()(get_vulnerability)
 
 mcp.tool()(get_all_audits_with_metrics)
 mcp.tool()(get_audit_gap_analysis)
@@ -168,11 +176,15 @@ mcp.tool()(create_quantitative_risk_scenario)
 mcp.tool()(create_quantitative_risk_hypothesis)
 mcp.tool()(refresh_quantitative_risk_study_simulations)
 mcp.tool()(create_task_template)
+mcp.tool()(create_vulnerability)
+mcp.tool()(update_vulnerability)
+mcp.tool()(delete_vulnerability)
 
 mcp.tool()(update_asset)
 mcp.tool()(update_risk_scenario)
 mcp.tool()(update_applied_control)
 mcp.tool()(update_requirement_assessment)
+mcp.tool()(update_requirement_assessments)
 mcp.tool()(update_quantitative_risk_study)
 mcp.tool()(update_quantitative_risk_scenario)
 mcp.tool()(update_quantitative_risk_hypothesis)

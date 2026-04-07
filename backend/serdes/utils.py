@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import List, Type, Set, Dict, Optional, Iterable
 
 import django.apps
 from django.contrib.contenttypes.models import ContentType
@@ -9,9 +9,9 @@ from collections import defaultdict
 
 from iam.models import Folder
 from rest_framework.exceptions import ValidationError
-from typing import List, Type, Set, Dict, Optional
 
 from core.models import (
+    Answer,
     Asset,
     AppliedControl,
     Evidence,
@@ -42,6 +42,7 @@ from ebios_rm.models import (
 from tprm.models import Entity
 
 from core.serializers import (
+    AnswerImportExportSerializer,
     FolderImportExportSerializer,
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,
@@ -148,6 +149,7 @@ def app_dot_model(model: Model) -> str:
 def import_export_serializer_class(model: Model) -> serializers.Serializer:
     model_serializer_map = {
         Folder: FolderImportExportSerializer,
+        Answer: AnswerImportExportSerializer,
         Asset: AssetImportExportSerializer,
         AppliedControl: AppliedControlImportExportSerializer,
         Evidence: EvidenceImportExportSerializer,
@@ -364,7 +366,16 @@ def sort_objects_by_self_reference(
     return [object_map[obj_id] for obj_id in reversed(sorted_ids)]
 
 
-def get_domain_export_objects(domain: Folder):
+def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model]]:
+    """
+    Get all objects related to a domain for export.
+
+    Args:
+        domain: The domain Folder instance.
+
+    Returns:
+        A dictionary mapping model names to QuerySets of related objects;
+    """
     folders = (
         Folder.objects.filter(
             Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])
@@ -412,6 +423,9 @@ def get_domain_export_objects(domain: Folder):
     ).distinct()
     requirement_assessments = RequirementAssessment.objects.filter(
         compliance_assessment__in=compliance_assessments
+    ).distinct()
+    answers = Answer.objects.filter(
+        requirement_assessment__in=requirement_assessments
     ).distinct()
     frameworks = Framework.objects.filter(
         Q(folder__in=folders) | Q(complianceassessment__in=compliance_assessments)
@@ -496,6 +510,7 @@ def get_domain_export_objects(domain: Folder):
         "perimeter": perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,
+        "answer": answers,
         "ebiosrmstudy": ebios_rm_studies,
         "riskassessment": risk_assessments,
         "riskscenario": risk_scenarios,

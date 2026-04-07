@@ -50,8 +50,8 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|Ref|Name|Assets|Threats|Current|Residual|\n"
-        result += "|---|---|---|---|---|---|\n"
+        result += "|Ref|Name|Assets|Threats|Existing Controls|Additional Controls|Current|Residual|\n"
+        result += "|---|---|---|---|---|---|---|---|\n"
 
         for rs in scenarios:
             ref_id = rs.get("ref_id") or "N/A"
@@ -75,7 +75,25 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
                 else "-"
             )
 
-            result += f"|{ref_id}|{name}|{asset_names}|{threat_names}|{current_level}|{residual_level}|\n"
+            # Extract existing applied control names (current risk)
+            existing_applied_controls = rs.get("existing_applied_controls", [])
+            existing_applied_control_names = (
+                ", ".join(
+                    a.get("name", a.get("str", "?")) for a in existing_applied_controls
+                )
+                if existing_applied_controls
+                else "-"
+            )
+
+            # Extract applied control names (additional/treatment controls for residual risk)
+            applied_controls = rs.get("applied_controls", [])
+            applied_control_names = (
+                ", ".join(a.get("name", a.get("str", "?")) for a in applied_controls)
+                if applied_controls
+                else "-"
+            )
+
+            result += f"|{ref_id}|{name}|{asset_names}|{threat_names}|{existing_applied_control_names}|{applied_control_names}|{current_level}|{residual_level}|\n"
 
         return success_response(
             result,
@@ -123,8 +141,8 @@ async def get_applied_controls(folder: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|UUID|Ref|Name|Status|ETA|Domain|Category|CSF Function|Effort|Impact|Priority|Cost|\n"
-        result += "|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        result += "|UUID|Ref|Name|Status|ETA|Owner|Domain|Category|CSF Function|Effort|Impact|Priority|Cost|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
 
         for item in controls:
             uuid = item.get("id")
@@ -132,6 +150,15 @@ async def get_applied_controls(folder: str = None):
             name = item.get("name", "N/A")
             status = item.get("status", "N/A")
             eta = item.get("eta") or "N/A"
+            owners = item.get("owner") or []
+            owner_str = (
+                ", ".join(
+                    o.get("str", str(o)) if isinstance(o, dict) else str(o)
+                    for o in owners
+                )
+                if owners
+                else "N/A"
+            )
             domain = (item.get("folder") or {}).get("str", "N/A")
             category = item.get("category", "N/A")
             csf_function = item.get("csf_function", "N/A")
@@ -140,7 +167,7 @@ async def get_applied_controls(folder: str = None):
             priority = item.get("priority", "N/A")
             cost = item.get("cost", 0)
 
-            result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
+            result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{owner_str}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
 
         return success_response(
             result,
@@ -156,15 +183,26 @@ async def get_applied_controls(folder: str = None):
         )
 
 
-async def get_audits_progress(folder: str = None, perimeter: str = None):
+async def get_audits_progress(
+    folder: str = None,
+    perimeter: str = None,
+    status: str = None,
+    framework: str = None,
+):
     """List compliance assessments (audits) with progress metrics
 
     Args:
         folder: Folder ID/name
         perimeter: Perimeter ID/name
+        status: Filter by status: created | in_progress | in_review | done | deprecated
+        framework: Framework ID/name to filter by
     """
     try:
-        from ..resolvers import resolve_folder_id, resolve_perimeter_id
+        from ..resolvers import (
+            resolve_folder_id,
+            resolve_perimeter_id,
+            resolve_framework_id,
+        )
 
         params = {}
         filters = {}
@@ -179,6 +217,14 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
             params["perimeter"] = resolve_perimeter_id(perimeter)
             filters["perimeter"] = perimeter
 
+        if status:
+            params["status"] = status
+            filters["status"] = status
+
+        if framework:
+            params["framework"] = resolve_framework_id(framework)
+            filters["framework"] = framework
+
         res = make_get_request("/compliance-assessments/", params=params)
 
         if res.status_code != 200:
@@ -190,7 +236,12 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
         if not audits:
             return empty_response("audits", filters)
 
-        result = f"Found {len(audits)} audits"
+        total_count = (
+            data.get("count", len(audits)) if isinstance(data, dict) else len(audits)
+        )
+        result = f"Found {total_count} audits"
+        if total_count > len(audits):
+            result += f" (showing first {len(audits)}, use filters to narrow down)"
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -199,12 +250,12 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
 
         for item in audits:
             name = item.get("name", "N/A")
-            framework = (item.get("framework") or {}).get("str", "N/A")
-            status = item.get("status", "N/A")
+            fw = (item.get("framework") or {}).get("str", "N/A")
+            st = item.get("status", "N/A")
             progress = item.get("progress", "N/A")
             domain = (item.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{name}|{framework}|{status}|{progress}|{domain}|\n"
+            result += f"|{name}|{fw}|{st}|{progress}|{domain}|\n"
 
         return success_response(
             result,
@@ -1192,3 +1243,157 @@ async def get_task_template_details(task_id: str):
         return result
     except Exception as e:
         return f"Error in get_task_template_details: {str(e)}"
+
+
+SEVERITY_LABELS = {
+    -1: "undefined",
+    0: "info",
+    1: "low",
+    2: "medium",
+    3: "high",
+    4: "critical",
+}
+
+STATUS_LABELS = {
+    "--": "Undefined",
+    "potential": "Potential",
+    "exploitable": "Exploitable",
+    "mitigated": "Mitigated",
+    "fixed": "Fixed",
+    "not_exploitable": "Not exploitable",
+    "unaffected": "Unaffected",
+}
+
+
+async def get_vulnerabilities(
+    folder: str = None,
+    status: str = None,
+    severity: int = None,
+    search: str = None,
+):
+    """List vulnerabilities with optional filters
+
+    Args:
+        folder: Folder ID/name to filter by
+        status: Filter by status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
+        severity: Filter by severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
+        search: Search term to filter results
+    """
+    try:
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+        filters = {}
+
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
+        if status:
+            params["status"] = status
+            filters["status"] = status
+        if severity is not None:
+            params["severity"] = severity
+            filters["severity"] = SEVERITY_LABELS.get(severity, str(severity))
+        if search:
+            params["search"] = search
+            filters["search"] = search
+
+        res = make_get_request("/vulnerabilities/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        vulnerabilities = get_paginated_results(data)
+
+        if not vulnerabilities:
+            return empty_response("vulnerabilities", filters)
+
+        result = f"Found {len(vulnerabilities)} vulnerabilities"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|ID|Name|Ref ID|Status|Severity|Folder|\n"
+        result += "|---|---|---|---|---|---|\n"
+
+        for vuln in vulnerabilities:
+            vuln_id = vuln.get("id", "N/A")
+            name = vuln.get("name", "N/A")
+            ref_id = vuln.get("ref_id") or "-"
+            vuln_status = STATUS_LABELS.get(vuln.get("status", "--"), vuln.get("status", "--"))
+            sev_val = vuln.get("severity", -1)
+            vuln_severity = SEVERITY_LABELS.get(sev_val, str(sev_val))
+            vuln_folder = (vuln.get("folder") or {})
+            if isinstance(vuln_folder, dict):
+                vuln_folder = vuln_folder.get("str", vuln_folder.get("name", "-"))
+            else:
+                vuln_folder = str(vuln_folder) if vuln_folder else "-"
+
+            result += f"|{vuln_id}|{name}|{ref_id}|{vuln_status}|{vuln_severity}|{vuln_folder}|\n"
+
+        return success_response(
+            result,
+            "get_vulnerabilities",
+            "Use get_vulnerability with a specific ID to retrieve full details, or create_vulnerability to add a new one",
+        )
+    except Exception as e:
+        return error_response("Error", str(e), "Check parameters and retry", retry_allowed=True)
+
+
+async def get_vulnerability(vulnerability_id: str):
+    """Retrieve a single vulnerability by ID
+
+    Args:
+        vulnerability_id: Vulnerability UUID or name
+    """
+    try:
+        from ..resolvers import resolve_vulnerability_id
+
+        resolved_id = resolve_vulnerability_id(vulnerability_id)
+        res = make_get_request(f"/vulnerabilities/{resolved_id}/")
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        vuln = res.json()
+
+        sev_val = vuln.get("severity", -1)
+        vuln_severity = SEVERITY_LABELS.get(sev_val, str(sev_val))
+        vuln_status = STATUS_LABELS.get(vuln.get("status", "--"), vuln.get("status", "--"))
+
+        result = f"## Vulnerability: {vuln.get('name', 'N/A')}\n\n"
+        result += f"**ID:** {vuln.get('id', 'N/A')}\n"
+        result += f"**Ref ID:** {vuln.get('ref_id') or '-'}\n"
+        result += f"**Status:** {vuln_status}\n"
+        result += f"**Severity:** {vuln_severity}\n"
+        result += f"**Description:** {vuln.get('description') or '-'}\n"
+
+        folder = vuln.get("folder")
+        if isinstance(folder, dict):
+            result += f"**Folder:** {folder.get('str', folder.get('name', folder.get('id', '-')))}\n"
+        elif folder:
+            result += f"**Folder:** {folder}\n"
+
+        filtering_labels = vuln.get("filtering_labels", [])
+        if filtering_labels:
+            result += f"**Labels:** {', '.join(str(l) for l in filtering_labels)}\n"
+
+        applied_controls = vuln.get("applied_controls", [])
+        if applied_controls:
+            result += f"**Applied Controls:** {', '.join(str(c) for c in applied_controls)}\n"
+
+        assets = vuln.get("assets", [])
+        if assets:
+            result += f"**Assets:** {', '.join(str(a) for a in assets)}\n"
+
+        security_exceptions = vuln.get("security_exceptions", [])
+        if security_exceptions:
+            result += f"**Security Exceptions:** {', '.join(str(e) for e in security_exceptions)}\n"
+
+        return success_response(
+            result,
+            "get_vulnerability",
+            "Use create_vulnerability to add a new vulnerability or get_vulnerabilities to list all",
+        )
+    except Exception as e:
+        return error_response("Error", str(e), "Check the vulnerability ID and retry", retry_allowed=True)

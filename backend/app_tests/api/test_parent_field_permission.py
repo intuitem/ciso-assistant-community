@@ -36,6 +36,7 @@ def _expected_parent_change_status(
     immutable_parent: bool = True,
     client=None,
     object_url: str | None = None,
+    target_folder: Folder | None = None,
 ) -> int:
     if immutable_parent and client and object_url:
         response = client.get(object_url)
@@ -67,6 +68,15 @@ def _expected_parent_change_status(
         return change_status
     if immutable_parent:
         return status.HTTP_403_FORBIDDEN
+    if target_folder:
+        add_fails, _, _ = EndpointTestsUtils.expected_request_response(
+            "add",
+            model_verbose_name,
+            str(target_folder),
+            user_group,
+        )
+        if add_fails:
+            return status.HTTP_403_FORBIDDEN
     return status.HTTP_200_OK
 
 
@@ -93,6 +103,7 @@ class TestParentFieldPermissionValidation:
             immutable_parent=False,
             client=test.client,
             object_url=f"/api/folders/{subfolder.id}/",
+            target_folder=folder_b,
         )
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:

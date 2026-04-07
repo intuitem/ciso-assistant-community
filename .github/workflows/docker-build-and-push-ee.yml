@@ -30,9 +30,11 @@ jobs:
           fetch-depth: 0
       - name: Generate version
         id: version
+        shell: bash
         run: |
-          echo "version=$(git describe --tags --always)" >> $GITHUB_OUTPUT
-          echo "build=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          echo "version=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
+          echo "build=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
   build-frontend:
     needs: prepare
@@ -55,6 +57,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract frontend metadata
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/intuitem/ciso-assistant-enterprise-frontend
+          tags: |
+            type=raw,value=${{ needs.prepare.outputs.version }}
+          labels: |
+            org.opencontainers.image.title=CISO Assistant Enterprise Frontend
+            org.opencontainers.image.description=Enterprise GRC platform for cybersecurity compliance and risk management
+            org.opencontainers.image.vendor=intuitem
+            org.opencontainers.image.licenses=LicenseRef-intuitem-Commercial
+            org.opencontainers.image.url=https://intuitem.com
+            org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
@@ -63,6 +79,8 @@ jobs:
           push: true
           tags: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ needs.prepare.outputs.version }}-${{ matrix.arch }}
           platforms: linux/${{ matrix.arch }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          annotations: ${{ steps.meta-frontend.outputs.annotations }}
 
   build-backend:
     needs: prepare
@@ -78,9 +96,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Create .meta file
+        shell: bash
+        env:
+          CISO_ASSISTANT_VERSION: ${{ needs.prepare.outputs.version }}
+          CISO_ASSISTANT_BUILD: ${{ needs.prepare.outputs.build }}
         run: |
-          echo "CISO_ASSISTANT_VERSION=${{ needs.prepare.outputs.version }}" > .meta
-          echo "CISO_ASSISTANT_BUILD=${{ needs.prepare.outputs.build }}" >> .meta
+          set -euo pipefail
+          {
+            echo "CISO_ASSISTANT_VERSION=$CISO_ASSISTANT_VERSION"
+            echo "CISO_ASSISTANT_BUILD=$CISO_ASSISTANT_BUILD"
+          } > .meta
           cp .meta ./backend/
           cp .meta ./backend/ciso_assistant/
       - name: Set up Docker Buildx
@@ -91,6 +116,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract backend metadata
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/intuitem/ciso-assistant-enterprise-backend
+          tags: |
+            type=raw,value=${{ needs.prepare.outputs.version }}
+          labels: |
+            org.opencontainers.image.title=CISO Assistant Enterprise Backend
+            org.opencontainers.image.description=Enterprise GRC platform for cybersecurity compliance and risk management
+            org.opencontainers.image.vendor=intuitem
+            org.opencontainers.image.licenses=LicenseRef-intuitem-Commercial
+            org.opencontainers.image.url=https://intuitem.com
+            org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
@@ -99,6 +138,8 @@ jobs:
           push: true
           tags: ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ needs.prepare.outputs.version }}-${{ matrix.arch }}
           platforms: linux/${{ matrix.arch }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          annotations: ${{ steps.meta-backend.outputs.annotations }}
 
   merge-manifests:
     needs: [prepare, build-frontend, build-backend]
@@ -111,15 +152,44 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create multi-arch manifests
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          GIT_SHA: ${{ github.sha }}
         run: |
+          set -euo pipefail
+          CREATED="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
           # Frontend
-          docker buildx imagetools create -t ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ needs.prepare.outputs.version }} \
-            -t ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest \
-            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ needs.prepare.outputs.version }}-amd64 \
-            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ needs.prepare.outputs.version }}-arm64
+          docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.title=CISO Assistant Enterprise Frontend" \
+            --annotation "index:org.opencontainers.image.description=Enterprise GRC platform for cybersecurity compliance and risk management" \
+            --annotation "index:org.opencontainers.image.vendor=intuitem" \
+            --annotation "index:org.opencontainers.image.licenses=LicenseRef-intuitem-Commercial" \
+            --annotation "index:org.opencontainers.image.url=https://intuitem.com" \
+            --annotation "index:org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            --annotation "index:org.opencontainers.image.version=$VERSION" \
+            --annotation "index:org.opencontainers.image.revision=$GIT_SHA" \
+            --annotation "index:org.opencontainers.image.created=$CREATED" \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION" \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest" \
+            "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION-amd64" \
+            "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION-arm64"
 
           # Backend
-          docker buildx imagetools create -t ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ needs.prepare.outputs.version }} \
-            -t ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest \
-            ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ needs.prepare.outputs.version }}-amd64 \
-            ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ needs.prepare.outputs.version }}-arm64
+          docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.title=CISO Assistant Enterprise Backend" \
+            --annotation "index:org.opencontainers.image.description=Enterprise GRC platform for cybersecurity compliance and risk management" \
+            --annotation "index:org.opencontainers.image.vendor=intuitem" \
+            --annotation "index:org.opencontainers.image.licenses=LicenseRef-intuitem-Commercial" \
+            --annotation "index:org.opencontainers.image.url=https://intuitem.com" \
+            --annotation "index:org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            --annotation "index:org.opencontainers.image.version=$VERSION" \
+            --annotation "index:org.opencontainers.image.revision=$GIT_SHA" \
+            --annotation "index:org.opencontainers.image.created=$CREATED" \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION" \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest" \
+            "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION-amd64" \
+            "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION-arm64"

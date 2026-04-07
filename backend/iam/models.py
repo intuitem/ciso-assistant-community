@@ -14,7 +14,7 @@ from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, Prefetch, QuerySet
 from knox.models import AuthToken
@@ -36,20 +36,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import send_mail, get_connection, EmailMessage
+from django.core.mail import get_connection, EmailMessage
 from django.core.validators import validate_email
-from ciso_assistant.settings import (
-    CISO_ASSISTANT_URL,
-    EMAIL_HOST,
-    EMAIL_HOST_USER,
-    EMAIL_HOST_USER_RESCUE,
-    EMAIL_HOST_PASSWORD_RESCUE,
-    EMAIL_HOST_RESCUE,
-    EMAIL_PORT,
-    EMAIL_PORT_RESCUE,
-    EMAIL_USE_TLS,
-    EMAIL_USE_TLS_RESCUE,
-)
 from django.conf import settings
 
 import structlog
@@ -87,6 +75,7 @@ ALLOWED_PERMISSION_APPS = (
     "crq",
     "pmbok",
     "iam",
+    "global_settings",
 )
 
 IGNORED_PERMISSION_MODELS = (
@@ -106,7 +95,9 @@ def _get_root_folder() -> Folder | None:
     pre-migration checks can instantiate models without failing.
     """
     try:
-        return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        return Folder.objects.only("id", "content_type").get(
+            content_type=Folder.ContentType.ROOT
+        )
     except Folder.DoesNotExist:
         return None
     except (OperationalError, ProgrammingError):
@@ -136,7 +127,9 @@ class Folder(NameDescriptionMixin):
             cached_root = state.folders.get(state.root_folder_id)
             if cached_root is not None:
                 return cached_root
-        return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        return Folder.objects.only("id", "content_type").get(
+            content_type=Folder.ContentType.ROOT
+        )
 
     @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
@@ -162,6 +155,10 @@ class Folder(NameDescriptionMixin):
         default=_get_root_folder,
     )
     builtin = models.BooleanField(default=False)
+    create_iam_groups = models.BooleanField(
+        default=False,
+        help_text=_("Automatically provision IAM groups for domain folders."),
+    )
 
     filtering_labels = models.ManyToManyField(
         "core.FilteringLabel",
@@ -255,6 +252,7 @@ class Folder(NameDescriptionMixin):
             ["provider_entity", "folder"],
             ["solution", "provider_entity", "folder"],
             ["processing", "folder"],
+            ["journey", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -313,67 +311,66 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def create_default_ug_and_ra(folder: "Folder"):
-        if folder.content_type == Folder.ContentType.DOMAIN:
-            readers = UserGroup.objects.create(
-                name=str(UserGroupCodename.READER), folder=folder, builtin=True
-            )
-            approvers = UserGroup.objects.create(
-                name=str(UserGroupCodename.APPROVER), folder=folder, builtin=True
-            )
-            analysts = UserGroup.objects.create(
-                name=str(UserGroupCodename.ANALYST), folder=folder, builtin=True
-            )
-            managers = UserGroup.objects.create(
-                name=str(UserGroupCodename.DOMAIN_MANAGER), folder=folder, builtin=True
-            )
-            ra1 = RoleAssignment.objects.create(
-                user_group=readers,
-                role=Role.objects.get(name=RoleCodename.READER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra1.perimeter_folders.add(folder)
-            ra2 = RoleAssignment.objects.create(
-                user_group=approvers,
-                role=Role.objects.get(name=RoleCodename.APPROVER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra2.perimeter_folders.add(folder)
-            ra3 = RoleAssignment.objects.create(
-                user_group=analysts,
-                role=Role.objects.get(name=RoleCodename.ANALYST),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra3.perimeter_folders.add(folder)
-            ra4 = RoleAssignment.objects.create(
-                user_group=managers,
-                role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra4.perimeter_folders.add(folder)
-            # Clear the cache after a new folder is created - purposely clearing everything
+        if (
+            folder.content_type != Folder.ContentType.DOMAIN
+            or not folder.create_iam_groups
+        ):
+            return
 
-            # Create a UG and RA for each non-builtin role (idempotent)
-            with transaction.atomic():
-                for role in Role.objects.filter(builtin=False):
-                    ug, _ = UserGroup.objects.get_or_create(
-                        name=role.name, folder=folder, defaults={"builtin": False}
-                    )
-                    ra, created = RoleAssignment.objects.get_or_create(
-                        user_group=ug,
-                        role=role,
-                        folder=Folder.get_root_folder(),
-                        defaults={"builtin": False, "is_recursive": True},
-                    )
-                    # Ensure perimeter folder link exists
-                    ra.perimeter_folders.add(folder)
+        root_folder = Folder.get_root_folder()
+        builtin_pairs = [
+            (UserGroupCodename.READER, RoleCodename.READER),
+            (UserGroupCodename.APPROVER, RoleCodename.APPROVER),
+            (UserGroupCodename.ANALYST, RoleCodename.ANALYST),
+            (UserGroupCodename.DOMAIN_MANAGER, RoleCodename.DOMAIN_MANAGER),
+            (UserGroupCodename.AUDITEE, RoleCodename.AUDITEE),
+        ]
+
+        for ug_codename, role_codename in builtin_pairs:
+            ug, created = UserGroup.objects.get_or_create(
+                name=str(ug_codename),
+                folder=folder,
+                defaults={"builtin": True},
+            )
+            if not created or not ug.builtin:
+                if not ug.builtin:
+                    ug.builtin = True
+                ug.save(update_fields=["builtin"])
+            role = Role.objects.get(name=str(role_codename))
+            ra, _ = RoleAssignment.objects.get_or_create(
+                user_group=ug,
+                role=role,
+                folder=root_folder,
+                defaults={"builtin": True, "is_recursive": True},
+            )
+            Folder._ensure_recursive_assignment(ra)
+            ra.perimeter_folders.add(folder)
+
+        with transaction.atomic():
+            for role in Role.objects.filter(builtin=False):
+                ug, created = UserGroup.objects.get_or_create(
+                    name=role.name,
+                    folder=folder,
+                    defaults={"builtin": True},
+                )
+                if not created or not ug.builtin:
+                    if not ug.builtin:
+                        ug.builtin = True
+                    ug.save(update_fields=["builtin"])
+                ra, _ = RoleAssignment.objects.get_or_create(
+                    user_group=ug,
+                    role=role,
+                    folder=root_folder,
+                    defaults={"builtin": False, "is_recursive": True},
+                )
+                Folder._ensure_recursive_assignment(ra)
+                ra.perimeter_folders.add(folder)
+
+    @staticmethod
+    def _ensure_recursive_assignment(role_assignment: "RoleAssignment") -> None:
+        if not role_assignment.is_recursive:
+            role_assignment.is_recursive = True
+            role_assignment.save(update_fields=["is_recursive"])
 
 
 class FolderMixin(models.Model):
@@ -429,20 +426,19 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("user groups")
 
     def __str__(self) -> str:
-        if self.builtin:
-            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return f"{self.folder.name} - {self.name}"
+        resolved_name = (
+            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
+        ) or self.name
+        return f"{self.folder.name} - {resolved_name}"
 
     def get_name_display(self) -> str:
         return self.name
 
     def get_localization_dict(self) -> dict:
-        return {
-            "folder": self.folder.name,
-            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name)
-            if self.builtin
-            else self.name,
-        }
+        resolved_name = (
+            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
+        ) or self.name
+        return {"folder": self.folder.name, "role": resolved_name}
 
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
@@ -489,6 +485,7 @@ class UserManager(BaseUserManager):
                 last_name=extra_fields.get("last_name", ""),
                 is_superuser=extra_fields.get("is_superuser", False),
                 is_active=extra_fields.get("is_active", True),
+                is_third_party=extra_fields.get("is_third_party", False),
                 observation=extra_fields.get("observation"),
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
@@ -500,6 +497,21 @@ class UserManager(BaseUserManager):
             user.password = make_password(password)
         else:
             user.set_unusable_password()
+        # Set default language from general settings
+        try:
+            from global_settings.models import GlobalSettings
+
+            general = GlobalSettings.objects.filter(name="general").first()
+            if general and isinstance(general.value, dict):
+                default_lang = general.value.get("default_language", "en")
+            else:
+                default_lang = "en"
+        except Exception:
+            default_lang = "en"
+        if not isinstance(user.preferences, dict):
+            user.preferences = {}
+        user.preferences["lang"] = default_lang
+
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
         if initial_group:
@@ -539,7 +551,7 @@ class UserManager(BaseUserManager):
         return self._create_user(
             email=email,
             password=password,
-            mailing=bool(EMAIL_HOST or EMAIL_HOST_RESCUE),
+            mailing=bool(settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE),
             initial_group=None,
             **extra_fields,
         )
@@ -553,7 +565,9 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool((not password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)),
+            mailing=bool(
+                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
+            ),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -669,31 +683,114 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_emails(self) -> list[str]:
         return [self.email]
 
+    def get_preferences(self) -> dict:
+        """
+        Return normalized user preferences, backfilling defaults in memory.
+        Ensures the returned dict always has a 'lang' key.
+        Does not persist changes — callers that need to save must do so explicitly.
+        """
+        prefs = self.preferences
+        if not isinstance(prefs, dict):
+            prefs = {}
+            self.preferences = prefs
+        valid_langs = {code for code, _ in settings.LANGUAGES}
+        if not isinstance(prefs.get("lang"), str) or prefs["lang"] not in valid_langs:
+            try:
+                from global_settings.models import GlobalSettings
+
+                general = GlobalSettings.objects.filter(name="general").first()
+                default_lang = (
+                    general.value.get("default_language", "en")
+                    if general and isinstance(general.value, dict)
+                    else "en"
+                )
+            except Exception:
+                default_lang = "en"
+            prefs["lang"] = default_lang
+        return prefs
+
+    # Maps Django HTML template names to YAML template keys
+    _TEMPLATE_KEY_MAP = {
+        "registration/first_connexion_email.html": "welcome",
+        "registration/first_connexion_email_sso.html": "welcome_sso",
+        "registration/password_reset_email.html": "password_reset",
+        "tprm/third_party_email.html": "questionnaire_assignment",
+    }
+
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
-        Sending a mail to a user for password resetting or creation
+        Sending a mail to a user for password resetting or creation.
+        Tries the YAML-based template system first (supports custom overrides),
+        falls back to the legacy Django HTML templates.
         """
+        user_lang = self.get_preferences().get("lang", "en")
+        uid = urlsafe_base64_encode(force_bytes(self.pk))
+        token = default_token_generator.make_token(self)
+
+        # Build context for the YAML template system
+        context = {
+            "set_password_url": f"{settings.CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
+            "reset_password_url": f"{settings.CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
+            "questionnaire_url": f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}/table-mode"
+            if object
+            else settings.CISO_ASSISTANT_URL,
+        }
+
+        # Try YAML template system (supports custom overrides and Markdown)
+        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
+        if template_key:
+            try:
+                from core.email_utils import render_email_template
+
+                rendered = render_email_template(
+                    template_key, context, locale=user_lang
+                )
+                if rendered:
+                    subject = rendered["subject"]
+                    body = rendered["body"]
+                    html_body = rendered.get("html_body")
+                    return self._send_email(subject, body, html_body)
+            except Exception as e:
+                logger.warning(
+                    "YAML template rendering failed, falling back to Django template",
+                    template_key=template_key,
+                    exc_info=e,
+                )
+
+        # Fallback to legacy Django HTML templates
         header = {
             "email": self.email,
-            "root_url": CISO_ASSISTANT_URL,
-            "uid": urlsafe_base64_encode(force_bytes(self.pk)),
+            "root_url": settings.CISO_ASSISTANT_URL,
+            "uid": uid,
             "user": self,
-            "token": default_token_generator.make_token(self),
+            "token": token,
             "protocol": "https",
             "pk": str(pk) if pk else None,
             "object": object,
             "object_id": object_id,
         }
-        email = render_to_string(email_template_name, header)
+        with translation_override(user_lang):
+            email = render_to_string(email_template_name, header)
+            subject = str(subject)
+
+        self._send_email(subject, email, email)
+
+    def _send_email(self, subject, body, html_body=None):
+        """Send an email with primary/rescue server fallback."""
         try:
-            send_mail(
-                subject=subject,
-                message=email,
-                from_email=None,
-                recipient_list=[self.email],
-                fail_silently=False,
-                html_message=email,
-            )
+            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+            with get_connection(ssl_context=ssl_context) as connection:
+                msg = EmailMessage(
+                    subject=subject,
+                    body=body,
+                    from_email=None,
+                    to=[self.email],
+                    connection=connection,
+                )
+                if html_body:
+                    msg.content_subtype = "html"
+                    msg.body = html_body
+                msg.send()
             logger.info(
                 "Email sent successfully", recipient=self.email, subject=subject
             )
@@ -703,27 +800,33 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 recipient=self.email,
                 subject=subject,
                 error=str(primary_exception),
-                email_host=EMAIL_HOST,
-                email_port=EMAIL_PORT,
-                email_host_user=EMAIL_HOST_USER,
-                email_use_tls=EMAIL_USE_TLS,
+                email_host=settings.EMAIL_HOST,
+                email_port=settings.EMAIL_PORT,
+                email_host_user=settings.EMAIL_HOST_USER,
+                email_use_tls=settings.EMAIL_USE_TLS,
             )
-            if EMAIL_HOST_RESCUE:
+            if settings.EMAIL_HOST_RESCUE:
                 try:
                     with get_connection(
-                        host=EMAIL_HOST_RESCUE,
-                        port=EMAIL_PORT_RESCUE,
-                        username=EMAIL_HOST_USER_RESCUE,
-                        password=EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                        host=settings.EMAIL_HOST_RESCUE,
+                        port=settings.EMAIL_PORT_RESCUE,
+                        username=settings.EMAIL_HOST_USER_RESCUE,
+                        password=settings.EMAIL_HOST_PASSWORD_RESCUE,
+                        use_tls=settings.EMAIL_USE_TLS_RESCUE,
+                        use_ssl=settings.EMAIL_USE_SSL_RESCUE,
+                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
                     ) as new_connection:
-                        EmailMessage(
+                        msg = EmailMessage(
                             subject=subject,
-                            body=email,
+                            body=body,
                             from_email=None,
                             to=[self.email],
                             connection=new_connection,
-                        ).send()
+                        )
+                        if html_body:
+                            msg.content_subtype = "html"
+                            msg.body = html_body
+                        msg.send()
                     logger.info(
                         "Email sent via rescue server",
                         recipient=self.email,
@@ -735,10 +838,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         recipient=self.email,
                         subject=subject,
                         error=str(rescue_exception),
-                        email_host=EMAIL_HOST_RESCUE,
-                        email_port=EMAIL_PORT_RESCUE,
-                        email_username=EMAIL_HOST_USER_RESCUE,
-                        email_use_tls=EMAIL_USE_TLS_RESCUE,
+                        email_host=settings.EMAIL_HOST_RESCUE,
+                        email_port=settings.EMAIL_PORT_RESCUE,
+                        email_username=settings.EMAIL_HOST_USER_RESCUE,
+                        email_use_tls=settings.EMAIL_USE_TLS_RESCUE,
                     )
                     raise rescue_exception
             else:
@@ -755,6 +858,13 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             .values_list("roleassignment__role__name", flat=True)
             .distinct()
         )
+
+    @property
+    def is_auditee(self) -> bool:
+        """True when the user holds the auditee role on at least one domain."""
+        from core.utils import get_auditee_filtered_folder_ids
+
+        return bool(get_auditee_filtered_folder_ids(self))
 
     @property
     def has_backup_permission(self) -> bool:
@@ -786,6 +896,14 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
 
+    # Permissions that grant write access but do not consume a license seat
+    NON_SEAT_PERMISSIONS = {
+        "change_validationflow",
+        "add_chatsession",
+        "change_chatsession",
+        "delete_chatsession",
+    }
+
     @property
     def is_editor(self) -> bool:
         permissions = RoleAssignment.get_permissions(self)
@@ -793,6 +911,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return any(
             any(perm.startswith(prefix) for prefix in editor_prefixes)
             for perm in permissions
+            if perm not in self.NON_SEAT_PERMISSIONS
         )
 
     @property
@@ -822,6 +941,15 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             for user in cls.objects.all()
             if user.is_editor and not user.is_third_party
         ]
+
+    @property
+    def is_sso(self) -> bool:
+        """
+        Indicates whether the user has a linked SSO (social) account.
+        """
+        from allauth.socialaccount.models import SocialAccount
+
+        return SocialAccount.objects.filter(user=self).exists()
 
     def has_mfa_enabled(self) -> bool:
         """
@@ -1179,6 +1307,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_iter = object_type.objects.filter(
                     provider_entity__folder_id__in=folder_ids
                 ).values_list("id", "provider_entity__folder_id")
+            elif hasattr(object_type, "journey"):
+                objects_iter = object_type.objects.filter(
+                    journey__folder_id__in=folder_ids
+                ).values_list("id", "journey__folder_id")
             else:
                 raise NotImplementedError("type not supported")
 

@@ -4,7 +4,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ChangePasswordSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		data: PageData;

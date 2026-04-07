@@ -89,17 +89,19 @@ test('user can create findings inside a follow up', async ({
 	await test.step('create evidence inside follow up', async () => {
 		await findingsAssessmentsPage.tab('Evidences').click();
 
-		await evidencesPage.createItem(
-			{
-				name: vars.evidenceName + ' from followup',
-				description: vars.description,
-				attachment: vars.file,
-				link: 'https://intuitem.com/'
-			},
-			undefined,
-			page,
-			'Add evidence' // temporary hack
-		);
+		await findingsAssessmentsPage.page
+			.locator('[data-testid="add-button"][title="Add evidence"]')
+			.click();
+		await evidencesPage.form.hasTitle();
+		await findingsAssessmentsPage.page.waitForLoadState('networkidle');
+		await evidencesPage.form.fill({
+			name: vars.evidenceName + ' from followup',
+			description: vars.description,
+			attachment: vars.file,
+			link: 'https://intuitem.com/'
+		});
+		await evidencesPage.form.saveButton.click();
+		await findingsAssessmentsPage.page.waitForLoadState('networkidle');
 	});
 });
 
