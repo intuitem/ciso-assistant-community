@@ -2,6 +2,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 	import { goto } from '$app/navigation';
 	import { m } from '$paraglide/messages';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -428,21 +429,21 @@
 										>
 											{#if compactMode}
 												{#if task.ref_id}
-													<a
+													<Anchor
 														href="/task-templates/{task.id}"
 														class="inline-block text-[11px] font-mono font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded hover:bg-violet-100 hover:text-violet-700 transition-colors"
 														title={task.name}
 													>
 														{task.ref_id}
-													</a>
+													</Anchor>
 												{:else}
-													<a
+													<Anchor
 														href="/task-templates/{task.id}"
 														class="text-xs text-gray-700 hover:text-violet-600 truncate block max-w-[120px] transition-colors"
 														title={task.name}
 													>
 														{task.name}
-													</a>
+													</Anchor>
 												{/if}
 											{:else}
 												<div class="flex flex-col gap-0.5">
@@ -453,12 +454,12 @@
 																>{task.ref_id}</span
 															>
 														{/if}
-														<a
+														<Anchor
 															href="/task-templates/{task.id}"
 															class="font-medium text-sm text-gray-800 hover:text-violet-600 transition-colors"
 														>
 															{task.name}
-														</a>
+														</Anchor>
 													</div>
 													{#if task.assigned_to && task.assigned_to.length > 0}
 														<div class="text-[11px] text-gray-400 flex items-center gap-1">
@@ -488,13 +489,12 @@
 												class:py-1.5={compactMode}
 											>
 												{#if firstNodeId}
-													<a
+													<Anchor
 														href="/task-nodes/{firstNodeId}"
+														label={task.name}
 														class="flex items-center justify-center w-full rounded-md {getStatusColor(
 															status
-														)} hover:opacity-80 transition-opacity"
-														class:h-7={!compactMode}
-														class:h-4={compactMode}
+														)} hover:opacity-80 transition-opacity {compactMode ? 'h-4' : 'h-7'}"
 														title={nodeIds.length > 1
 															? `${nodeIds.length} ${m.taskNodes().toLowerCase()}`
 															: m.viewTaskNode()}
@@ -504,7 +504,7 @@
 																>{nodeIds.length}</span
 															>
 														{/if}
-													</a>
+													</Anchor>
 												{:else}
 													<div
 														class="w-full rounded-md {getStatusColor(status)}"
