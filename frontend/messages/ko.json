@@ -3409,6 +3409,7 @@
 	"occurrenceDueDate": "발생 항목 마감일",
 	"relatedTo": "관련 대상",
 	"legacyEvidenceField": "레거시 증거",
+	"tasksReview": "작업 검토",
 	"yearlyTasksReview": "통합 작업 검토",
 	"startPeriod": "시작 기간",
 	"endPeriod": "종료 기간",

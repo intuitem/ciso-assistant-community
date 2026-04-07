@@ -5,7 +5,6 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const now = new Date();
 	const currentYear = now.getFullYear();
 
-	// Get query parameters with defaults
 	const startMonth = url.searchParams.get('start_month') || '1';
 	const startYear = url.searchParams.get('start_year') || currentYear.toString();
 	const endMonth = url.searchParams.get('end_month') || '12';
@@ -16,7 +15,6 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const appliedControls = url.searchParams.get('applied_controls') || '';
 	const status = url.searchParams.get('status') || '';
 
-	// Build endpoint with filters
 	const params = new URLSearchParams();
 	params.append('start_month', startMonth);
 	params.append('start_year', startYear);
@@ -30,30 +28,33 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 
 	const endpoint = `${BASE_API_URL}/task-templates/yearly_review/?${params.toString()}`;
 
-	const [res, foldersRes, actorsRes, appliedControlsRes] = await Promise.all([
-		fetch(endpoint),
-		fetch(`${BASE_API_URL}/folders/`),
-		fetch(`${BASE_API_URL}/actors/`),
-		fetch(`${BASE_API_URL}/applied-controls/?page_size=500`)
-	]);
+	// Streamed: return the promise without awaiting so the page renders immediately
+	const reviewPromise = fetch(endpoint).then((r) => r.json());
 
-	const data = await res.json();
-	const foldersData = await foldersRes.json();
-	const actorsData = await actorsRes.json();
-	const appliedControlsData = await appliedControlsRes.json();
+	// Filter dropdowns can also stream independently
+	const foldersPromise = fetch(`${BASE_API_URL}/folders/`).then((r) => r.json());
+	const actorsPromise = fetch(`${BASE_API_URL}/actors/`).then((r) => r.json());
+	const appliedControlsPromise = fetch(`${BASE_API_URL}/applied-controls/?page_size=500`).then(
+		(r) => r.json()
+	);
 
 	return {
-		folders: data.folders || [],
-		buckets: data.buckets || [],
-		granularity: data.granularity || 'monthly',
-		allFolders: foldersData.results || foldersData,
-		allActors: actorsData.results || actorsData,
-		allAppliedControls: appliedControlsData.results || appliedControlsData,
+		// Streamed data — page renders immediately, {#await} handles loading
+		reviewData: reviewPromise,
+		filterData: Promise.all([foldersPromise, actorsPromise, appliedControlsPromise]).then(
+			([foldersData, actorsData, appliedControlsData]) => ({
+				allFolders: foldersData.results || foldersData,
+				allActors: actorsData.results || actorsData,
+				allAppliedControls: appliedControlsData.results || appliedControlsData
+			})
+		),
+		// Synchronous — available immediately for filter state
 		startMonth: parseInt(startMonth),
 		startYear: parseInt(startYear),
 		endMonth: parseInt(endMonth),
 		endYear: parseInt(endYear),
 		selectedFolder: folder,
+		selectedGranularity: granularity,
 		selectedAssignedTo: assignedTo,
 		selectedAppliedControls: appliedControls,
 		selectedStatus: status

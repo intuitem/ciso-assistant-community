@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { pageTitle } from '$lib/utils/stores';
 	import { goto } from '$app/navigation';
-	import { navigating } from '$app/stores';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
@@ -10,7 +9,7 @@
 	}
 
 	let { data }: Props = $props();
-	pageTitle.set(m.yearlyTasksReview());
+	pageTitle.set(m.tasksReview());
 
 	// View settings
 	let compactMode = $state(false);
@@ -41,14 +40,23 @@
 	function parseMonthFormat(value: string): { year: number; month: number } | null {
 		if (!value || !value.includes('-')) return null;
 		const [year, month] = value.split('-').map(Number);
-		if (!year || !month || isNaN(year) || isNaN(month) || month < 1 || month > 12 || year < 1900 || year > 2100) {
+		if (
+			!year ||
+			!month ||
+			isNaN(year) ||
+			isNaN(month) ||
+			month < 1 ||
+			month > 12 ||
+			year < 1900 ||
+			year > 2100
+		) {
 			return null;
 		}
 		return { year, month };
 	}
 
-	function getBucketLabel(bucket: { key: string; label: string }): string {
-		if (data.granularity === 'monthly') {
+	function getBucketLabel(bucket: { key: string; label: string }, granularity: string): string {
+		if (granularity === 'monthly') {
 			const parts = bucket.key.split('-');
 			const monthIndex = parseInt(parts[1]) - 1;
 			return getMonthName(monthIndex);
@@ -59,20 +67,30 @@
 	let startPeriod = $state(toMonthFormat(data.startYear, data.startMonth));
 	let endPeriod = $state(toMonthFormat(data.endYear, data.endMonth));
 	let selectedFolder = $state(data.selectedFolder);
-	let selectedGranularity = $state(data.granularity || 'monthly');
+	let selectedGranularity = $state(data.selectedGranularity || 'monthly');
 	let selectedAssignedTo = $state(data.selectedAssignedTo || '');
 	let selectedAppliedControls = $state(data.selectedAppliedControls || '');
 	let selectedStatus = $state(data.selectedStatus || '');
 
 	let startFormatted = $derived.by(() => {
 		const parsed = parseMonthFormat(startPeriod);
-		if (!parsed) return { year: data.startYear, month: data.startMonth, label: getMonthName(data.startMonth - 1) };
+		if (!parsed)
+			return {
+				year: data.startYear,
+				month: data.startMonth,
+				label: getMonthName(data.startMonth - 1)
+			};
 		return { year: parsed.year, month: parsed.month, label: getMonthName(parsed.month - 1) };
 	});
 
 	let endFormatted = $derived.by(() => {
 		const parsed = parseMonthFormat(endPeriod);
-		if (!parsed) return { year: data.endYear, month: data.endMonth, label: getMonthName(data.endMonth - 1) };
+		if (!parsed)
+			return {
+				year: data.endYear,
+				month: data.endMonth,
+				label: getMonthName(data.endMonth - 1)
+			};
 		return { year: parsed.year, month: parsed.month, label: getMonthName(parsed.month - 1) };
 	});
 
@@ -80,7 +98,6 @@
 		const start = parseMonthFormat(startPeriod);
 		const end = parseMonthFormat(endPeriod);
 		if (!start || !end) return false;
-		// start must be <= end (equal is fine for single-month/week focus)
 		return start.year < end.year || (start.year === end.year && start.month <= end.month);
 	});
 
@@ -91,15 +108,6 @@
 		if (status === 'pending') return 'bg-red-100 border border-red-300';
 		if (status === 'cancelled') return 'bg-gray-100 border border-gray-300';
 		return 'bg-white border border-dashed border-gray-200';
-	}
-
-	function getStatusDot(status: string | null): string {
-		if (!status) return 'bg-gray-200';
-		if (status === 'completed') return 'bg-green-500';
-		if (status === 'in_progress') return 'bg-violet-500';
-		if (status === 'pending') return 'bg-red-500';
-		if (status === 'cancelled') return 'bg-gray-400';
-		return 'bg-gray-200';
 	}
 
 	function applyFilters() {
@@ -116,7 +124,7 @@
 		if (selectedAssignedTo) params.set('assigned_to', selectedAssignedTo);
 		if (selectedAppliedControls) params.set('applied_controls', selectedAppliedControls);
 		if (selectedStatus) params.set('status', selectedStatus);
-		goto(`/experimental/yearly-tasks-review?${params.toString()}`);
+		goto(`/tasks-review?${params.toString()}`);
 	}
 
 	function resetFilters() {
@@ -128,10 +136,9 @@
 		selectedAssignedTo = '';
 		selectedAppliedControls = '';
 		selectedStatus = '';
-		goto('/experimental/yearly-tasks-review');
+		goto('/tasks-review');
 	}
 
-	// Count active filters
 	let activeFilterCount = $derived(
 		[selectedFolder, selectedAssignedTo, selectedAppliedControls, selectedStatus].filter(Boolean)
 			.length
@@ -141,28 +148,26 @@
 <div class="space-y-5 p-6">
 	<!-- Header bar -->
 	<div class="flex items-start justify-between gap-4">
-		<div>
-			<h1
-				class="text-2xl font-bold bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
-			>
-				{m.yearlyTasksReview()}
-			</h1>
-			<p class="text-sm text-slate-500 mt-1">
+		<div
+			class="flex items-center gap-2 bg-white/90 border border-gray-200 rounded-lg px-3 py-1.5 shadow-sm"
+		>
+			<span class="text-sm font-semibold text-gray-800">
 				{startFormatted.label}
 				{startFormatted.year}
-				{m.periodTo()}
+			</span>
+			<i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
+			<span class="text-sm font-semibold text-gray-800">
 				{endFormatted.label}
 				{endFormatted.year}
-				{#if data.granularity === 'weekly'}
-					<span
-						class="ml-1.5 inline-flex items-center text-[10px] font-bold uppercase tracking-wider bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded"
-						>{m.weekly()}</span
-					>
-				{/if}
-			</p>
+			</span>
+			{#if selectedGranularity === 'weekly'}
+				<span
+					class="inline-flex items-center text-[10px] font-bold uppercase tracking-wider bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded"
+					>{m.weekly()}</span
+				>
+			{/if}
 		</div>
 		<div class="flex items-center gap-2">
-			<!-- Compact toggle -->
 			<button
 				type="button"
 				class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150
@@ -175,7 +180,6 @@
 				<i class="fa-solid {compactMode ? 'fa-expand' : 'fa-compress'} text-[10px]"></i>
 				<span>{compactMode ? m.detailedView() : m.compactView()}</span>
 			</button>
-			<!-- Filter toggle -->
 			<button
 				type="button"
 				class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150
@@ -200,14 +204,12 @@
 	{#if filtersExpanded}
 		<div class="bg-gray-50/80 border border-gray-200 rounded-xl p-4 transition-all duration-200">
 			<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 items-end">
-				<!-- Start Period -->
 				<div>
 					<label
 						for="start-period-filter"
 						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+						>{m.startPeriod()}</label
 					>
-						{m.startPeriod()}
-					</label>
 					<input
 						id="start-period-filter"
 						type="month"
@@ -215,15 +217,12 @@
 						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 					/>
 				</div>
-
-				<!-- End Period -->
 				<div>
 					<label
 						for="end-period-filter"
 						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+						>{m.endPeriod()}</label
 					>
-						{m.endPeriod()}
-					</label>
 					<input
 						id="end-period-filter"
 						type="month"
@@ -231,15 +230,12 @@
 						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 					/>
 				</div>
-
-				<!-- Granularity -->
 				<div>
 					<label
 						for="granularity-filter"
 						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+						>{m.granularity()}</label
 					>
-						{m.granularity()}
-					</label>
 					<select
 						id="granularity-filter"
 						bind:value={selectedGranularity}
@@ -250,74 +246,74 @@
 					</select>
 				</div>
 
-				<!-- Folder -->
-				<div>
-					<label
-						for="folder-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
-					>
-						{m.folder()}
-					</label>
-					<select
-						id="folder-filter"
-						bind:value={selectedFolder}
-						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-					>
-						<option value="">{m.allFolders()}</option>
-						{#each data.allFolders as folder}
-							<option value={folder.id}>{folder.name}</option>
-						{/each}
-					</select>
-				</div>
+				<!-- Filter dropdowns — streamed -->
+				{#await data.filterData}
+					<div class="col-span-4 flex items-end">
+						<div class="flex items-center gap-2 text-xs text-gray-400 py-2">
+							<i class="fa-solid fa-spinner fa-spin"></i>
+							{m.loading()}...
+						</div>
+					</div>
+				{:then filters}
+					<div>
+						<label
+							for="folder-filter"
+							class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+							>{m.folder()}</label
+						>
+						<select
+							id="folder-filter"
+							bind:value={selectedFolder}
+							class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+						>
+							<option value="">{m.allFolders()}</option>
+							{#each filters.allFolders as folder}
+								<option value={folder.id}>{folder.name}</option>
+							{/each}
+						</select>
+					</div>
+					<div>
+						<label
+							for="assigned-to-filter"
+							class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+							>{m.assignedTo()}</label
+						>
+						<select
+							id="assigned-to-filter"
+							bind:value={selectedAssignedTo}
+							class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+						>
+							<option value="">{m.allActors()}</option>
+							{#each filters.allActors as actor}
+								<option value={actor.id}>{actor.str || actor.name}</option>
+							{/each}
+						</select>
+					</div>
+					<div>
+						<label
+							for="applied-controls-filter"
+							class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+							>{m.appliedControls()}</label
+						>
+						<select
+							id="applied-controls-filter"
+							bind:value={selectedAppliedControls}
+							class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+						>
+							<option value="">{m.allAppliedControls()}</option>
+							{#each filters.allAppliedControls as control}
+								<option value={control.id}>{control.str || control.name}</option>
+							{/each}
+						</select>
+					</div>
+				{/await}
 
-				<!-- Assigned To -->
-				<div>
-					<label
-						for="assigned-to-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
-					>
-						{m.assignedTo()}
-					</label>
-					<select
-						id="assigned-to-filter"
-						bind:value={selectedAssignedTo}
-						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-					>
-						<option value="">{m.allActors()}</option>
-						{#each data.allActors as actor}
-							<option value={actor.id}>{actor.str || actor.name}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Applied Controls -->
-				<div>
-					<label
-						for="applied-controls-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
-					>
-						{m.appliedControls()}
-					</label>
-					<select
-						id="applied-controls-filter"
-						bind:value={selectedAppliedControls}
-						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-					>
-						<option value="">{m.allAppliedControls()}</option>
-						{#each data.allAppliedControls as control}
-							<option value={control.id}>{control.str || control.name}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Status -->
 				<div>
 					<label
 						for="status-filter"
 						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+						>{m.aggregatedStatus()}</label
 					>
-						{m.aggregatedStatus()}
-					</label>
 					<select
 						id="status-filter"
 						bind:value={selectedStatus}
@@ -331,7 +327,6 @@
 					</select>
 				</div>
 
-				<!-- Actions -->
 				<div class="flex gap-2">
 					<button
 						onclick={applyFilters}
@@ -355,8 +350,8 @@
 		</div>
 	{/if}
 
-	<!-- Loading state -->
-	{#if $navigating}
+	<!-- Review data — streamed -->
+	{#await data.reviewData}
 		<div class="space-y-6">
 			{#each [1, 2] as _}
 				<div class="border border-gray-200 rounded-xl overflow-hidden animate-pulse">
@@ -378,12 +373,14 @@
 				</div>
 			{/each}
 		</div>
-	{:else}
-		<!-- Data tables -->
+	{:then review}
+		{@const folders = review.folders || []}
+		{@const buckets = review.buckets || []}
+		{@const granularity = review.granularity || 'monthly'}
+
 		<div class="space-y-6">
-			{#each data.folders as folder}
+			{#each folders as folder}
 				<div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
-					<!-- Folder header with accent -->
 					<div
 						class="px-5 py-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex items-center gap-3"
 					>
@@ -406,13 +403,13 @@
 									>
 										{m.tasks()}
 									</th>
-									{#each data.buckets as bucket}
+									{#each buckets as bucket}
 										<th
 											class="px-1 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 w-14"
-											title={data.granularity === 'weekly' ? `${bucket.start} — ${bucket.end}` : ''}
+											title={granularity === 'weekly' ? `${bucket.start} — ${bucket.end}` : ''}
 										>
-											{getBucketLabel(bucket)}
-											{#if data.buckets.length > 12 || startFormatted.year !== endFormatted.year}
+											{getBucketLabel(bucket, granularity)}
+											{#if buckets.length > 12 || startFormatted.year !== endFormatted.year}
 												<div class="text-[10px] text-gray-300 font-normal normal-case">
 													{bucket.key.split('-')[0]}
 												</div>
@@ -422,7 +419,7 @@
 								</tr>
 							</thead>
 							<tbody class="divide-y divide-gray-100">
-								{#each folder.tasks as task, i}
+								{#each folder.tasks as task}
 									<tr class="hover:bg-violet-50/30 transition-colors duration-100">
 										<td
 											class="px-4 sticky left-0 z-10 bg-white"
@@ -480,7 +477,7 @@
 												</div>
 											{/if}
 										</td>
-										{#each data.buckets as bucket}
+										{#each buckets as bucket}
 											{@const bucketData = task.bucket_status?.[bucket.key]}
 											{@const status = bucketData?.status ?? null}
 											{@const nodeIds = bucketData?.node_ids ?? []}
@@ -533,7 +530,7 @@
 			{/each}
 		</div>
 
-		<!-- Legend — pinned at bottom -->
+		<!-- Legend -->
 		<div
 			class="flex items-center gap-5 justify-center text-xs text-gray-500 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl px-5 py-2.5"
 		>
@@ -558,5 +555,5 @@
 				<span>{m.noData()}</span>
 			</div>
 		</div>
-	{/if}
+	{/await}
 </div>
