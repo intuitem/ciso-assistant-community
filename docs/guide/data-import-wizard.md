@@ -97,7 +97,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 ### Template
 
-{% file src="../.gitbook/assets/applied_controls_sample (1).xlsx" %}
+{% file src="../.gitbook/assets/applied_controls_sample (2).xlsx" %}
 
 ### Supported fields
 
