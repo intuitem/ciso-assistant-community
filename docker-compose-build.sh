@@ -30,6 +30,8 @@ else
   echo "Starting services..."
   docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
 
+
+  # TEST
   # Simple wait for database migrations
   echo "Giving some time for the database to be ready, please wait ..."
   sleep 50
