@@ -588,9 +588,10 @@ def gen_audit_context(id, doc, tree, lang):
         requirement_assessments_list.append(
             {
                 "ref_id": ra.requirement.ref_id or "-",
-                "name": get_referential_translation(ra.requirement, "name") or "-",
+                "name": get_referential_translation(ra.requirement, "name", lang)
+                or "-",
                 "description": get_referential_translation(
-                    ra.requirement, "description"
+                    ra.requirement, "description", lang
                 )
                 or "-",
                 "status": safe_translate(lang, ra.status),
