@@ -1116,6 +1116,7 @@
 	"uploadTemplate": "Įkelti šabloną",
 	"wordTemplateUploadHelp": "Įkelkite .docx failą, naudodami tuos pačius šablono kintamuosius kaip numatytasis. Pirmiausia atsisiųskite numatytąjį, kad naudotumėte jį kaip atskaitos tašką.",
 	"downloadDefaultTemplate": "Atsisiųsti numatytąjį šabloną",
+	"wordTemplateSyntaxHelp": "Templates use docxtpl syntax. Refer to the docxtpl documentation for details on how to use variables, images, and loops in your .docx template.",
 	"uploading": "Įkeliama...",
 	"invalidDocxTemplate": "Neteisingas .docx šablono failas. Failas turi būti tinkamas docxtpl šablonas.",
 	"invalidFileType": "Neteisingas failo tipas",
