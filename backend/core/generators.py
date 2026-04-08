@@ -582,11 +582,9 @@ def gen_audit_context(id, doc, tree, lang):
 
     # Build flat list of requirement assessments for Word template
     requirement_assessments_list = []
-    for ra in (
-        requirement_assessments_objects.filter(requirement__assessable=True)
-        .select_related("requirement")
-        .prefetch_related("applied_controls")
-    ):
+    for ra in [
+        ra for ra in requirement_assessments_objects if ra.requirement.assessable
+    ]:
         requirement_assessments_list.append(
             {
                 "ref_id": ra.requirement.ref_id or "-",
