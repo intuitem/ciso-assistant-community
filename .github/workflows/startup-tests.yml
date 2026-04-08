@@ -143,7 +143,6 @@ jobs:
         run: |
           rm -rf db
           mkdir db
-          sudo chown -R 1001:1001 db
           docker compose -f docker-compose-build.yml up -d
       - name: Config the Docker app
         run: |
