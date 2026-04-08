@@ -324,18 +324,19 @@
 						<div class="text-xs text-gray-500 mb-3 space-y-1 font-mono">
 							<p>{'{{variable}}'} &mdash; simple value</p>
 							<p>{'{{image}}'} &mdash; inline image</p>
-							<p>{'{%tr for ra in requirement_assessments %} ... {%tr endfor %}'} &mdash; table rows</p>
+							<p>
+								{'{%tr for ra in requirement_assessments %} ... {%tr endfor %}'} &mdash; table rows
+							</p>
 						</div>
 						<div class="space-y-2 mt-2">
 							{#each getTemplateVariables(editingKey) as variable}
 								<div class="flex items-start gap-2 text-sm">
-									<code
-										class="bg-surface-200 px-2 py-0.5 rounded text-xs font-mono shrink-0"
+									<code class="bg-surface-200 px-2 py-0.5 rounded text-xs font-mono shrink-0"
 										>{variable.name}</code
 									>
 									<span
-										class="badge text-xs shrink-0 {TYPE_BADGE_CLASSES[variable.type] ?? 'preset-filled-surface-500'}"
-										>{variable.type}</span
+										class="badge text-xs shrink-0 {TYPE_BADGE_CLASSES[variable.type] ??
+											'preset-filled-surface-500'}">{variable.type}</span
 									>
 									<span class="text-gray-600 text-xs">{variable.description}</span>
 								</div>
