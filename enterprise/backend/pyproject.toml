@@ -17,7 +17,7 @@ dependencies = [
 dev = ["pytest>=9.0.2,<10"]
 
 [tool.uv.sources]
-ciso-assistant-community = { path = "../../backend", editable = true }
+ciso-assistant-community = { path = "../../backend", package = false}
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -25,4 +25,3 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["enterprise_core"]
-

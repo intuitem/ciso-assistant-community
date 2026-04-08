@@ -63,5 +63,6 @@ dev = [
     "pre-commit==3.7.1",
 ]
 
-[tool.setuptools]
-packages = []
+[tool.uv]
+package = false
+default-groups = "all"
