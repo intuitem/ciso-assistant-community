@@ -3535,6 +3535,7 @@
 	"ebiosRmSyncModeOperationalScenarios": "Full mode: {count} selected operational scenarios will generate risk scenarios with impact and likelihood.",
 	"ebiosRmSyncModeAttackPaths": "Light mode (WS3): {count} selected attack paths will generate risk scenarios. Impact will be derived from feared events. Likelihood will need to be set manually.",
 	"ebiosRmSyncModeFearedEvents": "Light mode (WS1): {count} selected feared events will generate risk scenarios. Impact will be derived from feared event gravity. Likelihood will need to be set manually.",
+	"ebiosRmSyncModeMixed": "Mixed mode: {count} objects at different workshop levels will generate risk scenarios. Likelihood may need to be set manually for some scenarios.",
 	"ebiosRmSyncConfirm": "Generate",
 	"ebiosRmSyncPreviewError": "No selected objects found. Please select feared events, attack paths, or operational scenarios first.",
 	"riskAssessmentsDescription": "Assess and manage risks using a simplified 27005 approach",

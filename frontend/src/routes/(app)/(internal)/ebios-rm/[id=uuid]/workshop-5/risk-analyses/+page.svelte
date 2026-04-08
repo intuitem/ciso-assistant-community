@@ -27,7 +27,7 @@
 	$effect(() => {
 		if (data.riskAssessmentToSync) {
 			// Auto-trigger sync for the specific risk assessment
-			syncRiskAssessment(data.riskAssessmentToSync.id, data.syncMode ?? undefined);
+			syncRiskAssessment(data.riskAssessmentToSync.id);
 			// Clean URL
 			window.history.replaceState({}, '', window.location.pathname);
 		}
@@ -50,13 +50,10 @@
 		modalStore.trigger(modal);
 	}
 
-	async function syncRiskAssessment(riskAssessmentId: string, syncMode?: string) {
+	async function syncRiskAssessment(riskAssessmentId: string) {
 		try {
 			const formData = new FormData();
 			formData.append('risk_assessment_id', riskAssessmentId);
-			if (syncMode) {
-				formData.append('sync_mode', syncMode);
-			}
 
 			const response = await fetch('?/sync', {
 				method: 'POST',

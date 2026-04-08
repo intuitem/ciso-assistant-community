@@ -523,73 +523,117 @@ def ebios_rm_visual_analysis(study):
 # --- EBIOS RM → Risk Assessment sync helpers ---
 
 
-def detect_sync_mode(ebios_rm_study):
+def detect_sync_sources(ebios_rm_study):
     """
-    Auto-detect the best sync mode based on available study data.
-    Priority: operational_scenarios > attack_paths > feared_events.
-    Returns (sync_mode, source_objects) or (None, None) if nothing is selected.
+    Detect all available sync sources from the study.
+    Handles hybrid cases: e.g. some feared events have attack paths, others don't.
+    Each source level absorbs the feared events it covers, leaving uncovered ones
+    to be handled at the feared_events level.
+
+    Returns a dict with keys: operational_scenarios, attack_paths, feared_events.
+    Each value is a list of source objects (may be empty).
+    Returns None if nothing is selected at all.
     """
-    # Priority 1: selected operational scenarios (full EBIOS)
+    result = {
+        "operational_scenarios": [],
+        "attack_paths": [],
+        "feared_events": [],
+    }
+
+    # Track which feared events are already covered by higher-level objects
+    covered_fe_ids = set()
+
+    # Level 1: selected operational scenarios (full EBIOS)
     selected_os = [
         os for os in ebios_rm_study.operational_scenarios.all() if os.is_selected
     ]
     if selected_os:
-        return "operational_scenarios", selected_os
+        result["operational_scenarios"] = selected_os
+        for os_obj in selected_os:
+            covered_fe_ids.update(
+                os_obj.ro_to.feared_events.filter(is_selected=True).values_list(
+                    "id", flat=True
+                )
+            )
 
-    # Priority 2: selected attack paths (WS3 light)
+    # Level 2: selected attack paths not already covered by an operational scenario
     selected_ap = list(ebios_rm_study.attackpath_set.filter(is_selected=True))
-    if selected_ap:
-        return "attack_paths", selected_ap
+    # Exclude attack paths that already have an operational scenario in the selected set
+    covered_ap_ids = (
+        {os_obj.attack_path_id for os_obj in selected_os} if selected_os else set()
+    )
+    uncovered_ap = [ap for ap in selected_ap if ap.id not in covered_ap_ids]
+    if uncovered_ap:
+        result["attack_paths"] = uncovered_ap
+        for ap in uncovered_ap:
+            covered_fe_ids.update(
+                ap.ro_to_couple.feared_events.filter(is_selected=True).values_list(
+                    "id", flat=True
+                )
+            )
 
-    # Priority 3: selected feared events (WS1 light)
+    # Level 3: selected feared events not already covered
     selected_fe = list(ebios_rm_study.feared_events.filter(is_selected=True))
-    if selected_fe:
-        return "feared_events", selected_fe
+    uncovered_fe = [fe for fe in selected_fe if fe.id not in covered_fe_ids]
+    if uncovered_fe:
+        result["feared_events"] = uncovered_fe
 
-    return None, None
+    if not any(result.values()):
+        return None
+
+    return result
 
 
-def build_sync_preview(ebios_rm_study, sync_mode, source_objects):
+def build_sync_preview(ebios_rm_study, sources):
     """Build preview data for the sync confirmation modal."""
     parsed_matrix = ebios_rm_study.parsed_matrix
     source_data = []
 
-    if sync_mode == "operational_scenarios":
-        for os_obj in source_objects:
-            gravity_display = FearedEvent.format_gravity(os_obj.gravity, parsed_matrix)
-            likelihood_display = OperationalScenario.format_likelihood(
-                os_obj.likelihood, parsed_matrix
-            )
-            source_data.append(
-                {
-                    "id": str(os_obj.id),
-                    "name": os_obj.name,
-                    "impact": gravity_display,
-                    "likelihood": likelihood_display,
-                }
-            )
-    elif sync_mode == "attack_paths":
-        for ap in source_objects:
-            gravity_display = FearedEvent.format_gravity(ap.gravity, parsed_matrix)
-            source_data.append(
-                {
-                    "id": str(ap.id),
-                    "name": str(ap),
-                    "impact": gravity_display,
-                    "likelihood": None,
-                }
-            )
-    elif sync_mode == "feared_events":
-        for fe in source_objects:
-            gravity_display = fe.get_gravity_display()
-            source_data.append(
-                {
-                    "id": str(fe.id),
-                    "name": fe.name,
-                    "impact": gravity_display,
-                    "likelihood": None,
-                }
-            )
+    for os_obj in sources.get("operational_scenarios", []):
+        gravity_display = FearedEvent.format_gravity(os_obj.gravity, parsed_matrix)
+        likelihood_display = OperationalScenario.format_likelihood(
+            os_obj.likelihood, parsed_matrix
+        )
+        source_data.append(
+            {
+                "id": str(os_obj.id),
+                "name": os_obj.name,
+                "source_type": "operational_scenario",
+                "impact": gravity_display,
+                "likelihood": likelihood_display,
+            }
+        )
+
+    for ap in sources.get("attack_paths", []):
+        gravity_display = FearedEvent.format_gravity(ap.gravity, parsed_matrix)
+        source_data.append(
+            {
+                "id": str(ap.id),
+                "name": str(ap),
+                "source_type": "attack_path",
+                "impact": gravity_display,
+                "likelihood": None,
+            }
+        )
+
+    for fe in sources.get("feared_events", []):
+        gravity_display = fe.get_gravity_display()
+        source_data.append(
+            {
+                "id": str(fe.id),
+                "name": fe.name,
+                "source_type": "feared_event",
+                "impact": gravity_display,
+                "likelihood": None,
+            }
+        )
+
+    # Determine the sync mode label for the frontend
+    active_modes = [k for k, v in sources.items() if v]
+    if len(active_modes) == 1:
+        sync_mode = active_modes[0]
+    else:
+        sync_mode = "mixed"
 
     return {
         "sync_mode": sync_mode,
@@ -618,19 +662,6 @@ def _find_existing_risk_scenario(risk_assessment, name):
             return risk_assessment.risk_scenarios.get(name=f"[ARCHIVED] {clean_name}")
         except RiskScenario.DoesNotExist:
             return None
-
-
-def _archive_unprocessed(risk_assessment, processed_names):
-    """Archive risk scenarios whose name is not in the processed set."""
-    archived_count = 0
-    for risk_scenario in risk_assessment.risk_scenarios.all():
-        clean_name = risk_scenario.name.replace("[ARCHIVED] ", "")
-        if clean_name not in processed_names:
-            if not risk_scenario.name.startswith("[ARCHIVED] "):
-                risk_scenario.name = f"[ARCHIVED] {risk_scenario.name}"
-                risk_scenario.save()
-                archived_count += 1
-    return archived_count
 
 
 def _get_assets_with_descendants(assets_qs):
@@ -777,31 +808,28 @@ def _upsert_risk_scenario(
     return risk_scenario, created
 
 
-def _build_sync_result(sync_mode, updated, created, archived, risk_assessment):
-    return {
-        "success": True,
-        "sync_mode": sync_mode,
-        "updated": updated,
-        "created": created,
-        "archived": archived,
-        "total_scenarios": risk_assessment.risk_scenarios.count(),
-    }
+def _archive_unprocessed(risk_assessment, processed_names):
+    """Archive risk scenarios whose name is not in the processed set."""
+    archived_count = 0
+    for risk_scenario in risk_assessment.risk_scenarios.all():
+        clean_name = risk_scenario.name.replace("[ARCHIVED] ", "")
+        if clean_name not in processed_names:
+            if not risk_scenario.name.startswith("[ARCHIVED] "):
+                risk_scenario.name = f"[ARCHIVED] {risk_scenario.name}"
+                risk_scenario.save()
+                archived_count += 1
+    return archived_count
 
 
 # --- Sync functions ---
 
 
-def sync_from_operational_scenarios(
-    risk_assessment, ebios_rm_study, selected_operational_scenarios
-):
+def _sync_operational_scenarios(risk_assessment, selected):
     """Full EBIOS sync path using operational scenarios."""
-    processed_os_ids = set()
     updated_count = 0
     created_count = 0
-    archived_count = 0
 
-    for operational_scenario in selected_operational_scenarios:
-        processed_os_ids.add(operational_scenario.id)
+    for operational_scenario in selected:
         scenario_name = operational_scenario.name
         ro_to = operational_scenario.ro_to
         feared_events = ro_to.feared_events.filter(is_selected=True)
@@ -817,16 +845,7 @@ def sync_from_operational_scenarios(
             _describe_operating_modes(operational_scenario),
         )
 
-        # Try to find by operational_scenario FK first
-        risk_scenario = None
-        try:
-            risk_scenario = risk_assessment.risk_scenarios.get(
-                operational_scenario=operational_scenario
-            )
-        except RiskScenario.DoesNotExist:
-            pass
-
-        rs, created = _upsert_risk_scenario(
+        _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=scenario_name,
             ref_id=operational_scenario.ref_id,
@@ -839,43 +858,20 @@ def sync_from_operational_scenarios(
             risk_origin=ro_to.risk_origin,
             extra_fields={"operational_scenario": operational_scenario},
         )
-        # If we found by FK but _upsert found by name, link it
-        if risk_scenario and risk_scenario.pk != rs.pk:
-            pass  # _upsert already handled it
         if created:
             created_count += 1
         else:
             updated_count += 1
 
-    # Archive risk scenarios linked to operational scenarios no longer selected
-    for risk_scenario in risk_assessment.risk_scenarios.filter(
-        operational_scenario__isnull=False
-    ):
-        if risk_scenario.operational_scenario_id not in processed_os_ids:
-            if not risk_scenario.name.startswith("[ARCHIVED] "):
-                risk_scenario.name = f"[ARCHIVED] {risk_scenario.name}"
-                risk_scenario.save()
-                archived_count += 1
-
-    return _build_sync_result(
-        "operational_scenarios",
-        updated_count,
-        created_count,
-        archived_count,
-        risk_assessment,
-    )
+    return updated_count, created_count, {os.name for os in selected}
 
 
-def sync_from_attack_paths(risk_assessment, ebios_rm_study, selected_attack_paths):
+def _sync_attack_paths(risk_assessment, selected):
     """Light sync from WS3 attack paths. Likelihood is left unset (-1)."""
-    processed_names = set()
     updated_count = 0
     created_count = 0
 
-    for attack_path in selected_attack_paths:
-        scenario_name = str(attack_path)
-        processed_names.add(scenario_name)
-
+    for attack_path in selected:
         ro_to = attack_path.ro_to_couple
         feared_events = ro_to.feared_events.filter(is_selected=True)
 
@@ -888,9 +884,9 @@ def sync_from_attack_paths(risk_assessment, ebios_rm_study, selected_attack_path
             _describe_named_object("Attack path", attack_path),
         )
 
-        _, created = _upsert_risk_scenario(
+        _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
-            name=scenario_name,
+            name=str(attack_path),
             ref_id=attack_path.ref_id,
             description=description,
             impact=attack_path.gravity,
@@ -908,23 +904,15 @@ def sync_from_attack_paths(risk_assessment, ebios_rm_study, selected_attack_path
         else:
             updated_count += 1
 
-    archived_count = _archive_unprocessed(risk_assessment, processed_names)
-
-    return _build_sync_result(
-        "attack_paths", updated_count, created_count, archived_count, risk_assessment
-    )
+    return updated_count, created_count, {str(ap) for ap in selected}
 
 
-def sync_from_feared_events(risk_assessment, ebios_rm_study, selected_feared_events):
+def _sync_feared_events(risk_assessment, selected):
     """Light sync from WS1 feared events. Likelihood is left unset (-1)."""
-    processed_names = set()
     updated_count = 0
     created_count = 0
 
-    for fe in selected_feared_events:
-        scenario_name = fe.name
-        processed_names.add(scenario_name)
-
+    for fe in selected:
         gravity_display = fe.get_gravity_display()
         gravity_text = (
             f" [{_('Gravity').capitalize()}: {gravity_display['name']}]"
@@ -944,9 +932,9 @@ def sync_from_feared_events(risk_assessment, ebios_rm_study, selected_feared_eve
 
         description = _build_description(fe_desc, fe.description, qual_desc)
 
-        _, created = _upsert_risk_scenario(
+        _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
-            name=scenario_name,
+            name=fe.name,
             ref_id=fe.ref_id,
             description=description,
             impact=fe.gravity,
@@ -958,8 +946,44 @@ def sync_from_feared_events(risk_assessment, ebios_rm_study, selected_feared_eve
         else:
             updated_count += 1
 
-    archived_count = _archive_unprocessed(risk_assessment, processed_names)
+    return updated_count, created_count, {fe.name for fe in selected}
 
-    return _build_sync_result(
-        "feared_events", updated_count, created_count, archived_count, risk_assessment
-    )
+
+def sync_risk_assessment(risk_assessment, sources):
+    """
+    Unified sync entry point. Runs all applicable sync paths from the sources dict.
+    Creates or updates risk scenarios, and archives those no longer covered.
+    """
+    total_updated = 0
+    total_created = 0
+    all_processed_names = set()
+    active_modes = []
+
+    sync_funcs = {
+        "operational_scenarios": _sync_operational_scenarios,
+        "attack_paths": _sync_attack_paths,
+        "feared_events": _sync_feared_events,
+    }
+
+    for mode, func in sync_funcs.items():
+        selected = sources.get(mode, [])
+        if selected:
+            updated, created, processed_names = func(risk_assessment, selected)
+            total_updated += updated
+            total_created += created
+            all_processed_names.update(processed_names)
+            active_modes.append(mode)
+
+    # Archive risk scenarios that are no longer covered by any source
+    total_archived = _archive_unprocessed(risk_assessment, all_processed_names)
+
+    sync_mode = active_modes[0] if len(active_modes) == 1 else "mixed"
+
+    return {
+        "success": True,
+        "sync_mode": sync_mode,
+        "updated": total_updated,
+        "created": total_created,
+        "archived": total_archived,
+        "total_scenarios": risk_assessment.risk_scenarios.count(),
+    }

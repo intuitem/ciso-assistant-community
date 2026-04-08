@@ -3493,9 +3493,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     def sync_preview(self, request, pk=None):
         """
         Preview what a sync from EBIOS RM would produce.
-        Auto-detects the sync mode and returns source objects with their impact/likelihood.
+        Auto-detects sync sources and returns them with impact/likelihood info.
         """
-        from ebios_rm.helpers import build_sync_preview, detect_sync_mode
+        from ebios_rm.helpers import build_sync_preview, detect_sync_sources
 
         risk_assessment = self.get_object()
 
@@ -3506,9 +3506,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             )
 
         ebios_rm_study = risk_assessment.ebios_rm_study
-        sync_mode, source_objects = detect_sync_mode(ebios_rm_study)
+        sources = detect_sync_sources(ebios_rm_study)
 
-        if sync_mode is None:
+        if sources is None:
             return Response(
                 {
                     "error": _(
@@ -3519,23 +3519,15 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        return Response(build_sync_preview(ebios_rm_study, sync_mode, source_objects))
+        return Response(build_sync_preview(ebios_rm_study, sources))
 
     @action(detail=True, methods=["post"], name="Sync with EBIOS RM")
     def sync_from_ebios_rm(self, request, pk=None):
         """
         Synchronize an existing risk assessment with its linked EBIOS RM study.
-        Supports three sync modes (auto-detected or specified):
-        - operational_scenarios: full EBIOS (WS4 complete)
-        - attack_paths: light mode from WS3
-        - feared_events: light mode from WS1
+        Handles hybrid cases where different objects are at different workshop levels.
         """
-        from ebios_rm.helpers import (
-            detect_sync_mode,
-            sync_from_attack_paths,
-            sync_from_feared_events,
-            sync_from_operational_scenarios,
-        )
+        from ebios_rm.helpers import detect_sync_sources, sync_risk_assessment
 
         risk_assessment = self.get_object()
 
@@ -3546,42 +3538,15 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             )
 
         ebios_rm_study = risk_assessment.ebios_rm_study
+        sources = detect_sync_sources(ebios_rm_study)
 
-        # Use requested sync_mode or auto-detect
-        requested_mode = request.data.get("sync_mode") if request.data else None
-        sync_mode, source_objects = detect_sync_mode(ebios_rm_study)
-
-        if requested_mode and requested_mode != sync_mode:
-            # If user requested a specific mode, fetch for that mode only
-            if requested_mode == "operational_scenarios":
-                selected = [
-                    os
-                    for os in ebios_rm_study.operational_scenarios.all()
-                    if os.is_selected
-                ]
-                if selected:
-                    sync_mode, source_objects = requested_mode, selected
-            elif requested_mode == "attack_paths":
-                selected = list(ebios_rm_study.attackpath_set.filter(is_selected=True))
-                if selected:
-                    sync_mode, source_objects = requested_mode, selected
-            elif requested_mode == "feared_events":
-                selected = list(ebios_rm_study.feared_events.filter(is_selected=True))
-                if selected:
-                    sync_mode, source_objects = requested_mode, selected
-
-        if sync_mode is None:
+        if sources is None:
             return Response(
                 {"error": "No selected objects found in the EBIOS RM study"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        sync_funcs = {
-            "operational_scenarios": sync_from_operational_scenarios,
-            "attack_paths": sync_from_attack_paths,
-            "feared_events": sync_from_feared_events,
-        }
-        result = sync_funcs[sync_mode](risk_assessment, ebios_rm_study, source_objects)
+        result = sync_risk_assessment(risk_assessment, sources)
         return Response(result)
 
     @action(detail=False, name="Risk assessments per status")

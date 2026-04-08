@@ -195,12 +195,15 @@
 			return;
 		}
 
-		const syncModeMessage =
-			preview.sync_mode === 'operational_scenarios'
-				? m.ebiosRmSyncModeOperationalScenarios({ count: preview.count })
-				: preview.sync_mode === 'attack_paths'
-					? m.ebiosRmSyncModeAttackPaths({ count: preview.count })
-					: m.ebiosRmSyncModeFearedEvents({ count: preview.count });
+		const syncModeMessages: Record<string, (args: { count: number }) => string> = {
+			operational_scenarios: m.ebiosRmSyncModeOperationalScenarios,
+			attack_paths: m.ebiosRmSyncModeAttackPaths,
+			feared_events: m.ebiosRmSyncModeFearedEvents,
+			mixed: m.ebiosRmSyncModeMixed
+		};
+		const syncModeMessage = (syncModeMessages[preview.sync_mode] ?? syncModeMessages.mixed)({
+			count: preview.count
+		});
 
 		const sourceList = preview.source_objects
 			.map((obj: { name: string; impact: { name: string } | null }) => {
@@ -216,7 +219,7 @@
 			buttonTextConfirm: m.ebiosRmSyncConfirm(),
 			response: (confirmed: boolean | undefined) => {
 				if (confirmed === true) {
-					window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessmentId}&sync_mode=${preview.sync_mode}`;
+					window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessmentId}`;
 				}
 			}
 		};
