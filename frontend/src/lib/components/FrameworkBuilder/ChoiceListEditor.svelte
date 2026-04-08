@@ -124,13 +124,13 @@
 							type="text"
 							value={choice.value ?? ''}
 							placeholder="Choice text..."
-							class="choice-value-input w-full bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm outline-none transition-colors pr-6"
+							class="choice-value-input w-full bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm outline-none focus-visible:ring-0 transition-colors pr-6"
 							onblur={(e) => saveField(choice.id, 'value', e.currentTarget.value)}
 							onkeydown={(e) => handleChoiceKeydown(e, choice, index)}
 						/>
-						<span
-							class="enter-hint absolute right-1 top-1/2 -translate-y-1/2 text-xs text-gray-300 opacity-0 pointer-events-none select-none"
-							>&#9166;</span
+						<kbd
+							class="enter-hint absolute right-1 top-1/2 -translate-y-1/2 text-xs text-secondary-700 bg-white border-2 border-secondary-300 rounded-md px-1.5 py-0.5 font-mono shadow-[0_2px_0_0_theme(colors.secondary.300)] opacity-0 pointer-events-none select-none"
+							>&#9166;</kbd
 						>
 					</div>
 				{/if}
@@ -273,6 +273,6 @@
 
 <style>
 	.choice-input-wrapper:focus-within .enter-hint {
-		opacity: 0.3;
+		opacity: 1;
 	}
 </style>
