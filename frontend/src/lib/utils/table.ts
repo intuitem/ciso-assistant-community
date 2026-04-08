@@ -561,6 +561,18 @@ export const LINKED_MODELS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const APPLIED_CONTROL_LINKED_MODELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'linkedModels',
+		optionsEndpoint: 'applied-controls/linked_models',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1451,6 +1463,7 @@ export const listViewFields = {
 			'owner',
 			'controlImpact',
 			'effort',
+			'linkedModels',
 			'labels'
 		],
 		body: [
@@ -1467,6 +1480,7 @@ export const listViewFields = {
 			'owner',
 			'control_impact',
 			'effort',
+			'linked_models',
 			'filtering_labels'
 		],
 		filters: {
@@ -1482,7 +1496,8 @@ export const listViewFields = {
 			reference_control: REFERENCE_CONTROL_FILTER,
 			eta__lte: undefined,
 			is_assigned: IS_ASSIGNED_FILTER,
-			owner: OWNER_FILTER
+			owner: OWNER_FILTER,
+			linked_models: APPLIED_CONTROL_LINKED_MODELS_FILTER
 		}
 	},
 	policies: {
@@ -2825,12 +2840,20 @@ export const contextMenuActions = {
 
 // Batch action configuration
 export interface BatchActionConfig {
-	type: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
+	type:
+		| 'delete'
+		| 'change_field'
+		| 'change_m2m'
+		| 'add_m2m'
+		| 'remove_m2m'
+		| 'change_folder'
+		| 'group';
 	label: string;
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
 	multiSelect?: boolean;
+	children?: BatchActionConfig[];
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
@@ -2863,6 +2886,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'owner',
 			optionsEndpoint: 'actors',
 			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
 		},
 		{
 			type: 'change_folder',
@@ -3009,6 +3055,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'owner',
 			optionsEndpoint: 'actors',
 			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
 		},
 		{
 			type: 'change_folder',
