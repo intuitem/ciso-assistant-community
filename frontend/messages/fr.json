@@ -4083,8 +4083,6 @@
 	"ganttChart": "Diagramme de Gantt",
 	"ganttChartDescription": "Vue chronologique des mesures appliquées, audits et analyses de risques avec couloirs par domaine",
 	"zoom": "Zoom",
-	"weekly": "Hebdomadaire",
-	"monthly": "Mensuel",
 	"yearly": "Annuel",
 	"loadingTimelineData": "Chargement des données du planning…",
 	"objectsWithNoDateNotShown": "{count} objet(s) sans information de date non affiché(s).",

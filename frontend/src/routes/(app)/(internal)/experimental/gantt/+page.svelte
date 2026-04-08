@@ -85,9 +85,10 @@
 		businessImpactAnalyses: any[];
 		findingsAssessments: any[];
 		securityExceptions: any[];
-	}): { items: GanttItem[]; noDateCount: number } {
+	}): { items: GanttItem[]; noDateCount: number; allFolderIds: Set<string> } {
 		const items: GanttItem[] = [];
 		let noDateCount = 0;
+		const allFolderIds = new Set<string>();
 
 		const catConfig = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
 		// Parse any date/datetime string to a Date at midnight UTC (no timezone drift)
@@ -106,13 +107,14 @@
 		if (enabledCategories.has('appliedControls')) {
 			for (const ac of sourceData.appliedControls) {
 				const folderId = ac.folder?.id ?? ac.folder;
-				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
 				const start = parseDate(ac.start_date);
 				const eta = parseDate(ac.eta);
 				if (!start && !eta) {
 					noDateCount++;
 					continue;
 				}
+				allFolderIds.add(folderId);
+				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
 				items.push({
 					id: ac.id,
 					name: ac.name ?? ac.str ?? '(unnamed)',
@@ -163,12 +165,13 @@
 			if (!enabledCategories.has(key)) continue;
 			for (const obj of data) {
 				const folderId = obj.folder?.id ?? obj.folder;
-				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
 				const date = parseDate(obj.eta) ?? parseDate(obj.due_date);
 				if (!date) {
 					noDateCount++;
 					continue;
 				}
+				allFolderIds.add(folderId);
+				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
 				const createdAt = useCreatedAtAsStart ? parseDate(obj.created_at) : null;
 				// Only use created_at as start if it's before the target date
 				const startDate = createdAt && createdAt < date ? createdAt : null;
@@ -195,12 +198,13 @@
 		if (enabledCategories.has('securityExceptions')) {
 			for (const se of sourceData.securityExceptions) {
 				const folderId = se.folder?.id ?? se.folder;
-				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
 				const date = parseDate(se.expiration_date);
 				if (!date) {
 					noDateCount++;
 					continue;
 				}
+				allFolderIds.add(folderId);
+				if (selectedFolders.size > 0 && !selectedFolders.has(folderId)) continue;
 				const createdAt = useCreatedAtAsStart ? parseDate(se.created_at) : null;
 				const startDate = createdAt && createdAt < date ? createdAt : null;
 				const hasRange = startDate !== null;
@@ -222,7 +226,7 @@
 			}
 		}
 
-		return { items, noDateCount };
+		return { items, noDateCount, allFolderIds };
 	}
 </script>
 
@@ -292,13 +296,9 @@
 		{@const result = buildItems(ganttData)}
 		{@const ganttItems = result.items}
 		{@const noDateCount = result.noDateCount}
-		{@const availableFolders = (() => {
-			const ids = new Set<string>();
-			for (const item of ganttItems) ids.add(item.folderId);
-			return Array.from(ids)
-				.map((id) => ({ id, name: folderMap.get(id) ?? 'Unknown' }))
-				.sort((a, b) => a.name.localeCompare(b.name));
-		})()}
+		{@const availableFolders = Array.from(result.allFolderIds)
+			.map((id) => ({ id, name: folderMap.get(id) ?? 'Unknown' }))
+			.sort((a, b) => a.name.localeCompare(b.name))}
 
 		<!-- Folder filter (only after data loads, only if multiple domains) -->
 		{#if availableFolders.length > 1}

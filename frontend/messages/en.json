@@ -4144,8 +4144,6 @@
 	"ganttChart": "Gantt Chart",
 	"ganttChartDescription": "Timeline view of applied controls, audits, and risk assessments with swimlanes by domain",
 	"zoom": "Zoom",
-	"weekly": "Weekly",
-	"monthly": "Monthly",
 	"yearly": "Yearly",
 	"loadingTimelineData": "Loading timeline data…",
 	"objectsWithNoDateNotShown": "{count} object(s) with no date information not shown.",

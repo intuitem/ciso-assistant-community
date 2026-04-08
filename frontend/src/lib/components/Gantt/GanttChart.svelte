@@ -335,8 +335,9 @@
 					{#each rows as row, i}
 						<div
 							class="flex items-center overflow-hidden text-ellipsis whitespace-nowrap"
-							style="height: {ROW_HEIGHT}px; margin-top: {ROW_GAP}px; padding-left: {8 +
-								row.depth * 16}px"
+							style="height: {ROW_HEIGHT}px; margin-top: {i === 0
+								? 0
+								: ROW_GAP}px; padding-left: {8 + row.depth * 16}px"
 							title={row.label}
 						>
 							{#if row.kind === 'folder-header'}
@@ -426,7 +427,8 @@
 
 							{#if item.type === 'milestone'}
 								{@const mx = dateToX(item.endDate ?? item.startDate ?? new Date())}
-								<g
+								<a
+									href={item.href}
 									class="cursor-pointer"
 									onmouseenter={(e) => showTooltip(e, item)}
 									onmouseleave={hideTooltip}
@@ -438,13 +440,14 @@
 										stroke="white"
 										stroke-width="1"
 									/>
-								</g>
+								</a>
 							{:else}
 								{@const x1 = dateToX(item.startDate!)}
 								{@const x2 = dateToX(item.endDate!)}
 								{@const barWidth = Math.max(MIN_BAR_WIDTH, x2 - x1)}
 								{@const barY = cy - BAR_HEIGHT / 2}
-								<g
+								<a
+									href={item.href}
 									class="cursor-pointer"
 									onmouseenter={(e) => showTooltip(e, item)}
 									onmouseleave={hideTooltip}
@@ -502,7 +505,7 @@
 											{item.progress}%
 										</text>
 									{/if}
-								</g>
+								</a>
 							{/if}
 						{/if}
 					{/each}
