@@ -42,31 +42,26 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+      - name: Install uv and set up python ${{ env.PYTHON_VERSION }}
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
-
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.in-project true
+          enable-cache: true
 
       - name: Cache Virtualenv
         id: cache-venv
         uses: actions/cache@v4
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
-          key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('backend/uv.lock') }}
 
       - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        run: poetry install
+        run: uv sync --locked
 
       - name: Run migrations
         working-directory: ${{ env.BACKEND_DIR }}
-        run: poetry run python manage.py migrate
+        run: uv run python manage.py migrate
 
       - name: Upload Database
         uses: actions/upload-artifact@v4
@@ -111,16 +106,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+      - name: Install uv and set up python ${{ env.PYTHON_VERSION }}
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
-
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.in-project true
+          enable-cache: true
 
       # Restore the exact venv created in 'setup' job to skip installation
       - name: Restore Virtualenv Cache
@@ -128,11 +118,11 @@ jobs:
         id: cache-venv
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
-          key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('backend/uv.lock') }}
 
       - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        run: poetry install
+        run: uv sync --locked
 
       - name: Download Database
         uses: actions/download-artifact@v4
@@ -153,7 +143,7 @@ jobs:
           JOB_INDEX: ${{ strategy.job-index }}
         run: |
           # Use --reuse-db to prevent pytest from destroying/recreating the DB
-          poetry run pytest "$TEST_FILE" --reuse-db --html="pytest-report-${JOB_INDEX}.html" --self-contained-html
+          uv run pytest "$TEST_FILE" --reuse-db --html="pytest-report-${JOB_INDEX}.html" --self-contained-html
 
       - name: Prepare Artifact Name
         if: ${{ !cancelled() }}

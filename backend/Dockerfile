@@ -2,10 +2,11 @@ FROM python:3.14-slim
 
 ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
-  POETRY_NO_INTERACTION=1 \
-  POETRY_VIRTUALENVS_IN_PROJECT=1 \
-  POETRY_VIRTUALENVS_CREATE=1 \
-  POETRY_CACHE_DIR=/tmp/poetry_cache
+  UV_COMPILE_BYTECODE=1 \
+  UV_LINK_MODE=copy \
+  PATH="/code/.venv/bin:$PATH"
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 WORKDIR /code
 
@@ -39,22 +40,22 @@ RUN apt-get update && apt-get install -y \
   && locale-gen ur_PK.UTF-8 \
   && locale-gen cs_CZ.UTF-8 \
   && locale-gen sv_SE.UTF-8 \
-  && locale-gen id_ID.UTF-8 \
-  && pip install --no-cache-dir --upgrade pip poetry==2.2.1
+  && locale-gen id_ID.UTF-8
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 
-RUN poetry install --no-root \
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=cache,target=/root/.cache/pip \
+    uv sync --locked --no-dev \
   && .venv/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-deps \
   && .venv/bin/pip uninstall -y cuda-bindings cuda-pathfinder cuda-toolkit \
      nvidia-cublas nvidia-cuda-cupti nvidia-cuda-nvrtc nvidia-cuda-runtime \
      nvidia-cudnn-cu13 nvidia-cufft nvidia-cufile nvidia-curand nvidia-cusolver \
      nvidia-cusparse nvidia-cusparselt-cu13 nvidia-nccl-cu13 nvidia-nvjitlink \
-     nvidia-nvshmem-cu13 nvidia-nvtx triton 2>/dev/null; \
-  rm -rf $POETRY_CACHE_DIR /root/.cache/pip
+     nvidia-nvshmem-cu13 nvidia-nvtx triton 2>/dev/null
 
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
 EXPOSE 8000
-ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
+ENTRYPOINT ["bash", "startup.sh"]

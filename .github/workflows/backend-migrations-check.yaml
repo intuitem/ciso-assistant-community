@@ -44,29 +44,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
+          enable-cache: true
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
-        run: poetry install
+        run: uv sync --locked
       - name: Check that migrations were made
         working-directory: ${{ env.backend-directory }}
-        run: poetry run python manage.py makemigrations --check --dry-run --verbosity=3
+        run: uv run python manage.py makemigrations --check --dry-run --verbosity=3
 
   enterprise-migrations-check:
     runs-on: ubuntu-24.04
@@ -92,35 +80,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-      - name: Configure Poetry to not use virtualenvs
-        run: poetry config virtualenvs.create false
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
-      - name: Install backend requirements
-        working-directory: ${{ env.backend-directory }}
-        run: poetry install
-      - name: Install enterprise backend
+          enable-cache: true
+      - name: Install enterprise backend requirements
         working-directory: ${{ env.enterprise-backend-directory }}
-        run: poetry install
+        run: uv sync --locked
       - name: Check that migrations were made
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          poetry run python manage.py makemigrations --check --dry-run --verbosity=3 --settings="$SETTINGS_MODULE"
+          uv run --project ../enterprise/backend python manage.py makemigrations --check --dry-run --verbosity=3 --settings="$SETTINGS_MODULE"
           if [ $? -ne 0 ]; then echo "::error Migrations were not made, please run the makemigrations command." && exit 1; fi
