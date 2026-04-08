@@ -81,6 +81,7 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 
 	// Check if there's a specific risk assessment to sync from URL parameter
 	const syncId = url.searchParams.get('sync');
+	const syncMode = url.searchParams.get('sync_mode');
 	if (syncId) {
 		const syncRiskAssessmentRes = await fetch(`${BASE_API_URL}/risk-assessments/${syncId}/`);
 		if (syncRiskAssessmentRes.ok) {
@@ -96,6 +97,7 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 		table,
 		lastRiskAssessment,
 		riskAssessmentToSync,
+		syncMode,
 		title: m.riskAnalyses(),
 		modelVerboseName: m.ebiosRmRiskAnalysesSubtitle()
 	};
@@ -117,6 +119,12 @@ export const actions: Actions = {
 	sync: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
 		const riskAssessmentId = formData.get('risk_assessment_id');
+		const syncMode = formData.get('sync_mode');
+
+		const body: Record<string, string> = {};
+		if (syncMode) {
+			body.sync_mode = syncMode as string;
+		}
 
 		const response = await fetch(
 			`${BASE_API_URL}/risk-assessments/${riskAssessmentId}/sync_from_ebios_rm/`,
@@ -124,7 +132,8 @@ export const actions: Actions = {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
-				}
+				},
+				body: JSON.stringify(body)
 			}
 		);
 

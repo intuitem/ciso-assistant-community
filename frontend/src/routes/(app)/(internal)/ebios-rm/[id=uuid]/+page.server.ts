@@ -60,7 +60,17 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 
 	riskModel['selectOptions'] = selectOptions;
 
-	return { createRiskAnalysisForm, riskModel };
+	// Fetch sync preview if a risk assessment already exists
+	let syncPreview = null;
+	if (data.last_risk_assessment) {
+		const previewEndpoint = `${BASE_API_URL}/risk-assessments/${data.last_risk_assessment.id}/sync_preview/`;
+		const previewRes = await fetch(previewEndpoint);
+		if (previewRes.ok) {
+			syncPreview = await previewRes.json();
+		}
+	}
+
+	return { createRiskAnalysisForm, riskModel, syncPreview };
 };
 
 export const actions: Actions = {
