@@ -17,6 +17,7 @@
 * [Understand mapping](guide/understand-mapping.md)
 * [Glossary](guide/glossary.md)
 * [Data import wizard](guide/data-import-wizard.md)
+* [Notifications](guide/notifications.md)
 
 ## Features focus
 
