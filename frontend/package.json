@@ -29,7 +29,7 @@
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-node": "^5.5.4",
 		"@sveltejs/kit": "^2.53.3",
-		"@sveltejs/vite-plugin-svelte": "^4.0.4",
+		"@sveltejs/vite-plugin-svelte": "^5.1.1",
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.16",
 		"@tailwindcss/vite": "^4.1.11",
@@ -60,8 +60,7 @@
 		"tailwindcss": "^4.1.11",
 		"tslib": "^2.8.1",
 		"typescript": "^5.8.3",
-		"vite": "^5.4.21",
-		"vite-plugin-tailwind-purgecss": "^0.3.5",
+		"vite": "^6.4.2",
 		"vitest": "^3.2.4",
 		"zod": "^4.3.6"
 	},
@@ -69,6 +68,7 @@
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.1",
 		"@fortawesome/fontawesome-free": "^6.7.2",
+		"@simplewebauthn/browser": "^13.3.0",
 		"@unovis/svelte": "1.6.4",
 		"@unovis/ts": "1.6.4",
 		"@xyflow/svelte": "^1.5.1",

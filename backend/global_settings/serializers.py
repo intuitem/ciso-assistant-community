@@ -191,6 +191,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.incidents", required=False, default=True
     )
     tasks = serializers.BooleanField(source="value.tasks", required=False, default=True)
+    control_plan = serializers.BooleanField(
+        source="value.control_plan", required=False, default=True
+    )
     risk_acceptances = serializers.BooleanField(
         source="value.risk_acceptances", required=False, default=True
     )

@@ -1891,42 +1891,49 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     DEFAULT_ENTITY_RELATIONSHIPS = [
         {
             "name": "regulatory_authority",
+            "translations": {"fr": "autorité de régulation"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "partner",
+            "translations": {"fr": "partenaire"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "accreditation_authority",
+            "translations": {"fr": "autorité d’homologation"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "client",
+            "translations": {"fr": "client"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "supplier",
+            "translations": {"fr": "fournisseur"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "contractor",
+            "translations": {"fr": "prestataire"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "other",
+            "translations": {"fr": "autre"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
@@ -4576,6 +4583,17 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     )
 
     is_published = models.BooleanField(_("published"), default=True)
+
+    occurred_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Occurred at")
+    )
+    resolved_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Resolved at")
+    )
+    resolution = models.TextField(null=True, blank=True, verbose_name=_("Resolution"))
+    is_bcp_activated = models.BooleanField(
+        null=True, blank=True, verbose_name=_("BCP activated")
+    )
 
     fields_to_check = ["name", "ref_id"]
 
