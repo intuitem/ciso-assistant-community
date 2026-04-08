@@ -119,20 +119,20 @@
 							)}
 					/>
 				{:else}
-					<div class="flex-1 relative choice-input-wrapper">
+					<div class="flex-1 choice-input-wrapper">
 						<input
 							type="text"
 							value={choice.value ?? ''}
 							placeholder="Choice text..."
-							class="choice-value-input w-full bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm outline-none focus-visible:ring-0 transition-colors pr-6"
+							class="choice-value-input w-full bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm text-gray-900 outline-none focus-visible:ring-0 transition-colors"
 							onblur={(e) => saveField(choice.id, 'value', e.currentTarget.value)}
 							onkeydown={(e) => handleChoiceKeydown(e, choice, index)}
 						/>
-						<kbd
-							class="enter-hint absolute right-1 top-1/2 -translate-y-1/2 text-xs text-secondary-700 bg-white border-2 border-secondary-300 rounded-md px-1.5 py-0.5 font-mono shadow-[0_2px_0_0_theme(colors.secondary.300)] opacity-0 pointer-events-none select-none"
-							>&#9166;</kbd
-						>
 					</div>
+					<kbd
+						class="enter-hint text-[10px] text-secondary-700 bg-white border border-secondary-300 rounded px-1.5 py-1 shadow-[0_1px_0_0_theme(colors.secondary.300)] opacity-0 pointer-events-none select-none shrink-0"
+						><i class="fa-solid fa-turn-down fa-rotate-90"></i></kbd
+					>
 				{/if}
 
 				{#if choice.add_score != null}
@@ -272,7 +272,7 @@
 </div>
 
 <style>
-	.choice-input-wrapper:focus-within .enter-hint {
+	.choice-input-wrapper:focus-within + .enter-hint {
 		opacity: 1;
 	}
 </style>
