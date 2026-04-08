@@ -130,7 +130,7 @@
 						/>
 					</div>
 					<kbd
-						class="enter-hint text-[10px] text-secondary-700 bg-white border border-secondary-300 rounded px-1.5 py-1 shadow-[0_1px_0_0_theme(colors.secondary.300)] opacity-0 pointer-events-none select-none shrink-0"
+						class="enter-hint hidden text-[10px] text-secondary-700 bg-white border border-secondary-300 rounded px-1.5 py-1 shadow-[0_1px_0_0_theme(colors.secondary.300)] pointer-events-none select-none shrink-0"
 						><i class="fa-solid fa-turn-down fa-rotate-90"></i></kbd
 					>
 				{/if}
@@ -273,6 +273,6 @@
 
 <style>
 	.choice-input-wrapper:focus-within + .enter-hint {
-		opacity: 1;
+		display: inline-flex;
 	}
 </style>
