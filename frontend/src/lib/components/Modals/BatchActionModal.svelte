@@ -15,7 +15,13 @@
 
 	interface Props {
 		parent: any;
-		actionType: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
+		actionType:
+			| 'delete'
+			| 'change_field'
+			| 'change_m2m'
+			| 'add_m2m'
+			| 'remove_m2m'
+			| 'change_folder';
 		count: number;
 		optionsEndpoint?: string;
 		multiSelect?: boolean;

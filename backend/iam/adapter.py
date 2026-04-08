@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.mfa.adapter import DefaultMFAAdapter
 from allauth.socialaccount.adapter import (
     DefaultSocialAccountAdapter,
     MultipleObjectsReturned,
@@ -54,6 +55,15 @@ class AccountAdapter(DefaultAccountAdapter):
             return user
         except Exception:
             return None
+
+
+class MFAAdapter(DefaultMFAAdapter):
+    def get_public_key_credential_rp_entity(self):
+        rp_id = urlparse(settings.CISO_ASSISTANT_URL).hostname
+        return {
+            "id": rp_id,
+            "name": "CISO Assistant",
+        }
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
