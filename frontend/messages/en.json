@@ -1117,7 +1117,7 @@
 	"uploadTemplate": "Upload template",
 	"wordTemplateUploadHelp": "Upload a .docx file using the same template variables as the default. Download the default first to use as a starting point.",
 	"downloadDefaultTemplate": "Download default template",
-	"wordTemplateSyntaxHelp": "Use {{variable}} for simple values, {{image}} for images, and {%tr for ra in requirement_assessments %} ... {%tr endfor %} for table rows. See docxtpl documentation for full syntax.",
+	"wordTemplateSyntaxHelp": "Templates use docxtpl syntax. Refer to the docxtpl documentation for details on how to use variables, images, and loops in your .docx template.",
 	"uploading": "Uploading...",
 	"invalidDocxTemplate": "Invalid .docx template file. The file must be a valid docxtpl template.",
 	"invalidFileType": "Invalid file type",

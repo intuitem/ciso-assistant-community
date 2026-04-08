@@ -321,6 +321,11 @@
 						<p class="text-xs text-gray-500 mt-2 mb-3">
 							{m.wordTemplateSyntaxHelp()}
 						</p>
+						<div class="text-xs text-gray-500 mb-3 space-y-1 font-mono">
+							<p>{'{{variable}}'} &mdash; simple value</p>
+							<p>{'{{image}}'} &mdash; inline image</p>
+							<p>{'{%tr for ra in requirement_assessments %} ... {%tr endfor %}'} &mdash; table rows</p>
+						</div>
 						<div class="space-y-2 mt-2">
 							{#each getTemplateVariables(editingKey) as variable}
 								<div class="flex items-start gap-2 text-sm">

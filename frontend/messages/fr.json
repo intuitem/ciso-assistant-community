@@ -1005,7 +1005,7 @@
 	"uploadTemplate": "Téléverser un modèle",
 	"wordTemplateUploadHelp": "Téléversez un fichier .docx utilisant les mêmes variables que le modèle par défaut. Téléchargez d'abord le modèle par défaut comme point de départ.",
 	"downloadDefaultTemplate": "Télécharger le modèle par défaut",
-	"wordTemplateSyntaxHelp": "Utilisez {{variable}} pour les valeurs simples, {{image}} pour les images, et {%tr for ra in requirement_assessments %} ... {%tr endfor %} pour les lignes de tableau. Consultez la documentation docxtpl pour la syntaxe complète.",
+	"wordTemplateSyntaxHelp": "Les modèles utilisent la syntaxe docxtpl. Consultez la documentation docxtpl pour les détails sur l'utilisation des variables, images et boucles dans votre modèle .docx.",
 	"uploading": "Téléversement...",
 	"invalidDocxTemplate": "Fichier .docx invalide. Le fichier doit être un modèle docxtpl valide.",
 	"invalidFileType": "Type de fichier non valide",
