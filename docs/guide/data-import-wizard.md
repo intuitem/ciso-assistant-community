@@ -22,7 +22,7 @@ If you encounter this error, it could be due to the Excel file being protected b
 
 IRM protection restricts access to the file and prevents it from being read by external tools such as data-wizard.
 
-#### How to fix
+**How to fix**
 
 To resolve this issue, use an unprotected version of the file:
 
@@ -142,11 +142,11 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 * filtering\_labels - pipe- or comma-separated label names (created if missing)
 * reference\_control - lookup by `ref_id`; also accepted as `reference_control_ref_id`
 * owner
-* amortization\_period - integer (1–50), defaults to 1
-* build\_fixed\_cost - number, defaults to 0
-* build\_people\_days - number, defaults to 0
-* run\_fixed\_cost - number, defaults to 0
-* run\_people\_days - number, defaults to 0
+* cost\_amortization\_period - integer (1–50), defaults to 1
+* cost\_build\_fixe - number, defaults to 0
+* cost\_build\_people\_days - number, defaults to 0
+* cost\_run\_fixed - number, defaults to 0
+* cost\_run\_people\_days - number, defaults to 0
 
 ### Special considerations
 
