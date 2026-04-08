@@ -1072,7 +1072,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         Uses the IAM-filtered queryset and serializers to respect permissions
         and validation, mirroring the standard partial_update / destroy flows.
 
-        Payload: { "action": "delete"|"change_field"|"change_m2m"|"change_folder",
+        Payload: { "action": "delete"|"change_field"|"change_m2m"|"add_m2m"|"remove_m2m"|"change_folder",
                    "ids": [...], "field": "<field_name>", "value": ... }
         """
         action_type = request.data.get("action")
@@ -1080,7 +1080,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         value = request.data.get("value")
         field_name = request.data.get("field")
 
-        valid_actions = ("delete", "change_field", "change_m2m", "change_folder")
+        valid_actions = (
+            "delete",
+            "change_field",
+            "change_m2m",
+            "add_m2m",
+            "remove_m2m",
+            "change_folder",
+        )
         if action_type not in valid_actions:
             return Response(
                 {"error": "Invalid action type"},
@@ -1162,6 +1169,23 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                             "Webhook dispatch failed on batch delete", exc_info=True
                         )
                     obj.delete()
+
+                elif action_type in ("add_m2m", "remove_m2m"):
+                    ids_to_modify = value if isinstance(value, list) else [value]
+                    m2m_field = getattr(obj, field_name)
+                    if action_type == "add_m2m":
+                        m2m_field.add(*ids_to_modify)
+                    else:
+                        m2m_field.remove(*ids_to_modify)
+                    obj.save(update_fields=["updated_at"])
+                    try:
+                        dispatch_webhook_event(obj, "updated")
+                    except Exception:
+                        logger.error(
+                            "Webhook dispatch failed on batch %s",
+                            action_type,
+                            exc_info=True,
+                        )
 
                 else:
                     # Build data dict for the serializer
