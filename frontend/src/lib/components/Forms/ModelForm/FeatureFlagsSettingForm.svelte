@@ -37,6 +37,11 @@
 					description: m.taskTemplatesDescription()
 				},
 				{
+					field: 'control_plan',
+					label: m.tasksReview(),
+					description: m.controlPlanDescription()
+				},
+				{
 					field: 'xrays',
 					label: m.xRays(),
 					description: m.xRaysDescription()

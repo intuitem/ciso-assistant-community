@@ -251,7 +251,7 @@ export const AppliedControlSchema = z.object({
 
 export const AppliedControlDuplicateSchema = z.object({
 	...AppliedControlSchema.shape,
-	duplicate_evidences: z.boolean()
+	duplicate_evidences: z.boolean().optional()
 });
 
 export const PolicySchema = AppliedControlSchema.omit({ category: true });
@@ -580,6 +580,7 @@ export const FeatureFlagsSchema = z.object({
 	xrays: z.boolean().optional(),
 	incidents: z.boolean().optional(),
 	tasks: z.boolean().optional(),
+	control_plan: z.boolean().optional(),
 	risk_acceptances: z.boolean().optional(),
 	exceptions: z.boolean().optional(),
 	follow_up: z.boolean().optional(),
