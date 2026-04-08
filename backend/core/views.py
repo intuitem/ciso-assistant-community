@@ -4954,7 +4954,11 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "category": {"source": "category", "label": "category"},
             "csf_function": {"source": "csf_function", "label": "csf_function"},
             "folder": {"source": "folder.name", "label": "folder"},
-            "status": {"source": "status", "label": "status"},
+            "status": {
+                "source": "status",
+                "label": "status",
+                "format": lambda v: "" if v == "--" else (v or ""),
+            },
             "start_date": {"source": "start_date", "label": "start_date"},
             "eta": {"source": "eta", "label": "eta"},
             "expiry_date": {"source": "expiry_date", "label": "expiry_date"},
