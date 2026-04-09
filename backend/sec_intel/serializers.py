@@ -1,3 +1,5 @@
+from rest_framework import serializers
+
 from core.serializers import (
     BaseModelSerializer,
     ReferentialSerializer,
@@ -35,6 +37,15 @@ class CVEReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    references = serializers.SerializerMethodField()
+
+    def get_references(self, obj):
+        if not obj.references:
+            return []
+        return [
+            {"str": ref.get("url", ""), "source": ref.get("source", "")}
+            for ref in obj.references
+        ]
 
     class Meta:
         model = CVE

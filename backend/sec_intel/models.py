@@ -50,6 +50,7 @@ class CVE(
         blank=True,
         verbose_name=_("EPSS percentile"),
     )
+    references = models.JSONField(null=True, blank=True, verbose_name=_("References"))
     is_kev = models.BooleanField(
         default=False, verbose_name=_("Known Exploited Vulnerability")
     )

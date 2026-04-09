@@ -55,13 +55,15 @@ class KEVFeed:
         return resp.json()
 
     def parse(self, raw: dict) -> list[dict]:
-        """Extract list of {cve_id, date_added} from KEV JSON."""
+        """Extract KEV entries from JSON."""
         results = []
         for vuln in raw.get("vulnerabilities", []):
             try:
                 results.append(
                     {
                         "cve_id": vuln["cveID"],
+                        "name": vuln.get("vulnerabilityName", vuln["cveID"]),
+                        "description": vuln.get("shortDescription", ""),
                         "date_added": datetime.strptime(
                             vuln["dateAdded"], "%Y-%m-%d"
                         ).date(),
@@ -71,26 +73,51 @@ class KEVFeed:
                 logger.warning("Skipping malformed KEV entry", error=str(e))
         return results
 
-    def sync(self) -> int:
-        """Full sync: fetch, parse, bulk-update existing CVEs. Returns count updated."""
+    def sync(self) -> dict:
+        """Full sync: fetch, parse, create new + update existing CVEs.
+        Returns {"created": N, "updated": N}."""
+        from iam.models import Folder
         from sec_intel.models import CVE
 
         raw = self.fetch()
         entries = self.parse(raw)
-        kev_map = {e["cve_id"]: e["date_added"] for e in entries}
+        kev_map = {e["cve_id"]: e for e in entries}
 
-        cves = CVE.objects.filter(ref_id__in=kev_map.keys())
+        # Update existing CVEs
+        existing = CVE.objects.filter(ref_id__in=kev_map.keys())
+        existing_ids = set()
         to_update = []
-        for cve in cves:
+        for cve in existing:
+            existing_ids.add(cve.ref_id)
             cve.is_kev = True
-            cve.kev_date_added = kev_map[cve.ref_id]
+            cve.kev_date_added = kev_map[cve.ref_id]["date_added"]
             to_update.append(cve)
 
         if to_update:
             CVE.objects.bulk_update(
                 to_update, ["is_kev", "kev_date_added"], batch_size=1000
             )
-        return len(to_update)
+
+        # Create new CVEs for KEV entries not yet in DB
+        root_folder = Folder.get_root_folder()
+        to_create = []
+        for cve_id, entry in kev_map.items():
+            if cve_id not in existing_ids:
+                to_create.append(
+                    CVE(
+                        ref_id=cve_id,
+                        name=entry["name"],
+                        description=entry["description"],
+                        is_kev=True,
+                        kev_date_added=entry["date_added"],
+                        folder=root_folder,
+                    )
+                )
+
+        if to_create:
+            CVE.objects.bulk_create(to_create, batch_size=1000, ignore_conflicts=True)
+
+        return {"created": len(to_create), "updated": len(to_update)}
 
 
 # --- EPSS Feed ---
@@ -188,6 +215,12 @@ class NVDFeed:
         cve_data = vulns[0].get("cve", {})
         result = {}
 
+        # CVE ID as ref_id and name
+        cve_id = cve_data.get("id")
+        if cve_id:
+            result["ref_id"] = cve_id
+            result["name"] = cve_id
+
         # Published date
         pub = cve_data.get("published")
         if pub:
@@ -217,6 +250,15 @@ class NVDFeed:
                     result["cvss_vector"] = vector
                 break
 
+        # References (URLs)
+        refs = cve_data.get("references", [])
+        if refs:
+            result["references"] = [
+                {"url": r.get("url"), "source": r.get("source", "")}
+                for r in refs
+                if r.get("url")
+            ]
+
         return result
 
     @staticmethod
@@ -244,3 +286,109 @@ class NVDFeed:
         if update_fields:
             cve_instance.save(update_fields=update_fields)
         return bool(update_fields)
+
+
+# --- CWE Feed ---
+
+CWE_URL = "https://cwe.mitre.org/data/xml/cwec_latest.xml.zip"
+
+
+class CWEFeed:
+    def __init__(self, file_path: Optional[Path] = None):
+        self.file_path = file_path
+
+    def fetch(self) -> bytes:
+        """Fetch zipped CWE JSON from MITRE or read local file."""
+        if self.file_path:
+            return self.file_path.read_bytes()
+        resp = httpx.get(CWE_URL, timeout=_get_timeout(), follow_redirects=True)
+        resp.raise_for_status()
+        return resp.content
+
+    def parse(self, raw_zip: bytes) -> list[dict]:
+        """Extract CWE entries from zipped XML."""
+        import zipfile
+        import xml.etree.ElementTree as ET
+
+        with zipfile.ZipFile(io.BytesIO(raw_zip)) as zf:
+            xml_name = [n for n in zf.namelist() if n.endswith(".xml")][0]
+            tree = ET.parse(zf.open(xml_name))
+
+        root = tree.getroot()
+        ns = {"cwe": root.tag.split("}")[0] + "}"} if "}" in root.tag else {"cwe": ""}
+        prefix = ns["cwe"]
+
+        results = []
+        for weakness in root.iter(f"{prefix}Weakness"):
+            cwe_id = weakness.get("ID")
+            if not cwe_id:
+                continue
+
+            name = weakness.get("Name", f"CWE-{cwe_id}")
+
+            description = ""
+            desc_el = weakness.find(f"{prefix}Description")
+            if desc_el is not None and desc_el.text:
+                description = desc_el.text.strip()
+            if not description:
+                ext_el = weakness.find(f"{prefix}Extended_Description")
+                if ext_el is not None:
+                    description = "".join(ext_el.itertext()).strip()
+
+            results.append(
+                {
+                    "cwe_id": f"CWE-{cwe_id}",
+                    "name": name,
+                    "description": description,
+                }
+            )
+        return results
+
+    def sync(self) -> dict:
+        """Full sync: fetch, parse, create new + update existing CWEs.
+        Returns {"created": N, "updated": N}."""
+        from iam.models import Folder
+        from sec_intel.models import CWE
+
+        raw = self.fetch()
+        entries = self.parse(raw)
+        cwe_map = {e["cwe_id"]: e for e in entries}
+
+        # Update existing
+        existing = CWE.objects.filter(ref_id__in=cwe_map.keys())
+        existing_ids = set()
+        to_update = []
+        for cwe in existing:
+            existing_ids.add(cwe.ref_id)
+            entry = cwe_map[cwe.ref_id]
+            changed = False
+            if not cwe.name and entry["name"]:
+                cwe.name = entry["name"]
+                changed = True
+            if not cwe.description and entry["description"]:
+                cwe.description = entry["description"]
+                changed = True
+            if changed:
+                to_update.append(cwe)
+
+        if to_update:
+            CWE.objects.bulk_update(to_update, ["name", "description"], batch_size=1000)
+
+        # Create new
+        root_folder = Folder.get_root_folder()
+        to_create = []
+        for cwe_id, entry in cwe_map.items():
+            if cwe_id not in existing_ids:
+                to_create.append(
+                    CWE(
+                        ref_id=cwe_id,
+                        name=entry["name"],
+                        description=entry["description"],
+                        folder=root_folder,
+                    )
+                )
+
+        if to_create:
+            CWE.objects.bulk_create(to_create, batch_size=1000, ignore_conflicts=True)
+
+        return {"created": len(to_create), "updated": len(to_update)}

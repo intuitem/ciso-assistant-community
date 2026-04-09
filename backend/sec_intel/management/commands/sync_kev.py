@@ -20,9 +20,11 @@ class Command(BaseCommand):
         file_path = Path(options["file"]) if options["file"] else None
         try:
             feed = KEVFeed(file_path=file_path)
-            count = feed.sync()
+            result = feed.sync()
             self.stdout.write(
-                self.style.SUCCESS(f"KEV sync complete: {count} CVEs updated")
+                self.style.SUCCESS(
+                    f"KEV sync complete: {result['created']} created, {result['updated']} updated"
+                )
             )
         except FileNotFoundError:
             self.stderr.write(self.style.ERROR(f"File not found: {file_path}"))

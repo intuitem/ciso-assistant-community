@@ -351,19 +351,19 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
     """
 
     critical = serializers.IntegerField(
-        source="value.critical", required=False, allow_null=True, default=None
+        source="value.critical", required=False, allow_null=True, default=15
     )
     high = serializers.IntegerField(
-        source="value.high", required=False, allow_null=True, default=None
+        source="value.high", required=False, allow_null=True, default=30
     )
     medium = serializers.IntegerField(
-        source="value.medium", required=False, allow_null=True, default=None
+        source="value.medium", required=False, allow_null=True, default=90
     )
     low = serializers.IntegerField(
-        source="value.low", required=False, allow_null=True, default=None
+        source="value.low", required=False, allow_null=True, default=180
     )
     info = serializers.IntegerField(
-        source="value.info", required=False, allow_null=True, default=None
+        source="value.info", required=False, allow_null=True, default=365
     )
 
     class Meta:

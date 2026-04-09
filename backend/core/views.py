@@ -3132,6 +3132,20 @@ class VulnerabilityViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
 
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        from core.serializers import VulnerabilityReadSerializer
+
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = VulnerabilityReadSerializer(objects, many=True)
+        return (
+            self.get_paginated_response(serializer.data)
+            if page is not None
+            else Response(serializer.data)
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):

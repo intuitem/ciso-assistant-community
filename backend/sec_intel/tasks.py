@@ -16,8 +16,8 @@ def sync_kev_feed():
         return
 
     try:
-        count = KEVFeed().sync()
-        logger.info("KEV feed sync completed", updated_count=count)
+        result = KEVFeed().sync()
+        logger.info("KEV feed sync completed", **result)
     except Exception:
         logger.warning("KEV feed sync failed", exc_info=True)
 

@@ -1679,15 +1679,25 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error(f"Failed to reset global settings: {e}")
 
+    vulnerability_sla_defaults = {
+        "critical": 15,
+        "high": 30,
+        "medium": 90,
+        "low": 180,
+        "info": 365,
+    }
     try:
-        GlobalSettings.objects.get_or_create(
+        sla_settings, sla_created = GlobalSettings.objects.get_or_create(
             name="vulnerability-sla",
             defaults={
-                "value": {},
+                "value": vulnerability_sla_defaults,
                 "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )
+        if not sla_created and not sla_settings.value:
+            sla_settings.value = vulnerability_sla_defaults
+            sla_settings.save(update_fields=["value"])
     except Exception as e:
         logger.error(f"Failed to create vulnerability SLA settings: {e}")
 

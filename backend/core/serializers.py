@@ -308,10 +308,42 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     severity = serializers.CharField(source="get_severity_display")
     state = serializers.SerializerMethodField()
 
+    RESOLVED_STATUSES = {"mitigated", "fixed", "not_exploitable", "unaffected"}
+
     def get_state(self, obj):
+        from datetime import date
+
+        from global_settings.models import GlobalSettings
+
+        if obj.status in self.RESOLVED_STATUSES:
+            return {"name": "resolved", "hexcolor": "#86efac"}
+
         if not obj.due_date:
             return None
-        return time_state(obj.due_date.isoformat())
+
+        today = date.today()
+
+        if obj.due_date < today:
+            return {"name": "overdue", "hexcolor": "#f87171"}
+        if obj.due_date == today:
+            return {"name": "today", "hexcolor": "#f97316"}
+
+        # Check if we're in the caution zone (past 50% of the SLA window)
+        try:
+            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
+            sla_policy = (
+                sla_settings.value if isinstance(sla_settings.value, dict) else {}
+            )
+            severity_label = obj.get_severity_display()
+            sla_days = sla_policy.get(severity_label)
+            if sla_days:
+                remaining = (obj.due_date - today).days
+                if remaining < sla_days * 0.5:
+                    return {"name": "caution", "hexcolor": "#fbbf24"}
+        except GlobalSettings.DoesNotExist:
+            pass
+
+        return {"name": "on track", "hexcolor": "#93c5fd"}
 
     class Meta:
         model = Vulnerability
