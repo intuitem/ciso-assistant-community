@@ -2,12 +2,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { safeTranslate } from '$lib/utils/i18n';
 import { m } from '$paraglide/messages';
-import {
-	getModelInfo,
-	urlParamModelForeignKeyFields,
-	urlParamModelSelectFields,
-	urlParamModelVerboseName
-} from '$lib/utils/crud';
+import { getModelInfo, urlParamModelSelectFields, urlParamModelVerboseName } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
@@ -16,7 +11,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 
-export const load: PageServerLoad = async ({ params, fetch, parent }) => {
+export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'ebios-rm';
 	const model: ModelInfo = getModelInfo(URLModel);
 
@@ -26,12 +21,10 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
-	// Get data from parent layout
-	const layoutData = await parent();
-
 	const initialData = {
 		risk_matrix: data.risk_matrix.id,
-		ebios_rm_study: params.id
+		ebios_rm_study: params.id,
+		folder: data.folder.id
 	};
 
 	const createSchema = modelSchema('risk-assessments');

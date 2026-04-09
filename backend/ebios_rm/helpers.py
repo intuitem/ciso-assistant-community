@@ -527,21 +527,28 @@ def detect_sync_sources(ebios_rm_study):
     """
     Detect all available sync sources from the study.
     Handles hybrid cases: e.g. some feared events have attack paths, others don't.
-    Each source level absorbs the feared events it covers, leaving uncovered ones
-    to be handled at the feared_events level.
+    Each level absorbs the feared events and strategic scenarios it covers,
+    leaving uncovered ones for lower levels.
 
-    Returns a dict with keys: operational_scenarios, attack_paths, feared_events.
-    Each value is a list of source objects (may be empty).
+    Returns a dict with keys: operational_scenarios, attack_paths,
+    strategic_scenarios, feared_events. Each value is a list (may be empty).
     Returns None if nothing is selected at all.
     """
     result = {
         "operational_scenarios": [],
         "attack_paths": [],
+        "strategic_scenarios": [],
         "feared_events": [],
     }
 
-    # Track which feared events are already covered by higher-level objects
     covered_fe_ids = set()
+    covered_ss_ids = set()
+
+    def _cover_feared_events(ro_to):
+        """Mark feared events from a RoTo as covered."""
+        covered_fe_ids.update(
+            ro_to.feared_events.filter(is_selected=True).values_list("id", flat=True)
+        )
 
     # Level 1: selected operational scenarios (full EBIOS)
     selected_os = [
@@ -550,29 +557,28 @@ def detect_sync_sources(ebios_rm_study):
     if selected_os:
         result["operational_scenarios"] = selected_os
         for os_obj in selected_os:
-            covered_fe_ids.update(
-                os_obj.ro_to.feared_events.filter(is_selected=True).values_list(
-                    "id", flat=True
-                )
-            )
+            _cover_feared_events(os_obj.ro_to)
+            covered_ss_ids.add(os_obj.attack_path.strategic_scenario_id)
 
-    # Level 2: selected attack paths not already covered by an operational scenario
+    # Level 2: selected attack paths not covered by an operational scenario
     selected_ap = list(ebios_rm_study.attackpath_set.filter(is_selected=True))
-    # Exclude attack paths that already have an operational scenario in the selected set
-    covered_ap_ids = (
-        {os_obj.attack_path_id for os_obj in selected_os} if selected_os else set()
-    )
+    covered_ap_ids = {os_obj.attack_path_id for os_obj in selected_os}
     uncovered_ap = [ap for ap in selected_ap if ap.id not in covered_ap_ids]
     if uncovered_ap:
         result["attack_paths"] = uncovered_ap
         for ap in uncovered_ap:
-            covered_fe_ids.update(
-                ap.ro_to_couple.feared_events.filter(is_selected=True).values_list(
-                    "id", flat=True
-                )
-            )
+            _cover_feared_events(ap.ro_to_couple)
+            covered_ss_ids.add(ap.strategic_scenario_id)
 
-    # Level 3: selected feared events not already covered
+    # Level 3: strategic scenarios not covered by attack paths or op scenarios
+    all_ss = list(ebios_rm_study.strategic_scenarios.all())
+    uncovered_ss = [ss for ss in all_ss if ss.id not in covered_ss_ids]
+    if uncovered_ss:
+        result["strategic_scenarios"] = uncovered_ss
+        for ss in uncovered_ss:
+            _cover_feared_events(ss.ro_to_couple)
+
+    # Level 4: selected feared events not already covered
     selected_fe = list(ebios_rm_study.feared_events.filter(is_selected=True))
     uncovered_fe = [fe for fe in selected_fe if fe.id not in covered_fe_ids]
     if uncovered_fe:
@@ -589,51 +595,46 @@ def build_sync_preview(ebios_rm_study, sources):
     parsed_matrix = ebios_rm_study.parsed_matrix
     source_data = []
 
-    for os_obj in sources.get("operational_scenarios", []):
-        gravity_display = FearedEvent.format_gravity(os_obj.gravity, parsed_matrix)
-        likelihood_display = OperationalScenario.format_likelihood(
-            os_obj.likelihood, parsed_matrix
+    def _entry(obj_id, name, source_type, gravity, likelihood_val=None):
+        impact = FearedEvent.format_gravity(gravity, parsed_matrix)
+        likelihood = (
+            OperationalScenario.format_likelihood(likelihood_val, parsed_matrix)
+            if likelihood_val is not None
+            else None
         )
+        return {
+            "id": str(obj_id),
+            "name": name,
+            "source_type": source_type,
+            "impact": impact,
+            "likelihood": likelihood,
+        }
+
+    for os_obj in sources.get("operational_scenarios", []):
         source_data.append(
-            {
-                "id": str(os_obj.id),
-                "name": os_obj.name,
-                "source_type": "operational_scenario",
-                "impact": gravity_display,
-                "likelihood": likelihood_display,
-            }
+            _entry(
+                os_obj.id,
+                os_obj.name,
+                "operational_scenario",
+                os_obj.gravity,
+                os_obj.likelihood,
+            )
         )
 
     for ap in sources.get("attack_paths", []):
-        gravity_display = FearedEvent.format_gravity(ap.gravity, parsed_matrix)
+        source_data.append(_entry(ap.id, str(ap), "attack_path", ap.gravity))
+
+    for ss in sources.get("strategic_scenarios", []):
         source_data.append(
-            {
-                "id": str(ap.id),
-                "name": str(ap),
-                "source_type": "attack_path",
-                "impact": gravity_display,
-                "likelihood": None,
-            }
+            _entry(ss.id, ss.name, "strategic_scenario", ss.ro_to_couple.get_gravity())
         )
 
     for fe in sources.get("feared_events", []):
-        gravity_display = fe.get_gravity_display()
-        source_data.append(
-            {
-                "id": str(fe.id),
-                "name": fe.name,
-                "source_type": "feared_event",
-                "impact": gravity_display,
-                "likelihood": None,
-            }
-        )
+        source_data.append(_entry(fe.id, fe.name, "feared_event", fe.gravity))
 
     # Determine the sync mode label for the frontend
     active_modes = [k for k, v in sources.items() if v]
-    if len(active_modes) == 1:
-        sync_mode = active_modes[0]
-    else:
-        sync_mode = "mixed"
+    sync_mode = active_modes[0] if len(active_modes) == 1 else "mixed"
 
     return {
         "sync_mode": sync_mode,
@@ -872,6 +873,9 @@ def _sync_attack_paths(risk_assessment, selected):
     created_count = 0
 
     for attack_path in selected:
+        scenario_name = (
+            attack_path.strategic_scenario.name[:95] + " - " + attack_path.name[:95]
+        )
         ro_to = attack_path.ro_to_couple
         feared_events = ro_to.feared_events.filter(is_selected=True)
 
@@ -886,7 +890,7 @@ def _sync_attack_paths(risk_assessment, selected):
 
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
-            name=str(attack_path),
+            name=scenario_name,
             ref_id=attack_path.ref_id,
             description=description,
             impact=attack_path.gravity,
@@ -904,7 +908,46 @@ def _sync_attack_paths(risk_assessment, selected):
         else:
             updated_count += 1
 
-    return updated_count, created_count, {str(ap) for ap in selected}
+    return (
+        updated_count,
+        created_count,
+        {ap.strategic_scenario.name[:95] + " - " + ap.name[:95] for ap in selected},
+    )
+
+
+def _sync_strategic_scenarios(risk_assessment, selected):
+    """Light sync from WS3 strategic scenarios (no attack paths). Likelihood is left unset (-1)."""
+    updated_count = 0
+    created_count = 0
+
+    for ss in selected:
+        ro_to = ss.ro_to_couple
+        feared_events = ro_to.feared_events.filter(is_selected=True)
+
+        description = _build_description(
+            _describe_feared_events(feared_events),
+            _describe_ro_to(ro_to),
+            _describe_named_object("Strategic Scenario", ss),
+        )
+
+        _rs, created = _upsert_risk_scenario(
+            risk_assessment=risk_assessment,
+            name=ss.name,
+            ref_id=ss.ref_id,
+            description=description,
+            impact=ro_to.get_gravity(),
+            likelihood=-1,
+            assets=_get_assets_with_descendants(
+                Asset.objects.filter(feared_events__in=feared_events)
+            ),
+            risk_origin=ro_to.risk_origin,
+        )
+        if created:
+            created_count += 1
+        else:
+            updated_count += 1
+
+    return updated_count, created_count, {ss.name for ss in selected}
 
 
 def _sync_feared_events(risk_assessment, selected):
@@ -962,6 +1005,7 @@ def sync_risk_assessment(risk_assessment, sources):
     sync_funcs = {
         "operational_scenarios": _sync_operational_scenarios,
         "attack_paths": _sync_attack_paths,
+        "strategic_scenarios": _sync_strategic_scenarios,
         "feared_events": _sync_feared_events,
     }
 

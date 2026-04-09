@@ -3366,6 +3366,7 @@
 	"ebiosRmSyncPreviewTitle": "Aperçu de la synchronisation",
 	"ebiosRmSyncModeOperationalScenarios": "Mode complet : {count} scénarios opérationnels sélectionnés généreront des scénarios de risque avec impact et vraisemblance.",
 	"ebiosRmSyncModeAttackPaths": "Mode allégé (AT3) : {count} chemins d'attaque sélectionnés généreront des scénarios de risque. L'impact sera dérivé des événements redoutés. La vraisemblance devra être définie manuellement.",
+	"ebiosRmSyncModeStrategicScenarios": "Mode allégé (AT3) : {count} scénarios stratégiques généreront des scénarios de risque. L'impact sera dérivé des événements redoutés. La vraisemblance devra être définie manuellement.",
 	"ebiosRmSyncModeFearedEvents": "Mode allégé (AT1) : {count} événements redoutés sélectionnés généreront des scénarios de risque. L'impact sera dérivé de la gravité des événements redoutés. La vraisemblance devra être définie manuellement.",
 	"ebiosRmSyncModeMixed": "Mode mixte : {count} objets à différents niveaux d'atelier généreront des scénarios de risque. La vraisemblance devra être définie manuellement pour certains scénarios.",
 	"ebiosRmSyncConfirm": "Générer",

@@ -198,6 +198,7 @@
 		const syncModeMessages: Record<string, (args: { count: number }) => string> = {
 			operational_scenarios: m.ebiosRmSyncModeOperationalScenarios,
 			attack_paths: m.ebiosRmSyncModeAttackPaths,
+			strategic_scenarios: m.ebiosRmSyncModeStrategicScenarios,
 			feared_events: m.ebiosRmSyncModeFearedEvents,
 			mixed: m.ebiosRmSyncModeMixed
 		};
