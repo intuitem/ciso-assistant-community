@@ -836,6 +836,7 @@ export const vulnerabilitySchema = z.object({
 	ref_id: z.string().optional().default(''),
 	status: z.string().default('--'),
 	severity: z.number().default(-1).optional(),
+	detected_at: z.string().optional().nullable(),
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	assets: z.string().uuid().optional().array().optional(),

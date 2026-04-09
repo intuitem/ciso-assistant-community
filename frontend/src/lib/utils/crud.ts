@@ -566,6 +566,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'cves', urlModel: 'cves' },
 			{ field: 'cwes', urlModel: 'cwes' },
+			{ field: 'detected_at', type: 'date' },
 			{ field: 'eta', type: 'date' },
 			{ field: 'due_date', type: 'date' }
 		],

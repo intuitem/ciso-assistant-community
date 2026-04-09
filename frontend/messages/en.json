@@ -2352,6 +2352,8 @@
 	"changeDomain": "Change domain",
 	"batchChangePriority": "Change priority",
 	"changeSeverity": "Change severity",
+	"detectedAt": "Detection date",
+	"detectedAtHelpText": "When the vulnerability was discovered. Defaults to today. The SLA deadline is calculated from this date.",
 	"resolved": "Resolved",
 	"changeTreatment": "Change treatment",
 	"changeAssignee": "Change assignee",

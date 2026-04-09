@@ -112,6 +112,15 @@
 <TextField
 	type="date"
 	{form}
+	field="detected_at"
+	label={m.detectedAt()}
+	helpText={m.detectedAtHelpText()}
+	cacheLock={cacheLocks['detected_at']}
+	bind:cachedValue={formDataCache['detected_at']}
+/>
+<TextField
+	type="date"
+	{form}
 	field="eta"
 	label={m.eta()}
 	cacheLock={cacheLocks['eta']}
