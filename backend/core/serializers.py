@@ -303,7 +303,15 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    cves = FieldsRelatedField(many=True)
+    cwes = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display")
+    state = serializers.SerializerMethodField()
+
+    def get_state(self, obj):
+        if not obj.due_date:
+            return None
+        return time_state(obj.due_date.isoformat())
 
     class Meta:
         model = Vulnerability

@@ -6,6 +6,7 @@
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
+	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
 
 	import { goto } from '$app/navigation';
 
@@ -25,6 +26,9 @@
 		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
+		>
+		<Tabs.Trigger value="vulnerabilitySla"
+			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
 		>
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
@@ -53,5 +57,8 @@
 	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="vulnerabilitySla">
+		<VulnerabilitySlaSettings {data} />
 	</Tabs.Content>
 </Tabs>

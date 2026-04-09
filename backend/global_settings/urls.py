@@ -9,6 +9,7 @@ from .views import (
     get_sso_info,
     GeneralSettingsViewSet,
     FeatureFlagsViewSet,
+    VulnerabilitySlaViewSet,
 )
 from .routers import DefaultSettingsRouter
 
@@ -32,6 +33,12 @@ settings_router.register(
     r"feature-flags",
     FeatureFlagsViewSet,
     basename="feature-flags",
+)
+
+settings_router.register(
+    r"vulnerability-sla",
+    VulnerabilitySlaViewSet,
+    basename="vulnerability-sla",
 )
 
 

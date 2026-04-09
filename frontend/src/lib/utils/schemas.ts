@@ -168,6 +168,27 @@ export const ThreatSchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 
+export const CVESchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional(),
+	published_date: z.string().optional().nullable(),
+	cvss_base_score: z.coerce.number().min(0).max(10).optional().nullable(),
+	cvss_vector: z.string().optional().nullable()
+});
+
+export const CWESchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
 export const RiskScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	applied_controls: z.string().uuid().optional().array().optional(),
@@ -576,6 +597,14 @@ export const GeneralSettingsSchema = z.object({
 	openai_api_key: z.string().default('').optional()
 });
 
+export const VulnerabilitySlaSchema = z.object({
+	critical: z.coerce.number().int().min(0).optional().nullable(),
+	high: z.coerce.number().int().min(0).optional().nullable(),
+	medium: z.coerce.number().int().min(0).optional().nullable(),
+	low: z.coerce.number().int().min(0).optional().nullable(),
+	info: z.coerce.number().int().min(0).optional().nullable()
+});
+
 export const FeatureFlagsSchema = z.object({
 	xrays: z.boolean().optional(),
 	incidents: z.boolean().optional(),
@@ -796,9 +825,13 @@ export const vulnerabilitySchema = z.object({
 	ref_id: z.string().optional().default(''),
 	status: z.string().default('--'),
 	severity: z.number().default(-1).optional(),
+	eta: z.string().optional().nullable(),
+	due_date: z.string().optional().nullable(),
 	assets: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	cves: z.string().uuid().optional().array().optional(),
+	cwes: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
@@ -1604,6 +1637,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
+	cves: CVESchema,
+	cwes: CWESchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
@@ -1622,6 +1657,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,
+	'vulnerability-sla': VulnerabilitySlaSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

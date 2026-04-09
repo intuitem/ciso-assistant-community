@@ -1246,6 +1246,24 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const CVE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'cves',
+		label: 'cve',
+		multiple: true
+	}
+};
+
+export const CWE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'cwes',
+		label: 'cwe',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
@@ -1295,12 +1313,22 @@ export const listViewFields = {
 		}
 	},
 	vulnerabilities: {
-		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'dueDate',
+			'applied_controls',
+			'folder',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'status',
 			'severity',
+			'due_date',
 			'applied_controls',
 			'folder',
 			'filtering_labels'
@@ -1309,7 +1337,10 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
 			status: VULNERABILITY_STATUS_FILTER,
-			severity: VULNERABILITY_SEVERITY_FILTER
+			severity: VULNERABILITY_SEVERITY_FILTER,
+			assets: ASSET_FILTER,
+			cves: CVE_FILTER,
+			cwes: CWE_FILTER
 		}
 	},
 	'risk-assessments': {
@@ -1348,6 +1379,42 @@ export const listViewFields = {
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
+			},
+			library: LIBRARY_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	cves: {
+		head: ['ref_id', 'name', 'cvssBaseScore', 'publishedDate', 'library', 'domain', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'cvss_base_score',
+			'published_date',
+			'library',
+			'folder',
+			'filtering_labels'
+		],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'cves/provider' }
+			},
+			library: LIBRARY_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	cwes: {
+		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'cwes/provider' }
 			},
 			library: LIBRARY_FILTER,
 			filtering_labels: LABELS_FILTER

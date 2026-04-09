@@ -342,3 +342,69 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             instance.save(update_fields=["value"])
 
         return instance
+
+
+class VulnerabilitySlaSerializer(serializers.ModelSerializer):
+    """
+    Serializer for managing Vulnerability SLA policy settings.
+    Maps severity levels to remediation deadlines (in days).
+    """
+
+    critical = serializers.IntegerField(
+        source="value.critical", required=False, allow_null=True, default=None
+    )
+    high = serializers.IntegerField(
+        source="value.high", required=False, allow_null=True, default=None
+    )
+    medium = serializers.IntegerField(
+        source="value.medium", required=False, allow_null=True, default=None
+    )
+    low = serializers.IntegerField(
+        source="value.low", required=False, allow_null=True, default=None
+    )
+    info = serializers.IntegerField(
+        source="value.info", required=False, allow_null=True, default=None
+    )
+
+    class Meta:
+        model = GlobalSettings
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
+        ]
+        read_only_fields = ["name"]
+
+    def update(self, instance, validated_data):
+        current_value_dict = instance.value if isinstance(instance.value, dict) else {}
+        value_changed = False
+        new_value_dict = validated_data.get("value", {})
+
+        for field_name, field_instance in self.fields.items():
+            if field_name in self.Meta.read_only_fields:
+                continue
+            if not hasattr(
+                field_instance, "source"
+            ) or not field_instance.source.startswith("value."):
+                continue
+
+            if field_name in new_value_dict:
+                source_key = field_instance.source.split(".")[-1]
+                new_flag_value = new_value_dict[field_name]
+
+                if current_value_dict.get(source_key) != new_flag_value:
+                    if new_flag_value is None:
+                        current_value_dict.pop(source_key, None)
+                    else:
+                        current_value_dict[source_key] = new_flag_value
+                    value_changed = True
+
+        if value_changed:
+            instance.value = current_value_dict
+            instance.save(update_fields=["value"])
+
+        return instance

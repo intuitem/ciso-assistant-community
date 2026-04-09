@@ -14,6 +14,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         GENERAL = "general", "General"
         SSO = "sso", "SSO"
         FEATURE_FLAGS = "feature-flags", "Feature Flags"
+        VULNERABILITY_SLA = "vulnerability-sla", "Vulnerability SLA"
 
     # Name of the setting category.
     name = models.CharField(

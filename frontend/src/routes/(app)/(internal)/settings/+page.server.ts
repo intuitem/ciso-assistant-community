@@ -7,6 +7,7 @@ import {
 	FeatureFlagsSchema,
 	GeneralSettingsSchema,
 	SSOSettingsSchema,
+	VulnerabilitySlaSchema,
 	webhookEndpointSchema
 } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
@@ -90,6 +91,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	generalSettingModel.selectOptions = selectOptions;
 
+	const vulnerabilitySlaSettings = await fetch(`${BASE_API_URL}/settings/vulnerability-sla/`).then(
+		(res) => res.json()
+	);
+
 	const ssoForm = await superValidate(ssoSettings, zod(SSOSettingsSchema), { errors: false });
 	const generalSettingForm = await superValidate(generalSettings, zod(GeneralSettingsSchema), {
 		errors: false
@@ -97,6 +102,11 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagForm = await superValidate(featureFlagSettings, zod(FeatureFlagsSchema), {
 		errors: false
 	});
+	const vulnerabilitySlaForm = await superValidate(
+		vulnerabilitySlaSettings,
+		zod(VulnerabilitySlaSchema),
+		{ errors: false }
+	);
 	const webhookEndpointCreateForm = await superValidate(zod(webhookEndpointSchema), {
 		errors: false
 	});
@@ -111,6 +121,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		featureFlagSettings,
 		featureFlagForm,
 		featureFlagModel,
+		vulnerabilitySlaSettings,
+		vulnerabilitySlaForm,
 		webhookEndpoints,
 		webhookEndpointCreateForm,
 		title: m.settings()
@@ -203,6 +215,30 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		setFlash({ type: 'success', message: m.featureFlagSettingsUpdated() }, event);
+
+		return { form };
+	},
+	vulnerabilitySla: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = VulnerabilitySlaSchema;
+		const form = await superValidate(formData, zod(schema));
+		const endpoint = `${BASE_API_URL}/settings/vulnerability-sla/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'PUT',
+			body: JSON.stringify(form.data)
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.vulnerabilitySlaSettingsUpdated() }, event);
 
 		return { form };
 	},

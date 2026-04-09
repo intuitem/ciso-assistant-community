@@ -275,6 +275,30 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
 	},
+	cves: {
+		name: 'cve',
+		localName: 'cve',
+		localNamePlural: 'cves',
+		verboseName: 'CVE',
+		verboseNamePlural: 'CVEs',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		]
+	},
+	cwes: {
+		name: 'cwe',
+		localName: 'cwe',
+		localNamePlural: 'cwes',
+		verboseName: 'CWE',
+		verboseNamePlural: 'CWEs',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		]
+	},
 	'risk-scenarios': {
 		name: 'riskscenario',
 		localName: 'riskScenario',
@@ -507,10 +531,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'cves', urlModel: 'cves' },
+			{ field: 'cwes', urlModel: 'cwes' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
-		filters: [{ field: 'folder' }, { field: 'filtering_labels' }],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'cves' },
+			{ field: 'cwes' }
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'vulnerabilities',
@@ -521,6 +552,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'vulnerabilities',
 				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'findings',
 				disableCreate: true,
 				disableDelete: true
 			}
