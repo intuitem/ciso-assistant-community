@@ -3517,6 +3517,7 @@ class LoadFileView(APIView):
 
                 # Parse solution references (newline, pipe, or comma-separated)
                 solution_ids = []
+                missing_solution_refs = []
                 solution_ref_id_raw = str(record.get("solution_ref_id", "")).strip()
                 if solution_ref_id_raw:
                     for sol_ref in re.split(r"[\n\r|,]+", solution_ref_id_raw):
@@ -3526,9 +3527,20 @@ class LoadFileView(APIView):
                         if sol_ref in solution_ref_map:
                             solution_ids.append(solution_ref_map[sol_ref])
                         else:
-                            logger.warning(
-                                f"Solution with ref_id '{sol_ref}' not found for contract '{ref_id}'"
-                            )
+                            missing_solution_refs.append(sol_ref)
+
+                if missing_solution_refs:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": (
+                                "Unknown solution_ref_id(s): "
+                                + ", ".join(missing_solution_refs)
+                            ),
+                        }
+                    )
+                    continue
 
                 # Add optional fields
                 if record.get("status"):
