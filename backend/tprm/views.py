@@ -679,6 +679,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "name": solution.name,
                     "description": solution.description,
                     "provider_entity_ref_id": solution.provider_entity.ref_id,
+                    "provider": solution.provider_entity.name,
                     "criticality": solution.criticality,
                 }
             )
@@ -694,6 +695,11 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "description": contract.description,
                     "provider_entity_ref_id": (
                         contract.provider_entity.ref_id
+                        if contract.provider_entity
+                        else ""
+                    ),
+                    "provider": (
+                        contract.provider_entity.name
                         if contract.provider_entity
                         else ""
                     ),
@@ -738,6 +744,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "name",
             "description",
             "provider_entity_ref_id",
+            "provider",
             "criticality",
         ]
         contract_columns = [
@@ -745,6 +752,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "name",
             "description",
             "provider_entity_ref_id",
+            "provider",
             "solution_ref_id",
             "status",
             "start_date",
