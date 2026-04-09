@@ -143,7 +143,7 @@
 		'TPRM',
 		'EbiosRMStudyARM',
 		'EbiosRMStudyExcel',
-		'TaskTemplate'
+		'TaskTemplate',
 		'Vulnerability'
 	];
 
