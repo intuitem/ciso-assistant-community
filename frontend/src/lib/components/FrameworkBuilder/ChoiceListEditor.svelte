@@ -264,4 +264,3 @@
 		<p class="text-xs text-gray-400 text-center py-2">No choices yet. Add one above.</p>
 	{/if}
 </div>
-

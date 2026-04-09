@@ -53,13 +53,16 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
         score = sum(
             (c.add_score or 0) * q.weight for c in selected if c.add_score is not None
         )
-        result[q.urn] = {
+        entry = {
             "value": answer.value,
             "score": score,
             "selected_choices": [c.urn for c in selected if c.urn],
             "weight": q.weight,
             "type": q.type,
         }
+        result[q.urn] = entry
+        if q.ref_id:
+            result[q.ref_id] = entry
     return result
 
 

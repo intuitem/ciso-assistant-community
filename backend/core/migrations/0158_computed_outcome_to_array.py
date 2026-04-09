@@ -19,7 +19,11 @@ def convert_computed_outcome_to_dict(apps, schema_editor):
             new = {}
             for item in old:
                 if isinstance(item, dict) and "ref_id" in item:
-                    entry = {k: v for k, v in item.items() if k not in ("ref_id", "expression")}
+                    entry = {
+                        k: v
+                        for k, v in item.items()
+                        if k not in ("ref_id", "expression")
+                    }
                     new[item["ref_id"]] = entry
             ca.computed_outcome = new if new else None
             ca.save(update_fields=["computed_outcome"])
@@ -29,7 +33,9 @@ def revert_computed_outcome_to_single(apps, schema_editor):
     """Reverse: convert dict back to single object (first entry only)."""
     ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
     for ca in ComplianceAssessment.objects.exclude(computed_outcome__isnull=True):
-        if isinstance(ca.computed_outcome, dict) and not ca.computed_outcome.get("ref_id"):
+        if isinstance(ca.computed_outcome, dict) and not ca.computed_outcome.get(
+            "ref_id"
+        ):
             # It's a dict-of-dicts, convert back to single object
             for ref_id, data in ca.computed_outcome.items():
                 ca.computed_outcome = {"ref_id": ref_id, **data}
@@ -40,7 +46,6 @@ def revert_computed_outcome_to_single(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0157_cel_expression_engine"),
     ]
