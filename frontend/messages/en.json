@@ -507,6 +507,7 @@
 	"informationNotAvailable": "Information not available",
 	"asCSV": "as CSV",
 	"asXLSX": "as Excel",
+	"exportEcosystem": "ecosystem export (XLSX)",
 	"asWord": "as Word",
 	"exportPdf": "Export PDF",
 	"exportExcel": "Excel (beta)",
