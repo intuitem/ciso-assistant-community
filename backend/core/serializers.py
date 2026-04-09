@@ -309,11 +309,23 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     state = serializers.SerializerMethodField()
 
     RESOLVED_STATUSES = {"mitigated", "fixed", "not_exploitable", "unaffected"}
+    _sla_policy_cache = None
+
+    def _get_sla_policy(self):
+        if self._sla_policy_cache is None:
+            from global_settings.models import GlobalSettings
+
+            try:
+                sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
+                self.__class__._sla_policy_cache = (
+                    sla_settings.value if isinstance(sla_settings.value, dict) else {}
+                )
+            except GlobalSettings.DoesNotExist:
+                self.__class__._sla_policy_cache = {}
+        return self._sla_policy_cache
 
     def get_state(self, obj):
         from datetime import date
-
-        from global_settings.models import GlobalSettings
 
         if obj.status in self.RESOLVED_STATUSES:
             return {"name": "resolved", "hexcolor": "#86efac"}
@@ -329,19 +341,13 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
             return {"name": "today", "hexcolor": "#f97316"}
 
         # Check if we're in the caution zone (past 50% of the SLA window)
-        try:
-            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-            sla_policy = (
-                sla_settings.value if isinstance(sla_settings.value, dict) else {}
-            )
-            severity_label = obj.get_severity_display()
-            sla_days = sla_policy.get(severity_label)
-            if sla_days:
-                remaining = (obj.due_date - today).days
-                if remaining < sla_days * 0.5:
-                    return {"name": "caution", "hexcolor": "#fbbf24"}
-        except GlobalSettings.DoesNotExist:
-            pass
+        sla_policy = self._get_sla_policy()
+        severity_label = obj.get_severity_display()
+        sla_days = sla_policy.get(severity_label)
+        if sla_days:
+            remaining = (obj.due_date - today).days
+            if remaining < sla_days * 0.5:
+                return {"name": "caution", "hexcolor": "#fbbf24"}
 
         return {"name": "on track", "hexcolor": "#93c5fd"}
 

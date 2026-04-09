@@ -174,6 +174,7 @@ export const CVESchema = z.object({
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
+	library: z.string().uuid().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
 	published_date: z.string().optional().nullable(),
 	cvss_base_score: z.coerce.number().min(0).max(10).optional().nullable(),
@@ -190,6 +191,7 @@ export const CWESchema = z.object({
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
+	library: z.string().uuid().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional()
 });
 

@@ -311,8 +311,11 @@ class CWEFeed:
         import xml.etree.ElementTree as ET
 
         with zipfile.ZipFile(io.BytesIO(raw_zip)) as zf:
-            xml_name = [n for n in zf.namelist() if n.endswith(".xml")][0]
-            tree = ET.parse(zf.open(xml_name))
+            xml_files = [n for n in zf.namelist() if n.endswith(".xml")]
+            if not xml_files:
+                logger.error("No XML file found in CWE zip archive")
+                return []
+            tree = ET.parse(zf.open(xml_files[0]))
 
         root = tree.getroot()
         ns = {"cwe": root.tag.split("}")[0] + "}"} if "}" in root.tag else {"cwe": ""}
