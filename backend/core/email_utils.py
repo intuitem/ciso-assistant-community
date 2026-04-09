@@ -350,9 +350,9 @@ def format_task_node_list(
         MarkdownSafe string with task node information (contains Markdown links)
     """
     base_url = getattr(settings, "CISO_ASSISTANT_URL", "http://localhost:5173")
-    task_lines = []
+    items = []
     for node in task_nodes:
-        name = node.task_template.name if node.task_template else "Unknown"
+        name = html_escape(node.task_template.name) if node.task_template else "Unknown"
         due_date = node.due_date.strftime("%Y-%m-%d") if node.due_date else "Not set"
         # Recurrent tasks link to the task node (each occurrence is distinct),
         # non-recurrent tasks link to the task template (the main object).
@@ -361,18 +361,21 @@ def format_task_node_list(
         else:
             template_id = node.task_template.id if node.task_template else node.id
             node_url = f"{base_url}/task-templates/{template_id}"
-        line = f"- [{name}]({node_url}) (Due: {due_date}, Status: {node.status})"
+        link = (
+            f'<a target="_blank" rel="noopener noreferrer" href="{node_url}">{name}</a>'
+        )
+        item = f"<li>{link}<br>Due: {due_date}<br>Status: {node.status}"
         if (
             include_description
             and node.task_template
             and node.task_template.description
         ):
-            description = node.task_template.description.strip()
-            # Indent continuation lines so they stay under the list item
-            line += f"\n  > {description}"
-        task_lines.append(line)
+            desc_html = markdown_to_html(node.task_template.description.strip())
+            item += f"<br>{desc_html}"
+        item += "</li>"
+        items.append(item)
 
-    return MarkdownSafe("\n".join(task_lines))
+    return MarkdownSafe("<ul>" + "".join(items) + "</ul>")
 
 
 def get_default_context() -> Dict[str, str]:
