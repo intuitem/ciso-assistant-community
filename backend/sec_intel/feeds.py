@@ -308,7 +308,8 @@ class CWEFeed:
     def parse(self, raw_zip: bytes) -> list[dict]:
         """Extract CWE entries from zipped XML."""
         import zipfile
-        import xml.etree.ElementTree as ET
+
+        import defusedxml.ElementTree as ET
 
         with zipfile.ZipFile(io.BytesIO(raw_zip)) as zf:
             xml_files = [n for n in zf.namelist() if n.endswith(".xml")]
