@@ -414,14 +414,14 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
-        run: uv run --project ${{ env.enterprise-backend-directory }} python manage.py migrate --settings="$SETTINGS_MODULE"
+        run: uv run --project ../enterprise/backend python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          uv run --project ${{ env.enterprise-backend-directory }} python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
-          nohup uv run --project ${{ env.enterprise-backend-directory }} python manage.py runserver localhost:8173 --settings="$SETTINGS_MODULE" &
+          uv run --project ../enterprise/backend python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
+          nohup uv run --project ../enterprise/backend python manage.py runserver localhost:8173 --settings="$SETTINGS_MODULE" &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}/
