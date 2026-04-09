@@ -561,6 +561,18 @@ export const LINKED_MODELS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const APPLIED_CONTROL_LINKED_MODELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'linkedModels',
+		optionsEndpoint: 'applied-controls/linked_models',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1263,14 +1275,22 @@ export const listViewFields = {
 		body: ['label']
 	},
 	'risk-matrices': {
-		head: ['name', 'description', 'provider', 'domain'],
-		body: ['name', 'description', 'provider', 'folder'],
+		head: ['name', 'description', 'provider', 'domain', 'isEnabled'],
+		body: ['name', 'description', 'provider', 'folder', 'is_enabled'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'risk-matrices/provider' }
+			},
+			is_enabled: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'isEnabled',
+					options: YES_NO_OPTIONS,
+					multiple: false
+				}
 			}
 		}
 	},
@@ -1338,6 +1358,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
@@ -1351,6 +1372,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
@@ -1365,6 +1387,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			treatment: TREATMENT_FILTER,
 			risk_assessment: RISK_ASSESSMENT_FILTER,
+			owner: OWNER_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
@@ -1429,8 +1452,10 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csfFunction',
 			'eta',
@@ -1438,13 +1463,16 @@ export const listViewFields = {
 			'owner',
 			'controlImpact',
 			'effort',
+			'linkedModels',
 			'labels'
 		],
 		body: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csf_function',
 			'eta',
@@ -1452,11 +1480,13 @@ export const listViewFields = {
 			'owner',
 			'control_impact',
 			'effort',
+			'linked_models',
 			'filtering_labels'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
+			assets: ASSET_FILTER,
 			category: APPLIED_CONTROL_CATEGORY_FILTER,
 			csf_function: APPLIED_CONTROL_CSF_FUNCTION_FILTER,
 			priority: PRIORITY_FILTER,
@@ -1466,7 +1496,8 @@ export const listViewFields = {
 			reference_control: REFERENCE_CONTROL_FILTER,
 			eta__lte: undefined,
 			is_assigned: IS_ASSIGNED_FILTER,
-			owner: OWNER_FILTER
+			owner: OWNER_FILTER,
+			linked_models: APPLIED_CONTROL_LINKED_MODELS_FILTER
 		}
 	},
 	policies: {
@@ -1689,6 +1720,14 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'document-revisions': {
+		head: ['versionNumber', 'status', 'author', 'changeSummary', 'createdAt'],
+		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
+	},
+	'managed-documents': {
+		head: ['name', 'documentType', 'policy', 'locale', 'domain'],
+		body: ['name', 'document_type', 'policy', 'locale', 'folder']
+	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],
@@ -1882,6 +1921,27 @@ export const listViewFields = {
 		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'impactOn', 'justification'],
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
+	'dora-incident-reports': {
+		head: [
+			'incident',
+			'incidentSubmission',
+			'reportCurrency',
+			'submittingEntity',
+			'folder',
+			'createdAt'
+		],
+		body: [
+			'incident',
+			'incident_submission',
+			'report_currency',
+			'submitting_entity',
+			'folder',
+			'created_at'
+		],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	processings: {
 		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
@@ -2030,7 +2090,9 @@ export const listViewFields = {
 		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
-			category: PERSONAL_DATA_CATEGORY_FILTER
+			category: PERSONAL_DATA_CATEGORY_FILTER,
+			deletion_policy: { hide: true } as ListViewFilterConfig,
+			is_sensitive: { hide: true } as ListViewFilterConfig
 		}
 	},
 	'data-subjects': {
@@ -2047,11 +2109,22 @@ export const listViewFields = {
 	},
 	'data-transfers': {
 		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
-		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link'],
+		filters: {
+			transfer_mechanism: { hide: true } as ListViewFilterConfig
+		}
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
-		body: ['name', 'description', 'folder', 'quotation_method', 'created_at', 'updated_at'],
+		head: ['name', 'description', 'domain', 'status', 'quotationMethod', 'createdAt', 'updatedAt'],
+		body: [
+			'name',
+			'description',
+			'folder',
+			'status',
+			'quotation_method',
+			'created_at',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
@@ -2767,12 +2840,20 @@ export const contextMenuActions = {
 
 // Batch action configuration
 export interface BatchActionConfig {
-	type: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
+	type:
+		| 'delete'
+		| 'change_field'
+		| 'change_m2m'
+		| 'add_m2m'
+		| 'remove_m2m'
+		| 'change_folder'
+		| 'group';
 	label: string;
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
 	multiSelect?: boolean;
+	children?: BatchActionConfig[];
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
@@ -2792,12 +2873,42 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'applied-controls/priority'
 		},
 		{
+			type: 'change_field',
+			label: 'changeCsfFunction',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'csf_function',
+			optionsEndpoint: 'applied-controls/csf_function'
+		},
+		{
 			type: 'change_m2m',
 			label: 'changeOwner',
 			icon: 'fa-solid fa-user-pen',
 			field: 'owner',
 			optionsEndpoint: 'actors',
 			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
 		},
 		{
 			type: 'change_folder',
@@ -2944,6 +3055,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'owner',
 			optionsEndpoint: 'actors',
 			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
 		},
 		{
 			type: 'change_folder',
@@ -3125,6 +3259,33 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'data-transfers': [
+		{
+			type: 'change_field',
+			label: 'changeTransferMechanism',
+			icon: 'fa-solid fa-right-left',
+			field: 'transfer_mechanism',
+			optionsEndpoint: 'data-transfers/transfer_mechanism'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'personal-data': [
+		{
+			type: 'change_field',
+			label: 'changeDeletionPolicy',
+			icon: 'fa-solid fa-clock-rotate-left',
+			field: 'deletion_policy',
+			optionsEndpoint: 'personal-data/deletion_policy'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsSensitive',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'is_sensitive',
+			optionsEndpoint: 'personal-data/is_sensitive'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	processings: [
 		{
 			type: 'change_field',

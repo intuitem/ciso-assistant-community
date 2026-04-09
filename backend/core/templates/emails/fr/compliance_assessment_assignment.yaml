@@ -12,7 +12,6 @@ body: |
   - Date d'échéance : ${assessment_due_date}
   - Domaine : ${folder_name}
 
-  Connectez-vous à votre portail CISO Assistant pour consulter et gérer cet audit :
-  ${ciso_assistant_url}
+  Connectez-vous à votre portail CISO Assistant pour consulter et gérer cet audit : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.

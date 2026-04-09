@@ -438,6 +438,15 @@ DATA_WIZARD_COMMANDS = [
         "requires_matrix": True,
     },
     {
+        "command": "import_vulnerabilities",
+        "model_type": "Vulnerability",
+        "help": "Import vulnerabilities using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
         "command": "import_bia",
         "model_type": "BusinessImpactAnalysis",
         "help": "Import business impact analyses (multi-sheet Excel) using the Data Wizard backend.",

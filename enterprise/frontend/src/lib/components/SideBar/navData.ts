@@ -210,7 +210,7 @@ export const navData = {
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
-					permissions: ['view_riskassessment', 'view_assessment']
+					permissions: ['view_riskassessment', 'view_complianceassessment']
 				},
 				{
 					name: 'incidents',
@@ -221,6 +221,12 @@ export const navData = {
 					name: 'tasks',
 					fa_icon: 'fa-solid fa-note-sticky',
 					href: '/task-templates'
+				},
+				{
+					name: 'tasksReview',
+					fa_icon: 'fa-solid fa-table-columns',
+					href: '/tasks-review',
+					permissions: ['view_appliedcontrol']
 				}
 			]
 		},

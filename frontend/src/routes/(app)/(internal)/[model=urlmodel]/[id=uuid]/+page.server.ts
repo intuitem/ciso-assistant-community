@@ -7,7 +7,7 @@ import { m } from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import {
 	defaultWriteFormAction,
@@ -30,11 +30,12 @@ export const load: PageServerLoad = async (event) => {
 	});
 
 	if (event.params.model === 'applied-controls') {
-		const appliedControlSchema = modelSchema(event.params.model);
+		const appliedControlSchema = modelSchema(event.params.model + '_duplicate');
 		const appliedControl = data.data;
 		const initialDataDuplicate = {
 			name: appliedControl.name,
-			description: appliedControl.description
+			description: appliedControl.description,
+			folder: appliedControl.folder.id
 		};
 
 		const appliedControlDuplicateForm = await superValidate(
@@ -103,6 +104,9 @@ export const actions: Actions = {
 
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
+		const res = await response.json();
+		const newId = res.results?.id;
+
 		const modelVerboseName: string = urlParamModelVerboseName(event.params.model as string);
 		setFlash(
 			{
@@ -113,6 +117,10 @@ export const actions: Actions = {
 			},
 			event
 		);
+
+		if (newId) {
+			return message(form, { redirect: `/${event.params.model}/${newId}` });
+		}
 
 		return { form };
 	},

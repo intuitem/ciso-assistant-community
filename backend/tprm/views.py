@@ -1,5 +1,8 @@
+import re
+
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from core.models import Asset
@@ -180,8 +183,10 @@ class EntityViewSet(BaseModelViewSet):
         entities_for_b_01_02 = [main_entity] + subsidiaries
 
         # Prepare contract QuerySets
-        contracts = Contract.objects.filter(id__in=viewable_contracts).exclude(
-            status=Contract.Status.DRAFT
+        contracts = (
+            Contract.objects.filter(id__in=viewable_contracts)
+            .exclude(status=Contract.Status.DRAFT)
+            .exclude(dora_exclude=True)
         )
 
         # Prepare business functions
@@ -212,17 +217,31 @@ class EntityViewSet(BaseModelViewSet):
         related_solution_ids = set(related_solutions.values_list("id", flat=True))
         business_function_contracts = contracts.filter(
             solutions__id__in=related_solution_ids
-        )
+        ).distinct()
 
-        # Calculate folder name for the ZIP structure (without .zip extension)
-        lei, _ = dora_export.get_entity_identifier(main_entity, priority=["LEI"])
-        competent_authority = main_entity.dora_competent_authority or "UNKNOWN"
+        # Get export metadata (naming, identifiers)
+        identifier_type = request.query_params.get("identifier_type", None)
+        level = request.query_params.get("level", "IND")
+        naming_convention = request.query_params.get("naming_convention", "nbb")
+        try:
+            export_meta = dora_export.get_dora_export_metadata(
+                main_entity,
+                identifier_type=identifier_type,
+                level=level,
+                naming_convention=naming_convention,
+            )
+        except ValueError:
+            logger.exception("Error generating DORA export metadata")
+            return Response(
+                {
+                    "error": "Error generating DORA export metadata. Please ensure the main entity has the required DORA metadata fields (folder_prefix, entity_id, filename)."
+                },
+                status=HTTP_400_BAD_REQUEST,
+            )
 
-        if lei:
-            base_folder_name = f"LEI_{lei}.CON_{competent_authority}_DOR_DORA_ROI"
-        else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            base_folder_name = f"DORA_ROI_{timestamp}"
+        base_folder_name = export_meta["folder_prefix"]
+        entity_id = export_meta["entity_id"]
+        filename = export_meta["filename"]
 
         # Create zip file in memory
         zip_buffer = io.BytesIO()
@@ -286,7 +305,9 @@ class EntityViewSet(BaseModelViewSet):
             dora_export.generate_filing_indicators(zip_file, base_folder_name)
 
             # Generate parameters.csv
-            dora_export.generate_parameters(zip_file, main_entity, base_folder_name)
+            dora_export.generate_parameters(
+                zip_file, main_entity, base_folder_name, entity_id=entity_id
+            )
 
             # Generate JSON metadata files
             dora_export.generate_report_package_json(zip_file, base_folder_name)
@@ -295,11 +316,9 @@ class EntityViewSet(BaseModelViewSet):
         # Prepare response
         zip_buffer.seek(0)
 
-        # Use the same base folder name for the ZIP filename
-        filename = f"{base_folder_name}.zip"
-
         response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        sanitized_filename = re.sub(r"[^\w.\-]", "_", filename)
+        response["Content-Disposition"] = f'attachment; filename="{sanitized_filename}"'
 
         return response
 
@@ -917,6 +936,7 @@ class ContractViewSet(BaseModelViewSet):
         "governing_law_country",
         "notice_period_entity",
         "notice_period_provider",
+        "end_date",
     ]
 
     @action(detail=False, name="Get status choices")

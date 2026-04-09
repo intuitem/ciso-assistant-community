@@ -17,10 +17,10 @@ import logging.config
 import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
+import ssl
 from ciso_assistant import meta
 
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
-
 load_dotenv(BASE_DIR / ".meta")
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
@@ -127,10 +127,17 @@ ENABLE_SANDBOX = os.environ.get("ENABLE_SANDBOX", "False").strip().lower() in (
     "yes",
 )
 
+ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
 LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
+logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -246,6 +253,8 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "chat",
+    "doc_management",
     "core",
     "cal",
     "django_filters",
@@ -304,13 +313,22 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
+logger.info("EMAIL_HOST: %s", EMAIL_HOST)
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
+logger.info("EMAIL_PORT: %s", EMAIL_PORT)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_TLS: %s", EMAIL_USE_TLS)
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_SSL: %s", EMAIL_USE_SSL)
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive")
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
+logger.info("EMAIL_HOST_RESCUE: %s", EMAIL_HOST_RESCUE)
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
+logger.info("EMAIL_PORT_RESCUE: %s", EMAIL_PORT_RESCUE)
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
 EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
@@ -318,8 +336,37 @@ EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() i
     "1",
     "yes",
 )
+logger.info("EMAIL_USE_TLS_RESCUE: %s", EMAIL_USE_TLS_RESCUE)
+EMAIL_USE_SSL_RESCUE = os.environ.get("EMAIL_USE_SSL_RESCUE", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_USE_SSL_RESCUE: %s", EMAIL_USE_SSL_RESCUE)
+if EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE:
+    raise ValueError(
+        "EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE are mutually exclusive"
+    )
+EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
+
+
+def _build_tls12_context():
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.maximum_version = ssl.TLSVersion.TLSv1_2
+    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
+    return context
+
+
+EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
+logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -450,6 +497,7 @@ LANGUAGES = [
     ("hr", "Croatian"),
     ("zh", "Chinese (Simplified)"),
     ("lt", "Lithuanian"),
+    ("ko", "Korean"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -467,7 +515,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # SQLIte file can be changed, useful for tests
 SQLITE_FILE = os.environ.get("SQLITE_FILE", BASE_DIR / "db/ciso-assistant.sqlite3")
-LIBRARIES_PATH = library_path = BASE_DIR / "library/libraries"
+_lib_path = BASE_DIR / "library/libraries"
+if not _lib_path.is_dir():
+    _lib_path = BASE_DIR.parent.parent / "backend" / "library" / "libraries"
+LIBRARIES_PATH = library_path = _lib_path
 
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
@@ -560,9 +611,26 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
+# MFA / WebAuthn settings
+MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
+MFA_PASSKEY_LOGIN_ENABLED = False
+MFA_PASSKEY_SIGNUP_ENABLED = False
+MFA_ADAPTER = "iam.adapter.MFAAdapter"
+
 ROUTES["client-settings"] = {
     "viewset": "enterprise_core.views.ClientSettingsViewSet",
     "basename": "client-settings",
+}
+
+ROUTES["custom-email-templates"] = {
+    "viewset": "enterprise_core.views.CustomEmailTemplateViewSet",
+    "basename": "custom-email-templates",
+}
+
+ROUTES["custom-word-templates"] = {
+    "viewset": "enterprise_core.views.CustomWordTemplateViewSet",
+    "basename": "custom-word-templates",
 }
 
 MODULES["enterprise_core"] = {

@@ -1,6 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from django.conf import settings
 from core.models import ComplianceAssessment, Framework
 
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
@@ -299,7 +299,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             email=instance.email,
         ).first()
         if not user:
-            send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+            send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
             try:
                 user = User.objects.create_user(
                     email=instance.email,

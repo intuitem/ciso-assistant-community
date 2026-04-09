@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.mfa.adapter import DefaultMFAAdapter
 from allauth.socialaccount.adapter import (
     DefaultSocialAccountAdapter,
     MultipleObjectsReturned,
@@ -56,14 +57,51 @@ class AccountAdapter(DefaultAccountAdapter):
             return None
 
 
+class MFAAdapter(DefaultMFAAdapter):
+    def get_public_key_credential_rp_entity(self):
+        rp_id = urlparse(settings.CISO_ASSISTANT_URL).hostname
+        return {
+            "id": rp_id,
+            "name": "CISO Assistant",
+        }
+
+
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
+    @staticmethod
+    def _find_email_in_dict(data, _depth=0, _max_depth=5):
+        """Recursively search for an email in a dict or list, checking known keys at each level."""
+        if _depth >= _max_depth:
+            return None
+        if isinstance(data, dict):
+            email = data.get("email") or data.get("email_address")
+            if isinstance(email, str) and email:
+                return email
+            if isinstance(email, list):
+                candidate = next((e for e in email if isinstance(e, str) and e), None)
+                if candidate:
+                    return candidate
+            for value in data.values():
+                if isinstance(value, (dict, list)):
+                    email = SocialAccountAdapter._find_email_in_dict(
+                        value, _depth=_depth + 1, _max_depth=_max_depth
+                    )
+                    if email:
+                        return email
+        elif isinstance(data, list):
+            for item in data:
+                if isinstance(item, (dict, list)):
+                    email = SocialAccountAdapter._find_email_in_dict(
+                        item, _depth=_depth + 1, _max_depth=_max_depth
+                    )
+                    if email:
+                        return email
+        return None
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
             "pre_social_login: extra_data received",
-            extra_data_keys=list(extra.keys()),
-            has_userinfo="userinfo" in extra,
-            has_id_token="id_token" in extra,
+            extra_data=extra,
             provider=sociallogin.account.provider,
         )
         # Primary lookup (legacy format)
@@ -84,6 +122,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 if candidate and "@" in candidate:
                     email_address = candidate
                     break
+        # Fallback: deep search in nested dicts (some IdPs nest email in sub-objects like "attributes")
+        if not email_address:
+            email_address = self._find_email_in_dict(extra)
         # Fallback: first string value containing '@'
         if not email_address:
             email_address = next(
@@ -102,23 +143,37 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             return Response(
                 {"message": "Email not provided."}, status=HTTP_401_UNAUTHORIZED
             )
-        logger.info(
-            "pre_social_login: resolved email for user lookup",
-            email_domain=email_address.split("@")[-1]
-            if "@" in email_address
-            else "unknown",
+        logger.debug(
+            "pre_social_login: resolved email from IdP",
+            idp_email=email_address,
+            idp_email_repr=repr(email_address),
             provider=sociallogin.account.provider,
         )
         try:
             user = User.objects.get(email__iexact=email_address)
+            logger.debug(
+                "pre_social_login: user matched",
+                idp_email=email_address,
+                db_email=user.email,
+                user_id=str(user.id),
+                is_active=user.is_active,
+            )
             sociallogin.user = user
             sociallogin.connect(request, user)
+            logger.info(
+                "pre_social_login: social account connected",
+                provider=sociallogin.account.provider,
+                user_id=str(user.id),
+            )
         except User.DoesNotExist:
             logger.error(
                 "pre_social_login: user not found",
-                email_domain=email_address.split("@")[-1]
-                if "@" in email_address
-                else "unknown",
+                provider=sociallogin.account.provider,
+            )
+            logger.debug(
+                "pre_social_login: user not found - check DB for this email",
+                idp_email=email_address,
+                idp_email_repr=repr(email_address),
                 provider=sociallogin.account.provider,
             )
             return Response(

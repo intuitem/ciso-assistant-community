@@ -68,13 +68,14 @@ services:
       - HOST_HEADER=x-forwarded-host
     image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest
     pull_policy: always
+    restart: always
     depends_on:
       backend:
         condition: service_healthy
 
   caddy:
     container_name: caddy
-    image: caddy:2.10.0
+    image: caddy:2.11.2
     environment:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
     depends_on:
@@ -88,9 +89,9 @@ services:
       - {{ cert_config.cert_path }}:/etc/caddy/cert.pem:ro
       - {{ cert_config.key_path }}:/etc/caddy/key.pem:ro{% endif %}
     command: |
-      sh -c 'echo $$CISO_ASSISTANT_URL "{
-      reverse_proxy /api/* backend:8000
-      reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
-      tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
-      tls internal{% endif %}{% endif %}
+      sh -c 'echo "$$CISO_ASSISTANT_URL {
+        reverse_proxy /api/* backend:8000
+        reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
+        tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
+        tls internal{% endif %}{% endif %}
       }" > Caddyfile && caddy run'
