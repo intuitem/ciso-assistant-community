@@ -60,9 +60,6 @@ importers:
       echarts:
         specifier: ^6.0.0
         version: 6.0.0
-      frappe-gantt:
-        specifier: ^1.0.3
-        version: 1.0.3
       globals:
         specifier: ^15.15.0
         version: 15.15.0
@@ -2299,9 +2296,6 @@ packages:
   foreground-child@3.3.1:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
-
-  frappe-gantt@1.0.3:
-    resolution: {integrity: sha512-NkwO2MD4JoWJ82ZruK/rQVIAEpI3nXUoo5gG+wQHV18yKXhzZsTehVfCXJ92DLl/foTtut1RVL0dqj7fo6Cfpg==}
 
   fsevents@2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
@@ -5952,8 +5946,6 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
-
-  frappe-gantt@1.0.3: {}
 
   fsevents@2.3.2:
     optional: true
