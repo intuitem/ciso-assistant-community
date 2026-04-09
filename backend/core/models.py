@@ -5461,22 +5461,32 @@ class Vulnerability(
         verbose_name=_("CWEs"),
         related_name="vulnerabilities",
     )
+    detected_at = models.DateField(
+        null=True, blank=True, verbose_name=_("Detection date")
+    )
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
     def save(self, *args, **kwargs):
+        from datetime import date
+
         is_new = self._state.adding
         severity_changed = False
         if not is_new:
             old = Vulnerability.objects.filter(pk=self.pk).values("severity").first()
             if old and old["severity"] != self.severity:
                 severity_changed = True
+        # Default detected_at to today on creation
+        if is_new and not self.detected_at:
+            self.detected_at = date.today()
         if (is_new or severity_changed) and not self.due_date:
             self._apply_sla_policy()
         super().save(*args, **kwargs)
 
     def _apply_sla_policy(self):
+        from datetime import date, timedelta
+
         from global_settings.models import GlobalSettings
 
         try:
@@ -5489,9 +5499,8 @@ class Vulnerability(
         severity_label = self.get_severity_display()
         days = sla_policy.get(severity_label)
         if days is not None:
-            from datetime import date, timedelta
-
-            self.due_date = date.today() + timedelta(days=int(days))
+            anchor = self.detected_at or date.today()
+            self.due_date = anchor + timedelta(days=int(days))
 
 
 # historical data
