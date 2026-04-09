@@ -1740,8 +1740,14 @@
 	"associatedFindingsAssessments": "Povezana praćenja",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Sat",
 				"countPlural=other": "{count} Sati"
@@ -1750,8 +1756,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minuta",
 				"countPlural=other": "{count} Minuta"
@@ -1760,8 +1771,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Dan",
 				"countPlural=other": "{count} Dana"
@@ -1770,8 +1786,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} objekt nije vidljiv.",
 				"countPlural=other": "{count} objekti nisu vidljivi."
@@ -2080,8 +2101,14 @@
 	"errorFetching": "Nije moguće učitati informacije o kaskadnom brisanju. Pokušajte ponovno.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Nijedan drugi objekt neće biti pogođen.",
 				"countPlural=one": "{count} povezanog objekta neće biti obrisan, ali će izgubiti jednu ili više veza.",
@@ -3657,5 +3684,6 @@
 	"xRaysLoadingData": "Analiziranje podataka...",
 	"xRaysView": "Pregledaj",
 	"tasksReview": "Pregled zadataka",
-	"yearlyTasksReview": "Pregled agregiranih zadataka"
+	"yearlyTasksReview": "Pregled agregiranih zadataka",
+	"exportEcosystem": "izvoz ekosustava (XLSX)"
 }

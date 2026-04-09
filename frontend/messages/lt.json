@@ -2513,8 +2513,14 @@
 	"associatedFindingsAssessments": "Susiję stebėjimai",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} valanda",
 				"countPlural=other": "{count} valandos"
@@ -2523,8 +2529,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} minutė",
 				"countPlural=other": "{count} minutės"
@@ -2533,8 +2544,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} diena",
 				"countPlural=other": "{count} dienos"
@@ -2543,8 +2559,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} objektas yra paslėptas. Redaguojant nuoroda gali būti prarasta.",
 				"countPlural=other": "{count} objektai yra paslėpti. Redaguojant nuorodos gali būti prarastos."
@@ -3867,8 +3888,14 @@
 	"errorFetching": "Nepavyko įkelti kaskadinės informacijos. Bandykite dar kartą.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Kiti objektai nebus paveikti.",
 				"countPlural=one": "{count} susijęs objektas nebus ištrintas, tačiau praras vieną ar daugiau ryšių.",
@@ -4120,5 +4147,6 @@
 	"soaScope": "Apimtis",
 	"allRequirements": "Visi reikalavimai",
 	"riskCoverage": "Rizikos aprėptis",
-	"soaSelectRiskDescription": "Pasirinkus rizikos vertinimus, taikymo pareiškimas bus praturtintas susietais rizikos scenarijais ir apdorojimo sprendimais"
+	"soaSelectRiskDescription": "Pasirinkus rizikos vertinimus, taikymo pareiškimas bus praturtintas susietais rizikos scenarijais ir apdorojimo sprendimais",
+	"exportEcosystem": "ekosistemos eksportas (XLSX)"
 }

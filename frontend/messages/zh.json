@@ -2814,8 +2814,14 @@
 	"bringTheEvidencesHelpText": "如果禁用，对象将在不带证据的情况下复制",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "不会影响其他对象。",
 				"countPlural=one": "{count} 个相关对象不会被删除，但会失去一个或多个关系。",
@@ -2840,8 +2846,13 @@
 	"dataContractors": "数据承包商",
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} 天",
 				"countPlural=other": "{count} 天"
@@ -2850,8 +2861,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} 个对象不可见。",
 				"countPlural=other": "{count} 个对象不可见。"
@@ -2934,8 +2950,14 @@
 	"hour": "小时",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} 小时",
 				"countPlural=other": "{count} 小时"
@@ -2974,8 +2996,13 @@
 	"minute": "分钟",
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} 分钟",
 				"countPlural=other": "{count} 分钟"
@@ -3178,5 +3205,6 @@
 	"confirmModalMessagePlural": "确定吗？此操作将永久影响以下对象",
 	"syncAppliedControlsMessage": "使用此参考控制措施的已应用控制措施将与其同步。请注意，此操作无法撤销。",
 	"syncToAppliedControl": "同步到已实施控制措施",
-	"syncToReferenceControl": "与参考控制措施同步"
+	"syncToReferenceControl": "与参考控制措施同步",
+	"exportEcosystem": "生态系统导出 (XLSX)"
 }

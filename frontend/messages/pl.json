@@ -1699,8 +1699,14 @@
 	"associatedFindingsAssessments": "Powiązane dalsze działania",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Godzina",
 				"countPlural=few": "{count} Godziny",
@@ -1710,8 +1716,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minuta",
 				"countPlural=few": "{count} Minuty",
@@ -1721,8 +1732,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Dzień",
 				"countPlural=few": "{count} Dni",
@@ -1732,8 +1748,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} obiekt niewidoczny.",
 				"countPlural=other": "{count} obiekty niewidoczne."
@@ -1857,8 +1878,14 @@
 	"errorFetching": "Nie można załadować informacji o kaskadzie. Spróbuj ponownie.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Żadne inne obiekty nie będą dotknięte.",
 				"countPlural=one": "{count} powiązany obiekt nie zostanie usunięty, ale straci jedno lub więcej relacji.",
@@ -1886,5 +1913,6 @@
 	"confirmModalMessagePlural": "Czy jesteś pewien? Ta akcja trwale wpłynie na następujące obiekty",
 	"syncAppliedControlsMessage": "Zastosowane kontrole korzystające z tej kontroli referencyjnej zostaną z nią zsynchronizowane. Należy pamiętać, że tej operacji nie można cofnąć.",
 	"syncToAppliedControl": "Synchronizuj z zastosowaną kontrolą",
-	"syncToReferenceControl": "Synchronizuj z kontrolą referencyjną"
+	"syncToReferenceControl": "Synchronizuj z kontrolą referencyjną",
+	"exportEcosystem": "eksport ekosystemu (XLSX)"
 }

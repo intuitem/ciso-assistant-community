@@ -2321,8 +2321,14 @@
 	"associatedFindingsAssessments": "연결된 후속 조치",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count}시간",
 				"countPlural=other": "{count}시간"
@@ -2331,8 +2337,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count}분",
 				"countPlural=other": "{count}분"
@@ -2341,8 +2352,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count}일",
 				"countPlural=other": "{count}일"
@@ -2351,8 +2367,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count}개의 객체가 숨겨져 있습니다. 편집 시 링크가 손실될 수 있습니다.",
 				"countPlural=other": "{count}개의 객체가 숨겨져 있습니다. 편집 시 링크가 손실될 수 있습니다."
@@ -3675,8 +3696,14 @@
 	"errorFetching": "연쇄 삭제 정보를 불러올 수 없습니다. 다시 시도하세요.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "영향을 받는 다른 객체가 없습니다.",
 				"countPlural=one": "관련 객체 {count}개는 삭제되지 않지만 하나 이상의 관계가 제거됩니다.",
@@ -3834,5 +3861,6 @@
 	"searchResults": "결과",
 	"searchFor": "에 대한",
 	"searchPrompt": "모든 객체에서 검색할 질의를 입력하세요",
-	"all": "전체"
+	"all": "전체",
+	"exportEcosystem": "생태계 내보내기 (XLSX)"
 }

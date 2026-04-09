@@ -952,8 +952,14 @@
 	"mappingSuggestionTeasing": "Suggesties voor in kaart brengen zijn nu beschikbaar! U kunt de filters gebruiken om suggesties te verkennen op basis van geladen kaders.",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Uur",
 				"countPlural=other": "{count} Uren"
@@ -962,8 +968,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minuut",
 				"countPlural=other": "{count} Minuten"
@@ -972,8 +983,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Dag",
 				"countPlural=other": "{count} Dagen"
@@ -982,8 +998,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} object niet zichtbaar.",
 				"countPlural=other": "{count} objecten niet zichtbaar."
@@ -2997,8 +3018,14 @@
 	"errorFetching": "Kan de kaskade-informatie niet laden. Probeer het opnieuw.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Geen andere objecten worden beïnvloed.",
 				"countPlural=one": "{count} gerelateerd object wordt niet verwijderd maar verliest een of meer relaties.",
@@ -3026,5 +3053,6 @@
 	"confirmModalMessagePlural": "Weet je het zeker? Deze actie zal permanent invloed hebben op de volgende objecten",
 	"syncAppliedControlsMessage": "De toegepaste controles die deze referentiecontrole gebruiken, worden ermee gesynchroniseerd. Houd er rekening mee dat dit niet ongedaan kan worden gemaakt.",
 	"syncToAppliedControl": "Synchroniseren met toegepaste controle",
-	"syncToReferenceControl": "Synchroniseren met referentiecontrole"
+	"syncToReferenceControl": "Synchroniseren met referentiecontrole",
+	"exportEcosystem": "ecosysteem export (XLSX)"
 }

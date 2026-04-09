@@ -948,8 +948,14 @@
 	"associatedFindingsAssessments": "متعلقہ فالو اپز",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "گھنٹہ {count}",
 				"countPlural=other": "گھنٹے {count}"
@@ -958,8 +964,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "منٹ {count}",
 				"countPlural=other": "منٹ {count}"
@@ -968,8 +979,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "دن {count}",
 				"countPlural=other": "دن {count}"
@@ -978,8 +994,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} چیز نظر نہیں آتی۔",
 				"countPlural=other": "{count} چیزیں نظر نہیں آتیں۔"
@@ -1081,8 +1102,14 @@
 	"errorFetching": "کاسکیڈ کی معلومات لوڈ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "کوئی دوسری اشیاء متاثر نہیں ہوں گی۔",
 				"countPlural=one": "{count} متعلقہ اشیاء حذف نہیں کی جائیں گی لیکن ان کی ایک یا زیادہ رشتے کھو دیں گی۔",
@@ -1110,5 +1137,6 @@
 	"confirmModalMessagePlural": "کیا آپ کو یقین ہے؟ یہ کارروائی درج ذیل اشیاء کو مستقل طور پر متاثر کرے گی",
 	"syncAppliedControlsMessage": "اس حوالہ کنٹرول کو استعمال کرنے والے اطلاق شدہ کنٹرولز اس کے ساتھ ہم آہنگ کر دیے جائیں گے۔ براہ کرم نوٹ کریں کہ یہ عمل واپس نہیں لیا جا سکتا۔",
 	"syncToAppliedControl": "لاگو کنٹرول کے ساتھ ہم آہنگ کریں",
-	"syncToReferenceControl": "حوالہ کنٹرول کے ساتھ ہم آہنگ کریں"
+	"syncToReferenceControl": "حوالہ کنٹرول کے ساتھ ہم آہنگ کریں",
+	"exportEcosystem": "ماحول کی برآمدگی (XLSX)"
 }

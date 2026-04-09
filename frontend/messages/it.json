@@ -1331,8 +1331,14 @@
 	"associatedFindingsAssessments": "Follow-up associati",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Ora",
 				"countPlural=other": "{count} Ore"
@@ -1341,8 +1347,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minuto",
 				"countPlural=other": "{count} Minuti"
@@ -1351,8 +1362,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Giorno",
 				"countPlural=other": "{count} Giorni"
@@ -1361,8 +1377,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} oggetto non visibile.",
 				"countPlural=other": "{count} oggetti non visibili."
@@ -1463,8 +1484,14 @@
 	"errorFetching": "Impossibile caricare le informazioni di cascata. Riprova.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Nessun altro oggetto sarà influenzato.",
 				"countPlural=one": "{count} oggetto correlato non verrà eliminato ma perderà una o più relazioni.",
@@ -2375,5 +2402,6 @@
 	"confirmModalMessagePlural": "Sei sicuro? Questa azione avrà effetto permanente sui seguenti oggetti",
 	"syncAppliedControlsMessage": "I controlli applicati che utilizzano questo controllo di riferimento saranno sincronizzati con esso. Si prega di notare che questa operazione non può essere annullata.",
 	"syncToAppliedControl": "Sincronizza con il controllo applicato",
-	"syncToReferenceControl": "Sincronizza con il controllo di riferimento"
+	"syncToReferenceControl": "Sincronizza con il controllo di riferimento",
+	"exportEcosystem": "esportazione dell'ecosistema (XLSX)"
 }

@@ -1166,8 +1166,14 @@
 	"associatedFindingsAssessments": "Tindak lanjut terkait",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Jam",
 				"countPlural=other": "{count} Jam"
@@ -1176,8 +1182,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Menit",
 				"countPlural=other": "{count} Menit"
@@ -1186,8 +1197,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Hari",
 				"countPlural=other": "{count} Hari"
@@ -1196,8 +1212,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} objek tidak terlihat.",
 				"countPlural=other": "{count} objek tidak terlihat."
@@ -1298,8 +1319,14 @@
 	"errorFetching": "Tidak dapat memuat informasi kaskade. Silakan coba lagi.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Tidak ada objek lain yang akan terpengaruh.",
 				"countPlural=one": "{count} objek terkait tidak akan dihapus tetapi akan kehilangan satu atau lebih hubungan.",
@@ -1327,5 +1354,6 @@
 	"confirmModalMessagePlural": "Apakah Anda yakin? Tindakan ini akan memengaruhi objek berikut secara permanen",
 	"syncAppliedControlsMessage": "Kontrol yang diterapkan yang menggunakan kontrol referensi ini akan disinkronkan dengannya. Harap dicatat bahwa tindakan ini tidak dapat dibatalkan.",
 	"syncToAppliedControl": "Sinkronkan dengan kontrol yang diterapkan",
-	"syncToReferenceControl": "Sinkronkan dengan kontrol referensi"
+	"syncToReferenceControl": "Sinkronkan dengan kontrol referensi",
+	"exportEcosystem": "ekspor ekosistem (XLSX)"
 }

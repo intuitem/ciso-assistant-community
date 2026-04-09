@@ -1698,8 +1698,14 @@
 	"associatedFindingsAssessments": "İlişkili takipler",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Saat",
 				"countPlural=other": "{count} Saatler"
@@ -1708,8 +1714,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Dakika",
 				"countPlural=other": "{count} Dakikalar"
@@ -1718,8 +1729,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Gün",
 				"countPlural=other": "{count} Günler"
@@ -1728,8 +1744,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} nesne görünür değil.",
 				"countPlural=other": "{count} nesne görünür değil."
@@ -1850,8 +1871,14 @@
 	"errorFetching": "Kaskat bilgileri yüklenemiyor. Lütfen tekrar deneyin.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Diğer nesneler etkilenmeyecek.",
 				"countPlural=one": "{count} ilgili nesne silinmeyecek ancak bir veya daha fazla ilişkiyi kaybedecek.",
@@ -1879,5 +1906,6 @@
 	"confirmModalMessagePlural": "Emin misiniz? Bu eylem aşağıdaki nesneleri kalıcı olarak etkileyecektir",
 	"syncAppliedControlsMessage": "Bu referans kontrolü kullanan uygulanan kontroller onunla senkronize edilecektir. Lütfen bunun geri alınamayacağını unutmayın.",
 	"syncToAppliedControl": "Uygulanan kontrol ile senkronize et",
-	"syncToReferenceControl": "Referans kontrol ile senkronize et"
+	"syncToReferenceControl": "Referans kontrol ile senkronize et",
+	"exportEcosystem": "ekosistem dışa aktarımı (XLSX)"
 }

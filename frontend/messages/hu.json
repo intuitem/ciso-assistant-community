@@ -980,8 +980,14 @@
 	"associatedFindingsAssessments": "Kapcsolódó követő értékelések",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Óra",
 				"countPlural=other": "{count} Óra"
@@ -990,8 +996,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Perc",
 				"countPlural=other": "{count} Perc"
@@ -1000,8 +1011,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Nap",
 				"countPlural=other": "{count} Nap"
@@ -1010,8 +1026,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} objektum nem látható.",
 				"countPlural=other": "{count} objektum nem látható."
@@ -1113,8 +1134,14 @@
 	"errorFetching": "Nem sikerült betölteni a láncolt információkat. Kérjük, próbálja újra.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Egyéb objektumok nem lesznek érintve.",
 				"countPlural=one": "{count} kapcsolódó objektum nem lesz törölve, de elveszíti egy vagy több kapcsolatot.",
@@ -1142,5 +1169,6 @@
 	"confirmModalMessagePlural": "Biztos benne? Ez a művelet véglegesen érinti a következő objektumokat",
 	"syncAppliedControlsMessage": "Azok az alkalmazott kontrollok, amelyek ezt a referencia kontrollt használják, szinkronizálva lesznek vele. Kérjük, vegye figyelembe, hogy ez nem vonható vissza.",
 	"syncToAppliedControl": "Szinkronizálás az alkalmazott kontrollal",
-	"syncToReferenceControl": "Szinkronizálás a referencia kontrollal"
+	"syncToReferenceControl": "Szinkronizálás a referencia kontrollal",
+	"exportEcosystem": "ökoszisztéma export (XLSX)"
 }

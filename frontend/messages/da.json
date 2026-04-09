@@ -1263,8 +1263,14 @@
 	"associatedFindingsAssessments": "Tilknyttede opfølgninger",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Time",
 				"countPlural=other": "{count} Timer"
@@ -1273,8 +1279,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minut",
 				"countPlural=other": "{count} Minutter"
@@ -1283,8 +1294,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Dag",
 				"countPlural=other": "{count} Dage"
@@ -1293,8 +1309,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} objekt ikke synligt.",
 				"countPlural=other": "{count} objekter ikke synlige."
@@ -1392,8 +1413,14 @@
 	"errorFetching": "Kan ikke indlæse kaskadeinformation. Prøv igen.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Ingen andre objekter vil blive påvirket.",
 				"countPlural=one": "{count} relateret objekt vil ikke blive slettet, men vil miste en eller flere relationer.",
@@ -1424,5 +1451,6 @@
 	"confirmModalMessagePlural": "Er du sikker? Denne handling vil permanent påvirke følgende objekter",
 	"syncAppliedControlsMessage": "De anvendte kontroller, der bruger denne referencekontrol, vil blive synkroniseret med den. Bemærk venligst, at dette ikke kan fortrydes.",
 	"syncToAppliedControl": "Synkroniser med anvendt kontrol",
-	"syncToReferenceControl": "Synkroniser med referencekontrol"
+	"syncToReferenceControl": "Synkroniser med referencekontrol",
+	"exportEcosystem": "økosystem-eksport (XLSX)"
 }
