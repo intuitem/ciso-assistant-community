@@ -17,6 +17,17 @@ import structlog
 
 logger = structlog.getLogger(__name__)
 
+
+class MarkdownSafe(str):
+    """
+    A string subclass that signals to render_email_template() that
+    this value already contains Markdown formatting (e.g. links) and
+    should NOT be HTML-escaped before Markdown conversion.
+    """
+
+    pass
+
+
 TEMPLATE_BASE_PATH = Path(__file__).parent / "templates" / "emails"
 
 
@@ -193,8 +204,13 @@ def render_email_template(
         full_context = get_default_context()
         full_context.update(context)
 
-        # Escape context values for safe HTML embedding
-        html_context = {k: html_escape(str(v)) for k, v in full_context.items()}
+        # Escape context values for safe HTML embedding.
+        # MarkdownSafe values are already formatted Markdown (e.g. links)
+        # and must NOT be escaped, so the Markdown->HTML pass can convert them.
+        html_context = {
+            k: str(v) if isinstance(v, MarkdownSafe) else html_escape(str(v))
+            for k, v in full_context.items()
+        }
 
         # Use string.Template for safe substitution
         subject = Template(template_data["subject"]).safe_substitute(full_context)
@@ -316,23 +332,47 @@ def format_validation_list(validations) -> str:
     return "\n".join(validation_lines)
 
 
-def format_task_node_list(task_nodes) -> str:
+def format_task_node_list(
+    task_nodes, include_description: bool = False
+) -> MarkdownSafe:
     """
-    Format a list of task nodes for email templates
+    Format a list of task nodes for email templates.
+
+    Each task node is rendered as a Markdown link pointing to its detail page,
+    so recipients can click through directly.
 
     Args:
         task_nodes: List of TaskNode objects
+        include_description: If True, include the task template description
+            below each task entry
 
     Returns:
-        Formatted string with task node information
+        MarkdownSafe string with task node information (contains Markdown links)
     """
+    base_url = getattr(settings, "CISO_ASSISTANT_URL", "http://localhost:5173")
     task_lines = []
     for node in task_nodes:
         name = node.task_template.name if node.task_template else "Unknown"
         due_date = node.due_date.strftime("%Y-%m-%d") if node.due_date else "Not set"
-        task_lines.append(f"- {name} (Due: {due_date}, Status: {node.status})")
+        # Recurrent tasks link to the task node (each occurrence is distinct),
+        # non-recurrent tasks link to the task template (the main object).
+        if node.task_template and node.task_template.is_recurrent:
+            node_url = f"{base_url}/task-nodes/{node.id}"
+        else:
+            template_id = node.task_template.id if node.task_template else node.id
+            node_url = f"{base_url}/task-templates/{template_id}"
+        line = f"- [{name}]({node_url}) (Due: {due_date}, Status: {node.status})"
+        if (
+            include_description
+            and node.task_template
+            and node.task_template.description
+        ):
+            description = node.task_template.description.strip()
+            # Indent continuation lines so they stay under the list item
+            line += f"\n  > {description}"
+        task_lines.append(line)
 
-    return "\n".join(task_lines)
+    return MarkdownSafe("\n".join(task_lines))
 
 
 def get_default_context() -> Dict[str, str]:
