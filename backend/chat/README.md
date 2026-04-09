@@ -114,7 +114,7 @@ New objects are indexed automatically via Django signals, but this requires Huey
 
 ```bash
 cd backend
-poetry run python manage.py run_huey -w 2 -k process
+uv run python manage.py run_huey -w 2 -k process
 ```
 
 ---

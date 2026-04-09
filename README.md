@@ -136,7 +136,7 @@ Here is an illustration of the **decoupling** principle and its advantages:
 
 Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
-## Setting up the local AI engine 
+## Setting up the local AI engine
 
 Read more here: [AI engine](backend/chat/README.md)
 
@@ -250,7 +250,7 @@ Read more here: [AI engine](backend/chat/README.md)
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
 108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
-109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷 
+109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷
 
 ### Community contributions
 
@@ -372,7 +372,7 @@ For the following executions, use "docker compose up" directly.
 
 - Python 3.14+
 - pip 25.3+
-- poetry 2.0+
+- uv 0.9+
 - node 24+
 - npm 10.2+
 - pnpm 10.30+
@@ -472,14 +472,14 @@ export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It define
 export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
 ```
 
-3. Install poetry
+3. Install uv
 
-Visit the poetry website for instructions: <https://python-poetry.org/docs/#installation>
+Visit the uv website for instructions: <https://docs.astral.sh/uv/getting-started/installation/>
 
 4. Install required dependencies.
 
 ```sh
-poetry install
+uv sync
 ```
 
 5. Recommended: Install the pre-commit hooks.
@@ -512,7 +512,7 @@ pre-commit install
 8. Apply migrations.
 
 ```sh
-poetry run python manage.py migrate
+uv run python manage.py migrate
 ```
 
 9. Create a Django superuser, that will be CISO Assistant administrator.
@@ -520,13 +520,13 @@ poetry run python manage.py migrate
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
-poetry run python manage.py createsuperuser
+uv run python manage.py createsuperuser
 ```
 
 10. Run development server.
 
 ```sh
-poetry run python manage.py runserver
+uv run python manage.py runserver
 ```
 
 11. for Huey (tasks runner)
@@ -587,15 +587,15 @@ find . -path "*/migrations/*.pyc"  -delete
 After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
-poetry run python manage.py makemigrations
-poetry run python manage.py migrate
+uv run python manage.py makemigrations
+uv run python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type "poetry run pytest" in a shell in the backend folder.
+To run API tests on the backend, simply type "uv run pytest" in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 
