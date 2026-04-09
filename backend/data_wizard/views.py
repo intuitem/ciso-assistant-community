@@ -1729,6 +1729,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             name=record_data.get("name"), folder_id=folder_id
         ).first()
 
+
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = BusinessImpactAnalysisWriteSerializer
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
