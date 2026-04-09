@@ -54,9 +54,11 @@ class CVEViewSet(BaseModelViewSet):
                     **result,
                 }
             )
-        except Exception as e:
+        except Exception:
             logger.warning("KEV sync failed", exc_info=True)
-            return Response({"error": str(e)}, status=502)
+            return Response(
+                {"error": "KEV sync failed due to an internal error"}, status=502
+            )
 
     @action(detail=True, methods=["post"], url_path="enrich")
     def enrich(self, request, pk=None):
@@ -135,6 +137,8 @@ class CWEViewSet(BaseModelViewSet):
                     **result,
                 }
             )
-        except Exception as e:
+        except Exception:
             logger.warning("CWE sync failed", exc_info=True)
-            return Response({"error": str(e)}, status=502)
+            return Response(
+                {"error": "CWE sync failed due to an internal error"}, status=502
+            )
