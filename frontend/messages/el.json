@@ -1689,13 +1689,8 @@
 	"associatedFindingsAssessments": "Συνδεδεμένες παρακολουθήσεις",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Ώρα",
 				"countPlural=other": "{count} Ώρες"
@@ -1807,14 +1802,8 @@
 	"errorFetching": "Δεν είναι δυνατή η φόρτωση των πληροφοριών αλυσιδωτής διαγραφής. Παρακαλώ προσπαθήστε ξανά.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"count=0": "Κανένα άλλο αντικείμενο δεν θα επηρεαστεί.",
 				"countPlural=one": "{count} σχετικό αντικείμενο δεν θα διαγραφεί αλλά θα χάσει μία ή περισσότερες σχέσεις.",
@@ -1827,13 +1816,8 @@
 	"campaignsDescription": "Διαχείριση εκστρατειών ελέγχου",
 	"objectsNotVisible": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} αντικείμενο δεν είναι ορατό.",
 				"countPlural=other": "{count} αντικείμενα δεν είναι ορατά."

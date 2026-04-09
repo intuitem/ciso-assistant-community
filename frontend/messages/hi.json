@@ -949,14 +949,8 @@
 	"associatedFindingsAssessments": "संबद्ध फॉलो-अप",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} घंटा",
 				"countPlural=other": "{count} घंटे"
@@ -965,13 +959,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} मिनट",
 				"countPlural=other": "{count} मिनट"
@@ -980,13 +969,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} दिन",
 				"countPlural=other": "{count} दिन"
@@ -995,13 +979,8 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} वस्तु दिखाई नहीं देती।",
 				"countPlural=other": "{count} वस्तुएं दिखाई नहीं देतीं।"
@@ -1103,14 +1082,8 @@
 	"errorFetching": "कास्केड जानकारी लोड करने में असमर्थ। कृपया पुनः प्रयास करें।",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"count=0": "कोई अन्य वस्तुएँ प्रभावित नहीं होंगी।",
 				"countPlural=one": "{count} संबंधित वस्तु हटाई नहीं जाएगी लेकिन एक या अधिक संबंध खो देगी।",

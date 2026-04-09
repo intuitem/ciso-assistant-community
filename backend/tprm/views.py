@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from django.utils.formats import date_format
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum, F, FloatField, Case, When, Value
+from django.db.models import Prefetch, Sum, F, FloatField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
 from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
@@ -623,9 +623,13 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         import io
         import pandas as pd
         from django.http import HttpResponse
+        from core.views import escape_excel_formula
 
         (viewable_entity_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Entity
+        )
+        (viewable_solution_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Solution
         )
         (viewable_contract_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Contract
@@ -635,13 +639,20 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "folder", "parent_entity"
         )
         solutions = Solution.objects.filter(
-            provider_entity__id__in=viewable_entity_ids
+            id__in=viewable_solution_ids
         ).select_related("provider_entity")
         contracts = (
             Contract.objects.filter(id__in=viewable_contract_ids)
             .select_related("folder", "provider_entity")
-            .prefetch_related("solutions")
+            .prefetch_related(
+                Prefetch(
+                    "solutions",
+                    queryset=Solution.objects.filter(id__in=viewable_solution_ids),
+                )
+            )
         )
+
+        esc = escape_excel_formula
 
         # --- Entities sheet ---
         entities_rows = []
@@ -649,24 +660,26 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             legal = entity.legal_identifiers or {}
             entities_rows.append(
                 {
-                    "ref_id": entity.ref_id,
-                    "name": entity.name,
-                    "description": entity.description,
-                    "mission": entity.mission,
-                    "country": entity.country,
-                    "currency": entity.currency,
+                    "ref_id": esc(entity.ref_id),
+                    "name": esc(entity.name),
+                    "description": esc(entity.description),
+                    "mission": esc(entity.mission),
+                    "country": esc(entity.country),
+                    "currency": esc(entity.currency),
                     "parent_entity_ref_id": (
-                        entity.parent_entity.ref_id if entity.parent_entity else ""
+                        esc(entity.parent_entity.ref_id)
+                        if entity.parent_entity
+                        else ""
                     ),
                     "dependency": entity.default_dependency,
                     "penetration": entity.default_penetration,
                     "maturity": entity.default_maturity,
                     "trust": entity.default_trust,
-                    "domain": entity.folder.name if entity.folder else "",
-                    "lei": legal.get("LEI", ""),
-                    "euid": legal.get("EUID", ""),
-                    "vat": legal.get("VAT", ""),
-                    "duns": legal.get("DUNS", ""),
+                    "domain": esc(entity.folder.name) if entity.folder else "",
+                    "lei": esc(legal.get("LEI", "")),
+                    "euid": esc(legal.get("EUID", "")),
+                    "vat": esc(legal.get("VAT", "")),
+                    "duns": esc(legal.get("DUNS", "")),
                 }
             )
 
@@ -675,11 +688,11 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         for solution in solutions:
             solutions_rows.append(
                 {
-                    "ref_id": solution.ref_id,
-                    "name": solution.name,
-                    "description": solution.description,
-                    "provider_entity_ref_id": solution.provider_entity.ref_id,
-                    "provider": solution.provider_entity.name,
+                    "ref_id": esc(solution.ref_id),
+                    "name": esc(solution.name),
+                    "description": esc(solution.description),
+                    "provider_entity_ref_id": esc(solution.provider_entity.ref_id),
+                    "provider": esc(solution.provider_entity.name),
                     "criticality": solution.criticality,
                 }
             )
@@ -690,20 +703,22 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             first_solution = contract.solutions.first()
             contracts_rows.append(
                 {
-                    "ref_id": contract.ref_id,
-                    "name": contract.name,
-                    "description": contract.description,
+                    "ref_id": esc(contract.ref_id),
+                    "name": esc(contract.name),
+                    "description": esc(contract.description),
                     "provider_entity_ref_id": (
-                        contract.provider_entity.ref_id
+                        esc(contract.provider_entity.ref_id)
                         if contract.provider_entity
                         else ""
                     ),
                     "provider": (
-                        contract.provider_entity.name
+                        esc(contract.provider_entity.name)
                         if contract.provider_entity
                         else ""
                     ),
-                    "solution_ref_id": first_solution.ref_id if first_solution else "",
+                    "solution_ref_id": (
+                        esc(first_solution.ref_id) if first_solution else ""
+                    ),
                     "status": contract.status,
                     "start_date": (
                         contract.start_date.isoformat() if contract.start_date else ""
@@ -716,8 +731,8 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                         if contract.annual_expense is not None
                         else ""
                     ),
-                    "currency": contract.currency,
-                    "domain": contract.folder.name if contract.folder else "",
+                    "currency": esc(contract.currency),
+                    "domain": esc(contract.folder.name) if contract.folder else "",
                 }
             )
 

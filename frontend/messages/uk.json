@@ -1622,14 +1622,8 @@
 	"errorFetching": "Не вдалося завантажити інформацію про каскад. Будь ласка, спробуйте ще раз.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"count=0": "Жоден інший об'єкт не буде зачеплений.",
 				"countPlural=one": "{count} пов'язаний об'єкт не буде видалений, але втратить одне або кілька зв'язків.",
@@ -1642,13 +1636,8 @@
 	"campaignsDescription": "Керування кампаніями аудиту",
 	"objectsNotVisible": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} об'єкт невидимий.",
 				"countPlural=other": "{count} об'єкти невидимі."
