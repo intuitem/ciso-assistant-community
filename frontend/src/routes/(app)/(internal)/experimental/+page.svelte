@@ -43,10 +43,4 @@
 		link="/experimental/framework-builder"
 		tags={['frameworks', 'builder', 'editor']}
 	/>
-	<Article
-		title={m.ganttChart()}
-		desc={m.ganttChartDescription()}
-		link="/experimental/gantt"
-		tags={['planning', 'timeline', 'controls', 'audits']}
-	/>
 </div>
