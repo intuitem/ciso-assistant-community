@@ -224,35 +224,83 @@
 	</button>
 	{#if showCelRef}
 		<div
-			class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono space-y-1"
+			class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono space-y-3"
 		>
-			<div><span class="text-gray-700">assessment.score_sum</span> — total points scored</div>
-			<div><span class="text-gray-700">assessment.score_max</span> — total possible points</div>
-			<div>
-				<span class="text-gray-700">assessment.answered_count</span> — answered requirements
+			<div class="font-sans font-semibold text-gray-600">Assessment</div>
+			<div class="space-y-1 ml-2">
+				<div><span class="text-gray-700">assessment.score_sum</span> — total points scored</div>
+				<div>
+					<span class="text-gray-700">assessment.score_max</span> — total possible points
+				</div>
+				<div>
+					<span class="text-gray-700">assessment.answered_count</span> — answered requirements
+				</div>
+				<div>
+					<span class="text-gray-700">assessment.total_count</span> — total assessable requirements
+				</div>
 			</div>
-			<div>
-				<span class="text-gray-700">assessment.total_count</span> — total assessable requirements
+
+			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
+				Requirements (by URN)
 			</div>
-			<div>
-				<span class="text-gray-700">requirements["urn:..."].score</span> — requirement score
+			<div class="space-y-1 ml-2">
+				<div>
+					<span class="text-gray-700">requirements["urn:..."].score</span> — requirement score
+				</div>
+				<div>
+					<span class="text-gray-700">requirements["urn:..."].max_score</span> — requirement max score
+				</div>
+				<div>
+					<span class="text-gray-700">requirements["urn:..."].result</span> — requirement result
+				</div>
+				<div>
+					<span class="text-gray-700">requirements["urn:..."].status</span> — requirement status
+				</div>
 			</div>
-			<div>
-				<span class="text-gray-700">requirements["urn:..."].max_score</span> — requirement max score
+
+			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
+				Requirements (by ref ID)
 			</div>
-			<div>
-				<span class="text-gray-700">requirements["urn:..."].result</span> — requirement result
+			<div class="space-y-1 ml-2">
+				<div>
+					<span class="text-gray-700">ref_ids["REF_ID"].score / .max_score / .result / .status</span
+					>
+					— same fields as above
+				</div>
 			</div>
-			<div>
-				<span class="text-gray-700">requirements["urn:..."].status</span> — requirement status
+
+			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
+				Answers (by question URN or ref ID)
 			</div>
-			<div class="pt-1 border-t border-gray-200 mt-1">
-				<span class="text-gray-700">ref_ids["REF_ID"].score</span> — requirement score (by ref ID, works
-				across copies)
+			<div class="space-y-1 ml-2">
+				<div>
+					<span class="text-gray-700">answers["Q_REF_ID"].score</span> — answer score (add_score × weight)
+				</div>
+				<div>
+					<span class="text-gray-700">answers["Q_REF_ID"].value</span> — free-text answer value
+				</div>
+				<div>
+					<span class="text-gray-700">answers["Q_REF_ID"].selected_choices</span> — list of selected
+					choice URNs
+				</div>
+				<div>
+					<span class="text-gray-700">answers["Q_REF_ID"].weight</span> — question weight
+				</div>
+				<div>
+					<span class="text-gray-700">answers["Q_REF_ID"].type</span> — question type (unique_choice,
+					multiple_choice, text)
+				</div>
 			</div>
-			<div>
-				<span class="text-gray-700">ref_ids["REF_ID"].max_score / .result / .status</span> — same fields
-				as above
+
+			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">Other</div>
+			<div class="space-y-1 ml-2">
+				<div>
+					<span class="text-gray-700">computed_outcomes</span> — map of previously computed outcome ref_ids
+				</div>
+				<div>
+					<span class="text-gray-700">hidden_requirements</span> — list of URNs hidden by visibility
+					expressions
+				</div>
 			</div>
 		</div>
 	{/if}
