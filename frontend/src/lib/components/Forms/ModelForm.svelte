@@ -11,6 +11,8 @@
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
+	import CVEForm from './ModelForm/CVEForm.svelte';
+	import CWEForm from './ModelForm/CWEForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
 	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
@@ -33,6 +35,8 @@
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
+	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
+	import SecIntelFeedsSettingForm from './ModelForm/SecIntelFeedsSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
@@ -376,6 +380,10 @@
 			/>
 		{:else if URLModel === 'threats'}
 			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'cves'}
+			<CVEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'cwes'}
+			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'risk-scenarios'}
 			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
@@ -501,6 +509,10 @@
 			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'feature-flags'}
 			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+		{:else if URLModel === 'vulnerability-sla'}
+			<VulnerabilitySlaSettingForm {form} {model} />
+		{:else if URLModel === 'sec-intel-feeds'}
+			<SecIntelFeedsSettingForm {form} {model} />
 		{:else if URLModel === 'filtering-labels'}
 			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'business-impact-analysis'}

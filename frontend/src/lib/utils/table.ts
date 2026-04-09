@@ -1318,6 +1318,7 @@ export const listViewFields = {
 			'name',
 			'status',
 			'severity',
+			'sla',
 			'dueDate',
 			'applied_controls',
 			'folder',
@@ -1328,6 +1329,7 @@ export const listViewFields = {
 			'name',
 			'status',
 			'severity',
+			'state',
 			'due_date',
 			'applied_controls',
 			'folder',
@@ -1388,22 +1390,22 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'description',
 			'cvssBaseScore',
 			'epssScore',
 			'isKev',
 			'publishedDate',
-			'library',
 			'domain',
 			'labels'
 		],
 		body: [
 			'ref_id',
 			'name',
+			'description',
 			'cvss_base_score',
 			'epss_score',
 			'is_kev',
 			'published_date',
-			'library',
 			'folder',
 			'filtering_labels'
 		],
@@ -3266,6 +3268,31 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'status',
 			optionsEndpoint: 'vulnerabilities/status'
 		},
+		{
+			type: 'change_field',
+			label: 'changeSeverity',
+			icon: 'fa-solid fa-arrow-up-wide-short',
+			field: 'severity',
+			optionsEndpoint: 'vulnerabilities/severity'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	cves: [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	cwes: [
 		{
 			type: 'change_folder',
 			label: 'changeDomain',
