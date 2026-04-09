@@ -14440,6 +14440,7 @@ class FindingViewSet(BaseModelViewSet):
         "filtering_labels",
         "applied_controls",
         "evidences",
+        "vulnerabilities",
         "due_date",
     ]
     ordering = ["ref_id"]

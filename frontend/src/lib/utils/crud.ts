@@ -1040,6 +1040,20 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Feature flag',
 		verboseNamePlural: 'Feature flags'
 	},
+	'vulnerability-sla': {
+		name: 'vulnerabilitySla',
+		localName: 'vulnerabilitySla',
+		localNamePlural: 'vulnerabilitySla',
+		verboseName: 'Vulnerability SLA',
+		verboseNamePlural: 'Vulnerability SLA'
+	},
+	'sec-intel-feeds': {
+		name: 'secIntelFeeds',
+		localName: 'secIntelFeeds',
+		localNamePlural: 'secIntelFeeds',
+		verboseName: 'Security Intelligence Feeds',
+		verboseNamePlural: 'Security Intelligence Feeds'
+	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
 		localName: 'requirementMappingSet',

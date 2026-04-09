@@ -36,6 +36,26 @@ class CVE(
     cvss_vector = models.CharField(
         max_length=255, blank=True, null=True, verbose_name=_("CVSS vector")
     )
+    epss_score = models.DecimalField(
+        max_digits=5,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        verbose_name=_("EPSS score"),
+    )
+    epss_percentile = models.DecimalField(
+        max_digits=5,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        verbose_name=_("EPSS percentile"),
+    )
+    is_kev = models.BooleanField(
+        default=False, verbose_name=_("Known Exploited Vulnerability")
+    )
+    kev_date_added = models.DateField(
+        null=True, blank=True, verbose_name=_("KEV date added")
+    )
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id"]

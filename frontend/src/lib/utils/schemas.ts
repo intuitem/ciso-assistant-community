@@ -177,7 +177,11 @@ export const CVESchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	published_date: z.string().optional().nullable(),
 	cvss_base_score: z.coerce.number().min(0).max(10).optional().nullable(),
-	cvss_vector: z.string().optional().nullable()
+	cvss_vector: z.string().optional().nullable(),
+	epss_score: z.coerce.number().min(0).max(1).optional().nullable(),
+	epss_percentile: z.coerce.number().min(0).max(1).optional().nullable(),
+	is_kev: z.boolean().default(false).optional(),
+	kev_date_added: z.string().optional().nullable()
 });
 
 export const CWESchema = z.object({
@@ -595,6 +599,13 @@ export const GeneralSettingsSchema = z.object({
 	openai_api_base: z.string().default('http://localhost:1234/v1').optional(),
 	openai_model: z.string().default('').optional(),
 	openai_api_key: z.string().default('').optional()
+});
+
+export const SecIntelFeedsSchema = z.object({
+	kev_feed_enabled: z.boolean().optional(),
+	epss_feed_enabled: z.boolean().optional(),
+	nvd_enrich_enabled: z.boolean().optional(),
+	network_timeout: z.number().int().min(5).max(120).optional()
 });
 
 export const VulnerabilitySlaSchema = z.object({
@@ -1658,6 +1669,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,
 	'vulnerability-sla': VulnerabilitySlaSchema,
+	'sec-intel-feeds': SecIntelFeedsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

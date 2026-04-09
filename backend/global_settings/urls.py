@@ -10,6 +10,7 @@ from .views import (
     GeneralSettingsViewSet,
     FeatureFlagsViewSet,
     VulnerabilitySlaViewSet,
+    SecIntelFeedsViewSet,
 )
 from .routers import DefaultSettingsRouter
 
@@ -39,6 +40,12 @@ settings_router.register(
     r"vulnerability-sla",
     VulnerabilitySlaViewSet,
     basename="vulnerability-sla",
+)
+
+settings_router.register(
+    r"sec-intel-feeds",
+    SecIntelFeedsViewSet,
+    basename="sec-intel-feeds",
 )
 
 

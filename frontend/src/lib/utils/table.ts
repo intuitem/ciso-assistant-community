@@ -1385,11 +1385,23 @@ export const listViewFields = {
 		}
 	},
 	cves: {
-		head: ['ref_id', 'name', 'cvssBaseScore', 'publishedDate', 'library', 'domain', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'cvssBaseScore',
+			'epssScore',
+			'isKev',
+			'publishedDate',
+			'library',
+			'domain',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'cvss_base_score',
+			'epss_score',
+			'is_kev',
 			'published_date',
 			'library',
 			'folder',

@@ -408,3 +408,63 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
             instance.save(update_fields=["value"])
 
         return instance
+
+
+class SecIntelFeedsSerializer(serializers.ModelSerializer):
+    """
+    Serializer for managing Security Intelligence feed settings.
+    Controls which external feeds are enabled and network parameters.
+    """
+
+    kev_feed_enabled = serializers.BooleanField(
+        source="value.kev_feed_enabled", required=False, default=False
+    )
+    epss_feed_enabled = serializers.BooleanField(
+        source="value.epss_feed_enabled", required=False, default=False
+    )
+    nvd_enrich_enabled = serializers.BooleanField(
+        source="value.nvd_enrich_enabled", required=False, default=False
+    )
+    network_timeout = serializers.IntegerField(
+        source="value.network_timeout", required=False, default=30
+    )
+
+    class Meta:
+        model = GlobalSettings
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
+        ]
+        read_only_fields = ["name"]
+
+    def update(self, instance, validated_data):
+        current_value_dict = instance.value if isinstance(instance.value, dict) else {}
+        value_changed = False
+        new_value_dict = validated_data.get("value", {})
+
+        for field_name, field_instance in self.fields.items():
+            if field_name in self.Meta.read_only_fields:
+                continue
+            if not hasattr(
+                field_instance, "source"
+            ) or not field_instance.source.startswith("value."):
+                continue
+
+            if field_name in new_value_dict:
+                source_key = field_instance.source.split(".")[-1]
+                new_flag_value = new_value_dict[field_name]
+
+                if current_value_dict.get(source_key) != new_flag_value:
+                    current_value_dict[source_key] = new_flag_value
+                    value_changed = True
+
+        if value_changed:
+            instance.value = current_value_dict
+            instance.save(update_fields=["value"])
+
+        return instance
