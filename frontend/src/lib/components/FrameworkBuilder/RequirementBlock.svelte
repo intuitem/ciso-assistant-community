@@ -316,7 +316,7 @@
 			<input
 				type="text"
 				class="w-full text-xs px-2 py-1 border border-gray-200 rounded font-mono bg-gray-50 focus:bg-white focus:border-blue-300 focus:outline-none"
-				placeholder="e.g. requirements["urn:..."].score > 50"
+				placeholder={'e.g. requirements["urn:..."].score > 50'}
 				value={requirement.node.visibility_expression ?? ''}
 				onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
 			/>
