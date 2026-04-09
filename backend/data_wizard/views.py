@@ -735,6 +735,14 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
         "control_impact": ("control_impact", "impact"),
         "reference_control": ("reference_control", "reference_control_ref_id"),
         "owner": ("owner",),
+        "cost": (
+            "cost_currency",
+            "cost_amortization_period",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+        ),
     }
     IMPACT_MAP: Final[dict[str, int]] = {
         "very low": 1,
