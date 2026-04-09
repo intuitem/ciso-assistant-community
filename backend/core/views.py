@@ -11507,7 +11507,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             compliance_assessment.get_requirement_assessments(
                 include_non_assessable=True,
                 lightweight=True,
-                skip_ig_filter=_framework.is_dynamic(),
+                skip_ig_filter=_framework.is_dynamic()
+                and not compliance_assessment.selected_implementation_groups,
             )
         )
         # Auditee filtering: scope to assigned requirements only
@@ -11549,7 +11550,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             _framework.max_score,
         )
         implementation_groups = compliance_assessment.selected_implementation_groups
-        if compliance_assessment.framework.is_dynamic():
+        if (
+            compliance_assessment.framework.is_dynamic()
+            and not compliance_assessment.selected_implementation_groups
+        ):
             implementation_groups = None
         return Response(
             filter_graph_by_implementation_groups(tree, implementation_groups)
