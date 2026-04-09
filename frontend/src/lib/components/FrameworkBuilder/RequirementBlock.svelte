@@ -303,6 +303,21 @@
 			</div>
 		{/if}
 
+		<!-- Visibility expression (CEL) -->
+		<div class="px-4 py-2 border-b border-gray-100">
+			<label class="text-xs text-gray-500 block mb-1">
+				Visibility expression (CEL)
+				<span class="text-gray-400 ml-1" title="CEL expression that must evaluate to true for this requirement to be visible. Example: requirements[&quot;urn:...&quot;].score > 50">&#9432;</span>
+			</label>
+			<input
+				type="text"
+				class="w-full text-xs px-2 py-1 border border-gray-200 rounded font-mono bg-gray-50 focus:bg-white focus:border-blue-300 focus:outline-none"
+				placeholder='e.g. requirements["urn:..."].score > 50'
+				value={requirement.node.visibility_expression ?? ''}
+				onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
+			/>
+		</div>
+
 		<!-- Questions -->
 		<div class="px-4 py-3 space-y-1">
 			{#each requirement.questions as bq, qIndex (bq.question.id)}

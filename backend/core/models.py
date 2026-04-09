@@ -1292,6 +1292,7 @@ class LibraryUpdater:
                                 "description",
                                 "order_id",
                                 "implementation_groups",
+                                "visibility_expression",
                             }
                         )
                     )
@@ -2470,6 +2471,15 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         choices=DisplayMode.choices,
         default=DisplayMode.DEFAULT,
         verbose_name=_("Display mode"),
+    )
+    visibility_expression = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Visibility expression"),
+        help_text=_(
+            "CEL expression that must evaluate to true for this requirement "
+            "to be visible in an assessment."
+        ),
     )
 
     @property

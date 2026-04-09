@@ -9026,6 +9026,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 typical_evidence=node.typical_evidence,
                 weight=node.weight,
                 importance=node.importance,
+                visibility_expression=node.visibility_expression,
                 folder_id=folder_id,
                 locale=node.locale,
                 default_locale=node.default_locale,
@@ -9201,6 +9202,8 @@ class FrameworkViewSet(BaseModelViewSet):
                 node_data["parent_urn"] = node.parent_urn
             if node.implementation_groups:
                 node_data["implementation_groups"] = node.implementation_groups
+            if node.visibility_expression:
+                node_data["visibility_expression"] = node.visibility_expression
             if node.typical_evidence:
                 node_data["typical_evidence"] = node.typical_evidence
             if node.display_mode and node.display_mode != "default":
@@ -9450,6 +9453,7 @@ class FrameworkViewSet(BaseModelViewSet):
             "order_id",
             "assessable",
             "implementation_groups",
+            "visibility_expression",
             "typical_evidence",
             "weight",
             "importance",
@@ -9834,6 +9838,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         order_id=data.get("order_id"),
                         assessable=data.get("assessable", False),
                         implementation_groups=data.get("implementation_groups"),
+                        visibility_expression=data.get("visibility_expression") or None,
                         typical_evidence=data.get("typical_evidence") or None,
                         weight=data.get("weight", 1),
                         importance=data.get("importance", "undefined"),
@@ -9854,6 +9859,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         "order_id",
                         "assessable",
                         "implementation_groups",
+                        "visibility_expression",
                         "typical_evidence",
                         "weight",
                         "importance",
@@ -9881,6 +9887,8 @@ class FrameworkViewSet(BaseModelViewSet):
                             order_id=data.get("order_id"),
                             assessable=data.get("assessable", False),
                             implementation_groups=data.get("implementation_groups"),
+                            visibility_expression=data.get("visibility_expression")
+                            or None,
                             typical_evidence=data.get("typical_evidence") or None,
                             weight=data.get("weight", 1),
                             importance=data.get("importance", "undefined"),
@@ -12143,6 +12151,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ra for ra in requirement_assessments_objects if ra.id in ra_ids
             ]
 
+        # CEL visibility filtering: exclude requirements hidden by visibility_expression
+        from core.cel_service import build_cel_context
+
+        _ctx, hidden_urns = build_cel_context(compliance_assessment)
+        if hidden_urns:
+            requirement_assessments_objects = [
+                ra
+                for ra in requirement_assessments_objects
+                if ra.requirement.urn not in hidden_urns
+            ]
+
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -12151,6 +12170,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
             .order_by(F("order_id").asc(nulls_last=True))
         )
+
+        # Also filter the requirements tree to exclude hidden nodes
+        if hidden_urns:
+            requirements_objects = [
+                n for n in requirements_objects if n.urn not in hidden_urns
+            ]
+
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
             parent = nodes_by_urn.get(node.parent_urn)
@@ -16828,6 +16854,17 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
         ]
 
+        # CEL visibility filtering: exclude requirements hidden by visibility_expression
+        from core.cel_service import build_cel_context
+
+        _ctx, hidden_urns = build_cel_context(compliance_assessment)
+        if hidden_urns:
+            requirement_assessments_objects = [
+                ra
+                for ra in requirement_assessments_objects
+                if ra.requirement.urn not in hidden_urns
+            ]
+
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -16836,6 +16873,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
             .order_by(F("order_id").asc(nulls_last=True))
         )
+
+        # Also filter the requirements tree to exclude hidden nodes
+        if hidden_urns:
+            requirements_objects = [
+                n for n in requirements_objects if n.urn not in hidden_urns
+            ]
+
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
             parent = nodes_by_urn.get(node.parent_urn)

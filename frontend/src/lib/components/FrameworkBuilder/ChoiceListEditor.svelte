@@ -119,20 +119,14 @@
 							)}
 					/>
 				{:else}
-					<div class="flex-1 choice-input-wrapper">
-						<input
-							type="text"
-							value={choice.value ?? ''}
-							placeholder="Choice text..."
-							class="choice-value-input w-full bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm text-gray-900 outline-none focus-visible:ring-0 transition-colors"
-							onblur={(e) => saveField(choice.id, 'value', e.currentTarget.value)}
-							onkeydown={(e) => handleChoiceKeydown(e, choice, index)}
-						/>
-					</div>
-					<kbd
-						class="enter-hint hidden text-[10px] text-secondary-700 bg-white border border-secondary-300 rounded px-1.5 py-1 shadow-[0_1px_0_0_theme(colors.secondary.300)] pointer-events-none select-none shrink-0"
-						><i class="fa-solid fa-turn-down fa-rotate-90"></i></kbd
-					>
+					<input
+						type="text"
+						value={choice.value ?? ''}
+						placeholder="Choice text..."
+						class="choice-value-input flex-1 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm text-gray-900 outline-none transition-colors"
+						onblur={(e) => saveField(choice.id, 'value', e.currentTarget.value)}
+						onkeydown={(e) => handleChoiceKeydown(e, choice, index)}
+					/>
 				{/if}
 
 				{#if choice.add_score != null}
@@ -271,8 +265,3 @@
 	{/if}
 </div>
 
-<style>
-	.choice-input-wrapper:focus-within + .enter-hint {
-		display: inline-flex;
-	}
-</style>

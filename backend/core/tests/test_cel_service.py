@@ -4,9 +4,12 @@ from unittest.mock import patch
 
 import pytest
 from core.models import (
+    Answer,
     ComplianceAssessment,
     Framework,
     Perimeter,
+    Question,
+    QuestionChoice,
     RequirementAssessment,
     RequirementNode,
 )
@@ -99,7 +102,8 @@ class TestBuildCelContext:
     def test_zero_fill_defaults(self, cel_setup):
         from core.cel_service import build_cel_context
 
-        ctx = build_cel_context(cel_setup["ca"])
+        ctx, hidden = build_cel_context(cel_setup["ca"])
+        assert hidden == set()
         assert ctx["assessment"]["total_count"] == 2
         assert ctx["assessment"]["score_sum"] == 0
         assert ctx["assessment"]["answered_count"] == 0
@@ -120,7 +124,7 @@ class TestBuildCelContext:
         ra1.is_scored = True
         ra1.save(update_fields=["score", "result", "is_scored"])
 
-        ctx = build_cel_context(cel_setup["ca"])
+        ctx, _ = build_cel_context(cel_setup["ca"])
         assert ctx["assessment"]["score_sum"] == 80
         assert ctx["assessment"]["answered_count"] == 1
         assert ctx["requirements"]["urn:test:cel:req:001"]["score"] == 80
@@ -134,7 +138,7 @@ class TestBuildCelContext:
         ra1.is_scored = True
         ra1.save(update_fields=["score", "result", "is_scored"])
 
-        ctx = build_cel_context(cel_setup["ca"])
+        ctx, _ = build_cel_context(cel_setup["ca"])
         assert ctx["assessment"]["score_sum"] == 0
         assert ctx["assessment"]["answered_count"] == 0
         assert ctx["requirements"]["urn:test:cel:req:001"]["score"] == 0
@@ -183,7 +187,7 @@ class TestBuildCelContext:
             compliance_assessment=ca, requirement=rn_in, folder=folder
         )
 
-        ctx = build_cel_context(ca)
+        ctx, _ = build_cel_context(ca)
         assert ctx["assessment"]["total_count"] == 1
         assert "urn:test:ig:in" in ctx["requirements"]
         assert "urn:test:ig:out" not in ctx["requirements"]
@@ -218,12 +222,67 @@ class TestBuildCelContext:
             max_score=100,
         )
         # No RA created for the node
-        ctx = build_cel_context(ca)
+        ctx, _ = build_cel_context(ca)
         assert ctx["assessment"]["total_count"] == 1
         req = ctx["requirements"]["urn:test:missing:001"]
         assert req["score"] == 0
         assert req["result"] == "not_assessed"
         assert req["status"] == "to_do"
+
+    def test_context_includes_answers(self, cel_setup):
+        """Answer data should appear in the CEL context."""
+        from core.cel_service import build_cel_context
+
+        rn1 = cel_setup["rn1"]
+        ra1 = cel_setup["ra1"]
+        folder = cel_setup["folder"]
+
+        q = Question.objects.create(
+            requirement_node=rn1,
+            urn="urn:test:cel:q:001",
+            text="Test question",
+            type="unique_choice",
+            folder=folder,
+        )
+        c1 = QuestionChoice.objects.create(
+            question=q,
+            urn="urn:test:cel:q:001:c:yes",
+            value="Yes",
+            add_score=80,
+            compute_result="true",
+            folder=folder,
+        )
+        answer = Answer.objects.create(
+            requirement_assessment=ra1,
+            question=q,
+            folder=folder,
+        )
+        answer.selected_choices.add(c1)
+
+        ctx, _ = build_cel_context(cel_setup["ca"])
+        assert "answers" in ctx
+        assert q.urn in ctx["answers"]
+        ans = ctx["answers"][q.urn]
+        assert ans["score"] == 80  # add_score * weight(1)
+        assert ans["type"] == "unique_choice"
+        assert "urn:test:cel:q:001:c:yes" in ans["selected_choices"]
+
+    def test_context_includes_computed_outcomes(self, cel_setup):
+        """Previously computed outcomes should be in the context."""
+        from core.cel_service import build_cel_context
+
+        ca = cel_setup["ca"]
+        ca.computed_outcome = [{"result": "pass", "label": "High"}]
+        ca.save(update_fields=["computed_outcome"])
+
+        ctx, _ = build_cel_context(ca)
+        assert ctx["computed_outcomes"] == [{"result": "pass", "label": "High"}]
+
+    def test_empty_answers_dict_when_no_answers(self, cel_setup):
+        from core.cel_service import build_cel_context
+
+        ctx, _ = build_cel_context(cel_setup["ca"])
+        assert ctx["answers"] == {}
 
 
 # ---------------------------------------------------------------------------
@@ -231,7 +290,8 @@ class TestBuildCelContext:
 # ---------------------------------------------------------------------------
 @pytest.mark.django_db
 class TestEvaluateOutcomes:
-    def test_first_match_wins(self, cel_setup):
+    def test_collects_all_matching_outcomes(self, cel_setup):
+        """All matching rules should be collected, not just the first."""
         from core.cel_service import evaluate_outcomes
 
         ra1, ra2 = cel_setup["ra1"], cel_setup["ra2"]
@@ -248,10 +308,18 @@ class TestEvaluateOutcomes:
         evaluate_outcomes(ca)
         ca.refresh_from_db()
 
-        assert ca.computed_outcome == {"result": "pass", "label": "High"}
-        assert "expression" not in ca.computed_outcome
+        # score_sum = 160 >= 150, >= 50, and true all match
+        assert isinstance(ca.computed_outcome, list)
+        assert len(ca.computed_outcome) == 3
+        assert ca.computed_outcome[0] == {"result": "pass", "label": "High"}
+        assert ca.computed_outcome[1] == {"result": "partial", "label": "Medium"}
+        assert ca.computed_outcome[2] == {"result": "fail", "label": "Low"}
+        # expression should not be included
+        for outcome in ca.computed_outcome:
+            assert "expression" not in outcome
 
-    def test_second_rule_match(self, cel_setup):
+    def test_partial_match(self, cel_setup):
+        """Only matching rules should be collected."""
         from core.cel_service import evaluate_outcomes
 
         ra1 = cel_setup["ra1"]
@@ -264,9 +332,13 @@ class TestEvaluateOutcomes:
         evaluate_outcomes(ca)
         ca.refresh_from_db()
 
-        assert ca.computed_outcome["result"] == "partial"
+        # score_sum = 60: >= 50 matches, true matches, >= 150 does not
+        assert isinstance(ca.computed_outcome, list)
+        assert len(ca.computed_outcome) == 2
+        assert ca.computed_outcome[0]["result"] == "partial"
+        assert ca.computed_outcome[1]["result"] == "fail"
 
-    def test_no_match_sets_none(self, db):
+    def test_no_match_sets_empty_list(self, db):
         from core.cel_service import evaluate_outcomes
 
         folder = Folder.get_root_folder()
@@ -292,13 +364,13 @@ class TestEvaluateOutcomes:
         )
         evaluate_outcomes(ca)
         ca.refresh_from_db()
-        assert ca.computed_outcome is None
+        assert ca.computed_outcome == []
 
-    def test_empty_outcomes_definition(self, cel_setup):
+    def test_empty_outcomes_definition_clears(self, cel_setup):
         from core.cel_service import evaluate_outcomes
 
         ca = cel_setup["ca"]
-        ca.computed_outcome = {"stale": True}
+        ca.computed_outcome = [{"stale": True}]
         ca.save(update_fields=["computed_outcome"])
 
         ca.framework.outcomes_definition = []
@@ -322,7 +394,7 @@ class TestEvaluateOutcomes:
         evaluate_outcomes(ca)
         ca.refresh_from_db()
 
-        assert ca.computed_outcome == {"result": "fallback", "label": "OK"}
+        assert ca.computed_outcome == [{"result": "fallback", "label": "OK"}]
 
     def test_no_save_when_outcome_unchanged(self, cel_setup):
         from core.cel_service import evaluate_outcomes
@@ -340,6 +412,232 @@ class TestEvaluateOutcomes:
 
         ca.refresh_from_db()
         assert ca.computed_outcome == first_outcome
+
+
+# ---------------------------------------------------------------------------
+# TestVisibilityExpression
+# ---------------------------------------------------------------------------
+@pytest.mark.django_db
+class TestVisibilityExpression:
+    def test_visibility_hides_requirement(self, db):
+        """A requirement with a false visibility expression should be hidden."""
+        from core.cel_service import build_cel_context
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Vis FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        rn_visible = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:vis:visible",
+            ref_id="VIS-001",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        rn_hidden = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:vis:hidden",
+            ref_id="VIS-002",
+            assessable=True,
+            visibility_expression="false",
+            folder=folder,
+            is_published=True,
+        )
+        perimeter = Perimeter.objects.create(name="Vis Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Vis CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn_visible, folder=folder
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn_hidden, folder=folder
+        )
+
+        ctx, hidden_urns = build_cel_context(ca)
+
+        assert "urn:test:vis:hidden" in hidden_urns
+        assert "urn:test:vis:visible" not in hidden_urns
+        # Hidden requirement excluded from context
+        assert "urn:test:vis:hidden" not in ctx["requirements"]
+        assert "urn:test:vis:visible" in ctx["requirements"]
+        assert ctx["assessment"]["total_count"] == 1
+        assert ctx["hidden_requirements"] == ["urn:test:vis:hidden"]
+
+    def test_visibility_no_expression_always_visible(self, cel_setup):
+        """Requirements without visibility_expression are always visible."""
+        from core.cel_service import build_cel_context
+
+        ctx, hidden_urns = build_cel_context(cel_setup["ca"])
+        assert hidden_urns == set()
+        assert len(ctx["requirements"]) == 2
+
+    def test_visibility_fail_open(self, db):
+        """Invalid visibility expression should keep requirement visible."""
+        from core.cel_service import build_cel_context
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Fail Open FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:failopen:001",
+            ref_id="FO-001",
+            assessable=True,
+            visibility_expression="!!!invalid CEL!!!",
+            folder=folder,
+            is_published=True,
+        )
+        perimeter = Perimeter.objects.create(name="FO Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="FO CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=fw.requirement_nodes.first(),
+            folder=folder,
+        )
+
+        ctx, hidden_urns = build_cel_context(ca)
+        # Bad expression = fail-open, requirement stays visible
+        assert hidden_urns == set()
+        assert "urn:test:failopen:001" in ctx["requirements"]
+
+    def test_visibility_based_on_other_requirement_score(self, db):
+        """Visibility expression can reference another requirement's score."""
+        from core.cel_service import build_cel_context
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Cross Ref FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        rn_driver = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:xref:driver",
+            ref_id="XREF-DRIVER",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        rn_dependent = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:xref:dependent",
+            ref_id="XREF-DEP",
+            assessable=True,
+            visibility_expression='requirements["urn:test:xref:driver"].score > 50',
+            folder=folder,
+            is_published=True,
+        )
+        perimeter = Perimeter.objects.create(name="XRef Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="XRef CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        ra_driver = RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn_driver, folder=folder
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn_dependent, folder=folder
+        )
+
+        # Driver score = 0, dependent should be hidden
+        ctx, hidden_urns = build_cel_context(ca)
+        assert "urn:test:xref:dependent" in hidden_urns
+
+        # Set driver score > 50, dependent should become visible
+        ra_driver.score = 80
+        ra_driver.result = "compliant"
+        ra_driver.is_scored = True
+        ra_driver.save(update_fields=["score", "result", "is_scored"])
+
+        ctx, hidden_urns = build_cel_context(ca)
+        assert "urn:test:xref:dependent" not in hidden_urns
+        assert "urn:test:xref:dependent" in ctx["requirements"]
+
+    def test_visibility_single_pass_no_cycle(self, db):
+        """Circular visibility deps should not cause infinite loops."""
+        from core.cel_service import build_cel_context
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Cycle FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        rn_a = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:cycle:a",
+            ref_id="CYC-A",
+            assessable=True,
+            visibility_expression='requirements["urn:test:cycle:b"].score > 50',
+            folder=folder,
+            is_published=True,
+        )
+        rn_b = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:cycle:b",
+            ref_id="CYC-B",
+            assessable=True,
+            visibility_expression='requirements["urn:test:cycle:a"].score > 50',
+            folder=folder,
+            is_published=True,
+        )
+        perimeter = Perimeter.objects.create(name="Cyc Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Cyc CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn_a, folder=folder
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn_b, folder=folder
+        )
+
+        # This should complete without hanging (single-pass evaluation)
+        ctx, hidden_urns = build_cel_context(ca)
+        # Both have score 0, both expressions evaluate to false
+        # Both should be hidden (single-pass, no re-evaluation)
+        assert "urn:test:cycle:a" in hidden_urns
+        assert "urn:test:cycle:b" in hidden_urns
 
 
 # ---------------------------------------------------------------------------

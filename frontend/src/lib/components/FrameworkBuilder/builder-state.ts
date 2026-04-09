@@ -57,6 +57,7 @@ export interface RequirementNode {
 	order_id: number | null;
 	assessable: boolean;
 	implementation_groups: string[] | null;
+	visibility_expression: string | null;
 	typical_evidence: string | null;
 	weight: number;
 	importance: string;
@@ -306,6 +307,7 @@ function serializeNode(n: RequirementNode): Record<string, unknown> {
 		order_id: n.order_id,
 		assessable: n.assessable,
 		implementation_groups: n.implementation_groups,
+		visibility_expression: n.visibility_expression,
 		typical_evidence: n.typical_evidence,
 		weight: n.weight,
 		importance: n.importance,
@@ -482,6 +484,7 @@ export function hydrateDraft(
 		order_id: (n.order_id ?? null) as number | null,
 		assessable: (n.assessable ?? false) as boolean,
 		implementation_groups: (n.implementation_groups ?? null) as string[] | null,
+		visibility_expression: (n.visibility_expression ?? null) as string | null,
 		typical_evidence: (n.typical_evidence ?? null) as string | null,
 		weight: (n.weight ?? 1) as number,
 		importance: (n.importance ?? '') as string,
@@ -865,6 +868,7 @@ export function createBuilderState(
 			order_id: order,
 			assessable: false,
 			implementation_groups: null,
+			visibility_expression: null,
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
@@ -912,6 +916,7 @@ export function createBuilderState(
 			order_id: order,
 			assessable: false,
 			implementation_groups: null,
+			visibility_expression: null,
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
@@ -965,6 +970,7 @@ export function createBuilderState(
 			order_id: order,
 			assessable: true,
 			implementation_groups: null,
+			visibility_expression: null,
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
