@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 # from icecream import ic
 
 from django.db.models import Count
+from library.helpers import get_referential_translation
 
 matplotlib.use("Agg")
 
@@ -502,6 +503,13 @@ def gen_audit_context(id, doc, tree, lang):
             "technical": "Technical",
             "physical": "Physical",
             "procedure": "Procedure",
+            "in_review": "In review",
+            "done": "Done",
+            "major_nonconformity": "Major nonconformity",
+            "minor_nonconformity": "Minor nonconformity",
+            "observation_sensitive_point": "Observation / sensitive point",
+            "opportunity_for_improvement": "Opportunity for improvement",
+            "good_practice": "Good practice",
         },
         "fr": {
             "compliant": "Conformes",
@@ -519,6 +527,13 @@ def gen_audit_context(id, doc, tree, lang):
             "technical": "Technique",
             "physical": "Physique",
             "procedure": "Procédure",
+            "in_review": "En revue",
+            "done": "Terminé",
+            "major_nonconformity": "Non-conformité majeure",
+            "minor_nonconformity": "Non-conformité mineure",
+            "observation_sensitive_point": "Observation / point sensible",
+            "opportunity_for_improvement": "Opportunité d'amélioration",
+            "good_practice": "Bonne pratique",
         },
     }
 
@@ -564,6 +579,34 @@ def gen_audit_context(id, doc, tree, lang):
     requirement_assessments_objects = audit.get_requirement_assessments(
         include_non_assessable=True
     )
+
+    # Build flat list of requirement assessments for Word template
+    requirement_assessments_list = []
+    for ra in [
+        ra for ra in requirement_assessments_objects if ra.requirement.assessable
+    ]:
+        requirement_assessments_list.append(
+            {
+                "ref_id": ra.requirement.ref_id or "-",
+                "name": get_referential_translation(ra.requirement, "name", lang)
+                or "-",
+                "description": get_referential_translation(
+                    ra.requirement, "description", lang
+                )
+                or "-",
+                "status": safe_translate(lang, ra.status),
+                "result": safe_translate(lang, ra.result),
+                "extended_result": safe_translate(lang, ra.extended_result),
+                "score": ra.score,
+                "max_score": audit.framework.max_score if ra.is_scored else None,
+                "observation": ra.observation or "-",
+                "applied_controls": ", ".join(
+                    ac.name for ac in ra.applied_controls.all()
+                )
+                or "-",
+            }
+        )
+
     applied_controls = AppliedControl.objects.filter(
         requirement_assessments__in=requirement_assessments_objects
     ).distinct()
@@ -647,6 +690,8 @@ def gen_audit_context(id, doc, tree, lang):
         "igs": IGs,
         "category_scores": category_scores,
         "category_radar": chart_category_radar,
+        "requirement_assessments": requirement_assessments_list,
+        "ra_count": len(requirement_assessments_list),
     }
 
     return context

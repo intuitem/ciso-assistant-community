@@ -9,10 +9,17 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	interface WordTemplateVariable {
+		name: string;
+		type: string;
+		description: string;
+	}
+
 	interface WordTemplateInfo {
 		template_key: string;
 		description: string;
 		default_languages: string[];
+		variables: WordTemplateVariable[];
 		overrides: string[];
 	}
 
@@ -189,6 +196,18 @@
 		return (LOCALE_DISPLAY_MAP as Record<string, string>)[code] ?? code.toUpperCase();
 	}
 
+	function getTemplateVariables(key: string): WordTemplateVariable[] {
+		return availableTemplates.find((t) => t.template_key === key)?.variables || [];
+	}
+
+	const TYPE_BADGE_CLASSES: Record<string, string> = {
+		string: 'preset-filled-primary-500',
+		number: 'preset-filled-success-500',
+		object: 'preset-filled-warning-500',
+		list: 'preset-filled-tertiary-500',
+		image: 'preset-filled-surface-500'
+	};
+
 	$effect(() => {
 		fetchData();
 	});
@@ -290,6 +309,40 @@
 						<i class="fa-solid fa-spinner fa-spin"></i>
 						<span>{m.uploading()}</span>
 					</div>
+				{/if}
+
+				<!-- Available variables reference -->
+				{#if getTemplateVariables(editingKey).length > 0}
+					<details class="p-3 rounded-lg bg-surface-50-950">
+						<summary class="cursor-pointer font-medium text-sm">
+							<i class="fa-solid fa-code text-xs mr-1"></i>
+							{m.templateVariables()}
+						</summary>
+						<p class="text-xs text-gray-500 mt-2 mb-3">
+							{m.wordTemplateSyntaxHelp()}
+						</p>
+						<div class="text-xs text-gray-500 mb-3 space-y-1 font-mono">
+							<p>{'{{variable}}'} &mdash; simple value</p>
+							<p>{'{{image}}'} &mdash; inline image</p>
+							<p>
+								{'{%tr for ra in requirement_assessments %} ... {%tr endfor %}'} &mdash; table rows
+							</p>
+						</div>
+						<div class="space-y-2 mt-2">
+							{#each getTemplateVariables(editingKey) as variable}
+								<div class="flex items-start gap-2 text-sm">
+									<code class="bg-surface-200 px-2 py-0.5 rounded text-xs font-mono shrink-0"
+										>{variable.name}</code
+									>
+									<span
+										class="badge text-xs shrink-0 {TYPE_BADGE_CLASSES[variable.type] ??
+											'preset-filled-surface-500'}">{variable.type}</span
+									>
+									<span class="text-gray-600 text-xs">{variable.description}</span>
+								</div>
+							{/each}
+						</div>
+					</details>
 				{/if}
 			</div>
 
