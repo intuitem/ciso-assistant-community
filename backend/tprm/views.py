@@ -667,9 +667,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "country": esc(entity.country),
                     "currency": esc(entity.currency),
                     "parent_entity_ref_id": (
-                        esc(entity.parent_entity.ref_id)
-                        if entity.parent_entity
-                        else ""
+                        esc(entity.parent_entity.ref_id) if entity.parent_entity else ""
                     ),
                     "dependency": entity.default_dependency,
                     "penetration": entity.default_penetration,
@@ -700,7 +698,13 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         # --- Contracts sheet ---
         contracts_rows = []
         for contract in contracts:
-            first_solution = contract.solutions.first()
+            contract_solutions = list(contract.solutions.all())
+            solution_ref_ids = "\n".join(
+                esc(s.ref_id) for s in contract_solutions if s.ref_id
+            )
+            solution_names = "\n".join(
+                esc(s.name) for s in contract_solutions if s.name
+            )
             contracts_rows.append(
                 {
                     "ref_id": esc(contract.ref_id),
@@ -716,9 +720,8 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                         if contract.provider_entity
                         else ""
                     ),
-                    "solution_ref_id": (
-                        esc(first_solution.ref_id) if first_solution else ""
-                    ),
+                    "solution_ref_id": solution_ref_ids,
+                    "solution": solution_names,
                     "status": contract.status,
                     "start_date": (
                         contract.start_date.isoformat() if contract.start_date else ""
@@ -769,6 +772,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "provider_entity_ref_id",
             "provider",
             "solution_ref_id",
+            "solution",
             "status",
             "start_date",
             "end_date",
@@ -1201,7 +1205,13 @@ class ContractViewSet(ExportMixin, BaseModelViewSet):
             "solution_ref_id": {
                 "source": "solutions",
                 "label": "solution_ref_id",
-                "format": lambda qs: qs.first().ref_id if qs.exists() else "",
+                "format": lambda qs: "\n".join(s.ref_id for s in qs.all() if s.ref_id),
+                "escape": True,
+            },
+            "solution": {
+                "source": "solutions",
+                "label": "solution",
+                "format": lambda qs: "\n".join(s.name for s in qs.all() if s.name),
                 "escape": True,
             },
             "status": {"source": "status", "label": "status"},
