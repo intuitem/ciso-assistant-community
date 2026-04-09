@@ -33,7 +33,7 @@ else
 
 	# Initialize the superuser account
 	echo "Initialize your superuser account..."
-	docker compose -p enterprise exec backend poetry run python manage.py createsuperuser
+	docker compose -p enterprise exec backend uv run python manage.py createsuperuser
 
 	echo "Connect to CISO Assistant on https://localhost:8443"
 	popd

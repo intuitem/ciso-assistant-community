@@ -47,8 +47,8 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=cache,target=/root/.cache/pip \
     uv sync --locked --no-dev \
-  && .venv/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-deps \
-  && .venv/bin/pip uninstall -y cuda-bindings cuda-pathfinder cuda-toolkit \
+  && uv pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-deps \
+  && uv pip uninstall cuda-bindings cuda-pathfinder cuda-toolkit \
      nvidia-cublas nvidia-cuda-cupti nvidia-cuda-nvrtc nvidia-cuda-runtime \
      nvidia-cudnn-cu13 nvidia-cufft nvidia-cufile nvidia-curand nvidia-cusolver \
      nvidia-cusparse nvidia-cusparselt-cu13 nvidia-nccl-cu13 nvidia-nvjitlink \
