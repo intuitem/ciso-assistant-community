@@ -4141,7 +4141,15 @@
 	"noRiskControls": "No risk treatment controls found",
 	"soaScope": "Scope",
 	"allRequirements": "All requirements",
-	"removeLanguageConfirm": "Remove {lang} translations?",
 	"riskCoverage": "Risk coverage",
-	"soaSelectRiskDescription": "Selecting risk assessments will enrich the SoA with linked risk scenarios and treatment decisions"
+	"soaSelectRiskDescription": "Selecting risk assessments will enrich the SoA with linked risk scenarios and treatment decisions",
+	"ganttChart": "Gantt Chart",
+	"ganttChartDescription": "Timeline view of applied controls, audits, and risk assessments with swimlanes by domain",
+	"zoom": "Zoom",
+	"yearly": "Yearly",
+	"loadingTimelineData": "Loading timeline data…",
+	"objectsWithNoDateNotShown": "{count} object(s) with no date information not shown.",
+	"noItemsToDisplayAdjustFilters": "No items to display. Adjust your filters or add dates to your objects.",
+	"failedToLoadTimelineData": "Failed to load timeline data. Please try again.",
+	"useCreationDateAsStart": "Use creation date as start"
 }

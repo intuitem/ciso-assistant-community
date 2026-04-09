@@ -4081,5 +4081,14 @@
 	"syncToAppliedControl": "Synchroniser les mesures appliquées associées",
 	"syncToReferenceControl": "Synchroniser avec la mesure de référence",
 	"riskCoverage": "Couverture des risques",
-	"soaSelectRiskDescription": "La s\u00e9lection d\u2019analyses de risques enrichira la DdA avec les sc\u00e9narios de risques et les d\u00e9cisions de traitement associ\u00e9s"
+	"soaSelectRiskDescription": "La sélection d'analyses de risques enrichira la DdA avec les scénarios de risques et les décisions de traitement associés",
+	"ganttChart": "Diagramme de Gantt",
+	"ganttChartDescription": "Vue chronologique des mesures appliquées, audits et analyses de risques avec couloirs par domaine",
+	"zoom": "Zoom",
+	"yearly": "Annuel",
+	"loadingTimelineData": "Chargement des données du planning…",
+	"objectsWithNoDateNotShown": "{count} objet(s) sans information de date non affiché(s).",
+	"noItemsToDisplayAdjustFilters": "Aucun élément à afficher. Ajustez vos filtres ou ajoutez des dates à vos objets.",
+	"failedToLoadTimelineData": "Échec du chargement des données du planning. Veuillez réessayer.",
+	"useCreationDateAsStart": "Utiliser la date de création comme début"
 }
