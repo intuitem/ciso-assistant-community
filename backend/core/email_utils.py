@@ -370,7 +370,9 @@ def format_task_node_list(
             and node.task_template
             and node.task_template.description
         ):
-            desc_html = markdown_to_html(node.task_template.description.strip())
+            # Escape HTML first to prevent injection, then convert Markdown.
+            desc_escaped = html_escape(node.task_template.description.strip())
+            desc_html = markdown_to_html(desc_escaped)
             item += f"<br>{desc_html}"
         item += "</li>"
         items.append(item)
