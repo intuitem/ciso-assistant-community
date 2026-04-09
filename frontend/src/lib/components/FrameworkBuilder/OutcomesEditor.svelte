@@ -143,7 +143,7 @@
 							value={rule.expression}
 							placeholder={'e.g. assessment.score_sum >= 150 or "true" for catch-all'}
 							rows="2"
-							class="w-full text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+							class="w-full text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 							onblur={(e) => {
 								rules[index].expression = e.currentTarget.value;
 								persist();
@@ -209,7 +209,7 @@
 	{/if}
 
 	<p class="text-xs text-gray-400">
-		Rules are evaluated in order. First matching rule wins. Use <code
+		All matching rules are included in the computed outcomes. Use <code
 			class="font-mono bg-gray-100 px-1 rounded">true</code
 		> as a catch-all.
 	</p>

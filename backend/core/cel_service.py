@@ -115,7 +115,7 @@ def _build_context_dict(
     if computed_outcomes is not None:
         ctx["computed_outcomes"] = computed_outcomes
     else:
-        ctx["computed_outcomes"] = []
+        ctx["computed_outcomes"] = {}
     return ctx
 
 
@@ -183,7 +183,7 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     answer_data = _build_answer_data(ca, in_scope_node_ids)
 
     max_score = ca.max_score or 100
-    computed_outcomes = ca.computed_outcome if ca.computed_outcome else []
+    computed_outcomes = ca.computed_outcome if ca.computed_outcome else {}
 
     # Phase 1: build initial context with assessable in-scope nodes
     initial_context = _build_context_dict(
@@ -254,18 +254,21 @@ def evaluate_outcomes(compliance_assessment) -> None:
     context, _hidden = build_cel_context(ca)
     cel_context = {k: _python_to_cel(v) for k, v in context.items()}
 
-    computed = []
+    computed = {}
     env = celpy.Environment()
     for rule in outcomes_def:
         expression = rule.get("expression", "")
-        if not expression:
+        ref_id = rule.get("ref_id", "")
+        if not expression or not ref_id:
             continue
         try:
             ast = env.compile(expression)
             prog = env.program(ast)
             result = prog.evaluate(cel_context)
             if result:
-                computed.append({k: v for k, v in rule.items() if k != "expression"})
+                computed[ref_id] = {
+                    k: v for k, v in rule.items() if k not in ("expression", "ref_id")
+                }
         except Exception:
             logger.warning(
                 "cel_evaluation_error",

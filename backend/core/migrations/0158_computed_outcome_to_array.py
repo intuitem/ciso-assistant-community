@@ -3,35 +3,51 @@
 from django.db import migrations
 
 
-def wrap_computed_outcome_in_array(apps, schema_editor):
-    """Wrap existing single-object computed_outcome values in arrays."""
+def convert_computed_outcome_to_dict(apps, schema_editor):
+    """Convert existing computed_outcome values from single object or list to dict keyed by ref_id."""
     ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
     for ca in ComplianceAssessment.objects.exclude(computed_outcome__isnull=True):
-        if isinstance(ca.computed_outcome, dict):
-            ca.computed_outcome = [ca.computed_outcome]
+        old = ca.computed_outcome
+        # Old format: single dict {"ref_id": "x", ...}
+        if isinstance(old, dict) and "ref_id" in old:
+            ref_id = old.pop("ref_id")
+            old.pop("expression", None)
+            ca.computed_outcome = {ref_id: old}
+            ca.save(update_fields=["computed_outcome"])
+        # Intermediate format: list of dicts [{"ref_id": "x", ...}, ...]
+        elif isinstance(old, list):
+            new = {}
+            for item in old:
+                if isinstance(item, dict) and "ref_id" in item:
+                    entry = {k: v for k, v in item.items() if k not in ("ref_id", "expression")}
+                    new[item["ref_id"]] = entry
+            ca.computed_outcome = new if new else None
             ca.save(update_fields=["computed_outcome"])
 
 
-def unwrap_computed_outcome_from_array(apps, schema_editor):
-    """Reverse: unwrap single-element arrays back to single objects."""
+def revert_computed_outcome_to_single(apps, schema_editor):
+    """Reverse: convert dict back to single object (first entry only)."""
     ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
     for ca in ComplianceAssessment.objects.exclude(computed_outcome__isnull=True):
-        if isinstance(ca.computed_outcome, list) and len(ca.computed_outcome) == 1:
-            ca.computed_outcome = ca.computed_outcome[0]
-            ca.save(update_fields=["computed_outcome"])
-        elif isinstance(ca.computed_outcome, list) and len(ca.computed_outcome) == 0:
-            ca.computed_outcome = None
+        if isinstance(ca.computed_outcome, dict) and not ca.computed_outcome.get("ref_id"):
+            # It's a dict-of-dicts, convert back to single object
+            for ref_id, data in ca.computed_outcome.items():
+                ca.computed_outcome = {"ref_id": ref_id, **data}
+                break
+            else:
+                ca.computed_outcome = None
             ca.save(update_fields=["computed_outcome"])
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("core", "0157_cel_expression_engine"),
     ]
 
     operations = [
         migrations.RunPython(
-            wrap_computed_outcome_in_array,
-            unwrap_computed_outcome_from_array,
+            convert_computed_outcome_to_dict,
+            revert_computed_outcome_to_single,
         ),
     ]
