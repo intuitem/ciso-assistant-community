@@ -64,6 +64,9 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 	if (body._action === 'start-editing') {
 		return proxyFetch(fetch, draftActionUrl(params.id, 'start-editing'), 'POST');
 	}
+	if (body._action === 'publish-draft-preview') {
+		return proxyFetch(fetch, draftActionUrl(params.id, 'publish-draft-preview'), 'POST');
+	}
 	if (body._action === 'publish-draft') {
 		return proxyFetch(fetch, draftActionUrl(params.id, 'publish-draft'), 'POST');
 	}

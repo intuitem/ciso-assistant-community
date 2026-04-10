@@ -64,6 +64,32 @@ export async function apiSaveDraft(frameworkId: string, draft: DraftJSON): Promi
 	await handleResponse(res);
 }
 
+/** Preview publish impact: returns what would change if the draft were published */
+export interface PublishPreview {
+	added: {
+		requirements: number;
+		questions: number;
+		choices: number;
+		details: { name: string; assessable: boolean }[];
+	};
+	removed: {
+		requirements: number;
+		questions: number;
+		choices: number;
+		details: { name: string; assessable: boolean }[];
+	};
+	affected_audits: { id: string; name: string }[];
+}
+
+export async function apiPublishDraftPreview(frameworkId: string): Promise<PublishPreview> {
+	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ _action: 'publish-draft-preview' })
+	});
+	return (await handleResponse(res)) as PublishPreview;
+}
+
 /** Publish draft: POST to reconcile draft into relational DB */
 export async function apiPublishDraft(frameworkId: string): Promise<void> {
 	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
