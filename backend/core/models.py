@@ -347,6 +347,12 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
         abstract = True
 
     @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
+
+    @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})
@@ -2321,6 +2327,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
             "Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'."
         ),
     )
+    urn_namespace = models.CharField(
+        max_length=50,
+        default="custom",
+        verbose_name=_("URN namespace"),
+        help_text=_("Organization identifier used in the URN prefix."),
+    )
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2679,6 +2691,12 @@ class Question(AbstractBaseModel, FolderMixin):
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
 
+    @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
+
     def __str__(self) -> str:
         return f"{self.ref_id or self.urn}: {self.text or ''}"
 
@@ -2717,6 +2735,12 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
         unique_together = [("question", "urn")]
         verbose_name = _("Question choice")
         verbose_name_plural = _("Question choices")
+
+    @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
 
     def __str__(self) -> str:
         return f"{self.ref_id or ''}: {self.value or ''}"
