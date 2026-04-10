@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1 \
   UV_LINK_MODE=copy \
   PATH="/code/.venv/bin:$PATH"
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
 
 WORKDIR /code
 
