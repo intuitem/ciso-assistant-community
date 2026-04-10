@@ -134,9 +134,23 @@ jobs:
           rm -rf db
           mkdir db
           docker compose -f docker-compose-build.yml up -d
+      - name: Wait for migrations to complete
+        run: |
+          echo "Waiting for migrations to complete..."
+          for i in $(seq 1 60); do
+            if docker compose -f docker-compose-build.yml exec -T backend python manage.py migrate --check 2>/dev/null; then
+              echo "Migrations complete after ~$((i * 10))s"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "Migrations did not complete within 600s"
+              docker compose -f docker-compose-build.yml logs backend
+              exit 1
+            fi
+            sleep 10
+          done
       - name: Config the Docker app
         run: |
-          sleep 200 # give the migrations time to finish (included in the up on the previous step)
           docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 uv run python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
@@ -262,11 +276,27 @@ jobs:
         run: pnpm exec playwright install
       - name: Build the Docker app
         run: docker compose -f enterprise/docker-compose-build.yml up -d
+      - name: Wait for migrations to complete
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
+        run: |
+          echo "Waiting for migrations to complete..."
+          for i in $(seq 1 60); do
+            if docker compose -f enterprise/docker-compose-build.yml exec -T backend python manage.py migrate --check --settings="$SETTINGS_MODULE" 2>/dev/null; then
+              echo "Migrations complete after ~$((i * 10))s"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "Migrations did not complete within 600s"
+              docker compose -f enterprise/docker-compose-build.yml logs backend
+              exit 1
+            fi
+            sleep 10
+          done
       - name: Config the Docker app
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          sleep 200 # give the migrations time to finish (included in the up on the previous step)
           docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 uv run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE" && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
