@@ -19,4 +19,14 @@ class Migration(migrations.Migration):
                 verbose_name="Visibility expression",
             ),
         ),
+        migrations.AddField(
+            model_name="framework",
+            name="urn_namespace",
+            field=models.CharField(
+                default="custom",
+                help_text="Organization identifier used in the URN prefix.",
+                max_length=50,
+                verbose_name="URN namespace",
+            ),
+        ),
     ]
