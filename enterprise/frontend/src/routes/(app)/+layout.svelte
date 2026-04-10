@@ -135,6 +135,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	const clientSettings = $page.data.clientSettings;
+
 	// Initialize external link interceptor
 	$effect(() => {
 		if (browser) {
@@ -152,7 +154,7 @@
 </script>
 
 <svelte:head>
-	<title>CISO Assistant | {safeTranslate(displayTitle)}</title>
+	<title>{clientSettings.settings.name || 'CISO Assistant'} | {safeTranslate(displayTitle)}</title>
 </svelte:head>
 
 <!-- App Shell -->
