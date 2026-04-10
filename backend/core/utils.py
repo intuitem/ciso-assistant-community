@@ -28,7 +28,10 @@ def extract_node_id(urn: str | None) -> str | None:
     if not urn:
         return None
     parts = urn.split(":")
-    return ":".join(parts[5:]) if len(parts) > 5 else None
+    if len(parts) <= 5:
+        return None
+    node_id = ":".join(parts[5:]).strip()
+    return node_id if node_id else None
 
 
 def is_compute_result_truthy(compute_result: str | None) -> bool:
