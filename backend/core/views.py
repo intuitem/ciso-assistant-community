@@ -9948,6 +9948,7 @@ class FrameworkViewSet(BaseModelViewSet):
             # --- 2b. URN collision pre-check for new items ---
             new_node_id_set = draft_node_ids - db_node_ids
             new_question_id_set = draft_question_ids - db_question_ids
+            new_choice_id_set = draft_choice_ids - db_choice_ids
 
             new_node_urns = {
                 n.get("urn")
@@ -9959,10 +9960,16 @@ class FrameworkViewSet(BaseModelViewSet):
                 for q in draft_questions
                 if uuid.UUID(q["id"]) in new_question_id_set and q.get("urn")
             }
+            new_choice_urns = {
+                c.get("urn")
+                for c in draft_choices
+                if uuid.UUID(c["id"]) in new_choice_id_set and c.get("urn")
+            }
 
-            if new_node_urns or new_question_urns:
+            if new_node_urns or new_question_urns or new_choice_urns:
                 node_collisions = set()
                 question_collisions = set()
+                choice_collisions = set()
                 if new_node_urns:
                     node_collisions = set(
                         RequirementNode.objects.filter(urn__in=new_node_urns)
@@ -9975,34 +9982,51 @@ class FrameworkViewSet(BaseModelViewSet):
                         .exclude(requirement_node__framework=framework)
                         .values_list("urn", flat=True)
                     )
+                if new_choice_urns:
+                    choice_collisions = set(
+                        QuestionChoice.objects.filter(urn__in=new_choice_urns)
+                        .exclude(question__requirement_node__framework=framework)
+                        .values_list("urn", flat=True)
+                    )
 
-                if node_collisions or question_collisions:
+                if node_collisions or question_collisions or choice_collisions:
                     # Disambiguate: detect current slug from colliding URNs and
                     # rewrite all draft URNs with a new slug suffix
-                    all_collisions = node_collisions | question_collisions
+                    all_collisions = (
+                        node_collisions | question_collisions | choice_collisions
+                    )
                     # Extract the slug from the first colliding URN
                     sample_urn = next(iter(all_collisions))
                     parts = sample_urn.split(":")
                     # URN format: urn:intuitem:risk:{type}:{slug}:{ref_id}
                     current_slug = parts[4] if len(parts) >= 6 else ""
+                    slug_pattern = f":{current_slug}:"
 
                     new_slug = None
                     for attempt in range(2, 12):
                         candidate = f"{current_slug}-{attempt}"
+                        candidate_pattern = f":{candidate}:"
                         # Rewrite all URNs with the candidate slug
                         candidate_node_urns = set()
                         for n in draft_nodes:
                             urn = n.get("urn")
-                            if urn and current_slug in urn:
+                            if urn and slug_pattern in urn:
                                 candidate_node_urns.add(
-                                    urn.replace(f":{current_slug}:", f":{candidate}:")
+                                    urn.replace(slug_pattern, candidate_pattern)
                                 )
                         candidate_q_urns = set()
                         for q in draft_questions:
                             urn = q.get("urn")
-                            if urn and current_slug in urn:
+                            if urn and slug_pattern in urn:
                                 candidate_q_urns.add(
-                                    urn.replace(f":{current_slug}:", f":{candidate}:")
+                                    urn.replace(slug_pattern, candidate_pattern)
+                                )
+                        candidate_c_urns = set()
+                        for c in draft_choices:
+                            urn = c.get("urn")
+                            if urn and slug_pattern in urn:
+                                candidate_c_urns.add(
+                                    urn.replace(slug_pattern, candidate_pattern)
                                 )
                         # Check if the candidate URNs also collide
                         still_collides = False
@@ -10022,31 +10046,54 @@ class FrameworkViewSet(BaseModelViewSet):
                                 .exists()
                             ):
                                 still_collides = True
+                        if not still_collides and candidate_c_urns:
+                            if (
+                                QuestionChoice.objects.filter(urn__in=candidate_c_urns)
+                                .exclude(
+                                    question__requirement_node__framework=framework
+                                )
+                                .exists()
+                            ):
+                                still_collides = True
                         if not still_collides:
                             new_slug = candidate
                             break
 
                     if new_slug:
+                        new_pattern = f":{new_slug}:"
                         # Rewrite all draft URNs and parent_urn references
                         for n in draft_nodes:
-                            if n.get("urn") and current_slug in n["urn"]:
-                                n["urn"] = n["urn"].replace(
-                                    f":{current_slug}:", f":{new_slug}:"
-                                )
-                            if n.get("parent_urn") and current_slug in n["parent_urn"]:
+                            if n.get("urn") and slug_pattern in n["urn"]:
+                                n["urn"] = n["urn"].replace(slug_pattern, new_pattern)
+                            if n.get("parent_urn") and slug_pattern in n["parent_urn"]:
                                 n["parent_urn"] = n["parent_urn"].replace(
-                                    f":{current_slug}:", f":{new_slug}:"
+                                    slug_pattern, new_pattern
                                 )
                         for q in draft_questions:
-                            if q.get("urn") and current_slug in q["urn"]:
-                                q["urn"] = q["urn"].replace(
-                                    f":{current_slug}:", f":{new_slug}:"
-                                )
+                            if q.get("urn") and slug_pattern in q["urn"]:
+                                q["urn"] = q["urn"].replace(slug_pattern, new_pattern)
+                            # Rewrite depends_on URN references
+                            dep = q.get("depends_on")
+                            if dep and isinstance(dep, dict):
+                                if (
+                                    dep.get("question")
+                                    and slug_pattern in dep["question"]
+                                ):
+                                    dep["question"] = dep["question"].replace(
+                                        slug_pattern, new_pattern
+                                    )
+                                if dep.get("answers") and isinstance(
+                                    dep["answers"], list
+                                ):
+                                    dep["answers"] = [
+                                        a.replace(slug_pattern, new_pattern)
+                                        if isinstance(a, str) and slug_pattern in a
+                                        else a
+                                        for a in dep["answers"]
+                                    ]
                         for c in draft_choices:
-                            if c.get("urn") and current_slug in c["urn"]:
-                                c["urn"] = c["urn"].replace(
-                                    f":{current_slug}:", f":{new_slug}:"
-                                )
+                            if c.get("urn") and slug_pattern in c["urn"]:
+                                c["urn"] = c["urn"].replace(slug_pattern, new_pattern)
                         warnings.append(
                             f"URN namespace collision detected, disambiguated to '{new_slug}'"
                         )
@@ -10397,6 +10444,57 @@ class FrameworkViewSet(BaseModelViewSet):
                     ]
                     if answers_to_create:
                         Answer.objects.bulk_create(answers_to_create, batch_size=1000)
+
+            # --- 9b. Backfill Answers for new questions on EXISTING requirements ---
+            existing_node_new_questions = (
+                list(
+                    Question.objects.filter(
+                        id__in=new_question_ids,
+                    )
+                    .exclude(requirement_node_id__in=new_node_ids)
+                    .select_related("requirement_node")
+                )
+                if new_question_ids
+                else []
+            )
+            if existing_node_new_questions:
+                existing_cas = (
+                    existing_cas
+                    if new_node_ids
+                    else ComplianceAssessment.objects.filter(framework=framework)
+                )
+                existing_req_ids = {
+                    q.requirement_node_id for q in existing_node_new_questions
+                }
+                ra_lookup = defaultdict(dict)
+                for ra in RequirementAssessment.objects.filter(
+                    compliance_assessment__framework=framework,
+                    requirement_id__in=existing_req_ids,
+                ).select_related():
+                    ra_lookup[ra.compliance_assessment_id][ra.requirement_id] = ra
+
+                existing_answer_pairs = set(
+                    Answer.objects.filter(
+                        requirement_assessment__compliance_assessment__framework=framework,
+                        question_id__in=[q.id for q in existing_node_new_questions],
+                    ).values_list("requirement_assessment_id", "question_id")
+                )
+
+                answers_to_backfill = []
+                for ca in existing_cas:
+                    ca_ras = ra_lookup.get(ca.id, {})
+                    for q in existing_node_new_questions:
+                        ra = ca_ras.get(q.requirement_node_id)
+                        if ra and (ra.id, q.id) not in existing_answer_pairs:
+                            answers_to_backfill.append(
+                                Answer(
+                                    requirement_assessment=ra,
+                                    question=q,
+                                    folder_id=ca.folder_id,
+                                )
+                            )
+                if answers_to_backfill:
+                    Answer.objects.bulk_create(answers_to_backfill, batch_size=1000)
 
             # --- 10. Snapshot history, bump version, clear draft ---
             history = list(framework.editing_history or [])
