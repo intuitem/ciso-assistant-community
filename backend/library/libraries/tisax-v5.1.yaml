@@ -3,7 +3,7 @@ convert_library_version: 'v2 ; Compat Mode: [1] {[< v2] Use legacy URN fallback 
 urn: urn:intuitem:risk:library:tisax-v5.1
 locale: en
 ref_id: TISAX v5.1
-name: Trusted Information Security Assessment Exchange v5.1
+name: Trusted Information Security Assessment Exchange (TISAX) v5.1
 description: 'VDA ISA provides the basis for
 
   - a self-assessment to determine the state of information security in an organization
@@ -29,7 +29,7 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:tisax-v5.1
     ref_id: TISAX v5.1
-    name: Trusted Information Security Assessment Exchange v5.1
+    name: Trusted Information Security Assessment Exchange (TISAX) v5.1
     description: 'VDA ISA provides the basis for
 
       - a self-assessment to determine the state of information security in an organization
