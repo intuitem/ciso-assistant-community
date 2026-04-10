@@ -3,7 +3,7 @@ FROM python:3.14-slim
 ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   UV_COMPILE_BYTECODE=1 \
-  UV_LINK_MODE=copy \
+  UV_LINK_MODE=copy
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
 
