@@ -58,6 +58,18 @@ class AccountAdapter(DefaultAccountAdapter):
 
 
 class MFAAdapter(DefaultMFAAdapter):
+    def is_mfa_enabled(self, user, types=None) -> bool:
+        from allauth.account.authentication import get_authentication_records
+        from allauth.core import context
+
+        # Skip local MFA challenge for SSO logins — the IdP already
+        # authenticated the user.
+        records = get_authentication_records(context.request)
+        if any(r.get("method") == "socialaccount" for r in records):
+            return False
+
+        return super().is_mfa_enabled(user, types=types)
+
     def get_public_key_credential_rp_entity(self):
         rp_id = urlparse(settings.CISO_ASSISTANT_URL).hostname
         return {
