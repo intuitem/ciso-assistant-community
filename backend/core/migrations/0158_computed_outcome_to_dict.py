@@ -30,19 +30,8 @@ def convert_computed_outcome_to_dict(apps, schema_editor):
 
 
 def revert_computed_outcome_to_single(apps, schema_editor):
-    """Reverse: convert dict back to single object (first entry only)."""
-    ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
-    for ca in ComplianceAssessment.objects.exclude(computed_outcome__isnull=True):
-        if isinstance(ca.computed_outcome, dict) and not ca.computed_outcome.get(
-            "ref_id"
-        ):
-            # It's a dict-of-dicts, convert back to single object
-            for ref_id, data in ca.computed_outcome.items():
-                ca.computed_outcome = {"ref_id": ref_id, **data}
-                break
-            else:
-                ca.computed_outcome = None
-            ca.save(update_fields=["computed_outcome"])
+    """Reverse: noop — the JSONField accepts any shape, no schema change to undo."""
+    pass
 
 
 class Migration(migrations.Migration):

@@ -28,16 +28,19 @@ def cel_setup(db):
         max_score=100,
         outcomes_definition=[
             {
+                "ref_id": "rule_high",
                 "expression": "assessment.score_sum >= 150",
                 "result": "pass",
                 "label": "High",
             },
             {
+                "ref_id": "rule_medium",
                 "expression": "assessment.score_sum >= 50",
                 "result": "partial",
                 "label": "Medium",
             },
             {
+                "ref_id": "rule_low",
                 "expression": "true",
                 "result": "fail",
                 "label": "Low",
@@ -272,11 +275,13 @@ class TestBuildCelContext:
         from core.cel_service import build_cel_context
 
         ca = cel_setup["ca"]
-        ca.computed_outcome = [{"result": "pass", "label": "High"}]
+        ca.computed_outcome = {"rule_high": {"result": "pass", "label": "High"}}
         ca.save(update_fields=["computed_outcome"])
 
         ctx, _ = build_cel_context(ca)
-        assert ctx["computed_outcomes"] == [{"result": "pass", "label": "High"}]
+        assert ctx["computed_outcomes"] == {
+            "rule_high": {"result": "pass", "label": "High"}
+        }
 
     def test_empty_answers_dict_when_no_answers(self, cel_setup):
         from core.cel_service import build_cel_context
@@ -309,14 +314,18 @@ class TestEvaluateOutcomes:
         ca.refresh_from_db()
 
         # score_sum = 160 >= 150, >= 50, and true all match
-        assert isinstance(ca.computed_outcome, list)
+        assert isinstance(ca.computed_outcome, dict)
         assert len(ca.computed_outcome) == 3
-        assert ca.computed_outcome[0] == {"result": "pass", "label": "High"}
-        assert ca.computed_outcome[1] == {"result": "partial", "label": "Medium"}
-        assert ca.computed_outcome[2] == {"result": "fail", "label": "Low"}
-        # expression should not be included
-        for outcome in ca.computed_outcome:
-            assert "expression" not in outcome
+        assert ca.computed_outcome["rule_high"] == {"result": "pass", "label": "High"}
+        assert ca.computed_outcome["rule_medium"] == {
+            "result": "partial",
+            "label": "Medium",
+        }
+        assert ca.computed_outcome["rule_low"] == {"result": "fail", "label": "Low"}
+        # expression and ref_id should not be included in payloads
+        for payload in ca.computed_outcome.values():
+            assert "expression" not in payload
+            assert "ref_id" not in payload
 
     def test_partial_match(self, cel_setup):
         """Only matching rules should be collected."""
@@ -333,10 +342,11 @@ class TestEvaluateOutcomes:
         ca.refresh_from_db()
 
         # score_sum = 60: >= 50 matches, true matches, >= 150 does not
-        assert isinstance(ca.computed_outcome, list)
+        assert isinstance(ca.computed_outcome, dict)
         assert len(ca.computed_outcome) == 2
-        assert ca.computed_outcome[0]["result"] == "partial"
-        assert ca.computed_outcome[1]["result"] == "fail"
+        assert "rule_high" not in ca.computed_outcome
+        assert ca.computed_outcome["rule_medium"]["result"] == "partial"
+        assert ca.computed_outcome["rule_low"]["result"] == "fail"
 
     def test_no_match_sets_empty_list(self, db):
         from core.cel_service import evaluate_outcomes
@@ -349,7 +359,7 @@ class TestEvaluateOutcomes:
             min_score=0,
             max_score=100,
             outcomes_definition=[
-                {"expression": "false", "result": "never"},
+                {"ref_id": "never", "expression": "false", "result": "never"},
             ],
         )
         perimeter = Perimeter.objects.create(name="NM Perim", folder=folder)
@@ -364,13 +374,13 @@ class TestEvaluateOutcomes:
         )
         evaluate_outcomes(ca)
         ca.refresh_from_db()
-        assert ca.computed_outcome == []
+        assert ca.computed_outcome == {}
 
     def test_empty_outcomes_definition_clears(self, cel_setup):
         from core.cel_service import evaluate_outcomes
 
         ca = cel_setup["ca"]
-        ca.computed_outcome = [{"stale": True}]
+        ca.computed_outcome = {"stale": {"stale": True}}
         ca.save(update_fields=["computed_outcome"])
 
         ca.framework.outcomes_definition = []
@@ -385,8 +395,8 @@ class TestEvaluateOutcomes:
 
         fw = cel_setup["framework"]
         fw.outcomes_definition = [
-            {"expression": "!!!bad syntax!!!", "result": "broken"},
-            {"expression": "true", "result": "fallback", "label": "OK"},
+            {"ref_id": "bad", "expression": "!!!bad syntax!!!", "result": "broken"},
+            {"ref_id": "ok", "expression": "true", "result": "fallback", "label": "OK"},
         ]
         fw.save(update_fields=["outcomes_definition"])
 
@@ -394,7 +404,9 @@ class TestEvaluateOutcomes:
         evaluate_outcomes(ca)
         ca.refresh_from_db()
 
-        assert ca.computed_outcome == [{"result": "fallback", "label": "OK"}]
+        assert isinstance(ca.computed_outcome, dict)
+        assert "bad" not in ca.computed_outcome
+        assert ca.computed_outcome["ok"] == {"result": "fallback", "label": "OK"}
 
     def test_no_save_when_outcome_unchanged(self, cel_setup):
         from core.cel_service import evaluate_outcomes
