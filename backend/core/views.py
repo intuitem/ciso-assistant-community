@@ -9060,7 +9060,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
             new_question = Question.objects.create(
                 urn=f"urn:{ns}:risk:question:{fw_slug}:{q_ref_id}",
-                ref_id=q.ref_id,
+                ref_id=q.ref_id or q_ref_id,
                 text=q.text,
                 annotation=q.annotation,
                 type=q.type,
@@ -9083,7 +9083,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     urn=f"urn:{ns}:risk:question_choice:{fw_slug}:{c_ref_id}"
                     if choice.urn
                     else None,
-                    ref_id=choice.ref_id,
+                    ref_id=choice.ref_id or c_ref_id,
                     value=choice.value,
                     annotation=choice.annotation,
                     add_score=choice.add_score,
