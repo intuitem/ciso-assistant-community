@@ -46,7 +46,7 @@ def cel_setup(db):
     )
     rn1 = RequirementNode.objects.create(
         framework=fw,
-        urn="urn:test:cel:req:001",
+        urn="urn:test:risk:req_node:cel:001",
         ref_id="CEL-001",
         assessable=True,
         folder=folder,
@@ -54,7 +54,7 @@ def cel_setup(db):
     )
     rn2 = RequirementNode.objects.create(
         framework=fw,
-        urn="urn:test:cel:req:002",
+        urn="urn:test:risk:req_node:cel:002",
         ref_id="CEL-002",
         assessable=True,
         folder=folder,
@@ -109,8 +109,8 @@ class TestBuildCelContext:
         assert ctx["assessment"]["answered_count"] == 0
         assert ctx["assessment"]["score_max"] == 200
 
-        for urn in ("urn:test:cel:req:001", "urn:test:cel:req:002"):
-            req = ctx["requirements"][urn]
+        for node_id in ("001", "002"):
+            req = ctx["requirements"][node_id]
             assert req["score"] == 0
             assert req["result"] == "not_assessed"
             assert req["status"] == "to_do"
@@ -127,7 +127,7 @@ class TestBuildCelContext:
         ctx, _ = build_cel_context(cel_setup["ca"])
         assert ctx["assessment"]["score_sum"] == 80
         assert ctx["assessment"]["answered_count"] == 1
-        assert ctx["requirements"]["urn:test:cel:req:001"]["score"] == 80
+        assert ctx["requirements"]["001"]["score"] == 80
 
     def test_not_applicable_excluded_from_score_sum(self, cel_setup):
         from core.cel_service import build_cel_context
@@ -141,7 +141,7 @@ class TestBuildCelContext:
         ctx, _ = build_cel_context(cel_setup["ca"])
         assert ctx["assessment"]["score_sum"] == 0
         assert ctx["assessment"]["answered_count"] == 0
-        assert ctx["requirements"]["urn:test:cel:req:001"]["score"] == 0
+        assert ctx["requirements"]["001"]["score"] == 0
 
     def test_implementation_groups_filtering(self, db):
         from core.cel_service import build_cel_context
@@ -156,7 +156,7 @@ class TestBuildCelContext:
         )
         rn_in = RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:ig:in",
+            urn="urn:test:risk:req_node:ig:in",
             ref_id="IG-IN",
             assessable=True,
             implementation_groups=["group_a"],
@@ -165,7 +165,7 @@ class TestBuildCelContext:
         )
         RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:ig:out",
+            urn="urn:test:risk:req_node:ig:out",
             ref_id="IG-OUT",
             assessable=True,
             implementation_groups=["group_b"],
@@ -189,8 +189,8 @@ class TestBuildCelContext:
 
         ctx, _ = build_cel_context(ca)
         assert ctx["assessment"]["total_count"] == 1
-        assert "urn:test:ig:in" in ctx["requirements"]
-        assert "urn:test:ig:out" not in ctx["requirements"]
+        assert "in" in ctx["requirements"]
+        assert "out" not in ctx["requirements"]
 
     def test_missing_ra_for_node(self, db):
         from core.cel_service import build_cel_context
@@ -205,7 +205,7 @@ class TestBuildCelContext:
         )
         RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:missing:001",
+            urn="urn:test:risk:req_node:missing:001",
             ref_id="MISS-001",
             assessable=True,
             folder=folder,
@@ -224,7 +224,7 @@ class TestBuildCelContext:
         # No RA created for the node
         ctx, _ = build_cel_context(ca)
         assert ctx["assessment"]["total_count"] == 1
-        req = ctx["requirements"]["urn:test:missing:001"]
+        req = ctx["requirements"]["001"]
         assert req["score"] == 0
         assert req["result"] == "not_assessed"
         assert req["status"] == "to_do"
@@ -239,14 +239,14 @@ class TestBuildCelContext:
 
         q = Question.objects.create(
             requirement_node=rn1,
-            urn="urn:test:cel:q:001",
+            urn="urn:test:risk:question:cel:001",
             text="Test question",
             type="unique_choice",
             folder=folder,
         )
         c1 = QuestionChoice.objects.create(
             question=q,
-            urn="urn:test:cel:q:001:c:yes",
+            urn="urn:test:risk:question:cel:001:c:yes",
             value="Yes",
             add_score=80,
             compute_result="true",
@@ -261,11 +261,11 @@ class TestBuildCelContext:
 
         ctx, _ = build_cel_context(cel_setup["ca"])
         assert "answers" in ctx
-        assert q.urn in ctx["answers"]
-        ans = ctx["answers"][q.urn]
+        assert q.node_id in ctx["answers"]
+        ans = ctx["answers"][q.node_id]
         assert ans["score"] == 80  # add_score * weight(1)
         assert ans["type"] == "unique_choice"
-        assert "urn:test:cel:q:001:c:yes" in ans["selected_choices"]
+        assert "001:c:yes" in ans["selected_choices"]
 
     def test_context_includes_computed_outcomes(self, cel_setup):
         """Previously computed outcomes should be in the context."""
@@ -433,7 +433,7 @@ class TestVisibilityExpression:
         )
         rn_visible = RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:vis:visible",
+            urn="urn:test:risk:req_node:vis:visible",
             ref_id="VIS-001",
             assessable=True,
             folder=folder,
@@ -441,7 +441,7 @@ class TestVisibilityExpression:
         )
         rn_hidden = RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:vis:hidden",
+            urn="urn:test:risk:req_node:vis:hidden",
             ref_id="VIS-002",
             assessable=True,
             visibility_expression="false",
@@ -467,13 +467,13 @@ class TestVisibilityExpression:
 
         ctx, hidden_urns = build_cel_context(ca)
 
-        assert "urn:test:vis:hidden" in hidden_urns
-        assert "urn:test:vis:visible" not in hidden_urns
-        # Hidden requirement excluded from context
-        assert "urn:test:vis:hidden" not in ctx["requirements"]
-        assert "urn:test:vis:visible" in ctx["requirements"]
+        assert "urn:test:risk:req_node:vis:hidden" in hidden_urns
+        assert "urn:test:risk:req_node:vis:visible" not in hidden_urns
+        # Hidden requirement excluded from context (keyed by node_id)
+        assert "hidden" not in ctx["requirements"]
+        assert "visible" in ctx["requirements"]
         assert ctx["assessment"]["total_count"] == 1
-        assert ctx["hidden_requirements"] == ["urn:test:vis:hidden"]
+        assert ctx["hidden_requirements"] == ["hidden"]
 
     def test_visibility_no_expression_always_visible(self, cel_setup):
         """Requirements without visibility_expression are always visible."""
@@ -497,7 +497,7 @@ class TestVisibilityExpression:
         )
         RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:failopen:001",
+            urn="urn:test:risk:req_node:failopen:001",
             ref_id="FO-001",
             assessable=True,
             visibility_expression="!!!invalid CEL!!!",
@@ -523,7 +523,7 @@ class TestVisibilityExpression:
         ctx, hidden_urns = build_cel_context(ca)
         # Bad expression = fail-open, requirement stays visible
         assert hidden_urns == set()
-        assert "urn:test:failopen:001" in ctx["requirements"]
+        assert "001" in ctx["requirements"]
 
     def test_visibility_based_on_other_requirement_score(self, db):
         """Visibility expression can reference another requirement's score."""
@@ -539,7 +539,7 @@ class TestVisibilityExpression:
         )
         rn_driver = RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:xref:driver",
+            urn="urn:test:risk:req_node:xref:driver",
             ref_id="XREF-DRIVER",
             assessable=True,
             folder=folder,
@@ -547,10 +547,10 @@ class TestVisibilityExpression:
         )
         rn_dependent = RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:xref:dependent",
+            urn="urn:test:risk:req_node:xref:dependent",
             ref_id="XREF-DEP",
             assessable=True,
-            visibility_expression='requirements["urn:test:xref:driver"].score > 50',
+            visibility_expression='requirements["driver"].score > 50',
             folder=folder,
             is_published=True,
         )
@@ -573,7 +573,7 @@ class TestVisibilityExpression:
 
         # Driver score = 0, dependent should be hidden
         ctx, hidden_urns = build_cel_context(ca)
-        assert "urn:test:xref:dependent" in hidden_urns
+        assert "urn:test:risk:req_node:xref:dependent" in hidden_urns
 
         # Set driver score > 50, dependent should become visible
         ra_driver.score = 80
@@ -582,8 +582,8 @@ class TestVisibilityExpression:
         ra_driver.save(update_fields=["score", "result", "is_scored"])
 
         ctx, hidden_urns = build_cel_context(ca)
-        assert "urn:test:xref:dependent" not in hidden_urns
-        assert "urn:test:xref:dependent" in ctx["requirements"]
+        assert "urn:test:risk:req_node:xref:dependent" not in hidden_urns
+        assert "dependent" in ctx["requirements"]
 
     def test_visibility_single_pass_no_cycle(self, db):
         """Circular visibility deps should not cause infinite loops."""
@@ -599,19 +599,19 @@ class TestVisibilityExpression:
         )
         rn_a = RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:cycle:a",
+            urn="urn:test:risk:req_node:cycle:a",
             ref_id="CYC-A",
             assessable=True,
-            visibility_expression='requirements["urn:test:cycle:b"].score > 50',
+            visibility_expression='requirements["b"].score > 50',
             folder=folder,
             is_published=True,
         )
         rn_b = RequirementNode.objects.create(
             framework=fw,
-            urn="urn:test:cycle:b",
+            urn="urn:test:risk:req_node:cycle:b",
             ref_id="CYC-B",
             assessable=True,
-            visibility_expression='requirements["urn:test:cycle:a"].score > 50',
+            visibility_expression='requirements["a"].score > 50',
             folder=folder,
             is_published=True,
         )
@@ -636,8 +636,8 @@ class TestVisibilityExpression:
         ctx, hidden_urns = build_cel_context(ca)
         # Both have score 0, both expressions evaluate to false
         # Both should be hidden (single-pass, no re-evaluation)
-        assert "urn:test:cycle:a" in hidden_urns
-        assert "urn:test:cycle:b" in hidden_urns
+        assert "urn:test:risk:req_node:cycle:a" in hidden_urns
+        assert "urn:test:risk:req_node:cycle:b" in hidden_urns
 
 
 # ---------------------------------------------------------------------------
@@ -694,7 +694,7 @@ class TestCelTrigger:
                 compliance_assessment=ca,
                 requirement=RequirementNode.objects.create(
                     framework=cel_setup["framework"],
-                    urn="urn:test:cel:req:new",
+                    urn="urn:test:risk:req_node:cel:new",
                     ref_id="CEL-NEW",
                     assessable=True,
                     folder=cel_setup["folder"],

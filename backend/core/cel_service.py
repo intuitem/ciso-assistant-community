@@ -33,9 +33,10 @@ def _python_to_cel(value):
 def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
     """Build per-question answer data for the CEL context.
 
-    Returns a dict keyed by question URN with score, value, selected choices, etc.
+    Returns a dict keyed by question node_id.
     """
     from core.models import Answer
+    from core.utils import extract_node_id
 
     answers = (
         Answer.objects.filter(
@@ -57,16 +58,14 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
             "value": answer.value,
             "score": score,
             "selected_choices": [
-                x
-                for c in selected
-                for x in ([c.urn] if c.urn else []) + ([c.ref_id] if c.ref_id else [])
+                extract_node_id(c.urn) for c in selected if extract_node_id(c.urn)
             ],
             "weight": q.weight,
             "type": q.type,
         }
-        result[q.urn] = entry
-        if q.ref_id:
-            result[q.ref_id] = entry
+        q_node_id = extract_node_id(q.urn)
+        if q_node_id:
+            result[q_node_id] = entry
     return result
 
 
@@ -74,16 +73,17 @@ def _build_context_dict(
     in_scope, ra_rows, answer_data, max_score, computed_outcomes=None
 ) -> dict:
     """Build the raw context dict from in-scope nodes, RA rows, and answer data."""
+    from core.utils import extract_node_id
+
     score_sum = 0
     score_max = 0
     answered_count = 0
     total_count = len(in_scope)
     requirements: dict[str, dict] = {}
-    ref_ids: dict[str, dict] = {}
 
     for node in in_scope:
         urn = node["urn"]
-        ref_id = node.get("ref_id")
+        node_id = extract_node_id(urn)
         ra = ra_rows.get(urn)
         score_max += max_score
 
@@ -104,9 +104,8 @@ def _build_context_dict(
                 "status": ra["status"] if ra else "to_do",
             }
 
-        requirements[urn] = entry
-        if ref_id:
-            ref_ids[ref_id] = entry
+        if node_id:
+            requirements[node_id] = entry
 
     ctx = {
         "assessment": {
@@ -116,7 +115,6 @@ def _build_context_dict(
             "total_count": total_count,
         },
         "requirements": requirements,
-        "ref_ids": ref_ids,
         "answers": answer_data,
     }
     if computed_outcomes is not None:
@@ -134,6 +132,7 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     Hidden URNs may include both assessable and non-assessable (splash screen) nodes.
     """
     from core.models import RequirementAssessment, RequirementNode
+    from core.utils import extract_node_id
 
     ca = compliance_assessment
     framework = ca.framework
@@ -234,10 +233,14 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
         final_context = _build_context_dict(
             visible_scope, ra_rows, visible_answer_data, max_score, computed_outcomes
         )
-        final_context["hidden_requirements"] = list(hidden_urns)
+        final_context["hidden_requirements"] = [
+            extract_node_id(u) for u in hidden_urns if extract_node_id(u)
+        ]
     else:
         final_context = initial_context
-        final_context["hidden_requirements"] = list(hidden_urns)
+        final_context["hidden_requirements"] = [
+            extract_node_id(u) for u in hidden_urns if extract_node_id(u)
+        ]
 
     return final_context, hidden_urns
 
