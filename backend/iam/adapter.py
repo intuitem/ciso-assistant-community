@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.mfa.adapter import DefaultMFAAdapter
 from allauth.socialaccount.adapter import (
     DefaultSocialAccountAdapter,
@@ -160,10 +161,16 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             )
             if not user.is_active:
                 logger.warning(
-                    "pre_social_login: user account is deactivated, SSO login will fail",
+                    "pre_social_login: user account is deactivated, aborting SSO login",
                     idp_email=email_address,
                     user_id=str(user.id),
                     provider=sociallogin.account.provider,
+                )
+                raise ImmediateHttpResponse(
+                    Response(
+                        {"message": "User account is deactivated."},
+                        status=HTTP_401_UNAUTHORIZED,
+                    )
                 )
             sociallogin.user = user
             sociallogin.connect(request, user)
