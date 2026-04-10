@@ -8971,10 +8971,12 @@ class FrameworkViewSet(BaseModelViewSet):
             locale=source.locale,
             default_locale=source.default_locale,
             provider=source.provider,
+            urn_namespace=source.urn_namespace,
         )
 
         # Use readable slug-based URNs instead of UUIDs
         fw_slug = self._slugify_framework_name(new_name, new_framework.id)
+        ns = new_framework.urn_namespace or "custom"
 
         # Map old URNs to new URNs for parent_urn remapping
         urn_map = {}
@@ -9003,7 +9005,7 @@ class FrameworkViewSet(BaseModelViewSet):
             old_urn = node.urn
             if old_urn:
                 ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
-                new_urn = f"urn:intuitem:risk:req_node:{fw_slug}:{ref_id}"
+                new_urn = f"urn:{ns}:risk:req_node:{fw_slug}:{ref_id}"
                 urn_map[old_urn] = new_urn
             else:
                 urn_map[old_urn] = None
@@ -9057,7 +9059,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 q_counter[q.requirement_node_id] = q_idx + 1
                 q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
             new_question = Question.objects.create(
-                urn=f"urn:intuitem:risk:question:{fw_slug}:{q_ref_id}",
+                urn=f"urn:{ns}:risk:question:{fw_slug}:{q_ref_id}",
                 ref_id=q.ref_id,
                 text=q.text,
                 annotation=q.annotation,
@@ -9078,7 +9080,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 else:
                     c_ref_id = f"{q_ref_id}-c{c_counter}"
                 QuestionChoice.objects.create(
-                    urn=f"urn:intuitem:risk:question_choice:{fw_slug}:{c_ref_id}"
+                    urn=f"urn:{ns}:risk:question_choice:{fw_slug}:{c_ref_id}"
                     if choice.urn
                     else None,
                     ref_id=choice.ref_id,
@@ -9260,7 +9262,7 @@ class FrameworkViewSet(BaseModelViewSet):
 
         # Build framework object
         framework_obj = {
-            "urn": f"urn:custom:risk:framework:{slug}",
+            "urn": f"urn:{framework.urn_namespace or 'custom'}:risk:framework:{slug}",
             "ref_id": slug,
             "name": framework.name,
             "description": framework.description or "",
@@ -9281,7 +9283,7 @@ class FrameworkViewSet(BaseModelViewSet):
         framework_obj["requirement_nodes"] = requirement_nodes_list
 
         library_data = {
-            "urn": f"urn:custom:risk:library:{slug}",
+            "urn": f"urn:{framework.urn_namespace or 'custom'}:risk:library:{slug}",
             "locale": framework.locale or "en",
             "ref_id": slug,
             "name": framework.name,
@@ -9541,6 +9543,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "implementation_groups_definition": framework.implementation_groups_definition,
                 "outcomes_definition": framework.outcomes_definition,
                 "field_visibility": framework.field_visibility or {},
+                "urn_namespace": framework.urn_namespace or "custom",
             },
             "nodes": nodes,
             "questions": questions,
@@ -9657,6 +9660,109 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
 
+        # Detect breaking field changes on existing nodes
+        BREAKING_NODE_FIELDS = {
+            "assessable",
+            "weight",
+            "implementation_groups",
+            "visibility_expression",
+        }
+        BREAKING_QUESTION_FIELDS = {"type", "depends_on", "weight"}
+        BREAKING_CHOICE_FIELDS = {
+            "add_score",
+            "compute_result",
+            "select_implementation_groups",
+        }
+
+        breaking_changes = []
+        existing_node_ids = db_node_ids & draft_node_ids
+
+        if affected_cas and existing_node_ids:
+            # Fetch current DB values for comparison
+            db_nodes_data = {
+                n["id"]: n
+                for n in RequirementNode.objects.filter(
+                    id__in=existing_node_ids
+                ).values("id", "urn", *BREAKING_NODE_FIELDS)
+            }
+            for nid in existing_node_ids:
+                draft_data = draft_node_map.get(nid)
+                db_data = db_nodes_data.get(nid)
+                if not draft_data or not db_data:
+                    continue
+                for field in BREAKING_NODE_FIELDS:
+                    old_val = db_data.get(field)
+                    new_val = draft_data.get(field)
+                    if old_val != new_val:
+                        label = (
+                            draft_data.get("ref_id")
+                            or draft_data.get("name")
+                            or str(nid)
+                        )
+                        breaking_changes.append(
+                            {
+                                "type": "requirement",
+                                "field": field,
+                                "name": label,
+                            }
+                        )
+
+            # Question breaking changes
+            existing_q_ids = db_question_ids & draft_question_ids
+            if existing_q_ids:
+                draft_q_map = {uuid.UUID(q["id"]): q for q in draft_questions}
+                db_q_data = {
+                    q["id"]: q
+                    for q in Question.objects.filter(id__in=existing_q_ids).values(
+                        "id", *BREAKING_QUESTION_FIELDS
+                    )
+                }
+                for qid in existing_q_ids:
+                    d = draft_q_map.get(qid)
+                    db = db_q_data.get(qid)
+                    if not d or not db:
+                        continue
+                    for field in BREAKING_QUESTION_FIELDS:
+                        if db.get(field) != d.get(field):
+                            label = (
+                                d.get("ref_id") or d.get("text", "")[:30] or str(qid)
+                            )
+                            breaking_changes.append(
+                                {
+                                    "type": "question",
+                                    "field": field,
+                                    "name": label,
+                                }
+                            )
+
+            # Choice breaking changes
+            existing_c_ids = db_choice_ids & draft_choice_ids
+            if existing_c_ids:
+                draft_c_map = {uuid.UUID(c["id"]): c for c in draft_choices}
+                db_c_data = {
+                    c["id"]: c
+                    for c in QuestionChoice.objects.filter(
+                        id__in=existing_c_ids
+                    ).values("id", *BREAKING_CHOICE_FIELDS)
+                }
+                for cid in existing_c_ids:
+                    d = draft_c_map.get(cid)
+                    db = db_c_data.get(cid)
+                    if not d or not db:
+                        continue
+                    for field in BREAKING_CHOICE_FIELDS:
+                        if db.get(field) != d.get(field):
+                            label = (
+                                d.get("ref_id") or d.get("value", "")[:30] or str(cid)
+                            )
+                            breaking_changes.append(
+                                {
+                                    "type": "choice",
+                                    "field": field,
+                                    "name": label,
+                                }
+                            )
+
         return {
             "added": {
                 "requirements": len(new_node_ids),
@@ -9676,6 +9782,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     for n in deleted_nodes_info
                 ],
             },
+            "breaking_changes": breaking_changes,
             "affected_audits": affected_cas,
         }
 
@@ -9767,6 +9874,52 @@ class FrameworkViewSet(BaseModelViewSet):
                 raise DraftValidationError(
                     f"Requirement '{label}': URN is {len(urn)} characters (max 255)."
                 )
+
+        # --- 0b. Validate referential integrity ---
+        from core.utils import extract_node_id
+
+        # Duplicate node_id check
+        node_urns = [n.get("urn") for n in draft_nodes if n.get("urn")]
+        node_ids = [extract_node_id(u) for u in node_urns]
+        seen_node_ids: set[str] = set()
+        for nid in node_ids:
+            if nid and nid in seen_node_ids:
+                raise DraftValidationError(
+                    f"Duplicate node_id '{nid}'. Each requirement must have a unique identifier."
+                )
+            if nid:
+                seen_node_ids.add(nid)
+
+        # Dangling parent_urn check
+        all_node_urns = {n.get("urn") for n in draft_nodes if n.get("urn")}
+        for node in draft_nodes:
+            parent_urn = node.get("parent_urn")
+            if parent_urn and parent_urn not in all_node_urns:
+                label = node.get("ref_id") or node.get("name") or "unknown"
+                raise DraftValidationError(
+                    f"Requirement '{label}' references a parent that does not exist in this framework."
+                )
+
+        # Dangling depends_on check
+        all_question_urns = {q.get("urn") for q in draft_questions if q.get("urn")}
+        all_choice_urns = {c.get("urn") for c in draft_choices if c.get("urn")}
+        for q in draft_questions:
+            depends_on = q.get("depends_on")
+            if not depends_on:
+                continue
+            dep_question = depends_on.get("question")
+            if dep_question and dep_question not in all_question_urns:
+                label = q.get("ref_id") or q.get("text", "")[:30] or "unknown"
+                raise DraftValidationError(
+                    f"Question '{label}' depends on a question that does not exist in this framework."
+                )
+            dep_answers = depends_on.get("answers", [])
+            for ans_urn in dep_answers:
+                if ans_urn and ans_urn not in all_choice_urns:
+                    label = q.get("ref_id") or q.get("text", "")[:30] or "unknown"
+                    raise DraftValidationError(
+                        f"Question '{label}' depends on a choice that does not exist in this framework."
+                    )
 
         with transaction.atomic():
             # --- 1. Collect existing DB IDs ---
@@ -10189,6 +10342,9 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework.translations = meta.get(
                     "translations", framework.translations
                 )
+                # urn_namespace is only settable before first publish
+                if framework.editing_version <= 1 and meta.get("urn_namespace"):
+                    framework.urn_namespace = meta["urn_namespace"]
 
             # --- 9. Sync RequirementAssessments for existing audits ---
             # New requirement nodes need RA + Answer rows in every existing CA.
@@ -10265,6 +10421,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "field_visibility",
                     "locale",
                     "translations",
+                    "urn_namespace",
                     "editing_draft",
                     "editing_version",
                     "editing_history",
