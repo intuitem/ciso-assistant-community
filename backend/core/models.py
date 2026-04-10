@@ -6831,24 +6831,74 @@ class ComplianceAssessment(Assessment):
         Returns the computed score, or -1 if no scored requirements exist.
         """
         if self.score_calculation_method == self.CalculationMethod.AVG_OF_AVG:
-            groups = defaultdict(lambda: {"weighted_score": 0, "total_weight": 0})
+            # Build leaf scores from requirement assessments
+            leaf_scores = {}
             for ras in requirement_assessments:
                 if not ig or (ig & set(ras.requirement.implementation_groups or [])):
-                    parent_key = ras.requirement.parent_urn or ras.requirement.urn
-                    weight = ras.requirement.weight if ras.requirement.weight else 1
-                    groups[parent_key]["weighted_score"] += (
-                        getattr(ras, score_field) or 0
-                    ) * weight
-                    groups[parent_key]["total_weight"] += weight
+                    leaf_scores[ras.requirement.urn] = {
+                        "score": getattr(ras, score_field) or 0,
+                        "weight": ras.requirement.weight or 1,
+                    }
 
-            group_averages = [
-                g["weighted_score"] / g["total_weight"]
-                for g in groups.values()
-                if g["total_weight"] > 0
-            ]
-            if not group_averages:
+            if not leaf_scores:
                 return -1
-            return int(sum(group_averages) / len(group_averages) * 10) / 10
+
+            # Fetch the framework tree structure
+            all_nodes = RequirementNode.objects.filter(
+                framework=self.framework
+            ).values_list("urn", "parent_urn", "weight")
+
+            children_map = defaultdict(list)
+            node_weights = {}
+            roots = []
+            for urn, parent_urn, weight in all_nodes:
+                node_weights[urn] = weight or 1
+                if parent_urn:
+                    children_map[parent_urn].append(urn)
+                else:
+                    roots.append(urn)
+
+            # Recursively compute weighted averages bottom-up
+            computed = {}
+
+            def compute(urn):
+                if urn in computed:
+                    return computed[urn]
+
+                if urn in leaf_scores:
+                    computed[urn] = leaf_scores[urn]["score"]
+                    return computed[urn]
+
+                children = children_map.get(urn, [])
+                if not children:
+                    return None
+
+                child_results = []
+                for child_urn in children:
+                    child_score = compute(child_urn)
+                    if child_score is not None:
+                        child_results.append(
+                            (child_score, node_weights.get(child_urn, 1))
+                        )
+
+                if not child_results:
+                    return None
+
+                total_weighted = sum(s * w for s, w in child_results)
+                total_weight = sum(w for _, w in child_results)
+                computed[urn] = total_weighted / total_weight
+                return computed[urn]
+
+            root_scores = []
+            for root in roots:
+                rs = compute(root)
+                if rs is not None:
+                    root_scores.append(rs)
+
+            if not root_scores:
+                return -1
+
+            return int(sum(root_scores) / len(root_scores) * 10) / 10
 
         weighted_score = 0
         total_weight = 0
