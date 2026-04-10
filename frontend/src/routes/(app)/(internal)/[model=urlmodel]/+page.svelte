@@ -211,7 +211,7 @@
 										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
 									>
 								{/if}
-								{#if URLModel === 'cves'}
+								{#if URLModel === 'security-advisories'}
 									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										title={m.syncKev()}
@@ -219,7 +219,9 @@
 										data-testid="sync-kev-button"
 										onclick={async () => {
 											try {
-												const res = await fetch('/cves/sync-kev', { method: 'POST' });
+												const res = await fetch('/security-advisories/sync-kev', {
+													method: 'POST'
+												});
 												const result = await res.json();
 												toastStore.trigger({
 													message: result.detail || result.error,

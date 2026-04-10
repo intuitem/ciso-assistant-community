@@ -275,12 +275,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
 	},
-	cves: {
-		name: 'cve',
-		localName: 'cve',
-		localNamePlural: 'cves',
-		verboseName: 'CVE',
-		verboseNamePlural: 'CVEs',
+	'security-advisories': {
+		name: 'securityadvisory',
+		localName: 'securityAdvisory',
+		localNamePlural: 'securityAdvisories',
+		verboseName: 'Security advisory',
+		verboseNamePlural: 'Security advisories',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'library', urlModel: 'loaded-libraries' },
@@ -304,7 +304,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{
-				field: 'cves',
+				field: 'security_advisories',
 				urlModel: 'vulnerabilities',
 				disableCreate: true,
 				disableDelete: true
@@ -564,7 +564,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
-			{ field: 'cves', urlModel: 'cves' },
+			{ field: 'security_advisories', urlModel: 'security-advisories' },
 			{ field: 'cwes', urlModel: 'cwes' },
 			{ field: 'detected_at', type: 'date' },
 			{ field: 'eta', type: 'date' },
@@ -574,7 +574,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [
 			{ field: 'folder' },
 			{ field: 'filtering_labels' },
-			{ field: 'cves' },
+			{ field: 'security_advisories' },
 			{ field: 'cwes' }
 		],
 		reverseForeignKeyFields: [

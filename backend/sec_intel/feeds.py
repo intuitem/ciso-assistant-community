@@ -77,14 +77,14 @@ class KEVFeed:
         """Full sync: fetch, parse, create new + update existing CVEs.
         Returns {"created": N, "updated": N}."""
         from iam.models import Folder
-        from sec_intel.models import CVE
+        from sec_intel.models import SecurityAdvisory
 
         raw = self.fetch()
         entries = self.parse(raw)
         kev_map = {e["cve_id"]: e for e in entries}
 
         # Update existing CVEs
-        existing = CVE.objects.filter(ref_id__in=kev_map.keys())
+        existing = SecurityAdvisory.objects.filter(ref_id__in=kev_map.keys())
         existing_ids = set()
         to_update = []
         for cve in existing:
@@ -94,7 +94,7 @@ class KEVFeed:
             to_update.append(cve)
 
         if to_update:
-            CVE.objects.bulk_update(
+            SecurityAdvisory.objects.bulk_update(
                 to_update, ["is_kev", "kev_date_added"], batch_size=1000
             )
 
@@ -104,7 +104,7 @@ class KEVFeed:
         for cve_id, entry in kev_map.items():
             if cve_id not in existing_ids:
                 to_create.append(
-                    CVE(
+                    SecurityAdvisory(
                         ref_id=cve_id,
                         name=entry["name"],
                         description=entry["description"],
@@ -115,7 +115,9 @@ class KEVFeed:
                 )
 
         if to_create:
-            CVE.objects.bulk_create(to_create, batch_size=1000, ignore_conflicts=True)
+            SecurityAdvisory.objects.bulk_create(
+                to_create, batch_size=1000, ignore_conflicts=True
+            )
 
         return {"created": len(to_create), "updated": len(to_update)}
 
@@ -164,13 +166,13 @@ class EPSSFeed:
 
     def sync(self) -> int:
         """Full sync: fetch, parse, bulk-update existing CVEs."""
-        from sec_intel.models import CVE
+        from sec_intel.models import SecurityAdvisory
 
         raw = self.fetch()
         entries = self.parse(raw)
         epss_map = {e["cve_id"]: e for e in entries}
 
-        cves = CVE.objects.filter(ref_id__in=epss_map.keys())
+        cves = SecurityAdvisory.objects.filter(ref_id__in=epss_map.keys())
         to_update = []
         for cve in cves:
             data = epss_map[cve.ref_id]
@@ -179,7 +181,7 @@ class EPSSFeed:
             to_update.append(cve)
 
         if to_update:
-            CVE.objects.bulk_update(
+            SecurityAdvisory.objects.bulk_update(
                 to_update, ["epss_score", "epss_percentile"], batch_size=1000
             )
         return len(to_update)

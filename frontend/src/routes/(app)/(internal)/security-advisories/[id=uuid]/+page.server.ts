@@ -17,12 +17,15 @@ export const actions: Actions = {
 		const schema = z.object({ id: z.string().uuid() });
 		const form = await superValidate(formData, zod(schema));
 
-		const response = await event.fetch(`${BASE_API_URL}/cves/${event.params.id}/enrich/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
+		const response = await event.fetch(
+			`${BASE_API_URL}/security-advisories/${event.params.id}/enrich/`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
 			}
-		});
+		);
 
 		const responseData = await response.json();
 

@@ -3,7 +3,7 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ fetch, request }) => {
-	const endpoint = `${BASE_API_URL}/cves/batch-action/`;
+	const endpoint = `${BASE_API_URL}/security-advisories/batch-action/`;
 
 	const body = await request.json();
 	const res = await fetch(endpoint, {

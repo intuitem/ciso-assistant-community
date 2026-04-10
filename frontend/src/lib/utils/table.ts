@@ -1246,11 +1246,11 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const CVE_FILTER: ListViewFilterConfig = {
+export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'cves',
-		label: 'cve',
+		optionsEndpoint: 'security-advisories',
+		label: 'securityAdvisory',
 		multiple: true
 	}
 };
@@ -1341,7 +1341,7 @@ export const listViewFields = {
 			status: VULNERABILITY_STATUS_FILTER,
 			severity: VULNERABILITY_SEVERITY_FILTER,
 			assets: ASSET_FILTER,
-			cves: CVE_FILTER,
+			security_advisories: SECURITY_ADVISORY_FILTER,
 			cwes: CWE_FILTER
 		}
 	},
@@ -1386,7 +1386,7 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
-	cves: {
+	'security-advisories': {
 		head: [
 			'ref_id',
 			'name',
@@ -3273,7 +3273,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
-	cves: [
+	'security-advisories': [
 		{
 			type: 'change_folder',
 			label: 'changeDomain',

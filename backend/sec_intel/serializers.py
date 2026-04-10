@@ -6,12 +6,12 @@ from core.serializers import (
     FieldsRelatedField,
     PathField,
 )
-from .models import CVE, CWE
+from .models import SecurityAdvisory, CWE
 
 
-class CVEWriteSerializer(BaseModelSerializer):
+class SecurityAdvisoryWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = CVE
+        model = SecurityAdvisory
         exclude = ["translations"]
 
     def create(self, validated_data):
@@ -32,7 +32,7 @@ class CVEWriteSerializer(BaseModelSerializer):
         return instance
 
 
-class CVEReadSerializer(ReferentialSerializer):
+class SecurityAdvisoryReadSerializer(ReferentialSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
@@ -48,7 +48,7 @@ class CVEReadSerializer(ReferentialSerializer):
         ]
 
     class Meta:
-        model = CVE
+        model = SecurityAdvisory
         exclude = ["translations"]
 
 

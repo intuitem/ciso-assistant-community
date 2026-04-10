@@ -1,5 +1,5 @@
 from .views import *
-from sec_intel.views import CVEViewSet, CWEViewSet
+from sec_intel.views import SecurityAdvisoryViewSet, CWEViewSet
 from tprm.views import (
     EntityViewSet,
     RepresentativeViewSet,
@@ -34,7 +34,9 @@ router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
 router.register(r"threats", ThreatViewSet, basename="threats")
-router.register(r"cves", CVEViewSet, basename="cves")
+router.register(
+    r"security-advisories", SecurityAdvisoryViewSet, basename="security-advisories"
+)
 router.register(r"cwes", CWEViewSet, basename="cwes")
 router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios")
 router.register(r"applied-controls", AppliedControlViewSet, basename="applied-controls")

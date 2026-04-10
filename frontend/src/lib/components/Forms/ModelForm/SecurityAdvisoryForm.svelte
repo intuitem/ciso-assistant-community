@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
+	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import NumberField from '../NumberField.svelte';
@@ -31,6 +32,19 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
+/>
+<Select
+	{form}
+	options={[
+		{ label: 'CVE', value: 'CVE' },
+		{ label: 'EUVD', value: 'EUVD' },
+		{ label: 'GHSA', value: 'GHSA' },
+		{ label: 'Other', value: 'other' }
+	]}
+	field="source"
+	label={m.source()}
+	cacheLock={cacheLocks['source']}
+	bind:cachedValue={formDataCache['source']}
 />
 <TextField
 	{form}

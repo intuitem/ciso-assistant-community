@@ -303,7 +303,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
-    cves = FieldsRelatedField(many=True)
+    security_advisories = FieldsRelatedField(many=True)
     cwes = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display")
     state = serializers.SerializerMethodField()

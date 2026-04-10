@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ fetch }) => {
-	const res = await fetch(`${BASE_API_URL}/cves/sync-kev/`, {
+	const res = await fetch(`${BASE_API_URL}/security-advisories/sync-kev/`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' }
 	});

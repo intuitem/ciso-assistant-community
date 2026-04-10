@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .models import CVE, CWE
+from .models import SecurityAdvisory, CWE
 
 logger = structlog.get_logger(__name__)
 
@@ -12,12 +12,12 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "sec_intel.serializers"
 
 
-class CVEViewSet(BaseModelViewSet):
+class SecurityAdvisoryViewSet(BaseModelViewSet):
     """
-    API endpoint that allows CVEs to be viewed or edited.
+    API endpoint that allows security advisories to be viewed or edited.
     """
 
-    model = CVE
+    model = SecurityAdvisory
     filterset_fields = [
         "folder",
         "provider",
@@ -29,12 +29,12 @@ class CVEViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
-        from sec_intel.serializers import CVEReadSerializer
+        from sec_intel.serializers import SecurityAdvisoryReadSerializer
 
         qs = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
-        serializer = CVEReadSerializer(objects, many=True)
+        serializer = SecurityAdvisoryReadSerializer(objects, many=True)
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:

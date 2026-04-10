@@ -168,12 +168,14 @@ export const ThreatSchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 
-export const CVESchema = z.object({
+export const SecurityAdvisorySchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
+	source: z.string().optional(),
+	aliases: z.any().optional().nullable(),
 	library: z.string().uuid().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
 	published_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
@@ -845,7 +847,7 @@ export const vulnerabilitySchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	cves: z.string().uuid().optional().array().optional(),
+	security_advisories: z.string().uuid().optional().array().optional(),
 	cwes: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
@@ -1652,7 +1654,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
-	cves: CVESchema,
+	'security-advisories': SecurityAdvisorySchema,
 	cwes: CWESchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,

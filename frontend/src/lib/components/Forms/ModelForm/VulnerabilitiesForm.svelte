@@ -89,13 +89,13 @@
 	multiple
 	lazy
 	{form}
-	optionsEndpoint="cves"
+	optionsEndpoint="security-advisories"
 	optionsInfoFields={{
 		fields: [{ field: 'ref_id' }],
 		classes: 'text-blue-500'
 	}}
-	field="cves"
-	label={m.cves()}
+	field="security_advisories"
+	label={m.securityAdvisories()}
 />
 <AutocompleteSelect
 	multiple

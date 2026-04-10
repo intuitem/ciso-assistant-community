@@ -3,7 +3,7 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
-	const endpoint = `${BASE_API_URL}/cves/${params.id}/${
+	const endpoint = `${BASE_API_URL}/security-advisories/${params.id}/${
 		url.searchParams ? '?' + url.searchParams.toString() : ''
 	}`;
 
@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 };
 
 export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
-	const endpoint = `${BASE_API_URL}/cves/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/security-advisories/${params.id}/`;
 
 	const body = await request.json();
 	const res = await fetch(endpoint, {

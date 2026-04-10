@@ -5449,10 +5449,10 @@ class Vulnerability(
         verbose_name="Security exceptions",
         related_name="vulnerabilities",
     )
-    cves = models.ManyToManyField(
-        "sec_intel.CVE",
+    security_advisories = models.ManyToManyField(
+        "sec_intel.SecurityAdvisory",
         blank=True,
-        verbose_name=_("CVEs"),
+        verbose_name=_("Security advisories"),
         related_name="vulnerabilities",
     )
     cwes = models.ManyToManyField(

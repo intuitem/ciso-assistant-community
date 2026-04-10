@@ -3127,7 +3127,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "security_exceptions",
         "filtering_labels",
         "findings",
-        "cves",
+        "security_advisories",
         "cwes",
     ]
     search_fields = ["name", "description", "ref_id"]

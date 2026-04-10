@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = "Enrich CVEs with NVD data"
+    help = "Enrich security advisories with NVD data"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from sec_intel.feeds import NVDFeed
-        from sec_intel.models import CVE
+        from sec_intel.models import SecurityAdvisory
 
         if options["cve_id"]:
             self._enrich_single(options["cve_id"], options.get("file"))
@@ -40,9 +40,9 @@ class Command(BaseCommand):
 
     def _enrich_single(self, cve_id: str, file_path: str | None):
         from sec_intel.feeds import NVDFeed
-        from sec_intel.models import CVE
+        from sec_intel.models import SecurityAdvisory
 
-        cve = CVE.objects.filter(ref_id=cve_id).first()
+        cve = SecurityAdvisory.objects.filter(ref_id=cve_id).first()
         if not cve:
             self.stderr.write(self.style.ERROR(f"CVE {cve_id} not found in database"))
             return
@@ -85,11 +85,11 @@ class Command(BaseCommand):
 
     def _enrich_all(self):
         from sec_intel.feeds import NVDFeed
-        from sec_intel.models import CVE
+        from sec_intel.models import SecurityAdvisory
 
         from django.db.models import Q
 
-        cves = CVE.objects.filter(ref_id__startswith="CVE-").filter(
+        cves = SecurityAdvisory.objects.filter(ref_id__startswith="CVE-").filter(
             Q(published_date__isnull=True)
             | Q(cvss_base_score__isnull=True)
             | Q(description__isnull=True)

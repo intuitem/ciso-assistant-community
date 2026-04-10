@@ -78,7 +78,7 @@ export const URL_MODEL = [
 	'contracts',
 	'representatives',
 	'vulnerabilities',
-	'cves',
+	'security-advisories',
 	'cwes',
 	'filtering-labels',
 	'library-filtering-labels',

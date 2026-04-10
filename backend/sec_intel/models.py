@@ -10,18 +10,35 @@ from core.models import (
 from iam.models import PublishInRootFolderMixin
 
 
-class CVE(
+class SecurityAdvisory(
     ReferentialObjectMixin,
     I18nObjectMixin,
     PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
+    class Source(models.TextChoices):
+        CVE = "CVE", "CVE"
+        EUVD = "EUVD", "EUVD"
+        GHSA = "GHSA", "GHSA"
+        OTHER = "other", "Other"
+
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="cves",
+        related_name="security_advisories",
+    )
+    source = models.CharField(
+        max_length=20,
+        choices=Source.choices,
+        default=Source.CVE,
+        verbose_name=_("Source"),
+    )
+    aliases = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_("Aliases"),
     )
     published_date = models.DateField(
         null=True, blank=True, verbose_name=_("Published date")
@@ -62,8 +79,8 @@ class CVE(
     fields_to_check = ["ref_id"]
 
     class Meta:
-        verbose_name = _("CVE")
-        verbose_name_plural = _("CVEs")
+        verbose_name = _("Security advisory")
+        verbose_name_plural = _("Security advisories")
 
     def __str__(self):
         return self.ref_id or self.name or str(self.id)
