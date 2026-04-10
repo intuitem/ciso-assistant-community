@@ -644,13 +644,18 @@ def build_sync_preview(ebios_rm_study, sources):
 
 
 def _set_risk_level(risk_scenario, impact, likelihood):
-    """Set impact/likelihood on a risk scenario respecting the inherent_risk feature flag."""
+    """Set impact/likelihood on a risk scenario respecting the inherent_risk feature flag.
+    Pass None for either value to leave it unchanged."""
     if ff_is_enabled("inherent_risk"):
-        risk_scenario.inherent_proba = likelihood
-        risk_scenario.inherent_impact = impact
+        if likelihood is not None:
+            risk_scenario.inherent_proba = likelihood
+        if impact is not None:
+            risk_scenario.inherent_impact = impact
     else:
-        risk_scenario.current_proba = likelihood
-        risk_scenario.current_impact = impact
+        if likelihood is not None:
+            risk_scenario.current_proba = likelihood
+        if impact is not None:
+            risk_scenario.current_impact = impact
 
 
 def _find_existing_risk_scenario(risk_assessment, name):
@@ -789,7 +794,12 @@ def _upsert_risk_scenario(
             **(extra_fields or {}),
         )
 
-    _set_risk_level(risk_scenario, impact, likelihood)
+    # On update, don't overwrite likelihood if the source doesn't provide one (-1),
+    # so user-set values are preserved across re-syncs in light modes.
+    if created or likelihood >= 0:
+        _set_risk_level(risk_scenario, impact, likelihood)
+    else:
+        _set_risk_level(risk_scenario, impact, None)
     risk_scenario.save()
 
     if assets is not None:
