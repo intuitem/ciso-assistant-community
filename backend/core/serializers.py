@@ -309,20 +309,20 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     state = serializers.SerializerMethodField()
 
     RESOLVED_STATUSES = {"mitigated", "fixed", "not_exploitable", "unaffected"}
-    _sla_policy_cache = None
 
     def _get_sla_policy(self):
-        if self._sla_policy_cache is None:
+        """Per-instance cache — one DB query per serializer instantiation."""
+        if not hasattr(self, "_sla_policy"):
             from global_settings.models import GlobalSettings
 
             try:
                 sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-                self.__class__._sla_policy_cache = (
+                self._sla_policy = (
                     sla_settings.value if isinstance(sla_settings.value, dict) else {}
                 )
             except GlobalSettings.DoesNotExist:
-                self.__class__._sla_policy_cache = {}
-        return self._sla_policy_cache
+                self._sla_policy = {}
+        return self._sla_policy
 
     def get_state(self, obj):
         from datetime import date

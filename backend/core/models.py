@@ -5474,6 +5474,8 @@ class Vulnerability(
     def save(self, *args, **kwargs):
         from datetime import date
 
+        update_fields = kwargs.get("update_fields")
+
         is_new = self._state.adding
         severity_changed = False
         if not is_new:
@@ -5483,8 +5485,12 @@ class Vulnerability(
         # Default detected_at to today on creation
         if is_new and not self.detected_at:
             self.detected_at = date.today()
-        if (is_new or severity_changed) and not self.due_date:
+            if update_fields is not None and "detected_at" not in update_fields:
+                update_fields.append("detected_at")
+        if is_new or severity_changed:
             self._apply_sla_policy()
+            if update_fields is not None and "due_date" not in update_fields:
+                update_fields.append("due_date")
         super().save(*args, **kwargs)
 
     def _apply_sla_policy(self):

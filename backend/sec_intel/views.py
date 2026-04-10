@@ -35,11 +35,14 @@ class CVEViewSet(BaseModelViewSet):
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
         serializer = CVEReadSerializer(objects, many=True)
-        return (
-            self.get_paginated_response(serializer.data)
-            if page is not None
-            else Response(serializer.data)
-        )
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
 
     @action(detail=False, methods=["post"], url_path="sync-kev")
     def sync_kev(self, request):
@@ -118,11 +121,14 @@ class CWEViewSet(BaseModelViewSet):
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
         serializer = CWEReadSerializer(objects, many=True)
-        return (
-            self.get_paginated_response(serializer.data)
-            if page is not None
-            else Response(serializer.data)
-        )
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
 
     @action(detail=False, methods=["post"], url_path="sync-catalog")
     def sync_catalog(self, request):

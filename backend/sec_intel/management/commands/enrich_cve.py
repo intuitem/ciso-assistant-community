@@ -87,8 +87,13 @@ class Command(BaseCommand):
         from sec_intel.feeds import NVDFeed
         from sec_intel.models import CVE
 
-        cves = CVE.objects.filter(
-            published_date__isnull=True, ref_id__startswith="CVE-"
+        from django.db.models import Q
+
+        cves = CVE.objects.filter(ref_id__startswith="CVE-").filter(
+            Q(published_date__isnull=True)
+            | Q(cvss_base_score__isnull=True)
+            | Q(description__isnull=True)
+            | Q(description="")
         )
         total = cves.count()
 

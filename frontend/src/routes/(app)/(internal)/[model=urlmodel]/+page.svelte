@@ -192,8 +192,8 @@
 													}
 												}
 											});
-										}}
-									><i class="fa-solid fa-clock-rotate-left"></i></button>
+										}}><i class="fa-solid fa-clock-rotate-left"></i></button
+									>
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a

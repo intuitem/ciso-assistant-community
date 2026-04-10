@@ -3140,11 +3140,14 @@ class VulnerabilityViewSet(BaseModelViewSet):
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
         serializer = VulnerabilityReadSerializer(objects, many=True)
-        return (
-            self.get_paginated_response(serializer.data)
-            if page is not None
-            else Response(serializer.data)
-        )
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
