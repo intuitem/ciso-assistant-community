@@ -56,7 +56,11 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
         entry = {
             "value": answer.value,
             "score": score,
-            "selected_choices": [c.urn for c in selected if c.urn],
+            "selected_choices": [
+                x
+                for c in selected
+                for x in ([c.urn] if c.urn else []) + ([c.ref_id] if c.ref_id else [])
+            ],
             "weight": q.weight,
             "type": q.type,
         }
