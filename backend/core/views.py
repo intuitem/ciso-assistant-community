@@ -1072,7 +1072,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         Uses the IAM-filtered queryset and serializers to respect permissions
         and validation, mirroring the standard partial_update / destroy flows.
 
-        Payload: { "action": "delete"|"change_field"|"change_m2m"|"change_folder",
+        Payload: { "action": "delete"|"change_field"|"change_m2m"|"add_m2m"|"remove_m2m"|"change_folder",
                    "ids": [...], "field": "<field_name>", "value": ... }
         """
         action_type = request.data.get("action")
@@ -1080,7 +1080,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         value = request.data.get("value")
         field_name = request.data.get("field")
 
-        valid_actions = ("delete", "change_field", "change_m2m", "change_folder")
+        valid_actions = (
+            "delete",
+            "change_field",
+            "change_m2m",
+            "add_m2m",
+            "remove_m2m",
+            "change_folder",
+        )
         if action_type not in valid_actions:
             return Response(
                 {"error": "Invalid action type"},
@@ -1162,6 +1169,23 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                             "Webhook dispatch failed on batch delete", exc_info=True
                         )
                     obj.delete()
+
+                elif action_type in ("add_m2m", "remove_m2m"):
+                    ids_to_modify = value if isinstance(value, list) else [value]
+                    m2m_field = getattr(obj, field_name)
+                    if action_type == "add_m2m":
+                        m2m_field.add(*ids_to_modify)
+                    else:
+                        m2m_field.remove(*ids_to_modify)
+                    obj.save(update_fields=["updated_at"])
+                    try:
+                        dispatch_webhook_event(obj, "updated")
+                    except Exception:
+                        logger.error(
+                            "Webhook dispatch failed on batch %s",
+                            action_type,
+                            exc_info=True,
+                        )
 
                 else:
                     # Build data dict for the serializer
@@ -3460,12 +3484,19 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         instance.save()
         return super().perform_create(serializer)
 
-    @action(detail=True, methods=["post"], name="Sync with EBIOS RM")
-    def sync_from_ebios_rm(self, request, pk=None):
+    @action(
+        detail=True,
+        methods=["get"],
+        name="Preview EBIOS RM sync",
+        url_path="sync_preview",
+    )
+    def sync_preview(self, request, pk=None):
         """
-        Synchronize an existing risk assessment with its linked EBIOS RM study.
-        Updates existing risk scenarios, adds new ones, and archives outdated ones.
+        Preview what a sync from EBIOS RM would produce.
+        Auto-detects sync sources and returns them with impact/likelihood info.
         """
+        from ebios_rm.helpers import build_sync_preview, detect_sync_sources
+
         risk_assessment = self.get_object()
 
         if not risk_assessment.ebios_rm_study:
@@ -3475,217 +3506,48 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             )
 
         ebios_rm_study = risk_assessment.ebios_rm_study
-        selected_operational_scenarios = [
-            os for os in ebios_rm_study.operational_scenarios.all() if os.is_selected
-        ]
+        sources = detect_sync_sources(ebios_rm_study)
 
-        # Track which operational scenarios we've processed
-        processed_os_ids = set()
-        updated_count = 0
-        created_count = 0
-        archived_count = 0
-
-        # Helper function to build description (DRY)
-        def build_description(operational_scenario):
-            description_parts = []
-
-            # Feared events
-            ro_to = operational_scenario.ro_to
-            feared_events = ro_to.feared_events.filter(is_selected=True)
-            if feared_events.exists():
-                feared_events_list = []
-                for fe in feared_events:
-                    gravity_display = fe.get_gravity_display()
-                    gravity_text = (
-                        f" [{_('Gravity').capitalize()}: {gravity_display['name']}]"
-                        if gravity_display["value"] >= 0
-                        else ""
+        if sources is None:
+            return Response(
+                {
+                    "error": _(
+                        "No selected objects found in the EBIOS RM study. "
+                        "Please select feared events, attack paths, or operational scenarios first."
                     )
-                    fe_text = f"- {fe.name}{gravity_text}"
-                    if fe.description:
-                        fe_text += f": {fe.description}"
-                    feared_events_list.append(fe_text)
-                feared_events_text = (
-                    f"**{_('Feared events').capitalize()}:**\n"
-                    + "\n".join(feared_events_list)
-                )
-                description_parts.append(feared_events_text)
-
-            # Risk origin and target objective
-            risk_origin_name = (
-                ro_to.risk_origin.get_name_translated
-                if hasattr(ro_to.risk_origin, "get_name_translated")
-                else str(ro_to.risk_origin)
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
-            ro_to_text = f"**{_('Risk origin').capitalize()}:** {risk_origin_name}\n**{_('Target objective').capitalize()}:** {ro_to.target_objective}"
-            description_parts.append(ro_to_text)
 
-            # Strategic scenario
-            strategic_scenario = operational_scenario.attack_path.strategic_scenario
-            if strategic_scenario.description:
-                description_parts.append(
-                    f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}\n{strategic_scenario.description}"
-                )
-            elif strategic_scenario.name:
-                description_parts.append(
-                    f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}"
-                )
+        return Response(build_sync_preview(ebios_rm_study, sources))
 
-            # Attack path
-            attack_path = operational_scenario.attack_path
-            if attack_path.description:
-                description_parts.append(
-                    f"**{_('Attack path').capitalize()}:** {attack_path.name}\n{attack_path.description}"
-                )
-            elif attack_path.name:
-                description_parts.append(
-                    f"**{_('Attack path').capitalize()}:** {attack_path.name}"
-                )
+    @action(detail=True, methods=["post"], name="Sync with EBIOS RM")
+    def sync_from_ebios_rm(self, request, pk=None):
+        """
+        Synchronize an existing risk assessment with its linked EBIOS RM study.
+        Handles hybrid cases where different objects are at different workshop levels.
+        """
+        from ebios_rm.helpers import detect_sync_sources, sync_risk_assessment
 
-            # Operating modes
-            operating_modes = operational_scenario.operating_modes.all()
-            if operating_modes.exists():
-                operating_modes_list = []
-                for om in operating_modes:
-                    likelihood_display = om.get_likelihood_display()
-                    likelihood_text = (
-                        f" [{_('Likelihood').capitalize()}: {likelihood_display['name']}]"
-                        if likelihood_display["value"] >= 0
-                        else ""
-                    )
-                    om_text = f"- {om.name}{likelihood_text}"
-                    if om.description:
-                        om_text += f": {om.description}"
-                    operating_modes_list.append(om_text)
-                operating_modes_text = (
-                    f"**{_('operating modes').capitalize()}:**\n"
-                    + "\n".join(operating_modes_list)
-                )
-                description_parts.append(operating_modes_text)
-            elif operational_scenario.operating_modes_description:
-                description_parts.append(
-                    f"**{_('operating modes').capitalize()}:**\n{operational_scenario.operating_modes_description}"
-                )
+        risk_assessment = self.get_object()
 
-            return "\n\n".join(description_parts)
+        if not risk_assessment.ebios_rm_study:
+            return Response(
+                {"error": "Risk assessment is not linked to an EBIOS RM study"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        # Update or create risk scenarios for selected operational scenarios
-        for operational_scenario in selected_operational_scenarios:
-            processed_os_ids.add(operational_scenario.id)
+        ebios_rm_study = risk_assessment.ebios_rm_study
+        sources = detect_sync_sources(ebios_rm_study)
 
-            # Try to find existing risk scenario for this operational scenario
-            risk_scenario = None
+        if sources is None:
+            return Response(
+                {"error": "No selected objects found in the EBIOS RM study"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-            # First, try to find by operational_scenario link
-            try:
-                risk_scenario = risk_assessment.risk_scenarios.get(
-                    operational_scenario=operational_scenario
-                )
-            except RiskScenario.DoesNotExist:
-                # Fallback: try to match by name (for backward compatibility with old data)
-                # Remove [ARCHIVED] prefix when matching
-                clean_name = operational_scenario.name.replace("[ARCHIVED] ", "")
-                try:
-                    risk_scenario = risk_assessment.risk_scenarios.get(
-                        operational_scenario__isnull=True, name=clean_name
-                    )
-                    # Establish the link for this old risk scenario
-                    risk_scenario.operational_scenario = operational_scenario
-                except RiskScenario.DoesNotExist:
-                    # Also try matching with [ARCHIVED] prefix
-                    try:
-                        risk_scenario = risk_assessment.risk_scenarios.get(
-                            operational_scenario__isnull=True,
-                            name=f"[ARCHIVED] {clean_name}",
-                        )
-                        # Establish the link for this old risk scenario
-                        risk_scenario.operational_scenario = operational_scenario
-                    except RiskScenario.DoesNotExist:
-                        pass
-
-            if risk_scenario:
-                # Update existing risk scenario - remove [ARCHIVED] prefix if present
-                risk_scenario.name = operational_scenario.name.replace(
-                    "[ARCHIVED] ", ""
-                )
-                risk_scenario.description = build_description(operational_scenario)
-
-                risk_scenario.risk_origin = operational_scenario.ro_to.risk_origin
-
-                # Update inherent or current probability/impact based on feature flag
-                if ff_is_enabled("inherent_risk"):
-                    risk_scenario.inherent_proba = operational_scenario.likelihood
-                    risk_scenario.inherent_impact = operational_scenario.gravity
-                else:
-                    risk_scenario.current_proba = operational_scenario.likelihood
-                    risk_scenario.current_impact = operational_scenario.gravity
-
-                risk_scenario.save()
-
-                # Update relationships
-                risk_scenario.assets.set(operational_scenario.get_assets())
-                risk_scenario.threats.set(operational_scenario.threats.all())
-
-                # Merge existing controls: keep user-added ones + update from EBIOS RM
-                # Get current existing controls
-                current_existing_controls = set(
-                    risk_scenario.existing_applied_controls.all()
-                )
-                # Get controls from EBIOS RM
-                ebios_controls = set(operational_scenario.get_applied_controls())
-                # Merge them (union)
-                merged_controls = current_existing_controls | ebios_controls
-                risk_scenario.existing_applied_controls.set(merged_controls)
-
-                updated_count += 1
-
-            else:
-                # Create new risk scenario (no existing match found)
-                risk_scenario = RiskScenario(
-                    risk_assessment=risk_assessment,
-                    operational_scenario=operational_scenario,
-                    name=operational_scenario.name,
-                    ref_id=operational_scenario.ref_id
-                    if operational_scenario.ref_id
-                    else RiskScenario.get_default_ref_id(risk_assessment),
-                    description=build_description(operational_scenario),
-                    risk_origin=operational_scenario.ro_to.risk_origin,
-                )
-                if ff_is_enabled("inherent_risk"):
-                    risk_scenario.inherent_proba = operational_scenario.likelihood
-                    risk_scenario.inherent_impact = operational_scenario.gravity
-                else:
-                    risk_scenario.current_proba = operational_scenario.likelihood
-                    risk_scenario.current_impact = operational_scenario.gravity
-                risk_scenario.save()
-
-                risk_scenario.assets.set(operational_scenario.get_assets())
-                risk_scenario.threats.set(operational_scenario.threats.all())
-                risk_scenario.existing_applied_controls.set(
-                    operational_scenario.get_applied_controls()
-                )
-
-                created_count += 1
-
-        # Archive risk scenarios that are no longer selected
-        for risk_scenario in risk_assessment.risk_scenarios.filter(
-            operational_scenario__isnull=False
-        ):
-            if risk_scenario.operational_scenario_id not in processed_os_ids:
-                if not risk_scenario.name.startswith("[ARCHIVED] "):
-                    risk_scenario.name = f"[ARCHIVED] {risk_scenario.name}"
-                    risk_scenario.save()
-                    archived_count += 1
-
-        return Response(
-            {
-                "success": True,
-                "updated": updated_count,
-                "created": created_count,
-                "archived": archived_count,
-                "total_scenarios": risk_assessment.risk_scenarios.count(),
-            }
-        )
+        result = sync_risk_assessment(risk_assessment, sources)
+        return Response(result)
 
     @action(detail=False, name="Risk assessments per status")
     def per_status(self, request):
