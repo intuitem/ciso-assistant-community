@@ -9593,6 +9593,105 @@ class FrameworkViewSet(BaseModelViewSet):
         framework.save(update_fields=["editing_draft", "updated_at"])
         return Response({"status": "draft_saved"})
 
+    @staticmethod
+    def _compute_draft_diff(framework, draft):
+        """Compute the diff between the draft and current DB state.
+
+        Returns a dict with counts and details of what would change,
+        plus the parsed draft lists for reuse by _reconcile_draft.
+        """
+        draft_nodes = draft.get("nodes", [])
+        draft_questions = draft.get("questions", [])
+        draft_choices = draft.get("choices", [])
+
+        db_node_ids = set(
+            RequirementNode.objects.filter(framework=framework).values_list(
+                "id", flat=True
+            )
+        )
+        db_question_ids = set(
+            Question.objects.filter(requirement_node__framework=framework).values_list(
+                "id", flat=True
+            )
+        )
+        db_choice_ids = set(
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework
+            ).values_list("id", flat=True)
+        )
+
+        draft_node_ids = {uuid.UUID(n["id"]) for n in draft_nodes}
+        draft_question_ids = {uuid.UUID(q["id"]) for q in draft_questions}
+        draft_choice_ids = {uuid.UUID(c["id"]) for c in draft_choices}
+
+        new_node_ids = draft_node_ids - db_node_ids
+        deleted_node_ids = db_node_ids - draft_node_ids
+
+        new_question_ids = draft_question_ids - db_question_ids
+        deleted_question_ids = db_question_ids - draft_question_ids
+
+        new_choice_ids = draft_choice_ids - db_choice_ids
+        deleted_choice_ids = db_choice_ids - draft_choice_ids
+
+        # Build name maps for human-readable output
+        draft_node_map = {uuid.UUID(n["id"]): n for n in draft_nodes}
+        new_nodes_info = [
+            {
+                "name": draft_node_map[nid].get("name")
+                or draft_node_map[nid].get("ref_id")
+                or str(nid),
+                "assessable": draft_node_map[nid].get("assessable", False),
+            }
+            for nid in new_node_ids
+        ]
+        deleted_nodes_info = list(
+            RequirementNode.objects.filter(id__in=deleted_node_ids).values(
+                "name", "ref_id", "assessable"
+            )
+        )
+
+        # Affected compliance assessments
+        affected_cas = list(
+            ComplianceAssessment.objects.filter(framework=framework).values(
+                "id", "name"
+            )
+        )
+
+        return {
+            "added": {
+                "requirements": len(new_node_ids),
+                "questions": len(new_question_ids),
+                "choices": len(new_choice_ids),
+                "details": new_nodes_info,
+            },
+            "removed": {
+                "requirements": len(deleted_node_ids),
+                "questions": len(deleted_question_ids),
+                "choices": len(deleted_choice_ids),
+                "details": [
+                    {
+                        "name": n.get("name") or n.get("ref_id") or "unnamed",
+                        "assessable": n.get("assessable", False),
+                    }
+                    for n in deleted_nodes_info
+                ],
+            },
+            "affected_audits": affected_cas,
+        }
+
+    @action(detail=True, methods=["post"], url_path="publish-draft-preview")
+    def publish_draft_preview(self, request, pk=None):
+        """Preview the impact of publishing the current draft."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        if framework.editing_draft is None:
+            return Response(
+                {"error": "No active draft to preview."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        diff = self._compute_draft_diff(framework, framework.editing_draft)
+        return Response(diff)
+
     @action(detail=True, methods=["post"], url_path="publish-draft")
     def publish_draft(self, request, pk=None):
         """Publish editing_draft → relational DB, snapshot history, bump version."""
@@ -10091,7 +10190,59 @@ class FrameworkViewSet(BaseModelViewSet):
                     "translations", framework.translations
                 )
 
-            # --- 9. Snapshot history, bump version, clear draft ---
+            # --- 9. Sync RequirementAssessments for existing audits ---
+            # New requirement nodes need RA + Answer rows in every existing CA.
+            if new_node_ids:
+                existing_cas = ComplianceAssessment.objects.filter(framework=framework)
+                new_nodes_list = list(
+                    RequirementNode.objects.filter(id__in=new_node_ids)
+                )
+                new_questions_list = list(
+                    Question.objects.filter(
+                        requirement_node_id__in=new_node_ids
+                    ).select_related("requirement_node")
+                )
+
+                # One query for all existing RAs across all CAs (avoid N+1)
+                existing_ra_map = defaultdict(set)
+                for ca_id, req_id in RequirementAssessment.objects.filter(
+                    compliance_assessment__framework=framework,
+                    requirement_id__in=new_node_ids,
+                ).values_list("compliance_assessment_id", "requirement_id"):
+                    existing_ra_map[ca_id].add(req_id)
+
+                for ca in existing_cas:
+                    already_exists = existing_ra_map.get(ca.id, set())
+                    nodes_needing_ra = [
+                        n for n in new_nodes_list if n.id not in already_exists
+                    ]
+                    if not nodes_needing_ra:
+                        continue
+
+                    new_ras = RequirementAssessment.objects.bulk_create(
+                        [
+                            RequirementAssessment(
+                                compliance_assessment=ca,
+                                requirement=node,
+                                folder_id=ca.folder_id,
+                            )
+                            for node in nodes_needing_ra
+                        ]
+                    )
+                    ra_by_req = {ra.requirement_id: ra for ra in new_ras}
+                    answers_to_create = [
+                        Answer(
+                            requirement_assessment=ra_by_req[q.requirement_node_id],
+                            question=q,
+                            folder_id=ca.folder_id,
+                        )
+                        for q in new_questions_list
+                        if q.requirement_node_id in ra_by_req
+                    ]
+                    if answers_to_create:
+                        Answer.objects.bulk_create(answers_to_create, batch_size=1000)
+
+            # --- 10. Snapshot history, bump version, clear draft ---
             history = list(framework.editing_history or [])
             history.append(
                 {
