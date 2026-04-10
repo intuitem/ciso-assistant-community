@@ -100,6 +100,8 @@ export interface Framework {
 	translations?: Translations | null;
 	available_languages?: string[];
 	urn: string | null;
+	urn_namespace: string;
+	editing_version: number;
 }
 
 export interface BuilderRequirement {
@@ -199,9 +201,10 @@ export function computeRefId(
 export function generateUrn(
 	type: 'req_node' | 'question' | 'question_choice',
 	slug: string,
-	refId: string
+	refId: string,
+	urnNamespace: string = 'custom'
 ): string {
-	return `urn:intuitem:risk:${type}:${slug}:${refId}`;
+	return `urn:${urnNamespace}:risk:${type}:${slug}:${refId}`;
 }
 
 // --- Recursive helpers ---
@@ -393,7 +396,8 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 			scores_definition: fw.scores_definition,
 			implementation_groups_definition: fw.implementation_groups_definition,
 			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
-			field_visibility: fw.field_visibility
+			field_visibility: fw.field_visibility,
+			urn_namespace: fw.urn_namespace
 		},
 		nodes,
 		questions,
@@ -426,7 +430,8 @@ export function hydrateDraft(
 		scores_definition: meta.scores_definition,
 		implementation_groups_definition: meta.implementation_groups_definition,
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
-		field_visibility: meta.field_visibility ?? {}
+		field_visibility: meta.field_visibility ?? {},
+		urn_namespace: meta.urn_namespace ?? 'custom'
 	};
 
 	// Build a lookup from question_id to choices
@@ -694,6 +699,9 @@ export function createBuilderState(
 	const frameworkId = frameworkData.id;
 	// Cache the slug at session start so all new items use a consistent namespace
 	const fwSlug = slugifyFrameworkName(frameworkData.name, frameworkId);
+	function getUrnNs(): string {
+		return get(framework).urn_namespace || 'custom';
+	}
 
 	// If we have a draft, hydrate from it; otherwise use relational data
 	let initialNodes = nodes;
@@ -856,7 +864,7 @@ export function createBuilderState(
 		const newId = crypto.randomUUID();
 		const siblingRefIds = currentSections.map((s) => s.node.ref_id);
 		const refId = computeRefId(siblingRefIds, null, 'section');
-		const newUrn = generateUrn('req_node', fwSlug, refId);
+		const newUrn = generateUrn('req_node', fwSlug, refId, getUrnNs());
 		const newNode: RequirementNode = {
 			id: newId,
 			urn: newUrn,
@@ -907,7 +915,7 @@ export function createBuilderState(
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: generateUrn('req_node', fwSlug, refId),
+			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
 			ref_id: refId,
 			name: 'New Splash Screen',
 			description: null,
@@ -961,7 +969,7 @@ export function createBuilderState(
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: generateUrn('req_node', fwSlug, refId),
+			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
 			ref_id: refId,
 			name: 'New Requirement',
 			description: null,
@@ -1041,7 +1049,7 @@ export function createBuilderState(
 		const parentRefId = req.node.ref_id ?? null;
 		const siblingRefIds = req.questions.map((bq) => bq.question.ref_id);
 		const refId = computeRefId(siblingRefIds, parentRefId, 'question');
-		const urn = generateUrn('question', fwSlug, refId);
+		const urn = generateUrn('question', fwSlug, refId, getUrnNs());
 
 		const newQuestion: Question = {
 			id: newId,
@@ -1112,7 +1120,7 @@ export function createBuilderState(
 
 		const newChoice: QuestionChoice = {
 			id: newId,
-			urn: generateUrn('question_choice', fwSlug, refId),
+			urn: generateUrn('question_choice', fwSlug, refId, getUrnNs()),
 			ref_id: refId,
 			value: '',
 			annotation: null,

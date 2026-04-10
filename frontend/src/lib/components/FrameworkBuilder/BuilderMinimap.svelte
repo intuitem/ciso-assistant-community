@@ -378,6 +378,30 @@
 						</div>
 					{/if}
 
+					{#if publishPreview.breaking_changes?.length > 0}
+						<div class="p-3 bg-orange-50 border-l-2 border-orange-500 rounded-r">
+							<div class="text-sm font-medium text-orange-800">
+								<i class="fa-solid fa-bolt mr-1"></i>
+								{publishPreview.breaking_changes.length} breaking change{publishPreview
+									.breaking_changes.length > 1
+									? 's'
+									: ''} detected
+							</div>
+							<ul class="mt-1.5 text-xs text-orange-700 space-y-0.5">
+								{#each publishPreview.breaking_changes as change}
+									<li class="truncate" title="{change.type}: {change.name} ({change.field})">
+										<span class="font-mono">{change.field}</span> changed on {change.type}
+										<span class="font-medium">{change.name}</span>
+									</li>
+								{/each}
+							</ul>
+							<p class="mt-1.5 text-xs text-orange-600">
+								These changes may affect scoring, visibility, or compliance results in existing
+								audits.
+							</p>
+						</div>
+					{/if}
+
 					{#if publishPreview.affected_audits.length > 0}
 						<div class="p-3 bg-amber-50 border-l-2 border-amber-400 rounded-r">
 							<div class="text-sm font-medium text-amber-800">

@@ -241,53 +241,46 @@
 			</div>
 
 			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
-				Requirements (by URN)
+				Requirements (by node_id)
 			</div>
 			<div class="space-y-1 ml-2">
 				<div>
-					<span class="text-gray-700">requirements["urn:..."].score</span> — requirement score
+					<span class="text-gray-700">requirements["NODE_ID"].score</span> — requirement score
 				</div>
 				<div>
-					<span class="text-gray-700">requirements["urn:..."].max_score</span> — requirement max score
+					<span class="text-gray-700">requirements["NODE_ID"].max_score</span> — requirement max score
 				</div>
 				<div>
-					<span class="text-gray-700">requirements["urn:..."].result</span> — requirement result
+					<span class="text-gray-700">requirements["NODE_ID"].result</span> — requirement result
 				</div>
 				<div>
-					<span class="text-gray-700">requirements["urn:..."].status</span> — requirement status
+					<span class="text-gray-700">requirements["NODE_ID"].status</span> — requirement status
+				</div>
+				<div class="text-gray-400 italic">
+					node_id = the part of the URN after the slug (e.g. "1.2" from
+					urn:custom:risk:req_node:my-fw:1.2)
 				</div>
 			</div>
 
 			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
-				Requirements (by ref ID)
+				Answers (by question node_id)
 			</div>
 			<div class="space-y-1 ml-2">
 				<div>
-					<span class="text-gray-700">ref_ids["REF_ID"].score / .max_score / .result / .status</span
-					>
-					— same fields as above
-				</div>
-			</div>
-
-			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
-				Answers (by question URN or ref ID)
-			</div>
-			<div class="space-y-1 ml-2">
-				<div>
-					<span class="text-gray-700">answers["Q_REF_ID"].score</span> — answer score (add_score × weight)
+					<span class="text-gray-700">answers["Q_NODE_ID"].score</span> — answer score (add_score × weight)
 				</div>
 				<div>
-					<span class="text-gray-700">answers["Q_REF_ID"].value</span> — free-text answer value
+					<span class="text-gray-700">answers["Q_NODE_ID"].value</span> — free-text answer value
 				</div>
 				<div>
-					<span class="text-gray-700">answers["Q_REF_ID"].selected_choices</span> — list of selected
-					choice URNs
+					<span class="text-gray-700">answers["Q_NODE_ID"].selected_choices</span> — list of selected
+					choice node_ids
 				</div>
 				<div>
-					<span class="text-gray-700">answers["Q_REF_ID"].weight</span> — question weight
+					<span class="text-gray-700">answers["Q_NODE_ID"].weight</span> — question weight
 				</div>
 				<div>
-					<span class="text-gray-700">answers["Q_REF_ID"].type</span> — question type (unique_choice,
+					<span class="text-gray-700">answers["Q_NODE_ID"].type</span> — question type (unique_choice,
 					multiple_choice, text)
 				</div>
 			</div>
@@ -298,7 +291,7 @@
 					<span class="text-gray-700">computed_outcomes</span> — map of previously computed outcome ref_ids
 				</div>
 				<div>
-					<span class="text-gray-700">hidden_requirements</span> — list of URNs hidden by visibility
+					<span class="text-gray-700">hidden_requirements</span> — list of node_ids hidden by visibility
 					expressions
 				</div>
 			</div>

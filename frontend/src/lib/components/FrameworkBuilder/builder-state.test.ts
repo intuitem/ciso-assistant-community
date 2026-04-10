@@ -92,21 +92,19 @@ describe('computeRefId', () => {
 });
 
 describe('generateUrn', () => {
-	it('generates req_node URN', () => {
-		expect(generateUrn('req_node', 'my-soc2', '1.1')).toBe(
-			'urn:intuitem:risk:req_node:my-soc2:1.1'
-		);
+	it('generates req_node URN with default namespace', () => {
+		expect(generateUrn('req_node', 'my-soc2', '1.1')).toBe('urn:custom:risk:req_node:my-soc2:1.1');
 	});
 
-	it('generates question URN', () => {
-		expect(generateUrn('question', 'my-soc2', '1.1-q1')).toBe(
-			'urn:intuitem:risk:question:my-soc2:1.1-q1'
+	it('generates question URN with custom namespace', () => {
+		expect(generateUrn('question', 'my-soc2', '1.1-q1', 'myorg')).toBe(
+			'urn:myorg:risk:question:my-soc2:1.1-q1'
 		);
 	});
 
 	it('generates question_choice URN', () => {
 		expect(generateUrn('question_choice', 'my-soc2', '1.1-q1-c1')).toBe(
-			'urn:intuitem:risk:question_choice:my-soc2:1.1-q1-c1'
+			'urn:custom:risk:question_choice:my-soc2:1.1-q1-c1'
 		);
 	});
 });

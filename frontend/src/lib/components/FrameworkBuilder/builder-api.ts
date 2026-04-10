@@ -20,6 +20,7 @@ export interface DraftJSON {
 		implementation_groups_definition: Record<string, unknown>[] | null;
 		outcomes_definition: Record<string, unknown>[] | null;
 		field_visibility?: Record<string, string>;
+		urn_namespace?: string;
 	};
 	nodes: Record<string, unknown>[];
 	questions: Record<string, unknown>[];
@@ -78,6 +79,7 @@ export interface PublishPreview {
 		choices: number;
 		details: { name: string; assessable: boolean }[];
 	};
+	breaking_changes: { type: string; field: string; name: string }[];
 	affected_audits: { id: string; name: string }[];
 }
 
