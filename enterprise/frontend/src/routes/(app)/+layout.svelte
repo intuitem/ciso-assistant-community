@@ -135,7 +135,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const clientSettings = $page.data.clientSettings;
+	const clientSettings = $derived($page.data.clientSettings);
 
 	// Initialize external link interceptor
 	$effect(() => {
