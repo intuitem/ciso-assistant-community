@@ -161,6 +161,40 @@
 										<i class="fa-solid fa-download"></i>
 									</button>
 								{/if}
+								{#if URLModel === 'vulnerabilities'}
+									<button
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										title={m.refreshDueDates()}
+										aria-label={m.refreshDueDates()}
+										data-testid="refresh-due-dates-button"
+										onclick={() => {
+											modalStore.trigger({
+												type: 'confirm',
+												title: m.refreshDueDates(),
+												body: m.refreshDueDatesConfirm(),
+												response: async (confirmed) => {
+													if (!confirmed) return;
+													try {
+														const res = await fetch('/vulnerabilities/refresh-due-dates', {
+															method: 'POST'
+														});
+														const result = await res.json();
+														toastStore.trigger({
+															message: result.detail || result.error,
+															preset: res.ok ? 'success' : 'error'
+														});
+														if (res.ok) invalidateAll();
+													} catch {
+														toastStore.trigger({
+															message: m.refreshDueDatesFailed(),
+															preset: 'error'
+														});
+													}
+												}
+											});
+										}}
+									><i class="fa-solid fa-clock-rotate-left"></i></button>
+								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
 										href="{URLModel}/flash-mode/{currentFilterSearch}"

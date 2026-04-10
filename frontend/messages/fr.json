@@ -2508,7 +2508,7 @@
 	"healthFieldHelpText": "Aide à suivre la progression globale",
 	"achieved": "Atteint",
 	"degraded": "Dégradé",
-	"onTrack": "Maîtrisé",
+	"onTrack": "Conforme",
 	"atRisk": "À risque",
 	"offTrack": "Non maîtrisé",
 	"isAssigned": "Est assigné",

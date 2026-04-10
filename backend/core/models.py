@@ -5464,6 +5464,9 @@ class Vulnerability(
     detected_at = models.DateField(
         null=True, blank=True, verbose_name=_("Detection date")
     )
+    published_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Publication date")
+    )
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
@@ -5500,14 +5503,8 @@ class Vulnerability(
         days = sla_policy.get(severity_label)
         if days is not None:
             sla_anchor = sla_policy.get("sla_anchor", "detected_at")
-            if sla_anchor == "published_date":
-                # Use publication date from linked CVEs if available
-                anchor = None
-                if self.pk:
-                    first_cve = self.cves.order_by("published_date").first()
-                    if first_cve and first_cve.published_date:
-                        anchor = first_cve.published_date
-                anchor = anchor or self.detected_at or date.today()
+            if sla_anchor == "published_date" and self.published_date:
+                anchor = self.published_date
             else:
                 anchor = self.detected_at or date.today()
             self.due_date = anchor + timedelta(days=int(days))
