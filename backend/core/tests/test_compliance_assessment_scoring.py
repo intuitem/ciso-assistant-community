@@ -543,6 +543,96 @@ class TestDeepTreeAvgOfAvg:
 
 
 @pytest.mark.django_db
+class TestAnchorNaToTarget:
+    """Tests for anchor_na_to_target behavior."""
+
+    def test_anchor_na_replaces_score_with_target(self, scoring_setup):
+        """
+        When anchor_na_to_target is True, N/A requirements use target_score.
+
+        Set B2 to N/A with target_score=3:
+        AVG: (80×1 + 60×1 + 40×1 + 3×3) / 6 = 189/6 = 31.5
+        """
+        ca = scoring_setup["ca"]
+        ra_b2 = scoring_setup["ra_b2"]
+
+        ra_b2.result = RequirementAssessment.Result.NOT_APPLICABLE
+        ra_b2.save()
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = 3
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 31.5
+
+    def test_anchor_na_defaults_to_max_score(self, scoring_setup):
+        """
+        When target_score is None, max_score is used as the replacement value.
+
+        Set B2 to N/A, max_score=100:
+        AVG: (80×1 + 60×1 + 40×1 + 100×3) / 6 = 480/6 = 80.0
+        """
+        ca = scoring_setup["ca"]
+        ra_b2 = scoring_setup["ra_b2"]
+
+        ra_b2.result = RequirementAssessment.Result.NOT_APPLICABLE
+        ra_b2.save()
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = None  # should fall back to max_score=100
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 80.0
+
+    def test_anchor_na_with_avg_of_avg(self, scoring_setup):
+        """
+        AVG_OF_AVG with anchor_na_to_target:
+
+        Set B2 to N/A with target_score=3:
+        Section A: (80+60)/2 = 70
+        Section B: (40×1 + 3×3) / 4 = 49/4 = 12.25
+        Average: (70 + 12.25) / 2 = 41.1 (truncated from 41.125)
+        """
+        ca = scoring_setup["ca"]
+        ra_b2 = scoring_setup["ra_b2"]
+
+        ra_b2.result = RequirementAssessment.Result.NOT_APPLICABLE
+        ra_b2.save()
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = 3
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 41.1
+
+    def test_anchor_na_false_excludes_na(self, scoring_setup):
+        """
+        When anchor_na_to_target is False (default), N/A are excluded.
+        This is the existing behavior.
+        """
+        ca = scoring_setup["ca"]
+        ra_b2 = scoring_setup["ra_b2"]
+
+        ra_b2.result = RequirementAssessment.Result.NOT_APPLICABLE
+        ra_b2.save()
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.anchor_na_to_target = False
+        ca.target_score = 3  # should have no effect
+        ca.save()
+
+        scores = ca.get_global_score()
+        # Same as before: (80+60+40)/(1+1+1) = 60.0
+        assert scores["implementation_score"] == 60.0
+
+
+@pytest.mark.django_db
 class TestTotalMaxScore:
     """Tests for get_total_max_score across calculation methods."""
 

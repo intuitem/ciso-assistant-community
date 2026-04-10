@@ -6541,6 +6541,15 @@ class ComplianceAssessment(Assessment):
         default=CalculationMethod.AVG,
         verbose_name=_("Score Calculation Method"),
     )
+    target_score = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_("Target score"),
+    )
+    anchor_na_to_target = models.BooleanField(
+        default=False,
+        verbose_name=_("Anchor N/A to target score"),
+    )
     auto_sync = models.BooleanField(
         default=False,
         verbose_name=_("Automatic sync to actions"),
@@ -6823,10 +6832,15 @@ class ComplianceAssessment(Assessment):
 
         return changes
 
-    def _compute_score_for_field(self, requirement_assessments, ig, score_field):
+    def _compute_score_for_field(
+        self, requirement_assessments, ig, score_field, na_target=None
+    ):
         """
         Compute a single score value from the given field using the current
         score_calculation_method (AVG, SUM, or AVG_OF_AVG).
+
+        When na_target is set, N/A requirement assessments use that value
+        instead of their actual score.
 
         Returns the computed score, or -1 if no scored requirements exist.
         """
@@ -6835,8 +6849,14 @@ class ComplianceAssessment(Assessment):
             leaf_scores = {}
             for ras in requirement_assessments:
                 if not ig or (ig & set(ras.requirement.implementation_groups or [])):
+                    is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    score = (
+                        na_target
+                        if is_na and na_target is not None
+                        else (getattr(ras, score_field) or 0)
+                    )
                     leaf_scores[ras.requirement.urn] = {
-                        "score": getattr(ras, score_field) or 0,
+                        "score": score,
                         "weight": ras.requirement.weight or 1,
                     }
 
@@ -6919,7 +6939,13 @@ class ComplianceAssessment(Assessment):
         for ras in requirement_assessments:
             if not ig or (ig & set(ras.requirement.implementation_groups or [])):
                 weight = ras.requirement.weight if ras.requirement.weight else 1
-                weighted_score += (getattr(ras, score_field) or 0) * weight
+                is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
+                score = (
+                    na_target
+                    if is_na and na_target is not None
+                    else (getattr(ras, score_field) or 0)
+                )
+                weighted_score += score * weight
                 total_weight += weight
 
         if total_weight == 0:
@@ -6940,29 +6966,42 @@ class ComplianceAssessment(Assessment):
         - maturity_score: average of the enabled layers
 
         Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG).
+
+        When anchor_na_to_target is True, N/A requirements are included with
+        their scores replaced by the effective target (target_score or max_score).
         Returns a dict with all three values.
         """
-        requirement_assessments_scored = list(
+        qs = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .select_related("requirement")
-            .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
         )
+        if not self.anchor_na_to_target:
+            qs = qs.exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
+
+        requirement_assessments_scored = list(qs)
+
         ig = (
             set(self.selected_implementation_groups)
             if self.selected_implementation_groups
             else None
         )
 
+        na_target = None
+        if self.anchor_na_to_target:
+            na_target = (
+                self.target_score if self.target_score is not None else self.max_score
+            )
+
         impl_score = self._compute_score_for_field(
-            requirement_assessments_scored, ig, "score"
+            requirement_assessments_scored, ig, "score", na_target
         )
 
         doc_score = None
         if self.show_documentation_score:
             doc_score = self._compute_score_for_field(
-                requirement_assessments_scored, ig, "documentation_score"
+                requirement_assessments_scored, ig, "documentation_score", na_target
             )
 
         # Maturity is the average of the enabled layers (ignore -1 / None)
