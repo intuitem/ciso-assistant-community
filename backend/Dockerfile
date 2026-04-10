@@ -3,7 +3,8 @@ FROM python:3.14-slim
 ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   UV_COMPILE_BYTECODE=1 \
-  UV_LINK_MODE=copy
+  UV_LINK_MODE=copy \
+  PATH="/code/.venv/bin:$PATH"
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
 
@@ -46,8 +47,8 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=cache,target=/root/.cache/pip \
     uv sync --locked --no-dev \
-  && uv pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-deps \
-  && uv pip uninstall cuda-bindings cuda-pathfinder cuda-toolkit \
+  && pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-deps \
+  && pip uninstall cuda-bindings cuda-pathfinder cuda-toolkit \
      nvidia-cublas nvidia-cuda-cupti nvidia-cuda-nvrtc nvidia-cuda-runtime \
      nvidia-cudnn-cu13 nvidia-cufft nvidia-cufile nvidia-curand nvidia-cusolver \
      nvidia-cusparse nvidia-cusparselt-cu13 nvidia-nccl-cu13 nvidia-nvjitlink \
@@ -57,4 +58,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY . .
 
 EXPOSE 8000
-ENTRYPOINT ["uv", "run", "bash", "startup.sh"]
+ENTRYPOINT ["bash", "startup.sh"]
