@@ -350,6 +350,12 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
     Maps severity levels to remediation deadlines (in days).
     """
 
+    sla_anchor = serializers.ChoiceField(
+        source="value.sla_anchor",
+        choices=["detected_at", "published_date"],
+        required=False,
+        default="detected_at",
+    )
     critical = serializers.IntegerField(
         source="value.critical", required=False, allow_null=True, default=15
     )

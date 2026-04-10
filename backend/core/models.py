@@ -5499,7 +5499,17 @@ class Vulnerability(
         severity_label = self.get_severity_display()
         days = sla_policy.get(severity_label)
         if days is not None:
-            anchor = self.detected_at or date.today()
+            sla_anchor = sla_policy.get("sla_anchor", "detected_at")
+            if sla_anchor == "published_date":
+                # Use publication date from linked CVEs if available
+                anchor = None
+                if self.pk:
+                    first_cve = self.cves.order_by("published_date").first()
+                    if first_cve and first_cve.published_date:
+                        anchor = first_cve.published_date
+                anchor = anchor or self.detected_at or date.today()
+            else:
+                anchor = self.detected_at or date.today()
             self.due_date = anchor + timedelta(days=int(days))
 
 

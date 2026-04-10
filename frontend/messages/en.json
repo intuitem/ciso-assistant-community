@@ -3640,6 +3640,8 @@
 	"sla": "SLA",
 	"onTrack": "On track",
 	"caution": "Caution",
+	"slaAnchor": "SLA start date",
+	"slaAnchorHelpText": "Choose when the SLA clock starts. Detection date: when the vulnerability was discovered by your organization. Publication date: when the CVE was publicly disclosed (requires linked CVE with published date).",
 	"slaDaysHelpText": "Number of days allowed for remediation",
 	"vulnerabilitySlaSettingsUpdated": "Vulnerability SLA settings updated",
 	"secIntelFeeds": "Security Intelligence Feeds",

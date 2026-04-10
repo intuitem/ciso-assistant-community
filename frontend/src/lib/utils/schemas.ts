@@ -611,6 +611,7 @@ export const SecIntelFeedsSchema = z.object({
 });
 
 export const VulnerabilitySlaSchema = z.object({
+	sla_anchor: z.string().optional(),
 	critical: z.coerce.number().int().min(0).optional().nullable(),
 	high: z.coerce.number().int().min(0).optional().nullable(),
 	medium: z.coerce.number().int().min(0).optional().nullable(),
