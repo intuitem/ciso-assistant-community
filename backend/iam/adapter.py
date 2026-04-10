@@ -158,6 +158,13 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 user_id=str(user.id),
                 is_active=user.is_active,
             )
+            if not user.is_active:
+                logger.warning(
+                    "pre_social_login: user account is deactivated, SSO login will fail",
+                    idp_email=email_address,
+                    user_id=str(user.id),
+                    provider=sociallogin.account.provider,
+                )
             sociallogin.user = user
             sociallogin.connect(request, user)
             logger.info(

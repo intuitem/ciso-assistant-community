@@ -77,6 +77,7 @@ def callback(request, provider_id):
                 has_socialaccount_state=bool(
                     request.session.get("socialaccount_state")
                 ),
+                redirect_location=response.get("Location"),
             )
             return render_authentication_error(
                 request, None, error=AuthError.FAILED_SSO

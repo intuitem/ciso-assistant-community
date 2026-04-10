@@ -29,6 +29,7 @@
 	}
 
 	let { data, form }: Props = $props();
+	let isSSO = $derived(page.data.user?.is_sso ?? false);
 	let isSSOOnly = $derived(page.data.user?.is_sso_only ?? false);
 
 	const modalStore: ModalStore = getModalStore();
@@ -190,109 +191,120 @@
 			{#if isSSOOnly}
 				<div class="card p-4 preset-tonal-warning flex items-start space-x-3">
 					<i class="fa-solid fa-circle-info text-warning-900 mt-0.5"></i>
-					<p class="text-sm text-warning-900">{m.mfaNotApplicableToSSO()}</p>
+					<p class="text-sm text-warning-900">{m.mfaDisabledForSSO()}</p>
+				</div>
+			{:else}
+				{#if isSSO}
+					<div class="card p-4 preset-tonal-warning flex items-start space-x-3">
+						<i class="fa-solid fa-circle-info text-warning-900 mt-0.5"></i>
+						<p class="text-sm text-warning-900">{m.mfaNotApplicableToSSO()}</p>
+					</div>
+				{/if}
+				<div class="flow-root">
+					<dl class="-my-3 divide-y divide-surface-100 text-sm">
+						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+							<dt class="font-medium">{m.multiFactorAuthentication()}</dt>
+							<dd class="text-surface-900 sm:col-span-2">
+								<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
+									<div class="flex flex-col space-y-2">
+										<span class="flex flex-row justify-between text-xl">
+											<i class="fa-solid fa-mobile-screen-button"></i>
+											{#if hasTOTP}
+												<i class="fa-solid fa-circle-check text-success-600-400"></i>
+											{/if}
+										</span>
+										<span class="flex flex-row space-x-2">
+											<h6 class="h6 base-font-color">{m.authenticatorApp()}</h6>
+											<p class="badge h-fit preset-tonal-secondary">{m.recommended()}</p>
+										</span>
+										<p class="text-sm text-surface-800 max-w-[50ch]">
+											{m.authenticatorAppDescription()}
+										</p>
+									</div>
+									<div class="flex flex-wrap justify-between gap-2">
+										{#if hasTOTP}
+											<button
+												class="btn preset-outlined-surface-500 w-fit"
+												onclick={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
+											>
+											{#if data.recoveryCodes}
+												<button
+													class="btn preset-outlined-surface-500 w-fit"
+													onclick={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
+												>
+											{/if}
+										{:else}
+											<button
+												class="btn preset-outlined-surface-500 w-fit"
+												onclick={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
+											>
+										{/if}
+									</div>
+								</div>
+							</dd>
+						</div>
+					</dl>
+					<dl class="-my-3 divide-y divide-surface-100 text-sm">
+						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+							<dt class="font-medium">{m.securityKeys()}</dt>
+							<dd class="text-surface-900 sm:col-span-2">
+								<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
+									<div class="flex flex-col space-y-2">
+										<span class="flex flex-row justify-between text-xl">
+											<i class="fa-solid fa-fingerprint"></i>
+											{#if data.webauthnCredentials.length > 0}
+												<i class="fa-solid fa-circle-check text-success-600-400"></i>
+											{/if}
+										</span>
+										<span class="flex flex-row space-x-2">
+											<h6 class="h6 base-font-color">{m.securityKeys()}</h6>
+										</span>
+										<p class="text-sm text-surface-800 max-w-[50ch]">
+											{m.securityKeyDescription()}
+										</p>
+									</div>
+									{#if data.webauthnCredentials.length > 0}
+										<ul class="flex flex-col gap-2">
+											{#each data.webauthnCredentials as credential}
+												<li class="flex flex-row justify-between items-center card p-3 bg-inherit">
+													<span class="flex flex-col">
+														<p class="font-medium">{credential.name}</p>
+														<p class="text-xs text-surface-600">
+															{new Date(credential.created_at * 1000).toLocaleDateString(
+																getLocale()
+															)}
+														</p>
+													</span>
+													<button
+														onclick={() => modalConfirmRemoveWebAuthn(credential.id)}
+														class="cursor-pointer hover:text-primary-500"
+														aria-label={m.removeSecurityKey()}
+													>
+														<i class="fa-solid fa-trash"></i>
+													</button>
+												</li>
+											{/each}
+										</ul>
+									{:else}
+										<p class="text-sm text-surface-600">{m.noSecurityKeysRegistered()}</p>
+									{/if}
+									<div class="flex flex-wrap gap-2">
+										{#if data.webauthnCreationOptions}
+											<button
+												class="btn preset-outlined-surface-500 w-fit"
+												onclick={() => modalRegisterWebAuthn()}
+											>
+												{m.addSecurityKey()}
+											</button>
+										{/if}
+									</div>
+								</div>
+							</dd>
+						</div>
+					</dl>
 				</div>
 			{/if}
 			<div class="flow-root">
-				<dl class="-my-3 divide-y divide-surface-100 text-sm">
-					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-						<dt class="font-medium">{m.multiFactorAuthentication()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
-							<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
-								<div class="flex flex-col space-y-2">
-									<span class="flex flex-row justify-between text-xl">
-										<i class="fa-solid fa-mobile-screen-button"></i>
-										{#if hasTOTP}
-											<i class="fa-solid fa-circle-check text-success-600-400"></i>
-										{/if}
-									</span>
-									<span class="flex flex-row space-x-2">
-										<h6 class="h6 base-font-color">{m.authenticatorApp()}</h6>
-										<p class="badge h-fit preset-tonal-secondary">{m.recommended()}</p>
-									</span>
-									<p class="text-sm text-surface-800 max-w-[50ch]">
-										{m.authenticatorAppDescription()}
-									</p>
-								</div>
-								<div class="flex flex-wrap justify-between gap-2">
-									{#if hasTOTP}
-										<button
-											class="btn preset-outlined-surface-500 w-fit"
-											onclick={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
-										>
-										{#if data.recoveryCodes}
-											<button
-												class="btn preset-outlined-surface-500 w-fit"
-												onclick={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
-											>
-										{/if}
-									{:else}
-										<button
-											class="btn preset-outlined-surface-500 w-fit"
-											onclick={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
-										>
-									{/if}
-								</div>
-							</div>
-						</dd>
-					</div>
-				</dl>
-				<dl class="-my-3 divide-y divide-surface-100 text-sm">
-					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-						<dt class="font-medium">{m.securityKeys()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
-							<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
-								<div class="flex flex-col space-y-2">
-									<span class="flex flex-row justify-between text-xl">
-										<i class="fa-solid fa-fingerprint"></i>
-										{#if data.webauthnCredentials.length > 0}
-											<i class="fa-solid fa-circle-check text-success-600-400"></i>
-										{/if}
-									</span>
-									<span class="flex flex-row space-x-2">
-										<h6 class="h6 base-font-color">{m.securityKeys()}</h6>
-									</span>
-									<p class="text-sm text-surface-800 max-w-[50ch]">
-										{m.securityKeyDescription()}
-									</p>
-								</div>
-								{#if data.webauthnCredentials.length > 0}
-									<ul class="flex flex-col gap-2">
-										{#each data.webauthnCredentials as credential}
-											<li class="flex flex-row justify-between items-center card p-3 bg-inherit">
-												<span class="flex flex-col">
-													<p class="font-medium">{credential.name}</p>
-													<p class="text-xs text-surface-600">
-														{new Date(credential.created_at * 1000).toLocaleDateString(getLocale())}
-													</p>
-												</span>
-												<button
-													onclick={() => modalConfirmRemoveWebAuthn(credential.id)}
-													class="cursor-pointer hover:text-primary-500"
-													aria-label={m.removeSecurityKey()}
-												>
-													<i class="fa-solid fa-trash"></i>
-												</button>
-											</li>
-										{/each}
-									</ul>
-								{:else}
-									<p class="text-sm text-surface-600">{m.noSecurityKeysRegistered()}</p>
-								{/if}
-								<div class="flex flex-wrap gap-2">
-									{#if data.webauthnCreationOptions}
-										<button
-											class="btn preset-outlined-surface-500 w-fit"
-											onclick={() => modalRegisterWebAuthn()}
-										>
-											{m.addSecurityKey()}
-										</button>
-									{/if}
-								</div>
-							</div>
-						</dd>
-					</div>
-				</dl>
 				<dl class="-my-3 divide-y divide-surface-100 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.personalAccessTokens()}</dt>

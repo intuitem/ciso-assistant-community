@@ -180,6 +180,14 @@ class FinishACSView(SAMLViewMixin, View):
             user.first_name = idp_first_names[0] if idp_first_names else user.first_name
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.save()
+            if not user.is_active:
+                logger.warning(
+                    "SAML login attempted for deactivated user",
+                    user_email=user.email,
+                    user_id=str(user.id),
+                )
+                error = AuthError.PERMISSION_DENIED
+                raise PermissionDenied()
             token = generate_token(user)
             login.state["next"] = (
                 f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate"

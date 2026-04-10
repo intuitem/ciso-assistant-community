@@ -991,6 +991,7 @@
 	"loginWithLocalAccount": "Login with a local account instead",
 	"ssoIsRequired": "Your organization requires SSO authentication",
 	"mfaNotApplicableToSSO": "Multi-factor authentication settings here only apply to local (password) login. Your SSO login is secured by your identity provider.",
+	"mfaDisabledForSSO": "Multi-factor authentication is managed by your identity provider. Since your account uses SSO without a local password, local MFA settings are not available.",
 	"or": "or",
 	"errorImportingLibrary": "Error during library import",
 	"libraryImportError": "An error occurred during library import",
