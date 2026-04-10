@@ -8180,6 +8180,16 @@ class Answer(AbstractBaseModel, FolderMixin):
             return [c.urn for c in self.selected_choices.all()]
         return []
 
+    def _defer_cel_evaluation(self):
+        ca = self.requirement_assessment.compliance_assessment
+
+        def _run():
+            from core.cel_service import evaluate_outcomes
+
+            evaluate_outcomes(ca)
+
+        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
 
@@ -8196,6 +8206,9 @@ class Answer(AbstractBaseModel, FolderMixin):
                 ca.pk,
                 lambda ca_ref=ca: update_selected_implementation_groups(ca_ref),
             )
+
+        # Trigger CEL outcome evaluation (deduplicated per transaction)
+        self._defer_cel_evaluation()
 
 
 class FindingsAssessment(Assessment):
