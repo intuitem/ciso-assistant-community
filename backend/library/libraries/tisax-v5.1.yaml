@@ -29,7 +29,7 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:tisax-v5.1
     ref_id: TISAX v5.1
-    name: Trusted Information Security Assessment Exchange
+    name: Trusted Information Security Assessment Exchange v5.1
     description: 'VDA ISA provides the basis for
 
       - a self-assessment to determine the state of information security in an organization

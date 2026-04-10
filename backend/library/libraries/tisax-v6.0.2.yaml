@@ -32,7 +32,7 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:tisax-v6.0.2
     ref_id: TISAX v6.0.2
-    name: Trusted Information Security Assessment Exchange
+    name: Trusted Information Security Assessment Exchange v6.0.2
     description: "ISA provides the basis for\n- a self-assessment to determine the\
       \ state of information security in an organization (e.g. company)\n- audits\
       \ performed by internal departments (e.g. Internal Audit, Information Security)\n\
