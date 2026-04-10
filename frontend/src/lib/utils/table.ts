@@ -1412,11 +1412,6 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			provider: {
-				...PROVIDER_FILTER,
-				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'cves/provider' }
-			},
-			library: LIBRARY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -1426,11 +1421,6 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			provider: {
-				...PROVIDER_FILTER,
-				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'cwes/provider' }
-			},
-			library: LIBRARY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
