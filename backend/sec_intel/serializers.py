@@ -38,6 +38,7 @@ class SecurityAdvisoryReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     references = serializers.SerializerMethodField()
+    aliases = serializers.SerializerMethodField()
 
     def get_references(self, obj):
         if not obj.references:
@@ -45,6 +46,14 @@ class SecurityAdvisoryReadSerializer(ReferentialSerializer):
         return [
             {"str": ref.get("url", ""), "source": ref.get("source", "")}
             for ref in obj.references
+        ]
+
+    def get_aliases(self, obj):
+        if not obj.aliases:
+            return []
+        return [
+            {"str": f"{alias.get('source', '')}: {alias.get('id', '')}"}
+            for alias in obj.aliases
         ]
 
     class Meta:

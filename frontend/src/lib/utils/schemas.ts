@@ -183,8 +183,8 @@ export const SecurityAdvisorySchema = z.object({
 	cvss_vector: z.string().optional().nullable(),
 	epss_score: z.coerce.number().min(0).max(1).optional().nullable(),
 	epss_percentile: z.coerce.number().min(0).max(1).optional().nullable(),
-	is_kev: z.boolean().default(false).optional(),
-	kev_date_added: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+	is_actively_exploited: z.boolean().default(false).optional(),
+	exploited_date_added: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const CWESchema = z.object({

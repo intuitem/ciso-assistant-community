@@ -24,8 +24,13 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
         "library",
         "filtering_labels",
         "urn",
+        "source",
     ]
     search_fields = ["name", "ref_id", "description", "cvss_vector"]
+
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(dict(SecurityAdvisory.Source.choices))
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
@@ -46,7 +51,7 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="sync-kev")
     def sync_kev(self, request):
-        """Sync KEV feed: create new CVEs + update existing ones."""
+        """Sync KEV feed — async via Huey if worker is running, sync otherwise."""
         from sec_intel.feeds import KEVFeed
 
         try:
@@ -60,38 +65,93 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
         except Exception:
             logger.warning("KEV sync failed", exc_info=True)
             return Response(
-                {"error": "KEV sync failed due to an internal error"}, status=502
+                {"error": "KEV sync failed due to an internal error"},
+                status=502,
+            )
+
+    @action(detail=False, methods=["post"], url_path="sync-euvd")
+    def sync_euvd(self, request):
+        """Sync EUVD feed — async via Huey if worker is running, sync otherwise."""
+        from sec_intel.feeds import EUVDFeed
+
+        try:
+            result = EUVDFeed().sync()
+            return Response(
+                {
+                    "detail": f"EUVD sync complete: {result['created']} created, {result['updated']} updated",
+                    **result,
+                }
+            )
+        except Exception:
+            logger.warning("EUVD sync failed", exc_info=True)
+            return Response(
+                {"error": "EUVD sync failed due to an internal error"},
+                status=502,
             )
 
     @action(detail=True, methods=["post"], url_path="enrich")
     def enrich(self, request, pk=None):
-        """Enrich this CVE with data from NVD."""
-        from sec_intel.feeds import NVDFeed
+        """Enrich this advisory with data from its source (NVD or EUVD)."""
+        sa = self.get_object()
+        lookup_id = sa.ref_id or sa.name
 
-        cve = self.get_object()
-        cve_id = cve.ref_id or cve.name
-        if not cve_id or not cve_id.startswith("CVE-"):
-            return Response(
-                {"error": "CVE ref_id or name must start with CVE-"}, status=400
-            )
+        if sa.source == "EUVD":
+            from sec_intel.feeds import EUVDFeed
 
-        raw = NVDFeed.fetch_cve(cve_id)
-        if raw is None:
-            return Response({"error": "Failed to fetch data from NVD"}, status=502)
+            if not lookup_id or not lookup_id.startswith("EUVD-"):
+                return Response(
+                    {"error": "EUVD ref_id must start with EUVD-"}, status=400
+                )
+            try:
+                resp = EUVDFeed().fetch_exploited()
+                # Find this specific entry
+                entry = next((e for e in resp if e.get("id") == lookup_id), None)
+                if not entry:
+                    # Try direct lookup
+                    import httpx
 
-        fields = NVDFeed.parse_cve(raw)
+                    direct = httpx.get(
+                        f"https://euvdservices.enisa.europa.eu/api/enisaid",
+                        params={"id": lookup_id},
+                        headers={"User-Agent": "CISO-Assistant/1.0"},
+                        timeout=30,
+                    )
+                    direct.raise_for_status()
+                    entry = direct.json()
+                if not entry:
+                    return Response({"error": "Advisory not found in EUVD"}, status=404)
+                parsed = EUVDFeed().parse([entry])
+                fields = parsed[0] if parsed else {}
+            except Exception:
+                logger.warning("EUVD enrich failed", exc_info=True)
+                return Response({"error": "Failed to fetch data from EUVD"}, status=502)
+        else:
+            from sec_intel.feeds import NVDFeed
+
+            if not lookup_id or not lookup_id.startswith("CVE-"):
+                return Response(
+                    {"error": "CVE ref_id or name must start with CVE-"}, status=400
+                )
+            raw = NVDFeed.fetch_cve(lookup_id)
+            if raw is None:
+                return Response({"error": "Failed to fetch data from NVD"}, status=502)
+            fields = NVDFeed.parse_cve(raw)
+
         if not fields:
             return Response({"detail": "No enrichment data found", "updated": []})
 
+        skip_fields = {"euvd_id", "source", "aliases", "ref_id"}
         updated = []
         for k, v in fields.items():
-            current = getattr(cve, k, None)
+            if k in skip_fields:
+                continue
+            current = getattr(sa, k, None)
             if current in (None, "", 0, []):
-                setattr(cve, k, v)
+                setattr(sa, k, v)
                 updated.append(k)
 
         if updated:
-            cve.save(update_fields=updated)
+            sa.save(update_fields=updated)
 
         return Response(
             {"detail": f"Enriched {len(updated)} fields", "updated": updated}
@@ -132,7 +192,7 @@ class CWEViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="sync-catalog")
     def sync_catalog(self, request):
-        """Sync CWE catalog from MITRE: create new + update existing."""
+        """Sync CWE catalog from MITRE."""
         from sec_intel.feeds import CWEFeed
 
         try:
@@ -146,5 +206,6 @@ class CWEViewSet(BaseModelViewSet):
         except Exception:
             logger.warning("CWE sync failed", exc_info=True)
             return Response(
-                {"error": "CWE sync failed due to an internal error"}, status=502
+                {"error": "CWE sync failed due to an internal error"},
+                status=502,
             )

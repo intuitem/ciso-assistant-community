@@ -68,10 +68,10 @@ class SecurityAdvisory(
         verbose_name=_("EPSS percentile"),
     )
     references = models.JSONField(null=True, blank=True, verbose_name=_("References"))
-    is_kev = models.BooleanField(
-        default=False, verbose_name=_("Known Exploited Vulnerability")
+    is_actively_exploited = models.BooleanField(
+        default=False, verbose_name=_("Actively exploited")
     )
-    kev_date_added = models.DateField(
+    exploited_date_added = models.DateField(
         null=True, blank=True, verbose_name=_("KEV date added")
     )
     is_published = models.BooleanField(_("published"), default=True)

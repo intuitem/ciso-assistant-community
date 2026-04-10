@@ -12,6 +12,19 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
+MAX_NAME_WORDS = 15
+
+
+def _truncate_name(text: str, max_words: int = MAX_NAME_WORDS) -> str:
+    """Truncate text to max_words, adding ellipsis if truncated."""
+    if not text:
+        return text
+    words = text.split()
+    if len(words) <= max_words:
+        return text
+    return " ".join(words[:max_words]) + "…"
+
+
 # --- Settings helper ---
 
 DEFAULT_SETTINGS = {
@@ -62,7 +75,9 @@ class KEVFeed:
                 results.append(
                     {
                         "cve_id": vuln["cveID"],
-                        "name": vuln.get("vulnerabilityName", vuln["cveID"]),
+                        "name": _truncate_name(
+                            vuln.get("vulnerabilityName", vuln["cveID"])
+                        ),
                         "description": vuln.get("shortDescription", ""),
                         "date_added": datetime.strptime(
                             vuln["dateAdded"], "%Y-%m-%d"
@@ -89,13 +104,15 @@ class KEVFeed:
         to_update = []
         for cve in existing:
             existing_ids.add(cve.ref_id)
-            cve.is_kev = True
-            cve.kev_date_added = kev_map[cve.ref_id]["date_added"]
+            cve.is_actively_exploited = True
+            cve.exploited_date_added = kev_map[cve.ref_id]["date_added"]
             to_update.append(cve)
 
         if to_update:
             SecurityAdvisory.objects.bulk_update(
-                to_update, ["is_kev", "kev_date_added"], batch_size=1000
+                to_update,
+                ["is_actively_exploited", "exploited_date_added"],
+                batch_size=1000,
             )
 
         # Create new CVEs for KEV entries not yet in DB
@@ -108,8 +125,8 @@ class KEVFeed:
                         ref_id=cve_id,
                         name=entry["name"],
                         description=entry["description"],
-                        is_kev=True,
-                        kev_date_added=entry["date_added"],
+                        is_actively_exploited=True,
+                        exploited_date_added=entry["date_added"],
                         folder=root_folder,
                     )
                 )
@@ -290,6 +307,167 @@ class NVDFeed:
         return bool(update_fields)
 
 
+# --- EUVD Feed ---
+
+EUVD_API_URL = "https://euvdservices.enisa.europa.eu/api"
+
+
+class EUVDFeed:
+    def fetch_exploited(self) -> list[dict]:
+        """Fetch exploited vulnerabilities from EUVD using search endpoint."""
+        results = []
+        page = 0
+        while True:
+            resp = httpx.get(
+                f"{EUVD_API_URL}/search",
+                params={"exploited": "true", "page": page, "size": 100},
+                headers={"User-Agent": "CISO-Assistant/1.0"},
+                timeout=_get_timeout(),
+                follow_redirects=True,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            items = data if isinstance(data, list) else data.get("items", [])
+            if not items:
+                break
+            results.extend(items)
+            page += 1
+            if len(items) < 100:
+                break
+        return results
+
+    def parse(self, entries: list[dict]) -> list[dict]:
+        """Parse EUVD entries into SecurityAdvisory-compatible dicts."""
+        results = []
+        for entry in entries:
+            euvd_id = entry.get("id")
+            if not euvd_id:
+                continue
+
+            # Extract CVE aliases
+            aliases_raw = entry.get("aliases", "")
+            cve_ids = [
+                a.strip()
+                for a in aliases_raw.split("\n")
+                if a.strip().startswith("CVE-")
+            ]
+
+            # EPSS: EUVD uses 0-100, we use 0-1
+            epss = entry.get("epss")
+            epss_score = None
+            if epss is not None:
+                try:
+                    epss_score = Decimal(str(epss)) / 100
+                except Exception:
+                    pass
+
+            pub = entry.get("datePublished")
+            published_date = None
+            if pub:
+                try:
+                    published_date = datetime.fromisoformat(
+                        pub.replace("Z", "+00:00")
+                    ).date()
+                except ValueError:
+                    pass
+
+            cvss_score = entry.get("baseScore")
+            cvss_vector = entry.get("baseScoreVector")
+
+            results.append(
+                {
+                    "euvd_id": euvd_id,
+                    "ref_id": euvd_id,
+                    "name": _truncate_name(entry.get("description", "")) or euvd_id,
+                    "description": entry.get("description", ""),
+                    "source": "EUVD",
+                    "aliases": [
+                        {"source": "EUVD", "id": euvd_id},
+                        *[{"source": "CVE", "id": cid} for cid in cve_ids],
+                    ],
+                    "published_date": published_date,
+                    "cvss_base_score": Decimal(str(cvss_score)) if cvss_score else None,
+                    "cvss_vector": cvss_vector,
+                    "epss_score": epss_score,
+                    "is_actively_exploited": True,
+                }
+            )
+        return results
+
+    def sync(self) -> dict:
+        """Sync EUVD exploited vulnerabilities: create new + update existing."""
+        from iam.models import Folder
+        from sec_intel.models import SecurityAdvisory
+
+        entries = self.fetch_exploited()
+        parsed = self.parse(entries)
+        ref_id_map = {e["ref_id"]: e for e in parsed}
+
+        # Update existing
+        existing = SecurityAdvisory.objects.filter(ref_id__in=ref_id_map.keys())
+        existing_ids = set()
+        to_update = []
+        for sa in existing:
+            existing_ids.add(sa.ref_id)
+            entry = ref_id_map[sa.ref_id]
+            changed = False
+            if not sa.is_actively_exploited:
+                sa.is_actively_exploited = True
+                changed = True
+            for field in [
+                "cvss_base_score",
+                "cvss_vector",
+                "epss_score",
+                "published_date",
+            ]:
+                if getattr(sa, field) in (None, "", 0) and entry.get(field):
+                    setattr(sa, field, entry[field])
+                    changed = True
+            if changed:
+                to_update.append(sa)
+
+        if to_update:
+            SecurityAdvisory.objects.bulk_update(
+                to_update,
+                [
+                    "is_actively_exploited",
+                    "cvss_base_score",
+                    "cvss_vector",
+                    "epss_score",
+                    "published_date",
+                ],
+                batch_size=1000,
+            )
+
+        # Create new
+        root_folder = Folder.get_root_folder()
+        to_create = []
+        for ref_id, entry in ref_id_map.items():
+            if ref_id not in existing_ids:
+                to_create.append(
+                    SecurityAdvisory(
+                        ref_id=ref_id,
+                        name=entry["name"],
+                        description=entry["description"],
+                        source=entry["source"],
+                        aliases=entry["aliases"],
+                        published_date=entry["published_date"],
+                        cvss_base_score=entry["cvss_base_score"],
+                        cvss_vector=entry["cvss_vector"],
+                        epss_score=entry["epss_score"],
+                        is_actively_exploited=True,
+                        folder=root_folder,
+                    )
+                )
+
+        if to_create:
+            SecurityAdvisory.objects.bulk_create(
+                to_create, batch_size=1000, ignore_conflicts=True
+            )
+
+        return {"created": len(to_create), "updated": len(to_update)}
+
+
 # --- CWE Feed ---
 
 CWE_URL = "https://cwe.mitre.org/data/xml/cwec_latest.xml.zip"
@@ -344,7 +522,7 @@ class CWEFeed:
             results.append(
                 {
                     "cwe_id": f"CWE-{cwe_id}",
-                    "name": name,
+                    "name": _truncate_name(name),
                     "description": description,
                 }
             )

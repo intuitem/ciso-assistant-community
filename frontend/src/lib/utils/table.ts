@@ -1390,10 +1390,11 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'source',
 			'description',
 			'cvssBaseScore',
 			'epssScore',
-			'isKev',
+			'isActivelyExploited',
 			'publishedDate',
 			'domain',
 			'labels'
@@ -1401,10 +1402,11 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'source',
 			'description',
 			'cvss_base_score',
 			'epss_score',
-			'is_kev',
+			'is_actively_exploited',
 			'published_date',
 			'folder',
 			'filtering_labels'
@@ -1412,6 +1414,17 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
+			source: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'security-advisories/source',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'source',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
 			filtering_labels: LABELS_FILTER
 		}
 	},

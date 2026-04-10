@@ -28,6 +28,7 @@
 	const toastStore = getToastStore();
 	let URLModel = $derived(data.URLModel);
 	let exportPopupOpen = $state(false);
+	let pullCatalogOpen = $state(false);
 	let currentFilterSearch = $state(page.url.search);
 
 	function handleFilterChange(filters: Record<string, any>) {
@@ -213,25 +214,68 @@
 								{/if}
 								{#if URLModel === 'security-advisories'}
 									<button
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										class="inline-block p-3 w-12 focus:relative bg-blue-50 hover:bg-blue-100"
 										title={m.syncKev()}
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
-										onclick={async () => {
-											try {
-												const res = await fetch('/security-advisories/sync-kev', {
-													method: 'POST'
-												});
-												const result = await res.json();
-												toastStore.trigger({
-													message: result.detail || result.error,
-													preset: res.ok ? 'success' : 'error'
-												});
-												if (res.ok) invalidateAll();
-											} catch {
-												toastStore.trigger({ message: m.syncKevFailed(), preset: 'error' });
-											}
-										}}><i class="fa-solid fa-satellite-dish"></i></button
+										onclick={() => {
+											modalStore.trigger({
+												type: 'confirm',
+												title: m.pullCatalog(),
+												body: m.syncKev(),
+												response: async (confirmed) => {
+													if (!confirmed) return;
+													try {
+														const res = await fetch('/security-advisories/sync-kev', {
+															method: 'POST'
+														});
+														const result = await res.json();
+														toastStore.trigger({
+															message: result.detail || result.error,
+															preset: res.ok ? 'success' : 'error'
+														});
+														if (res.ok) invalidateAll();
+													} catch {
+														toastStore.trigger({
+															message: m.syncKevFailed(),
+															preset: 'error'
+														});
+													}
+												}
+											});
+										}}>🇺🇸</button
+									>
+									<button
+										class="inline-block p-3 w-12 focus:relative bg-yellow-50 hover:bg-yellow-100"
+										title={m.syncEuvd()}
+										aria-label={m.syncEuvd()}
+										data-testid="sync-euvd-button"
+										onclick={() => {
+											modalStore.trigger({
+												type: 'confirm',
+												title: m.pullCatalog(),
+												body: m.syncEuvd(),
+												response: async (confirmed) => {
+													if (!confirmed) return;
+													try {
+														const res = await fetch('/security-advisories/sync-euvd', {
+															method: 'POST'
+														});
+														const result = await res.json();
+														toastStore.trigger({
+															message: result.detail || result.error,
+															preset: res.ok ? 'success' : 'error'
+														});
+														if (res.ok) invalidateAll();
+													} catch {
+														toastStore.trigger({
+															message: m.syncEuvdFailed(),
+															preset: 'error'
+														});
+													}
+												}
+											});
+										}}>🇪🇺</button
 									>
 								{/if}
 								{#if URLModel === 'cwes'}
