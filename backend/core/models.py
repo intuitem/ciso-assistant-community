@@ -6889,16 +6889,30 @@ class ComplianceAssessment(Assessment):
                 computed[urn] = total_weighted / total_weight
                 return computed[urn]
 
-            root_scores = []
+            # Compute all nodes bottom-up
             for root in roots:
-                rs = compute(root)
-                if rs is not None:
-                    root_scores.append(rs)
+                compute(root)
 
-            if not root_scores:
+            # Collect scores for the global average.
+            # If a root is structural (no scored leaves as direct children),
+            # descend one level and flat-average its children (categories).
+            # Otherwise the root itself is the grouping level.
+            category_scores = []
+            for root in roots:
+                children = children_map.get(root, [])
+                has_leaf_children = any(c in leaf_scores for c in children)
+                if has_leaf_children or not children:
+                    if root in computed:
+                        category_scores.append(computed[root])
+                else:
+                    for child_urn in children:
+                        if child_urn in computed:
+                            category_scores.append(computed[child_urn])
+
+            if not category_scores:
                 return -1
 
-            return int(sum(root_scores) / len(root_scores) * 10) / 10
+            return int(sum(category_scores) / len(category_scores) * 10) / 10
 
         weighted_score = 0
         total_weight = 0

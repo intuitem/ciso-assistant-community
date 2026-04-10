@@ -504,30 +504,28 @@ class TestDeepTreeAvgOfAvg:
 
     def test_recursive_avg_of_avg(self, deep_tree_setup):
         """
-        Recursive AVG_OF_AVG should average at every level of the tree.
+        AVG_OF_AVG recurses subcategory→category, then flat-averages categories.
 
         S1 = avg(80, 60) = 70
         S2 = 40
         C1 = avg(70, 40) = 55
         C2 = 100
-        F1 = avg(55, 100) = 77.5
         C3 = 50
-        F2 = 50
-        Global = avg(77.5, 50) = 63.7
+        Global = avg(C1, C2, C3) = (55 + 100 + 50) / 3 = 68.3
         """
         ca = deep_tree_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
         ca.save()
 
         scores = ca.get_global_score()
-        assert scores["implementation_score"] == 63.7
+        assert scores["implementation_score"] == 68.3
 
     def test_flat_avg_differs_from_recursive(self, deep_tree_setup):
         """
         Flat AVG should differ from recursive AVG_OF_AVG on a deep tree.
 
         Flat AVG = (80+60+40+100+50) / 5 = 66.0
-        Recursive AVG_OF_AVG = 63.7
+        Recursive AVG_OF_AVG = 68.3
         """
         ca = deep_tree_setup["ca"]
 
@@ -540,7 +538,7 @@ class TestDeepTreeAvgOfAvg:
         avg_of_avg_score = ca.get_global_score()["implementation_score"]
 
         assert avg_score == 66.0
-        assert avg_of_avg_score == 63.7
+        assert avg_of_avg_score == 68.3
         assert avg_score != avg_of_avg_score
 
 
