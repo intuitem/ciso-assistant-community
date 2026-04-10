@@ -192,6 +192,8 @@ export function computeRefId(
 	if (type === 'section') return String(next);
 	if (parentRefId) return `${parentRefId}${separator}${next}`;
 	// Fallback when parent has no ref_id
+	if (type === 'question') return `q${next}`;
+	if (type === 'choice') return `c${next}`;
 	return `${next}`;
 }
 
@@ -697,8 +699,6 @@ export function createBuilderState(
 	const folderId =
 		typeof frameworkData.folder === 'string' ? frameworkData.folder : frameworkData.folder.id;
 	const frameworkId = frameworkData.id;
-	// Cache the slug at session start so all new items use a consistent namespace
-	const fwSlug = slugifyFrameworkName(frameworkData.name, frameworkId);
 	function getUrnNs(): string {
 		return get(framework).urn_namespace || 'custom';
 	}
@@ -714,6 +714,9 @@ export function createBuilderState(
 		initialQuestions = hydrated.questions;
 		initialFrameworkData = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
 	}
+
+	// Cache the slug after hydration so renamed drafts use the updated name
+	const fwSlug = slugifyFrameworkName(initialFrameworkData.name, frameworkId);
 
 	const framework = writable<Framework>(initialFrameworkData);
 	const initialSections = buildTree(initialNodes, initialQuestions);
@@ -775,8 +778,8 @@ export function createBuilderState(
 
 	let saveInFlight = false;
 
-	async function flushDraft() {
-		if (saveInFlight) return;
+	async function flushDraft(): Promise<boolean> {
+		if (saveInFlight) return false;
 		saveInFlight = true;
 		saving.set(true);
 		try {
@@ -785,8 +788,10 @@ export function createBuilderState(
 			await apiSaveDraft(frameworkId, draft);
 			unsaved.set(false); // saved to draft, but still unpublished
 			clearError('save-draft');
+			return true;
 		} catch (e) {
 			setError('save-draft', (e as Error).message);
+			return false;
 		} finally {
 			saving.set(false);
 			saveInFlight = false;
@@ -803,7 +808,11 @@ export function createBuilderState(
 	}
 
 	async function publish() {
-		await flushDraft();
+		const saved = await flushDraft();
+		if (!saved) {
+			setError('publish', 'Failed to save draft before publishing.');
+			return;
+		}
 
 		// Clear previous node-level validation errors
 		errors.update((m) => {
