@@ -26,6 +26,9 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	let ssoForced = $derived(data.SSOInfo.is_enabled && data.SSOInfo.force_sso);
+	let showLocalLogin = $state(false);
+
 	function modalMFAAuthenticate(): void {
 		const mfaTypes: string[] = form?.mfaFlow?.types ?? ['totp'];
 		const modalComponent: ModalComponent = {
@@ -64,49 +67,65 @@
 		<p class="text-center text-gray-600 text-sm">
 			{m.youNeedToLogIn()}
 		</p>
-		<div class="w-full">
-			<!-- SuperForm with dataType 'form' -->
-			<SuperForm
-				class="flex flex-col space-y-3"
-				data={data?.form}
-				dataType="form"
-				validators={zod(loginSchema)}
-				action="?/login&next={page.url.searchParams.get('next') || '/'}"
-			>
-				{#snippet children({ form })}
-					<TextField type="email" {form} field="username" label={m.email()} />
-					<TextField type="password" {form} field="password" label={m.password()} />
-					<div class="flex flex-row justify-end">
-						<a
-							href="/password-reset"
-							class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
-							data-testid="forgot-password-btn"
-						>
-							<p class="">{m.forgtPassword()}?</p>
-						</a>
-					</div>
-					<p class="">
-						<button
-							class="btn preset-filled-primary-500 font-semibold w-full"
-							data-testid="login-btn"
-							type="submit">{m.login()}</button
-						>
-					</p>
-				{/snippet}
-			</SuperForm>
-		</div>
-		{#if data.SSOInfo.is_enabled}
-			<div class="flex items-center justify-center w-full space-x-2">
-				<hr class="w-64 items-center bg-gray-200 border-0" />
-				<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-				<hr class="w-64 items-center bg-gray-200 border-0" />
-			</div>
+		{#if ssoForced && !showLocalLogin}
+			<!-- SSO is forced: show SSO button prominently -->
+			<p class="text-center text-gray-500 text-sm">{m.ssoIsRequired()}</p>
 			<button
 				class="btn bg-linear-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
 				onclick={() =>
 					redirectToProvider(data.SSOInfo.sp_entity_id, data.SSOInfo.callback_url, 'login')}
 				>{m.loginSSO()}</button
 			>
+			<button
+				class="text-sm text-gray-500 hover:text-primary-600 underline"
+				onclick={() => (showLocalLogin = true)}
+			>
+				{m.loginWithLocalAccount()}
+			</button>
+		{:else}
+			<div class="w-full">
+				<SuperForm
+					class="flex flex-col space-y-3"
+					data={data?.form}
+					dataType="form"
+					validators={zod(loginSchema)}
+					action="?/login&next={page.url.searchParams.get('next') || '/'}"
+				>
+					{#snippet children({ form })}
+						<TextField type="email" {form} field="username" label={m.email()} />
+						<TextField type="password" {form} field="password" label={m.password()} />
+						<div class="flex flex-row justify-end">
+							<a
+								href="/password-reset"
+								class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+								data-testid="forgot-password-btn"
+							>
+								<p class="">{m.forgtPassword()}?</p>
+							</a>
+						</div>
+						<p class="">
+							<button
+								class="btn preset-filled-primary-500 font-semibold w-full"
+								data-testid="login-btn"
+								type="submit">{m.login()}</button
+							>
+						</p>
+					{/snippet}
+				</SuperForm>
+			</div>
+			{#if data.SSOInfo.is_enabled}
+				<div class="flex items-center justify-center w-full space-x-2">
+					<hr class="w-64 items-center bg-gray-200 border-0" />
+					<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
+					<hr class="w-64 items-center bg-gray-200 border-0" />
+				</div>
+				<button
+					class="btn bg-linear-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
+					onclick={() =>
+						redirectToProvider(data.SSOInfo.sp_entity_id, data.SSOInfo.callback_url, 'login')}
+					>{m.loginSSO()}</button
+				>
+			{/if}
 		{/if}
 	</div>
 </div>

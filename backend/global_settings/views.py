@@ -274,6 +274,7 @@ def get_sso_info(request):
     return Response(
         {
             "is_enabled": sso_settings.is_enabled,
+            "force_sso": sso_settings.force_sso,
             "sp_entity_id": sp_entity_id,
             "callback_url": callback_url,
         }

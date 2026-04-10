@@ -21,6 +21,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
+	import { page } from '$app/state';
 
 	interface Props {
 		data: PageData;
@@ -28,6 +29,7 @@
 	}
 
 	let { data, form }: Props = $props();
+	let isSSOOnly = $derived(page.data.user?.is_sso_only ?? false);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -185,6 +187,12 @@
 				<p class="text-sm text-surface-800">{m.securitySettingsDescription()}</p>
 			</div>
 			<hr />
+			{#if isSSOOnly}
+				<div class="card p-4 preset-tonal-warning flex items-start space-x-3">
+					<i class="fa-solid fa-circle-info text-warning-900 mt-0.5"></i>
+					<p class="text-sm text-warning-900">{m.mfaNotApplicableToSSO()}</p>
+				</div>
+			{/if}
 			<div class="flow-root">
 				<dl class="-my-3 divide-y divide-surface-100 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">

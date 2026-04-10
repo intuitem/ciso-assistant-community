@@ -12,6 +12,11 @@ import { m } from '$paraglide/messages';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 export const load: PageServerLoad = async (event) => {
+	// SSO-only users should not set up local MFA — it won't protect their SSO login
+	if (event.locals.user?.is_sso && !event.locals.user?.is_local) {
+		redirect(302, '/');
+	}
+
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
 	const authenticatorsResponse = await event
 		.fetch(authenticatorsEndpoint)
