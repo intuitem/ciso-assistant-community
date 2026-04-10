@@ -176,13 +176,13 @@ export const CVESchema = z.object({
 	annotation: z.string().optional().nullable(),
 	library: z.string().uuid().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
-	published_date: z.string().optional().nullable(),
+	published_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	cvss_base_score: z.coerce.number().min(0).max(10).optional().nullable(),
 	cvss_vector: z.string().optional().nullable(),
 	epss_score: z.coerce.number().min(0).max(1).optional().nullable(),
 	epss_percentile: z.coerce.number().min(0).max(1).optional().nullable(),
 	is_kev: z.boolean().default(false).optional(),
-	kev_date_added: z.string().optional().nullable()
+	kev_date_added: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const CWESchema = z.object({
