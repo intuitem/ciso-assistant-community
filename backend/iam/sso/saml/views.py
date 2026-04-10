@@ -47,7 +47,7 @@ from core.permissions import IsAdministrator  # ou une permission plus adaptée
 from iam.models import User
 from iam.sso.errors import AuthError
 from iam.sso.models import SSOSettings
-from iam.utils import complete_sso_login_bypassing_mfa, generate_token
+from iam.utils import generate_token
 from global_settings.models import GlobalSettings
 
 DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL = SAMLProvider.default_attribute_mapping["email"]
@@ -188,10 +188,6 @@ class FinishACSView(SAMLViewMixin, View):
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
             login._accept_login(request)  # complete_social_login not working
-            # If allauth's MFA stage blocked login(), bypass it —
-            # the IdP already authenticated the user.
-            if request.user.is_anonymous:
-                complete_sso_login_bypassing_mfa(request)
             record_authentication(request, login)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day

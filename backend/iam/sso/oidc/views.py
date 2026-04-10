@@ -15,7 +15,7 @@ from allauth.socialaccount.providers.openid_connect.views import (  # type: igno
 )
 
 from iam.sso.errors import AuthError
-from iam.utils import complete_sso_login_bypassing_mfa, generate_token
+from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
 
@@ -71,20 +71,16 @@ def callback(request, provider_id):
             return response
 
         if request.user.is_anonymous:
-            # If allauth's MFA stage blocked login(), bypass it —
-            # the IdP already authenticated the user.
-            user = complete_sso_login_bypassing_mfa(request)
-            if not user:
-                logger.error(
-                    "SSO authentication failed - user is anonymous after callback",
-                    provider=provider_id,
-                    has_socialaccount_state=bool(
-                        request.session.get("socialaccount_state")
-                    ),
-                )
-                return render_authentication_error(
-                    request, None, error=AuthError.FAILED_SSO
-                )
+            logger.error(
+                "SSO authentication failed - user is anonymous after callback",
+                provider=provider_id,
+                has_socialaccount_state=bool(
+                    request.session.get("socialaccount_state")
+                ),
+            )
+            return render_authentication_error(
+                request, None, error=AuthError.FAILED_SSO
+            )
 
         token = generate_token(request.user)
         next = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate"
