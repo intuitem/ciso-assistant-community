@@ -4,7 +4,6 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   UV_COMPILE_BYTECODE=1 \
   UV_LINK_MODE=copy \
-  PATH="/code/.venv/bin:$PATH"
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
 
@@ -58,4 +57,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY . .
 
 EXPOSE 8000
-ENTRYPOINT ["bash", "startup.sh"]
+ENTRYPOINT ["uv", "run", "bash", "startup.sh"]

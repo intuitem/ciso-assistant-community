@@ -4,7 +4,6 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   UV_COMPILE_BYTECODE=1 \
   UV_LINK_MODE=copy \
-  PATH="/code/.venv/bin:$PATH" \
   DJANGO_SETTINGS_MODULE=enterprise_core.settings
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
@@ -64,4 +63,4 @@ COPY enterprise/backend/enterprise_core /code/enterprise_core
 COPY backend/startup.sh /code/
 
 EXPOSE 8000
-ENTRYPOINT ["bash", "startup.sh"]
+ENTRYPOINT ["uv", "run", "bash", "startup.sh"]
