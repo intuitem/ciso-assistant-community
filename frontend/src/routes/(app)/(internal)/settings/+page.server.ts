@@ -113,11 +113,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		zod(VulnerabilitySlaSchema),
 		{ errors: false }
 	);
-	const secIntelFeedsForm = await superValidate(
-		secIntelFeedsSettings,
-		zod(SecIntelFeedsSchema),
-		{ errors: false }
-	);
+	const secIntelFeedsForm = await superValidate(secIntelFeedsSettings, zod(SecIntelFeedsSchema), {
+		errors: false
+	});
 	const webhookEndpointCreateForm = await superValidate(zod(webhookEndpointSchema), {
 		errors: false
 	});
