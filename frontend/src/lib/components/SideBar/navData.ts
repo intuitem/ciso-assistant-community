@@ -108,6 +108,16 @@ export const navData = {
 					href: '/threats'
 				},
 				{
+					name: 'securityAdvisories',
+					fa_icon: 'fa-solid fa-shield-virus',
+					href: '/security-advisories'
+				},
+				{
+					name: 'cwes',
+					fa_icon: 'fa-solid fa-bug-slash',
+					href: '/cwes'
+				},
+				{
 					name: 'referenceControls',
 					fa_icon: 'fa-solid fa-gears',
 					href: '/reference-controls'
