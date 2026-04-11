@@ -1244,6 +1244,16 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     state = serializers.SerializerMethodField()
     findings_count = serializers.IntegerField(source="findings.count")
     is_assigned = serializers.BooleanField(read_only=True)
+    linked_models = serializers.SerializerMethodField()
+
+    def get_linked_models(self, obj):
+        from core.views import APPLIED_CONTROL_LINKED_FIELD_NAMES
+
+        return [
+            name
+            for name in APPLIED_CONTROL_LINKED_FIELD_NAMES
+            if getattr(obj, f"has_{name}", False)
+        ]
 
     def get_state(self, obj):
         if not obj.eta:
@@ -2235,6 +2245,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "min_score",
             "max_score",
             "implementation_groups_definition",
+            "outcomes_definition",
             "ref_id",
             "reference_controls",
             "has_update",
@@ -2346,6 +2357,8 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "progress",
             "status",
             "is_locked",
+            "eta",
+            "due_date",
             "created_at",
             "updated_at",
             "path",
@@ -3803,6 +3816,33 @@ class IncidentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Incident
         exclude = ["created_at", "updated_at"]
+
+    def validate(self, attrs):
+        # Merge with existing instance values for partial updates
+        occurred_at = attrs.get(
+            "occurred_at", getattr(self.instance, "occurred_at", None)
+        )
+        reported_at = attrs.get(
+            "reported_at", getattr(self.instance, "reported_at", None)
+        )
+        resolved_at = attrs.get(
+            "resolved_at", getattr(self.instance, "resolved_at", None)
+        )
+
+        if occurred_at and reported_at and reported_at < occurred_at:
+            raise serializers.ValidationError(
+                {"reported_at": "Reported date cannot be before occurrence date."}
+            )
+        if resolved_at and occurred_at and resolved_at < occurred_at:
+            raise serializers.ValidationError(
+                {"resolved_at": "Resolution date cannot be before occurrence date."}
+            )
+        if resolved_at and reported_at and resolved_at < reported_at:
+            raise serializers.ValidationError(
+                {"resolved_at": "Resolution date cannot be before reported date."}
+            )
+
+        return super().validate(attrs)
 
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id

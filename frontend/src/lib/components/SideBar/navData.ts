@@ -54,13 +54,7 @@ export const navData = {
 					name: 'auditDashboard',
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/auditee-dashboard',
-					permissions: ['view_requirementassignment']
-				},
-				{
-					name: 'presets',
-					fa_icon: 'fa-solid fa-rocket',
-					href: '/presets',
-					permissions: ['add_loadedlibrary', 'view_presetjourney']
+					permissions: ['view_complianceassessment']
 				}
 			]
 		},
@@ -168,7 +162,7 @@ export const navData = {
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
-					permissions: ['view_riskassessment', 'view_complianceassessment']
+					permissions: ['view_riskassessment', 'view_assessment']
 				},
 				{
 					name: 'incidents',

@@ -240,7 +240,7 @@
 										<SimpleCard
 											count={metrics.compliance?.non_compliant_items}
 											label={m.sumpageNonCompliantItems()}
-											href="#"
+											href="/requirement-assessments?result=non_compliant"
 										/>
 										<SimpleCard
 											count={metrics.compliance?.evidences}
