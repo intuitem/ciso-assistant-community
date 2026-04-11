@@ -347,6 +347,12 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
         abstract = True
 
     @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
+
+    @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})
@@ -1292,6 +1298,7 @@ class LibraryUpdater:
                                 "description",
                                 "order_id",
                                 "implementation_groups",
+                                "visibility_expression",
                             }
                         )
                     )
@@ -2320,6 +2327,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
             "Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'."
         ),
     )
+    urn_namespace = models.CharField(
+        max_length=50,
+        default="custom",
+        verbose_name=_("URN namespace"),
+        help_text=_("Organization identifier used in the URN prefix."),
+    )
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2470,6 +2483,15 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         choices=DisplayMode.choices,
         default=DisplayMode.DEFAULT,
         verbose_name=_("Display mode"),
+    )
+    visibility_expression = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Visibility expression"),
+        help_text=_(
+            "CEL expression that must evaluate to true for this requirement "
+            "to be visible in an assessment."
+        ),
     )
 
     @property
@@ -2669,6 +2691,12 @@ class Question(AbstractBaseModel, FolderMixin):
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
 
+    @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
+
     def __str__(self) -> str:
         return f"{self.ref_id or self.urn}: {self.text or ''}"
 
@@ -2707,6 +2735,12 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
         unique_together = [("question", "urn")]
         verbose_name = _("Question choice")
         verbose_name_plural = _("Question choices")
+
+    @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
 
     def __str__(self) -> str:
         return f"{self.ref_id or ''}: {self.value or ''}"
@@ -8170,6 +8204,16 @@ class Answer(AbstractBaseModel, FolderMixin):
             return [c.urn for c in self.selected_choices.all()]
         return []
 
+    def _defer_cel_evaluation(self):
+        ca = self.requirement_assessment.compliance_assessment
+
+        def _run():
+            from core.cel_service import evaluate_outcomes
+
+            evaluate_outcomes(ca)
+
+        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
 
@@ -8186,6 +8230,9 @@ class Answer(AbstractBaseModel, FolderMixin):
                 ca.pk,
                 lambda ca_ref=ca: update_selected_implementation_groups(ca_ref),
             )
+
+        # Trigger CEL outcome evaluation (deduplicated per transaction)
+        self._defer_cel_evaluation()
 
 
 class FindingsAssessment(Assessment):
