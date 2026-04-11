@@ -2291,6 +2291,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "min_score",
             "max_score",
             "implementation_groups_definition",
+            "outcomes_definition",
             "ref_id",
             "reference_controls",
             "has_update",
