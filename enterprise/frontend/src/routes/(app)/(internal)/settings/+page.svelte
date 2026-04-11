@@ -75,7 +75,7 @@
 			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
 		>
 		{#if page.data?.featureflags?.outgoing_webhooks}
-		<Tabs.Trigger value="webhooks"
+			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
 					><svg width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 						<title>webhook</title>
