@@ -5438,7 +5438,11 @@ class Policy(AppliedControl):
 
 
 class Vulnerability(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    ETADueDateMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
 ):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
@@ -5479,9 +5483,75 @@ class Vulnerability(
         verbose_name="Security exceptions",
         related_name="vulnerabilities",
     )
+    security_advisories = models.ManyToManyField(
+        "sec_intel.SecurityAdvisory",
+        blank=True,
+        verbose_name=_("Security advisories"),
+        related_name="vulnerabilities",
+    )
+    cwes = models.ManyToManyField(
+        "sec_intel.CWE",
+        blank=True,
+        verbose_name=_("CWEs"),
+        related_name="vulnerabilities",
+    )
+    detected_at = models.DateField(
+        null=True, blank=True, verbose_name=_("Detection date")
+    )
+    published_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Publication date")
+    )
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
+
+    def save(self, *args, **kwargs):
+        from datetime import date
+
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            update_fields = set(update_fields)
+
+        is_new = self._state.adding
+        severity_changed = False
+        if not is_new:
+            old = Vulnerability.objects.filter(pk=self.pk).values("severity").first()
+            if old and old["severity"] != self.severity:
+                severity_changed = True
+        # Default detected_at to today on creation
+        if is_new and not self.detected_at:
+            self.detected_at = date.today()
+            if update_fields is not None:
+                update_fields.add("detected_at")
+        if is_new or severity_changed:
+            self._apply_sla_policy()
+            if update_fields is not None:
+                update_fields.add("due_date")
+        if update_fields is not None:
+            kwargs["update_fields"] = list(update_fields)
+        super().save(*args, **kwargs)
+
+    def _apply_sla_policy(self):
+        from datetime import date, timedelta
+
+        from global_settings.models import GlobalSettings
+
+        try:
+            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
+            sla_policy = (
+                sla_settings.value if isinstance(sla_settings.value, dict) else {}
+            )
+        except GlobalSettings.DoesNotExist:
+            return
+        severity_label = self.get_severity_display()
+        days = sla_policy.get(severity_label)
+        if days is not None:
+            sla_anchor = sla_policy.get("sla_anchor", "detected_at")
+            if sla_anchor == "published_date" and self.published_date:
+                anchor = self.published_date
+            else:
+                anchor = self.detected_at or date.today()
+            self.due_date = anchor + timedelta(days=int(days))
 
 
 # historical data

@@ -3127,8 +3127,27 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "security_exceptions",
         "filtering_labels",
         "findings",
+        "security_advisories",
+        "cwes",
     ]
     search_fields = ["name", "description", "ref_id"]
+
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        from core.serializers import VulnerabilityReadSerializer
+
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = VulnerabilityReadSerializer(objects, many=True)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -3139,6 +3158,75 @@ class VulnerabilityViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
+
+    @action(detail=False, methods=["post"], url_path="refresh-due-dates")
+    def refresh_due_dates(self, request):
+        """Recalculate due_date for all vulnerabilities based on current SLA policy."""
+        from datetime import timedelta
+
+        from django.db.models import F
+        from django.db.models.functions import Cast
+
+        from global_settings.models import GlobalSettings
+
+        try:
+            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
+            sla_policy = (
+                sla_settings.value if isinstance(sla_settings.value, dict) else {}
+            )
+        except GlobalSettings.DoesNotExist:
+            return Response({"error": "No SLA policy configured"}, status=400)
+
+        if not sla_policy:
+            return Response({"error": "SLA policy is empty"}, status=400)
+
+        sla_anchor = sla_policy.get("sla_anchor", "detected_at")
+
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Vulnerability
+        )
+        accessible = Vulnerability.objects.filter(id__in=object_ids)
+
+        # Backfill missing detected_at from created_at
+        accessible.filter(detected_at__isnull=True).update(
+            detected_at=Cast(F("created_at"), models.DateField())
+        )
+
+        # Pick the anchor field based on policy
+        anchor_field = (
+            "published_date" if sla_anchor == "published_date" else "detected_at"
+        )
+
+        # Bulk update per severity level
+        updated = 0
+        for severity_int, severity_label in Severity.choices:
+            days = sla_policy.get(severity_label)
+            if days is None:
+                continue
+            try:
+                delta = timedelta(days=int(days))
+            except (ValueError, TypeError):
+                continue
+            qs = accessible.filter(
+                severity=severity_int,
+                **{f"{anchor_field}__isnull": False},
+            )
+            count = qs.update(due_date=F(anchor_field) + delta)
+            # Fallback: vulns without the primary anchor but with detected_at
+            if anchor_field == "published_date":
+                count += accessible.filter(
+                    severity=severity_int,
+                    published_date__isnull=True,
+                    detected_at__isnull=False,
+                ).update(due_date=F("detected_at") + delta)
+            updated += count
+
+        return Response(
+            {
+                "detail": f"Refreshed due dates for {updated} vulnerabilities",
+                "updated": updated,
+            }
+        )
 
     @action(detail=False, methods=["get"], name="Get sankey data")
     def sankey_data(self, request):
@@ -15068,6 +15156,7 @@ class FindingViewSet(BaseModelViewSet):
         "filtering_labels",
         "applied_controls",
         "evidences",
+        "vulnerabilities",
         "due_date",
     ]
     ordering = ["ref_id"]

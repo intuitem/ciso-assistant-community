@@ -303,7 +303,56 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    security_advisories = FieldsRelatedField(many=True)
+    cwes = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display")
+    state = serializers.SerializerMethodField()
+
+    RESOLVED_STATUSES = {"mitigated", "fixed", "not_exploitable", "unaffected"}
+
+    def _get_sla_policy(self):
+        """Per-instance cache — one DB query per serializer instantiation."""
+        if not hasattr(self, "_sla_policy"):
+            from global_settings.models import GlobalSettings
+
+            try:
+                sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
+                self._sla_policy = (
+                    sla_settings.value if isinstance(sla_settings.value, dict) else {}
+                )
+            except GlobalSettings.DoesNotExist:
+                self._sla_policy = {}
+        return self._sla_policy
+
+    def get_state(self, obj):
+        from datetime import date
+
+        if obj.status in self.RESOLVED_STATUSES:
+            return {"name": "resolved", "hexcolor": "#86efac"}
+
+        if not obj.due_date:
+            return None
+
+        today = date.today()
+
+        if obj.due_date < today:
+            return {"name": "overdue", "hexcolor": "#f87171"}
+        if obj.due_date == today:
+            return {"name": "today", "hexcolor": "#f97316"}
+
+        # Check if we're in the caution zone (past 50% of the SLA window)
+        sla_policy = self._get_sla_policy()
+        severity_label = obj.get_severity_display()
+        try:
+            sla_days = int(sla_policy.get(severity_label, 0)) or None
+        except (TypeError, ValueError):
+            sla_days = None
+        if sla_days is not None:
+            remaining = (obj.due_date - today).days
+            if remaining < sla_days * 0.5:
+                return {"name": "caution", "hexcolor": "#fbbf24"}
+
+        return {"name": "on track", "hexcolor": "#93c5fd"}
 
     class Meta:
         model = Vulnerability
