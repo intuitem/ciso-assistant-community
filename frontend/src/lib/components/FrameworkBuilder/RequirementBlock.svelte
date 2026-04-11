@@ -41,6 +41,27 @@
 	const childDrag = createHandleGatedDragHandlers((from, to) =>
 		builder.reorderRequirements(requirement.node.id, from, to)
 	);
+
+	/** Auto-grow a textarea to fit its content */
+	function autoGrow(el: HTMLTextAreaElement) {
+		el.style.height = 'auto';
+		el.style.height = Math.max(40, el.scrollHeight) + 'px';
+	}
+
+	/** Svelte action: auto-grow textarea on mount and on input */
+	function autogrowAction(el: HTMLTextAreaElement) {
+		autoGrow(el);
+		const onInput = () => autoGrow(el);
+		el.addEventListener('input', onInput);
+		return {
+			destroy() {
+				el.removeEventListener('input', onInput);
+			}
+		};
+	}
+
+	/** Name length for live character counter */
+	let nameLength = $derived((requirement.node.name ?? '').length);
 </script>
 
 <div style="margin-left: {Math.min(requirement.depth, 3) * 16}px">
@@ -123,13 +144,15 @@
 						<textarea
 							value={requirement.node.description ?? ''}
 							readonly
-							rows="1"
+							rows="3"
+							use:autogrowAction
 							class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
 						></textarea>
 						<textarea
 							value={getTranslation(requirement.node.translations, lang, 'description')}
 							placeholder="Translate description..."
-							rows="1"
+							rows="3"
+							use:autogrowAction
 							class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 							onblur={(e) =>
 								saveField(
@@ -147,13 +170,15 @@
 						<textarea
 							value={requirement.node.typical_evidence ?? ''}
 							readonly
-							rows="1"
+							rows="2"
+							use:autogrowAction
 							class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
 						></textarea>
 						<textarea
 							value={getTranslation(requirement.node.translations, lang, 'typical_evidence')}
 							placeholder="Translate typical evidence..."
-							rows="1"
+							rows="2"
+							use:autogrowAction
 							class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 							onblur={(e) =>
 								saveField(
@@ -176,16 +201,27 @@
 							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
 							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 						/>
-						<input
-							type="text"
-							value={requirement.node.name ?? ''}
-							placeholder={requirement.node.description
-								? requirement.node.description.slice(0, 60) +
-									(requirement.node.description.length > 60 ? '...' : '')
-								: 'Requirement name'}
-							class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
-							onblur={(e) => saveField('name', e.currentTarget.value || null)}
-						/>
+						<div class="relative flex-1">
+							<input
+								type="text"
+								value={requirement.node.name ?? ''}
+								placeholder={requirement.node.description
+									? requirement.node.description.slice(0, 60) +
+										(requirement.node.description.length > 60 ? '...' : '')
+									: 'Requirement name'}
+								class="w-full text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+								onblur={(e) => saveField('name', e.currentTarget.value || null)}
+							/>
+							{#if nameLength > 0}
+								<span
+									class="absolute right-0 top-0 text-[10px] {nameLength > 180
+										? 'text-red-500 font-medium'
+										: 'text-gray-300'}"
+								>
+									{nameLength}/200
+								</span>
+							{/if}
+						</div>
 					</div>
 					{#if requirement.node.urn}
 						<button
@@ -206,14 +242,16 @@
 					<textarea
 						value={requirement.node.description ?? ''}
 						placeholder="Description (optional)"
-						rows="1"
+						rows="3"
+						use:autogrowAction
 						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 						onblur={(e) => saveField('description', e.currentTarget.value || null)}
 					></textarea>
 					<textarea
 						value={requirement.node.typical_evidence ?? ''}
 						placeholder="Typical evidence (optional)"
-						rows="1"
+						rows="2"
+						use:autogrowAction
 						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 						onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
 					></textarea>
@@ -265,6 +303,25 @@
 				{/each}
 			</div>
 		{/if}
+
+		<!-- Visibility expression (CEL) -->
+		<div class="px-4 py-2 border-b border-gray-100">
+			<label class="text-xs text-gray-500 block mb-1">
+				Visibility expression (CEL)
+				<span
+					class="text-gray-400 ml-1"
+					title="CEL expression that must evaluate to true for this requirement to be visible. Example: requirements[&quot;urn:...&quot;].score > 50"
+					>&#9432;</span
+				>
+			</label>
+			<input
+				type="text"
+				class="w-full text-xs px-2 py-1 border border-gray-200 rounded font-mono bg-gray-50 focus:bg-white focus:border-blue-300 focus:outline-none"
+				placeholder={'e.g. requirements["urn:..."].score > 50'}
+				value={requirement.node.visibility_expression ?? ''}
+				onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
+			/>
+		</div>
 
 		<!-- Questions -->
 		<div class="px-4 py-3 space-y-1">
