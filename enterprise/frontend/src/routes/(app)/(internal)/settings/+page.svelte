@@ -8,6 +8,8 @@
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
+	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
+	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
 	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
 
@@ -66,6 +68,12 @@
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
+		<Tabs.Trigger value="vulnerabilitySla"
+			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
+		>
+		<Tabs.Trigger value="secIntelFeeds"
+			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
+		>
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
@@ -100,6 +108,12 @@
 	</Tabs.Content>
 	<Tabs.Content value="featureFlags">
 		<FeatureFlagsSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="vulnerabilitySla">
+		<VulnerabilitySlaSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="secIntelFeeds">
+		<SecIntelFeedsSettings {data} />
 	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} allowMultiple />

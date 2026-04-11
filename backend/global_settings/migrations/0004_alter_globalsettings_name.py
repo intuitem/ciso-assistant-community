@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                     ("sso", "SSO"),
                     ("feature-flags", "Feature Flags"),
                     ("vulnerability-sla", "Vulnerability SLA"),
-                    ("sec-intel-feeds", "Security Intelligence Feeds"),
+                    ("sec-intel-feeds", "Vulnerability Feeds"),
                 ],
                 default="general",
                 max_length=30,

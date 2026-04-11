@@ -1088,8 +1088,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'secIntelFeeds',
 		localName: 'secIntelFeeds',
 		localNamePlural: 'secIntelFeeds',
-		verboseName: 'Security Intelligence Feeds',
-		verboseNamePlural: 'Security Intelligence Feeds'
+		verboseName: 'Vulnerability Feeds',
+		verboseNamePlural: 'Vulnerability Feeds'
 	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
