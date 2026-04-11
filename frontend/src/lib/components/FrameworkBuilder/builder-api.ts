@@ -20,6 +20,7 @@ export interface DraftJSON {
 		implementation_groups_definition: Record<string, unknown>[] | null;
 		outcomes_definition: Record<string, unknown>[] | null;
 		field_visibility?: Record<string, string>;
+		urn_namespace?: string;
 	};
 	nodes: Record<string, unknown>[];
 	questions: Record<string, unknown>[];
@@ -62,6 +63,33 @@ export async function apiSaveDraft(frameworkId: string, draft: DraftJSON): Promi
 		body: JSON.stringify({ _action: 'save-draft', editing_draft: draft })
 	});
 	await handleResponse(res);
+}
+
+/** Preview publish impact: returns what would change if the draft were published */
+export interface PublishPreview {
+	added: {
+		requirements: number;
+		questions: number;
+		choices: number;
+		details: { name: string; assessable: boolean }[];
+	};
+	removed: {
+		requirements: number;
+		questions: number;
+		choices: number;
+		details: { name: string; assessable: boolean }[];
+	};
+	breaking_changes: { type: string; field: string; name: string }[];
+	affected_audits: { id: string; name: string }[];
+}
+
+export async function apiPublishDraftPreview(frameworkId: string): Promise<PublishPreview> {
+	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ _action: 'publish-draft-preview' })
+	});
+	return (await handleResponse(res)) as PublishPreview;
 }
 
 /** Publish draft: POST to reconcile draft into relational DB */

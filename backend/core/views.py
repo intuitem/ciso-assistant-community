@@ -8766,6 +8766,14 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
 
+    @staticmethod
+    def _slugify_framework_name(name, framework_id):
+        """Slugify a framework name for URN namespacing, with UUID fallback."""
+        slug = slugify(name, allow_unicode=False)[:60]
+        if not slug:
+            slug = str(framework_id)[:8]
+        return slug
+
     @action(detail=True, methods=["post"], name="Duplicate framework")
     def duplicate(self, request, pk):
         """Deep-clone a framework with all requirement nodes, questions, and choices."""
@@ -8787,8 +8795,9 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
         # Clone framework
+        new_name = request.data.get("name", f"{source.name} (copy)")
         new_framework = Framework.objects.create(
-            name=request.data.get("name", f"{source.name} (copy)"),
+            name=new_name,
             description=source.description,
             annotation=source.annotation,
             folder_id=folder_id,
@@ -8800,17 +8809,44 @@ class FrameworkViewSet(BaseModelViewSet):
             locale=source.locale,
             default_locale=source.default_locale,
             provider=source.provider,
+            urn_namespace=source.urn_namespace,
         )
+
+        # Use readable slug-based URNs instead of UUIDs
+        fw_slug = self._slugify_framework_name(new_name, new_framework.id)
+        ns = new_framework.urn_namespace or "custom"
 
         # Map old URNs to new URNs for parent_urn remapping
         urn_map = {}
         nodes = RequirementNode.objects.filter(framework=source).order_by(
             F("order_id").asc(nulls_last=True)
         )
+
+        # Compute positional ref_ids for nodes that don't have one
+        child_counter = {}  # parent_urn -> next child number
+        computed_ref_ids = {}  # node urn -> computed ref_id
+        for node in nodes:
+            if node.ref_id:
+                computed_ref_ids[node.urn] = node.ref_id
+            else:
+                parent = node.parent_urn
+                if parent not in child_counter:
+                    child_counter[parent] = 1
+                idx = child_counter[parent]
+                child_counter[parent] = idx + 1
+                parent_ref = computed_ref_ids.get(parent)
+                computed_ref_ids[node.urn] = (
+                    f"{parent_ref}.{idx}" if parent_ref else str(idx)
+                )
+
         for node in nodes:
             old_urn = node.urn
-            new_urn = f"urn:intuitem:risk:req_node:{uuid.uuid4()}" if old_urn else None
-            urn_map[old_urn] = new_urn
+            if old_urn:
+                ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
+                new_urn = f"urn:{ns}:risk:req_node:{fw_slug}:{ref_id}"
+                urn_map[old_urn] = new_urn
+            else:
+                urn_map[old_urn] = None
 
         # Clone requirement nodes
         node_id_map = {}  # old node id -> new node id
@@ -8830,6 +8866,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 typical_evidence=node.typical_evidence,
                 weight=node.weight,
                 importance=node.importance,
+                visibility_expression=node.visibility_expression,
                 folder_id=folder_id,
                 locale=node.locale,
                 default_locale=node.default_locale,
@@ -8843,13 +8880,25 @@ class FrameworkViewSet(BaseModelViewSet):
             .prefetch_related("choices")
             .order_by("order")
         )
+        q_counter = {}  # req_node_id -> next question number
         for q in questions:
             new_req_node_id = node_id_map.get(q.requirement_node_id)
             if not new_req_node_id:
                 continue
+            # Compute positional ref_id for questions without one
+            if q.ref_id:
+                q_ref_id = q.ref_id
+            else:
+                req_node = q.requirement_node
+                parent_ref = computed_ref_ids.get(req_node.urn, "")
+                if q.requirement_node_id not in q_counter:
+                    q_counter[q.requirement_node_id] = 1
+                q_idx = q_counter[q.requirement_node_id]
+                q_counter[q.requirement_node_id] = q_idx + 1
+                q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
             new_question = Question.objects.create(
-                urn=f"urn:intuitem:risk:question:{uuid.uuid4()}",
-                ref_id=q.ref_id,
+                urn=f"urn:{ns}:risk:question:{fw_slug}:{q_ref_id}",
+                ref_id=q.ref_id or q_ref_id,
                 text=q.text,
                 annotation=q.annotation,
                 type=q.type,
@@ -8861,12 +8910,18 @@ class FrameworkViewSet(BaseModelViewSet):
                 folder_id=folder_id,
                 translations=q.translations,
             )
+            c_counter = 0
             for choice in q.choices.all():
+                c_counter += 1
+                if choice.ref_id:
+                    c_ref_id = choice.ref_id
+                else:
+                    c_ref_id = f"{q_ref_id}-c{c_counter}"
                 QuestionChoice.objects.create(
-                    urn=f"urn:intuitem:risk:choice:{uuid.uuid4()}"
+                    urn=f"urn:{ns}:risk:question_choice:{fw_slug}:{c_ref_id}"
                     if choice.urn
                     else None,
-                    ref_id=choice.ref_id,
+                    ref_id=choice.ref_id or c_ref_id,
                     value=choice.value,
                     annotation=choice.annotation,
                     add_score=choice.add_score,
@@ -8936,6 +8991,163 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
         return Response({p: p for p in providers})
+
+    @action(detail=True, methods=["get"], url_path="export-yaml")
+    def export_yaml(self, request, pk=None):
+        """Export a framework as a library-compatible YAML file."""
+        framework = self.get_object()
+
+        slug = self._slugify_framework_name(framework.name, framework.id)
+
+        # Query all nodes ordered by DFS order
+        nodes = list(
+            RequirementNode.objects.filter(framework=framework)
+            .prefetch_related("questions", "questions__choices")
+            .order_by(F("order_id").asc(nulls_last=True))
+        )
+
+        if not nodes:
+            return Response(
+                {"error": "No requirement nodes to export."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Build depth map from parent_urn relationships
+        depth_map = {}
+        urn_set = {n.urn for n in nodes if n.urn}
+        for node in nodes:
+            if not node.parent_urn or node.parent_urn not in urn_set:
+                depth_map[node.urn] = 1
+            else:
+                parent_depth = depth_map.get(node.parent_urn, 0)
+                depth_map[node.urn] = parent_depth + 1
+
+        # Build requirement_nodes list
+        requirement_nodes_list = []
+        for node in nodes:
+            node_data = {
+                "urn": node.urn,
+                "assessable": node.assessable,
+                "depth": depth_map.get(node.urn, 1),
+            }
+            if node.ref_id:
+                node_data["ref_id"] = node.ref_id
+            if node.name:
+                node_data["name"] = node.name
+            if node.description:
+                node_data["description"] = node.description
+            if node.annotation:
+                node_data["annotation"] = node.annotation
+            if node.parent_urn:
+                node_data["parent_urn"] = node.parent_urn
+            if node.implementation_groups:
+                node_data["implementation_groups"] = node.implementation_groups
+            if node.visibility_expression:
+                node_data["visibility_expression"] = node.visibility_expression
+            if node.typical_evidence:
+                node_data["typical_evidence"] = node.typical_evidence
+            if node.display_mode and node.display_mode != "default":
+                node_data["display_mode"] = node.display_mode
+            if node.weight and node.weight != 1:
+                node_data["weight"] = node.weight
+            if node.translations:
+                node_data["translations"] = node.translations
+
+            # Build questions dict keyed by URN
+            node_questions = node.questions.order_by("order")
+            questions_dict = {}
+            for q in node_questions:
+                q_data = {"type": q.type, "text": q.text}
+                if q.annotation:
+                    q_data["annotation"] = q.annotation
+                if q.weight and q.weight != 1:
+                    q_data["weight"] = q.weight
+                if q.depends_on:
+                    q_data["depends_on"] = q.depends_on
+                if q.translations:
+                    q_data["translations"] = q.translations
+
+                # Choices
+                choices = list(q.choices.order_by("order"))
+                if choices:
+                    q_data["choices"] = []
+                    for c in choices:
+                        c_data = {"value": c.value}
+                        if c.urn:
+                            c_data["urn"] = c.urn
+                        if c.description:
+                            c_data["description"] = c.description
+                        if c.add_score is not None:
+                            c_data["add_score"] = c.add_score
+                        if c.compute_result:
+                            c_data["compute_result"] = c.compute_result
+                        if c.color:
+                            c_data["color"] = c.color
+                        if c.select_implementation_groups:
+                            c_data["select_implementation_groups"] = (
+                                c.select_implementation_groups
+                            )
+                        if c.translations:
+                            c_data["translations"] = c.translations
+                        q_data["choices"].append(c_data)
+
+                questions_dict[q.urn] = q_data
+
+            if questions_dict:
+                node_data["questions"] = questions_dict
+
+            requirement_nodes_list.append(node_data)
+
+        # Build framework object
+        framework_obj = {
+            "urn": f"urn:{framework.urn_namespace or 'custom'}:risk:framework:{slug}",
+            "ref_id": slug,
+            "name": framework.name,
+            "description": framework.description or "",
+        }
+        if framework.min_score != 0:
+            framework_obj["min_score"] = framework.min_score
+        if framework.max_score != 100:
+            framework_obj["max_score"] = framework.max_score
+        if framework.scores_definition:
+            framework_obj["scores_definition"] = framework.scores_definition
+        if framework.implementation_groups_definition:
+            framework_obj["implementation_groups_definition"] = (
+                framework.implementation_groups_definition
+            )
+        if framework.outcomes_definition:
+            framework_obj["outcomes_definition"] = framework.outcomes_definition
+
+        framework_obj["requirement_nodes"] = requirement_nodes_list
+
+        library_data = {
+            "urn": f"urn:{framework.urn_namespace or 'custom'}:risk:library:{slug}",
+            "locale": framework.locale or "en",
+            "ref_id": slug,
+            "name": framework.name,
+            "description": framework.description or "",
+            "version": 1,
+            "provider": framework.provider or "custom",
+            "packager": "custom",
+            "objects": {
+                "framework": framework_obj,
+            },
+        }
+
+        # Add translations if present
+        if framework.translations:
+            library_data["translations"] = framework.translations
+
+        yaml_content = yaml.dump(
+            library_data,
+            allow_unicode=True,
+            default_flow_style=False,
+            sort_keys=False,
+        )
+
+        response = HttpResponse(yaml_content, content_type="application/x-yaml")
+        response["Content-Disposition"] = f'attachment; filename="{slug}.yaml"'
+        return response
 
     @action(detail=True, methods=["get"], name="Framework as an Excel template")
     def excel_template(self, request, pk):
@@ -9081,6 +9293,7 @@ class FrameworkViewSet(BaseModelViewSet):
             "order_id",
             "assessable",
             "implementation_groups",
+            "visibility_expression",
             "typical_evidence",
             "weight",
             "importance",
@@ -9168,6 +9381,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "implementation_groups_definition": framework.implementation_groups_definition,
                 "outcomes_definition": framework.outcomes_definition,
                 "field_visibility": framework.field_visibility or {},
+                "urn_namespace": framework.urn_namespace or "custom",
             },
             "nodes": nodes,
             "questions": questions,
@@ -9220,6 +9434,209 @@ class FrameworkViewSet(BaseModelViewSet):
         framework.save(update_fields=["editing_draft", "updated_at"])
         return Response({"status": "draft_saved"})
 
+    @staticmethod
+    def _compute_draft_diff(framework, draft):
+        """Compute the diff between the draft and current DB state.
+
+        Returns a dict with counts and details of what would change,
+        plus the parsed draft lists for reuse by _reconcile_draft.
+        """
+        draft_nodes = draft.get("nodes", [])
+        draft_questions = draft.get("questions", [])
+        draft_choices = draft.get("choices", [])
+
+        db_node_ids = set(
+            RequirementNode.objects.filter(framework=framework).values_list(
+                "id", flat=True
+            )
+        )
+        db_question_ids = set(
+            Question.objects.filter(requirement_node__framework=framework).values_list(
+                "id", flat=True
+            )
+        )
+        db_choice_ids = set(
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework
+            ).values_list("id", flat=True)
+        )
+
+        draft_node_ids = {uuid.UUID(n["id"]) for n in draft_nodes}
+        draft_question_ids = {uuid.UUID(q["id"]) for q in draft_questions}
+        draft_choice_ids = {uuid.UUID(c["id"]) for c in draft_choices}
+
+        new_node_ids = draft_node_ids - db_node_ids
+        deleted_node_ids = db_node_ids - draft_node_ids
+
+        new_question_ids = draft_question_ids - db_question_ids
+        deleted_question_ids = db_question_ids - draft_question_ids
+
+        new_choice_ids = draft_choice_ids - db_choice_ids
+        deleted_choice_ids = db_choice_ids - draft_choice_ids
+
+        # Build name maps for human-readable output
+        draft_node_map = {uuid.UUID(n["id"]): n for n in draft_nodes}
+        new_nodes_info = [
+            {
+                "name": draft_node_map[nid].get("name")
+                or draft_node_map[nid].get("ref_id")
+                or str(nid),
+                "assessable": draft_node_map[nid].get("assessable", False),
+            }
+            for nid in new_node_ids
+        ]
+        deleted_nodes_info = list(
+            RequirementNode.objects.filter(id__in=deleted_node_ids).values(
+                "name", "ref_id", "assessable"
+            )
+        )
+
+        # Affected compliance assessments
+        affected_cas = list(
+            ComplianceAssessment.objects.filter(framework=framework).values(
+                "id", "name"
+            )
+        )
+
+        # Detect breaking field changes on existing nodes
+        BREAKING_NODE_FIELDS = {
+            "assessable",
+            "weight",
+            "implementation_groups",
+            "visibility_expression",
+        }
+        BREAKING_QUESTION_FIELDS = {"type", "depends_on", "weight"}
+        BREAKING_CHOICE_FIELDS = {
+            "add_score",
+            "compute_result",
+            "select_implementation_groups",
+        }
+
+        breaking_changes = []
+        existing_node_ids = db_node_ids & draft_node_ids
+
+        if affected_cas and existing_node_ids:
+            # Fetch current DB values for comparison
+            db_nodes_data = {
+                n["id"]: n
+                for n in RequirementNode.objects.filter(
+                    id__in=existing_node_ids
+                ).values("id", "urn", *BREAKING_NODE_FIELDS)
+            }
+            for nid in existing_node_ids:
+                draft_data = draft_node_map.get(nid)
+                db_data = db_nodes_data.get(nid)
+                if not draft_data or not db_data:
+                    continue
+                for field in BREAKING_NODE_FIELDS:
+                    old_val = db_data.get(field)
+                    new_val = draft_data.get(field)
+                    if old_val != new_val:
+                        label = (
+                            draft_data.get("ref_id")
+                            or draft_data.get("name")
+                            or str(nid)
+                        )
+                        breaking_changes.append(
+                            {
+                                "type": "requirement",
+                                "field": field,
+                                "name": label,
+                            }
+                        )
+
+            # Question breaking changes
+            existing_q_ids = db_question_ids & draft_question_ids
+            if existing_q_ids:
+                draft_q_map = {uuid.UUID(q["id"]): q for q in draft_questions}
+                db_q_data = {
+                    q["id"]: q
+                    for q in Question.objects.filter(id__in=existing_q_ids).values(
+                        "id", *BREAKING_QUESTION_FIELDS
+                    )
+                }
+                for qid in existing_q_ids:
+                    d = draft_q_map.get(qid)
+                    db = db_q_data.get(qid)
+                    if not d or not db:
+                        continue
+                    for field in BREAKING_QUESTION_FIELDS:
+                        if db.get(field) != d.get(field):
+                            label = (
+                                d.get("ref_id") or d.get("text", "")[:30] or str(qid)
+                            )
+                            breaking_changes.append(
+                                {
+                                    "type": "question",
+                                    "field": field,
+                                    "name": label,
+                                }
+                            )
+
+            # Choice breaking changes
+            existing_c_ids = db_choice_ids & draft_choice_ids
+            if existing_c_ids:
+                draft_c_map = {uuid.UUID(c["id"]): c for c in draft_choices}
+                db_c_data = {
+                    c["id"]: c
+                    for c in QuestionChoice.objects.filter(
+                        id__in=existing_c_ids
+                    ).values("id", *BREAKING_CHOICE_FIELDS)
+                }
+                for cid in existing_c_ids:
+                    d = draft_c_map.get(cid)
+                    db = db_c_data.get(cid)
+                    if not d or not db:
+                        continue
+                    for field in BREAKING_CHOICE_FIELDS:
+                        if db.get(field) != d.get(field):
+                            label = (
+                                d.get("ref_id") or d.get("value", "")[:30] or str(cid)
+                            )
+                            breaking_changes.append(
+                                {
+                                    "type": "choice",
+                                    "field": field,
+                                    "name": label,
+                                }
+                            )
+
+        return {
+            "added": {
+                "requirements": len(new_node_ids),
+                "questions": len(new_question_ids),
+                "choices": len(new_choice_ids),
+                "details": new_nodes_info,
+            },
+            "removed": {
+                "requirements": len(deleted_node_ids),
+                "questions": len(deleted_question_ids),
+                "choices": len(deleted_choice_ids),
+                "details": [
+                    {
+                        "name": n.get("name") or n.get("ref_id") or "unnamed",
+                        "assessable": n.get("assessable", False),
+                    }
+                    for n in deleted_nodes_info
+                ],
+            },
+            "breaking_changes": breaking_changes,
+            "affected_audits": affected_cas,
+        }
+
+    @action(detail=True, methods=["post"], url_path="publish-draft-preview")
+    def publish_draft_preview(self, request, pk=None):
+        """Preview the impact of publishing the current draft."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        if framework.editing_draft is None:
+            return Response(
+                {"error": "No active draft to preview."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        diff = self._compute_draft_diff(framework, framework.editing_draft)
+        return Response(diff)
+
     @action(detail=True, methods=["post"], url_path="publish-draft")
     def publish_draft(self, request, pk=None):
         """Publish editing_draft → relational DB, snapshot history, bump version."""
@@ -9233,7 +9650,7 @@ class FrameworkViewSet(BaseModelViewSet):
 
         draft = framework.editing_draft
         try:
-            self._reconcile_draft(framework, draft)
+            warnings = self._reconcile_draft(framework, draft)
         except DraftValidationError as e:
             logger.warning(
                 "Validation error while publishing draft",
@@ -9251,10 +9668,97 @@ class FrameworkViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        return Response({"status": "draft_published"})
+        response_data = {"status": "draft_published"}
+        if warnings:
+            response_data["warnings"] = warnings
+        return Response(response_data)
 
     def _reconcile_draft(self, framework, draft):
-        """Reconcile the draft JSON into the relational DB within a transaction."""
+        """Reconcile the draft JSON into the relational DB within a transaction.
+
+        Returns a list of warnings (e.g. if URN disambiguation was needed).
+        """
+        warnings = []
+
+        # --- 0. Pre-validate draft field lengths ---
+        draft_nodes = draft.get("nodes", [])
+        draft_questions = draft.get("questions", [])
+        draft_choices = draft.get("choices", [])
+
+        fw_meta = draft.get("framework_meta", {})
+        fw_name = fw_meta.get("name", "")
+        if not fw_name or not fw_name.strip():
+            raise DraftValidationError("Framework name is required.")
+        if len(fw_name) > 200:
+            raise DraftValidationError(
+                f"Framework name is {len(fw_name)} characters (max 200)."
+            )
+
+        for node in draft_nodes:
+            label = node.get("ref_id") or f"position {node.get('order_id', '?')}"
+            name = node.get("name") or ""
+            ref_id = node.get("ref_id") or ""
+            urn = node.get("urn") or ""
+
+            if len(name) > 200:
+                raise DraftValidationError(
+                    f"Requirement '{label}': name is {len(name)} characters (max 200)."
+                )
+            if len(ref_id) > 100:
+                raise DraftValidationError(
+                    f"Requirement '{label}': ref_id is {len(ref_id)} characters (max 100)."
+                )
+            if len(urn) > 255:
+                raise DraftValidationError(
+                    f"Requirement '{label}': URN is {len(urn)} characters (max 255)."
+                )
+
+        # --- 0b. Validate referential integrity ---
+        from core.utils import extract_node_id
+
+        # Duplicate node_id check
+        node_urns = [n.get("urn") for n in draft_nodes if n.get("urn")]
+        node_ids = [extract_node_id(u) for u in node_urns]
+        seen_node_ids: set[str] = set()
+        for nid in node_ids:
+            if nid and nid in seen_node_ids:
+                raise DraftValidationError(
+                    f"Duplicate node_id '{nid}'. Each requirement must have a unique identifier."
+                )
+            if nid:
+                seen_node_ids.add(nid)
+
+        # Dangling parent_urn check
+        all_node_urns = {n.get("urn") for n in draft_nodes if n.get("urn")}
+        for node in draft_nodes:
+            parent_urn = node.get("parent_urn")
+            if parent_urn and parent_urn not in all_node_urns:
+                label = node.get("ref_id") or node.get("name") or "unknown"
+                raise DraftValidationError(
+                    f"Requirement '{label}' references a parent that does not exist in this framework."
+                )
+
+        # Dangling depends_on check
+        all_question_urns = {q.get("urn") for q in draft_questions if q.get("urn")}
+        all_choice_urns = {c.get("urn") for c in draft_choices if c.get("urn")}
+        for q in draft_questions:
+            depends_on = q.get("depends_on")
+            if not depends_on:
+                continue
+            dep_question = depends_on.get("question")
+            if dep_question and dep_question not in all_question_urns:
+                label = q.get("ref_id") or q.get("text", "")[:30] or "unknown"
+                raise DraftValidationError(
+                    f"Question '{label}' depends on a question that does not exist in this framework."
+                )
+            dep_answers = depends_on.get("answers", [])
+            for ans_urn in dep_answers:
+                if ans_urn and ans_urn not in all_choice_urns:
+                    label = q.get("ref_id") or q.get("text", "")[:30] or "unknown"
+                    raise DraftValidationError(
+                        f"Question '{label}' depends on a choice that does not exist in this framework."
+                    )
+
         with transaction.atomic():
             # --- 1. Collect existing DB IDs ---
             db_node_ids = set(
@@ -9274,13 +9778,163 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
             # --- 2. Collect draft IDs ---
-            draft_nodes = draft.get("nodes", [])
-            draft_questions = draft.get("questions", [])
-            draft_choices = draft.get("choices", [])
 
             draft_node_ids = {uuid.UUID(n["id"]) for n in draft_nodes}
             draft_question_ids = {uuid.UUID(q["id"]) for q in draft_questions}
             draft_choice_ids = {uuid.UUID(c["id"]) for c in draft_choices}
+
+            # --- 2b. URN collision pre-check for new items ---
+            new_node_id_set = draft_node_ids - db_node_ids
+            new_question_id_set = draft_question_ids - db_question_ids
+            new_choice_id_set = draft_choice_ids - db_choice_ids
+
+            new_node_urns = {
+                n.get("urn")
+                for n in draft_nodes
+                if uuid.UUID(n["id"]) in new_node_id_set and n.get("urn")
+            }
+            new_question_urns = {
+                q.get("urn")
+                for q in draft_questions
+                if uuid.UUID(q["id"]) in new_question_id_set and q.get("urn")
+            }
+            new_choice_urns = {
+                c.get("urn")
+                for c in draft_choices
+                if uuid.UUID(c["id"]) in new_choice_id_set and c.get("urn")
+            }
+
+            if new_node_urns or new_question_urns or new_choice_urns:
+                node_collisions = set()
+                question_collisions = set()
+                choice_collisions = set()
+                if new_node_urns:
+                    node_collisions = set(
+                        RequirementNode.objects.filter(urn__in=new_node_urns)
+                        .exclude(framework=framework)
+                        .values_list("urn", flat=True)
+                    )
+                if new_question_urns:
+                    question_collisions = set(
+                        Question.objects.filter(urn__in=new_question_urns)
+                        .exclude(requirement_node__framework=framework)
+                        .values_list("urn", flat=True)
+                    )
+                if new_choice_urns:
+                    choice_collisions = set(
+                        QuestionChoice.objects.filter(urn__in=new_choice_urns)
+                        .exclude(question__requirement_node__framework=framework)
+                        .values_list("urn", flat=True)
+                    )
+
+                if node_collisions or question_collisions or choice_collisions:
+                    # Disambiguate: detect current slug from colliding URNs and
+                    # rewrite all draft URNs with a new slug suffix
+                    all_collisions = (
+                        node_collisions | question_collisions | choice_collisions
+                    )
+                    # Extract the slug from the first colliding URN
+                    sample_urn = next(iter(all_collisions))
+                    parts = sample_urn.split(":")
+                    # URN format: urn:intuitem:risk:{type}:{slug}:{ref_id}
+                    current_slug = parts[4] if len(parts) >= 6 else ""
+                    slug_pattern = f":{current_slug}:"
+
+                    new_slug = None
+                    for attempt in range(2, 12):
+                        candidate = f"{current_slug}-{attempt}"
+                        candidate_pattern = f":{candidate}:"
+                        # Rewrite all URNs with the candidate slug
+                        candidate_node_urns = set()
+                        for n in draft_nodes:
+                            urn = n.get("urn")
+                            if urn and slug_pattern in urn:
+                                candidate_node_urns.add(
+                                    urn.replace(slug_pattern, candidate_pattern)
+                                )
+                        candidate_q_urns = set()
+                        for q in draft_questions:
+                            urn = q.get("urn")
+                            if urn and slug_pattern in urn:
+                                candidate_q_urns.add(
+                                    urn.replace(slug_pattern, candidate_pattern)
+                                )
+                        candidate_c_urns = set()
+                        for c in draft_choices:
+                            urn = c.get("urn")
+                            if urn and slug_pattern in urn:
+                                candidate_c_urns.add(
+                                    urn.replace(slug_pattern, candidate_pattern)
+                                )
+                        # Check if the candidate URNs also collide
+                        still_collides = False
+                        if candidate_node_urns:
+                            if (
+                                RequirementNode.objects.filter(
+                                    urn__in=candidate_node_urns
+                                )
+                                .exclude(framework=framework)
+                                .exists()
+                            ):
+                                still_collides = True
+                        if not still_collides and candidate_q_urns:
+                            if (
+                                Question.objects.filter(urn__in=candidate_q_urns)
+                                .exclude(requirement_node__framework=framework)
+                                .exists()
+                            ):
+                                still_collides = True
+                        if not still_collides and candidate_c_urns:
+                            if (
+                                QuestionChoice.objects.filter(urn__in=candidate_c_urns)
+                                .exclude(
+                                    question__requirement_node__framework=framework
+                                )
+                                .exists()
+                            ):
+                                still_collides = True
+                        if not still_collides:
+                            new_slug = candidate
+                            break
+
+                    if new_slug:
+                        new_pattern = f":{new_slug}:"
+                        # Rewrite all draft URNs and parent_urn references
+                        for n in draft_nodes:
+                            if n.get("urn") and slug_pattern in n["urn"]:
+                                n["urn"] = n["urn"].replace(slug_pattern, new_pattern)
+                            if n.get("parent_urn") and slug_pattern in n["parent_urn"]:
+                                n["parent_urn"] = n["parent_urn"].replace(
+                                    slug_pattern, new_pattern
+                                )
+                        for q in draft_questions:
+                            if q.get("urn") and slug_pattern in q["urn"]:
+                                q["urn"] = q["urn"].replace(slug_pattern, new_pattern)
+                            # Rewrite depends_on URN references
+                            dep = q.get("depends_on")
+                            if dep and isinstance(dep, dict):
+                                if (
+                                    dep.get("question")
+                                    and slug_pattern in dep["question"]
+                                ):
+                                    dep["question"] = dep["question"].replace(
+                                        slug_pattern, new_pattern
+                                    )
+                                if dep.get("answers") and isinstance(
+                                    dep["answers"], list
+                                ):
+                                    dep["answers"] = [
+                                        a.replace(slug_pattern, new_pattern)
+                                        if isinstance(a, str) and slug_pattern in a
+                                        else a
+                                        for a in dep["answers"]
+                                    ]
+                        for c in draft_choices:
+                            if c.get("urn") and slug_pattern in c["urn"]:
+                                c["urn"] = c["urn"].replace(slug_pattern, new_pattern)
+                        warnings.append(
+                            f"URN namespace collision detected, disambiguated to '{new_slug}'"
+                        )
 
             # --- 3. DELETE (choices → questions → nodes for FK safety) ---
             choices_to_delete = db_choice_ids - draft_choice_ids
@@ -9321,6 +9975,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         order_id=data.get("order_id"),
                         assessable=data.get("assessable", False),
                         implementation_groups=data.get("implementation_groups"),
+                        visibility_expression=data.get("visibility_expression") or None,
                         typical_evidence=data.get("typical_evidence") or None,
                         weight=data.get("weight", 1),
                         importance=data.get("importance", "undefined"),
@@ -9341,6 +9996,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         "order_id",
                         "assessable",
                         "implementation_groups",
+                        "visibility_expression",
                         "typical_evidence",
                         "weight",
                         "importance",
@@ -9368,6 +10024,8 @@ class FrameworkViewSet(BaseModelViewSet):
                             order_id=data.get("order_id"),
                             assessable=data.get("assessable", False),
                             implementation_groups=data.get("implementation_groups"),
+                            visibility_expression=data.get("visibility_expression")
+                            or None,
                             typical_evidence=data.get("typical_evidence") or None,
                             weight=data.get("weight", 1),
                             importance=data.get("importance", "undefined"),
@@ -9569,8 +10227,114 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework.translations = meta.get(
                     "translations", framework.translations
                 )
+                # urn_namespace is only settable before first publish
+                if framework.editing_version <= 1 and meta.get("urn_namespace"):
+                    framework.urn_namespace = meta["urn_namespace"]
 
-            # --- 9. Snapshot history, bump version, clear draft ---
+            # --- 9. Sync RequirementAssessments for existing audits ---
+            # New requirement nodes need RA + Answer rows in every existing CA.
+            if new_node_ids:
+                existing_cas = ComplianceAssessment.objects.filter(framework=framework)
+                new_nodes_list = list(
+                    RequirementNode.objects.filter(id__in=new_node_ids)
+                )
+                new_questions_list = list(
+                    Question.objects.filter(
+                        requirement_node_id__in=new_node_ids
+                    ).select_related("requirement_node")
+                )
+
+                # One query for all existing RAs across all CAs (avoid N+1)
+                existing_ra_map = defaultdict(set)
+                for ca_id, req_id in RequirementAssessment.objects.filter(
+                    compliance_assessment__framework=framework,
+                    requirement_id__in=new_node_ids,
+                ).values_list("compliance_assessment_id", "requirement_id"):
+                    existing_ra_map[ca_id].add(req_id)
+
+                for ca in existing_cas:
+                    already_exists = existing_ra_map.get(ca.id, set())
+                    nodes_needing_ra = [
+                        n for n in new_nodes_list if n.id not in already_exists
+                    ]
+                    if not nodes_needing_ra:
+                        continue
+
+                    new_ras = RequirementAssessment.objects.bulk_create(
+                        [
+                            RequirementAssessment(
+                                compliance_assessment=ca,
+                                requirement=node,
+                                folder_id=ca.folder_id,
+                            )
+                            for node in nodes_needing_ra
+                        ]
+                    )
+                    ra_by_req = {ra.requirement_id: ra for ra in new_ras}
+                    answers_to_create = [
+                        Answer(
+                            requirement_assessment=ra_by_req[q.requirement_node_id],
+                            question=q,
+                            folder_id=ca.folder_id,
+                        )
+                        for q in new_questions_list
+                        if q.requirement_node_id in ra_by_req
+                    ]
+                    if answers_to_create:
+                        Answer.objects.bulk_create(answers_to_create, batch_size=1000)
+
+            # --- 9b. Backfill Answers for new questions on EXISTING requirements ---
+            existing_node_new_questions = (
+                list(
+                    Question.objects.filter(
+                        id__in=new_question_ids,
+                    )
+                    .exclude(requirement_node_id__in=new_node_ids)
+                    .select_related("requirement_node")
+                )
+                if new_question_ids
+                else []
+            )
+            if existing_node_new_questions:
+                existing_cas = (
+                    existing_cas
+                    if new_node_ids
+                    else ComplianceAssessment.objects.filter(framework=framework)
+                )
+                existing_req_ids = {
+                    q.requirement_node_id for q in existing_node_new_questions
+                }
+                ra_lookup = defaultdict(dict)
+                for ra in RequirementAssessment.objects.filter(
+                    compliance_assessment__framework=framework,
+                    requirement_id__in=existing_req_ids,
+                ).select_related():
+                    ra_lookup[ra.compliance_assessment_id][ra.requirement_id] = ra
+
+                existing_answer_pairs = set(
+                    Answer.objects.filter(
+                        requirement_assessment__compliance_assessment__framework=framework,
+                        question_id__in=[q.id for q in existing_node_new_questions],
+                    ).values_list("requirement_assessment_id", "question_id")
+                )
+
+                answers_to_backfill = []
+                for ca in existing_cas:
+                    ca_ras = ra_lookup.get(ca.id, {})
+                    for q in existing_node_new_questions:
+                        ra = ca_ras.get(q.requirement_node_id)
+                        if ra and (ra.id, q.id) not in existing_answer_pairs:
+                            answers_to_backfill.append(
+                                Answer(
+                                    requirement_assessment=ra,
+                                    question=q,
+                                    folder_id=ca.folder_id,
+                                )
+                            )
+                if answers_to_backfill:
+                    Answer.objects.bulk_create(answers_to_backfill, batch_size=1000)
+
+            # --- 10. Snapshot history, bump version, clear draft ---
             history = list(framework.editing_history or [])
             history.append(
                 {
@@ -9593,12 +10357,14 @@ class FrameworkViewSet(BaseModelViewSet):
                     "field_visibility",
                     "locale",
                     "translations",
+                    "urn_namespace",
                     "editing_draft",
                     "editing_version",
                     "editing_history",
                     "updated_at",
                 ]
             )
+        return warnings
 
     @action(detail=True, methods=["post"], url_path="discard-draft")
     def discard_draft(self, request, pk=None):
@@ -11633,6 +12399,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ra for ra in requirement_assessments_objects if ra.id in ra_ids
             ]
 
+        # CEL visibility filtering: exclude requirements hidden by visibility_expression
+        from core.cel_service import build_cel_context
+
+        _ctx, hidden_urns = build_cel_context(compliance_assessment)
+        if hidden_urns:
+            requirement_assessments_objects = [
+                ra
+                for ra in requirement_assessments_objects
+                if ra.requirement.urn not in hidden_urns
+            ]
+
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -11641,6 +12418,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
             .order_by(F("order_id").asc(nulls_last=True))
         )
+
+        # Also filter the requirements tree to exclude hidden nodes
+        if hidden_urns:
+            requirements_objects = [
+                n for n in requirements_objects if n.urn not in hidden_urns
+            ]
+
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
             parent = nodes_by_urn.get(node.parent_urn)
@@ -16318,6 +17102,17 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
         ]
 
+        # CEL visibility filtering: exclude requirements hidden by visibility_expression
+        from core.cel_service import build_cel_context
+
+        _ctx, hidden_urns = build_cel_context(compliance_assessment)
+        if hidden_urns:
+            requirement_assessments_objects = [
+                ra
+                for ra in requirement_assessments_objects
+                if ra.requirement.urn not in hidden_urns
+            ]
+
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -16326,6 +17121,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
             .order_by(F("order_id").asc(nulls_last=True))
         )
+
+        # Also filter the requirements tree to exclude hidden nodes
+        if hidden_urns:
+            requirements_objects = [
+                n for n in requirements_objects if n.urn not in hidden_urns
+            ]
+
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
             parent = nodes_by_urn.get(node.parent_urn)
