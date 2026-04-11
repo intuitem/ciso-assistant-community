@@ -2,10 +2,24 @@ import structlog
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from django.contrib.auth.models import Permission
+
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from iam.models import Folder, RoleAssignment
 from .models import SecurityAdvisory, CWE
 
 logger = structlog.get_logger(__name__)
+
+
+def _is_admin(user) -> bool:
+    """Check if user has admin-level access (change_globalsettings on root folder)."""
+    try:
+        perm = Permission.objects.get(codename="change_globalsettings")
+        return RoleAssignment.is_access_allowed(
+            user=user, perm=perm, folder=Folder.get_root_folder()
+        )
+    except Permission.DoesNotExist:
+        return False
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -52,6 +66,8 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="sync-kev")
     def sync_kev(self, request):
         """Sync KEV feed synchronously. Scheduled async via Huey periodic tasks."""
+        if not _is_admin(request.user):
+            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import KEVFeed
 
         try:
@@ -72,6 +88,8 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="sync-euvd")
     def sync_euvd(self, request):
         """Sync EUVD exploited vulnerabilities synchronously."""
+        if not _is_admin(request.user):
+            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import EUVDFeed
 
         try:
@@ -109,12 +127,13 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
                 if not entry:
                     # Try direct lookup
                     import httpx
+                    from sec_intel.feeds import _get_timeout
 
                     direct = httpx.get(
                         f"https://euvdservices.enisa.europa.eu/api/enisaid",
                         params={"id": lookup_id},
                         headers={"User-Agent": "CISO-Assistant/1.0"},
-                        timeout=30,
+                        timeout=_get_timeout(),
                     )
                     direct.raise_for_status()
                     entry = direct.json()
@@ -193,6 +212,8 @@ class CWEViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="sync-catalog")
     def sync_catalog(self, request):
         """Sync CWE catalog from MITRE."""
+        if not _is_admin(request.user):
+            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import CWEFeed
 
         try:

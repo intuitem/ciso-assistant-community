@@ -14,23 +14,6 @@ class SecurityAdvisoryWriteSerializer(BaseModelSerializer):
         model = SecurityAdvisory
         exclude = ["translations"]
 
-    def create(self, validated_data):
-        instance = super().create(validated_data)
-        if instance.ref_id and instance.ref_id.startswith("CVE-"):
-            try:
-                from sec_intel.feeds import NVDFeed
-
-                NVDFeed.enrich_cve(instance)
-            except Exception:
-                import structlog
-
-                structlog.get_logger(__name__).warning(
-                    "NVD enrichment failed on create",
-                    ref_id=instance.ref_id,
-                    exc_info=True,
-                )
-        return instance
-
 
 class SecurityAdvisoryReadSerializer(ReferentialSerializer):
     path = PathField(read_only=True)

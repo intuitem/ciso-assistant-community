@@ -321,11 +321,13 @@ EUVD_API_URL = "https://euvdservices.enisa.europa.eu/api"
 
 
 class EUVDFeed:
+    MAX_PAGES = 500
+
     def fetch_exploited(self) -> list[dict]:
         """Fetch exploited vulnerabilities from EUVD using search endpoint."""
         results = []
         page = 0
-        while True:
+        while page < self.MAX_PAGES:
             resp = httpx.get(
                 f"{EUVD_API_URL}/search",
                 params={"exploited": "true", "page": page, "size": 100},
@@ -342,6 +344,12 @@ class EUVDFeed:
             page += 1
             if len(items) < 100:
                 break
+        else:
+            logger.warning(
+                "EUVD fetch hit page limit",
+                max_pages=self.MAX_PAGES,
+                total_fetched=len(results),
+            )
         return results
 
     def parse(self, entries: list[dict]) -> list[dict]:
@@ -372,15 +380,27 @@ class EUVDFeed:
             pub = entry.get("datePublished")
             published_date = None
             if pub:
-                try:
-                    published_date = datetime.fromisoformat(
-                        pub.replace("Z", "+00:00")
-                    ).date()
-                except ValueError:
-                    pass
+                for fmt in ("%Y-%m-%dT%H:%M:%S", "%b %d, %Y, %I:%M:%S %p", "%Y-%m-%d"):
+                    try:
+                        published_date = datetime.strptime(pub.strip(), fmt).date()
+                        break
+                    except ValueError:
+                        continue
 
             cvss_score = entry.get("baseScore")
             cvss_vector = entry.get("baseScoreVector")
+
+            # Parse newline-delimited references
+            refs_raw = entry.get("references", "")
+            references = (
+                [
+                    {"url": url.strip(), "source": "EUVD"}
+                    for url in refs_raw.split("\n")
+                    if url.strip().startswith("http")
+                ]
+                if refs_raw
+                else None
+            )
 
             results.append(
                 {
@@ -399,6 +419,7 @@ class EUVDFeed:
                     else None,
                     "cvss_vector": cvss_vector,
                     "epss_score": epss_score,
+                    "references": references,
                     "is_actively_exploited": True,
                 }
             )
@@ -429,6 +450,7 @@ class EUVDFeed:
                 "cvss_vector",
                 "epss_score",
                 "published_date",
+                "references",
             ]:
                 if getattr(sa, field) in (None, "") and entry.get(field) is not None:
                     setattr(sa, field, entry[field])
@@ -445,6 +467,7 @@ class EUVDFeed:
                     "cvss_vector",
                     "epss_score",
                     "published_date",
+                    "references",
                 ],
                 batch_size=1000,
             )
@@ -465,6 +488,7 @@ class EUVDFeed:
                         cvss_base_score=entry["cvss_base_score"],
                         cvss_vector=entry["cvss_vector"],
                         epss_score=entry["epss_score"],
+                        references=entry.get("references"),
                         is_actively_exploited=True,
                         folder=root_folder,
                     )
