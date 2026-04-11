@@ -42,6 +42,7 @@ test.describe('Client settings', () => {
 		await settingsPage.hasUrl();
 		await settingsPage.hasTitle();
 		const clientTab = page.getByRole('tab', { name: /Instance/ });
+		await clientTab.scrollIntoViewIfNeeded();
 		await clientTab.click();
 		await expect(clientTab).toHaveAttribute('aria-selected', 'true');
 	});

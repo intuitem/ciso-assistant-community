@@ -62,7 +62,7 @@
 </script>
 
 <Tabs value={group} onValueChange={(e) => handleTabChange(e.value)}>
-	<Tabs.List class="flex-wrap lg:flex-nowrap overflow-x-auto lg:overflow-x-visible gap-2">
+	<Tabs.List class="flex-nowrap overflow-x-auto gap-2">
 		<Tabs.Trigger value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Trigger>
 		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
 		<Tabs.Trigger value="featureFlags"
