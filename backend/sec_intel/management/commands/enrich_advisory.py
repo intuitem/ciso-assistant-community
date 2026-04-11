@@ -64,6 +64,16 @@ class Command(BaseCommand):
                 self.stdout.write(f"No enrichment data found for {cve_id}")
                 return
 
+            # Verify the parsed data matches the target advisory
+            parsed_id = fields.get("ref_id")
+            if parsed_id and parsed_id != cve_id:
+                self.stderr.write(
+                    self.style.ERROR(
+                        f"Data mismatch: file contains {parsed_id} but target is {cve_id}"
+                    )
+                )
+                return
+
             update_fields = []
             for k, v in fields.items():
                 current = getattr(cve, k, None)

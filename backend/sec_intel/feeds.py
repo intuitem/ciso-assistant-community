@@ -3,6 +3,7 @@ import gzip
 import io
 import json
 from datetime import datetime
+from decimal import InvalidOperation
 from decimal import Decimal
 from pathlib import Path
 from typing import Optional
@@ -175,33 +176,40 @@ class EPSSFeed:
                         "percentile": Decimal(row["percentile"]),
                     }
                 )
-            except (KeyError, ValueError) as e:
+            except (KeyError, ValueError, InvalidOperation) as e:
                 logger.warning(
                     "Skipping malformed EPSS entry", cve=cve_id, error=str(e)
                 )
         return results
 
     def sync(self) -> int:
-        """Full sync: fetch, parse, bulk-update existing CVEs."""
+        """Full sync: fetch, parse, bulk-update existing advisories."""
+        from itertools import islice
+
         from sec_intel.models import SecurityAdvisory
 
         raw = self.fetch()
         entries = self.parse(raw)
         epss_map = {e["cve_id"]: e for e in entries}
 
-        cves = SecurityAdvisory.objects.filter(ref_id__in=epss_map.keys())
-        to_update = []
-        for cve in cves:
-            data = epss_map[cve.ref_id]
-            cve.epss_score = data["epss"]
-            cve.epss_percentile = data["percentile"]
-            to_update.append(cve)
-
-        if to_update:
-            SecurityAdvisory.objects.bulk_update(
-                to_update, ["epss_score", "epss_percentile"], batch_size=1000
-            )
-        return len(to_update)
+        updated = 0
+        keys = iter(list(epss_map.keys()))
+        while True:
+            batch_keys = list(islice(keys, 5000))
+            if not batch_keys:
+                break
+            to_update = []
+            for sa in SecurityAdvisory.objects.filter(ref_id__in=batch_keys):
+                data = epss_map[sa.ref_id]
+                sa.epss_score = data["epss"]
+                sa.epss_percentile = data["percentile"]
+                to_update.append(sa)
+            if to_update:
+                SecurityAdvisory.objects.bulk_update(
+                    to_update, ["epss_score", "epss_percentile"], batch_size=1000
+                )
+                updated += len(to_update)
+        return updated
 
 
 # --- NVD Single-CVE Lookup ---
@@ -386,7 +394,9 @@ class EUVDFeed:
                         *[{"source": "CVE", "id": cid} for cid in cve_ids],
                     ],
                     "published_date": published_date,
-                    "cvss_base_score": Decimal(str(cvss_score)) if cvss_score else None,
+                    "cvss_base_score": Decimal(str(cvss_score))
+                    if cvss_score is not None
+                    else None,
                     "cvss_vector": cvss_vector,
                     "epss_score": epss_score,
                     "is_actively_exploited": True,
@@ -420,7 +430,7 @@ class EUVDFeed:
                 "epss_score",
                 "published_date",
             ]:
-                if getattr(sa, field) in (None, "", 0) and entry.get(field):
+                if getattr(sa, field) in (None, "") and entry.get(field) is not None:
                     setattr(sa, field, entry[field])
                     changed = True
             if changed:

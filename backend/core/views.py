@@ -3203,7 +3203,10 @@ class VulnerabilityViewSet(BaseModelViewSet):
             days = sla_policy.get(severity_label)
             if days is None:
                 continue
-            delta = timedelta(days=int(days))
+            try:
+                delta = timedelta(days=int(days))
+            except (ValueError, TypeError):
+                continue
             qs = accessible.filter(
                 severity=severity_int,
                 **{f"{anchor_field}__isnull": False},

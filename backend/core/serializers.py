@@ -343,8 +343,11 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
         # Check if we're in the caution zone (past 50% of the SLA window)
         sla_policy = self._get_sla_policy()
         severity_label = obj.get_severity_display()
-        sla_days = sla_policy.get(severity_label)
-        if sla_days:
+        try:
+            sla_days = int(sla_policy.get(severity_label, 0)) or None
+        except (TypeError, ValueError):
+            sla_days = None
+        if sla_days is not None:
             remaining = (obj.due_date - today).days
             if remaining < sla_days * 0.5:
                 return {"name": "caution", "hexcolor": "#fbbf24"}

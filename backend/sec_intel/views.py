@@ -51,7 +51,7 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="sync-kev")
     def sync_kev(self, request):
-        """Sync KEV feed — async via Huey if worker is running, sync otherwise."""
+        """Sync KEV feed synchronously. Scheduled async via Huey periodic tasks."""
         from sec_intel.feeds import KEVFeed
 
         try:
@@ -71,7 +71,7 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="sync-euvd")
     def sync_euvd(self, request):
-        """Sync EUVD feed — async via Huey if worker is running, sync otherwise."""
+        """Sync EUVD exploited vulnerabilities synchronously."""
         from sec_intel.feeds import EUVDFeed
 
         try:

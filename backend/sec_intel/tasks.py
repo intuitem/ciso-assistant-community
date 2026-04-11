@@ -16,6 +16,7 @@ def run_kev_sync():
         logger.info("KEV sync completed (on-demand)", **result)
     except Exception:
         logger.warning("KEV sync failed (on-demand)", exc_info=True)
+        raise
 
 
 @task()
@@ -28,6 +29,7 @@ def run_euvd_sync():
         logger.info("EUVD sync completed (on-demand)", **result)
     except Exception:
         logger.warning("EUVD sync failed (on-demand)", exc_info=True)
+        raise
 
 
 @task()
@@ -40,6 +42,7 @@ def run_cwe_sync():
         logger.info("CWE sync completed (on-demand)", **result)
     except Exception:
         logger.warning("CWE sync failed (on-demand)", exc_info=True)
+        raise
 
 
 @db_periodic_task(crontab(hour="3", minute="0"))

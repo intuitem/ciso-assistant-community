@@ -357,19 +357,17 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
         default="detected_at",
     )
     critical = serializers.IntegerField(
-        source="value.critical", required=False, allow_null=True, default=15
+        source="value.critical", required=False, allow_null=True
     )
     high = serializers.IntegerField(
-        source="value.high", required=False, allow_null=True, default=30
+        source="value.high", required=False, allow_null=True
     )
     medium = serializers.IntegerField(
-        source="value.medium", required=False, allow_null=True, default=90
+        source="value.medium", required=False, allow_null=True
     )
-    low = serializers.IntegerField(
-        source="value.low", required=False, allow_null=True, default=180
-    )
+    low = serializers.IntegerField(source="value.low", required=False, allow_null=True)
     info = serializers.IntegerField(
-        source="value.info", required=False, allow_null=True, default=365
+        source="value.info", required=False, allow_null=True
     )
 
     class Meta:
@@ -432,7 +430,11 @@ class SecIntelFeedsSerializer(serializers.ModelSerializer):
         source="value.nvd_enrich_enabled", required=False, default=False
     )
     network_timeout = serializers.IntegerField(
-        source="value.network_timeout", required=False, default=30
+        source="value.network_timeout",
+        required=False,
+        default=30,
+        min_value=5,
+        max_value=120,
     )
 
     class Meta:
