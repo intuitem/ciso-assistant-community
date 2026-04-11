@@ -78,6 +78,8 @@ export const URL_MODEL = [
 	'contracts',
 	'representatives',
 	'vulnerabilities',
+	'security-advisories',
+	'cwes',
 	'filtering-labels',
 	'library-filtering-labels',
 	// 'ebios-rm',
