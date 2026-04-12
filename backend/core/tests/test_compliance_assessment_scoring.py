@@ -291,17 +291,14 @@ def deep_tree_setup():
                   └── Subcategory S4 (non-assessable)
                         └── Req R5 (assessable, score=50)
 
-    Expected AVG_OF_AVG (recursive):
+    Expected AVG_OF_AVG (category-level flattening):
         S1 = avg(80, 60) = 70
         S2 = 40
         C1 = avg(70, 40) = 55
         S3 = 100
         C2 = 100
-        F1 = avg(55, 100) = 77.5
-        S4 = 50
         C3 = 50
-        F2 = 50
-        Global = avg(77.5, 50) = 63.7 (truncated from 63.75)
+        Global = avg(C1, C2, C3) = (55 + 100 + 50) / 3 = 68.3 (truncated from 68.33)
     """
     root_folder = Folder.get_root_folder()
     folder = Folder.objects.create(
