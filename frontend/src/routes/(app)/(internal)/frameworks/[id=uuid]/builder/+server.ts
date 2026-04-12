@@ -64,6 +64,9 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 	if (body._action === 'start-editing') {
 		return proxyFetch(fetch, draftActionUrl(params.id, 'start-editing'), 'POST');
 	}
+	if (body._action === 'publish-draft-preview') {
+		return proxyFetch(fetch, draftActionUrl(params.id, 'publish-draft-preview'), 'POST');
+	}
 	if (body._action === 'publish-draft') {
 		return proxyFetch(fetch, draftActionUrl(params.id, 'publish-draft'), 'POST');
 	}
@@ -111,6 +114,22 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 		return new Response(body, {
 			status: 200,
 			headers: { 'Content-Type': contentType }
+		});
+	}
+
+	if (action === 'export-yaml') {
+		const apiUrl = `${BASE_API_URL}/frameworks/${params.id}/export-yaml/`;
+		const res = await fetch(apiUrl);
+		if (!res.ok) {
+			return new Response(null, { status: res.status });
+		}
+		const body = await res.arrayBuffer();
+		return new Response(body, {
+			status: 200,
+			headers: {
+				'Content-Type': res.headers.get('Content-Type') || 'application/x-yaml',
+				'Content-Disposition': res.headers.get('Content-Disposition') || ''
+			}
 		});
 	}
 

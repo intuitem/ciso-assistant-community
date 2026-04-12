@@ -735,6 +735,14 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
         "control_impact": ("control_impact", "impact"),
         "reference_control": ("reference_control", "reference_control_ref_id"),
         "owner": ("owner",),
+        "cost": (
+            "cost_currency",
+            "cost_amortization_period",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+        ),
     }
     IMPACT_MAP: Final[dict[str, int]] = {
         "very low": 1,
@@ -759,11 +767,11 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
     }
     COST_KEYS: Final[frozenset[str]] = frozenset(
         {
-            "amortization_period",
-            "build_fixed_cost",
-            "build_people_days",
-            "run_fixed_cost",
-            "run_people_days",
+            "cost_amortization_period",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
         }
     )
 
@@ -859,15 +867,15 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
         )
         if has_cost_related_key:
             cost = {
-                "currency": context.currency,
-                "amortization_period": int(record.get("amortization_period") or 1),
+                "currency": record.get("cost_currency") or context.currency,
+                "amortization_period": int(record.get("cost_amortization_period") or 1),
                 "build": {
-                    "fixed_cost": int(record.get("build_fixed_cost") or 0),
-                    "people_days": int(record.get("build_people_days") or 0),
+                    "fixed_cost": int(record.get("cost_build_fixed") or 0),
+                    "people_days": int(record.get("cost_build_people_days") or 0),
                 },
                 "run": {
-                    "fixed_cost": int(record.get("run_fixed_cost") or 0),
-                    "people_days": int(record.get("run_people_days") or 0),
+                    "fixed_cost": int(record.get("cost_run_fixed") or 0),
+                    "people_days": int(record.get("cost_run_people_days") or 0),
                 },
             }
             data["cost"] = cost

@@ -27,6 +27,7 @@ const POLARITY_MAP: Map<string, BooleanPolarity> = new Map([
 	['dora_exclude', 'warning'],
 	['storage_of_data', 'warning'],
 	['is_locked', 'warning'],
+	['is_actively_exploited', 'warning'],
 	['is_enabled', 'warning_when_false'],
 	['recovery_documented', 'warning_when_false'],
 	['recovery_tested', 'warning_when_false'],
