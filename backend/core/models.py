@@ -6975,19 +6975,31 @@ class ComplianceAssessment(Assessment):
             children_map = defaultdict(list)
             node_weights = {}
             roots = []
+            all_urns = set()
+            parent_links = {}  # urn -> parent_urn
             for urn, parent_urn, weight in all_nodes:
                 node_weights[urn] = weight or 1
-                if parent_urn:
+                all_urns.add(urn)
+                parent_links[urn] = parent_urn
+            for urn, parent_urn in parent_links.items():
+                if parent_urn and parent_urn in all_urns:
                     children_map[parent_urn].append(urn)
                 else:
+                    # No parent, or parent_urn references a missing node —
+                    # treat as a root so the subtree is still reachable.
                     roots.append(urn)
 
             # Recursively compute weighted averages bottom-up
             computed = {}
+            visiting = set()
 
             def compute(urn):
                 if urn in computed:
                     return computed[urn]
+                if urn in visiting:
+                    # Cycle in the requirement tree — skip to avoid infinite recursion
+                    return None
+                visiting.add(urn)
 
                 if urn in leaf_scores:
                     computed[urn] = leaf_scores[urn]["score"]
@@ -7078,11 +7090,19 @@ class ComplianceAssessment(Assessment):
         qs = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .select_related("requirement")
-            .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
         )
-        if not self.anchor_na_to_target:
-            qs = qs.exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
+        if self.anchor_na_to_target:
+            # Keep N/A items (they'll be anchored to target), but still
+            # exclude non-N/A items that have is_scored=False.
+            qs = qs.exclude(
+                ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
+                is_scored=False,
+            )
+        else:
+            qs = qs.exclude(is_scored=False).exclude(
+                result=RequirementAssessment.Result.NOT_APPLICABLE
+            )
 
         requirement_assessments_scored = list(qs)
 

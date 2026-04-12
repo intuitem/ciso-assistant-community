@@ -2444,6 +2444,28 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
                 )
+
+        target = attrs.get(
+            "target_score",
+            getattr(self.instance, "target_score", None) if self.instance else None,
+        )
+        if target is not None:
+            min_s = attrs.get(
+                "min_score",
+                getattr(self.instance, "min_score", None) if self.instance else None,
+            )
+            max_s = attrs.get(
+                "max_score",
+                getattr(self.instance, "max_score", None) if self.instance else None,
+            )
+            if min_s is not None and max_s is not None:
+                if not (min_s <= target <= max_s):
+                    raise serializers.ValidationError(
+                        {
+                            "target_score": f"Target score must be between {min_s} and {max_s}."
+                        }
+                    )
+
         return super().validate(attrs)
 
     def create(self, validated_data: Any):
