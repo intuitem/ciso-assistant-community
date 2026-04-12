@@ -251,6 +251,7 @@
 					/>
 					<AutocompleteSelect
 						multiple
+						lazy
 						form={_form}
 						optionsEndpoint="vulnerabilities"
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}

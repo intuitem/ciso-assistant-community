@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
 	import { localeLabel } from './builder-utils.svelte';
+	import { apiPublishDraftPreview, type PublishPreview } from './builder-api';
 
 	interface Props {
 		frameworkId: string;
@@ -26,6 +27,8 @@
 	let discarding = $state(false);
 	let publishSuccess = $state(false);
 	let confirmCopyBase = $state(false);
+	let publishPreview = $state<PublishPreview | null>(null);
+	let loadingPreview = $state(false);
 
 	let translationProgress = $derived.by(() => {
 		if (!$activeLanguageStore) return null;
@@ -45,6 +48,7 @@
 			await builder.publish();
 			publishSuccess = true;
 			confirmPublish = false;
+			publishPreview = null;
 			builder.unsaved.set(false);
 			builder.unpublished.set(false);
 			setTimeout(() => (publishSuccess = false), 3000);
@@ -112,6 +116,22 @@
 				Preview
 			</a>
 		{/if}
+
+		<!-- Export YAML button -->
+		<a
+			href="/frameworks/{frameworkId}/builder?_action=export-yaml"
+			class="shrink-0 text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1 flex items-center gap-1"
+			download
+			title={$unpublishedStore
+				? "Unpublished changes won't be included. Publish first to export latest edits."
+				: 'Export framework as YAML library file'}
+		>
+			<i class="fa-solid fa-file-export text-[10px]"></i>
+			Export YAML
+			{#if $unpublishedStore}
+				<i class="fa-solid fa-triangle-exclamation text-amber-500 text-[10px]"></i>
+			{/if}
+		</a>
 
 		<!-- Language selector -->
 		{#if ($frameworkStore.available_languages ?? []).length > 0}
@@ -246,42 +266,199 @@
 			</button>
 		{/if}
 
-		{#if $unpublishedStore}
+		{#if $unpublishedStore && !$unsavedStore}
 			<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
-			<!-- Publish button -->
-			{#if confirmPublish}
-				<span class="shrink-0 text-xs text-blue-600 font-medium">Publish to live?</span>
+			<!-- Publish button (hidden until draft is saved) -->
+			<button
+				type="button"
+				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+				title="Publish draft to live framework"
+				disabled={loadingPreview}
+				onclick={async () => {
+					loadingPreview = true;
+					try {
+						publishPreview = await apiPublishDraftPreview(frameworkId);
+						confirmPublish = true;
+					} catch {
+						// Fall back to confirmation without preview
+						publishPreview = null;
+						confirmPublish = true;
+					} finally {
+						loadingPreview = false;
+					}
+				}}
+			>
+				{#if loadingPreview}
+					<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
+				{:else}
+					<i class="fa-solid fa-rocket text-[10px]"></i>
+				{/if}
+				Publish
+			</button>
+		{/if}
+	</div>
+</div>
+
+{#if confirmPublish}
+	<!-- Publish impact preview modal -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+		onkeydown={(e) => e.key === 'Escape' && (confirmPublish = false)}
+	>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<div
+			class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+			onclick={(e) => e.stopPropagation()}
+		>
+			<div class="px-5 py-4 border-b border-gray-200">
+				<h3 class="text-lg font-semibold text-gray-900">Publish draft to live</h3>
+				<p class="text-sm text-gray-500 mt-1">
+					This will update the live framework. Review the changes below.
+				</p>
+			</div>
+
+			<div class="px-5 py-4 space-y-3 max-h-[60vh] overflow-y-auto">
+				{#if publishPreview}
+					{#if publishPreview.added.requirements > 0}
+						<div class="p-3 bg-green-50 border-l-2 border-green-400 rounded-r">
+							<div class="text-sm font-medium text-green-800">
+								<i class="fa-solid fa-plus mr-1"></i>
+								{publishPreview.added.requirements} requirement{publishPreview.added.requirements >
+								1
+									? 's'
+									: ''} added
+								{#if publishPreview.added.questions > 0}
+									, {publishPreview.added.questions} question{publishPreview.added.questions > 1
+										? 's'
+										: ''}
+								{/if}
+							</div>
+							{#if publishPreview.added.details.length > 0}
+								<ul class="mt-1.5 text-xs text-green-700 space-y-0.5">
+									{#each publishPreview.added.details as node}
+										<li class="truncate" title={node.name}>{node.name}</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+					{/if}
+
+					{#if publishPreview.removed.requirements > 0}
+						<div class="p-3 bg-red-50 border-l-2 border-red-400 rounded-r">
+							<div class="text-sm font-medium text-red-800">
+								<i class="fa-solid fa-trash mr-1"></i>
+								{publishPreview.removed.requirements} requirement{publishPreview.removed
+									.requirements > 1
+									? 's'
+									: ''} removed
+								{#if publishPreview.removed.questions > 0}
+									, {publishPreview.removed.questions} question{publishPreview.removed.questions > 1
+										? 's'
+										: ''}
+								{/if}
+							</div>
+							{#if publishPreview.removed.details.length > 0}
+								<ul class="mt-1.5 text-xs text-red-700 space-y-0.5">
+									{#each publishPreview.removed.details as node}
+										<li class="truncate" title={node.name}>{node.name}</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+					{/if}
+
+					{#if publishPreview.added.requirements === 0 && publishPreview.removed.requirements === 0}
+						<div class="p-3 bg-gray-50 border-l-2 border-gray-300 rounded-r">
+							<div class="text-sm text-gray-600">
+								<i class="fa-solid fa-equals mr-1"></i>
+								No structural changes detected (metadata only).
+							</div>
+						</div>
+					{/if}
+
+					{#if publishPreview.breaking_changes?.length > 0}
+						<div class="p-3 bg-orange-50 border-l-2 border-orange-500 rounded-r">
+							<div class="text-sm font-medium text-orange-800">
+								<i class="fa-solid fa-bolt mr-1"></i>
+								{publishPreview.breaking_changes.length} breaking change{publishPreview
+									.breaking_changes.length > 1
+									? 's'
+									: ''} detected
+							</div>
+							<ul class="mt-1.5 text-xs text-orange-700 space-y-0.5">
+								{#each publishPreview.breaking_changes as change}
+									<li class="truncate" title="{change.type}: {change.name} ({change.field})">
+										<span class="font-mono">{change.field}</span> changed on {change.type}
+										<span class="font-medium">{change.name}</span>
+									</li>
+								{/each}
+							</ul>
+							<p class="mt-1.5 text-xs text-orange-600">
+								These changes may affect scoring, visibility, or compliance results in existing
+								audits.
+							</p>
+						</div>
+					{/if}
+
+					{#if publishPreview.affected_audits.length > 0}
+						<div class="p-3 bg-amber-50 border-l-2 border-amber-400 rounded-r">
+							<div class="text-sm font-medium text-amber-800">
+								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+								{publishPreview.affected_audits.length} existing audit{publishPreview
+									.affected_audits.length > 1
+									? 's'
+									: ''} will be affected
+							</div>
+							<ul class="mt-1.5 text-xs text-amber-700 space-y-0.5">
+								{#each publishPreview.affected_audits as audit}
+									<li class="truncate" title={audit.name}>{audit.name}</li>
+								{/each}
+							</ul>
+							{#if publishPreview.added.requirements > 0}
+								<p class="mt-1.5 text-xs text-amber-600">
+									New requirements will be added to these audits.
+								</p>
+							{/if}
+							{#if publishPreview.removed.requirements > 0}
+								<p class="mt-1.5 text-xs text-amber-600">
+									Removed requirements and their assessment data will be deleted from these audits.
+								</p>
+							{/if}
+						</div>
+					{/if}
+				{:else}
+					<div class="p-3 bg-gray-50 rounded text-sm text-gray-600">
+						Could not load impact preview. Proceed with caution.
+					</div>
+				{/if}
+			</div>
+
+			<div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
 				<button
 					type="button"
-					class="shrink-0 text-xs text-white font-medium px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 transition-colors"
+					class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+					onclick={() => {
+						confirmPublish = false;
+						publishPreview = null;
+					}}
+				>
+					Cancel
+				</button>
+				<button
+					type="button"
+					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
 					disabled={publishing}
 					onclick={handlePublish}
 				>
 					{#if publishing}
 						<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>Publishing...
 					{:else}
-						Confirm
+						Confirm publish
 					{/if}
 				</button>
-				<button
-					type="button"
-					class="shrink-0 text-xs text-gray-500 px-2 py-1"
-					onclick={() => (confirmPublish = false)}
-				>
-					Cancel
-				</button>
-			{:else}
-				<button
-					type="button"
-					class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5"
-					title="Publish draft to live framework"
-					onclick={() => (confirmPublish = true)}
-				>
-					<i class="fa-solid fa-rocket text-[10px]"></i>
-					Publish
-				</button>
-			{/if}
-		{/if}
+			</div>
+		</div>
 	</div>
-</div>
+{/if}

@@ -1246,6 +1246,24 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'security-advisories',
+		label: 'securityAdvisory',
+		multiple: true
+	}
+};
+
+export const CWE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'cwes',
+		label: 'cwe',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
@@ -1295,12 +1313,24 @@ export const listViewFields = {
 		}
 	},
 	vulnerabilities: {
-		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'sla',
+			'dueDate',
+			'applied_controls',
+			'folder',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'status',
 			'severity',
+			'state',
+			'due_date',
 			'applied_controls',
 			'folder',
 			'filtering_labels'
@@ -1309,7 +1339,10 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
 			status: VULNERABILITY_STATUS_FILTER,
-			severity: VULNERABILITY_SEVERITY_FILTER
+			severity: VULNERABILITY_SEVERITY_FILTER,
+			assets: ASSET_FILTER,
+			security_advisories: SECURITY_ADVISORY_FILTER,
+			cwes: CWE_FILTER
 		}
 	},
 	'risk-assessments': {
@@ -1350,6 +1383,57 @@ export const listViewFields = {
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
 			},
 			library: LIBRARY_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'security-advisories': {
+		head: [
+			'ref_id',
+			'name',
+			'source',
+			'description',
+			'cvssBaseScore',
+			'epssScore',
+			'isActivelyExploited',
+			'publishedDate',
+			'domain',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'source',
+			'description',
+			'cvss_base_score',
+			'epss_score',
+			'is_actively_exploited',
+			'published_date',
+			'folder',
+			'filtering_labels'
+		],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			source: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'security-advisories/source',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'source',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	cwes: {
+		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -3187,6 +3271,31 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'status',
 			optionsEndpoint: 'vulnerabilities/status'
 		},
+		{
+			type: 'change_field',
+			label: 'changeSeverity',
+			icon: 'fa-solid fa-arrow-up-wide-short',
+			field: 'severity',
+			optionsEndpoint: 'vulnerabilities/severity'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'security-advisories': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	cwes: [
 		{
 			type: 'change_folder',
 			label: 'changeDomain',
