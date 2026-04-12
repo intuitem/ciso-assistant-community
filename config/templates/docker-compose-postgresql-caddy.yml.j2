@@ -50,6 +50,13 @@ services:
       - EMAIL_HOST_PASSWORD={{ email.password }}
       - DEFAULT_FROM_EMAIL={{ email.from_email }}
       {% endif %}
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
     volumes:
       - ./db:/code/db
     user: "1001:1001"
@@ -120,6 +127,13 @@ services:
       - XDG_DATA_HOME=/tmp/.local/share
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     pull_policy: always
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
     depends_on:
       backend:
         condition: service_healthy

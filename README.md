@@ -636,7 +636,7 @@ Set DJANGO_DEBUG=False for security reason.
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
 
 > [!NOTE]
-> The docker-compose template files are now launching the backend, huey and frontend in non-root mode. If you use an old docker-compose.yml file, it is recommended to udpate it. The containers are compatible with both root and non-root modes.
+> The docker-compose template files are now launching the backend, huey and frontend in non-root mode. If you use an old docker-compose.yml file, it is recommended to update it. The containers are compatible with both root and non-root modes.
 
 ### Non-root docker containers
 

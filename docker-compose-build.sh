@@ -43,14 +43,17 @@ else
     DB_OWNER="$(get_owner_linux ./db)"
     if [ "$DB_OWNER" != "$EXPECTED_OWNER" ]; then
       echo "Fixing ownership of ./db (was $DB_OWNER, expected $EXPECTED_OWNER)"
-      sudo chown -R "$EXPECTED_OWNER" ./db
+      if ! chown -R "$EXPECTED_OWNER" ./db 2>/dev/null; then
+        echo "chown failed, retrying with sudo..."
+        sudo chown -R "$EXPECTED_OWNER" ./db
+      fi
     fi
   else
     echo "Non-Linux (no GNU stat detected): skipping ownership fix for ./db"
   fi
 
   echo "Starting services..."
-  docker compose -f "${DOCKER_COMPOSE_FILE}" up
+  docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
 
   echo "Giving some time for the database to be ready, please wait ..."
   sleep 50

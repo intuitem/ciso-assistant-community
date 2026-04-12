@@ -24,7 +24,10 @@ if is_linux_gnu_stat; then
   DB_OWNER="$(get_owner_linux ./db)"
   if [ "$DB_OWNER" != "$EXPECTED_OWNER" ]; then
     echo "Fixing ownership of ./db (was $DB_OWNER, expected $EXPECTED_OWNER)"
-    sudo chown -R "$EXPECTED_OWNER" ./db
+    if ! chown -R "$EXPECTED_OWNER" ./db 2>/dev/null; then
+      echo "chown failed, retrying with sudo..."
+      sudo chown -R "$EXPECTED_OWNER" ./db
+    fi
   fi
 else
   echo "Non-Linux (no GNU stat detected): skipping ownership fix for ./db"
