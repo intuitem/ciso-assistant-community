@@ -65,7 +65,7 @@ docker compose up -d         # restart
 To create an admin account manually:
 
 ```bash
-docker compose exec -it backend poetry run python manage.py createsuperuser
+docker compose exec -it backend uv run python manage.py createsuperuser
 ```
 
 ### 5. Connect
@@ -140,7 +140,7 @@ Database migrations are applied automatically on restart.
 
 ## Troubleshooting
 
-| Symptom                 | What to do                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| Application won't start | Run `docker compose logs backend` to check errors                                 |
+| Symptom                 | What to do                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| Application won't start | Run `docker compose logs backend` to check errors                             |
 | License error           | Check `LICENSE_SEATS` and `LICENSE_EXPIRATION` values in `docker-compose.yml` |

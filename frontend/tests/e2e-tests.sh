@@ -282,23 +282,23 @@ export LICENSE_SEATS=999
 
 cd "$APP_DIR"/backend/ || exit 1
 if [[ $KEEP_DATABASE_SNAPSHOT -ne 1 ]]; then
-  poetry run python3 manage.py makemigrations"$(django_args)"
-  poetry run python3 manage.py migrate"$(django_args)"
+  uv run python3 manage.py makemigrations"$(django_args)"
+  uv run python3 manage.py migrate"$(django_args)"
 elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
-  poetry run python3 manage.py makemigrations"$(django_args)"
-  poetry run python3 manage.py migrate"$(django_args)"
+  uv run python3 manage.py makemigrations"$(django_args)"
+  uv run python3 manage.py migrate"$(django_args)"
   cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
 else
   # Copying the initial database instead of applying the migrations saves a lot of time
   cp "$DB_DIR/$DB_INIT_NAME" "$DB_DIR/$DB_NAME"
 fi
 
-poetry run python3 manage.py createsuperuser --noinput"$(django_args)"
+uv run python3 manage.py createsuperuser --noinput"$(django_args)"
 if [[ -n "$STORE_BACKEND_OUTPUT" ]]; then
-  nohup poetry run python3 manage.py runserver "$BACKEND_PORT""$(django_args)" >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
+  nohup uv run python3 manage.py runserver "$BACKEND_PORT""$(django_args)" >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
   echo "You can view the backend server output at $APP_DIR/frontend/tests/utils/.testbackendoutput.out"
 else
-  nohup poetry run python3 manage.py runserver "$BACKEND_PORT""$(django_args)" >/dev/null 2>&1 &
+  nohup uv run python3 manage.py runserver "$BACKEND_PORT""$(django_args)" >/dev/null 2>&1 &
 fi
 BACKEND_PID=$!
 echo "Test backend server started on port $BACKEND_PORT (PID: $BACKEND_PID)"

@@ -22,7 +22,7 @@ env:
   enterprise-backend-settings-module: enterprise_core.settings
   POSTGRES_VERSION: "16"
   UBUNTU_VERSION: "ubuntu-24.04"
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.14"
 
 jobs:
   startup-functional-test:
@@ -57,29 +57,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          enable-cache: true
+      - name: Check uv version
+        run: uv --version
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
-        run: poetry install
+        run: uv sync --locked
       - name: Install frontend dependencies
         working-directory: ${{ env.frontend-directory }}
         run: |
@@ -90,12 +80,12 @@ jobs:
         run: pnpm exec playwright install
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: poetry run python manage.py migrate
+        run: uv run python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
-          poetry run python manage.py createsuperuser --noinput
-          nohup poetry run python manage.py runserver &
+          uv run python manage.py createsuperuser --noinput
+          nohup uv run python manage.py runserver &
       - name: Build frontend
         env:
           NODE_OPTIONS: "--max-old-space-size=6144"
@@ -144,10 +134,24 @@ jobs:
           rm -rf db
           mkdir db
           docker compose -f docker-compose-build.yml up -d
+      - name: Wait for migrations to complete
+        run: |
+          echo "Waiting for migrations to complete..."
+          for i in $(seq 1 60); do
+            if docker compose -f docker-compose-build.yml exec -T backend python manage.py migrate --check 2>/dev/null; then
+              echo "Migrations complete after ~$((i * 10))s"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "Migrations did not complete within 600s"
+              docker compose -f docker-compose-build.yml logs backend
+              exit 1
+            fi
+            sleep 10
+          done
       - name: Config the Docker app
         run: |
-          sleep 200 # give the migrations time to finish (included in the up on the previous step)
-          docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput && exit 0"
+          docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 uv run python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: |
@@ -204,34 +208,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          enable-cache: true
+      - name: Check uv version
+        run: uv --version
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-      - name: Configure Poetry to not use virtualenvs
-        run: poetry config virtualenvs.create false
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
-      - name: Install backend requirements
-        working-directory: ${{ env.backend-directory }}
-        run: poetry install
-      - name: Install enterprise backend
+      - name: Install enterprise backend requirements
         working-directory: ${{ env.enterprise-backend-directory }}
-        run: poetry install
+        run: uv sync --locked
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
         env:
@@ -244,14 +233,14 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
-        run: poetry run python manage.py migrate --settings="$SETTINGS_MODULE"
+        run: uv run --project ../enterprise/backend python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
-          nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
+          uv run --project ../enterprise/backend python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
+          nohup uv run --project ../enterprise/backend python manage.py runserver --settings="$SETTINGS_MODULE" &
       - name: Run tests
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright test tests/functional/startup.test.ts
@@ -287,12 +276,28 @@ jobs:
         run: pnpm exec playwright install
       - name: Build the Docker app
         run: docker compose -f enterprise/docker-compose-build.yml up -d
+      - name: Wait for migrations to complete
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
+        run: |
+          echo "Waiting for migrations to complete..."
+          for i in $(seq 1 60); do
+            if docker compose -f enterprise/docker-compose-build.yml exec -T backend python manage.py migrate --check --settings="$SETTINGS_MODULE" 2>/dev/null; then
+              echo "Migrations complete after ~$((i * 10))s"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "Migrations did not complete within 600s"
+              docker compose -f enterprise/docker-compose-build.yml logs backend
+              exit 1
+            fi
+            sleep 10
+          done
       - name: Config the Docker app
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          sleep 200 # give the migrations time to finish (included in the up on the previous step)
-          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE" && exit 0"
+          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 uv run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE" && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: |

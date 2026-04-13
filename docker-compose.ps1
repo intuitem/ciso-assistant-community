@@ -30,7 +30,7 @@ do {
 
 Write-Output "`nBackend is ready!"
 Write-Output "Creating superuser..."
-docker compose exec backend poetry run python manage.py createsuperuser
+docker compose exec backend uv run python manage.py createsuperuser
 
 Write-Output "`nInitialization complete!"
 Write-Output "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)"

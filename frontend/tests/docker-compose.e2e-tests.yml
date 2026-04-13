@@ -28,7 +28,7 @@ services:
       - /bin/sh
       - -c
       - |
-        poetry run python manage.py run_huey
+        uv run python manage.py run_huey
 
   tests:
     container_name: functional-tests

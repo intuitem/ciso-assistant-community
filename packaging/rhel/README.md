@@ -5,6 +5,7 @@ This directory contains everything needed to build and deploy CISO Assistant as 
 ## Overview
 
 The RPM package includes:
+
 - **Python 3.12** runtime with all backend dependencies
 - **Node.js 22** runtime with all frontend dependencies
 - **Backend** Django application (API server)
@@ -46,8 +47,8 @@ The build machine needs internet access and these tools:
 sudo dnf install -y rpm-build rsync curl gcc make openssl-devel \
     bzip2-devel libffi-devel zlib-devel
 
-# Install poetry (for Python dependencies)
-curl -sSL https://install.python-poetry.org | python3 -
+# Install uv (for Python dependencies)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Install pnpm (for Node.js dependencies)
 npm install -g pnpm
@@ -66,6 +67,7 @@ cd packaging/rhel
 ```
 
 The build script:
+
 1. Downloads and compiles Python 3.12 from source
 2. Creates a virtualenv with all backend dependencies
 3. Downloads Node.js 22 prebuilt binaries

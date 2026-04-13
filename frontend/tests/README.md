@@ -51,7 +51,7 @@ frontend/tests/
 ## Prerequisites
 
 - **Node.js** and **pnpm** installed
-- **Python 3** with **Poetry** for the backend
+- **Python 3** with **uv** for the backend
 - **Docker** for the mail service (optional with `-m`)
 - **Git** for version information
 
@@ -68,7 +68,7 @@ pnpm exec playwright install
 
 # Install backend dependencies
 cd ../backend
-poetry install
+uv sync
 ```
 
 ## Running Tests
