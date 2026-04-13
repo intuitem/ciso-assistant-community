@@ -86,7 +86,7 @@ from resilience.serializers import (
 from privacy.models import Processing, ProcessingNature
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
-from core.models import FilteringLabel, Vulnerability
+from core.models import FilteringLabel
 from core.utils import get_global_currency
 from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
@@ -287,7 +287,7 @@ def _resolve_vulnerabilities(value, folder) -> list[UUID]:
     vuln_names = [name.strip() for name in value.split(separator) if name.strip()]
     vuln_ids: list[UUID] = []
     for vuln_name in vuln_names:
-        vuln = Vulnerability.objects.filter(name=vuln_name).first()
+        vuln = Vulnerability.objects.filter(name=vuln_name, folder=folder).first()
         if vuln is None:
             try:
                 vuln = Vulnerability(name=vuln_name, folder=folder)
