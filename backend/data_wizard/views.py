@@ -277,7 +277,7 @@ def _resolve_filtering_labels(value) -> list[UUID]:
     return label_ids
 
 
-def _resolve_vulnerabilities(value) -> list[UUID]:
+def _resolve_vulnerabilities(value, folder) -> list[UUID]:
     """
     Parse pipe- or comma-separated label names and return list of Vulnerabilities IDs.
     """
@@ -289,8 +289,17 @@ def _resolve_vulnerabilities(value) -> list[UUID]:
     for vuln_name in vuln_names:
         vuln = Vulnerability.objects.filter(name=vuln_name).first()
         if vuln is None:
-            continue
-        vuln_ids.append(vuln.id)
+            try:
+                vuln = Vulnerability(name=vuln_name, folder=folder)
+                vuln.full_clean()
+                vuln.save()
+                vuln_ids.append(vuln.id)
+                print(f"created new vuln {vuln_name}")
+            except Exception:
+                logging.exception(f"Failed to save vulnerability {vuln_name}")
+        else:
+            print(f"vuln exists = {vuln}")
+            vuln_ids.append(vuln.id)
     return vuln_ids
 
 
@@ -1181,8 +1190,12 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         if isinstance(priority, int) and not (1 <= priority <= 4):
             priority = None
 
+        perimeter_id = self.perimeter_id
+        perimeter = Perimeter.objects.get(id=perimeter_id)
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
-        vulnerabilities = _resolve_vulnerabilities(record.get("vulnerabilities"))
+        vulnerabilities = _resolve_vulnerabilities(
+            record.get("vulnerabilities"), perimeter.folder
+        )
 
         finding_data = {
             "name": name,
