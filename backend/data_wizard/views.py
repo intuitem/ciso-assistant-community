@@ -86,7 +86,7 @@ from resilience.serializers import (
 from privacy.models import Processing, ProcessingNature
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
-from core.models import FilteringLabel
+from core.models import FilteringLabel, Vulnerability
 from core.utils import get_global_currency
 from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
@@ -275,6 +275,23 @@ def _resolve_filtering_labels(value) -> list[UUID]:
                 logging.error(f"Failed to save label: {value}")
         label_ids.append(label.id)
     return label_ids
+
+
+def _resolve_vulnerabilities(value) -> list[UUID]:
+    """
+    Parse pipe- or comma-separated label names and return list of Vulnerabilities IDs.
+    """
+    if not value or not isinstance(value, str):
+        return []
+    separator = "|" if "|" in value else ","
+    vuln_names = [name.strip() for name in value.split(separator) if name.strip()]
+    vuln_ids: list[UUID] = []
+    for vuln_name in vuln_names:
+        vuln = Vulnerability.objects.filter(name=vuln_name).first()
+        if vuln is None:
+            continue
+        vuln_ids.append(vuln.id)
+    return vuln_ids
 
 
 class RecordFileType(enum.StrEnum):
@@ -1165,6 +1182,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             priority = None
 
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
+        vulnerabilities = _resolve_vulnerabilities(record.get("vulnerabilities"))
 
         finding_data = {
             "name": name,
@@ -1177,6 +1195,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "vulnerabilities": vulnerabilities,
         }
 
         if priority is not None:
