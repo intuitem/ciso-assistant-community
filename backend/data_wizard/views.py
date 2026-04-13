@@ -294,11 +294,9 @@ def _resolve_vulnerabilities(value, folder) -> list[UUID]:
                 vuln.full_clean()
                 vuln.save()
                 vuln_ids.append(vuln.id)
-                print(f"created new vuln {vuln_name}")
             except Exception:
                 logging.exception(f"Failed to save vulnerability {vuln_name}")
         else:
-            print(f"vuln exists = {vuln}")
             vuln_ids.append(vuln.id)
     return vuln_ids
 
