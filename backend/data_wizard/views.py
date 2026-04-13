@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
 
 from .serializers import LoadFileSerializer
+from core.utils import build_questions_dict
 from core.models import (
     Actor,
     Asset,
@@ -86,6 +87,7 @@ from privacy.models import Processing, ProcessingNature
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
+from core.utils import get_global_currency
 from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
@@ -716,7 +718,12 @@ class AssetRecordConsumer(RecordConsumer[list]):
         return results
 
 
-class AppliedControlRecordConsumer(RecordConsumer[None]):
+@dataclass(frozen=True)
+class AppliedControlContext:
+    currency: str = field(default_factory=get_global_currency)
+
+
+class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
     """
     Consumer for importing AppliedControl records.
     Supports reference_control linking via ref_id and owner resolution
@@ -728,6 +735,14 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "control_impact": ("control_impact", "impact"),
         "reference_control": ("reference_control", "reference_control_ref_id"),
         "owner": ("owner",),
+        "cost": (
+            "cost_currency",
+            "cost_amortization_period",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+        ),
     }
     IMPACT_MAP: Final[dict[str, int]] = {
         "very low": 1,
@@ -750,12 +765,21 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "extralarge": "XL",
         "xl": "XL",
     }
+    COST_KEYS: Final[frozenset[str]] = frozenset(
+        {
+            "cost_amortization_period",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+        }
+    )
 
-    def create_context(self):
-        return None, None
+    def create_context(self) -> tuple[AppliedControlContext, Optional[Error]]:
+        return AppliedControlContext(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: AppliedControlContext
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -808,15 +832,23 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             if ref_control:
                 reference_control_id = ref_control.id
 
+        csf_function = record.get("csf_function", "govern")
+        if isinstance(csf_function, str):
+            csf_function = csf_function.lower()
+
+        category = record.get("category", "")
+        if isinstance(category, str):
+            category = category.lower()
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
-            "category": record.get("category", ""),
+            "category": category,
             "folder": domain,
             "status": record.get("status", "to_do"),
             "priority": priority,
-            "csf_function": record.get("csf_function", "govern"),
+            "csf_function": csf_function,
             "effort": effort,
             "control_impact": control_impact,
             "link": record.get("link", ""),
@@ -828,6 +860,25 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
 
         if reference_control_id:
             data["reference_control"] = reference_control_id
+
+        has_cost_related_key = any(
+            key in self.COST_KEYS and record.get(key) not in (None, "")
+            for key in record.keys()
+        )
+        if has_cost_related_key:
+            cost = {
+                "currency": record.get("cost_currency") or context.currency,
+                "amortization_period": int(record.get("cost_amortization_period") or 1),
+                "build": {
+                    "fixed_cost": int(record.get("cost_build_fixed") or 0),
+                    "people_days": int(record.get("cost_build_people_days") or 0),
+                },
+                "run": {
+                    "fixed_cost": int(record.get("cost_run_fixed") or 0),
+                    "people_days": int(record.get("cost_run_people_days") or 0),
+                },
+            }
+            data["cost"] = cost
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
@@ -2645,13 +2696,12 @@ class LoadFileView(APIView):
 
                             # Build answers from the "answers" cell
                             answers_cell = record.get("answers")
-                            if (
-                                answers_cell not in (None, "")
-                                and ReqNode
-                                and ReqNode.questions
-                            ):
+                            questions_dict = (
+                                build_questions_dict(ReqNode) if ReqNode else None
+                            )
+                            if answers_cell not in (None, "") and questions_dict:
                                 text_to_question = {}
-                                for q_urn, qdef in ReqNode.questions.items():
+                                for q_urn, qdef in questions_dict.items():
                                     q_text = qdef.get("text", "")
                                     if q_text:
                                         text_to_question[q_text] = (
@@ -2659,7 +2709,7 @@ class LoadFileView(APIView):
                                             qdef,
                                         )
 
-                                answers = requirement_assessment.answers or {}
+                                answers = {}
                                 has_any_answer = False
 
                                 for line in str(answers_cell).split("\n"):

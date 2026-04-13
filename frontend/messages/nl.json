@@ -2115,6 +2115,13 @@
 	"noQualificationsData": "Geen kwalificaties gevonden op incidenten",
 	"noQualificationsFoundOnRiskScenarios": "Geen kwalificaties gevonden op risicoscenario's",
 	"noRecurrentTasksFound": "Geen terugkerende taken gevonden",
+	"granularity": "Granulariteit",
+	"monthly": "Maandelijks",
+	"weekly": "Wekelijks",
+	"aggregatedStatus": "Status",
+	"allStatuses": "Alle statussen",
+	"allActors": "Alle actoren",
+	"allAppliedControls": "Alle toegepaste maatregelen",
 	"noRequirementFound": "Geen vereistebeoordeling gevonden",
 	"noResourceMatchQuery": "Geen resource gevonden die overeenkomt met uw zoekopdracht.",
 	"noResultsFound": "Geen secties gevonden",
@@ -2982,6 +2989,7 @@
 	"xRaysLoadingData": "Gegevens analyseren...",
 	"xRaysView": "Bekijken",
 	"year": "Jaar",
+	"tasksReview": "Takenoverzicht",
 	"yearlyTasksReview": "Geaggregeerde takenbeoordeling",
 	"yellowZoneRadius": "Gele zone radius",
 	"yes": "Ja",
@@ -3014,5 +3022,9 @@
 	"serverConfigurationError": "Serverconfiguratiefout",
 	"libraryLoadFailed": "Bibliotheek laden mislukt",
 	"sortAscending": "Sorteren A → Z",
-	"sortDescending": "Sorteren Z → A"
+	"sortDescending": "Sorteren Z → A",
+	"confirmModalMessagePlural": "Weet je het zeker? Deze actie zal permanent invloed hebben op de volgende objecten",
+	"syncAppliedControlsMessage": "De toegepaste controles die deze referentiecontrole gebruiken, worden ermee gesynchroniseerd. Houd er rekening mee dat dit niet ongedaan kan worden gemaakt.",
+	"syncToAppliedControl": "Synchroniseren met toegepaste controle",
+	"syncToReferenceControl": "Synchroniseren met referentiecontrole"
 }

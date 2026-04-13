@@ -90,6 +90,14 @@
 		placeholder={m.riskAssessmentMatrixHelpText()}
 		helpText={m.ebiosRmMatrixHelpText()}
 	/>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
 {:else if context === 'ebiosRmStudy'}
 	<div
 		class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
@@ -103,6 +111,14 @@
 		>
 			{m.activityOne()}
 		</p>
+		<Select
+			{form}
+			options={model.selectOptions['status']}
+			field="status"
+			label={m.status()}
+			cacheLock={cacheLocks['status']}
+			bind:cachedValue={formDataCache['status']}
+		/>
 		<AutocompleteSelect
 			{form}
 			optionsEndpoint="risk-matrices"

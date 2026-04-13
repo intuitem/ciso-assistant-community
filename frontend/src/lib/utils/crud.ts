@@ -124,6 +124,9 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 		};
 		lazy?: boolean; // Enable lazy loading for large option sets (e.g., assets)
 	};
+	batchCreate?: {
+		label?: string; // i18n key for button title (defaults to 'batchCreate')
+	};
 }
 
 interface Field {
@@ -272,6 +275,64 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
 	},
+	'security-advisories': {
+		name: 'securityadvisory',
+		localName: 'securityAdvisory',
+		localNamePlural: 'securityAdvisories',
+		verboseName: 'Security advisory',
+		verboseNamePlural: 'Security advisories',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'source' },
+			{ field: 'aliases' },
+			{ field: 'description' },
+			{ field: 'cvss_base_score' },
+			{ field: 'cvss_vector' },
+			{ field: 'epss_score' },
+			{ field: 'epss_percentile' },
+			{ field: 'is_actively_exploited' },
+			{ field: 'exploited_date_added', type: 'date' },
+			{ field: 'published_date', type: 'date' },
+			{ field: 'references' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'security_advisories',
+				urlModel: 'vulnerabilities',
+				disableCreate: true,
+				disableDelete: true
+			}
+		]
+	},
+	cwes: {
+		name: 'cwe',
+		localName: 'cwe',
+		localNamePlural: 'cwes',
+		verboseName: 'CWE',
+		verboseNamePlural: 'CWEs',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'cwes',
+				urlModel: 'vulnerabilities',
+				disableCreate: true,
+				disableDelete: true
+			}
+		]
+	},
 	'risk-scenarios': {
 		name: 'riskscenario',
 		localName: 'riskScenario',
@@ -313,12 +374,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'reference_control' },
 			{ field: 'category' },
-			{ field: 'csf_function' },
+			{ field: 'status' },
 			{ field: 'priority' },
 			{ field: 'effort' },
 			{ field: 'control_impact' },
 			{ field: 'annual_cost_display' },
-			{ field: 'status' },
+			{ field: 'csf_function' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'eta', type: 'date' },
@@ -504,10 +565,40 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'security_advisories', urlModel: 'security-advisories' },
+			{ field: 'cwes', urlModel: 'cwes' },
+			{ field: 'detected_at', type: 'date' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'due_date', type: 'date' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
-		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
+		filters: [
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'security_advisories' },
+			{ field: 'cwes' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'vulnerabilities',
+				urlModel: 'assets',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'findings',
+				disableCreate: true,
+				disableDelete: true
+			}
+		]
 	},
 	'filtering-labels': {
 		name: 'filteringlabel',
@@ -986,6 +1077,20 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Feature flag',
 		verboseNamePlural: 'Feature flags'
 	},
+	'vulnerability-sla': {
+		name: 'vulnerabilitySla',
+		localName: 'vulnerabilitySla',
+		localNamePlural: 'vulnerabilitySla',
+		verboseName: 'Vulnerability SLA',
+		verboseNamePlural: 'Vulnerability SLA'
+	},
+	'sec-intel-feeds': {
+		name: 'secIntelFeeds',
+		localName: 'secIntelFeeds',
+		localNamePlural: 'secIntelFeeds',
+		verboseName: 'Vulnerability Feeds',
+		verboseNamePlural: 'Vulnerability Feeds'
+	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
 		localName: 'requirementMappingSet',
@@ -1243,6 +1348,55 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at' }
 		]
 	},
+	'dora-incident-reports': {
+		endpointUrl: 'resilience/dora-incident-reports',
+		name: 'doraincidentreport',
+		localName: 'doraIncidentReport',
+		localNamePlural: 'doraIncidentReports',
+		verboseName: 'DORA incident report',
+		verboseNamePlural: 'DORA incident reports',
+		foreignKeyFields: [
+			{
+				field: 'folder',
+				urlModel: 'folders',
+				urlParams: 'content_type=DO&content_type=GL'
+			},
+			{ field: 'incident', urlModel: 'incidents' },
+			{ field: 'submitting_entity', urlModel: 'entities' },
+			{ field: 'ultimate_parent_entity', urlModel: 'entities' },
+			{ field: 'affected_entities', urlModel: 'entities' }
+		],
+		selectFields: [
+			{ field: 'incident_submission' },
+			{ field: 'report_currency' },
+			{ field: 'incident_discovery' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'incident' },
+			{ field: 'incident_submission' },
+			{ field: 'report_currency' },
+			{ field: 'submitting_entity' },
+			{ field: 'affected_entities' },
+			{ field: 'ultimate_parent_entity' },
+			{ field: 'primary_contact_name' },
+			{ field: 'primary_contact_email' },
+			{ field: 'primary_contact_phone' },
+			{ field: 'secondary_contact_name' },
+			{ field: 'secondary_contact_email' },
+			{ field: 'secondary_contact_phone' },
+			{ field: 'financial_entity_code' },
+			{ field: 'detection_date_time' },
+			{ field: 'classification_date_time' },
+			{ field: 'incident_description' },
+			{ field: 'incident_discovery' },
+			{ field: 'competent_authority_code' },
+			{ field: 'incident_duration' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		]
+	},
 	processings: {
 		endpointUrl: 'privacy/processings',
 		name: 'processing',
@@ -1281,7 +1435,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'processing', urlModel: 'personal-data' },
+			{
+				field: 'processing',
+				urlModel: 'personal-data',
+				batchCreate: {
+					label: 'batchCreatePersonalData'
+				}
+			},
 			{ field: 'processing', urlModel: 'data-subjects' },
 			{ field: 'processing', urlModel: 'purposes' },
 			{ field: 'processing', urlModel: 'data-recipients' },
@@ -1512,7 +1672,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				}
 			}
 		],
-		selectFields: [{ field: 'quotation_method' }]
+		selectFields: [{ field: 'status' }, { field: 'quotation_method' }]
 	},
 	'feared-events': {
 		endpointUrl: 'ebios-rm/feared-events',
@@ -1930,7 +2090,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entities', urlModel: 'entities' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
+		reverseForeignKeyFields: [
+			{ field: 'incident', urlModel: 'timeline-entries' },
+			{ field: 'incident', urlModel: 'dora-incident-reports' }
+		],
 		selectFields: [
 			{ field: 'severity', valueType: 'number' },
 			{ field: 'status' },
@@ -1950,6 +2113,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets' },
 			{ field: 'owners' },
 			{ field: 'entities' },
+			{ field: 'occurred_at' },
+			{ field: 'resolved_at' },
+			{ field: 'resolution' },
+			{ field: 'is_bcp_activated' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
 			{ field: 'link' },

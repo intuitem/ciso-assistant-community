@@ -897,7 +897,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return self.user_groups.filter(name="BI-UG-ADM").exists()
 
     # Permissions that grant write access but do not consume a license seat
-    NON_SEAT_PERMISSIONS = {"change_validationflow"}
+    NON_SEAT_PERMISSIONS = {
+        "change_validationflow",
+        "add_chatsession",
+        "change_chatsession",
+        "delete_chatsession",
+    }
 
     @property
     def is_editor(self) -> bool:

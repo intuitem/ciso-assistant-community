@@ -65,6 +65,7 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
+        "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
     },
 }
 
@@ -123,6 +124,16 @@ MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False").lower() in ("true", "1", "yes
 
 # SECURITY WARNING: Sensitive operations, such as excel file processing, can run in a sandbox.
 # The sandbox is disabled by default; set ENABLE_SANDBOX=true to enable bubblewrap isolation.
+# Chat/AI assistant module. Disabled by default to avoid disruption on SaaS.
+# Set ENABLE_CHAT=true to expose the chat feature flag, enable signals, and serve chat API.
+# The chat Django app stays in INSTALLED_APPS regardless (for migrations), but is dormant.
+ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
+
 ENABLE_SANDBOX = os.environ.get(
     "ENABLE_SANDBOX",
     "False",
@@ -241,6 +252,7 @@ INSTALLED_APPS = [
     "auditlog",
     "tailwind",
     "iam",
+    "sec_intel",
     "global_settings",
     "pmbok",
     "ebios_rm",
@@ -249,6 +261,7 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "chat",
     "doc_management",
     "core",
     "cal",
@@ -609,6 +622,13 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
     },
 }
+
+# MFA / WebAuthn settings
+MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
+MFA_PASSKEY_LOGIN_ENABLED = False
+MFA_PASSKEY_SIGNUP_ENABLED = False
+MFA_ADAPTER = "iam.adapter.MFAAdapter"
 
 if MAIL_DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
