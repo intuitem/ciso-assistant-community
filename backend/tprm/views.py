@@ -1,10 +1,15 @@
+import io
 import re
 
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from iam.models import Folder, RoleAssignment, UserGroup
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, ExportMixin
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    ExportMixin,
+    escape_excel_formula,
+)
 from core.models import Asset
 from tprm.models import Entity, Representative, Solution, EntityAssessment, Contract
 from rest_framework.decorators import action
@@ -620,10 +625,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         (Entities, Solutions, Contracts) using the same column layout as the
         data-wizard import
         """
-        import io
-        import pandas as pd
-        from django.http import HttpResponse
-        from core.views import escape_excel_formula
+        import pandas as pd  # imported lazily: optional/heavy dependency
 
         (viewable_entity_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Entity
@@ -1194,7 +1196,7 @@ class ContractViewSet(ExportMixin, BaseModelViewSet):
             },
             "provider_entity_ref_id": {
                 "source": "provider_entity.ref_id",
-                "label": "provider_ref_id",
+                "label": "provider_entity_ref_id",
                 "escape": True,
             },
             "provider_entity": {

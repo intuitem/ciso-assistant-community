@@ -3523,7 +3523,10 @@ class LoadFileView(APIView):
                     "folder": domain,
                 }
 
-                # Parse solution references (newline, pipe, or comma-separated)
+                # Parse solution references (newline, pipe, or comma-separated).
+                # Unknown refs are reported in results["errors"] but do not block
+                # contract creation — known refs are still linked, matching the
+                # pre-multi-solution lenient behavior.
                 solution_ids = []
                 missing_solution_refs = []
                 solution_ref_id_raw = str(record.get("solution_ref_id", "")).strip()
@@ -3536,19 +3539,20 @@ class LoadFileView(APIView):
                             solution_ids.append(solution_ref_map[sol_ref])
                         else:
                             missing_solution_refs.append(sol_ref)
+                            logger.warning(
+                                f"Solution with ref_id '{sol_ref}' not found for contract '{ref_id}'"
+                            )
 
                 if missing_solution_refs:
-                    results["failed"] += 1
                     results["errors"].append(
                         {
                             "record": record,
                             "error": (
-                                "Unknown solution_ref_id(s): "
+                                "Unknown solution_ref_id(s) skipped: "
                                 + ", ".join(missing_solution_refs)
                             ),
                         }
                     )
-                    continue
 
                 # Add optional fields
                 if record.get("status"):

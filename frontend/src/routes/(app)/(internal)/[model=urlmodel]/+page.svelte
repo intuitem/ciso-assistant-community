@@ -413,7 +413,7 @@
 									>
 									{#if URLModel === 'entities'}
 										<a
-											href="{URLModel}/export/ecosystem/"
+											href="/entities/export/ecosystem/"
 											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 											onclick={() => (exportPopupOpen = false)}>... {m.exportEcosystem()}</a
 										>
