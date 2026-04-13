@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0159_vulnerability_cwes_vulnerability_detected_at_and_more'),
+        ("core", "0159_vulnerability_cwes_vulnerability_detected_at_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='securityexception',
-            name='link',
-            field=models.URLField(blank=True, null=True, verbose_name='Link'),
+            model_name="securityexception",
+            name="link",
+            field=models.URLField(blank=True, null=True, verbose_name="Link"),
         ),
     ]

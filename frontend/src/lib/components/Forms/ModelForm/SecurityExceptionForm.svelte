@@ -155,12 +155,7 @@
 	cacheLock={cacheLocks['expiration_date']}
 	bind:cachedValue={formDataCache['expiration_date']}
 />
-<TextField
-	{form}
-	label={m.link()}
-	field="link"
-	bind:cachedValue={formDataCache["link"]}
-/>
+<TextField {form} label={m.link()} field="link" bind:cachedValue={formDataCache['link']} />
 <AutocompleteSelect
 	multiple
 	lazy
