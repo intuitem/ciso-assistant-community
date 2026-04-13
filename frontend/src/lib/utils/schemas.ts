@@ -168,6 +168,35 @@ export const ThreatSchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 
+export const SecurityAdvisorySchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	source: z.string().optional(),
+	aliases: z.any().optional().nullable(),
+	library: z.string().uuid().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional(),
+	published_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	cvss_base_score: z.coerce.number().min(0).max(10).optional().nullable(),
+	cvss_vector: z.string().optional().nullable(),
+	epss_score: z.coerce.number().min(0).max(1).optional().nullable(),
+	epss_percentile: z.coerce.number().min(0).max(1).optional().nullable(),
+	is_actively_exploited: z.boolean().default(false).optional(),
+	exploited_date_added: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+});
+
+export const CWESchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	library: z.string().uuid().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
 export const RiskScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	applied_controls: z.string().uuid().optional().array().optional(),
@@ -251,7 +280,7 @@ export const AppliedControlSchema = z.object({
 
 export const AppliedControlDuplicateSchema = z.object({
 	...AppliedControlSchema.shape,
-	duplicate_evidences: z.boolean()
+	duplicate_evidences: z.boolean().optional()
 });
 
 export const PolicySchema = AppliedControlSchema.omit({ category: true });
@@ -476,6 +505,7 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
+	scoring_enabled: z.boolean().optional().default(false),
 	show_documentation_score: z.boolean().optional().default(false),
 	extended_result_enabled: z.boolean().optional().default(false),
 	progress_status_enabled: z.boolean().optional().default(true),
@@ -563,13 +593,39 @@ export const GeneralSettingsSchema = z.object({
 	show_warning_external_links: z.boolean().default(true).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
-	default_language: z.string().default('en').optional()
+	default_language: z.string().default('en').optional(),
+	llm_provider: z.string().default('ollama').optional(),
+	ollama_base_url: z.string().default('http://localhost:11434').optional(),
+	ollama_model: z.string().default('mistral').optional(),
+	ollama_embed_model: z.string().default('snowflake-arctic-embed2').optional(),
+	embedding_backend: z.string().default('sentence-transformers').optional(),
+	chat_system_prompt: z.string().default('').optional(),
+	openai_api_base: z.string().default('http://localhost:1234/v1').optional(),
+	openai_model: z.string().default('').optional(),
+	openai_api_key: z.string().default('').optional()
+});
+
+export const SecIntelFeedsSchema = z.object({
+	kev_feed_enabled: z.boolean().optional(),
+	epss_feed_enabled: z.boolean().optional(),
+	nvd_enrich_enabled: z.boolean().optional(),
+	network_timeout: z.number().int().min(5).max(120).optional()
+});
+
+export const VulnerabilitySlaSchema = z.object({
+	sla_anchor: z.string().optional(),
+	critical: z.coerce.number().int().min(0).optional().nullable(),
+	high: z.coerce.number().int().min(0).optional().nullable(),
+	medium: z.coerce.number().int().min(0).optional().nullable(),
+	low: z.coerce.number().int().min(0).optional().nullable(),
+	info: z.coerce.number().int().min(0).optional().nullable()
 });
 
 export const FeatureFlagsSchema = z.object({
 	xrays: z.boolean().optional(),
 	incidents: z.boolean().optional(),
 	tasks: z.boolean().optional(),
+	control_plan: z.boolean().optional(),
 	risk_acceptances: z.boolean().optional(),
 	exceptions: z.boolean().optional(),
 	follow_up: z.boolean().optional(),
@@ -598,6 +654,7 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
+	chat_mode: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
@@ -784,9 +841,14 @@ export const vulnerabilitySchema = z.object({
 	ref_id: z.string().optional().default(''),
 	status: z.string().default('--'),
 	severity: z.number().default(-1).optional(),
+	detected_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	assets: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	security_advisories: z.string().uuid().optional().array().optional(),
+	cwes: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
@@ -1066,6 +1128,7 @@ export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	quotation_method: z.string().optional().default('express'),
+	status: z.string().optional().default('planned'),
 	ref_id: z.string().optional().default(''),
 	risk_matrix: z.string(),
 	authors: z.array(z.string().optional()).optional(),
@@ -1230,7 +1293,68 @@ export const IncidentSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
-	entities: z.string().uuid().optional().array().optional()
+	entities: z.string().uuid().optional().array().optional(),
+	occurred_at: z
+		.string()
+		.datetime({ local: true })
+		.refine((val) => !val || new Date(val) <= new Date(), {
+			message: m.timestampCannotBeInTheFuture()
+		})
+		.optional(),
+	resolved_at: z
+		.string()
+		.datetime({ local: true })
+		.refine((val) => !val || new Date(val) <= new Date(), {
+			message: m.timestampCannotBeInTheFuture()
+		})
+		.optional(),
+	resolution: z.string().optional().default(''),
+	is_bcp_activated: z.boolean().optional().nullable()
+});
+
+export const DoraIncidentReportSchema = z.object({
+	incident: z.string(),
+	incident_submission: z.string(),
+	report_currency: z.string().optional().default(''),
+	folder: z.string(),
+	submitting_entity: z.string().optional().nullable(),
+	ultimate_parent_entity: z.string().optional().nullable(),
+	affected_entities: z.string().uuid().optional().array().optional(),
+	primary_contact_name: z.string().optional().default(''),
+	primary_contact_email: z.string().optional().default(''),
+	primary_contact_phone: z.string().optional().default(''),
+	secondary_contact_name: z.string().optional().default(''),
+	secondary_contact_email: z.string().optional().default(''),
+	secondary_contact_phone: z.string().optional().default(''),
+	financial_entity_code: z.string().optional().default(''),
+	detection_date_time: z.string().datetime({ local: true }).optional().nullable(),
+	classification_date_time: z.string().datetime({ local: true }).optional().nullable(),
+	incident_description: z.string().optional().default(''),
+	other_information: z.string().optional().default(''),
+	incident_duration: z.string().optional().default(''),
+	originates_from_third_party_provider: z.string().optional().default(''),
+	incident_discovery: z.string().optional().default(''),
+	competent_authority_code: z.string().optional().default(''),
+	classification_types: z.any().optional(),
+	incident_type: z.any().optional(),
+	root_cause_hl_classification: z.any().optional(),
+	root_causes_detailed_classification: z.any().optional(),
+	root_causes_additional_classification: z.any().optional(),
+	root_causes_other: z.string().optional().default(''),
+	root_causes_information: z.string().optional().default(''),
+	root_cause_addressing_date_time: z.string().datetime({ local: true }).optional().nullable(),
+	incident_resolution_vs_planned: z.string().optional().default(''),
+	assessment_of_risk_to_critical_functions: z.string().optional().default(''),
+	information_relevant_to_resolution_authorities: z.string().optional().default(''),
+	financial_recoveries_amount: z.number().optional().nullable(),
+	gross_amount_indirect_direct_costs: z.number().optional().nullable(),
+	recurring_non_major_incidents_description: z.string().optional().default(''),
+	recurring_incident_date: z.string().datetime({ local: true }).optional().nullable(),
+	impact_assessment: z.any().optional(),
+	reporting_to_other_authorities: z.any().optional(),
+	reporting_to_other_authorities_other: z.string().optional().default(''),
+	info_duration_service_downtime_actual_or_estimate: z.string().optional().default(''),
+	is_submitted: z.boolean().optional().default(false)
 });
 
 export const TimelineEntrySchema = z.object({
@@ -1530,6 +1654,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
+	'security-advisories': SecurityAdvisorySchema,
+	cwes: CWESchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
@@ -1548,6 +1674,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,
+	'vulnerability-sla': VulnerabilitySlaSchema,
+	'sec-intel-feeds': SecIntelFeedsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
@@ -1579,6 +1707,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'findings-assessments': FindingsAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
+	'dora-incident-reports': DoraIncidentReportSchema,
 	'task-templates': TaskTemplateSchema,
 	'task-nodes': TaskNodeSchema,
 	'elementary-actions': ElementaryActionSchema,

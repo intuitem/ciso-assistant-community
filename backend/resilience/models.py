@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.utils.translation import gettext_lazy as _
 from django.db.models import (
     BooleanField,
     CharField,
@@ -296,6 +297,144 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
         }
 
 
+class DoraIncidentReport(AbstractBaseModel, FolderMixin):
+    """
+    DORA (Digital Operational Resilience Act) Incident Report.
+
+    Captures all regulatory data required by DORA IR schema v1.2.1
+    for reporting major ICT incidents to competent authorities.
+    Links to an existing Incident for shared lifecycle fields
+    (occurred_at, resolved_at, resolution, is_bcp_activated).
+    """
+
+    class SubmissionType(models.TextChoices):
+        INITIAL = "initial_notification", "Initial notification"
+        INTERMEDIATE = "intermediate_report", "Intermediate report"
+        FINAL = "final_report", "Final report"
+        RECLASSIFIED = (
+            "major_incident_reclassified_as_non-major",
+            "Reclassified as non-major",
+        )
+
+    # -- Report metadata --
+    incident = models.ForeignKey(
+        "core.Incident",
+        on_delete=models.PROTECT,
+        related_name="dora_reports",
+    )
+    incident_submission = models.CharField(
+        max_length=60,
+        choices=SubmissionType.choices,
+    )
+    report_currency = models.CharField(max_length=3, blank=True)
+
+    # -- Entity references (FK to tprm.Entity) --
+    submitting_entity = models.ForeignKey(
+        "tprm.Entity",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dora_ir_submitting",
+    )
+    ultimate_parent_entity = models.ForeignKey(
+        "tprm.Entity",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dora_ir_parent",
+    )
+    affected_entities = models.ManyToManyField(
+        "tprm.Entity",
+        blank=True,
+        related_name="dora_ir_affected",
+    )
+
+    # -- Contacts (plain fields, optionally filled from User in UI) --
+    primary_contact_name = models.CharField(max_length=255, blank=True)
+    primary_contact_email = models.EmailField(blank=True)
+    primary_contact_phone = models.CharField(max_length=255, blank=True)
+    secondary_contact_name = models.CharField(max_length=255, blank=True)
+    secondary_contact_email = models.EmailField(blank=True)
+    secondary_contact_phone = models.CharField(max_length=255, blank=True)
+
+    # -- Incident details (scalar fields) --
+    # NOTE: occurred_at, resolved_at, resolution, is_bcp_activated live on Incident (core)
+    financial_entity_code = models.CharField(max_length=255, blank=True)
+    detection_date_time = models.DateTimeField(null=True, blank=True)
+    classification_date_time = models.DateTimeField(null=True, blank=True)
+    incident_description = models.TextField(blank=True)
+    other_information = models.TextField(blank=True)
+    incident_duration = models.CharField(max_length=20, blank=True)  # HHH:MM:SS pattern
+    originates_from_third_party_provider = models.TextField(blank=True)
+    incident_discovery = models.CharField(max_length=60, blank=True)
+    competent_authority_code = models.CharField(max_length=255, blank=True)
+
+    # -- Classification types (polymorphic array) --
+    classification_types = models.JSONField(default=list, blank=True)
+
+    # -- Incident type (nested object) --
+    incident_type = models.JSONField(default=dict, blank=True)
+
+    # -- Root cause --
+    root_cause_hl_classification = models.JSONField(default=list, blank=True)
+    root_causes_detailed_classification = models.JSONField(default=list, blank=True)
+    root_causes_additional_classification = models.JSONField(default=list, blank=True)
+    root_causes_other = models.TextField(blank=True)
+    root_causes_information = models.TextField(blank=True)
+    root_cause_addressing_date_time = models.DateTimeField(null=True, blank=True)
+
+    # -- Resolution (DORA-specific fields only; summary + datetime from Incident) --
+    incident_resolution_vs_planned = models.TextField(blank=True)
+    assessment_of_risk_to_critical_functions = models.TextField(blank=True)
+    information_relevant_to_resolution_authorities = models.TextField(blank=True)
+
+    # -- Financial --
+    financial_recoveries_amount = models.DecimalField(
+        max_digits=19, decimal_places=2, null=True, blank=True
+    )
+    gross_amount_indirect_direct_costs = models.DecimalField(
+        max_digits=19, decimal_places=2, null=True, blank=True
+    )
+
+    # -- Recurring incident --
+    recurring_non_major_incidents_description = models.TextField(blank=True)
+    recurring_incident_date = models.DateTimeField(null=True, blank=True)
+
+    # -- Impact assessment (nested structure) --
+    impact_assessment = models.JSONField(default=dict, blank=True)
+
+    # -- Reporting to authorities --
+    reporting_to_other_authorities = models.JSONField(default=list, blank=True)
+    reporting_to_other_authorities_other = models.TextField(blank=True)
+    info_duration_service_downtime_actual_or_estimate = models.CharField(
+        max_length=50, blank=True
+    )
+
+    is_submitted = models.BooleanField(default=False, verbose_name=_("Submitted"))
+    submitted_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Submitted at")
+    )
+
+    fields_to_check = []
+
+    class Meta:
+        verbose_name = "DORA incident report"
+        verbose_name_plural = "DORA incident reports"
+
+    def __str__(self):
+        return f"DORA IR ({self.get_incident_submission_display()}) — {self.incident}"
+
+    def save(self, *args, **kwargs):
+        if self.incident_id:
+            self.folder = self.incident.folder
+        # Auto-set submitted_at on first submission
+        if self.is_submitted and not self.submitted_at:
+            from django.utils import timezone
+
+            self.submitted_at = timezone.now()
+        super().save(*args, **kwargs)
+
+
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     AssetAssessment,
@@ -307,5 +446,9 @@ auditlog.register(
 )
 auditlog.register(
     EscalationThreshold,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    DoraIncidentReport,
     exclude_fields=common_exclude,
 )

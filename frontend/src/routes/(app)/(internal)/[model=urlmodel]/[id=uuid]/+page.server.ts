@@ -30,7 +30,7 @@ export const load: PageServerLoad = async (event) => {
 	});
 
 	if (event.params.model === 'applied-controls') {
-		const appliedControlSchema = modelSchema(event.params.model);
+		const appliedControlSchema = modelSchema(event.params.model + '_duplicate');
 		const appliedControl = data.data;
 		const initialDataDuplicate = {
 			name: appliedControl.name,

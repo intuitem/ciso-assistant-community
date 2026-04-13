@@ -24,6 +24,7 @@
 		canEditRequirementAssessment: boolean;
 		hasParentNode: boolean;
 		showDocumentationScore: boolean;
+		scoringEnabled?: boolean;
 		scoreCalculationMethod: string;
 		selectedStatus: string[];
 		resultCounts: Record<string, number> | undefined;
@@ -43,6 +44,7 @@
 		canEditRequirementAssessment,
 		hasParentNode,
 		showDocumentationScore,
+		scoringEnabled = false,
 		scoreCalculationMethod,
 		selectedStatus,
 		resultCounts,
@@ -174,6 +176,14 @@
 	);
 
 	export const getBadgeStyles = (answers: any, questions: any) => {
+		if (!answers) {
+			return {
+				backgroundColor: '#fca5a5',
+				color: darkenColor('#fca5a5', 0.6),
+				answeredCount: 0,
+				totalCount: Object.keys(questions || {}).length
+			};
+		}
 		const visibleQuestions = Object.entries(questions || {}).filter(([_, q]) =>
 			isQuestionVisible(q, answers)
 		);
@@ -394,8 +404,48 @@
 					{/each}
 				</div>
 				<div class="flex flex-row space-x-2 items-center">
-					{#if hasParentNode}
-						{#if nodeScore() !== null}
+					{#if scoringEnabled}
+						{#if hasParentNode}
+							{#if nodeScore() !== null}
+								<div class="relative">
+									<Progress
+										value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+										min={0}
+										max={100}
+										data-testid="progress-ring-svg"
+									>
+										<Progress.Circle class="[--size:--spacing(12)]">
+											<Progress.CircleTrack />
+											<Progress.CircleRange
+												class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+											/>
+										</Progress.Circle>
+										<div class="absolute inset-0 flex items-center justify-center">
+											<span class="text-xs font-bold">{nodeScore()}</span>
+										</div>
+									</Progress>
+								</div>
+								{#if showDocumentationScore}
+									<div class="relative">
+										<Progress
+											value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+											min={0}
+											max={100}
+										>
+											<Progress.Circle class="[--size:--spacing(12)]">
+												<Progress.CircleTrack />
+												<Progress.CircleRange
+													class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+												/>
+											</Progress.Circle>
+											<div class="absolute inset-0 flex items-center justify-center">
+												<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+											</div>
+										</Progress>
+									</div>
+								{/if}
+							{/if}
+						{:else if nodeScore() !== null}
 							<div class="relative">
 								<Progress
 									value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
@@ -433,44 +483,6 @@
 									</Progress>
 								</div>
 							{/if}
-						{/if}
-					{:else if nodeScore() !== null}
-						<div class="relative">
-							<Progress
-								value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
-								min={0}
-								max={100}
-								data-testid="progress-ring-svg"
-							>
-								<Progress.Circle class="[--size:--spacing(12)]">
-									<Progress.CircleTrack />
-									<Progress.CircleRange
-										class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
-									/>
-								</Progress.Circle>
-								<div class="absolute inset-0 flex items-center justify-center">
-									<span class="text-xs font-bold">{nodeScore()}</span>
-								</div>
-							</Progress>
-						</div>
-						{#if showDocumentationScore}
-							<div class="relative">
-								<Progress
-									value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
-									min={0}
-									max={100}
-								>
-									<Progress.Circle class="[--size:--spacing(12)]">
-										<Progress.CircleTrack />
-										<Progress.CircleRange
-											class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
-										/>
-									</Progress.Circle>
-									<div class="absolute inset-0 flex items-center justify-center">
-										<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
-									</div>
-								</Progress>
-							</div>
 						{/if}
 					{/if}
 				</div>
