@@ -245,6 +245,7 @@ INSTALLED_APPS = [
     "auditlog",
     "tailwind",
     "iam",
+    "sec_intel",
     "global_settings",
     "pmbok",
     "ebios_rm",

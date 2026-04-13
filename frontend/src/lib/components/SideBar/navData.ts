@@ -54,13 +54,7 @@ export const navData = {
 					name: 'auditDashboard',
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/auditee-dashboard',
-					permissions: ['view_requirementassignment']
-				},
-				{
-					name: 'presets',
-					fa_icon: 'fa-solid fa-rocket',
-					href: '/presets',
-					permissions: ['add_loadedlibrary', 'view_presetjourney']
+					permissions: ['view_complianceassessment']
 				}
 			]
 		},
@@ -112,6 +106,16 @@ export const navData = {
 					name: 'threats',
 					fa_icon: 'fa-solid fa-biohazard',
 					href: '/threats'
+				},
+				{
+					name: 'securityAdvisories',
+					fa_icon: 'fa-solid fa-shield-virus',
+					href: '/security-advisories'
+				},
+				{
+					name: 'cwes',
+					fa_icon: 'fa-solid fa-bug-slash',
+					href: '/cwes'
 				},
 				{
 					name: 'referenceControls',
@@ -168,7 +172,7 @@ export const navData = {
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
-					permissions: ['view_riskassessment', 'view_complianceassessment']
+					permissions: ['view_riskassessment', 'view_assessment']
 				},
 				{
 					name: 'incidents',
@@ -179,12 +183,6 @@ export const navData = {
 					name: 'tasks',
 					fa_icon: 'fa-solid fa-note-sticky',
 					href: '/task-templates'
-				},
-				{
-					name: 'tasksReview',
-					fa_icon: 'fa-solid fa-table-columns',
-					href: '/tasks-review',
-					permissions: ['view_appliedcontrol']
 				}
 			]
 		},
