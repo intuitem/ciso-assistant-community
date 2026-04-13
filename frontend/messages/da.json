@@ -1424,5 +1424,6 @@
 	"confirmModalMessagePlural": "Er du sikker? Denne handling vil permanent påvirke følgende objekter",
 	"syncAppliedControlsMessage": "De anvendte kontroller, der bruger denne referencekontrol, vil blive synkroniseret med den. Bemærk venligst, at dette ikke kan fortrydes.",
 	"syncToAppliedControl": "Synkroniser med anvendt kontrol",
-	"syncToReferenceControl": "Synkroniser med referencekontrol"
+	"syncToReferenceControl": "Synkroniser med referencekontrol",
+	"exportEcosystem": "økosystem-eksport (XLSX)"
 }
