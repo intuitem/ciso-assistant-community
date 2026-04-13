@@ -50,6 +50,7 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     def save(self, *args, **kwargs):
         if self.policy:
             self.folder = self.policy.folder
+            self.is_published = self.policy.is_published
         super().save(*args, **kwargs)
 
     @property
@@ -120,6 +121,7 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
+        self.is_published = self.document.is_published
         if self.status == self.Status.DRAFT:
             existing = self.document.revisions.filter(status=self.Status.DRAFT).exclude(
                 pk=self.pk
@@ -194,6 +196,7 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
+        self.is_published = self.document.is_published
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -231,6 +234,7 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.revision.folder
+        self.is_published = self.revision.is_published
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -14,6 +14,8 @@ from .serializers import (
     GlobalSettingsSerializer,
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
+    VulnerabilitySlaSerializer,
+    SecIntelFeedsSerializer,
 )
 from django.db import transaction
 from .models import GlobalSettings
@@ -122,6 +124,13 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        # Clear cached LLM/embedder so new settings take effect immediately
+        from django.conf import settings as django_settings
+
+        if getattr(django_settings, "ENABLE_CHAT", False):
+            from chat.providers import clear_provider_cache
+
+            clear_provider_cache()
         return Response(serializer.data)
 
     def get_object(self):
@@ -253,6 +262,56 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             ),
         }
         return Response(interface_settings)
+
+
+class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = VulnerabilitySlaSerializer
+    queryset = GlobalSettings.objects.filter(name="vulnerability-sla")
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj, _ = self.model.objects.get_or_create(name="vulnerability-sla")
+        obj.is_published = True
+        obj.save(update_fields=["is_published"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
+class SecIntelFeedsViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = SecIntelFeedsSerializer
+    queryset = GlobalSettings.objects.filter(name="sec-intel-feeds")
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj, _ = self.model.objects.get_or_create(name="sec-intel-feeds")
+        obj.is_published = True
+        obj.save(update_fields=["is_published"])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 @api_view(["GET"])
