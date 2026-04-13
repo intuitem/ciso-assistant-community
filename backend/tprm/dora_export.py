@@ -1015,6 +1015,25 @@ def generate_b_05_01_provider_details(
         if contract.annual_expense:
             providers_data[provider_id]["total_expense"] += contract.annual_expense
 
+    # Register ancestor entities referenced by c0110 so that the c0110 → c0010
+    # foreign key (EBA rule 807) resolves. When a provider has a parent_entity
+    # chain but the ancestors are not themselves direct contract providers, the
+    # ultimate parent reported in c0110 has no matching c0010 row, which the
+    # OneGate filer rejects. Walk every direct provider's ancestry and add each
+    # ancestor as a zero-expense row if not already present.
+    for provider_id in list(providers_data.keys()):
+        current = providers_data[provider_id]["provider"].parent_entity
+        seen = {provider_id}
+        while current is not None and current.id not in seen:
+            seen.add(current.id)
+            if current.id not in providers_data:
+                providers_data[current.id] = {
+                    "provider": current,
+                    "total_expense": 0,
+                    "currency": "",
+                }
+            current = current.parent_entity
+
     # Write provider data
     for provider_id, data in providers_data.items():
         provider = data["provider"]
@@ -1133,6 +1152,13 @@ def generate_b_05_02_supply_chains(
     # The XBRL key for b_05.02 is (contract_ref, ict_service_type, provider_code, rank, recipient_code).
     seen_keys = set()
 
+    # NOTE: b_05.02 reports the ICT subcontracting chain (DORA Art. 28(2)), which is
+    # semantically distinct from the corporate-ownership chain (Entity.parent_entity).
+    # The data model has no subcontracting field today, so we emit a single rank=1 row
+    # per (contract, solution) — the direct provider in contractual relationship with
+    # the financial entity. This keeps b_05.02 consistent with b_02.02's c0030 and with
+    # the b_05.01 c0110 "ultimate parent undertaking" column, which continues to use
+    # parent_entity for corporate ownership as intended.
     for contract in supply_chain_contracts:
         for solution in contract.solutions.all():
             contract_ref = contract.ref_id or str(contract.id)
@@ -1140,52 +1166,42 @@ def generate_b_05_02_supply_chains(
             if not ict_service_type:
                 continue
 
-            # Build supply chain from solution's provider
-            chain = get_provider_chain(solution.provider_entity)
+            provider = solution.provider_entity
+            if provider is None:
+                continue
 
-            for rank, provider in enumerate(chain, start=1):
-                # c0030 is typed dimension eba_typ:IS — use "0" if empty
-                # c0040 is enumeration metric — keep empty when c0030 has no real value
-                provider_code, provider_code_type, _ = get_entity_identifier(provider)
-                provider_code = provider_code or "0"
+            # c0030 is typed dimension eba_typ:IS — use "0" if empty
+            # c0040 is enumeration metric — keep empty when c0030 has no real value
+            provider_code, provider_code_type, _ = get_entity_identifier(provider)
+            provider_code = provider_code or "0"
 
-                # c0060/c0070: recipient = previous entity in chain (the one that sub-contracted)
-                # CHECK_C0050: when rank=1, recipient must equal provider (direct service relationship)
-                # When rank>1, recipient is the previous entity in the chain
-                if rank == 1:
-                    recipient_code, recipient_code_type = (
-                        provider_code,
-                        provider_code_type,
-                    )
-                else:
-                    recipient = chain[rank - 2]
-                    recipient_code, recipient_code_type, _ = get_entity_identifier(
-                        recipient
-                    )
-                    recipient_code = recipient_code or "0"
+            # CHECK_C0050: when rank=1, recipient must equal provider
+            # (direct service relationship with the financial entity)
+            rank = 1
+            recipient_code, recipient_code_type = provider_code, provider_code_type
 
-                key = (
+            key = (
+                contract_ref,
+                ict_service_type,
+                provider_code,
+                rank,
+                recipient_code,
+            )
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+
+            csv_writer.writerow(
+                [
                     contract_ref,
                     ict_service_type,
                     provider_code,
+                    provider_code_type,
                     rank,
                     recipient_code,
-                )
-                if key in seen_keys:
-                    continue
-                seen_keys.add(key)
-
-                csv_writer.writerow(
-                    [
-                        contract_ref,
-                        ict_service_type,
-                        provider_code,
-                        provider_code_type,
-                        rank,
-                        recipient_code,
-                        recipient_code_type,
-                    ]
-                )
+                    recipient_code_type,
+                ]
+            )
 
     path = (
         f"{folder_prefix}/reports/b_05.02.csv"

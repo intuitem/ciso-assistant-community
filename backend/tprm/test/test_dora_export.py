@@ -1652,6 +1652,73 @@ class TestGenerateB0501(DoraExportTestMixin, DoraDataFactory, TestCase):
         intermediate.delete()
         grandparent.delete()
 
+    def test_parent_chain_registered_as_own_rows(self):
+        """
+        EBA rule 807: c0110 must reference a valid c0010 in b_05.01. When a
+        provider's ultimate parent has no direct contract with the financial
+        entity, it must still be registered as a b_05.01 row so the FK resolves.
+        """
+        grandparent = Entity.objects.create(
+            name="Ultimate Holdco",
+            legal_identifiers={"LEI": "ULTI1234567890123456"},
+            country="US",
+        )
+        intermediate = Entity.objects.create(
+            name="Mid Holdco",
+            legal_identifiers={"LEI": "MIDH1234567890123456"},
+            country="GB",
+            parent_entity=grandparent,
+        )
+        leaf = Entity.objects.create(
+            name="Leaf Subsidiary",
+            legal_identifiers={"LEI": "LEAFSUB123456789012"},
+            country="DE",
+            parent_entity=intermediate,
+            dora_provider_person_type="eba_CT:x212",
+        )
+        contract = Contract.objects.create(
+            name="Leaf Contract",
+            ref_id="CA-FK-PARENT",
+            provider_entity=leaf,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        data = self._data_rows(rows)
+        codes = {r[0] for r in data}
+
+        # All three entities must be registered as c0010 rows
+        self.assertIn("LEAFSUB123456789012", codes)
+        self.assertIn("MIDH1234567890123456", codes)
+        self.assertIn("ULTI1234567890123456", codes)
+
+        # c0110 FK: every c0110 value must exist as a c0010 value
+        c0110_refs = {r[10] for r in data if r[10]}
+        self.assertTrue(c0110_refs.issubset(codes))
+
+        # Parent-only rows have zero expense and empty currency
+        grand_row = next(r for r in data if r[0] == "ULTI1234567890123456")
+        self.assertEqual(float(grand_row[9]), 0.0)
+        self.assertEqual(grand_row[8], "")
+        # Grandparent self-references on c0110 (it IS the ultimate parent)
+        self.assertEqual(grand_row[10], "ULTI1234567890123456")
+
+        # Intermediate row points at grandparent on c0110
+        mid_row = next(r for r in data if r[0] == "MIDH1234567890123456")
+        self.assertEqual(mid_row[10], "ULTI1234567890123456")
+
+        contract.delete()
+        leaf.delete()
+        intermediate.delete()
+        grandparent.delete()
+
     def test_empty_queryset(self):
         buf = self._generate(
             dora_export.generate_b_05_01_provider_details,
@@ -1724,8 +1791,13 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         self.assertEqual(len(rows), 1)
 
-    def test_rank_from_provider_chain(self):
-        """Provider with parent chain produces multiple rows with increasing rank."""
+    def test_parent_entity_chain_does_not_expand_into_ranks(self):
+        """
+        Entity.parent_entity encodes corporate ownership, NOT ICT subcontracting.
+        b_05.02 must not synthesize rank>1 rows from parent_entity chains — doing so
+        breaks the b_02.02 ↔ b_05.02 cross-table consistency (b_02.02 c0030 reports
+        the direct contract provider; b_05.02 rank=1 must report the same entity).
+        """
         grandparent = Entity.objects.create(
             name="Root Provider",
             legal_identifiers={"LEI": "ROOT1234567890123456"},
@@ -1748,7 +1820,7 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         contract = Contract.objects.create(
             name="Chain Contract",
             ref_id="CA-CHAIN",
-            provider_entity=grandparent,
+            provider_entity=leaf,
             beneficiary_entity=self.main_entity,
             is_intragroup=False,
             status=Contract.Status.ACTIVE,
@@ -1762,25 +1834,11 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         chain_rows = [r for r in self._data_rows(rows) if r[0] == "CA-CHAIN"]
 
-        # 3 ranks
-        self.assertEqual(len(chain_rows), 3)
-
-        # Rank 1: root provider, recipient = provider (CHECK_C0050)
-        self.assertEqual(chain_rows[0][2], "ROOT1234567890123456")  # c0030
+        # Single rank=1 row for the direct provider (the solution's provider_entity)
+        self.assertEqual(len(chain_rows), 1)
+        self.assertEqual(chain_rows[0][2], "LEAF1234567890123456")  # c0030
         self.assertEqual(chain_rows[0][4], "1")  # c0050
-        self.assertEqual(
-            chain_rows[0][5], "ROOT1234567890123456"
-        )  # c0060: recipient = provider when rank=1
-
-        # Rank 2: intermediate, recipient = root
-        self.assertEqual(chain_rows[1][2], "INTM1234567890123456")
-        self.assertEqual(chain_rows[1][4], "2")
-        self.assertEqual(chain_rows[1][5], "ROOT1234567890123456")
-
-        # Rank 3: leaf, recipient = intermediate
-        self.assertEqual(chain_rows[2][2], "LEAF1234567890123456")
-        self.assertEqual(chain_rows[2][4], "3")
-        self.assertEqual(chain_rows[2][5], "INTM1234567890123456")
+        self.assertEqual(chain_rows[0][5], "LEAF1234567890123456")  # c0060 == c0030
 
         # Cleanup
         contract.solutions.clear()
@@ -2540,6 +2598,66 @@ class TestCrossTableReferentialIntegrity(
         b0202_fn_ids = {r[4] for r in self._data_rows(b0202_rows)}
         self.assertTrue(b0202_fn_ids.issubset(b0601_fn_ids))
 
+    def test_b0202_provider_codes_appear_in_b0502(self):
+        """
+        Every (contract_ref, ict_service_type, provider_code) reported in b_02.02
+        with a populated ict_service_type must appear in b_05.02 (at rank=1).
+        This is the cross-table consistency rule the EBA/OneGate filer enforces —
+        regression guard against the parent_entity supply-chain bug in b_05.02.
+
+        Note: b_02.02 rows with empty c0060 (ict_service_type) are excluded here
+        because b_05.02 skips such solutions. That divergence is a separate issue
+        (b_02.02 c0060 should not be empty per rule 805) and is not in scope for
+        this test.
+        """
+        b0202_rows = self._read_csv(self.buf, "reports/b_02.02.csv")
+        b0502_rows = self._read_csv(self.buf, "reports/b_05.02.csv")
+        # b_02.02 key: (c0010, c0030, c0060); skip rows with empty c0060
+        b0202_keys = {(r[0], r[2], r[5]) for r in self._data_rows(b0202_rows) if r[5]}
+        # b_05.02 key: (c0010, c0030, c0020)
+        b0502_keys = {(r[0], r[2], r[1]) for r in self._data_rows(b0502_rows)}
+        missing = b0202_keys - b0502_keys
+        self.assertFalse(
+            missing,
+            f"b_02.02 rows missing from b_05.02: {sorted(missing)[:5]}",
+        )
+
+    def test_b0501_c0110_fk_to_b0501_c0010(self):
+        """EBA rule 807: b_05.01 c0110 must reference an existing c0010 row."""
+        b0501_rows = self._read_csv(self.buf, "reports/b_05.01.csv")
+        data = self._data_rows(b0501_rows)
+        c0010_ids = {r[0] for r in data}
+        c0110_refs = {r[10] for r in data if r[10]}
+        missing = c0110_refs - c0010_ids
+        self.assertFalse(
+            missing,
+            f"b_05.01 c0110 values missing from c0010: {sorted(missing)[:5]}",
+        )
+
+    def test_b0502_c0030_fk_to_b0501_c0010(self):
+        """EBA rule 807: b_05.02 c0030 must reference an existing b_05.01 c0010 row."""
+        b0501_rows = self._read_csv(self.buf, "reports/b_05.01.csv")
+        b0502_rows = self._read_csv(self.buf, "reports/b_05.02.csv")
+        c0010_ids = {r[0] for r in self._data_rows(b0501_rows)}
+        c0030_refs = {r[2] for r in self._data_rows(b0502_rows) if r[2]}
+        missing = c0030_refs - c0010_ids
+        self.assertFalse(
+            missing,
+            f"b_05.02 c0030 values missing from b_05.01 c0010: {sorted(missing)[:5]}",
+        )
+
+    def test_b0502_c0060_fk_to_b0501_c0010(self):
+        """EBA rule 807: b_05.02 c0060 (recipient) must reference an existing b_05.01 c0010 row."""
+        b0501_rows = self._read_csv(self.buf, "reports/b_05.01.csv")
+        b0502_rows = self._read_csv(self.buf, "reports/b_05.02.csv")
+        c0010_ids = {r[0] for r in self._data_rows(b0501_rows)}
+        c0060_refs = {r[5] for r in self._data_rows(b0502_rows) if r[5]}
+        missing = c0060_refs - c0010_ids
+        self.assertFalse(
+            missing,
+            f"b_05.02 c0060 values missing from b_05.01 c0010: {sorted(missing)[:5]}",
+        )
+
 
 # ===========================================================================
 # EBA validation rules compliance
@@ -2778,6 +2896,11 @@ class TestEBAValidationRules(DoraExportTestMixin, DoraDataFactory, TestCase):
 
 
 class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
+    @unittest.skip(
+        "Awaiting ICT subcontracting data model (DORA Art. 28(2)). "
+        "Entity.parent_entity is corporate ownership, not subcontracting — "
+        "see generate_b_05_02_supply_chains."
+    )
     def test_b0502_rank_greater_than_1(self):
         """Sub-contracting chains should produce rank > 1."""
         parent = Entity.objects.create(
@@ -2819,6 +2942,11 @@ class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
         child.delete()
         parent.delete()
 
+    @unittest.skip(
+        "Awaiting ICT subcontracting data model (DORA Art. 28(2)). "
+        "Entity.parent_entity is corporate ownership, not subcontracting — "
+        "see generate_b_05_02_supply_chains."
+    )
     def test_b0502_recipient_code_populated(self):
         """Rank > 1 rows should have recipient entity code+type."""
         parent = Entity.objects.create(
