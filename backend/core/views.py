@@ -3734,7 +3734,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 item.get("eta"),
                 item.get("expiry_date"),
                 item.get("effort"),
-                item.get("impact"),
+                item.get("control_impact"),
                 item.get("annual_cost"),
                 "\n".join([ra.get("str") for ra in item.get("owner")]),
                 "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
@@ -11702,7 +11702,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     item.get("eta"),
                     item.get("expiry_date"),
                     item.get("effort"),
-                    item.get("impact"),
+                    item.get("control_impact"),
                     item.get("annual_cost"),
                     "\n".join(
                         [ra.get("str") for ra in item.get("requirement_assessments")]
@@ -11745,7 +11745,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "eta": item.get("eta"),
                 "expiry_date": item.get("expiry_date"),
                 "effort": item.get("effort"),
-                "impact": item.get("impact"),
+                "impact": item.get("control_impact"),
                 "cost": item.get("annual_cost"),
                 "covered_requirements": "\n".join(
                     [ra.get("str") for ra in item.get("requirement_assessments")]
