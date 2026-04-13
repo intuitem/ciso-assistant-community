@@ -6623,10 +6623,10 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 {"error": "Only the approver can accept the risk acceptance"}
             )
 
-        acceptance = self.get_object()
-        acceptance.set_state("accepted")
-        acceptance.justification = request.data.get("justification", "")
-        acceptance.save(update_fields=["justification"])
+        risk_acceptance = self.get_object()
+        risk_acceptance.set_state("accepted")
+        risk_acceptance.justification = request.data.get("justification", "").strip()
+        risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
@@ -6641,7 +6641,10 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 {"error": "Only the approver can reject the risk acceptance"}
             )
 
-        self.get_object().set_state("rejected")
+        risk_acceptance = self.get_object()
+        risk_acceptance.set_state("rejected")
+        risk_acceptance.justification = request.data.get("justification", "").strip()
+        risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
@@ -6655,10 +6658,10 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can revoke the risk acceptance"}
             )
-        acceptance = self.get_object()
-        acceptance.set_state("revoked")
-        acceptance.justification = request.data.get("justification", "")
-        acceptance.save(update_fields=["justification"])
+        risk_acceptance = self.get_object()
+        risk_acceptance.set_state("revoked")
+        risk_acceptance.justification = request.data.get("justification", "").strip()
+        risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
