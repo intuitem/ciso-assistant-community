@@ -456,20 +456,60 @@ class SolutionWriteSerializer(BaseModelSerializer):
         Ensure client-side invariants before hitting the DB:
           - No duplicate subcontractor within a single write.
           - Subcontractor != recipient (self-loop).
+          - Every recipient must be one of the submitted subcontractors.
+          - No cycles in the recipient graph.
           - Subcontractor != direct provider (checked in update/create since
             only then do we have the bound Solution).
         """
         subs = [entry["subcontractor"] for entry in value]
-        if len(subs) != len({s.id for s in subs}):
+        sub_ids = {s.id for s in subs}
+        if len(subs) != len(sub_ids):
             raise serializers.ValidationError(
                 _("A subcontractor cannot appear twice in the same chain.")
             )
+
+        # Build directed graph: subcontractor_id → recipient_id
+        graph = {}
         for entry in value:
             recipient = entry.get("recipient")
-            if recipient and entry["subcontractor"].id == recipient.id:
-                raise serializers.ValidationError(
-                    _("A subcontractor cannot be its own recipient.")
-                )
+            sub_id = entry["subcontractor"].id
+            if recipient:
+                if sub_id == recipient.id:
+                    raise serializers.ValidationError(
+                        _("A subcontractor cannot be its own recipient.")
+                    )
+                if recipient.id not in sub_ids:
+                    raise serializers.ValidationError(
+                        _(
+                            "Recipient must be one of the submitted "
+                            "subcontractors in the chain."
+                        )
+                    )
+                graph[sub_id] = recipient.id
+
+        # Cycle detection via DFS on the recipient graph.
+        WHITE, GRAY, BLACK = 0, 1, 2
+        color = {sid: WHITE for sid in sub_ids}
+        for start in sub_ids:
+            if color[start] != WHITE:
+                continue
+            stack = [start]
+            while stack:
+                node = stack[-1]
+                if color[node] == WHITE:
+                    color[node] = GRAY
+                    nxt = graph.get(node)
+                    if nxt is not None:
+                        if color[nxt] == GRAY:
+                            raise serializers.ValidationError(
+                                _("The subcontracting chain contains a cycle.")
+                            )
+                        if color[nxt] == WHITE:
+                            stack.append(nxt)
+                            continue
+                color[node] = BLACK
+                stack.pop()
+
         return value
 
     def _resolve_direct_provider(self, validated_data, instance):
@@ -520,15 +560,11 @@ class SolutionWriteSerializer(BaseModelSerializer):
                         ]
                     )
                 except IntegrityError as exc:
-                    # Concurrent-write race: another writer mutated the chain
-                    # between our DELETE and our INSERT. Surface as validation
-                    # error; the viewset translates it to 409 Conflict.
                     raise serializers.ValidationError(
                         {
                             "subcontracting_chain": [
                                 _("Chain modified by another user. Refresh and retry.")
                             ],
-                            "_integrity_conflict": True,
                         }
                     ) from exc
 
