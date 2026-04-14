@@ -5,11 +5,14 @@ locale: fr
 ref_id: 3CF-v3.1
 name: "Cadre de Conformit\xE9 Cyber France (3CF) pour l'aviation civile - v3.1"
 description: "Ce document, \xE9tabli par la direction de la s\xE9curit\xE9 de l\u2019\
-  aviation civile (DSAC) et l\u2019OSAC, pr\xE9sente le Cadre de Conformit\xE9 Cyber\
-  \ France (3CF) pour l\u2019aviation civile.\nVersion 3.1 du 11 mars 2026"
-copyright: null
+  aviation civile (DSAC) et l\u2019organisme pour la s\xE9curit\xE9 de l\u2019aviation\
+  \ civile (OSAC), pr\xE9sente le Cadre de Conformit\xE9 Cyber France (3CF) pour l\u2019\
+  aviation civile.\nVersion 3.1 du 11 mars 2026"
+copyright: "Ce document peut \xEAtre utilis\xE9 librement au sein de la communaut\xE9\
+  \ du transport a\xE9rien et sous r\xE9serve de mentionner sa paternit\xE9 (source\n\
+  et date de la derni\xE8re mise \xE0 jour)."
 version: 1
-publication_date: 2026-04-13
+publication_date: 2026-04-14
 provider: DSAC / OSAC
 packager: intuitem
 objects:
@@ -18,8 +21,9 @@ objects:
     ref_id: 3CF-v3.1
     name: "Cadre de Conformit\xE9 Cyber France (3CF) pour l'aviation civile - v3.1"
     description: "Ce document, \xE9tabli par la direction de la s\xE9curit\xE9 de\
-      \ l\u2019aviation civile (DSAC) et l\u2019OSAC, pr\xE9sente le Cadre de Conformit\xE9\
-      \ Cyber France (3CF) pour l\u2019aviation civile.\nVersion 3.1 du 11 mars 2026"
+      \ l\u2019aviation civile (DSAC) et l\u2019organisme pour la s\xE9curit\xE9 de\
+      \ l\u2019aviation civile (OSAC), pr\xE9sente le Cadre de Conformit\xE9 Cyber\
+      \ France (3CF) pour l\u2019aviation civile.\nVersion 3.1 du 11 mars 2026"
     implementation_groups_definition:
     - ref_id: sec
       name: "S\xE9curit\xE9 a\xE9rienne"
