@@ -106,6 +106,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    restart: always
 
   caddy:
     container_name: caddy

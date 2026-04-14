@@ -114,6 +114,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    restart: always
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`{{ fqdn }}`) && PathPrefix(`/`)"
