@@ -29,18 +29,28 @@ def compute_chain_depths(chain_rows):
     Returns a dict mapping subcontractor_id → rank (int, >= 2).
     - recipient=NULL → rank 2 (direct child of the provider)
     - recipient=X → rank_of(X) + 1
+
+    Cycles in corrupt data are broken by treating the back-edge as a root
+    (depth 2) instead of recursing infinitely.
     """
     by_sub = {sc.subcontractor_id: sc for sc in chain_rows}
     depths = {}
+    visiting = set()
 
     def _depth(sc):
         sid = sc.subcontractor_id
         if sid in depths:
             return depths[sid]
+        if sid in visiting:
+            # Cycle detected — break it by treating this node as a root.
+            depths[sid] = 2
+            return 2
+        visiting.add(sid)
         if sc.recipient_id is None or sc.recipient_id not in by_sub:
             depths[sid] = 2
         else:
             depths[sid] = _depth(by_sub[sc.recipient_id]) + 1
+        visiting.discard(sid)
         return depths[sid]
 
     for sc in chain_rows:

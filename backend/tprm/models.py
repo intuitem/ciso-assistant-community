@@ -448,6 +448,10 @@ class SolutionSubcontractor(AbstractBaseModel):
     def __str__(self):
         return f"{self.solution} → {self.subcontractor}"
 
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     def clean(self):
         super().clean()
         if (
