@@ -6,14 +6,13 @@
 
 	interface ChainRow {
 		subcontractor: string;
-		rank: number;
 		recipient: string | null;
 	}
 
 	interface TreeNode {
 		entityId: string;
 		label: string;
-		rank: number;
+		depth: number;
 		children: TreeNode[];
 	}
 
@@ -30,7 +29,6 @@
 	let chain = $state<ChainRow[]>(
 		(($formData as any).subcontracting_chain ?? []).map((r: any) => ({
 			subcontractor: r.subcontractor ?? '',
-			rank: r.rank ?? 2,
 			recipient: r.recipient ?? null
 		}))
 	);
@@ -48,7 +46,7 @@
 		directProviderId ? (entityLabels.get(directProviderId) ?? null) : null
 	);
 
-	// --- Tree building ---
+	// --- Tree building (depth computed from recipient pointers) ---
 
 	function buildTree(
 		rows: ChainRow[],
@@ -59,22 +57,24 @@
 		const root: TreeNode = {
 			entityId: rootId,
 			label: labels.get(providerId ?? '') ?? '',
-			rank: 1,
+			depth: 1,
 			children: []
 		};
 
 		const nodeMap = new Map<string, TreeNode>();
 		nodeMap.set(rootId, root);
 
+		// Create nodes (depth assigned later via parent linkage).
 		for (const row of rows) {
 			nodeMap.set(row.subcontractor, {
 				entityId: row.subcontractor,
 				label: labels.get(row.subcontractor) ?? row.subcontractor,
-				rank: row.rank,
+				depth: 0,
 				children: []
 			});
 		}
 
+		// Link children to parents.
 		for (const row of rows) {
 			const node = nodeMap.get(row.subcontractor)!;
 			const parentId = row.recipient ?? rootId;
@@ -86,25 +86,14 @@
 			}
 		}
 
-		return root;
-	}
-
-	function flattenTree(root: TreeNode, providerId: string | null): ChainRow[] {
-		const rows: ChainRow[] = [];
-		function walk(node: TreeNode, parentId: string | null) {
-			if (node.rank >= 2) {
-				rows.push({
-					subcontractor: node.entityId,
-					rank: node.rank,
-					recipient: parentId === providerId ? null : parentId
-				});
-			}
-			for (const child of node.children) {
-				walk(child, node.entityId);
-			}
+		// Assign depth via DFS.
+		function assignDepth(node: TreeNode, d: number) {
+			node.depth = d;
+			for (const child of node.children) assignDepth(child, d + 1);
 		}
-		walk(root, null);
-		return rows;
+		assignDepth(root, 1);
+
+		return root;
 	}
 
 	let tree = $derived(buildTree(chain, directProviderId, entityLabels));
@@ -116,7 +105,7 @@
 		($formData as any).subcontracting_chain = chain;
 	}
 
-	function onPickerChange(parentEntityId: string, parentRank: number, value: unknown) {
+	function onPickerChange(parentEntityId: string, value: unknown) {
 		const id = Array.isArray(value) ? value[0] : value;
 		if (!id || typeof id !== 'string') return;
 		if (directProviderId === id) return;
@@ -125,10 +114,9 @@
 		const picked = (pickerCachedOptions ?? []).find((o: any) => o?.value === id);
 		if (picked?.label) entityLabels.set(id, picked.label);
 
-		const newRank = parentRank + 1;
 		const recipient = parentEntityId === directProviderId ? null : parentEntityId;
 
-		commit([...chain, { subcontractor: id, rank: newRank, recipient }]);
+		commit([...chain, { subcontractor: id, recipient }]);
 		addingChildOf = null;
 	}
 
@@ -171,9 +159,9 @@
 		return entityLabels.get(entityId) ?? entityId;
 	}
 
-	function tierLabel(rank: number): string {
-		if (rank === 2) return m.subcontractor();
-		return `${m.subcontractor()} (${m.subcontractingTier({ n: rank - 1 })})`;
+	function tierLabel(depth: number): string {
+		if (depth === 2) return m.subcontractor();
+		return `${m.subcontractor()} (${m.subcontractingTier({ n: depth - 1 })})`;
 	}
 
 	function subtreeCount(node: TreeNode): number {
@@ -220,7 +208,7 @@
 				{#if isRoot}
 					{m.subcontractingDirectProvider()}
 				{:else}
-					{tierLabel(node.rank)}
+					{tierLabel(node.depth)}
 				{/if}
 			</div>
 			<div class="text-sm font-medium">
@@ -306,7 +294,7 @@
 					optionsSelf={directProviderId ? { id: directProviderId } : null}
 					bind:cachedValue={pickerCached}
 					bind:cachedOptions={pickerCachedOptions}
-					onChange={(value) => onPickerChange(node.entityId, node.rank, value)}
+					onChange={(value) => onPickerChange(node.entityId, value)}
 					label=""
 					placeholder={m.pickAnEntity()}
 					nullable
