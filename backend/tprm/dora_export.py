@@ -1227,7 +1227,10 @@ def generate_b_05_02_supply_chains(
             if not ict_service_type:
                 continue
 
-            direct_provider = solution.provider_entity
+            # Rank-1 provider is the contract counterparty, NOT the
+            # solution-level provider_entity.  This matches b_02.02 c0030
+            # and b_03.02 c0020, both of which use contract.provider_entity.
+            direct_provider = contract.provider_entity
             if direct_provider is None:
                 continue
 

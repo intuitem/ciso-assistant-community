@@ -2614,8 +2614,10 @@ class TestCrossTableReferentialIntegrity(
         b0502_rows = self._read_csv(self.buf, "reports/b_05.02.csv")
         # b_02.02 key: (c0010, c0030, c0060); skip rows with empty c0060
         b0202_keys = {(r[0], r[2], r[5]) for r in self._data_rows(b0202_rows) if r[5]}
-        # b_05.02 key: (c0010, c0030, c0020)
-        b0502_keys = {(r[0], r[2], r[1]) for r in self._data_rows(b0502_rows)}
+        # b_05.02 key: (c0010, c0030, c0020) — only rank-1 rows (c0050 == "1")
+        b0502_keys = {
+            (r[0], r[2], r[1]) for r in self._data_rows(b0502_rows) if r[4] == "1"
+        }
         missing = b0202_keys - b0502_keys
         self.assertFalse(
             missing,
