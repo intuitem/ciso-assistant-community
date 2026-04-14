@@ -152,7 +152,7 @@
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates'].includes(URLModel)}
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts'].includes(URLModel)}
 									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										title={m.exportButton()}
@@ -411,6 +411,13 @@
 										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 										onclick={() => (exportPopupOpen = false)}>... {m.asXLSX()}</a
 									>
+									{#if URLModel === 'entities'}
+										<a
+											href="/entities/export/ecosystem/"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											onclick={() => (exportPopupOpen = false)}>... {m.exportEcosystem()}</a
+										>
+									{/if}
 								</div>
 							</div>
 						{/if}

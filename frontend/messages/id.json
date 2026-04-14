@@ -1327,5 +1327,6 @@
 	"confirmModalMessagePlural": "Apakah Anda yakin? Tindakan ini akan memengaruhi objek berikut secara permanen",
 	"syncAppliedControlsMessage": "Kontrol yang diterapkan yang menggunakan kontrol referensi ini akan disinkronkan dengannya. Harap dicatat bahwa tindakan ini tidak dapat dibatalkan.",
 	"syncToAppliedControl": "Sinkronkan dengan kontrol yang diterapkan",
-	"syncToReferenceControl": "Sinkronkan dengan kontrol referensi"
+	"syncToReferenceControl": "Sinkronkan dengan kontrol referensi",
+	"exportEcosystem": "ekspor ekosistem (XLSX)"
 }
