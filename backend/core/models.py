@@ -6645,7 +6645,7 @@ class ComplianceAssessment(Assessment):
         default=CalculationMethod.AVG,
         verbose_name=_("Score Calculation Method"),
     )
-    target_score = models.IntegerField(
+    target_score = models.FloatField(
         null=True,
         blank=True,
         verbose_name=_("Target score"),

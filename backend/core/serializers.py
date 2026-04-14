@@ -2449,6 +2449,18 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             "target_score",
             getattr(self.instance, "target_score", None) if self.instance else None,
         )
+        anchor = attrs.get(
+            "anchor_na_to_target",
+            getattr(self.instance, "anchor_na_to_target", False)
+            if self.instance
+            else False,
+        )
+        if anchor and target is None:
+            raise serializers.ValidationError(
+                {
+                    "target_score": "A target score is required when anchoring N/A to target is enabled."
+                }
+            )
         if target is not None:
             min_s = attrs.get(
                 "min_score",
