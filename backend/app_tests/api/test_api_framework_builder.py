@@ -686,6 +686,59 @@ class TestFrameworkBuilderURNGeneration:
         result = slugify("", allow_unicode=False)
         assert result == ""
 
+    def test_duplicate_long_name_slug_collision(self, authenticated_client, app_config):
+        """Duplicating a framework whose slug fills the 60-char limit should not
+        collide with the source's URNs (regression test for slug truncation bug)."""
+        folder = Folder.get_root_folder()
+        # Name whose slug exceeds 55 chars so "(copy)" gets truncated away
+        long_name = "NIST Cybersecurity Framework 2.0 - Information Security Controls"
+        slug = slugify(long_name, allow_unicode=False)[:60]
+        assert len(slug) == 60, "Test requires a slug that fills the 60-char limit"
+
+        fw = Framework.objects.create(
+            name=long_name,
+            folder=folder,
+            is_published=True,
+        )
+        # Create nodes with URNs that use the full-length slug
+        RequirementNode.objects.create(
+            framework=fw,
+            urn=f"urn:custom:risk:req_node:{slug}:1",
+            ref_id="1",
+            name="Section 1",
+            assessable=False,
+            folder=folder,
+            is_published=True,
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn=f"urn:custom:risk:req_node:{slug}:1.1",
+            ref_id="1.1",
+            name="Requirement 1.1",
+            parent_urn=f"urn:custom:risk:req_node:{slug}:1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+
+        url = reverse("frameworks-duplicate", args=[fw.id])
+        response = authenticated_client.post(
+            url, {"name": f"{long_name} (copy)"}, format="json"
+        )
+        assert response.status_code == 201, (
+            f"Duplicate should succeed, got {response.status_code}: {response.data}"
+        )
+
+        new_fw_id = response.data["id"]
+        new_nodes = RequirementNode.objects.filter(framework_id=new_fw_id)
+        assert new_nodes.count() == 2
+        # New URNs must differ from source URNs
+        source_urns = set(
+            RequirementNode.objects.filter(framework=fw).values_list("urn", flat=True)
+        )
+        new_urns = set(new_nodes.values_list("urn", flat=True))
+        assert not source_urns & new_urns, "Copy URNs must not collide with source URNs"
+
 
 # --- YAML Export tests ---
 

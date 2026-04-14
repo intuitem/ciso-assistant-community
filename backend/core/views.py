@@ -8910,8 +8910,10 @@ class FrameworkViewSet(BaseModelViewSet):
 
         # Map old URNs to new URNs for parent_urn remapping
         urn_map = {}
-        nodes = RequirementNode.objects.filter(framework=source).order_by(
-            F("order_id").asc(nulls_last=True)
+        nodes = list(
+            RequirementNode.objects.filter(framework=source).order_by(
+                F("order_id").asc(nulls_last=True)
+            )
         )
 
         # Compute positional ref_ids for nodes that don't have one
@@ -8931,14 +8933,33 @@ class FrameworkViewSet(BaseModelViewSet):
                     f"{parent_ref}.{idx}" if parent_ref else str(idx)
                 )
 
-        for node in nodes:
-            old_urn = node.urn
-            if old_urn:
-                ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
-                new_urn = f"urn:{ns}:risk:req_node:{fw_slug}:{ref_id}"
-                urn_map[old_urn] = new_urn
-            else:
-                urn_map[old_urn] = None
+        # Build candidate URNs and check for collisions (can happen when
+        # the slug truncation makes the copy slug identical to the source slug)
+        def _build_urn_map(slug):
+            result = {}
+            for node in nodes:
+                old_urn = node.urn
+                if old_urn:
+                    ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
+                    result[old_urn] = f"urn:{ns}:risk:req_node:{slug}:{ref_id}"
+                else:
+                    result[old_urn] = None
+            return result
+
+        urn_map = _build_urn_map(fw_slug)
+        candidate_urns = {v for v in urn_map.values() if v}
+        if (
+            candidate_urns
+            and RequirementNode.objects.filter(urn__in=candidate_urns).exists()
+        ):
+            # Slug collision detected, disambiguate
+            for attempt in range(2, 100):
+                candidate_slug = f"{fw_slug}-{attempt}"
+                urn_map = _build_urn_map(candidate_slug)
+                candidate_urns = {v for v in urn_map.values() if v}
+                if not RequirementNode.objects.filter(urn__in=candidate_urns).exists():
+                    fw_slug = candidate_slug
+                    break
 
         # Clone requirement nodes
         node_id_map = {}  # old node id -> new node id
