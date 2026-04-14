@@ -509,6 +509,7 @@
 	"asXLSX": "as Excel",
 	"exportEcosystem": "ecosystem export (XLSX)",
 	"asWord": "as Word",
+	"asCyFunExcel": "as CyFun Self-Assessment",
 	"exportPdf": "Export PDF",
 	"exportExcel": "Excel (beta)",
 	"generating": "Generating",
