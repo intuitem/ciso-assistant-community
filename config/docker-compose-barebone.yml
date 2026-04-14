@@ -55,5 +55,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    restart: always
     ports:
       - 3000:3000

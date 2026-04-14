@@ -108,6 +108,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    restart: always
     networks:
       - bw-services
 

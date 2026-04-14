@@ -47,6 +47,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - backend
+    restart: always
 
   qdrant:
     container_name: qdrant
