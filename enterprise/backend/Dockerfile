@@ -60,5 +60,8 @@ COPY backend /code/
 COPY enterprise/backend/enterprise_core /code/enterprise_core
 COPY backend/startup.sh /code/
 
+RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /bin/bash app
+# USER app  # not activated by default to keep compatibility
+
 EXPOSE 8000
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
