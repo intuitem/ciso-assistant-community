@@ -469,11 +469,10 @@ class SolutionSubcontractingChainTestCase(TestCase):
     """
     Tests for the nested `subcontracting_chain` field on Solution serializers
     (DORA Art. 28(2) data model). Covers:
-      - Read serialization exposes the chain.
+      - Read serialization exposes the chain (id, subcontractor, recipient).
       - Write: create/update replacing the chain via bulk delete+insert.
       - PATCH empty array → clears; PATCH omitting → leaves untouched.
-      - Concurrent-write marker → visible on the ValidationError.
-      - Rank-gap and ordering preserved.
+      - Recipient-based tree structure and fan-out.
     """
 
     def setUp(self):
@@ -500,22 +499,25 @@ class SolutionSubcontractingChainTestCase(TestCase):
     def _seed_chain(self):
         """Seed a 2-entry chain for tests that care about existing state."""
         self.SolutionSubcontractor.objects.create(
-            solution=self.solution, subcontractor=self.sub_a, rank=2
+            solution=self.solution, subcontractor=self.sub_a
         )
         self.SolutionSubcontractor.objects.create(
-            solution=self.solution, subcontractor=self.sub_b, rank=3
+            solution=self.solution, subcontractor=self.sub_b
         )
 
     # --- Read path --------------------------------------------------------
 
-    def test_read_serializer_exposes_chain_in_rank_order(self):
+    def test_read_serializer_exposes_chain(self):
         self._seed_chain()
         data = SolutionReadSerializer(self.solution).data
         chain = data["subcontracting_chain"]
         self.assertEqual(len(chain), 2)
-        self.assertEqual(chain[0]["rank"], 2)
-        self.assertEqual(chain[1]["rank"], 3)
-        # FieldsRelatedField renders as a dict with id/str etc. (id is a UUID).
+        # Each row exposes id, subcontractor, recipient — no rank.
+        self.assertIn("id", chain[0])
+        self.assertIn("subcontractor", chain[0])
+        self.assertIn("recipient", chain[0])
+        self.assertNotIn("rank", chain[0])
+        # Ordered by created_at: sub_a first, sub_b second.
         self.assertEqual(str(chain[0]["subcontractor"]["id"]), str(self.sub_a.id))
         self.assertEqual(str(chain[1]["subcontractor"]["id"]), str(self.sub_b.id))
 
@@ -531,8 +533,8 @@ class SolutionSubcontractingChainTestCase(TestCase):
             "name": "Fresh Sol",
             "provider_entity": self.direct.id,
             "subcontracting_chain": [
-                {"subcontractor": self.sub_a.id, "rank": 2},
-                {"subcontractor": self.sub_b.id, "rank": 3},
+                {"subcontractor": self.sub_a.id},
+                {"subcontractor": self.sub_b.id},
             ],
         }
         serializer = SolutionWriteSerializer(
@@ -541,7 +543,7 @@ class SolutionSubcontractingChainTestCase(TestCase):
         self.assertTrue(serializer.is_valid(), serializer.errors)
         solution = serializer.save()
         chain = list(solution.subcontracting_chain.all())
-        self.assertEqual([r.rank for r in chain], [2, 3])
+        self.assertEqual(len(chain), 2)
         self.assertEqual(
             [r.subcontractor_id for r in chain], [self.sub_a.id, self.sub_b.id]
         )
@@ -564,7 +566,7 @@ class SolutionSubcontractingChainTestCase(TestCase):
             "name": "Loop Sol",
             "provider_entity": self.direct.id,
             "subcontracting_chain": [
-                {"subcontractor": self.direct.id, "rank": 2},
+                {"subcontractor": self.direct.id},
             ],
         }
         serializer = SolutionWriteSerializer(
@@ -583,8 +585,8 @@ class SolutionSubcontractingChainTestCase(TestCase):
             "name": "Dup Sol",
             "provider_entity": self.direct.id,
             "subcontracting_chain": [
-                {"subcontractor": self.sub_a.id, "rank": 2},
-                {"subcontractor": self.sub_a.id, "rank": 3},
+                {"subcontractor": self.sub_a.id},
+                {"subcontractor": self.sub_a.id},
             ],
         }
         serializer = SolutionWriteSerializer(
@@ -592,38 +594,6 @@ class SolutionSubcontractingChainTestCase(TestCase):
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("subcontracting_chain", serializer.errors)
-
-    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
-    def test_chain_allows_duplicate_rank_fan_out(self, _):
-        """Multiple subcontractors at rank 2 (e.g. AWS + Azure) is valid."""
-        payload = {
-            "name": "FanOut Sol",
-            "provider_entity": self.direct.id,
-            "subcontracting_chain": [
-                {"subcontractor": self.sub_a.id, "rank": 2},
-                {"subcontractor": self.sub_b.id, "rank": 2},
-            ],
-        }
-        serializer = SolutionWriteSerializer(
-            data=payload, context={"request": MagicMock()}
-        )
-        self.assertTrue(serializer.is_valid(), serializer.errors)
-        solution = serializer.save()
-        self.assertEqual(solution.subcontracting_chain.filter(rank=2).count(), 2)
-
-    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
-    def test_chain_rejects_rank_below_2(self, _):
-        payload = {
-            "name": "Rank1 Sol",
-            "provider_entity": self.direct.id,
-            "subcontracting_chain": [
-                {"subcontractor": self.sub_a.id, "rank": 1},
-            ],
-        }
-        serializer = SolutionWriteSerializer(
-            data=payload, context={"request": MagicMock()}
-        )
-        self.assertFalse(serializer.is_valid())
 
     # --- Write path: update (PATCH) --------------------------------------
 
@@ -666,7 +636,7 @@ class SolutionSubcontractingChainTestCase(TestCase):
             instance=self.solution,
             data={
                 "subcontracting_chain": [
-                    {"subcontractor": self.sub_c.id, "rank": 2},
+                    {"subcontractor": self.sub_c.id},
                 ]
             },
             partial=True,
@@ -678,18 +648,21 @@ class SolutionSubcontractingChainTestCase(TestCase):
         chain = list(self.solution.subcontracting_chain.all())
         self.assertEqual(len(chain), 1)
         self.assertEqual(chain[0].subcontractor_id, self.sub_c.id)
-        self.assertEqual(chain[0].rank, 2)
 
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
-    def test_patch_reordering_preserved(self, _):
-        """Reordering rank 2↔3 produces the correct final chain."""
-        self._seed_chain()  # A@2, B@3
+    def test_patch_updates_recipient_tree_structure(self, _):
+        """Updating recipient on existing rows changes the tree topology."""
+        self._seed_chain()  # A (null recipient), B (null recipient)
+        # Re-patch: B now subcontracts under A.
         serializer = SolutionWriteSerializer(
             instance=self.solution,
             data={
                 "subcontracting_chain": [
-                    {"subcontractor": self.sub_b.id, "rank": 2},
-                    {"subcontractor": self.sub_a.id, "rank": 3},
+                    {"subcontractor": self.sub_a.id, "recipient": None},
+                    {
+                        "subcontractor": self.sub_b.id,
+                        "recipient": self.sub_a.id,
+                    },
                 ]
             },
             partial=True,
@@ -698,9 +671,36 @@ class SolutionSubcontractingChainTestCase(TestCase):
         self.assertTrue(serializer.is_valid(), serializer.errors)
         serializer.save()
         chain = list(self.solution.subcontracting_chain.all())
-        self.assertEqual(
-            [r.subcontractor_id for r in chain], [self.sub_b.id, self.sub_a.id]
+        self.assertEqual(len(chain), 2)
+        row_a = next(r for r in chain if r.subcontractor_id == self.sub_a.id)
+        row_b = next(r for r in chain if r.subcontractor_id == self.sub_b.id)
+        self.assertIsNone(row_a.recipient_id)
+        self.assertEqual(row_b.recipient_id, self.sub_a.id)
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_fan_out_persists_via_shared_null_recipient(self, _):
+        """Two subcontractors both with recipient=null (both children of direct provider)."""
+        payload = {
+            "name": "FanOut Sol",
+            "provider_entity": self.direct.id,
+            "subcontracting_chain": [
+                {"subcontractor": self.sub_a.id, "recipient": None},
+                {"subcontractor": self.sub_b.id, "recipient": None},
+            ],
+        }
+        serializer = SolutionWriteSerializer(
+            data=payload, context={"request": MagicMock()}
         )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        solution = serializer.save()
+        chain = list(solution.subcontracting_chain.all())
+        self.assertEqual(len(chain), 2)
+        self.assertTrue(all(r.recipient_id is None for r in chain))
+        sub_ids = {r.subcontractor_id for r in chain}
+        self.assertEqual(sub_ids, {self.sub_a.id, self.sub_b.id})
+        # Verify read serializer also returns both.
+        read_data = SolutionReadSerializer(solution).data
+        self.assertEqual(len(read_data["subcontracting_chain"]), 2)
 
 
 # ===========================================================================
@@ -727,10 +727,10 @@ class EntitySubcontractsUsageTestCase(TestCase):
             name="Service B", provider_entity=self.direct
         )
         SolutionSubcontractor.objects.create(
-            solution=self.sol_a, subcontractor=self.aws, rank=2
+            solution=self.sol_a, subcontractor=self.aws
         )
         SolutionSubcontractor.objects.create(
-            solution=self.sol_b, subcontractor=self.aws, rank=2
+            solution=self.sol_b, subcontractor=self.aws
         )
 
     def test_subcontracts_count_reflects_usage(self):
@@ -743,8 +743,11 @@ class EntitySubcontractsUsageTestCase(TestCase):
         self.assertEqual(len(usage), 2)
         solution_names = sorted(u["solution_name"] for u in usage)
         self.assertEqual(solution_names, ["Service A", "Service B"])
+        # No rank field in usage rows.
         for u in usage:
-            self.assertEqual(u["rank"], 2)
+            self.assertNotIn("rank", u)
+            self.assertIn("solution_id", u)
+            self.assertIn("solution_name", u)
 
     def test_non_subcontractor_has_zero_count(self):
         other = Entity.objects.create(name="Other", folder=self.folder)

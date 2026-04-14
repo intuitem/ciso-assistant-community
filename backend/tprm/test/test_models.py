@@ -180,76 +180,53 @@ class TestSolutionSubcontractor(TestCase):
             name="Test Solution", provider_entity=self.provider
         )
 
-    def _new(self, subcontractor, rank, solution=None):
+    def _new(self, subcontractor, solution=None, recipient=None):
         """Build an unsaved SolutionSubcontractor for validation testing."""
         return SolutionSubcontractor(
             solution=solution or self.solution,
             subcontractor=subcontractor,
-            rank=rank,
+            recipient=recipient,
         )
 
     # --- clean() validation -------------------------------------------------
 
-    def test_clean_rejects_rank_below_2(self):
-        with self.assertRaises(ValidationError) as cm:
-            self._new(self.sub_a, rank=1).full_clean()
-        self.assertIn("rank", cm.exception.message_dict)
-
-    def test_clean_rejects_rank_zero(self):
-        with self.assertRaises(ValidationError) as cm:
-            self._new(self.sub_a, rank=0).full_clean()
-        self.assertIn("rank", cm.exception.message_dict)
-
     def test_clean_rejects_subcontractor_equal_to_direct_provider(self):
         with self.assertRaises(ValidationError) as cm:
-            self._new(self.provider, rank=2).full_clean()
+            self._new(self.provider).full_clean()
         self.assertIn("subcontractor", cm.exception.message_dict)
 
     def test_clean_accepts_valid_row(self):
-        row = self._new(self.sub_a, rank=2)
+        row = self._new(self.sub_a)
         row.full_clean()  # should not raise
-
-    def test_clean_accepts_non_contiguous_rank(self):
-        """Rank gaps are allowed at rest; exporter renumbers on the fly."""
-        self._new(self.sub_a, rank=2).save()
-        row = self._new(self.sub_b, rank=4)
-        row.full_clean()  # gap between 2 and 4 is fine
 
     # --- unique constraints -------------------------------------------------
 
-    def test_multiple_entities_at_same_rank_allowed(self):
-        """Fan-out: two different subcontractors at rank 2 (e.g. AWS + Azure)."""
-        self._new(self.sub_a, rank=2).save()
-        self._new(self.sub_b, rank=2).save()  # should not raise
-        self.assertEqual(self.solution.subcontracting_chain.filter(rank=2).count(), 2)
-
     def test_unique_subcontractor_per_solution(self):
-        self._new(self.sub_a, rank=2).save()
+        self._new(self.sub_a).save()
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
-                self._new(self.sub_a, rank=3).save()
+                self._new(self.sub_a).save()
 
-    def test_same_rank_allowed_on_different_solutions(self):
+    def test_same_subcontractor_on_different_solutions(self):
         other_solution = Solution.objects.create(
             name="Other Solution", provider_entity=self.provider
         )
-        self._new(self.sub_a, rank=2).save()
-        # Same rank on a different solution is fine.
-        self._new(self.sub_a, rank=2, solution=other_solution).save()
+        self._new(self.sub_a).save()
+        # Same subcontractor on a different solution is fine.
+        self._new(self.sub_a, solution=other_solution).save()
 
-    # --- ordering and reverse managers --------------------------------------
+    # --- fan-out -----------------------------------------------------------
 
-    def test_ordering_by_rank(self):
-        self._new(self.sub_b, rank=3).save()
-        self._new(self.sub_a, rank=2).save()
-        chain = list(self.solution.subcontracting_chain.all())
-        self.assertEqual([row.rank for row in chain], [2, 3])
-        self.assertEqual(
-            [row.subcontractor_id for row in chain], [self.sub_a.id, self.sub_b.id]
-        )
+    def test_fan_out_via_shared_recipient(self):
+        """Two subcontractors with the same recipient (both children of the direct provider)."""
+        self._new(self.sub_a).save()
+        self._new(self.sub_b).save()
+        self.assertEqual(self.solution.subcontracting_chain.count(), 2)
+
+    # --- reverse managers ---------------------------------------------------
 
     def test_reverse_manager_on_entity(self):
-        row = self._new(self.sub_a, rank=2)
+        row = self._new(self.sub_a)
         row.save()
         self.assertEqual(list(self.sub_a.subcontracts.all()), [row])
         self.assertEqual(list(self.sub_b.subcontracts.all()), [])
@@ -257,14 +234,14 @@ class TestSolutionSubcontractor(TestCase):
     # --- on_delete behaviour -----------------------------------------------
 
     def test_cascade_on_solution_delete(self):
-        self._new(self.sub_a, rank=2).save()
-        self._new(self.sub_b, rank=3).save()
+        self._new(self.sub_a).save()
+        self._new(self.sub_b).save()
         self.assertEqual(SolutionSubcontractor.objects.count(), 2)
         self.solution.delete()
         self.assertEqual(SolutionSubcontractor.objects.count(), 0)
 
     def test_protect_on_subcontractor_delete(self):
-        self._new(self.sub_a, rank=2).save()
+        self._new(self.sub_a).save()
         with self.assertRaises(ProtectedError):
             self.sub_a.delete()
         # Entity still exists, row still exists
@@ -272,7 +249,7 @@ class TestSolutionSubcontractor(TestCase):
         self.assertEqual(SolutionSubcontractor.objects.count(), 1)
 
     def test_subcontractor_can_be_deleted_after_chain_row_removed(self):
-        row = self._new(self.sub_a, rank=2)
+        row = self._new(self.sub_a)
         row.save()
         row.delete()
         # Now the Entity can be deleted.
@@ -282,9 +259,7 @@ class TestSolutionSubcontractor(TestCase):
     # --- str representation -------------------------------------------------
 
     def test_str_representation(self):
-        row = self._new(self.sub_a, rank=2)
+        row = self._new(self.sub_a)
         row.save()
-        s = str(row)
-        self.assertIn("Subcontractor A", s)
-        self.assertIn("Test Solution", s)
-        self.assertIn("rank 2", s)
+        expected = "Test Solution \u2192 Subcontractor A"
+        self.assertEqual(str(row), expected)

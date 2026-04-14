@@ -67,7 +67,7 @@ class EntityDestroyConflictTestCase(TestCase):
         )
         self.contract.solutions.add(self.solution)
         SolutionSubcontractor.objects.create(
-            solution=self.solution, subcontractor=self.subcontractor, rank=2
+            solution=self.solution, subcontractor=self.subcontractor
         )
         self.factory = APIRequestFactory()
 
@@ -97,7 +97,6 @@ class EntityDestroyConflictTestCase(TestCase):
         self.assertEqual(len(data["blocking_subcontracts"]), 1)
         entry = data["blocking_subcontracts"][0]
         self.assertEqual(entry["solution_name"], "Blocking Solution")
-        self.assertEqual(entry["rank"], 2)
         # Entity must still exist — destroy was prevented.
         self.assertTrue(Entity.objects.filter(pk=self.subcontractor.pk).exists())
 
@@ -132,7 +131,7 @@ class EntityDestroyConflictTestCase(TestCase):
             name="Second Blocking Solution", provider_entity=self.direct
         )
         SolutionSubcontractor.objects.create(
-            solution=solution_b, subcontractor=self.subcontractor, rank=2
+            solution=solution_b, subcontractor=self.subcontractor
         )
         response = self._call_destroy(self.subcontractor)
         self.assertEqual(response.status_code, 409)

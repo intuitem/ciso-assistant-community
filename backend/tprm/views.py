@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from django.utils.formats import date_format
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum, F, FloatField, Case, When, Value
+from django.db.models import Sum, F, FloatField, TextField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
 from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
@@ -79,6 +79,7 @@ class EntityViewSet(BaseModelViewSet):
         "default_maturity",
         "default_trust",
     ]
+    search_fields = ["name", "description", "legal_identifiers_text"]
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -96,7 +97,7 @@ class EntityViewSet(BaseModelViewSet):
         except ProtectedError as exc:
             blocking_subcontracts = instance.subcontracts.select_related(
                 "solution"
-            ).order_by("solution__name", "rank")[:50]
+            ).order_by("solution__name")[:50]
             return Response(
                 {
                     "detail": (
@@ -109,7 +110,6 @@ class EntityViewSet(BaseModelViewSet):
                             "id": str(row.id),
                             "solution_id": str(row.solution_id),
                             "solution_name": row.solution.name,
-                            "rank": row.rank,
                         }
                         for row in blocking_subcontracts
                     ],
@@ -118,8 +118,14 @@ class EntityViewSet(BaseModelViewSet):
             )
 
     def get_queryset(self):
-        """Add annotation for default_criticality to enable sorting"""
+        """Add annotations for default_criticality sorting and legal identifier search."""
         qs = super().get_queryset()
+
+        # Cast legal_identifiers JSON to text so DRF SearchFilter can icontains on it.
+        # Works on both SQLite (JSON stored as text) and PostgreSQL (jsonb → text cast).
+        qs = qs.annotate(
+            legal_identifiers_text=Cast("legal_identifiers", output_field=TextField()),
+        )
 
         # Annotate with default_criticality calculation
         # Formula: (default_dependency * default_penetration) / (default_maturity * default_trust)

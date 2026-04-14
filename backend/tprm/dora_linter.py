@@ -1409,11 +1409,15 @@ def lint_subcontracting_chains() -> List[Dict[str, Any]]:
         .distinct()
     )
 
-    if not chains.exists():
+    # Materialize once to avoid repeated DB round-trips.
+    chain_list = list(chains)
+    if not chain_list:
         return results
 
-    # --- Rule 1: subcontractor has a legal identifier ---
-    for sc in chains:
+    # Single pass over all rows — apply all rules per row.
+    seen_per_solution: Dict[Any, set] = {}
+    for sc in chain_list:
+        # Rule 1: subcontractor has a legal identifier
         code, _, _ = get_entity_identifier(sc.subcontractor)
         if not code:
             results.append(
@@ -1434,53 +1438,7 @@ def lint_subcontracting_chains() -> List[Dict[str, Any]]:
                 }
             )
 
-    # --- Rule 3: subcontractor != direct provider (self-loop) ---
-    for sc in chains:
-        if sc.solution.provider_entity_id == sc.subcontractor_id:
-            results.append(
-                {
-                    "severity": "error",
-                    "category": "Supply Chain (B_05.02)",
-                    "message": (
-                        f"Solution '{sc.solution.name}' has its own direct "
-                        f"provider '{sc.subcontractor.name}' in the "
-                        f"subcontracting chain (rank {sc.rank}). Rank 1 is "
-                        f"implicit; a subcontractor must be a different entity."
-                    ),
-                    "field": "subcontractor",
-                    "object_type": "solution_subcontractors",
-                    "object_id": str(sc.id),
-                    "object_name": (
-                        f"{sc.solution.name} → {sc.subcontractor.name} (rank {sc.rank})"
-                    ),
-                }
-            )
-
-    # --- Rule 4: rank >= 2 ---
-    for sc in chains.filter(rank__lt=2):
-        results.append(
-            {
-                "severity": "error",
-                "category": "Supply Chain (B_05.02)",
-                "message": (
-                    f"Subcontracting row for solution '{sc.solution.name}' has "
-                    f"rank {sc.rank}. Rank must be >= 2 (rank 1 is the "
-                    f"solution's direct provider, stored on Solution.provider_entity)."
-                ),
-                "field": "rank",
-                "object_type": "solution_subcontractors",
-                "object_id": str(sc.id),
-                "object_name": (
-                    f"{sc.solution.name} → {sc.subcontractor.name} (rank {sc.rank})"
-                ),
-            }
-        )
-
-    # --- Rule 2: no duplicate subcontractor within a chain ---
-    # The DB enforces this via unique_together, but if a chain somehow
-    # contains duplicates (e.g. imported via management command), surface it.
-    seen_per_solution: Dict[Any, set] = {}
-    for sc in chains:
+        # Rule 2: no duplicate subcontractor within a chain
         bucket = seen_per_solution.setdefault(sc.solution_id, set())
         if sc.subcontractor_id in bucket:
             results.append(
@@ -1494,20 +1452,37 @@ def lint_subcontracting_chains() -> List[Dict[str, Any]]:
                     "field": "subcontractor",
                     "object_type": "solution_subcontractors",
                     "object_id": str(sc.id),
-                    "object_name": (
-                        f"{sc.solution.name} → {sc.subcontractor.name} (rank {sc.rank})"
-                    ),
+                    "object_name": (f"{sc.solution.name} → {sc.subcontractor.name}"),
                 }
             )
         else:
             bucket.add(sc.subcontractor_id)
+
+        # Rule 3: subcontractor != direct provider (self-loop)
+        if sc.solution.provider_entity_id == sc.subcontractor_id:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Supply Chain (B_05.02)",
+                    "message": (
+                        f"Solution '{sc.solution.name}' has its own direct "
+                        f"provider '{sc.subcontractor.name}' in the "
+                        f"subcontracting chain. The direct provider is implicit "
+                        f"(rank 1); a subcontractor must be a different entity."
+                    ),
+                    "field": "subcontractor",
+                    "object_type": "solution_subcontractors",
+                    "object_id": str(sc.id),
+                    "object_name": (f"{sc.solution.name} → {sc.subcontractor.name}"),
+                }
+            )
 
     if not any(r["severity"] in ("error", "warning") for r in results):
         results.append(
             {
                 "severity": "ok",
                 "category": "Supply Chain (B_05.02)",
-                "message": f"All {chains.count()} subcontracting rows are valid",
+                "message": f"All {len(chain_list)} subcontracting rows are valid",
                 "field": None,
                 "object_type": None,
                 "object_id": None,

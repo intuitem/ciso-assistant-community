@@ -397,21 +397,17 @@ class SolutionSubcontractor(AbstractBaseModel):
     """
     ICT subcontracting tree for a Solution (DORA Art. 28(2), b_05.02).
 
-    Rank 1 is implicit (Solution.provider_entity). This table holds ranks 2..N.
-    Multiple entities at the same rank are allowed (fan-out / tree structure),
-    e.g. Zscaler subcontracting to both AWS and Azure at rank 2.
+    The tree is defined by the ``recipient`` parent pointer:
+      - recipient = NULL → child of the direct provider (Solution.provider_entity)
+      - recipient = entity → child of that entity in the chain
 
-    Each row stores its own ``recipient`` — the entity that sub-contracted to
-    this subcontractor. For rank-2 entries, recipient is typically the direct
-    provider (null = fallback to Solution.provider_entity). For deeper ranks,
-    recipient points to a specific rank N-1 entity in the same chain.
+    Rank (depth in the tree) is not stored — it is computed by walking up the
+    recipient chain. This makes ``recipient`` the single source of truth for
+    the tree topology and eliminates any risk of rank/tree inconsistency.
 
-    DORA b_05.02 PK is (contract, ict_service_type, provider, rank, recipient),
-    which accommodates multiple providers at the same rank as long as the
-    (provider, recipient) pair differs.
+    Multiple entities may share the same parent (fan-out), e.g. Zscaler
+    subcontracting to both AWS and Azure, both with recipient=NULL.
 
-    Defined as a standalone join model, not declared as a ManyToManyField
-    through on Solution, so rank ordering is never lost behind an M2M shortcut.
     Access via ``solution.subcontracting_chain.all()``.
     """
 
@@ -428,13 +424,6 @@ class SolutionSubcontractor(AbstractBaseModel):
         verbose_name=_("Subcontractor"),
         help_text=_("Entity providing the sub-contracted ICT service"),
     )
-    rank = models.PositiveSmallIntegerField(
-        verbose_name=_("Rank"),
-        help_text=_(
-            "Depth in the subcontracting tree "
-            "(2 = direct subcontractor, 3 = sub-subcontractor, ...)"
-        ),
-    )
     recipient = models.ForeignKey(
         Entity,
         on_delete=models.PROTECT,
@@ -442,8 +431,7 @@ class SolutionSubcontractor(AbstractBaseModel):
         verbose_name=_("Recipient"),
         help_text=_(
             "Entity that sub-contracted to this subcontractor. "
-            "Leave empty for rank-2 entries — defaults to the solution's "
-            "direct provider."
+            "Leave empty when the direct provider is the parent."
         ),
         null=True,
         blank=True,
@@ -455,22 +443,13 @@ class SolutionSubcontractor(AbstractBaseModel):
         unique_together = [
             ("solution", "subcontractor"),
         ]
-        ordering = ["rank"]
+        ordering = ["created_at"]
 
     def __str__(self):
-        return f"{self.solution} → {self.subcontractor} (rank {self.rank})"
+        return f"{self.solution} → {self.subcontractor}"
 
     def clean(self):
         super().clean()
-        if self.rank is not None and self.rank < 2:
-            raise ValidationError(
-                {
-                    "rank": _(
-                        "Rank must be >= 2. Rank 1 is the solution's direct "
-                        "provider and is implicit."
-                    )
-                }
-            )
         if (
             self.subcontractor_id is not None
             and self.solution_id is not None

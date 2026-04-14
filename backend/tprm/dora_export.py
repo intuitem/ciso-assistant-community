@@ -20,11 +20,33 @@ from core.models import Asset
 logger = logging.getLogger(__name__)
 
 
-class ExportError(RuntimeError):
-    """Raised when DORA ROI export cannot complete due to data inconsistency."""
-
-
 # Helper Functions
+
+
+def compute_chain_depths(chain_rows):
+    """Compute rank (depth) for each SolutionSubcontractor from the recipient tree.
+
+    Returns a dict mapping subcontractor_id → rank (int, >= 2).
+    - recipient=NULL → rank 2 (direct child of the provider)
+    - recipient=X → rank_of(X) + 1
+    """
+    by_sub = {sc.subcontractor_id: sc for sc in chain_rows}
+    depths = {}
+
+    def _depth(sc):
+        sid = sc.subcontractor_id
+        if sid in depths:
+            return depths[sid]
+        if sc.recipient_id is None or sc.recipient_id not in by_sub:
+            depths[sid] = 2
+        else:
+            depths[sid] = _depth(by_sub[sc.recipient_id]) + 1
+        return depths[sid]
+
+    for sc in chain_rows:
+        _depth(sc)
+    return depths
+
 
 IDENTIFIER_PRIORITY = ["LEI", "EUID", "KBO", "CRN", "VAT", "PNR", "NIN", "DUNS"]
 
@@ -1028,10 +1050,10 @@ def generate_b_05_01_provider_details(
     # is not a direct provider of any contract, so it has no entry yet. Emit a
     # zero-expense, empty-currency row per subcontractor. Runs BEFORE the
     # parent-entity walker so ancestors of subcontractors are also registered.
-    for contract in third_party_contracts:
-        for solution in contract.solutions.prefetch_related(
-            "subcontracting_chain__subcontractor"
-        ).all():
+    for contract in third_party_contracts.prefetch_related(
+        "solutions__subcontracting_chain__subcontractor"
+    ):
+        for solution in contract.solutions.all():
             for sc in solution.subcontracting_chain.all():
                 if sc.subcontractor_id not in providers_data:
                     providers_data[sc.subcontractor_id] = {
@@ -1220,17 +1242,12 @@ def generate_b_05_02_supply_chains(
                 )
                 rows_by_rank[1] = rows_by_rank.get(1, 0) + 1
 
-            # Ranks 2..N: each SolutionSubcontractor row is self-contained.
-            # recipient is stored per-row; null = direct provider.
-            try:
-                chain_rows = solution.subcontracting_chain.all()
-            except Entity.DoesNotExist as exc:
-                raise ExportError(
-                    f"Subcontractor entity deleted mid-export for solution "
-                    f"{solution.id}; refresh data and retry."
-                ) from exc
+            # Ranks 2..N: depth computed from the recipient tree.
+            chain_rows = list(solution.subcontracting_chain.all())
+            depths = compute_chain_depths(chain_rows)
 
             for sc in chain_rows:
+                rank = depths[sc.subcontractor_id]
                 provider_code, provider_code_type, _ = get_entity_identifier(
                     sc.subcontractor
                 )
@@ -1249,7 +1266,7 @@ def generate_b_05_02_supply_chains(
                     contract_ref,
                     ict_service_type,
                     provider_code,
-                    sc.rank,
+                    rank,
                     recipient_code,
                 )
                 if key in seen_keys:
@@ -1262,12 +1279,12 @@ def generate_b_05_02_supply_chains(
                         ict_service_type,
                         provider_code,
                         provider_code_type,
-                        sc.rank,
+                        rank,
                         recipient_code,
                         recipient_code_type,
                     ]
                 )
-                rows_by_rank[sc.rank] = rows_by_rank.get(sc.rank, 0) + 1
+                rows_by_rank[rank] = rows_by_rank.get(rank, 0) + 1
 
     logger.info(
         "dora_export.b_05_02.emitted",

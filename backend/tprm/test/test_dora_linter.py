@@ -77,7 +77,7 @@ class TestLintSubcontractingChainsHappyPath(LintSubcontractingChainsBase):
     def test_valid_chain_produces_ok(self):
         """A well-formed chain returns an 'ok' result and no errors/warnings."""
         SolutionSubcontractor.objects.create(
-            solution=self.solution, subcontractor=self.subcontractor, rank=2
+            solution=self.solution, subcontractor=self.subcontractor
         )
         results = lint_subcontracting_chains()
         self.assertEqual(len(self._errors(results)), 0)
@@ -95,7 +95,7 @@ class TestLintSubcontractingChainsMissingLEI(LintSubcontractingChainsBase):
             legal_identifiers={},
         )
         SolutionSubcontractor.objects.create(
-            solution=self.solution, subcontractor=no_id_sub, rank=2
+            solution=self.solution, subcontractor=no_id_sub
         )
         results = lint_subcontracting_chains()
         errors = self._errors(results)
@@ -111,7 +111,7 @@ class TestLintSubcontractingChainsMissingLEI(LintSubcontractingChainsBase):
             legal_identifiers={"LEI": ""},
         )
         SolutionSubcontractor.objects.create(
-            solution=self.solution, subcontractor=empty_id_sub, rank=2
+            solution=self.solution, subcontractor=empty_id_sub
         )
         results = lint_subcontracting_chains()
         self.assertEqual(len(self._errors(results)), 1)
@@ -130,7 +130,6 @@ class TestLintSubcontractingChainsSelfLoop(LintSubcontractingChainsBase):
                 SolutionSubcontractor(
                     solution=self.solution,
                     subcontractor=self.direct_provider,
-                    rank=2,
                 )
             ]
         )
@@ -138,19 +137,6 @@ class TestLintSubcontractingChainsSelfLoop(LintSubcontractingChainsBase):
         errors = self._errors(results)
         self.assertEqual(len(errors), 1)
         self.assertIn("direct provider", errors[0]["message"])
-
-
-class TestLintSubcontractingChainsInvalidRank(LintSubcontractingChainsBase):
-    def test_rank_below_2_errors(self):
-        """Rank 1 or 0 stored anyway (via .update bypassing clean) → error."""
-        row = SolutionSubcontractor.objects.create(
-            solution=self.solution, subcontractor=self.subcontractor, rank=2
-        )
-        # Bypass clean() via queryset update.
-        SolutionSubcontractor.objects.filter(pk=row.pk).update(rank=1)
-        results = lint_subcontracting_chains()
-        errors = self._errors(results)
-        self.assertTrue(any("rank" in e["message"].lower() for e in errors))
 
 
 class TestLintSubcontractingChainsIntragroupBeneficiary(LintSubcontractingChainsBase):
@@ -188,7 +174,7 @@ class TestLintSubcontractingChainsIntragroupBeneficiary(LintSubcontractingChains
 
         # The same subsidiary is a subcontractor in a different solution's chain.
         SolutionSubcontractor.objects.create(
-            solution=self.solution, subcontractor=subsidiary, rank=2
+            solution=self.solution, subcontractor=subsidiary
         )
         results = lint_subcontracting_chains()
         # No errors or warnings for the legit intragroup-subcontractor case.
@@ -221,7 +207,7 @@ class TestLintSubcontractingChainsDraftExcluded(LintSubcontractingChainsBase):
         )
         draft_contract.solutions.add(draft_solution)
         SolutionSubcontractor.objects.create(
-            solution=draft_solution, subcontractor=no_id_sub, rank=2
+            solution=draft_solution, subcontractor=no_id_sub
         )
         # Even though the subcontractor has no LEI, it's behind a Draft contract
         # and should be out of scope.
@@ -252,7 +238,7 @@ class TestLintSubcontractingChainsDraftExcluded(LintSubcontractingChainsBase):
         )
         excluded_contract.solutions.add(excl_solution)
         SolutionSubcontractor.objects.create(
-            solution=excl_solution, subcontractor=no_id_sub, rank=2
+            solution=excl_solution, subcontractor=no_id_sub
         )
         results = lint_subcontracting_chains()
         self.assertEqual(len(self._errors(results)), 0)

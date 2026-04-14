@@ -2897,7 +2897,7 @@ class TestEBAValidationRules(DoraExportTestMixin, DoraDataFactory, TestCase):
 
 class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
     def test_b0502_rank_greater_than_1(self):
-        """Sub-contracting chains (SolutionSubcontractor rank=2) produce rank > 1."""
+        """Sub-contracting chains (SolutionSubcontractor) produce rank > 1."""
         from tprm.models import SolutionSubcontractor
 
         direct = Entity.objects.create(
@@ -2913,9 +2913,7 @@ class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
             provider_entity=direct,
             dora_ict_service_type="eba_ZZ:x755",
         )
-        SolutionSubcontractor.objects.create(
-            solution=solution, subcontractor=sub, rank=2
-        )
+        SolutionSubcontractor.objects.create(solution=solution, subcontractor=sub)
         contract = Contract.objects.create(
             name="TDD Contract",
             ref_id="CA-TDD-RANK",
@@ -2958,9 +2956,7 @@ class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
             provider_entity=direct,
             dora_ict_service_type="eba_ZZ:x755",
         )
-        SolutionSubcontractor.objects.create(
-            solution=solution, subcontractor=sub, rank=2
-        )
+        SolutionSubcontractor.objects.create(solution=solution, subcontractor=sub)
         contract = Contract.objects.create(
             name="TDD Rcpt Contract",
             ref_id="CA-TDD-RCPT",
@@ -3053,13 +3049,14 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
         self,
         contract_ref: str,
         direct_lei: str,
-        sub_leis: list[tuple[str, int]] | list[tuple[str, int, str | None]],
+        sub_leis: list[tuple[str]] | list[tuple[str, str | None]],
     ):
         """Build a Contract + Solution + chain. Returns (contract, solution, direct, subs).
 
-        sub_leis entries are (lei, rank) or (lei, rank, recipient_lei). When
+        sub_leis entries are (lei,) or (lei, recipient_lei). When
         recipient_lei is given, the recipient FK is set to the entity whose LEI
         matches (must be the direct provider or an earlier sub in the list).
+        Depth is computed at export time from the recipient tree, not stored.
         """
         from tprm.models import SolutionSubcontractor
 
@@ -3077,15 +3074,14 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
         )
         for entry in sub_leis:
             lei = entry[0]
-            rank = entry[1]
-            recipient_lei = entry[2] if len(entry) > 2 else None
+            recipient_lei = entry[1] if len(entry) > 1 else None
             sub = Entity.objects.create(
                 name=f"Sub {lei}",
                 legal_identifiers={"LEI": lei},
             )
             recipient = lei_to_entity.get(recipient_lei) if recipient_lei else None
             SolutionSubcontractor.objects.create(
-                solution=solution, subcontractor=sub, rank=rank, recipient=recipient
+                solution=solution, subcontractor=sub, recipient=recipient
             )
             lei_to_entity[lei] = sub
             subs.append(sub)
@@ -3124,13 +3120,13 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
     # --- Multi-rank chain --------------------------------------------------
 
     def test_three_rank_chain(self):
-        """Three-rank chain: rank 1 (direct), 2 (sub), 3 (sub of sub with explicit recipient)."""
+        """Three-rank chain: rank 1 (direct), 2 (sub, child of direct), 3 (sub of sub)."""
         contract, _, _, _ = self._chain_case(
             "CA-3RANK",
             "DIR31234567890123456",
             [
-                ("SUB21234567890123456", 2),
-                ("SUB31234567890123456", 3, "SUB21234567890123456"),
+                ("SUB21234567890123456",),
+                ("SUB31234567890123456", "SUB21234567890123456"),
             ],
         )
         buf = self._generate(
@@ -3148,29 +3144,6 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
         # rank 3: sub3, recipient=sub2 (rank 2)
         self.assertEqual(rows[2][2], "SUB31234567890123456")
         self.assertEqual(rows[2][5], "SUB21234567890123456")
-
-    # --- Rank-gap renumbering ---------------------------------------------
-
-    def test_rank_emitted_as_stored(self):
-        """Storage ranks {2, 4} emit CSV ranks {1, 2, 4} — ranks are not renumbered.
-
-        With tree support, rank is a depth indicator (not a sequential position).
-        Multiple entities at rank 2 is valid (fan-out). The exporter writes
-        sc.rank directly; gaps between ranks are allowed.
-        """
-        contract, _, _, _ = self._chain_case(
-            "CA-GAP",
-            "GAPD1234567890123456",
-            [("GAPA1234567890123456", 2), ("GAPB1234567890123456", 4)],
-        )
-        buf = self._generate(
-            dora_export.generate_b_05_02_supply_chains,
-            Contract.objects.filter(pk=contract.pk),
-        )
-        rows = sorted(self._rows_for("CA-GAP", buf), key=lambda r: int(r[4]))
-        self.assertEqual([r[4] for r in rows], ["1", "2", "4"])
-        self.assertEqual(rows[1][2], "GAPA1234567890123456")
-        self.assertEqual(rows[2][2], "GAPB1234567890123456")
 
     # --- Null provider ----------------------------------------------------
     # Note: Solution.provider_entity has NOT NULL at the DB level (no null=True
@@ -3207,11 +3180,9 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
             data_location_processing="IE",
         )
         solution.assets.add(biz_fn)
+        SolutionSubcontractor.objects.create(solution=solution, subcontractor=sub_a)
         SolutionSubcontractor.objects.create(
-            solution=solution, subcontractor=sub_a, rank=2
-        )
-        SolutionSubcontractor.objects.create(
-            solution=solution, subcontractor=sub_b, rank=3
+            solution=solution, subcontractor=sub_b, recipient=sub_a
         )
         contract = Contract.objects.create(
             name="Multi-rank Contract",
@@ -3285,9 +3256,7 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
                     name=f"QC Sub {c_idx}-{s_idx}",
                     legal_identifiers={"LEI": f"QCS{c_idx:02d}{s_idx}1234567890123"},
                 )
-                SolutionSubcontractor.objects.create(
-                    solution=sol, subcontractor=sub, rank=2
-                )
+                SolutionSubcontractor.objects.create(solution=sol, subcontractor=sub)
                 contract.solutions.add(sol)
 
         with CaptureQueriesContext(connection) as ctx:
@@ -3334,9 +3303,7 @@ class TestB0501SubcontractorRegistration(
             provider_entity=direct,
             dora_ict_service_type="eba_TA:S09",
         )
-        SolutionSubcontractor.objects.create(
-            solution=solution, subcontractor=sub, rank=2
-        )
+        SolutionSubcontractor.objects.create(solution=solution, subcontractor=sub)
         contract = Contract.objects.create(
             name="Reg Contract",
             ref_id="CA-REG",
@@ -3393,9 +3360,7 @@ class TestB0501SubcontractorRegistration(
             provider_entity=direct,
             dora_ict_service_type="eba_TA:S09",
         )
-        SolutionSubcontractor.objects.create(
-            solution=solution, subcontractor=sub, rank=2
-        )
+        SolutionSubcontractor.objects.create(solution=solution, subcontractor=sub)
         contract = Contract.objects.create(
             name="Anc Contract",
             ref_id="CA-ANC",

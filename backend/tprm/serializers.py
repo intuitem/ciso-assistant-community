@@ -61,16 +61,15 @@ class EntityReadSerializer(BaseModelSerializer):
         return obj.subcontracts.count()
 
     def get_subcontracts_usage(self, obj):
-        """Up to 50 solutions blocking deletion, with rank and parent contract."""
-        rows = obj.subcontracts.select_related("solution").order_by(
-            "solution__name", "rank"
-        )[:50]
+        """Up to 50 solutions blocking deletion, with parent contract."""
+        rows = obj.subcontracts.select_related("solution").order_by("solution__name")[
+            :50
+        ]
         return [
             {
                 "id": str(row.id),
                 "solution_id": str(row.solution_id),
                 "solution_name": row.solution.name,
-                "rank": row.rank,
             }
             for row in rows
         ]
@@ -404,7 +403,7 @@ class SolutionSubcontractorReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = SolutionSubcontractor
-        fields = ["id", "subcontractor", "rank", "recipient"]
+        fields = ["id", "subcontractor", "recipient"]
 
 
 class SolutionSubcontractorWriteSerializer(serializers.Serializer):
@@ -415,11 +414,10 @@ class SolutionSubcontractorWriteSerializer(serializers.Serializer):
     replaced on each PATCH.
 
     `recipient` is optional — null means "direct provider" (the common case
-    for rank-2 fan-out entries).
+    for fan-out entries directly under the provider).
     """
 
     subcontractor = serializers.PrimaryKeyRelatedField(queryset=Entity.objects.all())
-    rank = serializers.IntegerField(min_value=2)
     recipient = serializers.PrimaryKeyRelatedField(
         queryset=Entity.objects.all(), required=False, allow_null=True, default=None
     )
@@ -442,9 +440,9 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
-    # DRF doesn't auto-write through-tables with non-FK fields (`rank`). The
-    # chain is handled manually in create()/update() below. Declared here so
-    # that `initial_data.get("subcontracting_chain")` is the surface we inspect.
+    # The chain is handled manually in create()/update() below. Declared here
+    # so that `initial_data.get("subcontracting_chain")` is the surface we
+    # inspect.
     subcontracting_chain = SolutionSubcontractorWriteSerializer(
         many=True, required=False
     )
@@ -456,13 +454,10 @@ class SolutionWriteSerializer(BaseModelSerializer):
     def validate_subcontracting_chain(self, value):
         """
         Ensure client-side invariants before hitting the DB:
-          - Each entry's rank >= 2 (enforced by SolutionSubcontractorWriteSerializer).
           - No duplicate subcontractor within a single write.
           - Subcontractor != recipient (self-loop).
-          - Subcontractor != direct provider (needs provider_entity from the
-            request or the instance; checked in update/create since only then
-            do we have the bound Solution).
-        Note: multiple entries at the same rank ARE allowed (fan-out / tree).
+          - Subcontractor != direct provider (checked in update/create since
+            only then do we have the bound Solution).
         """
         subs = [entry["subcontractor"] for entry in value]
         if len(subs) != len({s.id for s in subs}):
@@ -519,7 +514,6 @@ class SolutionWriteSerializer(BaseModelSerializer):
                             SolutionSubcontractor(
                                 solution=solution,
                                 subcontractor=entry["subcontractor"],
-                                rank=entry["rank"],
                                 recipient=entry.get("recipient"),
                             )
                             for entry in chain_data
