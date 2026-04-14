@@ -3026,5 +3026,6 @@
 	"confirmModalMessagePlural": "Weet je het zeker? Deze actie zal permanent invloed hebben op de volgende objecten",
 	"syncAppliedControlsMessage": "De toegepaste controles die deze referentiecontrole gebruiken, worden ermee gesynchroniseerd. Houd er rekening mee dat dit niet ongedaan kan worden gemaakt.",
 	"syncToAppliedControl": "Synchroniseren met toegepaste controle",
-	"syncToReferenceControl": "Synchroniseren met referentiecontrole"
+	"syncToReferenceControl": "Synchroniseren met referentiecontrole",
+	"exportEcosystem": "ecosysteem export (XLSX)"
 }
