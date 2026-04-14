@@ -1382,6 +1382,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
     requirement_assessments = serializers.SerializerMethodField(
         method_name="get_requirement_assessments"
     )
+    evidence_attachments = serializers.SerializerMethodField()
 
     def get_requirement_assessments(self, obj):
         pk = self.context.get("pk")
@@ -1397,6 +1398,20 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             }
             for req in requirement_assessments
         ]
+
+    def get_evidence_attachments(self, obj):
+        attachments = []
+        for evidence in obj.evidences.all():
+            filename = evidence.filename()
+            if filename:
+                attachments.append(
+                    {
+                        "id": str(evidence.id),
+                        "str": str(evidence),
+                        "filename": filename,
+                    }
+                )
+        return attachments
 
     class Meta:
         model = AppliedControl
@@ -1420,6 +1435,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "requirement_assessments",
             "reference_control",
             "evidences",
+            "evidence_attachments",
             "owner",
         ]
 

@@ -11687,6 +11687,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "Impact",
                 "Cost",
                 "Covered requirements",
+                "Associated evidences",
+                "Evidence attachments",
             ]
         )
 
@@ -11706,6 +11708,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     item.get("annual_cost"),
                     "\n".join(
                         [ra.get("str") for ra in item.get("requirement_assessments")]
+                    ),
+                    "\n".join(
+                        evidence.get("str")
+                        for evidence in item.get("evidences", [])
+                        if evidence.get("str")
+                    ),
+                    "\n".join(
+                        evidence.get("filename")
+                        for evidence in item.get("evidence_attachments", [])
+                        if evidence.get("filename")
                     ),
                 ]
             )
@@ -11750,6 +11762,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "covered_requirements": "\n".join(
                     [ra.get("str") for ra in item.get("requirement_assessments")]
                 ),
+                "associated_evidences": "\n".join(
+                    evidence.get("str")
+                    for evidence in item.get("evidences", [])
+                    if evidence.get("str")
+                ),
+                "evidence_attachments": "\n".join(
+                    evidence.get("filename")
+                    for evidence in item.get("evidence_attachments", [])
+                    if evidence.get("filename")
+                ),
             }
             entries.append(entry)
 
@@ -11760,7 +11782,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             df.to_excel(writer, index=False)
             worksheet = writer.sheets["Sheet1"]
 
-            wrap_columns = ["name", "description", "covered_requirements"]
+            wrap_columns = [
+                "name",
+                "description",
+                "covered_requirements",
+                "associated_evidences",
+                "evidence_attachments",
+            ]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
