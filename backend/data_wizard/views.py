@@ -279,7 +279,7 @@ def _resolve_filtering_labels(value) -> list[UUID]:
 
 def _resolve_vulnerabilities(value, folder) -> list[UUID]:
     """
-    Parse pipe- or comma-separated label names and return list of Vulnerabilities IDs.
+    Parse pipe- or comma-separated vulnerability names and return list of Vulnerability IDs.
     """
     if not value or not isinstance(value, str):
         return []
@@ -287,17 +287,13 @@ def _resolve_vulnerabilities(value, folder) -> list[UUID]:
     vuln_names = [name.strip() for name in value.split(separator) if name.strip()]
     vuln_ids: list[UUID] = []
     for vuln_name in vuln_names:
-        vuln = Vulnerability.objects.filter(name=vuln_name, folder=folder).first()
-        if vuln is None:
-            try:
-                vuln = Vulnerability(name=vuln_name, folder=folder)
-                vuln.full_clean()
-                vuln.save()
-                vuln_ids.append(vuln.id)
-            except Exception:
-                logging.exception(f"Failed to save vulnerability {vuln_name}")
-        else:
+        try:
+            vuln, _created = Vulnerability.objects.get_or_create(
+                name=vuln_name, folder=folder
+            )
             vuln_ids.append(vuln.id)
+        except Exception:
+            logging.exception(f"Failed to resolve vulnerability {vuln_name}")
     return vuln_ids
 
 
@@ -1121,6 +1117,7 @@ class ReferenceControlRecordConsumer(RecordConsumer[None]):
 @dataclass(frozen=True)
 class FindingsAssessmentContext:
     findings_assessment: FindingsAssessment
+    folder: Folder
 
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
@@ -1160,7 +1157,8 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                 )
 
                 return FindingsAssessmentContext(
-                    findings_assessment=findings_assessment
+                    findings_assessment=findings_assessment,
+                    folder=perimeter.folder,
                 ), None
             return None, Error(record=assessment_data, error=str(serializer.errors))
 
@@ -1188,11 +1186,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         if isinstance(priority, int) and not (1 <= priority <= 4):
             priority = None
 
-        perimeter_id = self.perimeter_id
-        perimeter = Perimeter.objects.get(id=perimeter_id)
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
         vulnerabilities = _resolve_vulnerabilities(
-            record.get("vulnerabilities"), perimeter.folder
+            record.get("vulnerabilities"), context.folder
         )
 
         finding_data = {
