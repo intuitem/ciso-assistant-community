@@ -317,6 +317,7 @@
 		<TextField
 			{form}
 			type="number"
+			step="any"
 			field="target_score"
 			label={m.targetScore()}
 			helpText={m.targetScoreHelpText()}
