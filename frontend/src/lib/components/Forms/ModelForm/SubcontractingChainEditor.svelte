@@ -7,6 +7,14 @@
 	interface ChainRow {
 		subcontractor: string;
 		rank: number;
+		recipient: string | null;
+	}
+
+	interface TreeNode {
+		entityId: string;
+		label: string;
+		rank: number;
+		children: TreeNode[];
 	}
 
 	interface Props {
@@ -19,80 +27,144 @@
 
 	const formData = form.form;
 
-	// Source of truth: ordered array. Position defines rank (position 0 = rank 2, ...).
-	// Stored `rank` field is derived; we assign it from position on every commit.
 	let chain = $state<ChainRow[]>(
-		renumber((($formData as any).subcontracting_chain ?? []) as ChainRow[])
+		(($formData as any).subcontracting_chain ?? []).map((r: any) => ({
+			subcontractor: r.subcontractor ?? '',
+			rank: r.rank ?? 2,
+			recipient: r.recipient ?? null
+		}))
 	);
 
-	// Label lookup for rendering chain rows AND the direct provider card.
-	// Populated from two sources:
-	//   1. one-shot fetch on mount of all viewable entities,
-	//   2. the cachedOptions binding from AutocompleteSelect when the user picks.
 	let entityLabels = $state<Map<string, string>>(new Map());
+	let addingChildOf = $state<string | null>(null);
+	let confirmingRemove = $state<string | null>(null);
 
-	// Resolve the direct provider's label from the same lookup. Single source
-	// of truth, avoids depending on the parent form's initialData shape.
-	let directProviderLabel = $derived(
-		directProviderId ? (entityLabels.get(directProviderId) ?? null) : null
-	);
-
-	// Picker state — AutocompleteSelect is form-bound. Use a synthetic field
-	// name that doesn't collide with the Solution schema; superforms creates
-	// it lazily and we never submit it. The picker is force-remounted via
-	// `{#key chain.length}` after each successful append, which clears its
-	// internal `selected` state — simpler than trying to drive the component
-	// to clear itself through props.
+	// Picker state (per-node, only one open at a time).
 	const pickerField = '__subcontractor_picker';
 	let pickerCached = $state<string[] | undefined>([]);
 	let pickerCachedOptions = $state<any[] | undefined>([]);
 
-	function renumber(rows: ChainRow[]): ChainRow[] {
-		return rows.map((r, i) => ({ subcontractor: r.subcontractor ?? '', rank: i + 2 }));
+	let directProviderLabel = $derived(
+		directProviderId ? (entityLabels.get(directProviderId) ?? null) : null
+	);
+
+	// --- Tree building ---
+
+	function buildTree(
+		rows: ChainRow[],
+		providerId: string | null,
+		labels: Map<string, string>
+	): TreeNode {
+		const rootId = providerId ?? '__no_provider__';
+		const root: TreeNode = {
+			entityId: rootId,
+			label: labels.get(providerId ?? '') ?? '',
+			rank: 1,
+			children: []
+		};
+
+		const nodeMap = new Map<string, TreeNode>();
+		nodeMap.set(rootId, root);
+
+		for (const row of rows) {
+			nodeMap.set(row.subcontractor, {
+				entityId: row.subcontractor,
+				label: labels.get(row.subcontractor) ?? row.subcontractor,
+				rank: row.rank,
+				children: []
+			});
+		}
+
+		for (const row of rows) {
+			const node = nodeMap.get(row.subcontractor)!;
+			const parentId = row.recipient ?? rootId;
+			const parent = nodeMap.get(parentId);
+			if (parent) {
+				parent.children.push(node);
+			} else {
+				root.children.push(node);
+			}
+		}
+
+		return root;
 	}
 
+	function flattenTree(root: TreeNode, providerId: string | null): ChainRow[] {
+		const rows: ChainRow[] = [];
+		function walk(node: TreeNode, parentId: string | null) {
+			if (node.rank >= 2) {
+				rows.push({
+					subcontractor: node.entityId,
+					rank: node.rank,
+					recipient: parentId === providerId ? null : parentId
+				});
+			}
+			for (const child of node.children) {
+				walk(child, node.entityId);
+			}
+		}
+		walk(root, null);
+		return rows;
+	}
+
+	let tree = $derived(buildTree(chain, directProviderId, entityLabels));
+
+	// --- Mutations ---
+
 	function commit(next: ChainRow[]) {
-		chain = renumber(next);
+		chain = next;
 		($formData as any).subcontracting_chain = chain;
 	}
 
-	function onPickerChange(value: unknown) {
+	function onPickerChange(parentEntityId: string, parentRank: number, value: unknown) {
 		const id = Array.isArray(value) ? value[0] : value;
 		if (!id || typeof id !== 'string') return;
-
-		// Guard: direct provider is excluded via optionsSelf but double-check.
 		if (directProviderId === id) return;
-		// Duplicate guard: silently ignore — the picker remounts on commit
-		// so the stale selection is cleared either way.
 		if (chain.some((r) => r.subcontractor === id)) return;
 
-		// Capture the label from AutocompleteSelect's cachedOptions for display.
 		const picked = (pickerCachedOptions ?? []).find((o: any) => o?.value === id);
 		if (picked?.label) entityLabels.set(id, picked.label);
 
-		// commit() bumps chain.length, which triggers `{#key chain.length}` to
-		// remount AutocompleteSelect with a fresh empty selection.
-		commit([...chain, { subcontractor: id, rank: chain.length + 2 }]);
+		const newRank = parentRank + 1;
+		const recipient = parentEntityId === directProviderId ? null : parentEntityId;
+
+		commit([...chain, { subcontractor: id, rank: newRank, recipient }]);
+		addingChildOf = null;
 	}
 
-	function removeRow(index: number) {
-		const next = chain.slice();
-		next.splice(index, 1);
-		commit(next);
+	function collectSubtreeIds(node: TreeNode): Set<string> {
+		const ids = new Set<string>();
+		function walk(n: TreeNode) {
+			ids.add(n.entityId);
+			for (const child of n.children) walk(child);
+		}
+		walk(node);
+		return ids;
 	}
 
-	function moveUp(index: number) {
-		if (index === 0) return;
-		const next = chain.slice();
-		[next[index - 1], next[index]] = [next[index], next[index - 1]];
-		commit(next);
+	function findNode(node: TreeNode, entityId: string): TreeNode | null {
+		if (node.entityId === entityId) return node;
+		for (const child of node.children) {
+			const found = findNode(child, entityId);
+			if (found) return found;
+		}
+		return null;
 	}
 
-	function moveDown(index: number) {
-		if (index === chain.length - 1) return;
-		const next = chain.slice();
-		[next[index + 1], next[index]] = [next[index], next[index + 1]];
-		commit(next);
+	function removeNode(entityId: string) {
+		const target = findNode(tree, entityId);
+		if (!target) return;
+		const toRemove = collectSubtreeIds(target);
+		commit(chain.filter((row) => !toRemove.has(row.subcontractor)));
+		confirmingRemove = null;
+	}
+
+	function handleRemoveClick(entityId: string, childCount: number) {
+		if (childCount === 0) {
+			removeNode(entityId);
+		} else {
+			confirmingRemove = entityId;
+		}
 	}
 
 	function displayLabel(entityId: string): string {
@@ -104,10 +176,14 @@
 		return `${m.subcontractor()} (${m.subcontractingTier({ n: rank - 1 })})`;
 	}
 
-	// One-shot label fetch on mount. Always runs — populates labels for the
-	// direct provider card AND any chain rows loaded with the form. Cheap
-	// (one request) and we read folder-scoped results via the existing
-	// /entities endpoint.
+	function subtreeCount(node: TreeNode): number {
+		let count = 0;
+		for (const child of node.children) {
+			count += 1 + subtreeCount(child);
+		}
+		return count;
+	}
+
 	onMount(async () => {
 		try {
 			const res = await fetch('/entities?is_active=true');
@@ -125,103 +201,134 @@
 	});
 </script>
 
-<div class="space-y-3">
-	<p class="text-sm text-surface-500">{m.subcontractingChainHelpText()}</p>
-
-	<!-- Locked "Direct provider" card (rank 1, implicit) -->
+{#snippet nodeCard(node: TreeNode, isRoot: boolean)}
 	<div
-		class="flex items-center gap-3 rounded border border-surface-300 bg-surface-100 p-3"
-		data-testid="chain-direct-provider"
+		class="flex items-center gap-3 rounded border p-3 {isRoot
+			? 'border-surface-300 bg-surface-100'
+			: 'border-surface-200'}"
+		data-testid={isRoot ? 'chain-direct-provider' : 'chain-row'}
 	>
-		<div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white">
-			<i class="fa-solid fa-building" aria-hidden="true"></i>
+		<div
+			class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full {isRoot
+				? 'bg-primary-500 text-white'
+				: 'bg-surface-300 text-surface-700'}"
+		>
+			<i class="fa-solid {isRoot ? 'fa-building' : 'fa-sitemap'}" aria-hidden="true"></i>
 		</div>
 		<div class="flex-1">
 			<div class="text-xs font-semibold tracking-wide text-surface-600 uppercase">
-				{m.subcontractingDirectProvider()}
+				{#if isRoot}
+					{m.subcontractingDirectProvider()}
+				{:else}
+					{tierLabel(node.rank)}
+				{/if}
 			</div>
 			<div class="text-sm font-medium">
-				{directProviderLabel ?? m.subcontractingDirectProviderUnset()}
+				{#if isRoot}
+					{directProviderLabel ?? m.subcontractingDirectProviderUnset()}
+				{:else}
+					{displayLabel(node.entityId)}
+				{/if}
 			</div>
 		</div>
-		<span class="text-xs text-surface-500" title={m.subcontractingRank1ImplicitHelp()}>
-			<i class="fa-solid fa-lock" aria-hidden="true"></i>
-		</span>
-	</div>
-
-	<!-- Chain rows: static cards with reorder/remove controls. -->
-	{#each chain as row, index (index)}
-		<div
-			class="flex items-center gap-3 rounded border border-surface-200 p-3"
-			data-testid="chain-row"
-		>
-			<div
-				class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-300 text-surface-700"
-			>
-				<i class="fa-solid fa-sitemap" aria-hidden="true"></i>
-			</div>
-			<div class="flex-1">
-				<div class="text-xs font-semibold tracking-wide text-surface-600 uppercase">
-					{tierLabel(row.rank)}
-				</div>
-				<div class="text-sm font-medium">{displayLabel(row.subcontractor)}</div>
-			</div>
-			<div class="flex flex-col gap-1">
+		<div class="flex items-center gap-1">
+			{#if isRoot}
+				<span class="text-xs text-surface-500" title={m.subcontractingRank1ImplicitHelp()}>
+					<i class="fa-solid fa-lock" aria-hidden="true"></i>
+				</span>
+			{/if}
+			{#if directProviderId}
 				<button
 					type="button"
 					class="btn btn-sm preset-tonal"
-					disabled={index === 0}
-					onclick={() => moveUp(index)}
-					aria-label={m.moveUp()}
+					onclick={() => {
+						addingChildOf = addingChildOf === node.entityId ? null : node.entityId;
+						confirmingRemove = null;
+					}}
+					aria-label={m.addSubcontractorTo({ entity: displayLabel(node.entityId) })}
+					title={m.addSubcontractorTo({ entity: displayLabel(node.entityId) })}
 				>
-					<i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+					<i class="fa-solid fa-plus" aria-hidden="true"></i>
 				</button>
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal"
-					disabled={index === chain.length - 1}
-					onclick={() => moveDown(index)}
-					aria-label={m.moveDown()}
-				>
-					<i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
-				</button>
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal-error"
-					onclick={() => removeRow(index)}
-					aria-label={m.remove()}
-				>
-					<i class="fa-solid fa-trash" aria-hidden="true"></i>
-				</button>
-			</div>
+			{/if}
+			{#if !isRoot}
+				{#if confirmingRemove === node.entityId}
+					<!-- inline confirmation for non-leaf removal -->
+					<div class="flex items-center gap-1">
+						<button
+							type="button"
+							class="btn btn-sm preset-filled-error-500"
+							onclick={() => removeNode(node.entityId)}
+						>
+							{m.confirm()}
+						</button>
+						<button
+							type="button"
+							class="btn btn-sm preset-tonal"
+							onclick={() => (confirmingRemove = null)}
+						>
+							{m.cancel()}
+						</button>
+					</div>
+				{:else}
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal-error"
+						onclick={() => handleRemoveClick(node.entityId, node.children.length)}
+						aria-label={m.remove()}
+					>
+						<i class="fa-solid fa-trash" aria-hidden="true"></i>
+					</button>
+				{/if}
+			{/if}
 		</div>
-	{/each}
-
-	<!-- One picker that appends to the chain on select. AutocompleteSelect does
-	     the fetching, searching, keyboard nav, and folder-scoped RBAC. The
-	     direct provider is excluded via `optionsSelf`. The whole component is
-	     remounted on every chain change via `{#key chain.length}` so the
-	     internal selection state resets immediately after a pick. -->
-	<div class="rounded border border-dashed border-surface-300 p-3">
-		<div class="mb-2 text-xs font-semibold tracking-wide text-surface-600 uppercase">
-			{m.addSubcontractor()}
-		</div>
-		{#key chain.length}
-			<AutocompleteSelect
-				{form}
-				field={pickerField}
-				optionsEndpoint="entities"
-				optionsExtraFields={[['folder', 'str']]}
-				optionsSelf={directProviderId ? { id: directProviderId } : null}
-				bind:cachedValue={pickerCached}
-				bind:cachedOptions={pickerCachedOptions}
-				onChange={onPickerChange}
-				label=""
-				placeholder={m.pickAnEntity()}
-				nullable
-			/>
-		{/key}
 	</div>
+
+	<!-- Subtree removal warning text -->
+	{#if confirmingRemove === node.entityId}
+		<p class="mt-1 text-xs text-error-500">
+			{m.removeSubtreeConfirm({ n: subtreeCount(node) })}
+		</p>
+	{/if}
+
+	<!-- Inline picker when adding a child to this node -->
+	{#if addingChildOf === node.entityId}
+		<div class="mt-2 rounded border border-dashed border-surface-300 p-3">
+			<div class="mb-2 text-xs font-semibold tracking-wide text-surface-600 uppercase">
+				{m.addSubcontractorTo({ entity: displayLabel(node.entityId) })}
+			</div>
+			{#key chain.length + '-' + node.entityId}
+				<AutocompleteSelect
+					{form}
+					field={pickerField}
+					optionsEndpoint="entities"
+					optionsExtraFields={[['folder', 'str']]}
+					optionsSelf={directProviderId ? { id: directProviderId } : null}
+					bind:cachedValue={pickerCached}
+					bind:cachedOptions={pickerCachedOptions}
+					onChange={(value) => onPickerChange(node.entityId, node.rank, value)}
+					label=""
+					placeholder={m.pickAnEntity()}
+					nullable
+				/>
+			{/key}
+		</div>
+	{/if}
+
+	<!-- Children -->
+	{#if node.children.length > 0}
+		<div class="ml-6 border-l-2 border-surface-300 pl-4 mt-2 space-y-2">
+			{#each node.children as child (child.entityId)}
+				{@render nodeCard(child, false)}
+			{/each}
+		</div>
+	{/if}
+{/snippet}
+
+<div class="space-y-3">
+	<p class="text-sm text-surface-500">{m.subcontractingChainHelpText()}</p>
+
+	{@render nodeCard(tree, true)}
 
 	<!-- Hidden input: serialized chain for form-action POST/PATCH flows. -->
 	<input type="hidden" name="subcontracting_chain" value={JSON.stringify(chain)} />
