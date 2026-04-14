@@ -3567,6 +3567,36 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
         fields = "__all__"
 
 
+class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    reviewers = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    authors = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = FindingsAssessment
+        fields = [
+            "ref_id",
+            "name",
+            "version",
+            "description",
+            "folder",
+            "perimeter",
+            "eta",
+            "due_date",
+            "status",
+            "observation",
+            "is_locked",
+            "category",
+            "evidences",
+            "reviewers",
+            "authors",
+            "created_at",
+            "updated_at",
+        ]
+
+
 class FindingWriteSerializer(BaseModelSerializer):
     def validate(self, attrs):
         if (

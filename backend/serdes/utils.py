@@ -27,6 +27,7 @@ from core.models import (
     Threat,
     ReferenceControl,
     LoadedLibrary,
+    FindingsAssessment,
 )
 
 from ebios_rm.models import (
@@ -58,6 +59,7 @@ from core.serializers import (
     ReferenceControlImportExportSerializer,
     FrameworkImportExportSerializer,
     RiskMatrixImportExportSerializer,
+    FindingsAssessmentImportExportSerializer,
 )
 
 from ebios_rm.serializers import (
@@ -173,6 +175,7 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         Framework: FrameworkImportExportSerializer,
         RiskMatrix: RiskMatrixImportExportSerializer,
         LoadedLibrary: LoadedLibraryImportExportSerializer,
+        FindingsAssessment: FindingsAssessmentImportExportSerializer,
     }
 
     return model_serializer_map.get(model, None)
@@ -494,6 +497,8 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         )
     ).distinct()
 
+    findings_assessments = FindingsAssessment.objects.filter(Q(folder__in=folders))
+
     return {
         # "folder": folders,
         "loadedlibrary": loaded_libraries,
@@ -520,4 +525,5 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "stakeholder": stakeholders,
         "strategicscenario": strategic_scenarios,
         "attackpath": attack_paths,
+        "findingsassessment": findings_assessments,
     }
