@@ -458,3 +458,299 @@ class SolutionSerializersTestCase(TestCase):
         self.assertEqual(solution.ref_id, new_solution_data["ref_id"])
         self.assertEqual(solution.criticality, new_solution_data["criticality"])
         self.assertIsNone(solution.recipient_entity)
+
+
+# ===========================================================================
+# SolutionSubcontractor serialization + chain semantics
+# ===========================================================================
+
+
+class SolutionSubcontractingChainTestCase(TestCase):
+    """
+    Tests for the nested `subcontracting_chain` field on Solution serializers
+    (DORA Art. 28(2) data model). Covers:
+      - Read serialization exposes the chain (id, subcontractor, recipient).
+      - Write: create/update replacing the chain via bulk delete+insert.
+      - PATCH empty array → clears; PATCH omitting → leaves untouched.
+      - Recipient-based tree structure and fan-out.
+    """
+
+    def setUp(self):
+        from tprm.models import SolutionSubcontractor
+
+        self.folder = Folder.objects.create(name="Chain Test Folder")
+        self.direct = Entity.objects.create(
+            name="Direct", folder=self.folder, legal_identifiers={"LEI": "DIRE1"}
+        )
+        self.sub_a = Entity.objects.create(
+            name="Sub A", folder=self.folder, legal_identifiers={"LEI": "SUBA1"}
+        )
+        self.sub_b = Entity.objects.create(
+            name="Sub B", folder=self.folder, legal_identifiers={"LEI": "SUBB1"}
+        )
+        self.sub_c = Entity.objects.create(
+            name="Sub C", folder=self.folder, legal_identifiers={"LEI": "SUBC1"}
+        )
+        self.solution = Solution.objects.create(
+            name="Chain Sol", provider_entity=self.direct
+        )
+        self.SolutionSubcontractor = SolutionSubcontractor
+
+    def _seed_chain(self):
+        """Seed a 2-entry chain for tests that care about existing state."""
+        self.SolutionSubcontractor.objects.create(
+            solution=self.solution, subcontractor=self.sub_a
+        )
+        self.SolutionSubcontractor.objects.create(
+            solution=self.solution, subcontractor=self.sub_b
+        )
+
+    # --- Read path --------------------------------------------------------
+
+    def test_read_serializer_exposes_chain(self):
+        self._seed_chain()
+        data = SolutionReadSerializer(self.solution).data
+        chain = data["subcontracting_chain"]
+        self.assertEqual(len(chain), 2)
+        # Each row exposes id, subcontractor, recipient — no rank.
+        self.assertIn("id", chain[0])
+        self.assertIn("subcontractor", chain[0])
+        self.assertIn("recipient", chain[0])
+        self.assertNotIn("rank", chain[0])
+        # Ordered by created_at: sub_a first, sub_b second.
+        self.assertEqual(str(chain[0]["subcontractor"]["id"]), str(self.sub_a.id))
+        self.assertEqual(str(chain[1]["subcontractor"]["id"]), str(self.sub_b.id))
+
+    def test_read_serializer_empty_chain_renders_empty_list(self):
+        data = SolutionReadSerializer(self.solution).data
+        self.assertEqual(data["subcontracting_chain"], [])
+
+    # --- Write path: create ----------------------------------------------
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_create_with_chain_persists_rows(self, _):
+        payload = {
+            "name": "Fresh Sol",
+            "provider_entity": self.direct.id,
+            "subcontracting_chain": [
+                {"subcontractor": self.sub_a.id},
+                {"subcontractor": self.sub_b.id},
+            ],
+        }
+        serializer = SolutionWriteSerializer(
+            data=payload, context={"request": MagicMock()}
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        solution = serializer.save()
+        chain = list(solution.subcontracting_chain.all())
+        self.assertEqual(len(chain), 2)
+        self.assertEqual(
+            [r.subcontractor_id for r in chain], [self.sub_a.id, self.sub_b.id]
+        )
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_create_without_chain_leaves_chain_empty(self, _):
+        payload = {"name": "No-Chain Sol", "provider_entity": self.direct.id}
+        serializer = SolutionWriteSerializer(
+            data=payload, context={"request": MagicMock()}
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        solution = serializer.save()
+        self.assertEqual(solution.subcontracting_chain.count(), 0)
+
+    # --- Write path: validation ------------------------------------------
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_chain_rejects_direct_provider(self, _):
+        payload = {
+            "name": "Loop Sol",
+            "provider_entity": self.direct.id,
+            "subcontracting_chain": [
+                {"subcontractor": self.direct.id},
+            ],
+        }
+        serializer = SolutionWriteSerializer(
+            data=payload, context={"request": MagicMock()}
+        )
+        # validation itself passes (direct check happens in _replace_chain
+        # because it needs the bound Solution); .save() raises.
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        with self.assertRaises(ValidationError) as cm:
+            serializer.save()
+        self.assertIn("subcontracting_chain", cm.exception.detail)
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_chain_rejects_duplicate_subcontractor(self, _):
+        payload = {
+            "name": "Dup Sol",
+            "provider_entity": self.direct.id,
+            "subcontracting_chain": [
+                {"subcontractor": self.sub_a.id},
+                {"subcontractor": self.sub_a.id},
+            ],
+        }
+        serializer = SolutionWriteSerializer(
+            data=payload, context={"request": MagicMock()}
+        )
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("subcontracting_chain", serializer.errors)
+
+    # --- Write path: update (PATCH) --------------------------------------
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_patch_with_empty_array_clears_chain(self, _):
+        self._seed_chain()
+        self.assertEqual(self.solution.subcontracting_chain.count(), 2)
+        serializer = SolutionWriteSerializer(
+            instance=self.solution,
+            data={"subcontracting_chain": []},
+            partial=True,
+            context={"request": MagicMock()},
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        serializer.save()
+        self.solution.refresh_from_db()
+        self.assertEqual(self.solution.subcontracting_chain.count(), 0)
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_patch_omitting_chain_leaves_unchanged(self, _):
+        self._seed_chain()
+        serializer = SolutionWriteSerializer(
+            instance=self.solution,
+            data={"name": "Renamed Only"},
+            partial=True,
+            context={"request": MagicMock()},
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        serializer.save()
+        self.solution.refresh_from_db()
+        self.assertEqual(self.solution.name, "Renamed Only")
+        # Chain untouched.
+        self.assertEqual(self.solution.subcontracting_chain.count(), 2)
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_patch_replaces_chain_completely(self, _):
+        """Write is replace-semantics, not merge — old rows go, new rows come."""
+        self._seed_chain()
+        serializer = SolutionWriteSerializer(
+            instance=self.solution,
+            data={
+                "subcontracting_chain": [
+                    {"subcontractor": self.sub_c.id},
+                ]
+            },
+            partial=True,
+            context={"request": MagicMock()},
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        serializer.save()
+        self.solution.refresh_from_db()
+        chain = list(self.solution.subcontracting_chain.all())
+        self.assertEqual(len(chain), 1)
+        self.assertEqual(chain[0].subcontractor_id, self.sub_c.id)
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_patch_updates_recipient_tree_structure(self, _):
+        """Updating recipient on existing rows changes the tree topology."""
+        self._seed_chain()  # A (null recipient), B (null recipient)
+        # Re-patch: B now subcontracts under A.
+        serializer = SolutionWriteSerializer(
+            instance=self.solution,
+            data={
+                "subcontracting_chain": [
+                    {"subcontractor": self.sub_a.id, "recipient": None},
+                    {
+                        "subcontractor": self.sub_b.id,
+                        "recipient": self.sub_a.id,
+                    },
+                ]
+            },
+            partial=True,
+            context={"request": MagicMock()},
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        serializer.save()
+        chain = list(self.solution.subcontracting_chain.all())
+        self.assertEqual(len(chain), 2)
+        row_a = next(r for r in chain if r.subcontractor_id == self.sub_a.id)
+        row_b = next(r for r in chain if r.subcontractor_id == self.sub_b.id)
+        self.assertIsNone(row_a.recipient_id)
+        self.assertEqual(row_b.recipient_id, self.sub_a.id)
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    def test_fan_out_persists_via_shared_null_recipient(self, _):
+        """Two subcontractors both with recipient=null (both children of direct provider)."""
+        payload = {
+            "name": "FanOut Sol",
+            "provider_entity": self.direct.id,
+            "subcontracting_chain": [
+                {"subcontractor": self.sub_a.id, "recipient": None},
+                {"subcontractor": self.sub_b.id, "recipient": None},
+            ],
+        }
+        serializer = SolutionWriteSerializer(
+            data=payload, context={"request": MagicMock()}
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        solution = serializer.save()
+        chain = list(solution.subcontracting_chain.all())
+        self.assertEqual(len(chain), 2)
+        self.assertTrue(all(r.recipient_id is None for r in chain))
+        sub_ids = {r.subcontractor_id for r in chain}
+        self.assertEqual(sub_ids, {self.sub_a.id, self.sub_b.id})
+        # Verify read serializer also returns both.
+        read_data = SolutionReadSerializer(solution).data
+        self.assertEqual(len(read_data["subcontracting_chain"]), 2)
+
+
+# ===========================================================================
+# EntityReadSerializer subcontracts usage fields
+# ===========================================================================
+
+
+class EntitySubcontractsUsageTestCase(TestCase):
+    def setUp(self):
+        from tprm.models import SolutionSubcontractor
+
+        self.folder = Folder.objects.create(name="Folder")
+        self.direct = Entity.objects.create(
+            name="Direct", folder=self.folder, legal_identifiers={"LEI": "DIRE1"}
+        )
+        self.aws = Entity.objects.create(
+            name="AWS", folder=self.folder, legal_identifiers={"LEI": "AWSX1"}
+        )
+        # Two solutions both subcontract to AWS.
+        self.sol_a = Solution.objects.create(
+            name="Service A", provider_entity=self.direct
+        )
+        self.sol_b = Solution.objects.create(
+            name="Service B", provider_entity=self.direct
+        )
+        SolutionSubcontractor.objects.create(
+            solution=self.sol_a, subcontractor=self.aws
+        )
+        SolutionSubcontractor.objects.create(
+            solution=self.sol_b, subcontractor=self.aws
+        )
+
+    def test_subcontracts_count_reflects_usage(self):
+        data = EntityReadSerializer(self.aws).data
+        self.assertEqual(data["subcontracts_count"], 2)
+
+    def test_subcontracts_usage_lists_blocking_solutions(self):
+        data = EntityReadSerializer(self.aws).data
+        usage = data["subcontracts_usage"]
+        self.assertEqual(len(usage), 2)
+        solution_names = sorted(u["solution_name"] for u in usage)
+        self.assertEqual(solution_names, ["Service A", "Service B"])
+        # No rank field in usage rows.
+        for u in usage:
+            self.assertNotIn("rank", u)
+            self.assertIn("solution_id", u)
+            self.assertIn("solution_name", u)
+
+    def test_non_subcontractor_has_zero_count(self):
+        other = Entity.objects.create(name="Other", folder=self.folder)
+        data = EntityReadSerializer(other).data
+        self.assertEqual(data["subcontracts_count"], 0)
+        self.assertEqual(data["subcontracts_usage"], [])
