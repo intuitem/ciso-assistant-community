@@ -796,7 +796,15 @@ export const solutionSchema = z.object({
 	dora_reintegration_possibility: z.string().nullish(),
 	dora_discontinuing_impact: z.string().nullish(),
 	dora_alternative_providers_identified: z.string().nullish(),
-	dora_alternative_providers: z.string().optional()
+	dora_alternative_providers: z.string().optional(),
+	subcontracting_chain: z
+		.array(
+			z.object({
+				subcontractor: z.string().uuid(),
+				rank: z.number().int().min(2)
+			})
+		)
+		.optional()
 });
 
 export const representativeSchema = z.object({
