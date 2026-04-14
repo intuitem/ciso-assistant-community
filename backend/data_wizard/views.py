@@ -3553,15 +3553,36 @@ class LoadFileView(APIView):
                     "folder": domain,
                 }
 
-                # Add optional solution reference
-                solution_ref_id = str(record.get("solution_ref_id", "")).strip()
-                if solution_ref_id:
-                    if solution_ref_id in solution_ref_map:
-                        contract_data["solution"] = solution_ref_map[solution_ref_id]
-                    else:
-                        logger.warning(
-                            f"Solution with ref_id '{solution_ref_id}' not found for contract '{ref_id}'"
-                        )
+                # Parse solution references (newline, pipe, or comma-separated).
+                # Unknown refs are reported in results["errors"] but do not block
+                # contract creation — known refs are still linked, matching the
+                # pre-multi-solution lenient behavior.
+                solution_ids = []
+                missing_solution_refs = []
+                solution_ref_id_raw = str(record.get("solution_ref_id", "")).strip()
+                if solution_ref_id_raw:
+                    for sol_ref in re.split(r"[\n\r|,]+", solution_ref_id_raw):
+                        sol_ref = sol_ref.strip()
+                        if not sol_ref:
+                            continue
+                        if sol_ref in solution_ref_map:
+                            solution_ids.append(solution_ref_map[sol_ref])
+                        else:
+                            missing_solution_refs.append(sol_ref)
+                            logger.warning(
+                                f"Solution with ref_id '{sol_ref}' not found for contract '{ref_id}'"
+                            )
+
+                if missing_solution_refs:
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": (
+                                "Unknown solution_ref_id(s) skipped: "
+                                + ", ".join(missing_solution_refs)
+                            ),
+                        }
+                    )
 
                 # Add optional fields
                 if record.get("status"):
@@ -3616,7 +3637,9 @@ class LoadFileView(APIView):
                                 context={"request": request},
                             )
                             if serializer.is_valid():
-                                serializer.save()
+                                contract = serializer.save()
+                                if solution_ids:
+                                    contract.solutions.set(solution_ids)
                                 results["updated"] += 1
                             else:
                                 results["failed"] += 1
@@ -3632,6 +3655,8 @@ class LoadFileView(APIView):
 
                 if serializer.is_valid(raise_exception=True):
                     contract = serializer.save()
+                    if solution_ids:
+                        contract.solutions.set(solution_ids)
                     results["successful"] += 1
                     logger.debug(
                         f"Created contract: {contract.name} with ref_id: {ref_id}"
