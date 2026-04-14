@@ -801,7 +801,8 @@ export const solutionSchema = z.object({
 		.array(
 			z.object({
 				subcontractor: z.string().uuid(),
-				rank: z.number().int().min(2)
+				rank: z.number().int().min(2),
+				recipient: z.string().uuid().nullish()
 			})
 		)
 		.optional()

@@ -217,11 +217,11 @@ class TestSolutionSubcontractor(TestCase):
 
     # --- unique constraints -------------------------------------------------
 
-    def test_unique_rank_per_solution(self):
+    def test_multiple_entities_at_same_rank_allowed(self):
+        """Fan-out: two different subcontractors at rank 2 (e.g. AWS + Azure)."""
         self._new(self.sub_a, rank=2).save()
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                self._new(self.sub_b, rank=2).save()
+        self._new(self.sub_b, rank=2).save()  # should not raise
+        self.assertEqual(self.solution.subcontracting_chain.filter(rank=2).count(), 2)
 
     def test_unique_subcontractor_per_solution(self):
         self._new(self.sub_a, rank=2).save()

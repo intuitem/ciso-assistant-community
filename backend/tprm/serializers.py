@@ -400,10 +400,11 @@ class SolutionSubcontractorReadSerializer(BaseModelSerializer):
     """Nested rows inside SolutionReadSerializer.subcontracting_chain."""
 
     subcontractor = FieldsRelatedField()
+    recipient = FieldsRelatedField()
 
     class Meta:
         model = SolutionSubcontractor
-        fields = ["id", "subcontractor", "rank"]
+        fields = ["id", "subcontractor", "rank", "recipient"]
 
 
 class SolutionSubcontractorWriteSerializer(serializers.Serializer):
@@ -412,10 +413,16 @@ class SolutionSubcontractorWriteSerializer(serializers.Serializer):
     `solution` is set by the parent SolutionWriteSerializer from URL context,
     not accepted from the client. `id` is also ignored; the chain is fully
     replaced on each PATCH.
+
+    `recipient` is optional — null means "direct provider" (the common case
+    for rank-2 fan-out entries).
     """
 
     subcontractor = serializers.PrimaryKeyRelatedField(queryset=Entity.objects.all())
     rank = serializers.IntegerField(min_value=2)
+    recipient = serializers.PrimaryKeyRelatedField(
+        queryset=Entity.objects.all(), required=False, allow_null=True, default=None
+    )
 
 
 class SolutionReadSerializer(BaseModelSerializer):
@@ -451,21 +458,23 @@ class SolutionWriteSerializer(BaseModelSerializer):
         Ensure client-side invariants before hitting the DB:
           - Each entry's rank >= 2 (enforced by SolutionSubcontractorWriteSerializer).
           - No duplicate subcontractor within a single write.
-          - No duplicate rank within a single write.
+          - Subcontractor != recipient (self-loop).
           - Subcontractor != direct provider (needs provider_entity from the
             request or the instance; checked in update/create since only then
             do we have the bound Solution).
+        Note: multiple entries at the same rank ARE allowed (fan-out / tree).
         """
         subs = [entry["subcontractor"] for entry in value]
         if len(subs) != len({s.id for s in subs}):
             raise serializers.ValidationError(
                 _("A subcontractor cannot appear twice in the same chain.")
             )
-        ranks = [entry["rank"] for entry in value]
-        if len(ranks) != len(set(ranks)):
-            raise serializers.ValidationError(
-                _("Each rank must be unique within a chain.")
-            )
+        for entry in value:
+            recipient = entry.get("recipient")
+            if recipient and entry["subcontractor"].id == recipient.id:
+                raise serializers.ValidationError(
+                    _("A subcontractor cannot be its own recipient.")
+                )
         return value
 
     def _resolve_direct_provider(self, validated_data, instance):
@@ -511,6 +520,7 @@ class SolutionWriteSerializer(BaseModelSerializer):
                                 solution=solution,
                                 subcontractor=entry["subcontractor"],
                                 rank=entry["rank"],
+                                recipient=entry.get("recipient"),
                             )
                             for entry in chain_data
                         ]

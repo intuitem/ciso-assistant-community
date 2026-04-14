@@ -594,9 +594,10 @@ class SolutionSubcontractingChainTestCase(TestCase):
         self.assertIn("subcontracting_chain", serializer.errors)
 
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
-    def test_chain_rejects_duplicate_rank(self, _):
+    def test_chain_allows_duplicate_rank_fan_out(self, _):
+        """Multiple subcontractors at rank 2 (e.g. AWS + Azure) is valid."""
         payload = {
-            "name": "Dup Rank Sol",
+            "name": "FanOut Sol",
             "provider_entity": self.direct.id,
             "subcontracting_chain": [
                 {"subcontractor": self.sub_a.id, "rank": 2},
@@ -606,8 +607,9 @@ class SolutionSubcontractingChainTestCase(TestCase):
         serializer = SolutionWriteSerializer(
             data=payload, context={"request": MagicMock()}
         )
-        self.assertFalse(serializer.is_valid())
-        self.assertIn("subcontracting_chain", serializer.errors)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        solution = serializer.save()
+        self.assertEqual(solution.subcontracting_chain.filter(rank=2).count(), 2)
 
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
     def test_chain_rejects_rank_below_2(self, _):

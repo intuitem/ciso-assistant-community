@@ -395,15 +395,24 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
 
 class SolutionSubcontractor(AbstractBaseModel):
     """
-    Ordered ICT subcontracting chain for a Solution (DORA Art. 28(2), b_05.02).
+    ICT subcontracting tree for a Solution (DORA Art. 28(2), b_05.02).
 
-    Rank 1 is implicit (Solution.provider_entity). This table holds ranks 2..N,
-    where each subcontractor's recipient is the entity at the previous rank in
-    the same chain.
+    Rank 1 is implicit (Solution.provider_entity). This table holds ranks 2..N.
+    Multiple entities at the same rank are allowed (fan-out / tree structure),
+    e.g. Zscaler subcontracting to both AWS and Azure at rank 2.
+
+    Each row stores its own ``recipient`` — the entity that sub-contracted to
+    this subcontractor. For rank-2 entries, recipient is typically the direct
+    provider (null = fallback to Solution.provider_entity). For deeper ranks,
+    recipient points to a specific rank N-1 entity in the same chain.
+
+    DORA b_05.02 PK is (contract, ict_service_type, provider, rank, recipient),
+    which accommodates multiple providers at the same rank as long as the
+    (provider, recipient) pair differs.
 
     Defined as a standalone join model, not declared as a ManyToManyField
     through on Solution, so rank ordering is never lost behind an M2M shortcut.
-    Access via `solution.subcontracting_chain.all()`.
+    Access via ``solution.subcontracting_chain.all()``.
     """
 
     solution = models.ForeignKey(
@@ -422,16 +431,28 @@ class SolutionSubcontractor(AbstractBaseModel):
     rank = models.PositiveSmallIntegerField(
         verbose_name=_("Rank"),
         help_text=_(
-            "Position in the subcontracting chain "
-            "(2 = first subcontractor, 3 = subcontractor of subcontractor, ...)"
+            "Depth in the subcontracting tree "
+            "(2 = direct subcontractor, 3 = sub-subcontractor, ...)"
         ),
+    )
+    recipient = models.ForeignKey(
+        Entity,
+        on_delete=models.PROTECT,
+        related_name="subcontract_recipients",
+        verbose_name=_("Recipient"),
+        help_text=_(
+            "Entity that sub-contracted to this subcontractor. "
+            "Leave empty for rank-2 entries — defaults to the solution's "
+            "direct provider."
+        ),
+        null=True,
+        blank=True,
     )
 
     class Meta:
         verbose_name = _("Solution subcontractor")
         verbose_name_plural = _("Solution subcontractors")
         unique_together = [
-            ("solution", "rank"),
             ("solution", "subcontractor"),
         ]
         ordering = ["rank"]
@@ -461,6 +482,14 @@ class SolutionSubcontractor(AbstractBaseModel):
                         "A subcontractor cannot be the solution's direct provider."
                     )
                 }
+            )
+        if (
+            self.subcontractor_id is not None
+            and self.recipient_id is not None
+            and self.subcontractor_id == self.recipient_id
+        ):
+            raise ValidationError(
+                {"recipient": _("A subcontractor cannot be its own recipient.")}
             )
 
 

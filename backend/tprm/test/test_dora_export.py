@@ -3053,9 +3053,14 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
         self,
         contract_ref: str,
         direct_lei: str,
-        sub_leis: list[tuple[str, int]],
+        sub_leis: list[tuple[str, int]] | list[tuple[str, int, str | None]],
     ):
-        """Build a Contract + Solution + chain. Returns (contract, solution, entities)."""
+        """Build a Contract + Solution + chain. Returns (contract, solution, direct, subs).
+
+        sub_leis entries are (lei, rank) or (lei, rank, recipient_lei). When
+        recipient_lei is given, the recipient FK is set to the entity whose LEI
+        matches (must be the direct provider or an earlier sub in the list).
+        """
         from tprm.models import SolutionSubcontractor
 
         direct = Entity.objects.create(
@@ -3063,19 +3068,26 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
             legal_identifiers={"LEI": direct_lei},
         )
         subs = []
+        # Build a lookup so we can resolve recipient LEIs to Entity objects.
+        lei_to_entity: dict[str, Entity] = {direct_lei: direct}
         solution = Solution.objects.create(
             name=f"Service {contract_ref}",
             provider_entity=direct,
             dora_ict_service_type="eba_TA:S09",
         )
-        for lei, rank in sub_leis:
+        for entry in sub_leis:
+            lei = entry[0]
+            rank = entry[1]
+            recipient_lei = entry[2] if len(entry) > 2 else None
             sub = Entity.objects.create(
                 name=f"Sub {lei}",
                 legal_identifiers={"LEI": lei},
             )
+            recipient = lei_to_entity.get(recipient_lei) if recipient_lei else None
             SolutionSubcontractor.objects.create(
-                solution=solution, subcontractor=sub, rank=rank
+                solution=solution, subcontractor=sub, rank=rank, recipient=recipient
             )
+            lei_to_entity[lei] = sub
             subs.append(sub)
         contract = Contract.objects.create(
             name=f"Contract {contract_ref}",
@@ -3112,11 +3124,14 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
     # --- Multi-rank chain --------------------------------------------------
 
     def test_three_rank_chain(self):
-        """Three-rank chain: rank 1 (direct), 2 (sub), 3 (sub of sub)."""
+        """Three-rank chain: rank 1 (direct), 2 (sub), 3 (sub of sub with explicit recipient)."""
         contract, _, _, _ = self._chain_case(
             "CA-3RANK",
             "DIR31234567890123456",
-            [("SUB21234567890123456", 2), ("SUB31234567890123456", 3)],
+            [
+                ("SUB21234567890123456", 2),
+                ("SUB31234567890123456", 3, "SUB21234567890123456"),
+            ],
         )
         buf = self._generate(
             dora_export.generate_b_05_02_supply_chains,
@@ -3136,8 +3151,13 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
 
     # --- Rank-gap renumbering ---------------------------------------------
 
-    def test_rank_gap_renumbers_on_export(self):
-        """Storage ranks {2, 4} emit CSV ranks {1, 2, 3} — renumber on the fly."""
+    def test_rank_emitted_as_stored(self):
+        """Storage ranks {2, 4} emit CSV ranks {1, 2, 4} — ranks are not renumbered.
+
+        With tree support, rank is a depth indicator (not a sequential position).
+        Multiple entities at rank 2 is valid (fan-out). The exporter writes
+        sc.rank directly; gaps between ranks are allowed.
+        """
         contract, _, _, _ = self._chain_case(
             "CA-GAP",
             "GAPD1234567890123456",
@@ -3148,8 +3168,7 @@ class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCas
             Contract.objects.filter(pk=contract.pk),
         )
         rows = sorted(self._rows_for("CA-GAP", buf), key=lambda r: int(r[4]))
-        self.assertEqual([r[4] for r in rows], ["1", "2", "3"])
-        # Chain ordering preserved: GAPA is rank=2 in storage → rank=2 in CSV
+        self.assertEqual([r[4] for r in rows], ["1", "2", "4"])
         self.assertEqual(rows[1][2], "GAPA1234567890123456")
         self.assertEqual(rows[2][2], "GAPB1234567890123456")
 
