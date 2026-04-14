@@ -2,10 +2,12 @@
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
+	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
@@ -75,9 +77,12 @@
 			'validation_deadline',
 			'timestamp',
 			'reported_at',
+			'occurred_at',
+			'resolved_at',
 			'due_date',
 			'start_date',
-			'closing_date'
+			'closing_date',
+			'commission_date'
 		],
 		widgets,
 		actions,
@@ -207,6 +212,23 @@
 			type: 'component',
 			component: modalComponent,
 			title: safeTranslate(addExisting.label ?? 'selectExisting')
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
+		if (!field.batchCreate) return;
+		const modalComponent: ModalComponent = {
+			ref: BatchCreatePersonalDataModal,
+			props: {
+				processingId: parentId,
+				urlModel: field.urlModel
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(field.batchCreate.label ?? 'batchCreate')
 		};
 		modalStore.trigger(modal);
 	}
@@ -380,7 +402,7 @@
 				{m.riskAcceptanceNotYetSubmittedMessage()}
 			</div>
 		</div>
-	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver?.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
@@ -415,7 +437,7 @@
 			<div class="text-green-900">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
-			{#if page.data.user.id === data.data.approver.id}
+			{#if page.data.user.id === data.data.approver?.id}
 				<div class="ml-auto whitespace-nowrap">
 					<button
 						onclick={(_) => {
@@ -433,6 +455,17 @@
 
 	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
+		{#if data.urlModel === 'stakeholders' && data.data?.ebios_rm_study?.id}
+			<div class="mb-4 p-3">
+				<Anchor
+					href={'/ebios-rm/' + data.data.ebios_rm_study.id + '/workshop-3/ecosystem'}
+					class="anchor text-sm"
+				>
+					<i class="fa-solid fa-arrow-left"></i>
+					{m.backToWorkshop()} : {m.ebiosWs3_1()}
+				</Anchor>
+			</div>
+		{/if}
 		{#each data.data?.sync_mappings as syncMapping}
 			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 				<h3 class="font-semibold text-secondary-800 mb-2">
@@ -597,6 +630,13 @@
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 																		>{safeTranslate(val.str)}</Anchor
 																	>
+																{:else if val.str && (val.str.startsWith('http://') || val.str.startsWith('https://'))}
+																	<a
+																		href={val.str}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		class="anchor">{val.str}</a
+																	>
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
@@ -656,6 +696,9 @@
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
 												<MarkdownRenderer content={value} />
+											{:else if typeof value === 'boolean'}
+												{@const bd = booleanDisplay(value, key, data.urlModel)}
+												<i class="{bd.icon} {bd.colorClass}"></i>
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
@@ -870,6 +913,20 @@
 												<i class="fa-solid fa-hand-pointer"></i>
 											</button>
 										</span>
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
 										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
@@ -881,6 +938,20 @@
 											</button>
 										</span>
 									{:else}
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
 											data-testid="add-button"

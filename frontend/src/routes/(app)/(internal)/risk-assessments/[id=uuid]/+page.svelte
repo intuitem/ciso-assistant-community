@@ -23,8 +23,8 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import z from 'zod';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { invalidateAll } from '$app/navigation';
 
@@ -362,6 +362,12 @@
 					href="/risk-assessments/{risk_assessment.id}/action-plan"
 					class="btn preset-filled-primary-500"
 					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
+				>
+				<Anchor
+					label={m.analytics()}
+					href="/risk-assessments/{risk_assessment.id}/analytics"
+					class="btn preset-filled-primary-500"
+					><i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button

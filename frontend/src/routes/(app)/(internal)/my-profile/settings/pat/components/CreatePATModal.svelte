@@ -4,7 +4,7 @@
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { AuthTokenCreateSchema } from '$lib/utils/schemas';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { m } from '$paraglide/messages';
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';

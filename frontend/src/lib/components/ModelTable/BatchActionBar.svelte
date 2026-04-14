@@ -26,7 +26,18 @@
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
+	let openGroupIndex: number | null = $state(null);
+
+	function toggleGroup(index: number) {
+		openGroupIndex = openGroupIndex === index ? null : index;
+	}
+
+	function closeGroup() {
+		openGroupIndex = null;
+	}
+
 	function triggerAction(action: BatchActionConfig) {
+		closeGroup();
 		const count = selectedIds.size;
 		const ids = [...selectedIds];
 
@@ -121,17 +132,47 @@
 		</button>
 	</div>
 	<div class="flex gap-2 items-center">
-		{#each actions as action}
-			<button
-				type="button"
-				class="btn text-sm {action.type === 'delete'
-					? 'preset-tonal-error hover:ring-2 hover:ring-error-500'
-					: 'preset-tonal-primary hover:ring-2 hover:ring-primary-500'}"
-				onclick={() => triggerAction(action)}
-			>
-				<i class={action.icon}></i>
-				<span>{safeTranslate(action.label)}</span>
-			</button>
+		{#each actions as action, index}
+			{#if action.type === 'group' && action.children}
+				<div class="relative">
+					<button
+						type="button"
+						class="btn text-sm preset-tonal-primary hover:ring-2 hover:ring-primary-500"
+						onclick={() => toggleGroup(index)}
+					>
+						<i class={action.icon}></i>
+						<span>{safeTranslate(action.label)}</span>
+						<i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+					</button>
+					{#if openGroupIndex === index}
+						<div
+							class="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-50 min-w-max"
+						>
+							{#each action.children as child}
+								<button
+									type="button"
+									class="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+									onclick={() => triggerAction(child)}
+								>
+									<i class={child.icon}></i>
+									<span>{safeTranslate(child.label)}</span>
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<button
+					type="button"
+					class="btn text-sm {action.type === 'delete'
+						? 'preset-tonal-error hover:ring-2 hover:ring-error-500'
+						: 'preset-tonal-primary hover:ring-2 hover:ring-primary-500'}"
+					onclick={() => triggerAction(action)}
+				>
+					<i class={action.icon}></i>
+					<span>{safeTranslate(action.label)}</span>
+				</button>
+			{/if}
 		{/each}
 	</div>
 </div>

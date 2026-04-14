@@ -7,9 +7,15 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.db import transaction
 
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, ActionPlanList
-from core.models import AppliedControl
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    ActionPlanList,
+    ActionPlanBudgetOverview,
+)
+from core.models import AppliedControl, Folder
 from core.utils import format_currency as _fmt_currency, get_global_currency
+from iam.models import RoleAssignment
+from rest_framework.exceptions import PermissionDenied
 from global_settings.models import GlobalSettings
 
 from .models import (
@@ -650,7 +656,11 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "study_id": str(study.id),
                 "study_name": study.name,
                 "study_description": study.description,
-                "study_authors": [author.email for author in study.authors.all()],
+                "study_authors": [
+                    email
+                    for author in study.authors.all()
+                    for email in author.get_emails()
+                ],
                 "study_folder": {"id": str(study.folder.id), "name": study.folder.name}
                 if study.folder
                 else None,
@@ -1415,8 +1425,18 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
         return QuantitativeRiskStudyActionPlanSerializer
 
     def get_queryset(self):
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        study_id = self.kwargs["pk"]
+
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            QuantitativeRiskStudy,
+            study_id,
+        ):
+            raise PermissionDenied()
+
         quantitative_risk_study: QuantitativeRiskStudy = (
-            QuantitativeRiskStudy.objects.get(id=self.kwargs["pk"])
+            QuantitativeRiskStudy.objects.get(id=study_id)
         )
 
         # Get all scenarios for this study
@@ -1428,6 +1448,21 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
         )
 
         # Get all added controls from these selected hypotheses
-        return AppliedControl.objects.filter(
+        qs = AppliedControl.objects.filter(
             quantitative_risk_hypotheses_added__in=hypotheses
         ).distinct()
+
+        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(),
+            self.request.user,
+            AppliedControl,
+        )
+        return qs.filter(id__in=viewable_controls)
+
+
+class QuantitativeRiskStudyActionPlanBudgetOverview(
+    ActionPlanBudgetOverview, QuantitativeRiskStudyActionPlanList
+):
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(self.compute_budget_overview(qs))

@@ -1,4 +1,4 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:cyfun-small-self-assessment
 locale: en
@@ -11,10 +11,23 @@ description: 'Centre For Cybersecurity Belgium - CyberFundamentals Framework - S
   https://ccb.belgium.be'
 copyright: All texts, layouts, designs and other elements of any nature in this document
   are subject to copyright law.
-version: 1
+version: 2
 publication_date: 2025-07-03
 provider: CCB
 packager: intuitem
+translations:
+  fr:
+    name: "CCB CyberFondamentaux Small - Auto-\xE9valuation"
+    description: "Centre pour la Cybers\xE9curit\xE9 Belgique - Cadre des CyberFondamentaux\
+      \ - Small\nAvec le contenu du site safeOnWeb en date de juillet 2025\nhttps://ccb.belgium.be"
+  nl:
+    name: CCB CyberFundamentals Small - Zelfbeoordeling
+    description: "Centrum voor Cyberveiligheid Belgi\xEB - CyberFundamentals Framework\
+      \ - Small\nMet inhoud van de safeOnWeb website per juli 2025\nhttps://ccb.belgium.be"
+  de:
+    name: CCB Cyber-Grundlagen Small - Selbstbewertung
+    description: "Zentrum f\xFCr Cybersicherheit Belgien - Cyber-Grundlagen Framework\
+      \ - Small\nMit Inhalten der safeOnWeb Website ab Juli 2025\nhttps://ccb.belgium.be"
 objects:
   framework:
     urn: urn:intuitem:risk:framework:cyfun-small-self-assessment
@@ -22,6 +35,19 @@ objects:
     name: CCB CyberFundamentals Small - Self assessment
     description: Centre For Cybersecurity Belgium - CyberFundamentals Framework -
       Small
+    translations:
+      fr:
+        name: "CCB CyberFondamentaux Small - Auto-\xE9valuation"
+        description: "Centre pour la Cybers\xE9curit\xE9 Belgique - Cadre des CyberFondamentaux\
+          \ - Small"
+      nl:
+        name: CCB CyberFundamentals Small - Zelfbeoordeling
+        description: "Centrum voor Cyberveiligheid Belgi\xEB - CyberFundamentals Framework\
+          \ - Small"
+      de:
+        name: CCB Cyber-Grundlagen Small - Selbstbewertung
+        description: "Zentrum f\xFCr Cybersicherheit Belgien - Cyber-Grundlagen Framework\
+          \ - Small"
     min_score: 1
     max_score: 5
     scores_definition:
@@ -40,6 +66,11 @@ objects:
           description: Er bestaat geen standaardproces.
           description_doc: Geen procesdocumentatie of niet formeel goedgekeurd door
             het management.
+        de:
+          name: Initial
+          description: Es gibt keinen Standardprozess.
+          description_doc: Keine Prozessdokumentation oder nicht formell durch das
+            Management genehmigt.
     - score: 2
       name: Repeatable
       description: Ad-hoc process exists and is done informally.
@@ -58,6 +89,12 @@ objects:
           description: Er bestaat een ad-hocproces dat informeel wordt uitgevoerd.
           description_doc: Er bestaat formeel goedgekeurde Procesdocumentatie, maar
             deze is de afgelopen 2 jaar niet herzien.
+        de:
+          name: Wiederholbar
+          description: "Ein Ad-hoc-Prozess existiert und wird informell durchgef\xFC\
+            hrt."
+          description_doc: "Es existiert eine formell genehmigte Prozessdokumentation,\
+            \ die jedoch in den letzten 2 Jahren nicht \xFCberpr\xFCft wurde."
     - score: 3
       name: Defined
       description: 'Formal process exists and is implemented.
@@ -86,6 +123,14 @@ objects:
           description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
             worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
             uitzonderingen < 5% van de tijd.
+        de:
+          name: Definiert
+          description: "Ein formaler Prozess existiert und ist implementiert.\nNachweise\
+            \ sind f\xFCr die meisten Aktivit\xE4ten verf\xFCgbar.\nWeniger als 10%\
+            \ Prozessausnahmen."
+          description_doc: "Es existiert eine formell genehmigte Prozessdokumentation,\
+            \ und Ausnahmen sind dokumentiert und genehmigt.\nDokumentierte und genehmigte\
+            \ Ausnahmen < 5% der F\xE4lle."
     - score: 4
       name: Managed
       description: 'Formal process exists and is implemented.
@@ -121,6 +166,15 @@ objects:
           description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
             worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
             uitzonderingen < 3% van de tijd.
+        de:
+          name: Gesteuert
+          description: "Ein formaler Prozess existiert und ist implementiert.\nNachweise\
+            \ sind f\xFCr alle Aktivit\xE4ten verf\xFCgbar.\nDetaillierte Prozesskennzahlen\
+            \ werden erfasst und berichtet.\nMinimalziele f\xFCr Kennzahlen wurden\
+            \ festgelegt.\nWeniger als 5% Prozessausnahmen."
+          description_doc: "Es existiert eine formell genehmigte Prozessdokumentation,\
+            \ und Ausnahmen sind dokumentiert und genehmigt.\nDokumentierte und genehmigte\
+            \ Ausnahmen < 3% der F\xE4lle."
     - score: 5
       name: Optimizing
       description: 'Formal process exists and is implemented.
@@ -157,6 +211,15 @@ objects:
           description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
             worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
             uitzonderingen < 0,5% van de tijd.
+        de:
+          name: Optimierend
+          description: "Ein formaler Prozess existiert und ist implementiert.\nNachweise\
+            \ sind f\xFCr alle Aktivit\xE4ten verf\xFCgbar.\nDetaillierte Prozesskennzahlen\
+            \ werden erfasst und berichtet.\nMinimalziele f\xFCr Kennzahlen wurden\
+            \ festgelegt und werden kontinuierlich verbessert.\nWeniger als 1% Prozessausnahmen."
+          description_doc: "Es existiert eine formell genehmigte Prozessdokumentation,\
+            \ und Ausnahmen sind dokumentiert und genehmigt.\nDokumentierte und genehmigte\
+            \ Ausnahmen < 0,5% der F\xE4lle."
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:passwords
       assessable: true
@@ -174,6 +237,46 @@ objects:
         are only changed if there is an indication of a violation.
 
         5: Two-factor authentication is in place for all critical systems.'
+      translations:
+        fr:
+          name: MOTS DE PASSE
+          description: "Avez-vous des r\xE8gles en place pour vos mots de passe ?"
+          annotation: "1 : Pas de r\xE8gles, les mots de passe n'ont aucun crit\xE8\
+            re de cr\xE9ation ou de r\xE9utilisation.\n2 : Il existe quelques r\xE8\
+            gles concernant la cr\xE9ation de mots de passe, mais pas de v\xE9rification\
+            \ de l'historique ou de la r\xE9utilisation.\n3 : Il existe des exigences\
+            \ communes pour tous les mots de passe et ceux-ci doivent \xEAtre modifi\xE9\
+            s r\xE9guli\xE8rement.\n4 : Il existe des exigences strictes pour tous\
+            \ les utilisateurs et la plupart des syst\xE8mes, et les mots de passe\
+            \ ne sont modifi\xE9s qu'en cas d'indication de violation.\n5 : L'authentification\
+            \ multifactorielle est en place pour tous les syst\xE8mes critiques."
+        nl:
+          name: WACHTWOORDEN
+          description: Heeft u regels voor uw wachtwoorden?
+          annotation: '1: Geen regels, wachtwoorden hebben geen criteria voor aanmaak
+            of hergebruik.
+
+            2: Er zijn enkele regels rond het aanmaken van wachtwoorden, maar geen
+            controle op geschiedenis of hergebruik.
+
+            3: Er zijn gemeenschappelijke vereisten voor alle wachtwoorden en deze
+            moeten regelmatig worden gewijzigd.
+
+            4: Er zijn strenge vereisten voor alle gebruikers en de meeste systemen,
+            en wachtwoorden worden alleen gewijzigd bij een indicatie van een schending.
+
+            5: Multifactorauthenticatie is ingesteld voor alle kritieke systemen.'
+        de:
+          name: "PASSW\xD6RTER"
+          description: "Haben Sie Regeln f\xFCr Ihre Passw\xF6rter?"
+          annotation: "1: Keine Regeln, Passw\xF6rter haben keine Erstellungs- oder\
+            \ Wiederverwendungskriterien.\n2: Es gibt einige Regeln zur Passworterstellung,\
+            \ aber keine \xDCberpr\xFCfung des Verlaufs oder der Wiederverwendung.\n\
+            3: Es gibt gemeinsame Anforderungen f\xFCr alle Passw\xF6rter und diese\
+            \ sollten regelm\xE4\xDFig ge\xE4ndert werden.\n4: Es gibt strenge Anforderungen\
+            \ f\xFCr alle Benutzer und die meisten Systeme, und Passw\xF6rter werden\
+            \ nur bei Anzeichen einer Verletzung ge\xE4ndert.\n5: Multi-Faktor-Authentifizierung\
+            \ ist f\xFCr alle kritischen Systeme eingerichtet."
     - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:system-maintenance
       assessable: true
       depth: 1
@@ -190,6 +293,41 @@ objects:
 
         5: All updates are done continuously and systematically, and are tested before
         implementation.'
+      translations:
+        fr:
+          name: "MAINTENANCE DES SYST\xC8MES"
+          description: "Mettez-vous \xE0 jour vos syst\xE8mes et applications ?"
+          annotation: "1 : Non, nous ne faisons aucune mise \xE0 jour tant que les\
+            \ syst\xE8mes continuent de fonctionner.\n2 : Des mises \xE0 jour manuelles\
+            \ sont effectu\xE9es en cas de besoin ou pour les syst\xE8mes les plus\
+            \ critiques.\n3 : Il existe une proc\xE9dure standard pour la planification\
+            \ des mises \xE0 jour.\n4 : Tous les syst\xE8mes sont rapidement mis \xE0\
+            \ jour vers leurs derni\xE8res versions.\n5 : Toutes les mises \xE0 jour\
+            \ sont effectu\xE9es de mani\xE8re continue et syst\xE9matique, et sont\
+            \ test\xE9es avant la mise en \u0153uvre."
+        nl:
+          name: SYSTEEMONDERHOUD
+          description: Werkt u uw systemen en applicaties bij?
+          annotation: '1: Nee, we doen geen updates zolang de systemen blijven werken.
+
+            2: Handmatige updates worden gedaan wanneer dat nodig is of voor de meest
+            kritieke systemen.
+
+            3: Er is een standaardprocedure voor het plannen van updates.
+
+            4: Alle systemen worden snel bijgewerkt naar de nieuwste versies.
+
+            5: Alle updates worden continu en systematisch uitgevoerd en worden getest
+            voor implementatie.'
+        de:
+          name: SYSTEMWARTUNG
+          description: Aktualisieren Sie Ihre Systeme und Anwendungen?
+          annotation: "1: Nein, wir f\xFChren keine Updates durch, solange die Systeme\
+            \ weiter funktionieren.\n2: Manuelle Updates werden bei Bedarf oder f\xFC\
+            r die kritischsten Systeme durchgef\xFChrt.\n3: Es gibt ein Standardverfahren\
+            \ f\xFCr die Planung von Updates.\n4: Alle Systeme werden schnell auf\
+            \ die neuesten Versionen aktualisiert.\n5: Alle Updates werden kontinuierlich\
+            \ und systematisch durchgef\xFChrt und vor der Implementierung getestet."
     - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:antivirus-and-anti-malware-management
       assessable: true
       depth: 1
@@ -204,6 +342,37 @@ objects:
         4: On all systems and updated a few times a week.
 
         5: On all systems and updated daily. Suspicious activity is also reported.'
+      translations:
+        fr:
+          name: GESTION ANTIVIRUS ET ANTI-MALWARE
+          description: Disposez-vous d'un logiciel antivirus ou anti-malware ?
+          annotation: "1 : Non, aucun.\n2 : Sur certains syst\xE8mes principaux, mais\
+            \ pas partout.\n3 : Sur tous les syst\xE8mes, mais ils ne sont pas n\xE9\
+            cessairement mis \xE0 jour.\n4 : Sur tous les syst\xE8mes et mis \xE0\
+            \ jour plusieurs fois par semaine.\n5 : Sur tous les syst\xE8mes et mis\
+            \ \xE0 jour quotidiennement. Les activit\xE9s suspectes sont \xE9galement\
+            \ signal\xE9es."
+        nl:
+          name: ANTIVIRUS- EN ANTI-MALWAREBEHEER
+          description: "Heeft u antivirus- of anti-malwaresoftware ge\xEFnstalleerd?"
+          annotation: '1: Nee, geen.
+
+            2: Op sommige belangrijke systemen, maar niet overal.
+
+            3: Op alle systemen, maar ze worden niet noodzakelijk bijgewerkt.
+
+            4: Op alle systemen en meerdere keren per week bijgewerkt.
+
+            5: Op alle systemen en dagelijks bijgewerkt. Verdachte activiteiten worden
+            ook gemeld.'
+        de:
+          name: ANTIVIRUS- UND ANTI-MALWARE-VERWALTUNG
+          description: Haben Sie Antivirus- oder Anti-Malware-Software installiert?
+          annotation: "1: Nein, keine.\n2: Auf einigen wichtigen Systemen, aber nicht\
+            \ \xFCberall.\n3: Auf allen Systemen, aber sie werden nicht unbedingt\
+            \ aktualisiert.\n4: Auf allen Systemen und mehrmals pro Woche aktualisiert.\n\
+            5: Auf allen Systemen und t\xE4glich aktualisiert. Verd\xE4chtige Aktivit\xE4\
+            ten werden ebenfalls gemeldet."
     - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:network-security
       assessable: true
       depth: 1
@@ -223,6 +392,49 @@ objects:
 
         5: The network is compartmentalized into strictly separated areas; anomalies
         are quickly detected and resolved.'
+      translations:
+        fr:
+          name: "S\xC9CURIT\xC9 DU R\xC9SEAU"
+          description: "Prot\xE9gez-vous votre r\xE9seau ?"
+          annotation: "1 : Pas activement : le r\xE9seau n'est pas segment\xE9 et\
+            \ est connect\xE9 \xE0 internet sans mises \xE0 jour ni mots de passe\
+            \ forts.\n2 : De mani\xE8re limit\xE9e : les r\xE9seaux public et interne\
+            \ sont s\xE9par\xE9s et prot\xE9g\xE9s par un pare-feu.\n3 : Protection\
+            \ de base : un certain nombre de segmentations existent selon les fonctions\
+            \ et les besoins, et tout est document\xE9.\n4 : La s\xE9curit\xE9 du\
+            \ r\xE9seau est mesur\xE9e et surveill\xE9e ; les anomalies peuvent \xEA\
+            tre d\xE9tect\xE9es.\n5 : Le r\xE9seau est compartiment\xE9 en zones strictement\
+            \ s\xE9par\xE9es ; les anomalies sont rapidement d\xE9tect\xE9es et r\xE9\
+            solues."
+        nl:
+          name: NETWERKBEVEILIGING
+          description: Beveiligt u uw netwerk?
+          annotation: '1: Niet actief: het netwerk is niet gesegmenteerd en is verbonden
+            met het internet zonder updates en sterke wachtwoorden.
+
+            2: Op een beperkte manier: het publieke en interne netwerk zijn gescheiden
+            en beschermd door een firewall.
+
+            3: Basisbescherming: er bestaan een aantal segmentaties volgens functies
+            en behoeften en alles is gedocumenteerd.
+
+            4: De beveiliging van het netwerk wordt gemeten en bewaakt; afwijkingen
+            kunnen worden gedetecteerd.
+
+            5: Het netwerk is opgedeeld in strikt gescheiden zones; afwijkingen worden
+            snel gedetecteerd en opgelost.'
+        de:
+          name: NETZWERKSICHERHEIT
+          description: "Sch\xFCtzen Sie Ihr Netzwerk?"
+          annotation: "1: Nicht aktiv: Das Netzwerk ist nicht segmentiert und ohne\
+            \ Updates und starke Passw\xF6rter mit dem Internet verbunden.\n2: In\
+            \ begrenztem Ma\xDFe: Das \xF6ffentliche und das interne Netzwerk sind\
+            \ getrennt und durch eine Firewall gesch\xFCtzt.\n3: Grundschutz: Es gibt\
+            \ eine Reihe von Segmentierungen nach Funktionen und Bed\xFCrfnissen,\
+            \ und alles ist dokumentiert.\n4: Die Sicherheit des Netzwerks wird gemessen\
+            \ und \xFCberwacht; Anomalien k\xF6nnen erkannt werden.\n5: Das Netzwerk\
+            \ ist in streng getrennte Bereiche unterteilt; Anomalien werden schnell\
+            \ erkannt und behoben."
     - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:backup-procedure
       assessable: true
       depth: 1
@@ -242,6 +454,51 @@ objects:
 
         5: All data is backed up completely with fast recovery time and without data
         loss.'
+      translations:
+        fr:
+          name: "PROC\xC9DURE DE SAUVEGARDE"
+          description: "Disposez-vous d'une proc\xE9dure de sauvegarde ?"
+          annotation: "1 : Non, ni syst\xE9matique ni document\xE9e.\n2 : Les sauvegardes\
+            \ sont limit\xE9es et manuelles, et la restauration n'est pas test\xE9\
+            e. Parfois, les sauvegardes sont faites localement par les employ\xE9\
+            s eux-m\xEAmes, sur des cl\xE9s USB ou des disques durs externes.\n3 :\
+            \ Les sauvegardes sont test\xE9es et disponibles pour tous les syst\xE8\
+            mes principaux, et les restaurations de fichiers sont test\xE9es r\xE9\
+            guli\xE8rement.\n4 : Les sauvegardes sont chiffr\xE9es, disponibles pour\
+            \ tous les syst\xE8mes de l'organisation et test\xE9es imm\xE9diatement\
+            \ avec des indicateurs de performance \xE0 am\xE9liorer.\n5 : Toutes les\
+            \ donn\xE9es sont sauvegard\xE9es compl\xE8tement avec un temps de r\xE9\
+            cup\xE9ration rapide et sans perte de donn\xE9es."
+        nl:
+          name: BACK-UPPROCEDURE
+          description: Heeft u een back-upprocedure?
+          annotation: '1: Nee, niet systematisch noch gedocumenteerd.
+
+            2: Back-ups zijn beperkt en handmatig, en herstel wordt niet getest. Soms
+            worden de back-ups lokaal door de medewerkers zelf gemaakt, op USB-sticks
+            of externe harde schijven.
+
+            3: Back-ups worden getest en zijn beschikbaar voor alle belangrijke systemen,
+            en bestandsherstel wordt regelmatig getest.
+
+            4: Back-ups zijn versleuteld, beschikbaar voor alle systemen in de organisatie
+            en onmiddellijk getest met prestatie-indicatoren om te verbeteren.
+
+            5: Alle gegevens worden volledig geback-upt met snelle hersteltijd en
+            zonder gegevensverlies.'
+        de:
+          name: BACKUP-VERFAHREN
+          description: Haben Sie ein Backup-Verfahren?
+          annotation: "1: Nein, weder systematisch noch dokumentiert.\n2: Backups\
+            \ sind begrenzt und manuell, und die Wiederherstellung wird nicht getestet.\
+            \ Manchmal werden die Backups von den Mitarbeitern selbst lokal auf USB-Sticks\
+            \ oder externen Festplatten erstellt.\n3: Backups werden getestet und\
+            \ sind f\xFCr alle wichtigen Systeme verf\xFCgbar, und Dateiwiederherstellungen\
+            \ werden regelm\xE4\xDFig getestet.\n4: Backups sind verschl\xFCsselt,\
+            \ f\xFCr alle Systeme in der Organisation verf\xFCgbar und werden sofort\
+            \ getestet, mit Leistungskennzahlen zur Verbesserung.\n5: Alle Daten werden\
+            \ vollst\xE4ndig gesichert mit schneller Wiederherstellungszeit und ohne\
+            \ Datenverlust."
     - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:administration-rights
       assessable: true
       depth: 1
@@ -260,6 +517,44 @@ objects:
 
         5: Administrator accounts are disabled or modified if there are changes and
         anomalies.'
+      translations:
+        fr:
+          name: DROITS D'ADMINISTRATION
+          description: "Comment prot\xE9gez-vous vos comptes administrateur ?"
+          annotation: "1 : Sans vue d'ensemble de nos comptes administrateurs ; nous\
+            \ ne les prot\xE9geons pas sp\xE9cifiquement.\n2 : Nous g\xE9rons l'acc\xE8\
+            s administrateur uniquement sur certains services.\n3 : Tous les acc\xE8\
+            s administrateur sont distribu\xE9s dans des comptes s\xE9par\xE9s et\
+            \ g\xE9r\xE9s de mani\xE8re centralis\xE9e.\n4 : Tous les comptes administrateur\
+            \ sont strictement surveill\xE9s avec des notifications automatiques en\
+            \ cas d'anomalies.\n5 : Les comptes administrateur sont d\xE9sactiv\xE9\
+            s ou modifi\xE9s en cas de changements et d'anomalies."
+        nl:
+          name: ADMINISTRATIERECHTEN
+          description: Hoe beschermt u uw beheerdersaccounts?
+          annotation: '1: Zonder overzicht van onze beheerdersaccounts; we beschermen
+            ze niet specifiek.
+
+            2: We beheren beheerderstoegang alleen op bepaalde diensten.
+
+            3: Alle beheerderstoegang is verdeeld over afzonderlijke accounts en wordt
+            centraal beheerd.
+
+            4: Alle beheerdersaccounts worden strikt bewaakt met automatische meldingen
+            bij afwijkingen.
+
+            5: Beheerdersaccounts worden uitgeschakeld of gewijzigd bij veranderingen
+            en afwijkingen.'
+        de:
+          name: VERWALTUNGSRECHTE
+          description: "Wie sch\xFCtzen Sie Ihre Administratorkonten?"
+          annotation: "1: Ohne \xDCberblick \xFCber unsere Administratorkonten; wir\
+            \ sch\xFCtzen sie nicht speziell.\n2: Wir verwalten den Administratorzugang\
+            \ nur bei bestimmten Diensten.\n3: Alle Administratorzug\xE4nge sind auf\
+            \ separate Konten verteilt und werden zentral verwaltet.\n4: Alle Administratorkonten\
+            \ werden streng \xFCberwacht, mit automatischen Benachrichtigungen bei\
+            \ Anomalien.\n5: Administratorkonten werden bei \xC4nderungen und Anomalien\
+            \ deaktiviert oder ge\xE4ndert."
     - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:physical-security
       assessable: true
       depth: 1
@@ -277,6 +572,44 @@ objects:
 
         5: Access control is centralized, regularly reviewed and follows the life
         cycle of employees (entry/change of position/exit).'
+      translations:
+        fr:
+          name: "S\xC9CURIT\xC9 PHYSIQUE"
+          description: "Avez-vous des mesures en place pour prot\xE9ger physiquement\
+            \ l'acc\xE8s \xE0 vos locaux et \xE0 votre infrastructure ?"
+          annotation: "1 : Nous n'avons rien en place.\n2 : Nous ne prot\xE9geons\
+            \ que les syst\xE8mes critiques (par ex. la salle des serveurs).\n3 :\
+            \ Toute notre infrastructure est prot\xE9g\xE9e, y compris la protection\
+            \ contre les incendies et les inondations.\n4 : Nous contr\xF4lons l'acc\xE8\
+            s de mani\xE8re centralis\xE9e (par ex. badges) et segmentons l'acc\xE8\
+            s selon les niveaux de confidentialit\xE9.\n5 : Le contr\xF4le d'acc\xE8\
+            s est centralis\xE9, r\xE9guli\xE8rement revu et suit le cycle de vie\
+            \ des employ\xE9s (entr\xE9e/changement de poste/sortie)."
+        nl:
+          name: FYSIEKE BEVEILIGING
+          description: Heeft u maatregelen getroffen om de fysieke toegang tot uw
+            gebouwen en infrastructuur te beschermen?
+          annotation: '1: We hebben niets in plaats.
+
+            2: We beschermen alleen kritieke systemen (bijv. serverruimte).
+
+            3: Al onze infrastructuur is beschermd, inclusief brand- en overstromingsbescherming.
+
+            4: We controleren de toegang centraal (bijv. badges) en segmenteren de
+            toegang op basis van vertrouwelijkheidsniveaus.
+
+            5: Toegangscontrole is gecentraliseerd, wordt regelmatig herzien en volgt
+            de levenscyclus van medewerkers (in dienst/functiewijziging/uit dienst).'
+        de:
+          name: PHYSISCHE SICHERHEIT
+          description: "Haben Sie Ma\xDFnahmen getroffen, um den physischen Zugang\
+            \ zu Ihren R\xE4umlichkeiten und Ihrer Infrastruktur zu sch\xFCtzen?"
+          annotation: "1: Wir haben nichts eingerichtet.\n2: Wir sch\xFCtzen nur kritische\
+            \ Systeme (z.B. Serverraum).\n3: Unsere gesamte Infrastruktur ist gesch\xFC\
+            tzt, einschlie\xDFlich Brand- und Hochwasserschutz.\n4: Wir kontrollieren\
+            \ den Zugang zentral (z.B. Badges) und segmentieren den Zugang nach Vertraulichkeitsstufen.\n\
+            5: Die Zugangskontrolle ist zentralisiert, wird regelm\xE4\xDFig \xFC\
+            berpr\xFCft und folgt dem Lebenszyklus der Mitarbeiter (Eintritt/Positionswechsel/Austritt)."
     - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:incident-preparedness
       assessable: true
       depth: 1
@@ -294,3 +627,35 @@ objects:
 
         5: We regularly test and improve our plan, including the communication and
         coordination parts.'
+      translations:
+        fr:
+          name: "PR\xC9PARATION AUX INCIDENTS"
+          description: Disposez-vous d'un plan de gestion des incidents ?
+          annotation: "1 : Non, nous ne nous en sommes pas encore occup\xE9s.\n2 :\
+            \ Nous avons un plan, mais les responsabilit\xE9s ne sont pas claires\
+            \ et nos fournisseurs n'ont pas \xE9t\xE9 identifi\xE9s.\n3 : Notre plan\
+            \ est valid\xE9 en interne et activement communiqu\xE9 \xE0 toutes les\
+            \ parties impliqu\xE9es, assurant une bonne coordination entre les acteurs.\n\
+            4 : Nous avons un plan et nous l'avons d\xE9j\xE0 test\xE9.\n5 : Nous\
+            \ testons et am\xE9liorons r\xE9guli\xE8rement notre plan, y compris les\
+            \ aspects de communication et de coordination."
+        nl:
+          name: INCIDENTVOORBEREIDING
+          description: Beschikt u over een incidentbeheerplan?
+          annotation: "1: Nee, daar hebben we nog niet naar gekeken.\n2: We hebben\
+            \ een plan, maar de verantwoordelijkheden zijn niet duidelijk en onze\
+            \ leveranciers zijn niet ge\xEFdentificeerd.\n3: Ons plan is intern gevalideerd\
+            \ en actief gecommuniceerd aan alle betrokken partijen, wat zorgt voor\
+            \ een goede co\xF6rdinatie tussen de spelers.\n4: We hebben een plan en\
+            \ we hebben het al getest.\n5: We testen en verbeteren regelmatig ons\
+            \ plan, inclusief de communicatie- en co\xF6rdinatieonderdelen."
+        de:
+          name: VORFALLSBEREITSCHAFT
+          description: Haben Sie einen Vorfallsmanagementplan?
+          annotation: "1: Nein, damit haben wir uns noch nicht befasst.\n2: Wir haben\
+            \ einen Plan, aber die Verantwortlichkeiten sind nicht klar und unsere\
+            \ Lieferanten wurden nicht identifiziert.\n3: Unser Plan ist intern validiert\
+            \ und wird aktiv an alle beteiligten Parteien kommuniziert, was eine gute\
+            \ Koordination zwischen den Akteuren gew\xE4hrleistet.\n4: Wir haben einen\
+            \ Plan und haben ihn bereits getestet.\n5: Wir testen und verbessern regelm\xE4\
+            \xDFig unseren Plan, einschlie\xDFlich der Kommunikations- und Koordinationsaspekte."

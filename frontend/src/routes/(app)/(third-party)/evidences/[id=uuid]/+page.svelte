@@ -10,7 +10,7 @@
 	import { m } from '$paraglide/messages';
 	import { defaults } from 'sveltekit-superforms';
 	import { z } from 'zod';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { getModalStore } from '$lib/components/Modals/stores';
 

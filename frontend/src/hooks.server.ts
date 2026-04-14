@@ -132,7 +132,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 			redirect(302, '/login');
 		}
 
-		const user = await validateUserSession(event);
+		// Skip session validation for SSO authenticate route — the token cookie
+		// has just been set by the backend but the allauth session token hasn't
+		// been fetched yet; that happens in the page's load function.
+		const isSSOAuthenticate = event.url.pathname.endsWith('/sso/authenticate');
+
+		const user = isSSOAuthenticate ? null : await validateUserSession(event);
 		if (user) {
 			event.locals.user = user;
 			applyUserLocale(event, user);
@@ -173,7 +178,11 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const currentLang =
 		event.locals.user?.preferences?.lang || event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
-		request.headers.set('Content-Type', 'application/json');
+		// Default to JSON unless the request is already a multipart upload (FormData)
+		const ct = request.headers.get('Content-Type') || '';
+		if (!ct.includes('multipart')) {
+			request.headers.set('Content-Type', 'application/json');
+		}
 		request.headers.set('Accept-Language', currentLang);
 
 		const token = event.cookies.get('token');
@@ -220,19 +229,22 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 					// Allauth session has fully expired — force logout
 					logoutUser(event);
 				} else if (
-					// User is authenticated, but needs to reauthenticate to perform a sensitive action
 					data.data?.flows?.some((flow: Record<string, any>) =>
 						reauthenticationFlows.includes(flow.id)
 					)
 				) {
-					setFlash(
-						{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
-						event
-					);
-					// NOTE: This is a temporary solution to force the user to reauthenticate
-					// We have to properly implement allauth's reauthentication flow
-					// https://docs.allauth.org/en/latest/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1reauthenticate/post
-					logoutUser(event);
+					if (event.locals.user?.is_sso) {
+						// SSO users: don't log out — let the page handle the 401
+						// gracefully. Logging out forces a full IdP round-trip.
+					} else {
+						// Local users: log out so they can re-enter their password
+						// to refresh the session (temporary until proper reauth flow).
+						setFlash(
+							{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
+							event
+						);
+						logoutUser(event);
+					}
 				}
 			} catch {
 				// Malformed response — force logout to be safe

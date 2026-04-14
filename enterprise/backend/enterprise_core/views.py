@@ -665,6 +665,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
                     "template_key": key,
                     "description": meta["description"],
                     "default_languages": meta["default_languages"],
+                    "variables": meta.get("variables", []),
                     "overrides": [
                         lang
                         for lang in meta["default_languages"]
