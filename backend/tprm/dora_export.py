@@ -8,12 +8,20 @@ Each function generates a specific report and writes it to a ZIP file.
 import csv
 import io
 import json
+import logging
 from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
 from django.db.models import QuerySet
 from tprm.models import Entity, Contract, Solution
 from core.models import Asset
+
+
+logger = logging.getLogger(__name__)
+
+
+class ExportError(RuntimeError):
+    """Raised when DORA ROI export cannot complete due to data inconsistency."""
 
 
 # Helper Functions
@@ -1015,6 +1023,23 @@ def generate_b_05_01_provider_details(
         if contract.annual_expense:
             providers_data[provider_id]["total_expense"] += contract.annual_expense
 
+    # Register subcontractors referenced by b_05.02 rank>1 rows so that the
+    # c0030/c0060 → c0010 foreign keys (EBA rule 807) resolve. A subcontractor
+    # is not a direct provider of any contract, so it has no entry yet. Emit a
+    # zero-expense, empty-currency row per subcontractor. Runs BEFORE the
+    # parent-entity walker so ancestors of subcontractors are also registered.
+    for contract in third_party_contracts:
+        for solution in contract.solutions.prefetch_related(
+            "subcontracting_chain__subcontractor"
+        ).all():
+            for sc in solution.subcontracting_chain.all():
+                if sc.subcontractor_id not in providers_data:
+                    providers_data[sc.subcontractor_id] = {
+                        "provider": sc.subcontractor,
+                        "total_expense": 0,
+                        "currency": "",
+                    }
+
     # Register ancestor entities referenced by c0110 so that the c0110 → c0010
     # foreign key (EBA rule 807) resolves. When a provider has a parent_entity
     # chain but the ancestors are not themselves direct contract providers, the
@@ -1144,21 +1169,25 @@ def generate_b_05_02_supply_chains(
             solutions__isnull=False,
         )
         .select_related("provider_entity", "beneficiary_entity")
-        .prefetch_related("solutions__provider_entity")
+        .prefetch_related(
+            "solutions__provider_entity",
+            "solutions__subcontracting_chain__subcontractor",
+        )
     )
 
     # Write supply chain data
     # Track written dimension keys to avoid XBRL duplicate fact errors.
     # The XBRL key for b_05.02 is (contract_ref, ict_service_type, provider_code, rank, recipient_code).
     seen_keys = set()
+    rows_by_rank: Dict[int, int] = {}
 
-    # NOTE: b_05.02 reports the ICT subcontracting chain (DORA Art. 28(2)), which is
-    # semantically distinct from the corporate-ownership chain (Entity.parent_entity).
-    # The data model has no subcontracting field today, so we emit a single rank=1 row
-    # per (contract, solution) — the direct provider in contractual relationship with
-    # the financial entity. This keeps b_05.02 consistent with b_02.02's c0030 and with
-    # the b_05.01 c0110 "ultimate parent undertaking" column, which continues to use
-    # parent_entity for corporate ownership as intended.
+    # DORA Art. 28(2) supply chains. Rank 1 is the solution's direct provider
+    # (Solution.provider_entity). Ranks 2..N are subcontractors from
+    # solution.subcontracting_chain, in rank order. Storage ranks are not
+    # required to be contiguous — the exporter renumbers to contiguous 1..N
+    # on the fly, preserving relative order. At rank=1, recipient = provider
+    # (direct service relationship). At rank>1, recipient = previous entity in
+    # the chain.
     for contract in supply_chain_contracts:
         for solution in contract.solutions.all():
             contract_ref = contract.ref_id or str(contract.id)
@@ -1166,42 +1195,73 @@ def generate_b_05_02_supply_chains(
             if not ict_service_type:
                 continue
 
-            provider = solution.provider_entity
-            if provider is None:
+            direct_provider = solution.provider_entity
+            if direct_provider is None:
                 continue
 
-            # c0030 is typed dimension eba_typ:IS — use "0" if empty
-            # c0040 is enumeration metric — keep empty when c0030 has no real value
-            provider_code, provider_code_type, _ = get_entity_identifier(provider)
-            provider_code = provider_code or "0"
+            # Build the chain: rank 1 = direct provider, ranks 2..N = ordered
+            # subcontractors. Defensive catch for the unlikely race where an
+            # Entity is deleted between linter pass and export.
+            try:
+                chain_entities = [direct_provider] + [
+                    sc.subcontractor for sc in solution.subcontracting_chain.all()
+                ]
+            except Entity.DoesNotExist as exc:
+                raise ExportError(
+                    f"Subcontractor entity deleted mid-export for solution "
+                    f"{solution.id}; refresh data and retry."
+                ) from exc
 
-            # CHECK_C0050: when rank=1, recipient must equal provider
-            # (direct service relationship with the financial entity)
-            rank = 1
-            recipient_code, recipient_code_type = provider_code, provider_code_type
+            for rank_idx, provider in enumerate(chain_entities, start=1):
+                # c0030 is typed dimension eba_typ:IS — use "0" if empty
+                # c0040 is enumeration metric — keep empty when c0030 has no real value
+                provider_code, provider_code_type, _ = get_entity_identifier(provider)
+                provider_code = provider_code or "0"
 
-            key = (
-                contract_ref,
-                ict_service_type,
-                provider_code,
-                rank,
-                recipient_code,
-            )
-            if key in seen_keys:
-                continue
-            seen_keys.add(key)
+                # CHECK_C0050: rank=1 recipient = provider (direct service
+                # relationship). rank>1 recipient = entity at the previous
+                # position in the chain (the entity that sub-contracted to
+                # this provider).
+                if rank_idx == 1:
+                    recipient_code, recipient_code_type = (
+                        provider_code,
+                        provider_code_type,
+                    )
+                else:
+                    recipient = chain_entities[rank_idx - 2]
+                    recipient_code, recipient_code_type, _ = get_entity_identifier(
+                        recipient
+                    )
+                    recipient_code = recipient_code or "0"
 
-            csv_writer.writerow(
-                [
+                key = (
                     contract_ref,
                     ict_service_type,
                     provider_code,
-                    provider_code_type,
-                    rank,
+                    rank_idx,
                     recipient_code,
-                    recipient_code_type,
-                ]
-            )
+                )
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
+
+                csv_writer.writerow(
+                    [
+                        contract_ref,
+                        ict_service_type,
+                        provider_code,
+                        provider_code_type,
+                        rank_idx,
+                        recipient_code,
+                        recipient_code_type,
+                    ]
+                )
+                rows_by_rank[rank_idx] = rows_by_rank.get(rank_idx, 0) + 1
+
+    logger.info(
+        "dora_export.b_05_02.emitted",
+        extra={"rows_by_rank": dict(sorted(rows_by_rank.items()))},
+    )
 
     path = (
         f"{folder_prefix}/reports/b_05.02.csv"

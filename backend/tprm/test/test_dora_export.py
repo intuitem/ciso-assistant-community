@@ -2896,31 +2896,30 @@ class TestEBAValidationRules(DoraExportTestMixin, DoraDataFactory, TestCase):
 
 
 class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
-    @unittest.skip(
-        "Awaiting ICT subcontracting data model (DORA Art. 28(2)). "
-        "Entity.parent_entity is corporate ownership, not subcontracting — "
-        "see generate_b_05_02_supply_chains."
-    )
     def test_b0502_rank_greater_than_1(self):
-        """Sub-contracting chains should produce rank > 1."""
-        parent = Entity.objects.create(
-            name="TDD Parent",
-            legal_identifiers={"LEI": "TDDP1234567890123456"},
+        """Sub-contracting chains (SolutionSubcontractor rank=2) produce rank > 1."""
+        from tprm.models import SolutionSubcontractor
+
+        direct = Entity.objects.create(
+            name="TDD Direct",
+            legal_identifiers={"LEI": "TDDD1234567890123456"},
         )
-        child = Entity.objects.create(
-            name="TDD Child",
-            legal_identifiers={"LEI": "TDDC1234567890123456"},
-            parent_entity=parent,
+        sub = Entity.objects.create(
+            name="TDD Sub",
+            legal_identifiers={"LEI": "TDDS1234567890123456"},
         )
         solution = Solution.objects.create(
             name="TDD Service",
-            provider_entity=child,
+            provider_entity=direct,
             dora_ict_service_type="eba_ZZ:x755",
+        )
+        SolutionSubcontractor.objects.create(
+            solution=solution, subcontractor=sub, rank=2
         )
         contract = Contract.objects.create(
             name="TDD Contract",
             ref_id="CA-TDD-RANK",
-            provider_entity=parent,
+            provider_entity=direct,
             beneficiary_entity=self.main_entity,
             is_intragroup=False,
             status=Contract.Status.ACTIVE,
@@ -2933,40 +2932,39 @@ class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
         )
         rows = self._read_csv(buf, "reports/b_05.02.csv")
         data = [r for r in self._data_rows(rows) if r[0] == "CA-TDD-RANK"]
-        ranks = [r[4] for r in data]
-        self.assertIn("2", ranks)
+        ranks = sorted(r[4] for r in data)
+        self.assertEqual(ranks, ["1", "2"])
 
         contract.solutions.clear()
         contract.delete()
         solution.delete()
-        child.delete()
-        parent.delete()
+        sub.delete()
+        direct.delete()
 
-    @unittest.skip(
-        "Awaiting ICT subcontracting data model (DORA Art. 28(2)). "
-        "Entity.parent_entity is corporate ownership, not subcontracting — "
-        "see generate_b_05_02_supply_chains."
-    )
     def test_b0502_recipient_code_populated(self):
-        """Rank > 1 rows should have recipient entity code+type."""
-        parent = Entity.objects.create(
-            name="TDD Rcpt Parent",
-            legal_identifiers={"LEI": "RCPP1234567890123456"},
+        """Rank>1 rows have recipient = entity at previous rank, with code type."""
+        from tprm.models import SolutionSubcontractor
+
+        direct = Entity.objects.create(
+            name="TDD Rcpt Direct",
+            legal_identifiers={"LEI": "RCPD1234567890123456"},
         )
-        child = Entity.objects.create(
-            name="TDD Rcpt Child",
-            legal_identifiers={"LEI": "RCPC1234567890123456"},
-            parent_entity=parent,
+        sub = Entity.objects.create(
+            name="TDD Rcpt Sub",
+            legal_identifiers={"LEI": "RCPS1234567890123456"},
         )
         solution = Solution.objects.create(
             name="TDD Rcpt Service",
-            provider_entity=child,
+            provider_entity=direct,
             dora_ict_service_type="eba_ZZ:x755",
+        )
+        SolutionSubcontractor.objects.create(
+            solution=solution, subcontractor=sub, rank=2
         )
         contract = Contract.objects.create(
             name="TDD Rcpt Contract",
             ref_id="CA-TDD-RCPT",
-            provider_entity=parent,
+            provider_entity=direct,
             beneficiary_entity=self.main_entity,
             is_intragroup=False,
             status=Contract.Status.ACTIVE,
@@ -2980,15 +2978,16 @@ class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, "reports/b_05.02.csv")
         data = [r for r in self._data_rows(rows) if r[0] == "CA-TDD-RCPT"]
         rank2_rows = [r for r in data if r[4] == "2"]
-        self.assertTrue(len(rank2_rows) > 0)
-        self.assertEqual(rank2_rows[0][5], "RCPP1234567890123456")
+        self.assertEqual(len(rank2_rows), 1)
+        # rank=2 recipient is the direct provider (rank=1 in the chain)
+        self.assertEqual(rank2_rows[0][5], "RCPD1234567890123456")
         self.assertEqual(rank2_rows[0][6], "eba_qCO:qx2000")  # LEI type code
 
         contract.solutions.clear()
         contract.delete()
         solution.delete()
-        child.delete()
-        parent.delete()
+        sub.delete()
+        direct.delete()
 
     def test_b9901_aggregation_data_rows(self):
         """B.99.01 should produce actual aggregate counts."""
@@ -3038,3 +3037,369 @@ class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
     def test_b0501_latin_name_distinct(self):
         """c0060 should use a separate latin_name field, not duplicate name."""
         pass
+
+
+# ===========================================================================
+# Subcontracting chain (SolutionSubcontractor) — full exporter coverage
+# ===========================================================================
+
+
+class TestB0502SubcontractingChain(DoraExportTestMixin, DoraDataFactory, TestCase):
+    """Coverage for chain-aware b_05.02 export (DORA Art. 28(2))."""
+
+    CSV = "reports/b_05.02.csv"
+
+    def _chain_case(
+        self,
+        contract_ref: str,
+        direct_lei: str,
+        sub_leis: list[tuple[str, int]],
+    ):
+        """Build a Contract + Solution + chain. Returns (contract, solution, entities)."""
+        from tprm.models import SolutionSubcontractor
+
+        direct = Entity.objects.create(
+            name=f"Direct {contract_ref}",
+            legal_identifiers={"LEI": direct_lei},
+        )
+        subs = []
+        solution = Solution.objects.create(
+            name=f"Service {contract_ref}",
+            provider_entity=direct,
+            dora_ict_service_type="eba_TA:S09",
+        )
+        for lei, rank in sub_leis:
+            sub = Entity.objects.create(
+                name=f"Sub {lei}",
+                legal_identifiers={"LEI": lei},
+            )
+            SolutionSubcontractor.objects.create(
+                solution=solution, subcontractor=sub, rank=rank
+            )
+            subs.append(sub)
+        contract = Contract.objects.create(
+            name=f"Contract {contract_ref}",
+            ref_id=contract_ref,
+            provider_entity=direct,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(solution)
+        return contract, solution, direct, subs
+
+    def _rows_for(self, contract_ref: str, buf):
+        rows = self._read_csv(buf, self.CSV)
+        return [r for r in self._data_rows(rows) if r[0] == contract_ref]
+
+    # --- Empty chain backward compatibility --------------------------------
+
+    def test_empty_chain_emits_single_rank_1_row(self):
+        """Solution with no subcontracting_chain still emits one rank=1 row."""
+        contract, solution, direct, _ = self._chain_case(
+            "CA-EMPTY", "EMPT1234567890123456", []
+        )
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._rows_for("CA-EMPTY", buf)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][4], "1")
+        self.assertEqual(rows[0][2], "EMPT1234567890123456")
+        self.assertEqual(rows[0][5], "EMPT1234567890123456")  # recipient=self at rank=1
+
+    # --- Multi-rank chain --------------------------------------------------
+
+    def test_three_rank_chain(self):
+        """Three-rank chain: rank 1 (direct), 2 (sub), 3 (sub of sub)."""
+        contract, _, _, _ = self._chain_case(
+            "CA-3RANK",
+            "DIR31234567890123456",
+            [("SUB21234567890123456", 2), ("SUB31234567890123456", 3)],
+        )
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = sorted(self._rows_for("CA-3RANK", buf), key=lambda r: r[4])
+        self.assertEqual(len(rows), 3)
+        # rank 1: direct, recipient=self
+        self.assertEqual(rows[0][2], "DIR31234567890123456")
+        self.assertEqual(rows[0][5], "DIR31234567890123456")
+        # rank 2: sub2, recipient=direct (rank 1)
+        self.assertEqual(rows[1][2], "SUB21234567890123456")
+        self.assertEqual(rows[1][5], "DIR31234567890123456")
+        # rank 3: sub3, recipient=sub2 (rank 2)
+        self.assertEqual(rows[2][2], "SUB31234567890123456")
+        self.assertEqual(rows[2][5], "SUB21234567890123456")
+
+    # --- Rank-gap renumbering ---------------------------------------------
+
+    def test_rank_gap_renumbers_on_export(self):
+        """Storage ranks {2, 4} emit CSV ranks {1, 2, 3} — renumber on the fly."""
+        contract, _, _, _ = self._chain_case(
+            "CA-GAP",
+            "GAPD1234567890123456",
+            [("GAPA1234567890123456", 2), ("GAPB1234567890123456", 4)],
+        )
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = sorted(self._rows_for("CA-GAP", buf), key=lambda r: int(r[4]))
+        self.assertEqual([r[4] for r in rows], ["1", "2", "3"])
+        # Chain ordering preserved: GAPA is rank=2 in storage → rank=2 in CSV
+        self.assertEqual(rows[1][2], "GAPA1234567890123456")
+        self.assertEqual(rows[2][2], "GAPB1234567890123456")
+
+    # --- Null provider ----------------------------------------------------
+    # Note: Solution.provider_entity has NOT NULL at the DB level (no null=True
+    # on the FK). A null-provider state is unreachable in practice. The
+    # exporter's `if provider is None: continue` guard is defense-in-depth for
+    # any future model relaxation; we don't test an unreachable branch here.
+
+    # --- Regression guard: b_02.02 ⊆ b_05.02 with multi-rank ---------------
+
+    def test_b0202_provider_in_b0502_at_rank_1_with_multi_rank_chain(self):
+        """With a populated multi-rank chain, b.02.02's direct provider still matches b.05.02 rank=1."""
+        from tprm.models import SolutionSubcontractor
+
+        # Use an existing business function asset so the solution lands in b.02.02.
+        biz_fn = self.biz_fn_critical
+        direct = Entity.objects.create(
+            name="Direct with chain",
+            legal_identifiers={"LEI": "MDIR1234567890123456"},
+        )
+        sub_a = Entity.objects.create(
+            name="Chain sub A",
+            legal_identifiers={"LEI": "MSUA1234567890123456"},
+        )
+        sub_b = Entity.objects.create(
+            name="Chain sub B",
+            legal_identifiers={"LEI": "MSUB1234567890123456"},
+        )
+        solution = Solution.objects.create(
+            name="Multi-rank Service",
+            provider_entity=direct,
+            dora_ict_service_type="eba_TA:S09",
+            storage_of_data=True,
+            data_location_storage="US",
+            data_location_processing="IE",
+        )
+        solution.assets.add(biz_fn)
+        SolutionSubcontractor.objects.create(
+            solution=solution, subcontractor=sub_a, rank=2
+        )
+        SolutionSubcontractor.objects.create(
+            solution=solution, subcontractor=sub_b, rank=3
+        )
+        contract = Contract.objects.create(
+            name="Multi-rank Contract",
+            ref_id="CA-MULTIRANK",
+            provider_entity=direct,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(solution)
+
+        # b_02.02
+        b0202_buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            Contract.objects.filter(pk=contract.pk),
+            business_function_asset_ids={biz_fn.id},
+        )
+        b0202_rows = [
+            r
+            for r in self._data_rows(self._read_csv(b0202_buf, "reports/b_02.02.csv"))
+            if r[0] == "CA-MULTIRANK"
+        ]
+        self.assertGreater(len(b0202_rows), 0)
+        # b.02.02 c0030 is contract provider LEI
+        self.assertEqual(b0202_rows[0][2], "MDIR1234567890123456")
+
+        # b_05.02
+        b0502_buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        b0502_rank1 = [
+            r
+            for r in self._data_rows(self._read_csv(b0502_buf, "reports/b_05.02.csv"))
+            if r[0] == "CA-MULTIRANK" and r[4] == "1"
+        ]
+        self.assertEqual(len(b0502_rank1), 1)
+        self.assertEqual(b0502_rank1[0][2], "MDIR1234567890123456")  # matches b.02.02
+
+    # --- Query count: prefetch_related is set --------------------------------
+
+    def test_export_query_count_stays_bounded(self):
+        """Building many contracts/solutions/subs should not trigger N+1 queries."""
+        from tprm.models import SolutionSubcontractor
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+
+        # 5 contracts, 3 solutions each, 2-rank chain each = 15 solutions + 15 subs.
+        direct = Entity.objects.create(
+            name="QC Direct",
+            legal_identifiers={"LEI": "QCDI1234567890123456"},
+        )
+        contract_pks = []
+        for c_idx in range(5):
+            contract = Contract.objects.create(
+                name=f"QC Contract {c_idx}",
+                ref_id=f"CA-QC-{c_idx}",
+                provider_entity=direct,
+                beneficiary_entity=self.main_entity,
+                is_intragroup=False,
+                status=Contract.Status.ACTIVE,
+            )
+            contract_pks.append(contract.pk)
+            for s_idx in range(3):
+                sol = Solution.objects.create(
+                    name=f"QC Sol {c_idx}-{s_idx}",
+                    provider_entity=direct,
+                    dora_ict_service_type=f"eba_TA:S{s_idx:02d}",
+                )
+                sub = Entity.objects.create(
+                    name=f"QC Sub {c_idx}-{s_idx}",
+                    legal_identifiers={"LEI": f"QCS{c_idx:02d}{s_idx}1234567890123"},
+                )
+                SolutionSubcontractor.objects.create(
+                    solution=sol, subcontractor=sub, rank=2
+                )
+                contract.solutions.add(sol)
+
+        with CaptureQueriesContext(connection) as ctx:
+            self._generate(
+                dora_export.generate_b_05_02_supply_chains,
+                Contract.objects.filter(pk__in=contract_pks),
+            )
+
+        # Baseline: filter + prefetch solutions + prefetch subcontracting_chain
+        # + prefetch subcontractors. Should be a handful of queries regardless
+        # of chain count. Generous ceiling to survive minor Django internals.
+        self.assertLess(
+            len(ctx.captured_queries),
+            15,
+            msg=f"N+1 suspected: {len(ctx.captured_queries)} queries",
+        )
+
+
+class TestB0501SubcontractorRegistration(
+    DoraExportTestMixin, DoraDataFactory, TestCase
+):
+    """Coverage for b_05.01 picking up subcontractors + their corporate ancestors."""
+
+    CSV = "reports/b_05.01.csv"
+
+    def test_subcontractor_appears_in_b_05_01(self):
+        """Every SolutionSubcontractor entity gets a zero-expense b.05.01 row."""
+        from tprm.models import SolutionSubcontractor
+
+        direct = Entity.objects.create(
+            name="Reg Direct",
+            legal_identifiers={"LEI": "RGDI1234567890123456"},
+            country="US",
+            dora_provider_person_type="eba_CT:x212",
+        )
+        sub = Entity.objects.create(
+            name="Reg Sub",
+            legal_identifiers={"LEI": "RGSU1234567890123456"},
+            country="US",
+            dora_provider_person_type="eba_CT:x212",
+        )
+        solution = Solution.objects.create(
+            name="Reg Service",
+            provider_entity=direct,
+            dora_ict_service_type="eba_TA:S09",
+        )
+        SolutionSubcontractor.objects.create(
+            solution=solution, subcontractor=sub, rank=2
+        )
+        contract = Contract.objects.create(
+            name="Reg Contract",
+            ref_id="CA-REG",
+            provider_entity=direct,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(solution)
+
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        data = self._data_rows(rows)
+        codes = {r[0] for r in data}
+
+        self.assertIn("RGDI1234567890123456", codes)  # direct provider
+        self.assertIn("RGSU1234567890123456", codes)  # subcontractor
+
+        # Subcontractor row has zero expense and empty currency.
+        sub_row = next(r for r in data if r[0] == "RGSU1234567890123456")
+        self.assertEqual(float(sub_row[9]), 0.0)
+        self.assertEqual(sub_row[8], "")
+        # c0110 self-ref (no parent)
+        self.assertEqual(sub_row[10], "RGSU1234567890123456")
+
+    def test_subcontractor_ancestor_appears_in_b_05_01(self):
+        """Corporate parent of a subcontractor also gets a b_05.01 row."""
+        from tprm.models import SolutionSubcontractor
+
+        grandparent = Entity.objects.create(
+            name="Sub Ultimate Parent",
+            legal_identifiers={"LEI": "SUBULT123456789012345"[:20]},
+        )
+        parent_ent = Entity.objects.create(
+            name="Sub Intermediate",
+            legal_identifiers={"LEI": "SUBMID123456789012345"[:20]},
+            parent_entity=grandparent,
+        )
+        direct = Entity.objects.create(
+            name="Anc Direct",
+            legal_identifiers={"LEI": "ANDR1234567890123456"},
+        )
+        sub = Entity.objects.create(
+            name="Anc Sub (leaf)",
+            legal_identifiers={"LEI": "ANSU1234567890123456"},
+            parent_entity=parent_ent,
+        )
+        solution = Solution.objects.create(
+            name="Anc Service",
+            provider_entity=direct,
+            dora_ict_service_type="eba_TA:S09",
+        )
+        SolutionSubcontractor.objects.create(
+            solution=solution, subcontractor=sub, rank=2
+        )
+        contract = Contract.objects.create(
+            name="Anc Contract",
+            ref_id="CA-ANC",
+            provider_entity=direct,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(solution)
+
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        data = self._data_rows(self._read_csv(buf, self.CSV))
+        codes = {r[0] for r in data}
+
+        # All three in the subcontractor's ancestry chain should be registered.
+        self.assertIn("ANSU1234567890123456", codes)  # sub itself
+        self.assertIn(parent_ent.legal_identifiers["LEI"], codes)  # intermediate
+        self.assertIn(grandparent.legal_identifiers["LEI"], codes)  # ultimate parent
+
+        # c0110 of the sub points at its ultimate parent (grandparent).
+        sub_row = next(r for r in data if r[0] == "ANSU1234567890123456")
+        self.assertEqual(sub_row[10], grandparent.legal_identifiers["LEI"])
