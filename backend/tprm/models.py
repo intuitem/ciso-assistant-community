@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -390,6 +391,77 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
+
+
+class SolutionSubcontractor(AbstractBaseModel):
+    """
+    Ordered ICT subcontracting chain for a Solution (DORA Art. 28(2), b_05.02).
+
+    Rank 1 is implicit (Solution.provider_entity). This table holds ranks 2..N,
+    where each subcontractor's recipient is the entity at the previous rank in
+    the same chain.
+
+    Defined as a standalone join model, not declared as a ManyToManyField
+    through on Solution, so rank ordering is never lost behind an M2M shortcut.
+    Access via `solution.subcontracting_chain.all()`.
+    """
+
+    solution = models.ForeignKey(
+        Solution,
+        on_delete=models.CASCADE,
+        related_name="subcontracting_chain",
+        verbose_name=_("Solution"),
+    )
+    subcontractor = models.ForeignKey(
+        Entity,
+        on_delete=models.PROTECT,
+        related_name="subcontracts",
+        verbose_name=_("Subcontractor"),
+        help_text=_("Entity providing the sub-contracted ICT service"),
+    )
+    rank = models.PositiveSmallIntegerField(
+        verbose_name=_("Rank"),
+        help_text=_(
+            "Position in the subcontracting chain "
+            "(2 = first subcontractor, 3 = subcontractor of subcontractor, ...)"
+        ),
+    )
+
+    class Meta:
+        verbose_name = _("Solution subcontractor")
+        verbose_name_plural = _("Solution subcontractors")
+        unique_together = [
+            ("solution", "rank"),
+            ("solution", "subcontractor"),
+        ]
+        ordering = ["rank"]
+
+    def __str__(self):
+        return f"{self.solution} → {self.subcontractor} (rank {self.rank})"
+
+    def clean(self):
+        super().clean()
+        if self.rank is not None and self.rank < 2:
+            raise ValidationError(
+                {
+                    "rank": _(
+                        "Rank must be >= 2. Rank 1 is the solution's direct "
+                        "provider and is implicit."
+                    )
+                }
+            )
+        if (
+            self.subcontractor_id is not None
+            and self.solution_id is not None
+            and self.solution.provider_entity_id == self.subcontractor_id
+        ):
+            raise ValidationError(
+                {
+                    "subcontractor": _(
+                        "A subcontractor cannot be the solution's direct provider."
+                    )
+                }
+            )
 
 
 class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
