@@ -1,8 +1,10 @@
 import re
 
+from django.db.models import ProtectedError
+from rest_framework import serializers as drf_serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from core.models import Asset
@@ -77,6 +79,43 @@ class EntityViewSet(BaseModelViewSet):
         "default_maturity",
         "default_trust",
     ]
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Convert Django's ProtectedError into a 409 Conflict with the list of
+        blocking references, so the frontend can render "this entity is used
+        as a subcontractor in N solutions" rather than a default 500.
+
+        The Entity.subcontracts reverse manager has on_delete=PROTECT — deleting
+        an Entity referenced by any SolutionSubcontractor row raises
+        ProtectedError. Catch it here and surface it as a structured 409.
+        """
+        instance = self.get_object()
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError as exc:
+            blocking_subcontracts = instance.subcontracts.select_related(
+                "solution"
+            ).order_by("solution__name", "rank")[:50]
+            return Response(
+                {
+                    "detail": (
+                        f"Cannot delete entity '{instance.name}' — it is used "
+                        f"as a subcontractor in {instance.subcontracts.count()} "
+                        f"solution(s). Remove those references first."
+                    ),
+                    "blocking_subcontracts": [
+                        {
+                            "id": str(row.id),
+                            "solution_id": str(row.solution_id),
+                            "solution_name": row.solution.name,
+                            "rank": row.rank,
+                        }
+                        for row in blocking_subcontracts
+                    ],
+                },
+                status=HTTP_409_CONFLICT,
+            )
 
     def get_queryset(self):
         """Add annotation for default_criticality to enable sorting"""
@@ -862,6 +901,43 @@ class SolutionViewSet(BaseModelViewSet):
         "dora_alternative_providers_identified",
         "filtering_labels",
     ]
+
+    def _handle_chain_conflict(self, exc):
+        """
+        If a ValidationError raised by SolutionWriteSerializer carries the
+        `_integrity_conflict` marker, translate it into a 409 Conflict.
+        Otherwise re-raise so DRF's default 400 handling kicks in.
+        """
+        detail = exc.detail if hasattr(exc, "detail") else None
+        is_conflict = False
+        if isinstance(detail, dict):
+            is_conflict = detail.get("_integrity_conflict") is True
+            # Strip the marker from the response body.
+            detail.pop("_integrity_conflict", None)
+        if is_conflict:
+            return Response(
+                {
+                    "detail": (
+                        "Subcontracting chain was modified by another user "
+                        "between your read and write. Refresh and retry."
+                    ),
+                    "errors": detail,
+                },
+                status=HTTP_409_CONFLICT,
+            )
+        raise exc
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except drf_serializers.ValidationError as exc:
+            return self._handle_chain_conflict(exc)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except drf_serializers.ValidationError as exc:
+            return self._handle_chain_conflict(exc)
 
     @action(detail=False, name="Get data location storage choices")
     def data_location_storage(self, request):
