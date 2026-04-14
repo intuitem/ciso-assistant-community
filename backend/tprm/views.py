@@ -2,7 +2,6 @@ import io
 import re
 
 from django.db.models import ProtectedError
-from rest_framework import serializers as drf_serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
@@ -137,34 +136,51 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         """
         Convert Django's ProtectedError into a 409 Conflict with the list of
         blocking references, so the frontend can render "this entity is used
-        as a subcontractor in N solutions" rather than a default 500.
+        as a subcontractor/recipient in N solutions" rather than a default 500.
 
-        The Entity.subcontracts reverse manager has on_delete=PROTECT — deleting
-        an Entity referenced by any SolutionSubcontractor row raises
-        ProtectedError. Catch it here and surface it as a structured 409.
+        Both the subcontractor and recipient FKs on SolutionSubcontractor use
+        on_delete=PROTECT, so deleting an Entity referenced by either role
+        raises ProtectedError. Collect blocking rows for both roles.
         """
         instance = self.get_object()
         try:
             return super().destroy(request, *args, **kwargs)
         except ProtectedError as exc:
-            blocking_subcontracts = instance.subcontracts.select_related(
-                "solution"
-            ).order_by("solution__name")[:50]
-            return Response(
-                {
-                    "detail": (
-                        f"Cannot delete entity '{instance.name}' — it is used "
-                        f"as a subcontractor in {instance.subcontracts.count()} "
-                        f"solution(s). Remove those references first."
-                    ),
-                    "blocking_subcontracts": [
+            as_subcontractor = instance.subcontracts.select_related("solution")
+            as_recipient = instance.subcontract_recipients.select_related("solution")
+            total_count = as_subcontractor.count() + as_recipient.count()
+
+            # Combine both querysets, ordered by solution name, capped at 50.
+            blocking_rows = []
+            for row in as_subcontractor.order_by("solution__name")[:50]:
+                blocking_rows.append(
+                    {
+                        "id": str(row.id),
+                        "solution_id": str(row.solution_id),
+                        "solution_name": row.solution.name,
+                        "role": "subcontractor",
+                    }
+                )
+            remaining = 50 - len(blocking_rows)
+            if remaining > 0:
+                for row in as_recipient.order_by("solution__name")[:remaining]:
+                    blocking_rows.append(
                         {
                             "id": str(row.id),
                             "solution_id": str(row.solution_id),
                             "solution_name": row.solution.name,
+                            "role": "recipient",
                         }
-                        for row in blocking_subcontracts
-                    ],
+                    )
+
+            return Response(
+                {
+                    "detail": (
+                        f"Cannot delete entity '{instance.name}' — it is "
+                        f"referenced in {total_count} subcontracting "
+                        f"chain row(s). Remove those references first."
+                    ),
+                    "blocking_subcontracts": blocking_rows,
                 },
                 status=HTTP_409_CONFLICT,
             )
@@ -1171,43 +1187,6 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         "dora_alternative_providers_identified",
         "filtering_labels",
     ]
-
-    def _handle_chain_conflict(self, exc):
-        """
-        If a ValidationError raised by SolutionWriteSerializer carries the
-        `_integrity_conflict` marker, translate it into a 409 Conflict.
-        Otherwise re-raise so DRF's default 400 handling kicks in.
-        """
-        detail = exc.detail if hasattr(exc, "detail") else None
-        is_conflict = False
-        if isinstance(detail, dict):
-            is_conflict = detail.get("_integrity_conflict") is True
-            # Strip the marker from the response body.
-            detail.pop("_integrity_conflict", None)
-        if is_conflict:
-            return Response(
-                {
-                    "detail": (
-                        "Subcontracting chain was modified by another user "
-                        "between your read and write. Refresh and retry."
-                    ),
-                    "errors": detail,
-                },
-                status=HTTP_409_CONFLICT,
-            )
-        raise exc
-
-    def create(self, request, *args, **kwargs):
-        try:
-            return super().create(request, *args, **kwargs)
-        except drf_serializers.ValidationError as exc:
-            return self._handle_chain_conflict(exc)
-
-    def update(self, request, *args, **kwargs):
-        try:
-            return super().update(request, *args, **kwargs)
-        except drf_serializers.ValidationError as exc:
-            return self._handle_chain_conflict(exc)
 
     @action(detail=False, name="Get data location storage choices")
     def data_location_storage(self, request):
