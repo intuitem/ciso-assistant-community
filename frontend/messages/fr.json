@@ -452,6 +452,7 @@
 	"asPDF": "en PDF",
 	"asCSV": "en CSV",
 	"asXLSX": "en Excel",
+	"exportEcosystem": "export de l'écosystème (XLSX)",
 	"asWord": "en Word",
 	"asMarkdown": "en Markdown",
 	"draft": "Brouillon",

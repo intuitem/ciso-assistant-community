@@ -623,9 +623,26 @@
 		<MultiSelect
 			bind:selected
 			bind:open={multiSelectOpen}
-			options={effectiveLazy && selected.length > 0 && !lazyHasSearched
-				? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
-				: options}
+			options={new Proxy(
+				effectiveLazy && selected.length > 0 && !lazyHasSearched
+					? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
+					: options,
+				{
+					get(target, prop, receiver) {
+						// Fix: svelte-multiselect's add() uses Array.includes() (reference equality) to
+						// check if a clicked option already exists. In Svelte 5, reactive proxy wrapping
+						// breaks reference identity, causing it to overwrite the clicked option with the
+						// raw search text. Override includes() to compare by .value instead.
+						if (prop === 'includes') {
+							return (item: unknown) =>
+								item !== null && typeof item === 'object' && 'value' in (item as object)
+									? (target as Option[]).some((opt) => opt.value === (item as Option).value)
+									: false;
+						}
+						return Reflect.get(target, prop, receiver);
+					}
+				}
+			)}
 			{...multiSelectOptions}
 			outerDivClass="!input !bg-surface-100 !px-2 !flex {overflowCssClass}"
 			disabled={_disabled}
