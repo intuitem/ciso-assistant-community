@@ -38,6 +38,7 @@
 
 <FolderTreeSelect
 	{form}
+	writable="add_accreditation"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

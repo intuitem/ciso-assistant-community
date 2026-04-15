@@ -79,6 +79,7 @@
 {#key folderKey}
 	<FolderTreeSelect
 		{form}
+		writable="add_businessimpactanalysis"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

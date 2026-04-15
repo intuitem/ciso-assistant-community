@@ -26,6 +26,7 @@
 
 <FolderTreeSelect
 	{form}
+	writable="add_perimeter"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

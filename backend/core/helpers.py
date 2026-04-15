@@ -1829,6 +1829,7 @@ def get_folder_content(
     include_enclaves,
     viewable_objects,
     needed_folders,
+    writable_ids=None,
 ):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
@@ -1840,6 +1841,7 @@ def get_folder_content(
                 "name": f.name,
                 "uuid": f.id,
                 "viewable": viewable_objects and f.id in viewable_objects,
+                "writable": writable_ids is None or f.id in writable_ids,
                 "content_type": f.content_type,
             }
             # Add enclave-specific styling
@@ -1857,6 +1859,7 @@ def get_folder_content(
                 include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
+                writable_ids=writable_ids,
             )
             if len(children) > 0:
                 entry.update({"children": children})

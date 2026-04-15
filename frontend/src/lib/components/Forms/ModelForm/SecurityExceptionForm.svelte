@@ -85,6 +85,7 @@
 <HiddenInput {form} field="requirement_assessments" />
 <FolderTreeSelect
 	{form}
+	writable="add_securityexception"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

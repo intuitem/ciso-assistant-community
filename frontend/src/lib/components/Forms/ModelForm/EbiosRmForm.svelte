@@ -85,6 +85,7 @@
 	/>
 	<FolderTreeSelect
 		{form}
+		writable="add_ebiosrmstudy"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

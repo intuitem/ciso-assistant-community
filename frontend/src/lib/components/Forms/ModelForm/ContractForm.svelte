@@ -30,6 +30,7 @@
 
 <FolderTreeSelect
 	{form}
+	writable="add_contract"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

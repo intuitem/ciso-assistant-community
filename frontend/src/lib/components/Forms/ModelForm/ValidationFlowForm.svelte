@@ -104,6 +104,7 @@
 {/if}
 <FolderTreeSelect
 	{form}
+	writable="add_validationflow"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

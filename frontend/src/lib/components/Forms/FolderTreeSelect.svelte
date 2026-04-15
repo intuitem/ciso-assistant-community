@@ -31,6 +31,13 @@
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
 		 */
 		contentTypes?: string[];
+		/**
+		 * Django permission codename (e.g. "add_asset"). When set, each tree node
+		 * returned by org_tree carries a ``writable`` boolean; only writable nodes
+		 * are selectable.  Ancestor-only nodes remain visible for navigation but
+		 * are rendered as non-selectable.
+		 */
+		writable?: string;
 	}
 
 	let {
@@ -49,7 +56,8 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
-		contentTypes = ['DO', 'GL']
+		contentTypes = ['DO', 'GL'],
+		writable = undefined
 	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
@@ -114,7 +122,8 @@
 		if (!q) return null;
 		const results: SearchResult[] = [];
 		function visit(n: TreeNode, ancestors: string[]) {
-			const selectable = !n.content_type || contentTypes.includes(n.content_type);
+			const selectable =
+				(!n.content_type || contentTypes.includes(n.content_type)) && n.writable !== false;
 			if (selectable && n.uuid !== excludedId && n.uuid && n.name.toLowerCase().includes(q)) {
 				results.push({ node: n, path: ancestors });
 			}
@@ -205,8 +214,9 @@
 
 		isLoading = true;
 		const includeEnclaves = contentTypes.includes('EN');
+		const writePerm = writable ? `&write_perm=${encodeURIComponent(writable)}` : '';
 		fetch(
-			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}`
+			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}${writePerm}`
 		)
 			.then((res) => {
 				if (res.ok) return res.json();

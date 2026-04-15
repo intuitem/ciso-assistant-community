@@ -7173,7 +7173,10 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
-        Returns the tree of domains and perimeters
+        Returns the tree of domains and perimeters.
+
+        Optional query param `write_perm` (e.g. write_perm=add_asset).When provided, each node in the response carries a ``writable`` boolean
+        that is ``true`` only for folders where the requesting user holds that permission.
         """
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"
@@ -7197,6 +7200,22 @@ class FolderViewSet(BaseModelViewSet):
                 needed_folders.add(current.parent_folder_id)
                 current = Folder.objects.get(pk=current.parent_folder_id)
 
+        # Optional per-node writable annotation
+        write_perm_codename = request.query_params.get("write_perm")
+        writable_ids = None
+        if write_perm_codename:
+            try:
+                perm = Permission.objects.get(codename=write_perm_codename)
+                writable_ids = {
+                    f.id
+                    for f in Folder.objects.filter(id__in=needed_folders)
+                    if RoleAssignment.is_access_allowed(
+                        user=request.user, perm=perm, folder=f
+                    )
+                }
+            except Permission.DoesNotExist:
+                writable_ids = set()
+
         folders_list = []
         for folder in (
             Folder.objects.exclude(content_type="GL")
@@ -7213,6 +7232,7 @@ class FolderViewSet(BaseModelViewSet):
                 "name": folder.name,
                 "uuid": folder.id,
                 "viewable": folder.id in viewable_objects,
+                "writable": writable_ids is None or folder.id in writable_ids,
                 "content_type": folder.content_type,
             }
             # Add enclave-specific styling
@@ -7230,6 +7250,7 @@ class FolderViewSet(BaseModelViewSet):
                 include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
+                writable_ids=writable_ids,
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
@@ -7241,6 +7262,7 @@ class FolderViewSet(BaseModelViewSet):
                 "name": root_folder.name,
                 "uuid": str(root_folder.id),
                 "content_type": root_folder.content_type,
+                "writable": writable_ids is None or root_folder.id in writable_ids,
                 "children": folders_list,
             }
         )

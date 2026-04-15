@@ -172,6 +172,7 @@
 </Dropdown>
 <FolderTreeSelect
 	{form}
+	writable="add_organisationobjective"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

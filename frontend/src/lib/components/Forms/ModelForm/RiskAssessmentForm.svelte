@@ -112,6 +112,7 @@
 {#key folderKey}
 	<FolderTreeSelect
 		{form}
+		writable="add_riskassessment"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

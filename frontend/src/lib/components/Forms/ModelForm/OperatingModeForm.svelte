@@ -51,6 +51,7 @@
 
 <FolderTreeSelect
 	{form}
+	writable="add_operatingmode"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

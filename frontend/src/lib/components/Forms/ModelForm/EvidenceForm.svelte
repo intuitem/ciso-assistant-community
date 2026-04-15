@@ -74,6 +74,7 @@
 {/if}
 <FolderTreeSelect
 	{form}
+	writable="add_evidence"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

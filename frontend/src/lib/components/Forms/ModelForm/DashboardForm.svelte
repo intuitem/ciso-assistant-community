@@ -46,6 +46,7 @@
 
 <FolderTreeSelect
 	{form}
+	writable="add_dashboard"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

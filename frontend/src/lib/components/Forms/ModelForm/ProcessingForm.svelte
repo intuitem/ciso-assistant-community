@@ -65,6 +65,7 @@
 />
 <FolderTreeSelect
 	{form}
+	writable="add_processing"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

@@ -51,6 +51,7 @@
 
 <FolderTreeSelect
 	{form}
+	writable="add_tasktemplate"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

@@ -88,6 +88,7 @@
 />
 <FolderTreeSelect
 	{form}
+	writable="add_organisationissue"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

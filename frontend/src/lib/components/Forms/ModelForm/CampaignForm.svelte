@@ -112,6 +112,7 @@
 />
 <FolderTreeSelect
 	{form}
+	writable="add_campaign"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

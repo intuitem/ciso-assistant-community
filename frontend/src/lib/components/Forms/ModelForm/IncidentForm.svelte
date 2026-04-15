@@ -77,6 +77,7 @@
 />
 <FolderTreeSelect
 	{form}
+	writable="add_incident"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

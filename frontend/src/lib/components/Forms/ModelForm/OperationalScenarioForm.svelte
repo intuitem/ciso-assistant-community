@@ -54,6 +54,7 @@
 />
 <FolderTreeSelect
 	{form}
+	writable="add_operationalscenario"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
