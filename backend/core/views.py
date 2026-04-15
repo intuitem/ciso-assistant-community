@@ -14831,6 +14831,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings_assessment = FindingsAssessment.objects.get(id=pk)
         findings = (
             Finding.objects.filter(findings_assessment=pk)
+            .select_related("folder")
             .prefetch_related(
                 "applied_controls",
                 "evidences",
