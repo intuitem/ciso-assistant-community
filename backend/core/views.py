@@ -14853,7 +14853,10 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "priority": finding.priority if finding.priority is not None else "",
                 "folder": finding.folder.name if finding.folder else "",
                 "filtering_labels": "|".join(
-                    [label.label for label in finding.filtering_labels.all()]
+                    [
+                        escape_excel_formula(label.label)
+                        for label in finding.filtering_labels.all()
+                    ]
                 ),
                 "applied_controls": "\n".join(
                     [
@@ -14863,9 +14866,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 ),
                 "evidences": "\n".join([ev.name for ev in finding.evidences.all()]),
                 "vulnerabilities": "|".join(
-                    [v.name for v in finding.vulnerabilities.all()]
+                    [
+                        escape_excel_formula(v.name)
+                        for v in finding.vulnerabilities.all()
+                    ]
                 ),
-                "observation": finding.observation or "",
+                "observation": escape_excel_formula(finding.observation),
                 "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
                 if finding.created_at
                 else "",
