@@ -229,8 +229,6 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 ### Supported fields
 
-
-
 * **ref\_id**
 * **name**<mark style="color:red;">\*</mark>
 * **description**
@@ -239,7 +237,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `medium`
   * `high`
   * `critical`
-* **status**<mark style="color:red;">\*</mark>
+* **status**
   * `identified`
   * `confirmed`
   * `dismissed`
