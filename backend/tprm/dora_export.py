@@ -8,6 +8,7 @@ Each function generates a specific report and writes it to a ZIP file.
 import csv
 import io
 import json
+import logging
 from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
@@ -16,7 +17,46 @@ from tprm.models import Entity, Contract, Solution
 from core.models import Asset
 
 
+logger = logging.getLogger(__name__)
+
+
 # Helper Functions
+
+
+def compute_chain_depths(chain_rows):
+    """Compute rank (depth) for each SolutionSubcontractor from the recipient tree.
+
+    Returns a dict mapping subcontractor_id → rank (int, >= 2).
+    - recipient=NULL → rank 2 (direct child of the provider)
+    - recipient=X → rank_of(X) + 1
+
+    Cycles in corrupt data are broken by treating the back-edge as a root
+    (depth 2) instead of recursing infinitely.
+    """
+    by_sub = {sc.subcontractor_id: sc for sc in chain_rows}
+    depths = {}
+    visiting = set()
+
+    def _depth(sc):
+        sid = sc.subcontractor_id
+        if sid in depths:
+            return depths[sid]
+        if sid in visiting:
+            # Cycle detected — break it by treating this node as a root.
+            depths[sid] = 2
+            return 2
+        visiting.add(sid)
+        if sc.recipient_id is None or sc.recipient_id not in by_sub:
+            depths[sid] = 2
+        else:
+            depths[sid] = _depth(by_sub[sc.recipient_id]) + 1
+        visiting.discard(sid)
+        return depths[sid]
+
+    for sc in chain_rows:
+        _depth(sc)
+    return depths
+
 
 IDENTIFIER_PRIORITY = ["LEI", "EUID", "KBO", "CRN", "VAT", "PNR", "NIN", "DUNS"]
 
@@ -1015,6 +1055,42 @@ def generate_b_05_01_provider_details(
         if contract.annual_expense:
             providers_data[provider_id]["total_expense"] += contract.annual_expense
 
+    # Register subcontractors referenced by b_05.02 rank>1 rows so that the
+    # c0030/c0060 → c0010 foreign keys (EBA rule 807) resolve. A subcontractor
+    # is not a direct provider of any contract, so it has no entry yet. Emit a
+    # zero-expense, empty-currency row per subcontractor. Runs BEFORE the
+    # parent-entity walker so ancestors of subcontractors are also registered.
+    for contract in third_party_contracts.prefetch_related(
+        "solutions__subcontracting_chain__subcontractor"
+    ):
+        for solution in contract.solutions.all():
+            for sc in solution.subcontracting_chain.all():
+                if sc.subcontractor_id not in providers_data:
+                    providers_data[sc.subcontractor_id] = {
+                        "provider": sc.subcontractor,
+                        "total_expense": 0,
+                        "currency": "",
+                    }
+
+    # Register ancestor entities referenced by c0110 so that the c0110 → c0010
+    # foreign key (EBA rule 807) resolves. When a provider has a parent_entity
+    # chain but the ancestors are not themselves direct contract providers, the
+    # ultimate parent reported in c0110 has no matching c0010 row, which the
+    # OneGate filer rejects. Walk every direct provider's ancestry and add each
+    # ancestor as a zero-expense row if not already present.
+    for provider_id in list(providers_data.keys()):
+        current = providers_data[provider_id]["provider"].parent_entity
+        seen = {provider_id}
+        while current is not None and current.id not in seen:
+            seen.add(current.id)
+            if current.id not in providers_data:
+                providers_data[current.id] = {
+                    "provider": current,
+                    "total_expense": 0,
+                    "currency": "",
+                }
+            current = current.parent_entity
+
     # Write provider data
     for provider_id, data in providers_data.items():
         provider = data["provider"]
@@ -1125,14 +1201,25 @@ def generate_b_05_02_supply_chains(
             solutions__isnull=False,
         )
         .select_related("provider_entity", "beneficiary_entity")
-        .prefetch_related("solutions__provider_entity")
+        .prefetch_related(
+            "solutions__provider_entity",
+            "solutions__subcontracting_chain__subcontractor",
+            "solutions__subcontracting_chain__recipient",
+        )
     )
 
     # Write supply chain data
     # Track written dimension keys to avoid XBRL duplicate fact errors.
     # The XBRL key for b_05.02 is (contract_ref, ict_service_type, provider_code, rank, recipient_code).
     seen_keys = set()
+    rows_by_rank: Dict[int, int] = {}
 
+    # DORA Art. 28(2) supply chains. Rank 1 is the solution's direct provider
+    # (Solution.provider_entity). Ranks 2..N come from SolutionSubcontractor
+    # rows, each carrying its own recipient (the entity that sub-contracted to
+    # this subcontractor). Multiple entities at the same rank are allowed
+    # (fan-out / tree), e.g. Zscaler subcontracting to both AWS and Azure at
+    # rank 2. At rank=1, recipient = provider (direct service relationship).
     for contract in supply_chain_contracts:
         for solution in contract.solutions.all():
             contract_ref = contract.ref_id or str(contract.id)
@@ -1140,29 +1227,53 @@ def generate_b_05_02_supply_chains(
             if not ict_service_type:
                 continue
 
-            # Build supply chain from solution's provider
-            chain = get_provider_chain(solution.provider_entity)
+            # Rank-1 provider is the contract counterparty, NOT the
+            # solution-level provider_entity.  This matches b_02.02 c0030
+            # and b_03.02 c0020, both of which use contract.provider_entity.
+            direct_provider = contract.provider_entity
+            if direct_provider is None:
+                continue
 
-            for rank, provider in enumerate(chain, start=1):
-                # c0030 is typed dimension eba_typ:IS — use "0" if empty
-                # c0040 is enumeration metric — keep empty when c0030 has no real value
-                provider_code, provider_code_type, _ = get_entity_identifier(provider)
+            # c0030/c0040 for the direct provider (rank 1).
+            dp_code, dp_code_type, _ = get_entity_identifier(direct_provider)
+            dp_code = dp_code or "0"
+
+            # Rank 1: direct provider, recipient = self.
+            rank1_key = (contract_ref, ict_service_type, dp_code, 1, dp_code)
+            if rank1_key not in seen_keys:
+                seen_keys.add(rank1_key)
+                csv_writer.writerow(
+                    [
+                        contract_ref,
+                        ict_service_type,
+                        dp_code,
+                        dp_code_type,
+                        1,
+                        dp_code,
+                        dp_code_type,
+                    ]
+                )
+                rows_by_rank[1] = rows_by_rank.get(1, 0) + 1
+
+            # Ranks 2..N: depth computed from the recipient tree.
+            chain_rows = list(solution.subcontracting_chain.all())
+            depths = compute_chain_depths(chain_rows)
+
+            for sc in chain_rows:
+                rank = depths[sc.subcontractor_id]
+                provider_code, provider_code_type, _ = get_entity_identifier(
+                    sc.subcontractor
+                )
                 provider_code = provider_code or "0"
 
-                # c0060/c0070: recipient = previous entity in chain (the one that sub-contracted)
-                # CHECK_C0050: when rank=1, recipient must equal provider (direct service relationship)
-                # When rank>1, recipient is the previous entity in the chain
-                if rank == 1:
-                    recipient_code, recipient_code_type = (
-                        provider_code,
-                        provider_code_type,
-                    )
-                else:
-                    recipient = chain[rank - 2]
+                # Resolve recipient: stored FK, or fall back to direct provider.
+                if sc.recipient_id is not None:
                     recipient_code, recipient_code_type, _ = get_entity_identifier(
-                        recipient
+                        sc.recipient
                     )
                     recipient_code = recipient_code or "0"
+                else:
+                    recipient_code, recipient_code_type = dp_code, dp_code_type
 
                 key = (
                     contract_ref,
@@ -1186,6 +1297,12 @@ def generate_b_05_02_supply_chains(
                         recipient_code_type,
                     ]
                 )
+                rows_by_rank[rank] = rows_by_rank.get(rank, 0) + 1
+
+    logger.info(
+        "dora_export.b_05_02.emitted",
+        extra={"rows_by_rank": dict(sorted(rows_by_rank.items()))},
+    )
 
     path = (
         f"{folder_prefix}/reports/b_05.02.csv"
