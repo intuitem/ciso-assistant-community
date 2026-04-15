@@ -1130,5 +1130,6 @@
 	"confirmModalMessagePlural": "Jste si jistí? Tato akce trvale ovlivní následující objekty",
 	"syncAppliedControlsMessage": "Použité kontroly využívající tuto referenční kontrolu s ní budou synchronizovány. Upozorňujeme, že tuto akci nelze vrátit zpět.",
 	"syncToAppliedControl": "Synchronizovat s aplikovanou kontrolou",
-	"syncToReferenceControl": "Synchronizovat s referenční kontrolou"
+	"syncToReferenceControl": "Synchronizovat s referenční kontrolou",
+	"exportEcosystem": "export ekosystému (XLSX)"
 }

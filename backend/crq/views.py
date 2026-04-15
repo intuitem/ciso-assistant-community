@@ -656,7 +656,11 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "study_id": str(study.id),
                 "study_name": study.name,
                 "study_description": study.description,
-                "study_authors": [author.email for author in study.authors.all()],
+                "study_authors": [
+                    email
+                    for author in study.authors.all()
+                    for email in author.get_emails()
+                ],
                 "study_folder": {"id": str(study.folder.id), "name": study.folder.name}
                 if study.folder
                 else None,
