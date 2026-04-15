@@ -255,7 +255,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * **due\_date** - due date (YYYY-MM-DD)
 * **observation**&#x20;
 * **vulnerabilities**\
-  Pipe- or comma-separated vulnerability names
+  Pipe or comma-separated vulnerability names
 
 
 
