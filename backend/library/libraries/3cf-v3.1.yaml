@@ -12,7 +12,7 @@ copyright: "Ce document peut \xEAtre utilis\xE9 librement au sein de la communau
   \ du transport a\xE9rien et sous r\xE9serve de mentionner sa paternit\xE9 (source\n\
   et date de la derni\xE8re mise \xE0 jour)."
 version: 1
-publication_date: 2026-04-14
+publication_date: 2026-04-15
 provider: DSAC / OSAC
 packager: intuitem
 objects:
@@ -71,7 +71,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.1:3
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.1
       description: "La d\xE9claration d\u2019engagement du Dirigeant Responsable est\
@@ -107,7 +107,7 @@ objects:
       ref_id: 3.2.1
       name: "Strat\xE9gie et objectifs de s\xE9curit\xE9 de l\u2019information"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.1
       description: "Le Dirigeant Responsable d\xE9finit et approuve une politique\
@@ -160,7 +160,7 @@ objects:
       ref_id: 3.2.2
       name: "Coh\xE9rence de la strat\xE9gie et des objectifs"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.2:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.2
       description: "Le Dirigeant Responsable s\u2019assure de la coh\xE9rence entre:"
@@ -190,7 +190,7 @@ objects:
       ref_id: 3.2.3
       name: "Int\xE9gration ou articulation entre les syst\xE8mes de gestion"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.3:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.3
       description: "Le Dirigeant Responsable pr\xE9cise l\u2019int\xE9gration ou l\u2019\
@@ -232,7 +232,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.4:1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.4:1
       description: "diffus\xE9e et promue de mani\xE8re appropri\xE9e:"
@@ -254,7 +254,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.4:1:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.2.4:1
       description: "formalis\xE9e et int\xE9gr\xE9e ou r\xE9f\xE9renc\xE9e dans:"
@@ -308,7 +308,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:1:3
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:1
       description: "d\xE9finit et attribue les r\xF4les et les responsabilit\xE9s\
@@ -317,14 +317,14 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:1:3:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:1:3
       description: "d\xE9signer une personne ou un groupe de personnes responsables:"
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:1:3:1:1
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:1:3:1
       description: "de la mise en \u0153uvre du r\xE8glement Partie \u2013 IS, qui:"
@@ -361,7 +361,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:1:3:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:1:3
       description: "formaliser la d\xE9signation de ces personnes ou groupes de personnes,\
@@ -438,7 +438,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:3
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3
       description: "Dans le cas o\xF9 l\u2019organisme partage des structures organisationnelles,\
@@ -485,7 +485,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:3:1:5
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:3.3:3:1
       description: "d\xE9signe une personne ou un groupe de personnes responsables\
@@ -603,7 +603,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4:1:3
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4:1
       description: "pr\xE9cise la m\xE9thodologie ou le standard utilis\xE9 pour mener\
@@ -613,7 +613,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4:1:3:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4:1:3
       description: "produit des r\xE9sultats:"
@@ -656,7 +656,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4:1:4
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4:1
       description: "formalise les proc\xE9dures relatives \xE0 la gestion des risques,\
@@ -698,7 +698,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4:1:5
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4:1
       description: "int\xE8gre ou fait r\xE9f\xE9rence \xE0 ces proc\xE9dures dans:"
@@ -732,7 +732,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4:2
-      assessable: false
+      assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4
       description: "Pour la suite, l\u2019organisme s\u2019appuie sur la m\xE9thodologie\
@@ -741,7 +741,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4:3
-      assessable: false
+      assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4
       description: "N\xE9anmoins, sont pr\xE9cis\xE9es ci-apr\xE8s les diff\xE9rentes\
@@ -762,7 +762,7 @@ objects:
       ref_id: 4.1.1
       name: Inventaire
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.1.1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.1.1
       description: "L\u2019organisme identifie la liste des fonctions relatives \xE0\
@@ -891,7 +891,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.1.1:5
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.1.1
       description: "L\u2019organisme dispose d\u2019une interface avec un autre organisme,\
@@ -987,7 +987,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.1.2:1:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.1.2:1
       description: "de probabilit\xE9 d\u2019occurrence (ou vraisemblance) du risque,\
@@ -1048,7 +1048,7 @@ objects:
       ref_id: 4.2.1
       name: Identification des risques
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.1
       description: "Sur la base de l\u2019inventaire pr\xE9c\xE9dent, l\u2019organisme\
@@ -1084,7 +1084,7 @@ objects:
       ref_id: 4.2.2
       name: Analyse des risques
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.2:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.2
       description: "Ensuite, l\u2019organisme identifie ses risques sur la base:"
@@ -1152,7 +1152,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.2:3
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.2
       description: "Uniquement \xE0 destination des organismes redevables de la Partie\
@@ -1218,7 +1218,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.4:1:1:1
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.4:1:1
       description: "la liste des risques relatifs \xE0 la s\xFBret\xE9 et/ou \xE0\
@@ -1290,7 +1290,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.4:2
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.2.4
       description: "Uniquement \xE0 destination des organismes redevables de la Partie\
@@ -1332,7 +1332,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.3.1:1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.3.1:1
       description: "d\xE9finit et justifie pour chacun des risques relatifs \xE0 la\
@@ -1393,7 +1393,7 @@ objects:
       ref_id: 4.3.2
       name: "\xC9laboration du plan de traitement des risques"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.3.2:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.3.2
       description: "L\u2019organisme \xE9labore un plan de traitement des risques\
@@ -1550,7 +1550,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4:1:2
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4:1
       description: "d\xE9finit et met en \u0153uvre:"
@@ -1558,7 +1558,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4:1:2:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4:1:2
       description: "une proc\xE9dure de d\xE9tection des incidents de s\xE9curit\xE9\
@@ -1726,7 +1726,7 @@ objects:
       ref_id: 4.4.1.2.2
       name: "Report interne des \xE9v\xE9nements"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.2.2:1
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.2.2
       description: "L\u2019organisme met en place un syst\xE8me de report interne\
@@ -1752,7 +1752,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.2.2:1:3
-      assessable: false
+      assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.2.2:1
       description: "est accessible aux personnes ayant besoin d\u2019en connaitre\
@@ -1796,7 +1796,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.2.2:2:2
-      assessable: false
+      assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.2.2:2
       description: "formalise la description de ce syst\xE8me et l\u2019int\xE8gre\
@@ -1826,7 +1826,7 @@ objects:
       ref_id: 4.4.1.3
       name: "Strat\xE9gie de d\xE9tection des \xE9v\xE9nements"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.3:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.3
       description: "L\u2019organisme met en place une strat\xE9gie de d\xE9tection\
@@ -1846,7 +1846,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.3:1:2
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.3:1
       description: "d\xE9finit des r\xE8gles de d\xE9tection s\u2019appuyant sur:"
@@ -1875,7 +1875,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.3:1:3
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.3:1
       description: "d\xE9finit des r\xE8gles de conservation des \xE9v\xE9nements\
@@ -1933,7 +1933,7 @@ objects:
       name: "Evaluation et qualification des \xE9v\xE9nements et des vuln\xE9rabilit\xE9\
         s"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.4:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.4
       description: "L\u2019organisme met en place une proc\xE9dure d\u2019\xE9valuation\
@@ -1999,7 +1999,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.5:1:1
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.5:1
       description: "notifie l\u2019incident de s\xE9curit\xE9 de l\u2019information:"
@@ -2022,7 +2022,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.5:1:2
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.1.5:1
       description: "d\xE9termine si l\u2019incident de s\xE9curit\xE9 de l\u2019information\
@@ -2111,7 +2111,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.2:1:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.2:1
       description: "d\xE9finit les actions imm\xE9diates \xE0 mettre en \u0153uvre\
@@ -2142,7 +2142,7 @@ objects:
       ref_id: 4.4.3
       name: "Rem\xE9diation"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.3:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.3
       description: "L\u2019organisme d\xE9finit une proc\xE9dure de rem\xE9diation\
@@ -2167,7 +2167,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.3:1:3
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.4.3:1
       description: "d\xE9finit les actions de rem\xE9diation \xE0 mettre en \u0153\
@@ -2216,7 +2216,7 @@ objects:
       ref_id: 4.5.1.1
       name: "Organismes pr\xE9sentant un risque pour la s\xFBret\xE9 a\xE9rienne"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.1
       description: "Sur la base de la liste des organismes en interface pr\xE9sentant\
@@ -2235,7 +2235,7 @@ objects:
       implementation_groups:
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.1:1:2
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.1:1
       description: "pr\xE9cise les exigences contractuelles \xE0 leur faire appliquer\
@@ -2321,7 +2321,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:1:2
-      assessable: false
+      assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:1
       description: "d\xE9finit un cadre de travail avec ces derniers, qui pr\xE9voit:"
@@ -2382,7 +2382,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:3:1
-      assessable: false
+      assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:3
       description: "la notification des incidents ou vuln\xE9rabilit\xE9s ayant un\
@@ -2406,7 +2406,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:3:2
-      assessable: false
+      assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:3
       description: "la soumission d\u2019un compte rendu:"
@@ -2430,7 +2430,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:3:3
-      assessable: false
+      assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:3
       description: "la soumission d\u2019un rapport de suivi:"
@@ -2445,7 +2445,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:3:3:2
-      assessable: false
+      assessable: true
       depth: 8
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.1.2.1:3:3
       description: "pr\xE9cisant les mesures que l\u2019organisme:"
@@ -2567,7 +2567,7 @@ objects:
       ref_id: 4.5.2
       name: "Sous-traitance d\u2019activit\xE9s du SMSI"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.2:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.2
       description: "L\u2019organisme identifie les sous-traitants \u0153uvrant pour\
@@ -2599,7 +2599,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.2:2:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.2:2
       description: "m\xE8ne une analyse de risque relative \xE0 la contractualisation\
@@ -2629,14 +2629,14 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.2:2:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.2:2
       description: "\xE9labore un contrat pr\xE9cisant:"
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.2:2:2:1
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:4.5.2:2:2
       description: "l\u2019organisation de la prestation:"
@@ -2774,7 +2774,7 @@ objects:
       ref_id: 5.1.1.1
       name: "Personnel de s\xFBret\xE9 a\xE9rienne"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.1.1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.1.1
       description: "Sur la base de son analyse de risques, l\u2019organisme identifie\
@@ -2868,7 +2868,7 @@ objects:
       name: "V\xE9rification renforc\xE9e des ant\xE9c\xE9dents pour les personnels\
         \ de s\xFBret\xE9 a\xE9rienne"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.1.2:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.1.2
       description: "L\u2019organisme applique ou fait appliquer par les tiers identifi\xE9\
@@ -2879,7 +2879,7 @@ objects:
       implementation_groups:
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.1.2:1:1
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.1.2:1
       description: "s\u2019assure que ces personnes disposent d\u2019une habilitation\
@@ -3021,7 +3021,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.2:2:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.2:2
       description: "des mesures de contr\xF4le de la fiabilit\xE9 qui:"
@@ -3092,7 +3092,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.2:3:4
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.2:3
       description: "int\xE8gre ou fait r\xE9f\xE9rence \xE0 cette politique dans:"
@@ -3115,7 +3115,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.2:3:5
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.2:3
       description: "conserve des informations document\xE9es appropri\xE9es comme\
@@ -3168,7 +3168,7 @@ objects:
       ref_id: 5.1.3.2
       name: "Personnels \xE0 l\u2019\xE9tranger"
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.3.2:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.1.3.2
       description: "Lorsqu\u2019un organisme emploie du personnel ne r\xE9sidant pas\
@@ -3263,7 +3263,7 @@ objects:
       ref_id: '5.2'
       name: Sensibilisation
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.2:1
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.2
       description: "L\u2019organisme met en \u0153uvre une campagne de sensibilisation\
@@ -3365,7 +3365,7 @@ objects:
       ref_id: '5.3'
       name: Formation
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.3:1
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.3
       description: "L\u2019organisme met en \u0153uvre un programme de formation ou\
@@ -3374,7 +3374,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:5.3:1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:5.3:1
       description: 'identifie les besoins au sein de son entreprise, notamment que:'
@@ -3480,7 +3480,7 @@ objects:
       ref_id: 6.1.1
       name: Organisation
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.1
       description: "L\u2019organisme d\xE9finit son organisation pour suivre la gestion\
@@ -3576,7 +3576,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.2:1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.2:1
       description: "planifie, met en \u0153uvre et contr\xF4le l\u2019efficacit\xE9\
@@ -3626,7 +3626,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.2:1:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.2:1
       description: 'des mesures techniques et organisationnelles:'
@@ -3693,7 +3693,7 @@ objects:
       - sec
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.3:1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.3:1
       description: "produit et tient \xE0 jour des tableaux de bord de suivi:"
@@ -3810,7 +3810,7 @@ objects:
       implementation_groups:
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.4:1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.4:1
       description: "des activit\xE9s de gestion des risques:"
@@ -3853,7 +3853,7 @@ objects:
       implementation_groups:
       - sur
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.4:1:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.1.4:1
       description: 'des mesures techniques et organisationnelles:'
@@ -3893,7 +3893,7 @@ objects:
       ref_id: 6.2.1.1
       name: Organisation
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.2.1.1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.2.1.1
       description: "L\u2019organisme d\xE9finit l\u2019organisation en charge de l\u2019\
@@ -4083,7 +4083,7 @@ objects:
       ref_id: 6.2.3.1
       name: Organisation
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.2.3.1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.2.3.1
       description: "L\u2019organisme d\xE9finit l\u2019organisation en charge de l\u2019\
@@ -4261,7 +4261,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.2.3.2:2:2
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.2.3.2:2
       description: 'identifie:'
@@ -4297,7 +4297,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.2.3.3:1:1
-      assessable: false
+      assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.2.3.3:1
       description: "produit et tient \xE0 jour des tableaux de bord de suivi de:"
@@ -4380,7 +4380,7 @@ objects:
       ref_id: 6.3.1
       name: Organisation
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.3.1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.3.1
       description: "L\u2019organisme d\xE9finit l\u2019organisation du pilotage de\
@@ -4449,7 +4449,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.3.2:1:1
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.3.2:1
       description: "des changements de contexte de l\u2019organisme, notamment:"
@@ -4470,7 +4470,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.3.2:1:2
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.3.2:1
       description: 'des tableaux de bord de suivi:'
@@ -4709,7 +4709,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.4:4
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.4
       description: "L\u2019organisme peut int\xE9grer cette proc\xE9dure \xE0 celle\
@@ -4717,7 +4717,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.4:5
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.4
       description: "Les modifications suivantes sont soumises \xE0 l\u2019approbation\
@@ -4725,7 +4725,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.4:5:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.4:5
       description: "Les changements majeurs de la chaine de responsabilit\xE9 au sein\
@@ -4770,7 +4770,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:6.4:6
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:6.4
       description: "L\u2019organisme int\xE8gre ou fait r\xE9f\xE9rence \xE0 ces modifications\
@@ -4812,7 +4812,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:7.1:1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:7.1:1
       description: "met \xE0 jour sa proc\xE9dure de conservation des enregistrements\
@@ -4854,7 +4854,7 @@ objects:
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:3cf-v3.1:7.1:1:3
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:3cf-v3.1:7.1:1
       description: "int\xE8gre ou fait r\xE9f\xE9rence \xE0 cette proc\xE9dure dans:"
