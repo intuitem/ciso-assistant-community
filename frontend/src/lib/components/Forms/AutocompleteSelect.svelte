@@ -158,7 +158,7 @@
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
-	const default_value = nullable ? null : selectedValues[0];
+	const default_value = nullable ? null : '';
 
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
