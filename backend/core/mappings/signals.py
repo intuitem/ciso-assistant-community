@@ -23,6 +23,11 @@ def update_mapping_engine_cache(sender, instance, **kwargs):
             transaction.on_commit(engine.reload_cache)
 
 
+@receiver(post_save, sender=Framework)
+def update_mapping_engine_cache_on_framework_save(sender, instance, **kwargs):
+    transaction.on_commit(engine.reload_cache)
+
+
 @receiver(post_delete, sender=Framework)
 def update_mapping_engine_cache_on_framework_delete(sender, instance, **kwargs):
     transaction.on_commit(engine.reload_cache)

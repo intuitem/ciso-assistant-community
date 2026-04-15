@@ -87,29 +87,45 @@ class MappingEngine:
         return self._decompress_rms(data)
 
     def reload_cache(self) -> None:
-        """Reloads all engine cache data: frameworks and RMS data."""
-        self._frameworks = defaultdict(dict)
-        self._all_rms = {}
-        self._framework_mappings = defaultdict(list)
-        self._direct_mappings = set()
+        """Reloads all engine cache data: frameworks and RMS data.
 
+        Builds new local containers from the database first, and only swaps
+        them into the instance attributes after both reads succeed. If the
+        tables are not yet available (e.g. during migrations), the existing
+        instance cache is preserved so ``_ensure_loaded`` can retry later.
+        """
         from django.db.utils import ProgrammingError, OperationalError
 
         try:
-            self.load_frameworks()
-            self.load_rms_data()
+            local_frameworks = self.load_frameworks()
+            (
+                local_all_rms,
+                local_framework_mappings,
+                local_direct_mappings,
+            ) = self.load_rms_data()
         except (ProgrammingError, OperationalError):
-            # Tables might not exist during migrations.
-            pass
+            # Tables might not exist during migrations. Preserve whatever
+            # cache state already exists and let the next access retry.
+            return
 
-    def load_rms_data(self) -> None:
+        self._frameworks = local_frameworks
+        self._all_rms = local_all_rms
+        self._framework_mappings = local_framework_mappings
+        self._direct_mappings = local_direct_mappings
+
+    def load_rms_data(
+        self,
+    ) -> tuple[dict, "defaultdict[str, list[str]]", set[tuple[str, str]]]:
         """
         Loads requirement mapping sets (RMS) from libraries.
-        Builds internal structures: all_rms and framework_mappings.
+
+        Returns the tuple ``(all_rms, framework_mappings, direct_mappings)``
+        built from the database. The caller is responsible for swapping these
+        into the instance attributes once the load is known to have succeeded.
         """
-        self._framework_mappings = defaultdict(list)
-        self._direct_mappings = set()
-        self._all_rms = {}
+        all_rms: dict = {}
+        framework_mappings: "defaultdict[str, list[str]]" = defaultdict(list)
+        direct_mappings: set[tuple[str, str]] = set()
 
         for lib in StoredLibrary.objects.filter(
             Q(content__requirement_mapping_set__isnull=False)
@@ -126,7 +142,7 @@ class MappingEngine:
                     index = (obj["source_framework_urn"], obj["target_framework_urn"])
                     obj["library_urn"] = library_urn
                     obj["id"] = str(lib_id)
-                    self._all_rms[index] = self._compress_rms(obj)
+                    all_rms[index] = self._compress_rms(obj)
 
                 if "requirement_mapping_sets" in content:
                     for obj in content["requirement_mapping_sets"]:
@@ -136,14 +152,21 @@ class MappingEngine:
                         )
                         obj["library_urn"] = library_urn
                         obj["id"] = str(lib_id)
-                        self._all_rms[index] = self._compress_rms(obj)
+                        all_rms[index] = self._compress_rms(obj)
 
-        for src, tgt in self._all_rms:
-            self._framework_mappings[src].append(tgt)
-            self._direct_mappings.add((src, tgt))
+        for src, tgt in all_rms:
+            framework_mappings[src].append(tgt)
+            direct_mappings.add((src, tgt))
 
-    def load_frameworks(self) -> None:
-        self._frameworks = dict(
+        return all_rms, framework_mappings, direct_mappings
+
+    def load_frameworks(self) -> dict:
+        """Returns the frameworks mapping loaded from the database.
+
+        The caller is responsible for swapping the returned dict into the
+        instance attribute after the full reload succeeds.
+        """
+        return dict(
             [
                 (
                     f.urn,
