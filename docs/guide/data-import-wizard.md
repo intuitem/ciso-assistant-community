@@ -231,15 +231,15 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 
 
-* ref\_id
-* name\*
-* description
-* severity
+* **ref\_id**
+* **name**<mark style="color:red;">\*</mark>
+* **description**
+* **severity**
   * `low`
   * `medium`
   * `high`
   * `critical`
-* status\*
+* **status**<mark style="color:red;">\*</mark>
   * `identified`
   * `confirmed`
   * `dismissed`
@@ -248,12 +248,14 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `mitigated`
   * `resolved`
   * `deprecated`
-* filtering\_labels\
+* **filtering\_labels**\
   you can add multiple labels for one finding separating them with `|` ( e.g. interna&#x6C;**|**&#x70;entes&#x74;**|**...)
-* `priority` -integer 1–4
-* `eta` - estimated resolution date (YYYY-MM-DD)
-* `due_date` - due date (YYYY-MM-DD)
-* `observation`&#x20;
+* **priority** -integer 1–4
+* **eta** - estimated resolution date (YYYY-MM-DD)
+* **due\_date** - due date (YYYY-MM-DD)
+* **observation**&#x20;
+* **vulnerabilities**\
+  Pipe- or comma-separated vulnerability names
 
 
 
