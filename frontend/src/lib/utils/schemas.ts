@@ -1230,7 +1230,7 @@ export const SecurityExceptionSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	link: z.string().url().optional().or(z.literal(''))
+	link: z.string().url().optional().nullable().or(z.literal(''))
 });
 
 export const FindingSchema = z.object({
