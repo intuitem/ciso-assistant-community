@@ -11228,6 +11228,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
+    @staticmethod
+    def escape_spreadsheet_cell(value):
+        if not value:
+            return ""
+        return f"'{value}" if value[0] in ("=", "+", "-", "@") else value
+
     def get_serializer_class(self, **kwargs):
         action = kwargs.get("action", self.action)
         if action == "list":
@@ -11710,13 +11716,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         [ra.get("str") for ra in item.get("requirement_assessments")]
                     ),
                     "\n".join(
-                        evidence.get("str")
-                        for evidence in item.get("evidences", [])
+                        self.escape_spreadsheet_cell(evidence.get("str"))
+                        for evidence in (item.get("evidences") or [])
                         if evidence.get("str")
                     ),
                     "\n".join(
-                        evidence.get("filename")
-                        for evidence in item.get("evidence_attachments", [])
+                        self.escape_spreadsheet_cell(evidence.get("filename"))
+                        for evidence in (item.get("evidence_attachments") or [])
                         if evidence.get("filename")
                     ),
                 ]
@@ -11763,13 +11769,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     [ra.get("str") for ra in item.get("requirement_assessments")]
                 ),
                 "associated_evidences": "\n".join(
-                    evidence.get("str")
-                    for evidence in item.get("evidences", [])
+                    self.escape_spreadsheet_cell(evidence.get("str"))
+                    for evidence in (item.get("evidences") or [])
                     if evidence.get("str")
                 ),
                 "evidence_attachments": "\n".join(
-                    evidence.get("filename")
-                    for evidence in item.get("evidence_attachments", [])
+                    self.escape_spreadsheet_cell(evidence.get("filename"))
+                    for evidence in (item.get("evidence_attachments") or [])
                     if evidence.get("filename")
                 ),
             }
