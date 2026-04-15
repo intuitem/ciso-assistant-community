@@ -1193,12 +1193,12 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             record.get("vulnerabilities"), context.folder
         )
 
-        if failed_vulns:
+        if failed_vulnerabilities:
             return {}, Error(
                 record=record,
                 error=(
                     "Failed to create or retrieve thiese vulnerabilities: "
-                    + ", ".join(failed_vulns)
+                    + ", ".join(failed_vulnerabilities)
                 ),
             )
 
