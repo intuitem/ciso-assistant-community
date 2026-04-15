@@ -210,7 +210,9 @@ class Folder(NameDescriptionMixin):
         Return a stringified slash-separated folder path.
         This string is unique per-folder.
         """
-        return "/".join(f.name for f in self.get_folder_full_path(include_root=include_root))
+        return "/".join(
+            f.name for f in self.get_folder_full_path(include_root=include_root)
+        )
 
     @staticmethod
     def _navigate_structure(start, path):

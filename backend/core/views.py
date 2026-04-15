@@ -2031,16 +2031,13 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         )
 
         def get_domain_key(domain: Folder) -> str:
-            return "/".join(
-                d.name for d in reversed(domain.get_folder_full_path())
-            )
+            return "/".join(d.name for d in reversed(domain.get_folder_full_path()))
 
         sorted_domains = sorted(
             Folder.objects.filter(id__in=viewable_folders), key=get_domain_key
         )
         categories = [
-            {"name": domain.get_folder_full_path_string()}
-            for domain in sorted_domains
+            {"name": domain.get_folder_full_path_string()} for domain in sorted_domains
         ]
         # Build category index mapping first (key by UUID to avoid name collisions)
         domain_to_category = {
