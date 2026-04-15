@@ -4063,10 +4063,14 @@ class LoadFileView(APIView):
                 "existing_applied_controls",
             )
 
-            # Link additional controls
+            # Link additional controls. Accept both the legacy column name
+            # (`additional_controls`) and the model field name (`applied_controls`,
+            # used by the CSV/XLSX export) for round-trip compatibility.
             self._link_controls_to_scenario(
                 risk_scenario,
-                record.get("additional_controls", ""),
+                record.get("additional_controls")
+                or record.get("applied_controls")
+                or "",
                 control_mapping,
                 "applied_controls",
             )
