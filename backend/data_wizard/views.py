@@ -284,8 +284,7 @@ def _resolve_vulnerabilities(value, folder) -> tuple[list[UUID], list[str]]:
     """
     if not value or not isinstance(value, str):
         return [], []
-    separator = "|" if "|" in value else ","
-    vuln_names = [name.strip() for name in value.split(separator) if name.strip()]
+    vuln_names = [name.strip() for name in re.split(r"[|,]", value) if name.strip()]
     vuln_ids: list[UUID] = []
     failed_names: list[str] = []
     for vuln_name in vuln_names:
@@ -295,7 +294,6 @@ def _resolve_vulnerabilities(value, folder) -> tuple[list[UUID], list[str]]:
             )
             vuln_ids.append(vuln.id)
         except Exception:
-            failed.append(vuln_name)
             logging.exception(f"Failed to resolve vulnerability {vuln_name}")
             failed_names.append(vuln_name)
     return vuln_ids, failed_names
@@ -1191,11 +1189,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             priority = None
 
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
-<<<<<<< HEAD
         vulnerabilities, failed_vulnerabilities = _resolve_vulnerabilities(
-=======
-        vulnerabilities, failed_vulns = _resolve_vulnerabilities(
->>>>>>> 4096daa22 (feat: add error returned in case the vuln resolving fails)
             record.get("vulnerabilities"), context.folder
         )
 
