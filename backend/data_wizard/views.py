@@ -277,6 +277,28 @@ def _resolve_filtering_labels(value) -> list[UUID]:
     return label_ids
 
 
+def _resolve_vulnerabilities(value, folder) -> tuple[list[UUID], list[str]]:
+    """
+    Parse pipe- or comma-separated vulnerability names and return a tuple of
+    (list of resolved Vulnerability IDs, list of names that failed to resolve).
+    """
+    if not value or not isinstance(value, str):
+        return [], []
+    vuln_names = [name.strip() for name in re.split(r"[|,]", value) if name.strip()]
+    vuln_ids: list[UUID] = []
+    failed_names: list[str] = []
+    for vuln_name in vuln_names:
+        try:
+            vuln, _created = Vulnerability.objects.get_or_create(
+                name=vuln_name, folder=folder
+            )
+            vuln_ids.append(vuln.id)
+        except Exception:
+            logging.exception(f"Failed to resolve vulnerability {vuln_name}")
+            failed_names.append(vuln_name)
+    return vuln_ids, failed_names
+
+
 class RecordFileType(enum.StrEnum):
     XLSX = "Excel"
     CSV = "CSV"
@@ -1097,6 +1119,7 @@ class ReferenceControlRecordConsumer(RecordConsumer[None]):
 @dataclass(frozen=True)
 class FindingsAssessmentContext:
     findings_assessment: FindingsAssessment
+    folder: Folder
 
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
@@ -1136,7 +1159,8 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                 )
 
                 return FindingsAssessmentContext(
-                    findings_assessment=findings_assessment
+                    findings_assessment=findings_assessment,
+                    folder=perimeter.folder,
                 ), None
             return None, Error(record=assessment_data, error=str(serializer.errors))
 
@@ -1165,6 +1189,18 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             priority = None
 
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
+        vulnerabilities, failed_vulnerabilities = _resolve_vulnerabilities(
+            record.get("vulnerabilities"), context.folder
+        )
+
+        if failed_vulnerabilities:
+            return {}, Error(
+                record=record,
+                error=(
+                    "Failed to create or retrieve thiese vulnerabilities: "
+                    + ", ".join(failed_vulnerabilities)
+                ),
+            )
 
         finding_data = {
             "name": name,
@@ -1177,10 +1213,18 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "vulnerabilities": vulnerabilities,
         }
 
         if priority is not None:
             finding_data["priority"] = priority
+
+        if failed_vulnerabilities:
+            return finding_data, Error(
+                record=record,
+                error=f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}",
+                is_warning=True,
+            )
 
         return finding_data, None
 

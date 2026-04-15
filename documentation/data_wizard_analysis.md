@@ -216,6 +216,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `due_date` | No | Date (YYYY-MM-DD) |
 | `priority` | No | Integer (1-4: P1-P4) |
 | `observation` | No | Free text |
+| `vulnerabilities` | No | Pipe- or comma-separated vulnerability names (created in the perimeter's folder if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -224,7 +225,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `applied_controls` | M2M | Medium |
 | `evidences` | M2M | Medium |
 | `threats` | M2M | Medium |
-| `vulnerabilities` | M2M | Medium |
 
 ---
 
