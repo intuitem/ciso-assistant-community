@@ -295,6 +295,7 @@ def _resolve_vulnerabilities(value, folder) -> tuple[list[UUID], list[str]]:
             )
             vuln_ids.append(vuln.id)
         except Exception:
+            failed.append(vuln_name)
             logging.exception(f"Failed to resolve vulnerability {vuln_name}")
             failed_names.append(vuln_name)
     return vuln_ids, failed_names
@@ -1190,9 +1191,22 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             priority = None
 
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
+<<<<<<< HEAD
         vulnerabilities, failed_vulnerabilities = _resolve_vulnerabilities(
+=======
+        vulnerabilities, failed_vulns = _resolve_vulnerabilities(
+>>>>>>> 4096daa22 (feat: add error returned in case the vuln resolving fails)
             record.get("vulnerabilities"), context.folder
         )
+
+        if failed_vulns:
+            return {}, Error(
+                record=record,
+                error=(
+                    "Failed to create or retrieve thiese vulnerabilities: "
+                    + ", ".join(failed_vulns)
+                ),
+            )
 
         finding_data = {
             "name": name,
