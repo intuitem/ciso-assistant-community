@@ -14829,7 +14829,16 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             )
 
         findings_assessment = FindingsAssessment.objects.get(id=pk)
-        findings = Finding.objects.filter(findings_assessment=pk).order_by("ref_id")
+        findings = (
+            Finding.objects.filter(findings_assessment=pk)
+            .prefetch_related(
+                "applied_controls",
+                "evidences",
+                "vulnerabilities",
+                "filtering_labels",
+            )
+            .order_by("ref_id")
+        )
 
         # Prepare data for Excel export
         entries = []
@@ -14838,9 +14847,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "ref_id": finding.ref_id,
                 "name": finding.name,
                 "description": finding.description,
-                "status": finding.get_status_display(),
+                "status": finding.status,
                 "severity": finding.get_severity_display(),
+                "priority": finding.priority if finding.priority is not None else "",
                 "folder": finding.folder.name if finding.folder else "",
+                "filtering_labels": "|".join(
+                    [label.label for label in finding.filtering_labels.all()]
+                ),
                 "applied_controls": "\n".join(
                     [
                         f"{ac.name} [{ac.get_status_display().lower()}]"
@@ -14848,6 +14861,10 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     ]
                 ),
                 "evidences": "\n".join([ev.name for ev in finding.evidences.all()]),
+                "vulnerabilities": "|".join(
+                    [v.name for v in finding.vulnerabilities.all()]
+                ),
+                "observation": finding.observation or "",
                 "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
                 if finding.created_at
                 else "",
@@ -14869,7 +14886,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             worksheet = writer.sheets["Findings"]
 
             # Apply text wrapping to columns with line breaks
-            wrap_columns = ["name", "description", "applied_controls", "evidences"]
+            wrap_columns = [
+                "name",
+                "description",
+                "applied_controls",
+                "evidences",
+                "observation",
+            ]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
