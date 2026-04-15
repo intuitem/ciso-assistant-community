@@ -1230,12 +1230,7 @@ export const SecurityExceptionSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	link: z
-		.string()
-		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
-			message: "Link must be either empty or a valid URL starting with 'http'"
-		})
-		.optional()
+	link: z.string().url().optional().or(z.literal(''))
 });
 
 export const FindingSchema = z.object({
