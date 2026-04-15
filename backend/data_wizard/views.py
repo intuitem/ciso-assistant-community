@@ -277,15 +277,17 @@ def _resolve_filtering_labels(value) -> list[UUID]:
     return label_ids
 
 
-def _resolve_vulnerabilities(value, folder) -> list[UUID]:
+def _resolve_vulnerabilities(value, folder) -> tuple[list[UUID], list[str]]:
     """
-    Parse pipe- or comma-separated vulnerability names and return list of Vulnerability IDs.
+    Parse pipe- or comma-separated vulnerability names and return a tuple of
+    (list of resolved Vulnerability IDs, list of names that failed to resolve).
     """
     if not value or not isinstance(value, str):
-        return []
+        return [], []
     separator = "|" if "|" in value else ","
     vuln_names = [name.strip() for name in value.split(separator) if name.strip()]
     vuln_ids: list[UUID] = []
+    failed_names: list[str] = []
     for vuln_name in vuln_names:
         try:
             vuln, _created = Vulnerability.objects.get_or_create(
@@ -294,7 +296,8 @@ def _resolve_vulnerabilities(value, folder) -> list[UUID]:
             vuln_ids.append(vuln.id)
         except Exception:
             logging.exception(f"Failed to resolve vulnerability {vuln_name}")
-    return vuln_ids
+            failed_names.append(vuln_name)
+    return vuln_ids, failed_names
 
 
 class RecordFileType(enum.StrEnum):
@@ -1187,7 +1190,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             priority = None
 
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
-        vulnerabilities = _resolve_vulnerabilities(
+        vulnerabilities, failed_vulnerabilities = _resolve_vulnerabilities(
             record.get("vulnerabilities"), context.folder
         )
 
@@ -1207,6 +1210,13 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
 
         if priority is not None:
             finding_data["priority"] = priority
+
+        if failed_vulnerabilities:
+            return finding_data, Error(
+                record=record,
+                error=f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}",
+                is_warning=True,
+            )
 
         return finding_data, None
 
