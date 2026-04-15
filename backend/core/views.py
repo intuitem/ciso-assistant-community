@@ -8998,19 +8998,28 @@ class FrameworkViewSet(BaseModelViewSet):
             new_req_node_id = node_id_map.get(q.requirement_node_id)
             if not new_req_node_id:
                 continue
+
+            req_node = q.requirement_node
+            parent_ref = computed_ref_ids.get(req_node.urn, "")
+            if q.requirement_node_id not in q_counter:
+                q_counter[q.requirement_node_id] = 1
+            q_idx = q_counter[q.requirement_node_id]
+            q_counter[q.requirement_node_id] = q_idx + 1
+
             # Compute positional ref_id for questions without one
             if q.ref_id:
                 q_ref_id = q.ref_id
             else:
-                req_node = q.requirement_node
-                parent_ref = computed_ref_ids.get(req_node.urn, "")
-                if q.requirement_node_id not in q_counter:
-                    q_counter[q.requirement_node_id] = 1
-                q_idx = q_counter[q.requirement_node_id]
-                q_counter[q.requirement_node_id] = q_idx + 1
                 q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
+
+            # URN must be globally unique (Question.urn has unique=True).
+            # Library-imported questions often share bare positional ref_ids
+            # ("1", "2", ...) across parent nodes, so we always scope with the
+            # parent node's ref_id plus a per-node index.
+            urn_suffix = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
+
             new_question = Question.objects.create(
-                urn=f"urn:{ns}:risk:question:{fw_slug}:{q_ref_id}",
+                urn=f"urn:{ns}:risk:question:{fw_slug}:{urn_suffix}",
                 ref_id=q.ref_id or q_ref_id,
                 text=q.text,
                 annotation=q.annotation,
