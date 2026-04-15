@@ -287,25 +287,28 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
 
 ### Supported fields:
 
-* ref\_id : String
-* name\* : String
-* description : String
-* inherent\_impact : String<sup>1</sup>
-* inherent\_proba : String<sup>1</sup>
-* _existing\_controls :_ String
-* current\_impact : String<sup>1</sup>
-* current\_proba : String<sup>1</sup>
-* _additional\_controls :_ String
-* residual\_impact : String<sup>1</sup>
-* residual\_proba : String<sup>1</sup>
-* treatment : String
-  * open
-  * mitigate
-  * accept
-  * avoid
-  * transfer
+* **ref\_id** : String
+* **name**<mark style="color:red;">\*</mark> : String
+* **description** : String
+* **inherent\_impact** : String<sup>1</sup>
+* **inherent\_proba** : String<sup>1</sup>
+* _**existing\_controls** :_ String
+* **current\_impact** : String<sup>1</sup>
+* **current\_proba** : String<sup>1</sup>
+* _**additional\_controls** :_ String
+* **residual\_impact** : String<sup>1</sup>
+* **residual\_proba** : String<sup>1</sup>
+* **treatment** : String
+  * `open`
+  * `mitigate`
+  * `accept`
+  * `avoid`
+  * `transfer`
+* **assets**\
+  Newline-, semicolon- or comma-separated asset names. Missing assets are auto-created in the domain folder with the default type Support
+* **justification**
 
-(1): the string of characters must represent a value present in the chosen risk matrix
+1: The string must represent a value present in the chosen risk matrix
 
 
 
