@@ -18,7 +18,7 @@
 <div class="flex items-center justify-between mb-4">
 	<Anchor
 		breadcrumbAction="push"
-		href={`/ebios-rm/${data.data.ebios_rm_study.id}`}
+		href={`/ebios-rm/${data.data?.ebios_rm_study?.id}`}
 		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 	>
 		<i class="fa-solid fa-arrow-left"></i>
