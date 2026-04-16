@@ -443,3 +443,78 @@ export function hasComputedScore(questions: Record<string, any> | null | undefin
 			question.choices.some((choice: any) => choice.add_score !== undefined)
 	);
 }
+
+// --- Auto-alignment question for respondent mode ---
+
+export const AUTO_ALIGNMENT_QUESTION_URN = 'auto:alignment';
+
+const AUTO_CHOICES = [
+	{ id: 'yes', urn: 'auto:alignment:choice:yes', color: '#22c55e' },
+	{ id: 'no', urn: 'auto:alignment:choice:no', color: '#ef4444' },
+	{ id: 'in_progress', urn: 'auto:alignment:choice:in_progress', color: '#f59e0b' },
+	{ id: 'not_applicable', urn: 'auto:alignment:choice:not_applicable', color: '#9ca3af' }
+] as const;
+
+export const alignmentColorMap: Record<string, string> = Object.fromEntries(
+	AUTO_CHOICES.map((c) => [c.id, c.color])
+);
+
+/**
+ * Build a synthetic question dict for the auto-alignment question.
+ * Passed to Question.svelte as the `questions` prop.
+ */
+export function buildAutoAlignmentQuestion(translations: {
+	text: string;
+	yes: string;
+	no: string;
+	inProgress: string;
+	notApplicable: string;
+}) {
+	return {
+		[AUTO_ALIGNMENT_QUESTION_URN]: {
+			type: 'unique_choice',
+			text: translations.text,
+			choices: [
+				{ urn: AUTO_CHOICES[0].urn, value: translations.yes, color: AUTO_CHOICES[0].color },
+				{ urn: AUTO_CHOICES[1].urn, value: translations.no, color: AUTO_CHOICES[1].color },
+				{
+					urn: AUTO_CHOICES[2].urn,
+					value: translations.inProgress,
+					color: AUTO_CHOICES[2].color
+				},
+				{
+					urn: AUTO_CHOICES[3].urn,
+					value: translations.notApplicable,
+					color: AUTO_CHOICES[3].color
+				}
+			]
+		}
+	};
+}
+
+export function alignmentValueFromChoiceUrn(choiceUrn: string | null): string | null {
+	if (!choiceUrn) return null;
+	return AUTO_CHOICES.find((c) => c.urn === choiceUrn)?.id ?? null;
+}
+
+export function choiceUrnFromAlignmentValue(value: string | null): string | undefined {
+	if (!value) return undefined;
+	return AUTO_CHOICES.find((c) => c.id === value)?.urn;
+}
+
+/**
+ * Whether the auto-alignment question should be shown for a given requirement.
+ * Conditions: no framework questions, result hidden from respondent, viewer is respondent.
+ */
+export function shouldShowAutoQuestion(
+	requirement: Record<string, any>,
+	viewerRole: string,
+	fw: any,
+	ca: any
+): boolean {
+	if (viewerRole !== 'respondent') return false;
+	const hasQuestions =
+		requirement.questions != null && Object.keys(requirement.questions).length > 0;
+	if (hasQuestions) return false;
+	return resolveFieldVisibility(fw, ca, 'result') !== 'everyone';
+}
