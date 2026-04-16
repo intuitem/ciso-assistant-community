@@ -41,8 +41,8 @@ def assign_third_parties_to_existing_audits(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("tprm", "0015_contract_dora_exclude_and_more"),
-        ("core", "0150_add_editable_mixin_to_riskmatrix"),
+        ("tprm", "0016_solutionsubcontractor"),
+        ("core", "0161_securityexception_link"),
     ]
 
     operations = [
