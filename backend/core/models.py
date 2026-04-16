@@ -2913,6 +2913,12 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
 
+    ALLOWS_PAST_EXPIRATION_DATE = {
+        Status.RESOLVED,
+        Status.EXPIRED,
+        Status.DEPRECATED,
+    }
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
     )
@@ -2955,9 +2961,15 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
 
     def clean(self):
         super().clean()
-        if self.expiration_date and self.expiration_date < now().date():
+        if (
+            self.expiration_date
+            and self.expiration_date < now().date()
+            and self.status not in self.ALLOWS_PAST_EXPIRATION_DATE
+        ):
             raise ValidationError(
-                {"expiration_date": "Expiration date must be in the future"}
+                {
+                    "expiration_date": "Past expiration dates are only allowed for resolved, expired, or deprecated exceptions"
+                }
             )
 
 
