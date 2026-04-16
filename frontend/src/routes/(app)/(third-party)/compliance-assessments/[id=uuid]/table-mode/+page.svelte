@@ -27,7 +27,14 @@
 		formatScoreValue,
 		getFieldVisibility,
 		hasComputedResult,
-		hasComputedScore
+		hasComputedScore,
+		shouldShowAutoQuestion,
+		buildAutoAlignmentQuestion,
+		alignmentValueFromChoiceUrn,
+		choiceUrnFromAlignmentValue,
+		alignmentColorMap,
+		AUTO_ALIGNMENT_QUESTION_URN,
+		resolveFieldVisibility
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -668,6 +675,51 @@
 														});
 													}}
 												/>
+											</div>
+										{/if}
+										<!-- Auto-alignment question (when no framework questions) -->
+										{#if shouldShowAutoQuestion(requirementAssessment.requirement, viewerRole, complianceAssessment.framework, complianceAssessment)}
+											<div class="flex flex-col w-full space-y-2">
+												<Question
+													questions={buildAutoAlignmentQuestion({
+														text: m.areYouAlignedWithThisRequirement(),
+														yes: m.yes(),
+														no: m.no(),
+														inProgress: m.inProgress(),
+														notApplicable: m.notApplicable()
+													})}
+													initialValue={{
+														[AUTO_ALIGNMENT_QUESTION_URN]:
+															choiceUrnFromAlignmentValue(
+																requirementAssessment.respondent_alignment
+															)
+													}}
+													field="respondent_alignment"
+													disabled={isReadOnly}
+													onChange={(_urn, choiceUrn) => {
+														const newAlignment =
+															alignmentValueFromChoiceUrn(choiceUrn);
+														requirementAssessment.respondent_alignment =
+															newAlignment;
+														update(requirementAssessment, 'respondent_alignment');
+													}}
+												/>
+											</div>
+										{/if}
+										<!-- Auditor badge: respondent's alignment answer -->
+										{#if viewerRole === 'auditor' && requirementAssessment.respondent_alignment}
+											<div class="flex flex-col items-center my-2">
+												<p class="text-xs italic text-surface-600">
+													{m.respondentAnswered()}
+												</p>
+												<span
+													class="badge text-sm font-semibold text-white"
+													style="background-color: {alignmentColorMap[
+														requirementAssessment.respondent_alignment
+													]}"
+												>
+													{safeTranslate(requirementAssessment.respondent_alignment)}
+												</span>
 											</div>
 										{/if}
 										<div
