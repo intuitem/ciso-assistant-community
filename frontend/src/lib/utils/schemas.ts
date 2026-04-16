@@ -510,6 +510,8 @@ export const ComplianceAssessmentSchema = z.object({
 	extended_result_enabled: z.boolean().optional().default(false),
 	progress_status_enabled: z.boolean().optional().default(true),
 	score_calculation_method: z.string().optional().default('average'),
+	target_score: z.number().optional().nullable(),
+	anchor_na_to_target: z.boolean().optional().default(false),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -796,7 +798,15 @@ export const solutionSchema = z.object({
 	dora_reintegration_possibility: z.string().nullish(),
 	dora_discontinuing_impact: z.string().nullish(),
 	dora_alternative_providers_identified: z.string().nullish(),
-	dora_alternative_providers: z.string().optional()
+	dora_alternative_providers: z.string().optional(),
+	subcontracting_chain: z
+		.array(
+			z.object({
+				subcontractor: z.string().uuid(),
+				recipient: z.string().uuid().nullish()
+			})
+		)
+		.optional()
 });
 
 export const representativeSchema = z.object({

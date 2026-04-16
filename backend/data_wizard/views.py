@@ -277,6 +277,28 @@ def _resolve_filtering_labels(value) -> list[UUID]:
     return label_ids
 
 
+def _resolve_vulnerabilities(value, folder) -> tuple[list[UUID], list[str]]:
+    """
+    Parse pipe- or comma-separated vulnerability names and return a tuple of
+    (list of resolved Vulnerability IDs, list of names that failed to resolve).
+    """
+    if not value or not isinstance(value, str):
+        return [], []
+    vuln_names = [name.strip() for name in re.split(r"[|,]", value) if name.strip()]
+    vuln_ids: list[UUID] = []
+    failed_names: list[str] = []
+    for vuln_name in vuln_names:
+        try:
+            vuln, _created = Vulnerability.objects.get_or_create(
+                name=vuln_name, folder=folder
+            )
+            vuln_ids.append(vuln.id)
+        except Exception:
+            logging.exception(f"Failed to resolve vulnerability {vuln_name}")
+            failed_names.append(vuln_name)
+    return vuln_ids, failed_names
+
+
 class RecordFileType(enum.StrEnum):
     XLSX = "Excel"
     CSV = "CSV"
@@ -1097,6 +1119,7 @@ class ReferenceControlRecordConsumer(RecordConsumer[None]):
 @dataclass(frozen=True)
 class FindingsAssessmentContext:
     findings_assessment: FindingsAssessment
+    folder: Folder
 
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
@@ -1136,7 +1159,8 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                 )
 
                 return FindingsAssessmentContext(
-                    findings_assessment=findings_assessment
+                    findings_assessment=findings_assessment,
+                    folder=perimeter.folder,
                 ), None
             return None, Error(record=assessment_data, error=str(serializer.errors))
 
@@ -1165,6 +1189,18 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             priority = None
 
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
+        vulnerabilities, failed_vulnerabilities = _resolve_vulnerabilities(
+            record.get("vulnerabilities"), context.folder
+        )
+
+        if failed_vulnerabilities:
+            return {}, Error(
+                record=record,
+                error=(
+                    "Failed to create or retrieve thiese vulnerabilities: "
+                    + ", ".join(failed_vulnerabilities)
+                ),
+            )
 
         finding_data = {
             "name": name,
@@ -1177,10 +1213,18 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "vulnerabilities": vulnerabilities,
         }
 
         if priority is not None:
             finding_data["priority"] = priority
+
+        if failed_vulnerabilities:
+            return finding_data, Error(
+                record=record,
+                error=f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}",
+                is_warning=True,
+            )
 
         return finding_data, None
 
@@ -3523,15 +3567,36 @@ class LoadFileView(APIView):
                     "folder": domain,
                 }
 
-                # Add optional solution reference
-                solution_ref_id = str(record.get("solution_ref_id", "")).strip()
-                if solution_ref_id:
-                    if solution_ref_id in solution_ref_map:
-                        contract_data["solution"] = solution_ref_map[solution_ref_id]
-                    else:
-                        logger.warning(
-                            f"Solution with ref_id '{solution_ref_id}' not found for contract '{ref_id}'"
-                        )
+                # Parse solution references (newline, pipe, or comma-separated).
+                # Unknown refs are reported in results["errors"] but do not block
+                # contract creation — known refs are still linked, matching the
+                # pre-multi-solution lenient behavior.
+                solution_ids = []
+                missing_solution_refs = []
+                solution_ref_id_raw = str(record.get("solution_ref_id", "")).strip()
+                if solution_ref_id_raw:
+                    for sol_ref in re.split(r"[\n\r|,]+", solution_ref_id_raw):
+                        sol_ref = sol_ref.strip()
+                        if not sol_ref:
+                            continue
+                        if sol_ref in solution_ref_map:
+                            solution_ids.append(solution_ref_map[sol_ref])
+                        else:
+                            missing_solution_refs.append(sol_ref)
+                            logger.warning(
+                                f"Solution with ref_id '{sol_ref}' not found for contract '{ref_id}'"
+                            )
+
+                if missing_solution_refs:
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": (
+                                "Unknown solution_ref_id(s) skipped: "
+                                + ", ".join(missing_solution_refs)
+                            ),
+                        }
+                    )
 
                 # Add optional fields
                 if record.get("status"):
@@ -3586,7 +3651,9 @@ class LoadFileView(APIView):
                                 context={"request": request},
                             )
                             if serializer.is_valid():
-                                serializer.save()
+                                contract = serializer.save()
+                                if solution_ids:
+                                    contract.solutions.set(solution_ids)
                                 results["updated"] += 1
                             else:
                                 results["failed"] += 1
@@ -3602,6 +3669,8 @@ class LoadFileView(APIView):
 
                 if serializer.is_valid(raise_exception=True):
                     contract = serializer.save()
+                    if solution_ids:
+                        contract.solutions.set(solution_ids)
                     results["successful"] += 1
                     logger.debug(
                         f"Created contract: {contract.name} with ref_id: {ref_id}"

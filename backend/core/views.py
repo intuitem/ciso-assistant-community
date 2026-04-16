@@ -2029,17 +2029,27 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             user=request.user,
             object_type=Asset,
         )
-        # Build category index mapping first (key by UUID to avoid name collisions)
-        domain_to_category = {}
-        for domain in Folder.objects.filter(id__in=viewable_folders):
-            categories.append({"name": domain.name})
-            domain_to_category[domain.id] = len(categories) - 1
 
+        def get_domain_key(domain: Folder) -> str:
+            return "/".join(d.name for d in reversed(domain.get_folder_full_path()))
+
+        sorted_domains = sorted(
+            Folder.objects.filter(id__in=viewable_folders), key=get_domain_key
+        )
+        categories = [
+            {"name": domain.get_folder_full_path_string()} for domain in sorted_domains
+        ]
+        # Build category index mapping first (key by UUID to avoid name collisions)
+        domain_to_category = {
+            domain.id: index for index, domain in enumerate(sorted_domains)
+        }
+
+        for domain in sorted_domains:
             if not hide_domains:
                 nodes_idx[domain.id] = N
                 nodes.append(
                     {
-                        "name": domain.name,
+                        "name": domain.get_folder_full_path_string(),
                         "category": domain_to_category[domain.id],
                         "symbol": "roundRect",
                         "symbolSize": 30,
@@ -12194,6 +12204,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,
+                "target_score": compliance_assessment.target_score,
+                "anchor_na_to_target": compliance_assessment.anchor_na_to_target,
             }
         )
 
