@@ -446,7 +446,6 @@
 
 <FolderTreeSelect
 	{form}
-	writable="add_appliedcontrol"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

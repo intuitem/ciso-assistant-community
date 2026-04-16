@@ -26,7 +26,6 @@
 
 <FolderTreeSelect
 	{form}
-	writable="add_team"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

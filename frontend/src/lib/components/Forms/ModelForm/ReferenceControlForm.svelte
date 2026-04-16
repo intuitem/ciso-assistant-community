@@ -64,7 +64,6 @@
 />
 <FolderTreeSelect
 	{form}
-	writable="add_referencecontrol"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

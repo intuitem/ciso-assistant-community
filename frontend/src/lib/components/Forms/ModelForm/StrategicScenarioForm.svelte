@@ -55,7 +55,6 @@
 {/key}
 <FolderTreeSelect
 	{form}
-	writable="add_strategicscenario"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import * as m from '$paraglide/messages';
 	import type { CacheLock } from '$lib/utils/types';
@@ -31,13 +31,6 @@
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
 		 */
 		contentTypes?: string[];
-		/**
-		 * Django permission codename (e.g. "add_asset"). When set, each tree node
-		 * returned by org_tree carries a ``writable`` boolean; only writable nodes
-		 * are selectable.  Ancestor-only nodes remain visible for navigation but
-		 * are rendered as non-selectable.
-		 */
-		writable?: string;
 	}
 
 	let {
@@ -56,9 +49,11 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
-		contentTypes = ['DO', 'GL'],
-		writable = undefined
+		contentTypes = ['DO', 'GL']
 	}: Props = $props();
+
+	// Write permission is inferred from ModelForm context: add_<model.name>.
+	const defaultWritePermission = getContext<string | undefined>('folderTreeDefaultWritePermission');
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
@@ -214,7 +209,9 @@
 
 		isLoading = true;
 		const includeEnclaves = contentTypes.includes('EN');
-		const writePerm = writable ? `&write_perm=${encodeURIComponent(writable)}` : '';
+		const writePerm = defaultWritePermission
+			? `&write_perm=${encodeURIComponent(defaultWritePermission)}`
+			: '';
 		fetch(
 			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}${writePerm}`
 		)

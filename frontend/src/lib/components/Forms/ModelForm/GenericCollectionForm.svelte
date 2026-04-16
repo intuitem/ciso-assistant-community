@@ -160,7 +160,6 @@
 
 	<FolderTreeSelect
 		{form}
-		writable="add_genericcollection"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

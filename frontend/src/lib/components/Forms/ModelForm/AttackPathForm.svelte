@@ -41,7 +41,6 @@
 />
 <FolderTreeSelect
 	{form}
-	writable="add_attackpath"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

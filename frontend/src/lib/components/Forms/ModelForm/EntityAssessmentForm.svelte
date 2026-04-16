@@ -87,7 +87,6 @@
 {#key folderKey}
 	<FolderTreeSelect
 		{form}
-		writable="add_entityassessment"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

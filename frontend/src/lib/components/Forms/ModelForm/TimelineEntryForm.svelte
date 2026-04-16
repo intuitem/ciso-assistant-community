@@ -34,7 +34,6 @@
 
 <FolderTreeSelect
 	{form}
-	writable="add_timelineentry"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

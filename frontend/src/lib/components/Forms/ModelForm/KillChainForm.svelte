@@ -29,7 +29,6 @@
 
 <FolderTreeSelect
 	{form}
-	writable="add_killchain"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

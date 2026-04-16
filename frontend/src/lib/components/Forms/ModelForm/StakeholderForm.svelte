@@ -106,7 +106,6 @@
 
 <FolderTreeSelect
 	{form}
-	writable="add_stakeholder"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

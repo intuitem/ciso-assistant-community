@@ -109,7 +109,6 @@
 
 <FolderTreeSelect
 	{form}
-	writable="add_quantitativeriskstudy"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

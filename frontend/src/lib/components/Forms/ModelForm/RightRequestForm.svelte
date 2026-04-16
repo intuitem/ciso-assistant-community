@@ -106,7 +106,6 @@
 />
 <FolderTreeSelect
 	{form}
-	writable="add_rightrequest"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
