@@ -349,7 +349,8 @@ export const DEFAULT_FIELD_VISIBILITY: Record<string, string> = {
 	answers: 'everyone',
 	evidences: 'everyone',
 	applied_controls: 'auditor',
-	security_exceptions: 'auditor'
+	security_exceptions: 'auditor',
+	respondent_alignment: 'everyone'
 };
 
 /**

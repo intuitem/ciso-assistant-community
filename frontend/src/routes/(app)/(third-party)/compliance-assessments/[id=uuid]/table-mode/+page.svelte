@@ -590,7 +590,22 @@
 											{/if}
 										</div>
 									{/if}
-
+									<!-- Auditor badge: respondent's alignment answer -->
+									{#if viewerRole === 'auditor' && requirementAssessment.respondent_alignment}
+										<div class="flex flex-col items-center my-2">
+											<p class="text-xs italic text-surface-600">
+												{m.respondentAnswered()}
+											</p>
+											<span
+												class="badge text-sm font-semibold text-white"
+												style="background-color: {alignmentColorMap[
+													requirementAssessment.respondent_alignment
+												]}"
+											>
+												{safeTranslate(requirementAssessment.respondent_alignment)}
+											</span>
+										</div>
+									{/if}
 									<form
 										class="flex flex-col space-y-2 items-center justify-evenly w-full table-mode-form"
 										id="tableModeForm-{requirementAssessment.id}"
@@ -704,22 +719,6 @@
 														update(requirementAssessment, 'respondent_alignment');
 													}}
 												/>
-											</div>
-										{/if}
-										<!-- Auditor badge: respondent's alignment answer -->
-										{#if viewerRole === 'auditor' && requirementAssessment.respondent_alignment}
-											<div class="flex flex-col items-center my-2">
-												<p class="text-xs italic text-surface-600">
-													{m.respondentAnswered()}
-												</p>
-												<span
-													class="badge text-sm font-semibold text-white"
-													style="background-color: {alignmentColorMap[
-														requirementAssessment.respondent_alignment
-													]}"
-												>
-													{safeTranslate(requirementAssessment.respondent_alignment)}
-												</span>
 											</div>
 										{/if}
 										<div
