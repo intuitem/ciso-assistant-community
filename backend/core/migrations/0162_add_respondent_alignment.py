@@ -4,15 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0161_securityexception_link'),
+        ("core", "0161_securityexception_link"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='requirementassessment',
-            name='respondent_alignment',
-            field=models.CharField(blank=True, choices=[('yes', 'Yes'), ('no', 'No'), ('in_progress', 'In progress'), ('not_applicable', 'Not applicable')], max_length=32, null=True, verbose_name='Respondent alignment'),
+            model_name="requirementassessment",
+            name="respondent_alignment",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("yes", "Yes"),
+                    ("no", "No"),
+                    ("in_progress", "In progress"),
+                    ("not_applicable", "Not applicable"),
+                ],
+                max_length=32,
+                null=True,
+                verbose_name="Respondent alignment",
+            ),
         ),
     ]

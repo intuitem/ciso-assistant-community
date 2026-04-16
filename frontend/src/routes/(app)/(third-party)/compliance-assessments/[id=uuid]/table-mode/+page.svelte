@@ -704,18 +704,15 @@
 														notApplicable: m.notApplicable()
 													})}
 													initialValue={{
-														[AUTO_ALIGNMENT_QUESTION_URN]:
-															choiceUrnFromAlignmentValue(
-																requirementAssessment.respondent_alignment
-															)
+														[AUTO_ALIGNMENT_QUESTION_URN]: choiceUrnFromAlignmentValue(
+															requirementAssessment.respondent_alignment
+														)
 													}}
 													field="respondent_alignment"
 													disabled={isReadOnly}
 													onChange={(_urn, choiceUrn) => {
-														const newAlignment =
-															alignmentValueFromChoiceUrn(choiceUrn);
-														requirementAssessment.respondent_alignment =
-															newAlignment;
+														const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
+														requirementAssessment.respondent_alignment = newAlignment;
 														update(requirementAssessment, 'respondent_alignment');
 													}}
 												/>

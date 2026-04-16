@@ -748,7 +748,9 @@
 							<span class="text-sm italic text-surface-600">{m.respondentAnswered()}:</span>
 							<span
 								class="badge text-sm font-semibold text-white"
-								style="background-color: {alignmentColorMap[page.data.requirementAssessment.respondent_alignment]}"
+								style="background-color: {alignmentColorMap[
+									page.data.requirementAssessment.respondent_alignment
+								]}"
 							>
 								{safeTranslate(page.data.requirementAssessment.respondent_alignment)}
 							</span>

@@ -103,7 +103,9 @@
 				<span class="italic text-surface-600">{m.respondentAnswered()}:</span>
 				<span
 					class="badge text-xs font-semibold text-white"
-					style="background-color: {alignmentColorMap[data.requirementAssessment.respondent_alignment]}"
+					style="background-color: {alignmentColorMap[
+						data.requirementAssessment.respondent_alignment
+					]}"
 				>
 					{safeTranslate(data.requirementAssessment.respondent_alignment)}
 				</span>

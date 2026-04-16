@@ -28,9 +28,7 @@ def backfill_alignment(apps, schema_editor):
             ra.respondent_alignment = mapped
             batch.append(ra)
         if len(batch) >= 1000:
-            RequirementAssessment.objects.bulk_update(
-                batch, ["respondent_alignment"]
-            )
+            RequirementAssessment.objects.bulk_update(batch, ["respondent_alignment"])
             batch = []
     if batch:
         RequirementAssessment.objects.bulk_update(batch, ["respondent_alignment"])
@@ -41,7 +39,6 @@ def reverse_backfill(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0162_add_respondent_alignment"),
     ]
