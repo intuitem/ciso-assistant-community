@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -390,6 +391,89 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
+
+
+class SolutionSubcontractor(AbstractBaseModel):
+    """
+    ICT subcontracting tree for a Solution (DORA Art. 28(2), b_05.02).
+
+    The tree is defined by the ``recipient`` parent pointer:
+      - recipient = NULL → child of the direct provider (Solution.provider_entity)
+      - recipient = entity → child of that entity in the chain
+
+    Rank (depth in the tree) is not stored — it is computed by walking up the
+    recipient chain. This makes ``recipient`` the single source of truth for
+    the tree topology and eliminates any risk of rank/tree inconsistency.
+
+    Multiple entities may share the same parent (fan-out), e.g. Zscaler
+    subcontracting to both AWS and Azure, both with recipient=NULL.
+
+    Access via ``solution.subcontracting_chain.all()``.
+    """
+
+    solution = models.ForeignKey(
+        Solution,
+        on_delete=models.CASCADE,
+        related_name="subcontracting_chain",
+        verbose_name=_("Solution"),
+    )
+    subcontractor = models.ForeignKey(
+        Entity,
+        on_delete=models.PROTECT,
+        related_name="subcontracts",
+        verbose_name=_("Subcontractor"),
+        help_text=_("Entity providing the sub-contracted ICT service"),
+    )
+    recipient = models.ForeignKey(
+        Entity,
+        on_delete=models.PROTECT,
+        related_name="subcontract_recipients",
+        verbose_name=_("Recipient"),
+        help_text=_(
+            "Entity that sub-contracted to this subcontractor. "
+            "Leave empty when the direct provider is the parent."
+        ),
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("Solution subcontractor")
+        verbose_name_plural = _("Solution subcontractors")
+        unique_together = [
+            ("solution", "subcontractor"),
+        ]
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.solution} → {self.subcontractor}"
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        super().clean()
+        if (
+            self.subcontractor_id is not None
+            and self.solution_id is not None
+            and self.solution.provider_entity_id == self.subcontractor_id
+        ):
+            raise ValidationError(
+                {
+                    "subcontractor": _(
+                        "A subcontractor cannot be the solution's direct provider."
+                    )
+                }
+            )
+        if (
+            self.subcontractor_id is not None
+            and self.recipient_id is not None
+            and self.subcontractor_id == self.recipient_id
+        ):
+            raise ValidationError(
+                {"recipient": _("A subcontractor cannot be its own recipient.")}
+            )
 
 
 class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
