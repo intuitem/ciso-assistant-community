@@ -7204,8 +7204,8 @@ class FolderViewSet(BaseModelViewSet):
         write_perm_codename = request.query_params.get("write_perm")
         writable_ids = None
         if write_perm_codename:
-            try:
-                perm = Permission.objects.get(codename=write_perm_codename)
+            perm = Permission.objects.filter(codename=write_perm_codename).first()
+            if perm:
                 writable_ids = {
                     f.id
                     for f in Folder.objects.filter(id__in=needed_folders)
@@ -7213,7 +7213,7 @@ class FolderViewSet(BaseModelViewSet):
                         user=request.user, perm=perm, folder=f
                     )
                 }
-            except Permission.DoesNotExist:
+            else:
                 writable_ids = set()
 
         folders_list = []
