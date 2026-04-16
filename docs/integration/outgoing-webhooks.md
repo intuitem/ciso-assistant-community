@@ -27,6 +27,14 @@ You can subscribe to events at a granular level. Currently, CISO Assistant suppo
   * `asset.created`
   * `asset.updated`
   * `asset.deleted`
+* Evidences:
+  * `evidence.created`
+  * `evidence.updated`
+  * `evidence.deleted`
+* Findigs:
+  * `finding.created`
+  * `finding.updated`
+  * `finding.deleted`
 
 ***
 
