@@ -1941,9 +1941,7 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
     def get_questions(self, obj):
         """Reconstruct the old JSON format from Question/QuestionChoice models
         for backward compatibility with the frontend."""
-        from core.utils import build_questions_dict
-
-        return build_questions_dict(obj)
+        return obj.get_questions_translated
 
     class Meta:
         model = RequirementNode
