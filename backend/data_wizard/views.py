@@ -100,6 +100,24 @@ import enum
 logger = logging.getLogger(__name__)
 
 
+def resolve_container_name(request, default_prefix: str) -> str:
+    """Return a user-supplied name for an imported container object (assessment,
+    study, etc.) or a timestamped fallback.
+
+    Data Wizard imports that create a single parent object (e.g. compliance /
+    risk / findings assessments, EBIOS RM studies) let the client override the
+    auto-generated name via the ``X-Name`` header. When absent or blank,
+    ``{default_prefix}_{YYYYMMDD_HHMMSS}`` is used.
+    """
+    custom_name = ""
+    if request is not None:
+        custom_name = (request.headers.get("X-Name") or "").strip()
+    if custom_name:
+        return custom_name
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{default_prefix}_{timestamp}"
+
+
 def get_accessible_folders_map(user: User) -> dict[str, UUID]:
     """
     Build a map of folder names to IDs that the provided user can access.
@@ -1139,8 +1157,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             perimeter = Perimeter.objects.get(id=perimeter_id)
             folder_id = perimeter.folder.id
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            assessment_name = f"Followup_{timestamp}"
+            assessment_name = resolve_container_name(self.request, "Followup")
             assessment_data = {
                 "name": assessment_name,
                 "perimeter": perimeter_id,
@@ -2627,8 +2644,7 @@ class LoadFileView(APIView):
             perimeter = Perimeter.objects.get(id=perimeter_id)
             folder_id = perimeter.folder.id
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            assessment_name = f"Assessment_{timestamp}"
+            assessment_name = resolve_container_name(request, "Assessment")
 
             # Prepare data for serializer
             assessment_data = {
@@ -3737,8 +3753,8 @@ class LoadFileView(APIView):
             # Get the risk matrix
             risk_matrix = RiskMatrix.objects.get(id=matrix_id)
 
+            assessment_name = resolve_container_name(request, "Risk_Assessment")
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            assessment_name = f"Risk_Assessment_{timestamp}"
 
             # Create the risk assessment
             assessment_data = {
@@ -4216,8 +4232,7 @@ class LoadFileView(APIView):
             arm_data = process_arm_file(excel_file.read())
 
             # Generate study name
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            study_name = f"EBIOS_RM_Study_{timestamp}"
+            study_name = resolve_container_name(request, "EBIOS_RM_Study")
 
             # Use missions as description
             study_description = arm_data.get("study_description", "")
@@ -5460,9 +5475,11 @@ class LoadFileView(APIView):
             data = process_ebios_rm_excel(excel_file.read())
             study_data = data.get("study", {})
 
-            # Create the study
+            # Create the study. Header override wins over the value parsed
+            # from the Excel file, which in turn wins over the generic fallback.
+            override_name = (request.headers.get("X-Name") or "").strip()
             study_payload = {
-                "name": study_data.get("name") or f"Imported Study",
+                "name": override_name or study_data.get("name") or "Imported Study",
                 "description": study_data.get("description", ""),
                 "ref_id": study_data.get("ref_id", ""),
                 "version": study_data.get("version", ""),
