@@ -2947,6 +2947,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    link = models.URLField(null=True, blank=True, verbose_name=_("Link"))
 
     fields_to_check = ["name"]
 
@@ -6645,6 +6646,15 @@ class ComplianceAssessment(Assessment):
         default=CalculationMethod.AVG,
         verbose_name=_("Score Calculation Method"),
     )
+    target_score = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_("Target score"),
+    )
+    anchor_na_to_target = models.BooleanField(
+        default=False,
+        verbose_name=_("Anchor N/A to target score"),
+    )
     auto_sync = models.BooleanField(
         default=False,
         verbose_name=_("Automatic sync to actions"),
@@ -6927,39 +6937,132 @@ class ComplianceAssessment(Assessment):
 
         return changes
 
-    def _compute_score_for_field(self, requirement_assessments, ig, score_field):
+    def _compute_score_for_field(
+        self, requirement_assessments, ig, score_field, na_target=None
+    ):
         """
         Compute a single score value from the given field using the current
         score_calculation_method (AVG, SUM, or AVG_OF_AVG).
 
+        When na_target is set, N/A requirement assessments use that value
+        instead of their actual score.
+
         Returns the computed score, or -1 if no scored requirements exist.
         """
         if self.score_calculation_method == self.CalculationMethod.AVG_OF_AVG:
-            groups = defaultdict(lambda: {"weighted_score": 0, "total_weight": 0})
+            # Build leaf scores from requirement assessments
+            leaf_scores = {}
             for ras in requirement_assessments:
                 if not ig or (ig & set(ras.requirement.implementation_groups or [])):
-                    parent_key = ras.requirement.parent_urn or ras.requirement.urn
-                    weight = ras.requirement.weight if ras.requirement.weight else 1
-                    groups[parent_key]["weighted_score"] += (
-                        getattr(ras, score_field) or 0
-                    ) * weight
-                    groups[parent_key]["total_weight"] += weight
+                    is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    score = (
+                        na_target
+                        if is_na and na_target is not None
+                        else (getattr(ras, score_field) or 0)
+                    )
+                    leaf_scores[ras.requirement.urn] = {
+                        "score": score,
+                        "weight": ras.requirement.weight or 1,
+                    }
 
-            group_averages = [
-                g["weighted_score"] / g["total_weight"]
-                for g in groups.values()
-                if g["total_weight"] > 0
-            ]
-            if not group_averages:
+            if not leaf_scores:
                 return -1
-            return int(sum(group_averages) / len(group_averages) * 10) / 10
+
+            # Fetch the framework tree structure
+            all_nodes = RequirementNode.objects.filter(
+                framework=self.framework
+            ).values_list("urn", "parent_urn", "weight")
+
+            children_map = defaultdict(list)
+            node_weights = {}
+            roots = []
+            all_urns = set()
+            parent_links = {}  # urn -> parent_urn
+            for urn, parent_urn, weight in all_nodes:
+                node_weights[urn] = weight or 1
+                all_urns.add(urn)
+                parent_links[urn] = parent_urn
+            for urn, parent_urn in parent_links.items():
+                if parent_urn and parent_urn in all_urns:
+                    children_map[parent_urn].append(urn)
+                else:
+                    # No parent, or parent_urn references a missing node —
+                    # treat as a root so the subtree is still reachable.
+                    roots.append(urn)
+
+            # Recursively compute weighted averages bottom-up
+            computed = {}
+            visiting = set()
+
+            def compute(urn):
+                if urn in computed:
+                    return computed[urn]
+                if urn in visiting:
+                    # Cycle in the requirement tree — skip to avoid infinite recursion
+                    return None
+                visiting.add(urn)
+
+                if urn in leaf_scores:
+                    computed[urn] = leaf_scores[urn]["score"]
+                    return computed[urn]
+
+                children = children_map.get(urn, [])
+                if not children:
+                    return None
+
+                child_results = []
+                for child_urn in children:
+                    child_score = compute(child_urn)
+                    if child_score is not None:
+                        child_results.append(
+                            (child_score, node_weights.get(child_urn, 1))
+                        )
+
+                if not child_results:
+                    return None
+
+                total_weighted = sum(s * w for s, w in child_results)
+                total_weight = sum(w for _, w in child_results)
+                computed[urn] = total_weighted / total_weight
+                return computed[urn]
+
+            # Compute all nodes bottom-up
+            for root in roots:
+                compute(root)
+
+            # Collect scores for the global average.
+            # If a root is structural (no scored leaves as direct children),
+            # descend one level and flat-average its children (categories).
+            # Otherwise the root itself is the grouping level.
+            category_scores = []
+            for root in roots:
+                children = children_map.get(root, [])
+                has_leaf_children = any(c in leaf_scores for c in children)
+                if has_leaf_children or not children:
+                    if root in computed:
+                        category_scores.append(computed[root])
+                else:
+                    for child_urn in children:
+                        if child_urn in computed:
+                            category_scores.append(computed[child_urn])
+
+            if not category_scores:
+                return -1
+
+            return int(sum(category_scores) / len(category_scores) * 10) / 10
 
         weighted_score = 0
         total_weight = 0
         for ras in requirement_assessments:
             if not ig or (ig & set(ras.requirement.implementation_groups or [])):
                 weight = ras.requirement.weight if ras.requirement.weight else 1
-                weighted_score += (getattr(ras, score_field) or 0) * weight
+                is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
+                score = (
+                    na_target
+                    if is_na and na_target is not None
+                    else (getattr(ras, score_field) or 0)
+                )
+                weighted_score += score * weight
                 total_weight += weight
 
         if total_weight == 0:
@@ -6980,29 +7083,50 @@ class ComplianceAssessment(Assessment):
         - maturity_score: average of the enabled layers
 
         Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG).
+
+        When anchor_na_to_target is True, N/A requirements are included with
+        their scores replaced by the effective target (target_score or max_score).
         Returns a dict with all three values.
         """
-        requirement_assessments_scored = list(
+        qs = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .select_related("requirement")
-            .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
-            .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
         )
+        if self.anchor_na_to_target:
+            # Keep N/A items (they'll be anchored to target), but still
+            # exclude non-N/A items that have is_scored=False.
+            qs = qs.exclude(
+                ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
+                is_scored=False,
+            )
+        else:
+            qs = qs.exclude(is_scored=False).exclude(
+                result=RequirementAssessment.Result.NOT_APPLICABLE
+            )
+
+        requirement_assessments_scored = list(qs)
+
         ig = (
             set(self.selected_implementation_groups)
             if self.selected_implementation_groups
             else None
         )
 
+        na_target = None
+        if self.anchor_na_to_target:
+            na_target = (
+                self.target_score if self.target_score is not None else self.max_score
+            )
+
         impl_score = self._compute_score_for_field(
-            requirement_assessments_scored, ig, "score"
+            requirement_assessments_scored, ig, "score", na_target
         )
 
         doc_score = None
         if self.show_documentation_score:
             doc_score = self._compute_score_for_field(
-                requirement_assessments_scored, ig, "documentation_score"
+                requirement_assessments_scored, ig, "documentation_score", na_target
             )
 
         # Maturity is the average of the enabled layers (ignore -1 / None)
