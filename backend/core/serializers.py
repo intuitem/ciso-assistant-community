@@ -2444,6 +2444,40 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
                 )
+
+        target = attrs.get(
+            "target_score",
+            getattr(self.instance, "target_score", None) if self.instance else None,
+        )
+        anchor = attrs.get(
+            "anchor_na_to_target",
+            getattr(self.instance, "anchor_na_to_target", False)
+            if self.instance
+            else False,
+        )
+        if anchor and target is None:
+            raise serializers.ValidationError(
+                {
+                    "target_score": "A target score is required when anchoring N/A to target is enabled."
+                }
+            )
+        if target is not None:
+            min_s = attrs.get(
+                "min_score",
+                getattr(self.instance, "min_score", None) if self.instance else None,
+            )
+            max_s = attrs.get(
+                "max_score",
+                getattr(self.instance, "max_score", None) if self.instance else None,
+            )
+            if min_s is not None and max_s is not None:
+                if not (min_s <= target <= max_s):
+                    raise serializers.ValidationError(
+                        {
+                            "target_score": f"Target score must be between {min_s} and {max_s}."
+                        }
+                    )
+
         return super().validate(attrs)
 
     def create(self, validated_data: Any):
@@ -2601,6 +2635,8 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "scores_definition",
             "scoring_enabled",
             "score_calculation_method",
+            "target_score",
+            "anchor_na_to_target",
             "created_at",
             "updated_at",
         ]

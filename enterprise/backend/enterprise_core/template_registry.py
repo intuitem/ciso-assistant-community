@@ -255,6 +255,7 @@ EMAIL_TEMPLATE_REGISTRY = {
         "variables": [
             "task_count",
             "task_list",
+            "task_list_detailed",
             "days_remaining",
             "ciso_assistant_url",
         ],
@@ -265,6 +266,7 @@ EMAIL_TEMPLATE_REGISTRY = {
         "variables": [
             "task_count",
             "task_list",
+            "task_list_detailed",
             "ciso_assistant_url",
         ],
     },

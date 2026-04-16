@@ -2029,17 +2029,27 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             user=request.user,
             object_type=Asset,
         )
-        # Build category index mapping first (key by UUID to avoid name collisions)
-        domain_to_category = {}
-        for domain in Folder.objects.filter(id__in=viewable_folders):
-            categories.append({"name": domain.name})
-            domain_to_category[domain.id] = len(categories) - 1
 
+        def get_domain_key(domain: Folder) -> str:
+            return "/".join(d.name for d in reversed(domain.get_folder_full_path()))
+
+        sorted_domains = sorted(
+            Folder.objects.filter(id__in=viewable_folders), key=get_domain_key
+        )
+        categories = [
+            {"name": domain.get_folder_full_path_string()} for domain in sorted_domains
+        ]
+        # Build category index mapping first (key by UUID to avoid name collisions)
+        domain_to_category = {
+            domain.id: index for index, domain in enumerate(sorted_domains)
+        }
+
+        for domain in sorted_domains:
             if not hide_domains:
                 nodes_idx[domain.id] = N
                 nodes.append(
                     {
-                        "name": domain.name,
+                        "name": domain.get_folder_full_path_string(),
                         "category": domain_to_category[domain.id],
                         "symbol": "roundRect",
                         "symbolSize": 30,
@@ -6261,10 +6271,15 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
                 "label": "risk_assessment",
                 "escape": True,
             },
-            "treatment": {"source": "get_treatment_display", "label": "treatment"},
-            "inherent_probability": {
+            "treatment": {"source": "treatment", "label": "treatment"},
+            "justification": {
+                "source": "justification",
+                "label": "justification",
+                "escape": True,
+            },
+            "inherent_proba": {
                 "source": "get_inherent_proba",
-                "label": "inherent_probability",
+                "label": "inherent_proba",
                 "format": lambda v: v.get("name", "--"),
             },
             "inherent_impact": {
@@ -6277,9 +6292,9 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
                 "label": "inherent_level",
                 "format": lambda v: v.get("name", "--"),
             },
-            "current_probability": {
+            "current_proba": {
                 "source": "get_current_proba",
-                "label": "current_probability",
+                "label": "current_proba",
                 "format": lambda v: v.get("name", "--"),
             },
             "current_impact": {
@@ -6292,9 +6307,9 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
                 "label": "current_level",
                 "format": lambda v: v.get("name", "--"),
             },
-            "residual_probability": {
+            "residual_proba": {
                 "source": "get_residual_proba",
-                "label": "residual_probability",
+                "label": "residual_proba",
                 "format": lambda v: v.get("name", "--"),
             },
             "residual_impact": {
@@ -6310,50 +6325,57 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "owners": {
                 "source": "owner",
                 "label": "owners",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(str(o)) for o in qs.all()
                 ),
             },
             "threats": {
                 "source": "threats",
                 "label": "threats",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(t.name) for t in qs.all()
                 ),
             },
             "assets": {
                 "source": "assets",
                 "label": "assets",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(a.name) for a in qs.all()
                 ),
             },
             "vulnerabilities": {
                 "source": "vulnerabilities",
                 "label": "vulnerabilities",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(v.name) for v in qs.all()
                 ),
             },
             "applied_controls": {
                 "source": "applied_controls",
                 "label": "applied_controls",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(c.name) for c in qs.all()
                 ),
             },
             "existing_applied_controls": {
                 "source": "existing_applied_controls",
                 "label": "existing_applied_controls",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(c.name) for c in qs.all()
                 ),
             },
             "qualifications": {
                 "source": "qualifications",
                 "label": "qualifications",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(q.name) for q in qs.all()
+                ),
+            },
+            "filtering_labels": {
+                "source": "filtering_labels",
+                "label": "filtering_labels",
+                "format": lambda qs: "|".join(
+                    escape_excel_formula(label.label) for label in qs.all()
                 ),
             },
         },
@@ -6367,6 +6389,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "applied_controls",
             "existing_applied_controls",
             "qualifications",
+            "filtering_labels",
         ],
     }
 
@@ -12178,6 +12201,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,
+                "target_score": compliance_assessment.target_score,
+                "anchor_na_to_target": compliance_assessment.anchor_na_to_target,
             }
         )
 
@@ -14817,7 +14842,17 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             )
 
         findings_assessment = FindingsAssessment.objects.get(id=pk)
-        findings = Finding.objects.filter(findings_assessment=pk).order_by("ref_id")
+        findings = (
+            Finding.objects.filter(findings_assessment=pk)
+            .select_related("folder")
+            .prefetch_related(
+                "applied_controls",
+                "evidences",
+                "vulnerabilities",
+                "filtering_labels",
+            )
+            .order_by("ref_id")
+        )
 
         # Prepare data for Excel export
         entries = []
@@ -14826,9 +14861,16 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "ref_id": finding.ref_id,
                 "name": finding.name,
                 "description": finding.description,
-                "status": finding.get_status_display(),
+                "status": finding.status,
                 "severity": finding.get_severity_display(),
+                "priority": finding.priority if finding.priority is not None else "",
                 "folder": finding.folder.name if finding.folder else "",
+                "filtering_labels": "|".join(
+                    [
+                        escape_excel_formula(label.label)
+                        for label in finding.filtering_labels.all()
+                    ]
+                ),
                 "applied_controls": "\n".join(
                     [
                         f"{ac.name} [{ac.get_status_display().lower()}]"
@@ -14836,6 +14878,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     ]
                 ),
                 "evidences": "\n".join([ev.name for ev in finding.evidences.all()]),
+                "vulnerabilities": "|".join(
+                    [
+                        escape_excel_formula(v.name)
+                        for v in finding.vulnerabilities.all()
+                    ]
+                ),
+                "observation": escape_excel_formula(finding.observation),
                 "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
                 if finding.created_at
                 else "",
@@ -14857,7 +14906,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             worksheet = writer.sheets["Findings"]
 
             # Apply text wrapping to columns with line breaks
-            wrap_columns = ["name", "description", "applied_controls", "evidences"]
+            wrap_columns = [
+                "name",
+                "description",
+                "applied_controls",
+                "evidences",
+                "observation",
+            ]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]

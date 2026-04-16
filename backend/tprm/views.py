@@ -1,9 +1,10 @@
 import io
 import re
 
+from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
@@ -21,7 +22,7 @@ from rest_framework.response import Response
 from django.utils.formats import date_format
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.db.models import Prefetch, Sum, F, FloatField, Case, When, Value
+from django.db.models import Prefetch, Sum, F, FloatField, TextField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
 from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
@@ -129,10 +130,70 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         "default_maturity",
         "default_trust",
     ]
+    search_fields = ["name", "description", "legal_identifiers_text"]
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Convert Django's ProtectedError into a 409 Conflict with the list of
+        blocking references, so the frontend can render "this entity is used
+        as a subcontractor/recipient in N solutions" rather than a default 500.
+
+        Both the subcontractor and recipient FKs on SolutionSubcontractor use
+        on_delete=PROTECT, so deleting an Entity referenced by either role
+        raises ProtectedError. Collect blocking rows for both roles.
+        """
+        instance = self.get_object()
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError as exc:
+            as_subcontractor = instance.subcontracts.select_related("solution")
+            as_recipient = instance.subcontract_recipients.select_related("solution")
+            total_count = as_subcontractor.count() + as_recipient.count()
+
+            # Combine both querysets, ordered by solution name, capped at 50.
+            blocking_rows = []
+            for row in as_subcontractor.order_by("solution__name")[:50]:
+                blocking_rows.append(
+                    {
+                        "id": str(row.id),
+                        "solution_id": str(row.solution_id),
+                        "solution_name": row.solution.name,
+                        "role": "subcontractor",
+                    }
+                )
+            remaining = 50 - len(blocking_rows)
+            if remaining > 0:
+                for row in as_recipient.order_by("solution__name")[:remaining]:
+                    blocking_rows.append(
+                        {
+                            "id": str(row.id),
+                            "solution_id": str(row.solution_id),
+                            "solution_name": row.solution.name,
+                            "role": "recipient",
+                        }
+                    )
+
+            return Response(
+                {
+                    "detail": (
+                        f"Cannot delete entity '{instance.name}' — it is "
+                        f"referenced in {total_count} subcontracting "
+                        f"chain row(s). Remove those references first."
+                    ),
+                    "blocking_subcontracts": blocking_rows,
+                },
+                status=HTTP_409_CONFLICT,
+            )
 
     def get_queryset(self):
-        """Add annotation for default_criticality to enable sorting"""
+        """Add annotations for default_criticality sorting and legal identifier search."""
         qs = super().get_queryset()
+
+        # Cast legal_identifiers JSON to text so DRF SearchFilter can icontains on it.
+        # Works on both SQLite (JSON stored as text) and PostgreSQL (jsonb → text cast).
+        qs = qs.annotate(
+            legal_identifiers_text=Cast("legal_identifiers", output_field=TextField()),
+        )
 
         # Annotate with default_criticality calculation
         # Formula: (default_dependency * default_penetration) / (default_maturity * default_trust)
