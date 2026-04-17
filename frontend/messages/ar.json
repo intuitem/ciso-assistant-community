@@ -1110,5 +1110,6 @@
 	"confirmModalMessagePlural": "هل أنت متأكد؟ سيؤثر هذا الإجراء بشكل دائم على الكائنات التالية",
 	"syncAppliedControlsMessage": "سيتم مزامنة عناصر التحكم المطبقة التي تستخدم عنصر التحكم المرجعي هذا معه. يرجى ملاحظة أن هذا الإجراء لا يمكن التراجع عنه.",
 	"syncToAppliedControl": "مزامنة مع التحكم المطبق",
-	"syncToReferenceControl": "مزامنة مع التحكم المرجعي"
+	"syncToReferenceControl": "مزامنة مع التحكم المرجعي",
+	"exportEcosystem": "تصدير النظام البيئي (XLSX)"
 }

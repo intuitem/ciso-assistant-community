@@ -2375,5 +2375,6 @@
 	"confirmModalMessagePlural": "Sei sicuro? Questa azione avrà effetto permanente sui seguenti oggetti",
 	"syncAppliedControlsMessage": "I controlli applicati che utilizzano questo controllo di riferimento saranno sincronizzati con esso. Si prega di notare che questa operazione non può essere annullata.",
 	"syncToAppliedControl": "Sincronizza con il controllo applicato",
-	"syncToReferenceControl": "Sincronizza con il controllo di riferimento"
+	"syncToReferenceControl": "Sincronizza con il controllo di riferimento",
+	"exportEcosystem": "esportazione dell'ecosistema (XLSX)"
 }

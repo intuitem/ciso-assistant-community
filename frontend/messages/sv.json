@@ -1133,5 +1133,6 @@
 	"confirmModalMessagePlural": "Är du säker? Denna åtgärd kommer permanent att påverka följande objekt",
 	"syncAppliedControlsMessage": "De tillämpade kontroller som använder denna referenskontroll kommer att synkroniseras med den. Observera att detta inte kan ångras.",
 	"syncToAppliedControl": "Synkronisera med tillämpad kontroll",
-	"syncToReferenceControl": "Synkronisera med referenskontroll"
+	"syncToReferenceControl": "Synkronisera med referenskontroll",
+	"exportEcosystem": "ekosystemexport (XLSX)"
 }

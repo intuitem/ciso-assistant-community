@@ -216,6 +216,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `due_date` | No | Date (YYYY-MM-DD) |
 | `priority` | No | Integer (1-4: P1-P4) |
 | `observation` | No | Free text |
+| `vulnerabilities` | No | Pipe- or comma-separated vulnerability names (created in the perimeter's folder if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -224,7 +225,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `applied_controls` | M2M | Medium |
 | `evidences` | M2M | Medium |
 | `threats` | M2M | Medium |
-| `vulnerabilities` | M2M | Medium |
 
 ---
 
@@ -284,19 +284,19 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 | `current_proba` | No | |
 | `residual_impact` | No | |
 | `residual_proba` | No | |
-| `existing_applied_controls` | No | Newline-separated, creates/finds controls |
-| `additional_controls` | No | Newline-separated |
+| `existing_applied_controls` | No | Pipe-, newline-, semicolon- or comma-separated; matching controls are created or found in the domain |
+| `additional_controls` | No | Pipe-, newline-, semicolon- or comma-separated; matching controls are created or found in the domain. Alias: `applied_controls` (used by the CSV/XLSX export). |
 | `treatment` | No | Defaults to "open" |
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing, set post-save) |
+| `justification` | No | Free text (max 2000 chars) |
+| `assets` | No | Pipe-, newline-, semicolon- or comma-separated asset names. Missing assets are auto-created in the domain folder with the default type **Support**; users can re-classify them afterward from the UI. |
 
 **Missing RiskScenario Fields:**
 | Field | Type | Priority |
 |-------|------|----------|
 | `strength_of_knowledge` | CharField | Medium |
-| `justification` | TextField | Medium |
 | `owner` | FK User | High |
 | `threats` | M2M | High |
-| `assets` | M2M | High |
 | `vulnerabilities` | M2M | Medium |
 
 ---
