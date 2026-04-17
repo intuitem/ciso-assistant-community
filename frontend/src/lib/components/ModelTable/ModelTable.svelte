@@ -981,10 +981,10 @@
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
 															{@const displayValue =
-																	['name', 'description', 'ref_id'].includes(key) &&
-																	URLModel !== 'roles'
-																		? (value ?? '-')
-																		: safeTranslate(value ?? '-')}
+																['name', 'description', 'ref_id'].includes(key) &&
+																URLModel !== 'roles'
+																	? (value ?? '-')
+																	: safeTranslate(value ?? '-')}
 															{#if displayValue?.length > 300}
 																{displayValue.slice(0, 300)}...
 															{:else}
