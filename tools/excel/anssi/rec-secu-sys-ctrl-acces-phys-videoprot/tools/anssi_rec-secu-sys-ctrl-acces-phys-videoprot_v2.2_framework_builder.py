@@ -17,6 +17,7 @@ import html
 import re
 import subprocess
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from pathlib import Path
 from textwrap import dedent
 from typing import Iterable
@@ -57,8 +58,7 @@ IMP_GRP_COLUMNS = ["ref_id", "name", "description"]
 URN_ROOT = "anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2"
 FRAMEWORK_REF_ID = "ANSSI_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2"
 FRAMEWORK_NAME = (
-    "ANSSI - Sécurisation des systèmes de contrôle d’accès physique et vidéoprotection "
-    "(v2.2)"
+    "ANSSI - Sécurisation des systèmes de contrôle d’accès physique et vidéoprotection (v2.2) [Recommandations]"
 )
 FRAMEWORK_DESCRIPTION = dedent(
     """
@@ -533,7 +533,9 @@ def parse_sections_from_toc(lines: list[str]) -> list[Section]:
                 parts.append(clean_toc_title_piece(stripped))
             index += 1
 
-        full_title = cleanup_text(" ".join(part for part in parts if part))
+        # Reuse the same wrapped-line joiner as the recommendation text so
+        # hyphenated TOC titles like "protec- / tion" are rebuilt cleanly.
+        full_title = join_wrapped_lines(part for part in parts if part)
         if node_id == "1" or node_id.startswith("Annexe"):
             continue
         sections.append(
@@ -769,11 +771,70 @@ def extract_pypdf_page_texts(pdf_path: Path) -> list[tuple[int, str]]:
     ]
 
 
-def extract_clean_top_level_section_titles_from_pypdf(
+def normalize_section_title_key(text: str) -> str:
+    # Compare titles on a compact key so spacing and hyphenation glitches do
+    # not prevent a clean pypdf heading from replacing the TOC version.
+    text = normalize_line(text).lower()
+    return re.sub(r"[^a-z0-9à-ÿ]+", "", text)
+
+
+def collect_pypdf_section_title_lines(
+    lines: list[str], start_index: int, known_ids: set[str], max_lines: int = 4
+) -> list[str]:
+    title_lines: list[str] = []
+
+    for candidate in lines[start_index : start_index + max_lines]:
+        if (
+            not candidate
+            or is_pypdf_page_noise(candidate)
+            or candidate in known_ids
+            or SECTION_RE.match(candidate)
+            or RECOMMENDATION_RE.match(candidate)
+            or candidate.startswith("n ")
+        ):
+            break
+        title_lines.append(candidate)
+
+    return title_lines
+
+
+def choose_best_pypdf_section_title(
+    expected_title: str, title_lines: list[str]
+) -> str | None:
+    expected_key = normalize_section_title_key(expected_title)
+    if not expected_key:
+        return None
+
+    best_title: str | None = None
+    best_score = 0.0
+
+    for length in range(1, min(len(title_lines), 4) + 1):
+        candidate_title = join_wrapped_lines(title_lines[:length])
+        candidate_key = normalize_section_title_key(candidate_title)
+        if not candidate_key:
+            continue
+
+        score = SequenceMatcher(None, expected_key, candidate_key).ratio()
+        if len(candidate_key) > len(expected_key) * 1.4:
+            score -= 0.15
+
+        if score > best_score:
+            best_title = candidate_title
+            best_score = score
+
+    if best_score < 0.55:
+        return None
+
+    return best_title
+
+
+def extract_clean_section_titles_from_pypdf(
     pdf_path: Path, sections: list[Section]
 ) -> dict[str, str]:
-    top_level_ids = {section.node_id for section in sections if section.depth == 1}
+    known_ids = {section.node_id for section in sections}
+    expected_titles = {section.node_id: section.name for section in sections}
     titles: dict[str, str] = {}
+    in_body = False
 
     for _, page_text in extract_pypdf_page_texts(pdf_path):
         lines = [
@@ -787,26 +848,51 @@ def extract_clean_top_level_section_titles_from_pypdf(
         if not filtered_lines:
             continue
 
-        # Top-level chapter headings appear at the top of their page in the body.
-        for index, line in enumerate(filtered_lines[:3]):
-            if line not in top_level_ids or line in titles:
+        start_index = 0
+        if not in_body:
+            # Ignore front matter and TOC pages until the first chapter "2"
+            # actually appears in the document body.
+            for index, line in enumerate(filtered_lines):
+                if line == "2":
+                    in_body = True
+                    start_index = index
+                    break
+            if not in_body:
                 continue
 
-            title_lines: list[str] = []
-            for candidate in filtered_lines[index + 1 : index + 6]:
-                if (
-                    not candidate
-                    or SECTION_RE.match(candidate)
-                    or RECOMMENDATION_RE.match(candidate)
-                    or candidate.startswith("n ")
-                    or len(candidate) > 70
-                ):
-                    break
-                title_lines.append(candidate)
+        for index in range(start_index, len(filtered_lines)):
+            line = filtered_lines[index]
+            compact_line = line.replace(" ", "")
+            if compact_line.startswith("AnnexeA"):
+                return titles
 
-            if title_lines:
-                titles[line] = join_wrapped_lines(title_lines)
-            break
+            section_id: str | None = None
+            title_lines: list[str] = []
+
+            if line in known_ids:
+                section_id = line
+                title_lines = collect_pypdf_section_title_lines(
+                    filtered_lines, index + 1, known_ids
+                )
+            else:
+                match = SECTION_RE.match(line)
+                if match and match.group(1) in known_ids:
+                    section_id = match.group(1)
+                    title_lines = [match.group(2).strip()]
+                    title_lines.extend(
+                        collect_pypdf_section_title_lines(
+                            filtered_lines, index + 1, known_ids
+                        )
+                    )
+
+            if not section_id or section_id in titles:
+                continue
+
+            title = choose_best_pypdf_section_title(
+                expected_titles[section_id], title_lines
+            )
+            if title:
+                titles[section_id] = title
 
     return titles
 
@@ -1418,7 +1504,7 @@ def main() -> None:
     reference_links = extract_bibliography_reference_links(gs_lines)
     sections = parse_sections_from_toc(extract_toc_lines(gs_lines))
     sections = merge_clean_section_titles(
-        sections, extract_clean_top_level_section_titles_from_pypdf(args.pdf, sections)
+        sections, extract_clean_section_titles_from_pypdf(args.pdf, sections)
     )
     gs_start, gs_end = body_slice(gs_lines)
     gs_recommendations = parse_ghostscript_recommendations_precise(

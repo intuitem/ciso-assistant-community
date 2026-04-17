@@ -197,8 +197,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:3
       ref_id: '3.4'
-      name: "Niveaudes\xFBret\xE9des\xE9quipementsetdesinstallationsdecontr\xF4led'acc\xE8\
-        s physique."
+      name: "Niveau de s\xFBret\xE9 des \xE9quipements et des installations de contr\xF4\
+        le d'acc\xE8s physique"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r6
       assessable: true
       depth: 3
@@ -354,7 +354,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.2
       ref_id: 4.2.2
-      name: "Connexionsentreles t\xEAtes de lecture et l'UTL"
+      name: "Connexions entre les t\xEAtes de lecture et l'UTL"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r13
       assessable: true
       depth: 4
@@ -422,13 +422,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4
       ref_id: '4.3'
-      name: "R\xE9seausupport"
+      name: "R\xE9seau support"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.3.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.3
       ref_id: 4.3.1
-      name: "Segmentationauseindur\xE9seausupport"
+      name: "Segmentation au sein du r\xE9seau support"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r16
       assessable: true
       depth: 4
@@ -501,8 +501,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.3
       ref_id: 4.3.3
-      name: "Mutualisationdesdispositifsdecontr\xF4led'acc\xE8sphysiquesurunm\xEA\
-        mer\xE9seau support"
+      name: "Mutualisation des dispositifs de contr\xF4le d'acc\xE8s physique sur\
+        \ un m\xEAme r\xE9seau support"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r20
       assessable: true
       depth: 4
@@ -523,7 +523,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.3
       ref_id: 4.3.4
       name: "Mutualisation des dispositifs de contr\xF4le d'acc\xE8s physique et de\
-        \ vid\xE9oprotec- tion sur un m\xEAme r\xE9seau support"
+        \ vid\xE9oprotection sur un m\xEAme r\xE9seau support"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r21
       assessable: true
       depth: 4
@@ -562,8 +562,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.3
       ref_id: 4.3.5
-      name: "R\xE9seausupportdescam\xE9rasplac\xE9es\xE0l'ext\xE9rieur de la zone\
-        \ contr\xF4l\xE9e"
+      name: "R\xE9seau support des cam\xE9ras plac\xE9es \xE0 l'ext\xE9rieur de la\
+        \ zone contr\xF4l\xE9e"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r22
       assessable: true
       depth: 4
@@ -596,7 +596,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4
       ref_id: '4.4'
-      name: "R\xE9seauf\xE9d\xE9rateur"
+      name: "R\xE9seau f\xE9d\xE9rateur"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.4.1
       assessable: false
       depth: 3
@@ -704,7 +704,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.6
       ref_id: 4.6.1
-      name: "Interconnexionentreunsyst\xE8medecontr\xF4led'acc\xE8sphysiqueetleSIdel'entit\xE9"
+      name: "Interconnexion entre un syst\xE8me de contr\xF4le d'acc\xE8s physique\
+        \ et le SI de l'entit\xE9"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r27
       assessable: true
       depth: 4
@@ -752,7 +753,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:4.6
       ref_id: 4.6.2
       name: "Interconnexion entre un syst\xE8me de contr\xF4le d'acc\xE8s physique\
-        \ et un syst\xE8me devid\xE9oprotection"
+        \ et un syst\xE8me de vid\xE9oprotection"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r29
       assessable: true
       depth: 4
@@ -828,7 +829,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:6
       ref_id: '6.1'
-      name: Badgesursupportphysique
+      name: Badge sur support physique
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r31
       assessable: true
       depth: 3
@@ -928,7 +929,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:6
       ref_id: '6.2'
-      name: Badgevirtuel sur ordiphone
+      name: Badge virtuel sur ordiphone
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r35
       assessable: true
       depth: 3
@@ -1655,8 +1656,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:9
       ref_id: '9.3'
-      name: "Chiffrementetauthentificationdesfluxenprovenanceet\xE0destinationdesdispositifs\
-        \ devid\xE9oprotection"
+      name: "Chiffrement et authentification des flux en provenance et \xE0 destination\
+        \ des dispositifs de vid\xE9oprotection"
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r75
       assessable: true
       depth: 3
