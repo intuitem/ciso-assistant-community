@@ -623,6 +623,11 @@ def is_footnote_or_marker(line: str) -> bool:
     return bool(re.fullmatch(r"\d+", stripped) or re.fullmatch(r"\d+\..*", stripped))
 
 
+def is_figure_caption_text(line: str) -> bool:
+    compact = normalize_line(line).replace(" ", "")
+    return compact.upper().startswith("FIGURE")
+
+
 def next_boundary_index(
     lines: list[str], start_index: int, end_index: int, known_ids: set[str]
 ) -> int:
@@ -1108,11 +1113,15 @@ def parse_pypdf_recommendations(
 def collect_ghostscript_post_lines(
     lines: list[str], start_index: int, end_index: int, content_indent: int
 ) -> list[str]:
-    post_lines: list[str] = []
+    post_lines: list[tuple[int, str]] = []
     inside_footnote = False
 
     for probe in range(start_index, end_index):
         raw_line = lines[probe]
+        if is_figure_caption_text(raw_line):
+            while post_lines and post_lines[-1][0] > content_indent:
+                post_lines.pop()
+            break
         if is_page_noise(raw_line):
             inside_footnote = False
             continue
@@ -1136,12 +1145,13 @@ def collect_ghostscript_post_lines(
             inside_footnote = True
             continue
 
-        if indentation(raw_line) < content_indent:
+        current_indent = indentation(raw_line)
+        if current_indent < content_indent:
             break
 
-        post_lines.append(stripped)
+        post_lines.append((current_indent, stripped))
 
-    return post_lines
+    return [line for _, line in post_lines]
 
 
 def parse_ghostscript_recommendations_precise(

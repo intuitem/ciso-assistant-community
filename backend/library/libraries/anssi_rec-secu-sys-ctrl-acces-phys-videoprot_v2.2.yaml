@@ -881,22 +881,7 @@ objects:
         \ Un num\xE9ro de tra\xE7abilit\xE9 peut \xEAtre indiqu\xE9 sur le badge \xE0\
         \ des fins administratives, mais ce num\xE9ro doit \xEAtre diff\xE9rent du\
         \ num\xE9ro d'identification. La photographie est tol\xE9r\xE9e car elle permet\
-        \ de v\xE9rifier rapidement que le badge appartient bien au porteur. XXXX\
-        \ La puce contient l'UID et le num\xE9ro d'identification YYYY Concernant\
-        \ les types de badges, les supports de type puce RFID <abbr title=\"Radio\
-        \ Frequency Identification.\"><sup>25</sup></abbr>, comparables aux antivols\
-        \ dans les magasins, ne permettent que l'identification, tandis que les supports\
-        \ de type carte \xE0 puce, comparables aux cartes de paiement bancaire, disposent\
-        \ de fonctions cryptographiques qui permettent une authentification. Certaines\
-        \ technologies de carte d'acc\xE8s, qui font appel \xE0 des m\xE9canismes\
-        \ cryptographiques faibles, ont des vuln\xE9rabilit\xE9s connues qui permettent\
-        \ leur clonage et des attaques par rejeu <abbr title=\"Attaque dans laquelle\
-        \ une transmission est frauduleusement r\xE9p\xE9t\xE9e par une tierce partie\
-        \ interceptant les paquets sur la ligne.\"><sup>26</sup></abbr>. Il convient\
-        \ donc de s'orienter vers des produits r\xE9cents, dont le niveau de s\xE9\
-        curit\xE9 est satisfaisant \xE0 date et dont le protocole de communication\
-        \ et la fonction anti-clone sont r\xE9sistants \xE0 des attaques de niveau\
-        \ AV A_V AN.327."
+        \ de v\xE9rifier rapidement que le badge appartient bien au porteur."
       implementation_groups:
       - R
     - urn: urn:intuitem:risk:req_node:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2:r33
