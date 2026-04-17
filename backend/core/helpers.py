@@ -384,8 +384,10 @@ def annotate_tree_with_aggregated_scores(
     For AVG: weighted average of leaf scores in the subtree.
     For SUM: sum of (score * weight) of leaves in the subtree.
     For AVG_OF_AVG: weighted average of direct children's aggregated scores
-    (recursive) — matches the per-node value computed in
-    ComplianceAssessment._compute_score_for_field.
+    (recursive) — matches the per-node `computed[urn]` value inside
+    ComplianceAssessment._compute_score_for_field. The overall global score
+    (ComplianceAssessment.get_global_score) uses a different top-level rule
+    for structural roots and is computed separately.
 
     Leaf requirements are included only when is_scored is True, the node is
     assessable, and the result is not N/A.
