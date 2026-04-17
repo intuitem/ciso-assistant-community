@@ -132,6 +132,7 @@
 						class="inline-block p-3 btn-mini-primary w-12 focus:relative border-r"
 						title={safeTranslate('add-' + data.entityModel.localName)}
 						onclick={modalCreateEntityForm}
+						data-testid="add-entity-button"
 						><i class="fa-solid fa-building"></i>
 					</button>
 					<button
