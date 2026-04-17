@@ -757,7 +757,7 @@ class TestFrameworkBuilderURNGeneration:
         for node_ref in ("a-01", "a-02"):
             rn = RequirementNode.objects.create(
                 framework=fw,
-                urn=f"urn:test:req_node:lib:{node_ref}",
+                urn=f"urn:test:risk:req_node:lib:{node_ref}",
                 ref_id=node_ref,
                 assessable=True,
                 folder=folder,
@@ -766,7 +766,7 @@ class TestFrameworkBuilderURNGeneration:
             for q_pos in ("1", "2"):
                 Question.objects.create(
                     requirement_node=rn,
-                    urn=f"urn:test:req_node:lib:{node_ref}:question:{q_pos}",
+                    urn=f"urn:test:risk:req_node:lib:{node_ref}:question:{q_pos}",
                     ref_id=q_pos,  # library loader sets this to the URN's last segment
                     text=f"Question {q_pos} for {node_ref}",
                     type=Question.Type.UNIQUE_CHOICE,
@@ -791,6 +791,142 @@ class TestFrameworkBuilderURNGeneration:
         assert len(set(new_urns)) == len(new_urns), (
             f"Duplicated question URNs must be unique, got: {new_urns}"
         )
+
+        # node_id (the part after urn:{org}:risk:{type}:{slug}:) must be
+        # preserved from source so CEL expressions referencing
+        # answers.<q_node_id> still evaluate on the copy.
+        from core.utils import extract_node_id
+
+        source_node_ids = {
+            extract_node_id(f"urn:test:risk:req_node:lib:{n}:question:{q}")
+            for n in ("a-01", "a-02")
+            for q in ("1", "2")
+        }
+        copy_node_ids = {extract_node_id(u) for u in new_urns}
+        assert source_node_ids == copy_node_ids, (
+            f"Question node_ids must be preserved, source={source_node_ids}, "
+            f"copy={copy_node_ids}"
+        )
+
+    def test_duplicate_preserves_question_and_choice_node_ids(
+        self, authenticated_client, app_config
+    ):
+        """Question and choice node_ids (the URN suffix after the slug) must
+        survive duplication. CEL expressions in outcomes_definition and
+        visibility_expression reference answers.<q_node_id> and
+        selected_choices by choice node_id — they only work on the copy when
+        those node_ids match the source's."""
+        from core.utils import extract_node_id
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Node ID FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:node-id-fw:governance",
+            ref_id="governance",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q_source_urn = "urn:intuitem:risk:question:node-id-fw:policy-exists"
+        c_source_urn = "urn:intuitem:risk:question_choice:node-id-fw:policy-yes"
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn=q_source_urn,
+            ref_id="policy-exists",
+            text="Is there a policy?",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q,
+            urn=c_source_urn,
+            ref_id="policy-yes",
+            value="Yes",
+            folder=folder,
+            is_published=True,
+        )
+
+        url = reverse("frameworks-duplicate", args=[fw.id])
+        response = authenticated_client.post(
+            url, {"name": "Node ID FW (copy)"}, format="json"
+        )
+        assert response.status_code == 201
+
+        new_fw_id = response.data["id"]
+        new_q = Question.objects.get(requirement_node__framework_id=new_fw_id)
+        new_c = QuestionChoice.objects.get(question=new_q)
+
+        assert extract_node_id(new_q.urn) == extract_node_id(q_source_urn)
+        assert extract_node_id(new_c.urn) == extract_node_id(c_source_urn)
+        # URN itself must still differ (different slug)
+        assert new_q.urn != q_source_urn
+        assert new_c.urn != c_source_urn
+
+    def test_duplicate_preserves_library_shape_node_ids(
+        self, authenticated_client, app_config
+    ):
+        """Library-imported questions carry URNs of the form
+        urn:{org}:risk:req_node:{slug}:{parent}:question:{N}. Their node_id
+        (e.g. 'governance:question:1') must be preserved on the copy so the
+        copied outcomes_definition and visibility_expression CEL still work."""
+        from core.utils import extract_node_id
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Lib Shape FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:lib-shape-fw:governance",
+            ref_id="governance",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q_source_urn = "urn:intuitem:risk:req_node:lib-shape-fw:governance:question:1"
+        c_source_urn = (
+            "urn:intuitem:risk:req_node:lib-shape-fw:governance:question:1:choice:1"
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn=q_source_urn,
+            ref_id="1",  # library loader sets ref_id to parts[-1]
+            text="First question",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q,
+            urn=c_source_urn,
+            ref_id="1",
+            value="Yes",
+            folder=folder,
+            is_published=True,
+        )
+
+        url = reverse("frameworks-duplicate", args=[fw.id])
+        response = authenticated_client.post(
+            url, {"name": "Lib Shape FW (copy)"}, format="json"
+        )
+        assert response.status_code == 201
+
+        new_fw_id = response.data["id"]
+        new_q = Question.objects.get(requirement_node__framework_id=new_fw_id)
+        new_c = QuestionChoice.objects.get(question=new_q)
+
+        assert extract_node_id(new_q.urn) == "governance:question:1"
+        assert extract_node_id(new_c.urn) == "governance:question:1:choice:1"
 
     def test_duplicate_remaps_depends_on_urns(self, authenticated_client, app_config):
         """Copied questions with depends_on must reference the copy's own

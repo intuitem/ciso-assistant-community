@@ -8871,6 +8871,8 @@ class FrameworkViewSet(BaseModelViewSet):
         """Deep-clone a framework with all requirement nodes, questions, and choices."""
         import uuid
 
+        from core.utils import extract_node_id
+
         source = self.get_object()  # checks read permission
         folder_id = request.data.get("folder", source.folder_id)
         folder = Folder.objects.get(id=folder_id)
@@ -8933,8 +8935,36 @@ class FrameworkViewSet(BaseModelViewSet):
                     f"{parent_ref}.{idx}" if parent_ref else str(idx)
                 )
 
+        # Pre-compute each question's URN suffix so it can participate in the
+        # slug collision check below. The suffix preserves the source node_id
+        # when extractable, so CEL expressions in outcomes_definition and
+        # visibility_expression that reference answers.<q_node_id> keep working
+        # on the copy. Falls back to a positional suffix when the source URN
+        # doesn't fit the urn:{org}:risk:{type}:{slug}:{node_id} shape.
+        questions_list = list(
+            Question.objects.filter(requirement_node__framework=source)
+            .prefetch_related("choices")
+            .order_by("order")
+        )
+        q_idx_counter = {}  # req_node_id -> next question number
+        question_suffixes = {}  # q.id -> URN suffix string
+        for q in questions_list:
+            if q.requirement_node_id not in q_idx_counter:
+                q_idx_counter[q.requirement_node_id] = 1
+            q_idx = q_idx_counter[q.requirement_node_id]
+            q_idx_counter[q.requirement_node_id] = q_idx + 1
+            source_node_id = extract_node_id(q.urn) if q.urn else None
+            if source_node_id:
+                question_suffixes[q.id] = source_node_id
+            else:
+                parent_ref = computed_ref_ids.get(q.requirement_node.urn, "")
+                question_suffixes[q.id] = (
+                    f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
+                )
+
         # Build candidate URNs and check for collisions (can happen when
-        # the slug truncation makes the copy slug identical to the source slug)
+        # the slug truncation makes the copy slug identical to the source slug,
+        # or when an unrelated framework happens to share the same slug+node_id)
         def _build_urn_map(slug):
             result = {}
             for node in nodes:
@@ -8946,19 +8976,29 @@ class FrameworkViewSet(BaseModelViewSet):
                     result[old_urn] = None
             return result
 
-        urn_map = _build_urn_map(fw_slug)
-        candidate_urns = {v for v in urn_map.values() if v}
-        if (
-            candidate_urns
-            and RequirementNode.objects.filter(urn__in=candidate_urns).exists()
-        ):
-            # Slug collision detected, disambiguate
+        def _build_question_candidate_urns(slug):
+            return {
+                f"urn:{ns}:risk:question:{slug}:{s}" for s in question_suffixes.values()
+            }
+
+        def _slug_collides(slug):
+            node_map = _build_urn_map(slug)
+            node_urns = {v for v in node_map.values() if v}
+            q_urns = _build_question_candidate_urns(slug)
+            if node_urns and RequirementNode.objects.filter(urn__in=node_urns).exists():
+                return True, node_map
+            if q_urns and Question.objects.filter(urn__in=q_urns).exists():
+                return True, node_map
+            return False, node_map
+
+        collides, urn_map = _slug_collides(fw_slug)
+        if collides:
             for attempt in range(2, 100):
                 candidate_slug = f"{fw_slug}-{attempt}"
-                urn_map = _build_urn_map(candidate_slug)
-                candidate_urns = {v for v in urn_map.values() if v}
-                if not RequirementNode.objects.filter(urn__in=candidate_urns).exists():
+                attempt_collides, candidate_map = _slug_collides(candidate_slug)
+                if not attempt_collides:
                     fw_slug = candidate_slug
+                    urn_map = candidate_map
                     break
 
         # Clone requirement nodes
@@ -8987,40 +9027,35 @@ class FrameworkViewSet(BaseModelViewSet):
             )
             node_id_map[old_id] = new_node.id
 
-        # Clone questions and choices
-        questions = (
-            Question.objects.filter(requirement_node__framework=source)
-            .prefetch_related("choices")
-            .order_by("order")
-        )
-        q_counter = {}  # req_node_id -> next question number
+        # Clone questions and choices. URN suffixes were pre-computed above so
+        # node_ids are preserved (CEL in outcomes_definition and
+        # visibility_expression references answers.<q_node_id> and
+        # selected_choices by choice node_id — those must match source node_ids
+        # for the copied CEL expressions to evaluate correctly).
         question_urn_map = {}  # old question urn -> new question urn
         choice_urn_map = {}  # old choice urn -> new choice urn
         questions_with_depends_on = []  # (new_question, original_depends_on)
-        for q in questions:
+        q_idx_counter_create = {}  # req_node_id -> next question number
+        for q in questions_list:
             new_req_node_id = node_id_map.get(q.requirement_node_id)
             if not new_req_node_id:
                 continue
 
-            req_node = q.requirement_node
-            parent_ref = computed_ref_ids.get(req_node.urn, "")
-            if q.requirement_node_id not in q_counter:
-                q_counter[q.requirement_node_id] = 1
-            q_idx = q_counter[q.requirement_node_id]
-            q_counter[q.requirement_node_id] = q_idx + 1
+            if q.requirement_node_id not in q_idx_counter_create:
+                q_idx_counter_create[q.requirement_node_id] = 1
+            q_idx = q_idx_counter_create[q.requirement_node_id]
+            q_idx_counter_create[q.requirement_node_id] = q_idx + 1
 
-            # Compute positional ref_id for questions without one
+            parent_ref = computed_ref_ids.get(q.requirement_node.urn, "")
+
+            # User-facing ref_id: preserve source value when present, else
+            # fall back to a positional label scoped to the parent node.
             if q.ref_id:
                 q_ref_id = q.ref_id
             else:
                 q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
 
-            # URN must be globally unique (Question.urn has unique=True).
-            # Library-imported questions often share bare positional ref_ids
-            # ("1", "2", ...) across parent nodes, so we always scope with the
-            # parent node's ref_id plus a per-node index.
-            urn_suffix = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
-
+            urn_suffix = question_suffixes[q.id]
             new_question_urn = f"urn:{ns}:risk:question:{fw_slug}:{urn_suffix}"
             new_question = Question.objects.create(
                 urn=new_question_urn,
@@ -9047,11 +9082,16 @@ class FrameworkViewSet(BaseModelViewSet):
                     c_ref_id = choice.ref_id
                 else:
                     c_ref_id = f"{q_ref_id}-c{c_counter}"
-                new_choice_urn = (
-                    f"urn:{ns}:risk:question_choice:{fw_slug}:{c_ref_id}"
-                    if choice.urn
-                    else None
-                )
+                # Preserve the source choice's node_id when the source URN is
+                # shaped like urn:{org}:risk:{type}:{slug}:{node_id}; fall
+                # back to a ref_id-based suffix for ad-hoc URNs.
+                if choice.urn:
+                    choice_node_id = extract_node_id(choice.urn) or c_ref_id
+                    new_choice_urn = (
+                        f"urn:{ns}:risk:question_choice:{fw_slug}:{choice_node_id}"
+                    )
+                else:
+                    new_choice_urn = None
                 QuestionChoice.objects.create(
                     urn=new_choice_urn,
                     ref_id=choice.ref_id or c_ref_id,
