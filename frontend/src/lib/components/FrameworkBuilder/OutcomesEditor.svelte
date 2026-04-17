@@ -143,7 +143,7 @@
 							value={rule.expression}
 							placeholder={'e.g. assessment.score_sum >= 150 or "true" for catch-all'}
 							rows="2"
-							class="w-full text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+							class="w-full text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 							onblur={(e) => {
 								rules[index].expression = e.currentTarget.value;
 								persist();
@@ -209,7 +209,7 @@
 	{/if}
 
 	<p class="text-xs text-gray-400">
-		Rules are evaluated in order. First matching rule wins. Use <code
+		All matching rules are included in the computed outcomes. Use <code
 			class="font-mono bg-gray-100 px-1 rounded">true</code
 		> as a catch-all.
 	</p>
@@ -224,35 +224,76 @@
 	</button>
 	{#if showCelRef}
 		<div
-			class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono space-y-1"
+			class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono space-y-3"
 		>
-			<div><span class="text-gray-700">assessment.score_sum</span> — total points scored</div>
-			<div><span class="text-gray-700">assessment.score_max</span> — total possible points</div>
-			<div>
-				<span class="text-gray-700">assessment.answered_count</span> — answered requirements
+			<div class="font-sans font-semibold text-gray-600">Assessment</div>
+			<div class="space-y-1 ml-2">
+				<div><span class="text-gray-700">assessment.score_sum</span> — total points scored</div>
+				<div>
+					<span class="text-gray-700">assessment.score_max</span> — total possible points
+				</div>
+				<div>
+					<span class="text-gray-700">assessment.answered_count</span> — answered requirements
+				</div>
+				<div>
+					<span class="text-gray-700">assessment.total_count</span> — total assessable requirements
+				</div>
 			</div>
-			<div>
-				<span class="text-gray-700">assessment.total_count</span> — total assessable requirements
+
+			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
+				Requirements (by node_id)
 			</div>
-			<div>
-				<span class="text-gray-700">requirements["urn:..."].score</span> — requirement score
+			<div class="space-y-1 ml-2">
+				<div>
+					<span class="text-gray-700">requirements["NODE_ID"].score</span> — requirement score
+				</div>
+				<div>
+					<span class="text-gray-700">requirements["NODE_ID"].max_score</span> — requirement max score
+				</div>
+				<div>
+					<span class="text-gray-700">requirements["NODE_ID"].result</span> — requirement result
+				</div>
+				<div>
+					<span class="text-gray-700">requirements["NODE_ID"].status</span> — requirement status
+				</div>
+				<div class="text-gray-400 italic">
+					node_id = the part of the URN after the slug (e.g. "1.2" from
+					urn:custom:risk:req_node:my-fw:1.2)
+				</div>
 			</div>
-			<div>
-				<span class="text-gray-700">requirements["urn:..."].max_score</span> — requirement max score
+
+			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
+				Answers (by question node_id)
 			</div>
-			<div>
-				<span class="text-gray-700">requirements["urn:..."].result</span> — requirement result
+			<div class="space-y-1 ml-2">
+				<div>
+					<span class="text-gray-700">answers["Q_NODE_ID"].score</span> — answer score (add_score × weight)
+				</div>
+				<div>
+					<span class="text-gray-700">answers["Q_NODE_ID"].value</span> — free-text answer value
+				</div>
+				<div>
+					<span class="text-gray-700">answers["Q_NODE_ID"].selected_choices</span> — list of selected
+					choice node_ids
+				</div>
+				<div>
+					<span class="text-gray-700">answers["Q_NODE_ID"].weight</span> — question weight
+				</div>
+				<div>
+					<span class="text-gray-700">answers["Q_NODE_ID"].type</span> — question type (unique_choice,
+					multiple_choice, text)
+				</div>
 			</div>
-			<div>
-				<span class="text-gray-700">requirements["urn:..."].status</span> — requirement status
-			</div>
-			<div class="pt-1 border-t border-gray-200 mt-1">
-				<span class="text-gray-700">ref_ids["REF_ID"].score</span> — requirement score (by ref ID, works
-				across copies)
-			</div>
-			<div>
-				<span class="text-gray-700">ref_ids["REF_ID"].max_score / .result / .status</span> — same fields
-				as above
+
+			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">Other</div>
+			<div class="space-y-1 ml-2">
+				<div>
+					<span class="text-gray-700">computed_outcomes</span> — map of previously computed outcome ref_ids
+				</div>
+				<div>
+					<span class="text-gray-700">hidden_requirements</span> — list of node_ids hidden by visibility
+					expressions
+				</div>
 			</div>
 		</div>
 	{/if}

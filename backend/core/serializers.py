@@ -303,7 +303,56 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    security_advisories = FieldsRelatedField(many=True)
+    cwes = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display")
+    state = serializers.SerializerMethodField()
+
+    RESOLVED_STATUSES = {"mitigated", "fixed", "not_exploitable", "unaffected"}
+
+    def _get_sla_policy(self):
+        """Per-instance cache — one DB query per serializer instantiation."""
+        if not hasattr(self, "_sla_policy"):
+            from global_settings.models import GlobalSettings
+
+            try:
+                sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
+                self._sla_policy = (
+                    sla_settings.value if isinstance(sla_settings.value, dict) else {}
+                )
+            except GlobalSettings.DoesNotExist:
+                self._sla_policy = {}
+        return self._sla_policy
+
+    def get_state(self, obj):
+        from datetime import date
+
+        if obj.status in self.RESOLVED_STATUSES:
+            return {"name": "resolved", "hexcolor": "#86efac"}
+
+        if not obj.due_date:
+            return None
+
+        today = date.today()
+
+        if obj.due_date < today:
+            return {"name": "overdue", "hexcolor": "#f87171"}
+        if obj.due_date == today:
+            return {"name": "today", "hexcolor": "#f97316"}
+
+        # Check if we're in the caution zone (past 50% of the SLA window)
+        sla_policy = self._get_sla_policy()
+        severity_label = obj.get_severity_display()
+        try:
+            sla_days = int(sla_policy.get(severity_label, 0)) or None
+        except (TypeError, ValueError):
+            sla_days = None
+        if sla_days is not None:
+            remaining = (obj.due_date - today).days
+            if remaining < sla_days * 0.5:
+                return {"name": "caution", "hexcolor": "#fbbf24"}
+
+        return {"name": "on track", "hexcolor": "#93c5fd"}
 
     class Meta:
         model = Vulnerability
@@ -2242,9 +2291,11 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     framework = FieldsRelatedField(
         [
             "id",
+            "urn",
             "min_score",
             "max_score",
             "implementation_groups_definition",
+            "outcomes_definition",
             "ref_id",
             "reference_controls",
             "has_update",
@@ -2394,6 +2445,40 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
                 )
+
+        target = attrs.get(
+            "target_score",
+            getattr(self.instance, "target_score", None) if self.instance else None,
+        )
+        anchor = attrs.get(
+            "anchor_na_to_target",
+            getattr(self.instance, "anchor_na_to_target", False)
+            if self.instance
+            else False,
+        )
+        if anchor and target is None:
+            raise serializers.ValidationError(
+                {
+                    "target_score": "A target score is required when anchoring N/A to target is enabled."
+                }
+            )
+        if target is not None:
+            min_s = attrs.get(
+                "min_score",
+                getattr(self.instance, "min_score", None) if self.instance else None,
+            )
+            max_s = attrs.get(
+                "max_score",
+                getattr(self.instance, "max_score", None) if self.instance else None,
+            )
+            if min_s is not None and max_s is not None:
+                if not (min_s <= target <= max_s):
+                    raise serializers.ValidationError(
+                        {
+                            "target_score": f"Target score must be between {min_s} and {max_s}."
+                        }
+                    )
+
         return super().validate(attrs)
 
     def create(self, validated_data: Any):
@@ -2551,6 +2636,8 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "scores_definition",
             "scoring_enabled",
             "score_calculation_method",
+            "target_score",
+            "anchor_na_to_target",
             "created_at",
             "updated_at",
         ]

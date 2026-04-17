@@ -3834,5 +3834,6 @@
 	"searchResults": "결과",
 	"searchFor": "에 대한",
 	"searchPrompt": "모든 객체에서 검색할 질의를 입력하세요",
-	"all": "전체"
+	"all": "전체",
+	"exportEcosystem": "생태계 내보내기 (XLSX)"
 }
