@@ -444,9 +444,10 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         return self.name
 
     def get_localization_dict(self) -> dict:
-        resolved_name = (
-            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
-        ) or self.name
+        with translation_override("en"):
+            resolved_name = (
+                str(BUILTIN_USERGROUP_CODENAMES.get(self.name)) if self.builtin else self.name
+            ) or self.name
         return {"folder": self.folder.name, "role": resolved_name}
 
     def save(self, *args, **kwargs):
