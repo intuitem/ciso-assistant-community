@@ -47,6 +47,7 @@ services:
       dockerfile: ./enterprise/frontend/Dockerfile
     depends_on:
       - backend
+    restart: always
 
   caddy:
     container_name: caddy
