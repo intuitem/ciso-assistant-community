@@ -1,0 +1,73 @@
+publiccodeYmlVersion: 0.5.0
+name: CISO Assistant
+url: https://github.com/intuitem/ciso-assistant-community
+landingURL: https://intuitem.com
+softwareVersion: 3.15.9
+releaseDate: 2026-04-16
+logo: https://intuitem.com/ciso-assistant.png
+platforms:
+  - web
+  - linux
+  - windows
+  - mac
+categories:
+  - it-security
+  - compliance-management
+  - it-management
+organisation:
+  name: intuitem
+  uri: https://www.intuitem.com
+fundedBy:
+  - name: intuitem
+    uri: https://www.intuitem.com
+roadmap: https://intuitem.releasedhub.com/ciso-assistant-public/roadmap/d738f2fd
+developmentStatus: stable
+softwareType: standalone/web
+description:
+  en:
+    shortDescription: CISO Assistant is a one-stop-shop GRC platform covering all
+      cybersecurity managment activities
+    longDescription: CISO Assistant is a one-stop-shop GRC platform for Risk
+      Management, AppSec, Compliance & Audit, TPRM, Privacy, and Reporting. It
+      supports 130+ global frameworks with automatic control mapping, including
+      ISO 27001, NIST CSF, SOC 2, CIS, PCI DSS, NIS2, DORA, GDPR, HIPAA, CMMC,
+      and more.
+    documentation: https://intuitem.gitbook.io/ciso-assistant
+    apiDocumentation: https://ca-api-doc.pages.dev
+    features:
+      - risk-management
+      - compliance-management
+      - GDPR-management
+      - risk-quantification
+      - frameworks-mapping
+      - dora
+      - vulnerabilities
+      - mcp
+      - api
+legal:
+  license: AGPL-3.0-or-later
+maintenance:
+  type: internal
+  contacts:
+    - name: Abderrahmane Smimite
+      email: contact@intuitem.com
+      affiliation: intuitem
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - fr
+    - nl
+    - de
+    - it
+    - en
+    - ar
+    - pt
+    - es
+    - ko
+    - lt
+    - zh
+    - id
+    - tr
+    - pl
+    - ro
+    - el
