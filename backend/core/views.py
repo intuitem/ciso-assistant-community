@@ -11745,7 +11745,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             _framework.max_score,
         )
         implementation_groups = audit_obj.selected_implementation_groups
-        tree = filter_graph_by_implementation_groups(tree, implementation_groups)
+        # Don't reassign the return value: the Word spider chart depends on
+        # empty top-level sections still being present (filter mutates
+        # children in place but the returned dict drops them).
+        filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
         context = gen_audit_context(pk, doc, tree, lang)
         doc.render(context)
