@@ -3,7 +3,7 @@ convert_library_version: 'v2 ; Compat Mode: [1] {[< v2] Use legacy URN fallback 
 urn: urn:intuitem:risk:library:lpm-oiv-2019
 locale: fr
 ref_id: LPM-OIV-2019_Activites-civiles-de-l-etat
-name: "R\xE8gles OIV - Secteur \xAB Activit\xE9s civiles de l'Etat \xBB"
+name: "R\xE8gles OIV - Secteur \xAB Activit\xE9s civiles de l'Etat \xBB (2019)"
 description: "R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9S D'IMPORTANCE\
   \ VITALE \xAB ACTIVIT\xC9S CIVILES DE L'\xC9TAT \xBB\n\nArr\xEAt\xE9 du 29 mai 2019\
   \ fixant les r\xE8gles de s\xE9curit\xE9 et les modalit\xE9s de d\xE9claration des\
@@ -12,15 +12,15 @@ description: "R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9S D'
   \ de l'Etat \xBB et pris en application des articles R. 1332-41-1, R. 1332-41-2\
   \ et R. 1332-41-10 du code de la d\xE9fense.\n\nhttps://www.legifrance.gouv.fr/jorf/id/JORFTEXT000038565011"
 copyright: "Loi fran\xE7aise"
-version: 2
-publication_date: 2026-04-15
+version: 3
+publication_date: 2026-04-17
 provider: "Gouvernement fran\xE7ais"
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:lpm-oiv-2019
     ref_id: LPM-OIV-2019_Activites-civiles-de-l-etat
-    name: "R\xE8gles OIV - Secteur \xAB Activit\xE9s civiles de l'Etat \xBB"
+    name: "R\xE8gles OIV - Secteur \xAB Activit\xE9s civiles de l'Etat \xBB (2019)"
     description: "R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9S\
       \ D'IMPORTANCE VITALE \xAB ACTIVIT\xC9S CIVILES DE L'\xC9TAT \xBB\n\nArr\xEA\
       t\xE9 du 29 mai 2019 fixant les r\xE8gles de s\xE9curit\xE9 et les modalit\xE9\
