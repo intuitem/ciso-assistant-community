@@ -128,7 +128,6 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
-    build_questions_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
     _generate_occurrences,
@@ -9272,7 +9271,7 @@ class FrameworkViewSet(BaseModelViewSet):
             .prefetch_related("questions__choices")
             .order_by("urn")
         )
-        questions_by_node = {rn.id: build_questions_dict(rn) for rn in req_nodes}
+        questions_by_node = {rn.id: rn.get_questions_translated for rn in req_nodes}
         has_questions = any(questions_by_node.values())
         entries = []
 
@@ -11484,7 +11483,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ).prefetch_related("questions__choices")
         }
         questions_by_node = {
-            node_id: build_questions_dict(node) for node_id, node in req_nodes.items()
+            node_id: node.get_questions_translated
+            for node_id, node in req_nodes.items()
         }
         has_questions = any(questions_by_node.values())
 
@@ -12225,6 +12225,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                                 ][ra.requirement.urn]["security_exceptions"]
                             ]
                         )
+
+            # Align is_scored on requirement assessments with the audit's scoring_enabled.
+            # Runs after baseline copy and mapping-inference bulk_update, both of which can
+            # overwrite is_scored with values from the source audit.
+            assessable_ras = RequirementAssessment.objects.filter(
+                compliance_assessment=instance,
+                requirement__assessable=True,
+            ).exclude(
+                result=RequirementAssessment.Result.NOT_APPLICABLE,
+            )
+            if instance.scoring_enabled:
+                assessable_ras.update(is_scored=True)
+                assessable_ras.filter(score__isnull=True).update(
+                    score=instance.min_score or 0
+                )
+            else:
+                assessable_ras.update(is_scored=False)
 
             # Handle applied controls creation
             if create_applied_controls:
@@ -13951,7 +13968,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
                 "requirement__questions",  # Needed by FilteredNodeSerializer.questions
-                "requirement__questions__choices",  # Needed by build_questions_dict()
+                "requirement__questions__choices",  # Needed by get_questions_translated
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
@@ -14513,7 +14530,7 @@ def generate_html(
 
     questions_dict_by_urn = {}
     for node in requirement_nodes.prefetch_related("questions__choices"):
-        qd = build_questions_dict(node)
+        qd = node.get_questions_translated
         if qd:
             questions_dict_by_urn[node.urn] = qd
 
