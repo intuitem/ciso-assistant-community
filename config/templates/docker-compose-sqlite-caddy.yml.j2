@@ -102,6 +102,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    restart: always
     user: "1001:1001"
 
   caddy:
