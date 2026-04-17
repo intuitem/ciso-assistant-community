@@ -14468,7 +14468,7 @@ def generate_html(
 
     requirement_nodes = RequirementNode.objects.filter(
         framework=compliance_assessment.framework
-    )
+    ).order_by("order_id")
 
     assessments = RequirementAssessment.objects.filter(
         compliance_assessment=compliance_assessment,
