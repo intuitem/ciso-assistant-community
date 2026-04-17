@@ -11,10 +11,14 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import (
+    Answer,
+    ComplianceAssessment,
     Framework,
-    RequirementNode,
+    Perimeter,
     Question,
     QuestionChoice,
+    RequirementAssessment,
+    RequirementNode,
     RequirementNodeAttachment,
     StoredLibrary,
 )
@@ -1419,3 +1423,950 @@ class TestFrameworkExportYaml:
         url = reverse("frameworks-export-yaml", args=[empty_fw.id])
         response = authenticated_client.get(url)
         assert response.status_code == 400
+
+
+# --- Framework duplicate behavior tests ---
+
+
+@pytest.mark.django_db
+class TestFrameworkDuplicateBehavior:
+    """Higher-level behavior tests for Framework duplicate action beyond URN
+    generation: CEL evaluation on copies, depends_on edges, scalar
+    round-trip, folder placement, structural edges, and copy boundaries."""
+
+    # --- CEL end-to-end on a duplicated framework ---
+
+    def test_duplicate_outcomes_definition_evaluates_on_copy(
+        self, authenticated_client, app_config
+    ):
+        """outcomes_definition CEL that references answers.<q_node_id> must
+        evaluate correctly on the duplicated framework's ComplianceAssessment."""
+        from core.cel_service import evaluate_outcomes
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Outcomes FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+            urn_namespace="intuitem",
+            outcomes_definition=[
+                {
+                    "ref_id": "compliant",
+                    "expression": 'answers["policy-exists"].value == "yes"',
+                    "result": "pass",
+                    "label": "Compliant",
+                },
+            ],
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:outcomes-fw:governance",
+            ref_id="governance",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:outcomes-fw:policy-exists",
+            ref_id="policy-exists",
+            text="Is there a policy?",
+            type=Question.Type.TEXT,
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Outcomes FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+        new_fw = Framework.objects.get(id=response.data["id"])
+
+        perimeter = Perimeter.objects.create(name="Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="CA",
+            framework=new_fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        new_rn = RequirementNode.objects.get(framework=new_fw)
+        new_q = Question.objects.get(requirement_node=new_rn)
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=new_rn, folder=folder
+        )
+        Answer.objects.create(
+            requirement_assessment=ra,
+            question=new_q,
+            value="yes",
+            folder=folder,
+        )
+
+        evaluate_outcomes(ca)
+        ca.refresh_from_db()
+        assert ca.computed_outcome == {
+            "compliant": {"result": "pass", "label": "Compliant"}
+        }
+
+    def test_duplicate_visibility_expression_with_answer_reference(
+        self, authenticated_client, app_config
+    ):
+        """A node's visibility_expression that references answers.<q_node_id>
+        must still hide/reveal correctly on the duplicated framework."""
+        from core.cel_service import build_cel_context
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Vis Answer FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+            urn_namespace="intuitem",
+        )
+        rn_trigger = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:vis-answer-fw:trigger",
+            ref_id="trigger",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        rn_dependent = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:vis-answer-fw:dependent",
+            ref_id="dependent",
+            assessable=True,
+            # has() guards against the "no answer yet" path (where evaluating
+            # answers["toggle"] raises and CEL fails-open, masking the test).
+            visibility_expression=(
+                'has(answers.toggle) && answers.toggle.value == "show"'
+            ),
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=rn_trigger,
+            urn="urn:intuitem:risk:question:vis-answer-fw:toggle",
+            ref_id="toggle",
+            text="Show dependent?",
+            type=Question.Type.TEXT,
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Vis Answer FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+        new_fw = Framework.objects.get(id=response.data["id"])
+
+        perimeter = Perimeter.objects.create(name="Perim2", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="CA2",
+            framework=new_fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        new_trigger = RequirementNode.objects.get(framework=new_fw, ref_id="trigger")
+        new_dependent = RequirementNode.objects.get(
+            framework=new_fw, ref_id="dependent"
+        )
+        new_q = Question.objects.get(requirement_node=new_trigger)
+        ra_trigger = RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=new_trigger, folder=folder
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=new_dependent, folder=folder
+        )
+
+        # Without an answer, has() is false → expression false → hidden
+        _ctx, hidden = build_cel_context(ca)
+        assert new_dependent.urn in hidden, (
+            "Without an answer, visibility_expression should evaluate false "
+            "and hide the dependent requirement"
+        )
+
+        # Answer "show" → expression true → visible
+        answer = Answer.objects.create(
+            requirement_assessment=ra_trigger,
+            question=new_q,
+            value="show",
+            folder=folder,
+        )
+        _ctx, hidden = build_cel_context(ca)
+        assert new_dependent.urn not in hidden
+
+        # Change answer to "hide" → expression false → hidden
+        answer.value = "hide"
+        answer.save(update_fields=["value"])
+        _ctx, hidden = build_cel_context(ca)
+        assert new_dependent.urn in hidden
+
+    # --- depends_on edge cases ---
+
+    def test_duplicate_depends_on_multihop_chain(
+        self, authenticated_client, app_config
+    ):
+        """Q3 → Q2 → Q1 depends_on chain: all three question URNs and their
+        answer choice URNs must be remapped consistently on the copy."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Chain FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:chain-fw:node1",
+            ref_id="node1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q1 = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:chain-fw:q1",
+            ref_id="q1",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        c1 = QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:intuitem:risk:question_choice:chain-fw:q1-yes",
+            ref_id="q1-yes",
+            value="Yes",
+            folder=folder,
+            is_published=True,
+        )
+        q2 = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:chain-fw:q2",
+            ref_id="q2",
+            type=Question.Type.UNIQUE_CHOICE,
+            depends_on={
+                "question": q1.urn,
+                "answers": [c1.urn],
+                "condition": "any",
+            },
+            folder=folder,
+            is_published=True,
+        )
+        c2 = QuestionChoice.objects.create(
+            question=q2,
+            urn="urn:intuitem:risk:question_choice:chain-fw:q2-yes",
+            ref_id="q2-yes",
+            value="Yes",
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:chain-fw:q3",
+            ref_id="q3",
+            type=Question.Type.TEXT,
+            depends_on={
+                "question": q2.urn,
+                "answers": [c2.urn],
+                "condition": "any",
+            },
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Chain FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+
+        new_fw_id = response.data["id"]
+        qs = {
+            q.ref_id: q
+            for q in Question.objects.filter(requirement_node__framework_id=new_fw_id)
+        }
+        assert qs["q2"].depends_on["question"] == qs["q1"].urn
+        assert qs["q2"].depends_on["answers"] == [
+            qs["q1"].choices.get(ref_id="q1-yes").urn
+        ]
+        assert qs["q3"].depends_on["question"] == qs["q2"].urn
+        assert qs["q3"].depends_on["answers"] == [
+            qs["q2"].choices.get(ref_id="q2-yes").urn
+        ]
+
+    def test_duplicate_depends_on_all_condition(self, authenticated_client, app_config):
+        """depends_on condition='all' with multiple answer URNs must have all
+        choice URNs remapped and the condition preserved."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="All Cond FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:all-cond-fw:node1",
+            ref_id="node1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q1 = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:all-cond-fw:q1",
+            ref_id="q1",
+            type=Question.Type.MULTIPLE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        ca = QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:intuitem:risk:question_choice:all-cond-fw:q1-a",
+            ref_id="a",
+            value="A",
+            folder=folder,
+            is_published=True,
+        )
+        cb = QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:intuitem:risk:question_choice:all-cond-fw:q1-b",
+            ref_id="b",
+            value="B",
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:all-cond-fw:q2",
+            ref_id="q2",
+            type=Question.Type.TEXT,
+            depends_on={
+                "question": q1.urn,
+                "answers": [ca.urn, cb.urn],
+                "condition": "all",
+            },
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "All Cond FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+
+        new_fw_id = response.data["id"]
+        new_q2 = Question.objects.get(
+            requirement_node__framework_id=new_fw_id, ref_id="q2"
+        )
+        new_q1 = Question.objects.get(
+            requirement_node__framework_id=new_fw_id, ref_id="q1"
+        )
+        new_ca = new_q1.choices.get(ref_id="a")
+        new_cb = new_q1.choices.get(ref_id="b")
+        assert new_q2.depends_on["condition"] == "all"
+        assert new_q2.depends_on["question"] == new_q1.urn
+        assert set(new_q2.depends_on["answers"]) == {new_ca.urn, new_cb.urn}
+
+    def test_duplicate_depends_on_cross_node(self, authenticated_client, app_config):
+        """A question on node B depending on a question on node A must still
+        resolve correctly after duplicate (cross-node reference)."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="XNode FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn_a = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:xnode-fw:a",
+            ref_id="a",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        rn_b = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:xnode-fw:b",
+            ref_id="b",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q_a = Question.objects.create(
+            requirement_node=rn_a,
+            urn="urn:intuitem:risk:question:xnode-fw:qa",
+            ref_id="qa",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        c_a = QuestionChoice.objects.create(
+            question=q_a,
+            urn="urn:intuitem:risk:question_choice:xnode-fw:qa-yes",
+            ref_id="qa-yes",
+            value="Yes",
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=rn_b,
+            urn="urn:intuitem:risk:question:xnode-fw:qb",
+            ref_id="qb",
+            type=Question.Type.TEXT,
+            depends_on={
+                "question": q_a.urn,
+                "answers": [c_a.urn],
+                "condition": "any",
+            },
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "XNode FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+
+        new_fw_id = response.data["id"]
+        new_qb = Question.objects.get(
+            requirement_node__framework_id=new_fw_id, ref_id="qb"
+        )
+        new_qa = Question.objects.get(
+            requirement_node__framework_id=new_fw_id, ref_id="qa"
+        )
+        new_ca = new_qa.choices.get(ref_id="qa-yes")
+        assert new_qb.depends_on["question"] == new_qa.urn
+        assert new_qb.depends_on["answers"] == [new_ca.urn]
+
+    # --- Scalar field round-trip ---
+
+    def test_duplicate_preserves_all_scalar_fields(
+        self, authenticated_client, app_config
+    ):
+        """Every carried scalar field on Node/Question/Choice must round-trip
+        through duplicate. Guards against silent field drops in future edits."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Scalar FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:scalar-fw:n1",
+            ref_id="n1",
+            name="Node name",
+            description="Node desc",
+            annotation="Node annotation",
+            assessable=True,
+            order_id=7,
+            weight=3,
+            importance="high",
+            implementation_groups=["base", "advanced"],
+            typical_evidence="Some evidence",
+            visibility_expression='requirements["n1"].score >= 0',
+            locale="en",
+            default_locale=True,
+            translations={"fr": {"name": "Nom FR"}},
+            folder=folder,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:scalar-fw:q1",
+            ref_id="q1",
+            text="Question text",
+            annotation="Question annotation",
+            type=Question.Type.UNIQUE_CHOICE,
+            config={"foo": "bar"},
+            order=5,
+            weight=2,
+            translations={"fr": {"text": "Texte FR"}},
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q,
+            urn="urn:intuitem:risk:question_choice:scalar-fw:c1",
+            ref_id="c1",
+            value="Yes",
+            annotation="Choice annotation",
+            add_score=42,
+            compute_result="true",
+            order=1,
+            description="Choice desc",
+            color="#00ff00",
+            select_implementation_groups=["base"],
+            translations={"fr": {"value": "Oui"}},
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Scalar FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+
+        new_fw_id = response.data["id"]
+        new_rn = RequirementNode.objects.get(framework_id=new_fw_id)
+        new_q = Question.objects.get(requirement_node=new_rn)
+        new_c = QuestionChoice.objects.get(question=new_q)
+
+        for attr in (
+            "ref_id",
+            "name",
+            "description",
+            "annotation",
+            "assessable",
+            "order_id",
+            "weight",
+            "importance",
+            "implementation_groups",
+            "typical_evidence",
+            "visibility_expression",
+            "locale",
+            "default_locale",
+            "translations",
+        ):
+            assert getattr(new_rn, attr) == getattr(rn, attr), (
+                f"RequirementNode.{attr} dropped: "
+                f"{getattr(new_rn, attr)!r} != {getattr(rn, attr)!r}"
+            )
+        for attr in (
+            "ref_id",
+            "text",
+            "annotation",
+            "type",
+            "config",
+            "order",
+            "weight",
+            "translations",
+        ):
+            assert getattr(new_q, attr) == getattr(q, attr), f"Question.{attr} dropped"
+        source_c = QuestionChoice.objects.get(question=q)
+        for attr in (
+            "ref_id",
+            "value",
+            "annotation",
+            "add_score",
+            "compute_result",
+            "order",
+            "description",
+            "color",
+            "select_implementation_groups",
+            "translations",
+        ):
+            assert getattr(new_c, attr) == getattr(source_c, attr), (
+                f"QuestionChoice.{attr} dropped"
+            )
+
+    # --- Folder placement ---
+
+    def test_duplicate_uses_source_folder_when_not_specified(
+        self, authenticated_client, app_config
+    ):
+        """Without a folder parameter, the copy lands in the source's folder."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Folder FW", folder=folder, is_published=True
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:risk:req_node:folder-fw:n1",
+            ref_id="n1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Folder FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+        assert Framework.objects.get(id=response.data["id"]).folder_id == folder.id
+
+    def test_duplicate_places_nodes_in_requested_folder(
+        self, authenticated_client, app_config
+    ):
+        """With a folder parameter, the copy and its children land there."""
+        root = Folder.get_root_folder()
+        target = Folder.objects.create(name="Target Folder", parent_folder=root)
+        fw = Framework.objects.create(
+            name="Folder Target FW", folder=root, is_published=True
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:risk:req_node:folder-target-fw:n1",
+            ref_id="n1",
+            assessable=True,
+            folder=root,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:risk:question:folder-target-fw:q1",
+            ref_id="q1",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=root,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q,
+            urn="urn:test:risk:question_choice:folder-target-fw:c1",
+            ref_id="c1",
+            value="Yes",
+            folder=root,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Folder Target FW (copy)", "folder": str(target.id)},
+            format="json",
+        )
+        assert response.status_code == 201
+        new_fw = Framework.objects.get(id=response.data["id"])
+        assert new_fw.folder_id == target.id
+        for new_node in RequirementNode.objects.filter(framework=new_fw):
+            assert new_node.folder_id == target.id
+        for new_q in Question.objects.filter(requirement_node__framework=new_fw):
+            assert new_q.folder_id == target.id
+        for new_c in QuestionChoice.objects.filter(
+            question__requirement_node__framework=new_fw
+        ):
+            assert new_c.folder_id == target.id
+
+    # --- Structural edges ---
+
+    def test_duplicate_framework_with_no_requirement_nodes(
+        self, authenticated_client, app_config
+    ):
+        """Empty framework duplicates successfully with zero children."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Empty Dup FW", folder=folder, is_published=True
+        )
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Empty Dup FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+        new_fw_id = response.data["id"]
+        assert RequirementNode.objects.filter(framework_id=new_fw_id).count() == 0
+        assert (
+            Question.objects.filter(requirement_node__framework_id=new_fw_id).count()
+            == 0
+        )
+
+    def test_duplicate_copy_of_copy_has_unique_urns(
+        self, authenticated_client, app_config
+    ):
+        """Duplicating a duplicate: URNs across all three generations differ."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Gen0 FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:gen0-fw:n1",
+            ref_id="n1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:gen0-fw:q1",
+            ref_id="q1",
+            type=Question.Type.TEXT,
+            folder=folder,
+            is_published=True,
+        )
+
+        r1 = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Gen1 FW"},
+            format="json",
+        )
+        assert r1.status_code == 201
+        gen1_id = r1.data["id"]
+        r2 = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[gen1_id]),
+            {"name": "Gen2 FW"},
+            format="json",
+        )
+        assert r2.status_code == 201
+        gen2_id = r2.data["id"]
+
+        gen0_urns = set(
+            Question.objects.filter(requirement_node__framework=fw).values_list(
+                "urn", flat=True
+            )
+        )
+        gen1_urns = set(
+            Question.objects.filter(requirement_node__framework_id=gen1_id).values_list(
+                "urn", flat=True
+            )
+        )
+        gen2_urns = set(
+            Question.objects.filter(requirement_node__framework_id=gen2_id).values_list(
+                "urn", flat=True
+            )
+        )
+        assert gen0_urns.isdisjoint(gen1_urns)
+        assert gen0_urns.isdisjoint(gen2_urns)
+        assert gen1_urns.isdisjoint(gen2_urns)
+        assert len(gen0_urns) == len(gen1_urns) == len(gen2_urns) == 1
+
+    def test_duplicate_node_with_null_urn(self, authenticated_client, app_config):
+        """A RequirementNode with urn=None (builder draft state) duplicates
+        without crashing; the copy also has urn=None."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Null URN FW", folder=folder, is_published=True
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn=None,
+            ref_id="no-urn",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Null URN FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+        new_node = RequirementNode.objects.get(framework_id=response.data["id"])
+        assert new_node.urn is None
+        assert new_node.ref_id == "no-urn"
+
+    def test_duplicate_choice_with_null_urn(self, authenticated_client, app_config):
+        """A QuestionChoice with urn=None must duplicate without crashing;
+        the copy also has urn=None but retains other fields."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Null Choice URN FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:null-choice-urn-fw:n1",
+            ref_id="n1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:null-choice-urn-fw:q1",
+            ref_id="q1",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q,
+            urn=None,
+            ref_id="c1",
+            value="NoURN",
+            folder=folder,
+            is_published=True,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Null Choice URN FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+        new_c = QuestionChoice.objects.get(
+            question__requirement_node__framework_id=response.data["id"]
+        )
+        assert new_c.urn is None
+        assert new_c.value == "NoURN"
+
+    def test_duplicate_multi_level_parent_urn_chain(
+        self, authenticated_client, app_config
+    ):
+        """parent_urn chain 4 levels deep must all re-point at the copy's
+        nodes, not the source's."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Deep FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        levels = [("1", None), ("1.1", 0), ("1.1.1", 1), ("1.1.1.1", 2)]
+        urns = []
+        for _depth, (ref, parent_idx) in enumerate(levels):
+            urn = f"urn:intuitem:risk:req_node:deep-fw:{ref}"
+            urns.append(urn)
+            RequirementNode.objects.create(
+                framework=fw,
+                urn=urn,
+                ref_id=ref,
+                assessable=True,
+                parent_urn=urns[parent_idx] if parent_idx is not None else None,
+                order_id=_depth,
+                folder=folder,
+                is_published=True,
+            )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Deep FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+
+        new_fw_id = response.data["id"]
+        new_urns = set(
+            RequirementNode.objects.filter(framework_id=new_fw_id).values_list(
+                "urn", flat=True
+            )
+        )
+        for node in RequirementNode.objects.filter(framework_id=new_fw_id):
+            if node.parent_urn is not None:
+                assert node.parent_urn in new_urns, (
+                    f"parent_urn {node.parent_urn} points outside copy framework"
+                )
+                assert node.parent_urn not in urns, (
+                    "parent_urn still points at source URN"
+                )
+
+    # --- Negative boundaries (what duplicate must NOT copy) ---
+
+    def test_duplicate_does_not_copy_compliance_assessments(
+        self, authenticated_client, app_config
+    ):
+        """The duplicated framework must start empty of ComplianceAssessments
+        even if the source has assessments + answers."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="CA Boundary FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:ca-boundary-fw:n1",
+            ref_id="n1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:intuitem:risk:question:ca-boundary-fw:q1",
+            ref_id="q1",
+            type=Question.Type.TEXT,
+            folder=folder,
+            is_published=True,
+        )
+        perimeter = Perimeter.objects.create(name="Boundary Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Source CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn, folder=folder
+        )
+        Answer.objects.create(
+            requirement_assessment=ra, question=q, value="something", folder=folder
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "CA Boundary FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+        new_fw_id = response.data["id"]
+        assert not ComplianceAssessment.objects.filter(framework_id=new_fw_id).exists()
+        assert not RequirementAssessment.objects.filter(
+            requirement__framework_id=new_fw_id
+        ).exists()
+        assert not Answer.objects.filter(
+            question__requirement_node__framework_id=new_fw_id
+        ).exists()
+
+    def test_duplicate_does_not_copy_attachments_or_m2m_today(
+        self, authenticated_client, app_config
+    ):
+        """Documents current behavior: attachments, threats, and
+        reference_controls are NOT carried over by the duplicate action.
+        If this test ever fails, the scope of duplicate changed — audit
+        whether the new behavior is intended and update accordingly."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Attach FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:intuitem:risk:req_node:attach-fw:n1",
+            ref_id="n1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        RequirementNodeAttachment.objects.create(
+            requirement_node=rn,
+            file=SimpleUploadedFile("x.png", REAL_PNG, content_type="image/png"),
+            folder=folder,
+        )
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Attach FW (copy)"},
+            format="json",
+        )
+        assert response.status_code == 201
+        new_rn = RequirementNode.objects.get(framework_id=response.data["id"])
+        assert new_rn.attachments.count() == 0
