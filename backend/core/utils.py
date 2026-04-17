@@ -165,26 +165,26 @@ class UserGroupCodename(Enum):
 
 
 BUILTIN_ROLE_CODENAMES = {
-    str(RoleCodename.ADMINISTRATOR): _("Administrator"),
-    str(RoleCodename.DOMAIN_MANAGER): _("Domain manager"),
-    str(RoleCodename.ANALYST): _("Analyst"),
-    str(RoleCodename.APPROVER): _("Approver"),
-    str(RoleCodename.READER): _("Reader"),
-    str(RoleCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
-    str(RoleCodename.AUDITEE): _("Auditee"),
+    str(RoleCodename.ADMINISTRATOR): "Administrator",
+    str(RoleCodename.DOMAIN_MANAGER): "Domain manager",
+    str(RoleCodename.ANALYST): "Analyst",
+    str(RoleCodename.APPROVER): "Approver",
+    str(RoleCodename.READER): "Reader",
+    str(RoleCodename.THIRD_PARTY_RESPONDENT): "Third-party respondent",
+    str(RoleCodename.AUDITEE): "Auditee",
 }
 
 BUILTIN_USERGROUP_CODENAMES = {
-    str(UserGroupCodename.ADMINISTRATOR): _("Administrator"),
-    str(UserGroupCodename.GLOBAL_READER): _("Reader"),
-    str(UserGroupCodename.GLOBAL_APPROVER): _("Approver"),
-    str(UserGroupCodename.GLOBAL_AUDITEE): _("Auditee"),
-    str(UserGroupCodename.DOMAIN_MANAGER): _("Domain manager"),
-    str(UserGroupCodename.ANALYST): _("Analyst"),
-    str(UserGroupCodename.APPROVER): _("Approver"),
-    str(UserGroupCodename.READER): _("Reader"),
-    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
-    str(UserGroupCodename.AUDITEE): _("Auditee"),
+    str(UserGroupCodename.ADMINISTRATOR): "Administrator",
+    str(UserGroupCodename.GLOBAL_READER): "Reader",
+    str(UserGroupCodename.GLOBAL_APPROVER): "Approver",
+    str(UserGroupCodename.GLOBAL_AUDITEE): "Auditee",
+    str(UserGroupCodename.DOMAIN_MANAGER): "Domain manager",
+    str(UserGroupCodename.ANALYST): "Analyst",
+    str(UserGroupCodename.APPROVER): "Approver",
+    str(UserGroupCodename.READER): "Reader",
+    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): "Third-party respondent",
+    str(UserGroupCodename.AUDITEE): "Auditee",
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier

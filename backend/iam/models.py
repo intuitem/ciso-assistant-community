@@ -14,7 +14,7 @@ from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
-from django.utils.translation import gettext_lazy as _, override as translation_override
+from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, Prefetch, QuerySet
 from knox.models import AuthToken
@@ -435,20 +435,18 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("user groups")
 
     def __str__(self) -> str:
-        with translation_override("en"):
-            resolved_name = (
-                str(BUILTIN_USERGROUP_CODENAMES.get(self.name)) if self.builtin else self.name
-            ) or self.name
+        resolved_name = (
+            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
+        ) or self.name
         return f"{self.folder.name} - {resolved_name}"
 
     def get_name_display(self) -> str:
         return self.name
 
     def get_localization_dict(self) -> dict:
-        with translation_override("en"):
-            resolved_name = (
-                str(BUILTIN_USERGROUP_CODENAMES.get(self.name)) if self.builtin else self.name
-            ) or self.name
+        resolved_name = (
+            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
+        ) or self.name
         return {"folder": self.folder.name, "role": resolved_name}
 
     def save(self, *args, **kwargs):
@@ -992,8 +990,7 @@ class Role(NameDescriptionMixin, FolderMixin):
 
     def __str__(self) -> str:
         if self.builtin:
-            with translation_override("en"):
-                return str(BUILTIN_ROLE_CODENAMES.get(self.name) or self.name)
+            return BUILTIN_ROLE_CODENAMES.get(self.name) or self.name
         return self.name
 
     fields_to_check = ["name"]
