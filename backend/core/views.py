@@ -12134,6 +12134,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             ]
                         )
 
+            # Align is_scored on requirement assessments with the audit's scoring_enabled.
+            # Runs after baseline copy and mapping-inference bulk_update, both of which can
+            # overwrite is_scored with values from the source audit.
+            assessable_ras = RequirementAssessment.objects.filter(
+                compliance_assessment=instance,
+                requirement__assessable=True,
+            ).exclude(
+                result=RequirementAssessment.Result.NOT_APPLICABLE,
+            )
+            if instance.scoring_enabled:
+                assessable_ras.update(is_scored=True)
+                assessable_ras.filter(score__isnull=True).update(
+                    score=instance.min_score or 0
+                )
+            else:
+                assessable_ras.update(is_scored=False)
+
             # Handle applied controls creation
             if create_applied_controls:
                 # Prefetch all requirement assessments with their suggestions
