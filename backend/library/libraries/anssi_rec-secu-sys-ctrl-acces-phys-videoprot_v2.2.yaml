@@ -4,7 +4,7 @@ urn: urn:intuitem:risk:library:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2
 locale: fr
 ref_id: ANSSI_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2
 name: "ANSSI - S\xE9curisation des syst\xE8mes de contr\xF4le d\u2019acc\xE8s physique\
-  \ et vid\xE9oprotection (v2.2)"
+  \ et vid\xE9oprotection (v2.2) [Recommandations]"
 description: "Ce guide d\xE9veloppe les aspects d\u2019architecture et de s\xE9curit\xE9\
   \ logique propres aux syst\xE8mes de contr\xF4le d\u2019acc\xE8s utilisant des technologies\
   \ sans contact, et aux syst\xE8mes de vid\xE9oprotection. Comme lors de la r\xE9\
@@ -41,7 +41,7 @@ objects:
     urn: urn:intuitem:risk:framework:anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2
     ref_id: ANSSI_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2
     name: "ANSSI - S\xE9curisation des syst\xE8mes de contr\xF4le d\u2019acc\xE8s\
-      \ physique et vid\xE9oprotection (v2.2)"
+      \ physique et vid\xE9oprotection (v2.2) [Recommandations]"
     description: "Ce guide d\xE9veloppe les aspects d\u2019architecture et de s\xE9\
       curit\xE9 logique propres aux syst\xE8mes de contr\xF4le d\u2019acc\xE8s utilisant\
       \ des technologies sans contact, et aux syst\xE8mes de vid\xE9oprotection. Comme\
