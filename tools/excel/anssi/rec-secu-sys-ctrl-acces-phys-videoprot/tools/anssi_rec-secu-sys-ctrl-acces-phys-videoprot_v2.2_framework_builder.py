@@ -143,7 +143,6 @@ KNOWN_TEXT_FIXES: tuple[tuple[str, str], ...] = (
     ("administrationdu", "administration du"),
 )
 
-PYPDF_RECOMMENDATION_RE = re.compile(r"^\s*R\s*((?:\d+\s*)+)\s*([+-])?\s*$")
 PYPDF_HEADER_RE = re.compile(
     r"RECOMMANDATIONS\s+SUR\s+LA\s+S[ÉE]CURISATION", re.IGNORECASE
 )
@@ -922,12 +921,25 @@ def extract_pypdf_pages(pdf_path: Path) -> tuple[list[tuple[int, str]], dict[int
 
 
 def parse_pypdf_ref_id(line: str) -> str | None:
-    match = PYPDF_RECOMMENDATION_RE.match(line)
-    if not match:
+    stripped = line.strip()
+    if not stripped.startswith("R"):
         return None
 
-    digits = re.sub(r"\s+", "", match.group(1))
-    suffix = match.group(2) or ""
+    tail = stripped[1:].strip()
+    suffix = ""
+    if tail.endswith(("+", "-")):
+        suffix = tail[-1]
+        tail = tail[:-1].strip()
+
+    if not tail:
+        return None
+    if any(char not in "0123456789 " for char in tail):
+        return None
+
+    digits = tail.replace(" ", "")
+    if not digits:
+        return None
+
     return f"R{digits}{suffix}"
 
 
