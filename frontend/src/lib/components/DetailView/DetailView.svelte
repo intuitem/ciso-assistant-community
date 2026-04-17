@@ -630,6 +630,13 @@
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 																		>{safeTranslate(val.str)}</Anchor
 																	>
+																{:else if val.str && (val.str.startsWith('http://') || val.str.startsWith('https://'))}
+																	<a
+																		href={val.str}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		class="anchor">{val.str}</a
+																	>
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
