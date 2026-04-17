@@ -120,7 +120,7 @@
 										</ul>
 									{:else if key === 'field_visibility'}
 										{#if Object.entries(value).length === 0}
-											---
+											--
 										{:else}
 											<ul>
 												{#each Object.entries(value) as [obj, how_can_see]}
