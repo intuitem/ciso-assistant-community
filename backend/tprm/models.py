@@ -227,6 +227,12 @@ class EntityAssessment(Assessment):
         blank=True,
         null=True,
     )
+    reference_link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        verbose_name=_("Reference link"),
+    )
 
     class Meta:
         verbose_name = _("Entity assessment")
