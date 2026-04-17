@@ -435,9 +435,10 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("user groups")
 
     def __str__(self) -> str:
-        resolved_name = (
-            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
-        ) or self.name
+        with translation_override("en"):
+            resolved_name = (
+                str(BUILTIN_USERGROUP_CODENAMES.get(self.name)) if self.builtin else self.name
+            ) or self.name
         return f"{self.folder.name} - {resolved_name}"
 
     def get_name_display(self) -> str:
@@ -991,7 +992,8 @@ class Role(NameDescriptionMixin, FolderMixin):
 
     def __str__(self) -> str:
         if self.builtin:
-            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
+            with translation_override("en"):
+                return str(BUILTIN_ROLE_CODENAMES.get(self.name) or self.name)
         return self.name
 
     fields_to_check = ["name"]
