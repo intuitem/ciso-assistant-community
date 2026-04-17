@@ -11737,16 +11737,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 / f"audit_report_template_{lang}.docx"
             )
             doc = DocxTemplate(template_path)
-        _framework = self.get_object().framework
+        audit_obj = self.get_object()
+        _framework = audit_obj.framework
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
-            RequirementAssessment.objects.filter(
-                compliance_assessment=self.get_object()
-            ).all(),
+            RequirementAssessment.objects.filter(compliance_assessment=audit_obj).all(),
             _framework.max_score,
         )
-        implementation_groups = self.get_object().selected_implementation_groups
+        implementation_groups = audit_obj.selected_implementation_groups
+        # Don't reassign the return value: the Word spider chart depends on
+        # empty top-level sections still being present (filter mutates
+        # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
+        annotate_tree_with_aggregated_scores(tree, audit_obj)
         context = gen_audit_context(pk, doc, tree, lang)
         doc.render(context)
         buffer_doc = io.BytesIO()
@@ -12385,9 +12388,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             and not compliance_assessment.selected_implementation_groups
         ):
             implementation_groups = None
-        return Response(
-            filter_graph_by_implementation_groups(tree, implementation_groups)
-        )
+        tree = filter_graph_by_implementation_groups(tree, implementation_groups)
+        annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        return Response(tree)
 
     @action(detail=True, methods=["get"])
     def soa(self, request, pk):
@@ -12438,6 +12441,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             effective_groups = compliance_assessment.selected_implementation_groups
         tree = filter_graph_by_implementation_groups(tree, effective_groups)
+        annotate_tree_with_aggregated_scores(tree, compliance_assessment)
 
         # Build ra_id → RequirementAssessment lookup with prefetched applied_controls
         ras = RequirementAssessment.objects.filter(
@@ -14498,6 +14502,7 @@ def generate_html(
         compliance_assessment.framework.max_score,
     )
     graph = filter_graph_by_implementation_groups(graph, implementation_groups)
+    annotate_tree_with_aggregated_scores(graph, compliance_assessment)
     flattened_graph = flatten_dict(graph)
 
     requirement_nodes = requirement_nodes.filter(urn__in=flattened_graph.values())
