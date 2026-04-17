@@ -471,6 +471,9 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
     context = {
         "task_count": len(task_nodes),
         "task_list": format_task_node_list(task_nodes),
+        "task_list_detailed": format_task_node_list(
+            task_nodes, include_description=True
+        ),
         "days_remaining": days,
     }
 
@@ -501,6 +504,9 @@ def send_task_node_overdue_notification(actor_email, task_nodes):
     context = {
         "task_count": len(task_nodes),
         "task_list": format_task_node_list(task_nodes),
+        "task_list_detailed": format_task_node_list(
+            task_nodes, include_description=True
+        ),
     }
 
     rendered = render_email_template(
