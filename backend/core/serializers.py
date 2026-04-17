@@ -2291,6 +2291,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     framework = FieldsRelatedField(
         [
             "id",
+            "urn",
             "min_score",
             "max_score",
             "implementation_groups_definition",
