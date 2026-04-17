@@ -1,5 +1,5 @@
 from django.db.utils import IntegrityError, OperationalError, ProgrammingError
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 import copy
@@ -11629,6 +11629,98 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         response["Content-Disposition"] = f'attachment; filename="{audit.name}.xlsx"'
 
+        return response
+
+    @action(detail=True, methods=["get"], name="CyFun Excel Export")
+    def cyfun_xlsx(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        audit = ComplianceAssessment.objects.get(id=pk)
+        CYFUN_FRAMEWORK_URN = "urn:intuitem:risk:framework:ccb-cyfun2025"
+        if audit.framework.urn != CYFUN_FRAMEWORK_URN:
+            return Response(
+                {"error": "This export is only available for CyFun 2025 assessments"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        template_path = (
+            Path(__file__).resolve().parent
+            / "templates"
+            / "core"
+            / "CyFun2025_Self-Assessment_tool_ESSENTIAL_v3.1.xlsx"
+        )
+        wb = load_workbook(template_path)
+
+        SHEET_MAP = {
+            "GV": "GOVERN",
+            "ID": "IDENTIFY",
+            "PR": "PROTECT",
+            "DE": "DETECT",
+            "RS": "RESPOND",
+            "RC": "RECOVER",
+        }
+
+        # Build ref_id → row lookup for each function sheet
+        sheet_row_maps = {}
+        for sheet_name in SHEET_MAP.values():
+            ws = wb[sheet_name]
+            row_map = {}
+            for row in range(1, ws.max_row + 1):
+                cell_value = ws.cell(row=row, column=6).value  # Column F
+                if cell_value and isinstance(cell_value, str):
+                    ref_id = cell_value.split(":")[0].strip().rstrip(".")
+                    if ref_id:
+                        row_map[ref_id] = row
+            sheet_row_maps[sheet_name] = row_map
+
+        # Fetch all requirement assessments
+        requirement_assessments = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .select_related("requirement")
+            .filter(requirement__assessable=True)
+        )
+
+        for ra in requirement_assessments:
+            ref_id = ra.requirement.ref_id
+            if not ref_id:
+                continue
+
+            prefix = ref_id.split(".")[0]
+            sheet_name = SHEET_MAP.get(prefix)
+            if not sheet_name:
+                continue
+
+            row = sheet_row_maps.get(sheet_name, {}).get(ref_id)
+            if row is None:
+                continue
+
+            ws = wb[sheet_name]
+            if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
+                ws.cell(row=row, column=7, value="N/A")  # Column G: doc score
+                ws.cell(row=row, column=8, value="N/A")  # Column H: impl score
+            else:
+                if ra.documentation_score is not None:
+                    ws.cell(row=row, column=7, value=ra.documentation_score)
+                if ra.score is not None:
+                    ws.cell(row=row, column=8, value=ra.score)
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="{audit.name}_CyFun_Self-Assessment.xlsx"'
+        )
         return response
 
     @action(detail=True, methods=["get"])
