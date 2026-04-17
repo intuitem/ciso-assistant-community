@@ -719,16 +719,18 @@
 							{/each}
 						</span>
 					{/if}
-					{#if translateOptions && option}
-						{#if field === 'ro_to_couple'}
-							{@const [firstPart, ...restParts] = option.label.split(' - ')}
-							{safeTranslate(firstPart)} - {restParts.join(' - ')}
+					<span class="inline-block max-w-[30ch] truncate align-bottom" title={option.label}>
+						{#if translateOptions && option}
+							{#if field === 'ro_to_couple'}
+								{@const [firstPart, ...restParts] = option.label.split(' - ')}
+								{safeTranslate(firstPart)} - {restParts.join(' - ')}
+							{:else}
+								{option.translatedLabel}
+							{/if}
 						{:else}
-							{option.translatedLabel}
+							{option.label || option}
 						{/if}
-					{:else}
-						{option.label || option}
-					{/if}
+					</span>
 					{#if option.infoString?.position === 'suffix'}
 						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
 					{/if}
