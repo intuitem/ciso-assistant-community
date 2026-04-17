@@ -8994,6 +8994,9 @@ class FrameworkViewSet(BaseModelViewSet):
             .order_by("order")
         )
         q_counter = {}  # req_node_id -> next question number
+        question_urn_map = {}  # old question urn -> new question urn
+        choice_urn_map = {}  # old choice urn -> new choice urn
+        questions_with_depends_on = []  # (new_question, original_depends_on)
         for q in questions:
             new_req_node_id = node_id_map.get(q.requirement_node_id)
             if not new_req_node_id:
@@ -9018,8 +9021,9 @@ class FrameworkViewSet(BaseModelViewSet):
             # parent node's ref_id plus a per-node index.
             urn_suffix = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
 
+            new_question_urn = f"urn:{ns}:risk:question:{fw_slug}:{urn_suffix}"
             new_question = Question.objects.create(
-                urn=f"urn:{ns}:risk:question:{fw_slug}:{urn_suffix}",
+                urn=new_question_urn,
                 ref_id=q.ref_id or q_ref_id,
                 text=q.text,
                 annotation=q.annotation,
@@ -9032,6 +9036,10 @@ class FrameworkViewSet(BaseModelViewSet):
                 folder_id=folder_id,
                 translations=q.translations,
             )
+            if q.urn:
+                question_urn_map[q.urn] = new_question_urn
+            if q.depends_on:
+                questions_with_depends_on.append((new_question, q.depends_on))
             c_counter = 0
             for choice in q.choices.all():
                 c_counter += 1
@@ -9039,10 +9047,13 @@ class FrameworkViewSet(BaseModelViewSet):
                     c_ref_id = choice.ref_id
                 else:
                     c_ref_id = f"{q_ref_id}-c{c_counter}"
-                QuestionChoice.objects.create(
-                    urn=f"urn:{ns}:risk:question_choice:{fw_slug}:{c_ref_id}"
+                new_choice_urn = (
+                    f"urn:{ns}:risk:question_choice:{fw_slug}:{c_ref_id}"
                     if choice.urn
-                    else None,
+                    else None
+                )
+                QuestionChoice.objects.create(
+                    urn=new_choice_urn,
                     ref_id=choice.ref_id or c_ref_id,
                     value=choice.value,
                     annotation=choice.annotation,
@@ -9056,6 +9067,24 @@ class FrameworkViewSet(BaseModelViewSet):
                     folder_id=folder_id,
                     translations=choice.translations,
                 )
+                if choice.urn and new_choice_urn:
+                    choice_urn_map[choice.urn] = new_choice_urn
+
+        # Remap depends_on URNs (question + answer choices) to the copy's new
+        # URNs. Unknown URNs (e.g. cross-framework refs) are left untouched.
+        for new_question, original_depends_on in questions_with_depends_on:
+            if not isinstance(original_depends_on, dict):
+                continue
+            remapped = dict(original_depends_on)
+            target_urn = remapped.get("question")
+            if target_urn in question_urn_map:
+                remapped["question"] = question_urn_map[target_urn]
+            raw_answers = remapped.get("answers")
+            if isinstance(raw_answers, list):
+                remapped["answers"] = [choice_urn_map.get(a, a) for a in raw_answers]
+            if remapped != original_depends_on:
+                new_question.depends_on = remapped
+                new_question.save(update_fields=["depends_on"])
 
         serializer = FrameworkReadSerializer(new_framework)
         return Response(serializer.data, status=201)

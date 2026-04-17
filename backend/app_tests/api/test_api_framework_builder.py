@@ -792,6 +792,139 @@ class TestFrameworkBuilderURNGeneration:
             f"Duplicated question URNs must be unique, got: {new_urns}"
         )
 
+    def test_duplicate_remaps_depends_on_urns(self, authenticated_client, app_config):
+        """Copied questions with depends_on must reference the copy's own
+        question/choice URNs, not the source's."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Depends On FW",
+            folder=folder,
+            is_published=True,
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:dep:1",
+            ref_id="1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q1 = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:req_node:dep:1:question:1",
+            ref_id="1",
+            text="Parent question",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        c1 = QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:test:req_node:dep:1:question:1:choice:1",
+            ref_id="1",
+            value="Yes",
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:test:req_node:dep:1:question:1:choice:2",
+            ref_id="2",
+            value="No",
+            folder=folder,
+            is_published=True,
+        )
+        # Q2 depends on Q1 = "Yes"
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:req_node:dep:1:question:2",
+            ref_id="2",
+            text="Child question",
+            type=Question.Type.TEXT,
+            depends_on={
+                "question": q1.urn,
+                "answers": [c1.urn],
+                "condition": "any",
+            },
+            folder=folder,
+            is_published=True,
+        )
+
+        url = reverse("frameworks-duplicate", args=[fw.id])
+        response = authenticated_client.post(
+            url, {"name": "Depends On FW (copy)"}, format="json"
+        )
+        assert response.status_code == 201, (
+            f"Duplicate should succeed, got {response.status_code}: {response.data}"
+        )
+
+        new_fw_id = response.data["id"]
+        new_questions = Question.objects.filter(
+            requirement_node__framework_id=new_fw_id
+        ).order_by("order")
+        assert new_questions.count() == 2
+        new_q1, new_q2 = new_questions[0], new_questions[1]
+
+        # depends_on on the copy must point at the copy's own URNs, not source's
+        assert new_q2.depends_on is not None
+        assert new_q2.depends_on["question"] == new_q1.urn, (
+            f"depends_on.question must be remapped to copy's URN, "
+            f"got {new_q2.depends_on['question']} vs {new_q1.urn}"
+        )
+        new_c1 = new_q1.choices.get(ref_id="1")
+        assert new_q2.depends_on["answers"] == [new_c1.urn], (
+            f"depends_on.answers must be remapped to copy's choice URNs, "
+            f"got {new_q2.depends_on['answers']} vs [{new_c1.urn}]"
+        )
+        assert new_q2.depends_on["condition"] == "any"
+
+    def test_duplicate_preserves_foreign_depends_on_urns(
+        self, authenticated_client, app_config
+    ):
+        """depends_on URNs not found in the framework (e.g. stale/cross-framework
+        refs) must be left untouched rather than silently dropped."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Foreign Dep FW",
+            folder=folder,
+            is_published=True,
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:foreign:1",
+            ref_id="1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        foreign_q_urn = "urn:other:framework:question:x"
+        foreign_c_urn = "urn:other:framework:question:x:choice:1"
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:req_node:foreign:1:question:1",
+            ref_id="1",
+            text="Question with foreign dependency",
+            type=Question.Type.TEXT,
+            depends_on={
+                "question": foreign_q_urn,
+                "answers": [foreign_c_urn],
+                "condition": "any",
+            },
+            folder=folder,
+            is_published=True,
+        )
+
+        url = reverse("frameworks-duplicate", args=[fw.id])
+        response = authenticated_client.post(
+            url, {"name": "Foreign Dep FW (copy)"}, format="json"
+        )
+        assert response.status_code == 201
+
+        new_fw_id = response.data["id"]
+        new_q = Question.objects.get(requirement_node__framework_id=new_fw_id)
+        assert new_q.depends_on["question"] == foreign_q_urn
+        assert new_q.depends_on["answers"] == [foreign_c_urn]
+
 
 # --- YAML Export tests ---
 
