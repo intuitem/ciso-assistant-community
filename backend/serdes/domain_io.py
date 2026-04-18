@@ -422,15 +422,17 @@ def import_objects(
                 if not LoadedLibrary.objects.filter(
                     urn=library["urn"], version=library["version"]
                 ).exists():
-                    if (
+                    # Pick the newest compatible stored version to avoid
+                    # MultipleObjectsReturned when several are on disk.
+                    stored = (
                         StoredLibrary.objects.filter(
                             urn=library["urn"], version__gte=library["version"]
-                        ).exists()
-                        and load_missing_libraries
-                    ):
-                        StoredLibrary.objects.get(
-                            urn=library["urn"], version__gte=library["version"]
-                        ).load()
+                        )
+                        .order_by("-version")
+                        .first()
+                    )
+                    if stored and load_missing_libraries:
+                        stored.load()
                     else:
                         missing_libraries.append(library)
 
@@ -607,8 +609,16 @@ def create_batch(
                 try:
                     model(**fields).clean()
                 except ValidationError as e:
-                    for field, error in e.error_dict.items():
-                        fields[field] = f"{fields[field]} {uuid.uuid4()}"
+                    # clean() raises on fields_to_check uniqueness conflicts;
+                    # de-duplicate by appending a UUID, but only for
+                    # string-valued fields. Dates / FKs / enums in error_dict
+                    # (e.g. TaskNode.fields_to_check = ["task_template",
+                    # "due_date"]) are left untouched so we surface the real
+                    # error instead of silently corrupting the object.
+                    for field in getattr(e, "error_dict", {}):
+                        current = fields.get(field)
+                        if isinstance(current, str):
+                            fields[field] = f"{current} {uuid.uuid4()}"
 
                 logger.debug("Creating object", fields=fields)
                 objects_creation_data.append(
