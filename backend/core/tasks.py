@@ -1355,3 +1355,28 @@ def send_assignment_reviewed_notification(
                         email,
                         rendered.get("html_body"),
                     )
+
+
+@task()
+def generate_crosswalk_suggestions(mapping_set_id: str) -> None:
+    """Generate semantic-similarity-based mapping suggestions for a crosswalk."""
+    from core.models import RequirementMappingSet
+    from core.mappings.crosswalk import generate_suggestions
+
+    try:
+        mapping_set = RequirementMappingSet.objects.get(pk=mapping_set_id)
+    except RequirementMappingSet.DoesNotExist:
+        logger.warning("crosswalk_mapping_set_missing", id=mapping_set_id)
+        return
+
+    mapping_set.status = RequirementMappingSet.Status.GENERATING
+    mapping_set.generation_error = ""
+    mapping_set.save(update_fields=["status", "generation_error", "updated_at"])
+
+    try:
+        generate_suggestions(mapping_set)
+    except Exception as e:
+        logger.exception("crosswalk_generation_failed", id=mapping_set_id)
+        mapping_set.status = RequirementMappingSet.Status.FAILED
+        mapping_set.generation_error = str(e)[:2000]
+        mapping_set.save(update_fields=["status", "generation_error", "updated_at"])

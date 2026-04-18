@@ -17813,3 +17813,180 @@ def global_search(request):
             "total_candidates": len(candidates),
         }
     )
+
+
+# ---------- Crosswalk (user-built requirement mapping sets) ----------
+
+
+class CrosswalkViewSet(BaseModelViewSet):
+    """User-built semantic crosswalks between two frameworks."""
+
+    model = RequirementMappingSet
+    filterset_fields = ["status", "source_framework", "target_framework"]
+    search_fields = ["name", "description"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(library__isnull=True).select_related(
+            "source_framework", "target_framework", "folder"
+        )
+
+    def get_serializer_class(self, **kwargs):
+        from core.serializers import (
+            CrosswalkReadSerializer,
+            CrosswalkWriteSerializer,
+        )
+
+        if self.action in ("create", "update", "partial_update"):
+            return CrosswalkWriteSerializer
+        return CrosswalkReadSerializer
+
+    def perform_create(self, serializer):
+        mapping_set = serializer.save()
+        from core.tasks import generate_crosswalk_suggestions
+
+        generate_crosswalk_suggestions(str(mapping_set.id))
+
+    @action(detail=True, methods=["post"])
+    def regenerate(self, request, pk=None):
+        """Re-run the suggestion engine — wipes unreviewed suggestions first."""
+        mapping_set = self.get_object()
+        from core.tasks import generate_crosswalk_suggestions
+
+        generate_crosswalk_suggestions(str(mapping_set.id))
+        return Response({"status": "dispatched", "mapping_set_id": str(mapping_set.id)})
+
+    @action(detail=True, methods=["get"])
+    def matrix(self, request, pk=None):
+        """
+        Compact payload for the heatmap view: axis nodes (IDs only) + cells.
+        Full text is fetched separately via the candidates endpoint or pair detail.
+        """
+        mapping_set = self.get_object()
+
+        source_nodes = list(
+            RequirementNode.objects.filter(
+                framework=mapping_set.source_framework, assessable=True
+            )
+            .order_by("order_id")
+            .values("id", "urn", "ref_id", "name", "description", "parent_urn")
+        )
+        target_nodes = list(
+            RequirementNode.objects.filter(
+                framework=mapping_set.target_framework, assessable=True
+            )
+            .order_by("order_id")
+            .values("id", "urn", "ref_id", "name", "description", "parent_urn")
+        )
+
+        src_urn_to_idx = {n["urn"]: i for i, n in enumerate(source_nodes)}
+        tgt_urn_to_idx = {n["urn"]: i for i, n in enumerate(target_nodes)}
+
+        cells = []
+        for m in mapping_set.mappings.select_related(
+            "source_requirement", "target_requirement"
+        ).all():
+            s_urn = m.source_requirement.urn
+            t_urn = m.target_requirement.urn
+            if s_urn not in src_urn_to_idx or t_urn not in tgt_urn_to_idx:
+                continue
+            cells.append(
+                {
+                    "id": str(m.id),
+                    "s": src_urn_to_idx[s_urn],
+                    "t": tgt_urn_to_idx[t_urn],
+                    "relationship": m.relationship,
+                    "strength": m.strength_of_relationship or 0,
+                    "reviewed": m.reviewed,
+                    "suggested": m.is_suggested,
+                }
+            )
+
+        for nodes in (source_nodes, target_nodes):
+            for n in nodes:
+                n["id"] = str(n["id"])
+                if n.get("description"):
+                    n["description"] = n["description"][:400]
+
+        return Response(
+            {
+                "mapping_set": {
+                    "id": str(mapping_set.id),
+                    "status": mapping_set.status,
+                    "source_framework": {
+                        "id": str(mapping_set.source_framework.id),
+                        "name": mapping_set.source_framework.name,
+                    },
+                    "target_framework": {
+                        "id": str(mapping_set.target_framework.id),
+                        "name": mapping_set.target_framework.name,
+                    },
+                },
+                "source_nodes": source_nodes,
+                "target_nodes": target_nodes,
+                "cells": cells,
+            }
+        )
+
+    @action(detail=True, methods=["get"])
+    def candidates(self, request, pk=None):
+        """Paginated list of mapping rows for the pairs table view."""
+        mapping_set = self.get_object()
+        qs = mapping_set.mappings.select_related(
+            "source_requirement", "target_requirement"
+        )
+        relationship = request.query_params.get("relationship")
+        if relationship:
+            qs = qs.filter(relationship=relationship)
+        reviewed = request.query_params.get("reviewed")
+        if reviewed in ("true", "false"):
+            qs = qs.filter(reviewed=(reviewed == "true"))
+        ordering = request.query_params.get("ordering", "-strength_of_relationship")
+        qs = qs.order_by(ordering)
+
+        from core.serializers import CrosswalkMappingReadSerializer
+
+        page = self.paginate_queryset(qs)
+        serializer = CrosswalkMappingReadSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+
+class CrosswalkMappingViewSet(BaseModelViewSet):
+    """Individual requirement mapping rows — used for reviewer edits."""
+
+    model = RequirementMapping
+    filterset_fields = ["mapping_set", "relationship", "reviewed"]
+    search_fields = []
+
+    def get_serializer_class(self, **kwargs):
+        from core.serializers import (
+            CrosswalkMappingReadSerializer,
+            CrosswalkMappingWriteSerializer,
+        )
+
+        if self.action in ("create", "update", "partial_update"):
+            return CrosswalkMappingWriteSerializer
+        return CrosswalkMappingReadSerializer
+
+    def get_queryset(self):
+        # RequirementMapping has no folder — scope through its mapping_set.folder.
+        accessible_mapping_sets = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, RequirementMappingSet
+        )[0]
+        return RequirementMapping.objects.filter(
+            mapping_set__in=accessible_mapping_sets
+        ).select_related("mapping_set", "source_requirement", "target_requirement")
+
+    def perform_update(self, serializer):
+        from django.utils import timezone
+
+        instance = serializer.save()
+        # Any update through this viewset counts as a human review.
+        update_fields = []
+        if not instance.reviewed:
+            instance.reviewed = True
+            update_fields.append("reviewed")
+        instance.reviewed_at = timezone.now()
+        instance.reviewed_by = self.request.user
+        update_fields.extend(["reviewed_at", "reviewed_by"])
+        instance.save(update_fields=update_fields)

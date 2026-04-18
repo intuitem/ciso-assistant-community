@@ -2747,6 +2747,13 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
 
 
 class RequirementMappingSet(ReferentialObjectMixin):
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        GENERATING = "generating", _("Generating")
+        READY = "ready", _("Ready for review")
+        REVIEWED = "reviewed", _("Reviewed")
+        FAILED = "failed", _("Failed")
+
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2766,6 +2773,27 @@ class RequirementMappingSet(ReferentialObjectMixin):
         on_delete=models.CASCADE,
         verbose_name=_("Target framework"),
         related_name="target_framework",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    embedding_model = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name=_("Embedding model"),
+    )
+    generated_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Suggestions generated at")
+    )
+    generation_params = models.JSONField(
+        null=True, blank=True, verbose_name=_("Generation parameters")
+    )
+    generation_error = models.TextField(
+        blank=True, default="", verbose_name=_("Generation error")
     )
 
     def save(self, *args, **kwargs) -> None:
@@ -2839,6 +2867,24 @@ class RequirementMapping(models.Model):
         validators=[MaxValueValidator(10)],
     )
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+    is_suggested = models.BooleanField(
+        default=False, verbose_name=_("Machine-suggested")
+    )
+    reviewed = models.BooleanField(default=False, verbose_name=_("Reviewed"))
+    reviewed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Reviewed at")
+    )
+    reviewed_by = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_requirement_mappings",
+        verbose_name=_("Reviewed by"),
+    )
+    suggestion_metadata = models.JSONField(
+        null=True, blank=True, verbose_name=_("Suggestion metadata")
+    )
 
     @property
     def coverage(self) -> str:

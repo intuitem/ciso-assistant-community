@@ -102,6 +102,12 @@ router.register(
     RequirementMappingSetViewSet,
     basename="requirement-mapping-sets",
 )
+router.register(r"crosswalks", CrosswalkViewSet, basename="crosswalks")
+router.register(
+    r"crosswalk-mappings",
+    CrosswalkMappingViewSet,
+    basename="crosswalk-mappings",
+)
 router.register(
     r"filtering-labels",
     FilteringLabelViewSet,
