@@ -363,6 +363,10 @@ def import_objects(
 
     try:
         models_map = get_models_map(objects)
+        # Our own domain exports never contain Folder rows (see the comment
+        # in serdes.utils.get_domain_export_objects). This guard only rejects
+        # dumps from elsewhere — e.g. a full DB backup mistakenly uploaded
+        # here.
         if Folder in models_map.values():
             logger.error("Dump contains a domain")
             raise ValidationError({"error": "Dump contains a domain"})

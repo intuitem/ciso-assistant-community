@@ -508,15 +508,24 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
 
     incidents = Incident.objects.filter(folder__in=folders).distinct()
     # Close the loop on reverse M2Ms so objects reachable only through
-    # incidents/campaigns still make it into the dump (and into loaded_libraries).
-    entities = (entities | Entity.objects.filter(incidents__in=incidents)).distinct()
+    # incidents/campaigns still make it into the dump (and into
+    # loaded_libraries). Rebuild with fresh Q filters rather than queryset
+    # union so the result plays nicely with .distinct().
+    entities = Entity.objects.filter(
+        Q(folder__in=folders)
+        | Q(stakeholders__in=stakeholders)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(incidents__in=incidents)
+    ).distinct()
 
     campaigns = Campaign.objects.filter(folder__in=folders).distinct()
-    frameworks = (
-        frameworks | Framework.objects.filter(campaigns__in=campaigns)
+    frameworks = Framework.objects.filter(
+        Q(folder__in=folders)
+        | Q(complianceassessment__in=compliance_assessments)
+        | Q(campaigns__in=campaigns)
     ).distinct()
-    perimeters = (
-        perimeters | Perimeter.objects.filter(campaigns__in=campaigns)
+    perimeters = Perimeter.objects.filter(
+        Q(folder__in=folders) | Q(campaigns__in=campaigns)
     ).distinct()
 
     task_templates = TaskTemplate.objects.filter(folder__in=folders).distinct()
@@ -554,6 +563,12 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     return {
+        # Folder is deliberately NOT exported. The domain tree is flattened on
+        # import: all `folder` FKs are remapped to the newly-created
+        # base_folder by create_batch's generic folder handler. Keeping
+        # Folder out of the dump is what makes the re-import possible — the
+        # guard in import_objects rejects dumps that *do* contain Folder rows
+        # (e.g. full DB backups), not our own domain exports.
         # "folder": folders,
         "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,
