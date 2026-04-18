@@ -213,16 +213,20 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
         if "objects" not in json_dump:
             raise ValidationError("badly formatted json")
 
-        try:
-            schema_version_int = int(schema_version)
-        except (ValueError, TypeError) as e:
-            logger.error(
-                "Invalid schema version format",
-                schema_version=schema_version,
-                exc_info=e,
-            )
-            raise ValidationError({"error": "invalidSchemaVersionFormat"})
-        compare_schema_versions(schema_version_int, import_version)
+        # Older dumps may omit schema_version; compare_schema_versions()
+        # handles None by falling back to media_version, so leave it as-is
+        # in that case instead of erroring on int(None).
+        if schema_version is not None:
+            try:
+                schema_version = int(schema_version)
+            except (ValueError, TypeError) as e:
+                logger.error(
+                    "Invalid schema version format",
+                    schema_version=schema_version,
+                    exc_info=e,
+                )
+                raise ValidationError({"error": "invalidSchemaVersionFormat"})
+        compare_schema_versions(schema_version, import_version)
 
         # Collect every file living under `attachments/` (including the
         # evidence-revisions/ subdir used by the current exporter).
@@ -254,29 +258,47 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
                             )
                             continue
                         evidence_uuid, version_str, basename = m.groups()
-                        new_name = default_storage.save(basename, io.BytesIO(content))
                         evidence_hash = sha256(str(evidence_uuid).encode()).hexdigest()[
                             :12
                         ]
                         version = int(version_str)
-                        for x in json_dump["objects"]:
-                            if (
-                                x["model"] == "core.evidencerevision"
-                                and x["fields"].get("evidence") == evidence_hash
-                                and int(x["fields"].get("version", 0)) == version
-                            ):
-                                x["fields"]["attachment"] = new_name
+                        matching = [
+                            x
+                            for x in json_dump["objects"]
+                            if x["model"] == "core.evidencerevision"
+                            and x["fields"].get("evidence") == evidence_hash
+                            and int(x["fields"].get("version", 0)) == version
+                        ]
+                        if not matching:
+                            # Don't persist arbitrary files from the ZIP if
+                            # nothing in data.json references them.
+                            logger.warning(
+                                "Skipping unreferenced evidence-revision attachment",
+                                filename=zip_name,
+                            )
+                            continue
+                        new_name = default_storage.save(basename, io.BytesIO(content))
+                        for x in matching:
+                            x["fields"]["attachment"] = new_name
                     else:
                         # Legacy layout: attachments/<basename> tied to
                         # core.evidence.attachment
+                        matching = [
+                            x
+                            for x in json_dump["objects"]
+                            if x["model"] == "core.evidence"
+                            and x["fields"].get("attachment") == zip_name
+                        ]
+                        if not matching:
+                            logger.warning(
+                                "Skipping unreferenced attachment",
+                                filename=zip_name,
+                            )
+                            continue
                         new_name = default_storage.save(zip_name, io.BytesIO(content))
                         if new_name != zip_name:
-                            for x in json_dump["objects"]:
-                                if (
-                                    x["model"] == "core.evidence"
-                                    and x["fields"].get("attachment") == zip_name
-                                ):
-                                    x["fields"]["attachment"] = new_name
+                            for x in matching:
+                                x["fields"]["attachment"] = new_name
 
                 except Exception:
                     logger.error("Error extracting attachment", exc_info=True)
@@ -459,7 +481,9 @@ def import_objects(
 
         return {"message": "Import successful"}
 
-    except ValidationError as e:
+    except (ValidationError, PermissionDenied) as e:
+        # Keep 403 semantics — don't let the broad Exception branch below
+        # repackage a PermissionDenied into a generic ValidationError.
         logger.error(f"error: {e}")
         raise
     except Exception as e:
@@ -613,12 +637,24 @@ def create_batch(
                     # de-duplicate by appending a UUID, but only for
                     # string-valued fields. Dates / FKs / enums in error_dict
                     # (e.g. TaskNode.fields_to_check = ["task_template",
-                    # "due_date"]) are left untouched so we surface the real
-                    # error instead of silently corrupting the object.
+                    # "due_date"]) are left untouched so we don't corrupt
+                    # them.
                     for field in getattr(e, "error_dict", {}):
                         current = fields.get(field)
                         if isinstance(current, str):
                             fields[field] = f"{current} {uuid.uuid4()}"
+                    # Re-validate. Anything still failing isn't a name
+                    # collision we can paper over — log it so it's visible
+                    # instead of silently creating bogus data.
+                    try:
+                        model(**fields).clean()
+                    except ValidationError as retry_err:
+                        logger.warning(
+                            "Import validation still failing after UUID dedup",
+                            model=model._meta.model_name,
+                            obj_id=obj_id,
+                            errors=getattr(retry_err, "error_dict", {}),
+                        )
 
                 logger.debug("Creating object", fields=fields)
                 objects_creation_data.append(
