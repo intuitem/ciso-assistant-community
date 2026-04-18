@@ -507,8 +507,17 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     incidents = Incident.objects.filter(folder__in=folders).distinct()
+    # Close the loop on reverse M2Ms so objects reachable only through
+    # incidents/campaigns still make it into the dump (and into loaded_libraries).
+    entities = (entities | Entity.objects.filter(incidents__in=incidents)).distinct()
 
     campaigns = Campaign.objects.filter(folder__in=folders).distinct()
+    frameworks = (
+        frameworks | Framework.objects.filter(campaigns__in=campaigns)
+    ).distinct()
+    perimeters = (
+        perimeters | Perimeter.objects.filter(campaigns__in=campaigns)
+    ).distinct()
 
     task_templates = TaskTemplate.objects.filter(folder__in=folders).distinct()
     task_nodes = TaskNode.objects.filter(

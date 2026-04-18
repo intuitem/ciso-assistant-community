@@ -3450,6 +3450,13 @@ class RiskAcceptanceImportExportSerializer(BaseModelSerializer):
 
 class SecurityExceptionImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    risk_scenarios = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    requirement_assessments = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
 
     class Meta:
         model = SecurityException
@@ -3463,6 +3470,11 @@ class SecurityExceptionImportExportSerializer(BaseModelSerializer):
             "observation",
             "link",
             "folder",
+            "assets",
+            "applied_controls",
+            "vulnerabilities",
+            "risk_scenarios",
+            "requirement_assessments",
             "created_at",
             "updated_at",
         ]

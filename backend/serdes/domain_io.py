@@ -10,8 +10,10 @@ from __future__ import annotations
 import io
 import json
 import os
+import re
 import uuid
 import zipfile
+from hashlib import sha256
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 from uuid import UUID
@@ -47,6 +49,7 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
+    SecurityException,
     StoredLibrary,
     TaskTemplate,
     Terminology,
@@ -221,26 +224,59 @@ def process_uploaded_file(dump_file: str | Path) -> Any:
             raise ValidationError({"error": "invalidSchemaVersionFormat"})
         compare_schema_versions(schema_version_int, import_version)
 
-        if "attachments" in directories:
-            attachments = {
-                f for f in infolist if Path(f.filename).parent.name == "attachments"
-            }
+        # Collect every file living under `attachments/` (including the
+        # evidence-revisions/ subdir used by the current exporter).
+        attachments = [
+            f
+            for f in infolist
+            if not f.is_dir() and "attachments" in Path(f.filename).parts
+        ]
+        if attachments:
             logger.info(
                 "Attachments found in uploaded file",
                 attachments_count=len(attachments),
             )
+            revision_re = re.compile(r"^([0-9a-fA-F\-]{36})_v(\d+)_(.+)$")
             for attachment in attachments:
                 try:
                     content = zipf.read(attachment)
-                    current_name = Path(attachment.filename).name
-                    new_name = default_storage.save(current_name, io.BytesIO(content))
-                    if new_name != current_name:
+                    parts = Path(attachment.filename).parts
+                    zip_name = parts[-1]
+
+                    if "evidence-revisions" in parts:
+                        # Exporter path: attachments/evidence-revisions/
+                        #   {evidence_uuid}_v{version}_{basename}
+                        m = revision_re.match(zip_name)
+                        if not m:
+                            logger.warning(
+                                "Skipping attachment with unrecognized filename",
+                                filename=zip_name,
+                            )
+                            continue
+                        evidence_uuid, version_str, basename = m.groups()
+                        new_name = default_storage.save(basename, io.BytesIO(content))
+                        evidence_hash = sha256(str(evidence_uuid).encode()).hexdigest()[
+                            :12
+                        ]
+                        version = int(version_str)
                         for x in json_dump["objects"]:
                             if (
-                                x["model"] == "core.evidence"
-                                and x["fields"]["attachment"] == current_name
+                                x["model"] == "core.evidencerevision"
+                                and x["fields"].get("evidence") == evidence_hash
+                                and int(x["fields"].get("version", 0)) == version
                             ):
                                 x["fields"]["attachment"] = new_name
+                    else:
+                        # Legacy layout: attachments/<basename> tied to
+                        # core.evidence.attachment
+                        new_name = default_storage.save(zip_name, io.BytesIO(content))
+                        if new_name != zip_name:
+                            for x in json_dump["objects"]:
+                                if (
+                                    x["model"] == "core.evidence"
+                                    and x["fields"].get("attachment") == zip_name
+                                ):
+                                    x["fields"]["attachment"] = new_name
 
                 except Exception:
                     logger.error("Error extracting attachment", exc_info=True)
@@ -412,6 +448,8 @@ def import_objects(
                     objects=objects,
                     link_dump_database_ids=link_dump_database_ids,
                 )
+
+            resolve_security_exception_m2m(objects, link_dump_database_ids)
 
         return {"message": "Import successful"}
 
@@ -743,20 +781,19 @@ def process_model_relationships(
             _fields["risk_origin"] = import_terminologies(
                 _fields.get("risk_origin"), Terminology.FieldPath.ROTO_RISK_ORIGIN
             )
-            related__fields = [
-                "threats",
-                "vulnerabilities",
-                "assets",
-                "applied_controls",
-                "existing_applied_controls",
-                "qualifications",
-            ]
-            for field in related__fields:
-                map_key = (
-                    f"{field.rstrip('s')}_ids"
-                    if not field.endswith("controls")
-                    else f"{field}_ids"
-                )
+            # Keys here must match those read in set_many_to_many_relations.
+            # (Previously derived with `.rstrip('s')`, which strips *chars*,
+            # not the suffix — silently dropping vulnerabilities /
+            # applied_controls / existing_applied_controls.)
+            related_fields = {
+                "threats": "threat_ids",
+                "vulnerabilities": "vulnerability_ids",
+                "assets": "asset_ids",
+                "applied_controls": "applied_control_ids",
+                "existing_applied_controls": "existing_applied_control_ids",
+                "qualifications": "qualification_ids",
+            }
+            for field, map_key in related_fields.items():
                 if field == "qualifications":
                     many_to_many_map_ids[map_key] = import_terminologies(
                         _fields.pop(field, []), Terminology.FieldPath.QUALIFICATIONS
@@ -949,6 +986,20 @@ def process_model_relationships(
             many_to_many_map_ids["evidences_ids"] = get_mapped_ids(
                 _fields.pop("evidences", []), link_dump_database_ids
             )
+
+        case "securityexception":
+            # Reverse M2M targets (Asset/AppliedControl/etc.) may be created
+            # after SecurityException in the topo sort, so we only drop the
+            # hash lists here and resolve them in a post-pass once every
+            # object exists. See resolve_security_exception_m2m.
+            for field in (
+                "assets",
+                "applied_controls",
+                "vulnerabilities",
+                "risk_scenarios",
+                "requirement_assessments",
+            ):
+                _fields.pop(field, None)
 
     return _fields
 
@@ -1163,6 +1214,45 @@ def set_many_to_many_relations(
         case "tasknode":
             if evidence_ids := many_to_many_map_ids.get("evidences_ids"):
                 obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
+
+def resolve_security_exception_m2m(
+    objects: List[dict], link_dump_database_ids: dict[str, Any]
+) -> None:
+    """Post-pass: set SecurityException reverse M2Ms once every target exists.
+
+    These relations (assets, applied_controls, vulnerabilities, risk_scenarios,
+    requirement_assessments) are defined on the other side, so the topological
+    sort doesn't guarantee SE is created last; we resolve them here instead.
+    """
+    se_model_name = "core.securityexception"
+    reverse_m2m = (
+        ("assets", Asset),
+        ("applied_controls", AppliedControl),
+        ("vulnerabilities", Vulnerability),
+        ("risk_scenarios", RiskScenario),
+        ("requirement_assessments", RequirementAssessment),
+    )
+    for obj in objects:
+        if obj["model"] != se_model_name:
+            continue
+        se_db_id = link_dump_database_ids.get(obj["id"])
+        if not se_db_id:
+            continue
+        try:
+            se = SecurityException.objects.get(id=se_db_id)
+        except SecurityException.DoesNotExist:
+            continue
+        fields = obj.get("fields", {})
+        for field_name, model_cls in reverse_m2m:
+            hash_ids = fields.get(field_name) or []
+            ids = [
+                link_dump_database_ids[h]
+                for h in hash_ids
+                if h in link_dump_database_ids
+            ]
+            if ids:
+                getattr(se, field_name).set(model_cls.objects.filter(id__in=ids))
 
 
 def split_uuids_urns(ids: List[str]) -> Tuple[List[UUID], List[str]]:
