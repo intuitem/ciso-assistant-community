@@ -2887,6 +2887,11 @@ class RequirementMapping(models.Model):
     )
 
     @property
+    def folder(self):
+        """Proxy to parent mapping_set.folder so permission checks resolve."""
+        return self.mapping_set.folder
+
+    @property
     def coverage(self) -> str:
         if self.relationship == RequirementMapping.Relationship.NOT_RELATED:
             return RequirementMapping.Coverage.NOT_RELATED

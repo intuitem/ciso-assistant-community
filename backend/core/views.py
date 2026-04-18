@@ -17849,9 +17849,24 @@ class CrosswalkViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"])
     def regenerate(self, request, pk=None):
-        """Re-run the suggestion engine — wipes unreviewed suggestions first."""
+        """Re-run the suggestion engine — wipes unreviewed suggestions first.
+
+        Optional body fields `top_k`, `high_threshold`, `medium_threshold`
+        override the current generation_params before dispatch.
+        """
         mapping_set = self.get_object()
         from core.tasks import generate_crosswalk_suggestions
+
+        params = dict(mapping_set.generation_params or {})
+        for key in ("top_k", "high_threshold", "medium_threshold"):
+            if key in request.data:
+                value = request.data[key]
+                if value in (None, ""):
+                    params.pop(key, None)
+                else:
+                    params[key] = int(value) if key == "top_k" else float(value)
+        mapping_set.generation_params = params or None
+        mapping_set.save(update_fields=["generation_params", "updated_at"])
 
         generate_crosswalk_suggestions(str(mapping_set.id))
         return Response({"status": "dispatched", "mapping_set_id": str(mapping_set.id)})
@@ -17879,6 +17894,20 @@ class CrosswalkViewSet(BaseModelViewSet):
             .values("id", "urn", "ref_id", "name", "description", "parent_urn")
         )
 
+        # Resolve parent section labels: a single query per framework rather than
+        # O(N) joins. Non-assessable rows (section containers) carry the labels.
+        parent_urns = {
+            n["parent_urn"]
+            for n in (*source_nodes, *target_nodes)
+            if n.get("parent_urn")
+        }
+        parent_labels = {
+            urn: ref_id
+            for urn, ref_id in RequirementNode.objects.filter(
+                urn__in=parent_urns
+            ).values_list("urn", "ref_id")
+        }
+
         src_urn_to_idx = {n["urn"]: i for i, n in enumerate(source_nodes)}
         tgt_urn_to_idx = {n["urn"]: i for i, n in enumerate(target_nodes)}
 
@@ -17905,6 +17934,7 @@ class CrosswalkViewSet(BaseModelViewSet):
         for nodes in (source_nodes, target_nodes):
             for n in nodes:
                 n["id"] = str(n["id"])
+                n["section_label"] = parent_labels.get(n.get("parent_urn") or "") or ""
                 if n.get("description"):
                     n["description"] = n["description"][:400]
 
@@ -17941,8 +17971,12 @@ class CrosswalkViewSet(BaseModelViewSet):
         reviewed = request.query_params.get("reviewed")
         if reviewed in ("true", "false"):
             qs = qs.filter(reviewed=(reviewed == "true"))
-        ordering = request.query_params.get("ordering", "-strength_of_relationship")
-        qs = qs.order_by(ordering)
+        default_ordering = [
+            "source_requirement__order_id",
+            "target_requirement__order_id",
+        ]
+        ordering = request.query_params.get("ordering")
+        qs = qs.order_by(*([ordering] if ordering else default_ordering))
 
         from core.serializers import CrosswalkMappingReadSerializer
 
@@ -17957,6 +17991,7 @@ class CrosswalkMappingViewSet(BaseModelViewSet):
     model = RequirementMapping
     filterset_fields = ["mapping_set", "relationship", "reviewed"]
     search_fields = []
+    ordering = ["id"]
 
     def get_serializer_class(self, **kwargs):
         from core.serializers import (

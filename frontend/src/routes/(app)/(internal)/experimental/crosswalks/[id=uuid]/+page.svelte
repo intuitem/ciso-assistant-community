@@ -12,6 +12,8 @@
 		ref_id: string | null;
 		name: string | null;
 		description: string | null;
+		parent_urn: string | null;
+		section_label: string | null;
 	};
 	type Cell = {
 		id: string;
@@ -53,6 +55,15 @@
 	let chartEl: HTMLDivElement | null = $state(null);
 	let chart: any = null;
 
+	let showTuning = $state(false);
+	let tuneTopK = $state<number>(crosswalk.generation_params?.top_k ?? 15);
+	let tuneMediumThreshold = $state<number>(
+		crosswalk.generation_params?.medium_threshold ?? 0.4
+	);
+	let tuneHighThreshold = $state<number>(
+		crosswalk.generation_params?.high_threshold ?? 0.6
+	);
+
 	async function loadMatrix() {
 		matrixLoading = true;
 		try {
@@ -71,7 +82,6 @@
 			const params = new URLSearchParams();
 			if (filterRelationship) params.set('relationship', filterRelationship);
 			if (filterReviewed) params.set('reviewed', filterReviewed);
-			params.set('ordering', '-strength_of_relationship');
 			const res = await fetch(`/experimental/crosswalks/${crosswalk.id}/candidates?${params}`);
 			if (res.ok) {
 				const body = await res.json();
@@ -92,9 +102,24 @@
 
 	async function regenerate() {
 		if (!confirm('Re-run suggestion generation? This wipes unreviewed suggestions.')) return;
+		const payload: Record<string, number> = {};
+		if (Number.isFinite(tuneTopK)) payload.top_k = Math.max(1, Math.min(50, tuneTopK));
+		if (Number.isFinite(tuneMediumThreshold))
+			payload.medium_threshold = Math.max(0, Math.min(1, tuneMediumThreshold));
+		if (Number.isFinite(tuneHighThreshold))
+			payload.high_threshold = Math.max(0, Math.min(1, tuneHighThreshold));
+		if (
+			payload.high_threshold !== undefined &&
+			payload.medium_threshold !== undefined &&
+			payload.high_threshold < payload.medium_threshold
+		) {
+			statusMessage = 'High threshold must be ≥ medium threshold.';
+			return;
+		}
 		const res = await fetch(`/experimental/crosswalks/${crosswalk.id}?action=regenerate`, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' }
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
 		});
 		if (res.ok) {
 			statusMessage = 'Regenerating…';
@@ -156,6 +181,28 @@
 		const { source_nodes, target_nodes, cells } = matrixPayload;
 		const cellSize = Math.max(8, Math.min(20, Math.floor(800 / Math.max(target_nodes.length, 1))));
 
+		// Section-level axis labels: show only the first node per section
+		// (grouped by parent_urn), blank the rest. Humans scan a short list
+		// of section headers faster than a wall of IDs.
+		function sectionLabels(nodes: any[]): { labels: string[]; breaks: number[] } {
+			const labels: string[] = [];
+			const breaks: number[] = [];
+			let prev: string | null | undefined = undefined;
+			nodes.forEach((n, i) => {
+				const key = n.parent_urn || '';
+				if (key !== prev) {
+					labels.push(n.section_label || n.ref_id || '');
+					if (i > 0) breaks.push(i);
+					prev = key;
+				} else {
+					labels.push('');
+				}
+			});
+			return { labels, breaks };
+		}
+		const x = sectionLabels(target_nodes);
+		const y = sectionLabels(source_nodes);
+
 		const data = cells.map((c) => ({
 			value: [c.t, c.s, c.strength],
 			itemStyle: {
@@ -168,9 +215,19 @@
 			cellId: c.id
 		}));
 
+		const dividerStyle = {
+			symbol: 'none',
+			lineStyle: { color: '#d1d5db', type: 'solid' as const, width: 1 },
+			silent: true,
+			label: { show: false }
+		};
+
+		const srcFw = crosswalk.source_framework?.name ?? 'Source';
+		const tgtFw = crosswalk.target_framework?.name ?? 'Target';
+
 		chart.setOption(
 			{
-				grid: { left: 140, right: 20, top: 30, bottom: 120 },
+				grid: { left: 140, right: 20, top: 80, bottom: 30 },
 				tooltip: {
 					formatter: (p: any) => {
 						const tgt = target_nodes[p.value[0]];
@@ -191,21 +248,50 @@
 				},
 				xAxis: {
 					type: 'category',
-					data: target_nodes.map((n) => n.ref_id || ''),
+					name: `Target → ${tgtFw}`,
+					nameLocation: 'middle',
+					nameGap: 55,
+					nameTextStyle: {
+						fontSize: 12,
+						fontWeight: 700,
+						color: '#111827'
+					},
+					data: x.labels,
 					position: 'top',
 					axisLabel: {
-						rotate: 60,
-						fontSize: 10,
-						interval: 0
+						rotate: 45,
+						fontSize: 11,
+						fontWeight: 600,
+						color: '#374151',
+						interval: 0,
+						formatter: (v: string) => (v ? v : '')
 					},
-					splitArea: { show: false },
-					axisTick: { alignWithLabel: true }
+					axisTick: { show: false },
+					axisLine: { show: false },
+					splitArea: { show: false }
 				},
 				yAxis: {
 					type: 'category',
-					data: source_nodes.map((n) => n.ref_id || ''),
+					name: `Source ↓ ${srcFw}`,
+					nameLocation: 'middle',
+					nameGap: 90,
+					nameRotate: 90,
+					nameTextStyle: {
+						fontSize: 12,
+						fontWeight: 700,
+						color: '#111827'
+					},
+					data: y.labels,
 					inverse: true,
-					axisLabel: { fontSize: 10, interval: 0 }
+					axisLabel: {
+						fontSize: 11,
+						fontWeight: 600,
+						color: '#374151',
+						interval: 0,
+						formatter: (v: string) => (v ? v : '')
+					},
+					axisTick: { show: false },
+					axisLine: { show: false }
 				},
 				dataZoom: [
 					{ type: 'inside', xAxisIndex: 0 },
@@ -217,7 +303,14 @@
 						symbol: 'rect',
 						symbolSize: cellSize,
 						data,
-						animation: false
+						animation: false,
+						markLine: {
+							...dividerStyle,
+							data: [
+								...x.breaks.map((i) => ({ xAxis: i - 0.5 })),
+								...y.breaks.map((i) => ({ yAxis: i - 0.5 }))
+							]
+						}
 					}
 				]
 			},
@@ -393,6 +486,15 @@
 					<button
 						type="button"
 						class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
+						onclick={() => (showTuning = !showTuning)}
+						title="Engine tuning"
+						aria-label="Engine tuning"
+					>
+						<i class="fa-solid fa-sliders mr-1"></i> Tune
+					</button>
+					<button
+						type="button"
+						class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
 						onclick={regenerate}
 						disabled={crosswalk.status === 'generating'}
 					>
@@ -400,6 +502,60 @@
 					</button>
 				</div>
 			</div>
+
+			{#if showTuning}
+				<div class="bg-gray-50 border rounded p-3 flex flex-wrap items-end gap-4 text-xs">
+					<div>
+						<label class="block font-semibold text-gray-600 mb-0.5" for="tune-topk">
+							top_k
+							<span class="font-normal text-gray-400">(candidates per source)</span>
+						</label>
+						<input
+							id="tune-topk"
+							class="input input-sm w-24"
+							type="number"
+							min="1"
+							max="50"
+							step="1"
+							bind:value={tuneTopK}
+						/>
+					</div>
+					<div>
+						<label class="block font-semibold text-gray-600 mb-0.5" for="tune-med">
+							medium_threshold
+							<span class="font-normal text-gray-400">(floor, below is discarded)</span>
+						</label>
+						<input
+							id="tune-med"
+							class="input input-sm w-24"
+							type="number"
+							min="0"
+							max="1"
+							step="0.05"
+							bind:value={tuneMediumThreshold}
+						/>
+					</div>
+					<div>
+						<label class="block font-semibold text-gray-600 mb-0.5" for="tune-high">
+							high_threshold
+							<span class="font-normal text-gray-400">(equal/superset/subset cutoff)</span>
+						</label>
+						<input
+							id="tune-high"
+							class="input input-sm w-24"
+							type="number"
+							min="0"
+							max="1"
+							step="0.05"
+							bind:value={tuneHighThreshold}
+						/>
+					</div>
+					<p class="text-[11px] text-gray-500 max-w-md">
+						Values are stored on the mapping set and reused on future regenerations. Cosine
+						scores for this model (MiniLM multilingual) usually land in 0.3–0.75.
+					</p>
+				</div>
+			{/if}
 
 			{#if summary}
 				<div class="flex flex-wrap gap-4 text-xs text-gray-600">
