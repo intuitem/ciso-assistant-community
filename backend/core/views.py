@@ -17858,11 +17858,13 @@ class CrosswalkViewSet(BaseModelViewSet):
         from core.tasks import generate_crosswalk_suggestions
 
         params = dict(mapping_set.generation_params or {})
-        for key in ("top_k", "high_threshold", "medium_threshold"):
+        for key in ("top_k", "high_threshold", "medium_threshold", "use_bm25"):
             if key in request.data:
                 value = request.data[key]
                 if value in (None, ""):
                     params.pop(key, None)
+                elif key == "use_bm25":
+                    params[key] = bool(value)
                 else:
                     params[key] = int(value) if key == "top_k" else float(value)
         mapping_set.generation_params = params or None

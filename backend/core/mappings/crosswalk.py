@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import re
 import time
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -37,6 +38,11 @@ DEFAULT_HIGH_THRESHOLD = 0.60
 DEFAULT_MEDIUM_THRESHOLD = 0.40
 DEFAULT_LENGTH_SUBSET_RATIO = 1.5
 DEFAULT_LENGTH_SUPERSET_RATIO = 0.67
+# BM25 hybrid retrieval. RRF fuses dense (Qdrant) + BM25 ranks so lexical
+# signals rescue pairs dense misses (shared GRC jargon like MFA, RPO/RTO).
+DEFAULT_USE_BM25 = True
+DEFAULT_RRF_K = 60
+DEFAULT_DENSE_FETCH_MULTIPLIER = 5  # over-fetch dense so BM25 hits have cosines
 
 
 @dataclass
@@ -46,15 +52,22 @@ class Signals:
     length_ratio: float
     rank: int
     bidirectional: bool
+    bm25_rank: int | None = None  # rank in BM25-only list (1-based); None if absent
+    dense_rank: int | None = None  # rank in dense-only list; None if BM25 rescued it
 
     def as_dict(self) -> dict:
-        return {
+        out = {
             "cosine": round(self.cosine, 4),
             "lexical": round(self.lexical, 4),
             "length_ratio": round(self.length_ratio, 3),
             "rank": self.rank,
             "bidirectional": self.bidirectional,
         }
+        if self.bm25_rank is not None:
+            out["bm25_rank"] = self.bm25_rank
+        if self.dense_rank is not None:
+            out["dense_rank"] = self.dense_rank
+        return out
 
 
 _TOKEN_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ0-9]+")
@@ -81,13 +94,24 @@ def _build_node_text(node: RequirementNode) -> str:
     return "\n".join(parts)
 
 
+BM25_RESCUE_RANK = 2  # top-3 BM25 hits escape the dense-cosine floor
+
+
 def _suggest_relationship(signals: Signals, high_thr: float, med_thr: float) -> str:
     """
     Orientation heuristic — suggests a relationship type from the raw signals.
     Humans are expected to confirm or override. Never returns not_related;
     rows below med_thr are not created at all.
+
+    BM25-rescue: a pair can clear the medium floor via high BM25 rank even
+    if its dense cosine is low — that's where hybrid retrieval adds recall
+    on jargon-heavy pairs.
     """
     r = signals.length_ratio
+    bm25_rescued = (
+        signals.bm25_rank is not None and signals.bm25_rank <= BM25_RESCUE_RANK
+    )
+
     if signals.cosine >= high_thr and signals.bidirectional:
         if 0.75 <= r <= 1.35:
             return RequirementMapping.Relationship.EQUAL
@@ -102,7 +126,7 @@ def _suggest_relationship(signals: Signals, high_thr: float, med_thr: float) -> 
         if r < DEFAULT_LENGTH_SUPERSET_RATIO:
             return RequirementMapping.Relationship.SUPERSET
         return RequirementMapping.Relationship.INTERSECT
-    if signals.cosine >= med_thr:
+    if signals.cosine >= med_thr or bm25_rescued:
         return RequirementMapping.Relationship.INTERSECT
     return RequirementMapping.Relationship.NOT_RELATED
 
@@ -111,18 +135,46 @@ def _strength(signals: Signals) -> int:
     return max(0, min(10, round(signals.cosine * 10)))
 
 
+@dataclass
+class Hit:
+    """One target candidate for a source node, with all signals needed downstream."""
+
+    urn: str
+    cosine: float  # from Qdrant; 0.0 if BM25 surfaced it and dense missed
+    fused_rank: int  # 0-based final rank after RRF
+    dense_rank: int | None  # rank in dense-only list (0-based), None if outside
+    bm25_rank: int | None  # rank in BM25-only list (0-based), None if outside
+
+
+def _build_bm25_corpus(nodes: list[RequirementNode]):
+    """Build a BM25 index over the node texts. Returns (index, urn_order)."""
+    from rank_bm25 import BM25Okapi
+
+    tokenized = [list(_tokens(_build_node_text(n))) for n in nodes]
+    urns = [n.urn for n in nodes]
+    # rank_bm25 rejects empty corpora — guard.
+    if not any(tokenized):
+        return None, urns
+    # Replace empty token lists with a placeholder so BM25 stays well-defined;
+    # their scores will be ~0 regardless.
+    tokenized = [t or ["_"] for t in tokenized]
+    return BM25Okapi(tokenized), urns
+
+
 def _query_directional_topk(
     client,
     embedder,
-    nodes: list[RequirementNode],
+    source_nodes: list[RequirementNode],
+    target_nodes: list[RequirementNode],
     allowed_urns: set[str],
     target_framework_ref_id: str,
     top_k: int,
     collection: str,
-) -> dict[str, list[tuple[str, float, int]]]:
+    use_bm25: bool,
+) -> dict[str, list[Hit]]:
     """
-    For each source node, query Qdrant for the top-K hits among the allowed
-    URNs. Returns src_urn -> [(tgt_urn, score, rank)].
+    For each source node, retrieve top-K target candidates using dense (Qdrant)
+    retrieval optionally fused with BM25 via RRF. Returns src_urn -> [Hit].
     """
     from qdrant_client.models import Filter, FieldCondition, MatchValue
 
@@ -139,37 +191,94 @@ def _query_directional_topk(
         )
     base_filter = Filter(must=must)
 
-    out: dict[str, list[tuple[str, float, int]]] = {}
-    # With a framework filter, top_k * 2 is plenty; urn de-dup removes at most 1.
-    fetch_limit = max(top_k * 2, 20)
+    # Build a BM25 index over the target corpus once — reused across all sources.
+    bm25_index = None
+    bm25_urns: list[str] = []
+    if use_bm25:
+        bm25_index, bm25_urns = _build_bm25_corpus(target_nodes)
 
-    for node in nodes:
+    # Over-fetch dense so BM25-surfaced candidates still have a cosine score.
+    dense_limit = max(top_k * DEFAULT_DENSE_FETCH_MULTIPLIER, 30)
+
+    out: dict[str, list[Hit]] = {}
+
+    for node in source_nodes:
         text = _build_node_text(node)
         if not text.strip():
             continue
+
+        # --- Dense retrieval ---
+        dense_by_urn: dict[str, tuple[int, float]] = {}  # urn -> (rank, cosine)
         try:
             vector = embedder.embed_query(text)
             hits = client.query_points(
                 collection_name=collection,
                 query=vector,
-                limit=fetch_limit,
+                limit=dense_limit,
                 query_filter=base_filter,
             ).points
-        except Exception as e:  # Qdrant down or embedding failure — skip node
+        except Exception as e:
             logger.warning("crosswalk_qdrant_query_failed", urn=node.urn, error=e)
-            continue
-
-        filtered: list[tuple[str, float, int]] = []
+            hits = []
         rank = 0
         for h in hits:
             urn = (h.payload or {}).get("urn")
             if not urn or urn not in allowed_urns or urn == node.urn:
                 continue
-            filtered.append((urn, float(h.score), rank))
+            dense_by_urn[urn] = (rank, float(h.score))
             rank += 1
-            if rank >= top_k:
-                break
-        out[node.urn] = filtered
+
+        # --- BM25 retrieval (optional) ---
+        bm25_by_urn: dict[str, int] = {}
+        if bm25_index is not None:
+            query_tokens = list(_tokens(text))
+            if query_tokens:
+                scores = bm25_index.get_scores(query_tokens)
+                # Top BM25 candidates, excluding self
+                ranked = sorted(
+                    range(len(bm25_urns)), key=lambda i: scores[i], reverse=True
+                )
+                r = 0
+                for idx in ranked[: top_k * 2]:
+                    if scores[idx] <= 0:
+                        break
+                    urn = bm25_urns[idx]
+                    if urn == node.urn or urn not in allowed_urns:
+                        continue
+                    bm25_by_urn[urn] = r
+                    r += 1
+
+        # --- Reciprocal Rank Fusion ---
+        candidate_urns = set(dense_by_urn) | set(bm25_by_urn)
+        if not candidate_urns:
+            out[node.urn] = []
+            continue
+        fused_scores: dict[str, float] = {}
+        for urn in candidate_urns:
+            score = 0.0
+            if urn in dense_by_urn:
+                score += 1.0 / (DEFAULT_RRF_K + dense_by_urn[urn][0] + 1)
+            if urn in bm25_by_urn:
+                score += 1.0 / (DEFAULT_RRF_K + bm25_by_urn[urn] + 1)
+            fused_scores[urn] = score
+
+        ordered = sorted(fused_scores.items(), key=lambda kv: kv[1], reverse=True)[
+            :top_k
+        ]
+        hits_out: list[Hit] = []
+        for fused_rank, (urn, _score) in enumerate(ordered):
+            dense = dense_by_urn.get(urn)
+            bm25_r = bm25_by_urn.get(urn)
+            hits_out.append(
+                Hit(
+                    urn=urn,
+                    cosine=dense[1] if dense else 0.0,
+                    fused_rank=fused_rank,
+                    dense_rank=dense[0] if dense else None,
+                    bm25_rank=bm25_r,
+                )
+            )
+        out[node.urn] = hits_out
 
     return out
 
@@ -187,6 +296,7 @@ def generate_suggestions(mapping_set: RequirementMappingSet) -> dict:
     top_k = int(params.get("top_k", DEFAULT_TOP_K))
     high_thr = float(params.get("high_threshold", DEFAULT_HIGH_THRESHOLD))
     med_thr = float(params.get("medium_threshold", DEFAULT_MEDIUM_THRESHOLD))
+    use_bm25 = bool(params.get("use_bm25", DEFAULT_USE_BM25))
 
     t0 = time.time()
 
@@ -228,27 +338,31 @@ def generate_suggestions(mapping_set: RequirementMappingSet) -> dict:
         client,
         embedder,
         source_nodes,
+        target_nodes,
         set(target_by_urn),
         mapping_set.target_framework.ref_id or "",
         top_k,
         COLLECTION_NAME,
+        use_bm25,
     )
     rev = _query_directional_topk(
         client,
         embedder,
         target_nodes,
+        source_nodes,
         set(source_by_urn),
         mapping_set.source_framework.ref_id or "",
         top_k,
         COLLECTION_NAME,
+        use_bm25,
     )
 
     # Invert reverse map for quick symmetric lookup:
     # rev_lookup[(src_urn, tgt_urn)] = True iff src was in tgt's top-K
     rev_lookup: set[tuple[str, str]] = set()
     for tgt_urn, hits in rev.items():
-        for src_urn, _score, _rank in hits:
-            rev_lookup.add((src_urn, tgt_urn))
+        for h in hits:
+            rev_lookup.add((h.urn, tgt_urn))
 
     # Build text once for length / lexical signals
     src_text = {n.urn: _build_node_text(n) for n in source_nodes}
@@ -260,17 +374,19 @@ def generate_suggestions(mapping_set: RequirementMappingSet) -> dict:
     for src_urn, hits in fwd.items():
         src_node = source_by_urn[src_urn]
         src_len = max(1, len(src_text[src_urn]))
-        for tgt_urn, score, rank in hits:
-            tgt_node = target_by_urn.get(tgt_urn)
+        for h in hits:
+            tgt_node = target_by_urn.get(h.urn)
             if tgt_node is None:
                 continue
-            tgt_len = max(1, len(tgt_text[tgt_urn]))
+            tgt_len = max(1, len(tgt_text[h.urn]))
             signals = Signals(
-                cosine=score,
-                lexical=_jaccard(src_tokens[src_urn], tgt_tokens[tgt_urn]),
+                cosine=h.cosine,
+                lexical=_jaccard(src_tokens[src_urn], tgt_tokens[h.urn]),
                 length_ratio=tgt_len / src_len,
-                rank=rank,
-                bidirectional=(src_urn, tgt_urn) in rev_lookup,
+                rank=h.fused_rank,
+                bidirectional=(src_urn, h.urn) in rev_lookup,
+                bm25_rank=h.bm25_rank,
+                dense_rank=h.dense_rank,
             )
             suggested = _suggest_relationship(signals, high_thr, med_thr)
             if suggested == RequirementMapping.Relationship.NOT_RELATED:

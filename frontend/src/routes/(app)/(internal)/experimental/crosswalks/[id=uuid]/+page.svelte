@@ -57,12 +57,9 @@
 
 	let showTuning = $state(false);
 	let tuneTopK = $state<number>(crosswalk.generation_params?.top_k ?? 15);
-	let tuneMediumThreshold = $state<number>(
-		crosswalk.generation_params?.medium_threshold ?? 0.4
-	);
-	let tuneHighThreshold = $state<number>(
-		crosswalk.generation_params?.high_threshold ?? 0.6
-	);
+	let tuneMediumThreshold = $state<number>(crosswalk.generation_params?.medium_threshold ?? 0.4);
+	let tuneHighThreshold = $state<number>(crosswalk.generation_params?.high_threshold ?? 0.6);
+	let tuneUseBm25 = $state<boolean>(crosswalk.generation_params?.use_bm25 ?? true);
 
 	async function loadMatrix() {
 		matrixLoading = true;
@@ -102,15 +99,16 @@
 
 	async function regenerate() {
 		if (!confirm('Re-run suggestion generation? This wipes unreviewed suggestions.')) return;
-		const payload: Record<string, number> = {};
+		const payload: Record<string, number | boolean> = {};
 		if (Number.isFinite(tuneTopK)) payload.top_k = Math.max(1, Math.min(50, tuneTopK));
 		if (Number.isFinite(tuneMediumThreshold))
 			payload.medium_threshold = Math.max(0, Math.min(1, tuneMediumThreshold));
 		if (Number.isFinite(tuneHighThreshold))
 			payload.high_threshold = Math.max(0, Math.min(1, tuneHighThreshold));
+		payload.use_bm25 = tuneUseBm25;
 		if (
-			payload.high_threshold !== undefined &&
-			payload.medium_threshold !== undefined &&
+			typeof payload.high_threshold === 'number' &&
+			typeof payload.medium_threshold === 'number' &&
 			payload.high_threshold < payload.medium_threshold
 		) {
 			statusMessage = 'High threshold must be ≥ medium threshold.';
@@ -550,9 +548,18 @@
 							bind:value={tuneHighThreshold}
 						/>
 					</div>
+					<label class="inline-flex items-center gap-2 cursor-pointer">
+						<input type="checkbox" class="checkbox" bind:checked={tuneUseBm25} />
+						<span class="font-semibold text-gray-600">
+							Hybrid (BM25 + dense)
+							<span class="font-normal text-gray-400 block">
+								Rescues pairs where shared jargon beats semantic similarity
+							</span>
+						</span>
+					</label>
 					<p class="text-[11px] text-gray-500 max-w-md">
-						Values are stored on the mapping set and reused on future regenerations. Cosine
-						scores for this model (MiniLM multilingual) usually land in 0.3–0.75.
+						Values are stored on the mapping set and reused on future regenerations. Cosine scores
+						for this model (MiniLM multilingual) usually land in 0.3–0.75.
 					</p>
 				</div>
 			{/if}
@@ -762,17 +769,42 @@
 				</section>
 
 				{#if selectedPair.suggestion_metadata}
-					<section class="bg-gray-50 rounded p-3 text-xs space-y-1">
-						<h4 class="font-semibold uppercase text-gray-500">Engine signals</h4>
+					{@const meta = selectedPair.suggestion_metadata}
+					{@const denseOnly = meta.dense_rank !== undefined && meta.bm25_rank === undefined}
+					{@const bm25Only = meta.bm25_rank !== undefined && meta.dense_rank === undefined}
+					<section class="bg-gray-50 rounded p-3 text-xs space-y-2">
+						<div class="flex items-center justify-between">
+							<h4 class="font-semibold uppercase text-gray-500">Engine signals</h4>
+							{#if bm25Only}
+								<span
+									class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-700"
+									title="BM25 surfaced this pair; dense retrieval missed it"
+								>
+									BM25 rescue
+								</span>
+							{:else if denseOnly}
+								<span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">Dense only</span>
+							{:else if meta.bm25_rank !== undefined}
+								<span
+									class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700"
+									title="Both dense and BM25 agreed"
+								>
+									Hybrid
+								</span>
+							{/if}
+						</div>
 						<div class="grid grid-cols-2 gap-1">
-							<div>Cosine: <b>{selectedPair.suggestion_metadata.cosine}</b></div>
-							<div>Lexical: <b>{selectedPair.suggestion_metadata.lexical}</b></div>
-							<div>Length ratio: <b>{selectedPair.suggestion_metadata.length_ratio}</b></div>
-							<div>Rank: <b>{selectedPair.suggestion_metadata.rank}</b></div>
-							<div>
-								Bi-dir:
-								<b>{selectedPair.suggestion_metadata.bidirectional ? 'yes' : 'no'}</b>
-							</div>
+							<div>Cosine: <b>{meta.cosine}</b></div>
+							<div>Lexical: <b>{meta.lexical}</b></div>
+							<div>Length ratio: <b>{meta.length_ratio}</b></div>
+							<div>Fused rank: <b>{meta.rank}</b></div>
+							<div>Bi-dir: <b>{meta.bidirectional ? 'yes' : 'no'}</b></div>
+							{#if meta.dense_rank !== undefined}
+								<div>Dense rank: <b>{meta.dense_rank}</b></div>
+							{/if}
+							{#if meta.bm25_rank !== undefined}
+								<div>BM25 rank: <b>{meta.bm25_rank}</b></div>
+							{/if}
 						</div>
 					</section>
 				{/if}

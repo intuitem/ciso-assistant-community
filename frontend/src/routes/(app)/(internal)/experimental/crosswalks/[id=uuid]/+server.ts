@@ -35,9 +35,7 @@ export const POST: RequestHandler = async ({ fetch, params, url, request }) => {
 	// Sub-action: /{id}?action=regenerate proxies to /{id}/regenerate/
 	const action = url.searchParams.get('action');
 	if (action === 'regenerate') {
-		const body = await request
-			.json()
-			.catch(() => ({}));
+		const body = await request.json().catch(() => ({}));
 		const res = await fetch(`${ENDPOINT}/${params.id}/regenerate/`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
