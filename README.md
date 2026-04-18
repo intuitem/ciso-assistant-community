@@ -156,7 +156,7 @@ Read more here: [AI engine](backend/chat/README.md)
 12. DORA (Act, RTS, ITS and GL) 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸🤖
 14. NIST SP 800-53 rev5 🇺🇸
-15. France LPM/OIV rules 🇫🇷
+15. Règles OIV - Secteur « Activités civiles de l'Etat » (2019) 🇫🇷
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
@@ -252,6 +252,7 @@ Read more here: [AI engine](backend/chat/README.md)
 108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
 109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷 
 110. Cadre Conformité Cyber France (3CF) v3.1 (2026) ✈️🇫🇷
+111. Règles OIV - Secteur « Transport aérien » (2016) ✈️🇫🇷
 
 ### Community contributions
 
