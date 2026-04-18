@@ -8418,6 +8418,71 @@ class FolderViewSet(BaseModelViewSet):
                     _fields.pop("threats", []), link_dump_database_ids
                 )
 
+            case "findingsassessment":
+                perimeter_id = link_dump_database_ids.get(_fields.get("perimeter"))
+                _fields["perimeter"] = (
+                    Perimeter.objects.filter(id=perimeter_id).first()
+                    if perimeter_id
+                    else None
+                )
+                many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
+                    _fields.pop("evidences", []), link_dump_database_ids
+                )
+
+            case "finding":
+                _fields["findings_assessment"] = FindingsAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["findings_assessment"])
+                )
+                for field in (
+                    "threats",
+                    "vulnerabilities",
+                    "reference_controls",
+                    "applied_controls",
+                    "evidences",
+                ):
+                    many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
+                        _fields.pop(field, []), link_dump_database_ids
+                    )
+
+            case "riskacceptance":
+                many_to_many_map_ids["risk_scenarios_ids"] = get_mapped_ids(
+                    _fields.pop("risk_scenarios", []), link_dump_database_ids
+                )
+
+            case "incident":
+                for field in ("threats", "assets", "entities"):
+                    many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
+                        _fields.pop(field, []), link_dump_database_ids
+                    )
+
+            case "campaign":
+                many_to_many_map_ids["framework_urns"] = _fields.pop("frameworks", [])
+                many_to_many_map_ids["perimeters_ids"] = get_mapped_ids(
+                    _fields.pop("perimeters", []), link_dump_database_ids
+                )
+
+            case "tasktemplate":
+                for field in (
+                    "evidences",
+                    "assets",
+                    "applied_controls",
+                    "compliance_assessments",
+                    "risk_assessments",
+                    "findings_assessment",
+                ):
+                    many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
+                        _fields.pop(field, []), link_dump_database_ids
+                    )
+
+            case "tasknode":
+                tt_id = link_dump_database_ids.get(_fields.get("task_template"))
+                _fields["task_template"] = (
+                    TaskTemplate.objects.filter(id=tt_id).first() if tt_id else None
+                )
+                many_to_many_map_ids["evidences_ids"] = get_mapped_ids(
+                    _fields.pop("evidences", []), link_dump_database_ids
+                )
+
         return _fields
 
     def _set_many_to_many_relations(
@@ -8575,6 +8640,79 @@ class FolderViewSet(BaseModelViewSet):
             case "entity":
                 if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                     obj.relationship.set(relationship_ids)
+
+            case "findingsassessment":
+                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
+            case "finding":
+                if threat_ids := many_to_many_map_ids.get("threats_ids"):
+                    uuids, urns = self._split_uuids_urns(threat_ids)
+                    obj.threats.set(
+                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                    )
+                if rc_ids := many_to_many_map_ids.get("reference_controls_ids"):
+                    uuids, urns = self._split_uuids_urns(rc_ids)
+                    obj.reference_controls.set(
+                        ReferenceControl.objects.filter(
+                            Q(id__in=uuids) | Q(urn__in=urns)
+                        )
+                    )
+                if vuln_ids := many_to_many_map_ids.get("vulnerabilities_ids"):
+                    obj.vulnerabilities.set(
+                        Vulnerability.objects.filter(id__in=vuln_ids)
+                    )
+                if ac_ids := many_to_many_map_ids.get("applied_controls_ids"):
+                    obj.applied_controls.set(
+                        AppliedControl.objects.filter(id__in=ac_ids)
+                    )
+                if evidence_ids := many_to_many_map_ids.get("evidences_ids"):
+                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
+            case "riskacceptance":
+                if rs_ids := many_to_many_map_ids.get("risk_scenarios_ids"):
+                    obj.risk_scenarios.set(RiskScenario.objects.filter(id__in=rs_ids))
+
+            case "incident":
+                if threat_ids := many_to_many_map_ids.get("threats_ids"):
+                    uuids, urns = self._split_uuids_urns(threat_ids)
+                    obj.threats.set(
+                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                    )
+                if asset_ids := many_to_many_map_ids.get("assets_ids"):
+                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+                if entity_ids := many_to_many_map_ids.get("entities_ids"):
+                    obj.entities.set(Entity.objects.filter(id__in=entity_ids))
+
+            case "campaign":
+                if framework_urns := many_to_many_map_ids.get("framework_urns"):
+                    obj.frameworks.set(Framework.objects.filter(urn__in=framework_urns))
+                if perimeter_ids := many_to_many_map_ids.get("perimeters_ids"):
+                    obj.perimeters.set(Perimeter.objects.filter(id__in=perimeter_ids))
+
+            case "tasktemplate":
+                for key, mcls, attr in (
+                    ("evidences_ids", Evidence, "evidences"),
+                    ("assets_ids", Asset, "assets"),
+                    ("applied_controls_ids", AppliedControl, "applied_controls"),
+                    (
+                        "compliance_assessments_ids",
+                        ComplianceAssessment,
+                        "compliance_assessments",
+                    ),
+                    ("risk_assessments_ids", RiskAssessment, "risk_assessments"),
+                    (
+                        "findings_assessment_ids",
+                        FindingsAssessment,
+                        "findings_assessment",
+                    ),
+                ):
+                    if ids := many_to_many_map_ids.get(key):
+                        getattr(obj, attr).set(mcls.objects.filter(id__in=ids))
+
+            case "tasknode":
+                if evidence_ids := many_to_many_map_ids.get("evidences_ids"):
+                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""
