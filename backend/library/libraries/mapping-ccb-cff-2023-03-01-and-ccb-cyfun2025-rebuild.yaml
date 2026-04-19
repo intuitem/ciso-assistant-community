@@ -1,0 +1,2366 @@
+urn: urn:intuitem:risk:library:mapping-ccb-cff-2023-03-01-and-ccb-cyfun2025-rebuild
+locale: en
+ref_id: mapping-ccb-cff-2023-03-01-and-ccb-cyfun2025-rebuild
+name: CCB-CFF-2023-03-01 <-> cyfun2025 (rebuild)
+description: |-
+  Mapping between CCB CyberFundamentals Framework - 2023-03-01 and CyberFundamentals 2025 (parallel rebuild via mapping-builder skill for evaluation).
+copyright: intuitem
+version: 1
+publication_date: '2026-04-19'
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:ccb-cff-2023-03-01
+- urn:intuitem:risk:library:ccb-cyfun2025
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-ccb-cff-2023-03-01-and-ccb-cyfun2025-rebuild
+    ref_id: mapping-ccb-cff-2023-03-01-and-ccb-cyfun2025-rebuild
+    name: CCB-CFF-2023-03-01 <-> cyfun2025 (rebuild)
+    description: |-
+      Mapping between CCB CyberFundamentals Framework - 2023-03-01 and CyberFundamentals 2025 (parallel rebuild via mapping-builder skill for evaluation).
+    source_framework_urn: urn:intuitem:risk:framework:ccb-cff-2023-03-01
+    target_framework_urn: urn:intuitem:risk:framework:ccb-cyfun2025
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.am-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-01.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Both require hardware/infrastructure inventory documented/reviewed/updated; source wording slightly broader
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: 'Same clause: inventory reflects changes in context, includes accountability info'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-01.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Unauthorized hardware quarantined/removed; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-01.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Detection mechanisms for unauthorized hardware/firmware; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.am-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Both require software inventory; target expanded to include digital services and business systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Software inventory reflects context changes, accountability info; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Individuals responsible for software admin identified; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Unauthorized software quarantined/removed; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Detection mechanisms for unauthorized software; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.am-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-07.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Data/information stored and used shall be identified; minor terminology difference
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03-2
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Internal connections vs network communication/data flows — both require mapping, documenting, authorizing,
+        updating
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03-2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Both require internal information/data flows mapped, documented, authorized, updated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-04.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: External services and connections mapped/authorized/updated; target adds explicit approval step
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-04.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Information flow to/from external systems mapped, authorized, updated; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03-3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: External data flows mapping overlap (secondary)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.am-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-05.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Resources prioritized by classification, criticality, business value; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Roles, responsibilities and authorities documented, reviewed, authorized, updated; CSF 2.0 moved to GV.RR
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-02.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Appoint information security officer; target specifies senior-level executive (CSF 2.0 GV.RR)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-05.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Organization's role in supply chain identified/documented/communicated (CSF 2.0 moved to GV.OC-05)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-01.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Both address supply chain protection; source requires security strategy, target requires SC risk mgmt program
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Org's place in critical infrastructure overlaps with identifying critical services relied upon by external
+        stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-01.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Mission/objectives/priorities established and communicated; target ties mission to risk mgmt basis
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Dependencies/mission-critical functions identified, documented, prioritized as part of risk assessment
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: 'Cyber resilience requirements identified, tested, approved (target: validate via testing/audits)'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Redundancy for availability requirements; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: RTO/RPO for ICT/OT systems defined; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.po-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Security policies/procedures established, documented, reviewed, approved, updated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.po-01.2
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Both require org-wide policy approved by senior management; target adds cryptography/encryption requirement
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Legal/regulatory requirements understood and implemented; source explicitly includes privacy
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Legal/regulatory requirements continuously managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-03.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Comprehensive strategy to manage information/cyber security risks
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-03.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Security risks documented, formally approved, updated; CSF 2.0 integrates with ERM
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.ra-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Threats and vulnerabilities shall be identified
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Continuous vulnerability monitoring process; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Performance/load/penetration testing conducted with care; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Threat/vuln awareness program with cross-org info sharing; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-02.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Automated mechanisms for security alerts/advisories to stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.ra-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-05.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Risk assessment by threats/vulnerabilities/impact on business
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-05.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Risk assessment including likelihood
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-05.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Risk assessment results disseminated to stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-06.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Risk response strategy with identification and prioritization
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-01.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Risk mgmt process identifying stakeholders overlaps with security objectives approved by stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-05.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Both address risk-related communication lines with internal/external stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-02.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Risk appetite determined/defined/documented
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-02.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Role in critical infrastructure as criterion for risk appetite
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: SC risk management process documented, reviewed, approved, updated, implemented
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Supplier risks identified, prioritized, mitigated, assessed annually and on change
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: List of suppliers involvable in major incident, kept online/offline
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-05.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Contractual framework for suppliers covering sensitive info and interconnected services
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-05.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Verifiable flaw remediation via contractual cybersecurity requirements
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-05.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Contractual right to review supplier cyber programs
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Review of supplier compliance via audits, tests, evaluations
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Review via third-party independent audits
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-08.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Supplier key personnel in response/recovery planning
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-08.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Supplier key personnel in plan testing/execution; target covers full incident lifecycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identities and credentials for authorized users/devices managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identities/credentials managed via automated mechanisms where feasible
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Credentials deactivated after inactivity (with safety exception)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: MFA and certificate-based authentication for critical transactions; target adds tokens/keys
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Monitor atypical credential use; disable high-risk credentials
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-06.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Physical access to facility/servers/network managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-06.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Emergency situation physical access procedures
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-06.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Additional physical access controls for critical zones
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-06.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Assets in critical zones physically protected
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Wireless access points secured; target adds guest access/monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: MFA required for remote network access
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Usage restrictions, connection requirements, authorization for remote access
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Access permissions defined and managed; target adds enforcement/review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Who needs access to critical information and means of access
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Principle of Least Privilege
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: No admin privileges for routine tasks
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated account management on critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Separation of Duties in access rights management
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Privileged users managed and monitored
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Account usage time/location restrictions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Privileged users managed, monitored, audited
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Documented procedures for verifying identity before issuing credentials
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-02.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Unique credentials per user/device/process, authenticated, captured
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-04.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Risk-based authentication maps partially to identity assertions protected/verified
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.4
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Authenticate commensurate with risk; target covers MFA/certs/tokens for critical transactions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Firewalls installed and activated on all networks
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Network segmentation and segregation for critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Identify/document/control connections between components
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Limiting external connections overlaps with boundary protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Monitor/control connections at external and internal boundaries
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Authenticated proxy servers for external traffic
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Critical systems fail safely when boundary device fails
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:r.ac-3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Remote access monitored, crypto mechanisms implemented (wording matches verbatim)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:r.ac-3.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: External system connection security verified by documented agreements (wording matches verbatim)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.at-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-01.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Employees trained; target formalizes awareness/training program
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Insider threat awareness and reporting in training
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-01.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Evaluate effectiveness of awareness training
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-02.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Privileged users qualified before privileges granted (wording matches)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-05.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Security requirements for third-party providers (moved to GV.SC in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Third-party notification of personnel transfer/termination
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Monitor third-party for compliance vs audit third party; related
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Audit business-critical third-party for security compliance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-02.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Senior executives/management bodies demonstrate understanding of roles
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-02.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Specialised roles (here physical security personnel) qualified before privileges
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Protect critical/sensitive information at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-02.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Protect critical information in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ds-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Assets/media disposed of safely
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Accountability for assets throughout system lifecycle (moved to ID.AM-08 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Measures for loss/misuse/damage/theft of assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Disposal actions approved, tracked, documented, verified
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-04.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Capacity planning for critical system resources
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-10.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: DoS attack protection for critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Software/firmware/information integrity checks for unauthorized changes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated integrity verification notification tools
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated response with pre-defined safeguards for integrity violations
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Dev/test environments isolated from production
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Hardware integrity checks; target's integrity checks cover software/firmware/info, so partial coverage
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Hardware tampering detection in incident response; target covers integrity-violation response broadly
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Audit data from critical systems moved to alternative system (moved to PR.PS-04 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Baseline configuration developed, documented, maintained
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Essential capabilities only; disable non-essential
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Disable non-essential ports/protocols/services overlaps with essential capabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Security considerations throughout SDLC
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Secure SDLC practices integrated into all phases
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Dev process covers design cycle, functional properties of security controls
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Changes tested and validated before operational implementation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Security impact analysis in separate test environment before production
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ip-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Backups stored on different system from original
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Backup reliability/integrity tested regularly
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Alternate storage site with equivalent safeguards
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Backup verification coordinated with continuity/recovery plans
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Critical system backups separate from critical information backups
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Emergency/safety/fire/environmental policies for critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-02.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Fire detection devices with automatic personnel notification
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.9
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Data destruction per policy overlaps with asset disposal
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.5
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Sanitation processes documented/tested overlaps with disposal approval/tracking
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Continuous improvement from monitoring/assessments/lessons into protection updates
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Independent teams assess protection processes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Security plan facilitates review/testing/continual improvement
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Collaborate and share security incident info with designated partners
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Communication of protection effectiveness shared with stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated mechanisms for information sharing/collaboration
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-04.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: IR/continuity/recovery plans established, maintained, tested
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-04.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Coordinate IR/recovery plan development/testing with stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ip-11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-04.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Personnel with critical access verified/authenticated (CSF 2.0 moved to GV.RR-04)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-04.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: HR cyber process at recruitment/employment/termination (moved to GV.RR-04)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Continuous review of vulnerabilities and mitigation strategies
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Vulnerability management plan with CVD
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ma-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: OS/critical component patches installed (moved to ID.AM-08 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Preventive maintenance/repairs per approved processes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Approval/control/monitoring of maintenance tools
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:d.am-08.10
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Verify security controls following hardware maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Prevent unauthorized removal of maintenance equipment with critical info
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Maintenance tools/portable storage inspected and anti-malware scanned
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:d.am-08.10
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Verify security controls following maintenance/repairs/patching
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.11
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Remote maintenance pre-approved and logged
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.12
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Strong authenticators and session termination for remote maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.13
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Remote diagnostic from system with equivalent security features
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.pt-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Logs maintained, documented, reviewed (moved to PR.PS-04 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Log timestamps sync with authoritative time source
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Audit processing failures trigger alerts/responses
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Authorized personnel extend audit capabilities when needed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Portable storage usage restriction via documented policy/safeguards
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Removable media only when necessary; block autoruns
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Portable storage with system data controlled in transit/storage
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Essential functions only on critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Disable unnecessary functions/ports/protocols/services
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Deny-all permit-by-exception software execution policy
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.pt-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-05.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Web and email filters installed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Control info/data flows within and between critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: External comm interfaces managed with traffic flow policy and exception review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Review and analyze detected events to identify attack targets/methods
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-02.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated mechanisms for event review/analysis
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_de.ae-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-03.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Protection/detection tool logging enabled, backed up, reviewed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-03.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Event data compiled/correlated from multiple sources
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-03.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Integrate event analysis with vulnerability scanning, performance, monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-04.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Negative impacts from detected events assessed and correlated with risk
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-06.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Automated event detection + alert thresholds; target focuses on prompt delivery to personnel
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-08.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Incident alert thresholds defined for incident reporting
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Baseline for event tracking overlaps with continuous network monitoring with defined rules
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03-2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Baseline of network operations and expected data flows overlaps with mapping internal data flows
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Monitoring at borders for unauthorized access/data leakage
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_de.cm-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Firewalls at network boundaries and endpoints
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Monitor unauthorized local/network/remote connections
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Ongoing network security status monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Physical environment monitored for events
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-02.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Physical intrusion alarms/surveillance for critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_de.cm-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-03-1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Endpoint/network protection for end-user behavior implemented
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-03-2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Endpoint/network protection tools managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-02.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Software usage/installation restrictions enforced (moved to PR.PS-02 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-05.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Prevent unauthorized software installation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_de.cm-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Anti-virus/anti-malware installed and updated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-09.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Distinguish false positives from real malicious code detection
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-09.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Mobile code control overlaps with runtime environment monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-06.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: External vendor connections secured and monitored
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-06.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: External service provider security conformance monitored
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-09.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Monitor for unauthorized personnel/devices/software in critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Unauthorized config changes monitored and mitigated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Vulnerability scanning without adversely impacting system functions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.6
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Vulnerabilities identified/managed in all relevant assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: 'Vulnerability scanning: analysis, remediation, information sharing'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Automated dissemination/tracking of vulnerability remediation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.dp-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-02.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Detection activities per applicable laws/regulations/standards/policies
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.dp-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-02.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Validate event detection operating as intended via security tests/exercises
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.dp-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-06.1
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Communicate event detection info to predefined parties/personnel
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.dp-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Improvements from monitoring/lessons learned into detection revisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.dp-5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Specialized assessments including monitoring, vuln scanning, insider testing, V&V
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rs.rp-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Incident response plan with roles/responsibilities/authorities executed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-01.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Personnel understand roles/priorities for incident response (CSF 2.0 moved to PR.AT-01)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-08.1
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Incident reporting in defined timeframe per incident criteria
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.co-02.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Incident reporting to defined personnel/roles
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.co-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-08.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Events reported consistent with established criteria
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rs.co-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.co-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Incident information communicated to employees understandably
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.co-02.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Share incident info with relevant stakeholders per IR plan
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-01.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Coordinate incident response actions with predefined stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.co-02.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Voluntary info sharing with external stakeholders/industry groups for situational awareness
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-02.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Investigate notifications from detection systems (triaged/validated in target)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-02.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated mechanisms for investigation/analysis
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-08.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Thorough investigation for full implication (incident magnitude estimated/validated)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-03.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Analysis to identify root cause and full impact
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-02.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Automated mechanisms for incident impact analysis
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-06.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: On-demand audit review/analysis records preserved for investigations
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-07.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Incident data/metadata collected and protected
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-03.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Forensic analysis to determine root cause
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-03.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Incidents categorized by severity/impact per IR plan criteria
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: 'Vulnerability management: processing/analyzing/remedying from internal/external sources'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated mechanisms to disseminate/track vulnerability remediation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.mi-01.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Incident handling capability with containment/eradication/documented risk acceptance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rs.im-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Post-incident evaluations, lessons learned, improve processes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.im-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Lessons learned translated into updated procedures tested/approved/trained
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.im-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-03-2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Update response/recovery plans for context changes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rc.rp-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.rp-01.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Recovery process for disasters and incidents developed/executed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.rp-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.rp-02.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Essential functions continued until full system restoration
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rc.im-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Lessons learned from recovery incorporated into updated procedures with training
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rc.co-1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.co-04.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Centralize/coordinate public information dissemination
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.co-1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.co-04.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Public Relations Officer assigned
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.co-2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.co-04.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Crisis response/communication strategy to protect reputation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rc.co-3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.co-03.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Communicate recovery activities to predefined stakeholders
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-ccb-cff-2023-03-01-and-ccb-cyfun2025-rebuild
+    ref_id: mapping-ccb-cff-2023-03-01-and-ccb-cyfun2025-rebuild
+    name: CCB-CFF-2023-03-01 <-> cyfun2025 (rebuild)
+    description: |-
+      Mapping between CCB CyberFundamentals Framework - 2023-03-01 and CyberFundamentals 2025 (parallel rebuild via mapping-builder skill for evaluation).
+    source_framework_urn: urn:intuitem:risk:framework:ccb-cyfun2025
+    target_framework_urn: urn:intuitem:risk:framework:ccb-cff-2023-03-01
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.am-1.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Both require hardware/infrastructure inventory documented/reviewed/updated; source wording slightly broader
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: 'Same clause: inventory reflects changes in context, includes accountability info'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-1.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Unauthorized hardware quarantined/removed; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-1.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Detection mechanisms for unauthorized hardware/firmware; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.am-2.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Both require software inventory; target expanded to include digital services and business systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Software inventory reflects context changes, accountability info; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Individuals responsible for software admin identified; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Unauthorized software quarantined/removed; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-02.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-2.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Detection mechanisms for unauthorized software; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.am-3.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Data/information stored and used shall be identified; minor terminology difference
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03-2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-3.2
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Internal connections vs network communication/data flows — both require mapping, documenting, authorizing,
+        updating
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03-2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-3.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Both require internal information/data flows mapped, documented, authorized, updated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-4.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: External services and connections mapped/authorized/updated; target adds explicit approval step
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-4.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Information flow to/from external systems mapped, authorized, updated; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03-3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-4.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: External data flows mapping overlap (secondary)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.am-5.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Resources prioritized by classification, criticality, business value; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-6.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Roles, responsibilities and authorities documented, reviewed, authorized, updated; CSF 2.0 moved to GV.RR
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-6.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Appoint information security officer; target specifies senior-level executive (CSF 2.0 GV.RR)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Organization's role in supply chain identified/documented/communicated (CSF 2.0 moved to GV.OC-05)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-1.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Both address supply chain protection; source requires security strategy, target requires SC risk mgmt program
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-2.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Org's place in critical infrastructure overlaps with identifying critical services relied upon by external
+        stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-3.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Mission/objectives/priorities established and communicated; target ties mission to risk mgmt basis
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-4.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Dependencies/mission-critical functions identified, documented, prioritized as part of risk assessment
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-5.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: 'Cyber resilience requirements identified, tested, approved (target: validate via testing/audits)'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-5.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Redundancy for availability requirements; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-5.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: RTO/RPO for ICT/OT systems defined; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.po-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Security policies/procedures established, documented, reviewed, approved, updated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.po-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-1.2
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Both require org-wide policy approved by senior management; target adds cryptography/encryption requirement
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-3.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Legal/regulatory requirements understood and implemented; source explicitly includes privacy
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Legal/regulatory requirements continuously managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-4.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Comprehensive strategy to manage information/cyber security risks
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-4.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Security risks documented, formally approved, updated; CSF 2.0 integrates with ERM
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.ra-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Threats and vulnerabilities shall be identified
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Continuous vulnerability monitoring process; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-1.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Performance/load/penetration testing conducted with care; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-2.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Threat/vuln awareness program with cross-org info sharing; wording matches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-2.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Automated mechanisms for security alerts/advisories to stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.ra-5.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Risk assessment by threats/vulnerabilities/impact on business
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-5.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Risk assessment including likelihood
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-05.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-5.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Risk assessment results disseminated to stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-6.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Risk response strategy with identification and prioritization
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-1.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Risk mgmt process identifying stakeholders overlaps with security objectives approved by stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-1.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Both address risk-related communication lines with internal/external stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-2.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Risk appetite determined/defined/documented
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rm-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-3.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Role in critical infrastructure as criterion for risk appetite
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: SC risk management process documented, reviewed, approved, updated, implemented
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-2.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Supplier risks identified, prioritized, mitigated, assessed annually and on change
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-2.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: List of suppliers involvable in major incident, kept online/offline
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-3.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Contractual framework for suppliers covering sensitive info and interconnected services
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Verifiable flaw remediation via contractual cybersecurity requirements
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-05.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Contractual right to review supplier cyber programs
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-4.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Review of supplier compliance via audits, tests, evaluations
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-4.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Review via third-party independent audits
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-08.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-5.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Supplier key personnel in response/recovery planning
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-08.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-5.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Supplier key personnel in plan testing/execution; target covers full incident lifecycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identities and credentials for authorized users/devices managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identities/credentials managed via automated mechanisms where feasible
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Credentials deactivated after inactivity (with safety exception)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: MFA and certificate-based authentication for critical transactions; target adds tokens/keys
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Monitor atypical credential use; disable high-risk credentials
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-2.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Physical access to facility/servers/network managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-06.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-2.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Emergency situation physical access procedures
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-06.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-2.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Additional physical access controls for critical zones
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-06.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-2.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Assets in critical zones physically protected
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-3.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Wireless access points secured; target adds guest access/monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: MFA required for remote network access
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-3.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Usage restrictions, connection requirements, authorization for remote access
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Access permissions defined and managed; target adds enforcement/review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Who needs access to critical information and means of access
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Principle of Least Privilege
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: No admin privileges for routine tasks
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated account management on critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Separation of Duties in access rights management
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Privileged users managed and monitored
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Account usage time/location restrictions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-05.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Privileged users managed, monitored, audited
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-6.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Documented procedures for verifying identity before issuing credentials
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-6.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Unique credentials per user/device/process, authenticated, captured
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-7.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Risk-based authentication maps partially to identity assertions protected/verified
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-7.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Authenticate commensurate with risk; target covers MFA/certs/tokens for critical transactions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-5.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Firewalls installed and activated on all networks
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-5.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Network segmentation and segregation for critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Identify/document/control connections between components
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Limiting external connections overlaps with boundary protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Monitor/control connections at external and internal boundaries
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Authenticated proxy servers for external traffic
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Critical systems fail safely when boundary device fails
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:r.ac-3.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Remote access monitored, crypto mechanisms implemented (wording matches verbatim)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.aa-03.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:r.ac-3.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: External system connection security verified by documented agreements (wording matches verbatim)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.at-1.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Employees trained; target formalizes awareness/training program
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Insider threat awareness and reporting in training
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-1.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Evaluate effectiveness of awareness training
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-02.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-2.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Privileged users qualified before privileges granted (wording matches)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Security requirements for third-party providers (moved to GV.SC in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Third-party notification of personnel transfer/termination
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Monitor third-party for compliance vs audit third party; related
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.sc-07.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-3.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Audit business-critical third-party for security compliance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-4.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Senior executives/management bodies demonstrate understanding of roles
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-5.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Specialised roles (here physical security personnel) qualified before privileges
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-1.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Protect critical/sensitive information at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-2.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Protect critical information in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ds-3.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Assets/media disposed of safely
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Accountability for assets throughout system lifecycle (moved to ID.AM-08 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-3.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Measures for loss/misuse/damage/theft of assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-3.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Disposal actions approved, tracked, documented, verified
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-4.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Capacity planning for critical system resources
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-4.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: DoS attack protection for critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-6.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Software/firmware/information integrity checks for unauthorized changes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-6.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated integrity verification notification tools
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-6.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated response with pre-defined safeguards for integrity violations
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-7.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Dev/test environments isolated from production
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-8.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Hardware integrity checks; target's integrity checks cover software/firmware/info, so partial coverage
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-8.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Hardware tampering detection in incident response; target covers integrity-violation response broadly
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-4.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Audit data from critical systems moved to alternative system (moved to PR.PS-04 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Baseline configuration developed, documented, maintained
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Essential capabilities only; disable non-essential
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-1.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Disable non-essential ports/protocols/services overlaps with essential capabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-2.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Security considerations throughout SDLC
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-2.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Secure SDLC practices integrated into all phases
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-2.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Dev process covers design cycle, functional properties of security controls
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-3.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Changes tested and validated before operational implementation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-06.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Security impact analysis in separate test environment before production
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ip-4.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Backups stored on different system from original
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-4.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Backup reliability/integrity tested regularly
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-4.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Alternate storage site with equivalent safeguards
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-4.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Backup verification coordinated with continuity/recovery plans
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-11.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-4.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Critical system backups separate from critical information backups
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-5.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Emergency/safety/fire/environmental policies for critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-5.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Fire detection devices with automatic personnel notification
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-6.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Data destruction per policy overlaps with asset disposal
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-6.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Sanitation processes documented/tested overlaps with disposal approval/tracking
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-7.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Continuous improvement from monitoring/assessments/lessons into protection updates
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-7.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Independent teams assess protection processes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-7.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Security plan facilitates review/testing/continual improvement
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-8.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Collaborate and share security incident info with designated partners
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-8.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Communication of protection effectiveness shared with stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-8.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated mechanisms for information sharing/collaboration
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-9.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: IR/continuity/recovery plans established, maintained, tested
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-9.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Coordinate IR/recovery plan development/testing with stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ip-11.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Personnel with critical access verified/authenticated (CSF 2.0 moved to GV.RR-04)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-11.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: HR cyber process at recruitment/employment/termination (moved to GV.RR-04)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-12.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Continuous review of vulnerabilities and mitigation strategies
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-12.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Vulnerability management plan with CVD
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ma-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: OS/critical component patches installed (moved to ID.AM-08 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Preventive maintenance/repairs per approved processes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Approval/control/monitoring of maintenance tools
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:d.am-08.10
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Verify security controls following hardware maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Prevent unauthorized removal of maintenance equipment with critical info
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Maintenance tools/portable storage inspected and anti-malware scanned
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:d.am-08.10
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Verify security controls following maintenance/repairs/patching
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.11
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-2.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Remote maintenance pre-approved and logged
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.12
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-2.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Strong authenticators and session termination for remote maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.13
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-2.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Remote diagnostic from system with equivalent security features
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.pt-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Logs maintained, documented, reviewed (moved to PR.PS-04 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Log timestamps sync with authoritative time source
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-1.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Audit processing failures trigger alerts/responses
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-04.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-1.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Authorized personnel extend audit capabilities when needed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-2.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Portable storage usage restriction via documented policy/safeguards
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-01.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-2.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Removable media only when necessary; block autoruns
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ds-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-2.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Portable storage with system data controlled in transit/storage
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-3.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Essential functions only on critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Disable unnecessary functions/ports/protocols/services
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-3.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Deny-all permit-by-exception software execution policy
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.pt-4.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Web and email filters installed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-4.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Control info/data flows within and between critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ir-01.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-4.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: External comm interfaces managed with traffic flow policy and exception review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-2.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Review and analyze detected events to identify attack targets/methods
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-2.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated mechanisms for event review/analysis
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_de.ae-3.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Protection/detection tool logging enabled, backed up, reviewed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Event data compiled/correlated from multiple sources
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-3.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Integrate event analysis with vulnerability scanning, performance, monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-4.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Negative impacts from detected events assessed and correlated with risk
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-5.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Automated event detection + alert thresholds; target focuses on prompt delivery to personnel
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-08.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-5.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Incident alert thresholds defined for incident reporting
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-1.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Baseline for event tracking overlaps with continuous network monitoring with defined rules
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03-2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-1.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Baseline of network operations and expected data flows overlaps with mapping internal data flows
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-5.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Monitoring at borders for unauthorized access/data leakage
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_de.cm-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Firewalls at network boundaries and endpoints
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Monitor unauthorized local/network/remote connections
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-1.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Ongoing network security status monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-2.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Physical environment monitored for events
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-2.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Physical intrusion alarms/surveillance for critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-03-1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_de.cm-3.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Endpoint/network protection for end-user behavior implemented
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-03-2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-3.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Endpoint/network protection tools managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-3.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Software usage/installation restrictions enforced (moved to PR.PS-02 in CSF 2.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-3.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Prevent unauthorized software installation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_de.cm-4.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Anti-virus/anti-malware installed and updated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-09.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-4.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Distinguish false positives from real malicious code detection
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-09.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-5.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Mobile code control overlaps with runtime environment monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: External vendor connections secured and monitored
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-06.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: External service provider security conformance monitored
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-09.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-7.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Monitor for unauthorized personnel/devices/software in critical systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.ps-01.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-7.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Unauthorized config changes monitored and mitigated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Vulnerability scanning without adversely impacting system functions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Vulnerabilities identified/managed in all relevant assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: 'Vulnerability scanning: analysis, remediation, information sharing'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Automated dissemination/tracking of vulnerability remediation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.dp-2.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Detection activities per applicable laws/regulations/standards/policies
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.dp-3.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Validate event detection operating as intended via security tests/exercises
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.dp-4.1
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Communicate event detection info to predefined parties/personnel
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.dp-5.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Improvements from monitoring/lessons learned into detection revisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.dp-5.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Specialized assessments including monitoring, vuln scanning, insider testing, V&V
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rs.rp-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Incident response plan with roles/responsibilities/authorities executed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:pr.at-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-1.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Personnel understand roles/priorities for incident response (CSF 2.0 moved to PR.AT-01)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-08.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-2.1
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Incident reporting in defined timeframe per incident criteria
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.co-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-2.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Incident reporting to defined personnel/roles
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.ae-08.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.co-2.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Events reported consistent with established criteria
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.co-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rs.co-3.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Incident information communicated to employees understandably
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.co-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-3.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Share incident info with relevant stakeholders per IR plan
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-4.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Coordinate incident response actions with predefined stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.co-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-5.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Voluntary info sharing with external stakeholders/industry groups for situational awareness
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-1.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Investigate notifications from detection systems (triaged/validated in target)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated mechanisms for investigation/analysis
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-08.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-2.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Thorough investigation for full implication (incident magnitude estimated/validated)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-2.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Analysis to identify root cause and full impact
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-2.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Automated mechanisms for incident impact analysis
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-3.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: On-demand audit review/analysis records preserved for investigations
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-3.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Incident data/metadata collected and protected
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.an-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-3.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Forensic analysis to determine root cause
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.ma-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-4.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Incidents categorized by severity/impact per IR plan criteria
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.an-5.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: 'Vulnerability management: processing/analyzing/remedying from internal/external sources'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-5.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Automated mechanisms to disseminate/track vulnerability remediation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rs.mi-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-3.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Incident handling capability with containment/eradication/documented risk acceptance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rs.im-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Post-incident evaluations, lessons learned, improve processes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.im-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Lessons learned translated into updated procedures tested/approved/trained
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-03-2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.im-2.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Update response/recovery plans for context changes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.rp-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_rc.rp-1.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Recovery process for disasters and incidents developed/executed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.rp-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.rp-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Essential functions continued until full system restoration
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rc.im-1.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Lessons learned from recovery incorporated into updated procedures with training
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.co-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rc.co-1.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Centralize/coordinate public information dissemination
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.co-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.co-1.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Public Relations Officer assigned
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.co-04.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.co-2.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Crisis response/communication strategy to protect reputation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:rc.co-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rc.co-3.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Communicate recovery activities to predefined stakeholders

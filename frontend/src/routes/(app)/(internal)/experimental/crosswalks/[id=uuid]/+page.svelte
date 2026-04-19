@@ -482,6 +482,20 @@
 					>
 						{crosswalk.status}
 					</span>
+					{#if crosswalk.embedding_model}
+						{@const isQdrant = /qdrant/i.test(crosswalk.embedding_model)}
+						<span
+							class="text-xs px-2 py-0.5 rounded-full {isQdrant
+								? 'bg-indigo-50 text-indigo-700'
+								: 'bg-amber-50 text-amber-700'}"
+							title={isQdrant
+								? 'Retrieval used the shared Qdrant vector store (fast path)'
+								: 'Qdrant was unavailable — embeddings computed in-process for this run'}
+						>
+							<i class="fa-solid {isQdrant ? 'fa-bolt' : 'fa-microchip'} mr-1"></i>
+							{isQdrant ? 'Qdrant' : 'in-process'}
+						</span>
+					{/if}
 					<button
 						type="button"
 						class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -618,7 +632,9 @@
 					<div class="p-8 text-center text-gray-500">Loading matrix…</div>
 				{:else if !matrixPayload || matrixPayload.cells.length === 0}
 					<div class="p-8 text-center text-gray-500">
-						{crosswalk.status === 'generating' ? m.crosswalkGeneratingWait() : 'No suggestions yet.'}
+						{crosswalk.status === 'generating'
+							? m.crosswalkGeneratingWait()
+							: 'No suggestions yet.'}
 					</div>
 				{:else}
 					<div class="p-4">

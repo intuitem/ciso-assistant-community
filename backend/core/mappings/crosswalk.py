@@ -15,7 +15,7 @@ import re
 import time
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Callable, Iterable
 
 import structlog
 from django.db import transaction
@@ -26,6 +26,10 @@ from core.models import (
     RequirementMappingSet,
     RequirementNode,
 )
+
+
+DenseRetriever = Callable[[str, str], dict[str, tuple[int, float]]]
+"""(source_urn, source_text) -> {target_urn: (rank, cosine_score)}"""
 
 logger = structlog.get_logger(__name__)
 
@@ -146,6 +150,128 @@ class Hit:
     bm25_rank: int | None  # rank in BM25-only list (0-based), None if outside
 
 
+def _probe_qdrant(client) -> bool:
+    """Return True if the shared collection is reachable and non-empty.
+
+    Called once per generation run. Connection failures, timeouts, or an
+    empty collection all mean we should fall back to the in-process path.
+    """
+    from chat.rag import COLLECTION_NAME
+
+    try:
+        info = client.get_collection(COLLECTION_NAME)
+    except Exception as e:
+        logger.info("crosswalk_qdrant_unavailable", error=str(e))
+        return False
+    points = getattr(info, "points_count", 0) or 0
+    if points <= 0:
+        logger.info("crosswalk_qdrant_empty")
+        return False
+    return True
+
+
+def _make_qdrant_retriever(
+    client,
+    embedder,
+    collection: str,
+    target_framework_ref_id: str,
+    allowed_urns: set[str],
+    limit: int,
+) -> DenseRetriever:
+    """Dense retriever backed by the shared Qdrant index."""
+    from qdrant_client.models import Filter, FieldCondition, MatchValue
+
+    must = [
+        FieldCondition(key="source_type", match=MatchValue(value="library")),
+        FieldCondition(key="object_type", match=MatchValue(value="requirement_node")),
+    ]
+    if target_framework_ref_id:
+        must.append(
+            FieldCondition(
+                key="framework_ref_id",
+                match=MatchValue(value=target_framework_ref_id),
+            )
+        )
+    base_filter = Filter(must=must)
+
+    def retrieve(source_urn: str, source_text: str) -> dict[str, tuple[int, float]]:
+        try:
+            vector = embedder.embed_query(source_text)
+            hits = client.query_points(
+                collection_name=collection,
+                query=vector,
+                limit=limit,
+                query_filter=base_filter,
+            ).points
+        except Exception as e:
+            logger.warning(
+                "crosswalk_qdrant_query_failed", urn=source_urn, error=str(e)
+            )
+            return {}
+        out: dict[str, tuple[int, float]] = {}
+        rank = 0
+        for h in hits:
+            urn = (h.payload or {}).get("urn")
+            if not urn or urn not in allowed_urns or urn == source_urn:
+                continue
+            out[urn] = (rank, float(h.score))
+            rank += 1
+        return out
+
+    return retrieve
+
+
+def _make_inprocess_retriever(
+    embedder,
+    target_nodes: list[RequirementNode],
+    allowed_urns: set[str],
+    limit: int,
+) -> DenseRetriever:
+    """Dense retriever that embeds the target corpus locally and brute-forces cosine.
+
+    Cheap for framework-sized corpora (100–2000 nodes) and has no external
+    dependency. Used when Qdrant is unavailable.
+    """
+    import numpy as np
+
+    texts = [_build_node_text(n) for n in target_nodes]
+    urns = [n.urn for n in target_nodes]
+    vectors = embedder.embed(texts) if texts else []
+    matrix = (
+        np.asarray(vectors, dtype=np.float32)
+        if vectors
+        else np.zeros((0, 0), dtype=np.float32)
+    )
+    if matrix.size:
+        norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+        matrix = matrix / np.clip(norms, 1e-9, None)
+
+    def retrieve(source_urn: str, source_text: str) -> dict[str, tuple[int, float]]:
+        if not matrix.size:
+            return {}
+        q = np.asarray(embedder.embed_query(source_text), dtype=np.float32)
+        q_norm = float(np.linalg.norm(q))
+        if q_norm == 0.0:
+            return {}
+        q = q / q_norm
+        scores = matrix @ q  # cosine since both sides are unit-normalized
+        # argsort descending; -scores is cheaper than sorted(..., reverse=True)
+        order = np.argsort(-scores)
+        out: dict[str, tuple[int, float]] = {}
+        rank = 0
+        for i in order:
+            urn = urns[int(i)]
+            if urn == source_urn or urn not in allowed_urns:
+                continue
+            out[urn] = (rank, float(scores[int(i)]))
+            rank += 1
+            if rank >= limit:
+                break
+        return out
+
+    return retrieve
+
+
 def _build_bm25_corpus(nodes: list[RequirementNode]):
     """Build a BM25 index over the node texts. Returns (index, urn_order)."""
     from rank_bm25 import BM25Okapi
@@ -162,43 +288,19 @@ def _build_bm25_corpus(nodes: list[RequirementNode]):
 
 
 def _query_directional_topk(
-    client,
-    embedder,
+    dense_retriever: DenseRetriever,
     source_nodes: list[RequirementNode],
     target_nodes: list[RequirementNode],
     allowed_urns: set[str],
-    target_framework_ref_id: str,
     top_k: int,
-    collection: str,
     use_bm25: bool,
 ) -> dict[str, list[Hit]]:
-    """
-    For each source node, retrieve top-K target candidates using dense (Qdrant)
-    retrieval optionally fused with BM25 via RRF. Returns src_urn -> [Hit].
-    """
-    from qdrant_client.models import Filter, FieldCondition, MatchValue
-
-    must = [
-        FieldCondition(key="source_type", match=MatchValue(value="library")),
-        FieldCondition(key="object_type", match=MatchValue(value="requirement_node")),
-    ]
-    if target_framework_ref_id:
-        must.append(
-            FieldCondition(
-                key="framework_ref_id",
-                match=MatchValue(value=target_framework_ref_id),
-            )
-        )
-    base_filter = Filter(must=must)
-
+    """For each source node, fuse dense + BM25 retrieval via RRF and return top-K."""
     # Build a BM25 index over the target corpus once — reused across all sources.
     bm25_index = None
     bm25_urns: list[str] = []
     if use_bm25:
         bm25_index, bm25_urns = _build_bm25_corpus(target_nodes)
-
-    # Over-fetch dense so BM25-surfaced candidates still have a cosine score.
-    dense_limit = max(top_k * DEFAULT_DENSE_FETCH_MULTIPLIER, 30)
 
     out: dict[str, list[Hit]] = {}
 
@@ -207,26 +309,8 @@ def _query_directional_topk(
         if not text.strip():
             continue
 
-        # --- Dense retrieval ---
-        dense_by_urn: dict[str, tuple[int, float]] = {}  # urn -> (rank, cosine)
-        try:
-            vector = embedder.embed_query(text)
-            hits = client.query_points(
-                collection_name=collection,
-                query=vector,
-                limit=dense_limit,
-                query_filter=base_filter,
-            ).points
-        except Exception as e:
-            logger.warning("crosswalk_qdrant_query_failed", urn=node.urn, error=e)
-            hits = []
-        rank = 0
-        for h in hits:
-            urn = (h.payload or {}).get("urn")
-            if not urn or urn not in allowed_urns or urn == node.urn:
-                continue
-            dense_by_urn[urn] = (rank, float(h.score))
-            rank += 1
+        # --- Dense retrieval (Qdrant or in-process, same shape) ---
+        dense_by_urn = dense_retriever(node.urn, text)
 
         # --- BM25 retrieval (optional) ---
         bm25_by_urn: dict[str, int] = {}
@@ -327,34 +411,54 @@ def generate_suggestions(mapping_set: RequirementMappingSet) -> dict:
         )
         return {"pairs": 0, "reason": "empty_framework"}
 
-    client = get_qdrant_client()
     embedder = get_embedder()
-    embedding_model = getattr(embedder, "model", None)
     embedding_model_name = getattr(
-        embedding_model, "__class__", type(embedder)
+        getattr(embedder, "model", None), "__class__", type(embedder)
     ).__name__
 
+    # Probe Qdrant once; fall back to in-process embedding if unreachable/empty.
+    # With a fallback available, deployments without Qdrant still get the feature —
+    # at the cost of embedding both frameworks on every run.
+    client = get_qdrant_client()
+    qdrant_ready = _probe_qdrant(client)
+    retrieval_backend = "qdrant" if qdrant_ready else "in-process"
+    dense_limit = max(top_k * DEFAULT_DENSE_FETCH_MULTIPLIER, 30)
+    logger.info(
+        "crosswalk_retrieval_backend",
+        backend=retrieval_backend,
+        mapping_set=str(mapping_set.id),
+    )
+
+    if qdrant_ready:
+        fwd_retriever = _make_qdrant_retriever(
+            client,
+            embedder,
+            COLLECTION_NAME,
+            mapping_set.target_framework.ref_id or "",
+            set(target_by_urn),
+            dense_limit,
+        )
+        rev_retriever = _make_qdrant_retriever(
+            client,
+            embedder,
+            COLLECTION_NAME,
+            mapping_set.source_framework.ref_id or "",
+            set(source_by_urn),
+            dense_limit,
+        )
+    else:
+        fwd_retriever = _make_inprocess_retriever(
+            embedder, target_nodes, set(target_by_urn), dense_limit
+        )
+        rev_retriever = _make_inprocess_retriever(
+            embedder, source_nodes, set(source_by_urn), dense_limit
+        )
+
     fwd = _query_directional_topk(
-        client,
-        embedder,
-        source_nodes,
-        target_nodes,
-        set(target_by_urn),
-        mapping_set.target_framework.ref_id or "",
-        top_k,
-        COLLECTION_NAME,
-        use_bm25,
+        fwd_retriever, source_nodes, target_nodes, set(target_by_urn), top_k, use_bm25
     )
     rev = _query_directional_topk(
-        client,
-        embedder,
-        target_nodes,
-        source_nodes,
-        set(source_by_urn),
-        mapping_set.source_framework.ref_id or "",
-        top_k,
-        COLLECTION_NAME,
-        use_bm25,
+        rev_retriever, target_nodes, source_nodes, set(source_by_urn), top_k, use_bm25
     )
 
     # Invert reverse map for quick symmetric lookup:
@@ -411,7 +515,7 @@ def generate_suggestions(mapping_set: RequirementMappingSet) -> dict:
         RequirementMapping.objects.bulk_create(rows, batch_size=500)
         mapping_set.status = RequirementMappingSet.Status.READY
         mapping_set.generated_at = timezone.now()
-        mapping_set.embedding_model = embedding_model_name
+        mapping_set.embedding_model = f"{embedding_model_name} ({retrieval_backend})"
         mapping_set.generation_error = ""
         # Do not overwrite generation_params — it represents user-supplied
         # overrides, not the effective run config.

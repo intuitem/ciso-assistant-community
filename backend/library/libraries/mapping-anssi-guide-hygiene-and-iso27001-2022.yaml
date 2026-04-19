@@ -1,0 +1,1191 @@
+urn: urn:intuitem:risk:library:mapping-anssi-guide-hygiene-and-iso27001-2022
+locale: en
+ref_id: mapping-anssi-guide-hygiene-and-iso27001-2022
+name: ANSSI Guide d'hygiène informatique <-> ISO/IEC 27001:2022
+description: Mapping between ANSSI Guide d'hygiène informatique (42 règles d'hygiène) and International standard ISO/IEC 27001:2022.
+copyright: intuitem
+version: 1
+publication_date: '2026-04-19'
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:anssi-guide-hygiene
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-anssi-guide-hygiene-and-iso27001-2022
+    ref_id: mapping-anssi-guide-hygiene-and-iso27001-2022
+    name: ANSSI Guide d'hygiène informatique <-> ISO/IEC 27001:2022
+    description: Mapping between ANSSI Guide d'hygiène informatique (42 règles d'hygiène) and International standard ISO/IEC
+      27001:2022.
+    source_framework_urn: urn:intuitem:risk:framework:anssi-guide-hygiene
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Privileged teams require dedicated security training
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Concerns privileged access roles (admin/RSSI)
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: User awareness/training on security from onboarding
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Security responsibilities included in terms of employment
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Charter of IT resource usage = acceptable use policy
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Signed by users — echoes terms of employment
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Risk assessment prior to outsourcing — supplier relationships
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Outsourcing/cloud risk assessment
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Identify sensitive data — inventory of information/assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Information classification by sensitivity
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Inventory privileged accounts as sensitive assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Privileged access rights — identify/manage privileged accounts
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Access rights evolve with personnel movement
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Responsibilities after termination/change of employment
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Formalized, updated procedures — documented operating procedures
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Procedures for access rights
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Control connected equipment — inventory of assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Endpoint devices connected to IS
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: 802.1X endpoint authentication — endpoint device protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Network access authentication
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Nominative accounts — identity management
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Unique identifier tied to user for authentication
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Connection logging — logging of activities
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Identity-related logging complements identity management
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Restrict access to sensitive resources — access control
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Information access restriction — need-to-know
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Password rules and sizing — protection of authentication information
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Password authentication mechanism
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Secure password storage (avoid post-its) — authentication info protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Change default credentials
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Default configuration hardening
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Credential rotation — authentication information lifecycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: MFA with two-factor authentication — secure authentication
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Strong authentication mechanisms
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Smart cards / OTP tokens — secure authentication mechanisms
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Crypto operations on dedicated hardware
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: User workstation as first entry vector — endpoint device protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: User awareness as protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Regular backups on separate equipment — information backup
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Removable media control — storage media safeguards
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Removable media as malware vector
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: AppLocker / block execution from removable devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Technical control on removable media
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Homogenize security policies — configuration management
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Common security policies across the estate
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Prevent lateral movement — network segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Access control to contain compromised endpoints
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Block admin ports (TCP 135/445/3389) — network security controls
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Port blocking for lateral movement prevention
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Protect data in transit over Internet — cryptography
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Secure information transfer
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Flat network dangers — network segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Wi-Fi security risks — network security
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Wi-Fi as network service
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Enable security features in network protocols
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Protocol security includes cryptography
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Proxy/web filtering for Internet access
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Proxy antivirus + URL category filtering
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Proxy antivirus scanning — malware protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Hosting Internet-facing services — network services security
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Application security for Internet-facing services
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Email as malware vector — malware protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Filter malicious URLs in email
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Mail relay servers — securing network services
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Mail relay = DMZ segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Partner interconnections — securing network services
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Partner connection isolation
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Managing partner/supplier network connections
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Dedicated IP filtering at partner boundary — firewall/network security
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Partner segment segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Physical security of IS components — perimeters
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Equipment siting and protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Admin workstation isolation — privileged access rights
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Admin workstation not connected to Internet — segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Software updates for admin equipment verified from trusted sources
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Controlled installation of software on admin systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Admin network segmentation
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Admin network isolation for privileged access
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Physical network separation for admin
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Limit admin privileges on user workstations
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Limit access rights commensurate with role
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Nomadic device loss/theft — assets off-premises
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Endpoint device protection in mobile contexts
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Smart card/USB token for decryption secrets
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: External authenticator — authentication information
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Encrypt devices taken off-premises
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Security of off-premises assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Remote working / nomadic access to org IS
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Secure remote network connection
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Strong authentication to avoid credential reuse
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Remote working authentication controls
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Smartphones/tablets — endpoint device protection, separation of personal/pro
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Mobile device use in remote work contexts
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Voice assistants increase attack surface on endpoints
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Acceptable use of mobile features
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Patch management — technical vulnerabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Obsolete systems = vulnerabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Replace obsolete software
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Maintain relevant logs — logging
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Centralize logs on dedicated device — logging
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Centralized monitoring activities
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Backups kept safely — information backup
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Annual restore exercises — backup testing
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Continuity testing
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Regular IS audits — independent review
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Internal audit at planned intervals
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Internal audit programme
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: SSI referent (CISO) — information security roles and responsibilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Roles, responsibilities and authorities defined at management level
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Unusual behavior — assessment and decision on security events
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Response to security incidents
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Incident management planning as framework for reacting
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Formalize action plans — information security policy
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Security objectives and planning in org-specific context
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:42.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: ANSSI-qualified suppliers — supplier relationships
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:42.r
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Qualified ICT supply chain
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-anssi-guide-hygiene-and-iso27001-2022
+    ref_id: mapping-anssi-guide-hygiene-and-iso27001-2022
+    name: ANSSI Guide d'hygiène informatique <-> ISO/IEC 27001:2022
+    description: Mapping between ANSSI Guide d'hygiène informatique (42 règles d'hygiène) and International standard ISO/IEC
+      27001:2022.
+    source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    target_framework_urn: urn:intuitem:risk:framework:anssi-guide-hygiene
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Privileged teams require dedicated security training
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Concerns privileged access roles (admin/RSSI)
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: User awareness/training on security from onboarding
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Security responsibilities included in terms of employment
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Charter of IT resource usage = acceptable use policy
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Signed by users — echoes terms of employment
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Risk assessment prior to outsourcing — supplier relationships
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Outsourcing/cloud risk assessment
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Identify sensitive data — inventory of information/assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Information classification by sensitivity
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Inventory privileged accounts as sensitive assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Privileged access rights — identify/manage privileged accounts
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Access rights evolve with personnel movement
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Responsibilities after termination/change of employment
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Formalized, updated procedures — documented operating procedures
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Procedures for access rights
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Control connected equipment — inventory of assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Endpoint devices connected to IS
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: 802.1X endpoint authentication — endpoint device protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Network access authentication
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Nominative accounts — identity management
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Unique identifier tied to user for authentication
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Connection logging — logging of activities
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Identity-related logging complements identity management
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Restrict access to sensitive resources — access control
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Information access restriction — need-to-know
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Password rules and sizing — protection of authentication information
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Password authentication mechanism
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:11
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Secure password storage (avoid post-its) — authentication info protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: Change default credentials
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Default configuration hardening
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Credential rotation — authentication information lifecycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: MFA with two-factor authentication — secure authentication
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Strong authentication mechanisms
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Smart cards / OTP tokens — secure authentication mechanisms
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Crypto operations on dedicated hardware
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: User workstation as first entry vector — endpoint device protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: User awareness as protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Regular backups on separate equipment — information backup
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Removable media control — storage media safeguards
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Removable media as malware vector
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: AppLocker / block execution from removable devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Technical control on removable media
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Homogenize security policies — configuration management
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Common security policies across the estate
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Prevent lateral movement — network segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Access control to contain compromised endpoints
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Block admin ports (TCP 135/445/3389) — network security controls
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Port blocking for lateral movement prevention
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Protect data in transit over Internet — cryptography
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Secure information transfer
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Flat network dangers — network segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Wi-Fi security risks — network security
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Wi-Fi as network service
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Enable security features in network protocols
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Protocol security includes cryptography
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Proxy/web filtering for Internet access
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Proxy antivirus + URL category filtering
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Proxy antivirus scanning — malware protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Hosting Internet-facing services — network services security
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Application security for Internet-facing services
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Email as malware vector — malware protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Filter malicious URLs in email
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Mail relay servers — securing network services
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Mail relay = DMZ segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Partner interconnections — securing network services
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Partner connection isolation
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Managing partner/supplier network connections
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Dedicated IP filtering at partner boundary — firewall/network security
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Partner segment segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Physical security of IS components — perimeters
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Equipment siting and protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Admin workstation isolation — privileged access rights
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Admin workstation not connected to Internet — segregation
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Software updates for admin equipment verified from trusted sources
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Controlled installation of software on admin systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Admin network segmentation
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Admin network isolation for privileged access
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Physical network separation for admin
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Limit admin privileges on user workstations
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Limit access rights commensurate with role
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Nomadic device loss/theft — assets off-premises
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Endpoint device protection in mobile contexts
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Smart card/USB token for decryption secrets
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: External authenticator — authentication information
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Encrypt devices taken off-premises
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Security of off-premises assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Remote working / nomadic access to org IS
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Secure remote network connection
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Strong authentication to avoid credential reuse
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Remote working authentication controls
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Smartphones/tablets — endpoint device protection, separation of personal/pro
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Mobile device use in remote work contexts
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Voice assistants increase attack surface on endpoints
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Acceptable use of mobile features
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Patch management — technical vulnerabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Obsolete systems = vulnerabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Replace obsolete software
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Maintain relevant logs — logging
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Centralize logs on dedicated device — logging
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Centralized monitoring activities
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Backups kept safely — information backup
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Annual restore exercises — backup testing
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Continuity testing
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Regular IS audits — independent review
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Internal audit at planned intervals
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Internal audit programme
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: SSI referent (CISO) — information security roles and responsibilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Roles, responsibilities and authorities defined at management level
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Unusual behavior — assessment and decision on security events
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Response to security incidents
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: Incident management planning as framework for reacting
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Formalize action plans — information security policy
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Security objectives and planning in org-specific context
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:42.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: ANSSI-qualified suppliers — supplier relationships
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:42.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: Qualified ICT supply chain
