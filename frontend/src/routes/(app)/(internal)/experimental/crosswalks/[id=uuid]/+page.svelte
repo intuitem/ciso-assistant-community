@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { pageTitle } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
 
 	let { data } = $props();
 	let crosswalk: any = $state(data.crosswalk);
@@ -120,7 +121,7 @@
 			body: JSON.stringify(payload)
 		});
 		if (res.ok) {
-			statusMessage = 'Regenerating…';
+			statusMessage = '';
 			startPolling();
 		}
 	}
@@ -617,9 +618,7 @@
 					<div class="p-8 text-center text-gray-500">Loading matrix…</div>
 				{:else if !matrixPayload || matrixPayload.cells.length === 0}
 					<div class="p-8 text-center text-gray-500">
-						{crosswalk.status === 'generating'
-							? 'Generating suggestions… this may take a minute for large frameworks.'
-							: 'No suggestions yet.'}
+						{crosswalk.status === 'generating' ? m.crosswalkGeneratingWait() : 'No suggestions yet.'}
 					</div>
 				{:else}
 					<div class="p-4">
