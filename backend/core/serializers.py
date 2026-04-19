@@ -3365,6 +3365,233 @@ class AnswerImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = FindingsAssessment
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "version",
+            "status",
+            "eta",
+            "due_date",
+            "observation",
+            "category",
+            "is_locked",
+            "folder",
+            "perimeter",
+            "evidences",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class FindingImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    findings_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    reference_controls = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = Finding
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "severity",
+            "status",
+            "priority",
+            "observation",
+            "eta",
+            "due_date",
+            "folder",
+            "findings_assessment",
+            "threats",
+            "vulnerabilities",
+            "reference_controls",
+            "applied_controls",
+            "evidences",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class RiskAcceptanceImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    risk_scenarios = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = RiskAcceptance
+        fields = [
+            "name",
+            "description",
+            "state",
+            "expiry_date",
+            "accepted_at",
+            "rejected_at",
+            "revoked_at",
+            "justification",
+            "folder",
+            "risk_scenarios",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class SecurityExceptionImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    risk_scenarios = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    requirement_assessments = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
+
+    class Meta:
+        model = SecurityException
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "severity",
+            "status",
+            "expiration_date",
+            "observation",
+            "link",
+            "folder",
+            "assets",
+            "applied_controls",
+            "vulnerabilities",
+            "risk_scenarios",
+            "requirement_assessments",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class IncidentImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    entities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = Incident
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "status",
+            "severity",
+            "reported_at",
+            "detection",
+            "link",
+            "occurred_at",
+            "resolved_at",
+            "resolution",
+            "is_bcp_activated",
+            "folder",
+            "threats",
+            "assets",
+            "entities",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CampaignImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    frameworks = serializers.SlugRelatedField(
+        slug_field="urn", read_only=True, many=True
+    )
+    perimeters = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = Campaign
+        fields = [
+            "name",
+            "description",
+            "status",
+            "start_date",
+            "eta",
+            "due_date",
+            "selected_implementation_groups",
+            "folder",
+            "frameworks",
+            "perimeters",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class TaskTemplateImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    compliance_assessments = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
+    risk_assessments = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    findings_assessment = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
+
+    class Meta:
+        model = TaskTemplate
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "task_date",
+            "is_recurrent",
+            "schedule",
+            "enabled",
+            "link",
+            "folder",
+            "evidences",
+            "assets",
+            "applied_controls",
+            "compliance_assessments",
+            "risk_assessments",
+            "findings_assessment",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class TaskNodeImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    task_template = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = TaskNode
+        fields = [
+            "due_date",
+            "scheduled_date",
+            "status",
+            "observation",
+            "to_delete",
+            "folder",
+            "task_template",
+            "evidences",
+            "created_at",
+            "updated_at",
+        ]
+
+
 class RequirementAssignmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessment = FieldsRelatedField()
