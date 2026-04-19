@@ -32,7 +32,7 @@ MB=.claude/skills/mapping-builder/scripts  # reused for framework parsing
 .venv/bin/python $MB/parse_framework.py backend/library/libraries/<framework>.yaml > /tmp/fw.json
 
 # Parse the key-controls library
-.venv/bin/python $SKILL/parse_controls.py backend/library/libraries/doc-pol.yaml > /tmp/controls.json
+.venv/bin/python $SKILL/parse_controls.py backend/library/libraries/key-reference-controls.yaml > /tmp/controls.json
 
 # Write a reviewable xlsx from the running verdicts
 .venv/bin/python $SKILL/write_review.py /tmp/fw.json /tmp/controls.json /tmp/verdicts.jsonl /tmp/<name>_review.xlsx
@@ -83,7 +83,7 @@ Grep the framework for `urn:intuitem:risk:function:doc-pol:` to check prior link
   backend/library/libraries/<framework>.yaml > /tmp/fw.json
 
 .venv/bin/python .claude/skills/reference-controls-enricher/scripts/parse_controls.py \
-  backend/library/libraries/doc-pol.yaml > /tmp/controls.json
+  backend/library/libraries/key-reference-controls.yaml > /tmp/controls.json
 ```
 
 Read both JSONs. Note `n_assessable` for the framework and the doc-pol prefix breakdown (doc / pol / proc / tech / phys / train).
@@ -225,7 +225,7 @@ Report:
 | File | Purpose |
 |---|---|
 | `.claude/skills/mapping-builder/scripts/parse_framework.py` | Framework YAML → JSON with items grouped by section (reused) |
-| `scripts/parse_controls.py` | doc-pol.yaml → JSON with controls indexed by URN + prefix |
+| `scripts/parse_controls.py` | key-reference-controls.yaml → JSON with controls indexed by URN + prefix |
 | `scripts/write_review.py` | Verdicts + parsed framework + parsed controls → reviewable xlsx |
 | `scripts/apply_enrichment.py` | Verdicts → patches framework YAML in place |
 | `scripts/coverage_report.py` | Verdicts + parsed framework → coverage %, histogram, flagged items |

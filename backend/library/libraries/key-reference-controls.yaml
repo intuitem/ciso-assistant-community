@@ -20,13 +20,13 @@ translations:
   fr:
     name: "Mesures de r\xE9f\xE9rence cl\xE9s CISO Assistant"
     description:
-      "Ensemble curat\xE9 de mesures de r\xE9f\xE9rence cl\xE9s maintenu\
-      \ par intuitem : politiques, proc\xE9dures, documents, formations, capacit\xE9\
-      s techniques et physiques. Couvre la gouvernance, les acc\xE8s, la protection\
-      \ des donn\xE9es, la r\xE9silience, la vie priv\xE9e, l'IA, le cloud et la s\xE9\
-      curit\xE9 physique. Les r\xE9f\xE9rentiels de CISO Assistant s'y rattachent\
-      \ pour alimenter les suggestions de mesures appliqu\xE9es. L'espace de noms\
-      \ URN `doc-pol` est conserv\xE9 pour compatibilit\xE9."
+      "Ensemble s\xE9lectionn\xE9 de mesures de r\xE9f\xE9rence cl\xE9\
+      s maintenu par intuitem : politiques, proc\xE9dures, documents, formations,\
+      \ capacit\xE9s techniques et physiques. Couvre la gouvernance, les acc\xE8s,\
+      \ la protection des donn\xE9es, la r\xE9silience, la vie priv\xE9e, l'IA, le\
+      \ cloud et la s\xE9curit\xE9 physique. Les r\xE9f\xE9rentiels de CISO Assistant\
+      \ s'y rattachent pour alimenter les suggestions de mesures appliqu\xE9es. L'espace\
+      \ de noms URN `doc-pol` est conserv\xE9 pour compatibilit\xE9."
   de:
     name: "\xDCbliche Referenzkontrollen"
     description:
@@ -3703,6 +3703,20 @@ objects:
             \ scripts sur les actifs de l'entreprise.\nP\xE9rim\xE8tre : postes utilisateurs,\
             \ serveurs, charges de production.\nCircuit d'approbation des nouveaux logiciels.\n\
             Traitement des d\xE9tections de logiciels non autoris\xE9s."
+        de:
+          name: Richtlinie zur Anwendungskontrolle und Zulassungsliste
+          description:
+            "Regeln f\xFCr Zulassungslisten autorisierter Software, Bibliotheken\
+            \ und Skripte auf Unternehmensger\xE4ten.\nGeltungsbereich: Endger\xE4te,\
+            \ Server, Produktionsumgebungen.\nGenehmigungsablauf f\xFCr neue Software.\n\
+            Behandlung nicht autorisierter Software bei Erkennung."
+        es:
+          name: "Pol\xEDtica de control de aplicaciones y listas de autorizaci\xF3n"
+          description:
+            "Reglas para la autorizaci\xF3n de software, bibliotecas y scripts\
+            \ en los activos de la empresa.\nAlcance: dispositivos de usuario, servidores,\
+            \ cargas de producci\xF3n.\nFlujo de aprobaci\xF3n para el software nuevo.\n\
+            Tratamiento de la detecci\xF3n de software no autorizado."
     - urn: urn:intuitem:risk:function:doc-pol:pol.hardening
       ref_id: POL.HARDENING
       name: Secure configuration and hardening policy
@@ -3729,6 +3743,19 @@ objects:
             \ actifs et logiciels.\nR\xE9f\xE9rentiels : CIS Benchmarks, guides \xE9\
             diteurs, STIGs.\nGestion des d\xE9rogations, contr\xF4le de conformit\xE9\
             , cadence de recertification."
+        de:
+          name: "Richtlinie zur sicheren Konfiguration und H\xE4rtung"
+          description:
+            "Sichere Referenzkonfigurationen f\xFCr Unternehmensressourcen\
+            \ und Software.\nBezug auf CIS Benchmarks, Herstellerleitf\xE4den und STIGs.\n\
+            Abweichungsmanagement, Compliance-\xDCberwachung, Rezertifizierungszyklus."
+        es:
+          name: "Pol\xEDtica de configuraci\xF3n segura y endurecimiento"
+          description:
+            "Configuraciones seguras de referencia para los activos y el\
+            \ software de la empresa.\nReferencias a CIS Benchmarks, gu\xEDas de fabricantes\
+            \ y STIGs.\nGesti\xF3n de excepciones, supervisi\xF3n del cumplimiento y\
+            \ cadencia de recertificaci\xF3n."
     - urn: urn:intuitem:risk:function:doc-pol:pol.pentest
       ref_id: POL.PENTEST
       name: Penetration testing policy
@@ -3754,6 +3781,18 @@ objects:
             "Programme et autorisations pour les activit\xE9s de tests d'intrusion.\n\
             P\xE9rim\xE8tre, fr\xE9quence (internes / externes), r\xE8gles d'engagement.\n\
             Circuit de rem\xE9diation des constats."
+        de:
+          name: Richtlinie zu Penetrationstests
+          description:
+            "Programm und Genehmigung f\xFCr Penetrationstest-Aktivit\xE4\
+            ten.\nUmfang, H\xE4ufigkeit (intern/extern), Einsatzregeln.\nBehebungsprozess\
+            \ f\xFCr Feststellungen."
+        es:
+          name: "Pol\xEDtica de pruebas de intrusi\xF3n"
+          description:
+            "Programa y autorizaci\xF3n para las actividades de pruebas de\
+            \ intrusi\xF3n.\nAlcance, frecuencia (internas / externas), reglas de compromiso.\n\
+            Flujo de remediaci\xF3n de los hallazgos."
     - urn: urn:intuitem:risk:function:doc-pol:pol.retention
       ref_id: POL.RETENTION
       name: Data retention policy
@@ -3779,6 +3818,18 @@ objects:
             "R\xE8gles de conservation et de suppression par classe de donn\xE9\
             es et juridiction.\nProc\xE9dure de conservation l\xE9gale.\nExigences de\
             \ suppression \xE0 l'expiration."
+        de:
+          name: Richtlinie zur Datenaufbewahrung
+          description:
+            "Aufbewahrungs- und L\xF6schregeln je Datenklasse und Rechtsgebiet.\n\
+            Verfahren f\xFCr rechtliche Aufbewahrungspflichten.\nL\xF6schungsanforderungen\
+            \ nach Ablauf der Aufbewahrungsfrist."
+        es:
+          name: "Pol\xEDtica de conservaci\xF3n de datos"
+          description:
+            "Reglas de conservaci\xF3n y eliminaci\xF3n por clase de datos\
+            \ y jurisdicci\xF3n.\nProcedimiento de retenci\xF3n legal.\nRequisitos de\
+            \ eliminaci\xF3n al vencimiento de la conservaci\xF3n."
     - urn: urn:intuitem:risk:function:doc-pol:proc.ir_exercise
       ref_id: PROC.IR_EXERCISE
       name: Incident response exercise procedure
@@ -3803,6 +3854,18 @@ objects:
             "Planification, ex\xE9cution et \xE9valuation des exercices de\
             \ r\xE9ponse \xE0 incident (tabletop et techniques).\nCadence minimale,\
             \ r\xF4les, sc\xE9narios, collecte des enseignements."
+        de:
+          name: "Verfahren f\xFCr Incident-Response-\xDCbungen"
+          description:
+            "Planung, Durchf\xFChrung und Auswertung von Planspiel- und technischen\
+            \ Incident-Response-\xDCbungen.\nMindesth\xE4ufigkeit, Rollen, Szenarien,\
+            \ Dokumentation von Lehren."
+        es:
+          name: Procedimiento de ejercicios de respuesta a incidentes
+          description:
+            "Planificaci\xF3n, ejecuci\xF3n y evaluaci\xF3n de ejercicios\
+            \ de respuesta a incidentes (mesa y t\xE9cnicos).\nCadencia m\xEDnima, roles,\
+            \ escenarios y registro de lecciones aprendidas."
     - urn: urn:intuitem:risk:function:doc-pol:proc.pentest
       ref_id: PROC.PENTEST
       name: Penetration testing procedure
@@ -3827,6 +3890,18 @@ objects:
             "Proc\xE9dure op\xE9rationnelle pour le cadrage, l'ex\xE9cution\
             \ et la restitution des tests d'intrusion internes et externes.\nClassification\
             \ des constats et suivi de la rem\xE9diation."
+        de:
+          name: "Verfahren f\xFCr Penetrationstests"
+          description:
+            "Operatives Verfahren zur Planung, Durchf\xFChrung und Berichterstattung\
+            \ interner und externer Penetrationstests.\nKlassifikation der Feststellungen\
+            \ und Nachverfolgung der Behebung."
+        es:
+          name: "Procedimiento de pruebas de intrusi\xF3n"
+          description:
+            "Procedimiento operativo para el alcance, ejecuci\xF3n y reporte\
+            \ de pruebas de intrusi\xF3n internas y externas.\nClasificaci\xF3n de los\
+            \ hallazgos y seguimiento de la remediaci\xF3n."
     - urn: urn:intuitem:risk:function:doc-pol:proc.post_incident
       ref_id: PROC.POST_INCIDENT
       name: Post-incident review procedure
@@ -3849,6 +3924,17 @@ objects:
             "Retour d'exp\xE9rience structur\xE9 apr\xE8s un incident de\
             \ s\xE9curit\xE9.\nAnalyse des causes, reconstitution de la chronologie,\
             \ attribution des actions correctives."
+        de:
+          name: "Verfahren f\xFCr Post-Incident-Reviews"
+          description:
+            "Strukturierte Auswertung nach Sicherheitsvorf\xE4llen.\nUrsachenanalyse,\
+            \ Rekonstruktion des Zeitablaufs, Zuweisung von Korrekturma\xDFnahmen."
+        es:
+          name: "Procedimiento de revisi\xF3n posterior al incidente"
+          description:
+            "Revisi\xF3n estructurada de lecciones aprendidas tras incidentes\
+            \ de seguridad.\nAn\xE1lisis de causa ra\xEDz, reconstrucci\xF3n de la l\xED\
+            nea de tiempo, asignaci\xF3n de acciones correctivas."
     - urn: urn:intuitem:risk:function:doc-pol:proc.rbac
       ref_id: PROC.RBAC
       name: Role-based access control administration procedure
@@ -3873,6 +3959,20 @@ objects:
             "D\xE9finition des r\xF4les, mapping r\xF4les-habilitations,\
             \ cycle de vie des r\xF4les, contr\xF4les de s\xE9paration des t\xE2ches.\n\
             Cadence de revue et recertification des r\xF4les."
+        de:
+          name: Verfahren zur Administration rollenbasierter Zugriffskontrollen
+          description:
+            "Rollendefinition, Zuordnung von Rollen zu Berechtigungen, Rollen-Lebenszyklus,\
+            \ Pr\xFCfung der Funktionstrennung.\nZyklus f\xFCr Rollen\xFCberpr\xFCfung\
+            \ und Rezertifizierung."
+        es:
+          name:
+            "Procedimiento de administraci\xF3n del control de acceso basado en\
+            \ roles"
+          description:
+            "Definici\xF3n de roles, mapeo de roles a permisos, ciclo de\
+            \ vida de los roles, controles de segregaci\xF3n de funciones.\nCadencia\
+            \ de revisi\xF3n y recertificaci\xF3n de roles."
     - urn: urn:intuitem:risk:function:doc-pol:proc.sbom
       ref_id: PROC.SBOM
       name: Software Bill of Materials (SBOM) management procedure
@@ -3897,6 +3997,17 @@ objects:
             "G\xE9n\xE9ration, collecte et mise \xE0 jour des Software Bill\
             \ of Materials pour les logiciels internes et tiers.\nSurveillance des vuln\xE9\
             rabilit\xE9s des composants list\xE9s."
+        de:
+          name: Verfahren zur Verwaltung von Software Bill of Materials (SBOM)
+          description:
+            "Erstellung, Erfassung und Pflege von SBOMs f\xFCr Eigen- und\
+            \ Fremdsoftware.\n\xDCberwachung gelisteter Komponenten auf Schwachstellen."
+        es:
+          name: "Procedimiento de gesti\xF3n del Software Bill of Materials (SBOM)"
+          description:
+            "Generaci\xF3n, recopilaci\xF3n y mantenimiento de SBOMs para\
+            \ el software propio y de terceros.\nSupervisi\xF3n de vulnerabilidades\
+            \ en los componentes listados."
     - urn: urn:intuitem:risk:function:doc-pol:proc.sdlc
       ref_id: PROC.SDLC
       name: Secure software development lifecycle procedure
@@ -3921,6 +4032,18 @@ objects:
             "Int\xE9gration des contr\xF4les de s\xE9curit\xE9 \xE0 chaque\
             \ \xE9tape du cycle de d\xE9veloppement logiciel.\nExigences de s\xE9curit\xE9\
             , revue de conception, codage s\xE9curis\xE9, tests et contr\xF4les de livraison."
+        de:
+          name: "Verfahren f\xFCr den sicheren Softwareentwicklungszyklus"
+          description:
+            "Integration von Sicherheitskontrollen \xFCber den gesamten Softwareentwicklungszyklus.\n\
+            Sicherheitsanforderungen, Design-Review, sichere Programmierung, Test- und\
+            \ Freigabetore."
+        es:
+          name: Procedimiento del ciclo de desarrollo seguro de software
+          description:
+            "Integraci\xF3n de controles de seguridad a lo largo del ciclo\
+            \ de desarrollo de software.\nRequisitos de seguridad, revisi\xF3n de dise\xF1\
+            o, codificaci\xF3n segura, puertas de prueba y de liberaci\xF3n."
     - urn: urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
       ref_id: PROC.SOFTWARE_LIFECYCLE
       name: Software lifecycle management procedure
@@ -3943,6 +4066,17 @@ objects:
             "Suivi des versions logicielles support\xE9es, surveillance des\
             \ fins de vie et planification du remplacement des logiciels non support\xE9\
             s."
+        de:
+          name: Verfahren zur Verwaltung des Softwarelebenszyklus
+          description:
+            "Nachverfolgung unterst\xFCtzter Softwareversionen, \xDCberwachung\
+            \ des Endes der Unterst\xFCtzung und Planung des Austauschs nicht unterst\xFC\
+            tzter Software."
+        es:
+          name: "Procedimiento de gesti\xF3n del ciclo de vida del software"
+          description:
+            "Seguimiento de versiones de software con soporte, supervisi\xF3\
+            n de fin de vida y planificaci\xF3n de reemplazo del software sin soporte."
     - urn: urn:intuitem:risk:function:doc-pol:proc.threat_modeling
       ref_id: PROC.THREAT_MODELING
       name: Threat modeling procedure
@@ -3965,6 +4099,17 @@ objects:
             "Activit\xE9s structur\xE9es de mod\xE9lisation des menaces en\
             \ phase de conception.\nM\xE9thodologie (STRIDE, PASTA, LINDDUN), livrables,\
             \ cadence de revue."
+        de:
+          name: Verfahren zur Bedrohungsmodellierung
+          description:
+            "Strukturierte Bedrohungsmodellierung in der Entwurfsphase.\n\
+            Methodik (STRIDE, PASTA, LINDDUN), Liefergegenst\xE4nde, \xDCberpr\xFCfungszyklus."
+        es:
+          name: Procedimiento de modelado de amenazas
+          description:
+            "Actividades estructuradas de modelado de amenazas en la fase\
+            \ de dise\xF1o.\nMetodolog\xEDa (STRIDE, PASTA, LINDDUN), entregables, cadencia\
+            \ de revisi\xF3n."
     - urn: urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
       ref_id: PROC.TPRM_ASSESSMENT
       name: Third-party risk assessment procedure
@@ -3987,6 +4132,17 @@ objects:
           description:
             "\xC9valuation et surveillance continue des fournisseurs et prestataires.\n\
             Tierisation, cadence, questionnaires, revue des preuves."
+        de:
+          name: Verfahren zur Bewertung von Drittparteirisiken
+          description:
+            "Bewertung und laufende \xDCberwachung von Lieferanten und Dienstleistern.\n\
+            Einstufung, Bewertungszyklus, Frageb\xF6gen, Nachweispr\xFCfung."
+        es:
+          name: "Procedimiento de evaluaci\xF3n de riesgos de terceros"
+          description:
+            "Evaluaci\xF3n y supervisi\xF3n continua de proveedores y prestadores\
+            \ de servicios.\nCategorizaci\xF3n, cadencia de evaluaci\xF3n, cuestionarios,\
+            \ revisi\xF3n de evidencias."
     - urn: urn:intuitem:risk:function:doc-pol:tech.app_control
       ref_id: TECH.APP_CONTROL
       name: Application control / allowlisting capability
@@ -4012,6 +4168,18 @@ objects:
             \ sur les applications, biblioth\xE8ques et scripts.\nG\xE9n\xE9ralement\
             \ fournie par AppLocker, WDAC, un outil d'allowlisting tiers ou des fonctions\
             \ EDR."
+        de:
+          name: Funktion zur Anwendungskontrolle / Allowlisting
+          description:
+            "Technische Funktion zur Durchsetzung von Zulassungslisten f\xFC\
+            r Anwendungen, Bibliotheken und Skripte.\nTypischerweise durch AppLocker,\
+            \ WDAC, externe Allowlisting-Werkzeuge oder EDR-Funktionen bereitgestellt."
+        es:
+          name: Capacidad de control de aplicaciones / allowlisting
+          description:
+            "Capacidad t\xE9cnica que aplica listas de autorizaci\xF3n sobre\
+            \ aplicaciones, bibliotecas y scripts.\nNormalmente proporcionada por AppLocker,\
+            \ WDAC, herramientas de allowlisting de terceros o funciones del EDR."
     - urn: urn:intuitem:risk:function:doc-pol:tech.asset_discovery
       ref_id: TECH.ASSET_DISCOVERY
       name: Active and passive asset discovery capability
@@ -4034,6 +4202,17 @@ objects:
             "D\xE9couverte automatis\xE9e des actifs connect\xE9s aux r\xE9\
             seaux de l'entreprise par scan actif, \xE9coute passive et corr\xE9lation\
             \ DHCP / journaux."
+        de:
+          name: Funktion zur aktiven und passiven Asset-Erkennung
+          description:
+            Automatisierte Erkennung von Ressourcen in Unternehmensnetzen
+            mittels aktivem Scannen, passiver Erfassung und Korrelation von DHCP-/Protokolldaten.
+        es:
+          name: Capacidad de descubrimiento activo y pasivo de activos
+          description:
+            "Descubrimiento automatizado de activos conectados a las redes\
+            \ de la empresa mediante escaneo activo, captura pasiva y correlaci\xF3\
+            n de DHCP y registros."
     - urn: urn:intuitem:risk:function:doc-pol:tech.dlp
       ref_id: TECH.DLP
       name: Data Loss Prevention (DLP) capability
@@ -4056,6 +4235,16 @@ objects:
             "Capacit\xE9 technique de d\xE9tection et de pr\xE9vention des\
             \ exfiltrations non autoris\xE9es de donn\xE9es sensibles (postes, r\xE9\
             seau, cloud)."
+        de:
+          name: Funktion zur Data Loss Prevention (DLP)
+          description:
+            "Technische Funktion zur Erkennung und Verhinderung unbefugter\
+            \ Abfl\xFCsse sensibler Daten \xFCber Endger\xE4te, Netzwerk und Cloud."
+        es:
+          name: "Capacidad de prevenci\xF3n de p\xE9rdida de datos (DLP)"
+          description:
+            "Capacidad t\xE9cnica para detectar y prevenir la exfiltraci\xF3\
+            n no autorizada de datos sensibles en puestos de trabajo, red y nube."
     - urn: urn:intuitem:risk:function:doc-pol:tech.dns_filter
       ref_id: TECH.DNS_FILTER
       name: DNS filtering / secure DNS capability
@@ -4077,6 +4266,16 @@ objects:
           description:
             "Service DNS protecteur filtrant les domaines malveillants ou\
             \ non conformes \xE0 la politique, avec journalisation des requ\xEAtes."
+        de:
+          name: Funktion zur DNS-Filterung / sicheres DNS
+          description:
+            "Schutz-DNS-Dienst zur Filterung b\xF6sartiger, riskanter oder\
+            \ richtlinienwidriger Domains, mit Protokollierung der DNS-Anfragen."
+        es:
+          name: Capacidad de filtrado DNS / DNS seguro
+          description:
+            "Servicio DNS de protecci\xF3n que filtra dominios maliciosos,\
+            \ de alto riesgo o contrarios a la pol\xEDtica, con registro de consultas."
     - urn: urn:intuitem:risk:function:doc-pol:tech.email_auth
       ref_id: TECH.EMAIL_AUTH
       name: Email authentication (DMARC / SPF / DKIM)
@@ -4098,6 +4297,16 @@ objects:
           description:
             "Authentification des exp\xE9diteurs de courriel par SPF, DKIM\
             \ et DMARC avec politique d'application et rapports."
+        de:
+          name: E-Mail-Authentifizierung (DMARC / SPF / DKIM)
+          description:
+            "Authentifizierung von E-Mail-Absendern \xFCber SPF, DKIM und\
+            \ DMARC mit Durchsetzungsrichtlinie und Berichterstattung."
+        es:
+          name: "Autenticaci\xF3n de correo electr\xF3nico (DMARC / SPF / DKIM)"
+          description:
+            "Autenticaci\xF3n de remitentes de correo electr\xF3nico mediante\
+            \ SPF, DKIM y DMARC con pol\xEDtica de aplicaci\xF3n y reportes."
     - urn: urn:intuitem:risk:function:doc-pol:tech.iam
       ref_id: TECH.IAM
       name: Centralized Identity & Access Management capability
@@ -4121,6 +4330,17 @@ objects:
           description:
             "Annuaire d'identit\xE9 centralis\xE9 avec SSO, provisioning,\
             \ d\xE9provisionnement et gouvernance des acc\xE8s int\xE9gr\xE9s aux applications."
+        de:
+          name: "Zentrale Funktion zur Identit\xE4ts- und Zugriffsverwaltung"
+          description:
+            "Zentrales Identit\xE4tsverzeichnis mit SSO, Provisionierung,\
+            \ Deprovisionierung und Zugriffs-Governance, integriert in Unternehmensanwendungen."
+        es:
+          name: "Capacidad centralizada de gesti\xF3n de identidades y accesos"
+          description:
+            "Directorio de identidades centralizado con SSO, provisi\xF3\
+            n, desaprovisionamiento y gobierno de accesos integrado en las aplicaciones\
+            \ de la empresa."
     - urn: urn:intuitem:risk:function:doc-pol:tech.mdm
       ref_id: TECH.MDM
       name: Mobile Device Management capability
@@ -4143,6 +4363,18 @@ objects:
             "Capacit\xE9 MDM / UEM assurant le verrouillage, l'effacement\
             \ \xE0 distance, la s\xE9paration des espaces et la configuration de r\xE9\
             f\xE9rence sur les terminaux mobiles."
+        de:
+          name: Funktion zur Mobile-Device-Management
+          description:
+            "MDM-/UEM-Funktion zur Durchsetzung von Ger\xE4tesperre, Fernl\xF6\
+            schung, Arbeitsbereichstrennung und Referenzkonfigurationen auf mobilen\
+            \ und tragbaren Endger\xE4ten."
+        es:
+          name: "Capacidad de gesti\xF3n de dispositivos m\xF3viles (MDM)"
+          description:
+            "Capacidad MDM / UEM que aplica bloqueo de dispositivos, borrado\
+            \ remoto, separaci\xF3n de espacios de trabajo y configuraciones de referencia\
+            \ en terminales m\xF3viles y port\xE1tiles."
     - urn: urn:intuitem:risk:function:doc-pol:tech.paw
       ref_id: TECH.PAW
       name: Privileged Access Workstation capability
@@ -4164,6 +4396,17 @@ objects:
           description:
             "Postes durcis ou h\xF4tes-rebond utilis\xE9s exclusivement pour\
             \ l'administration, isol\xE9s des usages bureautiques."
+        de:
+          name: "Funktion f\xFCr dedizierte Administrationsarbeitspl\xE4tze (PAW)"
+          description:
+            "Dedizierte geh\xE4rtete Arbeitspl\xE4tze oder Sprungrechner,\
+            \ die ausschlie\xDFlich f\xFCr administrative T\xE4tigkeiten genutzt und\
+            \ von allgemeinen Nutzungsumgebungen isoliert sind."
+        es:
+          name: "Capacidad de puesto dedicado de administraci\xF3n (PAW)"
+          description:
+            Puestos de trabajo reforzados o servidores de salto dedicados
+            exclusivamente a tareas administrativas, aislados de los usos generales.
     - urn: urn:intuitem:risk:function:doc-pol:tech.sast_dast
       ref_id: TECH.SAST_DAST
       name: SAST / DAST / code security scanning capability
@@ -4185,6 +4428,17 @@ objects:
           description:
             "Tests de s\xE9curit\xE9 applicative statique et dynamique automatis\xE9\
             s, int\xE9gr\xE9s aux pipelines CI/CD, avec triage des constats."
+        de:
+          name: "Funktion f\xFCr Code-Sicherheitsscans (SAST / DAST)"
+          description:
+            Automatisierte statische und dynamische Anwendungssicherheitstests,
+            in CI/CD-Pipelines integriert, mit Triage der Feststellungen.
+        es:
+          name: "Capacidad de an\xE1lisis de c\xF3digo SAST / DAST"
+          description:
+            "Pruebas de seguridad de aplicaciones est\xE1ticas y din\xE1\
+            micas automatizadas, integradas en los pipelines CI/CD, con triaje de los\
+            \ hallazgos."
     - urn: urn:intuitem:risk:function:doc-pol:tech.sw_inventory
       ref_id: TECH.SW_INVENTORY
       name: Automated software inventory capability
@@ -4206,6 +4460,16 @@ objects:
           description:
             "D\xE9couverte et suivi automatis\xE9s des logiciels install\xE9\
             s sur les actifs, alimentant l'inventaire logiciel."
+        de:
+          name: "Funktion f\xFCr automatisiertes Softwareinventar"
+          description:
+            Automatisierte Erkennung und Nachverfolgung installierter Software
+            auf Unternehmensressourcen, die das Softwareinventar speist.
+        es:
+          name: Capacidad de inventario de software automatizado
+          description:
+            Descubrimiento y seguimiento automatizados del software instalado
+            en los activos, alimentando el inventario de software.
     - urn: urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
       ref_id: TECH.VULN_SCANNER
       name: Vulnerability scanner capability
@@ -4229,6 +4493,17 @@ objects:
           description:
             "Scan automatis\xE9 des vuln\xE9rabilit\xE9s sur les actifs internes\
             \ et expos\xE9s, avec scan authentifi\xE9 lorsque possible."
+        de:
+          name: "Funktion f\xFCr Schwachstellenscanner"
+          description:
+            "Automatisiertes Scannen von Schwachstellen auf internen und\
+            \ extern exponierten Ressourcen, nach M\xF6glichkeit mit authentifiziertem\
+            \ Scannen."
+        es:
+          name: "Capacidad de esc\xE1ner de vulnerabilidades"
+          description:
+            Escaneo automatizado de vulnerabilidades en activos internos
+            y expuestos, con escaneo autenticado cuando sea posible.
     - urn: urn:intuitem:risk:function:doc-pol:tech.ztna
       ref_id: TECH.ZTNA
       name: Zero Trust Network Access capability
@@ -4250,6 +4525,16 @@ objects:
           description:
             "Acc\xE8s identitaire par session aux applications internes et\
             \ aux actifs distants, sans diffusion VPN traditionnelle."
+        de:
+          name: "Funktion f\xFCr Zero Trust Network Access (ZTNA)"
+          description:
+            "Identit\xE4tsbasierter, sitzungsbezogener Zugriff auf interne\
+            \ Anwendungen und entfernte Ressourcen ohne klassische VPN-Ausstrahlung."
+        es:
+          name: Capacidad de acceso a red Zero Trust (ZTNA)
+          description:
+            "Acceso por sesi\xF3n basado en identidad a aplicaciones internas\
+            \ y activos remotos, sin la difusi\xF3n de un VPN tradicional."
     - urn: urn:intuitem:risk:function:doc-pol:train.secdev
       ref_id: TRAIN.SECDEV
       name: Secure development training
@@ -4272,6 +4557,18 @@ objects:
             "Formation des d\xE9veloppeurs au codage s\xE9curis\xE9, aux\
             \ vuln\xE9rabilit\xE9s courantes, aux pi\xE8ges des frameworks et aux bases\
             \ de la mod\xE9lisation des menaces."
+        de:
+          name: Schulung zum sicheren Software-Entwickeln
+          description:
+            "Schulung f\xFCr Entwickler zu sicherer Programmierung, h\xE4\
+            ufigen Schwachstellen, Framework-spezifischen Fallstricken und Grundlagen\
+            \ der Bedrohungsmodellierung."
+        es:
+          name: "Formaci\xF3n en desarrollo seguro"
+          description:
+            "Formaci\xF3n para desarrolladores sobre codificaci\xF3n segura,\
+            \ vulnerabilidades comunes, errores espec\xEDficos de frameworks y fundamentos\
+            \ del modelado de amenazas."
     - urn: urn:intuitem:risk:function:doc-pol:pol.privacy
       ref_id: POL.PRIVACY
       name: Privacy and personal data protection policy
@@ -4292,6 +4589,18 @@ objects:
             "Cadre du traitement licite des donn\xE9es \xE0 caract\xE8re\
             \ personnel : finalit\xE9s, bases l\xE9gales, minimisation, conservation,\
             \ droits, transferts transfrontaliers."
+        de:
+          name: Richtlinie zum Datenschutz und zum Schutz personenbezogener Daten
+          description:
+            "Rahmen f\xFCr die rechtm\xE4\xDFige Verarbeitung personenbezogener\
+            \ Daten: Zwecke, Rechtsgrundlagen, Datenminimierung, Aufbewahrung, Rechte,\
+            \ Drittlands\xFCbermittlungen."
+        es:
+          name: "Pol\xEDtica de privacidad y protecci\xF3n de datos personales"
+          description:
+            "Marco para el tratamiento l\xEDcito de datos personales: finalidades,\
+            \ bases legales, minimizaci\xF3n, conservaci\xF3n, derechos y transferencias\
+            \ internacionales."
     - urn: urn:intuitem:risk:function:doc-pol:proc.dpia
       ref_id: PROC.DPIA
       name: Data Protection / Privacy Impact Assessment procedure
@@ -4315,6 +4624,20 @@ objects:
             "Proc\xE9dure de r\xE9alisation des AIPD / PIA sur les traitements\
             \ \xE0 risque \xE9lev\xE9.\nCrit\xE8res de d\xE9clenchement, m\xE9thodologie,\
             \ consultation des parties prenantes, suivi des conclusions."
+        de:
+          name: "Verfahren zur Datenschutz-Folgenabsch\xE4tzung (DSFA)"
+          description:
+            "Verfahren zur Durchf\xFChrung von DSFAs / PIAs bei Verarbeitungen\
+            \ mit hohem Risiko.\nAusl\xF6ser, Methodik, Beteiligung Betroffener, Nachverfolgung\
+            \ der Ergebnisse."
+        es:
+          name:
+            "Procedimiento de evaluaci\xF3n de impacto relativa a la protecci\xF3\
+            n de datos (EIPD)"
+          description:
+            "Procedimiento para realizar EIPD / PIA en tratamientos de alto\
+            \ riesgo.\nCriterios de activaci\xF3n, metodolog\xEDa, consulta de partes\
+            \ interesadas y seguimiento de resultados."
     - urn: urn:intuitem:risk:function:doc-pol:proc.data_subject_rights
       ref_id: PROC.DATA_SUBJECT_RIGHTS
       name: Data subject rights handling procedure
@@ -4335,6 +4658,18 @@ objects:
             "R\xE9ception, authentification, traitement et suivi des demandes\
             \ des personnes concern\xE9es (acc\xE8s, rectification, effacement, portabilit\xE9\
             , opposition)."
+        de:
+          name: Verfahren zur Wahrnehmung der Betroffenenrechte
+          description:
+            "Erfassung, Authentifizierung, Bearbeitung und Nachverfolgung\
+            \ von Anfragen Betroffener (Auskunft, Berichtigung, L\xF6schung, \xDCbertragbarkeit,\
+            \ Widerspruch)."
+        es:
+          name: "Procedimiento de gesti\xF3n de derechos de los interesados"
+          description:
+            "Recepci\xF3n, autenticaci\xF3n, atenci\xF3n y seguimiento de\
+            \ las solicitudes de los interesados (acceso, rectificaci\xF3n, supresi\xF3\
+            n, portabilidad, oposici\xF3n)."
     - urn: urn:intuitem:risk:function:doc-pol:proc.breach_notif
       ref_id: PROC.BREACH_NOTIF
       name: Personal data breach notification procedure
@@ -4355,6 +4690,18 @@ objects:
             "D\xE9tection, qualification, notification \xE0 l'autorit\xE9\
             \ et communication aux personnes en cas de violation de donn\xE9es personnelles,\
             \ dans les d\xE9lais r\xE9glementaires."
+        de:
+          name: Verfahren zur Meldung von Datenschutzverletzungen
+          description:
+            "Erkennung, Bewertung, Meldung an die Aufsichtsbeh\xF6rde und\
+            \ Benachrichtigung Betroffener bei Verletzungen des Schutzes personenbezogener\
+            \ Daten innerhalb regulatorischer Fristen."
+        es:
+          name: "Procedimiento de notificaci\xF3n de violaciones de datos personales"
+          description:
+            "Detecci\xF3n, evaluaci\xF3n, notificaci\xF3n a la autoridad\
+            \ y comunicaci\xF3n a los interesados ante violaciones de datos personales,\
+            \ dentro de los plazos regulatorios."
     - urn: urn:intuitem:risk:function:doc-pol:doc.ropa
       ref_id: DOC.ROPA
       name: Record of Processing Activities
@@ -4375,6 +4722,18 @@ objects:
             "Registre central des traitements de donn\xE9es personnelles\
             \ incluant les finalit\xE9s, cat\xE9gories de donn\xE9es, destinataires,\
             \ dur\xE9es de conservation et mesures de s\xE9curit\xE9."
+        de:
+          name: "Verzeichnis von Verarbeitungst\xE4tigkeiten"
+          description:
+            "Zentrales Verzeichnis der Verarbeitungst\xE4tigkeiten personenbezogener\
+            \ Daten mit Zwecken, Datenkategorien, Empf\xE4ngern, Aufbewahrung und Schutzma\xDF\
+            nahmen."
+        es:
+          name: Registro de actividades de tratamiento
+          description:
+            "Registro central de las actividades de tratamiento de datos\
+            \ personales incluyendo finalidades, categor\xEDas de datos, destinatarios,\
+            \ conservaci\xF3n y medidas de seguridad."
     - urn: urn:intuitem:risk:function:doc-pol:doc.dpa_register
       ref_id: DOC.DPA_REGISTER
       name: Register of Data Processing Agreements
@@ -4394,6 +4753,16 @@ objects:
           description:
             Inventaire des accords de traitement actifs avec les sous-traitants
             et co-responsables.
+        de:
+          name: "Verzeichnis der Auftragsverarbeitungsvertr\xE4ge"
+          description:
+            "Bestandsverzeichnis aktiver Auftragsverarbeitungsvertr\xE4ge\
+            \ mit Auftragsverarbeitern und gemeinsam Verantwortlichen."
+        es:
+          name: Registro de acuerdos de tratamiento de datos
+          description:
+            Inventario de los acuerdos de tratamiento vigentes con encargados
+            y corresponsables del tratamiento.
     - urn: urn:intuitem:risk:function:doc-pol:pol.ai
       ref_id: POL.AI
       name: AI governance and acceptable use policy
@@ -4416,6 +4785,18 @@ objects:
             "Principes et r\xE8gles applicables au d\xE9veloppement, \xE0\
             \ l'achat et \xE0 l'utilisation des syst\xE8mes d'IA.\nUsages acceptables,\
             \ usages prohib\xE9s, transparence, supervision humaine."
+        de:
+          name: Richtlinie zur KI-Governance und zum verantwortungsvollen KI-Einsatz
+          description:
+            "Grunds\xE4tze und Regeln f\xFCr Entwicklung, Beschaffung und\
+            \ Nutzung von KI-Systemen.\nZul\xE4ssige Nutzung, unzul\xE4ssige Anwendungsf\xE4\
+            lle, Transparenz, menschliche Aufsicht."
+        es:
+          name: "Pol\xEDtica de gobernanza y uso responsable de la IA"
+          description:
+            "Principios y reglas para el desarrollo, adquisici\xF3n y uso\
+            \ de sistemas de IA.\nUsos aceptables, usos prohibidos, transparencia y\
+            \ supervisi\xF3n humana."
     - urn: urn:intuitem:risk:function:doc-pol:proc.ai_risk
       ref_id: PROC.AI_RISK
       name: AI risk assessment procedure
@@ -4436,6 +4817,18 @@ objects:
             "Identification, classification et \xE9valuation des risques\
             \ sp\xE9cifiques aux syst\xE8mes d'IA : biais, hallucinations, fuite de\
             \ donn\xE9es, s\xFBret\xE9, explicabilit\xE9."
+        de:
+          name: Verfahren zur KI-Risikobewertung
+          description:
+            "Identifikation, Klassifikation und Bewertung KI-spezifischer\
+            \ Risiken: Verzerrungen, Halluzinationen, Datenabfluss, Sicherheit, Erkl\xE4\
+            rbarkeit."
+        es:
+          name: "Procedimiento de evaluaci\xF3n de riesgos de IA"
+          description:
+            "Identificaci\xF3n, clasificaci\xF3n y evaluaci\xF3n de riesgos\
+            \ propios de los sistemas de IA: sesgos, alucinaciones, fuga de datos, seguridad\
+            \ y explicabilidad."
     - urn: urn:intuitem:risk:function:doc-pol:proc.ai_lifecycle
       ref_id: PROC.AI_LIFECYCLE
       name: AI system lifecycle management procedure
@@ -4456,6 +4849,18 @@ objects:
             "Contr\xF4les sur l'ensemble du cycle : acquisition des donn\xE9\
             es, entra\xEEnement, validation, d\xE9ploiement, surveillance et mise hors\
             \ service."
+        de:
+          name: Verfahren zum Lebenszyklusmanagement von KI-Systemen
+          description:
+            "Lebenszykluskontrollen \xFCber Datenbeschaffung, Modelltraining,\
+            \ Validierung, Bereitstellung, \xDCberwachung und Au\xDFerbetriebnahme von\
+            \ KI-Systemen."
+        es:
+          name: "Procedimiento de gesti\xF3n del ciclo de vida de sistemas de IA"
+          description:
+            "Controles sobre el ciclo de vida: obtenci\xF3n de datos, entrenamiento\
+            \ del modelo, validaci\xF3n, despliegue, supervisi\xF3n y retirada de sistemas\
+            \ de IA."
     - urn: urn:intuitem:risk:function:doc-pol:doc.ai_inventory
       ref_id: DOC.AI_INVENTORY
       name: AI systems and models inventory
@@ -4476,6 +4881,16 @@ objects:
             "Inventaire des syst\xE8mes et mod\xE8les d'IA d\xE9ploy\xE9\
             s, leur finalit\xE9, leurs sources de donn\xE9es, leur classification de\
             \ risque et leur propri\xE9taire."
+        de:
+          name: Inventar von KI-Systemen und -Modellen
+          description:
+            "Inventar eingesetzter KI-Systeme und -Modelle, ihres Zwecks,\
+            \ ihrer Datenquellen, Risikoklassifizierung und Eigent\xFCmerschaft."
+        es:
+          name: Inventario de sistemas y modelos de IA
+          description:
+            "Inventario de los sistemas y modelos de IA desplegados, su finalidad,\
+            \ fuentes de datos, clasificaci\xF3n de riesgo y propiedad."
     - urn: urn:intuitem:risk:function:doc-pol:proc.bia
       ref_id: PROC.BIA
       name: Business Impact Analysis procedure
@@ -4495,6 +4910,16 @@ objects:
           description:
             "Proc\xE9dure d'identification des activit\xE9s critiques, des\
             \ d\xE9pendances, des objectifs RTO / RPO et des impacts dans le temps."
+        de:
+          name: Verfahren zur Business-Impact-Analyse (BIA)
+          description:
+            "Verfahren zur Identifikation kritischer Aktivit\xE4ten, Abh\xE4\
+            ngigkeiten, RTO-/RPO-Zielen und Auswirkungen im Zeitverlauf."
+        es:
+          name: "Procedimiento de an\xE1lisis de impacto al negocio (BIA)"
+          description:
+            "Procedimiento de identificaci\xF3n de actividades cr\xEDticas,\
+            \ dependencias, objetivos RTO / RPO e impactos en el tiempo."
     - urn: urn:intuitem:risk:function:doc-pol:proc.drp
       ref_id: PROC.DRP
       name: Disaster Recovery Plan execution procedure
@@ -4514,6 +4939,17 @@ objects:
           description:
             "Activation, ex\xE9cution et validation des plans de reprise\
             \ informatique pour les syst\xE8mes supportant les activit\xE9s critiques."
+        de:
+          name: "Verfahren zur Ausf\xFChrung des Disaster-Recovery-Plans"
+          description:
+            "Aktivierung, Ausf\xFChrung und Validierung von Disaster-Recovery-Pl\xE4\
+            nen f\xFCr IT-Systeme, die kritische Aktivit\xE4ten unterst\xFCtzen."
+        es:
+          name: "Procedimiento de ejecuci\xF3n del plan de recuperaci\xF3n ante desastres"
+          description:
+            "Activaci\xF3n, ejecuci\xF3n y validaci\xF3n de los planes de\
+            \ recuperaci\xF3n ante desastres para los sistemas de TI que soportan actividades\
+            \ cr\xEDticas."
     - urn: urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
       ref_id: PROC.BCP_EXERCISE
       name: BCP / DR exercise procedure
@@ -4536,6 +4972,18 @@ objects:
             "Planification et ex\xE9cution des exercices de continuit\xE9\
             \ d'activit\xE9 et de reprise.\nObjectifs, types de sc\xE9narios, \xE9valuation,\
             \ retours d'exp\xE9rience."
+        de:
+          name: "Verfahren f\xFCr BCP-/DR-\xDCbungen"
+          description:
+            "Planung und Durchf\xFChrung von \xDCbungen zur Gesch\xE4ftskontinuit\xE4\
+            t und Wiederherstellung.\nZiele, Szenariotypen, Auswertung, Lehren aus der\
+            \ \xDCbung."
+        es:
+          name: Procedimiento de ejercicios de BCP / DR
+          description:
+            "Planificaci\xF3n y ejecuci\xF3n de ejercicios de continuidad\
+            \ de negocio y recuperaci\xF3n.\nObjetivos, tipos de escenarios, evaluaci\xF3\
+            n y lecciones aprendidas."
     - urn: urn:intuitem:risk:function:doc-pol:doc.bia
       ref_id: DOC.BIA
       name: Business Impact Analysis document
@@ -4556,6 +5004,17 @@ objects:
             "Rapport consolid\xE9 d'analyse d'impact par p\xE9rim\xE8tre,\
             \ listant les activit\xE9s critiques, les d\xE9pendances et les objectifs\
             \ de reprise."
+        de:
+          name: Dokument zur Business-Impact-Analyse
+          description:
+            "Konsolidierter Bericht der Business-Impact-Analyse je Geltungsbereich,\
+            \ mit Auflistung kritischer Aktivit\xE4ten, Abh\xE4ngigkeiten und Wiederherstellungszielen."
+        es:
+          name: "Documento de an\xE1lisis de impacto al negocio"
+          description:
+            "Informe consolidado de an\xE1lisis de impacto por alcance, con\
+            \ listado de actividades cr\xEDticas, dependencias y objetivos de recuperaci\xF3\
+            n."
     - urn: urn:intuitem:risk:function:doc-pol:tech.dr_site
       ref_id: TECH.DR_SITE
       name: Disaster recovery site / alternate processing capability
@@ -4576,6 +5035,18 @@ objects:
             "Site de traitement alternatif (froid, ti\xE8de ou chaud) et\
             \ m\xE9canismes de r\xE9plication permettant la reprise dans les RTO / RPO\
             \ d\xE9finis."
+        de:
+          name: "Funktion f\xFCr Disaster-Recovery-Standort / alternative Verarbeitung"
+          description:
+            "Alternativer Verarbeitungsstandort (kalt, warm oder hei\xDF\
+            ) und Replikationsmechanismen, die eine Wiederherstellung innerhalb der\
+            \ definierten RTO/RPO erm\xF6glichen."
+        es:
+          name: "Capacidad de sitio de recuperaci\xF3n / procesamiento alternativo"
+          description:
+            "Sitio alternativo de procesamiento (fr\xEDo, tibio o caliente)\
+            \ y mecanismos de replicaci\xF3n que permiten la recuperaci\xF3n dentro\
+            \ de los RTO / RPO definidos."
     - urn: urn:intuitem:risk:function:doc-pol:pol.cloud
       ref_id: POL.CLOUD
       name: Cloud security policy
@@ -4597,6 +5068,18 @@ objects:
             "R\xE8gles d'adoption et d'exploitation des services cloud.\n\
             Responsabilit\xE9 partag\xE9e, fournisseurs approuv\xE9s, configurations\
             \ de r\xE9f\xE9rence, contraintes de classification des donn\xE9es."
+        de:
+          name: Richtlinie zur Cloud-Sicherheit
+          description:
+            "Regeln f\xFCr Einf\xFChrung und Betrieb von Cloud-Diensten.\n\
+            Geteilte Verantwortung, zugelassene Anbieter, Referenzkonfigurationen, Einschr\xE4\
+            nkungen auf Basis der Datenklassifizierung."
+        es:
+          name: "Pol\xEDtica de seguridad en la nube"
+          description:
+            "Reglas para la adopci\xF3n y operaci\xF3n de servicios en la\
+            \ nube.\nResponsabilidad compartida, proveedores autorizados, configuraciones\
+            \ de referencia y restricciones seg\xFAn la clasificaci\xF3n de los datos."
     - urn: urn:intuitem:risk:function:doc-pol:proc.cloud_config
       ref_id: PROC.CLOUD_CONFIG
       name: Cloud secure configuration procedure
@@ -4617,6 +5100,17 @@ objects:
             "Mise en service et maintenance des configurations s\xE9curis\xE9\
             es des tenants, comptes et charges cloud via des r\xE9f\xE9rences et de\
             \ l'infrastructure-as-code."
+        de:
+          name: Verfahren zur sicheren Cloud-Konfiguration
+          description:
+            "Bereitstellung und Pflege sicherer Konfigurationen f\xFCr Cloud-Tenants,\
+            \ -Konten und -Workloads mittels Referenzen und Infrastructure-as-Code."
+        es:
+          name: "Procedimiento de configuraci\xF3n segura en la nube"
+          description:
+            "Aprovisionamiento y mantenimiento de configuraciones seguras\
+            \ para tenants, cuentas y cargas de trabajo en la nube, mediante l\xEDneas\
+            \ base e infraestructura como c\xF3digo."
     - urn: urn:intuitem:risk:function:doc-pol:tech.cspm
       ref_id: TECH.CSPM
       name: Cloud Security Posture Management (CSPM) capability
@@ -4637,6 +5131,17 @@ objects:
             "\xC9valuation continue des configurations des ressources cloud\
             \ au regard de r\xE9f\xE9rences de s\xE9curit\xE9, avec alertes sur les\
             \ d\xE9rives et mauvaises configurations."
+        de:
+          name: "Funktion f\xFCr Cloud Security Posture Management (CSPM)"
+          description:
+            Kontinuierliche Bewertung von Cloud-Ressourcen-Konfigurationen
+            gegen Sicherheitsreferenzen, mit Warnungen bei Abweichungen und Fehlkonfigurationen.
+        es:
+          name: "Capacidad de gesti\xF3n de la postura de seguridad en la nube (CSPM)"
+          description:
+            "Evaluaci\xF3n continua de las configuraciones de recursos en\
+            \ la nube frente a l\xEDneas base de seguridad, con alertas de desv\xED\
+            o y errores de configuraci\xF3n."
     - urn: urn:intuitem:risk:function:doc-pol:tech.cwpp
       ref_id: TECH.CWPP
       name: Cloud Workload Protection Platform (CWPP) capability
@@ -4657,6 +5162,18 @@ objects:
             "Protection \xE0 l'ex\xE9cution des charges cloud (VM, conteneurs,\
             \ serverless) : scan de vuln\xE9rabilit\xE9s, anti-malware, int\xE9grit\xE9\
             , d\xE9tection comportementale."
+        de:
+          name: "Funktion f\xFCr Cloud Workload Protection Platform (CWPP)"
+          description:
+            "Laufzeitschutz f\xFCr Cloud-Workloads (VMs, Container, Serverless):\
+            \ Schwachstellenscan, Antischadsoftware, Integrit\xE4ts\xFCberwachung, verhaltensbasierte\
+            \ Erkennung."
+        es:
+          name: "Capacidad de protecci\xF3n de cargas en la nube (CWPP)"
+          description:
+            "Protecci\xF3n en tiempo de ejecuci\xF3n para cargas de trabajo\
+            \ en la nube (VM, contenedores, serverless): escaneo de vulnerabilidades,\
+            \ antimalware, supervisi\xF3n de integridad y detecci\xF3n basada en comportamiento."
     - urn: urn:intuitem:risk:function:doc-pol:tech.casb
       ref_id: TECH.CASB
       name: Cloud Access Security Broker (CASB) capability
@@ -4677,6 +5194,17 @@ objects:
             "Visibilit\xE9 et contr\xF4le sur les usages SaaS approuv\xE9\
             s et non approuv\xE9s, avec application des politiques sur les flux de donn\xE9\
             es et d'authentification."
+        de:
+          name: "Funktion f\xFCr Cloud Access Security Broker (CASB)"
+          description:
+            "Transparenz und Steuerung genehmigter und ungenehmigter SaaS-Nutzung\
+            \ mit Richtliniendurchsetzung f\xFCr Datenfl\xFCsse und Authentifizierung."
+        es:
+          name: Capacidad de broker de seguridad de acceso a la nube (CASB)
+          description:
+            "Visibilidad y control sobre el uso de SaaS autorizado y no autorizado,\
+            \ con aplicaci\xF3n de pol\xEDticas sobre flujos de datos y autenticaci\xF3\
+            n."
     - urn: urn:intuitem:risk:function:doc-pol:phys.secure_area
       ref_id: PHYS.SECURE_AREA
       name: Secure area and physical zoning
@@ -4697,6 +5225,18 @@ objects:
             "D\xE9finition et application de p\xE9rim\xE8tres et zones de\
             \ s\xE9curit\xE9 physiques avec des contr\xF4les d'acc\xE8s gradu\xE9s selon\
             \ la sensibilit\xE9."
+        de:
+          name: Sicherer Bereich und physische Zonierung
+          description:
+            "Definition und Durchsetzung physischer Sicherheitsperimeter\
+            \ und -zonen mit abgestuften Zugangskontrollen entsprechend der Sensibilit\xE4\
+            t des Bereichs."
+        es:
+          name: "Zona segura y zonificaci\xF3n f\xEDsica"
+          description:
+            "Definici\xF3n y aplicaci\xF3n de per\xEDmetros y zonas de seguridad\
+            \ f\xEDsica con controles de acceso graduados seg\xFAn la sensibilidad de\
+            \ la zona."
     - urn: urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
       ref_id: PHYS.VISITOR_MGMT
       name: Visitor management
@@ -4716,6 +5256,16 @@ objects:
           description:
             "Enregistrement, identification, accompagnement et suivi des\
             \ visiteurs dans les locaux s\xE9curis\xE9s."
+        de:
+          name: Besuchermanagement
+          description:
+            Registrierung, Identifikation, Begleitung und Nachverfolgung
+            von Besuchern in sicheren Bereichen.
+        es:
+          name: "Gesti\xF3n de visitantes"
+          description:
+            "Registro, identificaci\xF3n, acompa\xF1amiento y seguimiento\
+            \ de visitantes en instalaciones seguras."
     - urn: urn:intuitem:risk:function:doc-pol:phys.cctv
       ref_id: PHYS.CCTV
       name: CCTV / surveillance capability
@@ -4735,6 +5285,16 @@ objects:
           description:
             "Vid\xE9osurveillance des locaux s\xE9curis\xE9s et des acc\xE8\
             s, avec dur\xE9e de conservation et contr\xF4les d'acc\xE8s aux enregistrements."
+        de:
+          name: "Funktion f\xFCr CCTV / Video\xFCberwachung"
+          description:
+            "Video\xFCberwachung sicherer Bereiche und Zug\xE4nge, mit Aufbewahrungsfristen\
+            \ und Zugriffskontrollen auf Aufzeichnungen."
+        es:
+          name: Capacidad de CCTV / videovigilancia
+          description:
+            "Videovigilancia de instalaciones seguras y puntos de acceso,\
+            \ con conservaci\xF3n de grabaciones y controles de acceso a las mismas."
     - urn: urn:intuitem:risk:function:doc-pol:phys.clear_desk
       ref_id: PHYS.CLEAR_DESK
       name: Clear desk and clear screen enforcement
@@ -4754,6 +5314,16 @@ objects:
           description:
             "Exigences de rangement des documents, supports amovibles et\
             \ verrouillage des \xE9crans lorsque le poste n'est pas surveill\xE9."
+        de:
+          name: Durchsetzung von Clean-Desk und Bildschirmsperre
+          description:
+            "Anforderungen zum Wegr\xE4umen von Dokumenten und Wechseldatentr\xE4\
+            gern sowie zur Sperrung ungenutzter Bildschirme."
+        es:
+          name: Mesa limpia y bloqueo de pantalla
+          description:
+            "Requisitos para recoger documentos, retirar soportes extra\xED\
+            bles y bloquear pantallas desatendidas."
     - urn: urn:intuitem:risk:function:doc-pol:phys.equipment_disposal
       ref_id: PHYS.EQUIPMENT_DISPOSAL
       name: Secure equipment and media disposal
@@ -4773,6 +5343,16 @@ objects:
           description:
             "Destruction physique ou effacement s\xE9curis\xE9 des \xE9quipements\
             \ et supports amovibles d\xE9saffect\xE9s contenant des informations sensibles."
+        de:
+          name: "Sichere Entsorgung von Ger\xE4ten und Datentr\xE4gern"
+          description:
+            "Physische Vernichtung oder L\xF6schung ausgemusterter Ger\xE4\
+            te und Wechseldatentr\xE4ger mit sensiblen Informationen."
+        es:
+          name: "Eliminaci\xF3n segura de equipos y soportes"
+          description:
+            "Destrucci\xF3n f\xEDsica o borrado seguro de equipos y soportes\
+            \ extra\xEDbles dados de baja que contengan informaci\xF3n sensible."
     - urn: urn:intuitem:risk:function:doc-pol:phys.power_env
       ref_id: PHYS.POWER_ENV
       name: Power and environmental controls
@@ -4792,6 +5372,17 @@ objects:
           description:
             "Protection des sites contre les coupures et al\xE9as environnementaux\
             \ : ASI, groupes, CVC, d\xE9tection incendie, d\xE9tection fuites."
+        de:
+          name: "Kontrollen f\xFCr Stromversorgung und Umgebungsbedingungen"
+          description:
+            "Schutz von Standorten gegen Stromausf\xE4lle und Umweltgefahren:\
+            \ USV, Generatoren, Klimatechnik, Brandmeldung, Leckerkennung."
+        es:
+          name: "Controles de alimentaci\xF3n y ambientales"
+          description:
+            "Protecci\xF3n de las instalaciones frente a cortes el\xE9ctricos\
+            \ y riesgos ambientales: SAI, generadores, climatizaci\xF3n, detecci\xF3\
+            n de incendios, detecci\xF3n de fugas."
     - urn: urn:intuitem:risk:function:doc-pol:proc.key_mgmt
       ref_id: PROC.KEY_MGMT
       name: Cryptographic key management procedure
@@ -4811,6 +5402,18 @@ objects:
           description:
             "Gestion de bout en bout des cl\xE9s et certificats : g\xE9n\xE9\
             ration, distribution, stockage, rotation, r\xE9vocation, archivage, destruction."
+        de:
+          name: "Verfahren zur Verwaltung kryptografischer Schl\xFCssel"
+          description:
+            "Durchg\xE4ngige Verwaltung kryptografischer Schl\xFCssel und\
+            \ Zertifikate: Erzeugung, Verteilung, Speicherung, Rotation, Widerruf, Archivierung,\
+            \ Vernichtung."
+        es:
+          name: "Procedimiento de gesti\xF3n de claves criptogr\xE1ficas"
+          description:
+            "Gesti\xF3n integral de claves y certificados criptogr\xE1ficos:\
+            \ generaci\xF3n, distribuci\xF3n, almacenamiento, rotaci\xF3n, revocaci\xF3\
+            n, archivado y destrucci\xF3n."
     - urn: urn:intuitem:risk:function:doc-pol:tech.pki
       ref_id: TECH.PKI
       name: PKI / certificate management capability
@@ -4831,6 +5434,16 @@ objects:
             "\xC9mission, inventaire, surveillance et renouvellement des\
             \ certificats num\xE9riques utilis\xE9s pour l'authentification, la signature\
             \ et le chiffrement."
+        de:
+          name: "Funktion f\xFCr PKI / Zertifikatsverwaltung"
+          description:
+            "Ausstellung, Inventar, \xDCberwachung und Erneuerung digitaler\
+            \ Zertifikate f\xFCr Authentifizierung, Signatur und Verschl\xFCsselung."
+        es:
+          name: "Capacidad de PKI / gesti\xF3n de certificados"
+          description:
+            "Emisi\xF3n, inventario, supervisi\xF3n y renovaci\xF3n de certificados\
+            \ digitales usados para autenticaci\xF3n, firma y cifrado."
     - urn: urn:intuitem:risk:function:doc-pol:tech.hsm
       ref_id: TECH.HSM
       name: Hardware Security Module / key vault capability
@@ -4853,6 +5466,17 @@ objects:
             "Utilisation de HSM ou coffres-forts de cl\xE9s manag\xE9s pour\
             \ prot\xE9ger les cl\xE9s cryptographiques \xE0 forte valeur, avec audit\
             \ et contr\xF4le d'acc\xE8s."
+        de:
+          name: "Funktion f\xFCr Hardware Security Module / Schl\xFCsseltresor"
+          description:
+            "Einsatz von HSMs oder verwalteten Schl\xFCsseltresoren zum Schutz\
+            \ hochwertiger kryptografischer Schl\xFCssel mit Audit- und Zugriffskontrollen."
+        es:
+          name: "Capacidad de m\xF3dulo de seguridad hardware / b\xF3veda de claves"
+          description:
+            "Uso de HSM o b\xF3vedas de claves gestionadas para proteger\
+            \ claves criptogr\xE1ficas de alto valor con auditor\xEDa y controles de\
+            \ acceso."
     - urn: urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
       ref_id: PROC.COMPLIANCE_MONITORING
       name: Compliance monitoring procedure
@@ -4873,6 +5497,18 @@ objects:
             "Surveillance p\xE9riodique de la conformit\xE9 aux politiques\
             \ internes, aux exigences contractuelles et r\xE9glementaires, avec collecte\
             \ de preuves et reporting."
+        de:
+          name: "Verfahren zur Compliance-\xDCberwachung"
+          description:
+            "Periodische \xDCberwachung der Einhaltung interner Richtlinien,\
+            \ vertraglicher und regulatorischer Anforderungen, mit Nachweiserhebung\
+            \ und Berichterstattung."
+        es:
+          name: "Procedimiento de supervisi\xF3n del cumplimiento"
+          description:
+            "Supervisi\xF3n peri\xF3dica del cumplimiento de pol\xEDticas\
+            \ internas, requisitos contractuales y regulatorios, con recopilaci\xF3\
+            n de evidencias y reporte."
     - urn: urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
       ref_id: PROC.EXCEPTION_MGMT
       name: Security exception and deviation management procedure
@@ -4892,6 +5528,16 @@ objects:
           description:
             "R\xE9ception, revue, approbation, acceptation du risque et expiration\
             \ des d\xE9rogations aux contr\xF4les \xE9tablis."
+        de:
+          name: Verfahren zur Verwaltung von Sicherheitsausnahmen und Abweichungen
+          description:
+            "Erfassung, Pr\xFCfung, Genehmigung, Risikoakzeptanz und Ablauf\
+            \ von Ausnahmen zu etablierten Sicherheitskontrollen."
+        es:
+          name: "Procedimiento de gesti\xF3n de excepciones y desviaciones de seguridad"
+          description:
+            "Recepci\xF3n, revisi\xF3n, aprobaci\xF3n, aceptaci\xF3n del\
+            \ riesgo y caducidad de excepciones a los controles de seguridad establecidos."
     - urn: urn:intuitem:risk:function:doc-pol:doc.exception_register
       ref_id: DOC.EXCEPTION_REGISTER
       name: Register of security exceptions
@@ -4911,6 +5557,16 @@ objects:
             "Registre central des d\xE9rogations approuv\xE9es, leur p\xE9\
             rim\xE8tre, les contr\xF4les compensatoires, le propri\xE9taire et la date\
             \ d'expiration."
+        de:
+          name: Verzeichnis der Sicherheitsausnahmen
+          description:
+            "Zentrales Verzeichnis genehmigter Sicherheitsausnahmen, ihres\
+            \ Geltungsbereichs, kompensierender Ma\xDFnahmen, Eigent\xFCmer und Ablaufdatums."
+        es:
+          name: Registro de excepciones de seguridad
+          description:
+            Registro central de excepciones de seguridad aprobadas, su alcance,
+            controles compensatorios, propietario y fecha de caducidad.
     - urn: urn:intuitem:risk:function:doc-pol:train.privacy
       ref_id: TRAIN.PRIVACY
       name: Privacy and personal data protection training
@@ -4931,6 +5587,16 @@ objects:
             "Formation adapt\xE9e aux r\xF4les sur les obligations de protection\
             \ des donn\xE9es personnelles, les r\xE8gles de traitement et la remont\xE9\
             e d'incidents."
+        de:
+          name: Schulung zum Datenschutz und zum Schutz personenbezogener Daten
+          description:
+            Rollenspezifische Schulung zu Datenschutzpflichten, Umgang mit
+            personenbezogenen Daten und Vorfallmeldung.
+        es:
+          name: "Formaci\xF3n en privacidad y protecci\xF3n de datos personales"
+          description:
+            "Formaci\xF3n adaptada al rol sobre obligaciones de protecci\xF3\
+            n de datos personales, reglas de tratamiento y reporte de incidentes."
     - urn: urn:intuitem:risk:function:doc-pol:train.ai
       ref_id: TRAIN.AI
       name: AI literacy and governance training
@@ -4950,6 +5616,16 @@ objects:
           description:
             "Formation \xE0 un usage s\xFBr et responsable de l'IA : risques,\
             \ politiques, hygi\xE8ne d'invite, canaux de signalement."
+        de:
+          name: Schulung zu KI-Kompetenz und -Governance
+          description:
+            "Schulung zur sicheren und verantwortungsvollen KI-Nutzung: Risiken,
+            Richtlinien, Prompt-Hygiene, Meldewege."
+        es:
+          name: "Formaci\xF3n en alfabetizaci\xF3n y gobernanza de la IA"
+          description:
+            "Formaci\xF3n en uso seguro y responsable de la IA: riesgos,\
+            \ pol\xEDticas, higiene de prompts y canales de reporte."
     - urn: urn:intuitem:risk:function:doc-pol:pol.web_sec
       ref_id: POL.WEB_SEC
       name: Web security policy
@@ -4976,6 +5652,19 @@ objects:
             s : utilisation de WAF et de reverse proxies, gestion des sessions et des\
             \ cookies, authentification forte des clients, validation des entr\xE9es,\
             \ durcissement et exposition s\xE9curis\xE9e des services internes."
+        de:
+          name: Richtlinie zur Web-Sicherheit
+          description:
+            "Sicherheitsanforderungen f\xFCr exponierte Webdienste: Einsatz\
+            \ von WAF und Reverse-Proxys, Sitzungs- und Cookie-Verwaltung, starke Kundenauthentifizierung,\
+            \ Eingabevalidierung, H\xE4rtung und sichere Bereitstellung interner Dienste."
+        es:
+          name: "Pol\xEDtica de seguridad web"
+          description:
+            "Requisitos de seguridad para los servicios web expuestos: uso\
+            \ de WAF y proxys inversos, gesti\xF3n de sesiones y cookies, autenticaci\xF3\
+            n reforzada de clientes, validaci\xF3n de entradas, endurecimiento y exposici\xF3\
+            n segura de servicios internos."
     - urn: urn:intuitem:risk:function:doc-pol:pol.change_mgmt
       ref_id: POL.CHANGE_MGMT
       name: Change management policy
@@ -5000,6 +5689,18 @@ objects:
             "Exigences d'initiation, d'\xE9valuation, d'approbation, de communication\
             \ et de revue des changements apport\xE9s aux syst\xE8mes et services.\n\
             Analyse d'impact s\xE9curit\xE9, retour arri\xE8re, s\xE9paration des environnements."
+        de:
+          name: "Richtlinie zum \xC4nderungsmanagement"
+          description:
+            "Anforderungen f\xFCr Initiierung, Bewertung, Genehmigung, Kommunikation\
+            \ und \xDCberpr\xFCfung von \xC4nderungen an Systemen und Diensten.\nSicherheitsauswirkungsanalyse,\
+            \ Rollback, Trennung der Umgebungen."
+        es:
+          name: "Pol\xEDtica de gesti\xF3n de cambios"
+          description:
+            "Requisitos para iniciar, evaluar, aprobar, comunicar y revisar\
+            \ los cambios sobre sistemas y servicios.\nAn\xE1lisis de impacto de seguridad,\
+            \ reversi\xF3n y separaci\xF3n de entornos."
     - urn: urn:intuitem:risk:function:doc-pol:proc.change_mgmt
       ref_id: PROC.CHANGE_MGMT
       name: Change management procedure
@@ -5024,6 +5725,18 @@ objects:
             \ l'\xE9valuation de risque et d'impact s\xE9curit\xE9, les portes d'approbation,\
             \ la planification, les tests, le d\xE9ploiement et la revue post-mise en\
             \ production."
+        de:
+          name: "Verfahren zum \xC4nderungsmanagement"
+          description:
+            "Operatives Verfahren f\xFCr \xC4nderungsantr\xE4ge, Risiko-\
+            \ und Sicherheitsauswirkungsanalyse, Genehmigungstore, Planung, Tests, Bereitstellung\
+            \ und Nachbetrachtung."
+        es:
+          name: "Procedimiento de gesti\xF3n de cambios"
+          description:
+            "Procedimiento operativo para solicitudes de cambio, evaluaci\xF3\
+            n de riesgo e impacto de seguridad, puertas de aprobaci\xF3n, planificaci\xF3\
+            n, pruebas, despliegue y revisi\xF3n posterior."
     - urn: urn:intuitem:risk:function:doc-pol:proc.capacity_mgmt
       ref_id: PROC.CAPACITY_MGMT
       name: Capacity and performance management procedure
@@ -5046,6 +5759,18 @@ objects:
             "Surveillance de la capacit\xE9 et des performances actuelles\
             \ et pr\xE9visionnelles, avec planification et actions de mise \xE0 l'\xE9\
             chelle pour soutenir la disponibilit\xE9 et les objectifs de service."
+        de:
+          name: "Verfahren zum Kapazit\xE4ts- und Leistungsmanagement"
+          description:
+            "\xDCberwachung der aktuellen und prognostizierten Kapazit\xE4\
+            t und Leistung, mit Planung und Skalierungsma\xDFnahmen zur Einhaltung von\
+            \ Verf\xFCgbarkeits- und Service-Level-Zielen."
+        es:
+          name: "Procedimiento de gesti\xF3n de capacidad y rendimiento"
+          description:
+            "Supervisi\xF3n de la capacidad y el rendimiento actuales y previstos,\
+            \ con planificaci\xF3n y acciones de escalado para mantener los objetivos\
+            \ de disponibilidad y servicio."
     - urn: urn:intuitem:risk:function:doc-pol:proc.threat_intel
       ref_id: PROC.THREAT_INTEL
       name: Threat intelligence operations procedure
@@ -5068,6 +5793,18 @@ objects:
             "Collecte, analyse, priorisation et diffusion de renseignements\
             \ sur les menaces (sources ouvertes, commerciales, sectorielles) pour alimenter\
             \ la d\xE9tection et les d\xE9cisions de risque."
+        de:
+          name: Verfahren zum operativen Betrieb von Threat Intelligence
+          description:
+            "Erfassung, Analyse, Priorisierung und Verteilung von Bedrohungsinformationen\
+            \ aus offenen, kommerziellen und branchenspezifischen Quellen zur Unterst\xFC\
+            tzung von Detektion und Risikoentscheidungen."
+        es:
+          name: Procedimiento de operaciones de inteligencia de amenazas
+          description:
+            "Recopilaci\xF3n, an\xE1lisis, priorizaci\xF3n y difusi\xF3n\
+            \ de informaci\xF3n sobre amenazas procedente de fuentes abiertas, comerciales\
+            \ y sectoriales para alimentar la detecci\xF3n y las decisiones de riesgo."
     - urn: urn:intuitem:risk:function:doc-pol:proc.threat_hunt
       ref_id: PROC.THREAT_HUNT
       name: Threat hunting procedure
@@ -5088,6 +5825,18 @@ objects:
             "Recherche proactive et guid\xE9e par hypoth\xE8ses d'activit\xE9\
             s adverses dans les syst\xE8mes de l'entreprise, en compl\xE9ment de la\
             \ d\xE9tection par signatures."
+        de:
+          name: Verfahren zum Threat Hunting
+          description:
+            "Proaktive, hypothesengeleitete Suche nach Aktivit\xE4ten von\
+            \ Angreifern in Unternehmensumgebungen als Erg\xE4nzung zur signaturbasierten\
+            \ Erkennung."
+        es:
+          name: "Procedimiento de b\xFAsqueda proactiva de amenazas"
+          description:
+            "B\xFAsqueda proactiva y guiada por hip\xF3tesis de actividades\
+            \ de adversarios en los sistemas de la empresa, complementando la detecci\xF3\
+            n basada en firmas."
     - urn: urn:intuitem:risk:function:doc-pol:proc.insider_threat
       ref_id: PROC.INSIDER_THREAT
       name: Insider threat management procedure
@@ -5108,6 +5857,18 @@ objects:
             "D\xE9tection et traitement des risques d'origine interne, combinant\
             \ surveillance comportementale, contr\xF4les d'acc\xE8s privil\xE9gi\xE9\
             s, coordination RH et sensibilisation cibl\xE9e."
+        de:
+          name: "Verfahren zum Management von Innent\xE4tern"
+          description:
+            "Erkennung und Behandlung von Risiken durch interne Akteure,\
+            \ Kombination aus Verhaltens\xFCberwachung, privilegierten Zugriffskontrollen,\
+            \ HR-Koordination und gezielter Sensibilisierung."
+        es:
+          name: "Procedimiento de gesti\xF3n de la amenaza interna"
+          description:
+            "Detecci\xF3n y tratamiento de riesgos originados internamente,\
+            \ combinando monitorizaci\xF3n de comportamiento, controles de acceso privilegiado,\
+            \ coordinaci\xF3n con RR.HH. y sensibilizaci\xF3n dirigida."
     - urn: urn:intuitem:risk:function:doc-pol:proc.vuln_disclosure
       ref_id: PROC.VULN_DISCLOSURE
       name: Vulnerability disclosure program (VDP) procedure
@@ -5134,6 +5895,18 @@ objects:
             "R\xE9ception, tri, coordination et rem\xE9diation des vuln\xE9\
             rabilit\xE9s signal\xE9es par des tiers externes.\nContact s\xE9curit\xE9\
             \ public, clause de \xAB safe harbor \xBB, programme de bug bounty optionnel."
+        de:
+          name: "Verfahren f\xFCr ein Vulnerability-Disclosure-Programm (VDP)"
+          description:
+            "Aufnahme, Triage, Koordination und Behebung extern gemeldeter\
+            \ Schwachstellen.\n\xD6ffentlicher Sicherheitskontakt, Safe-Harbor-Erkl\xE4\
+            rung, optional Bug-Bounty."
+        es:
+          name: "Procedimiento del programa de divulgaci\xF3n de vulnerabilidades (VDP)"
+          description:
+            "Recepci\xF3n, triaje, coordinaci\xF3n y remediaci\xF3n de vulnerabilidades\
+            \ notificadas por terceros.\nContacto p\xFAblico de seguridad, cl\xE1usula\
+            \ de safe harbor y, opcionalmente, programa de recompensas por errores."
     - urn: urn:intuitem:risk:function:doc-pol:pol.ot
       ref_id: POL.OT
       name: OT / ICS / IoT / embedded systems security policy
@@ -5165,6 +5938,20 @@ objects:
             s.\nIdentification, classification, s\xE9gr\xE9gation IT-OT, ma\xEEtrise\
             \ des changements, gestion du cycle de vie, traitement des risques align\xE9\
             \ sur la s\xFBret\xE9."
+        de:
+          name: Richtlinie zur Sicherheit von OT / ICS / IoT / eingebetteten Systemen
+          description:
+            "Sicherheitsanforderungen f\xFCr Betriebstechnik, industrielle\
+            \ Steuerungssysteme, IoT und eingebettete Systeme.\nIdentifikation, Klassifikation,\
+            \ IT-/OT-Trennung, restriktives \xC4nderungsmanagement, Lebenszyklusverwaltung,\
+            \ auf Safety abgestimmte Risikobehandlung."
+        es:
+          name: "Pol\xEDtica de seguridad de OT / ICS / IoT / sistemas embebidos"
+          description:
+            "Requisitos de seguridad para tecnolog\xEDa operativa, sistemas\
+            \ de control industrial, IoT y sistemas embebidos.\nIdentificaci\xF3n, clasificaci\xF3\
+            n, segregaci\xF3n IT-OT, control estricto de cambios, gesti\xF3n del ciclo\
+            \ de vida y tratamiento del riesgo alineado con la seguridad f\xEDsica."
     - urn: urn:intuitem:risk:function:doc-pol:proc.ot_segmentation
       ref_id: PROC.OT_SEGMENTATION
       name: OT / IT segmentation procedure
@@ -5188,6 +5975,19 @@ objects:
             "Mise en \u0153uvre et maintien d'une segmentation en zones et\
             \ conduits entre les r\xE9seaux OT / ICS / IoT et l'IT, avec interfaces\
             \ contr\xF4l\xE9es, diodes lorsque pertinent et acc\xE8s distants restreints."
+        de:
+          name: Verfahren zur OT-/IT-Segmentierung
+          description:
+            "Umsetzung und Pflege einer Zonen-und-Konduit-Segmentierung zwischen\
+            \ OT-/ICS-/IoT-Netzen und der Unternehmens-IT, mit kontrollierten Schnittstellen,\
+            \ Datendioden bei Bedarf und eingeschr\xE4nktem Fernzugriff."
+        es:
+          name: "Procedimiento de segmentaci\xF3n OT / IT"
+          description:
+            "Implementaci\xF3n y mantenimiento de una segmentaci\xF3n por\
+            \ zonas y conductos entre las redes OT / ICS / IoT y la TI corporativa,\
+            \ con interfaces controladas, diodos de datos cuando proceda y accesos remotos\
+            \ restringidos."
     - urn: urn:intuitem:risk:function:doc-pol:doc.ot_inventory
       ref_id: DOC.OT_INVENTORY
       name: OT / ICS / IoT / embedded device inventory
@@ -5210,6 +6010,17 @@ objects:
             "Inventaire des \xE9quipements OT / ICS / IoT / embarqu\xE9s\
             \ avec propri\xE9taire, localisation, \xE9tape de cycle de vie, criticit\xE9\
             \ et classification d'impact s\xFBret\xE9."
+        de:
+          name: "Inventar von OT-/ICS-/IoT-/eingebetteten Ger\xE4ten"
+          description:
+            "Inventar der OT-/ICS-/IoT-/eingebetteten Ger\xE4te mit Eigent\xFC\
+            mer, Standort, Lebenszyklusphase, Kritikalit\xE4t und Safety-Auswirkungsklassifizierung."
+        es:
+          name: Inventario de equipos OT / ICS / IoT / embebidos
+          description:
+            "Inventario de equipos OT / ICS / IoT / embebidos con propietario,\
+            \ localizaci\xF3n, fase de ciclo de vida, criticidad y clasificaci\xF3n\
+            \ de impacto en seguridad f\xEDsica."
     - urn: urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
       ref_id: PROC.CRISIS_MGMT
       name: Crisis management procedure
@@ -5238,6 +6049,20 @@ objects:
             \ de la r\xE9ponse \xE0 incident op\xE9rationnelle.\nComposition et pouvoirs\
             \ de la cellule de crise, communications internes et externes, notifications\
             \ r\xE9glementaires, journalisation des d\xE9cisions et sortie de crise."
+        de:
+          name: Verfahren zum Krisenmanagement
+          description:
+            "Ausrufung, Steuerung und F\xFChrung einer Krise, abgegrenzt\
+            \ von der operativen Vorfallbew\xE4ltigung.\nZusammensetzung und Befugnisse\
+            \ des Krisenstabs, interne und externe Kommunikation, beh\xF6rdliche Meldungen,\
+            \ Entscheidungsprotokollierung und Krisenbeendigung."
+        es:
+          name: "Procedimiento de gesti\xF3n de crisis"
+          description:
+            "Declaraci\xF3n, gobierno y conducci\xF3n de una crisis, diferenciado\
+            \ de la respuesta operativa a incidentes.\nComposici\xF3n y facultades del\
+            \ comit\xE9 de crisis, comunicaciones internas y externas, notificaciones\
+            \ reglamentarias, registro de decisiones y salida de crisis."
     - urn: urn:intuitem:risk:function:doc-pol:proc.disciplinary
       ref_id: PROC.DISCIPLINARY
       name: Disciplinary process for security breaches
@@ -5264,6 +6089,20 @@ objects:
             r\xE9es des politiques de s\xE9curit\xE9 par le personnel.\nInvestigation,\
             \ gestion des preuves, sanctions proportionn\xE9es, coordination avec les\
             \ RH et le juridique."
+        de:
+          name: "Verfahren zu Disziplinarma\xDFnahmen bei Sicherheitsverst\xF6\xDFen"
+          description:
+            "Formales Verfahren zur Behandlung best\xE4tigter Verst\xF6\xDF\
+            e gegen Informationssicherheitsrichtlinien durch Personal.\nUntersuchung,\
+            \ Umgang mit Beweismitteln, verh\xE4ltnism\xE4\xDFige Sanktionen, Abstimmung\
+            \ mit HR und Recht."
+        es:
+          name: Procedimiento disciplinario ante incumplimientos de seguridad
+          description:
+            "Procedimiento formal para el tratamiento de violaciones confirmadas\
+            \ de las pol\xEDticas de seguridad por parte del personal.\nInvestigaci\xF3\
+            n, gesti\xF3n de pruebas, sanciones proporcionales y coordinaci\xF3n con\
+            \ RR.HH. y asesor\xEDa jur\xEDdica."
     - urn: urn:intuitem:risk:function:doc-pol:pol.removable_media
       ref_id: POL.REMOVABLE_MEDIA
       name: Removable media policy
@@ -5292,6 +6131,22 @@ objects:
             \ de listes d'autorisation et de protection physique des supports amovibles\
             \ (USB, disques externes, optiques, cartes m\xE9moire).\nTransport, stockage\
             \ et destruction s\xE9curis\xE9e des supports contenant des donn\xE9es sensibles."
+        de:
+          name: "Richtlinie zur Nutzung von Wechseldatentr\xE4gern"
+          description:
+            "Regeln f\xFCr akzeptable Nutzung, Verschl\xFCsselung, Scan,\
+            \ Protokollierung, Zulassungslisten und physischen Schutz von Wechseldatentr\xE4\
+            gern (USB, externe Festplatten, optische Medien, Speicherkarten).\nTransport,\
+            \ Aufbewahrung und sichere Entsorgung von Datentr\xE4gern mit sensiblen\
+            \ Daten."
+        es:
+          name: "Pol\xEDtica de uso de soportes extra\xEDbles"
+          description:
+            "Reglas de uso aceptable, cifrado, an\xE1lisis, registro, listas\
+            \ de autorizaci\xF3n y protecci\xF3n f\xEDsica de los soportes extra\xED\
+            bles (USB, discos externos, soportes \xF3pticos, tarjetas de memoria).\n\
+            Transporte, almacenamiento y eliminaci\xF3n segura de soportes que contengan\
+            \ datos sensibles."
     - urn: urn:intuitem:risk:function:doc-pol:doc.risk_appetite
       ref_id: DOC.RISK_APPETITE
       name: Risk appetite and tolerance statement
@@ -5317,6 +6172,19 @@ objects:
             "D\xE9claration approuv\xE9e par la direction exprimant le niveau\
             \ de risque cyber acceptable pour atteindre les objectifs, incluant les\
             \ seuils de tol\xE9rance par cat\xE9gorie de risque et la cadence de revue."
+        de:
+          name: "Erkl\xE4rung zu Risikoappetit und Risikotoleranz"
+          description:
+            "Vom Vorstand genehmigte Erkl\xE4rung, die das Niveau des akzeptablen\
+            \ Cyberrisikos zur Erreichung der Unternehmensziele ausdr\xFCckt, einschlie\xDF\
+            lich Toleranzschwellen je Risikokategorie und \xDCberpr\xFCfungszyklus."
+        es:
+          name: "Declaraci\xF3n de apetito y tolerancia al riesgo"
+          description:
+            "Declaraci\xF3n aprobada por la direcci\xF3n que expresa el nivel\
+            \ de riesgo cibern\xE9tico aceptable para alcanzar los objetivos, incluyendo\
+            \ umbrales de tolerancia por categor\xEDa de riesgo y cadencia de revisi\xF3\
+            n."
     - urn: urn:intuitem:risk:function:doc-pol:proc.forensics
       ref_id: PROC.FORENSICS
       name: Digital forensics and evidence handling procedure
@@ -5345,6 +6213,20 @@ objects:
             \ num\xE9riques pendant et apr\xE8s un incident.\nCha\xEEne de conservation,\
             \ int\xE9grit\xE9 et provenance des preuves, outillage, coordination avec\
             \ le juridique et le r\xE9gulateur."
+        de:
+          name: Verfahren zur digitalen Forensik und Beweissicherung
+          description:
+            "Erhebung, Sicherung, Analyse und Berichterstattung digitaler\
+            \ Beweise w\xE4hrend und nach Sicherheitsvorf\xE4llen.\nBeweiskette, Integrit\xE4\
+            t und Herkunft der Beweise, Werkzeuge, Abstimmung mit Recht und Aufsichtsbeh\xF6\
+            rden."
+        es:
+          name: "Procedimiento de an\xE1lisis forense digital y tratamiento de evidencias"
+          description:
+            "Recopilaci\xF3n, preservaci\xF3n, an\xE1lisis e informe de evidencias\
+            \ digitales durante y despu\xE9s de los incidentes de seguridad.\nCadena\
+            \ de custodia, integridad y procedencia de las evidencias, herramientas\
+            \ y coordinaci\xF3n con asesor\xEDa jur\xEDdica y reguladores."
     - urn: urn:intuitem:risk:function:doc-pol:proc.tlpt
       ref_id: PROC.TLPT
       name: Threat-Led Penetration Testing (TLPT) procedure
@@ -5376,6 +6258,21 @@ objects:
             \ et processus de production.\nDistincts des tests d'intrusion classiques\
             \ par leur p\xE9rim\xE8tre, leur dur\xE9e et leur r\xE9alisme. Align\xE9\
             s sur TIBER-EU lorsque pertinent."
+        de:
+          name: "Verfahren f\xFCr bedrohungsgef\xFChrte Penetrationstests (TLPT)"
+          description:
+            "Szenariengest\xFCtzte, durch Threat Intelligence informierte\
+            \ Penetrationstests, die reale Angreifer-Taktiken, -Techniken und -Vorgehensweisen\
+            \ gegen produktive Systeme, Personen und Prozesse simulieren. Abgrenzung\
+            \ zu klassischen Penetrationstests in Umfang, Dauer und Realit\xE4tsgrad."
+        es:
+          name: "Procedimiento de pruebas de intrusi\xF3n guiadas por la amenaza (TLPT)"
+          description:
+            "Pruebas de intrusi\xF3n basadas en escenarios e informadas por\
+            \ inteligencia de amenazas, que simulan t\xE1cticas, t\xE9cnicas y procedimientos\
+            \ de adversarios reales sobre sistemas, personas y procesos de producci\xF3\
+            n. Diferenciadas de las pruebas de intrusi\xF3n cl\xE1sicas por su alcance,\
+            \ duraci\xF3n y realismo."
     - urn: urn:intuitem:risk:function:doc-pol:proc.bg_screening
       ref_id: PROC.BG_SCREENING
       name: Personnel background screening procedure
@@ -5405,3 +6302,18 @@ objects:
             , casier judiciaire, prise de r\xE9f\xE9rences, dipl\xF4mes, int\xE9grit\xE9\
             \ financi\xE8re lorsque pertinent.\nCoordination avec les RH, le juridique\
             \ et les exigences de protection des donn\xE9es."
+        de:
+          name: "Verfahren zur Sicherheits\xFCberpr\xFCfung des Personals"
+          description:
+            "Vor- und regelm\xE4\xDFige \xDCberpr\xFCfung des Personals entsprechend\
+            \ der Rollensensibilit\xE4t: Identit\xE4tspr\xFCfung, Strafregister, Referenzen,\
+            \ Qualifikationen, bei Bedarf finanzielle Integrit\xE4t.\nAbstimmung mit\
+            \ HR, Recht und Datenschutzvorgaben."
+        es:
+          name: "Procedimiento de verificaci\xF3n de antecedentes del personal"
+          description:
+            "Verificaci\xF3n previa al empleo y peri\xF3dica del personal\
+            \ adaptada a la sensibilidad del puesto: verificaci\xF3n de identidad, antecedentes\
+            \ penales, referencias, cualificaciones e integridad financiera cuando proceda.\n\
+            Coordinaci\xF3n con RR.HH., asesor\xEDa jur\xEDdica y requisitos de protecci\xF3\
+            n de datos."

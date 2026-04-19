@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Parse a reference-control library YAML (typically doc-pol.yaml).
+"""Parse a reference-control library YAML (typically key-reference-controls.yaml).
 
 Outputs JSON to stdout with:
   - library_urn, library_ref_id, library_name, control_count
