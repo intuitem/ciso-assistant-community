@@ -7,6 +7,9 @@
 	let { data } = $props();
 	let crosswalks: any[] = $state(data.crosswalks ?? []);
 	const frameworks: any[] = data.frameworks ?? [];
+	const librarySources: any[] = data.librarySources ?? [];
+	let cloneBusyId = $state<string | null>(null);
+	let cloneError = $state('');
 
 	let sourceFrameworkId = $state('');
 	let targetFrameworkId = $state('');
@@ -61,6 +64,31 @@
 		}
 	}
 
+	async function cloneFromLibrary(source: any) {
+		cloneError = '';
+		cloneBusyId = `${source.stored_library_id}:${source.set_urn}`;
+		try {
+			const res = await fetch('/experimental/crosswalks/clone-from', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					stored_library_id: source.stored_library_id,
+					set_urn: source.set_urn
+				})
+			});
+			const body = await res.json();
+			if (!res.ok) {
+				cloneError = body?.error || body?.detail || JSON.stringify(body);
+				return;
+			}
+			goto(`/experimental/crosswalks/${body.id}`);
+		} catch (e: any) {
+			cloneError = e.message ?? String(e);
+		} finally {
+			cloneBusyId = null;
+		}
+	}
+
 	async function deleteCrosswalk(id: string) {
 		if (!confirm('Delete this crosswalk? This also removes all pair suggestions.')) return;
 		const res = await fetch(`/experimental/crosswalks/${id}`, { method: 'DELETE' });
@@ -77,6 +105,31 @@
 			return iso;
 		}
 	}
+
+	// --- Library sources pagination ---
+	const PAGE_SIZE = 10;
+	let librarySearch = $state('');
+	let libraryPage = $state(1);
+	let filteredLibrary = $derived(
+		(() => {
+			const q = librarySearch.trim().toLowerCase();
+			if (!q) return librarySources;
+			return librarySources.filter((s) => {
+				const hay = [s.name, s.source_framework?.name, s.target_framework?.name, s.provider]
+					.filter(Boolean)
+					.join(' ')
+					.toLowerCase();
+				return hay.includes(q);
+			});
+		})()
+	);
+	let libraryPageCount = $derived(Math.max(1, Math.ceil(filteredLibrary.length / PAGE_SIZE)));
+	$effect(() => {
+		if (libraryPage > libraryPageCount) libraryPage = libraryPageCount;
+	});
+	let libraryPageRows = $derived(
+		filteredLibrary.slice((libraryPage - 1) * PAGE_SIZE, libraryPage * PAGE_SIZE)
+	);
 </script>
 
 <div class="space-y-6 p-4">
@@ -215,4 +268,106 @@
 			</div>
 		{/if}
 	</section>
+
+	{#if librarySources.length > 0}
+		<section class="card p-4 space-y-3">
+			<div class="flex items-start justify-between gap-4 flex-wrap">
+				<div>
+					<h2 class="text-lg font-semibold">
+						<i class="fa-solid fa-copy mr-1"></i> Clone from library
+					</h2>
+					<p class="text-xs text-gray-500">
+						Start a draft from an existing library-imported crosswalk. All its pairs are copied in
+						as reviewed; Regenerate will add AI suggestions for any gaps.
+					</p>
+				</div>
+				<div class="flex items-center gap-2">
+					<input
+						class="input input-sm w-56"
+						type="search"
+						placeholder="Filter by name, framework, provider…"
+						bind:value={librarySearch}
+					/>
+					<span class="text-xs text-gray-500 whitespace-nowrap">
+						{filteredLibrary.length} total
+					</span>
+				</div>
+			</div>
+			{#if cloneError}
+				<p class="text-sm text-red-600">{cloneError}</p>
+			{/if}
+			<div class="overflow-x-auto">
+				<table class="table table-compact w-full">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Source</th>
+							<th>Target</th>
+							<th>Provider</th>
+							<th>Pairs</th>
+							<th class="w-32"></th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each libraryPageRows as src}
+							{@const key = `${src.stored_library_id}:${src.set_urn}`}
+							<tr>
+								<td class="font-medium">{src.name ?? '—'}</td>
+								<td class="text-sm">{src.source_framework?.name ?? '—'}</td>
+								<td class="text-sm">{src.target_framework?.name ?? '—'}</td>
+								<td class="text-xs text-gray-500">{src.provider ?? '—'}</td>
+								<td class="text-sm">{src.pair_count}</td>
+								<td>
+									<button
+										type="button"
+										class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+										onclick={() => cloneFromLibrary(src)}
+										disabled={cloneBusyId === key}
+										title="Clone this mapping into an editable draft"
+									>
+										{#if cloneBusyId === key}
+											<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+										{:else}
+											<i class="fa-solid fa-copy mr-1"></i>
+										{/if}
+										Clone
+									</button>
+								</td>
+							</tr>
+						{/each}
+						{#if libraryPageRows.length === 0}
+							<tr>
+								<td colspan="6" class="text-center text-sm text-gray-400 py-4"> No matches. </td>
+							</tr>
+						{/if}
+					</tbody>
+				</table>
+			</div>
+			{#if libraryPageCount > 1}
+				<div class="flex items-center justify-end gap-2 text-xs pt-1">
+					<button
+						type="button"
+						class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-40"
+						onclick={() => (libraryPage = Math.max(1, libraryPage - 1))}
+						disabled={libraryPage === 1}
+						aria-label="Previous page"
+					>
+						<i class="fa-solid fa-chevron-left"></i>
+					</button>
+					<span class="text-gray-600">
+						Page <b>{libraryPage}</b> / {libraryPageCount}
+					</span>
+					<button
+						type="button"
+						class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-40"
+						onclick={() => (libraryPage = Math.min(libraryPageCount, libraryPage + 1))}
+						disabled={libraryPage === libraryPageCount}
+						aria-label="Next page"
+					>
+						<i class="fa-solid fa-chevron-right"></i>
+					</button>
+				</div>
+			{/if}
+		</section>
+	{/if}
 </div>

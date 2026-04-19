@@ -30,12 +30,12 @@ from core.models import (
 logger = structlog.get_logger(__name__)
 
 
-DEFAULT_TOP_K = 15
+DEFAULT_TOP_K = 5
 # Tuned for paraphrase-multilingual-MiniLM-L12-v2 — its cosines compress into
 # the 0.3-0.75 range for semantically similar requirements. A model with wider
 # spread (mpnet) would justify higher defaults; override via generation_params.
-DEFAULT_HIGH_THRESHOLD = 0.60
-DEFAULT_MEDIUM_THRESHOLD = 0.40
+DEFAULT_HIGH_THRESHOLD = 0.70
+DEFAULT_MEDIUM_THRESHOLD = 0.50
 DEFAULT_LENGTH_SUBSET_RATIO = 1.5
 DEFAULT_LENGTH_SUPERSET_RATIO = 0.67
 # BM25 hybrid retrieval. RRF fuses dense (Qdrant) + BM25 ranks so lexical

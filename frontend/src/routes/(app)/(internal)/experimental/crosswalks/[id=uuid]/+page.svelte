@@ -56,9 +56,9 @@
 	let chart: any = null;
 
 	let showTuning = $state(false);
-	let tuneTopK = $state<number>(crosswalk.generation_params?.top_k ?? 15);
-	let tuneMediumThreshold = $state<number>(crosswalk.generation_params?.medium_threshold ?? 0.4);
-	let tuneHighThreshold = $state<number>(crosswalk.generation_params?.high_threshold ?? 0.6);
+	let tuneTopK = $state<number>(crosswalk.generation_params?.top_k ?? 5);
+	let tuneMediumThreshold = $state<number>(crosswalk.generation_params?.medium_threshold ?? 0.5);
+	let tuneHighThreshold = $state<number>(crosswalk.generation_params?.high_threshold ?? 0.7);
 	let tuneUseBm25 = $state<boolean>(crosswalk.generation_params?.use_bm25 ?? true);
 
 	async function loadMatrix() {
