@@ -17,35 +17,35 @@ The output YAML drops directly into `backend/library/libraries/` and is loadable
 
 ## How to use the helpers
 
-Stdlib + pyyaml scripts under `scripts/`:
+Stdlib + pyyaml scripts under `.claude/skills/mapping-builder/scripts/`. All invocations in this doc assume you run from the repo root with the project's venv.
 
 ```bash
+SKILL=.claude/skills/mapping-builder/scripts   # shorthand for the examples below
+
 # Parse a framework YAML → JSON with assessable items grouped by section.
 # Emits warnings on stderr: empty-description items, too-few-sections hint.
-python scripts/parse_framework.py path/to/framework.yaml > parsed.json
+.venv/bin/python $SKILL/parse_framework.py path/to/framework.yaml > parsed.json
 
 # Slice items by Category (e.g. ID.AM, PR.AC) rather than top-level Function.
 # Use this when parse_framework warns that sections are too coarse.
-python scripts/cat_slice.py parsed.json                    # summary mode
-python scripts/cat_slice.py parsed.json ID.AM,GV.OC        # filter mode
+.venv/bin/python $SKILL/cat_slice.py parsed.json                    # summary mode
+.venv/bin/python $SKILL/cat_slice.py parsed.json ID.AM,GV.OC        # filter mode
 
 # Emit the mapping library YAML from a verdicts spec.
-python scripts/write_mapping_yaml.py spec.json output.yaml
+.venv/bin/python $SKILL/write_mapping_yaml.py spec.json output.yaml
 
 # Emit a review xlsx (or csv if openpyxl missing).
-python scripts/write_review.py spec.json source_parsed.json target_parsed.json review.xlsx
+.venv/bin/python $SKILL/write_review.py spec.json source_parsed.json target_parsed.json review.xlsx
 
 # Audit the running verdicts jsonl: coverage, unmapped items, low-strength verdicts.
-python scripts/audit_verdicts.py parsed_src.json verdicts.jsonl --threshold 6
+.venv/bin/python $SKILL/audit_verdicts.py parsed_src.json verdicts.jsonl --threshold 6
 
 # Diff two mapping YAMLs (or a YAML vs jsonl) — great for eval against a published mapping.
-python scripts/diff_mappings.py A.yaml B.yaml --sample 5
+.venv/bin/python $SKILL/diff_mappings.py A.yaml B.yaml --sample 5
 
 # Render a standalone interactive HTML (category heatmap + filterable pair list).
-python scripts/render_html.py spec.json src_parsed.json tgt_parsed.json out.html
+.venv/bin/python $SKILL/render_html.py spec.json src_parsed.json tgt_parsed.json out.html
 ```
-
-Always invoke them with the project's venv: `.venv/bin/python scripts/...`.
 
 The `spec.json` for `write_mapping_yaml.py` and `write_review.py` is built up across the workflow below — see the docstrings of the scripts for the exact field shape.
 
@@ -86,15 +86,15 @@ Read the `sections` array from each parsed JSON (typically 5-30 entries per side
 **If parse warned about coarse sections**, use `cat_slice.py` to list categories on both sides instead:
 
 ```bash
-.venv/bin/python scripts/cat_slice.py /tmp/src.json   # summary → stderr
-.venv/bin/python scripts/cat_slice.py /tmp/tgt.json
+.venv/bin/python .claude/skills/mapping-builder/scripts/cat_slice.py /tmp/src.json   # summary → stderr
+.venv/bin/python .claude/skills/mapping-builder/scripts/cat_slice.py /tmp/tgt.json
 ```
 
 Then build affinity at the Category level (e.g. `ID.AM → ID.AM + GV.OC + GV.RR`) rather than at the Function level. NIST CSF 2.0 restructuring moves many CSF 1.1 Categories across Functions (e.g. `ID.GV → GV.PO/GV.RR`, `PR.IP → PR.PS/PR.IR/ID.IM`), so affinity must operate at that granularity.
 
 Build a section affinity table by reasoning over section names alone — for each source section, identify the 1-3 target sections most likely to contain real mappings:
 
-```
+```text
 SOURCE section ID.AM (Asset Management)
   → likely targets: ID.AM (direct), GV.OC (governance overlap)
 SOURCE section PR.AC (Access Control)
@@ -140,7 +140,7 @@ Append verdicts to a running `verdicts` list. Persist the running list to `/tmp/
 Before emitting the YAML, run the audit script on the running verdicts jsonl:
 
 ```bash
-.venv/bin/python scripts/audit_verdicts.py /tmp/src.json /tmp/<name>_verdicts.jsonl --threshold 6
+.venv/bin/python .claude/skills/mapping-builder/scripts/audit_verdicts.py /tmp/src.json /tmp/<name>_verdicts.jsonl --threshold 6
 ```
 
 It reports coverage %, unmapped source items (split into empty-description YAML bugs vs. real gaps), relationship/strength distributions, and every verdict ≤ threshold.

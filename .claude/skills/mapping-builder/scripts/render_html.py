@@ -516,15 +516,15 @@ function renderPairs() {
   // Truncate long text
   const trunc = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
 
+  const VALID_RELS = new Set(["equal", "intersect", "subset", "superset"]);
   let html = "";
   for (const m of rows) {
     const lowStr = (m.st ?? 10) <= 6;
     const rat = m.ra ? `<div class="rationale">${escapeHtml(m.ra)}</div>` : "";
-    const descs = `<div class="desc" title="${escapeHtml(m.sd)}"><b>Src:</b> ${escapeHtml(trunc(m.sd, 180))}</div>
-                   <div class="desc" title="${escapeHtml(m.td)}"><b>Tgt:</b> ${escapeHtml(trunc(m.td, 180))}</div>`;
+    const relClass = VALID_RELS.has(m.re) ? `rel-${m.re}` : "";
     html += `<tr>
       <td><div class="ref">${escapeHtml(m.sr)}</div><div class="desc">${escapeHtml(trunc(m.sd, 70))}</div></td>
-      <td><span class="pill rel-${m.re}">${escapeHtml(m.re)}</span></td>
+      <td><span class="pill ${relClass}">${escapeHtml(m.re)}</span></td>
       <td class="strength${lowStr ? ' low' : ''}">${m.st ?? '-'}</td>
       <td><div class="ref">${escapeHtml(m.tr)}</div><div class="desc">${escapeHtml(trunc(m.td, 70))}</div></td>
       <td>${rat}</td>
@@ -575,8 +575,16 @@ def render(spec_or_yaml: Path, src_parsed: Path, tgt_parsed: Path, out: Path) ->
         if meta.get("description")
         else ""
     )
+    # Embed JSON safely in <script>: escape </ to prevent early tag close,
+    # and <!-- / --> to avoid HTML comment confusion in the payload.
+    payload_json = (
+        json.dumps(payload, ensure_ascii=False)
+        .replace("</", "<\\/")
+        .replace("<!--", "<\\!--")
+        .replace("-->", "--\\>")
+    )
     html = HTML_TEMPLATE.replace("__TITLE__", escape(meta.get("name") or "Mapping"))
-    html = html.replace("__PAYLOAD__", json.dumps(payload, ensure_ascii=False))
+    html = html.replace("__PAYLOAD__", payload_json)
     out.write_text(html, encoding="utf-8")
 
 

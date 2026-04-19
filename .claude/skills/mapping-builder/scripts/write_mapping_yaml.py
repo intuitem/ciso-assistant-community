@@ -82,6 +82,18 @@ def _validate(spec: dict) -> None:
                 f"verdict[{i}] has invalid relationship {rel!r} "
                 f"(must be one of {sorted(VALID_RELATIONSHIPS)})"
             )
+        s = v.get("strength_of_relationship")
+        if s is not None:
+            try:
+                s_int = int(s)
+            except (TypeError, ValueError):
+                raise SystemExit(
+                    f"verdict[{i}] strength_of_relationship must be an int 0-10, got {s!r}"
+                )
+            if not 0 <= s_int <= 10:
+                raise SystemExit(
+                    f"verdict[{i}] strength_of_relationship {s_int} out of range 0-10"
+                )
 
 
 def _build_mapping_set(
@@ -156,11 +168,12 @@ def build_library(spec: dict) -> dict:
         spec["verdicts"],
         reverse=False,
     )
-    # Reverse set re-uses the same ref_id+name for backwards compatibility with
-    # existing published mappings (which also list two sets under the same name).
+    # Reverse set requires a distinct urn/ref_id because RequirementMappingSet
+    # enforces unique=True on urn. Published mappings use the `-revert` suffix.
+    reverse_ref_id = f"{ref_id}-revert"
     reverse = _build_mapping_set(
         set_urn_prefix,
-        ref_id,
+        reverse_ref_id,
         name,
         description,
         spec["target_framework_urn"],

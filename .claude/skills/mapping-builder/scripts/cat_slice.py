@@ -63,8 +63,15 @@ def extract_category(ref_id: str) -> str | None:
 
 
 def _matches_typos(ref_id: str) -> bool:
-    """CCB-style source typo: R.AC-* (missing the 'P')."""
-    return ref_id.startswith("R.AC-")
+    """CCB-style source typo: R.AC-* (missing the 'P').
+
+    Case-insensitive and strips CCB level prefixes (BASIC_/IMPORTANT_/KEY_)
+    so variants like `BASIC_R.AC-3.4` or `important_r.ac-3.4` are caught.
+    """
+    if not ref_id:
+        return False
+    stripped = _LEVEL_PREFIX.sub("", ref_id.upper())
+    return stripped.startswith("R.AC-")
 
 
 def slice_by_category(parsed: dict, cats: set[str]) -> list[dict]:

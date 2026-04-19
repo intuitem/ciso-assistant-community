@@ -65,7 +65,11 @@ def main() -> int:
     verdicts = load_verdicts(Path(args.verdicts))
 
     src_items = {it["urn"]: it for it in src["items"]}
-    mapped = {v["source_requirement_urn"] for v in verdicts}
+    verdict_sources = {v["source_requirement_urn"] for v in verdicts}
+    # Only count URNs that actually exist in the parsed source for coverage.
+    # URNs in verdicts but not in src are reported separately (typos / wrong direction).
+    mapped = verdict_sources & set(src_items)
+    unknown_sources = verdict_sources - set(src_items)
     unmapped = set(src_items) - mapped
 
     rel_dist = Counter((v.get("relationship") or "").lower() for v in verdicts)
@@ -88,6 +92,15 @@ def main() -> int:
         f"({100.0 * len(mapped) / max(len(src_items), 1):.1f}%)"
     )
     print(f"Total verdicts: {len(verdicts)}")
+    if unknown_sources:
+        print(
+            f"WARNING: {len(unknown_sources)} verdict(s) reference source URNs not in "
+            f"parsed framework (typos or reversed direction):"
+        )
+        for u in sorted(unknown_sources)[:10]:
+            print(f"    {u}")
+        if len(unknown_sources) > 10:
+            print(f"    ... and {len(unknown_sources) - 10} more")
     print(f"Relationship distribution: {dict(rel_dist)}")
     if strength_dist:
         avg = sum(k * v for k, v in strength_dist.items()) / sum(strength_dist.values())
@@ -123,10 +136,21 @@ def main() -> int:
                 )
         print()
 
+    def _strength(v: dict) -> int | None:
+        s = v.get("strength_of_relationship")
+        if s is None:
+            return None
+        try:
+            return int(s)
+        except (TypeError, ValueError):
+            return None
+
+    # Missing strength treated as "not rated" → skip the low-strength filter
+    # (not treated as 10, which previously hid strength==0 due to `or 10`).
     low = [
         v
         for v in verdicts
-        if (v.get("strength_of_relationship") or 10) <= args.threshold
+        if (_strength(v) is not None and _strength(v) <= args.threshold)
     ]
     if low:
         print(f"Low-strength verdicts (strength <= {args.threshold}, n={len(low)}):")
