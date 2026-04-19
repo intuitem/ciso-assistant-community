@@ -1010,6 +1010,7 @@
 	"requirementMappings": "Reikalavimų susiejimai",
 	"sourceFramework": "Šaltinio sistema",
 	"targetFramework": "Tikslinė sistema",
+	"targetFrameworks": "Tikslinės sistemos",
 	"baseline": "Bazinis lygis",
 	"ebiosRmBaseline": "Pagrindai",
 	"createAuditFromBaseline": "Taikyti susiejimą",

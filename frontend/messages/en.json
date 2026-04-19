@@ -1013,6 +1013,7 @@
 	"requirementMappings": "Requirement mappings",
 	"sourceFramework": "Source framework",
 	"targetFramework": "Target framework",
+	"targetFrameworks": "Target frameworks",
 	"baseline": "Baseline",
 	"ebiosRmBaseline": "Foundations",
 	"createAuditFromBaseline": "Apply a mapping",

@@ -771,6 +771,7 @@
 	"requirementMappings": "Mapowania wymagań",
 	"sourceFramework": "Struktura źródłowa",
 	"targetFramework": "Struktura docelowa",
+	"targetFrameworks": "Struktury docelowe",
 	"baseline": "Linia bazowa",
 	"createAuditFromBaseline": "Utwórz audyt od poziomu bazowego",
 	"coverageColon": "Zasięg:",
