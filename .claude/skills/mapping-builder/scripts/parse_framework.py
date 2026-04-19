@@ -85,10 +85,15 @@ def parse(yaml_path: Path) -> dict:
     all_nodes = {n.get("urn"): n for n in nodes if n.get("urn")}
 
     items: list[dict] = []
+    empty_desc_refs: list[str] = []
     for node in nodes:
         if not node.get("assessable"):
             continue
         section = _find_section(node, all_nodes)
+        desc = (node.get("description") or "").strip()
+        name = (node.get("name") or "").strip()
+        if not desc and not name:
+            empty_desc_refs.append(node.get("ref_id") or node.get("urn") or "?")
         items.append(
             {
                 "ref_id": node.get("ref_id") or "",
@@ -119,6 +124,24 @@ def parse(yaml_path: Path) -> dict:
                 }
             )
 
+    # Surface parse-time warnings so the caller can act on them upfront.
+    warnings: list[str] = []
+    if empty_desc_refs:
+        warnings.append(
+            f"{len(empty_desc_refs)} assessable item(s) have empty name AND description "
+            f"(likely YAML bugs in source — they cannot be mapped). "
+            f"First few: {', '.join(empty_desc_refs[:5])}"
+        )
+    # Hint: NIST CSF-style frameworks expose only 5–6 top-level Functions.
+    # Section-affinity at that level is too coarse. Suggest Category-level slicing.
+    if items and 0 < len(sections) <= 8 and len(items) / max(len(sections), 1) > 15:
+        warnings.append(
+            f"Only {len(sections)} top-level section(s) for {len(items)} items "
+            f"(avg {len(items) // max(len(sections), 1)} items/section). "
+            f"Consider Category-level slicing via scripts/cat_slice.py — Function-level "
+            f"affinity will be too coarse for NIST CSF / CCB-style frameworks."
+        )
+
     return {
         "source_path": str(yaml_path),
         "library_urn": library_urn,
@@ -130,6 +153,7 @@ def parse(yaml_path: Path) -> dict:
         "n_sections": len(sections),
         "sections": sections,
         "items": items,
+        "warnings": warnings,
     }
 
 
@@ -144,6 +168,9 @@ def main() -> int:
     args = p.parse_args()
 
     parsed = parse(Path(args.yaml_path))
+    # Surface warnings on stderr so they land in Claude's tool-output view.
+    for w in parsed.get("warnings", []):
+        print(f"[parse_framework] WARNING: {w}", file=sys.stderr)
     if args.items_only:
         json.dump(parsed["items"], sys.stdout, ensure_ascii=False, indent=2)
     else:
