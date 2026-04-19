@@ -83,6 +83,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - backend
+    restart: always
     user: "1001:1001"
 
   qdrant:

@@ -1,31 +1,34 @@
+convert_library_version: 'v2 ; Compat Mode: [1] {[< v2] Use legacy URN fallback logic
+  (for requirements without ref_id)}'
 urn: urn:intuitem:risk:library:lpm-oiv-2019
 locale: fr
-ref_id: LPM-OIV-2019
-name: "R\xE8gles OIV"
-description: " R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9S D'IMPORTANCE\
-  \ VITALE \" ACTIVIT\xC9S CIVILES DE L'\xC9TAT \"\nArr\xEAt\xE9 du 29 mai 2019 fixant\
-  \ les r\xE8gles de s\xE9curit\xE9 et les modalit\xE9s de d\xE9claration des syst\xE8\
-  mes d'information d'importance vitale et des incidents de s\xE9curit\xE9 relatives\
-  \ au secteur d'activit\xE9s d'importance vitale \xAB Activit\xE9s civiles de l'Etat\
-  \ \xBB et pris en application des articles R. 1332-41-1, R. 1332-41-2 et R. 1332-41-10\
-  \ du code de la d\xE9fense\nhttps://www.legifrance.gouv.fr/jorf/id/JORFTEXT000038565011"
+ref_id: LPM-OIV-2019_Activites-civiles-de-l-etat
+name: "R\xE8gles OIV - Secteur \xAB Activit\xE9s civiles de l'Etat \xBB (2019)"
+description: "R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9S D'IMPORTANCE\
+  \ VITALE \xAB ACTIVIT\xC9S CIVILES DE L'\xC9TAT \xBB\n\nArr\xEAt\xE9 du 29 mai 2019\
+  \ fixant les r\xE8gles de s\xE9curit\xE9 et les modalit\xE9s de d\xE9claration des\
+  \ syst\xE8mes d'information d'importance vitale et des incidents de s\xE9curit\xE9\
+  \ relatives au secteur d'activit\xE9s d'importance vitale \xAB Activit\xE9s civiles\
+  \ de l'Etat \xBB et pris en application des articles R. 1332-41-1, R. 1332-41-2\
+  \ et R. 1332-41-10 du code de la d\xE9fense.\n\nhttps://www.legifrance.gouv.fr/jorf/id/JORFTEXT000038565011"
 copyright: "Loi fran\xE7aise"
-version: 1
+version: 3
+publication_date: 2026-04-17
 provider: "Gouvernement fran\xE7ais"
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:lpm-oiv-2019
-    ref_id: LPM-OIV-2019
-    name: "R\xE8gles OIV"
-    description: " R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9\
-      S D'IMPORTANCE VITALE \" ACTIVIT\xC9S CIVILES DE L'\xC9TAT \"\nArr\xEAt\xE9\
-      \ du 29 mai 2019 fixant les r\xE8gles de s\xE9curit\xE9 et les modalit\xE9s\
-      \ de d\xE9claration des syst\xE8mes d'information d'importance vitale et des\
+    ref_id: LPM-OIV-2019_Activites-civiles-de-l-etat
+    name: "R\xE8gles OIV - Secteur \xAB Activit\xE9s civiles de l'Etat \xBB (2019)"
+    description: "R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9S\
+      \ D'IMPORTANCE VITALE \xAB ACTIVIT\xC9S CIVILES DE L'\xC9TAT \xBB\n\nArr\xEA\
+      t\xE9 du 29 mai 2019 fixant les r\xE8gles de s\xE9curit\xE9 et les modalit\xE9\
+      s de d\xE9claration des syst\xE8mes d'information d'importance vitale et des\
       \ incidents de s\xE9curit\xE9 relatives au secteur d'activit\xE9s d'importance\
       \ vitale \xAB Activit\xE9s civiles de l'Etat \xBB et pris en application des\
-      \ articles R. 1332-41-1, R. 1332-41-2 et R. 1332-41-10 du code de la d\xE9fense\n\
-      https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000038565011"
+      \ articles R. 1332-41-1, R. 1332-41-2 et R. 1332-41-10 du code de la d\xE9fense.\n\
+      \nhttps://www.legifrance.gouv.fr/jorf/id/JORFTEXT000038565011"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:1
       assessable: false
