@@ -59,13 +59,15 @@ def load_mappings(path: Path) -> tuple[list[dict], dict]:
     """Return (mappings_list, metadata) from a spec.json or mapping YAML."""
     suffix = path.suffix.lower()
     if suffix == ".json":
-        data = json.load(open(path))
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
         return data.get("verdicts", []), {
             "name": data.get("name", ""),
             "description": data.get("description", ""),
         }
     if suffix in {".yaml", ".yml"}:
-        data = yaml.safe_load(open(path))
+        with open(path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
         sets = (data or {}).get("objects", {}).get("requirement_mapping_sets") or []
         if not sets:
             raise SystemExit(f"{path}: no requirement_mapping_sets found")
@@ -139,23 +141,57 @@ def build_payload(
     src_cat_name = first_section_name(src_cat_of, src_parsed["items"])
     tgt_cat_name = first_section_name(tgt_cat_of, tgt_parsed["items"])
 
+    # Fail fast on mappings that reference URNs not present in the parsed frameworks;
+    # otherwise such rows would appear in the pair table but get silently dropped from
+    # the heatmap (their "?" category isn't an axis label).
+    unknown_src = sorted(
+        {
+            m["source_requirement_urn"]
+            for m in mappings
+            if m["source_requirement_urn"] not in src_items
+        }
+    )
+    unknown_tgt = sorted(
+        {
+            m["target_requirement_urn"]
+            for m in mappings
+            if m["target_requirement_urn"] not in tgt_items
+        }
+    )
+    if unknown_src or unknown_tgt:
+        msg_parts = []
+        if unknown_src:
+            msg_parts.append(
+                f"{len(unknown_src)} source URN(s) not in parsed source framework: "
+                f"{unknown_src[:5]}{' ...' if len(unknown_src) > 5 else ''}"
+            )
+        if unknown_tgt:
+            msg_parts.append(
+                f"{len(unknown_tgt)} target URN(s) not in parsed target framework: "
+                f"{unknown_tgt[:5]}{' ...' if len(unknown_tgt) > 5 else ''}"
+            )
+        raise SystemExit(
+            "render_html: mapping references unknown requirements "
+            "(would be invisible in the heatmap):\n  " + "\n  ".join(msg_parts)
+        )
+
     # Compact mapping records; use display labels for cat fields so matrix keys match
     compact = []
     for m in mappings:
         su = m["source_requirement_urn"]
         tu = m["target_requirement_urn"]
-        src = src_items.get(su, {})
-        tgt = tgt_items.get(tu, {})
+        src = src_items[su]
+        tgt = tgt_items[tu]
         compact.append(
             {
                 "sr": src.get("ref_id") or su.split(":")[-1],
                 "su": su,
                 "sd": (src.get("description") or "").strip(),
-                "sc": src_disp.get(src_cat_of.get(su, "?"), "?"),
+                "sc": src_disp[src_cat_of[su]],
                 "tr": tgt.get("ref_id") or tu.split(":")[-1],
                 "tu": tu,
                 "td": (tgt.get("description") or "").strip(),
-                "tc": tgt_disp.get(tgt_cat_of.get(tu, "?"), "?"),
+                "tc": tgt_disp[tgt_cat_of[tu]],
                 "re": (m.get("relationship") or "").lower(),
                 "st": m.get("strength_of_relationship"),
                 "ra": (m.get("rationale") or "").strip(),
@@ -338,7 +374,7 @@ table.pairs .desc { color: var(--muted); font-size: 11.5px; max-width: 380px; }
   </section>
 
   <section class="section">
-    <h2>Mappings <span class="hint">click a row to expand descriptions</span></h2>
+    <h2>Mappings <span class="hint">hover a row's description for the full text</span></h2>
     <div class="controls" id="controls">
       <input type="search" id="search" placeholder="Search ref_id, description, or rationale...">
       <div class="chipgroup" id="rel-filter">
@@ -523,10 +559,10 @@ function renderPairs() {
     const rat = m.ra ? `<div class="rationale">${escapeHtml(m.ra)}</div>` : "";
     const relClass = VALID_RELS.has(m.re) ? `rel-${m.re}` : "";
     html += `<tr>
-      <td><div class="ref">${escapeHtml(m.sr)}</div><div class="desc">${escapeHtml(trunc(m.sd, 70))}</div></td>
+      <td><div class="ref">${escapeHtml(m.sr)}</div><div class="desc" title="${escapeHtml(m.sd)}">${escapeHtml(trunc(m.sd, 70))}</div></td>
       <td><span class="pill ${relClass}">${escapeHtml(m.re)}</span></td>
       <td class="strength${lowStr ? ' low' : ''}">${m.st ?? '-'}</td>
-      <td><div class="ref">${escapeHtml(m.tr)}</div><div class="desc">${escapeHtml(trunc(m.td, 70))}</div></td>
+      <td><div class="ref">${escapeHtml(m.tr)}</div><div class="desc" title="${escapeHtml(m.td)}">${escapeHtml(trunc(m.td, 70))}</div></td>
       <td>${rat}</td>
     </tr>`;
   }
@@ -567,8 +603,10 @@ renderPairs();
 
 def render(spec_or_yaml: Path, src_parsed: Path, tgt_parsed: Path, out: Path) -> None:
     mappings, meta = load_mappings(spec_or_yaml)
-    src = json.load(open(src_parsed))
-    tgt = json.load(open(tgt_parsed))
+    with open(src_parsed, "r", encoding="utf-8") as f:
+        src = json.load(f)
+    with open(tgt_parsed, "r", encoding="utf-8") as f:
+        tgt = json.load(f)
     payload = build_payload(mappings, src, tgt)
     payload["title_meta"] = escape(meta.get("name", "")) + (
         f" &mdash; <code>{escape(meta.get('description', ''))[:120]}</code>"
