@@ -3,19 +3,27 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:intuitem:risk:library:doc-pol
 locale: en
 ref_id: usual-controls
-name: Usual reference controls
-description: Usual documents, policies, procedures, training and technical controls
-  recommended by intuitem
+name: CISO Assistant Key Reference Controls
+description: 'Curated set of key reference controls maintained by intuitem: policies,
+  procedures, documents, training, technical and physical capabilities. Covers governance,
+  access, data protection, resilience, privacy, AI, cloud and physical domains. Frameworks
+  across CISO Assistant reference these controls to drive applied-control suggestions.
+  URN namespace preserved from the legacy `doc-pol` library.'
 copyright: "\xA9 intuitem - 2026"
-version: 6
+version: 11
 publication_date: 2026-01-09
 provider: intuitem
 packager: intuitem
 translations:
   fr:
-    name: "Mesures de r\xE9f\xE9rence courantes"
-    description: "Documents, politiques, proc\xE9dures, formations et mesures techniques\
-      \ recommand\xE9s par intuitem"
+    name: "Mesures de r\xE9f\xE9rence cl\xE9s CISO Assistant"
+    description: "Ensemble curat\xE9 de mesures de r\xE9f\xE9rence cl\xE9s maintenu\
+      \ par intuitem : politiques, proc\xE9dures, documents, formations, capacit\xE9\
+      s techniques et physiques. Couvre la gouvernance, les acc\xE8s, la protection\
+      \ des donn\xE9es, la r\xE9silience, la vie priv\xE9e, l'IA, le cloud et la s\xE9\
+      curit\xE9 physique. Les r\xE9f\xE9rentiels de CISO Assistant s'y rattachent\
+      \ pour alimenter les suggestions de mesures appliqu\xE9es. L'espace de noms\
+      \ URN `doc-pol` est conserv\xE9 pour compatibilit\xE9."
   de:
     name: "\xDCbliche Referenzkontrollen"
     description: "\xDCbliche Dokumente, Richtlinien, Verfahren, Schulungen und technischen\
@@ -278,12 +286,15 @@ objects:
       es:
         name: Matriz de responsabilidades
         description: RACI para el SGSI
+    annotation: 'cis-v8: 17.5'
   - urn: urn:intuitem:risk:function:doc-pol:doc.com
     ref_id: DOC.COM
     name: Communication plan document
     category: process
     csf_function: govern
-    annotation: '7.4'
+    annotation: '7.4
+
+      cis-v8: 17.6'
     translations:
       fr:
         name: Plan de communication
@@ -466,7 +477,9 @@ objects:
     name: Registry of assets
     category: process
     csf_function: identify
-    annotation: A.5.9
+    annotation: 'A.5.9
+
+      cis-v8: 1.1, 2.1, 3.2'
     translations:
       fr:
         name: Registre des biens
@@ -490,6 +503,7 @@ objects:
       es:
         name: Registro de proveedores
         description: "Gesti\xF3n de riesgos"
+    annotation: 'cis-v8: 15.1, 15.3'
   - urn: urn:intuitem:risk:function:doc-pol:doc.educ_plan
     ref_id: DOC.EDUC_PLAN
     name: Information security awareness and training plan
@@ -519,7 +533,9 @@ objects:
       Continuous Improvement: Update based on feedback and emerging threats.'
     annotation: '7.3.c
 
-      A.6.3'
+      A.6.3
+
+      cis-v8: 14.1, 14.2, 14.9'
     translations:
       fr:
         name: Plan de sensibilisation et de formation
@@ -641,7 +657,9 @@ objects:
     name: Register of privileged access accounts
     category: process
     csf_function: identify
-    annotation: A.5.18
+    annotation: 'A.5.18
+
+      cis-v8: 5.1, 5.5'
     translations:
       fr:
         name: "Registre des acc\xE8s \xE0 privil\xE8ges"
@@ -654,7 +672,9 @@ objects:
     name: Security Incident Register
     category: process
     csf_function: respond
-    annotation: A.5.34
+    annotation: 'A.5.34
+
+      cis-v8: 17.2, 17.3'
     translations:
       fr:
         name: "Registre des incidents de s\xE9curit\xE9"
@@ -669,7 +689,9 @@ objects:
     csf_function: identify
     description: A document mapping authorized data flows between systems, applications,
       or network zones to ensure secure and compliant communication.
-    annotation: A.5.20
+    annotation: 'A.5.20
+
+      cis-v8: 3.8, 12.4'
     translations:
       fr:
         name: Matrice de flux
@@ -691,7 +713,9 @@ objects:
     name: Security Architecture Principles
     category: process
     csf_function: protect
-    annotation: A.8.27
+    annotation: 'A.8.27
+
+      cis-v8: 12.2, 16.10'
     translations:
       fr:
         name: "Principes d'architecture s\xE9curit\xE9"
@@ -710,7 +734,9 @@ objects:
       access to minimize risks.
     annotation: 'A.5.18
 
-      A.8.2'
+      A.8.2
+
+      cis-v8: 5.4, 6.5, 12.8'
     translations:
       fr:
         name: "Proc\xE9dure de gestion des acc\xE8s \xE0 privil\xE8ges"
@@ -742,7 +768,9 @@ objects:
       user access rights, system certifications, or compliance with standards. It
       ensures that only authorized users and systems retain access or certification,
       and it helps identify and revoke outdated or unnecessary permissions.
-    annotation: A.5.22
+    annotation: 'A.5.22
+
+      cis-v8: 5.3'
     translations:
       fr:
         name: "Proc\xE9dure de recertification des acc\xE8s"
@@ -783,7 +811,9 @@ objects:
 
       A.5.30
 
-      A.5.18'
+      A.5.18
+
+      cis-v8: 6.1, 6.2'
     translations:
       fr:
         name: "Proc\xE9dure de s\xE9curit\xE9 RH"
@@ -874,7 +904,9 @@ objects:
       settings, system configurations, and user policies across a Windows environment.
       It ensures consistent implementation of organizational policies for secure and
       compliant IT operations.
-    annotation: A.5.23
+    annotation: 'A.5.23
+
+      cis-v8: 4.1, 4.3, 4.6, 4.7, 4.8, 4.10, 9.1, 9.4, 10.3'
     translations:
       fr:
         name: "Proc\xE9dure GPO"
@@ -915,7 +947,9 @@ objects:
       Monitoring and Verification
 
       Documentation and Reporting'
-    annotation: A.8.8
+    annotation: 'A.8.8
+
+      cis-v8: 7.2, 7.3, 7.4, 7.7, 12.1'
     translations:
       fr:
         name: "Proc\xE9dure de gestion des mises \xE0 jour"
@@ -947,7 +981,9 @@ objects:
 
       A.5.27
 
-      A.5.28'
+      A.5.28
+
+      cis-v8: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9'
     translations:
       fr:
         name: "Proc\xE9dure de gestion des incidents"
@@ -977,7 +1013,9 @@ objects:
       Documentation and Record Keeping
 
       Verification and Audit'
-    annotation: A.7.14
+    annotation: 'A.7.14
+
+      cis-v8: 3.5, 15.7'
     translations:
       fr:
         name: "Proc\xE9dure de gestion de la mise au rebut"
@@ -1016,7 +1054,9 @@ objects:
       Configuration: Define synchronization intervals and fallback mechanisms.
 
       Monitoring: Regularly verify time synchronization status.'
-    annotation: A.8.17
+    annotation: 'A.8.17
+
+      cis-v8: 8.4'
     translations:
       fr:
         name: "Proc\xE9dure de synchronisation des horloges"
@@ -1054,7 +1094,9 @@ objects:
       Backup and Recovery
 
       User Awareness and Training'
-    annotation: A.8.21
+    annotation: 'A.8.21
+
+      cis-v8: 9.5, 9.6, 9.7'
     translations:
       fr:
         name: "Proc\xE9dure de s\xE9curisation des emails"
@@ -1086,7 +1128,9 @@ objects:
       Secure storage and retention policies
 
       Analysis for anomaly detection and incident response'
-    annotation: A.8.15
+    annotation: 'A.8.15
+
+      cis-v8: 8.1, 8.2, 8.5, 8.10'
     translations:
       fr:
         name: "Proc\xE9dure de gestion de la journalisation"
@@ -1158,7 +1202,9 @@ objects:
 
       A.6.8
 
-      5.1.g'
+      5.1.g
+
+      cis-v8: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 14.9'
     translations:
       fr:
         name: "Politique de sensibilisation et de formation \xE0 la s\xE9curit\xE9\
@@ -1223,7 +1269,9 @@ objects:
       Encryption
 
       Continual improvement'
-    annotation: 5.1.g
+    annotation: '5.1.g
+
+      cis-v8: 3.6, 3.9, 3.10, 3.11, 12.6'
     translations:
       fr:
         name: Politique cryptographique
@@ -1265,7 +1313,9 @@ objects:
 
       A.8.33
 
-      5.1.g'
+      5.1.g
+
+      cis-v8: 3.1, 3.2, 3.3, 3.4, 3.5, 3.7, 3.8, 3.12, 3.13, 14.4'
     translations:
       fr:
         name: "Politique de classification et de traitement de l\u2019information"
@@ -1327,6 +1377,7 @@ objects:
         name: "Notfall- und Gesch\xE4ftskontinuit\xE4tsrichtlinie"
       es:
         name: "Pol\xEDtica de continuidad de negocio"
+    annotation: 'cis-v8: 11.5'
   - urn: urn:intuitem:risk:function:doc-pol:pol.seg_duty
     ref_id: POL.SEG_DUTY
     name: Segregation of duties policy
@@ -1370,7 +1421,10 @@ objects:
       Continual improvement'
     annotation: 'A.5.15
 
-      5.1.g'
+      5.1.g
+
+      cis-v8: 3.3, 4.7, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6,
+      6.7, 6.8, 12.5, 12.7, 13.5'
     translations:
       fr:
         name: "Politique de contr\xF4le d\u2019acc\xE8s"
@@ -1416,6 +1470,7 @@ objects:
         description: 'Antivirus
 
           EDR'
+    annotation: 'cis-v8: 10.1, 10.2, 10.3, 10.4, 10.6, 10.7'
   - urn: urn:intuitem:risk:function:doc-pol:pol.risk
     ref_id: POL.RISK
     name: Risk management policy
@@ -1489,6 +1544,7 @@ objects:
         name: Asset-Management-Richtlinie
       es:
         name: "Pol\xEDtica de gesti\xF3n de activos"
+    annotation: 'cis-v8: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 3.1'
   - urn: urn:intuitem:risk:function:doc-pol:pol.backup
     ref_id: POL.BACKUP
     name: Backup and restore policy
@@ -1501,12 +1557,15 @@ objects:
         name: Richtlinie zur Sicherung von Backups und Wiederherstellung
       es:
         name: "Pol\xEDtica de copia de seguridad y restauraci\xF3n"
+    annotation: 'cis-v8: 11.1, 11.2, 11.3, 11.4, 11.5'
   - urn: urn:intuitem:risk:function:doc-pol:pol.supplier
     ref_id: POL.SUPPLIER
     name: Third party supplier security policy
     category: policy
     csf_function: govern
-    annotation: A.5.19, A.5.20, A.5.21, A.5.22, A.5.23
+    annotation: 'A.5.19, A.5.20, A.5.21, A.5.22, A.5.23
+
+      cis-v8: 8.12, 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7'
     translations:
       fr:
         name: "Politique de s\xE9curit\xE9 des fournisseurs tiers"
@@ -1520,7 +1579,10 @@ objects:
     category: policy
     csf_function: govern
     description: Logging
-    annotation: A.8.15
+    annotation: 'A.8.15
+
+      cis-v8: 3.14, 8.1, 8.2, 8.3, 8.5, 8.6, 8.7, 8.8, 8.9, 8.10, 8.11, 8.12, 13.1,
+      13.6, 13.11'
     translations:
       fr:
         name: Politique de journalisation et de surveillance
@@ -1535,7 +1597,9 @@ objects:
     name: Information transfer policy
     category: policy
     csf_function: govern
-    annotation: A.5.14
+    annotation: 'A.5.14
+
+      cis-v8: 3.10'
     translations:
       fr:
         name: "Politique de transfert d\u2019informations"
@@ -1555,6 +1619,8 @@ objects:
         name: "Richtlinie f\xFCr sichere Software- und Systementwicklung"
       es:
         name: "Pol\xEDtica de desarrollo seguro"
+    annotation: 'cis-v8: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 16.8, 16.9, 16.10,
+      16.11, 16.12, 16.13, 16.14'
   - urn: urn:intuitem:risk:function:doc-pol:pol.physical
     ref_id: POL.PHYSICAL
     name: Physical security policy
@@ -1603,6 +1669,7 @@ objects:
         name: Richtlinie zum Management der Netzwerksicherheit
       es:
         name: "Pol\xEDtica de gesti\xF3n de la seguridad de red"
+    annotation: 'cis-v8: 3.12, 4.2, 4.4, 12.1, 12.2, 12.3, 12.4, 12.6, 13.4'
   - urn: urn:intuitem:risk:function:doc-pol:pol.accept
     ref_id: POL.ACCEPT
     name: Acceptable use policy
@@ -1714,7 +1781,9 @@ objects:
 
       A.5.27
 
-      A.5.28'
+      A.5.28
+
+      cis-v8: 16.3, 17.1, 17.4, 17.5, 17.9'
     translations:
       fr:
         name: Politique de gestion des incidents du SI
@@ -1771,7 +1840,9 @@ objects:
       Patch management'
     annotation: 'A.8.8
 
-      A.5.35'
+      A.5.35
+
+      cis-v8: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 16.2, 16.6, 18.3'
     translations:
       fr:
         name: "Politique de gestion des vuln\xE9rabilit\xE9s"
@@ -1843,7 +1914,9 @@ objects:
       Outcome: Improved awareness and readiness to address evolving threats.'
     annotation: '7.2
 
-      7.3'
+      7.3
+
+      cis-v8: 14.6'
     translations:
       fr:
         name: "Formation sur l'\xE9tat de la menace"
@@ -1891,7 +1964,9 @@ objects:
       Methods: Practical workshops, use cases, demonstrations.
 
       Outcome: Enhanced skills to secure and efficiently manage access.'
-    annotation: '7.2'
+    annotation: '7.2
+
+      cis-v8: 14.3'
     translations:
       fr:
         name: "Formation IAM (Gestion des Identit\xE9s et des Acc\xE8s)"
@@ -1950,7 +2025,9 @@ objects:
       Methods: Interactive labs, simulations, and hands-on exercises.
 
       Outcome: Enhanced ability to protect and monitor network environments.'
-    annotation: '7.2'
+    annotation: '7.2
+
+      cis-v8: 14.8'
     translations:
       fr:
         name: "Formation s\xE9curit\xE9 r\xE9seau"
@@ -2094,7 +2171,9 @@ objects:
 
       A.5.14
 
-      A.5.15'
+      A.5.15
+
+      cis-v8: 8.11'
     translations:
       fr:
         name: Formation sur la Journalisation et la Surveillance
@@ -2234,7 +2313,9 @@ objects:
       or users before granting network access. It ensures secure access to wired and
       wireless networks by leveraging protocols like 82.1X and RADIUS to validate
       credentials and apply access policies.
-    annotation: A.5.20
+    annotation: 'A.5.20
+
+      cis-v8: 1.2, 13.9'
     translations:
       fr:
         name: "Contr\xF4le d'Acc\xE8s R\xE9seau (802.1X)"
@@ -2265,7 +2346,9 @@ objects:
     csf_function: detect
     annotation: 'A.5.12
 
-      A.5.15'
+      A.5.15
+
+      cis-v8: 8.2, 8.8'
     translations:
       fr:
         name: "Journalisation des acc\xE8s"
@@ -2280,7 +2363,9 @@ objects:
     csf_function: detect
     annotation: 'A.5.12
 
-      A.5.15'
+      A.5.15
+
+      cis-v8: 10.5, 10.7, 13.2, 13.7'
     translations:
       fr:
         name: "Capacit\xE9 de d\xE9tection et de traitement des \xE9v\xE9nements (EDR)"
@@ -2297,7 +2382,9 @@ objects:
       usage of passwords for systems, applications, and accounts. It reduces the risk
       of unauthorized access by enforcing strong password policies and ensuring secure
       handling of credentials.
-    annotation: A.5.18
+    annotation: 'A.5.18
+
+      cis-v8: 5.2'
     translations:
       fr:
         name: "Syst\xE8me de gestion des mots de passe"
@@ -2361,7 +2448,9 @@ objects:
     csf_function: detect
     description: Integrated solutions for securing endpoints, including antivirus,
       firewall, and USB port control
-    annotation: A.8.7
+    annotation: 'A.8.7
+
+      cis-v8: 4.5, 10.1, 10.2, 10.4, 10.6'
     translations:
       fr:
         name: Antivirus et pare-feu pour poste de travail
@@ -2381,7 +2470,9 @@ objects:
     category: technical
     csf_function: protect
     description: Full-disk encryption for workstations
-    annotation: A.8.24
+    annotation: 'A.8.24
+
+      cis-v8: 3.6, 3.11'
     translations:
       fr:
         name: "Capacit\xE9 de chiffrement de disque"
@@ -2399,7 +2490,9 @@ objects:
     csf_function: recover
     description: A capability that ensures backups cannot be altered, deleted, or
       overwritten, protecting data integrity against ransomware and unauthorized access.
-    annotation: A.5.30
+    annotation: 'A.5.30
+
+      cis-v8: 11.3, 11.4'
     translations:
       fr:
         name: "Capacit\xE9 de sauvegarde immuable"
@@ -2423,7 +2516,9 @@ objects:
     category: technical
     csf_function: protect
     description: File encryption utilities like 7zip
-    annotation: A.8.24
+    annotation: 'A.8.24
+
+      cis-v8: 3.9, 3.11'
     translations:
       fr:
         name: "Capacit\xE9 de chiffrement de fichiers"
@@ -2465,7 +2560,9 @@ objects:
     csf_function: detect
     description: A system that collects, analyzes, and correlates security data from
       multiple sources to detect and respond to threats.
-    annotation: A.5.12
+    annotation: 'A.5.12
+
+      cis-v8: 3.14, 8.3, 8.9, 13.1, 13.6, 13.11'
     translations:
       fr:
         name: "Gestion des informations et des \xE9v\xE9nements de s\xE9curit\xE9\
@@ -2488,7 +2585,9 @@ objects:
     csf_function: protect
     description: A physical or digital filter that limits screen visibility to authorized
       users, reducing the risk of visual data breaches.
-    annotation: A.7.9
+    annotation: 'A.7.9
+
+      cis-v8: 4.3'
     translations:
       fr:
         name: "Filtre d'\xE9cran"
@@ -2512,7 +2611,9 @@ objects:
     csf_function: protect
     description: ecurity system that monitors and controls incoming and outgoing network
       traffic based on predefined rules.
-    annotation: A.8.22
+    annotation: 'A.8.22
+
+      cis-v8: 4.4, 4.5'
     translations:
       fr:
         name: "Pare-feu r\xE9seau"
@@ -2533,7 +2634,9 @@ objects:
     csf_function: protect
     description: system that filters, monitors, and protects email communications
       against spam, malware, and unauthorized access
-    annotation: A.5.23
+    annotation: 'A.5.23
+
+      cis-v8: 9.6, 9.7'
     translations:
       fr:
         name: "Passerelle mail s\xE9curis\xE9e"
@@ -2554,7 +2657,9 @@ objects:
     category: technical
     csf_function: detect
     description: Protects email and web traffic at the network edge against malware
-    annotation: A.8.7
+    annotation: 'A.8.7
+
+      cis-v8: 9.7'
     translations:
       fr:
         name: "Antivirus r\xE9seau"
@@ -2574,7 +2679,9 @@ objects:
     csf_function: protect
     description: VLANs isolate and segment network traffic to enhance security and
       optimize performance.
-    annotation: A.8.22
+    annotation: 'A.8.22
+
+      cis-v8: 13.4'
     translations:
       fr:
         name: VLAN
@@ -2596,7 +2703,9 @@ objects:
     description: Microsegmentation is a security strategy that creates fine-grained,
       context-aware policies to isolate individual workloads or applications within
       a network, limiting lateral movement and containing breaches.
-    annotation: A.8.22
+    annotation: 'A.8.22
+
+      cis-v8: 13.4'
     translations:
       fr:
         name: Micro-segmentation
@@ -2655,7 +2764,9 @@ objects:
     csf_function: protect
     description: A reverse proxy forwards client requests to backend servers, enhancing
       security, load balancing, and performance.
-    annotation: A.8.23
+    annotation: 'A.8.23
+
+      cis-v8: 13.10'
     translations:
       fr:
         name: Proxy inverse
@@ -2678,7 +2789,9 @@ objects:
     csf_function: detect
     description: A Web Application Firewall (WAF) protects web applications by filtering
       and monitoring HTTP traffic to block malicious activity.
-    annotation: A.8.23
+    annotation: 'A.8.23
+
+      cis-v8: 13.10'
     translations:
       fr:
         name: Firewall applicatif web
@@ -2702,7 +2815,9 @@ objects:
     csf_function: detect
     description: An Intrusion Detection System (IDS) monitors network traffic to detect
       and alert on potential security threats or unauthorized activities
-    annotation: A.8.20
+    annotation: 'A.8.20
+
+      cis-v8: 13.2, 13.3, 13.8'
     translations:
       fr:
         name: "Syst\xE8me de d\xE9tection d'intrusion (IDS)"
@@ -2726,7 +2841,9 @@ objects:
     csf_function: protect
     description: A web proxy filters and monitors web traffic, enforces security policies,
       and supports user authentication to control and secure internet access
-    annotation: A.8.23
+    annotation: 'A.8.23
+
+      cis-v8: 8.7, 9.3'
     translations:
       fr:
         name: Proxy web
@@ -2753,7 +2870,9 @@ objects:
       interception."
     annotation: 'A.8.20
 
-      A.8.24'
+      A.8.24
+
+      cis-v8: 6.4, 12.7'
     translations:
       fr:
         name: VPN
@@ -2780,7 +2899,9 @@ objects:
       two verification factors from different categories: something you know (e.g.,
       a password), something you have (e.g., a token or smartphone), and something
       you are (e.g., a fingerprint or facial recognition).'
-    annotation: A.8.5
+    annotation: 'A.8.5
+
+      cis-v8: 6.3, 6.4, 6.5'
     translations:
       fr:
         name: Authentification Multi-Facteur (MFA)
@@ -2802,3 +2923,1577 @@ objects:
           \ algo que sabes (por ejemplo, una contrase\xF1a), algo que tienes (por\
           \ ejemplo, un token o un tel\xE9fono m\xF3vil) y algo que eres (por ejemplo,\
           \ una huella dactilar o reconocimiento facial)."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.app_control
+    ref_id: POL.APP_CONTROL
+    name: Application control and allowlisting policy
+    category: policy
+    csf_function: protect
+    description: 'Rules for allowlisting authorized software, libraries and scripts
+      on enterprise assets.
+
+      Scope: end-user devices, servers, production workloads.
+
+      Approval workflow for new software.
+
+      Handling of unauthorized software detection.'
+    typical_evidence:
+    - Signed application control policy document
+    - List of allowed applications / publishers
+    - Exception handling records
+    annotation: 'cis-v8: 2.5, 2.6, 2.7
+
+      iso-27002: 8.19'
+    translations:
+      fr:
+        name: "Politique de contr\xF4le applicatif et de listes d'autorisation"
+        description: "R\xE8gles d'autorisation des logiciels, biblioth\xE8ques et\
+          \ scripts sur les actifs de l'entreprise.\nP\xE9rim\xE8tre : postes utilisateurs,\
+          \ serveurs, charges de production.\nCircuit d'approbation des nouveaux logiciels.\n\
+          Traitement des d\xE9tections de logiciels non autoris\xE9s."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.hardening
+    ref_id: POL.HARDENING
+    name: Secure configuration and hardening policy
+    category: policy
+    csf_function: protect
+    description: 'Baseline secure configurations for enterprise assets and software.
+
+      References to CIS Benchmarks, vendor guides, STIGs.
+
+      Deviation management, compliance monitoring, recertification cadence.'
+    typical_evidence:
+    - Signed hardening policy
+    - Hardening baselines per asset class
+    - Deviation register
+    annotation: 'cis-v8: 4.1, 4.2, 4.6, 4.8, 9.1, 9.4, 10.5, 12.3, 16.7, 16.8
+
+      iso-27002: 8.9'
+    translations:
+      fr:
+        name: "Politique de configuration s\xE9curis\xE9e et de durcissement"
+        description: "Configurations s\xE9curis\xE9es de r\xE9f\xE9rence pour les\
+          \ actifs et logiciels.\nR\xE9f\xE9rentiels : CIS Benchmarks, guides \xE9\
+          diteurs, STIGs.\nGestion des d\xE9rogations, contr\xF4le de conformit\xE9\
+          , cadence de recertification."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.pentest
+    ref_id: POL.PENTEST
+    name: Penetration testing policy
+    category: policy
+    csf_function: detect
+    description: 'Program and authorization for penetration testing activities.
+
+      Scope, frequency (internal / external), rules of engagement.
+
+      Remediation workflow for findings.'
+    typical_evidence:
+    - Signed pentest policy
+    - Rules of engagement template
+    - Annual pentest plan
+    annotation: 'cis-v8: 18.1, 18.4
+
+      iso-27002: 8.8'
+    translations:
+      fr:
+        name: Politique de tests d'intrusion
+        description: "Programme et autorisations pour les activit\xE9s de tests d'intrusion.\n\
+          P\xE9rim\xE8tre, fr\xE9quence (internes / externes), r\xE8gles d'engagement.\n\
+          Circuit de rem\xE9diation des constats."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.retention
+    ref_id: POL.RETENTION
+    name: Data retention policy
+    category: policy
+    csf_function: govern
+    description: 'Retention and disposal rules per data class and jurisdiction.
+
+      Legal hold procedure.
+
+      Disposal requirements on retention expiry.'
+    typical_evidence:
+    - Signed retention policy
+    - Retention schedule per data class
+    - Legal hold register
+    annotation: 'cis-v8: 3.4
+
+      iso-27002: 5.33, 8.10'
+    translations:
+      fr:
+        name: "Politique de conservation des donn\xE9es"
+        description: "R\xE8gles de conservation et de suppression par classe de donn\xE9\
+          es et juridiction.\nProc\xE9dure de conservation l\xE9gale.\nExigences de\
+          \ suppression \xE0 l'expiration."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.ir_exercise
+    ref_id: PROC.IR_EXERCISE
+    name: Incident response exercise procedure
+    category: procedure
+    csf_function: respond
+    description: 'Planning, execution and evaluation of tabletop and technical incident
+      response exercises.
+
+      Minimum cadence, roles, scenarios, lessons-learned capture.'
+    typical_evidence:
+    - Annual IR exercise plan
+    - Tabletop / exercise reports
+    - Action-item tracking
+    annotation: 'cis-v8: 17.7
+
+      iso-27002: 5.24'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'exercice de r\xE9ponse \xE0 incident"
+        description: "Planification, ex\xE9cution et \xE9valuation des exercices de\
+          \ r\xE9ponse \xE0 incident (tabletop et techniques).\nCadence minimale,\
+          \ r\xF4les, sc\xE9narios, collecte des enseignements."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.pentest
+    ref_id: PROC.PENTEST
+    name: Penetration testing procedure
+    category: procedure
+    csf_function: detect
+    description: 'Operational procedure for scoping, executing and reporting internal
+      and external penetration tests.
+
+      Finding classification and remediation tracking.'
+    typical_evidence:
+    - Pentest engagement reports
+    - Remediation tracker linked to findings
+    - Retest evidence
+    annotation: 'cis-v8: 18.1, 18.2, 18.3, 18.5
+
+      iso-27002: 8.8'
+    translations:
+      fr:
+        name: "Proc\xE9dure de tests d'intrusion"
+        description: "Proc\xE9dure op\xE9rationnelle pour le cadrage, l'ex\xE9cution\
+          \ et la restitution des tests d'intrusion internes et externes.\nClassification\
+          \ des constats et suivi de la rem\xE9diation."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.post_incident
+    ref_id: PROC.POST_INCIDENT
+    name: Post-incident review procedure
+    category: procedure
+    csf_function: respond
+    description: 'Structured lessons-learned after security incidents.
+
+      Root-cause analysis, timeline reconstruction, corrective action assignment.'
+    typical_evidence:
+    - Post-incident review reports
+    - Corrective action tracker
+    - Updated runbooks
+    annotation: 'cis-v8: 17.8
+
+      iso-27002: 5.27'
+    translations:
+      fr:
+        name: "Proc\xE9dure de revue post-incident"
+        description: "Retour d'exp\xE9rience structur\xE9 apr\xE8s un incident de\
+          \ s\xE9curit\xE9.\nAnalyse des causes, reconstitution de la chronologie,\
+          \ attribution des actions correctives."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.rbac
+    ref_id: PROC.RBAC
+    name: Role-based access control administration procedure
+    category: procedure
+    csf_function: protect
+    description: 'Role definition, role-to-entitlement mapping, role lifecycle, segregation-of-duties
+      checks.
+
+      Role review and recertification cadence.'
+    typical_evidence:
+    - Role catalog
+    - SoD conflict matrix
+    - Role recertification evidence
+    annotation: 'cis-v8: 6.8
+
+      iso-27002: 5.3, 5.15'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'administration RBAC"
+        description: "D\xE9finition des r\xF4les, mapping r\xF4les-habilitations,\
+          \ cycle de vie des r\xF4les, contr\xF4les de s\xE9paration des t\xE2ches.\n\
+          Cadence de revue et recertification des r\xF4les."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.sbom
+    ref_id: PROC.SBOM
+    name: Software Bill of Materials (SBOM) management procedure
+    category: procedure
+    csf_function: identify
+    description: 'Generation, collection and maintenance of SBOMs for first-party
+      and third-party software.
+
+      Monitoring for vulnerabilities in listed components.'
+    typical_evidence:
+    - SBOM repository
+    - SBOM-based vulnerability alerts
+    - Supplier SBOM intake records
+    annotation: 'cis-v8: 16.4, 16.5
+
+      iso-27002: 8.28, 8.30'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion des SBOM"
+        description: "G\xE9n\xE9ration, collecte et mise \xE0 jour des Software Bill\
+          \ of Materials pour les logiciels internes et tiers.\nSurveillance des vuln\xE9\
+          rabilit\xE9s des composants list\xE9s."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.sdlc
+    ref_id: PROC.SDLC
+    name: Secure software development lifecycle procedure
+    category: procedure
+    csf_function: protect
+    description: 'Integration of security controls across the software development
+      lifecycle.
+
+      Security requirements, design review, secure coding, testing and release gates.'
+    typical_evidence:
+    - SDLC workflow diagrams
+    - Security gate evidence per release
+    - Code review records
+    annotation: 'cis-v8: 16.1
+
+      iso-27002: 8.25, 8.27, 8.28'
+    translations:
+      fr:
+        name: "Proc\xE9dure de cycle de d\xE9veloppement s\xE9curis\xE9"
+        description: "Int\xE9gration des contr\xF4les de s\xE9curit\xE9 \xE0 chaque\
+          \ \xE9tape du cycle de d\xE9veloppement logiciel.\nExigences de s\xE9curit\xE9\
+          , revue de conception, codage s\xE9curis\xE9, tests et contr\xF4les de livraison."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+    ref_id: PROC.SOFTWARE_LIFECYCLE
+    name: Software lifecycle management procedure
+    category: procedure
+    csf_function: identify
+    description: Tracking of supported software versions, end-of-life monitoring and
+      replacement planning for unsupported software.
+    typical_evidence:
+    - Software inventory with EOL dates
+    - Replacement roadmap
+    - Exceptions for unsupported software
+    annotation: 'cis-v8: 2.2
+
+      iso-27002: 8.8, 8.9'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion du cycle de vie des logiciels"
+        description: "Suivi des versions logicielles support\xE9es, surveillance des\
+          \ fins de vie et planification du remplacement des logiciels non support\xE9\
+          s."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.threat_modeling
+    ref_id: PROC.THREAT_MODELING
+    name: Threat modeling procedure
+    category: procedure
+    csf_function: identify
+    description: 'Structured threat modeling activities during design phase.
+
+      Methodology (STRIDE, PASTA, LINDDUN), deliverables, review cadence.'
+    typical_evidence:
+    - Threat model documents
+    - Design review sign-off
+    - Mitigation tracker
+    annotation: 'cis-v8: 16.14
+
+      iso-27002: 8.27'
+    translations:
+      fr:
+        name: "Proc\xE9dure de mod\xE9lisation des menaces"
+        description: "Activit\xE9s structur\xE9es de mod\xE9lisation des menaces en\
+          \ phase de conception.\nM\xE9thodologie (STRIDE, PASTA, LINDDUN), livrables,\
+          \ cadence de revue."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+    ref_id: PROC.TPRM_ASSESSMENT
+    name: Third-party risk assessment procedure
+    category: procedure
+    csf_function: govern
+    description: 'Assessment and ongoing monitoring of suppliers and service providers.
+
+      Tiering, assessment cadence, questionnaires, evidence review.'
+    typical_evidence:
+    - Completed third-party assessments
+    - Supplier monitoring reports
+    - Remediation tracking
+    annotation: 'cis-v8: 15.5, 15.6
+
+      iso-27002: 5.19, 5.20, 5.22'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'\xE9valuation des tiers"
+        description: "\xC9valuation et surveillance continue des fournisseurs et prestataires.\n\
+          Tierisation, cadence, questionnaires, revue des preuves."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.app_control
+    ref_id: TECH.APP_CONTROL
+    name: Application control / allowlisting capability
+    category: technical
+    csf_function: protect
+    description: 'Technical capability enforcing allowlists of authorized applications,
+      libraries and scripts.
+
+      Typically provided by AppLocker, WDAC, third-party allowlisting or EDR features.'
+    typical_evidence:
+    - Deployment coverage report
+    - Allowlist policy configuration
+    - Blocked execution events
+    annotation: 'cis-v8: 2.3, 2.5, 2.6, 2.7
+
+      iso-27002: 8.19'
+    translations:
+      fr:
+        name: "Capacit\xE9 de contr\xF4le applicatif / allowlisting"
+        description: "Capacit\xE9 technique d'application de listes d'autorisation\
+          \ sur les applications, biblioth\xE8ques et scripts.\nG\xE9n\xE9ralement\
+          \ fournie par AppLocker, WDAC, un outil d'allowlisting tiers ou des fonctions\
+          \ EDR."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.asset_discovery
+    ref_id: TECH.ASSET_DISCOVERY
+    name: Active and passive asset discovery capability
+    category: technical
+    csf_function: identify
+    description: Automated discovery of assets connected to enterprise networks via
+      active scanning, passive sniffing and DHCP/log correlation.
+    typical_evidence:
+    - Discovery tool deployment
+    - Scheduled scan configuration
+    - Discovered-vs-inventoried reconciliation
+    annotation: 'cis-v8: 1.3, 1.4, 1.5
+
+      iso-27002: 5.9'
+    translations:
+      fr:
+        name: "Capacit\xE9 de d\xE9couverte active et passive des actifs"
+        description: "D\xE9couverte automatis\xE9e des actifs connect\xE9s aux r\xE9\
+          seaux de l'entreprise par scan actif, \xE9coute passive et corr\xE9lation\
+          \ DHCP / journaux."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.dlp
+    ref_id: TECH.DLP
+    name: Data Loss Prevention (DLP) capability
+    category: technical
+    csf_function: protect
+    description: Technical capability detecting and preventing unauthorized exfiltration
+      of sensitive data across endpoints, network and cloud.
+    typical_evidence:
+    - DLP deployment scope
+    - DLP policy configuration
+    - Violation / quarantine reports
+    annotation: 'cis-v8: 3.13
+
+      iso-27002: 8.12'
+    translations:
+      fr:
+        name: "Capacit\xE9 de pr\xE9vention des pertes de donn\xE9es (DLP)"
+        description: "Capacit\xE9 technique de d\xE9tection et de pr\xE9vention des\
+          \ exfiltrations non autoris\xE9es de donn\xE9es sensibles (postes, r\xE9\
+          seau, cloud)."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.dns_filter
+    ref_id: TECH.DNS_FILTER
+    name: DNS filtering / secure DNS capability
+    category: technical
+    csf_function: protect
+    description: Protective DNS service with filtering of malicious, high-risk or
+      policy-violating domains, and DNS query logging.
+    typical_evidence:
+    - Protective DNS deployment
+    - Filtering category policy
+    - Blocked-query reports
+    annotation: 'cis-v8: 4.9, 8.6, 9.2
+
+      iso-27002: 8.23'
+    translations:
+      fr:
+        name: "Capacit\xE9 de filtrage DNS / DNS s\xE9curis\xE9"
+        description: "Service DNS protecteur filtrant les domaines malveillants ou\
+          \ non conformes \xE0 la politique, avec journalisation des requ\xEAtes."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.email_auth
+    ref_id: TECH.EMAIL_AUTH
+    name: Email authentication (DMARC / SPF / DKIM)
+    category: technical
+    csf_function: protect
+    description: Email sender authentication via SPF, DKIM and DMARC with enforcement
+      policy and reporting.
+    typical_evidence:
+    - SPF / DKIM / DMARC DNS records
+    - DMARC aggregate reports
+    - Enforcement policy (p=reject / quarantine)
+    annotation: 'cis-v8: 9.5
+
+      iso-27002: 5.14'
+    translations:
+      fr:
+        name: Authentification des courriels (DMARC / SPF / DKIM)
+        description: "Authentification des exp\xE9diteurs de courriel par SPF, DKIM\
+          \ et DMARC avec politique d'application et rapports."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.iam
+    ref_id: TECH.IAM
+    name: Centralized Identity & Access Management capability
+    category: technical
+    csf_function: protect
+    description: Centralized identity store with SSO, provisioning, deprovisioning,
+      and access governance features integrated with enterprise applications.
+    typical_evidence:
+    - IAM / SSO platform inventory
+    - Integration coverage report
+    - Access review exports
+    annotation: 'cis-v8: 5.6, 6.6, 6.7, 12.5
+
+      iso-27002: 5.16, 5.18'
+    translations:
+      fr:
+        name: "Capacit\xE9 centralis\xE9e de gestion des identit\xE9s et des acc\xE8\
+          s"
+        description: "Annuaire d'identit\xE9 centralis\xE9 avec SSO, provisioning,\
+          \ d\xE9provisionnement et gouvernance des acc\xE8s int\xE9gr\xE9s aux applications."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.mdm
+    ref_id: TECH.MDM
+    name: Mobile Device Management capability
+    category: technical
+    csf_function: protect
+    description: MDM / UEM capability enforcing device lockout, remote wipe, workspace
+      separation and configuration baselines on mobile and portable endpoints.
+    typical_evidence:
+    - MDM enrollment coverage
+    - Remote wipe test records
+    - Configuration profile catalog
+    annotation: 'cis-v8: 4.10, 4.11, 4.12
+
+      iso-27002: 8.1'
+    translations:
+      fr:
+        name: "Capacit\xE9 de gestion des appareils mobiles (MDM)"
+        description: "Capacit\xE9 MDM / UEM assurant le verrouillage, l'effacement\
+          \ \xE0 distance, la s\xE9paration des espaces et la configuration de r\xE9\
+          f\xE9rence sur les terminaux mobiles."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.paw
+    ref_id: TECH.PAW
+    name: Privileged Access Workstation capability
+    category: technical
+    csf_function: protect
+    description: Dedicated hardened workstations or jump-hosts used exclusively for
+      administrative work, isolated from general-purpose computing.
+    typical_evidence:
+    - PAW inventory
+    - Isolation architecture diagram
+    - Access logs to PAW
+    annotation: 'cis-v8: 12.8
+
+      iso-27002: 8.2'
+    translations:
+      fr:
+        name: "Capacit\xE9 de poste d'administration d\xE9di\xE9 (PAW)"
+        description: "Postes durcis ou h\xF4tes-rebond utilis\xE9s exclusivement pour\
+          \ l'administration, isol\xE9s des usages bureautiques."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.sast_dast
+    ref_id: TECH.SAST_DAST
+    name: SAST / DAST / code security scanning capability
+    category: technical
+    csf_function: detect
+    description: Automated static and dynamic application security testing integrated
+      into CI/CD pipelines, with findings triage.
+    typical_evidence:
+    - Tool integration in pipeline
+    - Scan frequency configuration
+    - Findings dashboards
+    annotation: 'cis-v8: 16.12
+
+      iso-27002: 8.29'
+    translations:
+      fr:
+        name: "Capacit\xE9 d'analyse de code SAST / DAST"
+        description: "Tests de s\xE9curit\xE9 applicative statique et dynamique automatis\xE9\
+          s, int\xE9gr\xE9s aux pipelines CI/CD, avec triage des constats."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.sw_inventory
+    ref_id: TECH.SW_INVENTORY
+    name: Automated software inventory capability
+    category: technical
+    csf_function: identify
+    description: Automated discovery and tracking of installed software across enterprise
+      assets, feeding the software inventory.
+    typical_evidence:
+    - Software inventory tool deployment
+    - Inventory coverage %
+    - Unauthorized-software alerts
+    annotation: 'cis-v8: 2.4
+
+      iso-27002: 5.9'
+    translations:
+      fr:
+        name: "Capacit\xE9 d'inventaire logiciel automatis\xE9"
+        description: "D\xE9couverte et suivi automatis\xE9s des logiciels install\xE9\
+          s sur les actifs, alimentant l'inventaire logiciel."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+    ref_id: TECH.VULN_SCANNER
+    name: Vulnerability scanner capability
+    category: technical
+    csf_function: detect
+    description: 'Automated vulnerability scanning covering internal and externally-exposed
+      assets.
+
+      Authenticated scanning where feasible.'
+    typical_evidence:
+    - Scanner deployment and scope
+    - Scan schedule
+    - Finding export samples
+    annotation: 'cis-v8: 7.5, 7.6
+
+      iso-27002: 8.8'
+    translations:
+      fr:
+        name: "Capacit\xE9 de scanner de vuln\xE9rabilit\xE9s"
+        description: "Scan automatis\xE9 des vuln\xE9rabilit\xE9s sur les actifs internes\
+          \ et expos\xE9s, avec scan authentifi\xE9 lorsque possible."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.ztna
+    ref_id: TECH.ZTNA
+    name: Zero Trust Network Access capability
+    category: technical
+    csf_function: protect
+    description: Identity-aware, per-session access to internal applications and remote
+      assets without traditional VPN broadcast.
+    typical_evidence:
+    - ZTNA platform deployment
+    - Application coverage inventory
+    - Per-application access policies
+    annotation: 'cis-v8: 13.5
+
+      iso-27002: 8.20'
+    translations:
+      fr:
+        name: "Capacit\xE9 d'acc\xE8s r\xE9seau Zero Trust (ZTNA)"
+        description: "Acc\xE8s identitaire par session aux applications internes et\
+          \ aux actifs distants, sans diffusion VPN traditionnelle."
+  - urn: urn:intuitem:risk:function:doc-pol:train.secdev
+    ref_id: TRAIN.SECDEV
+    name: Secure development training
+    category: process
+    csf_function: protect
+    description: Training for developers on secure coding, common vulnerabilities,
+      framework-specific pitfalls and threat modeling basics.
+    typical_evidence:
+    - Training curriculum
+    - Completion records per developer
+    - Certification renewal tracking
+    annotation: 'cis-v8: 16.9
+
+      iso-27002: 8.25, 8.28'
+    translations:
+      fr:
+        name: "Formation au d\xE9veloppement s\xE9curis\xE9"
+        description: "Formation des d\xE9veloppeurs au codage s\xE9curis\xE9, aux\
+          \ vuln\xE9rabilit\xE9s courantes, aux pi\xE8ges des frameworks et aux bases\
+          \ de la mod\xE9lisation des menaces."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.privacy
+    ref_id: POL.PRIVACY
+    name: Privacy and personal data protection policy
+    category: policy
+    csf_function: govern
+    description: 'Framework for lawful processing of personal data: purposes, legal
+      bases, data minimization, retention, rights, cross-border transfers.'
+    typical_evidence:
+    - Signed privacy policy
+    - Legal basis register
+    - Rights handling workflow
+    annotation: 'iso-27701; gdpr-arts-5-6; iso-27002: 5.34'
+    translations:
+      fr:
+        name: "Politique de protection des donn\xE9es personnelles"
+        description: "Cadre du traitement licite des donn\xE9es \xE0 caract\xE8re\
+          \ personnel : finalit\xE9s, bases l\xE9gales, minimisation, conservation,\
+          \ droits, transferts transfrontaliers."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.dpia
+    ref_id: PROC.DPIA
+    name: Data Protection / Privacy Impact Assessment procedure
+    category: procedure
+    csf_function: govern
+    description: 'Procedure for performing DPIAs / PIAs on high-risk processing activities.
+
+      Triggers, methodology, stakeholder consultation, outcome tracking.'
+    typical_evidence:
+    - DPIA template
+    - Completed DPIAs
+    - DPIA register
+    annotation: gdpr-art-35; iso-29134
+    translations:
+      fr:
+        name: "Proc\xE9dure d'analyse d'impact relative \xE0 la protection des donn\xE9\
+          es (AIPD)"
+        description: "Proc\xE9dure de r\xE9alisation des AIPD / PIA sur les traitements\
+          \ \xE0 risque \xE9lev\xE9.\nCrit\xE8res de d\xE9clenchement, m\xE9thodologie,\
+          \ consultation des parties prenantes, suivi des conclusions."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.data_subject_rights
+    ref_id: PROC.DATA_SUBJECT_RIGHTS
+    name: Data subject rights handling procedure
+    category: procedure
+    csf_function: govern
+    description: Intake, authentication, fulfillment and tracking of data subject
+      requests (access, rectification, erasure, portability, objection).
+    typical_evidence:
+    - Rights request intake log
+    - Response templates
+    - SLA compliance reports
+    annotation: gdpr-arts-15-22
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion des droits des personnes concern\xE9es"
+        description: "R\xE9ception, authentification, traitement et suivi des demandes\
+          \ des personnes concern\xE9es (acc\xE8s, rectification, effacement, portabilit\xE9\
+          , opposition)."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.breach_notif
+    ref_id: PROC.BREACH_NOTIF
+    name: Personal data breach notification procedure
+    category: procedure
+    csf_function: respond
+    description: Detection, assessment, authority notification and data-subject communication
+      for personal data breaches, within regulatory deadlines.
+    typical_evidence:
+    - Breach notification workflow
+    - Authority notification templates
+    - Breach log
+    annotation: 'gdpr-arts-33-34; iso-27002: 5.26'
+    translations:
+      fr:
+        name: "Proc\xE9dure de notification de violation de donn\xE9es personnelles"
+        description: "D\xE9tection, qualification, notification \xE0 l'autorit\xE9\
+          \ et communication aux personnes en cas de violation de donn\xE9es personnelles,\
+          \ dans les d\xE9lais r\xE9glementaires."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.ropa
+    ref_id: DOC.ROPA
+    name: Record of Processing Activities
+    category: policy
+    csf_function: govern
+    description: Central register of personal data processing activities including
+      purposes, categories of data, recipients, retention and safeguards.
+    typical_evidence:
+    - ROPA master register
+    - Periodic review records
+    - Linked DPIAs
+    annotation: gdpr-art-30
+    translations:
+      fr:
+        name: "Registre des activit\xE9s de traitement"
+        description: "Registre central des traitements de donn\xE9es personnelles\
+          \ incluant les finalit\xE9s, cat\xE9gories de donn\xE9es, destinataires,\
+          \ dur\xE9es de conservation et mesures de s\xE9curit\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.dpa_register
+    ref_id: DOC.DPA_REGISTER
+    name: Register of Data Processing Agreements
+    category: policy
+    csf_function: govern
+    description: Inventory of active data processing agreements with processors and
+      joint controllers.
+    typical_evidence:
+    - DPA register export
+    - Signed DPAs linked to suppliers
+    - Cross-border transfer mechanisms
+    annotation: gdpr-art-28
+    translations:
+      fr:
+        name: "Registre des accords de traitement de donn\xE9es"
+        description: Inventaire des accords de traitement actifs avec les sous-traitants
+          et co-responsables.
+  - urn: urn:intuitem:risk:function:doc-pol:pol.ai
+    ref_id: POL.AI
+    name: AI governance and acceptable use policy
+    category: policy
+    csf_function: govern
+    description: 'Principles and rules for development, procurement and use of AI
+      systems.
+
+      Acceptable use, prohibited use cases, transparency, human oversight.'
+    typical_evidence:
+    - Signed AI policy
+    - Approval workflow for AI use cases
+    - Employee AI acceptable-use acknowledgements
+    annotation: iso-42001; nist-ai-rmf; eu-ai-act
+    translations:
+      fr:
+        name: Politique de gouvernance et d'usage responsable de l'IA
+        description: "Principes et r\xE8gles applicables au d\xE9veloppement, \xE0\
+          \ l'achat et \xE0 l'utilisation des syst\xE8mes d'IA.\nUsages acceptables,\
+          \ usages prohib\xE9s, transparence, supervision humaine."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.ai_risk
+    ref_id: PROC.AI_RISK
+    name: AI risk assessment procedure
+    category: procedure
+    csf_function: identify
+    description: 'Identification, classification and assessment of risks specific
+      to AI systems: bias, hallucination, data leakage, safety, explainability.'
+    typical_evidence:
+    - AI risk assessment template
+    - Completed AI risk assessments
+    - Mitigation tracker
+    annotation: 'iso-42001: 6.1; nist-ai-rmf: map'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'\xE9valuation des risques IA"
+        description: "Identification, classification et \xE9valuation des risques\
+          \ sp\xE9cifiques aux syst\xE8mes d'IA : biais, hallucinations, fuite de\
+          \ donn\xE9es, s\xFBret\xE9, explicabilit\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.ai_lifecycle
+    ref_id: PROC.AI_LIFECYCLE
+    name: AI system lifecycle management procedure
+    category: procedure
+    csf_function: govern
+    description: Lifecycle controls across data sourcing, model training, validation,
+      deployment, monitoring and retirement of AI systems.
+    typical_evidence:
+    - AI system datasheets
+    - Model cards
+    - Post-deployment monitoring reports
+    annotation: 'iso-42001: 8; nist-ai-rmf: manage'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion du cycle de vie des syst\xE8mes d'IA"
+        description: "Contr\xF4les sur l'ensemble du cycle : acquisition des donn\xE9\
+          es, entra\xEEnement, validation, d\xE9ploiement, surveillance et mise hors\
+          \ service."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.ai_inventory
+    ref_id: DOC.AI_INVENTORY
+    name: AI systems and models inventory
+    category: policy
+    csf_function: identify
+    description: Inventory of deployed AI systems and models, their purpose, data
+      sources, risk classification and ownership.
+    typical_evidence:
+    - AI inventory register
+    - Risk classification per system
+    - Owner assignment
+    annotation: 'iso-42001: 6.1.2; eu-ai-act'
+    translations:
+      fr:
+        name: "Inventaire des syst\xE8mes et mod\xE8les d'IA"
+        description: "Inventaire des syst\xE8mes et mod\xE8les d'IA d\xE9ploy\xE9\
+          s, leur finalit\xE9, leurs sources de donn\xE9es, leur classification de\
+          \ risque et leur propri\xE9taire."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.bia
+    ref_id: PROC.BIA
+    name: Business Impact Analysis procedure
+    category: procedure
+    csf_function: identify
+    description: Procedure for identifying critical activities, dependencies, RTO/RPO
+      objectives and impact over time.
+    typical_evidence:
+    - BIA methodology document
+    - Completed BIA per activity
+    - RTO / RPO catalog
+    annotation: 'iso-22301; iso-27002: 5.30'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'analyse d'impact sur l'activit\xE9 (BIA)"
+        description: "Proc\xE9dure d'identification des activit\xE9s critiques, des\
+          \ d\xE9pendances, des objectifs RTO / RPO et des impacts dans le temps."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.drp
+    ref_id: PROC.DRP
+    name: Disaster Recovery Plan execution procedure
+    category: procedure
+    csf_function: recover
+    description: Activation, execution and validation of disaster recovery plans for
+      IT systems supporting critical activities.
+    typical_evidence:
+    - DRP runbooks per system
+    - Activation criteria
+    - Recovery exercise reports
+    annotation: 'iso-27002: 5.30, 8.14; iso-22301'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'ex\xE9cution du plan de reprise d'activit\xE9"
+        description: "Activation, ex\xE9cution et validation des plans de reprise\
+          \ informatique pour les syst\xE8mes supportant les activit\xE9s critiques."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+    ref_id: PROC.BCP_EXERCISE
+    name: BCP / DR exercise procedure
+    category: procedure
+    csf_function: recover
+    description: 'Planning and execution of business continuity and disaster recovery
+      exercises.
+
+      Objectives, scenario types, evaluation, lessons learned.'
+    typical_evidence:
+    - Annual BCP/DR exercise plan
+    - Exercise reports
+    - Corrective action tracker
+    annotation: 'iso-22301; iso-27002: 5.29'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'exercice PCA / PRA"
+        description: "Planification et ex\xE9cution des exercices de continuit\xE9\
+          \ d'activit\xE9 et de reprise.\nObjectifs, types de sc\xE9narios, \xE9valuation,\
+          \ retours d'exp\xE9rience."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.bia
+    ref_id: DOC.BIA
+    name: Business Impact Analysis document
+    category: policy
+    csf_function: identify
+    description: Consolidated Business Impact Analysis report per scope, listing critical
+      activities, dependencies and recovery objectives.
+    typical_evidence:
+    - Signed BIA report
+    - Dependency maps
+    - RTO/RPO summary
+    annotation: 'iso-22301; iso-27002: 5.30'
+    translations:
+      fr:
+        name: "Document d'analyse d'impact sur l'activit\xE9"
+        description: "Rapport consolid\xE9 d'analyse d'impact par p\xE9rim\xE8tre,\
+          \ listant les activit\xE9s critiques, les d\xE9pendances et les objectifs\
+          \ de reprise."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.dr_site
+    ref_id: TECH.DR_SITE
+    name: Disaster recovery site / alternate processing capability
+    category: technical
+    csf_function: recover
+    description: Alternate processing site (cold, warm or hot) and replication mechanisms
+      enabling recovery within defined RTO/RPO.
+    typical_evidence:
+    - Alternate-site architecture
+    - Replication dashboards
+    - Failover test records
+    annotation: 'iso-27002: 8.14; iso-22301'
+    translations:
+      fr:
+        name: "Capacit\xE9 de site de reprise / traitement alternatif"
+        description: "Site de traitement alternatif (froid, ti\xE8de ou chaud) et\
+          \ m\xE9canismes de r\xE9plication permettant la reprise dans les RTO / RPO\
+          \ d\xE9finis."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.cloud
+    ref_id: POL.CLOUD
+    name: Cloud security policy
+    category: policy
+    csf_function: govern
+    description: 'Rules for adoption and operation of cloud services.
+
+      Shared responsibility, approved providers, configuration baselines, data classification
+      constraints.'
+    typical_evidence:
+    - Signed cloud security policy
+    - Approved cloud provider list
+    - Shared-responsibility matrix
+    annotation: 'iso-27017; iso-27002: 5.23'
+    translations:
+      fr:
+        name: "Politique de s\xE9curit\xE9 du cloud"
+        description: "R\xE8gles d'adoption et d'exploitation des services cloud.\n\
+          Responsabilit\xE9 partag\xE9e, fournisseurs approuv\xE9s, configurations\
+          \ de r\xE9f\xE9rence, contraintes de classification des donn\xE9es."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.cloud_config
+    ref_id: PROC.CLOUD_CONFIG
+    name: Cloud secure configuration procedure
+    category: procedure
+    csf_function: protect
+    description: Provisioning and maintenance of secure configurations for cloud tenants,
+      accounts and workloads using baselines and infrastructure as code.
+    typical_evidence:
+    - Cloud baseline definitions
+    - IaC repositories
+    - Drift detection reports
+    annotation: 'iso-27017; iso-27002: 8.9'
+    translations:
+      fr:
+        name: "Proc\xE9dure de configuration s\xE9curis\xE9e du cloud"
+        description: "Mise en service et maintenance des configurations s\xE9curis\xE9\
+          es des tenants, comptes et charges cloud via des r\xE9f\xE9rences et de\
+          \ l'infrastructure-as-code."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.cspm
+    ref_id: TECH.CSPM
+    name: Cloud Security Posture Management (CSPM) capability
+    category: technical
+    csf_function: detect
+    description: Continuous assessment of cloud resource configurations against security
+      baselines, with drift and misconfiguration alerting.
+    typical_evidence:
+    - CSPM tool deployment
+    - Findings dashboards
+    - Remediation tracker
+    annotation: iso-27017
+    translations:
+      fr:
+        name: "Capacit\xE9 de gestion de la posture de s\xE9curit\xE9 du cloud (CSPM)"
+        description: "\xC9valuation continue des configurations des ressources cloud\
+          \ au regard de r\xE9f\xE9rences de s\xE9curit\xE9, avec alertes sur les\
+          \ d\xE9rives et mauvaises configurations."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.cwpp
+    ref_id: TECH.CWPP
+    name: Cloud Workload Protection Platform (CWPP) capability
+    category: technical
+    csf_function: protect
+    description: 'Runtime protection for cloud workloads (VMs, containers, serverless):
+      vulnerability scanning, anti-malware, integrity monitoring, behavioral detection.'
+    typical_evidence:
+    - CWPP deployment inventory
+    - Coverage by workload type
+    - Incident signal samples
+    annotation: iso-27017
+    translations:
+      fr:
+        name: "Capacit\xE9 de protection des charges cloud (CWPP)"
+        description: "Protection \xE0 l'ex\xE9cution des charges cloud (VM, conteneurs,\
+          \ serverless) : scan de vuln\xE9rabilit\xE9s, anti-malware, int\xE9grit\xE9\
+          , d\xE9tection comportementale."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.casb
+    ref_id: TECH.CASB
+    name: Cloud Access Security Broker (CASB) capability
+    category: technical
+    csf_function: protect
+    description: Visibility and control over sanctioned and unsanctioned SaaS usage,
+      with policy enforcement on data and authentication flows.
+    typical_evidence:
+    - CASB deployment scope
+    - Shadow-IT discovery reports
+    - DLP / policy coverage
+    annotation: 'iso-27017; iso-27002: 5.23'
+    translations:
+      fr:
+        name: "Capacit\xE9 de courtier de s\xE9curit\xE9 d'acc\xE8s au cloud (CASB)"
+        description: "Visibilit\xE9 et contr\xF4le sur les usages SaaS approuv\xE9\
+          s et non approuv\xE9s, avec application des politiques sur les flux de donn\xE9\
+          es et d'authentification."
+  - urn: urn:intuitem:risk:function:doc-pol:phys.secure_area
+    ref_id: PHYS.SECURE_AREA
+    name: Secure area and physical zoning
+    category: physical
+    csf_function: protect
+    description: Definition and enforcement of physical security perimeters and zones
+      with graded access controls matching sensitivity of the area.
+    typical_evidence:
+    - Site zoning plan
+    - Access matrix per zone
+    - Physical access logs
+    annotation: 'iso-27002: 7.1, 7.2, 7.3'
+    translations:
+      fr:
+        name: "Zone s\xE9curis\xE9e et zonage physique"
+        description: "D\xE9finition et application de p\xE9rim\xE8tres et zones de\
+          \ s\xE9curit\xE9 physiques avec des contr\xF4les d'acc\xE8s gradu\xE9s selon\
+          \ la sensibilit\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
+    ref_id: PHYS.VISITOR_MGMT
+    name: Visitor management
+    category: physical
+    csf_function: protect
+    description: Visitor registration, identification, escort, and tracking within
+      secure premises.
+    typical_evidence:
+    - Visitor log
+    - Visitor badge inventory
+    - Escort procedures
+    annotation: 'iso-27002: 7.2'
+    translations:
+      fr:
+        name: Gestion des visiteurs
+        description: "Enregistrement, identification, accompagnement et suivi des\
+          \ visiteurs dans les locaux s\xE9curis\xE9s."
+  - urn: urn:intuitem:risk:function:doc-pol:phys.cctv
+    ref_id: PHYS.CCTV
+    name: CCTV / surveillance capability
+    category: physical
+    csf_function: detect
+    description: Video surveillance of secure premises and entry points, with retention
+      and access controls over recordings.
+    typical_evidence:
+    - Camera coverage plan
+    - Retention configuration
+    - Access logs to recordings
+    annotation: 'iso-27002: 7.4'
+    translations:
+      fr:
+        name: "Vid\xE9osurveillance / CCTV"
+        description: "Vid\xE9osurveillance des locaux s\xE9curis\xE9s et des acc\xE8\
+          s, avec dur\xE9e de conservation et contr\xF4les d'acc\xE8s aux enregistrements."
+  - urn: urn:intuitem:risk:function:doc-pol:phys.clear_desk
+    ref_id: PHYS.CLEAR_DESK
+    name: Clear desk and clear screen enforcement
+    category: physical
+    csf_function: protect
+    description: Requirements for clearing papers, removable media and unlocked screens
+      when workspaces are unattended.
+    typical_evidence:
+    - Clear desk policy clause
+    - Awareness training records
+    - Inspection / spot-check reports
+    annotation: 'iso-27002: 7.7'
+    translations:
+      fr:
+        name: "Bureau propre et \xE9cran verrouill\xE9"
+        description: "Exigences de rangement des documents, supports amovibles et\
+          \ verrouillage des \xE9crans lorsque le poste n'est pas surveill\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:phys.equipment_disposal
+    ref_id: PHYS.EQUIPMENT_DISPOSAL
+    name: Secure equipment and media disposal
+    category: physical
+    csf_function: protect
+    description: Physical destruction or sanitization of decommissioned equipment
+      and removable media containing sensitive information.
+    typical_evidence:
+    - Disposal records
+    - Certificates of destruction
+    - Sanitization tool logs
+    annotation: 'iso-27002: 7.10, 7.14'
+    translations:
+      fr:
+        name: "Mise au rebut s\xE9curis\xE9e des \xE9quipements et supports"
+        description: "Destruction physique ou effacement s\xE9curis\xE9 des \xE9quipements\
+          \ et supports amovibles d\xE9saffect\xE9s contenant des informations sensibles."
+  - urn: urn:intuitem:risk:function:doc-pol:phys.power_env
+    ref_id: PHYS.POWER_ENV
+    name: Power and environmental controls
+    category: physical
+    csf_function: protect
+    description: 'Protection of facilities against power loss and environmental hazards:
+      UPS, generators, HVAC, fire suppression, leak detection.'
+    typical_evidence:
+    - Facility resilience design
+    - UPS / generator test records
+    - Environmental monitoring alerts
+    annotation: 'iso-27002: 7.11, 7.12'
+    translations:
+      fr:
+        name: "Contr\xF4les d'alimentation et d'environnement"
+        description: "Protection des sites contre les coupures et al\xE9as environnementaux\
+          \ : ASI, groupes, CVC, d\xE9tection incendie, d\xE9tection fuites."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.key_mgmt
+    ref_id: PROC.KEY_MGMT
+    name: Cryptographic key management procedure
+    category: procedure
+    csf_function: protect
+    description: 'End-to-end management of cryptographic keys and certificates: generation,
+      distribution, storage, rotation, revocation, archival, destruction.'
+    typical_evidence:
+    - Key management procedure document
+    - Key inventory / registry
+    - Rotation evidence
+    annotation: 'iso-27002: 8.24'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion des cl\xE9s cryptographiques"
+        description: "Gestion de bout en bout des cl\xE9s et certificats : g\xE9n\xE9\
+          ration, distribution, stockage, rotation, r\xE9vocation, archivage, destruction."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.pki
+    ref_id: TECH.PKI
+    name: PKI / certificate management capability
+    category: technical
+    csf_function: protect
+    description: Issuance, inventory, monitoring and renewal of digital certificates
+      used for authentication, signing and encryption.
+    typical_evidence:
+    - Certificate inventory
+    - Expiry monitoring alerts
+    - CA hierarchy diagram
+    annotation: 'iso-27002: 8.24'
+    translations:
+      fr:
+        name: "Capacit\xE9 d'infrastructure \xE0 cl\xE9s publiques (PKI)"
+        description: "\xC9mission, inventaire, surveillance et renouvellement des\
+          \ certificats num\xE9riques utilis\xE9s pour l'authentification, la signature\
+          \ et le chiffrement."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.hsm
+    ref_id: TECH.HSM
+    name: Hardware Security Module / key vault capability
+    category: technical
+    csf_function: protect
+    description: Use of HSMs or managed key vaults for protection of high-value cryptographic
+      keys with audit and access controls.
+    typical_evidence:
+    - HSM / key vault inventory
+    - Key access audit logs
+    - Compliance attestations (FIPS / Common Criteria)
+    annotation: 'iso-27002: 8.24'
+    translations:
+      fr:
+        name: "Capacit\xE9 de module mat\xE9riel de s\xE9curit\xE9 (HSM) / coffre-fort\
+          \ de cl\xE9s"
+        description: "Utilisation de HSM ou coffres-forts de cl\xE9s manag\xE9s pour\
+          \ prot\xE9ger les cl\xE9s cryptographiques \xE0 forte valeur, avec audit\
+          \ et contr\xF4le d'acc\xE8s."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+    ref_id: PROC.COMPLIANCE_MONITORING
+    name: Compliance monitoring procedure
+    category: procedure
+    csf_function: govern
+    description: Periodic monitoring of compliance with internal policies, contractual
+      and regulatory requirements, with evidence collection and reporting.
+    typical_evidence:
+    - Compliance calendar
+    - Monitoring reports
+    - Non-compliance escalation log
+    annotation: 'iso-27002: 5.35, 5.36'
+    translations:
+      fr:
+        name: "Proc\xE9dure de surveillance de la conformit\xE9"
+        description: "Surveillance p\xE9riodique de la conformit\xE9 aux politiques\
+          \ internes, aux exigences contractuelles et r\xE9glementaires, avec collecte\
+          \ de preuves et reporting."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+    ref_id: PROC.EXCEPTION_MGMT
+    name: Security exception and deviation management procedure
+    category: procedure
+    csf_function: govern
+    description: Intake, review, approval, risk acceptance and expiry of security
+      exceptions to established controls.
+    typical_evidence:
+    - Exception request template
+    - Exception approval records
+    - Expiry tracking
+    annotation: 'iso-27002: 5.31, 5.37'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion des d\xE9rogations de s\xE9curit\xE9"
+        description: "R\xE9ception, revue, approbation, acceptation du risque et expiration\
+          \ des d\xE9rogations aux contr\xF4les \xE9tablis."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.exception_register
+    ref_id: DOC.EXCEPTION_REGISTER
+    name: Register of security exceptions
+    category: policy
+    csf_function: govern
+    description: Central register of approved security exceptions, their scope, compensating
+      controls, owner and expiry.
+    typical_evidence:
+    - Exception register export
+    - Linked risk acceptance records
+    annotation: 'iso-27002: 5.31'
+    translations:
+      fr:
+        name: "Registre des d\xE9rogations de s\xE9curit\xE9"
+        description: "Registre central des d\xE9rogations approuv\xE9es, leur p\xE9\
+          rim\xE8tre, les contr\xF4les compensatoires, le propri\xE9taire et la date\
+          \ d'expiration."
+  - urn: urn:intuitem:risk:function:doc-pol:train.privacy
+    ref_id: TRAIN.PRIVACY
+    name: Privacy and personal data protection training
+    category: process
+    csf_function: govern
+    description: Role-appropriate training on personal data protection obligations,
+      handling rules and incident reporting.
+    typical_evidence:
+    - Training curriculum
+    - Completion records
+    - Refresher cadence
+    annotation: 'gdpr-art-39; iso-27002: 6.3'
+    translations:
+      fr:
+        name: "Formation \xE0 la protection des donn\xE9es personnelles"
+        description: "Formation adapt\xE9e aux r\xF4les sur les obligations de protection\
+          \ des donn\xE9es personnelles, les r\xE8gles de traitement et la remont\xE9\
+          e d'incidents."
+  - urn: urn:intuitem:risk:function:doc-pol:train.ai
+    ref_id: TRAIN.AI
+    name: AI literacy and governance training
+    category: process
+    csf_function: govern
+    description: Training on safe and responsible AI use, including risks, policies,
+      prompting hygiene and reporting channels.
+    typical_evidence:
+    - Training curriculum
+    - Completion records
+    - Role-specific modules
+    annotation: 'iso-42001: 7.2; eu-ai-act-art-4'
+    translations:
+      fr:
+        name: "Formation \xE0 la gouvernance et \xE0 l'usage responsable de l'IA"
+        description: "Formation \xE0 un usage s\xFBr et responsable de l'IA : risques,\
+          \ politiques, hygi\xE8ne d'invite, canaux de signalement."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.web_sec
+    ref_id: POL.WEB_SEC
+    name: Web security policy
+    category: policy
+    csf_function: protect
+    description: 'Security requirements for client-facing web services: use of WAF
+      and reverse proxies, session and cookie management, strong customer authentication,
+      input validation, hardening, and secure exposure of internal services.'
+    typical_evidence:
+    - Signed web security policy
+    - WAF / reverse proxy deployment matrix
+    - Secure framework / library standards
+    annotation: 'cis-v8: 13.10
+
+      iso-27002: 8.23, 8.28
+
+      scf: WEB-01, WEB-03, WEB-05, WEB-06, WEB-09'
+    translations:
+      fr:
+        name: "Politique de s\xE9curit\xE9 web"
+        description: "Exigences de s\xE9curit\xE9 pour les services web expos\xE9\
+          s : utilisation de WAF et de reverse proxies, gestion des sessions et des\
+          \ cookies, authentification forte des clients, validation des entr\xE9es,\
+          \ durcissement et exposition s\xE9curis\xE9e des services internes."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.change_mgmt
+    ref_id: POL.CHANGE_MGMT
+    name: Change management policy
+    category: policy
+    csf_function: govern
+    description: 'Requirements for initiating, assessing, approving, communicating
+      and reviewing changes to information systems and services.
+
+      Security impact analysis, rollback, segregation of environments.'
+    typical_evidence:
+    - Signed change management policy
+    - Change advisory board terms of reference
+    - Change authorization matrix
+    annotation: 'iso-27002: 8.32
+
+      scf: CHG-01'
+    translations:
+      fr:
+        name: Politique de gestion des changements
+        description: "Exigences d'initiation, d'\xE9valuation, d'approbation, de communication\
+          \ et de revue des changements apport\xE9s aux syst\xE8mes et services.\n\
+          Analyse d'impact s\xE9curit\xE9, retour arri\xE8re, s\xE9paration des environnements."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.change_mgmt
+    ref_id: PROC.CHANGE_MGMT
+    name: Change management procedure
+    category: procedure
+    csf_function: protect
+    description: Operational procedure for change requests, risk and security impact
+      assessment, approval gates, scheduling, testing, deployment and post-implementation
+      review.
+    typical_evidence:
+    - Change tickets with impact assessment
+    - Approval records per change type
+    - Post-implementation review records
+    annotation: 'iso-27002: 8.32
+
+      scf: CHG-02, CHG-03, CHG-04'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion des changements"
+        description: "Proc\xE9dure op\xE9rationnelle pour les demandes de changement,\
+          \ l'\xE9valuation de risque et d'impact s\xE9curit\xE9, les portes d'approbation,\
+          \ la planification, les tests, le d\xE9ploiement et la revue post-mise en\
+          \ production."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.capacity_mgmt
+    ref_id: PROC.CAPACITY_MGMT
+    name: Capacity and performance management procedure
+    category: procedure
+    csf_function: identify
+    description: Monitoring of current and forecasted capacity and performance, with
+      planning and scaling actions to sustain availability and service-level objectives.
+    typical_evidence:
+    - Capacity plan
+    - Performance monitoring dashboards
+    - Scaling decision records
+    annotation: 'iso-27002: 8.6
+
+      scf: CAP-01, CAP-03, CAP-04'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion de la capacit\xE9 et des performances"
+        description: "Surveillance de la capacit\xE9 et des performances actuelles\
+          \ et pr\xE9visionnelles, avec planification et actions de mise \xE0 l'\xE9\
+          chelle pour soutenir la disponibilit\xE9 et les objectifs de service."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.threat_intel
+    ref_id: PROC.THREAT_INTEL
+    name: Threat intelligence operations procedure
+    category: procedure
+    csf_function: identify
+    description: Collection, analysis, prioritization and distribution of threat intelligence
+      from open, commercial and sectoral sources to feed detection and risk decisions.
+    typical_evidence:
+    - Intel source inventory
+    - Intelligence bulletins issued
+    - Integration with SIEM / detection tooling
+    annotation: 'iso-27002: 5.7
+
+      scf: THR-01, THR-03'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'op\xE9rations de renseignement sur les menaces"
+        description: "Collecte, analyse, priorisation et diffusion de renseignements\
+          \ sur les menaces (sources ouvertes, commerciales, sectorielles) pour alimenter\
+          \ la d\xE9tection et les d\xE9cisions de risque."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.threat_hunt
+    ref_id: PROC.THREAT_HUNT
+    name: Threat hunting procedure
+    category: procedure
+    csf_function: detect
+    description: Proactive, hypothesis-driven search for adversary activity across
+      enterprise systems, complementing signature-based detection.
+    typical_evidence:
+    - Hunting hypotheses register
+    - Hunt reports with findings
+    - Detection rules derived from hunts
+    annotation: 'scf: THR-07'
+    translations:
+      fr:
+        name: "Proc\xE9dure de chasse aux menaces"
+        description: "Recherche proactive et guid\xE9e par hypoth\xE8ses d'activit\xE9\
+          s adverses dans les syst\xE8mes de l'entreprise, en compl\xE9ment de la\
+          \ d\xE9tection par signatures."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.insider_threat
+    ref_id: PROC.INSIDER_THREAT
+    name: Insider threat management procedure
+    category: procedure
+    csf_function: detect
+    description: Detection and response to insider-originated risks, combining behavioral
+      monitoring, privileged access controls, HR coordination and targeted awareness.
+    typical_evidence:
+    - Insider threat program charter
+    - Behavioral monitoring use cases
+    - Case handling records
+    annotation: 'scf: THR-04, THR-05'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion de la menace interne"
+        description: "D\xE9tection et traitement des risques d'origine interne, combinant\
+          \ surveillance comportementale, contr\xF4les d'acc\xE8s privil\xE9gi\xE9\
+          s, coordination RH et sensibilisation cibl\xE9e."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.vuln_disclosure
+    ref_id: PROC.VULN_DISCLOSURE
+    name: Vulnerability disclosure program (VDP) procedure
+    category: procedure
+    csf_function: identify
+    description: 'Intake, triage, coordination and remediation for externally reported
+      vulnerabilities.
+
+      Public security contact, safe harbor statement, optional bug bounty.'
+    typical_evidence:
+    - security.txt / disclosure page
+    - Triage workflow
+    - Case log with response SLAs
+    annotation: 'iso-27002: 8.8
+
+      iso-29147
+
+      scf: THR-06'
+    translations:
+      fr:
+        name: "Proc\xE9dure de divulgation responsable des vuln\xE9rabilit\xE9s (VDP)"
+        description: "R\xE9ception, tri, coordination et rem\xE9diation des vuln\xE9\
+          rabilit\xE9s signal\xE9es par des tiers externes.\nContact s\xE9curit\xE9\
+          \ public, clause de \xAB safe harbor \xBB, programme de bug bounty optionnel."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.ot
+    ref_id: POL.OT
+    name: OT / ICS / IoT / embedded systems security policy
+    category: policy
+    csf_function: govern
+    description: 'Security requirements for operational technology, industrial control
+      systems, IoT and embedded devices.
+
+      Identification, classification, IT-OT segregation, restricted change, lifecycle
+      management, safety-aligned risk handling.'
+    typical_evidence:
+    - Signed OT security policy
+    - OT scope and classification
+    - IT-OT boundary architecture
+    annotation: 'iec-62443
+
+      nist-sp-800-82
+
+      scf: EMB-01, EMB-02, EMB-03'
+    translations:
+      fr:
+        name: "Politique de s\xE9curit\xE9 OT / ICS / IoT / syst\xE8mes embarqu\xE9\
+          s"
+        description: "Exigences de s\xE9curit\xE9 pour les technologies op\xE9rationnelles,\
+          \ syst\xE8mes de contr\xF4le industriel, IoT et syst\xE8mes embarqu\xE9\
+          s.\nIdentification, classification, s\xE9gr\xE9gation IT-OT, ma\xEEtrise\
+          \ des changements, gestion du cycle de vie, traitement des risques align\xE9\
+          \ sur la s\xFBret\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.ot_segmentation
+    ref_id: PROC.OT_SEGMENTATION
+    name: OT / IT segmentation procedure
+    category: procedure
+    csf_function: protect
+    description: Implementation and maintenance of zones-and-conduits segmentation
+      between OT / ICS / IoT networks and enterprise IT, with controlled interfaces,
+      data diodes where appropriate and restricted remote access.
+    typical_evidence:
+    - Zones & conduits architecture document
+    - Interface firewall rule baselines
+    - Remote-access to OT review records
+    annotation: 'iec-62443-3-2
+
+      scf: EMB-04'
+    translations:
+      fr:
+        name: "Proc\xE9dure de segmentation OT / IT"
+        description: "Mise en \u0153uvre et maintien d'une segmentation en zones et\
+          \ conduits entre les r\xE9seaux OT / ICS / IoT et l'IT, avec interfaces\
+          \ contr\xF4l\xE9es, diodes lorsque pertinent et acc\xE8s distants restreints."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.ot_inventory
+    ref_id: DOC.OT_INVENTORY
+    name: OT / ICS / IoT / embedded device inventory
+    category: policy
+    csf_function: identify
+    description: Inventory of OT / ICS / IoT / embedded devices with owner, location,
+      lifecycle stage, criticality and safety impact classification.
+    typical_evidence:
+    - OT inventory register
+    - Criticality classification
+    - Linked safety impact assessments
+    annotation: 'iec-62443-2-1
+
+      scf: EMB-01, EMB-10'
+    translations:
+      fr:
+        name: "Inventaire des \xE9quipements OT / ICS / IoT / embarqu\xE9s"
+        description: "Inventaire des \xE9quipements OT / ICS / IoT / embarqu\xE9s\
+          \ avec propri\xE9taire, localisation, \xE9tape de cycle de vie, criticit\xE9\
+          \ et classification d'impact s\xFBret\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+    ref_id: PROC.CRISIS_MGMT
+    name: Crisis management procedure
+    category: procedure
+    csf_function: respond
+    description: 'Declaration, governance and operation of a crisis, distinct from
+      operational incident response.
+
+      Crisis team composition and authority, internal and external communications,
+      regulatory notifications, decision logging and crisis exit.'
+    typical_evidence:
+    - Crisis management plan
+    - Crisis team roster and contact tree
+    - Crisis exercise / activation records
+    annotation: 'eu-2024-2690: 4.3
+
+      iso-22361
+
+      iso-27002: 5.29'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion de crise"
+        description: "D\xE9claration, gouvernance et conduite d'une crise, distincte\
+          \ de la r\xE9ponse \xE0 incident op\xE9rationnelle.\nComposition et pouvoirs\
+          \ de la cellule de crise, communications internes et externes, notifications\
+          \ r\xE9glementaires, journalisation des d\xE9cisions et sortie de crise."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.disciplinary
+    ref_id: PROC.DISCIPLINARY
+    name: Disciplinary process for security breaches
+    category: procedure
+    csf_function: govern
+    description: 'Formal process for handling confirmed violations of information
+      security policies by personnel.
+
+      Investigation, evidence handling, proportional sanctions, coordination with
+      HR and legal.'
+    typical_evidence:
+    - Disciplinary procedure document
+    - Case handling log
+    - HR and legal coordination records
+    annotation: 'eu-2024-2690: 10.4
+
+      iso-27002: 6.4'
+    translations:
+      fr:
+        name: "Proc\xE9dure disciplinaire en cas de manquement \xE0 la s\xE9curit\xE9"
+        description: "Proc\xE9dure formalis\xE9e de traitement des violations av\xE9\
+          r\xE9es des politiques de s\xE9curit\xE9 par le personnel.\nInvestigation,\
+          \ gestion des preuves, sanctions proportionn\xE9es, coordination avec les\
+          \ RH et le juridique."
+  - urn: urn:intuitem:risk:function:doc-pol:pol.removable_media
+    ref_id: POL.REMOVABLE_MEDIA
+    name: Removable media policy
+    category: policy
+    csf_function: protect
+    description: 'Rules for acceptable use, encryption, scanning, logging, allowlisting
+      and physical protection of removable media (USB, external drives, optical, memory
+      cards).
+
+      Transport, storage and secure disposal of media containing sensitive data.'
+    typical_evidence:
+    - Signed removable media policy
+    - USB control / allowlisting configuration
+    - Media transport and disposal records
+    annotation: 'eu-2024-2690: 12.3
+
+      iso-27002: 7.10
+
+      cis-v8: 10.3, 10.4'
+    translations:
+      fr:
+        name: Politique d'utilisation des supports amovibles
+        description: "R\xE8gles d'usage, de chiffrement, d'analyse, de journalisation,\
+          \ de listes d'autorisation et de protection physique des supports amovibles\
+          \ (USB, disques externes, optiques, cartes m\xE9moire).\nTransport, stockage\
+          \ et destruction s\xE9curis\xE9e des supports contenant des donn\xE9es sensibles."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.risk_appetite
+    ref_id: DOC.RISK_APPETITE
+    name: Risk appetite and tolerance statement
+    category: policy
+    csf_function: govern
+    description: Board-approved statement expressing the level of cybersecurity risk
+      the organization is willing to accept to achieve its objectives, including tolerance
+      thresholds per risk category and review cadence.
+    typical_evidence:
+    - Signed risk appetite statement
+    - Tolerance thresholds per risk category
+    - Board approval records
+    annotation: 'cyfun2025: GV.RM-02
+
+      nist-csf-2.0: GV.RM-02
+
+      iso-27002: 5.1'
+    translations:
+      fr:
+        name: "D\xE9claration d'app\xE9tence et de tol\xE9rance au risque"
+        description: "D\xE9claration approuv\xE9e par la direction exprimant le niveau\
+          \ de risque cyber acceptable pour atteindre les objectifs, incluant les\
+          \ seuils de tol\xE9rance par cat\xE9gorie de risque et la cadence de revue."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.forensics
+    ref_id: PROC.FORENSICS
+    name: Digital forensics and evidence handling procedure
+    category: procedure
+    csf_function: respond
+    description: 'Collection, preservation, analysis and reporting of digital evidence
+      during and after security incidents.
+
+      Chain of custody, evidence integrity and provenance, tooling, legal and regulatory
+      coordination.'
+    typical_evidence:
+    - Forensics procedure document
+    - Chain of custody forms
+    - Forensic tooling inventory and acquisition logs
+    annotation: 'cyfun2025: RS.AN-06, RS.AN-07
+
+      iso-27037
+
+      iso-27002: 5.28'
+    translations:
+      fr:
+        name: "Proc\xE9dure d'investigation num\xE9rique et de traitement des preuves"
+        description: "Collecte, pr\xE9servation, analyse et restitution des preuves\
+          \ num\xE9riques pendant et apr\xE8s un incident.\nCha\xEEne de conservation,\
+          \ int\xE9grit\xE9 et provenance des preuves, outillage, coordination avec\
+          \ le juridique et le r\xE9gulateur."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.tlpt
+    ref_id: PROC.TLPT
+    name: Threat-Led Penetration Testing (TLPT) procedure
+    category: procedure
+    csf_function: detect
+    description: 'Scenario-driven, threat-intelligence-informed penetration testing
+      simulating real adversary tactics, techniques and procedures against live production
+      systems, people and processes.
+
+      Distinct from standard pentesting in scope, duration and realism. TIBER-EU-aligned
+      where applicable.'
+    typical_evidence:
+    - TLPT engagement scope and rules of engagement
+    - Threat intelligence dossier informing the test
+    - Red team report and remediation tracker
+    annotation: 'dora-rts-tlpt
+
+      norea-dora: 20
+
+      tiber-eu'
+    translations:
+      fr:
+        name: "Proc\xE9dure de tests d'intrusion guid\xE9s par la menace (TLPT)"
+        description: "Tests d'intrusion fond\xE9s sur des sc\xE9narios et inform\xE9\
+          s par le renseignement sur les menaces, simulant les tactiques, techniques\
+          \ et proc\xE9dures d'adversaires r\xE9els sur des syst\xE8mes, personnes\
+          \ et processus de production.\nDistincts des tests d'intrusion classiques\
+          \ par leur p\xE9rim\xE8tre, leur dur\xE9e et leur r\xE9alisme. Align\xE9\
+          s sur TIBER-EU lorsque pertinent."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.bg_screening
+    ref_id: PROC.BG_SCREENING
+    name: Personnel background screening procedure
+    category: procedure
+    csf_function: govern
+    description: 'Pre-employment and periodic screening of personnel commensurate
+      with role sensitivity: identity verification, criminal record checks, reference
+      checks, qualification verification, financial integrity where relevant.
+
+      Coordination with HR, legal and data-protection constraints.'
+    typical_evidence:
+    - Signed background screening procedure
+    - Screening records per role class
+    - Third-party screening provider agreements
+    annotation: 'pcidss-4_0: 12.7
+
+      iso-27002: 6.1
+
+      cyfun2025: GV.RR-04'
+    translations:
+      fr:
+        name: "Proc\xE9dure de v\xE9rification des ant\xE9c\xE9dents du personnel"
+        description: "V\xE9rification pr\xE9-embauche et p\xE9riodique du personnel,\
+          \ adapt\xE9e \xE0 la sensibilit\xE9 du poste : v\xE9rification d'identit\xE9\
+          , casier judiciaire, prise de r\xE9f\xE9rences, dipl\xF4mes, int\xE9grit\xE9\
+          \ financi\xE8re lorsque pertinent.\nCoordination avec les RH, le juridique\
+          \ et les exigences de protection des donn\xE9es."
