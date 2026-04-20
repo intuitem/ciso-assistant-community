@@ -283,7 +283,7 @@ describe('checkSveltekitRouteConflicts', () => {
 			const [dirNameSet, fileNameSet] = getDirAndFileNames(routePath);
 
 			// Check conflicts with: (app)/(third-party)/[model=thirdparty_urlmodels]/+server.ts
-			const conflictRoute = path.join(INTERNAL_ROUTE_PATH, '[model=thirdparty_urlmodels]');
+			const conflictRoute = path.join(THIRD_PARTY_ROUTE_PATH, '[model=thirdparty_urlmodels]');
 			checkRouteConflict(fileNameSet, routePath, conflictRoute);
 
 			if (dirNameSet.has('[id=uuid]')) {
@@ -293,7 +293,7 @@ describe('checkSveltekitRouteConflicts', () => {
 
 				// Check conflicts with: (app)/(third-party)/[model=thirdparty_urlmodels]/[id=uuid]/+server.ts
 				const conflictRoute = path.join(
-					INTERNAL_ROUTE_PATH,
+					THIRD_PARTY_ROUTE_PATH,
 					'[model=thirdparty_urlmodels]/[id=uuid]'
 				);
 				checkRouteConflict(fileNameSet, detailedRoutePath, conflictRoute);
