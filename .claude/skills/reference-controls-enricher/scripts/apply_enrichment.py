@@ -43,12 +43,29 @@ def load_verdicts(path: Path) -> list[dict]:
 
 
 def main() -> int:
+    default_controls = (
+        Path(__file__).resolve().parents[4]
+        / "backend"
+        / "library"
+        / "libraries"
+        / "key-reference-controls.yaml"
+    )
     ap = argparse.ArgumentParser(
         description="Apply reference-control URN assignments to a framework YAML"
     )
     ap.add_argument("framework_yaml")
     ap.add_argument("verdicts_jsonl")
     ap.add_argument("--controls-lib-urn", default="urn:intuitem:risk:library:doc-pol")
+    ap.add_argument(
+        "--controls-file",
+        default=str(default_controls),
+        help="Path to the reference-controls library YAML used to validate target URNs",
+    )
+    ap.add_argument(
+        "--skip-validation",
+        action="store_true",
+        help="Skip validation that target URNs exist in --controls-file",
+    )
     ap.add_argument("--bump", action="store_true", help="Increment library version")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
@@ -58,6 +75,45 @@ def main() -> int:
 
     data = yaml.safe_load(fpath.read_text(encoding="utf-8"))
     verdicts = load_verdicts(vpath)
+
+    # Validate that every target URN exists in the controls library.
+    # This catches typos and stale slugs before they're written into the framework.
+    if not args.skip_validation:
+        cpath = Path(args.controls_file)
+        if not cpath.exists():
+            print(
+                f"ERROR: controls file not found: {cpath}\n"
+                f"Pass --controls-file <path> or --skip-validation.",
+                file=sys.stderr,
+            )
+            return 2
+        controls_data = yaml.safe_load(cpath.read_text(encoding="utf-8"))
+        known_urns = {
+            rc["urn"]
+            for rc in controls_data.get("objects", {}).get("reference_controls") or []
+        }
+        unknown: dict[str, list[str]] = {}
+        for v in verdicts:
+            for tgt in v.get("target_urns") or []:
+                if tgt not in known_urns:
+                    unknown.setdefault(tgt, []).append(
+                        v["source_urn"].rsplit(":", 1)[-1]
+                    )
+        if unknown:
+            print(
+                f"ERROR: {len(unknown)} unknown target URN(s) in verdicts "
+                f"(not defined in {cpath.name}):",
+                file=sys.stderr,
+            )
+            for urn in sorted(unknown):
+                cited = unknown[urn]
+                sample = ", ".join(cited[:3]) + (" ..." if len(cited) > 3 else "")
+                print(f"  {urn}   (cited by: {sample})", file=sys.stderr)
+            print(
+                "Fix the verdicts file, or re-run with --skip-validation to bypass.",
+                file=sys.stderr,
+            )
+            return 2
 
     nodes = data["objects"]["framework"]["requirement_nodes"]
     by_urn = {n["urn"]: n for n in nodes}
