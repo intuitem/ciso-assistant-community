@@ -1,5 +1,5 @@
 from django.db.utils import IntegrityError, OperationalError, ProgrammingError
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 import copy
@@ -128,7 +128,6 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
-    build_questions_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
     _generate_occurrences,
@@ -2029,17 +2028,27 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             user=request.user,
             object_type=Asset,
         )
-        # Build category index mapping first (key by UUID to avoid name collisions)
-        domain_to_category = {}
-        for domain in Folder.objects.filter(id__in=viewable_folders):
-            categories.append({"name": domain.name})
-            domain_to_category[domain.id] = len(categories) - 1
 
+        def get_domain_key(domain: Folder) -> str:
+            return "/".join(d.name for d in reversed(domain.get_folder_full_path()))
+
+        sorted_domains = sorted(
+            Folder.objects.filter(id__in=viewable_folders), key=get_domain_key
+        )
+        categories = [
+            {"name": domain.get_folder_full_path_string()} for domain in sorted_domains
+        ]
+        # Build category index mapping first (key by UUID to avoid name collisions)
+        domain_to_category = {
+            domain.id: index for index, domain in enumerate(sorted_domains)
+        }
+
+        for domain in sorted_domains:
             if not hide_domains:
                 nodes_idx[domain.id] = N
                 nodes.append(
                     {
-                        "name": domain.name,
+                        "name": domain.get_folder_full_path_string(),
                         "category": domain_to_category[domain.id],
                         "symbol": "roundRect",
                         "symbolSize": 30,
@@ -6261,10 +6270,15 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
                 "label": "risk_assessment",
                 "escape": True,
             },
-            "treatment": {"source": "get_treatment_display", "label": "treatment"},
-            "inherent_probability": {
+            "treatment": {"source": "treatment", "label": "treatment"},
+            "justification": {
+                "source": "justification",
+                "label": "justification",
+                "escape": True,
+            },
+            "inherent_proba": {
                 "source": "get_inherent_proba",
-                "label": "inherent_probability",
+                "label": "inherent_proba",
                 "format": lambda v: v.get("name", "--"),
             },
             "inherent_impact": {
@@ -6277,9 +6291,9 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
                 "label": "inherent_level",
                 "format": lambda v: v.get("name", "--"),
             },
-            "current_probability": {
+            "current_proba": {
                 "source": "get_current_proba",
-                "label": "current_probability",
+                "label": "current_proba",
                 "format": lambda v: v.get("name", "--"),
             },
             "current_impact": {
@@ -6292,9 +6306,9 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
                 "label": "current_level",
                 "format": lambda v: v.get("name", "--"),
             },
-            "residual_probability": {
+            "residual_proba": {
                 "source": "get_residual_proba",
-                "label": "residual_probability",
+                "label": "residual_proba",
                 "format": lambda v: v.get("name", "--"),
             },
             "residual_impact": {
@@ -6310,50 +6324,57 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "owners": {
                 "source": "owner",
                 "label": "owners",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(str(o)) for o in qs.all()
                 ),
             },
             "threats": {
                 "source": "threats",
                 "label": "threats",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(t.name) for t in qs.all()
                 ),
             },
             "assets": {
                 "source": "assets",
                 "label": "assets",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(a.name) for a in qs.all()
                 ),
             },
             "vulnerabilities": {
                 "source": "vulnerabilities",
                 "label": "vulnerabilities",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(v.name) for v in qs.all()
                 ),
             },
             "applied_controls": {
                 "source": "applied_controls",
                 "label": "applied_controls",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(c.name) for c in qs.all()
                 ),
             },
             "existing_applied_controls": {
                 "source": "existing_applied_controls",
                 "label": "existing_applied_controls",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(c.name) for c in qs.all()
                 ),
             },
             "qualifications": {
                 "source": "qualifications",
                 "label": "qualifications",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "|".join(
                     escape_excel_formula(q.name) for q in qs.all()
+                ),
+            },
+            "filtering_labels": {
+                "source": "filtering_labels",
+                "label": "filtering_labels",
+                "format": lambda qs: "|".join(
+                    escape_excel_formula(label.label) for label in qs.all()
                 ),
             },
         },
@@ -6367,6 +6388,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             "applied_controls",
             "existing_applied_controls",
             "qualifications",
+            "filtering_labels",
         ],
     }
 
@@ -7155,7 +7177,6 @@ class FolderViewSet(BaseModelViewSet):
     model = Folder
     filterset_class = FolderFilter
     search_fields = ["name"]
-    batch_size = 100  # Configurable batch size for processing domain import
 
     def perform_create(self, serializer):
         """
@@ -7408,106 +7429,9 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
         """Export the domain as a zip file containing a JSON dump of all objects and their relationships"""
-        include_attachments = True
-        instance = self.get_object()
+        from serdes import domain_io
 
-        logger.info(
-            "Starting domain export",
-            domain_id=instance.id,
-            domain_name=instance.name,
-            include_attachments=include_attachments,
-            user=request.user.username,
-        )
-
-        objects = get_domain_export_objects(instance)
-
-        for model in objects.keys():
-            if not RoleAssignment.is_access_allowed(
-                user=request.user,
-                perm=Permission.objects.get(codename=f"view_{model}"),
-                folder=instance,
-            ):
-                logger.error(
-                    "User does not have permission to export object",
-                    user=request.user,
-                    model=model,
-                )
-                raise PermissionDenied(
-                    {"error": "userDoesNotHavePermissionToExportDomain"}
-                )
-
-        logger.debug(
-            "Retrieved domain objects for export",
-            object_types=list(objects.keys()),
-            total_objects=sum(len(queryset) for queryset in objects.values()),
-            objects_per_model={
-                model: len(queryset) for model, queryset in objects.items()
-            },
-        )
-
-        # Create in-memory zip file
-        zip_buffer = io.BytesIO()
-
-        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-            if include_attachments:
-                revisions = objects.get(
-                    "evidencerevision", EvidenceRevision.objects.none()
-                ).filter(attachment__isnull=False)
-                logger.info(
-                    "Processing evidence attachments",
-                    total_revisions=revisions.count(),
-                    domain_id=instance.id,
-                )
-
-                for revision in revisions:
-                    if revision.attachment and default_storage.exists(
-                        revision.attachment.name
-                    ):
-                        # Read file directly into memory
-                        with default_storage.open(revision.attachment.name) as file:
-                            file_content = file.read()
-                            # Write the file content directly to the zip
-                            zipf.writestr(
-                                os.path.join(
-                                    "attachments",
-                                    "evidence-revisions",
-                                    f"{revision.evidence_id}_v{revision.version}_"
-                                    f"{os.path.basename(revision.attachment.name)}",
-                                ),
-                                file_content,
-                            )
-
-            # Add the JSON dump to the zip file
-            dumpfile_name = (
-                f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
-            )
-            dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
-
-            logger.debug(
-                "Adding JSON dump to zip",
-                json_size=len(json.dumps(dump_data).encode("utf-8")),
-                filename=f"{dumpfile_name}.json",
-            )
-
-            zipf.writestr("data.json", json.dumps(dump_data).encode("utf-8"))
-
-        # Reset buffer position to the start
-        zip_buffer.seek(0)
-        final_size = len(zip_buffer.getvalue())
-
-        # Create the response with the in-memory zip file
-        response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{dumpfile_name}.zip"'
-
-        logger.info(
-            "Domain export completed successfully",
-            domain_id=instance.id,
-            domain_name=instance.name,
-            zip_size=final_size,
-            filename=f"{dumpfile_name}.zip",
-        )
-
-        return response
+        return domain_io.export_domain(self.get_object(), request.user)
 
     @action(
         detail=False,
@@ -7517,6 +7441,8 @@ class FolderViewSet(BaseModelViewSet):
     )
     def import_domain(self, request):
         """Handle file upload and initiate import process."""
+        from serdes import domain_io
+
         load_missing_libraries = (
             request.query_params.get("load_missing_libraries", "false").lower()
             == "true"
@@ -7531,8 +7457,8 @@ class FolderViewSet(BaseModelViewSet):
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
-            parsed_data = self._process_uploaded_file(request.data["file"])
-            result = self._import_objects(
+            parsed_data = domain_io.process_uploaded_file(request.data["file"])
+            result = domain_io.import_objects(
                 parsed_data, domain_name, load_missing_libraries, user=request.user
             )
             return Response(result, status=status.HTTP_200_OK)
@@ -7566,6 +7492,8 @@ class FolderViewSet(BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
+        from serdes import domain_io
+
         domain_name = "DEMO"
         try:
             PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -7576,8 +7504,8 @@ class FolderViewSet(BaseModelViewSet):
                     {"error": "dummyDomainFixtureNotFound"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            parsed_data = self._process_uploaded_file(dummy_fixture_path)
-            result = self._import_objects(
+            parsed_data = domain_io.process_uploaded_file(dummy_fixture_path)
+            result = domain_io.import_objects(
                 parsed_data, domain_name, load_missing_libraries=True, user=request.user
             )
             logger.info("Dummy domain imported successfully", domain_name=domain_name)
@@ -7595,976 +7523,6 @@ class FolderViewSet(BaseModelViewSet):
                 {"error": "failedToImportDummyDomain"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-    def _process_uploaded_file(self, dump_file: str | Path) -> Any:
-        """Process the uploaded file and return parsed data."""
-        if not zipfile.is_zipfile(dump_file):
-            logger.error("Invalid ZIP file format")
-            raise ValidationError({"file": "invalidZipFileFormat"})
-
-        with zipfile.ZipFile(dump_file, mode="r") as zipf:
-            if "data.json" not in zipf.namelist():
-                logger.error(
-                    "No data.json file found in uploaded file", files=zipf.namelist()
-                )
-                raise ValidationError({"file": "noDataJsonFileFound"})
-            infolist = zipf.infolist()
-            directories = list(set([Path(f.filename).parent.name for f in infolist]))
-            decompressed_data = zipf.read("data.json")
-            # Decode bytes to string if necessary
-            if isinstance(decompressed_data, bytes):
-                decompressed_data = decompressed_data.decode("utf-8")
-            try:
-                json_dump = json.loads(decompressed_data)
-                import_version = json_dump["meta"]["media_version"]
-                schema_version = json_dump["meta"].get("schema_version")
-            except json.JSONDecodeError:
-                logger.error("Invalid JSON format in uploaded file", exc_info=True)
-                raise
-            if "objects" not in json_dump:
-                raise ValidationError("badly formatted json")
-
-            # Check backup and local version
-
-            try:
-                schema_version_int = int(schema_version)
-            except (ValueError, TypeError) as e:
-                logger.error(
-                    "Invalid schema version format",
-                    schema_version=schema_version,
-                    exc_info=e,
-                )
-                raise ValidationError({"error": "invalidSchemaVersionFormat"})
-            compare_schema_versions(schema_version_int, import_version)
-
-            if "attachments" in directories:
-                attachments = {
-                    f for f in infolist if Path(f.filename).parent.name == "attachments"
-                }
-                logger.info(
-                    "Attachments found in uploaded file",
-                    attachments_count=len(attachments),
-                )
-                for attachment in attachments:
-                    try:
-                        content = zipf.read(attachment)
-                        current_name = Path(attachment.filename).name
-                        new_name = default_storage.save(
-                            current_name, io.BytesIO(content)
-                        )
-                        if new_name != current_name:
-                            for x in json_dump["objects"]:
-                                if (
-                                    x["model"] == "core.evidence"
-                                    and x["fields"]["attachment"] == current_name
-                                ):
-                                    x["fields"]["attachment"] = new_name
-
-                    except Exception:
-                        logger.error("Error extracting attachment", exc_info=True)
-
-        return json_dump
-
-    def _get_models_map(self, objects):
-        """Build a map of model names to model classes."""
-        model_names = {obj["model"] for obj in objects}
-        return {name: apps.get_model(name) for name in model_names}
-
-    def _resolve_dependencies(self, all_models):
-        """Resolve model dependencies and detect cycles."""
-        logger.debug("Resolving model dependencies", all_models=all_models)
-
-        graph = build_dependency_graph(all_models)
-
-        logger.debug("Dependency graph", graph=graph)
-
-        try:
-            return topological_sort(graph)
-        except ValueError as e:
-            logger.error("Cyclic dependency detected", error=str(e))
-            raise ValidationError({"error": "Cyclic dependency detected"})
-
-    def _import_terminologies(
-        self,
-        names: str | List[str] | None,
-        field_path: Terminology.FieldPath,
-    ) -> QuerySet[Terminology] | Terminology | None:
-        """
-        Ensure that requested terminologies exist and are visible. If not, create them. If they exist but are not visible, make them visible.
-
-        Args:
-            names: name of the Terminology (str) to import, or list of names for multiple Terminologies.
-            field_path: which Terminology.FieldPath to assign
-
-        Returns:
-            - For single input: Terminology object
-            - For list input: QuerySet of Terminology objects
-            - For None or empty list: None
-        """
-        if not names:
-            return None
-
-        # Convert single value to list
-        single_value = False
-        if isinstance(names, str):  # Foreign key case
-            names = [names]
-            single_value = True
-
-        # Fetch existing
-        existing = Terminology.objects.filter(name__in=names, field_path=field_path)
-        existing_names = set(existing.values_list("name", flat=True))
-
-        # Create missing
-        missing_names = set(names) - existing_names
-        if missing_names:
-            Terminology.objects.bulk_create(
-                [
-                    Terminology(name=name, field_path=field_path, is_visible=True)
-                    for name in missing_names
-                ],
-                ignore_conflicts=True,
-            )
-
-        # Ensure visibility
-        Terminology.objects.filter(
-            name__in=names, field_path=field_path, is_visible=False
-        ).update(is_visible=True)
-
-        result_qs = Terminology.objects.filter(name__in=names, field_path=field_path)
-
-        if single_value:
-            return result_qs.first()
-        return result_qs
-
-    def _import_objects(
-        self,
-        parsed_data: dict,
-        domain_name: str,
-        load_missing_libraries: bool,
-        user: User,
-    ) -> dict[str, str]:
-        """
-        Import and validate objects using appropriate serializers.
-        Handles both validation and creation in separate phases within a transaction.
-
-        Args:
-            parsed_data: The data parsed from the uploaded JSON dump.
-            domain_name: The name choosen by the user for the new domain being created.
-            load_missing_libraries: Whether to automatically load missing libraries from stored ones.
-            user: The user performing the import, for permission checks.
-
-        Returns:
-            A dict with success message if no error was encountered.
-        """
-        validation_errors = []
-        required_libraries = []
-        missing_libraries = []
-        link_dump_database_ids = {}
-
-        # First check if objects exist
-        objects = parsed_data.get("objects")
-        if not objects:
-            logger.error("No objects found in the dump")
-            raise ValidationError({"error": "No objects found in the dump"})
-
-        try:
-            # Validate models and check for domain
-            models_map = self._get_models_map(objects)
-            if Folder in models_map.values():
-                logger.error("Dump contains a domain")
-                raise ValidationError({"error": "Dump contains a domain"})
-
-            # check that user has permission to create all objects to import
-            error_dict = {}
-            for model in filter(
-                lambda x: x not in [RequirementAssessment], models_map.values()
-            ):
-                if not RoleAssignment.is_access_allowed(
-                    user=user,
-                    perm=Permission.objects.get(
-                        codename=f"add_{model._meta.model_name}"
-                    ),
-                    folder=Folder.get_root_folder(),
-                ):
-                    error_dict[model._meta.model_name] = "permission_denied"
-            if error_dict:
-                logger.error(
-                    "User does not have permission to import objects",
-                    error_dict=error_dict,
-                )
-                raise PermissionDenied()
-
-            # Validation phase (outside transaction since it doesn't modify database)
-            creation_order = self._resolve_dependencies(list(models_map.values()))
-
-            logger.debug("Resolved creation order", creation_order=creation_order)
-            logger.debug("Starting objects validation", objects_count=len(objects))
-
-            # Validate all objects first
-            for model in creation_order:
-                self._validate_model_objects(
-                    model=model,
-                    objects=objects,
-                    validation_errors=validation_errors,
-                    required_libraries=required_libraries,
-                )
-
-            logger.debug("required_libraries", required_libraries=required_libraries)
-
-            # If validation errors exist, raise them immediately
-            if validation_errors:
-                logger.error(
-                    "Failed to validate objects", validation_errors=validation_errors
-                )
-                raise ValidationError({"validation_errors": validation_errors})
-
-            # Creation phase - wrap in transaction
-            with transaction.atomic():
-                # Create base folder and store its ID
-                base_folder = Folder.objects.create(
-                    name=domain_name,
-                    content_type=Folder.ContentType.DOMAIN,
-                    create_iam_groups=True,
-                )
-                link_dump_database_ids["base_folder"] = base_folder
-                Folder.create_default_ug_and_ra(base_folder)
-
-                # Check for missing libraries after folder creation
-                for library in required_libraries:
-                    if not LoadedLibrary.objects.filter(
-                        urn=library["urn"], version=library["version"]
-                    ).exists():
-                        if (
-                            StoredLibrary.objects.filter(
-                                urn=library["urn"], version__gte=library["version"]
-                            ).exists()
-                            and load_missing_libraries
-                        ):
-                            StoredLibrary.objects.get(
-                                urn=library["urn"], version__gte=library["version"]
-                            ).load()
-                        else:
-                            missing_libraries.append(library)
-
-                logger.debug("missing_libraries", missing_libraries=missing_libraries)
-
-                # If missing libraries exist, raise specific error
-                if missing_libraries:
-                    logger.warning(f"Missing libraries: {missing_libraries}")
-                    raise ValidationError({"missing_libraries": missing_libraries})
-
-                logger.info(
-                    "Starting objects creation",
-                    objects_count=len(objects),
-                    creation_order=creation_order,
-                )
-
-                # Create all objects within the transaction
-                for model in creation_order:
-                    self._create_model_objects(
-                        model=model,
-                        objects=objects,
-                        link_dump_database_ids=link_dump_database_ids,
-                    )
-
-            return {"message": "Import successful"}
-
-        except ValidationError as e:
-            logger.error(f"error: {e}")
-            raise
-        except Exception as e:
-            # Handle unexpected errors with a generic message
-            logger.exception(f"Failed to import objects: {str(e)}")
-            raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
-
-    def _validate_model_objects(
-        self, model, objects, validation_errors, required_libraries
-    ):
-        """Validate all objects for a model before creation."""
-        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
-        model_objects = [obj for obj in objects if obj["model"] == model_name]
-
-        if not model_objects:
-            return
-
-        # Process validation in batches
-        for i in range(0, len(model_objects), self.batch_size):
-            batch = model_objects[i : i + self.batch_size]
-            self._validate_batch(
-                model=model,
-                batch=batch,
-                validation_errors=validation_errors,
-                required_libraries=required_libraries,
-            )
-
-    def _validate_batch(self, model, batch, validation_errors, required_libraries):
-        """Validate a batch of objects."""
-        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
-
-        for obj in batch:
-            obj_id = obj.get("id")
-            fields = obj.get("fields", {}).copy()
-
-            try:
-                # Handle library objects
-                if model == LoadedLibrary:
-                    required_libraries.append(
-                        {"urn": fields["urn"], "version": fields["version"]}
-                    )
-                    logger.info(
-                        "Adding library to required libraries", urn=fields["urn"]
-                    )
-                    continue
-                if fields.get("library"):
-                    continue
-
-                # Validate using serializer
-                serializer_class = import_export_serializer_class(model)
-                serializer = serializer_class(data=fields)
-
-                if not serializer.is_valid():
-                    validation_errors.append(
-                        {
-                            "model": model_name,
-                            "id": obj_id,
-                            "errors": serializer.errors,
-                        }
-                    )
-
-            except Exception as e:
-                logger.error(
-                    f"Error validating object {obj_id} in {model_name}: {str(e)}",
-                    exc_info=True,
-                )
-                validation_errors.append(
-                    {
-                        "model": model_name,
-                        "id": obj_id,
-                        "errors": [str(e)],
-                    }
-                )
-
-    def _create_model_objects(
-        self,
-        model: models.Model,
-        objects: List[dict],
-        link_dump_database_ids: dict[str, Any],
-    ) -> None:
-        """
-        Create all objects for a model after validation. Creation happens in batch of size `self.batch_size`.
-
-        Args:
-            model: Current model for which objects are being created.
-            objects: List of all objects from the dump, used to filter only those relevant for the current model.
-            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
-        """
-        logger.debug("Creating objects for model", model=model)
-
-        # rebuild model name and keep objects only of this model for creation
-        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
-        model_objects = [obj for obj in objects if obj["model"] == model_name]
-
-        logger.debug("Model objects", model=model, count=len(model_objects))
-
-        if not model_objects:
-            return
-
-        # Handle self-referencing dependencies
-        self_ref_field = get_self_referencing_field(model)
-        if self_ref_field:
-            try:
-                model_objects = sort_objects_by_self_reference(
-                    model_objects, self_ref_field
-                )
-            except ValueError as e:
-                logger.error(f"Cyclic dependency detected in {model_name}: {str(e)}")
-                raise ValidationError(
-                    {"error": f"Cyclic dependency detected in {model_name}"}
-                )
-
-        # Process creation in batches
-        for i in range(0, len(model_objects), self.batch_size):
-            batch = model_objects[i : i + self.batch_size]
-            self._create_batch(
-                model=model,
-                batch=batch,
-                link_dump_database_ids=link_dump_database_ids,
-            )
-
-    def _create_batch(
-        self,
-        model: models.Model,
-        batch: List[dict],
-        link_dump_database_ids: dict[str, Any],
-    ) -> None:
-        """
-        Create a batch of objects with proper relationship handling in 4 main steps:
-        1. Handle special cases (e.g. library objects, folder reference)
-        2. Process model-specific relationships, separating m2m relationships to be handled in the fourth step, after the object is created (because it requires the database ID of the created object to be set)
-        3. Create the object
-        4. Handle many-to-many relationships
-
-        Args:
-            model: Current model for which objects are being created.
-            batch: Sublist of all objects from the dump to create in this batch.
-            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
-        """
-        # Create all objects in the batch within a single transaction
-        with transaction.atomic():
-            try:
-                objects_creation_data = []
-
-                for obj in batch:
-                    obj_id = obj.get("id")
-                    fields = obj.get("fields", {}).copy()
-
-                    # Handle library objects
-                    if fields.get("library") or model == LoadedLibrary:
-                        logger.info(f"Skipping creation of library object {obj_id}")
-                        link_dump_database_ids[obj_id] = fields.get("urn")
-                        continue
-
-                    # Handle folder reference
-                    if fields.get("folder"):
-                        fields["folder"] = link_dump_database_ids.get("base_folder")
-
-                    # Process model-specific relationships
-                    # Handling of m2m happens in a second step (see call to self._set_many_to_many_relations),
-                    many_to_many_map_ids = {}
-                    fields = self._process_model_relationships(
-                        model=model,
-                        fields=fields,
-                        link_dump_database_ids=link_dump_database_ids,
-                        many_to_many_map_ids=many_to_many_map_ids,
-                    )
-
-                    # Run clean to validate unique constraints
-                    try:
-                        model(**fields).clean()
-                    except ValidationError as e:
-                        for field, error in e.error_dict.items():
-                            fields[field] = f"{fields[field]} {uuid.uuid4()}"
-
-                    # Create the object
-                    logger.debug("Creating object", fields=fields)
-                    objects_creation_data.append(
-                        {
-                            "id": obj_id,
-                            "fields": fields,
-                            "many_to_many_map_ids": many_to_many_map_ids,
-                        }
-                    )
-
-                # Use bulk_create for models without custom save() or for
-                # RequirementAssessment (whose side effects are handled
-                # explicitly below). Fall back to individual create() for
-                # other models with custom save() to preserve their side
-                # effects without double-writing.
-                is_requirement_assessment = model is RequirementAssessment
-                has_save_override = model.save is not models.Model.save
-
-                if has_save_override and not is_requirement_assessment:
-                    created_objects = []
-                    for object_creation_data in objects_creation_data:
-                        obj_created = model.objects.create(
-                            **object_creation_data["fields"]
-                        )
-                        created_objects.append(obj_created)
-                else:
-                    objects_to_create = [
-                        model(**ocd["fields"]) for ocd in objects_creation_data
-                    ]
-                    created_objects = model.objects.bulk_create(objects_to_create)
-
-                if is_requirement_assessment:
-                    seen_cas = set()
-                    for ra in created_objects:
-                        ca_id = ra.compliance_assessment_id
-                        if ca_id not in seen_cas:
-                            seen_cas.add(ca_id)
-                            ra.trigger_compliance_assessment_update_hooks()
-
-                for obj_created, object_creation_data in zip(
-                    created_objects, objects_creation_data
-                ):
-                    if obj_created.id is None:
-                        obj_created.refresh_from_db()
-
-                    obj_id = object_creation_data["id"]
-                    link_dump_database_ids[obj_id] = obj_created.id
-
-                    many_to_many_map_ids = object_creation_data["many_to_many_map_ids"]
-                    self._set_many_to_many_relations(
-                        model=model,
-                        obj=obj_created,
-                        many_to_many_map_ids=many_to_many_map_ids,
-                    )
-
-            except Exception as e:
-                logger.error(
-                    "Error creating object batch",
-                    model=model._meta.model_name,
-                    exc_info=True,
-                )
-                # This will trigger a rollback of the entire batch
-                raise ValidationError(
-                    f"Error creating {model._meta.model_name}: {str(e)}"
-                )
-
-    def _process_model_relationships(
-        self,
-        model: models.Model,
-        fields: dict[str, Any],
-        link_dump_database_ids: dict[str, Any],
-        many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
-    ):
-        """
-        Process model-specific relationships:
-         - M2M relationships are removed from `fields` and stored in a separate map to be processed later (see `_set_many_to_many_relations`).
-         - Other relationships are directly converted to their database IDs or instances.
-
-        Args:
-            model: Current model for which the object is being created
-            fields: The fields of the object being created.
-            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
-            many_to_many_map_ids: A map to store the IDs, names or QuerySet of related objects for m2m relationships.
-
-        Returns:
-            The updated fields with relationships processed (except for m2m which are removed).
-        """
-
-        def get_mapped_ids(
-            ids: List[str], link_dump_database_ids: Dict[str, str]
-        ) -> List[str]:
-            return [
-                link_dump_database_ids[id] for id in ids if id in link_dump_database_ids
-            ]
-
-        model_name = model._meta.model_name
-        _fields = fields.copy()
-
-        logger.debug(
-            "Processing model relationships", model=model_name, _fields=_fields
-        )
-
-        match model_name:
-            case "asset":
-                many_to_many_map_ids["parent_ids"] = get_mapped_ids(
-                    _fields.pop("parent_assets", []), link_dump_database_ids
-                )
-
-            case "riskassessment":
-                _fields["perimeter"] = Perimeter.objects.filter(
-                    id=link_dump_database_ids.get(_fields["perimeter"])
-                ).first()  # filter.first to handle when no perimeter on the riskassessment (since it's optional)
-                _fields["risk_matrix"] = RiskMatrix.objects.get(
-                    urn=_fields.get("risk_matrix")
-                )
-                _fields["ebios_rm_study"] = (
-                    EbiosRMStudy.objects.get(
-                        id=link_dump_database_ids.get(_fields["ebios_rm_study"])
-                    )
-                    if _fields.get("ebios_rm_study")
-                    else None
-                )
-
-            case "complianceassessment":
-                _fields["perimeter"] = Perimeter.objects.get(
-                    id=link_dump_database_ids.get(_fields["perimeter"])
-                )
-                _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
-
-            case "appliedcontrol":
-                many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
-                    _fields.pop("evidences", []), link_dump_database_ids
-                )
-                many_to_many_map_ids["objective_ids"] = get_mapped_ids(
-                    _fields.pop("objectives", []), link_dump_database_ids
-                )
-                ref_control_id = link_dump_database_ids.get(
-                    _fields["reference_control"]
-                )
-                _fields["reference_control"] = ReferenceControl.objects.filter(
-                    urn=ref_control_id
-                ).first()
-
-            case "evidence":
-                many_to_many_map_ids["owner_ids"] = get_mapped_ids(
-                    _fields.pop("owner", []), link_dump_database_ids
-                )
-
-            case "evidencerevision":
-                _fields.pop("size", None)
-                _fields.pop("attachment_hash", None)
-                _fields["evidence"] = Evidence.objects.get(
-                    id=link_dump_database_ids.get(_fields["evidence"])
-                )
-
-            case "requirementassessment":
-                logger.debug("Looking for requirement", urn=_fields.get("requirement"))
-                _fields["requirement"] = RequirementNode.objects.get(
-                    urn=_fields.get("requirement")
-                )
-                _fields["compliance_assessment"] = ComplianceAssessment.objects.get(
-                    id=link_dump_database_ids.get(_fields["compliance_assessment"])
-                )
-                _fields.pop("answers", None)
-                many_to_many_map_ids.update(
-                    {
-                        "applied_controls": get_mapped_ids(
-                            _fields.pop("applied_controls", []), link_dump_database_ids
-                        ),
-                        "evidence_ids": get_mapped_ids(
-                            _fields.pop("evidences", []), link_dump_database_ids
-                        ),
-                    }
-                )
-
-            case "answer":
-                _fields["requirement_assessment"] = RequirementAssessment.objects.get(
-                    id=link_dump_database_ids.get(_fields["requirement_assessment"])
-                )
-                question = Question.objects.get(urn=_fields.get("question"))
-                # Validate question belongs to the requirement
-                ra = _fields["requirement_assessment"]
-                if question.requirement_node_id != ra.requirement_id:
-                    raise ValidationError(
-                        f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
-                    )
-                _fields["question"] = question
-
-                # Store M2M urns for post-create
-                choice_urns = _fields.pop("selected_choices_urns", None)
-                if choice_urns:
-                    many_to_many_map_ids["selected_choices_urns"] = choice_urns
-
-            case "vulnerability":
-                many_to_many_map_ids["applied_controls"] = get_mapped_ids(
-                    _fields.pop("applied_controls", []), link_dump_database_ids
-                )
-
-            case "riskscenario":
-                _fields["risk_assessment"] = RiskAssessment.objects.get(
-                    id=link_dump_database_ids.get(_fields["risk_assessment"])
-                )
-                _fields["risk_origin"] = self._import_terminologies(
-                    _fields.get("risk_origin"), Terminology.FieldPath.ROTO_RISK_ORIGIN
-                )
-                # TODO: feels complicated, may be simplified
-                # Process all related _fields at once
-                related__fields = [
-                    "threats",
-                    "vulnerabilities",
-                    "assets",
-                    "applied_controls",
-                    "existing_applied_controls",
-                    "qualifications",
-                ]
-                for field in related__fields:
-                    map_key = (
-                        f"{field.rstrip('s')}_ids"
-                        if not field.endswith("controls")
-                        else f"{field}_ids"
-                    )
-                    if field == "qualifications":
-                        many_to_many_map_ids[map_key] = self._import_terminologies(
-                            _fields.pop(field, []), Terminology.FieldPath.QUALIFICATIONS
-                        )
-                    else:
-                        many_to_many_map_ids[map_key] = get_mapped_ids(
-                            _fields.pop(field, []), link_dump_database_ids
-                        )
-
-            case "entity":
-                _fields.pop("owned_folders", None)
-                many_to_many_map_ids["relationship_ids"] = self._import_terminologies(
-                    _fields.pop("relationship", []),
-                    Terminology.FieldPath.ENTITY_RELATIONSHIP,
-                )  # relationship_ids are in fact names of the relationships
-
-            case "ebiosrmstudy":
-                _fields.update(
-                    {
-                        "risk_matrix": RiskMatrix.objects.get(
-                            urn=_fields.get("risk_matrix")
-                        ),
-                        "reference_entity": Entity.objects.get(
-                            id=link_dump_database_ids.get(_fields["reference_entity"])
-                        ),
-                    }
-                )
-                many_to_many_map_ids.update(
-                    {
-                        "asset_ids": get_mapped_ids(
-                            _fields.pop("assets", []), link_dump_database_ids
-                        ),
-                        "compliance_assessment_ids": get_mapped_ids(
-                            _fields.pop("compliance_assessments", []),
-                            link_dump_database_ids,
-                        ),
-                    }
-                )
-
-            case "fearedevent":
-                _fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(_fields["ebios_rm_study"])
-                )
-                many_to_many_map_ids.update(
-                    {
-                        "qualification_ids": self._import_terminologies(
-                            _fields.pop("qualifications", []),
-                            Terminology.FieldPath.QUALIFICATIONS,
-                        ),
-                        "asset_ids": get_mapped_ids(
-                            _fields.pop("assets", []), link_dump_database_ids
-                        ),
-                    }
-                )
-
-            case "roto":
-                _fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(_fields["ebios_rm_study"])
-                )
-                many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
-                    _fields.pop("feared_events", []), link_dump_database_ids
-                )
-                _fields["risk_origin"] = self._import_terminologies(
-                    _fields[
-                        "risk_origin"
-                    ],  # risk origin must exist, it's a mandatory field on RoTo
-                    Terminology.FieldPath.ROTO_RISK_ORIGIN,
-                )
-
-            case "stakeholder":
-                _fields.update(
-                    {
-                        "ebios_rm_study": EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
-                        ),
-                        "entity": Entity.objects.get(
-                            id=link_dump_database_ids.get(_fields["entity"])
-                        ),
-                    }
-                )
-                _fields["category"] = self._import_terminologies(
-                    _fields["category"],
-                    Terminology.FieldPath.ENTITY_RELATIONSHIP,  # category must exist, it's a mandatory field on Stakeholder
-                )
-                many_to_many_map_ids["applied_controls"] = get_mapped_ids(
-                    _fields.pop("applied_controls", []), link_dump_database_ids
-                )
-
-            case "strategicscenario":
-                _fields.update(
-                    {
-                        "ebios_rm_study": EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
-                        ),
-                        "ro_to_couple": RoTo.objects.get(
-                            id=link_dump_database_ids.get(_fields["ro_to_couple"])
-                        ),
-                    }
-                )
-
-            case "attackpath":
-                _fields.update(
-                    {
-                        "ebios_rm_study": EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
-                        ),
-                        "strategic_scenario": StrategicScenario.objects.get(
-                            id=link_dump_database_ids.get(_fields["strategic_scenario"])
-                        ),
-                    }
-                )
-                many_to_many_map_ids["stakeholder_ids"] = get_mapped_ids(
-                    _fields.pop("stakeholders", []), link_dump_database_ids
-                )
-
-            case "operationalscenario":
-                _fields.update(
-                    {
-                        "ebios_rm_study": EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
-                        ),
-                        "attack_path": AttackPath.objects.get(
-                            id=link_dump_database_ids.get(_fields["attack_path"])
-                        ),
-                    }
-                )
-                many_to_many_map_ids["threat_ids"] = get_mapped_ids(
-                    _fields.pop("threats", []), link_dump_database_ids
-                )
-
-        return _fields
-
-    def _set_many_to_many_relations(
-        self,
-        model: models.Model,
-        obj: models.Model,
-        many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
-    ) -> None:
-        """
-        Set many-to-many relationships after object creation.
-
-        Args:
-            model: Current model for which the object was created.
-            obj: The created object for which to set the m2m relationships.
-            many_to_many_map_ids: A map containing the IDs, names or QuerySet of related objects for m2m relationships.
-
-        """
-        model_name = model._meta.model_name
-
-        match model_name:
-            case "asset":
-                if parent_ids := many_to_many_map_ids.get("parent_ids"):
-                    logger.debug(
-                        "Setting parent assets", asset=obj, parent_ids=parent_ids
-                    )
-                    obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
-
-            case "appliedcontrol":
-                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
-                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
-
-                if objectives_ids := many_to_many_map_ids.get("objective_ids"):
-                    obj.objectives.set(
-                        OrganisationObjective.objects.filter(id__in=objectives_ids)
-                    )
-
-            case "requirementassessment":
-                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
-                    obj.applied_controls.set(
-                        AppliedControl.objects.filter(id__in=applied_control_ids)
-                    )
-                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
-                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
-
-            case "vulnerability":
-                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
-                    obj.applied_controls.set(
-                        AppliedControl.objects.filter(id__in=applied_control_ids)
-                    )
-
-            case "riskscenario":
-                if threat_ids := many_to_many_map_ids.get("threat_ids"):
-                    uuids, urns = self._split_uuids_urns(threat_ids)
-                    obj.threats.set(
-                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
-                    )
-                if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
-                    obj.qualifications.set(qualification_ids)
-
-                for field, model_class in {
-                    "vulnerability_ids": (Vulnerability, "vulnerabilities"),
-                    "asset_ids": (Asset, "assets"),
-                    "applied_control_ids": (AppliedControl, "applied_controls"),
-                    "existing_applied_control_ids": (
-                        AppliedControl,
-                        "existing_applied_controls",
-                    ),
-                }.items():
-                    if ids := many_to_many_map_ids.get(field):
-                        getattr(obj, model_class[1]).set(
-                            model_class[0].objects.filter(id__in=ids)
-                        )
-
-            case "ebiosrmstudy":
-                if asset_ids := many_to_many_map_ids.get("asset_ids"):
-                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
-                if compliance_assessment_ids := many_to_many_map_ids.get(
-                    "compliance_assessment_ids"
-                ):
-                    obj.compliance_assessments.set(
-                        ComplianceAssessment.objects.filter(
-                            id__in=compliance_assessment_ids
-                        )
-                    )
-
-            case "fearedevent":
-                if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
-                    obj.qualifications.set(qualification_ids)
-
-                if asset_ids := many_to_many_map_ids.get("asset_ids"):
-                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
-
-            case "roto":
-                if feared_event_ids := many_to_many_map_ids.get("feared_event_ids"):
-                    obj.feared_events.set(
-                        FearedEvent.objects.filter(id__in=feared_event_ids)
-                    )
-
-            case "stakeholder":
-                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
-                    obj.applied_controls.set(
-                        AppliedControl.objects.filter(id__in=applied_control_ids)
-                    )
-
-            case "attackpath":
-                if stakeholder_ids := many_to_many_map_ids.get("stakeholder_ids"):
-                    obj.stakeholders.set(
-                        Stakeholder.objects.filter(id__in=stakeholder_ids)
-                    )
-
-            case "operationalscenario":
-                if threat_ids := many_to_many_map_ids.get("threat_ids"):
-                    uuids, urns = self._split_uuids_urns(threat_ids)
-                    obj.threats.set(
-                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
-                    )
-
-            case "answer":
-                if urns := many_to_many_map_ids.get("selected_choices_urns"):
-                    if obj.question.type not in (
-                        Question.Type.UNIQUE_CHOICE,
-                        Question.Type.MULTIPLE_CHOICE,
-                    ):
-                        logger.warning(
-                            "Answer import: choice identifiers (selected_choices_ref_ids/selected_choices_urns) "
-                            "provided for non-choice question %s",
-                            obj.question.urn,
-                        )
-                    else:
-                        choices = list(
-                            QuestionChoice.objects.filter(
-                                question=obj.question, urn__in=urns
-                            )
-                        )
-                        found_urns = {c.urn for c in choices}
-                        missing = set(urns) - found_urns
-                        if missing:
-                            logger.warning(
-                                "Answer import: could not resolve choice urns %s "
-                                "for question %s",
-                                missing,
-                                obj.question.urn,
-                            )
-                        if (
-                            obj.question.type == Question.Type.UNIQUE_CHOICE
-                            and len(choices) > 1
-                        ):
-                            logger.warning(
-                                "Answer import: multiple choices provided for "
-                                "unique_choice question %s, keeping only first",
-                                obj.question.urn,
-                            )
-                            choices = choices[:1]
-                        obj.selected_choices.set(choices)
-            case "entity":
-                if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
-                    obj.relationship.set(relationship_ids)
-
-    def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
-        """Split a list of strings into UUIDs and URNs."""
-        uuids = []
-        urns = []
-        for item in ids:
-            try:
-                uuid = UUID(str(item))
-                uuids.append(uuid)
-            except ValueError:
-                urns.append(item)
-        return uuids, urns
 
     @action(detail=False, methods=["get"])
     def get_accessible_objects(self, request):
@@ -9249,7 +8207,7 @@ class FrameworkViewSet(BaseModelViewSet):
             .prefetch_related("questions__choices")
             .order_by("urn")
         )
-        questions_by_node = {rn.id: build_questions_dict(rn) for rn in req_nodes}
+        questions_by_node = {rn.id: rn.get_questions_translated for rn in req_nodes}
         has_questions = any(questions_by_node.values())
         entries = []
 
@@ -11461,7 +10419,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ).prefetch_related("questions__choices")
         }
         questions_by_node = {
-            node_id: build_questions_dict(node) for node_id, node in req_nodes.items()
+            node_id: node.get_questions_translated
+            for node_id, node in req_nodes.items()
         }
         has_questions = any(questions_by_node.values())
 
@@ -11586,6 +10545,98 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         return response
 
+    @action(detail=True, methods=["get"], name="CyFun Excel Export")
+    def cyfun_xlsx(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        audit = ComplianceAssessment.objects.get(id=pk)
+        CYFUN_FRAMEWORK_URN = "urn:intuitem:risk:framework:ccb-cyfun2025"
+        if audit.framework.urn != CYFUN_FRAMEWORK_URN:
+            return Response(
+                {"error": "This export is only available for CyFun 2025 assessments"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        template_path = (
+            Path(__file__).resolve().parent
+            / "templates"
+            / "core"
+            / "CyFun2025_Self-Assessment_tool_ESSENTIAL_v3.1.xlsx"
+        )
+        wb = load_workbook(template_path)
+
+        SHEET_MAP = {
+            "GV": "GOVERN",
+            "ID": "IDENTIFY",
+            "PR": "PROTECT",
+            "DE": "DETECT",
+            "RS": "RESPOND",
+            "RC": "RECOVER",
+        }
+
+        # Build ref_id → row lookup for each function sheet
+        sheet_row_maps = {}
+        for sheet_name in SHEET_MAP.values():
+            ws = wb[sheet_name]
+            row_map = {}
+            for row in range(1, ws.max_row + 1):
+                cell_value = ws.cell(row=row, column=6).value  # Column F
+                if cell_value and isinstance(cell_value, str):
+                    ref_id = cell_value.split(":")[0].strip().rstrip(".")
+                    if ref_id:
+                        row_map[ref_id] = row
+            sheet_row_maps[sheet_name] = row_map
+
+        # Fetch all requirement assessments
+        requirement_assessments = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .select_related("requirement")
+            .filter(requirement__assessable=True)
+        )
+
+        for ra in requirement_assessments:
+            ref_id = ra.requirement.ref_id
+            if not ref_id:
+                continue
+
+            prefix = ref_id.split(".")[0]
+            sheet_name = SHEET_MAP.get(prefix)
+            if not sheet_name:
+                continue
+
+            row = sheet_row_maps.get(sheet_name, {}).get(ref_id)
+            if row is None:
+                continue
+
+            ws = wb[sheet_name]
+            if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
+                ws.cell(row=row, column=7, value="N/A")  # Column G: doc score
+                ws.cell(row=row, column=8, value="N/A")  # Column H: impl score
+            else:
+                if ra.documentation_score is not None:
+                    ws.cell(row=row, column=7, value=ra.documentation_score)
+                if ra.score is not None:
+                    ws.cell(row=row, column=8, value=ra.score)
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="{audit.name}_CyFun_Self-Assessment.xlsx"'
+        )
+        return response
+
     @action(detail=True, methods=["get"])
     def word_report(self, request, pk):
         """
@@ -11622,16 +10673,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 / f"audit_report_template_{lang}.docx"
             )
             doc = DocxTemplate(template_path)
-        _framework = self.get_object().framework
+        audit_obj = self.get_object()
+        _framework = audit_obj.framework
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
-            RequirementAssessment.objects.filter(
-                compliance_assessment=self.get_object()
-            ).all(),
+            RequirementAssessment.objects.filter(compliance_assessment=audit_obj).all(),
             _framework.max_score,
         )
-        implementation_groups = self.get_object().selected_implementation_groups
+        implementation_groups = audit_obj.selected_implementation_groups
+        # Don't reassign the return value: the Word spider chart depends on
+        # empty top-level sections still being present (filter mutates
+        # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
+        annotate_tree_with_aggregated_scores(tree, audit_obj)
         context = gen_audit_context(pk, doc, tree, lang)
         doc.render(context)
         buffer_doc = io.BytesIO()
@@ -12111,6 +11165,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             ]
                         )
 
+            # Align is_scored on requirement assessments with the audit's scoring_enabled.
+            # Runs after baseline copy and mapping-inference bulk_update, both of which can
+            # overwrite is_scored with values from the source audit.
+            assessable_ras = RequirementAssessment.objects.filter(
+                compliance_assessment=instance,
+                requirement__assessable=True,
+            ).exclude(
+                result=RequirementAssessment.Result.NOT_APPLICABLE,
+            )
+            if instance.scoring_enabled:
+                assessable_ras.update(is_scored=True)
+                assessable_ras.filter(score__isnull=True).update(
+                    score=instance.min_score or 0
+                )
+            else:
+                assessable_ras.update(is_scored=False)
+
             # Handle applied controls creation
             if create_applied_controls:
                 # Prefetch all requirement assessments with their suggestions
@@ -12178,6 +11249,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "scoring_enabled": compliance_assessment.scoring_enabled,
                 "show_documentation_score": compliance_assessment.show_documentation_score,
                 "score_calculation_method": compliance_assessment.score_calculation_method,
+                "target_score": compliance_assessment.target_score,
+                "anchor_na_to_target": compliance_assessment.anchor_na_to_target,
             }
         )
 
@@ -12251,9 +11324,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             and not compliance_assessment.selected_implementation_groups
         ):
             implementation_groups = None
-        return Response(
-            filter_graph_by_implementation_groups(tree, implementation_groups)
-        )
+        tree = filter_graph_by_implementation_groups(tree, implementation_groups)
+        annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        return Response(tree)
 
     @action(detail=True, methods=["get"])
     def soa(self, request, pk):
@@ -12304,6 +11377,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             effective_groups = compliance_assessment.selected_implementation_groups
         tree = filter_graph_by_implementation_groups(tree, effective_groups)
+        annotate_tree_with_aggregated_scores(tree, compliance_assessment)
 
         # Build ra_id → RequirementAssessment lookup with prefetched applied_controls
         ras = RequirementAssessment.objects.filter(
@@ -13834,7 +12908,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
                 "requirement__questions",  # Needed by FilteredNodeSerializer.questions
-                "requirement__questions__choices",  # Needed by build_questions_dict()
+                "requirement__questions__choices",  # Needed by get_questions_translated
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
@@ -14351,7 +13425,7 @@ def generate_html(
 
     requirement_nodes = RequirementNode.objects.filter(
         framework=compliance_assessment.framework
-    )
+    ).order_by("order_id")
 
     assessments = RequirementAssessment.objects.filter(
         compliance_assessment=compliance_assessment,
@@ -14364,6 +13438,7 @@ def generate_html(
         compliance_assessment.framework.max_score,
     )
     graph = filter_graph_by_implementation_groups(graph, implementation_groups)
+    annotate_tree_with_aggregated_scores(graph, compliance_assessment)
     flattened_graph = flatten_dict(graph)
 
     requirement_nodes = requirement_nodes.filter(urn__in=flattened_graph.values())
@@ -14396,7 +13471,7 @@ def generate_html(
 
     questions_dict_by_urn = {}
     for node in requirement_nodes.prefetch_related("questions__choices"):
-        qd = build_questions_dict(node)
+        qd = node.get_questions_translated
         if qd:
             questions_dict_by_urn[node.urn] = qd
 
@@ -14817,7 +13892,17 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             )
 
         findings_assessment = FindingsAssessment.objects.get(id=pk)
-        findings = Finding.objects.filter(findings_assessment=pk).order_by("ref_id")
+        findings = (
+            Finding.objects.filter(findings_assessment=pk)
+            .select_related("folder")
+            .prefetch_related(
+                "applied_controls",
+                "evidences",
+                "vulnerabilities",
+                "filtering_labels",
+            )
+            .order_by("ref_id")
+        )
 
         # Prepare data for Excel export
         entries = []
@@ -14826,9 +13911,16 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "ref_id": finding.ref_id,
                 "name": finding.name,
                 "description": finding.description,
-                "status": finding.get_status_display(),
+                "status": finding.status,
                 "severity": finding.get_severity_display(),
+                "priority": finding.priority if finding.priority is not None else "",
                 "folder": finding.folder.name if finding.folder else "",
+                "filtering_labels": "|".join(
+                    [
+                        escape_excel_formula(label.label)
+                        for label in finding.filtering_labels.all()
+                    ]
+                ),
                 "applied_controls": "\n".join(
                     [
                         f"{ac.name} [{ac.get_status_display().lower()}]"
@@ -14836,6 +13928,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     ]
                 ),
                 "evidences": "\n".join([ev.name for ev in finding.evidences.all()]),
+                "vulnerabilities": "|".join(
+                    [
+                        escape_excel_formula(v.name)
+                        for v in finding.vulnerabilities.all()
+                    ]
+                ),
+                "observation": escape_excel_formula(finding.observation),
                 "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
                 if finding.created_at
                 else "",
@@ -14857,7 +13956,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             worksheet = writer.sheets["Findings"]
 
             # Apply text wrapping to columns with line breaks
-            wrap_columns = ["name", "description", "applied_controls", "evidences"]
+            wrap_columns = [
+                "name",
+                "description",
+                "applied_controls",
+                "evidences",
+                "observation",
+            ]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]

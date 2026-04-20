@@ -510,6 +510,8 @@ export const ComplianceAssessmentSchema = z.object({
 	extended_result_enabled: z.boolean().optional().default(false),
 	progress_status_enabled: z.boolean().optional().default(true),
 	score_calculation_method: z.string().optional().default('average'),
+	target_score: z.number().optional().nullable(),
+	anchor_na_to_target: z.boolean().optional().default(false),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -773,7 +775,13 @@ export const EntityAssessmentSchema = z.object({
 	dependency: z.number().optional(),
 	maturity: z.number().optional(),
 	trust: z.number().optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	reference_link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional()
 });
 
 export const solutionSchema = z.object({
@@ -796,7 +804,15 @@ export const solutionSchema = z.object({
 	dora_reintegration_possibility: z.string().nullish(),
 	dora_discontinuing_impact: z.string().nullish(),
 	dora_alternative_providers_identified: z.string().nullish(),
-	dora_alternative_providers: z.string().optional()
+	dora_alternative_providers: z.string().optional(),
+	subcontracting_chain: z
+		.array(
+			z.object({
+				subcontractor: z.string().uuid(),
+				recipient: z.string().uuid().nullish()
+			})
+		)
+		.optional()
 });
 
 export const representativeSchema = z.object({
@@ -1229,7 +1245,8 @@ export const SecurityExceptionSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	observation: z.string().optional()
+	observation: z.string().optional().nullable(),
+	link: z.string().url().optional().nullable().or(z.literal(''))
 });
 
 export const FindingSchema = z.object({

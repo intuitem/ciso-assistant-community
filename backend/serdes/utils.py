@@ -14,20 +14,27 @@ from core.models import (
     Answer,
     Asset,
     AppliedControl,
+    Campaign,
     Evidence,
     EvidenceRevision,
+    Finding,
+    FindingsAssessment,
     Framework,
+    Incident,
     Perimeter,
+    RiskAcceptance,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
     ComplianceAssessment,
     RequirementAssessment,
+    SecurityException,
+    TaskNode,
+    TaskTemplate,
     Vulnerability,
     Threat,
     ReferenceControl,
     LoadedLibrary,
-    FindingsAssessment,
 )
 
 from ebios_rm.models import (
@@ -47,19 +54,26 @@ from core.serializers import (
     FolderImportExportSerializer,
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,
+    CampaignImportExportSerializer,
     EvidenceImportExportSerializer,
     EvidenceRevisionImportExportSerializer,
+    FindingImportExportSerializer,
+    FindingsAssessmentImportExportSerializer,
+    IncidentImportExportSerializer,
     PerimeterImportExportSerializer,
+    RiskAcceptanceImportExportSerializer,
     RiskAssessmentImportExportSerializer,
     RiskScenarioImportExportSerializer,
     ComplianceAssessmentImportExportSerializer,
     RequirementAssessmentImportExportSerializer,
+    SecurityExceptionImportExportSerializer,
+    TaskNodeImportExportSerializer,
+    TaskTemplateImportExportSerializer,
     VulnerabilityImportExportSerializer,
     ThreatImportExportSerializer,
     ReferenceControlImportExportSerializer,
     FrameworkImportExportSerializer,
     RiskMatrixImportExportSerializer,
-    FindingsAssessmentImportExportSerializer,
 )
 
 from ebios_rm.serializers import (
@@ -154,13 +168,21 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         Answer: AnswerImportExportSerializer,
         Asset: AssetImportExportSerializer,
         AppliedControl: AppliedControlImportExportSerializer,
+        Campaign: CampaignImportExportSerializer,
         Evidence: EvidenceImportExportSerializer,
         EvidenceRevision: EvidenceRevisionImportExportSerializer,
+        Finding: FindingImportExportSerializer,
+        FindingsAssessment: FindingsAssessmentImportExportSerializer,
+        Incident: IncidentImportExportSerializer,
         Perimeter: PerimeterImportExportSerializer,
+        RiskAcceptance: RiskAcceptanceImportExportSerializer,
         RiskAssessment: RiskAssessmentImportExportSerializer,
         RiskScenario: RiskScenarioImportExportSerializer,
         ComplianceAssessment: ComplianceAssessmentImportExportSerializer,
         RequirementAssessment: RequirementAssessmentImportExportSerializer,
+        SecurityException: SecurityExceptionImportExportSerializer,
+        TaskNode: TaskNodeImportExportSerializer,
+        TaskTemplate: TaskTemplateImportExportSerializer,
         Vulnerability: VulnerabilityImportExportSerializer,
         Threat: ThreatImportExportSerializer,
         ReferenceControl: ReferenceControlImportExportSerializer,
@@ -175,7 +197,6 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         Framework: FrameworkImportExportSerializer,
         RiskMatrix: RiskMatrixImportExportSerializer,
         LoadedLibrary: LoadedLibraryImportExportSerializer,
-        FindingsAssessment: FindingsAssessmentImportExportSerializer,
     }
 
     return model_serializer_map.get(model, None)
@@ -470,10 +491,54 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(operational_scenarios__in=operational_scenarios)
     ).distinct()
 
+    findings_assessments = FindingsAssessment.objects.filter(
+        Q(perimeter__in=perimeters) | Q(folder__in=folders)
+    ).distinct()
+    findings = Finding.objects.filter(
+        findings_assessment__in=findings_assessments
+    ).distinct()
+
+    risk_acceptances = RiskAcceptance.objects.filter(
+        Q(folder__in=folders) | Q(risk_scenarios__in=risk_scenarios)
+    ).distinct()
+
+    security_exceptions = SecurityException.objects.filter(
+        folder__in=folders
+    ).distinct()
+
+    incidents = Incident.objects.filter(folder__in=folders).distinct()
+    # Close the loop on reverse M2Ms so objects reachable only through
+    # incidents/campaigns still make it into the dump (and into
+    # loaded_libraries). Rebuild with fresh Q filters rather than queryset
+    # union so the result plays nicely with .distinct().
+    entities = Entity.objects.filter(
+        Q(folder__in=folders)
+        | Q(stakeholders__in=stakeholders)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(incidents__in=incidents)
+    ).distinct()
+
+    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
+    frameworks = Framework.objects.filter(
+        Q(folder__in=folders)
+        | Q(complianceassessment__in=compliance_assessments)
+        | Q(campaigns__in=campaigns)
+    ).distinct()
+    perimeters = Perimeter.objects.filter(
+        Q(folder__in=folders) | Q(campaigns__in=campaigns)
+    ).distinct()
+
+    task_templates = TaskTemplate.objects.filter(folder__in=folders).distinct()
+    task_nodes = TaskNode.objects.filter(
+        Q(folder__in=folders) | Q(task_template__in=task_templates)
+    ).distinct()
+
     evidences = Evidence.objects.filter(
         Q(folder__in=folders)
         | Q(applied_controls__in=applied_controls)
         | Q(requirement_assessments__in=requirement_assessments)
+        | Q(findings__in=findings)
+        | Q(findings_assessments__in=findings_assessments)
     ).distinct()
 
     evidence_revisions = EvidenceRevision.objects.filter(
@@ -497,9 +562,13 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         )
     ).distinct()
 
-    findings_assessments = FindingsAssessment.objects.filter(Q(folder__in=folders))
-
     return {
+        # Folder is deliberately NOT exported. The domain tree is flattened on
+        # import: all `folder` FKs are remapped to the newly-created
+        # base_folder by create_batch's generic folder handler. Keeping
+        # Folder out of the dump is what makes the re-import possible — the
+        # guard in import_objects rejects dumps that *do* contain Folder rows
+        # (e.g. full DB backups), not our own domain exports.
         # "folder": folders,
         "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,
@@ -526,4 +595,11 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "strategicscenario": strategic_scenarios,
         "attackpath": attack_paths,
         "findingsassessment": findings_assessments,
+        "finding": findings,
+        "riskacceptance": risk_acceptances,
+        "securityexception": security_exceptions,
+        "incident": incidents,
+        "campaign": campaigns,
+        "tasktemplate": task_templates,
+        "tasknode": task_nodes,
     }
