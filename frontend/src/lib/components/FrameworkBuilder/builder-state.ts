@@ -57,6 +57,7 @@ export interface RequirementNode {
 	order_id: number | null;
 	assessable: boolean;
 	implementation_groups: string[] | null;
+	visibility_expression: string | null;
 	typical_evidence: string | null;
 	weight: number;
 	importance: string;
@@ -99,6 +100,8 @@ export interface Framework {
 	translations?: Translations | null;
 	available_languages?: string[];
 	urn: string | null;
+	urn_namespace: string;
+	editing_version: number;
 }
 
 export interface BuilderRequirement {
@@ -116,6 +119,94 @@ export interface BuilderSection {
 	node: RequirementNode;
 	requirements: BuilderRequirement[];
 	collapsed: boolean;
+}
+
+// --- URN / ref_id generation utilities ---
+
+/**
+ * Slugify a framework name into a URL-safe namespace for URNs.
+ * Uses NFKD normalization to strip accents, then ASCII-only filtering.
+ * Falls back to first 8 chars of frameworkId for CJK-only names.
+ */
+export function slugifyFrameworkName(name: string, frameworkId: string): string {
+	const normalized = name
+		.normalize('NFKD')
+		.replace(/[\u0300-\u036f]/g, '') // strip combining diacritical marks
+		.replace(/[^\x00-\x7F]/g, ''); // strip non-ASCII
+	let slug = normalized
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/-{2,}/g, '-')
+		.replace(/^-+|-+$/g, '');
+	if (slug.length > 60) slug = slug.slice(0, 60).replace(/-+$/, '');
+	if (!slug) slug = frameworkId.slice(0, 8);
+	return slug;
+}
+
+/**
+ * Compute a ref_id for a new item based on its siblings and parent.
+ * Uses max(existing numeric last segments) + 1 to avoid reusing deleted IDs.
+ */
+export function computeRefId(
+	siblingRefIds: (string | null)[],
+	parentRefId: string | null,
+	type: 'section' | 'requirement' | 'question' | 'choice'
+): string {
+	const separator = type === 'question' ? '-q' : type === 'choice' ? '-c' : '.';
+	const prefix =
+		type === 'section'
+			? ''
+			: parentRefId
+				? `${parentRefId}${separator}`
+				: `${separator === '.' ? '' : ''}`;
+
+	// Extract numeric last segments from sibling ref_ids
+	const nums: number[] = [];
+	for (const refId of siblingRefIds) {
+		if (!refId) continue;
+		let lastPart: string;
+		if (type === 'question') {
+			const match = refId.match(/-q(\d+)$/);
+			if (match) nums.push(parseInt(match[1], 10));
+			continue;
+		} else if (type === 'choice') {
+			const match = refId.match(/-c(\d+)$/);
+			if (match) nums.push(parseInt(match[1], 10));
+			continue;
+		} else {
+			// section or requirement: take the last dot-segment
+			const parts = refId.split('.');
+			lastPart = parts[parts.length - 1];
+		}
+		const n = parseInt(lastPart, 10);
+		if (!isNaN(n)) nums.push(n);
+	}
+
+	const next =
+		nums.length > 0
+			? Math.max(...nums) + 1
+			: siblingRefIds.length > 0
+				? siblingRefIds.length + 1
+				: 1;
+
+	if (type === 'section') return String(next);
+	if (parentRefId) return `${parentRefId}${separator}${next}`;
+	// Fallback when parent has no ref_id
+	if (type === 'question') return `q${next}`;
+	if (type === 'choice') return `c${next}`;
+	return `${next}`;
+}
+
+/**
+ * Generate a URN for a framework item.
+ */
+export function generateUrn(
+	type: 'req_node' | 'question' | 'question_choice',
+	slug: string,
+	refId: string,
+	urnNamespace: string = 'custom'
+): string {
+	return `urn:${urnNamespace}:risk:${type}:${slug}:${refId}`;
 }
 
 // --- Recursive helpers ---
@@ -221,6 +312,7 @@ function serializeNode(n: RequirementNode): Record<string, unknown> {
 		order_id: n.order_id,
 		assessable: n.assessable,
 		implementation_groups: n.implementation_groups,
+		visibility_expression: n.visibility_expression,
 		typical_evidence: n.typical_evidence,
 		weight: n.weight,
 		importance: n.importance,
@@ -237,10 +329,17 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 	const nodes: Record<string, unknown>[] = [];
 	const questions: Record<string, unknown>[] = [];
 	const choices: Record<string, unknown>[] = [];
+	let globalOrder = 0;
+
+	function pushNode(n: RequirementNode) {
+		const serialized = serializeNode(n);
+		serialized.order_id = globalOrder++;
+		nodes.push(serialized);
+	}
 
 	function collectFromRequirements(reqs: BuilderRequirement[]) {
 		for (const req of reqs) {
-			nodes.push(serializeNode(req.node));
+			pushNode(req.node);
 			for (const bq of req.questions) {
 				const q = bq.question;
 				questions.push({
@@ -282,7 +381,7 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 	}
 
 	for (const sec of sections) {
-		nodes.push(serializeNode(sec.node));
+		pushNode(sec.node);
 		collectFromRequirements(sec.requirements);
 	}
 
@@ -299,7 +398,8 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 			scores_definition: fw.scores_definition,
 			implementation_groups_definition: fw.implementation_groups_definition,
 			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
-			field_visibility: fw.field_visibility
+			field_visibility: fw.field_visibility,
+			urn_namespace: fw.urn_namespace
 		},
 		nodes,
 		questions,
@@ -332,7 +432,8 @@ export function hydrateDraft(
 		scores_definition: meta.scores_definition,
 		implementation_groups_definition: meta.implementation_groups_definition,
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
-		field_visibility: meta.field_visibility ?? {}
+		field_visibility: meta.field_visibility ?? {},
+		urn_namespace: meta.urn_namespace ?? 'custom'
 	};
 
 	// Build a lookup from question_id to choices
@@ -390,6 +491,7 @@ export function hydrateDraft(
 		order_id: (n.order_id ?? null) as number | null,
 		assessable: (n.assessable ?? false) as boolean,
 		implementation_groups: (n.implementation_groups ?? null) as string[] | null,
+		visibility_expression: (n.visibility_expression ?? null) as string | null,
 		typical_evidence: (n.typical_evidence ?? null) as string | null,
 		weight: (n.weight ?? 1) as number,
 		importance: (n.importance ?? '') as string,
@@ -400,6 +502,88 @@ export function hydrateDraft(
 	}));
 
 	return { frameworkPatch, nodes, questions };
+}
+
+// --- Pre-publish validation (exported for testing) ---
+
+export interface ValidationError {
+	key: string;
+	message: string;
+}
+
+/**
+ * Validate framework and nodes before publishing.
+ * Returns an array of validation errors (empty if valid).
+ */
+export function validateDraft(fw: Framework, allSections: BuilderSection[]): ValidationError[] {
+	const errors: ValidationError[] = [];
+
+	// Validate framework name
+	if (!fw.name || fw.name.trim().length === 0) {
+		errors.push({ key: 'publish', message: 'Framework name is required.' });
+	} else if (fw.name.length > 200) {
+		errors.push({
+			key: 'publish',
+			message: `Framework name is ${fw.name.length} characters (max 200).`
+		});
+	}
+
+	// Validate each node recursively
+	function validateNodes(reqs: BuilderRequirement[]) {
+		for (const req of reqs) {
+			const n = req.node;
+
+			if (n.name && n.name.length > 200) {
+				errors.push({
+					key: `node-${n.id}`,
+					message: `Name exceeds 200 characters (${n.name.length}/200). Move long text to the description field.`
+				});
+			}
+			if (n.ref_id && n.ref_id.length > 100) {
+				const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
+				errors.push({
+					key: `node-${n.id}`,
+					message: `Requirement '${label}': ref_id is ${n.ref_id.length} characters (max 100).`
+				});
+			}
+			if (n.urn && n.urn.length > 255) {
+				const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
+				errors.push({
+					key: `node-${n.id}`,
+					message: `Requirement '${label}': URN is ${n.urn.length} characters (max 255).`
+				});
+			}
+
+			validateNodes(req.children);
+		}
+	}
+
+	for (const sec of allSections) {
+		const sn = sec.node;
+		if (sn.name && sn.name.length > 200) {
+			errors.push({
+				key: `node-${sn.id}`,
+				message: `Name exceeds 200 characters (${sn.name.length}/200). Move long text to the description field.`
+			});
+		}
+		if (sn.ref_id && sn.ref_id.length > 100) {
+			const label = sn.ref_id ?? `position ${sn.order_id ?? '?'}`;
+			errors.push({
+				key: `node-${sn.id}`,
+				message: `Section '${label}': ref_id is ${sn.ref_id.length} characters (max 100).`
+			});
+		}
+		if (sn.urn && sn.urn.length > 255) {
+			const label = sn.ref_id ?? `position ${sn.order_id ?? '?'}`;
+			errors.push({
+				key: `node-${sn.id}`,
+				message: `Section '${label}': URN is ${sn.urn.length} characters (max 255).`
+			});
+		}
+		validateNodes(sec.requirements);
+	}
+
+	return errors;
 }
 
 // --- State ---
@@ -515,6 +699,9 @@ export function createBuilderState(
 	const folderId =
 		typeof frameworkData.folder === 'string' ? frameworkData.folder : frameworkData.folder.id;
 	const frameworkId = frameworkData.id;
+	function getUrnNs(): string {
+		return get(framework).urn_namespace || 'custom';
+	}
 
 	// If we have a draft, hydrate from it; otherwise use relational data
 	let initialNodes = nodes;
@@ -527,6 +714,9 @@ export function createBuilderState(
 		initialQuestions = hydrated.questions;
 		initialFrameworkData = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
 	}
+
+	// Cache the slug after hydration so renamed drafts use the updated name
+	const fwSlug = slugifyFrameworkName(initialFrameworkData.name, frameworkId);
 
 	const framework = writable<Framework>(initialFrameworkData);
 	const initialSections = buildTree(initialNodes, initialQuestions);
@@ -588,8 +778,8 @@ export function createBuilderState(
 
 	let saveInFlight = false;
 
-	async function flushDraft() {
-		if (saveInFlight) return;
+	async function flushDraft(): Promise<boolean> {
+		if (saveInFlight) return false;
 		saveInFlight = true;
 		saving.set(true);
 		try {
@@ -598,16 +788,46 @@ export function createBuilderState(
 			await apiSaveDraft(frameworkId, draft);
 			unsaved.set(false); // saved to draft, but still unpublished
 			clearError('save-draft');
+			return true;
 		} catch (e) {
 			setError('save-draft', (e as Error).message);
+			return false;
 		} finally {
 			saving.set(false);
 			saveInFlight = false;
 		}
 	}
 
+	/** Validate all nodes and framework before publish. Returns true if valid. */
+	function validateBeforePublish(): boolean {
+		const validationErrors = validateDraft(get(framework), get(sections));
+		for (const err of validationErrors) {
+			setError(err.key, err.message);
+		}
+		return validationErrors.length === 0;
+	}
+
 	async function publish() {
-		await flushDraft();
+		const saved = await flushDraft();
+		if (!saved) {
+			setError('publish', 'Failed to save draft before publishing.');
+			return;
+		}
+
+		// Clear previous node-level validation errors
+		errors.update((m) => {
+			const next = new Map(m);
+			for (const key of next.keys()) {
+				if (key.startsWith('node-')) next.delete(key);
+			}
+			return next;
+		});
+		clearError('publish');
+
+		if (!validateBeforePublish()) {
+			return;
+		}
+
 		try {
 			await apiPublishDraft(frameworkId);
 			clearError('publish');
@@ -651,11 +871,13 @@ export function createBuilderState(
 			afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : currentSections.length * 100;
 
 		const newId = crypto.randomUUID();
-		const newUrn = `urn:intuitem:risk:req_node:${newId}`;
+		const siblingRefIds = currentSections.map((s) => s.node.ref_id);
+		const refId = computeRefId(siblingRefIds, null, 'section');
+		const newUrn = generateUrn('req_node', fwSlug, refId, getUrnNs());
 		const newNode: RequirementNode = {
 			id: newId,
 			urn: newUrn,
-			ref_id: null,
+			ref_id: refId,
 			name: 'New Section',
 			description: null,
 			annotation: null,
@@ -663,6 +885,7 @@ export function createBuilderState(
 			order_id: order,
 			assessable: false,
 			implementation_groups: null,
+			visibility_expression: null,
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
@@ -690,19 +913,19 @@ export function createBuilderState(
 	// --- Requirement CRUD (node ID-based) ---
 
 	function addSplashScreen(parentNodeId: string, parentUrn: string) {
-		const siblings = (() => {
-			for (const sec of get(sections)) {
-				if (sec.node.id === parentNodeId) return sec.requirements;
-			}
-			return [];
-		})();
+		const parentSection = get(sections).find((s) => s.node.id === parentNodeId);
+		const siblings = parentSection ? parentSection.requirements : [];
 		const order = siblings.length * 100;
+
+		const parentRefId = parentSection?.node.ref_id ?? null;
+		const siblingRefIds = siblings.map((r) => r.node.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'requirement');
 
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: `urn:intuitem:risk:req_node:${newId}`,
-			ref_id: null,
+			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
+			ref_id: refId,
 			name: 'New Splash Screen',
 			description: null,
 			annotation: null,
@@ -710,6 +933,7 @@ export function createBuilderState(
 			order_id: order,
 			assessable: false,
 			implementation_groups: null,
+			visibility_expression: null,
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
@@ -744,11 +968,18 @@ export function createBuilderState(
 		const parentDepth = parentReq ? parentReq.depth : -1;
 		const order = siblings.length * 100;
 
+		// Compute ref_id from parent and siblings
+		const parentRefId = parentReq
+			? parentReq.node.ref_id
+			: (get(sections).find((s) => s.node.id === parentNodeId)?.node.ref_id ?? null);
+		const siblingRefIds = siblings.map((r) => r.node.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'requirement');
+
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: `urn:intuitem:risk:req_node:${newId}`,
-			ref_id: null,
+			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
+			ref_id: refId,
 			name: 'New Requirement',
 			description: null,
 			annotation: null,
@@ -756,6 +987,7 @@ export function createBuilderState(
 			order_id: order,
 			assessable: true,
 			implementation_groups: null,
+			visibility_expression: null,
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
@@ -822,12 +1054,16 @@ export function createBuilderState(
 		if (!req) return;
 		const order = req.questions.length * 100;
 		const newId = crypto.randomUUID();
-		const urn = `urn:intuitem:risk:question:${newId}`;
+
+		const parentRefId = req.node.ref_id ?? null;
+		const siblingRefIds = req.questions.map((bq) => bq.question.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'question');
+		const urn = generateUrn('question', fwSlug, refId, getUrnNs());
 
 		const newQuestion: Question = {
 			id: newId,
 			urn,
-			ref_id: null,
+			ref_id: refId,
 			text: '',
 			annotation: null,
 			type,
@@ -887,10 +1123,14 @@ export function createBuilderState(
 		const order = q.question.choices.length * 100;
 		const newId = crypto.randomUUID();
 
+		const parentRefId = q.question.ref_id ?? null;
+		const siblingRefIds = q.question.choices.map((c) => c.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'choice');
+
 		const newChoice: QuestionChoice = {
 			id: newId,
-			urn: `urn:intuitem:risk:question_choice:${newId}`,
-			ref_id: null,
+			urn: generateUrn('question_choice', fwSlug, refId, getUrnNs()),
+			ref_id: refId,
 			value: '',
 			annotation: null,
 			add_score: null,

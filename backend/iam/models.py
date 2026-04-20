@@ -205,6 +205,15 @@ class Folder(NameDescriptionMixin):
         """
         return get_folder_path(self.id, include_root=include_root)
 
+    def get_folder_full_path_string(self, *, include_root: bool = False) -> str:
+        """
+        Return a stringified slash-separated folder path.
+        This string is unique per-folder.
+        """
+        return "/".join(
+            f.name for f in self.get_folder_full_path(include_root=include_root)
+        )
+
     @staticmethod
     def _navigate_structure(start, path):
         """
@@ -897,7 +906,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return self.user_groups.filter(name="BI-UG-ADM").exists()
 
     # Permissions that grant write access but do not consume a license seat
-    NON_SEAT_PERMISSIONS = {"change_validationflow"}
+    NON_SEAT_PERMISSIONS = {
+        "change_validationflow",
+        "add_chatsession",
+        "change_chatsession",
+        "delete_chatsession",
+    }
 
     @property
     def is_editor(self) -> bool:

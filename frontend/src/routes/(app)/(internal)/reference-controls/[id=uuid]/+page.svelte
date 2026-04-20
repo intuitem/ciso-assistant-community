@@ -53,7 +53,7 @@
 </script>
 
 <DetailView {data}>
-	{#snippet widgets()}
+	{#snippet actions()}
 		<button
 			class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
 			data-testid="sync-to-actions-button"

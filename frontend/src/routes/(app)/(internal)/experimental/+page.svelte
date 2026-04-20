@@ -26,12 +26,6 @@
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
 	<Article
-		title="Yearly Tasks Review"
-		desc="Review all recurrent tasks grouped by folder for yearly planning"
-		link="/experimental/yearly-tasks-review"
-		tags={['tasks', 'planning', 'review', 'PRO']}
-	/>
-	<Article
 		title={m.matrixEditor()}
 		desc={m.matrixEditorDescription()}
 		link="/experimental/matrix-editor"

@@ -158,7 +158,7 @@
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
-	const default_value = nullable ? null : selectedValues[0];
+	const default_value = nullable ? null : '';
 
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
@@ -623,9 +623,26 @@
 		<MultiSelect
 			bind:selected
 			bind:open={multiSelectOpen}
-			options={effectiveLazy && selected.length > 0 && !lazyHasSearched
-				? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
-				: options}
+			options={new Proxy(
+				effectiveLazy && selected.length > 0 && !lazyHasSearched
+					? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
+					: options,
+				{
+					get(target, prop, receiver) {
+						// Fix: svelte-multiselect's add() uses Array.includes() (reference equality) to
+						// check if a clicked option already exists. In Svelte 5, reactive proxy wrapping
+						// breaks reference identity, causing it to overwrite the clicked option with the
+						// raw search text. Override includes() to compare by .value instead.
+						if (prop === 'includes') {
+							return (item: unknown) =>
+								item !== null && typeof item === 'object' && 'value' in (item as object)
+									? (target as Option[]).some((opt) => opt.value === (item as Option).value)
+									: false;
+						}
+						return Reflect.get(target, prop, receiver);
+					}
+				}
+			)}
 			{...multiSelectOptions}
 			outerDivClass="!input !bg-surface-100 !px-2 !flex {overflowCssClass}"
 			disabled={_disabled}
@@ -687,6 +704,15 @@
 				{#if overflowCount > 0 && chipIdx === maxVisibleChips}
 					<span use:styleAsBadge>+{overflowCount}</span>
 				{:else}
+					{@const coupleParts =
+						translateOptions && field === 'ro_to_couple' && typeof option.label === 'string'
+							? option.label.split(' - ')
+							: null}
+					{@const displayLabel = coupleParts
+						? `${safeTranslate(coupleParts[0])} - ${coupleParts.slice(1).join(' - ')}`
+						: translateOptions
+							? (option.translatedLabel ?? option.label ?? option)
+							: (option.label ?? option)}
 					{#if option.infoString?.position === 'prefix'}
 						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
 					{/if}
@@ -702,16 +728,9 @@
 							{/each}
 						</span>
 					{/if}
-					{#if translateOptions && option}
-						{#if field === 'ro_to_couple'}
-							{@const [firstPart, ...restParts] = option.label.split(' - ')}
-							{safeTranslate(firstPart)} - {restParts.join(' - ')}
-						{:else}
-							{option.translatedLabel}
-						{/if}
-					{:else}
-						{option.label || option}
-					{/if}
+					<span class="inline-block max-w-[30ch] truncate align-bottom" title={displayLabel}>
+						{displayLabel}
+					</span>
 					{#if option.infoString?.position === 'suffix'}
 						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
 					{/if}

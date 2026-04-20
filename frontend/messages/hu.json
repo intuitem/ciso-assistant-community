@@ -1142,5 +1142,6 @@
 	"confirmModalMessagePlural": "Biztos benne? Ez a művelet véglegesen érinti a következő objektumokat",
 	"syncAppliedControlsMessage": "Azok az alkalmazott kontrollok, amelyek ezt a referencia kontrollt használják, szinkronizálva lesznek vele. Kérjük, vegye figyelembe, hogy ez nem vonható vissza.",
 	"syncToAppliedControl": "Szinkronizálás az alkalmazott kontrollal",
-	"syncToReferenceControl": "Szinkronizálás a referencia kontrollal"
+	"syncToReferenceControl": "Szinkronizálás a referencia kontrollal",
+	"exportEcosystem": "ökoszisztéma export (XLSX)"
 }

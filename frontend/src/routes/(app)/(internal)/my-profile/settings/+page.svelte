@@ -4,6 +4,7 @@
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
+	import RegisterWebAuthnModal from './mfa/components/RegisterWebAuthnModal.svelte';
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { m } from '$paraglide/messages';
@@ -119,7 +120,46 @@
 		modalStore.trigger(modal);
 	}
 
-	let hasTOTP = $derived(data.authenticators.some((auth) => auth.type === 'totp'));
+	function modalRegisterWebAuthn(): void {
+		const modalComponent: ModalComponent = {
+			ref: RegisterWebAuthnModal,
+			props: {
+				creationOptions: data.webauthnCreationOptions,
+				formAction: '?/registerWebAuthn'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.addSecurityKey(),
+			body: m.securityKeyDescription()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalConfirmRemoveWebAuthn(id: number): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: defaults({ id }, zod(z.object({ id: z.number() }))),
+				schema: zod(z.object({ id: z.number() })),
+				id: id,
+				debug: false,
+				formAction: '?/removeWebAuthn'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: m.removeSecurityKeyConfirm()
+		};
+		modalStore.trigger(modal);
+	}
+
+	let hasTOTP = $derived(
+		data.authenticators.some((auth: { type: string }) => auth.type === 'totp')
+	);
 	run(() => {
 		$recoveryCodes =
 			form && Object.hasOwn(form, 'recoveryCodes') ? form.recoveryCodes : data.recoveryCodes;
@@ -183,6 +223,62 @@
 											class="btn preset-outlined-surface-500 w-fit"
 											onclick={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
 										>
+									{/if}
+								</div>
+							</div>
+						</dd>
+					</div>
+				</dl>
+				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium">{m.securityKeys()}</dt>
+						<dd class="text-surface-900 sm:col-span-2">
+							<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
+								<div class="flex flex-col space-y-2">
+									<span class="flex flex-row justify-between text-xl">
+										<i class="fa-solid fa-fingerprint"></i>
+										{#if data.webauthnCredentials.length > 0}
+											<i class="fa-solid fa-circle-check text-success-600-400"></i>
+										{/if}
+									</span>
+									<span class="flex flex-row space-x-2">
+										<h6 class="h6 base-font-color">{m.securityKeys()}</h6>
+									</span>
+									<p class="text-sm text-surface-800 max-w-[50ch]">
+										{m.securityKeyDescription()}
+									</p>
+								</div>
+								{#if data.webauthnCredentials.length > 0}
+									<ul class="flex flex-col gap-2">
+										{#each data.webauthnCredentials as credential}
+											<li class="flex flex-row justify-between items-center card p-3 bg-inherit">
+												<span class="flex flex-col">
+													<p class="font-medium">{credential.name}</p>
+													<p class="text-xs text-surface-600">
+														{new Date(credential.created_at * 1000).toLocaleDateString(getLocale())}
+													</p>
+												</span>
+												<button
+													onclick={() => modalConfirmRemoveWebAuthn(credential.id)}
+													class="cursor-pointer hover:text-primary-500"
+													aria-label={m.removeSecurityKey()}
+												>
+													<i class="fa-solid fa-trash"></i>
+												</button>
+											</li>
+										{/each}
+									</ul>
+								{:else}
+									<p class="text-sm text-surface-600">{m.noSecurityKeysRegistered()}</p>
+								{/if}
+								<div class="flex flex-wrap gap-2">
+									{#if data.webauthnCreationOptions}
+										<button
+											class="btn preset-outlined-surface-500 w-fit"
+											onclick={() => modalRegisterWebAuthn()}
+										>
+											{m.addSecurityKey()}
+										</button>
 									{/if}
 								</div>
 							</div>

@@ -191,6 +191,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.incidents", required=False, default=True
     )
     tasks = serializers.BooleanField(source="value.tasks", required=False, default=True)
+    control_plan = serializers.BooleanField(
+        source="value.control_plan", required=False, default=True
+    )
     risk_acceptances = serializers.BooleanField(
         source="value.risk_acceptances", required=False, default=True
     )
@@ -327,6 +330,140 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
 
             if field_name in new_value_dict:
                 # Get the key name used within the 'value' dictionary (e.g., 'xrays')
+                source_key = field_instance.source.split(".")[-1]
+                new_flag_value = new_value_dict[field_name]
+
+                if current_value_dict.get(source_key) != new_flag_value:
+                    current_value_dict[source_key] = new_flag_value
+                    value_changed = True
+
+        if value_changed:
+            instance.value = current_value_dict
+            instance.save(update_fields=["value"])
+
+        return instance
+
+
+class VulnerabilitySlaSerializer(serializers.ModelSerializer):
+    """
+    Serializer for managing Vulnerability SLA policy settings.
+    Maps severity levels to remediation deadlines (in days).
+    """
+
+    sla_anchor = serializers.ChoiceField(
+        source="value.sla_anchor",
+        choices=["detected_at", "published_date"],
+        required=False,
+        default="detected_at",
+    )
+    critical = serializers.IntegerField(
+        source="value.critical", required=False, allow_null=True
+    )
+    high = serializers.IntegerField(
+        source="value.high", required=False, allow_null=True
+    )
+    medium = serializers.IntegerField(
+        source="value.medium", required=False, allow_null=True
+    )
+    low = serializers.IntegerField(source="value.low", required=False, allow_null=True)
+    info = serializers.IntegerField(
+        source="value.info", required=False, allow_null=True
+    )
+
+    class Meta:
+        model = GlobalSettings
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
+        ]
+        read_only_fields = ["name"]
+
+    def update(self, instance, validated_data):
+        current_value_dict = instance.value if isinstance(instance.value, dict) else {}
+        value_changed = False
+        new_value_dict = validated_data.get("value", {})
+
+        for field_name, field_instance in self.fields.items():
+            if field_name in self.Meta.read_only_fields:
+                continue
+            if not hasattr(
+                field_instance, "source"
+            ) or not field_instance.source.startswith("value."):
+                continue
+
+            if field_name in new_value_dict:
+                source_key = field_instance.source.split(".")[-1]
+                new_flag_value = new_value_dict[field_name]
+
+                if current_value_dict.get(source_key) != new_flag_value:
+                    if new_flag_value is None:
+                        current_value_dict.pop(source_key, None)
+                    else:
+                        current_value_dict[source_key] = new_flag_value
+                    value_changed = True
+
+        if value_changed:
+            instance.value = current_value_dict
+            instance.save(update_fields=["value"])
+
+        return instance
+
+
+class SecIntelFeedsSerializer(serializers.ModelSerializer):
+    """
+    Serializer for managing Security Intelligence feed settings.
+    Controls which external feeds are enabled and network parameters.
+    """
+
+    kev_feed_enabled = serializers.BooleanField(
+        source="value.kev_feed_enabled", required=False, default=False
+    )
+    epss_feed_enabled = serializers.BooleanField(
+        source="value.epss_feed_enabled", required=False, default=False
+    )
+    nvd_enrich_enabled = serializers.BooleanField(
+        source="value.nvd_enrich_enabled", required=False, default=False
+    )
+    network_timeout = serializers.IntegerField(
+        source="value.network_timeout",
+        required=False,
+        default=30,
+        min_value=5,
+        max_value=120,
+    )
+
+    class Meta:
+        model = GlobalSettings
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
+        ]
+        read_only_fields = ["name"]
+
+    def update(self, instance, validated_data):
+        current_value_dict = instance.value if isinstance(instance.value, dict) else {}
+        value_changed = False
+        new_value_dict = validated_data.get("value", {})
+
+        for field_name, field_instance in self.fields.items():
+            if field_name in self.Meta.read_only_fields:
+                continue
+            if not hasattr(
+                field_instance, "source"
+            ) or not field_instance.source.startswith("value."):
+                continue
+
+            if field_name in new_value_dict:
                 source_key = field_instance.source.split(".")[-1]
                 new_flag_value = new_value_dict[field_name]
 

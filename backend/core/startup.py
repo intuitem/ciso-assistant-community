@@ -45,6 +45,8 @@ READER_PERMISSIONS_LIST = [
     "view_contract",
     "view_storedlibrary",
     "view_threat",
+    "view_securityadvisory",
+    "view_cwe",
     "view_vulnerability",
     "view_user",
     "view_actor",
@@ -70,6 +72,7 @@ READER_PERMISSIONS_LIST = [
     "view_businessimpactanalysis",
     "view_assetassessment",
     "view_escalationthreshold",
+    "view_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # privacy,
@@ -129,6 +132,8 @@ APPROVER_PERMISSIONS_LIST = [
     "change_validationflow",
     "view_asset",
     "view_threat",
+    "view_securityadvisory",
+    "view_cwe",
     "view_vulnerability",
     "view_referencecontrol",
     "view_folder",
@@ -172,6 +177,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_businessimpactanalysis",
     "view_assetassessment",
     "view_escalationthreshold",
+    "view_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # campaigns,
@@ -227,6 +233,8 @@ ANALYST_PERMISSIONS_LIST = [
     "add_solution",
     "add_contract",
     "add_threat",
+    "add_securityadvisory",
+    "add_cwe",
     "add_vulnerability",
     "change_appliedcontrol",
     "change_asset",
@@ -253,6 +261,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_solution",
     "change_contract",
     "change_threat",
+    "change_securityadvisory",
+    "change_cwe",
     "add_validationflow",
     "view_validationflow",
     "change_validationflow",
@@ -273,6 +283,8 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_solution",
     "delete_contract",
     "delete_threat",
+    "delete_securityadvisory",
+    "delete_cwe",
     "view_appliedcontrol",
     "view_asset",
     "view_complianceassessment",
@@ -285,6 +297,8 @@ ANALYST_PERMISSIONS_LIST = [
     "view_policy",
     "view_perimeter",
     "view_referencecontrol",
+    "view_securityadvisory",
+    "view_cwe",
     "view_vulnerability",
     "view_representative",
     "view_requirementassessment",
@@ -382,6 +396,9 @@ ANALYST_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    "add_doraincidentreport",
+    "view_doraincidentreport",
+    "change_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # campaigns,
@@ -539,6 +556,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_solution",
     "add_contract",
     "add_threat",
+    "add_securityadvisory",
+    "add_cwe",
     "change_appliedcontrol",
     "change_asset",
     "change_complianceassessment",
@@ -565,6 +584,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_solution",
     "change_contract",
     "change_threat",
+    "change_securityadvisory",
+    "change_cwe",
     "add_validationflow",
     "view_validationflow",
     "change_validationflow",
@@ -591,6 +612,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_solution",
     "delete_contract",
     "delete_threat",
+    "delete_securityadvisory",
+    "delete_cwe",
     "view_appliedcontrol",
     "view_asset",
     "view_complianceassessment",
@@ -606,6 +629,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_policy",
     "view_perimeter",
     "view_referencecontrol",
+    "view_securityadvisory",
+    "view_cwe",
     "view_representative",
     "view_requirementassessment",
     "view_requirementmapping",
@@ -716,6 +741,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    "add_doraincidentreport",
+    "view_doraincidentreport",
+    "change_doraincidentreport",
+    "delete_doraincidentreport",
     "view_assetclass",
     "view_assetcapability",
     # campaigns,
@@ -901,6 +930,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_threat",
     "change_threat",
     "delete_threat",
+    "add_securityadvisory",
+    "view_securityadvisory",
+    "change_securityadvisory",
+    "delete_securityadvisory",
+    "add_cwe",
+    "view_cwe",
+    "change_cwe",
+    "delete_cwe",
     "add_referencecontrol",
     "view_referencecontrol",
     "change_referencecontrol",
@@ -1177,6 +1214,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    "add_doraincidentreport",
+    "view_doraincidentreport",
+    "change_doraincidentreport",
+    "delete_doraincidentreport",
     # campaigns,
     "add_campaign",
     "view_campaign",
@@ -1637,6 +1678,49 @@ def startup(sender: AppConfig, **kwargs):
             )
     except Exception as e:
         logger.error(f"Failed to reset global settings: {e}")
+
+    vulnerability_sla_defaults = {
+        "critical": 15,
+        "high": 30,
+        "medium": 90,
+        "low": 180,
+        "info": 365,
+    }
+    try:
+        sla_settings, sla_created = GlobalSettings.objects.get_or_create(
+            name="vulnerability-sla",
+            defaults={
+                "value": vulnerability_sla_defaults,
+                "is_published": True,
+                "folder": Folder.get_root_folder(),
+            },
+        )
+        if not sla_created and not sla_settings.value:
+            sla_settings.value = vulnerability_sla_defaults
+            sla_settings.save(update_fields=["value"])
+    except Exception as e:
+        logger.error(f"Failed to create vulnerability SLA settings: {e}")
+
+    sec_intel_defaults = {
+        "kev_feed_enabled": False,
+        "epss_feed_enabled": False,
+        "nvd_enrich_enabled": False,
+        "network_timeout": 30,
+    }
+    try:
+        sec_intel_settings, created = GlobalSettings.objects.get_or_create(
+            name="sec-intel-feeds",
+            defaults={
+                "value": sec_intel_defaults,
+                "is_published": True,
+                "folder": Folder.get_root_folder(),
+            },
+        )
+        if not created and not sec_intel_settings.value:
+            sec_intel_settings.value = sec_intel_defaults
+            sec_intel_settings.save(update_fields=["value"])
+    except Exception as e:
+        logger.error(f"Failed to create sec-intel-feeds settings: {e}")
 
     # Pre-warm the chat knowledge graph (reads YAML files, no DB needed)
     if getattr(settings, "ENABLE_CHAT", False):

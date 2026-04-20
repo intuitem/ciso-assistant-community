@@ -21,7 +21,7 @@ from statistics import mean
 import math
 
 from .models import *
-from .utils import build_answers_dict, build_questions_dict, camel_case
+from .utils import build_answers_dict, camel_case
 
 DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
 
@@ -44,6 +44,7 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "--": "#CCC",
     "to_do": "#BFDBFE",
     "active": "#46D39A",
+    "degraded": "#F97316",
     "deprecated": "#E55759",
     "in_progress": "#5470c6",
     "in_review": "#BBF7D0",
@@ -294,7 +295,7 @@ def get_sorted_requirement_nodes(
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
                 "weight": node.weight if node.weight else 1,
-                "questions": build_questions_dict(node),
+                "questions": node.get_questions_translated,
                 "answers": build_answers_dict(req_as.answers.all()) if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
@@ -338,7 +339,7 @@ def get_sorted_requirement_nodes(
                     else None,
                     "max_score": max_score if child_req_as else None,
                     "weight": child.weight if child.weight else 1,
-                    "questions": build_questions_dict(child),
+                    "questions": child.get_questions_translated,
                     "answers": build_answers_dict(child_req_as.answers.all())
                     if child_req_as
                     else None,
@@ -369,6 +370,115 @@ def get_sorted_requirement_nodes(
     top_level_nodes.sort(key=lambda x: x.order_id)
 
     tree = get_sorted_requirement_nodes_rec(top_level_nodes)
+    return tree
+
+
+def annotate_tree_with_aggregated_scores(
+    tree: dict[str, dict], compliance_assessment
+) -> dict[str, dict]:
+    """
+    Walk the requirement tree and annotate each node with `aggregated_score`
+    (and optionally `aggregated_documentation_score`) according to the
+    compliance_assessment's score_calculation_method.
+
+    For AVG: weighted average of leaf scores in the subtree.
+    For SUM: sum of (score * weight) of leaves in the subtree.
+    For AVG_OF_AVG: weighted average of direct children's aggregated scores
+    (recursive) — matches the per-node `computed[urn]` value inside
+    ComplianceAssessment._compute_score_for_field. The overall global score
+    (ComplianceAssessment.get_global_score) uses a different top-level rule
+    for structural roots and is computed separately.
+
+    Leaf requirements are included only when is_scored is True, the node is
+    assessable, and the result is not N/A.
+    """
+    method = compliance_assessment.score_calculation_method
+    show_doc = compliance_assessment.show_documentation_score
+
+    def walk(node: dict) -> None:
+        children = node.get("children") or {}
+
+        # Recurse first so children have their aggregates computed.
+        for child in children.values():
+            walk(child)
+
+        if not children:
+            is_assessed = (
+                node.get("is_scored")
+                and node.get("assessable")
+                and node.get("result") != "not_applicable"
+            )
+            weight = node.get("weight") or 1
+            if is_assessed:
+                score_val = node.get("score") or 0
+                node["aggregated_score"] = score_val
+                node["_leaf_weighted_score"] = score_val * weight
+                node["_leaf_weight"] = weight
+                if show_doc:
+                    doc_val = node.get("documentation_score") or 0
+                    node["aggregated_documentation_score"] = doc_val
+                    node["_leaf_weighted_doc"] = doc_val * weight
+            else:
+                node["_leaf_weighted_score"] = 0
+                node["_leaf_weighted_doc"] = 0
+                node["_leaf_weight"] = 0
+            return
+
+        leaf_weighted_score = sum(
+            c.get("_leaf_weighted_score", 0) for c in children.values()
+        )
+        leaf_weighted_doc = sum(
+            c.get("_leaf_weighted_doc", 0) for c in children.values()
+        )
+        leaf_weight = sum(c.get("_leaf_weight", 0) for c in children.values())
+        node["_leaf_weighted_score"] = leaf_weighted_score
+        node["_leaf_weighted_doc"] = leaf_weighted_doc
+        node["_leaf_weight"] = leaf_weight
+
+        if method == ComplianceAssessment.CalculationMethod.AVG_OF_AVG:
+            total_weighted = 0.0
+            total_weighted_doc = 0.0
+            total_child_weight = 0
+            for child in children.values():
+                child_agg = child.get("aggregated_score")
+                if child_agg is None:
+                    continue
+                cw = child.get("weight") or 1
+                total_weighted += child_agg * cw
+                if show_doc:
+                    total_weighted_doc += (
+                        child.get("aggregated_documentation_score") or 0
+                    ) * cw
+                total_child_weight += cw
+            if total_child_weight > 0:
+                node["aggregated_score"] = total_weighted / total_child_weight
+                if show_doc:
+                    node["aggregated_documentation_score"] = (
+                        total_weighted_doc / total_child_weight
+                    )
+        elif method == ComplianceAssessment.CalculationMethod.SUM:
+            if leaf_weight > 0:
+                node["aggregated_score"] = leaf_weighted_score
+                if show_doc:
+                    node["aggregated_documentation_score"] = leaf_weighted_doc
+        else:
+            if leaf_weight > 0:
+                node["aggregated_score"] = leaf_weighted_score / leaf_weight
+                if show_doc:
+                    node["aggregated_documentation_score"] = (
+                        leaf_weighted_doc / leaf_weight
+                    )
+
+    def cleanup(node: dict) -> None:
+        node.pop("_leaf_weighted_score", None)
+        node.pop("_leaf_weighted_doc", None)
+        node.pop("_leaf_weight", None)
+        for child in (node.get("children") or {}).values():
+            cleanup(child)
+
+    for root in tree.values():
+        walk(root)
+        cleanup(root)
     return tree
 
 
@@ -595,6 +705,7 @@ def applied_control_per_status(user: User):
         AppliedControl.Status.ACTIVE: "#46D39A",
         AppliedControl.Status.IN_PROGRESS: "#392F5A",
         AppliedControl.Status.ON_HOLD: "#F4D06F",
+        AppliedControl.Status.DEGRADED: "#F97316",
         AppliedControl.Status.DEPRECATED: "#E55759",
     }
     (
@@ -1277,6 +1388,7 @@ def get_metrics(user: User, folder_id):
             "in_progress": viewable_controls.filter(status="in_progress").count(),
             "on_hold": viewable_controls.filter(status="on_hold").count(),
             "active": viewable_controls.filter(status="active").count(),
+            "degraded": viewable_controls.filter(status="degraded").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
             "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
             "eta_missed": missed_eta_count,
