@@ -389,7 +389,8 @@
 								hideFilters={true}
 								URLModel="evidences"
 								expectedCount={countMasked(data.requirementAssessment.evidences)}
-								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
+								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
+									.id}"
 							/>
 						</div>
 					</Tabs.Content>
