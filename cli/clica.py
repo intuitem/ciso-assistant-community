@@ -414,6 +414,15 @@ DATA_WIZARD_COMMANDS = [
         "requires_matrix": False,
     },
     {
+        "command": "import_metric_instances",
+        "model_type": "MetricInstance",
+        "help": "Import metric instances using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
         "command": "import_tprm",
         "model_type": "TPRM",
         "help": "Import third-party records using the Data Wizard backend.",
