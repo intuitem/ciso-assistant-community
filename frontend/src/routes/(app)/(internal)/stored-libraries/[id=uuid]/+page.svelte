@@ -15,6 +15,7 @@
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	let { data } = $props();
 	let loading = $state({ form: false, library: '' });
@@ -171,49 +172,45 @@
 		</span>
 		<div class="space-y-1">
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.description()}</strong>: {data.library.description}
+				<MarkdownRenderer content={`**${m.description()}**: ${data.library.description}`} />
 			</p>
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.provider()}</strong>: {data.library.provider}
+				<MarkdownRenderer content={`**${m.provider()}**: ${data.library.provider}`} />
 			</p>
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.packager()}</strong>: {data.library.packager}
+				<MarkdownRenderer content={`**${m.packager()}**: ${data.library.packager}`} />
 			</p>
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.version()}</strong>: {data.library.version}
+				<MarkdownRenderer content={`**${m.version()}**: ${data.library.version}`} />
 			</p>
 			{#if data.library.publication_date}
 				<p class="text-md leading-5 text-gray-700">
-					<strong>{m.publicationDate()}</strong>: {formatDateOrDateTime(
-						data.library.publication_date,
-						getLocale()
-					)}
+					<MarkdownRenderer
+						content={`**${m.publicationDate()}**: ${formatDateOrDateTime(
+							data.library.publication_date,
+							getLocale()
+						)}`}
+					/>
 				</p>
 			{/if}
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
-					<strong>{m.dependencies()}</strong>:
+					<MarkdownRenderer
+						content={`**${m.dependencies()}**:\n${data.library.dependencies.map((dep) => `* ${dep.name}`).join('\n')}`}
+					/>
 				</p>
-				<ul class="list-disc list-inside">
-					{#each data.library.dependencies as dependency}
-						<li>{dependency.name}</li>
-					{/each}
-				</ul>
 			{/if}
 			{#if data.library.copyright}
 				<p class="text-md leading-5 text-gray-700">
-					<strong>{m.copyright()}</strong>: {data.library.copyright}
+					<MarkdownRenderer content={`**${m.copyright()}**: ${data.library.copyright}`} />
 				</p>
 			{/if}
 			{#if data.library.filtering_labels && data.library.filtering_labels.length > 0}
 				<p class="text-md leading-5 text-gray-700">
-					<strong>{m.labels()}</strong>:
+					<MarkdownRenderer
+						content={`**${m.labels()}**:\n${data.library.filtering_labels.map((label) => `* ${label.name}`).join('\n')}`}
+					/>
 				</p>
-				<ul class="list-disc list-inside">
-					{#each data.library.filtering_labels as label}
-						<li>{label.label}</li>
-					{/each}
-				</ul>
 			{/if}
 		</div>
 	</div>

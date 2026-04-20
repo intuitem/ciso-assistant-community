@@ -54,6 +54,7 @@
 		type ModalComponent,
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		// Props
@@ -984,9 +985,9 @@
 																? (value ?? '-')
 																: safeTranslate(value ?? '-')}
 															{#if displayValue?.length > 300}
-																{displayValue.slice(0, 300)}...
+																<MarkdownRenderer content={displayValue.slice(0, 300)} />
 															{:else}
-																{displayValue}
+																<MarkdownRenderer content={displayValue.slice(0, 300)} />
 															{/if}
 														{/if}
 														{@render badge?.(key, row)}

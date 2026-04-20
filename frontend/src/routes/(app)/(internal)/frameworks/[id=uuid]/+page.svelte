@@ -93,13 +93,15 @@
 										{/each}
 									{:else if key === 'implementation_groups_definition'}
 										{#each Object.entries(value) as [_, definition]}
-											<div>
-												** {definition.ref_id} **
-												{definition.name}
-												{#if Object.hasOwn(definition, 'description') && definition.description}
-													: {definition.description}
-												{/if}
-											</div>
+											<MarkdownRenderer
+												content={'* **' +
+													definition.ref_id +
+													'**\n\t' +
+													definition.name +
+													(Object.hasOwn(definition, 'description') && definition.description
+														? ' : ' + definition.description
+														: '')}
+											/>
 										{/each}
 									{:else if Array.isArray(value)}
 										<ul>
