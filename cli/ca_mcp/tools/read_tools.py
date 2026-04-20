@@ -802,17 +802,40 @@ async def get_security_exceptions(folder: str = None):
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
-        result += "|ID|Name|State|Expiry Date|Folder|\n"
-        result += "|---|---|---|---|---|\n"
+        result += "|ID|Ref ID|Name|Severity|Status|Approver|Owners|Expiration Date|Associated Objects|Folder|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|\n"
 
         for exception in exceptions:
             exception_id = exception.get("id", "N/A")
+            ref_id = exception.get("ref_id") or "N/A"
             name = exception.get("name", "N/A")
-            state = exception.get("state", "N/A")
-            expiry_date = exception.get("expiry_date") or "N/A"
+            severity = exception.get("severity") or "N/A"
+            status = exception.get("status", "N/A")
+            approver = exception.get("approver")
+            approver_str = (
+                approver.get("str", "N/A")
+                if isinstance(approver, dict)
+                else (approver or "N/A")
+            )
+            owners = exception.get("owners") or []
+            owners_str = (
+                ", ".join(
+                    o.get("str", str(o)) if isinstance(o, dict) else str(o)
+                    for o in owners
+                )
+                if owners
+                else "N/A"
+            )
+            expiration_date = exception.get("expiration_date") or "N/A"
+            associated_objects_count = exception.get("associated_objects_count")
+            if associated_objects_count is None:
+                associated_objects_count = "N/A"
             folder = (exception.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{exception_id}|{name}|{state}|{expiry_date}|{folder}|\n"
+            result += (
+                f"|{exception_id}|{ref_id}|{name}|{severity}|{status}|{approver_str}|"
+                f"{owners_str}|{expiration_date}|{associated_objects_count}|{folder}|\n"
+            )
 
         return result
     except Exception as e:
@@ -1320,10 +1343,12 @@ async def get_vulnerabilities(
             vuln_id = vuln.get("id", "N/A")
             name = vuln.get("name", "N/A")
             ref_id = vuln.get("ref_id") or "-"
-            vuln_status = STATUS_LABELS.get(vuln.get("status", "--"), vuln.get("status", "--"))
+            vuln_status = STATUS_LABELS.get(
+                vuln.get("status", "--"), vuln.get("status", "--")
+            )
             sev_val = vuln.get("severity", -1)
             vuln_severity = SEVERITY_LABELS.get(sev_val, str(sev_val))
-            vuln_folder = (vuln.get("folder") or {})
+            vuln_folder = vuln.get("folder") or {}
             if isinstance(vuln_folder, dict):
                 vuln_folder = vuln_folder.get("str", vuln_folder.get("name", "-"))
             else:
@@ -1337,7 +1362,9 @@ async def get_vulnerabilities(
             "Use get_vulnerability with a specific ID to retrieve full details, or create_vulnerability to add a new one",
         )
     except Exception as e:
-        return error_response("Error", str(e), "Check parameters and retry", retry_allowed=True)
+        return error_response(
+            "Error", str(e), "Check parameters and retry", retry_allowed=True
+        )
 
 
 async def get_vulnerability(vulnerability_id: str):
@@ -1359,7 +1386,9 @@ async def get_vulnerability(vulnerability_id: str):
 
         sev_val = vuln.get("severity", -1)
         vuln_severity = SEVERITY_LABELS.get(sev_val, str(sev_val))
-        vuln_status = STATUS_LABELS.get(vuln.get("status", "--"), vuln.get("status", "--"))
+        vuln_status = STATUS_LABELS.get(
+            vuln.get("status", "--"), vuln.get("status", "--")
+        )
 
         result = f"## Vulnerability: {vuln.get('name', 'N/A')}\n\n"
         result += f"**ID:** {vuln.get('id', 'N/A')}\n"
@@ -1380,7 +1409,9 @@ async def get_vulnerability(vulnerability_id: str):
 
         applied_controls = vuln.get("applied_controls", [])
         if applied_controls:
-            result += f"**Applied Controls:** {', '.join(str(c) for c in applied_controls)}\n"
+            result += (
+                f"**Applied Controls:** {', '.join(str(c) for c in applied_controls)}\n"
+            )
 
         assets = vuln.get("assets", [])
         if assets:
@@ -1396,4 +1427,6 @@ async def get_vulnerability(vulnerability_id: str):
             "Use create_vulnerability to add a new vulnerability or get_vulnerabilities to list all",
         )
     except Exception as e:
-        return error_response("Error", str(e), "Check the vulnerability ID and retry", retry_allowed=True)
+        return error_response(
+            "Error", str(e), "Check the vulnerability ID and retry", retry_allowed=True
+        )
