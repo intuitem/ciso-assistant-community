@@ -269,28 +269,25 @@
 	}
 
 	// --- Progress (question-based when framework has questions, else result-based) ---
-	// Auto-question RAs count as 1 virtual question (visible=1, answered if respondent_alignment set)
+	// Framework-less assessable RAs count as 1 virtual auto-question for both roles,
+	// so respondent and auditor see the same progress.
+	function isFrameworklessAssessableItem(item: { data: Record<string, any> }): boolean {
+		if (!item.data.requirement) return false;
+		const q = item.data.requirement.questions;
+		return (item.data.visible_questions ?? 0) === 0 && (q == null || Object.keys(q).length === 0);
+	}
 	const totalQuestions = $derived(
 		assessableItems.reduce((sum, item) => {
 			const visible = item.data.visible_questions ?? 0;
-			if (
-				visible === 0 &&
-				shouldShowAutoQuestion(item.data.requirement, viewerRole, fw, complianceAssessment)
-			) {
-				return sum + 1;
-			}
+			if (isFrameworklessAssessableItem(item)) return sum + 1;
 			return sum + visible;
 		}, 0)
 	);
 	const answeredQuestions = $derived(
 		assessableItems.reduce((sum, item) => {
 			const answered = item.data.answered_questions ?? 0;
-			if (
-				(item.data.visible_questions ?? 0) === 0 &&
-				shouldShowAutoQuestion(item.data.requirement, viewerRole, fw, complianceAssessment) &&
-				item.data.respondent_alignment
-			) {
-				return sum + 1;
+			if (isFrameworklessAssessableItem(item)) {
+				return sum + (item.data.respondent_alignment ? 1 : 0);
 			}
 			return sum + answered;
 		}, 0)
@@ -318,12 +315,7 @@
 		const answered = item.data.answered_questions ?? 0;
 		// Framework-less assessable RA: reflect respondent_alignment state
 		// for both respondent and auditor views so the ToC is accurate for everyone.
-		const isFrameworklessAssessable =
-			visible === 0 &&
-			item.data.requirement &&
-			(item.data.requirement.questions == null ||
-				Object.keys(item.data.requirement.questions).length === 0);
-		if (isFrameworklessAssessable) {
+		if (isFrameworklessAssessableItem(item)) {
 			return item.data.respondent_alignment ? '#22c55e' : '#ef4444';
 		}
 		if (visible === 0) return '#22c55e'; // no questions = complete (green)
