@@ -1319,6 +1319,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_indexeddocument",
     "change_indexeddocument",
     "delete_indexeddocument",
+    "add_serviceaccountkey",
+    "view_serviceaccountkey",
+    "change_serviceaccountkey",
+    "delete_serviceaccountkey",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

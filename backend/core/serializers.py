@@ -1598,6 +1598,7 @@ class UserReadSerializer(BaseModelSerializer):
             "has_mfa_enabled",
             "expiry_date",
             "is_superuser",
+            "is_service_account",
         ]
 
 

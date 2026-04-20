@@ -821,6 +821,33 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
 		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'service_account',
+				urlModel: 'service-account-keys',
+				disableEdit: true
+			}
+		],
+		filters: []
+	},
+	'service-account-keys': {
+		endpointUrl: 'iam/service-account-keys',
+		name: 'serviceaccountkey',
+		localName: 'serviceAccountKey',
+		localNamePlural: 'serviceAccountKeys',
+		verboseName: 'API key',
+		verboseNamePlural: 'API keys',
+		foreignKeyFields: [],
+		filters: []
+	},
+	'service-accounts': {
+		endpointUrl: 'iam/service-accounts',
+		name: 'serviceaccount',
+		localName: 'serviceAccount',
+		localNamePlural: 'serviceAccounts',
+		verboseName: 'Service account',
+		verboseNamePlural: 'Service accounts',
+		foreignKeyFields: [],
 		filters: []
 	},
 	teams: {

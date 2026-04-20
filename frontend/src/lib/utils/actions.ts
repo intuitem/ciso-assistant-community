@@ -215,7 +215,9 @@ export async function defaultDeleteFormAction({
 	urlModel: string;
 }) {
 	const formData = await event.request.formData();
-	const schema = z.object({ id: z.string().uuid() });
+	const schema = z.object({
+		id: urlModel === 'service-account-keys' ? z.string() : z.string().uuid()
+	});
 	const deleteForm = await superValidate(formData, zod(schema));
 	const model = getModelInfo(urlModel);
 

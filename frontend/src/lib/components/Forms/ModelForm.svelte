@@ -82,6 +82,7 @@
 	import DashboardWidgetForm from './ModelForm/DashboardWidgetForm.svelte';
 	import DashboardTextWidgetForm from './ModelForm/DashboardTextWidgetForm.svelte';
 	import DashboardBuiltinWidgetForm from './ModelForm/DashboardBuiltinWidgetForm.svelte';
+	import ServiceAccountKeyForm from './ModelForm/ServiceAccountKeyForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -501,6 +502,8 @@
 			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'users'}
 			<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
+		{:else if URLModel === 'service-account-keys'}
+			<ServiceAccountKeyForm {form} {model} {cacheLocks} {formDataCache} />
 		{:else if URLModel === 'teams'}
 			<TeamForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
 		{:else if URLModel === 'sso-settings'}

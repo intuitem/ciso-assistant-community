@@ -1709,6 +1709,14 @@ export const listViewFields = {
 			is_third_party: USER_IS_THIRD_PARTY_FILTER
 		}
 	},
+	'service-accounts': {
+		head: ['email', 'name', 'description', 'isActive', 'activeKeys', 'expiryDate'],
+		body: ['email', 'slug', 'description', 'is_active', 'active_key_count', 'expiry_date']
+	},
+	'service-account-keys': {
+		head: ['name', 'isActive', 'createdAt', 'expiryDate'],
+		body: ['name', 'is_active', 'created_at', 'expiry_date']
+	},
 	teams: {
 		head: ['name', 'description', 'teamEmail'],
 		body: ['name', 'description', 'team_email']

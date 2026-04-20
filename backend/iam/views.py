@@ -4,7 +4,6 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
-from django.db import models
 from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
@@ -30,18 +29,38 @@ from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
+from core.permissions import IsAdministrator
 from .models import Folder, PersonalAccessToken, Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
     PersonalAccessTokenReadSerializer,
     ResetPasswordConfirmSerializer,
+    ServiceAccountCreateSerializer,
+    ServiceAccountKeyCreateSerializer,
+    ServiceAccountKeyReadSerializer,
+    ServiceAccountReadSerializer,
+    ServiceAccountUpdateSerializer,
     SetPasswordSerializer,
 )
 
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
+
+
+class ServiceAccountTokenAuthentication(TokenAuthentication):
+    """Blocks requests from service accounts whose PAT key has is_active=False."""
+
+    def authenticate_credentials(self, token):
+        from rest_framework.exceptions import AuthenticationFailed
+
+        user, auth_token = super().authenticate_credentials(token)
+        if user.is_service_account:
+            pat = PersonalAccessToken.objects.filter(auth_token=auth_token).first()
+            if pat is None or not pat.is_active:
+                raise AuthenticationFailed("This API key has been disabled.")
+        return user, auth_token
 
 
 class LoginView(KnoxLoginView):
@@ -52,6 +71,11 @@ class LoginView(KnoxLoginView):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
+        if user.is_service_account:
+            return Response(
+                {"error": "Service accounts cannot log in via the login form."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         login(request, user)
         return super(LoginView, self).post(request, format=None)
 
@@ -282,7 +306,9 @@ class PasswordResetView(views.APIView):
     @method_decorator(ensure_csrf_cookie)
     def post(self, request):
         email = request.data["email"]  # type: ignore
-        associated_user = User.objects.filter(email__iexact=email).first()
+        associated_user = User.objects.filter(
+            email__iexact=email, is_service_account=False
+        ).first()
         if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
             if associated_user is not None and associated_user.is_local:
                 try:
@@ -484,3 +510,282 @@ class RevokeOtherSessionsView(views.APIView):
             {"revoked_sessions": deleted_count},
             status=status.HTTP_200_OK,
         )
+
+
+# ---------------------------------------------------------------------------
+# Service Account views
+# ---------------------------------------------------------------------------
+
+
+class ServiceAccountListCreateView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def get(self, request):
+        from core.pagination import CustomLimitOffsetPagination
+        from django.db.models import Count, Q
+
+        qs = (
+            User.objects.filter(is_service_account=True)
+            .annotate(
+                active_key_count=Count(
+                    "auth_token_set__personalaccesstoken",
+                    filter=Q(auth_token_set__personalaccesstoken__is_active=True),
+                )
+            )
+            .order_by("email")
+        )
+        search = request.query_params.get("search")
+        if search:
+            qs = qs.filter(email__icontains=search)
+        paginator = CustomLimitOffsetPagination()
+        page = paginator.paginate_queryset(qs, request)
+        serializer = ServiceAccountReadSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def post(self, request):
+        serializer = ServiceAccountCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        sa = serializer.save()
+        logger.info("service account created", sa=sa.email, by=request.user.email)
+        return Response(
+            ServiceAccountReadSerializer(sa).data, status=status.HTTP_201_CREATED
+        )
+
+
+class ServiceAccountDetailView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def _get_sa(self, pk):
+        try:
+            return User.objects.get(pk=pk, is_service_account=True)
+        except User.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        sa = self._get_sa(pk)
+        if sa is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(ServiceAccountReadSerializer(sa).data)
+
+    def patch(self, request, pk):
+        sa = self._get_sa(pk)
+        if sa is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ServiceAccountUpdateSerializer(sa, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        logger.info("service account updated", sa=sa.email, by=request.user.email)
+        return Response(ServiceAccountReadSerializer(sa).data)
+
+    def delete(self, request, pk):
+        sa = self._get_sa(pk)
+        if sa is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        email = sa.email
+        sa.delete()
+        logger.info("service account deleted", sa=email, by=request.user.email)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ServiceAccountKeyListCreateView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def _get_sa(self, sa_pk):
+        try:
+            return User.objects.get(pk=sa_pk, is_service_account=True)
+        except User.DoesNotExist:
+            return None
+
+    def get(self, request, sa_pk):
+        sa = self._get_sa(sa_pk)
+        if sa is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        keys = PersonalAccessToken.objects.filter(auth_token__user=sa).order_by(
+            "auth_token__created"
+        )
+        return Response(ServiceAccountKeyReadSerializer(keys, many=True).data)
+
+    def post(self, request, sa_pk):
+        sa = self._get_sa(sa_pk)
+        if sa is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data.copy()
+        data["service_account"] = str(sa_pk)
+        serializer = ServiceAccountKeyCreateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        expiry_days = serializer.validated_data["expiry_days"]
+        auth_token_instance, token_value = get_token_model().objects.create(
+            user=sa, expiry=timedelta(days=expiry_days)
+        )
+        key = PersonalAccessToken.objects.create(
+            auth_token=auth_token_instance,
+            name=serializer.validated_data["name"],
+        )
+        logger.info(
+            "service account key created",
+            sa=sa.email,
+            key=key.name,
+            by=request.user.email,
+        )
+        data = ServiceAccountKeyReadSerializer(key).data
+        data["token"] = token_value
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
+class ServiceAccountKeyDetailView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def _get_key(self, sa_pk, key_pk):
+        try:
+            return PersonalAccessToken.objects.select_related("auth_token__user").get(
+                pk=key_pk,
+                auth_token__user__pk=sa_pk,
+                auth_token__user__is_service_account=True,
+            )
+        except PersonalAccessToken.DoesNotExist:
+            return None
+
+    def patch(self, request, sa_pk, key_pk):
+        key = self._get_key(sa_pk, key_pk)
+        if key is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        if "is_active" in request.data:
+            key.is_active = request.data["is_active"]
+            key.save(update_fields=["is_active"])
+        logger.info(
+            "service account key updated",
+            sa=key.auth_token.user.email,
+            key=key.name,
+            by=request.user.email,
+        )
+        return Response(ServiceAccountKeyReadSerializer(key).data)
+
+    def delete(self, request, sa_pk, key_pk):
+        key = self._get_key(sa_pk, key_pk)
+        if key is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        sa_email = key.auth_token.user.email
+        key_name = key.name
+        key.auth_token.delete()  # cascades to PersonalAccessToken
+        logger.info(
+            "service account key revoked",
+            sa=sa_email,
+            key=key_name,
+            by=request.user.email,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ServiceAccountKeyFlatListCreateView(views.APIView):
+    """Flat endpoint: GET /iam/service-account-keys/?service_account=<uuid>, POST to create."""
+
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def get(self, request):
+        sa_id = request.query_params.get("service_account")
+        qs = PersonalAccessToken.objects.select_related("auth_token__user").filter(
+            auth_token__user__is_service_account=True
+        )
+        if sa_id:
+            qs = qs.filter(auth_token__user__pk=sa_id)
+        from core.pagination import CustomLimitOffsetPagination
+
+        paginator = CustomLimitOffsetPagination()
+        page = paginator.paginate_queryset(qs.order_by("auth_token__created"), request)
+        serializer = ServiceAccountKeyReadSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def post(self, request):
+        serializer = ServiceAccountKeyCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        sa = serializer.validated_data["service_account"]
+        expiry_days = serializer.validated_data["expiry_days"]
+        auth_token_instance, token_value = get_token_model().objects.create(
+            user=sa, expiry=timedelta(days=expiry_days)
+        )
+        key = PersonalAccessToken.objects.create(
+            auth_token=auth_token_instance,
+            name=serializer.validated_data["name"],
+        )
+        logger.info(
+            "service account key created",
+            sa=sa.email,
+            key=key.name,
+            by=request.user.email,
+        )
+        data = ServiceAccountKeyReadSerializer(key).data
+        data["token"] = token_value
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
+class ServiceAccountKeyFlatDetailView(views.APIView):
+    """Flat detail: GET/PATCH/DELETE /iam/service-account-keys/<int:pk>/"""
+
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def _get_key(self, pk):
+        try:
+            return PersonalAccessToken.objects.select_related("auth_token__user").get(
+                pk=pk, auth_token__user__is_service_account=True
+            )
+        except PersonalAccessToken.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        key = self._get_key(pk)
+        if key is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(ServiceAccountKeyReadSerializer(key).data)
+
+    def patch(self, request, pk):
+        key = self._get_key(pk)
+        if key is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        updated = []
+        if "is_active" in request.data:
+            val = request.data["is_active"]
+            key.is_active = (
+                val
+                if isinstance(val, bool)
+                else str(val).lower() not in ("false", "0", "no")
+            )
+            updated.append("is_active")
+        if "name" in request.data:
+            new_name = request.data["name"]
+            if (
+                new_name != key.name
+                and PersonalAccessToken.objects.filter(
+                    auth_token__user=key.auth_token.user, name=new_name
+                ).exists()
+            ):
+                return Response(
+                    {
+                        "name": "A key with this name already exists for this service account."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            key.name = new_name
+            updated.append("name")
+        if updated:
+            key.save(update_fields=updated)
+        return Response(ServiceAccountKeyReadSerializer(key).data)
+
+    def put(self, request, pk):
+        return self.patch(request, pk)
+
+    def delete(self, request, pk):
+        key = self._get_key(pk)
+        if key is None:
+            return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        sa_email = key.auth_token.user.email
+        key_name = key.name
+        key.auth_token.delete()  # cascades to PersonalAccessToken
+        logger.info(
+            "service account key revoked",
+            sa=sa_email,
+            key=key_name,
+            by=request.user.email,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1483,6 +1483,35 @@ export const AuthTokenCreateSchema = z.object({
 	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
+export const ServiceAccountCreateSchema = z.object({
+	slug: z
+		.string()
+		.min(1)
+		.max(64)
+		.regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/, {
+			message: 'Lowercase alphanumeric and hyphens only, no leading/trailing hyphens'
+		}),
+	description: z.string().max(500).optional().default(''),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+});
+
+export const ServiceAccountUpdateSchema = z.object({
+	is_active: z.boolean().optional(),
+	description: z.string().max(500).optional(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+});
+
+export const ServiceAccountKeyCreateSchema = z.object({
+	service_account: z.string().uuid().optional(),
+	name: z.string().min(1).max(64),
+	expiry_days: z.number().int().min(1).max(365).default(30)
+});
+
+export const ServiceAccountKeyUpdateSchema = z.object({
+	name: z.string().min(1).max(64).optional(),
+	is_active: z.boolean().optional()
+});
+
 export const ElementaryActionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1741,7 +1770,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
 	teams: teamSchema,
 	'managed-documents': ManagedDocumentSchema,
-	'document-revisions': DocumentRevisionSchema
+	'document-revisions': DocumentRevisionSchema,
+	'service-account-keys': ServiceAccountKeyCreateSchema
 };
 
 export const modelSchema = (model: string) => {
