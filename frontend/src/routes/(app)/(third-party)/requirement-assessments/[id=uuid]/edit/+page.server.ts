@@ -59,8 +59,9 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const schema = modelSchema(URLModel);
-	object.evidences = object.evidences.map((evidence) => evidence.id);
-	object.applied_controls = object.applied_controls.map((applied_control) => applied_control.id);
+	object.evidences = object.evidences?.map((evidence) => evidence.id) ?? [];
+	object.applied_controls =
+		object.applied_controls?.map((applied_control) => applied_control.id) ?? [];
 	object.security_exceptions =
 		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
 	object.nextRequirementAssessmentId = nextRequirementAssessmentId;

@@ -268,7 +268,13 @@
 		showSecurityExceptions
 	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
 
-	let group = $state(page.data.user.is_third_party ? 'evidences' : 'applied_controls');
+	function pickDefaultTab(): string {
+		if (showAppliedControls && !page.data.user.is_third_party) return 'applied_controls';
+		if (showEvidences) return 'evidences';
+		if (showSecurityExceptions) return 'security_exceptions';
+		return 'applied_controls';
+	}
+	let group = $state(pickDefaultTab());
 
 	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = $state(false);

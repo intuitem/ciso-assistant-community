@@ -6,6 +6,7 @@
 	import {
 		displayScoreColor,
 		formatScoreValue,
+		getFieldVisibility,
 		getRequirementTitle,
 		getSecureRedirect
 	} from '$lib/utils/helpers';
@@ -77,7 +78,23 @@
 
 	let expandedInferences = $state(false);
 
-	let group = $state(page.data.user.is_third_party ? 'evidence' : 'applied_controls');
+	const fw = data.requirementAssessment.compliance_assessment.framework;
+	const complianceAssessment = data.requirementAssessment.compliance_assessment;
+	const viewerRole: 'respondent' | 'auditor' = (data.viewerRole ?? 'auditor') as
+		| 'respondent'
+		| 'auditor';
+	const { showAppliedControls, showEvidences } = getFieldVisibility(
+		fw,
+		complianceAssessment,
+		viewerRole
+	);
+
+	function pickDefaultTab(): string {
+		if (showAppliedControls && !page.data.user.is_third_party) return 'applied_controls';
+		if (showEvidences) return 'evidence';
+		return 'applied_controls';
+	}
+	let group = $state(pickDefaultTab());
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow-sm">
@@ -318,55 +335,61 @@
 			{/if}
 		</div>
 	{/if}
-	<div>
-		<Tabs
-			value={group}
-			onValueChange={(e) => {
-				group = e.value;
-			}}
-		>
-			<Tabs.List>
-				{#if !page.data.user.is_third_party}
-					<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
+	{#if showAppliedControls || showEvidences}
+		<div>
+			<Tabs
+				value={group}
+				onValueChange={(e) => {
+					group = e.value;
+				}}
+			>
+				<Tabs.List>
+					{#if showAppliedControls && !page.data.user.is_third_party}
+						<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
+					{/if}
+					{#if showEvidences}
+						<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
+					{/if}
+					<Tabs.Indicator />
+				</Tabs.List>
+				{#if showAppliedControls && !page.data.user.is_third_party}
+					<Tabs.Content value="applied_controls">
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementAppliedControlHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['applied-controls']}
+								hideFilters={true}
+								URLModel="applied-controls"
+								expectedCount={countMasked(data.requirementAssessment.applied_controls)}
+								baseEndpoint="/applied-controls?requirement_assessments={page.data
+									.requirementAssessment.id}"
+							/>
+						</div>
+					</Tabs.Content>
 				{/if}
-				<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
-				<Tabs.Indicator />
-			</Tabs.List>
-			<Tabs.Content value="applied_controls">
-				{#if !page.data.user.is_third_party}
-					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-						<i class="fa-solid fa-info-circle"></i>
-						<p>{m.requirementAppliedControlHelpText()}</p>
-					</div>
-					<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-						<ModelTable
-							source={data.tables['applied-controls']}
-							hideFilters={true}
-							URLModel="applied-controls"
-							expectedCount={countMasked(data.requirementAssessment.applied_controls)}
-							baseEndpoint="/applied-controls?requirement_assessments={page.data
-								.requirementAssessment.id}"
-						/>
-					</div>
+				{#if showEvidences}
+					<Tabs.Content value="evidence">
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementEvidenceHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['evidences']}
+								hideFilters={true}
+								URLModel="evidences"
+								expectedCount={countMasked(data.requirementAssessment.evidences)}
+								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
+							/>
+						</div>
+					</Tabs.Content>
 				{/if}
-			</Tabs.Content>
-			<Tabs.Content value="evidence">
-				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-					<i class="fa-solid fa-info-circle"></i>
-					<p>{m.requirementEvidenceHelpText()}</p>
-				</div>
-				<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-					<ModelTable
-						source={data.tables['evidences']}
-						hideFilters={true}
-						URLModel="evidences"
-						expectedCount={countMasked(data.requirementAssessment.evidences)}
-						baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
-					/>
-				</div>
-			</Tabs.Content>
-		</Tabs>
-	</div>
+			</Tabs>
+		</div>
+	{/if}
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
 		<h1 class="font-semibold text-sm">{m.questions()}</h1>
 		{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
