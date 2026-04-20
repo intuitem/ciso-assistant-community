@@ -704,6 +704,15 @@
 				{#if overflowCount > 0 && chipIdx === maxVisibleChips}
 					<span use:styleAsBadge>+{overflowCount}</span>
 				{:else}
+					{@const coupleParts =
+						translateOptions && field === 'ro_to_couple' && typeof option.label === 'string'
+							? option.label.split(' - ')
+							: null}
+					{@const displayLabel = coupleParts
+						? `${safeTranslate(coupleParts[0])} - ${coupleParts.slice(1).join(' - ')}`
+						: translateOptions
+							? (option.translatedLabel ?? option.label ?? option)
+							: (option.label ?? option)}
 					{#if option.infoString?.position === 'prefix'}
 						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
 					{/if}
@@ -719,16 +728,9 @@
 							{/each}
 						</span>
 					{/if}
-					{#if translateOptions && option}
-						{#if field === 'ro_to_couple'}
-							{@const [firstPart, ...restParts] = option.label.split(' - ')}
-							{safeTranslate(firstPart)} - {restParts.join(' - ')}
-						{:else}
-							{option.translatedLabel}
-						{/if}
-					{:else}
-						{option.label || option}
-					{/if}
+					<span class="inline-block max-w-[30ch] truncate align-bottom" title={displayLabel}>
+						{displayLabel}
+					</span>
 					{#if option.infoString?.position === 'suffix'}
 						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
 					{/if}

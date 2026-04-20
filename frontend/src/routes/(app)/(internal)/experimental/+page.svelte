@@ -26,12 +26,6 @@
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
 	<Article
-		title="Control Plan"
-		desc="Now available in Operations > Control Plan"
-		link="/tasks-review"
-		tags={['tasks', 'planning', 'review', 'released']}
-	/>
-	<Article
 		title={m.matrixEditor()}
 		desc={m.matrixEditorDescription()}
 		link="/experimental/matrix-editor"
