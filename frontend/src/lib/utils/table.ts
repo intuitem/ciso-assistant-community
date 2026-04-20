@@ -3491,14 +3491,14 @@ export const headData = (model: urlModel) =>
 		return obj;
 	}, {});
 
-/** Example output: ["folder", "lc_status", "filtering_labels"] */
+/** Example output: ['folder', 'lc_status', 'filtering_labels'] */
 export const filterKeys = new Set<string>(
 	Object.values(listViewFields)
 		.filter((field) => field.hasOwnProperty('filters'))
-		.flatMap((field) => Object.keys(field.filters))
+		.flatMap((field) => Object.keys(field.filters ?? {}))
 );
 
-/** Example fields: "folder", "lc_status", "filtering_labels", etc. */
+/** Example fields: 'folder', 'lc_status', 'filtering_labels', etc. */
 export const fieldSet = new Set<string>(
 	Object.values(listViewFields)
 		.filter((field) => field.hasOwnProperty('body'))

@@ -35,7 +35,7 @@ interface ParamsThirdPartyUrlmodelId extends BaseParams {
 export const urlmodelIdGET: RequestHandler<ParamsUrlmodelId> = async ({ fetch, params, url }) => {
 	const model = getModelInfo(params.model);
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? params.model}/${params.id}/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
+		url.searchParams.size > 0 ? '?' + url.searchParams.toString() : ''
 	}`;
 
 	const res = await fetch(endpoint);
@@ -229,7 +229,7 @@ export function genericUrlmodelIdFieldGET(
 	field: string
 ): typeof urlmodelIdFieldGET {
 	return async (event) =>
-		urlmodelIdGET({
+		urlmodelIdFieldGET({
 			...event,
 			params: { ...event.params, model: urlModel, field }
 		});
