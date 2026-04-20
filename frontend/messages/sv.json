@@ -1129,5 +1129,10 @@
 	"serverConfigurationError": "Serverkonfigurationsfel",
 	"libraryLoadFailed": "Biblioteket kunde inte laddas",
 	"sortAscending": "Sortera A → Z",
-	"sortDescending": "Sortera Z → A"
+	"sortDescending": "Sortera Z → A",
+	"confirmModalMessagePlural": "Är du säker? Denna åtgärd kommer permanent att påverka följande objekt",
+	"syncAppliedControlsMessage": "De tillämpade kontroller som använder denna referenskontroll kommer att synkroniseras med den. Observera att detta inte kan ångras.",
+	"syncToAppliedControl": "Synkronisera med tillämpad kontroll",
+	"syncToReferenceControl": "Synkronisera med referenskontroll",
+	"exportEcosystem": "ekosystemexport (XLSX)"
 }

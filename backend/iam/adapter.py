@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.mfa.adapter import DefaultMFAAdapter
 from allauth.socialaccount.adapter import (
     DefaultSocialAccountAdapter,
     MultipleObjectsReturned,
@@ -56,6 +57,27 @@ class AccountAdapter(DefaultAccountAdapter):
             return None
 
 
+class MFAAdapter(DefaultMFAAdapter):
+    def is_mfa_enabled(self, user, types=None) -> bool:
+        from allauth.account.authentication import get_authentication_records
+        from allauth.core import context
+
+        # Skip local MFA challenge for SSO logins — the IdP already
+        # authenticated the user.
+        records = get_authentication_records(context.request)
+        if any(r.get("method") == "socialaccount" for r in records):
+            return False
+
+        return super().is_mfa_enabled(user, types=types)
+
+    def get_public_key_credential_rp_entity(self):
+        rp_id = urlparse(settings.CISO_ASSISTANT_URL).hostname
+        return {
+            "id": rp_id,
+            "name": "CISO Assistant",
+        }
+
+
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     @staticmethod
     def _find_email_in_dict(data, _depth=0, _max_depth=5):
@@ -91,9 +113,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         extra = sociallogin.account.extra_data
         logger.debug(
             "pre_social_login: extra_data received",
-            extra_data_keys=list(extra.keys()),
-            has_userinfo="userinfo" in extra,
-            has_id_token="id_token" in extra,
+            extra_data=extra,
             provider=sociallogin.account.provider,
         )
         # Primary lookup (legacy format)
@@ -135,23 +155,37 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             return Response(
                 {"message": "Email not provided."}, status=HTTP_401_UNAUTHORIZED
             )
-        logger.info(
-            "pre_social_login: resolved email for user lookup",
-            email_domain=email_address.split("@")[-1]
-            if "@" in email_address
-            else "unknown",
+        logger.debug(
+            "pre_social_login: resolved email from IdP",
+            idp_email=email_address,
+            idp_email_repr=repr(email_address),
             provider=sociallogin.account.provider,
         )
         try:
             user = User.objects.get(email__iexact=email_address)
+            logger.debug(
+                "pre_social_login: user matched",
+                idp_email=email_address,
+                db_email=user.email,
+                user_id=str(user.id),
+                is_active=user.is_active,
+            )
             sociallogin.user = user
             sociallogin.connect(request, user)
+            logger.info(
+                "pre_social_login: social account connected",
+                provider=sociallogin.account.provider,
+                user_id=str(user.id),
+            )
         except User.DoesNotExist:
             logger.error(
                 "pre_social_login: user not found",
-                email_domain=email_address.split("@")[-1]
-                if "@" in email_address
-                else "unknown",
+                provider=sociallogin.account.provider,
+            )
+            logger.debug(
+                "pre_social_login: user not found - check DB for this email",
+                idp_email=email_address,
+                idp_email_repr=repr(email_address),
                 provider=sociallogin.account.provider,
             )
             return Response(

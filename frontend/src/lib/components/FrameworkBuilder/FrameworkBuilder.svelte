@@ -450,6 +450,38 @@
 								></textarea>
 							</div>
 
+							<!-- URN namespace -->
+							<div>
+								<label class="block">
+									<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
+										>URN namespace</span
+									>
+									<input
+										type="text"
+										value={$frameworkStore.urn_namespace ?? 'custom'}
+										placeholder="custom"
+										pattern="[a-zA-Z0-9_-]+"
+										class="mt-1 w-48 text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {$frameworkStore.editing_version >
+										1
+											? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+											: ''}"
+										readonly={$frameworkStore.editing_version > 1}
+										onblur={(e) => {
+											if ($frameworkStore.editing_version > 1) return;
+											const val = e.currentTarget.value.replace(/[^a-zA-Z0-9_-]/g, '') || 'custom';
+											builder.updateFramework({ urn_namespace: val });
+										}}
+									/>
+								</label>
+								<p class="text-[10px] text-gray-400 mt-0.5">
+									Organization in URN prefix (urn:<b>{$frameworkStore.urn_namespace ?? 'custom'}</b
+									>:risk:...).
+									{#if $frameworkStore.editing_version > 1}
+										Locked after first publish.
+									{/if}
+								</p>
+							</div>
+
 							<!-- Scoring settings -->
 							<div class="space-y-1.5">
 								<button
@@ -722,7 +754,7 @@
 										class="text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
 										onchange={(e) => builder.setBaseLocale(e.currentTarget.value)}
 									>
-										{#each frameworkLocales as code}
+										{#each supportedLocales as code}
 											<option value={code}>{localeLabel(code)}</option>
 										{/each}
 									</select>
@@ -823,6 +855,10 @@
 						<h3 class="text-lg font-medium text-gray-600 mb-1">No sections yet</h3>
 						<p class="text-sm text-gray-400 mb-4">
 							Start building your framework by adding a section.
+						</p>
+						<p class="text-xs text-gray-400 mb-4 max-w-md mx-auto">
+							Sections group your requirements into chapters or domains. Each section becomes a
+							top-level category in assessments.
 						</p>
 						<button
 							type="button"

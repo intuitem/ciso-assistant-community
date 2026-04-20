@@ -13,6 +13,8 @@ import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
+import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
+import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -554,6 +556,18 @@ export const LINKED_MODELS_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'linkedModels',
 		optionsEndpoint: 'validation-flows/linked_models',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const APPLIED_CONTROL_LINKED_MODELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'linkedModels',
+		optionsEndpoint: 'applied-controls/linked_models',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
@@ -1234,6 +1248,24 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'security-advisories',
+		label: 'securityAdvisory',
+		multiple: true
+	}
+};
+
+export const CWE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'cwes',
+		label: 'cwe',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
@@ -1283,12 +1315,24 @@ export const listViewFields = {
 		}
 	},
 	vulnerabilities: {
-		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'sla',
+			'dueDate',
+			'applied_controls',
+			'folder',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'status',
 			'severity',
+			'state',
+			'due_date',
 			'applied_controls',
 			'folder',
 			'filtering_labels'
@@ -1297,7 +1341,10 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
 			status: VULNERABILITY_STATUS_FILTER,
-			severity: VULNERABILITY_SEVERITY_FILTER
+			severity: VULNERABILITY_SEVERITY_FILTER,
+			assets: ASSET_FILTER,
+			security_advisories: SECURITY_ADVISORY_FILTER,
+			cwes: CWE_FILTER
 		}
 	},
 	'risk-assessments': {
@@ -1338,6 +1385,57 @@ export const listViewFields = {
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
 			},
 			library: LIBRARY_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'security-advisories': {
+		head: [
+			'ref_id',
+			'name',
+			'source',
+			'description',
+			'cvssBaseScore',
+			'epssScore',
+			'isActivelyExploited',
+			'publishedDate',
+			'domain',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'source',
+			'description',
+			'cvss_base_score',
+			'epss_score',
+			'is_actively_exploited',
+			'published_date',
+			'folder',
+			'filtering_labels'
+		],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			source: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'security-advisories/source',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'source',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	cwes: {
+		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -1451,6 +1549,7 @@ export const listViewFields = {
 			'owner',
 			'controlImpact',
 			'effort',
+			'linkedModels',
 			'labels'
 		],
 		body: [
@@ -1467,6 +1566,7 @@ export const listViewFields = {
 			'owner',
 			'control_impact',
 			'effort',
+			'linked_models',
 			'filtering_labels'
 		],
 		filters: {
@@ -1482,7 +1582,8 @@ export const listViewFields = {
 			reference_control: REFERENCE_CONTROL_FILTER,
 			eta__lte: undefined,
 			is_assigned: IS_ASSIGNED_FILTER,
-			owner: OWNER_FILTER
+			owner: OWNER_FILTER,
+			linked_models: APPLIED_CONTROL_LINKED_MODELS_FILTER
 		}
 	},
 	policies: {
@@ -1906,6 +2007,27 @@ export const listViewFields = {
 		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'impactOn', 'justification'],
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
+	'dora-incident-reports': {
+		head: [
+			'incident',
+			'incidentSubmission',
+			'reportCurrency',
+			'submittingEntity',
+			'folder',
+			'createdAt'
+		],
+		body: [
+			'incident',
+			'incident_submission',
+			'report_currency',
+			'submitting_entity',
+			'folder',
+			'created_at'
+		],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	processings: {
 		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
@@ -2291,6 +2413,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'description',
 			'findings_assessment',
 			'severity',
 			'priority',
@@ -2302,6 +2425,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'description',
 			'findings_assessment',
 			'severity',
 			'priority',
@@ -2799,17 +2923,29 @@ export const contextMenuActions = {
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
 	'operational-scenarios': [{ component: SelectObject, props: {} }],
-	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }],
+	vulnerabilities: [
+		{ component: VulnerabilityChangeStatus, props: {} },
+		{ component: VulnerabilityChangeSeverity, props: {} }
+	]
 };
 
 // Batch action configuration
 export interface BatchActionConfig {
-	type: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
+	type:
+		| 'delete'
+		| 'change_field'
+		| 'change_m2m'
+		| 'add_m2m'
+		| 'remove_m2m'
+		| 'change_folder'
+		| 'group';
 	label: string;
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
 	multiSelect?: boolean;
+	children?: BatchActionConfig[];
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
@@ -2829,12 +2965,42 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'applied-controls/priority'
 		},
 		{
+			type: 'change_field',
+			label: 'changeCsfFunction',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'csf_function',
+			optionsEndpoint: 'applied-controls/csf_function'
+		},
+		{
 			type: 'change_m2m',
 			label: 'changeOwner',
 			icon: 'fa-solid fa-user-pen',
 			field: 'owner',
 			optionsEndpoint: 'actors',
 			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
 		},
 		{
 			type: 'change_folder',
@@ -2983,6 +3149,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			multiSelect: true
 		},
 		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
+		},
+		{
 			type: 'change_folder',
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
@@ -3090,6 +3279,31 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'status',
 			optionsEndpoint: 'vulnerabilities/status'
 		},
+		{
+			type: 'change_field',
+			label: 'changeSeverity',
+			icon: 'fa-solid fa-arrow-up-wide-short',
+			field: 'severity',
+			optionsEndpoint: 'vulnerabilities/severity'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'security-advisories': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	cwes: [
 		{
 			type: 'change_folder',
 			label: 'changeDomain',

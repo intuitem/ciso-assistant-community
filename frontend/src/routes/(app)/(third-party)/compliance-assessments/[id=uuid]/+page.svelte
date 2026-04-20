@@ -364,7 +364,6 @@
 			props: {
 				_form: data.form,
 				id: id,
-				debug: false,
 				URLModel: 'compliance-assessments',
 				formAction: action,
 				bodyComponent: List,
@@ -372,7 +371,7 @@
 					items: Object.values(requirementAssessmentsSync.changes).map(
 						({ str, changes }) =>
 							`${str}: ${changes
-								.map((change) => `${safeTranslate(change.current)} 🠲 ${safeTranslate(change.new)}`)
+								.map((change) => `${safeTranslate(change.current)} ➡️ ${safeTranslate(change.new)}`)
 								.join(' | ')}`
 					),
 					message: m.theFollowingChangesWillBeApplied()
@@ -384,9 +383,7 @@
 			component: modalComponent,
 			// Data
 			title: m.syncToAppliedControls(),
-			body: m.syncToAppliedControlsMessage({
-				count: data.compliance_assessment.framework.reference_controls.length //change this
-			}),
+			body: m.syncToAppliedControlsMessage(),
 			response: (r: boolean) => {
 				syncingToActionsIsLoading = r;
 			}
@@ -519,29 +516,6 @@
 		</div>
 	{/if}
 
-	{#if compliance_assessment.computed_outcome}
-		<div
-			class="flex items-center gap-2 px-4 py-3 rounded-lg border"
-			style="background-color: {compliance_assessment.computed_outcome.color ??
-				'#6b7280'}10; border-color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}30"
-		>
-			{#if compliance_assessment.computed_outcome.color}
-				<span
-					class="w-3 h-3 rounded-full shrink-0"
-					style="background-color: {compliance_assessment.computed_outcome.color}"
-				></span>
-			{/if}
-			<span
-				class="text-sm font-semibold"
-				style="color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}"
-				>{compliance_assessment.computed_outcome.annotation ??
-					compliance_assessment.computed_outcome.label ??
-					compliance_assessment.computed_outcome.ref_id ??
-					compliance_assessment.computed_outcome.result}</span
-			>
-		</div>
-	{/if}
-
 	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
@@ -640,6 +614,38 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
+				{#if compliance_assessment.framework.outcomes_definition?.length}
+					<div>
+						<div class="text-sm font-medium text-gray-800">{safeTranslate('outcomes')}</div>
+						<div class="flex flex-wrap gap-1.5 mt-1">
+							{#each compliance_assessment.framework.outcomes_definition as rule}
+								{@const isActive =
+									compliance_assessment.computed_outcome &&
+									rule.ref_id in compliance_assessment.computed_outcome}
+								<span
+									class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border"
+									class:font-semibold={isActive}
+									class:text-gray-800={isActive}
+									class:bg-white={isActive}
+									class:border-gray-300={isActive}
+									class:shadow-sm={isActive}
+									class:font-normal={!isActive}
+									class:text-gray-400={!isActive}
+									class:bg-gray-50={!isActive}
+									class:border-gray-200={!isActive}
+									class:opacity-50={!isActive}
+								>
+									<span
+										class="w-2 h-2 rounded-full shrink-0 translate-y-px"
+										style="background-color: {rule.color ?? '#d1d5db'}"
+										class:opacity-40={!isActive}
+									></span>
+									{rule.annotation ?? rule.ref_id}
+								</span>
+							{/each}
+						</div>
+					</div>
+				{/if}
 				{#if page.data?.featureflags?.validation_flows}
 					{#key compliance_assessment.validation_flows}
 						<ValidationFlowsSection validationFlows={compliance_assessment.validation_flows} />
@@ -753,6 +759,14 @@
 											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 											>... {m.asWord()}</a
 										>
+										{#if data.compliance_assessment.framework?.urn === 'urn:intuitem:risk:framework:ccb-cyfun2025'}
+											<a
+												href="/compliance-assessments/{data.compliance_assessment
+													.id}/export/cyfun-xlsx"
+												class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+												>... {m.asCyFunExcel()}</a
+											>
+										{/if}
 									{/if}
 									<a
 										href="/compliance-assessments/{data.compliance_assessment.id}/export"

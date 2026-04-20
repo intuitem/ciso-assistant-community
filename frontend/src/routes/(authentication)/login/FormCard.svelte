@@ -27,11 +27,13 @@
 	const modalStore: ModalStore = getModalStore();
 
 	function modalMFAAuthenticate(): void {
+		const mfaTypes: string[] = form?.mfaFlow?.types ?? ['totp'];
 		const modalComponent: ModalComponent = {
 			ref: MfaAuthenticateModal,
 			props: {
 				_form: data.mfaAuthenticateForm,
-				formAction: '?/mfaAuthenticate'
+				formAction: '?/mfaAuthenticate',
+				mfaTypes
 			}
 		};
 		const modal: ModalSettings = {

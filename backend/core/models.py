@@ -26,6 +26,7 @@ from django.core.validators import (
 from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
+from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -344,6 +345,12 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
 
     class Meta:
         abstract = True
+
+    @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
 
     @property
     def get_name_translated(self) -> str:
@@ -1291,6 +1298,7 @@ class LibraryUpdater:
                                 "description",
                                 "order_id",
                                 "implementation_groups",
+                                "visibility_expression",
                             }
                         )
                     )
@@ -1890,42 +1898,49 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     DEFAULT_ENTITY_RELATIONSHIPS = [
         {
             "name": "regulatory_authority",
+            "translations": {"fr": "autorité de régulation"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "partner",
+            "translations": {"fr": "partenaire"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "accreditation_authority",
+            "translations": {"fr": "autorité d’homologation"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "client",
+            "translations": {"fr": "client"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "supplier",
+            "translations": {"fr": "fournisseur"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "contractor",
+            "translations": {"fr": "prestataire"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "other",
+            "translations": {"fr": "autre"},
             "builtin": True,
             "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
@@ -2190,6 +2205,15 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     def frameworks(self):
         return Framework.objects.filter(requirement__reference_controls=self).distinct()
 
+    def get_unsynced_applied_controls_queryset(self) -> QuerySet[AppliedControl]:
+        """Return a `QuerySet` selecting all `AppliedControl` objects linked to this `ReferenceControl` which are not currently synced to it."""
+
+        unsynced_applied_controls_query = self.appliedcontrol_set.exclude(
+            csf_function=self.csf_function,
+            category=self.category,
+        )
+        return unsynced_applied_controls_query
+
 
 class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
     library = models.ForeignKey(
@@ -2302,6 +2326,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         help_text=_(
             "Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'."
         ),
+    )
+    urn_namespace = models.CharField(
+        max_length=50,
+        default="custom",
+        verbose_name=_("URN namespace"),
+        help_text=_("Organization identifier used in the URN prefix."),
     )
     library = models.ForeignKey(
         LoadedLibrary,
@@ -2453,6 +2483,15 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         choices=DisplayMode.choices,
         default=DisplayMode.DEFAULT,
         verbose_name=_("Display mode"),
+    )
+    visibility_expression = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Visibility expression"),
+        help_text=_(
+            "CEL expression that must evaluate to true for this requirement "
+            "to be visible in an assessment."
+        ),
     )
 
     @property
@@ -2652,6 +2691,12 @@ class Question(AbstractBaseModel, FolderMixin):
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
 
+    @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
+
     def __str__(self) -> str:
         return f"{self.ref_id or self.urn}: {self.text or ''}"
 
@@ -2690,6 +2735,12 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
         unique_together = [("question", "urn")]
         verbose_name = _("Question choice")
         verbose_name_plural = _("Question choices")
+
+    @property
+    def node_id(self) -> str | None:
+        from core.utils import extract_node_id
+
+        return extract_node_id(self.urn)
 
     def __str__(self) -> str:
         return f"{self.ref_id or ''}: {self.value or ''}"
@@ -2896,6 +2947,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    link = models.URLField(null=True, blank=True, verbose_name=_("Link"))
 
     fields_to_check = ["name"]
 
@@ -4567,6 +4619,17 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
     is_published = models.BooleanField(_("published"), default=True)
 
+    occurred_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Occurred at")
+    )
+    resolved_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Resolved at")
+    )
+    resolution = models.TextField(null=True, blank=True, verbose_name=_("Resolution"))
+    is_bcp_activated = models.BooleanField(
+        null=True, blank=True, verbose_name=_("BCP activated")
+    )
+
     fields_to_check = ["name", "ref_id"]
 
     class Meta:
@@ -4767,6 +4830,7 @@ class AppliedControl(
         IN_PROGRESS = "in_progress", _("In progress")
         ON_HOLD = "on_hold", _("On hold")
         ACTIVE = "active", _("Active")
+        DEGRADED = "degraded", _("Degraded")
         DEPRECATED = "deprecated", _("Deprecated")
         UNDEFINED = "--", _("Undefined")
 
@@ -4797,7 +4861,18 @@ class AppliedControl(
 
     IMPACT = [(1, "Very Low"), (2, "Low"), (3, "Medium"), (4, "High"), (5, "Very High")]
     MAP_EFFORT = {None: -1, "XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
-    # todo: think about a smarter model for ranking
+
+    INTEGRATION_SYNCABLE_FIELDS: Final[set[str]] = {
+        "name",
+        "description",
+        "status",
+        "priority",
+        "eta",
+        "start_date",
+        "effort",
+        "observation",
+    }
+
     reference_control = models.ForeignKey(
         ReferenceControl,
         on_delete=models.CASCADE,
@@ -4988,22 +5063,11 @@ class AppliedControl(
 
         BuiltinMetricSample.update_or_create_snapshot(self.folder)
 
-    def _get_changed_fields(self, old_instance):
+    def _get_changed_fields(self, old_instance) -> list[str]:
         """Detect which fields changed"""
         changed = []
-        # Check syncable fields only
-        syncable_fields = [
-            "name",
-            "description",
-            "status",
-            "priority",
-            "eta",
-            "start_date",
-            "effort",
-            "observation",
-        ]
 
-        for field in syncable_fields:
+        for field in self.INTEGRATION_SYNCABLE_FIELDS:
             old_val = getattr(old_instance, field)
             new_val = getattr(self, field)
             if old_val != new_val:
@@ -5375,7 +5439,11 @@ class Policy(AppliedControl):
 
 
 class Vulnerability(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    ETADueDateMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
 ):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
@@ -5416,9 +5484,75 @@ class Vulnerability(
         verbose_name="Security exceptions",
         related_name="vulnerabilities",
     )
+    security_advisories = models.ManyToManyField(
+        "sec_intel.SecurityAdvisory",
+        blank=True,
+        verbose_name=_("Security advisories"),
+        related_name="vulnerabilities",
+    )
+    cwes = models.ManyToManyField(
+        "sec_intel.CWE",
+        blank=True,
+        verbose_name=_("CWEs"),
+        related_name="vulnerabilities",
+    )
+    detected_at = models.DateField(
+        null=True, blank=True, verbose_name=_("Detection date")
+    )
+    published_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Publication date")
+    )
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
+
+    def save(self, *args, **kwargs):
+        from datetime import date
+
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            update_fields = set(update_fields)
+
+        is_new = self._state.adding
+        severity_changed = False
+        if not is_new:
+            old = Vulnerability.objects.filter(pk=self.pk).values("severity").first()
+            if old and old["severity"] != self.severity:
+                severity_changed = True
+        # Default detected_at to today on creation
+        if is_new and not self.detected_at:
+            self.detected_at = date.today()
+            if update_fields is not None:
+                update_fields.add("detected_at")
+        if is_new or severity_changed:
+            self._apply_sla_policy()
+            if update_fields is not None:
+                update_fields.add("due_date")
+        if update_fields is not None:
+            kwargs["update_fields"] = list(update_fields)
+        super().save(*args, **kwargs)
+
+    def _apply_sla_policy(self):
+        from datetime import date, timedelta
+
+        from global_settings.models import GlobalSettings
+
+        try:
+            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
+            sla_policy = (
+                sla_settings.value if isinstance(sla_settings.value, dict) else {}
+            )
+        except GlobalSettings.DoesNotExist:
+            return
+        severity_label = self.get_severity_display()
+        days = sla_policy.get(severity_label)
+        if days is not None:
+            sla_anchor = sla_policy.get("sla_anchor", "detected_at")
+            if sla_anchor == "published_date" and self.published_date:
+                anchor = self.published_date
+            else:
+                anchor = self.detected_at or date.today()
+            self.due_date = anchor + timedelta(days=int(days))
 
 
 # historical data
@@ -6512,6 +6646,15 @@ class ComplianceAssessment(Assessment):
         default=CalculationMethod.AVG,
         verbose_name=_("Score Calculation Method"),
     )
+    target_score = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_("Target score"),
+    )
+    anchor_na_to_target = models.BooleanField(
+        default=False,
+        verbose_name=_("Anchor N/A to target score"),
+    )
     auto_sync = models.BooleanField(
         default=False,
         verbose_name=_("Automatic sync to actions"),
@@ -6794,39 +6937,132 @@ class ComplianceAssessment(Assessment):
 
         return changes
 
-    def _compute_score_for_field(self, requirement_assessments, ig, score_field):
+    def _compute_score_for_field(
+        self, requirement_assessments, ig, score_field, na_target=None
+    ):
         """
         Compute a single score value from the given field using the current
         score_calculation_method (AVG, SUM, or AVG_OF_AVG).
 
+        When na_target is set, N/A requirement assessments use that value
+        instead of their actual score.
+
         Returns the computed score, or -1 if no scored requirements exist.
         """
         if self.score_calculation_method == self.CalculationMethod.AVG_OF_AVG:
-            groups = defaultdict(lambda: {"weighted_score": 0, "total_weight": 0})
+            # Build leaf scores from requirement assessments
+            leaf_scores = {}
             for ras in requirement_assessments:
                 if not ig or (ig & set(ras.requirement.implementation_groups or [])):
-                    parent_key = ras.requirement.parent_urn or ras.requirement.urn
-                    weight = ras.requirement.weight if ras.requirement.weight else 1
-                    groups[parent_key]["weighted_score"] += (
-                        getattr(ras, score_field) or 0
-                    ) * weight
-                    groups[parent_key]["total_weight"] += weight
+                    is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    score = (
+                        na_target
+                        if is_na and na_target is not None
+                        else (getattr(ras, score_field) or 0)
+                    )
+                    leaf_scores[ras.requirement.urn] = {
+                        "score": score,
+                        "weight": ras.requirement.weight or 1,
+                    }
 
-            group_averages = [
-                g["weighted_score"] / g["total_weight"]
-                for g in groups.values()
-                if g["total_weight"] > 0
-            ]
-            if not group_averages:
+            if not leaf_scores:
                 return -1
-            return int(sum(group_averages) / len(group_averages) * 10) / 10
+
+            # Fetch the framework tree structure
+            all_nodes = RequirementNode.objects.filter(
+                framework=self.framework
+            ).values_list("urn", "parent_urn", "weight")
+
+            children_map = defaultdict(list)
+            node_weights = {}
+            roots = []
+            all_urns = set()
+            parent_links = {}  # urn -> parent_urn
+            for urn, parent_urn, weight in all_nodes:
+                node_weights[urn] = weight or 1
+                all_urns.add(urn)
+                parent_links[urn] = parent_urn
+            for urn, parent_urn in parent_links.items():
+                if parent_urn and parent_urn in all_urns:
+                    children_map[parent_urn].append(urn)
+                else:
+                    # No parent, or parent_urn references a missing node —
+                    # treat as a root so the subtree is still reachable.
+                    roots.append(urn)
+
+            # Recursively compute weighted averages bottom-up
+            computed = {}
+            visiting = set()
+
+            def compute(urn):
+                if urn in computed:
+                    return computed[urn]
+                if urn in visiting:
+                    # Cycle in the requirement tree — skip to avoid infinite recursion
+                    return None
+                visiting.add(urn)
+
+                if urn in leaf_scores:
+                    computed[urn] = leaf_scores[urn]["score"]
+                    return computed[urn]
+
+                children = children_map.get(urn, [])
+                if not children:
+                    return None
+
+                child_results = []
+                for child_urn in children:
+                    child_score = compute(child_urn)
+                    if child_score is not None:
+                        child_results.append(
+                            (child_score, node_weights.get(child_urn, 1))
+                        )
+
+                if not child_results:
+                    return None
+
+                total_weighted = sum(s * w for s, w in child_results)
+                total_weight = sum(w for _, w in child_results)
+                computed[urn] = total_weighted / total_weight
+                return computed[urn]
+
+            # Compute all nodes bottom-up
+            for root in roots:
+                compute(root)
+
+            # Collect scores for the global average.
+            # If a root is structural (no scored leaves as direct children),
+            # descend one level and flat-average its children (categories).
+            # Otherwise the root itself is the grouping level.
+            category_scores = []
+            for root in roots:
+                children = children_map.get(root, [])
+                has_leaf_children = any(c in leaf_scores for c in children)
+                if has_leaf_children or not children:
+                    if root in computed:
+                        category_scores.append(computed[root])
+                else:
+                    for child_urn in children:
+                        if child_urn in computed:
+                            category_scores.append(computed[child_urn])
+
+            if not category_scores:
+                return -1
+
+            return int(sum(category_scores) / len(category_scores) * 10) / 10
 
         weighted_score = 0
         total_weight = 0
         for ras in requirement_assessments:
             if not ig or (ig & set(ras.requirement.implementation_groups or [])):
                 weight = ras.requirement.weight if ras.requirement.weight else 1
-                weighted_score += (getattr(ras, score_field) or 0) * weight
+                is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
+                score = (
+                    na_target
+                    if is_na and na_target is not None
+                    else (getattr(ras, score_field) or 0)
+                )
+                weighted_score += score * weight
                 total_weight += weight
 
         if total_weight == 0:
@@ -6847,29 +7083,50 @@ class ComplianceAssessment(Assessment):
         - maturity_score: average of the enabled layers
 
         Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG).
+
+        When anchor_na_to_target is True, N/A requirements are included with
+        their scores replaced by the effective target (target_score or max_score).
         Returns a dict with all three values.
         """
-        requirement_assessments_scored = list(
+        qs = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .select_related("requirement")
-            .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
-            .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
         )
+        if self.anchor_na_to_target:
+            # Keep N/A items (they'll be anchored to target), but still
+            # exclude non-N/A items that have is_scored=False.
+            qs = qs.exclude(
+                ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
+                is_scored=False,
+            )
+        else:
+            qs = qs.exclude(is_scored=False).exclude(
+                result=RequirementAssessment.Result.NOT_APPLICABLE
+            )
+
+        requirement_assessments_scored = list(qs)
+
         ig = (
             set(self.selected_implementation_groups)
             if self.selected_implementation_groups
             else None
         )
 
+        na_target = None
+        if self.anchor_na_to_target:
+            na_target = (
+                self.target_score if self.target_score is not None else self.max_score
+            )
+
         impl_score = self._compute_score_for_field(
-            requirement_assessments_scored, ig, "score"
+            requirement_assessments_scored, ig, "score", na_target
         )
 
         doc_score = None
         if self.show_documentation_score:
             doc_score = self._compute_score_for_field(
-                requirement_assessments_scored, ig, "documentation_score"
+                requirement_assessments_scored, ig, "documentation_score", na_target
             )
 
         # Maturity is the average of the enabled layers (ignore -1 / None)
@@ -8141,6 +8398,16 @@ class Answer(AbstractBaseModel, FolderMixin):
             return [c.urn for c in self.selected_choices.all()]
         return []
 
+    def _defer_cel_evaluation(self):
+        ca = self.requirement_assessment.compliance_assessment
+
+        def _run():
+            from core.cel_service import evaluate_outcomes
+
+            evaluate_outcomes(ca)
+
+        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
 
@@ -8157,6 +8424,9 @@ class Answer(AbstractBaseModel, FolderMixin):
                 ca.pk,
                 lambda ca_ref=ca: update_selected_implementation_groups(ca_ref),
             )
+
+        # Trigger CEL outcome evaluation (deduplicated per transaction)
+        self._defer_cel_evaluation()
 
 
 class FindingsAssessment(Assessment):
