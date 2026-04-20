@@ -3778,7 +3778,9 @@ class LoadFileView(APIView):
                 if folder_id is None:
                     results["failed"] += 1
                     results["errors"].append(
-                        {"error": "A folder must be specified when there's no perimeter!"}
+                        {
+                            "error": "A folder must be specified when there's no perimeter!"
+                        }
                     )
                     return results
                 else:
