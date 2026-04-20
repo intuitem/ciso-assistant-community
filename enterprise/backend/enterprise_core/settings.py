@@ -127,10 +127,17 @@ ENABLE_SANDBOX = os.environ.get("ENABLE_SANDBOX", "False").strip().lower() in (
     "yes",
 )
 
+ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
 LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
+logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -238,6 +245,7 @@ INSTALLED_APPS = [
     "auditlog",
     "tailwind",
     "iam",
+    "sec_intel",
     "global_settings",
     "pmbok",
     "ebios_rm",
@@ -246,6 +254,7 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "chat",
     "doc_management",
     "core",
     "cal",
@@ -305,13 +314,22 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
+logger.info("EMAIL_HOST: %s", EMAIL_HOST)
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
+logger.info("EMAIL_PORT: %s", EMAIL_PORT)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_TLS: %s", EMAIL_USE_TLS)
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_SSL: %s", EMAIL_USE_SSL)
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive")
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
+logger.info("EMAIL_HOST_RESCUE: %s", EMAIL_HOST_RESCUE)
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
+logger.info("EMAIL_PORT_RESCUE: %s", EMAIL_PORT_RESCUE)
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
 EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
@@ -319,11 +337,23 @@ EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() i
     "1",
     "yes",
 )
+logger.info("EMAIL_USE_TLS_RESCUE: %s", EMAIL_USE_TLS_RESCUE)
+EMAIL_USE_SSL_RESCUE = os.environ.get("EMAIL_USE_SSL_RESCUE", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_USE_SSL_RESCUE: %s", EMAIL_USE_SSL_RESCUE)
+if EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE:
+    raise ValueError(
+        "EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE are mutually exclusive"
+    )
 EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
     "true",
     "1",
     "yes",
 )
+logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
 
 
 def _build_tls12_context():
@@ -337,6 +367,7 @@ def _build_tls12_context():
 EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
+logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -485,7 +516,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # SQLIte file can be changed, useful for tests
 SQLITE_FILE = os.environ.get("SQLITE_FILE", BASE_DIR / "db/ciso-assistant.sqlite3")
-LIBRARIES_PATH = library_path = BASE_DIR / "library/libraries"
+_lib_path = BASE_DIR / "library/libraries"
+if not _lib_path.is_dir():
+    _lib_path = BASE_DIR.parent.parent / "backend" / "library" / "libraries"
+LIBRARIES_PATH = library_path = _lib_path
 
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
@@ -577,6 +611,13 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
     },
 }
+
+# MFA / WebAuthn settings
+MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
+MFA_PASSKEY_LOGIN_ENABLED = False
+MFA_PASSKEY_SIGNUP_ENABLED = False
+MFA_ADAPTER = "iam.adapter.MFAAdapter"
 
 ROUTES["client-settings"] = {
     "viewset": "enterprise_core.views.ClientSettingsViewSet",

@@ -6,8 +6,8 @@ It checks for mandatory and recommended fields before generating the actual repo
 """
 
 from typing import List, Dict, Any
-from tprm.models import Entity, Contract, Solution
-from tprm.dora_export import IDENTIFIER_PRIORITY
+from tprm.models import Entity, Contract, Solution, SolutionSubcontractor
+from tprm.dora_export import IDENTIFIER_PRIORITY, get_entity_identifier
 from core.models import Asset
 from django.db.models import Q
 import re
@@ -1038,6 +1038,39 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
                 )
                 contract_has_error = True
 
+        # Check that solutions on this contract have dora_ict_service_type set.
+        # c0060 is a PK/typed dimension in b_02.02 (Nullable=No per the DORA
+        # data model) and must not be empty per OneGate protocol §4.6. Solutions
+        # without it produce an empty key column that the XBRL filer rejects.
+        for solution in contract.solutions.all():
+            if business_function_asset_ids:
+                has_biz_fn = solution.assets.filter(
+                    id__in=business_function_asset_ids, is_business_function=True
+                ).exists()
+            else:
+                has_biz_fn = solution.assets.filter(is_business_function=True).exists()
+            if not has_biz_fn:
+                continue
+            if not solution.dora_ict_service_type:
+                results.append(
+                    {
+                        "severity": "warning",
+                        "category": "B_02.02 Contracts",
+                        "message": (
+                            f"Solution '{solution.name}' on contract "
+                            f"'{contract.name}' has no ICT service type. "
+                            f"Column c0060 is a primary key in b_02.02 and "
+                            f"must not be empty — the OneGate filer will "
+                            f"reject the filing."
+                        ),
+                        "field": "dora_ict_service_type",
+                        "object_type": "solutions",
+                        "object_id": str(solution.id),
+                        "object_name": solution.name,
+                    }
+                )
+                contract_has_error = True
+
         if contract_has_error:
             contracts_with_errors += 1
 
@@ -1329,6 +1362,127 @@ def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
                 "severity": "ok",
                 "category": "Supply Chain (B_05.02)",
                 "message": f"All {solutions.count()} supply-chain solutions have ICT service type set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
+def lint_subcontracting_chains() -> List[Dict[str, Any]]:
+    """
+    Validate SolutionSubcontractor chains for b_05.02 / b_05.01 integrity.
+
+    Checks:
+      1. Every subcontractor has a legal identifier. Without one, the ROI emits
+         "0" as c0030 / c0060 / c0010, and multiple zero-identifier subcontractors
+         collapse into a single b_05.01 row, breaking rule 807 (FK to c0010).
+         Severity: error.
+      2. No duplicate subcontractor in the same chain (belt-and-braces on top
+         of the DB unique constraint). Severity: warning.
+      3. Subcontractor is not the solution's own direct provider (self-loop).
+         Redundant with the model's clean() but makes misuse visible on data
+         imported by management commands that bypass validation. Severity: error.
+      4. Chain rank is >= 2. Redundant with clean(), defensive for DB-level
+         writes that skipped validation. Severity: error.
+
+    Category: "Supply Chain (B_05.02)" (same bucket as lint_supply_chain_solutions
+    so the existing dashboard aggregates them together).
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # Scope: chains on solutions attached to non-draft, non-dora_exclude contracts
+    # with a provider. Same scope as generate_b_05_02_supply_chains.
+    chains = (
+        SolutionSubcontractor.objects.filter(
+            solution__contracts__provider_entity__isnull=False,
+        )
+        .exclude(solution__contracts__status=Contract.Status.DRAFT)
+        .exclude(solution__contracts__dora_exclude=True)
+        .select_related("subcontractor", "solution", "solution__provider_entity")
+        .distinct()
+    )
+
+    # Materialize once to avoid repeated DB round-trips.
+    chain_list = list(chains)
+    if not chain_list:
+        return results
+
+    # Single pass over all rows — apply all rules per row.
+    seen_per_solution: Dict[Any, set] = {}
+    for sc in chain_list:
+        # Rule 1: subcontractor has a legal identifier
+        code, _, _ = get_entity_identifier(sc.subcontractor)
+        if not code:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Supply Chain (B_05.02)",
+                    "message": (
+                        f"Subcontractor '{sc.subcontractor.name}' in chain of "
+                        f"solution '{sc.solution.name}' has no legal identifier "
+                        f"(LEI / EUID / VAT / ...). b_05.01 and b_05.02 need a "
+                        f"valid identifier to satisfy the c0030/c0060/c0010 "
+                        f"foreign keys (EBA rule 807)."
+                    ),
+                    "field": "legal_identifiers",
+                    "object_type": "entities",
+                    "object_id": str(sc.subcontractor.id),
+                    "object_name": sc.subcontractor.name,
+                }
+            )
+
+        # Rule 2: no duplicate subcontractor within a chain
+        bucket = seen_per_solution.setdefault(sc.solution_id, set())
+        if sc.subcontractor_id in bucket:
+            results.append(
+                {
+                    "severity": "warning",
+                    "category": "Supply Chain (B_05.02)",
+                    "message": (
+                        f"Subcontractor '{sc.subcontractor.name}' appears more "
+                        f"than once in the chain of solution '{sc.solution.name}'."
+                    ),
+                    "field": "subcontractor",
+                    "object_type": "solution_subcontractors",
+                    "object_id": str(sc.id),
+                    "object_name": (f"{sc.solution.name} → {sc.subcontractor.name}"),
+                }
+            )
+        else:
+            bucket.add(sc.subcontractor_id)
+
+        # Rule 3: subcontractor != direct provider (self-loop)
+        if sc.solution.provider_entity_id == sc.subcontractor_id:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Supply Chain (B_05.02)",
+                    "message": (
+                        f"Solution '{sc.solution.name}' has its own direct "
+                        f"provider '{sc.subcontractor.name}' in the "
+                        f"subcontracting chain. The direct provider is implicit "
+                        f"(rank 1); a subcontractor must be a different entity."
+                    ),
+                    "field": "subcontractor",
+                    "object_type": "solution_subcontractors",
+                    "object_id": str(sc.id),
+                    "object_name": (f"{sc.solution.name} → {sc.subcontractor.name}"),
+                }
+            )
+
+    if not any(r["severity"] in ("error", "warning") for r in results):
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Supply Chain (B_05.02)",
+                "message": f"All {len(chain_list)} subcontracting rows are valid",
                 "field": None,
                 "object_type": None,
                 "object_id": None,
@@ -1711,6 +1865,7 @@ def lint_dora_roi() -> Dict[str, Any]:
     results.extend(lint_b_02_02_contracts())
     results.extend(lint_solutions())
     results.extend(lint_supply_chain_solutions())
+    results.extend(lint_subcontracting_chains())
     results.extend(lint_provider_entities())
     results.extend(lint_cross_table_consistency())
     results.extend(lint_conditional_fields())

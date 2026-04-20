@@ -1,6 +1,6 @@
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from rest_framework import serializers
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from django.conf import settings
 from core.models import ComplianceAssessment, Framework
 
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
@@ -8,12 +8,25 @@ from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
 from django.contrib.auth import get_user_model
-from tprm.models import Entity, EntityAssessment, Representative, Solution, Contract
+from tprm.models import (
+    Entity,
+    EntityAssessment,
+    Representative,
+    Solution,
+    SolutionSubcontractor,
+    Contract,
+)
 from django.utils.translation import gettext_lazy as _
 
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+
+# Sentinel used to distinguish "client omitted this field" from "client sent an
+# empty array" in nested chain writes. Must be a unique object — not None, [],
+# or any value a client could legitimately send.
+_CHAIN_UNSET = object()
 
 User = get_user_model()
 
@@ -28,6 +41,8 @@ class EntityReadSerializer(BaseModelSerializer):
     legal_identifiers = serializers.SerializerMethodField()
     default_criticality = serializers.ReadOnlyField()
     filtering_labels = FieldsRelatedField(many=True)
+    subcontracts_count = serializers.SerializerMethodField()
+    subcontracts_usage = serializers.SerializerMethodField()
 
     def get_legal_identifiers(self, obj):
         """Format legal identifiers as a readable string for display"""
@@ -36,6 +51,28 @@ class EntityReadSerializer(BaseModelSerializer):
         return "\n".join(
             [f"{key}: {value}" for key, value in obj.legal_identifiers.items()]
         )
+
+    def get_subcontracts_count(self, obj):
+        """Number of solutions where this entity is declared as a subcontractor.
+
+        Powers the Entity detail view's "Used as subcontractor in N solutions"
+        panel and the disabled-delete-button tooltip.
+        """
+        return obj.subcontracts.count()
+
+    def get_subcontracts_usage(self, obj):
+        """Up to 50 solutions blocking deletion, with parent contract."""
+        rows = obj.subcontracts.select_related("solution").order_by("solution__name")[
+            :50
+        ]
+        return [
+            {
+                "id": str(row.id),
+                "solution_id": str(row.solution_id),
+                "solution_name": row.solution.name,
+            }
+            for row in rows
+        ]
 
     class Meta:
         model = Entity
@@ -299,7 +336,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             email=instance.email,
         ).first()
         if not user:
-            send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+            send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
             try:
                 user = User.objects.create_user(
                     email=instance.email,
@@ -358,6 +395,34 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
         exclude = []
 
 
+class SolutionSubcontractorReadSerializer(BaseModelSerializer):
+    """Nested rows inside SolutionReadSerializer.subcontracting_chain."""
+
+    subcontractor = FieldsRelatedField()
+    recipient = FieldsRelatedField()
+
+    class Meta:
+        model = SolutionSubcontractor
+        fields = ["id", "subcontractor", "recipient"]
+
+
+class SolutionSubcontractorWriteSerializer(serializers.Serializer):
+    """
+    Write shape for nested chain rows. Deliberately NOT a ModelSerializer —
+    `solution` is set by the parent SolutionWriteSerializer from URL context,
+    not accepted from the client. `id` is also ignored; the chain is fully
+    replaced on each PATCH.
+
+    `recipient` is optional — null means "direct provider" (the common case
+    for fan-out entries directly under the provider).
+    """
+
+    subcontractor = serializers.PrimaryKeyRelatedField(queryset=Entity.objects.all())
+    recipient = serializers.PrimaryKeyRelatedField(
+        queryset=Entity.objects.all(), required=False, allow_null=True, default=None
+    )
+
+
 class SolutionReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     recipient_entity = FieldsRelatedField()
@@ -365,6 +430,9 @@ class SolutionReadSerializer(BaseModelSerializer):
     contracts = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
+    subcontracting_chain = SolutionSubcontractorReadSerializer(
+        many=True, read_only=True
+    )
 
     class Meta:
         model = Solution
@@ -372,9 +440,133 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
+    # The chain is handled manually in create()/update() below. Declared here
+    # so that `initial_data.get("subcontracting_chain")` is the surface we
+    # inspect.
+    subcontracting_chain = SolutionSubcontractorWriteSerializer(
+        many=True, required=False
+    )
+
     def validate_provider_entity(self, value):
         self._ensure_immutable("provider_entity", value)
         return value
+
+    def validate_subcontracting_chain(self, value):
+        """
+        Ensure client-side invariants before hitting the DB:
+          - No duplicate subcontractor within a single write.
+          - Subcontractor != recipient (self-loop).
+          - Every recipient must be one of the submitted subcontractors.
+          - No cycles in the recipient graph.
+          - Subcontractor != direct provider (checked in update/create since
+            only then do we have the bound Solution).
+        """
+        subs = [entry["subcontractor"] for entry in value]
+        sub_ids = {s.id for s in subs}
+        if len(subs) != len(sub_ids):
+            raise serializers.ValidationError(
+                _("A subcontractor cannot appear twice in the same chain.")
+            )
+
+        # Build directed graph: subcontractor_id → recipient_id
+        graph = {}
+        for entry in value:
+            recipient = entry.get("recipient")
+            sub_id = entry["subcontractor"].id
+            if recipient:
+                if sub_id == recipient.id:
+                    raise serializers.ValidationError(
+                        _("A subcontractor cannot be its own recipient.")
+                    )
+                if recipient.id not in sub_ids:
+                    raise serializers.ValidationError(
+                        _(
+                            "Recipient must be one of the submitted "
+                            "subcontractors in the chain."
+                        )
+                    )
+                graph[sub_id] = recipient.id
+
+        # Cycle detection via DFS on the recipient graph.
+        WHITE, GRAY, BLACK = 0, 1, 2
+        color = {sid: WHITE for sid in sub_ids}
+        for start in sub_ids:
+            if color[start] != WHITE:
+                continue
+            stack = [start]
+            while stack:
+                node = stack[-1]
+                if color[node] == WHITE:
+                    color[node] = GRAY
+                    nxt = graph.get(node)
+                    if nxt is not None:
+                        if color[nxt] == GRAY:
+                            raise serializers.ValidationError(
+                                _("The subcontracting chain contains a cycle.")
+                            )
+                        if color[nxt] == WHITE:
+                            stack.append(nxt)
+                            continue
+                color[node] = BLACK
+                stack.pop()
+
+        return value
+
+    def _resolve_direct_provider(self, validated_data, instance):
+        """Pull the direct provider id from the write data, falling back to instance."""
+        provider = validated_data.get("provider_entity")
+        if provider is not None:
+            return provider.id if hasattr(provider, "id") else provider
+        if instance is not None and instance.provider_entity_id is not None:
+            return instance.provider_entity_id
+        return None
+
+    def _replace_chain(self, solution, chain_data, direct_provider_id):
+        """
+        Delete all existing SolutionSubcontractor rows for this solution and
+        bulk-create the new set inside a single atomic transaction.
+
+        Enforces the self-loop rule here (subcontractor != direct provider)
+        because we need the bound solution to resolve it.
+        """
+        for entry in chain_data:
+            if (
+                direct_provider_id is not None
+                and entry["subcontractor"].id == direct_provider_id
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "subcontracting_chain": [
+                            _(
+                                "A subcontractor cannot be the solution's "
+                                "direct provider (rank 1 is implicit)."
+                            )
+                        ]
+                    }
+                )
+
+        with transaction.atomic():
+            SolutionSubcontractor.objects.filter(solution=solution).delete()
+            if chain_data:
+                try:
+                    SolutionSubcontractor.objects.bulk_create(
+                        [
+                            SolutionSubcontractor(
+                                solution=solution,
+                                subcontractor=entry["subcontractor"],
+                                recipient=entry.get("recipient"),
+                            )
+                            for entry in chain_data
+                        ]
+                    )
+                except IntegrityError as exc:
+                    raise serializers.ValidationError(
+                        {
+                            "subcontracting_chain": [
+                                _("Chain modified by another user. Refresh and retry.")
+                            ],
+                        }
+                    ) from exc
 
     def to_internal_value(self, data):
         """Convert None to empty string for CharField DORA fields before validation"""
@@ -395,6 +587,55 @@ class SolutionWriteSerializer(BaseModelSerializer):
             if field in data and data[field] is None:
                 data[field] = ""
         return super().to_internal_value(data)
+
+    def create(self, validated_data):
+        chain_data = validated_data.pop("subcontracting_chain", _CHAIN_UNSET)
+        with transaction.atomic():
+            solution = super().create(validated_data)
+            if chain_data is not _CHAIN_UNSET:
+                self._replace_chain(solution, chain_data, solution.provider_entity_id)
+        self._log_chain_event(solution, chain_data, is_create=True)
+        return solution
+
+    def update(self, instance, validated_data):
+        # Distinguish "omit the field" (leave chain untouched) from "send []"
+        # (explicitly clear). `initial_data` preserves the raw presence signal
+        # even after validated_data.pop() mutations.
+        chain_sent = "subcontracting_chain" in self.initial_data
+        chain_data = validated_data.pop("subcontracting_chain", _CHAIN_UNSET)
+
+        with transaction.atomic():
+            solution = super().update(instance, validated_data)
+            if chain_sent:
+                direct_provider_id = self._resolve_direct_provider(
+                    validated_data, solution
+                )
+                self._replace_chain(
+                    solution,
+                    chain_data if chain_data is not _CHAIN_UNSET else [],
+                    direct_provider_id,
+                )
+        if chain_sent:
+            self._log_chain_event(
+                solution,
+                chain_data if chain_data is not _CHAIN_UNSET else [],
+            )
+        return solution
+
+    def _log_chain_event(self, solution, chain_data, is_create=False):
+        """Emit structured audit log for chain mutations (post-commit)."""
+        if chain_data is _CHAIN_UNSET or chain_data is None:
+            return
+        request = self.context.get("request")
+        user_id = getattr(getattr(request, "user", None), "id", None)
+        logger.info(
+            "solution.subcontracting_chain.updated",
+            solution_id=str(solution.id),
+            user_id=str(user_id) if user_id else None,
+            chain_length=len(chain_data),
+            is_create=is_create,
+            subcontractor_ids=[str(entry["subcontractor"].id) for entry in chain_data],
+        )
 
     class Meta:
         model = Solution

@@ -37,6 +37,11 @@
 					description: m.taskTemplatesDescription()
 				},
 				{
+					field: 'control_plan',
+					label: m.tasksReview(),
+					description: m.controlPlanDescription()
+				},
+				{
 					field: 'xrays',
 					label: m.xRays(),
 					description: m.xRaysDescription()
@@ -224,6 +229,11 @@
 					field: 'experimental',
 					label: m.experimental(),
 					description: m.experimentalFeatures()
+				},
+				{
+					field: 'chat_mode',
+					label: m.chatMode(),
+					description: m.chatModeDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		}
