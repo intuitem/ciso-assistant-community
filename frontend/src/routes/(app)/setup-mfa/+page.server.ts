@@ -4,7 +4,7 @@ import type { Actions, PageServerLoad } from './$types';
 import {
 	activateTOTPSchema,
 	registerWebAuthnSchema
-} from '../(internal)/my-profile/settings/mfa/utils/schemas';
+} from '../(third-party)/my-profile/settings/mfa/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { safeTranslate } from '$lib/utils/i18n';
