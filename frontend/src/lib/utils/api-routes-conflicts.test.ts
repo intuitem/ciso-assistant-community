@@ -191,6 +191,8 @@ This new +server.ts SHALL implement request handlers using "generic*" request ha
 }
 
 /**
+ **WARNING:** This test does NOT check for `enterprise/frontend/**` route conflicts yet.
+
   This test handle route conflicts related to either one of those:
 
   - `(app)/(internal)/[model=urlmodel]/+server.ts`
