@@ -83,11 +83,14 @@
 	const viewerRole: 'respondent' | 'auditor' = (data.viewerRole ?? 'auditor') as
 		| 'respondent'
 		| 'auditor';
-	const { showAppliedControls, showEvidences } = getFieldVisibility(
-		fw,
-		complianceAssessment,
-		viewerRole
-	);
+	const {
+		showAppliedControls,
+		showEvidences,
+		showStatus,
+		showResult,
+		showScore,
+		showDocumentationScore
+	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
 
 	function pickDefaultTab(): string {
 		if (showAppliedControls && !page.data.user.is_third_party) return 'applied_controls';
@@ -100,20 +103,24 @@
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
 		<code class="code">{data.requirement.urn}</code>
-		<span
-			class="badge h-fit"
-			style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
-				'#d1d5db'};"
-		>
-			{safeTranslate(data.requirementAssessment.status)}
-		</span>
-		<span
-			class="badge {classesText} h-fit"
-			style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
-				'#d1d5db'};"
-		>
-			{safeTranslate(data.requirementAssessment.result)}
-		</span>
+		{#if showStatus}
+			<span
+				class="badge h-fit"
+				style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
+					'#d1d5db'};"
+			>
+				{safeTranslate(data.requirementAssessment.status)}
+			</span>
+		{/if}
+		{#if showResult}
+			<span
+				class="badge {classesText} h-fit"
+				style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
+					'#d1d5db'};"
+			>
+				{safeTranslate(data.requirementAssessment.result)}
+			</span>
+		{/if}
 		{#if data.requirement.implementation_groups && data.requirement.implementation_groups.length > 0}
 			<div class="ml-3">
 				<b class="mr-2">{m.implementationGroups()} :</b>
@@ -124,7 +131,7 @@
 				{/each}
 			</div>
 		{/if}
-		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
+		{#if showScore && data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
 			<div class="shrink-0 relative">
 				<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
 					<Progress.Circle class="[--size:--spacing(10)]">
@@ -136,7 +143,7 @@
 					</div>
 				</Progress>
 			</div>
-			{#if data.complianceAssessmentScore.show_documentation_score}
+			{#if showDocumentationScore && data.complianceAssessmentScore.show_documentation_score}
 				<div class="shrink-0 relative">
 					<Progress value={formatScoreValue(documentationScore, max_score)} min={0} max={100}>
 						<Progress.Circle class="[--size:--spacing(10)]">
