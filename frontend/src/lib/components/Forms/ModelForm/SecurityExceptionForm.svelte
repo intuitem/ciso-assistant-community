@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import HiddenInput from '../HiddenInput.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
@@ -9,7 +10,7 @@
 	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { invalidateAll } from '$app/navigation';
 	import { AppliedControlSchema } from '$lib/utils/schemas';
@@ -82,11 +83,9 @@
 </script>
 
 <HiddenInput {form} field="requirement_assessments" />
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -155,6 +154,13 @@
 	label={m.expirationDate()}
 	cacheLock={cacheLocks['expiration_date']}
 	bind:cachedValue={formDataCache['expiration_date']}
+/>
+<TextField
+	{form}
+	label={m.link()}
+	field="link"
+	bind:cachedValue={formDataCache['link']}
+	cacheLock={cacheLocks['link']}
 />
 <AutocompleteSelect
 	multiple

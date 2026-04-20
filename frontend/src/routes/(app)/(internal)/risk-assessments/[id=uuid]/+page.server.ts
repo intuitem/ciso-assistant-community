@@ -12,8 +12,8 @@ import {
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { message, superValidate } from 'sveltekit-superforms';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 
 export const actions: Actions = {
@@ -44,6 +44,9 @@ export const actions: Actions = {
 
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
+		const res = await response.json();
+		const newId = res.results?.id;
+
 		const modelVerboseName: string = urlParamModelVerboseName(urlModel);
 		setFlash(
 			{
@@ -54,6 +57,10 @@ export const actions: Actions = {
 			},
 			event
 		);
+
+		if (newId) {
+			return message(form, { redirect: `/risk-assessments/${newId}` });
+		}
 
 		return { form };
 	},

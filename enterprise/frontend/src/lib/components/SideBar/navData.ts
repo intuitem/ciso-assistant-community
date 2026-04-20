@@ -54,7 +54,13 @@ export const navData = {
 					name: 'auditDashboard',
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/auditee-dashboard',
-					permissions: ['view_requirementassignment']
+					permissions: ['view_complianceassessment']
+				},
+				{
+					name: 'presets',
+					fa_icon: 'fa-solid fa-rocket',
+					href: '/presets',
+					permissions: ['add_loadedlibrary', 'view_presetjourney']
 				}
 			]
 		},
@@ -155,6 +161,16 @@ export const navData = {
 					href: '/threats'
 				},
 				{
+					name: 'securityAdvisories',
+					fa_icon: 'fa-solid fa-shield-virus',
+					href: '/security-advisories'
+				},
+				{
+					name: 'cwes',
+					fa_icon: 'fa-solid fa-bug-slash',
+					href: '/cwes'
+				},
+				{
 					name: 'referenceControls',
 					fa_icon: 'fa-solid fa-gears',
 					href: '/reference-controls'
@@ -215,6 +231,12 @@ export const navData = {
 					name: 'tasks',
 					fa_icon: 'fa-solid fa-note-sticky',
 					href: '/task-templates'
+				},
+				{
+					name: 'tasksReview',
+					fa_icon: 'fa-solid fa-table-columns',
+					href: '/tasks-review',
+					permissions: ['view_appliedcontrol']
 				}
 			]
 		},

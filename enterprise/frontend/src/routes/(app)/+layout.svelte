@@ -23,12 +23,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 	import type { LayoutData } from './$types';
-	import {
-		getModalStore,
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore
-	} from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: LayoutData;
@@ -43,6 +38,11 @@
 		sideBarVisibleItems = getSidebarVisibleItems(data?.featureflags),
 		children
 	}: Props = $props();
+
+	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+	const modifierKey = isMac ? '⌘' : 'Ctrl';
+
+	let commandPalette: ReturnType<typeof CommandPalette> | undefined = $state();
 
 	let sidebarOpen = $state(true);
 
@@ -128,25 +128,14 @@
 	const licenseAboutToExpire =
 		licenseStatus?.status === 'active' && licenseStatus?.days_left <= licenseExpirationNotifyDays;
 	import type { PageData, ActionData } from './$types';
-	import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
+	import { getStartedTrigger } from '$lib/utils/stores';
 
 	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
 	import { interceptExternalLinks, setGlobalModalStore } from '$lib/utils/external-links';
 
 	const modalStore: ModalStore = getModalStore();
-	function modalQuickStart(): void {
-		let modalComponent: ModalComponent = {
-			ref: QuickStartModal,
-			props: {}
-		};
-		let modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.quickStart()
-		};
-		modalStore.trigger(modal);
-	}
+
+	const clientSettings = $derived($page.data.clientSettings);
 
 	// Initialize external link interceptor
 	$effect(() => {
@@ -165,7 +154,7 @@
 </script>
 
 <svelte:head>
-	<title>CISO Assistant | {safeTranslate(displayTitle)}</title>
+	<title>{clientSettings.settings.name || 'CISO Assistant'} | {safeTranslate(displayTitle)}</title>
 </svelte:head>
 
 <!-- App Shell -->
@@ -202,18 +191,32 @@
 					{/if}
 				</div>
 				<div class="flex items-center gap-3 shrink-0">
+					<button
+						onclick={() => commandPalette?.toggle()}
+						class="flex items-center gap-2 shrink-0 rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-1.5
+			text-xs text-gray-500 hover:bg-gray-100 hover:border-gray-300 hover:text-gray-700
+			transition-all duration-150 cursor-pointer"
+					>
+						<i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+						<span class="hidden sm:inline text-gray-400">{m.searchEllipsis()}</span>
+						<kbd
+							class="hidden sm:inline-flex items-center rounded border border-gray-200 bg-white px-1.5 py-0.5
+				font-mono text-[10px] text-gray-400">{modifierKey}K</kbd
+						>
+					</button>
 					{#if data?.featureflags?.focus_mode}
 						<FocusModeSelector orgTree={data?.orgTree} />
 					{/if}
 					{#if data?.user?.is_admin}
 						<button
-							onclick={modalQuickStart}
-							class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
-	ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-	hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-	focus:outline-hidden focus:ring-violet-500"
+							onclick={() => getStartedTrigger.set(true)}
+							class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
+			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
+			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
+			focus:outline-hidden focus:ring-violet-500 cursor-pointer"
 						>
-							{m.quickStart()}
+							<i class="fa-solid fa-rocket mr-1"></i>
+							{m.getStarted()}
 						</button>
 					{/if}
 				</div>
@@ -225,7 +228,7 @@
 		</AppBar>
 	</div>
 	<!-- Router Slot -->
-	<CommandPalette />
+	<CommandPalette bind:this={commandPalette} />
 	<main
 		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen

@@ -3,10 +3,12 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -34,10 +36,9 @@
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
 />
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.folder()}
@@ -59,12 +60,13 @@
 	bind:cachedValue={formDataCache['gravity']}
 	helpText={m.gravityHelpText()}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="justification"
 	label={m.justification()}
 	cacheLock={cacheLocks['justification']}
 	bind:cachedValue={formDataCache['justification']}
+	data-focusindex="1"
 />
 <AutocompleteSelect
 	multiple

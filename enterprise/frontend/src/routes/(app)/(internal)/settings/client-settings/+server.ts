@@ -11,7 +11,8 @@ export const GET: RequestHandler = async ({ fetch }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		console.error('Error fetching client info', await res.json());
+		const errorBody = await res.text().catch(() => 'unknown error');
+		console.error('Error fetching client info:', res.status, errorBody);
 		error(400, 'Error fetching client info');
 	}
 

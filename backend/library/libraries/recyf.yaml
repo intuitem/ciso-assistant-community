@@ -1,0 +1,2718 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:recyf
+locale: fr
+ref_id: ReCyF
+name: "RECYF : R\xC9F\xC9RENTIEL CYBER France - Version 2.5 du 17/03/2026"
+description: "RECYF constitue le r\xE9f\xE9rentiel de cybers\xE9curit\xE9 mentionn\xE9\
+  \ au 6\xE8me alin\xE9a de l\u2019article 14 du projet de loi relatif \xE0 la r\xE9\
+  silience des infrastructures critiques et au renforcement de la cybers\xE9curit\xE9\
+  \ (PJL). Il se compose d\u2019objectifs de s\xE9curit\xE9 et, pour chacun d\u2019\
+  eux, de moyens acceptables de conformit\xE9."
+copyright: ANSSI
+version: 2
+publication_date: 2026-03-17
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:recyf
+    ref_id: ReCyF
+    name: "RECYF : R\xC9F\xC9RENTIEL CYBER France - Version 2.5 du 17/03/2026"
+    description: "RECYF constitue le r\xE9f\xE9rentiel de cybers\xE9curit\xE9 mentionn\xE9\
+      \ au 6\xE8me alin\xE9a de l\u2019article 14 du projet de loi relatif \xE0 la\
+      \ r\xE9silience des infrastructures critiques et au renforcement de la cybers\xE9\
+      curit\xE9 (PJL). Il se compose d\u2019objectifs de s\xE9curit\xE9 et, pour chacun\
+      \ d\u2019eux, de moyens acceptables de conformit\xE9."
+    implementation_groups_definition:
+    - ref_id: EI
+      name: "Entit\xE9 Importante"
+      description: null
+    - ref_id: EE
+      name: "Entit\xE9 Essentielle"
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:recyf:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: "Objectif de s\xE9curit\xE9 1: Recensement des syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:1
+      ref_id: '1.1'
+      description: "L\u2019entit\xE9 liste l\u2019ensemble de ses activit\xE9s et\
+        \ services, y compris les activit\xE9s et services qui ne correspondent pas\
+        \ aux crit\xE8res pour lesquels l\u2019entit\xE9 constitue une entit\xE9 importante\
+        \ ou essentielle (par exemple : une entit\xE9 essentielle au titre d\u2019\
+        une activit\xE9 exploitation d\u2019un ol\xE9oduc doit lister, en plus des\
+        \ activit\xE9s et services participant \xE0 l\u2019exploitation de l\u2019\
+        ol\xE9oduc, tous les services et les autres activit\xE9s qu\u2019elle fournit).\n\
+        Pour chaque entr\xE9e de cette liste, l\u2019entit\xE9 :\n\u2022\tidentifie\
+        \ un responsable de l\u2019activit\xE9 ou du service (par exemple le chef\
+        \ de service auquel est rattach\xE9e l'activit\xE9 ou le service, un directeur\
+        \ m\xE9tier, la direction g\xE9n\xE9rale) ;\n\u2022\tliste les syst\xE8mes\
+        \ d\u2019information les supportant."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:doc.context
+    - urn: urn:intuitem:risk:req_node:recyf:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:1
+      ref_id: '1.2'
+      description: "L\u2019entit\xE9 pr\xE9cise dans la liste pr\xE9vue au 1.1-EI/EE\
+        \ les syst\xE8mes d\u2019information qui ne sont expos\xE9s \xE0 aucun des\
+        \ risques mentionn\xE9s \xE0 l\u2019alin\xE9a 2 de l\u2019objectif de s\xE9\
+        curit\xE9.\nL\u2019entit\xE9 renseigne les justifications de ces choix."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:doc.scope
+    - urn: urn:intuitem:risk:req_node:recyf:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:1
+      ref_id: '1.3'
+      description: "L\u2019entit\xE9 valide et r\xE9examine annuellement la liste\
+        \ pr\xE9vue au 1.1-EI/EE, et en tant que de besoin, notamment en cas d\u2019\
+        \xE9volution des activit\xE9s et services de l\u2019entit\xE9 ou en cas de\
+        \ mise en service d\u2019un nouveau syst\xE8me d\u2019information."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+    - urn: urn:intuitem:risk:req_node:recyf:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Objectif de s\xE9curit\xE9 2: Mise en \u0153uvre d'un cadre de gouvernance\
+        \ de la s\xE9curit\xE9 num\xE9rique"
+    - urn: urn:intuitem:risk:req_node:recyf:2.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:2
+      ref_id: 2.A
+      name: "R\xF4les et responsabilit\xE9s"
+    - urn: urn:intuitem:risk:req_node:recyf:2.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.a
+      ref_id: 2.A.1
+      description: "Le dirigeant ex\xE9cutif de l\u2019entit\xE9 est responsable de\
+        \ la s\xE9curit\xE9 num\xE9rique au sein de son entit\xE9 et en particulier\
+        \ du suivi de la conformit\xE9 des syst\xE8mes d\u2019information aux pr\xE9\
+        sentes mesures."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+    - urn: urn:intuitem:risk:req_node:recyf:2.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.a
+      ref_id: 2.A.2
+      description: "Il d\xE9signe au moins une personne qui le conseille et l\u2019\
+        accompagne dans l\u2019exercice de cette responsabilit\xE9. Cette personne\
+        \ est le point de contact privil\xE9gi\xE9 de l\u2019Agence nationale de la\
+        \ s\xE9curit\xE9 des syst\xE8mes d\u2019information pour tous les sujets relatifs\
+        \ \xE0 la s\xE9curit\xE9 num\xE9rique (notamment incidents de s\xE9curit\xE9\
+        , communications de l\u2019ANSSI sur les sujets relatifs aux entit\xE9s essentielles)"
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:doc.controls
+    - urn: urn:intuitem:risk:req_node:recyf:2.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.a
+      ref_id: 2.A.3
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre une organisation\
+        \ adapt\xE9e pour assurer sa s\xE9curit\xE9 num\xE9rique (par exemple : la\
+        \ d\xE9signation d\u2019un responsable de la s\xE9curit\xE9 num\xE9rique,\
+        \ l\u2019\xE9tablissement d\u2019un RACI, la mise en place d\u2019une comitologie)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:doc.controls
+      - urn:intuitem:risk:function:doc-pol:pol.main
+    - urn: urn:intuitem:risk:req_node:recyf:2.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:2
+      ref_id: 2.B
+      name: "Politique de s\xE9curit\xE9 des syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:2.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.b
+      ref_id: 2.B.1
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre une politique\
+        \ de s\xE9curit\xE9 des syst\xE8mes d\u2019information (PSSI)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+    - urn: urn:intuitem:risk:req_node:recyf:2.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.b
+      ref_id: 2.B.2
+      description: "Cette PSSI comprend au moins :\n\u2022\tL\u2019organisation de\
+        \ la gouvernance de la s\xE9curit\xE9 num\xE9rique et notamment les r\xF4\
+        les et les responsabilit\xE9s du personnel interne et externe (par exemple\
+        \ : prestataires, fournisseurs) ;\n\u2022\tLes orientations et objectifs strat\xE9\
+        giques en mati\xE8re de s\xE9curit\xE9 num\xE9rique d\xE9clin\xE9s de la strat\xE9\
+        gie globale de l\u2019entit\xE9 ;\n\u2022\tL\u2019engagement du dirigeant\
+        \ ex\xE9cutif de l\u2019entit\xE9 \xE0 assurer la s\xE9curit\xE9 num\xE9rique\
+        \ des syst\xE8mes d\u2019information dont il est responsable ;\n\u2022\tL\u2019\
+        engagement du dirigeant ex\xE9cutif de l\u2019entit\xE9 \xE0 respecter les\
+        \ exigences l\xE9gales et r\xE9glementaires et en particulier celles d\xE9\
+        finies dans la transposition nationale de la directive NIS 2.\n\u2022\tLa\
+        \ PSSI tient \xE9galement compte des exigences, proc\xE9dures et sp\xE9cificit\xE9\
+        s propres au(x) secteur(s) dans lesquels l\u2019entit\xE9 exerce ses activit\xE9\
+        s."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.overview
+      - urn:intuitem:risk:function:doc-pol:doc.legal
+    - urn: urn:intuitem:risk:req_node:recyf:2.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.b
+      ref_id: 2.B.3
+      description: "Le dirigeant ex\xE9cutif de l\u2019entit\xE9 approuve la PSSI."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
+    - urn: urn:intuitem:risk:req_node:recyf:2.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.b
+      ref_id: 2.B.4
+      description: "La PSSI est au minimum revue annuellement et mise \xE0 jour lorsque\
+        \ n\xE9cessaire, notamment en cas d\u2019\xE9volutions majeures de la menace,\
+        \ du contexte m\xE9tier, technique ou organisationnel intervenues apr\xE8\
+        s son approbation."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
+    - urn: urn:intuitem:risk:req_node:recyf:2.b.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.b
+      ref_id: 2.B.5
+      description: "L\u2019entit\xE9 d\xE9cline, en tant que de besoin, la PSSI en\
+        \ politiques de s\xE9curit\xE9 relatives \xE0 des th\xE8mes pr\xE9cis permettant\
+        \ de couvrir tout ou partie des pr\xE9sentes mesures.\nEn particulier, l\u2019\
+        entit\xE9 d\xE9finit et met en \u0153uvre, au minimum, des politiques de s\xE9\
+        curit\xE9 en mati\xE8re :\n\u2022\tD\u2019usage du chiffrement ;\n\u2022\t\
+        De contr\xF4le d\u2019acc\xE8s physique et logique ;\n\u2022\tDe revue de\
+        \ l\u2019application des mesures de s\xE9curit\xE9 mises en \u0153uvre ;\n\
+        \u2022\tDe gestion des comptes."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+    - urn: urn:intuitem:risk:req_node:recyf:2.c
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:2
+      ref_id: 2.C
+      name: "Gestion de la conformit\xE9"
+    - urn: urn:intuitem:risk:req_node:recyf:2.c.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.c
+      ref_id: 2.C.1
+      description: "Pour chaque syst\xE8me d\u2019information, l\u2019entit\xE9 r\xE9\
+        alise et maintient \xE0 jour une analyse de la conformit\xE9 du syst\xE8me\
+        \ d\u2019information vis-\xE0-vis des mesures du pr\xE9sent r\xE9f\xE9rentiel.\n\
+        L\u2019analyse de la conformit\xE9 identifie les \xE9ventuels \xE9carts entre\
+        \ les mesures mises en \u0153uvre par l\u2019entit\xE9 et les mesures pr\xE9\
+        vues dans le pr\xE9sent r\xE9f\xE9rentiel.\nCette analyse tient compte de\
+        \ la PSSI de l\u2019entit\xE9."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+      - urn:intuitem:risk:function:doc-pol:doc.soa
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+    - urn: urn:intuitem:risk:req_node:recyf:2.c.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.c
+      ref_id: 2.C.2
+      description: "L\u2019entit\xE9 \xE9tablit, met en \u0153uvre et suit dans la\
+        \ dur\xE9e un plan d\u2019action adapt\xE9 \xE0 la structure et \xE0 l\u2019\
+        environnement dans lequel elle op\xE8re afin de corriger ces \xE9carts dans\
+        \ les meilleurs d\xE9lais.\nLa responsabilit\xE9 de ce plan d\u2019action\
+        \ est d\xE9termin\xE9e au regard du cadre de gouvernance de la s\xE9curit\xE9\
+        \ num\xE9rique mis en place.\nCe plan d\u2019action pr\xE9voit, au minimum,\
+        \ une \xE9ch\xE9ance raisonnable au regard du besoin de s\xE9curisation du\
+        \ syst\xE8me d\u2019information et un responsable pour la r\xE9alisation de\
+        \ chaque action.\nCe plan d\u2019action ne pr\xE9juge pas de l\u2019appr\xE9\
+        ciation du respect de ses obligations l\xE9gales et r\xE9glementaires lors\
+        \ d\u2019un contr\xF4le de l\u2019ANSSI."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+    - urn: urn:intuitem:risk:req_node:recyf:2.c.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:2.c
+      ref_id: 2.C.3
+      description: "Lorsque l\u2019entit\xE9 n\u2019est pas tenue de mettre en \u0153\
+        uvre le r\xE9f\xE9rentiel mais qu\u2019elle d\xE9cide de l\u2019appliquer\
+        \ pour d\xE9montrer sa conformit\xE9 aux objectifs de s\xE9curit\xE9, et qu\u2019\
+        elle applique une ou plusieurs mesures alternatives aux moyens acceptables\
+        \ de conformit\xE9 du r\xE9f\xE9rentiel, elle en pr\xE9cise les justifications\
+        \ dans son analyse de la conformit\xE9. L\u2019ANSSI peut appr\xE9cier la\
+        \ pertinence de la mesure retenue pour satisfaire la mesure du r\xE9f\xE9\
+        rentiel non retenue lors d\u2019un contr\xF4le."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+      - urn:intuitem:risk:function:doc-pol:doc.exception_register
+    - urn: urn:intuitem:risk:req_node:recyf:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "Objectif de s\xE9curit\xE9 3: Ma\xEEtrise de l'\xE9cosyst\xE8me"
+    - urn: urn:intuitem:risk:req_node:recyf:3.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:3
+      ref_id: 3.A
+      name: "Cartographie de l'\xE9cosyst\xE8me"
+    - urn: urn:intuitem:risk:req_node:recyf:3.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:3.a
+      ref_id: 3.A.1
+      description: "L\u2019entit\xE9 d\xE9finit et maintient \xE0 jour une cartographie\
+        \ de l\u2019\xE9cosyst\xE8me dans lequel ses syst\xE8mes d\u2019information\
+        \ sont mis en \u0153uvre et contenant, au minimum, les informations suivantes\
+        \ :\n\u2022\tLa liste des prestataires et fournisseurs informatiques contribuant\
+        \ \xE0 la r\xE9alisation des activit\xE9s ou des services de l\u2019entit\xE9\
+        \ et avec lesquels il existe une relation de droit ou de fait (par exemple\
+        \ : prestataire d\u2019infog\xE9rance, mat\xE9riels et services fournis par\
+        \ la maison m\xE8re \xE0 une filiale, fournisseur de mat\xE9riel informatique)\n\
+        \u2022\tLa liste des interconnexions avec les syst\xE8mes d\u2019information\
+        \ de l\u2019entit\xE9.\n(Cette liste peut s\u2019appuyer sur les d\xE9marches\
+        \ d\xE9j\xE0 r\xE9alis\xE9es par l\u2019entit\xE9 pour r\xE9aliser une telle\
+        \ liste. Par exemple, la d\xE9claration de sous-traitance r\xE9alis\xE9e dans\
+        \ le cadre d\u2019un contrat de la commande publique)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+    - urn: urn:intuitem:risk:req_node:recyf:3.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:3.a
+      ref_id: 3.A.2
+      description: "L\u2019entit\xE9 renseigne et maintient \xE0 jour les coordonn\xE9\
+        es d\u2019au moins un point de contact pour chaque entr\xE9e figurant dans\
+        \ la cartographie de l\u2019\xE9cosyst\xE8me."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+    - urn: urn:intuitem:risk:req_node:recyf:3.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:3
+      ref_id: 3.B
+      name: "S\xE9curit\xE9 num\xE9rique dans les contrats avec les prestataires et\
+        \ fournisseurs informatiques"
+    - urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:3.b
+      ref_id: 3.B.1
+      description: "En cas de recours \xE0 un prestataire ou \xE0 un fournisseur informatique,\
+        \ l\u2019entit\xE9 s\u2019assure que la prestation est conforme aux obligations\
+        \ auxquelles l\u2019entit\xE9 est assujettie, notamment en mati\xE8re de gestion\
+        \ des risques qui menacent la s\xE9curit\xE9 de leurs r\xE9seaux et syst\xE8\
+        mes d\u2019information et de notification des incidents importants et s\u2019\
+        assure de disposer des assurances contractuelles de cette conformit\xE9 (par\
+        \ exemple : plan d\u2019assurance s\xE9curit\xE9, charte de t\xE9l\xE9maintenance,\
+        \ mise en place d\u2019indicateurs de suivi de la conformit\xE9)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:doc.sap
+    - urn: urn:intuitem:risk:req_node:recyf:3.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:3.b
+      ref_id: 3.B.2
+      description: "L'entit\xE9 v\xE9rifie p\xE9riodiquement la conformit\xE9 de la\
+        \ prestation aux obligations auxquelles l\u2019entit\xE9 est assujettie notamment\
+        \ en mati\xE8re de gestion des risques qui menacent la s\xE9curit\xE9 de leurs\
+        \ r\xE9seaux et syst\xE8mes d\u2019information et de notification des incidents\
+        \ importants. L\u2019entit\xE9 peut s\u2019appuyer sur des audits dont les\
+        \ conditions sont pr\xE9cis\xE9es par les Moyens acceptables de conformit\xE9\
+        \ 17.2-EE, 17.4-EE et 17.5-EE relatifs \xE0 l\u2019audit."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+    - urn: urn:intuitem:risk:req_node:recyf:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Objectif de s\xE9curit\xE9 4: Prise en compte de la s\xE9curit\xE9 num\xE9\
+        rique dans la gestion des ressources humaines"
+    - urn: urn:intuitem:risk:req_node:recyf:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:4
+      ref_id: '4.1'
+      description: "L'entit\xE9 d\xE9finit et met en \u0153uvre une charte d'usage\
+        \ des syst\xE8mes d'information, et la rend opposable \xE0 chacun des utilisateurs\
+        \ de ces syst\xE8mes d'information.\nCette charte peut pr\xE9voir des dispositions\
+        \ sp\xE9cifiques pour les administrateurs.\nCette charte peut \xE9galement\
+        \ couvrir les syst\xE8mes d'information pour lesquels l'entit\xE9 a d\xE9\
+        cid\xE9 de ne pas appliquer les objectifs de s\xE9curit\xE9."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.accept
+    - urn: urn:intuitem:risk:req_node:recyf:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:4
+      ref_id: '4.2'
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre un programme\
+        \ de sensibilisation \xE0 la s\xE9curit\xE9 num\xE9rique de l\u2019ensemble\
+        \ des utilisateurs.\nCe programme doit comporter des actions tout au long\
+        \ de la pr\xE9sence des utilisateurs dans l\u2019entit\xE9."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+    - urn: urn:intuitem:risk:req_node:recyf:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:4
+      ref_id: '4.3'
+      description: "L\u2019entit\xE9 pr\xE9voit des clauses de s\xE9curit\xE9 dans\
+        \ ses contrats de travail (par exemple : clauses de confidentialit\xE9 de\
+        \ nature \xE0 garantir la confidentialit\xE9 des informations auxquelles les\
+        \ salari\xE9s ont acc\xE8s au cours de leur contrat et \xE0 l\u2019issu de\
+        \ celui-ci)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+    - urn: urn:intuitem:risk:req_node:recyf:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:4
+      ref_id: '4.4'
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre un processus\
+        \ de gestion des arriv\xE9es, des d\xE9parts et des changements de fonction\
+        \ des personnels et des tiers acc\xE9dant aux syst\xE8mes d\u2019information.\
+        \ Ce processus pr\xE9voit :\n\u2022\tLa prise de connaissance des r\xE8gles\
+        \ de s\xE9curit\xE9 en vigueur lors leur arriv\xE9e ;\n\u2022\tL\u2019attribution\
+        \ des acc\xE8s appropri\xE9s lors de leur arriv\xE9e ;\n\u2022\tLa mise \xE0\
+        \ jour des acc\xE8s lors d\u2019un changement de fonction ;\n\u2022\tLors\
+        \ du d\xE9part, la restitution de l\u2019ensemble du mat\xE9riel qui a \xE9\
+        t\xE9 mis \xE0 disposition et la d\xE9sactivation de l\u2019ensemble des acc\xE8\
+        s logiques aux syst\xE8mes d\u2019information et physiques aux locaux et salles."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:4
+      ref_id: '4.5'
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre, pour les fonctions\
+        \ assumant des responsabilit\xE9s dans le domaine du num\xE9rique, un programme\
+        \ de formations d\xE9di\xE9es \xE0 la s\xE9curit\xE9 num\xE9rique adapt\xE9\
+        \ \xE0 leurs responsabilit\xE9s."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:train.threat
+      - urn:intuitem:risk:function:doc-pol:train.iam
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+    - urn: urn:intuitem:risk:req_node:recyf:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "Objectif de s\xE9curit\xE9 5: Maitrise des syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:5.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:5
+      ref_id: 5.A
+      name: "Cartographie des syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.a
+      ref_id: 5.A.1
+      description: "L\u2019entit\xE9 \xE9labore et maintient \xE0 jour au moins une\
+        \ cartographie de ses syst\xE8mes d\u2019information dont le niveau de d\xE9\
+        tail est suffisant pour lui permettre :\no\td\u2019assurer le maintien en\
+        \ condition op\xE9rationnelles et de s\xE9curit\xE9 de ces syst\xE8mes (par\
+        \ exemple : \xEAtre capable d\u2019identifier les ressources mat\xE9rielles\
+        \ ou logicielles vuln\xE9rables suite \xE0 la publication d\u2019un bulletin\
+        \ d\u2019alerte) ;\no\tde pouvoir r\xE9agir sans retard injustifi\xE9 \xE0\
+        \ un incident de s\xE9curit\xE9 affectant ces syst\xE8mes d\u2019information\
+        \ (par exemple : \xEAtre capable d\u2019identifier les ressources mat\xE9\
+        rielles ou logicielles affect\xE9es par un incident de s\xE9curit\xE9 et ainsi\
+        \ limiter les cons\xE9quences de l\u2019incident).\nCette cartographie peut\
+        \ s\u2019appuyer sur les recommandations de l\u2019autorit\xE9 nationale de\
+        \ s\xE9curit\xE9 des syst\xE8mes d\u2019information en mati\xE8re de cartographie."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+    - urn: urn:intuitem:risk:req_node:recyf:5.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:5
+      ref_id: 5.B
+      name: "Maintien en condition op\xE9rationnelle et de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.1
+      description: "L\u2019entit\xE9 \xE9labore, met en \u0153uvre et maintient \xE0\
+        \ jour une proc\xE9dure de maintien en conditions op\xE9rationnelle et de\
+        \ s\xE9curit\xE9 des ressources mat\xE9rielles et logicielles de ses syst\xE8\
+        mes d\u2019information."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.2
+      description: "L\u2019entit\xE9 maintient \xE0 jour les bases de connaissances\
+        \ des outils de protection contre les codes malveillants qu\u2019elle utilise\
+        \ (par exemple : la mise \xE0 jour de la base antivirale de l\u2019antivirus,\
+        \ la mise \xE0 jour des signatures utilis\xE9es par la solution d\u2019EDR)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.malware
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      - urn:intuitem:risk:function:doc-pol:tech.edr
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.3
+      description: "L\u2019entit\xE9 met en \u0153uvre une veille sur les vuln\xE9\
+        rabilit\xE9s, les correctifs de s\xE9curit\xE9 et les mesures d\u2019att\xE9\
+        nuation pr\xE9conis\xE9es susceptibles de concerner les ressources de ses\
+        \ syst\xE8mes d\u2019information, qui sont diffus\xE9es notamment par les\
+        \ fournisseurs ou les fabricants de ces ressources, par un prestataire mandat\xE9\
+        \ ou par des centres de pr\xE9vention et d\u2019alerte en mati\xE8re de cyber\
+        \ s\xE9curit\xE9 tels que le CERT-FR (centre gouvernemental de veille, d\u2019\
+        alerte et de r\xE9ponse aux attaques informatiques) ou les CSIRT (centres\
+        \ de r\xE9ponse aux incidents de s\xE9curit\xE9 informatique)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.4
+      description: "L\u2019entit\xE9 met en \u0153uvre, au regard de la nature de\
+        \ la vuln\xE9rabilit\xE9 :\n\u2022\tsans d\xE9lai : les actions visant \xE0\
+        \ l\u2019installation des correctifs de s\xE9curit\xE9 (par exemple : le d\xE9\
+        ploiement en environnement de test, pr\xE9-production et production, m\xE9\
+        canismes de rollback) ;\n\u2022\tsans retard injustifi\xE9 : l\u2019application\
+        \ effective des correctifs de s\xE9curit\xE9 apr\xE8s la r\xE9alisation des\
+        \ actions pr\xE9c\xE9dentes\nsur les ressources expos\xE9es \xE0 des syst\xE8\
+        mes d\u2019information tiers (par exemple : un serveur Web, un pare-feu expos\xE9\
+        \ sur Internet, un serveur de messagerie) et les postes de travail des utilisateurs."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.update
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.5
+      description: "L\u2019entit\xE9 planifie et installe sur l\u2019ensemble de ses\
+        \ ressources, y compris celles non expos\xE9es \xE0 des syst\xE8mes d\u2019\
+        information tiers, les correctifs de s\xE9curit\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.update
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.6
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas l\u2019installation des correctifs de s\xE9curit\xE9 sur les ressources\
+        \ concern\xE9es, l\u2019entit\xE9 met en \u0153uvre des mesures d\u2019att\xE9\
+        nuation pour r\xE9duire les risques li\xE9s \xE0 l\u2019utilisation d\u2019\
+        une version comportant des vuln\xE9rabilit\xE9s connues (par exemple : isoler\
+        \ la ressource du reste du SI, mettre en place un contr\xF4le d'acc\xE8s renforc\xE9\
+        )."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.7
+      description: "L\u2019entit\xE9 met en \u0153uvre sans d\xE9lai les actions visant\
+        \ \xE0 l\u2019installation et le maintien \xE0 jour des ressources logicielles\
+        \ de ses syst\xE8mes d\u2019information, y compris les logiciels embarqu\xE9\
+        s, dans des versions b\xE9n\xE9ficiant d\u2019un support par leurs fournisseurs\
+        \ ou leurs fabricants et comportant les mises \xE0 jour de s\xE9curit\xE9."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.8
+      description: "L\u2019entit\xE9 v\xE9rifie que toute nouvelle version d\u2019\
+        un logiciel est t\xE9l\xE9charg\xE9e depuis les ressources officielles mises\
+        \ \xE0 disposition par les \xE9diteurs ou les fournisseurs."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:pol.secdev
+    - urn: urn:intuitem:risk:req_node:recyf:5.b.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:5.b
+      ref_id: 5.B.9
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas l\u2019installation d\u2019une version support\xE9e par le fournisseur\
+        \ ou l\u2019\xE9diteur, l\u2019entit\xE9 met en \u0153uvre des mesures pour\
+        \ r\xE9duire les risques li\xE9s \xE0 l\u2019utilisation d\u2019une version\
+        \ obsol\xE8te."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "Objectif de s\xE9curit\xE9 6: Maitrise des acc\xE8s physiques aux locaux"
+    - urn: urn:intuitem:risk:req_node:recyf:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:6
+      ref_id: '6.1'
+      description: "L\u2019entit\xE9 met en place des mesures de s\xE9curit\xE9 permettant\
+        \ de limiter l\u2019acc\xE8s de personnes non autoris\xE9es \xE0 ses locaux,\
+        \ ses salles serveurs et ses locaux techniques (par exemple : tenue d\u2019\
+        un registre des visiteurs, badges d\u2019acc\xE8s, etc)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
+      - urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.physical
+    - urn: urn:intuitem:risk:req_node:recyf:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:6
+      ref_id: '6.2'
+      description: "L\u2019entit\xE9 s\u2019assure de la protection physique des locaux,\
+        \ salles serveurs et locaux techniques (par exemple : vid\xE9osurveillance,\
+        \ gardiennage, alarme).\nCette protection physique permet de pr\xE9venir,\
+        \ de surveiller et de r\xE9agir aux acc\xE8s non autoris\xE9s \xE0 ces locaux."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:phys.cctv
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
+      - urn:intuitem:risk:function:doc-pol:proc.physical_security
+    - urn: urn:intuitem:risk:req_node:recyf:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:6
+      ref_id: '6.3'
+      description: "L\u2019entit\xE9 s\u2019assure que les droits d'acc\xE8s physique\
+        \ sont attribu\xE9s au regard du besoin strictement n\xE9cessaire \xE0 l\u2019\
+        ex\xE9cution des missions des personnes."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
+      - urn:intuitem:risk:function:doc-pol:pol.physical
+      - urn:intuitem:risk:function:doc-pol:proc.physical_security
+    - urn: urn:intuitem:risk:req_node:recyf:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:6
+      ref_id: '6.4'
+      description: "L'entit\xE9 s'assure que les personnes externes acc\xE9dant aux\
+        \ locaux techniques et salles serveurs de l\u2019entit\xE9 sont accompagn\xE9\
+        es ou d\xFBment autoris\xE9es."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
+      - urn:intuitem:risk:function:doc-pol:proc.physical_security
+    - urn: urn:intuitem:risk:req_node:recyf:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: "Objectif de s\xE9curit\xE9 7: S\xE9curisation de l'architecture des syst\xE8\
+        mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:7.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:7
+      ref_id: 7.A
+      name: Cloisonnement
+    - urn: urn:intuitem:risk:req_node:recyf:7.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.a
+      ref_id: 7.A.1
+      description: "L\u2019entit\xE9 cloisonne physiquement et/ou logiquement l\u2019\
+        ensemble de ses syst\xE8mes d\u2019information vis-\xE0-vis des autres syst\xE8\
+        mes d\u2019information, y compris des syst\xE8mes d\u2019information pour\
+        \ lesquels elle a d\xE9cid\xE9 de ne pas appliquer les objectifs de s\xE9\
+        curit\xE9 et les syst\xE8mes d\u2019information tiers (par exemple : cloisonnement\
+        \ logique par VLAN \u2013 r\xE9seau local virtuel - (r\xE9seau), par VM \u2013\
+        \ machine virtuelle - (calcul) ou par volume (stockage))."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+      - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
+      - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+    - urn: urn:intuitem:risk:req_node:recyf:7.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.a
+      ref_id: 7.A.2
+      description: "L\u2019entit\xE9 cloisonne physiquement et/ou logiquement chaque\
+        \ syst\xE8me d\u2019information vis-\xE0-vis des autres syst\xE8mes d\u2019\
+        information, y compris des syst\xE8mes d\u2019information pour lesquels elle\
+        \ a d\xE9cid\xE9 de ne pas appliquer les objectifs de s\xE9curit\xE9 et des\
+        \ syst\xE8mes d\u2019information tiers (par exemple : un syst\xE8me d\u2019\
+        information est cloisonn\xE9 logiquement des autres syst\xE8mes d\u2019information\
+        \ de l\u2019entit\xE9. Il est aussi cloisonn\xE9 physiquement des syst\xE8\
+        mes d\u2019information de l\u2019entit\xE9 pour lesquels elle a d\xE9cid\xE9\
+        \ de ne pas appliquer les objectifs de s\xE9curit\xE9)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+      - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
+    - urn: urn:intuitem:risk:req_node:recyf:7.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.a
+      ref_id: 7.A.3
+      description: "L\u2019entit\xE9 m\xE8ne des r\xE9flexions, pour chaque syst\xE8\
+        me d\u2019information, sur la pertinence de d\xE9finir des sous-syst\xE8mes.\
+        \ Lorsqu\u2019elle n\u2019identifie aucun sous-syst\xE8me, l\u2019entit\xE9\
+        \ en apporte la justification.\nUn sous-syst\xE8me regroupe des ressources\
+        \ assurant des fonctionnalit\xE9s similaires et ayant des niveaux de sensibilit\xE9\
+        , d\u2019exposition et de s\xE9curit\xE9 homog\xE8nes."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.a
+      ref_id: 7.A.4
+      description: "Les sous-syst\xE8mes identifi\xE9s \xE0 la mesure 7.A.4-EE sont\
+        \ cloisonn\xE9s entre eux physiquement et/ou logiquement."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+    - urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.a
+      ref_id: 7.A.5
+      description: "L\u2019entit\xE9 met en \u0153uvre au moins un sous-syst\xE8me\
+        \ \u201Cpasserelle sortante\u201D permettant :\n\u2022\taux ressources de\
+        \ ses syst\xE8mes d\u2019information d\u2019acc\xE9der aux syst\xE8mes d\u2019\
+        informations tiers ;\n\u2022\td\u2019authentifier, de filtrer et de tracer\
+        \ les acc\xE8s aux syst\xE8mes d\u2019information tiers (par exemple : un\
+        \ serveur mandataire)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.web_proxy
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.a
+      ref_id: 7.A.6
+      description: "L\u2019entit\xE9 met en \u0153uvre au moins un sous-syst\xE8me\
+        \ \u201Cpasserelle entrante\u201D permettant :\n\u2022\td\u2019exposer des\
+        \ ressources de ses syst\xE8mes d\u2019information aux syst\xE8mes d\u2019\
+        information tiers ;\n\u2022\tde filtrer et de tracer les acc\xE8s depuis des\
+        \ syst\xE8mes d\u2019information tiers (par exemple : un serveur mandataire\
+        \ inverse ou un relai)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.reverse_proxy
+      - urn:intuitem:risk:function:doc-pol:pol.web_sec
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:7.a.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.a
+      ref_id: 7.A.7
+      description: "Seules les interconnexions n\xE9cessaires \xE0 la r\xE9alisation\
+        \ des activit\xE9s et services de l\u2019entit\xE9 ou au maintien en condition\
+        \ op\xE9rationnelle ou de s\xE9curit\xE9 sont mises en \u0153uvre entre l\u2019\
+        ensemble des syst\xE8mes d\u2019information et, d\u2019une part les syst\xE8\
+        mes d\u2019information tiers et, d\u2019autre part les autres syst\xE8mes\
+        \ d\u2019information sous la responsabilit\xE9 de l\u2019entit\xE9 pour lesquels\
+        \ elle a d\xE9cid\xE9 de ne pas appliquer les objectifs de s\xE9curit\xE9."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+    - urn: urn:intuitem:risk:req_node:recyf:7.a.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.a
+      ref_id: 7.A.8
+      description: "Seules les interconnexions n\xE9cessaires \xE0 la r\xE9alisation\
+        \ des activit\xE9s et services de l\u2019entit\xE9 ou au maintien en condition\
+        \ op\xE9rationnelle ou de s\xE9curit\xE9 sont mises en \u0153uvre entre chaque\
+        \ syst\xE8me d\u2019information et, d\u2019une part les syst\xE8mes d\u2019\
+        information tiers et, d\u2019autre part les autres syst\xE8mes d\u2019information\
+        \ sous la responsabilit\xE9 de l\u2019entit\xE9 pour lesquels elle a d\xE9\
+        cid\xE9 de ne pas appliquer les objectifs de s\xE9curit\xE9, ou entre les\
+        \ sous-syst\xE8mes du syst\xE8me d\u2019information."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+    - urn: urn:intuitem:risk:req_node:recyf:7.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:7
+      ref_id: 7.B
+      name: Filtrage des communications
+    - urn: urn:intuitem:risk:req_node:recyf:7.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.b
+      ref_id: 7.B.1
+      description: "L\u2019entit\xE9 d\xE9finit et documente les communications n\xE9\
+        cessaires :\n\u2022\t\xE0 la r\xE9alisation de ses activit\xE9s et services\
+        \ ;\n\u2022\tau maintien en condition op\xE9rationnelle de s\xE9curit\xE9\
+        \ circulant entre ses syst\xE8mes d\u2019information et les autres syst\xE8\
+        mes d\u2019information pour lesquels elle a d\xE9cid\xE9 de ne pas appliquer\
+        \ les objectifs de s\xE9curit\xE9, d\u2019une part, et les syst\xE8mes d\u2019\
+        information tiers, d\u2019autre part."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:7.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.b
+      ref_id: 7.B.2
+      description: "L\u2019entit\xE9 d\xE9finit et documente les communications n\xE9\
+        cessaires au maintien en condition op\xE9rationnelle de s\xE9curit\xE9 circulant\
+        \ entre les sous-syst\xE8mes du syst\xE8me d\u2019information."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.b
+      ref_id: 7.B.3
+      description: "L\u2019entit\xE9 met en \u0153uvre, au niveau des interconnexions,\
+        \ les r\xE8gles de filtrage pour n\u2019autoriser que les communications identifi\xE9\
+        es \xE0 la mesure 7.B.1-EI/EE ou 7.B.2-EE. Les autres communications sont\
+        \ bloqu\xE9es par d\xE9faut."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+    - urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.b
+      ref_id: 7.B.4
+      description: "L\u2019entit\xE9 filtre par un ou plusieurs pares-feux d\xE9di\xE9\
+        s \xE0 cet usage, au minimum :\n\u2022\tles communications entre les syst\xE8\
+        mes d\u2019information de l\u2019entit\xE9 pour lesquels elle a d\xE9cid\xE9\
+        \ d'appliquer les objectifs ou non, d\u2019une part ; et\n\u2022\tles SI tiers\
+        \ d\u2019autre part.\nPar exemple : une entit\xE9 mettant en \u0153uvre un\
+        \ pare-feu pour filtrer les communications entre ses syst\xE8mes d\u2019information\
+        \ (pour lesquels elle applique les objectifs de s\xE9curit\xE9 ou non) d\u2019\
+        une part et les syst\xE8mes d\u2019information tiers d\u2019autre part est\
+        \ une solution acceptable."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:7.b.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:7.b
+      ref_id: 7.B.5
+      description: "L\u2019entit\xE9 effectue annuellement une revue de la mise en\
+        \ \u0153uvre technique des r\xE8gles de filtrage mentionn\xE9es \xE0 la mesure\
+        \ 7.B.4-EI/EE."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+    - urn: urn:intuitem:risk:req_node:recyf:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: "Objectif de s\xE9curit\xE9 8: S\xE9curisation des acc\xE8s distants aux\
+        \ syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:8
+      ref_id: '8.1'
+      description: "L\u2019entit\xE9 prot\xE8ge les acc\xE8s \xE0 ses syst\xE8mes\
+        \ d\u2019information effectu\xE9s \xE0 travers un syst\xE8me d\u2019information\
+        \ tiers au moyen de m\xE9canismes de chiffrement conformes aux recommandations\
+        \ de l\u2019autorit\xE9 nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information (par exemple : VPN TLS ou IPSec, protocoles applicatifs chiffr\xE9\
+        s comme TLS, SSH, etc.)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:8
+      ref_id: '8.2'
+      description: "Lorsque les acc\xE8s vis\xE9s \xE0 la mesure 8.2-EI/EE sont effectu\xE9\
+        s par les personnels et prestataires qu\u2019elle a autoris\xE9e, l\u2019\
+        entit\xE9 prot\xE8ge les acc\xE8s aux syst\xE8mes d\u2019information par un\
+        \ m\xE9canisme d'authentification conforme aux mesures relatives \xE0 l\u2019\
+        Authentification."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
+    - urn: urn:intuitem:risk:req_node:recyf:8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:8
+      ref_id: '8.3'
+      description: "Pour les acc\xE8s vis\xE9s \xE0 la mesure 8.2-EI/EE le m\xE9canisme\
+        \ d\u2019authentification est multifacteur et repose sur au moins un facteur\
+        \ de connaissance (par exemple : authentification avec une carte \xE0 puce\
+        \ et un code PIN)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:8.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:8
+      ref_id: '8.4'
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas la mise en \u0153uvre d\u2019une authentification multifacteur, l\u2019\
+        entit\xE9 met en \u0153uvre des mesures permettant de r\xE9duire le risque\
+        \ associ\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:8.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:8
+      ref_id: '8.5'
+      description: "Les m\xE9moires de masse (par exemple : les \xAB disques \xBB\
+        ) des postes de travail et \xE9quipements mobiles permettant aux personnels\
+        \ et prestataires de l\u2019entit\xE9 d\u2019acc\xE9der \xE0 distance aux\
+        \ syst\xE8mes d\u2019information depuis un lieu qui n\u2019est pas ma\xEE\
+        tris\xE9 par l\u2019entit\xE9, sont en permanence prot\xE9g\xE9es par des\
+        \ m\xE9canismes de chiffrement et d\u2019authentification conformes \xE0 l\u2019\
+        \xE9tat de l\u2019art tel que recommand\xE9 par l\u2019autorit\xE9 nationale\
+        \ de s\xE9curit\xE9 des syst\xE8mes d\u2019information (par exemple : disques\
+        \ chiffr\xE9s avec code PIN exig\xE9 pour le d\xE9chiffrement au d\xE9marrage)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:pol.work
+    - urn: urn:intuitem:risk:req_node:recyf:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: "Objectif de s\xE9curit\xE9 9: Protection des syst\xE8mes d'information\
+        \ contre les codes malveillants"
+    - urn: urn:intuitem:risk:req_node:recyf:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:9
+      ref_id: '9.1'
+      description: "L\u2019entit\xE9 d\xE9finit les ressources mat\xE9rielles, en\
+        \ particulier les terminaux, autoris\xE9es \xE0 se connecter \xE0 ses syst\xE8\
+        mes d\u2019information.\nNB : Cette mesure autorise le AVEC (Apportez votre\
+        \ \xE9quipement de communication) ou BYOD en anglais."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:pol.accept
+    - urn: urn:intuitem:risk:req_node:recyf:9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:9
+      ref_id: '9.2'
+      description: "Seules les ressources mat\xE9rielles dont l\u2019entit\xE9, ou\
+        \ le prestataire qu\u2019elle a mandat\xE9 \xE0 cet effet, assure la gestion\
+        \ et qui participent \xE0 la r\xE9alisation des activit\xE9s ou des services\
+        \ de l\u2019entit\xE9 ou au maintien en condition op\xE9rationnelle et de\
+        \ s\xE9curit\xE9 se connectent aux syst\xE8mes d\u2019information.\nNB : Cette\
+        \ mesure interdit le AVEC (Apportez votre \xE9quipement de communication)\
+        \ ou BYOD en anglais."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:tech.nac
+      - urn:intuitem:risk:function:doc-pol:tech.uem
+    - urn: urn:intuitem:risk:req_node:recyf:9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:9
+      ref_id: '9.3'
+      description: "L\u2019entit\xE9 met en \u0153uvre des mesures organisationnelles\
+        \ ou techniques visant \xE0 emp\xEAcher la connexion des ressources mat\xE9\
+        rielles autres que celles identifi\xE9es \xE0 la mesure 9.1-EI/EE sur ses\
+        \ syst\xE8mes d\u2019information."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.nac
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+    - urn: urn:intuitem:risk:req_node:recyf:9.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:9
+      ref_id: '9.4'
+      description: "L\u2019entit\xE9 met en \u0153uvre des mesures organisationnelles\
+        \ ou techniques visant \xE0 emp\xEAcher la connexion des ressources mat\xE9\
+        rielles autres que celles identifi\xE9es \xE0 la mesure 9.2-EE sur ses syst\xE8\
+        mes d\u2019information."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.nac
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+    - urn: urn:intuitem:risk:req_node:recyf:9.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:9
+      ref_id: '9.5'
+      description: "Seuls les supports amovibles r\xE9inscriptibles n\xE9cessaires\
+        \ \xE0 la r\xE9alisation des activit\xE9s et services de l\u2019entit\xE9\
+        \ ou au maintien en condition op\xE9rationnelle ou de s\xE9curit\xE9 se connectent\
+        \ \xE0 ses syst\xE8mes d\u2019information (par exemple : clefs USB ou disques\
+        \ dur amovibles)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.removable_media
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+    - urn: urn:intuitem:risk:req_node:recyf:9.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:9
+      ref_id: '9.6'
+      description: "Les postes de travail, les serveurs et les \xE9quipements mobiles\
+        \ ma\xEEtris\xE9s par l\u2019entit\xE9, qui sont amen\xE9s \xE0 traiter de\
+        \ donn\xE9es provenant de sources externes (par exemple les supports amovibles,\
+        \ la messagerie ou la navigation web), \xE0 l\u2019exception de donn\xE9es\
+        \ de mise \xE0 jour fournies par les \xE9diteurs et dont l\u2019authenticit\xE9\
+        \ et l\u2019int\xE9grit\xE9 sont v\xE9rifi\xE9es, disposent de m\xE9canismes\
+        \ de protection contre les risques d'ex\xE9cution de codes malveillants (par\
+        \ exemple : un antivirus ou un EDR)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.malware
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      - urn:intuitem:risk:function:doc-pol:tech.edr
+    - urn: urn:intuitem:risk:req_node:recyf:9.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:9
+      ref_id: '9.7'
+      description: "L\u2019entit\xE9 proc\xE8de \xE0 l\u2019analyse des donn\xE9es\
+        \ provenant de sources externes lors de leur r\xE9ception, pour y rechercher\
+        \ des codes malveillants, \xE0 l\u2019exception de donn\xE9es de mise \xE0\
+        \ jour fournies par les \xE9diteurs et dont l\u2019authenticit\xE9 et l\u2019\
+        int\xE9grit\xE9 sont v\xE9rifi\xE9es (par exemple : une passerelle mail analysant\
+        \ les pi\xE8ces jointes avant distribution, un SAS de d\xE9contamination antivirale\
+        \ pour les clefs USB)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.malware
+      - urn:intuitem:risk:function:doc-pol:tech.mail_gateway
+      - urn:intuitem:risk:function:doc-pol:tech.network_antivirus
+    - urn: urn:intuitem:risk:req_node:recyf:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: "Objectif de s\xE9curit\xE9 10: Gestion des identit\xE9s et des acc\xE8\
+        s des utilisateurs aux syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:10.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:10
+      ref_id: 10.A
+      name: Identification
+    - urn: urn:intuitem:risk:req_node:recyf:10.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.a
+      ref_id: 10.A.1
+      description: "Les utilisateurs et les processus automatiques acc\xE9dant aux\
+        \ ressources des syst\xE8mes d\u2019information de l\u2019entit\xE9 disposent\
+        \ de comptes individuels. Les utilisateurs peuvent, le cas \xE9ch\xE9ant,\
+        \ disposer de plusieurs comptes individuels."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
+    - urn: urn:intuitem:risk:req_node:recyf:10.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.a
+      ref_id: 10.A.2
+      description: "L\u2019emploi d\u2019un compte individuel du syst\xE8me d\u2019\
+        information est r\xE9serv\xE9 \xE0 l\u2019utilisateur ou au processus automatique\
+        \ auquel ce compte a \xE9t\xE9 attribu\xE9."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:10.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.a
+      ref_id: 10.A.3
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de cr\xE9er de comptes individuels pour les utilisateurs ou pour les\
+        \ processus automatiques, l\u2019entit\xE9 met en place des mesures permettant\
+        \ de r\xE9duire le risque li\xE9 \xE0 l'utilisation de comptes partag\xE9\
+        s et d'assurer la tra\xE7abilit\xE9 de l'utilisation de ces comptes (par exemple\
+        \ : carnet de quart dans une salle de supervision, badgeuse \xE0 l\u2019entr\xE9\
+        e de la salle)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:10.a.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.a
+      ref_id: 10.A.4
+      description: "Lorsqu'un syst\xE8me d\u2019information est utilis\xE9 pour diffuser\
+        \ de l'information au public, l\u2019entit\xE9 n'est pas tenue de cr\xE9er\
+        \ de comptes pour l'acc\xE8s du public \xE0 cette information (par exemple\
+        \ : l\u2019acc\xE8s \xE0 un site vitrine ne n\xE9cessite pas d\u2019authentifier\
+        \ les visiteurs alors que l\u2019acc\xE8s \xE0 l\u2019intranet doit authentifier\
+        \ les utilisateurs)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:10.a.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.a
+      ref_id: 10.A.5
+      description: "L\u2019entit\xE9 d\xE9sactive les comptes qui ne sont plus n\xE9\
+        cessaires dans les d\xE9lais pr\xE9vus par sa politique de gestion des comptes\
+        \ (par exemple : sous 7 jours)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+    - urn: urn:intuitem:risk:req_node:recyf:10.a.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.a
+      ref_id: 10.A.6
+      description: "L\u2019entit\xE9 effectue p\xE9riodiquement, au moins annuellement,\
+        \ une revue des comptes. Cette revue doit notamment v\xE9rifier le respect\
+        \ des pr\xE9sentes mesures relatives \xE0 l'identification et, le cas \xE9\
+        ch\xE9ant, corriger les anomalies."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+    - urn: urn:intuitem:risk:req_node:recyf:10.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:10
+      ref_id: 10.B
+      name: Authentification
+    - urn: urn:intuitem:risk:req_node:recyf:10.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.b
+      ref_id: 10.B.1
+      description: "L\u2019entit\xE9 prot\xE8ge les acc\xE8s des utilisateurs et processus\
+        \ automatiques aux ressources de ses syst\xE8mes d\u2019information au moyen\
+        \ d'un m\xE9canisme d'authentification impliquant au moins un \xE9l\xE9ment\
+        \ secret (par exemple : un m\xE9canisme d\u2019authentification mono-facteur\
+        \ tel qu\u2019un mot de passe, ou multi-facteur, tel qu\u2019une carte \xE0\
+        \ puce avec code PIN)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:10.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.b
+      ref_id: 10.B.2
+      description: "L\u2019entit\xE9 change les \xE9l\xE9ments secrets configur\xE9\
+        s par d\xE9faut, avant la mise en service d\u2019une ressource. \xC0 cet effet,\
+        \ l\u2019entit\xE9 s'assure aupr\xE8s du fabricant ou du fournisseur de la\
+        \ ressource qu'elle dispose des moyens et des droits permettant d\u2019effectuer\
+        \ ces changements."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:10.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.b
+      ref_id: 10.B.3
+      description: "L\u2019\xE9l\xE9ment secret d'un compte partag\xE9 est renouvel\xE9\
+        \ \xE0 chaque retrait d'un utilisateur de ce compte."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+    - urn: urn:intuitem:risk:req_node:recyf:10.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.b
+      ref_id: 10.B.4
+      description: "L\u2019\xE9l\xE9ment secret d\u2019un compte n\u2019est connu,\
+        \ que des utilisateurs autoris\xE9s \xE0 utiliser le compte (par exemple :\
+        \ les mots de passe des comptes partag\xE9s peuvent \xEAtre stock\xE9s dans\
+        \ un coffre-fort de mots de passe)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.password_manager
+    - urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.b
+      ref_id: 10.B.5
+      description: "Les facteurs d\u2019authentification sont conformes aux recommandations\
+        \ de l\u2019autorit\xE9 nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information en mati\xE8re de complexit\xE9, en tenant compte du niveau de\
+        \ complexit\xE9 maximal permis par la ressource concern\xE9e, et en mati\xE8\
+        re de fr\xE9quence de renouvellement."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:10.b.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.b
+      ref_id: 10.B.6
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de modifier l'\xE9l\xE9ment secret, l\u2019entit\xE9 met en \u0153uvre\
+        \ un contr\xF4le d'acc\xE8s appropri\xE9 \xE0 la ressource concern\xE9e ainsi\
+        \ que des mesures de r\xE9duction du risque li\xE9 \xE0 l'utilisation d'un\
+        \ \xE9l\xE9ment secret d'authentification fixe."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:10.b.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.b
+      ref_id: 10.B.7
+      description: "Dans le cadre de cette exception, l\u2019entit\xE9 met \xE9galement\
+        \ en \u0153uvre des mesures de s\xE9curit\xE9 permettant d'assurer la tra\xE7\
+        abilit\xE9 des acc\xE8s."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+    - urn: urn:intuitem:risk:req_node:recyf:10.c
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:10
+      ref_id: 10.C
+      name: "Droits d'acc\xE8s"
+    - urn: urn:intuitem:risk:req_node:recyf:10.c.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.c
+      ref_id: 10.C.1
+      description: "L\u2019entit\xE9 n\u2019attribue des droits qu\u2019aux utilisateurs\
+        \ et processus automatiques authentifi\xE9s."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.c
+      ref_id: 10.C.2
+      description: "Pour chaque utilisateur ou chaque processus automatique, l\u2019\
+        entit\xE9 n'attribue les droits d'acc\xE8s qu\u2019aux seules ressources n\xE9\
+        cessaires \xE0 la r\xE9alisation des activit\xE9s et services de l\u2019entit\xE9\
+        \ ou au maintien en condition op\xE9rationnelle ou de s\xE9curit\xE9."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
+    - urn: urn:intuitem:risk:req_node:recyf:10.c.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.c
+      ref_id: 10.C.3
+      description: "Pour chaque ressource du syst\xE8me d\u2019information, l\u2019\
+        entit\xE9 n\u2019attribue les droits d\u2019acc\xE8s qu\u2019aux seuls utilisateurs\
+        \ et processus automatiques justifiant d\u2019un besoin au regard de leurs\
+        \ missions."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
+    - urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:10.c
+      ref_id: 10.C.4
+      description: "L\u2019entit\xE9 effectue p\xE9riodiquement, au moins annuellement,\
+        \ une revue des droits d\u2019acc\xE8s. Cette revue doit notamment v\xE9rifier\
+        \ le respect des pr\xE9sentes mesures relatives au droit d\u2019acc\xE8s et,\
+        \ le cas \xE9ch\xE9ant, corriger les anomalies."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+    - urn: urn:intuitem:risk:req_node:recyf:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: "Objectif de s\xE9curit\xE9 11: Maitrise de l'administration des syst\xE8\
+        mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:11.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:11
+      ref_id: 11.A
+      name: Comptes d'administration
+    - urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.a
+      ref_id: 11.A.1
+      description: "Les actions d'administration sont effectu\xE9es exclusivement\
+        \ \xE0 partir de comptes d'administration et les comptes d'administration\
+        \ sont utilis\xE9s exclusivement pour les actions d'administration.\nPar exemple\
+        \ : le compte d\u2019administration d\u2019un poste utilisateur est utilis\xE9\
+        \ exclusivement pour l\u2019administration de ce poste. L\u2019utilisateur\
+        \ de ce poste dispose d\u2019un compte bureautique non administrateur pour\
+        \ son utilisation quotidienne."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
+    - urn: urn:intuitem:risk:req_node:recyf:11.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.a
+      ref_id: 11.A.2
+      description: "Les comptes d\u2019administration ne sont utilis\xE9s que par\
+        \ des administrateurs ou des personnes autoris\xE9es."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:11.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.a
+      ref_id: 11.A.3
+      description: "Les comptes d\u2019administration respectent les mesures relatives\
+        \ \xE0 la gestion des identit\xE9s et des acc\xE8s des utilisateurs aux syst\xE8\
+        mes d\u2019information."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:11.a.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.a
+      ref_id: 11.A.4
+      description: "Un compte d'administration est utilis\xE9 exclusivement pour se\
+        \ connecter aux ressources que ce compte administre pour effectuer des actions\
+        \ d\u2019administration, ou \xE0 une ressource d\u2019administration (par\
+        \ exemple : le compte administrateur d\u2019un routeur est utilis\xE9 depuis\
+        \ un poste d\u2019administration ou sur le routeur pour l\u2019administrer)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:recyf:11.a.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.a
+      ref_id: 11.A.5
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas d\u2019effectuer des actions d\u2019administration \xE0 partir d'un\
+        \ compte d'administration, l\u2019entit\xE9 met en \u0153uvre des mesures\
+        \ permettant d'assurer le contr\xF4le de ces actions d'administration et des\
+        \ mesures de r\xE9duction du risque li\xE9 \xE0 l'utilisation d'un compte\
+        \ non d\xE9di\xE9 \xE0 l'administration."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:11.a.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.a
+      ref_id: 11.A.6
+      description: "L\u2019entit\xE9 \xE9tablit et tient \xE0 jour la liste des comptes\
+        \ d'administration de ses syst\xE8mes d\u2019information."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:recyf:11.a.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.a
+      ref_id: 11.A.7
+      description: "Lors de toute modification d'un compte d\u2019administration (ajout,\
+        \ suppression, suspension ou modification des droits associ\xE9s), l\u2019\
+        entit\xE9 v\xE9rifie que les droits d'acc\xE8s aux ressources et fonctionnalit\xE9\
+        s sont attribu\xE9s en coh\xE9rence avec les besoins d'utilisation du compte.\n\
+        En particulier, afin de limiter la port\xE9e des droits individuels, ils sont\
+        \ attribu\xE9s \xE0 chaque compte d\u2019administration en les restreignant\
+        \ autant que possible au p\xE9rim\xE8tre fonctionnel et technique de ce dernier.\n\
+        Pour ceci, il est recommand\xE9 d\u2019octroyer les droits d\u2019administration\
+        \ au travers des groupes dont les comptes d\u2019administration sont membres."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
+    - urn: urn:intuitem:risk:req_node:recyf:11.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:11
+      ref_id: 11.B
+      name: "S\xE9curit\xE9 des annuaires"
+    - urn: urn:intuitem:risk:req_node:recyf:11.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.b
+      ref_id: 11.B.1
+      description: "L\u2019entit\xE9 applique sans retard injustifi\xE9 les correctifs\
+        \ de s\xE9curit\xE9 sur les annuaires g\xE9rant les utilisateurs ou les ressources\
+        \ de ses syst\xE8mes d\u2019information."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:recyf:11.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.b
+      ref_id: 11.B.2
+      description: "La s\xE9curit\xE9 des syst\xE8mes d\u2019information de l\u2019\
+        entit\xE9 repose en grande partie sur la s\xE9curit\xE9 du ou des annuaires\
+        \ g\xE9rant les utilisateurs ou les ressources des syst\xE8mes d\u2019information.\n\
+        L\u2019ensemble des ressources regroupant un annuaire, les ressources mat\xE9\
+        rielles et logicielles h\xE9bergeant cet annuaire ou permettant de prendre\
+        \ le contr\xF4le de cet annuaire (les comptes, les hyperviseurs, les machines\
+        \ d\u2019administration, etc.) est d\xE9sign\xE9 \xAB c\u0153ur de confiance\
+        \ \xBB (par exemple : Le Tier0 un annuaire AD DS constitue le c\u0153ur de\
+        \ confiance du syst\xE8me d\u2019information).\nPour chacun de ses annuaires,\
+        \ l\u2019entit\xE9 identifie les ressources constituant son c\u0153ur de confiance."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:recyf:11.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.b
+      ref_id: 11.B.3
+      description: "Les actions d\u2019administration d\u2019un c\u0153ur de confiance\
+        \ sont r\xE9alis\xE9es depuis des comptes d\u2019administration d\xE9di\xE9\
+        s \xE0 l\u2019administration de c\u0153urs de confiance."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+    - urn: urn:intuitem:risk:req_node:recyf:11.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.b
+      ref_id: 11.B.4
+      description: "Les actions d'administration d\u2019un c\u0153ur de confiance\
+        \ sont r\xE9alis\xE9es depuis des ressources d\xE9di\xE9es exclusivement \xE0\
+        \ l\u2019administration de c\u0153urs de confiance."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:recyf:11.b.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.b
+      ref_id: 11.B.5
+      description: "Les connexions externes \xE0 un c\u0153ur de confiance, \xE0 destination\
+        \ des ressources d\u2019administration de c\u0153urs de confiance sont interdites\
+        \ par un dispositif de filtrage sur les ressources d\u2019administration (par\
+        \ exemple : le filtrage peut \xEAtre r\xE9alis\xE9 par le pare-feu local de\
+        \ la ressource d\u2019administration du c\u0153ur de confiance)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+    - urn: urn:intuitem:risk:req_node:recyf:11.b.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.b
+      ref_id: 11.B.6
+      description: "L\u2019entit\xE9 effectue annuellement une revue de la configuration\
+        \ des annuaires g\xE9rant les utilisateurs ou les ressources de ses syst\xE8\
+        mes d\u2019information, afin d\u2019identifier tout \xE9l\xE9ment inutile\
+        \ ou anormal.\nIl est recommand\xE9 que cette revue s\u2019appuie sur un outil\
+        \ automatis\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+    - urn: urn:intuitem:risk:req_node:recyf:11.b.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:recyf:11.b
+      ref_id: 11.B.7
+      description: "Lorsqu\u2019elles existent, les recommandations de l\u2019autorit\xE9\
+        \ nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019information relatives\
+        \ au c\u0153ur de confiance sont mises en \u0153uvre (par exemple : guide\
+        \ de s\xE9curisation, guide de r\xE9ponses \xE0 incidents, m\xE9mos techniques,\
+        \ recommandations issues des outils de revues de configurations)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:recyf:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: "Objectif de s\xE9curit\xE9 12: Identification et r\xE9action aux incidents\
+        \ de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:recyf:12.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:12
+      ref_id: '12.1'
+      description: "L\u2019entit\xE9 s\u2019assure de l\u2019\xE9laboration, du maintien\
+        \ \xE0 jour et de la mise en \u0153uvre d\u2019une proc\xE9dure de traitement\
+        \ des incidents de s\xE9curit\xE9 affectant ses syst\xE8mes d\u2019information."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+    - urn: urn:intuitem:risk:req_node:recyf:12.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:12
+      ref_id: '12.2'
+      description: "L\u2019entit\xE9 s\u2019assure de la mise en \u0153uvre des outils\
+        \ permettant de collecter les signalements remont\xE9s, en particulier par\
+        \ les sources suivantes :\n\u2022\tLes employ\xE9s de l\u2019entit\xE9 essentielle\
+        \ ;\n\u2022\tLes clients et les usagers des activit\xE9s et services mis en\
+        \ \u0153uvre par l\u2019entit\xE9 essentielle ;\n\u2022\tLes prestataires\
+        \ et les fournisseurs contractant avec l\u2019entit\xE9 essentielle."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+    - urn: urn:intuitem:risk:req_node:recyf:12.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:12
+      ref_id: '12.3'
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition et de la mise\
+        \ en \u0153uvre des m\xE9canismes permettant d\u2019analyser et de qualifier\
+        \ les \xE9v\xE9nements remont\xE9s et d\u2019identifier les incidents potentiels\
+        \ ou av\xE9r\xE9s."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+    - urn: urn:intuitem:risk:req_node:recyf:12.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:12
+      ref_id: '12.4'
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition et de la mise\
+        \ en \u0153uvre des m\xE9canismes organisationnels et techniques permettant\
+        \ de r\xE9agir en cas d\u2019incident et de limiter les cons\xE9quences sur\
+        \ la fourniture des services.\nCes m\xE9canismes sont repris, le cas \xE9\
+        ch\xE9ant, dans la d\xE9finition des plans de continuit\xE9 et de reprise\
+        \ d\u2019activit\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+    - urn: urn:intuitem:risk:req_node:recyf:12.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:12
+      ref_id: '12.5'
+      description: "En compl\xE9ment des dispositions de l\u2019article 17 de la loi\
+        \ XXX, l\u2019entit\xE9 s\u2019assure, apr\xE8s chaque incident de s\xE9curit\xE9\
+        , qu\u2019une analyse des causes de l\u2019incident a \xE9t\xE9 r\xE9alis\xE9\
+        e.\nL\u2019analyse des causes vise \xE0 d\xE9finir et mettre en \u0153uvre\
+        \ les mesures de s\xE9curit\xE9 permettant de limiter la vraisemblance d\u2019\
+        un nouvel incident ou d\u2019en r\xE9duire l\u2019impact. L\u2019entit\xE9\
+        \ conserve des preuves de cette analyse."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
+      - urn:intuitem:risk:function:doc-pol:proc.forensics
+    - urn: urn:intuitem:risk:req_node:recyf:12.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:12
+      ref_id: '12.6'
+      description: "L\u2019entit\xE9 conserve les relev\xE9s techniques dont elles\
+        \ disposent (par exemple : rapport d\u2019analyse, alertes remont\xE9es par\
+        \ les outils de protection contre les codes malveillants) et pouvant \xEA\
+        tre utilis\xE9s comme \xE9l\xE9ments de preuve en cas de judiciarisation.\
+        \ Ces relev\xE9s techniques sont conserv\xE9s pour une dur\xE9e pertinente\
+        \ au regard de la protection des donn\xE9es \xE0 caract\xE8re personnel et\
+        \ en particulier la finalit\xE9 du traitement."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.forensics
+      - urn:intuitem:risk:function:doc-pol:doc.incident_register
+    - urn: urn:intuitem:risk:req_node:recyf:12.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:12
+      ref_id: '12.7'
+      description: "Les relev\xE9s techniques relatifs aux analyses des incidents\
+        \ sont prot\xE9g\xE9s d\u2019un incident qui les rendrait inexploitables (par\
+        \ exemple : le stockage hors-ligne pour r\xE9pondre \xE0 un incident de type\
+        \ ran\xE7ongiciel)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.forensics
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+    - urn: urn:intuitem:risk:req_node:recyf:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: "Objectif de s\xE9curit\xE9 13: Continuit\xE9 et reprise d'activit\xE9"
+    - urn: urn:intuitem:risk:req_node:recyf:13.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:13
+      ref_id: '13.1'
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre des proc\xE9\
+        dures de sauvegarde et de restauration de ses syst\xE8mes d\u2019information\
+        \ et des donn\xE9es qu\u2019ils manipulent."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+    - urn: urn:intuitem:risk:req_node:recyf:13.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:13
+      ref_id: '13.2'
+      description: "L\u2019entit\xE9 s\u2019assure que les processus de sauvegarde\
+        \ et de restauration sont test\xE9s au minimum une fois par an. Ces tests\
+        \ visent notamment \xE0 v\xE9rifier la bonne r\xE9alisation des sauvegardes\
+        \ et leur bonne restauration."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+    - urn: urn:intuitem:risk:req_node:recyf:13.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:13
+      ref_id: '13.3'
+      description: "Les sauvegardes sont prot\xE9g\xE9es d\u2019un incident les rendant\
+        \ inexploitables (par exemple : le stockage hors-ligne pour r\xE9pondre \xE0\
+        \ un incident de type ran\xE7ongiciel)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+    - urn: urn:intuitem:risk:req_node:recyf:13.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:13
+      ref_id: '13.4'
+      description: "L\u2019entit\xE9, pour chacun de ses activit\xE9s et services,\
+        \ d\xE9finit et documente la dur\xE9e maximale d\u2019interruption admissible\
+        \ (DMIA) et le point de r\xE9tablissement des donn\xE9es (PRD)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.bia
+      - urn:intuitem:risk:function:doc-pol:proc.bia
+    - urn: urn:intuitem:risk:req_node:recyf:13.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:13
+      ref_id: '13.5'
+      description: "Les m\xE9canismes de sauvegarde sont dimensionn\xE9s pour r\xE9\
+        pondre aux besoins de disponibilit\xE9 associ\xE9s aux diff\xE9rents services\
+        \ et aux diff\xE9rentes activit\xE9s fournis par l\u2019entit\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:proc.bia
+    - urn: urn:intuitem:risk:req_node:recyf:13.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:13
+      ref_id: '13.6'
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre un plan de continuit\xE9\
+        \ d\u2019activit\xE9 (PCA) et un plan de reprise d\u2019activit\xE9 (PRA)\
+        \ adapt\xE9s aux sc\xE9narios de crises d\u2019origine cyber et coh\xE9rents\
+        \ avec la dur\xE9e maximale d\u2019interruption admissible et le point de\
+        \ r\xE9tablissement des donn\xE9es."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:tech.dr_site
+    - urn: urn:intuitem:risk:req_node:recyf:13.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:13
+      ref_id: '13.7'
+      description: "L\u2019identification de ces mesures de continuit\xE9 s\u2019\
+        appuie notamment :\n\u2022\tSur la cartographie de l\u2019\xE9cosyst\xE8me\
+        \ ;\n\u2022\tSur la proc\xE9dure de gestion des incidents pour d\xE9tecter\
+        \ et r\xE9agir au plus t\xF4t aux incidents ;\n\u2022\tSur la proc\xE9dure\
+        \ de gestion des crises d\u2019origine cyber pour permettre la reprise au\
+        \ plus t\xF4t des services."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+    - urn: urn:intuitem:risk:req_node:recyf:14
+      assessable: false
+      depth: 1
+      ref_id: '14'
+      name: "Objectif de s\xE9curit\xE9 14: R\xE9action aux crises d'origine cyber"
+    - urn: urn:intuitem:risk:req_node:recyf:14.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.1'
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition, du maintien\
+        \ \xE0 jour et de la mise en \u0153uvre d\u2019une proc\xE9dure de gestion\
+        \ de crises en cas d\u2019incident de s\xE9curit\xE9 sur ses syst\xE8mes d\u2019\
+        information n\xE9cessitant le passage en mode crise (par exemple : pour les\
+        \ incidents importants au sens de l\u2019article 17 du PJL)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+    - urn: urn:intuitem:risk:req_node:recyf:14.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.2'
+      description: "L\u2019entit\xE9 s\u2019assure du maintien \xE0 jour d\u2019une\
+        \ liste imprim\xE9e des personnes mobilisables dans la gestion de la crise\
+        \ sur les sujets relatifs \xE0 la s\xE9curit\xE9 num\xE9rique ainsi que leurs\
+        \ coordonn\xE9es."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:doc.com
+    - urn: urn:intuitem:risk:req_node:recyf:14.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.3'
+      description: "L\u2019entit\xE9 s\u2019assure que la liste des personnes mobilisables\
+        \ pr\xE9vue au 14.2-EI/EE est accessible dans un format adapt\xE9 \xE0 la\
+        \ nature de la crise (par exemple, la liste doit \xEAtre accessible au format\
+        \ papier si les syst\xE8mes d\u2019information ne sont plus disponibles, et\
+        \ elle doit \xEAtre accessible au format num\xE9rique si la version papier\
+        \ n\u2019est pas accessible)."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:doc.com
+    - urn: urn:intuitem:risk:req_node:recyf:14.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.4'
+      description: "L\u2019entit\xE9 s\u2019assure du maintien \xE0 jour d\u2019un\
+        \ annuaire des parties prenantes externes \xE0 l\u2019entit\xE9 pertinente\
+        \ dans la gestion de la crise en s\u2019appuyant sur la cartographie de l\u2019\
+        \xE9cosyst\xE8me."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+      - urn:intuitem:risk:function:doc-pol:doc.com
+    - urn: urn:intuitem:risk:req_node:recyf:14.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.5'
+      description: "L\u2019entit\xE9 essentielle s\u2019assure de la mise en \u0153\
+        uvre de retour d\u2019exp\xE9rience (RETEX) permettant d\u2019identifier les\
+        \ axes d\u2019am\xE9lioration et les mesures associ\xE9es \xE0 mettre en \u0153\
+        uvre suite \xE0 un entra\xEEnement, un exercice ou une crise r\xE9elle."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+    - urn: urn:intuitem:risk:req_node:recyf:14.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.6'
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition, du maintien\
+        \ \xE0 jour et de la mise en \u0153uvre des crit\xE8res permettant d\u2019\
+        activer et de d\xE9sactiver le dispositif de gestion de crise prenant en compte\
+        \ les menaces cyber."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:14.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.7'
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition, du maintien\
+        \ \xE0 jour et de la mise en \u0153uvre des proc\xE9dures et des m\xE9canismes\
+        \ de gestion de la crise adapt\xE9s \xE0 la menace cyber en s\u2019appuyant\
+        \ sur les recommandations de l\u2019autorit\xE9 nationale de s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+    - urn: urn:intuitem:risk:req_node:recyf:14.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.8'
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition et de la mise\
+        \ en \u0153uvre des mesures pour isoler, prot\xE9ger et, le cas \xE9ch\xE9\
+        ant, reconstruire les syst\xE8mes d\u2019information concern\xE9s, activables\
+        \ en cas d\u2019incident de s\xE9curit\xE9.\nCes mesures prennent en compte\
+        \ les infrastructures, applicatifs et services num\xE9riques externalis\xE9\
+        s \xE0 des prestataires et sont mises en place en coh\xE9rence avec les plans\
+        \ de continuit\xE9 et de reprise d\u2019activit\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+    - urn: urn:intuitem:risk:req_node:recyf:14.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.9'
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition d\u2019une\
+        \ strat\xE9gie de communication adapt\xE9e aux crises d\u2019origine cyber,\
+        \ incluant des sc\xE9narios de crise, le sch\xE9ma d\u2019organisation de\
+        \ la communication de crise, les outils de pilotage de la communication et\
+        \ des \xE9l\xE9ments de langage sur des sujets sensibles ou de crise. Cette\
+        \ strat\xE9gie prend en compte les sc\xE9narios de menaces cyber identifi\xE9\
+        s."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:doc.com
+    - urn: urn:intuitem:risk:req_node:recyf:14.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:14
+      ref_id: '14.10'
+      description: "L\u2019entit\xE9 s\u2019assure de la disponibilit\xE9 de moyens\
+        \ de communication de secours, si possible, s\xE9curis\xE9s en temps de crise\
+        \ lorsque les moyens de communication habituels sont indisponibles."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:15
+      assessable: false
+      depth: 1
+      ref_id: '15'
+      name: "Objectif de s\xE9curit\xE9 15: Exercices, tests et entrainements"
+    - urn: urn:intuitem:risk:req_node:recyf:15.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:15
+      ref_id: '15.1'
+      description: "L\u2019entit\xE9 s\u2019assure de la sensibilisation et de la\
+        \ mise en \u0153uvre d\u2019un exercice sur table \xE0 une fr\xE9quence qu\u2019\
+        elle d\xE9finit pour les personnes mobilisables dans le dispositif de gestion\
+        \ des crises d\u2019origine cyber."
+      implementation_groups:
+      - EI
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+    - urn: urn:intuitem:risk:req_node:recyf:15.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:15
+      ref_id: '15.2'
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre une strat\xE9\
+        gie d\u2019entra\xEEnement qui comporte, au minimum, les \xE9l\xE9ments suivants\
+        \ :\n\u2022\tUne liste des acteurs amen\xE9s \xE0 participer aux diff\xE9\
+        rents dispositifs d\u2019entra\xEEnement et d\u2019exercice ;\n\u2022\tUne\
+        \ liste d\u2019exercices permettant d\u2019entra\xEEner ou de tester les capacit\xE9\
+        s op\xE9rationnelles ;\n\u2022\tLes objectifs vis\xE9s par la strat\xE9gie\
+        \ ; \n\u2022\tLes moyens de v\xE9rification ou d\u2019\xE9valuation d\u2019\
+        atteinte de ces objectifs ;\n\u2022\tLes sc\xE9narios de risques ou d\u2019\
+        attaques \xE0 tester en priorit\xE9 ;\n\u2022\tLa comitologie de suivi de\
+        \ la strat\xE9gie.\nCette strat\xE9gie peut \xEAtre mutualis\xE9e avec d\u2019\
+        autres livrables."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+    - urn: urn:intuitem:risk:req_node:recyf:15.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:15
+      ref_id: '15.3'
+      description: "Cette strat\xE9gie d\u2019entra\xEEnement vise \xE0 tester les\
+        \ dispositifs mis en \u0153uvre par l\u2019entit\xE9 en mati\xE8re :\n\u2022\
+        \tDe gestion des alertes relatives aux incidents, aux vuln\xE9rabilit\xE9\
+        s et menaces ;\n\u2022\tDe continuit\xE9 et de reprise d\u2019activit\xE9\
+        \ ;\n\u2022\tDe gestion des crises d\u2019origine cyber."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:15.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:15
+      ref_id: '15.4'
+      description: "L\u2019entit\xE9 d\xE9cline cette strat\xE9gie dans la d\xE9finition\
+        \ et la mise en \u0153uvre d\u2019un programme triennal d\u2019entra\xEEnement\
+        \ et d\u2019exercice. Ce programme pr\xE9cise notamment la fr\xE9quence de\
+        \ ces entra\xEEnements et exercices ainsi que leur nature et que leurs objectifs.\n\
+        Ce programme triennal doit permettre de tester les dispositifs de gestion\
+        \ des incidents, de gestion des crises d\u2019origine cyber et de coop\xE9\
+        ration avec l\u2019\xE9cosyst\xE8me et, le cas \xE9ch\xE9ant, le volet cyber\
+        \ des plans de continuit\xE9 et de reprise d\u2019activit\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+    - urn: urn:intuitem:risk:req_node:recyf:16
+      assessable: false
+      depth: 1
+      ref_id: '16'
+      name: "Objectif de s\xE9curit\xE9 16: Mise en \u0153uvre d'une approche par\
+        \ les risques"
+    - urn: urn:intuitem:risk:req_node:recyf:16.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:16
+      ref_id: '16.1'
+      description: "L\u2019entit\xE9 d\xE9finit, met en \u0153uvre et maintient \xE0\
+        \ jour une gouvernance par les risques.\nCette gouvernance vise \xE0 s\u2019\
+        assurer que le risque num\xE9rique est pris en compte par le dirigeant ex\xE9\
+        cutif de l\u2019entit\xE9 et les responsables d\u2019activit\xE9 ou de service\
+        \ de l\u2019entit\xE9 au regard des r\xF4les et responsabilit\xE9s d\xE9finis\
+        \ et que les moyens financiers, humains ou techniques ad\xE9quats sont allou\xE9\
+        s pour ma\xEEtriser ce risque.\nCette gouvernance int\xE8gre les \xE9l\xE9\
+        ments issus de l\u2019approche par la conformit\xE9 et la compl\xE8te par\
+        \ une approche par les risques, r\xE9alis\xE9e dans les conditions d\xE9finies\
+        \ ci-apr\xE8s. Ces approches sont compl\xE9mentaires et peuvent \xEAtre mutualis\xE9\
+        es, notamment en termes de livrables attendus."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_appetite
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+    - urn: urn:intuitem:risk:req_node:recyf:16.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:16
+      ref_id: '16.2'
+      description: "L\u2019entit\xE9 s\u2019assure que chaque syst\xE8me d\u2019information\
+        \ fait l\u2019objet d\u2019une analyse de risques.\nCette exigence peut \xEA\
+        tre satisfaite via la r\xE9alisation et le maintien \xE0 jour d\u2019une analyse\
+        \ de risques pour chaque activit\xE9 ou service qu\u2019elle fournit, couvrant\
+        \ l\u2019ensemble des syst\xE8mes d\u2019information supportant cette activit\xE9\
+        \ ou ce service.\nCette analyse de risques s\u2019appuie sur les \xE9l\xE9\
+        ments issus :\n\u2022\tDe la PSSI et des sp\xE9cificit\xE9s sectorielles ;\n\
+        \u2022\tDe la ma\xEEtrise de l\u2019\xE9cosyst\xE8me ;\n\u2022\tDe la ma\xEE\
+        trise du syst\xE8me d\u2019information ;\n\u2022\tDe l\u2019approche par conformit\xE9\
+        \ ;\n\u2022\tDes audits.\nLa m\xE9thode EBIOS RM peut \xEAtre utilis\xE9e\
+        \ pour r\xE9aliser cette analyse de risques."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
+    - urn: urn:intuitem:risk:req_node:recyf:16.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:16
+      ref_id: '16.3'
+      description: "L\u2019entit\xE9 valide l\u2019analyse de risques, accepte les\
+        \ risques r\xE9siduels et met en \u0153uvre le plan d\u2019action pour ma\xEE\
+        triser ces risques.\nLe plan d\u2019action pr\xE9voit, au minimum, une \xE9\
+        ch\xE9ance raisonnable et un responsable pour la r\xE9alisation de chaque\
+        \ action."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
+      - urn:intuitem:risk:function:doc-pol:doc.risk_appetite
+    - urn: urn:intuitem:risk:req_node:recyf:16.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:16
+      ref_id: '16.4'
+      description: "L\u2019entit\xE9 r\xE9examine l\u2019analyse de risques au minimum\
+        \ tous les trois ans et en tant que de besoin, notamment en cas d\u2019incident\
+        \ de s\xE9curit\xE9 ou d\u2019\xE9volutions majeures du contexte m\xE9tier,\
+        \ technique ou organisationnel."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
+    - urn: urn:intuitem:risk:req_node:recyf:17
+      assessable: false
+      depth: 1
+      ref_id: '17'
+      name: "Objectif de s\xE9curit\xE9 17: Audit de la s\xE9curit\xE9 des syst\xE8\
+        mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:17.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:17
+      ref_id: '17.1'
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre un programme\
+        \ d\u2019audit de l\u2019ensemble de ses syst\xE8mes d\u2019information et\
+        \ s\u2019assure que les audits associ\xE9s \xE0 ce programme ainsi que leur\
+        \ profondeur et leur fr\xE9quence tiennent compte de tout ou partie de l\u2019\
+        analyse de risque r\xE9alis\xE9e, de la criticit\xE9 du syst\xE8me d\u2019\
+        information au regard de son organisation et de l\u2019exposition du syst\xE8\
+        me d\u2019information aux risques num\xE9riques.\nPour \xE9valuer cette criticit\xE9\
+        \ et ce niveau d\u2019exposition, l\u2019entit\xE9 peut s\u2019appuyer sur\
+        \ les recommandations de l\u2019autorit\xE9 nationale de s\xE9curit\xE9 des\
+        \ syst\xE8mes d\u2019information en mati\xE8re de gestion des risques num\xE9\
+        riques."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.audit_plan
+    - urn: urn:intuitem:risk:req_node:recyf:17.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:17
+      ref_id: '17.2'
+      description: "L\u2019audit de s\xE9curit\xE9 permet, de mani\xE8re ind\xE9pendante\
+        \ :\n\u2022\tDe v\xE9rifier, sur le p\xE9rim\xE8tre d\xE9fini, l\u2019atteinte\
+        \ des objectifs fix\xE9s par la r\xE9glementation via \no\tLa conformit\xE9\
+        \ aux pr\xE9sentes mesures, ou \no\tLa mise en \u0153uvre de mesures alternatives\
+        \ ; et\n\u2022\tD\u2019\xE9valuer le niveau de s\xE9curit\xE9 du ou des syst\xE8\
+        mes d\u2019information couverts au regard des menaces et des vuln\xE9rabilit\xE9\
+        s connues."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+    - urn: urn:intuitem:risk:req_node:recyf:17.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:17
+      ref_id: '17.3'
+      description: "Sans pr\xE9judice d\u2019autres obligations l\xE9gales et r\xE9\
+        glementaires, l\u2019audit de s\xE9curit\xE9 comprend au minimum une activit\xE9\
+        \ parmi les suivantes : un test d\u2019intrusion (couvrant au minimum les\
+        \ interfaces expos\xE9es \xE0 des syst\xE8mes sous la responsabilit\xE9 de\
+        \ l\u2019entit\xE9 pour lesquels elle a d\xE9cid\xE9 de ne pas appliquer les\
+        \ objectifs de s\xE9curit\xE9 ainsi qu\u2019\xE0 des syst\xE8mes d\u2019information\
+        \ tiers), un audit de configuration, un audit d\u2019architecture, un audit\
+        \ organisationnel et physique et, lorsque cela est pertinent, un audit de\
+        \ code."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.pentest
+      - urn:intuitem:risk:function:doc-pol:proc.pentest
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:tech.sast_dast
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:recyf:17.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:17
+      ref_id: '17.4'
+      description: "Le rapport de l\u2019audit de s\xE9curit\xE9 pr\xE9sente :\n\u2022\
+        \tUne synth\xE8se de la conformit\xE9 aux pr\xE9sentes mesures ou aux mesures\
+        \ d\xE9finies par l\u2019entit\xE9 pour atteindre les objectifs fix\xE9s par\
+        \ la r\xE9glementation et du niveau de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information audit\xE9s ;\n\u2022\tLes constats de non-conformit\xE9 et les\
+        \ vuln\xE9rabilit\xE9s identifi\xE9es ;\n\u2022\tLes recommandations pour\
+        \ y rem\xE9dier."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+    - urn: urn:intuitem:risk:req_node:recyf:17.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:17
+      ref_id: '17.5'
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre un plan d\u2019\
+        action visant \xE0 corriger les non-conformit\xE9s et les vuln\xE9rabilit\xE9\
+        s identifi\xE9es.\nCe plan d\u2019action pr\xE9voit, au minimum, une \xE9\
+        ch\xE9ance raisonnable et un responsable pour la r\xE9alisation de chaque\
+        \ action."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+    - urn: urn:intuitem:risk:req_node:recyf:18
+      assessable: false
+      depth: 1
+      ref_id: '18'
+      name: "Objectif de s\xE9curit\xE9 18: S\xE9curisation de la configuration des\
+        \ ressources des syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:18.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:18
+      ref_id: '18.1'
+      description: "L\u2019entit\xE9 n\u2019installe et ne conserve sur ses syst\xE8\
+        mes d\u2019information que les ressources logicielles n\xE9cessaires \xE0\
+        \ la r\xE9alisation de ses activit\xE9s et services ou au maintien en condition\
+        \ op\xE9rationnelle ou de s\xE9curit\xE9 de ses syst\xE8mes d\u2019information\
+        \ (par exemple : utilisation d\u2019un mod\xE8le de configuration centralis\xE9\
+        \ (master) contenant exclusivement les logiciels/services strictement n\xE9\
+        cessaires aux besoins m\xE9tiers et d\u2019administration)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
+    - urn: urn:intuitem:risk:req_node:recyf:18.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:18
+      ref_id: '18.2'
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de d\xE9sactiver ou d\xE9sinstaller une ressource logicielle, l\u2019\
+        entit\xE9 met en \u0153uvre des mesures permettant de r\xE9duire le risque\
+        \ associ\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:recyf:18.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:18
+      ref_id: '18.3'
+      description: "L\u2019entit\xE9 configure les ressources de ses syst\xE8mes d\u2019\
+        information de mani\xE8re s\xE9curis\xE9e en s\u2019appuyant sur les recommandations\
+        \ de l\u2019\xE9diteur de la fonctionnalit\xE9, du fabricant de la ressource\
+        \ ou de l\u2019autorit\xE9 nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+    - urn: urn:intuitem:risk:req_node:recyf:18.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:18
+      ref_id: '18.4'
+      description: "L\u2019entit\xE9 effectue annuellement une revue de configuration\
+        \ des ressources de ses syst\xE8mes d\u2019information pour v\xE9rifier l\u2019\
+        application des mesures pr\xE9c\xE9dentes. Il est recommand\xE9 que cette\
+        \ revue s\u2019appuie sur un ou des outils automatis\xE9s (par exemple : scan\
+        \ de port et de vuln\xE9rabilit\xE9, revue (manuel ou automatique) des configurations\
+        \ des pares-feux par rapport aux matrices de flux)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+    - urn: urn:intuitem:risk:req_node:recyf:19
+      assessable: false
+      depth: 1
+      ref_id: '19'
+      name: "Objectif de s\xE9curit\xE9 19: Administration des syst\xE8mes d'information\
+        \ depuis des ressources d\xE9di\xE9es"
+    - urn: urn:intuitem:risk:req_node:recyf:19.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.1'
+      description: "Les actions d\u2019administration sont effectu\xE9es au moyen\
+        \ d\u2019un r\xE9seau d\u2019administration d\xE9di\xE9."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:19.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.2'
+      description: "Les ressources des r\xE9seaux d'administration sont g\xE9r\xE9\
+        es et configur\xE9es par l\u2019entit\xE9 ou par le prestataire qu'elle a\
+        \ mandat\xE9 pour r\xE9aliser les actions d'administration."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:recyf:19.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.3'
+      description: "Les ressources mat\xE9rielles des r\xE9seaux d\u2019administration\
+        \ sont utilis\xE9es exclusivement pour r\xE9aliser des actions d\u2019administration."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:19.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.4'
+      description: "Le poste physique utilis\xE9 pour effectuer des actions d'administration\
+        \ est utilis\xE9 exclusivement pour r\xE9aliser des actions d\u2019administration."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:recyf:19.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.5'
+      description: "La connexion des administrateurs \xE0 un r\xE9seau d\u2019administration\
+        \ s\u2019effectue au moyen d\u2019un poste physique utilis\xE9 exclusivement\
+        \ pour des actions d\u2019administration."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+    - urn: urn:intuitem:risk:req_node:recyf:19.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.6'
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de d\xE9dier le poste de travail physique de l'administrateur pour les\
+        \ actions d'administration, l\u2019entit\xE9 met en \u0153uvre des mesures\
+        \ de durcissement et de cloisonnement du syst\xE8me d'exploitation du poste\
+        \ de travail permettant d'isoler le syst\xE8me d\u2019exploitation utilis\xE9\
+        \ pour les actions d'administration du syst\xE8me d\u2019exploitation utilis\xE9\
+        \ pour les autres actions. Ces mesures sont conformes aux recommandations\
+        \ de l\u2019autorit\xE9 nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information, y compris les recommandations alternatives."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+    - urn: urn:intuitem:risk:req_node:recyf:19.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.7'
+      description: "Les r\xE9seaux d'administration sont connect\xE9s aux ressources\
+        \ du syst\xE8me d\u2019information \xE0 administrer au travers d'une liaison\
+        \ r\xE9seau physique utilis\xE9e exclusivement pour les actions d'administration.\
+        \ Ces ressources sont administr\xE9es au travers de leur interface d'administration\
+        \ physique."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:19.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.8'
+      description: "Les modalit\xE9s de cloisonnement et de filtrage du r\xE9seau\
+        \ d\u2019administration respectent les modalit\xE9s de cloisonnement et de\
+        \ filtrage mis en \u0153uvre entre et au sein des syst\xE8mes d\u2019information\
+        \ (par exemple : deux machines ne pouvant pas communiquer au travers des syst\xE8\
+        mes d\u2019information ne peuvent pas communiquer au travers du r\xE9seau\
+        \ d\u2019administration)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
+    - urn: urn:intuitem:risk:req_node:recyf:19.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.9'
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas d'administrer une ressource au travers d'une liaison r\xE9seau physique\
+        \ ou de son interface d'administration physique, l\u2019entit\xE9 met en \u0153\
+        uvre des mesures de r\xE9duction du risque telles que des mesures de s\xE9\
+        curit\xE9 logique. Ces mesures sont conformes aux recommandations de l\u2019\
+        autorit\xE9 nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ y compris les recommandations alternatives."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:recyf:19.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.10'
+      description: "Les communications associ\xE9es \xE0 des actions d\u2019administration\
+        \ sont prot\xE9g\xE9es par des m\xE9canismes de chiffrement et d\u2019authentification\
+        \ conformes \xE0 l\u2019\xE9tat de l'art tel que recommand\xE9 par l\u2019\
+        autorit\xE9 nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ (par exemple : en utilisant des protocoles s\xE9curis\xE9s garantissant\
+        \ l\u2019authentification de l\u2019administrateur, l\u2019int\xE9grit\xE9\
+        \ et la confidentialit\xE9 des messages)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:recyf:19.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.11'
+      description: "Les communications associ\xE9es \xE0 des actions d\u2019administration\
+        \ qui transitent sur des r\xE9seaux non d\xE9di\xE9s \xE0 ces communications\
+        \ sont cloisonn\xE9es au moyen de m\xE9canismes de chiffrement et d\u2019\
+        authentification conformes aux mesures recommand\xE9es par l\u2019autorit\xE9\
+        \ nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019information (par exemple\
+        \ : au travers de tunnels VPN)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+    - urn: urn:intuitem:risk:req_node:recyf:19.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:19
+      ref_id: '19.12'
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de recourir \xE0 des m\xE9canismes de chiffrement ou d\u2019authentification\
+        \ de ces communications, l\u2019entit\xE9 met en \u0153uvre des mesures permettant\
+        \ de prot\xE9ger la confidentialit\xE9 et l\u2019int\xE9grit\xE9 de ces flux\
+        \ et de renforcer le contr\xF4le et la tra\xE7abilit\xE9 des actions d\u2019\
+        administration."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+    - urn: urn:intuitem:risk:req_node:recyf:20
+      assessable: false
+      depth: 1
+      ref_id: '20'
+      name: "Objectif de s\xE9curit\xE9 20: Supervision de la s\xE9curit\xE9 des syst\xE8\
+        mes d'information"
+    - urn: urn:intuitem:risk:req_node:recyf:20.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:20
+      ref_id: '20.1'
+      description: "L\u2019entit\xE9 s\u2019assure que les \xE9quipes en charge de\
+        \ l\u2019activit\xE9 de supervision de s\xE9curit\xE9 dimensionnent et op\xE8\
+        rent le syst\xE8me d\u2019information supportant l\u2019activit\xE9 de supervision\
+        \ de s\xE9curit\xE9 en ad\xE9quation avec leur capacit\xE9 op\xE9rationnelle,\
+        \ afin de prendre en compte les journaux et les \xE9v\xE8nements de s\xE9\
+        curit\xE9, sans retard injustifi\xE9 et au maximum sous 24h ouvr\xE9s (Par\
+        \ exemple : l\u2019ensemble des \xE9v\xE8nements de s\xE9curit\xE9 issus de\
+        \ l\u2019EDR)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+    - urn: urn:intuitem:risk:req_node:recyf:20.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:20
+      ref_id: '20.2'
+      description: "L\u2019entit\xE9 \xE9labore et met en \u0153uvre une d\xE9marche\
+        \ d\u2019am\xE9lioration continue de son activit\xE9 de supervision de s\xE9\
+        curit\xE9, afin d\u2019am\xE9liorer la couverture des sc\xE9narios de menaces\
+        \ identifi\xE9s \xE0 l\u2019occasion de l\u2019analyse de risque pr\xE9vue\
+        \ \xE0 l\u2019objectif de s\xE9curit\xE9 16, et l\u2019efficacit\xE9 de la\
+        \ supervision de s\xE9curit\xE9, en accord avec les dispositions pr\xE9vues\
+        \ 20.1-EE (par exemple : augmentation des sources de collecte, am\xE9lioration\
+        \ des processus de traitements, augmentation des capacit\xE9s de traitement,\
+        \ centralisation des journaux et des \xE9v\xE8nements de s\xE9curit\xE9, mise\
+        \ en place de corr\xE9lation, prise en compte de sc\xE9narios de menace suppl\xE9\
+        mentaires)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+    - urn: urn:intuitem:risk:req_node:recyf:20.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:20
+      ref_id: '20.3'
+      description: "L\u2019entit\xE9 ou le prestataire qu\u2019elle a mandat\xE9 \xE0\
+        \ cet effet ma\xEEtrise l\u2019architecture et la configuration du syst\xE8\
+        me d\u2019information supportant l\u2019activit\xE9 de supervision de s\xE9\
+        curit\xE9 (par exemple : Le syst\xE8me peut \xEAtre compos\xE9 d\u2019une\
+        \ ou plusieurs des cha\xEEnes suivantes : collecte, analyse, investigation,\
+        \ signalement)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+    - urn: urn:intuitem:risk:req_node:recyf:20.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:20
+      ref_id: '20.4'
+      description: "En lien avec la d\xE9marche d\u2019am\xE9lioration continue, l\u2019\
+        entit\xE9 collecte les donn\xE9es de supervision et les \xE9v\xE8nements de\
+        \ s\xE9curit\xE9 utiles \xE0 la d\xE9tection des sc\xE9narios principaux de\
+        \ menaces, conform\xE9ment \xE0 la disposition pr\xE9vue en 20.1-EE. Les journaux\
+        \ et \xE9v\xE8nements refl\xE8tent, la vari\xE9t\xE9 des activit\xE9s du syst\xE8\
+        me d\u2019information associ\xE9es (par exemple : r\xE9seau, syst\xE8me, applicatif,\
+        \ utilisateur)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:tech.access_log
+    - urn: urn:intuitem:risk:req_node:recyf:20.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:20
+      ref_id: '20.5'
+      description: "L\u2019entit\xE9 s\u2019assure que les donn\xE9es de supervision\
+        \ et les \xE9v\xE9nements de s\xE9curit\xE9 sont conserv\xE9s pour une dur\xE9\
+        e d'au moins trois mois, sans pr\xE9judice d\u2019autres obligations l\xE9\
+        gales et r\xE9glementaires (par exemple : le r\xE8glement g\xE9n\xE9ral sur\
+        \ la protection des donn\xE9es \xE0 caract\xE8re personnel)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+    - urn: urn:intuitem:risk:req_node:recyf:20.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:recyf:20
+      ref_id: '20.6'
+      description: "Les donn\xE9es de supervision et les \xE9v\xE9nements de s\xE9\
+        curit\xE9 sont prot\xE9g\xE9s d\u2019un incident les rendant inexploitables\
+        \ (par exemple : le stockage hors-ligne pour r\xE9pondre \xE0 un incident\
+        \ de type ran\xE7ongiciel)."
+      implementation_groups:
+      - EE
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+dependencies:
+- urn:intuitem:risk:library:doc-pol

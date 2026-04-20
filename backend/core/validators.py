@@ -69,6 +69,7 @@ def validate_file_name(value):
         "mp4",
         "mov",
         "gif",
+        "webp",
     ]
     parts = value.name.split(".")
     extension = parts[-1].lower()

@@ -12,13 +12,13 @@
 
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { getModalStore } from './stores';
 	import { onMount, tick } from 'svelte';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
-		form: SuperValidated<AnyZodObject>;
+		form: SuperValidated<FormDataShape>;
 		customNameDescription?: boolean;
 		importFolder?: boolean;
 		model: ModelInfo;
@@ -39,8 +39,8 @@
 		form,
 		importFolder = false,
 		model,
-		customNameDescription = model.customNameDescription ??
-			model.info?.customNameDescription ??
+		customNameDescription = model?.customNameDescription ??
+			model?.info?.customNameDescription ??
 			false,
 		duplicate = false,
 		invalidateAll = true,

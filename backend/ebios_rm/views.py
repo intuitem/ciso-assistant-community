@@ -193,16 +193,18 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         from core.models import RequirementAssessment
         from .helpers import ecosystem_circular_chart_data
 
-        # Get all related data
+        # Get all related data, sorted per issue #3715
         feared_events = FearedEvent.objects.filter(
             ebios_rm_study=study, is_selected=True
+        ).order_by("-gravity", "name")
+        ro_to_couples = (
+            RoTo.objects.filter(ebios_rm_study=study, is_selected=True)
+            .with_pertinence()
+            .order_by("-pertinence", "risk_origin__name", "target_objective")
         )
-        ro_to_couples = RoTo.objects.filter(
-            ebios_rm_study=study, is_selected=True
-        ).with_pertinence()
         stakeholders = Stakeholder.objects.filter(
             ebios_rm_study=study, is_selected=True
-        )
+        ).order_by("entity__name")
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
@@ -352,19 +354,39 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 mode_data["graph"] = graph_data
             operating_modes_data.append(mode_data)
 
+        # Sort strategic scenarios by gravity desc, then name asc
+        strategic_scenarios_data = sorted(
+            StrategicScenarioReadSerializer(strategic_scenarios, many=True).data,
+            key=lambda s: (-s.get("gravity", {}).get("value", -1), s.get("name", "")),
+        )
+
+        # Sort operational scenarios by gravity desc, likelihood desc, then name asc
+        operational_scenarios_data = sorted(
+            OperationalScenarioReadSerializer(operational_scenarios, many=True).data,
+            key=lambda s: (
+                -s.get("gravity", {}).get("value", -1),
+                -s.get("likelihood", {}).get("value", -1),
+                s.get("str", ""),
+            ),
+        )
+
+        # Sort study assets: primary before support, then alphabetical
+        study_data = EbiosRMStudyReadSerializer(study).data
+        if study_data.get("assets"):
+            study_data["assets"] = sorted(
+                study_data["assets"],
+                key=lambda a: (0 if a.get("type") == "PR" else 1, a.get("str", "")),
+            )
+
         # Build comprehensive report data
         report_data = {
-            "study": EbiosRMStudyReadSerializer(study).data,
+            "study": study_data,
             "feared_events": FearedEventReadSerializer(feared_events, many=True).data,
             "ro_to_couples": RoToReadSerializer(ro_to_couples, many=True).data,
             "stakeholders": StakeholderReadSerializer(stakeholders, many=True).data,
-            "strategic_scenarios": StrategicScenarioReadSerializer(
-                strategic_scenarios, many=True
-            ).data,
+            "strategic_scenarios": strategic_scenarios_data,
             "attack_paths": AttackPathReadSerializer(attack_paths, many=True).data,
-            "operational_scenarios": OperationalScenarioReadSerializer(
-                operational_scenarios, many=True
-            ).data,
+            "operational_scenarios": operational_scenarios_data,
             "operating_modes": operating_modes_data,
             "compliance_assessments": compliance_assessments_data,
             "risk_matrix_data": risk_matrix_data,

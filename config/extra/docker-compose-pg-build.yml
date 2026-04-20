@@ -54,6 +54,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - backend
+    restart: always
 
   postgres:
     container_name: postgres
@@ -68,7 +69,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.10.0
+    image: caddy:2.11.2
     restart: unless-stopped
     ports:
       - 8443:8443

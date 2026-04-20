@@ -8,7 +8,8 @@ Each function generates a specific report and writes it to a ZIP file.
 import csv
 import io
 import json
-from datetime import date
+import logging
+from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
 from django.db.models import QuerySet
@@ -16,27 +17,158 @@ from tprm.models import Entity, Contract, Solution
 from core.models import Asset
 
 
+logger = logging.getLogger(__name__)
+
+
 # Helper Functions
+
+
+def compute_chain_depths(chain_rows):
+    """Compute rank (depth) for each SolutionSubcontractor from the recipient tree.
+
+    Returns a dict mapping subcontractor_id → rank (int, >= 2).
+    - recipient=NULL → rank 2 (direct child of the provider)
+    - recipient=X → rank_of(X) + 1
+
+    Cycles in corrupt data are broken by treating the back-edge as a root
+    (depth 2) instead of recursing infinitely.
+    """
+    by_sub = {sc.subcontractor_id: sc for sc in chain_rows}
+    depths = {}
+    visiting = set()
+
+    def _depth(sc):
+        sid = sc.subcontractor_id
+        if sid in depths:
+            return depths[sid]
+        if sid in visiting:
+            # Cycle detected — break it by treating this node as a root.
+            depths[sid] = 2
+            return 2
+        visiting.add(sid)
+        if sc.recipient_id is None or sc.recipient_id not in by_sub:
+            depths[sid] = 2
+        else:
+            depths[sid] = _depth(by_sub[sc.recipient_id]) + 1
+        visiting.discard(sid)
+        return depths[sid]
+
+    for sc in chain_rows:
+        _depth(sc)
+    return depths
+
+
+IDENTIFIER_PRIORITY = ["LEI", "EUID", "KBO", "CRN", "VAT", "PNR", "NIN", "DUNS"]
+
+
+def get_dora_export_metadata(
+    main_entity: Entity,
+    identifier_type: str = None,
+    level: str = "IND",
+    naming_convention: str = "nbb",
+) -> dict:
+    """
+    Compute metadata for DORA RoI export.
+
+    Args:
+        main_entity: The main financial entity
+        identifier_type: Explicit identifier key to use (e.g. "LEI", "KBO"). If None, uses priority list.
+        level: Consolidation level — "IND" (individual) or "CON" (consolidated). Defaults to "IND".
+        naming_convention: "nbb" for NBB format, "eba" for EBA FAQ #24 format.
+
+    Returns:
+        Dictionary with:
+        - folder_prefix: The prefix for files inside the ZIP
+        - filename: The name of the ZIP file
+        - entity_id: The identifier for parameters.csv
+        - competent_authority: The authority name used in naming
+    """
+    if level not in ("IND", "CON"):
+        raise ValueError(f"Invalid level '{level}'. Must be 'IND' or 'CON'.")
+
+    priority = [identifier_type] if identifier_type else None
+    code, xbrl_type, key_name = get_entity_identifier(main_entity, priority=priority)
+    if not code or (identifier_type and key_name != identifier_type):
+        missing = identifier_type or "legal identifier"
+        raise ValueError(
+            f"Cannot generate DORA RoI export: main entity has no {missing}. "
+            f"Please set a {missing} in the main entity's legal identifiers before exporting."
+        )
+
+    authority = main_entity.dora_competent_authority or "UNKNOWN"
+    folder_prefix = f"{key_name}_{code}.{level}_{authority}_DOR_DORA_ROI"
+    entity_id = f"rs:{code}.{level}"
+
+    if naming_convention == "eba":
+        country = getattr(main_entity, "country", None) or "XX"
+        if len(country) > 2:
+            country = country[:2].upper()
+        ref_date = f"{date.today().year - 1}-12-31"
+        timestamp = datetime.now().strftime("%Y%m%dT%H%M%Sz")
+        filename = f"{key_name}_{code}.{level}_{country}_DORA010100_DORA_{ref_date}_{timestamp}.zip"
+    else:
+        filename = f"{folder_prefix}.zip"
+
+    return {
+        "folder_prefix": folder_prefix,
+        "filename": filename,
+        "entity_id": entity_id,
+        "competent_authority": authority,
+    }
+
+
+def get_ultimate_parent(entity):
+    """Walk parent_entity chain to the root. Returns None if no parent."""
+    current = entity.parent_entity
+    seen = {entity.pk}
+    while current is not None:
+        if current.pk in seen:
+            break  # cycle guard
+        seen.add(current.pk)
+        if current.parent_entity is None:
+            return current
+        current = current.parent_entity
+    return current
+
+
+def get_provider_chain(entity):
+    """
+    Walk parent_entity from entity to root.
+    Returns list from root to leaf, e.g. [A, B, C] where A is root.
+    If entity has no parent, returns [entity].
+    """
+    chain = [entity]
+    seen = {entity.pk}
+    current = entity
+    while current.parent_entity is not None:
+        parent = current.parent_entity
+        if parent.pk in seen:
+            break  # cycle guard
+        seen.add(parent.pk)
+        chain.append(parent)
+        current = parent
+    chain.reverse()  # root first
+    return chain
 
 
 def get_entity_identifier(
     entity: Entity, priority: List[str] = None
-) -> tuple[str, str]:
+) -> tuple[str, str, str]:
     """
-    Extract identification code and type from entity's legal_identifiers.
+    Extract identification code, type, and key name from entity's legal_identifiers.
 
     Args:
         entity: Entity object with legal_identifiers
-        priority: List of identifier types in priority order (default: LEI, EUID, VAT, DUNS)
+        priority: List of identifier types in priority order (default: LEI, EUID, KBO, VAT, DUNS)
 
     Returns:
-        Tuple of (identifier_code, identifier_type)
+        Tuple of (identifier_code, identifier_type, key_name)
     """
     if priority is None:
-        priority = ["LEI", "EUID", "VAT", "DUNS"]
+        priority = IDENTIFIER_PRIORITY
 
     if not entity or not entity.legal_identifiers:
-        return "", ""
+        return "", "", ""
 
     def map_identifier_type(key: str) -> str:
         key_upper = key.upper()
@@ -44,22 +176,30 @@ def get_entity_identifier(
             return "eba_qCO:qx2000"
         elif key_upper == "EUID":
             return "eba_qCO:qx2002"
+        elif key_upper in ("KBO", "CRN"):
+            return "eba_qCO:qx2003"
         elif key_upper == "VAT":
             return "eba_qCO:qx2004"
+        elif key_upper in ("PNR", "NIN"):
+            return "eba_qCO:qx2005"
         else:
-            return "eba_qCO:qx2003"
+            return "eba_qCO:qx2001"
 
     # Try priority identifiers first
     for id_type in priority:
         if id_type in entity.legal_identifiers and entity.legal_identifiers[id_type]:
-            return entity.legal_identifiers[id_type], map_identifier_type(id_type)
+            return (
+                entity.legal_identifiers[id_type],
+                map_identifier_type(id_type),
+                id_type,
+            )
 
-    # Use first available identifier
+    # Use first available identifier if we couldn't find any of the priority ones
     for key, value in entity.legal_identifiers.items():
         if value:
-            return value, map_identifier_type(key)
+            return value, map_identifier_type(key), key
 
-    return "", ""
+    return "", "", ""
 
 
 def format_date(date_obj) -> str:
@@ -83,8 +223,6 @@ def generate_b_01_01_main_entity(
         main_entity: The main builtin entity
         folder_prefix: Optional folder prefix to prepend to file path
     """
-    from datetime import datetime
-
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
 
@@ -246,15 +384,17 @@ def generate_b_01_03_branches(
 
     # Write branch data (one row per branch)
     for branch in branches:
-        # c0010: Identification code of the branch
-        branch_code, _ = get_entity_identifier(branch)
+        # c0010: Identification code of the branch (typed dimension eba_typ:IS — use "0" if empty)
+        branch_code, _, _ = get_entity_identifier(branch)
+        branch_code = branch_code or "0"
 
-        # c0020: LEI of the financial entity head office (parent entity)
+        # c0020: LEI of the financial entity head office (typed dimension eba_typ:LE — use "0" if empty)
         head_office_lei = ""
         if branch.parent_entity:
-            head_office_lei, _ = get_entity_identifier(
+            head_office_lei, _, _ = get_entity_identifier(
                 branch.parent_entity, priority=["LEI"]
             )
+        head_office_lei = head_office_lei or "0"
 
         # c0030: Name of the branch
         branch_name = branch.name
@@ -320,11 +460,14 @@ def generate_b_02_01_contracts(
         arrangement_type = contract.dora_contractual_arrangement or ""
 
         # b_02.01.0030: Overarching contractual arrangement reference number
-        overarching_ref = ""
+        # FAQ #124: c0030 is a FK and cannot be blank. When there is no
+        # overarching contract, type "Not Applicable" (no dropdown exists).
         if contract.overarching_contract:
             overarching_ref = contract.overarching_contract.ref_id or str(
                 contract.overarching_contract.id
             )
+        else:
+            overarching_ref = "Not Applicable"
 
         # b_02.01.0040: Currency
         currency = ""
@@ -423,6 +566,10 @@ def generate_b_02_02_ict_services(
         )
 
     # Write contract-solution-function data
+    # Track written dimension keys to avoid XBRL duplicate fact errors.
+    # The XBRL key for b_02.02 is (c0010, c0020, c0030, c0050, c0060, c0130, c0150, c0160).
+    seen_keys = set()
+
     for contract in filtered_contracts:
         # Iterate through all solutions in this contract
         for solution in contract.solutions.all():
@@ -438,20 +585,23 @@ def generate_b_02_02_ict_services(
                 # c0010: Contract reference
                 contract_ref = contract.ref_id or str(contract.id)
 
-                # c0020: LEI of entity using the service (beneficiary entity)
+                # c0020: LEI of entity using the service (typed dimension eba_typ:LE — use "0" if empty)
                 entity_lei = ""
                 if contract.beneficiary_entity:
-                    entity_lei, _ = get_entity_identifier(
+                    entity_lei, _, _ = get_entity_identifier(
                         contract.beneficiary_entity, priority=["LEI"]
                     )
+                entity_lei = entity_lei or "0"
 
                 # c0030, c0040: Provider identification
+                # c0030 is typed dimension eba_typ:IS — use "0" if empty
+                # c0040 is enumeration metric — keep empty when c0030 has no real value
                 provider_code, provider_code_type = "", ""
                 if contract.provider_entity:
-                    provider_code, provider_code_type = get_entity_identifier(
-                        contract.provider_entity,
-                        priority=["LEI", "EUID", "VAT", "DUNS"],
+                    provider_code, provider_code_type, _ = get_entity_identifier(
+                        contract.provider_entity
                     )
+                provider_code = provider_code or "0"
 
                 # c0050: Function identifier
                 function_id = function.ref_id or str(function.id)
@@ -524,6 +674,20 @@ def generate_b_02_02_ict_services(
 
                 # c0180: Level of reliance
                 reliance_level = solution.dora_reliance_level or ""
+
+                key = (
+                    contract_ref,
+                    entity_lei,
+                    provider_code,
+                    function_id,
+                    ict_service_type,
+                    provider_country,
+                    data_location_storage,
+                    data_location_processing,
+                )
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
 
                 csv_writer.writerow(
                     [
@@ -632,7 +796,7 @@ def generate_b_03_01_signing_entities(
     csv_writer.writerow(["c0010", "c0020", "c0030"])
 
     # Get main entity identifier
-    main_code, _ = get_entity_identifier(main_entity)
+    main_code, _, _ = get_entity_identifier(main_entity)
 
     # Write contract-entity data (main entity signs all contracts)
     for contract in contracts:
@@ -687,9 +851,10 @@ def generate_b_03_02_ict_providers(
         provider = contract.provider_entity
 
         # Get provider identifier (prioritize LEI)
-        provider_code, code_type = get_entity_identifier(
-            provider, priority=["LEI", "EUID", "VAT", "DUNS"]
-        )
+        # c0020 is typed dimension eba_typ:IS — use "0" if empty
+        # c0030 is enumeration metric — keep empty when c0020 has no real value
+        provider_code, code_type, _ = get_entity_identifier(provider)
+        provider_code = provider_code or "0"
 
         csv_writer.writerow([contract_ref, provider_code, code_type])
 
@@ -732,9 +897,11 @@ def generate_b_03_03_intragroup_providers(
     # Write provider data for each intra-group contract
     for contract in intragroup_contracts:
         contract_ref = contract.ref_id or str(contract.id)
-        provider_lei, _ = get_entity_identifier(
+        # c0020 is typed dimension eba_typ:LE — use "0" if empty
+        provider_lei, _, _ = get_entity_identifier(
             contract.provider_entity, priority=["LEI"]
         )
+        provider_lei = provider_lei or "0"
         csv_writer.writerow([contract_ref, provider_lei, "true"])
 
     path = (
@@ -787,20 +954,21 @@ def generate_b_04_01_service_users(
         # c0010: Contract reference
         contract_ref = contract.ref_id or str(contract.id)
 
-        # c0020: LEI of beneficiary entity
+        # c0020: LEI of beneficiary entity (typed dimension eba_typ:LE — use "0" if empty)
         beneficiary_lei = ""
         if contract.beneficiary_entity:
-            beneficiary_lei, _ = get_entity_identifier(
+            beneficiary_lei, _, _ = get_entity_identifier(
                 contract.beneficiary_entity, priority=["LEI"]
             )
+        beneficiary_lei = beneficiary_lei or "0"
 
         # Write row for beneficiary entity (not a branch)
-        combination = (contract_ref, beneficiary_lei, "")
+        combination = (contract_ref, beneficiary_lei, "0")
         if combination not in written_combinations:
             # c0030: Nature of entity (not a branch)
             entity_nature = "eba_ZZ:x839"  # not a branch
-            # c0040: Branch code (empty for non-branch)
-            branch_code = ""
+            # c0040: Branch code (typed dimension eba_typ:IS — use "0" for non-branch)
+            branch_code = "0"
 
             csv_writer.writerow(
                 [contract_ref, beneficiary_lei, entity_nature, branch_code]
@@ -813,7 +981,9 @@ def generate_b_04_01_service_users(
                 contract.beneficiary_entity, "id", None
             ):
                 continue
-            branch_code, _ = get_entity_identifier(branch)
+            # c0040: Branch code (typed dimension eba_typ:IS — use "0" if empty)
+            branch_code, _, _ = get_entity_identifier(branch)
+            branch_code = branch_code or "0"
             combination = (contract_ref, beneficiary_lei, branch_code)
             if combination not in written_combinations:
                 # c0030: Nature of entity (branch of a financial entity)
@@ -846,18 +1016,21 @@ def generate_b_05_01_provider_details(
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
 
-    # Write CSV headers
+    # Write CSV headers (DORA 4.0 Layout)
     csv_writer.writerow(
         [
             "c0010",  # Identification code of ICT third-party service provider
-            "c0020",  # Type of code
-            "c0030",  # Name of the ICT third-party service provider
-            "c0040",  # Type of person
-            "c0050",  # Country
-            "c0060",  # Currency
-            "c0070",  # Total annual expense
-            "c0080",  # Identification code of parent undertaking
-            "c0090",  # Type of code for parent undertaking
+            "c0020",  # Type of code to identify the ICT third-party service provider
+            "c0030",  # Additional identification code of ICT third-party service provider
+            "c0040",  # Type of additional identification code of the ICT third-party service provider
+            "c0050",  # Legal name of the ICT third-party service provider
+            "c0060",  # Name of the ICT third-party service provider in Latin alphabet
+            "c0070",  # Type of person of the ICT third-party service provider
+            "c0080",  # Country of the ICT third-party service provider’s headquarters
+            "c0090",  # Currency of the amount reported in RT.05.01.0070
+            "c0100",  # Total annual expense or estimated cost of the ICT third-party service provider
+            "c0110",  # Identification code of the ICT third-party service provider’s ultimate parent undertaking
+            "c0120",  # Type of code to identify the ICT third-party service provider’s ultimate parent undertaking
         ]
     )
 
@@ -882,52 +1055,97 @@ def generate_b_05_01_provider_details(
         if contract.annual_expense:
             providers_data[provider_id]["total_expense"] += contract.annual_expense
 
+    # Register subcontractors referenced by b_05.02 rank>1 rows so that the
+    # c0030/c0060 → c0010 foreign keys (EBA rule 807) resolve. A subcontractor
+    # is not a direct provider of any contract, so it has no entry yet. Emit a
+    # zero-expense, empty-currency row per subcontractor. Runs BEFORE the
+    # parent-entity walker so ancestors of subcontractors are also registered.
+    for contract in third_party_contracts.prefetch_related(
+        "solutions__subcontracting_chain__subcontractor"
+    ):
+        for solution in contract.solutions.all():
+            for sc in solution.subcontracting_chain.all():
+                if sc.subcontractor_id not in providers_data:
+                    providers_data[sc.subcontractor_id] = {
+                        "provider": sc.subcontractor,
+                        "total_expense": 0,
+                        "currency": "",
+                    }
+
+    # Register ancestor entities referenced by c0110 so that the c0110 → c0010
+    # foreign key (EBA rule 807) resolves. When a provider has a parent_entity
+    # chain but the ancestors are not themselves direct contract providers, the
+    # ultimate parent reported in c0110 has no matching c0010 row, which the
+    # OneGate filer rejects. Walk every direct provider's ancestry and add each
+    # ancestor as a zero-expense row if not already present.
+    for provider_id in list(providers_data.keys()):
+        current = providers_data[provider_id]["provider"].parent_entity
+        seen = {provider_id}
+        while current is not None and current.id not in seen:
+            seen.add(current.id)
+            if current.id not in providers_data:
+                providers_data[current.id] = {
+                    "provider": current,
+                    "total_expense": 0,
+                    "currency": "",
+                }
+            current = current.parent_entity
+
     # Write provider data
     for provider_id, data in providers_data.items():
         provider = data["provider"]
 
         # c0010, c0020: Provider identifier (prioritize LEI)
-        provider_code, code_type = get_entity_identifier(
-            provider, priority=["LEI", "EUID", "VAT", "DUNS"]
-        )
+        # c0010 is typed dimension eba_typ:IS — use "0" if empty
+        # c0020 is enumeration metric — keep empty when c0010 has no real value
+        provider_code, code_type, _ = get_entity_identifier(provider)
+        provider_code = provider_code or "0"
 
-        # c0030: Provider name
+        # c0050: Provider legal name
         provider_name = provider.name
 
-        # c0040: Type of person
+        # c0070: Type of person
         person_type = provider.dora_provider_person_type or ""
 
-        # c0050: Country with eba_GA prefix
+        # c0080: Country with eba_GA prefix
         country = ""
         if provider.country:
             country = f"eba_GA:{provider.country}"
 
-        # c0060: Currency with eba_CU prefix
+        # c0090: Currency with eba_CU prefix
         currency = ""
         if data["currency"]:
             currency = f"eba_CU:{data['currency']}"
 
-        # c0070: Total annual expense
+        # c0100: Total annual expense
         total_expense = data["total_expense"]
 
-        # c0080, c0090: Parent entity identifier (prioritize LEI)
+        # c0110, c0120: Ultimate parent undertaking identifier (prioritize LEI)
+        # FK constraint: c0110 must reference a valid c0010 in B_05.01
+        # If no parent, self-reference the provider (it IS its own ultimate parent)
         parent_code, parent_code_type = "", ""
-        if provider.parent_entity:
-            parent_code, parent_code_type = get_entity_identifier(
-                provider.parent_entity, priority=["LEI", "EUID", "VAT", "DUNS"]
-            )
+        ultimate_parent = get_ultimate_parent(provider)
+        if ultimate_parent:
+            parent_code, parent_code_type, _ = get_entity_identifier(ultimate_parent)
+        if not parent_code:
+            parent_code = provider_code
+            parent_code_type = code_type
 
+        # Write provider detail row (12 columns for DORA 4.0)
         csv_writer.writerow(
             [
-                provider_code,
-                code_type,
-                provider_name,
-                person_type,
-                country,
-                currency,
-                total_expense,
-                parent_code,
-                parent_code_type,
+                provider_code,  # c0010
+                code_type,  # c0020
+                "0",  # c0030: Additional identification code (typed dimension eba_typ:IS — "0" = not applicable)
+                "",  # c0040: Type of additional identification code (enumeration metric — empty)
+                provider_name,  # c0050
+                provider_name,  # c0060: Name in Latin alphabet TODO: add Entity.latin_name DB column, equals Entity.name by default, to be displayed in EntityForm if name contains non-Latin characters
+                person_type,  # c0070
+                country,  # c0080
+                currency,  # c0090
+                total_expense,  # c0100
+                parent_code,  # c0110
+                parent_code_type,  # c0120
             ]
         )
 
@@ -976,50 +1194,115 @@ def generate_b_05_02_supply_chains(
     )
 
     # Get contracts with both provider and solutions
+    # NOTE: intragroup providers ARE included per EBA FAQ #70, #82, #84
     supply_chain_contracts = (
         contracts.filter(
-            is_intragroup=False,
             provider_entity__isnull=False,
             solutions__isnull=False,
         )
         .select_related("provider_entity", "beneficiary_entity")
-        .prefetch_related("solutions")
+        .prefetch_related(
+            "solutions__provider_entity",
+            "solutions__subcontracting_chain__subcontractor",
+            "solutions__subcontracting_chain__recipient",
+        )
     )
 
     # Write supply chain data
+    # Track written dimension keys to avoid XBRL duplicate fact errors.
+    # The XBRL key for b_05.02 is (contract_ref, ict_service_type, provider_code, rank, recipient_code).
+    seen_keys = set()
+    rows_by_rank: Dict[int, int] = {}
+
+    # DORA Art. 28(2) supply chains. Rank 1 is the solution's direct provider
+    # (Solution.provider_entity). Ranks 2..N come from SolutionSubcontractor
+    # rows, each carrying its own recipient (the entity that sub-contracted to
+    # this subcontractor). Multiple entities at the same rank are allowed
+    # (fan-out / tree), e.g. Zscaler subcontracting to both AWS and Azure at
+    # rank 2. At rank=1, recipient = provider (direct service relationship).
     for contract in supply_chain_contracts:
-        # Iterate through all solutions in this contract
         for solution in contract.solutions.all():
-            # c0010: Contract reference
             contract_ref = contract.ref_id or str(contract.id)
+            ict_service_type = solution.dora_ict_service_type
+            if not ict_service_type:
+                continue
 
-            # c0020: ICT service type
-            ict_service_type = solution.dora_ict_service_type or ""
+            # Rank-1 provider is the contract counterparty, NOT the
+            # solution-level provider_entity.  This matches b_02.02 c0030
+            # and b_03.02 c0020, both of which use contract.provider_entity.
+            direct_provider = contract.provider_entity
+            if direct_provider is None:
+                continue
 
-            # c0030, c0040: Provider identification
-            provider_code, provider_code_type = get_entity_identifier(
-                contract.provider_entity
-            )
+            # c0030/c0040 for the direct provider (rank 1).
+            dp_code, dp_code_type, _ = get_entity_identifier(direct_provider)
+            dp_code = dp_code or "0"
 
-            # c0050: Rank in supply chain (1 = direct provider)
-            # Sub-contracting chains are not modeled, so rank is always 1
-            rank = 1
+            # Rank 1: direct provider, recipient = self.
+            rank1_key = (contract_ref, ict_service_type, dp_code, 1, dp_code)
+            if rank1_key not in seen_keys:
+                seen_keys.add(rank1_key)
+                csv_writer.writerow(
+                    [
+                        contract_ref,
+                        ict_service_type,
+                        dp_code,
+                        dp_code_type,
+                        1,
+                        dp_code,
+                        dp_code_type,
+                    ]
+                )
+                rows_by_rank[1] = rows_by_rank.get(1, 0) + 1
 
-            # c0060, c0070: Recipient of sub-contracted ICT services
-            # For rank 1 (direct providers), these fields should be empty
-            recipient_code, recipient_code_type = "", ""
+            # Ranks 2..N: depth computed from the recipient tree.
+            chain_rows = list(solution.subcontracting_chain.all())
+            depths = compute_chain_depths(chain_rows)
 
-            csv_writer.writerow(
-                [
+            for sc in chain_rows:
+                rank = depths[sc.subcontractor_id]
+                provider_code, provider_code_type, _ = get_entity_identifier(
+                    sc.subcontractor
+                )
+                provider_code = provider_code or "0"
+
+                # Resolve recipient: stored FK, or fall back to direct provider.
+                if sc.recipient_id is not None:
+                    recipient_code, recipient_code_type, _ = get_entity_identifier(
+                        sc.recipient
+                    )
+                    recipient_code = recipient_code or "0"
+                else:
+                    recipient_code, recipient_code_type = dp_code, dp_code_type
+
+                key = (
                     contract_ref,
                     ict_service_type,
                     provider_code,
-                    provider_code_type,
                     rank,
                     recipient_code,
-                    recipient_code_type,
-                ]
-            )
+                )
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
+
+                csv_writer.writerow(
+                    [
+                        contract_ref,
+                        ict_service_type,
+                        provider_code,
+                        provider_code_type,
+                        rank,
+                        recipient_code,
+                        recipient_code_type,
+                    ]
+                )
+                rows_by_rank[rank] = rows_by_rank.get(rank, 0) + 1
+
+    logger.info(
+        "dora_export.b_05_02.emitted",
+        extra={"rows_by_rank": dict(sorted(rows_by_rank.items()))},
+    )
 
     path = (
         f"{folder_prefix}/reports/b_05.02.csv"
@@ -1060,7 +1343,7 @@ def generate_b_06_01_functions(
     )
 
     # Get main entity LEI
-    main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
+    main_lei, _, _ = get_entity_identifier(main_entity, priority=["LEI"])
 
     # Write function data
     for function in business_functions:
@@ -1147,9 +1430,9 @@ def generate_b_07_01_assessment(
     )
 
     # Get contracts with both provider and solutions
+    # NOTE: intragroup providers ARE included per EBA FAQ #70, #82, #84
     assessment_contracts = (
         contracts.filter(
-            is_intragroup=False,
             provider_entity__isnull=False,
             solutions__isnull=False,
         )
@@ -1158,16 +1441,29 @@ def generate_b_07_01_assessment(
     )
 
     # Write assessment data
+    # Track written dimension keys to avoid XBRL duplicate fact errors.
+    # The XBRL key for b_07.01 is (contract_ref, provider_code, ict_service_type).
+    seen_keys = set()
+
     for contract in assessment_contracts:
         # Iterate through all solutions in this contract
         for solution in contract.solutions.all():
             contract_ref = contract.ref_id or str(contract.id)
 
-            provider_code, provider_code_type = get_entity_identifier(
+            # c0020 is typed dimension eba_typ:IS — use "0" if empty
+            # c0030 is enumeration metric — keep empty when c0020 has no real value
+            provider_code, provider_code_type, _ = get_entity_identifier(
                 contract.provider_entity
             )
+            provider_code = provider_code or "0"
 
             ict_service_type = solution.dora_ict_service_type or ""
+
+            key = (contract_ref, provider_code, ict_service_type)
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+
             substitutability = solution.dora_substitutability or ""
             non_substitutability_reason = (
                 solution.dora_non_substitutability_reason or ""
@@ -1212,10 +1508,10 @@ def generate_b_99_01_aggregation(
     zip_file, contracts: QuerySet, business_functions: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
-    Generate b_99.01.csv - Aggregation report placeholder (standard not yet finalized).
+    Generate b_99.01.csv - Definitions from Entities making use of ICT Services.
 
-    This currently only generates headers as the DORA standard for this report
-    is not yet properly defined.
+    Single-row aggregation table with counts of contracts, solutions and business
+    functions grouped by their DORA classification attributes.
 
     Args:
         zip_file: ZIP file object to write to
@@ -1225,32 +1521,87 @@ def generate_b_99_01_aggregation(
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
 
-    # Write CSV headers
     csv_writer.writerow(
         [
-            "c0010",  # Standalone arrangement
-            "c0020",  # Overarching arrangement
-            "c0030",  # Subsequent or associated arrangement
-            "c0040",  # Data sensitiveness: Low
-            "c0050",  # Data sensitiveness: Medium
-            "c0060",  # Data sensitiveness: High
-            "c0070",  # Impact discontinuing function: Low
-            "c0080",  # Impact discontinuing function: Medium
-            "c0090",  # Impact discontinuing function: High
-            "c0100",  # Substitutability: Not substitutable
-            "c0110",  # Substitutability: Highly complex
-            "c0120",  # Substitutability: Medium complexity
-            "c0130",  # Substitutability: Easily substitutable
-            "c0140",  # Reintegration: Easy
-            "c0150",  # Reintegration: Difficult
-            "c0160",  # Reintegration: Highly complex
-            "c0170",  # Impact discontinuing ICT: Low
-            "c0180",  # Impact discontinuing ICT: Medium
-            "c0190",  # Impact discontinuing ICT: High
+            "c0010",  # Contracts: services (eba_CO:x1)
+            "c0020",  # Contracts: goods (eba_CO:x2)
+            "c0030",  # Contracts: goods and services (eba_CO:x3)
+            "c0040",  # Data sensitiveness: normal (eba_ZZ:x791)
+            "c0050",  # Data sensitiveness: sensitive (eba_ZZ:x792)
+            "c0060",  # Data sensitiveness: highly sensitive (eba_ZZ:x793)
+            "c0070",  # Discontinuing impact (functions): low (eba_ZZ:x791)
+            "c0080",  # Discontinuing impact (functions): medium (eba_ZZ:x792)
+            "c0090",  # Discontinuing impact (functions): high (eba_ZZ:x793)
+            "c0100",  # Substitutability: easily substitutable (eba_ZZ:x959)
+            "c0110",  # Substitutability: substitutable (eba_ZZ:x960)
+            "c0120",  # Substitutability: difficult to substitute (eba_ZZ:x961)
+            "c0130",  # Substitutability: not substitutable (eba_ZZ:x962)
+            "c0140",  # Reintegration: easy (eba_ZZ:x798)
+            "c0150",  # Reintegration: difficult (eba_ZZ:x966)
+            "c0160",  # Reintegration: not possible (eba_ZZ:x967)
+            "c0170",  # Discontinuing impact (ICT services): low (eba_ZZ:x791)
+            "c0180",  # Discontinuing impact (ICT services): medium (eba_ZZ:x792)
+            "c0190",  # Discontinuing impact (ICT services): high (eba_ZZ:x793)
         ]
     )
 
-    # TODO: Add data rows once DORA standard is properly defined
+    # c0010-c0030: Count contracts by type
+    c0010 = contracts.filter(dora_contractual_arrangement="eba_CO:x1").count()
+    c0020 = contracts.filter(dora_contractual_arrangement="eba_CO:x2").count()
+    c0030 = contracts.filter(dora_contractual_arrangement="eba_CO:x3").count()
+
+    # Get distinct solutions linked to these contracts
+    solutions = Solution.objects.filter(contracts__in=contracts).distinct()
+
+    # c0040-c0060: Data sensitiveness (solutions)
+    c0040 = solutions.filter(dora_data_sensitiveness="eba_ZZ:x791").count()
+    c0050 = solutions.filter(dora_data_sensitiveness="eba_ZZ:x792").count()
+    c0060 = solutions.filter(dora_data_sensitiveness="eba_ZZ:x793").count()
+
+    # c0070-c0090: Impact of discontinuing function (business functions)
+    c0070 = business_functions.filter(dora_discontinuing_impact="eba_ZZ:x791").count()
+    c0080 = business_functions.filter(dora_discontinuing_impact="eba_ZZ:x792").count()
+    c0090 = business_functions.filter(dora_discontinuing_impact="eba_ZZ:x793").count()
+
+    # c0100-c0130: Substitutability (solutions)
+    c0100 = solutions.filter(dora_substitutability="eba_ZZ:x959").count()
+    c0110 = solutions.filter(dora_substitutability="eba_ZZ:x960").count()
+    c0120 = solutions.filter(dora_substitutability="eba_ZZ:x961").count()
+    c0130 = solutions.filter(dora_substitutability="eba_ZZ:x962").count()
+
+    # c0140-c0160: Reintegration possibility (solutions)
+    c0140 = solutions.filter(dora_reintegration_possibility="eba_ZZ:x798").count()
+    c0150 = solutions.filter(dora_reintegration_possibility="eba_ZZ:x966").count()
+    c0160 = solutions.filter(dora_reintegration_possibility="eba_ZZ:x967").count()
+
+    # c0170-c0190: Impact of discontinuing ICT services (solutions)
+    c0170 = solutions.filter(dora_discontinuing_impact="eba_ZZ:x791").count()
+    c0180 = solutions.filter(dora_discontinuing_impact="eba_ZZ:x792").count()
+    c0190 = solutions.filter(dora_discontinuing_impact="eba_ZZ:x793").count()
+
+    csv_writer.writerow(
+        [
+            c0010,
+            c0020,
+            c0030,
+            c0040,
+            c0050,
+            c0060,
+            c0070,
+            c0080,
+            c0090,
+            c0100,
+            c0110,
+            c0120,
+            c0130,
+            c0140,
+            c0150,
+            c0160,
+            c0170,
+            c0180,
+            c0190,
+        ]
+    )
 
     path = (
         f"{folder_prefix}/reports/b_99.01.csv"
@@ -1320,7 +1671,9 @@ def _compute_ref_period() -> str:
     return f"{current_year - 1}-12-31"
 
 
-def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") -> None:
+def generate_parameters(
+    zip_file, main_entity: Entity, folder_prefix: str = "", entity_id: str = ""
+) -> None:
     """
     Generate parameters.csv - Report metadata and configuration parameters.
 
@@ -1330,6 +1683,8 @@ def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") 
     Args:
         zip_file: ZIP file object to write to
         main_entity: The main builtin entity
+        folder_prefix: Optional folder prefix to prepend to file path
+        entity_id: The identifier for the report (optional, will be computed if not provided)
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -1337,28 +1692,31 @@ def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") 
     # Write CSV headers
     csv_writer.writerow(["name", "value"])
 
-    # Get LEI for entityID
-    lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-    if not lei:
-        raise ValueError(
-            "Cannot generate DORA RoI export: main entity has no LEI. "
-            "The entityID parameter requires a valid LEI (EBA Filing Rules v5.5). "
-            "Please set a LEI in the main entity's legal identifiers before exporting."
-        )
-    entity_id = f"rs:{lei}.CON"
+    # If entityID not provided, compute it (default to IND)
+    if not entity_id:
+        code, _, key_name = get_entity_identifier(main_entity)
+        if not code:
+            raise ValueError(
+                "Cannot generate DORA RoI export: main entity has no legal identifier. "
+                "The entityID parameter requires a valid identifier (EBA Filing Rules v5.5). "
+                "Please set a legal identifier in the main entity before exporting."
+            )
+        entity_id = f"rs:{code}.IND"
 
     # Get currency for baseCurrency
     base_currency = (
         f"iso4217:{main_entity.currency}" if main_entity.currency else "iso4217:EUR"
     )
 
-    # Write parameters
+    # Write parameters (7 parameters per OneGate XBRL Protocol v1.2, section 3.2)
     parameters = [
         ("entityID", entity_id),
         ("refPeriod", _compute_ref_period()),
         ("baseCurrency", base_currency),
         ("decimalsInteger", "0"),
         ("decimalsMonetary", "-3"),
+        ("decimalsPercentage", "4"),
+        ("decimalsDecimal", "2"),
     ]
 
     for name, value in parameters:

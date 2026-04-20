@@ -1,3 +1,4 @@
+import json
 import time
 
 from .helpers import get_referential_translation
@@ -6,6 +7,8 @@ from typing import List, Union
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
+    Question,
+    QuestionChoice,
     RequirementMapping,
     RequirementMappingSet,
     StoredLibrary,
@@ -15,6 +18,7 @@ from core.models import (
     ReferenceControl,
     Terminology,
     Threat,
+    _create_questions_from_data,
 )
 from metrology.models import MetricDefinition
 from django.db import transaction
@@ -50,7 +54,6 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
-                    questions=requirement_node.get("questions"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
@@ -73,7 +76,6 @@ class RequirementNodeImporter:
         if parent_urn:
             parent_urn = parent_urn.lower()
         requirement_node = RequirementNode.objects.create(
-            # Should i just inherit the folder from Framework or this is useless ?
             folder=Folder.get_root_folder(),
             framework=framework_object,
             urn=self.requirement_data["urn"].lower(),
@@ -87,20 +89,26 @@ class RequirementNodeImporter:
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
             implementation_groups=self.requirement_data.get("implementation_groups"),
+            display_mode=self.requirement_data.get(
+                "display_mode", RequirementNode.DisplayMode.DEFAULT
+            ),
             weight=self.requirement_data.get("weight", 1),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
             is_published=True,
-            questions=self.requirement_data.get("questions"),
         )
+
+        # Create Question + QuestionChoice objects from questions data
+        questions_data = self.requirement_data.get("questions")
+        if questions_data and isinstance(questions_data, dict):
+            _create_questions_from_data(requirement_node, questions_data)
+
         for threat in self.requirement_data.get("threats", []):
             logger.info(
                 f"Parsing the threats for {self.requirement_data.get('ref_id')}"
             )
-            requirement_node.threats.add(
-                Threat.objects.get(urn=threat.lower())
-            )  # URN are not case insensitive in the whole codebase yet, we should fix that and make sure URNs are always transformed into lowercase before being used.
+            requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
 
         for reference_control in self.requirement_data.get("reference_controls", []):
             logger.info(
@@ -307,6 +315,11 @@ class FrameworkImporter:
                 "minimum score must be less than maximum score and equal or greater than 0."
             )
 
+        # Normalize scores_definition to object format
+        scores_definition = self.framework_data.get("scores_definition")
+        if isinstance(scores_definition, list):
+            scores_definition = {"scale": scores_definition}
+
         framework_object = Framework.objects.create(
             folder=Folder.get_root_folder(),
             library=library_object,
@@ -316,13 +329,14 @@ class FrameworkImporter:
             description=self.framework_data.get("description"),
             min_score=min_score,
             max_score=max_score,
-            scores_definition=self.framework_data.get("scores_definition"),
+            scores_definition=scores_definition,
             implementation_groups_definition=self.framework_data.get(
                 "implementation_groups_definition"
             ),
+            outcomes_definition=self.framework_data.get("outcomes_definition", []),
             provider=library_object.provider,
             locale=library_object.locale,
-            default_locale=library_object.default_locale,  # Change this in the future ?
+            default_locale=library_object.default_locale,
             translations=self.framework_data.get("translations", {}),
             is_published=True,
         )
@@ -701,6 +715,16 @@ class LibraryImporter:
 
         library_objects = self._library.content
 
+        # Guard against double-serialised content (old databases may store JSON as a string)
+        if isinstance(library_objects, str):
+            library_objects = json.loads(library_objects)
+
+        # Preset-only libraries don't need regular object imports
+        if "preset" in library_objects and not any(
+            object_field in library_objects for object_field in self.OBJECT_FIELDS
+        ):
+            return None
+
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
         ):
@@ -717,6 +741,8 @@ class LibraryImporter:
             key for key in ["framework", "frameworks"] if key in library_objects
         ]:
             framework_data = library_objects[keys_found[0]]
+            if isinstance(framework_data, str):
+                return f"[FRAMEWORK_ERROR] The '{keys_found[0]}' field must be a dict or list, not a string. The stored library data may be corrupted."
             if isinstance(framework_data, dict):
                 framework_data = [framework_data]
             if (
@@ -763,6 +789,8 @@ class LibraryImporter:
             key for key in ["risk_matrix", "risk_matrices"] if key in library_objects
         ]:
             risk_matrix_data = library_objects[keys_found[0]]
+            if isinstance(risk_matrix_data, str):
+                return f"[RISK_MATRIX_ERROR] The '{keys_found[0]}' field must be a dict or list, not a string. The stored library data may be corrupted."
             if isinstance(risk_matrix_data, dict):
                 # Handle risk matrix as dict for consistency (it would be bad for "risk_matrix" to not accept a dict but allowing it for "framework" and "requiremnt_mapping_set")
                 risk_matrix_data = [risk_matrix_data]
@@ -791,11 +819,14 @@ class LibraryImporter:
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
+        content = self._library.content
+        if isinstance(content, str):
+            content = json.loads(content)
         if (
             not self._library.dependencies
-            or self._library.content.get(
+            or content.get(
                 "requirement_mapping_set",
-                self._library.content.get("requirement_mapping_sets"),
+                content.get("requirement_mapping_sets"),
             )
             is not None
         ):

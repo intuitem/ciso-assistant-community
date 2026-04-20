@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -135,11 +136,11 @@
 	/>
 {/if}
 {#key folderKey}
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
+		contentTypes={['DO', 'GL', 'EN']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.folder()}
 		onChange={handleFolderChange}
@@ -257,11 +258,35 @@
 		{/if}
 		<Checkbox
 			{form}
+			field="scoring_enabled"
+			label={m.scoringEnabled()}
+			helpText={m.scoringEnabledHelpText()}
+			cacheLock={cacheLocks['scoring_enabled']}
+			bind:cachedValue={formDataCache['scoring_enabled']}
+			onChange={(value) => {
+				if (!value) {
+					form.form.update((currentData) => ({
+						...currentData,
+						show_documentation_score: false
+					}));
+				}
+			}}
+		/>
+		<Checkbox
+			{form}
 			field="show_documentation_score"
 			label={m.useDocumentationScore()}
 			helpText={m.useDocumentationScoreHelpText()}
 			cacheLock={cacheLocks['show_documentation_score']}
 			bind:cachedValue={formDataCache['show_documentation_score']}
+			onChange={(value) => {
+				if (value) {
+					form.form.update((currentData) => ({
+						...currentData,
+						scoring_enabled: true
+					}));
+				}
+			}}
 		/>
 		<Checkbox
 			{form}
@@ -288,6 +313,24 @@
 			cacheLock={cacheLocks['score_calculation_method']}
 			bind:cachedValue={formDataCache['score_calculation_method']}
 			disableDoubleDash
+		/>
+		<TextField
+			{form}
+			type="number"
+			step="any"
+			field="target_score"
+			label={m.targetScore()}
+			helpText={m.targetScoreHelpText()}
+			cacheLock={cacheLocks['target_score']}
+			bind:cachedValue={formDataCache['target_score']}
+		/>
+		<Checkbox
+			{form}
+			field="anchor_na_to_target"
+			label={m.anchorNaToTarget()}
+			helpText={m.anchorNaToTargetHelpText()}
+			cacheLock={cacheLocks['anchor_na_to_target']}
+			bind:cachedValue={formDataCache['anchor_na_to_target']}
 		/>
 	</div>
 	<TextField

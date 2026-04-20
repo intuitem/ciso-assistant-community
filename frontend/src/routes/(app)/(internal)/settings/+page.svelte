@@ -6,8 +6,12 @@
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
+	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
+	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 
-	let group = $state('general');
+	import { goto } from '$app/navigation';
+
+	let group = $state(page.url.searchParams.get('tab') || 'general');
 
 	let { data } = $props();
 </script>
@@ -18,11 +22,17 @@
 		group = e.value;
 	}}
 >
-	<Tabs.List>
+	<Tabs.List class="flex-nowrap overflow-x-auto gap-2">
 		<Tabs.Trigger value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Trigger>
 		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
+		>
+		<Tabs.Trigger value="vulnerabilitySla"
+			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
+		>
+		<Tabs.Trigger value="secIntelFeeds"
+			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
 		>
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
@@ -51,5 +61,11 @@
 	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="vulnerabilitySla">
+		<VulnerabilitySlaSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="secIntelFeeds">
+		<SecIntelFeedsSettings {data} />
 	</Tabs.Content>
 </Tabs>

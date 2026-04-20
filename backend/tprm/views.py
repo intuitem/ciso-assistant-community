@@ -1,7 +1,16 @@
+import io
+import re
+
+from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
 from iam.models import Folder, RoleAssignment, UserGroup
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    ExportMixin,
+    escape_excel_formula,
+)
 from core.models import Asset
 from tprm.models import Entity, Representative, Solution, EntityAssessment, Contract
 from rest_framework.decorators import action
@@ -13,7 +22,7 @@ from rest_framework.response import Response
 from django.utils.formats import date_format
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum, F, FloatField, Case, When, Value
+from django.db.models import Prefetch, Sum, F, FloatField, TextField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
 from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
@@ -48,12 +57,59 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
 
 
 # Create your views here.
-class EntityViewSet(BaseModelViewSet):
+class EntityViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows entities to be viewed or edited.
     """
 
     model = Entity
+    export_config = {
+        "filename": "entities_export",
+        "fields": {
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "mission": {"source": "mission", "label": "mission", "escape": True},
+            "country": {"source": "country", "label": "country"},
+            "currency": {"source": "currency", "label": "currency"},
+            "dependency": {"source": "default_dependency", "label": "dependency"},
+            "penetration": {"source": "default_penetration", "label": "penetration"},
+            "maturity": {"source": "default_maturity", "label": "maturity"},
+            "trust": {"source": "default_trust", "label": "trust"},
+            "lei": {
+                "source": "legal_identifiers",
+                "label": "lei",
+                "format": lambda v: (v or {}).get("LEI", ""),
+            },
+            "euid": {
+                "source": "legal_identifiers",
+                "label": "euid",
+                "format": lambda v: (v or {}).get("EUID", ""),
+            },
+            "duns": {
+                "source": "legal_identifiers",
+                "label": "duns",
+                "format": lambda v: (v or {}).get("DUNS", ""),
+            },
+            "vat": {
+                "source": "legal_identifiers",
+                "label": "vat",
+                "format": lambda v: (v or {}).get("VAT", ""),
+            },
+            "parent_entity_ref_id": {
+                "source": "parent_entity.ref_id",
+                "label": "parent_entity_ref_id",
+                "escape": True,
+            },
+            "domain": {"source": "folder.name", "label": "domain", "escape": True},
+        },
+        "select_related": ["folder", "parent_entity"],
+        "wrap_columns": ["name", "description", "mission"],
+    }
     filterset_fields = [
         "name",
         "ref_id",
@@ -74,10 +130,70 @@ class EntityViewSet(BaseModelViewSet):
         "default_maturity",
         "default_trust",
     ]
+    search_fields = ["name", "description", "legal_identifiers_text"]
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Convert Django's ProtectedError into a 409 Conflict with the list of
+        blocking references, so the frontend can render "this entity is used
+        as a subcontractor/recipient in N solutions" rather than a default 500.
+
+        Both the subcontractor and recipient FKs on SolutionSubcontractor use
+        on_delete=PROTECT, so deleting an Entity referenced by either role
+        raises ProtectedError. Collect blocking rows for both roles.
+        """
+        instance = self.get_object()
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError as exc:
+            as_subcontractor = instance.subcontracts.select_related("solution")
+            as_recipient = instance.subcontract_recipients.select_related("solution")
+            total_count = as_subcontractor.count() + as_recipient.count()
+
+            # Combine both querysets, ordered by solution name, capped at 50.
+            blocking_rows = []
+            for row in as_subcontractor.order_by("solution__name")[:50]:
+                blocking_rows.append(
+                    {
+                        "id": str(row.id),
+                        "solution_id": str(row.solution_id),
+                        "solution_name": row.solution.name,
+                        "role": "subcontractor",
+                    }
+                )
+            remaining = 50 - len(blocking_rows)
+            if remaining > 0:
+                for row in as_recipient.order_by("solution__name")[:remaining]:
+                    blocking_rows.append(
+                        {
+                            "id": str(row.id),
+                            "solution_id": str(row.solution_id),
+                            "solution_name": row.solution.name,
+                            "role": "recipient",
+                        }
+                    )
+
+            return Response(
+                {
+                    "detail": (
+                        f"Cannot delete entity '{instance.name}' — it is "
+                        f"referenced in {total_count} subcontracting "
+                        f"chain row(s). Remove those references first."
+                    ),
+                    "blocking_subcontracts": blocking_rows,
+                },
+                status=HTTP_409_CONFLICT,
+            )
 
     def get_queryset(self):
-        """Add annotation for default_criticality to enable sorting"""
+        """Add annotations for default_criticality sorting and legal identifier search."""
         qs = super().get_queryset()
+
+        # Cast legal_identifiers JSON to text so DRF SearchFilter can icontains on it.
+        # Works on both SQLite (JSON stored as text) and PostgreSQL (jsonb → text cast).
+        qs = qs.annotate(
+            legal_identifiers_text=Cast("legal_identifiers", output_field=TextField()),
+        )
 
         # Annotate with default_criticality calculation
         # Formula: (default_dependency * default_penetration) / (default_maturity * default_trust)
@@ -180,7 +296,11 @@ class EntityViewSet(BaseModelViewSet):
         entities_for_b_01_02 = [main_entity] + subsidiaries
 
         # Prepare contract QuerySets
-        contracts = Contract.objects.filter(id__in=viewable_contracts)
+        contracts = (
+            Contract.objects.filter(id__in=viewable_contracts)
+            .exclude(status=Contract.Status.DRAFT)
+            .exclude(dora_exclude=True)
+        )
 
         # Prepare business functions
         business_functions = Asset.objects.filter(
@@ -210,17 +330,31 @@ class EntityViewSet(BaseModelViewSet):
         related_solution_ids = set(related_solutions.values_list("id", flat=True))
         business_function_contracts = contracts.filter(
             solutions__id__in=related_solution_ids
-        )
+        ).distinct()
 
-        # Calculate folder name for the ZIP structure (without .zip extension)
-        lei, _ = dora_export.get_entity_identifier(main_entity, priority=["LEI"])
-        competent_authority = main_entity.dora_competent_authority or "UNKNOWN"
+        # Get export metadata (naming, identifiers)
+        identifier_type = request.query_params.get("identifier_type", None)
+        level = request.query_params.get("level", "IND")
+        naming_convention = request.query_params.get("naming_convention", "nbb")
+        try:
+            export_meta = dora_export.get_dora_export_metadata(
+                main_entity,
+                identifier_type=identifier_type,
+                level=level,
+                naming_convention=naming_convention,
+            )
+        except ValueError:
+            logger.exception("Error generating DORA export metadata")
+            return Response(
+                {
+                    "error": "Error generating DORA export metadata. Please ensure the main entity has the required DORA metadata fields (folder_prefix, entity_id, filename)."
+                },
+                status=HTTP_400_BAD_REQUEST,
+            )
 
-        if lei:
-            base_folder_name = f"LEI_{lei}.CON_{competent_authority}_DOR_DORA_ROI"
-        else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            base_folder_name = f"DORA_ROI_{timestamp}"
+        base_folder_name = export_meta["folder_prefix"]
+        entity_id = export_meta["entity_id"]
+        filename = export_meta["filename"]
 
         # Create zip file in memory
         zip_buffer = io.BytesIO()
@@ -284,7 +418,9 @@ class EntityViewSet(BaseModelViewSet):
             dora_export.generate_filing_indicators(zip_file, base_folder_name)
 
             # Generate parameters.csv
-            dora_export.generate_parameters(zip_file, main_entity, base_folder_name)
+            dora_export.generate_parameters(
+                zip_file, main_entity, base_folder_name, entity_id=entity_id
+            )
 
             # Generate JSON metadata files
             dora_export.generate_report_package_json(zip_file, base_folder_name)
@@ -293,11 +429,9 @@ class EntityViewSet(BaseModelViewSet):
         # Prepare response
         zip_buffer.seek(0)
 
-        # Use the same base folder name for the ZIP filename
-        filename = f"{base_folder_name}.zip"
-
         response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        sanitized_filename = re.sub(r"[^\w.\-]", "_", filename)
+        response["Content-Disposition"] = f'attachment; filename="{sanitized_filename}"'
 
         return response
 
@@ -544,6 +678,193 @@ class EntityViewSet(BaseModelViewSet):
                 "meta": {"display_name": "Entities Graph"},
             }
         )
+
+    @action(detail=False, methods=["get"], name="Export TPRM ecosystem")
+    def export_ecosystem(self, request):
+        """
+        Export the TPRM ecosystem as a multi-sheet Excel file with three sheets
+        (Entities, Solutions, Contracts) using the same column layout as the
+        data-wizard import
+        """
+        import pandas as pd  # imported lazily: optional/heavy dependency
+
+        (viewable_entity_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Entity
+        )
+        (viewable_solution_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Solution
+        )
+        (viewable_contract_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Contract
+        )
+
+        entities = Entity.objects.filter(id__in=viewable_entity_ids).select_related(
+            "folder", "parent_entity"
+        )
+        solutions = Solution.objects.filter(
+            id__in=viewable_solution_ids
+        ).select_related("provider_entity")
+        contracts = (
+            Contract.objects.filter(id__in=viewable_contract_ids)
+            .select_related("folder", "provider_entity")
+            .prefetch_related(
+                Prefetch(
+                    "solutions",
+                    queryset=Solution.objects.filter(id__in=viewable_solution_ids),
+                )
+            )
+        )
+
+        esc = escape_excel_formula
+
+        # --- Entities sheet ---
+        entities_rows = []
+        for entity in entities:
+            legal = entity.legal_identifiers or {}
+            entities_rows.append(
+                {
+                    "ref_id": esc(entity.ref_id),
+                    "name": esc(entity.name),
+                    "description": esc(entity.description),
+                    "mission": esc(entity.mission),
+                    "country": esc(entity.country),
+                    "currency": esc(entity.currency),
+                    "parent_entity_ref_id": (
+                        esc(entity.parent_entity.ref_id) if entity.parent_entity else ""
+                    ),
+                    "dependency": entity.default_dependency,
+                    "penetration": entity.default_penetration,
+                    "maturity": entity.default_maturity,
+                    "trust": entity.default_trust,
+                    "domain": esc(entity.folder.name) if entity.folder else "",
+                    "lei": esc(legal.get("LEI", "")),
+                    "euid": esc(legal.get("EUID", "")),
+                    "vat": esc(legal.get("VAT", "")),
+                    "duns": esc(legal.get("DUNS", "")),
+                }
+            )
+
+        # --- Solutions sheet ---
+        solutions_rows = []
+        for solution in solutions:
+            solutions_rows.append(
+                {
+                    "ref_id": esc(solution.ref_id),
+                    "name": esc(solution.name),
+                    "description": esc(solution.description),
+                    "provider_entity_ref_id": esc(solution.provider_entity.ref_id),
+                    "provider": esc(solution.provider_entity.name),
+                    "criticality": solution.criticality,
+                }
+            )
+
+        # --- Contracts sheet ---
+        contracts_rows = []
+        for contract in contracts:
+            contract_solutions = list(contract.solutions.all())
+            solution_ref_ids = "\n".join(
+                esc(s.ref_id) for s in contract_solutions if s.ref_id
+            )
+            solution_names = "\n".join(
+                esc(s.name) for s in contract_solutions if s.name
+            )
+            contracts_rows.append(
+                {
+                    "ref_id": esc(contract.ref_id),
+                    "name": esc(contract.name),
+                    "description": esc(contract.description),
+                    "provider_entity_ref_id": (
+                        esc(contract.provider_entity.ref_id)
+                        if contract.provider_entity
+                        else ""
+                    ),
+                    "provider": (
+                        esc(contract.provider_entity.name)
+                        if contract.provider_entity
+                        else ""
+                    ),
+                    "solution_ref_id": solution_ref_ids,
+                    "solution": solution_names,
+                    "status": contract.status,
+                    "start_date": (
+                        contract.start_date.isoformat() if contract.start_date else ""
+                    ),
+                    "end_date": (
+                        contract.end_date.isoformat() if contract.end_date else ""
+                    ),
+                    "annual_expense": (
+                        contract.annual_expense
+                        if contract.annual_expense is not None
+                        else ""
+                    ),
+                    "currency": esc(contract.currency),
+                    "domain": esc(contract.folder.name) if contract.folder else "",
+                }
+            )
+
+        entity_columns = [
+            "ref_id",
+            "name",
+            "description",
+            "mission",
+            "country",
+            "currency",
+            "parent_entity_ref_id",
+            "dependency",
+            "penetration",
+            "maturity",
+            "trust",
+            "domain",
+            "lei",
+            "euid",
+            "vat",
+            "duns",
+        ]
+        solution_columns = [
+            "ref_id",
+            "name",
+            "description",
+            "provider_entity_ref_id",
+            "provider",
+            "criticality",
+        ]
+        contract_columns = [
+            "ref_id",
+            "name",
+            "description",
+            "provider_entity_ref_id",
+            "provider",
+            "solution_ref_id",
+            "solution",
+            "status",
+            "start_date",
+            "end_date",
+            "annual_expense",
+            "currency",
+            "domain",
+        ]
+
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            pd.DataFrame(entities_rows, columns=entity_columns).to_excel(
+                writer, index=False, sheet_name="Entities"
+            )
+            pd.DataFrame(solutions_rows, columns=solution_columns).to_excel(
+                writer, index=False, sheet_name="Solutions"
+            )
+            pd.DataFrame(contracts_rows, columns=contract_columns).to_excel(
+                writer, index=False, sheet_name="Contracts"
+            )
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="tprm_ecosystem_export.xlsx"'
+        )
+        return response
 
     @action(detail=False, name="Get country choices")
     def country(self, request):
@@ -812,12 +1133,37 @@ class RepresentativeViewSet(BaseModelViewSet):
     search_fields = ["email"]
 
 
-class SolutionViewSet(BaseModelViewSet):
+class SolutionViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows solutions to be viewed or edited.
     """
 
     model = Solution
+    export_config = {
+        "filename": "solutions_export",
+        "fields": {
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "provider_entity_ref_id": {
+                "source": "provider_entity.ref_id",
+                "label": "provider_entity_ref_id",
+                "escape": True,
+            },
+            "provider_entity": {
+                "source": "provider_entity.name",
+                "label": "provider",
+                "escape": True,
+            },
+            "criticality": {"source": "criticality", "label": "criticality"},
+        },
+        "select_related": ["provider_entity"],
+        "wrap_columns": ["name", "description"],
+    }
     filterset_fields = [
         "name",
         "ref_id",
@@ -893,12 +1239,55 @@ class SolutionViewSet(BaseModelViewSet):
         return Response(dict(DORA_ICT_SERVICE_CHOICES))
 
 
-class ContractViewSet(BaseModelViewSet):
+class ContractViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows contracts to be viewed or edited.
     """
 
     model = Contract
+    export_config = {
+        "filename": "contracts_export",
+        "fields": {
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "provider_entity_ref_id": {
+                "source": "provider_entity.ref_id",
+                "label": "provider_entity_ref_id",
+                "escape": True,
+            },
+            "provider_entity": {
+                "source": "provider_entity.name",
+                "label": "provider",
+                "escape": True,
+            },
+            "solution_ref_id": {
+                "source": "solutions",
+                "label": "solution_ref_id",
+                "format": lambda qs: "\n".join(s.ref_id for s in qs.all() if s.ref_id),
+                "escape": True,
+            },
+            "solution": {
+                "source": "solutions",
+                "label": "solution",
+                "format": lambda qs: "\n".join(s.name for s in qs.all() if s.name),
+                "escape": True,
+            },
+            "status": {"source": "status", "label": "status"},
+            "start_date": {"source": "start_date", "label": "start_date"},
+            "end_date": {"source": "end_date", "label": "end_date"},
+            "annual_expense": {"source": "annual_expense", "label": "annual_expense"},
+            "currency": {"source": "currency", "label": "currency"},
+            "domain": {"source": "folder.name", "label": "domain", "escape": True},
+        },
+        "select_related": ["folder", "provider_entity"],
+        "prefetch_related": ["solutions"],
+        "wrap_columns": ["name", "description"],
+    }
     filterset_fields = [
         "name",
         "folder",
@@ -915,6 +1304,7 @@ class ContractViewSet(BaseModelViewSet):
         "governing_law_country",
         "notice_period_entity",
         "notice_period_provider",
+        "end_date",
     ]
 
     @action(detail=False, name="Get status choices")

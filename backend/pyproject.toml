@@ -7,8 +7,8 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.14"
-django = "^6.0.3"
+python = ">=3.14,<3.15"
+django = "^6.0.4"
 weasyprint = "^68.0"
 psycopg2-binary = "^2.9.11"
 gunicorn = "^23.0.0"
@@ -49,7 +49,14 @@ icecream = "^2.1.8"
 regex = "^2025.11.3"
 prometheus-client = "^0.22.1"
 jira = "^3.10.5"
-cryptography = "^46.0.5"
+cryptography = "^46.0.7"
+cel-python = "^0.5.0"
+qdrant-client = "^1.14.2"
+httpx = "^0.28.1"
+sentence-transformers = "^4.1.0"
+PyMuPDF = "^1.25.5"
+markdown = "^3.10.2"
+rapidfuzz = "^3.14.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.11.1"
