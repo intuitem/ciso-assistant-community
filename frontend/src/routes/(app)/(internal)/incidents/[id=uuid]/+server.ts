@@ -1,4 +1,4 @@
-import { genericUrlmodelIdGET, genericUrlmodelIdPATCH } from "$lib/utils/api-routes";
+import { genericUrlmodelIdGET, genericUrlmodelIdPATCH } from '$lib/utils/api-routes';
 
-export const GET = genericUrlmodelIdGET("incidents");
-export const PATCH = genericUrlmodelIdPATCH("incidents");
+export const GET = genericUrlmodelIdGET('incidents');
+export const PATCH = genericUrlmodelIdPATCH('incidents');

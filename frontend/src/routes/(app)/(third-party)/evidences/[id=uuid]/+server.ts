@@ -1,3 +1,3 @@
-import { genericThirdPartyUrlmodelGET } from "$lib/utils/api-routes";
+import { genericThirdPartyUrlmodelGET } from '$lib/utils/api-routes';
 
-export const GET = genericThirdPartyUrlmodelGET("evidences");
+export const GET = genericThirdPartyUrlmodelGET('evidences');

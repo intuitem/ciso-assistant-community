@@ -1,3 +1,3 @@
-import { genericThirdPartyUrlmodelGET } from "$lib/utils/api-routes";
+import { genericThirdPartyUrlmodelGET } from '$lib/utils/api-routes';
 
-export const GET = genericThirdPartyUrlmodelGET("compliance-assessments");
+export const GET = genericThirdPartyUrlmodelGET('compliance-assessments');
