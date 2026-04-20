@@ -150,13 +150,13 @@ export function genericUrlmodelGET(urlModel: urlModel): typeof urlmodelGET {
 		});
 }
 
-export const thirdPartyUrlmodelGET: RequestHandler<ParamsThirdPartyUrlmodelId> = async ({
+export const thirdPartyUrlmodelIdGET: RequestHandler<ParamsThirdPartyUrlmodelId> = async ({
 	fetch,
 	params,
 	url
 }) => {
 	const model = getModelInfo(params.model);
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl ? model.endpointUrl : params.model}/${
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl ? model.endpointUrl : params.model}/${params.id}/${
 		url.searchParams.size > 0 ? '?' + url.searchParams.toString() : ''
 	}`;
 
@@ -179,14 +179,14 @@ export const thirdPartyUrlmodelGET: RequestHandler<ParamsThirdPartyUrlmodelId> =
  * Example for `(app)/(third-party)/evidences/[id=uuid]/+server.ts`:
  *
  * ```ts
- * export const GET = genericThirdPartyUrlmodelGET("evidences");
+ * export const GET = genericThirdPartyUrlmodelIdGET("evidences");
  * ```
  */
-export function genericThirdPartyUrlmodelGET(
+export function genericThirdPartyUrlmodelIdGET(
 	urlModel: thirdPartyUrlModel
-): typeof thirdPartyUrlmodelGET {
+): typeof thirdPartyUrlmodelIdGET {
 	return async (event) =>
-		thirdPartyUrlmodelGET({
+		thirdPartyUrlmodelIdGET({
 			...event,
 			params: { ...event.params, model: urlModel }
 		});
