@@ -510,12 +510,14 @@ export function choiceUrnFromAlignmentValue(value: string | null): string | unde
 export function shouldShowAutoQuestion(
 	requirement: Record<string, any>,
 	viewerRole: string,
-	fw: any,
-	ca: any
+	fw: Record<string, any> | null | undefined,
+	ca: Record<string, any> | null | undefined
 ): boolean {
 	if (viewerRole !== 'respondent') return false;
 	const hasQuestions =
 		requirement.questions != null && Object.keys(requirement.questions).length > 0;
 	if (hasQuestions) return false;
-	return resolveFieldVisibility(fw, ca, 'result') !== 'everyone';
+	if (resolveFieldVisibility(fw, ca, 'result') === 'everyone') return false;
+	// Don't render a non-editable synthetic question to respondents
+	return resolveFieldVisibility(fw, ca, 'respondent_alignment') === 'everyone';
 }

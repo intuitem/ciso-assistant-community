@@ -2928,21 +2928,28 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 if has_score_or_result:
                     instance.compute_score_and_result()
 
-            # Auto-map respondent_alignment to result
+            # Auto-map respondent_alignment to result.
+            # Skipped when framework questions already drive the result, to avoid
+            # the alignment silently overwriting an answer-computed value.
             ALIGNMENT_TO_RESULT = {
                 "yes": RequirementAssessment.Result.COMPLIANT,
                 "no": RequirementAssessment.Result.NON_COMPLIANT,
                 "in_progress": RequirementAssessment.Result.PARTIALLY_COMPLIANT,
                 "not_applicable": RequirementAssessment.Result.NOT_APPLICABLE,
             }
-            new_alignment = validated_data.get("respondent_alignment")
-            if new_alignment and new_alignment in ALIGNMENT_TO_RESULT:
-                instance.result = ALIGNMENT_TO_RESULT[new_alignment]
-                instance.save(update_fields=["result"])
-            elif "respondent_alignment" in validated_data and not new_alignment:
-                # Deselection: reset result to not_assessed
-                instance.result = RequirementAssessment.Result.NOT_ASSESSED
-                instance.save(update_fields=["result"])
+            requirement_has_questions = instance.requirement.questions.exists()
+            if (
+                "respondent_alignment" in validated_data
+                and not requirement_has_questions
+            ):
+                new_alignment = validated_data.get("respondent_alignment")
+                if new_alignment and new_alignment in ALIGNMENT_TO_RESULT:
+                    instance.result = ALIGNMENT_TO_RESULT[new_alignment]
+                    instance.save(update_fields=["result"])
+                elif not new_alignment:
+                    # Deselection: reset result to not_assessed
+                    instance.result = RequirementAssessment.Result.NOT_ASSESSED
+                    instance.save(update_fields=["result"])
 
             return instance
 

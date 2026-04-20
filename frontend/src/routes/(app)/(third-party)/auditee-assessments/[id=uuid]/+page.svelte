@@ -316,11 +316,14 @@
 	function getQuestionStatus(item: { data: Record<string, any> }): string {
 		const visible = item.data.visible_questions ?? 0;
 		const answered = item.data.answered_questions ?? 0;
-		// Auto-question RA: count respondent_alignment as the answer
-		if (
+		// Framework-less assessable RA: reflect respondent_alignment state
+		// for both respondent and auditor views so the ToC is accurate for everyone.
+		const isFrameworklessAssessable =
 			visible === 0 &&
-			shouldShowAutoQuestion(item.data.requirement, viewerRole, fw, complianceAssessment)
-		) {
+			item.data.requirement &&
+			(item.data.requirement.questions == null ||
+				Object.keys(item.data.requirement.questions).length === 0);
+		if (isFrameworklessAssessable) {
 			return item.data.respondent_alignment ? '#22c55e' : '#ef4444';
 		}
 		if (visible === 0) return '#22c55e'; // no questions = complete (green)
