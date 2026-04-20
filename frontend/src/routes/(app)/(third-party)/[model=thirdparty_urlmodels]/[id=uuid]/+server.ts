@@ -1,3 +1,3 @@
-import { thirdPartyUrlmodelGET } from '$lib/utils/api-routes';
+import { thirdPartyUrlmodelIdGET } from '$lib/utils/api-routes';
 
-export const GET = thirdPartyUrlmodelGET;
+export const GET = thirdPartyUrlmodelIdGET;
