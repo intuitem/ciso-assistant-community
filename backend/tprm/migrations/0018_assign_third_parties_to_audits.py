@@ -41,7 +41,7 @@ def assign_third_parties_to_existing_audits(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("tprm", "0016_solutionsubcontractor"),
+        ("tprm", "0017_entityassessment_reference_link"),
         ("core", "0161_securityexception_link"),
     ]
 
