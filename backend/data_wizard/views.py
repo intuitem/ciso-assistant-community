@@ -2659,9 +2659,11 @@ class LoadFileView(APIView):
             if perimeter is not None:
                 folder_id = perimeter.folder.id
             elif folder_id is None:
-                raise AssertionError(
-                    "A folder must be specified when there's no perimeter!"
+                results["failed"] += 1
+                results["errors"].append(
+                    {"error": "A folder must be specified when there's no perimeter!"}
                 )
+                return results
 
             assessment_name = resolve_container_name(request, "Assessment")
 
@@ -3774,10 +3776,13 @@ class LoadFileView(APIView):
                 domain = perimeter.folder
             else:
                 if folder_id is None:
-                    raise AssertionError(
-                        "A folder must be specified when there's no perimeter!"
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"error": "A folder must be specified when there's no perimeter!"}
                     )
-                domain = Folder.objects.get(id=folder_id)
+                    return results
+                else:
+                    domain = Folder.objects.get(id=folder_id)
 
             # Get the risk matrix
             risk_matrix = RiskMatrix.objects.get(id=matrix_id)
