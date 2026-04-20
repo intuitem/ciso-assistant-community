@@ -284,19 +284,19 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 | `current_proba` | No | |
 | `residual_impact` | No | |
 | `residual_proba` | No | |
-| `existing_applied_controls` | No | Newline-separated, creates/finds controls |
-| `additional_controls` | No | Newline-separated |
+| `existing_applied_controls` | No | Pipe-, newline-, semicolon- or comma-separated; matching controls are created or found in the domain |
+| `additional_controls` | No | Pipe-, newline-, semicolon- or comma-separated; matching controls are created or found in the domain. Alias: `applied_controls` (used by the CSV/XLSX export). |
 | `treatment` | No | Defaults to "open" |
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing, set post-save) |
+| `justification` | No | Free text (max 2000 chars) |
+| `assets` | No | Pipe-, newline-, semicolon- or comma-separated asset names. Missing assets are auto-created in the domain folder with the default type **Support**; users can re-classify them afterward from the UI. |
 
 **Missing RiskScenario Fields:**
 | Field | Type | Priority |
 |-------|------|----------|
 | `strength_of_knowledge` | CharField | Medium |
-| `justification` | TextField | Medium |
 | `owner` | FK User | High |
 | `threats` | M2M | High |
-| `assets` | M2M | High |
 | `vulnerabilities` | M2M | Medium |
 
 ---
