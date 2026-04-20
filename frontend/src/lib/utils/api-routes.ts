@@ -117,7 +117,7 @@ export function genericUrlmodelIdPATCH(urlModel: urlModel): typeof urlmodelIdPAT
 export const urlmodelGET: RequestHandler<ParamsUrlmodel> = async ({ fetch, params, url }) => {
 	const model = getModelInfo(params.model);
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ? model.endpointUrl : params.model}/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
+		url.searchParams.size > 0 ? '?' + url.searchParams.toString() : ''
 	}`;
 
 	const res = await fetch(endpoint);
@@ -157,7 +157,7 @@ export const thirdPartyUrlmodelGET: RequestHandler<ParamsThirdPartyUrlmodelId> =
 }) => {
 	const model = getModelInfo(params.model);
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ? model.endpointUrl : params.model}/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
+		url.searchParams.size > 0 ? '?' + url.searchParams.toString() : ''
 	}`;
 
 	const res = await fetch(endpoint);

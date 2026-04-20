@@ -5,7 +5,7 @@ import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const endpoint = `${BASE_API_URL}/compliance-assessments/${params.id}/evidences-list/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
+		url.searchParams.size > 0 ? '?' + url.searchParams.toString() : ''
 	}`;
 
 	const res = await fetch(endpoint);
