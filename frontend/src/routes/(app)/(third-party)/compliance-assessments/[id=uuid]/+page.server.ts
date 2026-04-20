@@ -34,66 +34,64 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 	}
 	const compliance_assessment = await res.json();
 
-	const object = await fetch(objectEndpoint).then((res) => res.json());
-
-	const tree = await fetch(`${endpoint}tree/`).then((res) => res.json());
-
-	const compliance_assessment_donut_values = await fetch(
-		`${BASE_API_URL}/${URLModel}/${params.id}/donut_data/`
-	).then((res) => res.json());
-
-	const global_score = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/global_score/`).then(
-		(res) => res.json()
-	);
-
-	const threats = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/threats_metrics/`).then(
-		(res) => res.json()
-	);
-	const initialData = { baseline: compliance_assessment.id };
-	const auditCreateForm = await superValidate(initialData, zod(ComplianceAssessmentSchema), {
-		errors: false
-	});
-
-	const cloneInitialData = {
-		baseline: compliance_assessment.id,
-		framework: compliance_assessment.framework.id,
-		perimeter: compliance_assessment.perimeter?.id
-	};
-	const auditCloneForm = await superValidate(cloneInitialData, zod(ComplianceAssessmentSchema), {
-		errors: false
-	});
-
 	const auditModel = getModelInfo('compliance-assessments');
-
 	const selectOptions: Record<string, any> = {};
 
-	const frameworksMappings = await fetch(`/compliance-assessments/${params.id}/frameworks`).then(
-		(res) => res.json()
-	);
+	// Parallelize ALL independent API calls + form validation in a single batch.
+	// Use BASE_API_URL for frameworks/ to avoid triggering a SvelteKit layout reload.
+	const selectFieldPromises = (auditModel.selectFields || []).map(async (selectField) => {
+		const url = `${BASE_API_URL}/compliance-assessments/${selectField.field}/`;
+		const response = await fetch(url);
 
-	if (auditModel.selectFields) {
-		for (const selectField of auditModel.selectFields) {
-			const url = `${BASE_API_URL}/compliance-assessments/${selectField.field}/`;
-			const response = await fetch(url);
-			if (response.ok) {
-				const responseData = await response.json();
-				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
-			} else {
-				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
-			}
+		if (response.ok) {
+			const responseData = await response.json();
+			selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
+		} else {
+			console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 		}
-	}
+	});
+
+	const [
+		object,
+		tree,
+		compliance_assessment_donut_values,
+		global_score,
+		threats,
+		frameworksMappings,
+		auditCreateForm,
+		auditCloneForm,
+		form,
+		{ validationFlowForm }
+	] = await Promise.all([
+		fetch(objectEndpoint).then((res) => res.json()),
+		fetch(`${endpoint}tree/`).then((res) => res.json()),
+		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/donut_data/`).then((res) => res.json()),
+		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/global_score/`).then((res) => res.json()),
+		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/threats_metrics/`).then((res) => res.json()),
+		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/frameworks/`).then((res) => res.json()),
+		superValidate({ baseline: compliance_assessment.id }, zod(ComplianceAssessmentSchema), {
+			errors: false
+		}),
+		superValidate(
+			{
+				baseline: compliance_assessment.id,
+				framework: compliance_assessment.framework?.id,
+				perimeter: compliance_assessment.perimeter?.id
+			},
+			zod(ComplianceAssessmentSchema),
+			{ errors: false }
+		),
+		superValidate(zod(z.object({ id: z.string().uuid() }))),
+		loadValidationFlowFormData({
+			event: { fetch },
+			folderId: compliance_assessment.folder.id,
+			targetField: 'compliance_assessments',
+			targetIds: [params.id]
+		}),
+		...selectFieldPromises
+	]);
 
 	auditModel.selectOptions = selectOptions;
-
-	const form = await superValidate(zod(z.object({ id: z.string().uuid() })));
-
-	const { validationFlowForm } = await loadValidationFlowFormData({
-		event: { fetch },
-		folderId: compliance_assessment.folder.id,
-		targetField: 'compliance_assessments',
-		targetIds: [params.id]
-	});
 
 	return {
 		URLModel,

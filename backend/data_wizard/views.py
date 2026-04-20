@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
 
 from .serializers import LoadFileSerializer
+from core.utils import build_questions_dict
 from core.models import (
     Actor,
     Asset,
@@ -23,6 +24,7 @@ from core.models import (
     Policy,
     SecurityException,
     Incident,
+    Vulnerability,
 )
 from core.serializers import (
     BaseModelSerializer,
@@ -43,6 +45,7 @@ from core.serializers import (
     PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
     IncidentWriteSerializer,
+    VulnerabilityWriteSerializer,
 )
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -84,6 +87,7 @@ from privacy.models import Processing, ProcessingNature
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
+from core.utils import get_global_currency
 from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
@@ -94,6 +98,24 @@ from abc import ABC, abstractmethod
 import enum
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_container_name(request, default_prefix: str) -> str:
+    """Return a user-supplied name for an imported container object (assessment,
+    study, etc.) or a timestamped fallback.
+
+    Data Wizard imports that create a single parent object (e.g. compliance /
+    risk / findings assessments, EBIOS RM studies) let the client override the
+    auto-generated name via the ``X-Name`` header. When absent or blank,
+    ``{default_prefix}_{YYYYMMDD_HHMMSS}`` is used.
+    """
+    custom_name = ""
+    if request is not None:
+        custom_name = (request.headers.get("X-Name") or "").strip()
+    if custom_name:
+        return custom_name
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{default_prefix}_{timestamp}"
 
 
 def get_accessible_folders_map(user: User) -> dict[str, UUID]:
@@ -173,23 +195,63 @@ def _parse_time_to_seconds(s: str) -> int | None:
     return h * 3600 + mn * 60 + sc
 
 
-def _parse_security_objectives(raw: str) -> dict:
-    """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}."""
+def _get_security_objective_scale() -> list:
+    """Return the active security-objective scale from GlobalSettings."""
+    from global_settings.models import GlobalSettings
+
+    settings = GlobalSettings.objects.filter(name="general").first()
+    scale_key = (
+        settings.value.get("security_objective_scale", "1-4") if settings else "1-4"
+    )
+    return Asset.SECURITY_OBJECTIVES_SCALES[scale_key]
+
+
+def _reverse_scale_value(display_val: str, scale: list) -> int | None:
+    """Map a display value back to its raw 0-based index.
+
+    The scale list maps raw index → display value.  We need the reverse:
+    find the *first* index whose display value matches.
+    Supports both numeric scales (1-4, 0-3, …) and string scales (FIPS-199).
+    """
+    # Try numeric comparison first
+    try:
+        numeric = int(display_val)
+        for idx, sv in enumerate(scale):
+            if isinstance(sv, (int, float)) and int(sv) == numeric:
+                return idx
+    except (ValueError, TypeError):
+        pass
+
+    # Fall back to case-insensitive string comparison (e.g. FIPS-199)
+    display_lower = display_val.strip().lower()
+    for idx, sv in enumerate(scale):
+        if str(sv).lower() == display_lower:
+            return idx
+
+    return None
+
+
+def _parse_security_objectives(raw: str, scale: list | None = None) -> dict:
+    """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}.
+
+    Values in the input are *display* values (scale-mapped).  They are
+    reverse-mapped back to the raw 0-based index before storage so that
+    an export → import round-trip is lossless.
+    """
     result = {}
     if not raw:
         return result
+    if scale is None:
+        scale = _get_security_objective_scale()
     for part in str(raw).split(","):
         part = part.strip()
         if ":" not in part:
             continue
         key, _, val = part.partition(":")
         key = key.strip()
-        try:
-            v = int(val.strip())
-            if 0 <= v <= 4:
-                result[key] = {"value": v, "is_enabled": True}
-        except (ValueError, TypeError):
-            pass
+        v = _reverse_scale_value(val.strip(), scale)
+        if v is not None and 0 <= v <= 4:
+            result[key] = {"value": v, "is_enabled": True}
     return result
 
 
@@ -228,9 +290,31 @@ def _resolve_filtering_labels(value) -> list[UUID]:
                 label.full_clean()
                 label.save()
             except Exception:
-                continue
+                logging.error(f"Failed to save label: {value}")
         label_ids.append(label.id)
     return label_ids
+
+
+def _resolve_vulnerabilities(value, folder) -> tuple[list[UUID], list[str]]:
+    """
+    Parse pipe- or comma-separated vulnerability names and return a tuple of
+    (list of resolved Vulnerability IDs, list of names that failed to resolve).
+    """
+    if not value or not isinstance(value, str):
+        return [], []
+    vuln_names = [name.strip() for name in re.split(r"[|,]", value) if name.strip()]
+    vuln_ids: list[UUID] = []
+    failed_names: list[str] = []
+    for vuln_name in vuln_names:
+        try:
+            vuln, _created = Vulnerability.objects.get_or_create(
+                name=vuln_name, folder=folder
+            )
+            vuln_ids.append(vuln.id)
+        except Exception:
+            logging.exception(f"Failed to resolve vulnerability {vuln_name}")
+            failed_names.append(vuln_name)
+    return vuln_ids, failed_names
 
 
 class RecordFileType(enum.StrEnum):
@@ -275,6 +359,7 @@ class ModelType(enum.StrEnum):
     POLICY = "Policy"
     SECURITY_EXCEPTION = "SecurityException"
     INCIDENT = "Incident"
+    VULNERABILITY = "Vulnerability"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
 
     @staticmethod
@@ -528,7 +613,7 @@ class RecordConsumer[Context](ABC):
         return results
 
 
-class AssetRecordConsumer(RecordConsumer[None]):
+class AssetRecordConsumer(RecordConsumer[list]):
     """
     Consumer for importing Asset records.
     Supports parent_assets linking via ref_id in a second pass.
@@ -547,10 +632,10 @@ class AssetRecordConsumer(RecordConsumer[None]):
     }
 
     def create_context(self):
-        return None, None
+        return _get_security_objective_scale(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: list
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -568,6 +653,16 @@ class AssetRecordConsumer(RecordConsumer[None]):
                 asset_type.lower().strip(), asset_type.upper()
             )
 
+        record_is_business_function = record.get("is_business_function", False)
+        is_business_function = False
+        if isinstance(record_is_business_function, str):
+            is_business_function = record_is_business_function.strip().lower() in [
+                "true",
+                "yes",
+            ]
+        elif isinstance(record_is_business_function, bool):
+            is_business_function = record_is_business_function
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
@@ -578,6 +673,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "reference_link": record.get("reference_link", "")
             or record.get("link", ""),
             "observation": record.get("observation", ""),
+            "is_business_function": is_business_function,
         }
 
         raw_labels = (
@@ -598,7 +694,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "recovery_capabilities", ""
         )
 
-        sec_objectives = _parse_security_objectives(raw_sec)
+        sec_objectives = _parse_security_objectives(raw_sec, scale=context)
         rec_objectives = _parse_recovery_objectives(raw_rec)
 
         parse_warning_msgs = []
@@ -673,7 +769,12 @@ class AssetRecordConsumer(RecordConsumer[None]):
         return results
 
 
-class AppliedControlRecordConsumer(RecordConsumer[None]):
+@dataclass(frozen=True)
+class AppliedControlContext:
+    currency: str = field(default_factory=get_global_currency)
+
+
+class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
     """
     Consumer for importing AppliedControl records.
     Supports reference_control linking via ref_id and owner resolution
@@ -685,6 +786,14 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "control_impact": ("control_impact", "impact"),
         "reference_control": ("reference_control", "reference_control_ref_id"),
         "owner": ("owner",),
+        "cost": (
+            "cost_currency",
+            "cost_amortization_period",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+        ),
     }
     IMPACT_MAP: Final[dict[str, int]] = {
         "very low": 1,
@@ -707,12 +816,21 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "extralarge": "XL",
         "xl": "XL",
     }
+    COST_KEYS: Final[frozenset[str]] = frozenset(
+        {
+            "cost_amortization_period",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+        }
+    )
 
-    def create_context(self):
-        return None, None
+    def create_context(self) -> tuple[AppliedControlContext, Optional[Error]]:
+        return AppliedControlContext(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: AppliedControlContext
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -765,15 +883,23 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             if ref_control:
                 reference_control_id = ref_control.id
 
+        csf_function = record.get("csf_function", "govern")
+        if isinstance(csf_function, str):
+            csf_function = csf_function.lower()
+
+        category = record.get("category", "")
+        if isinstance(category, str):
+            category = category.lower()
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
-            "category": record.get("category", ""),
+            "category": category,
             "folder": domain,
             "status": record.get("status", "to_do"),
             "priority": priority,
-            "csf_function": record.get("csf_function", "govern"),
+            "csf_function": csf_function,
             "effort": effort,
             "control_impact": control_impact,
             "link": record.get("link", ""),
@@ -785,6 +911,25 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
 
         if reference_control_id:
             data["reference_control"] = reference_control_id
+
+        has_cost_related_key = any(
+            key in self.COST_KEYS and record.get(key) not in (None, "")
+            for key in record.keys()
+        )
+        if has_cost_related_key:
+            cost = {
+                "currency": record.get("cost_currency") or context.currency,
+                "amortization_period": int(record.get("cost_amortization_period") or 1),
+                "build": {
+                    "fixed_cost": int(record.get("cost_build_fixed") or 0),
+                    "people_days": int(record.get("cost_build_people_days") or 0),
+                },
+                "run": {
+                    "fixed_cost": int(record.get("cost_run_fixed") or 0),
+                    "people_days": int(record.get("cost_run_people_days") or 0),
+                },
+            }
+            data["cost"] = cost
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
@@ -1003,6 +1148,7 @@ class ReferenceControlRecordConsumer(RecordConsumer[None]):
 @dataclass(frozen=True)
 class FindingsAssessmentContext:
     findings_assessment: FindingsAssessment
+    folder: Folder
 
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
@@ -1022,8 +1168,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             perimeter = Perimeter.objects.get(id=perimeter_id)
             folder_id = perimeter.folder.id
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            assessment_name = f"Followup_{timestamp}"
+            assessment_name = resolve_container_name(self.request, "Followup")
             assessment_data = {
                 "name": assessment_name,
                 "perimeter": perimeter_id,
@@ -1042,7 +1187,8 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                 )
 
                 return FindingsAssessmentContext(
-                    findings_assessment=findings_assessment
+                    findings_assessment=findings_assessment,
+                    folder=perimeter.folder,
                 ), None
             return None, Error(record=assessment_data, error=str(serializer.errors))
 
@@ -1071,6 +1217,18 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             priority = None
 
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
+        vulnerabilities, failed_vulnerabilities = _resolve_vulnerabilities(
+            record.get("vulnerabilities"), context.folder
+        )
+
+        if failed_vulnerabilities:
+            return {}, Error(
+                record=record,
+                error=(
+                    "Failed to create or retrieve thiese vulnerabilities: "
+                    + ", ".join(failed_vulnerabilities)
+                ),
+            )
 
         finding_data = {
             "name": name,
@@ -1083,10 +1241,18 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "vulnerabilities": vulnerabilities,
         }
 
         if priority is not None:
             finding_data["priority"] = priority
+
+        if failed_vulnerabilities:
+            return finding_data, Error(
+                record=record,
+                error=f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}",
+                is_warning=True,
+            )
 
         return finding_data, None
 
@@ -1304,6 +1470,134 @@ class IncidentRecordConsumer(RecordConsumer[None]):
             data["filtering_labels"] = filtering_labels
 
         return data, None
+
+
+class VulnerabilityRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Vulnerability records.
+    """
+
+    SERIALIZER_CLASS = VulnerabilityWriteSerializer
+    SEVERITY_MAP: Final[dict[str, int]] = {
+        "undefined": -1,
+        "info": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "critical": 4,
+    }
+    STATUS_MAP: Final[dict[str, str]] = {
+        "undefined": "--",
+        "potential": "potential",
+        "exploitable": "exploitable",
+        "mitigated": "mitigated",
+        "fixed": "fixed",
+        "not exploitable": "not_exploitable",
+        "unaffected": "unaffected",
+    }
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        folder_id = self.folder_id
+
+        raw_severity = record.get("severity")
+        if isinstance(raw_severity, str):
+            severity = self.SEVERITY_MAP.get(raw_severity.lower().strip(), -1)
+        elif isinstance(raw_severity, int) and -1 <= raw_severity <= 4:
+            severity = raw_severity
+        else:
+            severity = -1
+
+        raw_status = record.get("status")
+        if isinstance(raw_status, str):
+            status = self.STATUS_MAP.get(raw_status.lower().strip(), "--")
+        else:
+            status = "--"
+
+        applied_controls = []
+        for ap_name in (record.get("applied_controls") or "").splitlines():
+            ap_name = ap_name.strip()
+            if not ap_name:
+                continue
+            obj = AppliedControl.objects.filter(
+                name=ap_name, folder_id=folder_id
+            ).first()
+            if obj:
+                applied_controls.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No applied control named '{ap_name}' found in folder",
+                )
+
+        assets = []
+        for asset_name in (record.get("assets") or "").splitlines():
+            asset_name = asset_name.strip()
+            if not asset_name:
+                continue
+            obj = Asset.objects.filter(name=asset_name, folder_id=folder_id).first()
+            if obj:
+                assets.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No asset named '{asset_name}' found in folder",
+                )
+
+        security_exceptions = []
+        for se_name in (record.get("security_exceptions") or "").splitlines():
+            se_name = se_name.strip()
+            if not se_name:
+                continue
+            obj = SecurityException.objects.filter(
+                name=se_name, folder_id=folder_id
+            ).first()
+            if obj:
+                security_exceptions.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No security exception named '{se_name}' found in folder",
+                )
+
+        data = {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "status": status,
+            "severity": severity,
+            "folder": folder_id,
+            "applied_controls": applied_controls,
+            "assets": assets,
+            "security_exceptions": security_exceptions,
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
+
+    def find_existing(self, record_data: dict):
+        folder_id = record_data.get("folder")
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = Vulnerability.objects.filter(
+                ref_id=ref_id, folder_id=folder_id
+            ).first()
+            if existing:
+                return existing
+        return Vulnerability.objects.filter(
+            name=record_data.get("name"), folder_id=folder_id
+        ).first()
 
 
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
@@ -1995,6 +2289,12 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.VULNERABILITY:
+                            res = (
+                                VulnerabilityRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case ModelType.BUSINESS_IMPACT_ANALYSIS:
                             res = (
                                 BusinessImpactAnalysisRecordConsumer(base_context)
@@ -2035,7 +2335,6 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         folders_map = get_accessible_folders_map(request.user)
-
         # Dispatch to appropriate handler
         match model_type:
             case ModelType.COMPLIANCE_ASSESSMENT:
@@ -2356,8 +2655,7 @@ class LoadFileView(APIView):
             perimeter = Perimeter.objects.get(id=perimeter_id)
             folder_id = perimeter.folder.id
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            assessment_name = f"Assessment_{timestamp}"
+            assessment_name = resolve_container_name(request, "Assessment")
 
             # Prepare data for serializer
             assessment_data = {
@@ -2469,13 +2767,12 @@ class LoadFileView(APIView):
 
                             # Build answers from the "answers" cell
                             answers_cell = record.get("answers")
-                            if (
-                                answers_cell not in (None, "")
-                                and ReqNode
-                                and ReqNode.questions
-                            ):
+                            questions_dict = (
+                                build_questions_dict(ReqNode) if ReqNode else None
+                            )
+                            if answers_cell not in (None, "") and questions_dict:
                                 text_to_question = {}
-                                for q_urn, qdef in ReqNode.questions.items():
+                                for q_urn, qdef in questions_dict.items():
                                     q_text = qdef.get("text", "")
                                     if q_text:
                                         text_to_question[q_text] = (
@@ -2483,7 +2780,7 @@ class LoadFileView(APIView):
                                             qdef,
                                         )
 
-                                answers = requirement_assessment.answers or {}
+                                answers = {}
                                 has_any_answer = False
 
                                 for line in str(answers_cell).split("\n"):
@@ -3297,15 +3594,36 @@ class LoadFileView(APIView):
                     "folder": domain,
                 }
 
-                # Add optional solution reference
-                solution_ref_id = str(record.get("solution_ref_id", "")).strip()
-                if solution_ref_id:
-                    if solution_ref_id in solution_ref_map:
-                        contract_data["solution"] = solution_ref_map[solution_ref_id]
-                    else:
-                        logger.warning(
-                            f"Solution with ref_id '{solution_ref_id}' not found for contract '{ref_id}'"
-                        )
+                # Parse solution references (newline, pipe, or comma-separated).
+                # Unknown refs are reported in results["errors"] but do not block
+                # contract creation — known refs are still linked, matching the
+                # pre-multi-solution lenient behavior.
+                solution_ids = []
+                missing_solution_refs = []
+                solution_ref_id_raw = str(record.get("solution_ref_id", "")).strip()
+                if solution_ref_id_raw:
+                    for sol_ref in re.split(r"[\n\r|,]+", solution_ref_id_raw):
+                        sol_ref = sol_ref.strip()
+                        if not sol_ref:
+                            continue
+                        if sol_ref in solution_ref_map:
+                            solution_ids.append(solution_ref_map[sol_ref])
+                        else:
+                            missing_solution_refs.append(sol_ref)
+                            logger.warning(
+                                f"Solution with ref_id '{sol_ref}' not found for contract '{ref_id}'"
+                            )
+
+                if missing_solution_refs:
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": (
+                                "Unknown solution_ref_id(s) skipped: "
+                                + ", ".join(missing_solution_refs)
+                            ),
+                        }
+                    )
 
                 # Add optional fields
                 if record.get("status"):
@@ -3360,7 +3678,9 @@ class LoadFileView(APIView):
                                 context={"request": request},
                             )
                             if serializer.is_valid():
-                                serializer.save()
+                                contract = serializer.save()
+                                if solution_ids:
+                                    contract.solutions.set(solution_ids)
                                 results["updated"] += 1
                             else:
                                 results["failed"] += 1
@@ -3376,6 +3696,8 @@ class LoadFileView(APIView):
 
                 if serializer.is_valid(raise_exception=True):
                     contract = serializer.save()
+                    if solution_ids:
+                        contract.solutions.set(solution_ids)
                     results["successful"] += 1
                     logger.debug(
                         f"Created contract: {contract.name} with ref_id: {ref_id}"
@@ -3442,8 +3764,8 @@ class LoadFileView(APIView):
             # Get the risk matrix
             risk_matrix = RiskMatrix.objects.get(id=matrix_id)
 
+            assessment_name = resolve_container_name(request, "Risk_Assessment")
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            assessment_name = f"Risk_Assessment_{timestamp}"
 
             # Create the risk assessment
             assessment_data = {
@@ -3479,26 +3801,23 @@ class LoadFileView(APIView):
             matrix_mappings = self._build_matrix_mappings(risk_matrix)
 
             # Process controls first - collect all unique control names
+            # Accept both the legacy column name (`additional_controls`) and the
+            # model field name (`applied_controls`, as used by the export) for the
+            # to-be-added controls column.
             all_controls = set()
             for record in records:
                 existing_controls = record.get("existing_applied_controls", "").strip()
-                additional_controls = record.get("additional_controls", "").strip()
+                additional_controls = (
+                    record.get("additional_controls")
+                    or record.get("applied_controls")
+                    or ""
+                ).strip()
 
                 if existing_controls:
-                    all_controls.update(
-                        [
-                            ctrl.strip()
-                            for ctrl in existing_controls.split("\n")
-                            if ctrl.strip()
-                        ]
-                    )
+                    all_controls.update(self._split_multi_separator(existing_controls))
                 if additional_controls:
                     all_controls.update(
-                        [
-                            ctrl.strip()
-                            for ctrl in additional_controls.split("\n")
-                            if ctrl.strip()
-                        ]
+                        self._split_multi_separator(additional_controls)
                     )
 
             # Create or find controls in the domain
@@ -3515,6 +3834,7 @@ class LoadFileView(APIView):
                         matrix_mappings,
                         control_mapping,
                         request,
+                        domain,
                     )
                     if scenario_data:
                         results["successful"] += 1
@@ -3657,7 +3977,13 @@ class LoadFileView(APIView):
         return control_mapping
 
     def _process_risk_scenario_record(
-        self, record, risk_assessment, matrix_mappings, control_mapping, request
+        self,
+        record,
+        risk_assessment,
+        matrix_mappings,
+        control_mapping,
+        request,
+        domain,
     ):
         """Process a single risk scenario record"""
         try:
@@ -3669,26 +3995,35 @@ class LoadFileView(APIView):
             if not name:
                 raise ValueError("Risk scenario name is required")
 
-            # Map risk values using matrix mappings
+            # Map risk values using matrix mappings. Accept both the short form
+            # (`*_proba`, used historically) and the long form (`*_probability`,
+            # used by the CSV/XLSX export) so that exported files round-trip cleanly.
             inherent_impact = self._map_risk_value(
                 record.get("inherent_impact", ""), matrix_mappings["impact"]
             )
             inherent_proba = self._map_risk_value(
-                record.get("inherent_proba", ""), matrix_mappings["probability"]
+                record.get("inherent_proba")
+                or record.get("inherent_probability")
+                or "",
+                matrix_mappings["probability"],
             )
 
             current_impact = self._map_risk_value(
                 record.get("current_impact", ""), matrix_mappings["impact"]
             )
             current_proba = self._map_risk_value(
-                record.get("current_proba", ""), matrix_mappings["probability"]
+                record.get("current_proba") or record.get("current_probability") or "",
+                matrix_mappings["probability"],
             )
 
             residual_impact = self._map_risk_value(
                 record.get("residual_impact", ""), matrix_mappings["impact"]
             )
             residual_proba = self._map_risk_value(
-                record.get("residual_proba", ""), matrix_mappings["probability"]
+                record.get("residual_proba")
+                or record.get("residual_probability")
+                or "",
+                matrix_mappings["probability"],
             )
 
             logger.debug(
@@ -3720,6 +4055,7 @@ class LoadFileView(APIView):
                     ),
                     "open",
                 ),
+                "justification": record.get("justification", "") or "",
             }
 
             # Create the risk scenario
@@ -3754,12 +4090,21 @@ class LoadFileView(APIView):
                 "existing_applied_controls",
             )
 
-            # Link additional controls
+            # Link additional controls. Accept both the legacy column name
+            # (`additional_controls`) and the model field name (`applied_controls`,
+            # used by the CSV/XLSX export) for round-trip compatibility.
             self._link_controls_to_scenario(
                 risk_scenario,
-                record.get("additional_controls", ""),
+                record.get("additional_controls")
+                or record.get("applied_controls")
+                or "",
                 control_mapping,
                 "applied_controls",
+            )
+
+            # Link assets (must already exist in the domain folder)
+            self._link_assets_to_scenario(
+                risk_scenario, record.get("assets", ""), domain
             )
 
             return risk_scenario
@@ -3792,6 +4137,13 @@ class LoadFileView(APIView):
         )
         return -1
 
+    @staticmethod
+    def _split_multi_separator(text: str) -> list[str]:
+        """Split a string on newline, pipe, semicolon or comma and return trimmed, non-empty items."""
+        if not text:
+            return []
+        return [item.strip() for item in re.split(r"[\n|;,]", text) if item.strip()]
+
     def _link_controls_to_scenario(
         self, risk_scenario, controls_text, control_mapping, field_name
     ):
@@ -3799,9 +4151,7 @@ class LoadFileView(APIView):
         if not controls_text:
             return
 
-        control_names = [
-            ctrl.strip() for ctrl in controls_text.split("\n") if ctrl.strip()
-        ]
+        control_names = self._split_multi_separator(controls_text)
         control_ids = []
 
         for control_name in control_names:
@@ -3812,6 +4162,38 @@ class LoadFileView(APIView):
             # Get the field and set the many-to-many relationship
             field = getattr(risk_scenario, field_name)
             field.set(control_ids)
+
+    def _link_assets_to_scenario(self, risk_scenario, assets_text, domain):
+        """Link assets to a risk scenario based on asset names.
+
+        Assets are looked up by name within the domain folder. Missing assets are
+        created with the model's default type (SUPPORT); users can re-classify
+        them afterward from the UI.
+        """
+        if not assets_text:
+            return
+
+        asset_names = self._split_multi_separator(assets_text)
+        asset_ids = []
+
+        for asset_name in asset_names:
+            try:
+                asset, created = Asset.objects.get_or_create(
+                    name=asset_name, folder=domain
+                )
+                if created:
+                    logger.info(
+                        f"Created asset '{asset_name}' in domain '{domain.name}' "
+                        f"with default type '{asset.get_type_display()}'"
+                    )
+                asset_ids.append(asset.id)
+            except Exception:
+                logger.exception(
+                    f"Failed to resolve asset '{asset_name}' in domain '{domain.name}'"
+                )
+
+        if asset_ids:
+            risk_scenario.assets.set(asset_ids)
 
     def _process_ebios_rm_study_arm(
         self,
@@ -3861,8 +4243,7 @@ class LoadFileView(APIView):
             arm_data = process_arm_file(excel_file.read())
 
             # Generate study name
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            study_name = f"EBIOS_RM_Study_{timestamp}"
+            study_name = resolve_container_name(request, "EBIOS_RM_Study")
 
             # Use missions as description
             study_description = arm_data.get("study_description", "")
@@ -5105,9 +5486,11 @@ class LoadFileView(APIView):
             data = process_ebios_rm_excel(excel_file.read())
             study_data = data.get("study", {})
 
-            # Create the study
+            # Create the study. Header override wins over the value parsed
+            # from the Excel file, which in turn wins over the generic fallback.
+            override_name = (request.headers.get("X-Name") or "").strip()
             study_payload = {
-                "name": study_data.get("name") or f"Imported Study",
+                "name": override_name or study_data.get("name") or "Imported Study",
                 "description": study_data.get("description", ""),
                 "ref_id": study_data.get("ref_id", ""),
                 "version": study_data.get("version", ""),

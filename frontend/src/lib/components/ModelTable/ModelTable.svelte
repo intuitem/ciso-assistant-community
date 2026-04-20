@@ -5,6 +5,7 @@
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
+	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
@@ -563,6 +564,7 @@
 	// Helper function to convert linked_models snake_case to camelCase for translation
 	const convertLinkedModelName = (snakeCaseName: string): string => {
 		const mapping: Record<string, string> = {
+			// Validation flows
 			compliance_assessments: 'complianceAssessments',
 			risk_assessments: 'riskAssessments',
 			business_impact_analysis: 'businessImpactAnalysis',
@@ -572,7 +574,22 @@
 			findings_assessments: 'findingsAssessments',
 			evidences: 'evidences',
 			security_exceptions: 'securityExceptions',
-			policies: 'policies'
+			policies: 'policies',
+			// Applied controls
+			requirement_assessments: 'requirementAssessments',
+			risk_scenarios: 'riskScenarios',
+			risk_scenarios_e: 'riskScenariosExisting',
+			findings: 'findings',
+			vulnerabilities: 'vulnerabilities',
+			stakeholders: 'stakeholders',
+			processings: 'processings',
+			data_breaches_remediated: 'dataBreaches',
+			quantitative_risk_hypotheses_existing: 'crqHypothesesExisting',
+			quantitative_risk_hypotheses_added: 'crqHypothesesAdded',
+			quantitative_risk_hypotheses_removed: 'crqHypothesesRemoved',
+			assetassessment: 'assetAssessments',
+			task_templates: 'taskTemplates',
+			comments: 'comments'
 		};
 		return mapping[snakeCaseName] || snakeCaseName;
 	};
@@ -920,7 +937,11 @@
 														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
 															{formatDateOrDateTime(value, getLocale())}
 														{:else if [true, false].includes(value)}
-															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+															{@const bd = booleanDisplay(value, key, URLModel)}
+															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
+														{:else if value === 'YES' || value === 'NO'}
+															{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
+															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
 														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
 																>{safeTranslate('percentageDisplay', { number: value })}</span

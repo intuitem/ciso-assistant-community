@@ -5,6 +5,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
@@ -45,6 +46,24 @@
 	label={m.reportedAt()}
 	cacheLock={cacheLocks['reported_at']}
 	bind:cachedValue={formDataCache['reported_at']}
+/>
+<TextField
+	type="datetime-local"
+	step="1"
+	{form}
+	field="occurred_at"
+	label={m.occurredAt()}
+	cacheLock={cacheLocks['occurred_at']}
+	bind:cachedValue={formDataCache['occurred_at']}
+/>
+<TextField
+	type="datetime-local"
+	step="1"
+	{form}
+	field="resolved_at"
+	label={m.resolvedAt()}
+	cacheLock={cacheLocks['resolved_at']}
+	bind:cachedValue={formDataCache['resolved_at']}
 />
 
 <Select
@@ -167,4 +186,16 @@
 		translateOptions={false}
 		allowUserOptions="append"
 	/>
+	<Select
+		{form}
+		options={[
+			{ label: m.yes(), value: true },
+			{ label: m.no(), value: false }
+		]}
+		field="is_bcp_activated"
+		label={m.isBcpActivated()}
+		cacheLock={cacheLocks['is_bcp_activated']}
+		bind:cachedValue={formDataCache['is_bcp_activated']}
+	/>
+	<MarkdownField {form} field="resolution" label={m.resolution()} />
 </Dropdown>

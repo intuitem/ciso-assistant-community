@@ -7,6 +7,93 @@ WORD_TEMPLATE_REGISTRY = {
     "audit_report": {
         "description": "Compliance assessment Word report",
         "default_languages": ["en", "fr"],
+        "variables": [
+            {
+                "name": "audit",
+                "type": "object",
+                "description": "The compliance assessment object (audit.name, audit.description, audit.framework, etc.)",
+            },
+            {
+                "name": "date",
+                "type": "string",
+                "description": "Current date formatted as DD/MM/YYYY",
+            },
+            {
+                "name": "contributors",
+                "type": "string",
+                "description": "Authors and reviewers email addresses",
+            },
+            {
+                "name": "req",
+                "type": "object",
+                "description": "Aggregated result counts: req.compliant, req.non_compliant, req.partially_compliant, req.not_applicable, req.not_assessed, req.total",
+            },
+            {
+                "name": "compliance_donut",
+                "type": "image",
+                "description": "Donut chart of compliance results distribution",
+            },
+            {
+                "name": "completion_bar",
+                "type": "image",
+                "description": "Bar chart of completion percentage per category",
+            },
+            {
+                "name": "compliance_radar",
+                "type": "image",
+                "description": "Spider/radar chart of compliance percentage per category",
+            },
+            {
+                "name": "category_radar",
+                "type": "image",
+                "description": "Radar chart of average scores per category",
+            },
+            {
+                "name": "chart_controls",
+                "type": "image",
+                "description": "Horizontal bar chart of applied control status distribution",
+            },
+            {
+                "name": "drifts_per_domain",
+                "type": "list",
+                "description": "List of {name, drift_count} per top-level domain",
+            },
+            {
+                "name": "p1_controls",
+                "type": "list",
+                "description": "P1 priority controls: {name, description, status, category, coverage}",
+            },
+            {
+                "name": "full_controls",
+                "type": "list",
+                "description": "All applied controls: {name, description, prio, status, eta, category, coverage}",
+            },
+            {
+                "name": "ac_count",
+                "type": "number",
+                "description": "Total number of applied controls",
+            },
+            {
+                "name": "igs",
+                "type": "string",
+                "description": "Selected implementation groups (comma-separated)",
+            },
+            {
+                "name": "category_scores",
+                "type": "object",
+                "description": "Per-category score details: {name, total_score, item_count, scored_count, average_score}",
+            },
+            {
+                "name": "requirement_assessments",
+                "type": "list",
+                "description": "All assessable requirement assessments: {ref_id, name, description, status, result, extended_result, score, max_score, observation, applied_controls}",
+            },
+            {
+                "name": "ra_count",
+                "type": "number",
+                "description": "Total number of assessable requirement assessments",
+            },
+        ],
     },
 }
 
@@ -168,6 +255,7 @@ EMAIL_TEMPLATE_REGISTRY = {
         "variables": [
             "task_count",
             "task_list",
+            "task_list_detailed",
             "days_remaining",
             "ciso_assistant_url",
         ],
@@ -178,6 +266,7 @@ EMAIL_TEMPLATE_REGISTRY = {
         "variables": [
             "task_count",
             "task_list",
+            "task_list_detailed",
             "ciso_assistant_url",
         ],
     },
