@@ -123,8 +123,8 @@
 											--
 										{:else}
 											<ul>
-												{#each Object.entries(value) as [obj, how_can_see]}
-													<li>{obj} : {how_can_see}</li>
+												{#each Object.entries(value) as [obj, who_can_see]}
+													<li>{obj} : {who_can_see}</li>
 												{/each}
 											</ul>
 										{/if}
