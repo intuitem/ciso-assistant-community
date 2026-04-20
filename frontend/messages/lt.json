@@ -4120,5 +4120,6 @@
 	"soaScope": "Apimtis",
 	"allRequirements": "Visi reikalavimai",
 	"riskCoverage": "Rizikos aprėptis",
-	"soaSelectRiskDescription": "Pasirinkus rizikos vertinimus, taikymo pareiškimas bus praturtintas susietais rizikos scenarijais ir apdorojimo sprendimais"
+	"soaSelectRiskDescription": "Pasirinkus rizikos vertinimus, taikymo pareiškimas bus praturtintas susietais rizikos scenarijais ir apdorojimo sprendimais",
+	"exportEcosystem": "ekosistemos eksportas (XLSX)"
 }

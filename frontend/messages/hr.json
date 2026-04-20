@@ -3657,5 +3657,6 @@
 	"xRaysLoadingData": "Analiziranje podataka...",
 	"xRaysView": "Pregledaj",
 	"tasksReview": "Pregled zadataka",
-	"yearlyTasksReview": "Pregled agregiranih zadataka"
+	"yearlyTasksReview": "Pregled agregiranih zadataka",
+	"exportEcosystem": "izvoz ekosustava (XLSX)"
 }
