@@ -23,10 +23,22 @@ from pathlib import Path
 
 
 def main() -> int:
+    default_controls = (
+        Path(__file__).resolve().parents[4]
+        / "backend"
+        / "library"
+        / "libraries"
+        / "key-reference-controls.yaml"
+    )
     ap = argparse.ArgumentParser(description="Coverage report for enrichment")
     ap.add_argument("parsed_framework_json")
     ap.add_argument("verdicts_jsonl")
     ap.add_argument("--threshold", type=int, default=5)
+    ap.add_argument(
+        "--controls-file",
+        default=str(default_controls),
+        help="Reference-controls library YAML (to flag unknown target URNs)",
+    )
     args = ap.parse_args()
 
     fw = json.loads(Path(args.parsed_framework_json).read_text(encoding="utf-8"))
@@ -123,6 +135,35 @@ def main() -> int:
             print(f"  ... ({len(zero_items) - 20} more)")
     else:
         print("No uncovered requirements.")
+
+    # Unknown URNs (target URNs not defined in the controls library)
+    print()
+    cpath = Path(args.controls_file)
+    if cpath.exists():
+        import yaml  # local import — only needed for this check
+
+        controls_data = yaml.safe_load(cpath.read_text(encoding="utf-8"))
+        known_urns = {
+            rc["urn"]
+            for rc in controls_data.get("objects", {}).get("reference_controls") or []
+        }
+        unknown: dict[str, list[str]] = {}
+        for v in verdicts.values():
+            for tgt in v.get("target_urns") or []:
+                if tgt not in known_urns:
+                    unknown.setdefault(tgt, []).append(
+                        v["source_urn"].rsplit(":", 1)[-1]
+                    )
+        if unknown:
+            print(f"UNKNOWN target URNs (not defined in {cpath.name}): {len(unknown)}")
+            for urn in sorted(unknown):
+                cited = unknown[urn]
+                sample = ", ".join(cited[:3]) + (" ..." if len(cited) > 3 else "")
+                print(f"  {urn}   (cited by: {sample})")
+        else:
+            print(f"All target URNs are defined in {cpath.name}.")
+    else:
+        print(f"(controls file {cpath} not found — skipping URN validation)")
 
     return 0
 
