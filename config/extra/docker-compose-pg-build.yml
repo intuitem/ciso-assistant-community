@@ -54,6 +54,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - backend
+    restart: always
 
   postgres:
     container_name: postgres

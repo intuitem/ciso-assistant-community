@@ -314,6 +314,24 @@
 			bind:cachedValue={formDataCache['score_calculation_method']}
 			disableDoubleDash
 		/>
+		<TextField
+			{form}
+			type="number"
+			step="any"
+			field="target_score"
+			label={m.targetScore()}
+			helpText={m.targetScoreHelpText()}
+			cacheLock={cacheLocks['target_score']}
+			bind:cachedValue={formDataCache['target_score']}
+		/>
+		<Checkbox
+			{form}
+			field="anchor_na_to_target"
+			label={m.anchorNaToTarget()}
+			helpText={m.anchorNaToTargetHelpText()}
+			cacheLock={cacheLocks['anchor_na_to_target']}
+			bind:cachedValue={formDataCache['anchor_na_to_target']}
+		/>
 	</div>
 	<TextField
 		{form}

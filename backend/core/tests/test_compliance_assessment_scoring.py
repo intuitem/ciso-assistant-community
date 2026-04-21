@@ -271,6 +271,318 @@ class TestScoringCalculationMethods:
             assert scores["maturity_score"] == -1
 
 
+@pytest.fixture
+def deep_tree_setup():
+    """
+    Creates a 4-level framework tree mimicking CyFun structure:
+
+        Function F1 (root, non-assessable)
+            ├── Category C1 (non-assessable)
+            │     ├── Subcategory S1 (non-assessable)
+            │     │     ├── Req R1 (assessable, score=80)
+            │     │     └── Req R2 (assessable, score=60)
+            │     └── Subcategory S2 (non-assessable)
+            │           └── Req R3 (assessable, score=40)
+            └── Category C2 (non-assessable)
+                  └── Subcategory S3 (non-assessable)
+                        └── Req R4 (assessable, score=100)
+        Function F2 (root, non-assessable)
+            └── Category C3 (non-assessable)
+                  └── Subcategory S4 (non-assessable)
+                        └── Req R5 (assessable, score=50)
+
+    Expected AVG_OF_AVG (category-level flattening):
+        S1 = avg(80, 60) = 70
+        S2 = 40
+        C1 = avg(70, 40) = 55
+        S3 = 100
+        C2 = 100
+        C3 = 50
+        Global = avg(C1, C2, C3) = (55 + 100 + 50) / 3 = 68.3 (truncated from 68.33)
+    """
+    root_folder = Folder.get_root_folder()
+    folder = Folder.objects.create(
+        parent_folder=root_folder,
+        name="deep tree test folder",
+    )
+    perimeter = Perimeter.objects.create(name="deep tree test perimeter", folder=folder)
+
+    framework = Framework.objects.create(
+        name="Deep Tree Test Framework",
+        urn="urn:test:deep-tree-framework",
+        min_score=0,
+        max_score=100,
+        folder=root_folder,
+    )
+
+    # Functions (roots)
+    RequirementNode.objects.create(
+        name="Function F1",
+        urn="urn:test:f1",
+        ref_id="F1",
+        framework=framework,
+        assessable=False,
+        folder=root_folder,
+    )
+    RequirementNode.objects.create(
+        name="Function F2",
+        urn="urn:test:f2",
+        ref_id="F2",
+        framework=framework,
+        assessable=False,
+        folder=root_folder,
+    )
+
+    # Categories
+    RequirementNode.objects.create(
+        name="Category C1",
+        urn="urn:test:c1",
+        ref_id="C1",
+        framework=framework,
+        parent_urn="urn:test:f1",
+        assessable=False,
+        folder=root_folder,
+    )
+    RequirementNode.objects.create(
+        name="Category C2",
+        urn="urn:test:c2",
+        ref_id="C2",
+        framework=framework,
+        parent_urn="urn:test:f1",
+        assessable=False,
+        folder=root_folder,
+    )
+    RequirementNode.objects.create(
+        name="Category C3",
+        urn="urn:test:c3",
+        ref_id="C3",
+        framework=framework,
+        parent_urn="urn:test:f2",
+        assessable=False,
+        folder=root_folder,
+    )
+
+    # Subcategories
+    RequirementNode.objects.create(
+        name="Subcategory S1",
+        urn="urn:test:s1",
+        ref_id="S1",
+        framework=framework,
+        parent_urn="urn:test:c1",
+        assessable=False,
+        folder=root_folder,
+    )
+    RequirementNode.objects.create(
+        name="Subcategory S2",
+        urn="urn:test:s2",
+        ref_id="S2",
+        framework=framework,
+        parent_urn="urn:test:c1",
+        assessable=False,
+        folder=root_folder,
+    )
+    RequirementNode.objects.create(
+        name="Subcategory S3",
+        urn="urn:test:s3",
+        ref_id="S3",
+        framework=framework,
+        parent_urn="urn:test:c2",
+        assessable=False,
+        folder=root_folder,
+    )
+    RequirementNode.objects.create(
+        name="Subcategory S4",
+        urn="urn:test:s4",
+        ref_id="S4",
+        framework=framework,
+        parent_urn="urn:test:c3",
+        assessable=False,
+        folder=root_folder,
+    )
+
+    # Assessable requirements
+    req_r1 = RequirementNode.objects.create(
+        name="Req R1",
+        urn="urn:test:r1",
+        ref_id="R1",
+        framework=framework,
+        parent_urn="urn:test:s1",
+        assessable=True,
+        folder=root_folder,
+    )
+    req_r2 = RequirementNode.objects.create(
+        name="Req R2",
+        urn="urn:test:r2",
+        ref_id="R2",
+        framework=framework,
+        parent_urn="urn:test:s1",
+        assessable=True,
+        folder=root_folder,
+    )
+    req_r3 = RequirementNode.objects.create(
+        name="Req R3",
+        urn="urn:test:r3",
+        ref_id="R3",
+        framework=framework,
+        parent_urn="urn:test:s2",
+        assessable=True,
+        folder=root_folder,
+    )
+    req_r4 = RequirementNode.objects.create(
+        name="Req R4",
+        urn="urn:test:r4",
+        ref_id="R4",
+        framework=framework,
+        parent_urn="urn:test:s3",
+        assessable=True,
+        folder=root_folder,
+    )
+    req_r5 = RequirementNode.objects.create(
+        name="Req R5",
+        urn="urn:test:r5",
+        ref_id="R5",
+        framework=framework,
+        parent_urn="urn:test:s4",
+        assessable=True,
+        folder=root_folder,
+    )
+
+    ca = ComplianceAssessment.objects.create(
+        name="Deep Tree Test Assessment",
+        framework=framework,
+        folder=folder,
+        perimeter=perimeter,
+        min_score=0,
+        max_score=100,
+    )
+
+    RequirementAssessment.objects.create(
+        compliance_assessment=ca,
+        requirement=req_r1,
+        folder=folder,
+        is_scored=True,
+        score=80,
+    )
+    RequirementAssessment.objects.create(
+        compliance_assessment=ca,
+        requirement=req_r2,
+        folder=folder,
+        is_scored=True,
+        score=60,
+    )
+    RequirementAssessment.objects.create(
+        compliance_assessment=ca,
+        requirement=req_r3,
+        folder=folder,
+        is_scored=True,
+        score=40,
+    )
+    RequirementAssessment.objects.create(
+        compliance_assessment=ca,
+        requirement=req_r4,
+        folder=folder,
+        is_scored=True,
+        score=100,
+    )
+    RequirementAssessment.objects.create(
+        compliance_assessment=ca,
+        requirement=req_r5,
+        folder=folder,
+        is_scored=True,
+        score=50,
+    )
+
+    return {"ca": ca}
+
+
+@pytest.mark.django_db
+class TestDeepTreeAvgOfAvg:
+    """Tests for recursive average-of-averages on deep (4-level) trees."""
+
+    def test_recursive_avg_of_avg(self, deep_tree_setup):
+        """
+        AVG_OF_AVG recurses subcategory→category, then flat-averages categories.
+
+        S1 = avg(80, 60) = 70
+        S2 = 40
+        C1 = avg(70, 40) = 55
+        C2 = 100
+        C3 = 50
+        Global = avg(C1, C2, C3) = (55 + 100 + 50) / 3 = 68.3
+        """
+        ca = deep_tree_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 68.3
+
+    def test_flat_avg_differs_from_recursive(self, deep_tree_setup):
+        """
+        Flat AVG should differ from recursive AVG_OF_AVG on a deep tree.
+
+        Flat AVG = (80+60+40+100+50) / 5 = 66.0
+        Recursive AVG_OF_AVG = 68.3
+        """
+        ca = deep_tree_setup["ca"]
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.save()
+        avg_score = ca.get_global_score()["implementation_score"]
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+        avg_of_avg_score = ca.get_global_score()["implementation_score"]
+
+        assert avg_score == 66.0
+        assert avg_of_avg_score == 68.3
+        assert avg_score != avg_of_avg_score
+
+
+@pytest.mark.django_db
+class TestAnchorNaToTarget:
+    """Tests for anchor_na_to_target behavior.
+
+    All cases set B2 (weight=3, score=100) to NOT_APPLICABLE, then vary
+    the calculation method, anchor flag, and target score.
+    """
+
+    @pytest.mark.parametrize(
+        "method, anchor, target, expected",
+        [
+            # AVG with target=3: (80×1+60×1+40×1+3×3)/6 = 31.5
+            ("average", True, 3, 31.5),
+            # AVG with target=None → falls back to max_score=100: (80+60+40+300)/6 = 80.0
+            ("average", True, None, 80.0),
+            # AVG_OF_AVG with target=3:
+            #   Section A: (80+60)/2=70, Section B: (40×1+3×3)/4=12.25
+            #   avg(70, 12.25) = 41.1
+            ("average_of_averages", True, 3, 41.1),
+            # Anchor disabled: N/A excluded → (80+60+40)/(1+1+1) = 60.0
+            ("average", False, 3, 60.0),
+        ],
+        ids=[
+            "avg-target-3",
+            "avg-target-defaults-to-max",
+            "avg-of-avg-target-3",
+            "anchor-disabled-excludes-na",
+        ],
+    )
+    def test_anchor_na(self, scoring_setup, method, anchor, target, expected):
+        ca = scoring_setup["ca"]
+        ra_b2 = scoring_setup["ra_b2"]
+
+        ra_b2.result = RequirementAssessment.Result.NOT_APPLICABLE
+        ra_b2.save()
+
+        ca.score_calculation_method = method
+        ca.anchor_na_to_target = anchor
+        ca.target_score = target
+        ca.save()
+
+        assert ca.get_global_score()["implementation_score"] == expected
+
+
 @pytest.mark.django_db
 class TestTotalMaxScore:
     """Tests for get_total_max_score across calculation methods."""
@@ -422,3 +734,163 @@ class TestThreeLayerScoring:
 
         impl_with_doc = ca.get_global_score()["implementation_score"]
         assert impl_without_doc == impl_with_doc == 80.0
+
+
+@pytest.mark.django_db
+class TestAnnotateTreeAggregatedScores:
+    """Tests for helpers.annotate_tree_with_aggregated_scores.
+
+    Per-node aggregates are what the tree UI renders at each intermediate
+    node. They match the per-node `computed[urn]` values in
+    ComplianceAssessment._compute_score_for_field (not the top-level global
+    score, which uses a flat-average-of-categories rule for structural roots).
+    """
+
+    @staticmethod
+    def _build_tree(ca):
+        from core.helpers import (
+            get_sorted_requirement_nodes,
+            annotate_tree_with_aggregated_scores,
+        )
+
+        nodes = list(RequirementNode.objects.filter(framework=ca.framework))
+        ras = list(RequirementAssessment.objects.filter(compliance_assessment=ca))
+        tree = get_sorted_requirement_nodes(nodes, ras, ca.framework.max_score)
+        annotate_tree_with_aggregated_scores(tree, ca)
+        return tree
+
+    @staticmethod
+    def _find(tree, ref_id):
+        """Depth-first search for a node by ref_id."""
+        for node in tree.values():
+            if node.get("ref_id") == ref_id:
+                return node
+            found = TestAnnotateTreeAggregatedScores._find(
+                node.get("children") or {}, ref_id
+            )
+            if found is not None:
+                return found
+        return None
+
+    def test_avg_of_avg_per_node_matches_recursive_weighted_avg(self, deep_tree_setup):
+        """
+        On the deep 4-level tree, AVG_OF_AVG annotates each intermediate
+        node with the weighted avg of its children's aggregated scores.
+
+        Expected (all weights = 1):
+            S1 = avg(80, 60) = 70
+            S2 = 40
+            C1 = avg(70, 40) = 55
+            S3 = 100 → C2 = 100
+            S4 = 50  → C3 = 50
+            F1 = avg(55, 100) = 77.5
+            F2 = 50
+        """
+        ca = deep_tree_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+
+        tree = self._build_tree(ca)
+
+        assert self._find(tree, "S1")["aggregated_score"] == 70
+        assert self._find(tree, "S2")["aggregated_score"] == 40
+        assert self._find(tree, "C1")["aggregated_score"] == 55
+        assert self._find(tree, "C2")["aggregated_score"] == 100
+        assert self._find(tree, "C3")["aggregated_score"] == 50
+        assert self._find(tree, "F1")["aggregated_score"] == 77.5
+        assert self._find(tree, "F2")["aggregated_score"] == 50
+
+    def test_avg_of_avg_user_reported_case(self, deep_tree_setup):
+        """
+        Reproduces the reported RC.CO bug: a parent of intermediates where
+        one child has a single leaf (score 4) and the other has multiple
+        leaves whose average is ~2.3. With the previous flat weighted-avg,
+        the parent showed 2.7; with per-level aggregation it should show
+        (4 + 2.33…) / 2 = 3.17 (stored raw; UI truncates to 3.1).
+        """
+        ca = deep_tree_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+
+        # Rewrite scores to mirror RC.CO: R1=R2=R3 under one side average to
+        # 2.33, R4 alone on the other side = 4.
+        RequirementAssessment.objects.filter(requirement__ref_id="R1").update(score=4)
+        RequirementAssessment.objects.filter(requirement__ref_id="R2").update(score=1)
+        RequirementAssessment.objects.filter(requirement__ref_id="R3").update(score=2)
+        RequirementAssessment.objects.filter(requirement__ref_id="R4").update(score=4)
+
+        tree = self._build_tree(ca)
+
+        # C1 collects R1,R2,R3 via S1(=avg(4,1)=2.5) and S2(=2), so
+        # avg_of_avg C1 = avg(2.5, 2) = 2.25. Not the RC.CO shape — use F1
+        # which collects C1(2.25) and C2(=S3=R4=4): F1 = avg(2.25, 4) = 3.125
+        f1 = self._find(tree, "F1")
+        assert round(f1["aggregated_score"], 3) == 3.125
+
+    def test_avg_per_node_is_flat_weighted_over_subtree_leaves(self, deep_tree_setup):
+        """
+        AVG: per-node aggregated = Σ(score × weight) / Σ(weight) over all
+        scored leaves in the subtree.
+        """
+        ca = deep_tree_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.save()
+
+        tree = self._build_tree(ca)
+
+        # F1 covers R1=80, R2=60, R3=40, R4=100 → avg = 280/4 = 70
+        assert self._find(tree, "F1")["aggregated_score"] == 70
+        # F2 covers only R5=50
+        assert self._find(tree, "F2")["aggregated_score"] == 50
+        # C1 covers R1, R2, R3 → (80+60+40)/3 = 60
+        assert self._find(tree, "C1")["aggregated_score"] == 60
+
+    def test_sum_per_node_is_weighted_sum_over_subtree_leaves(self, deep_tree_setup):
+        """SUM: per-node aggregated = Σ(score × weight) over leaves."""
+        ca = deep_tree_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
+        ca.save()
+
+        tree = self._build_tree(ca)
+
+        assert self._find(tree, "F1")["aggregated_score"] == 80 + 60 + 40 + 100
+        assert self._find(tree, "F2")["aggregated_score"] == 50
+        assert self._find(tree, "C1")["aggregated_score"] == 80 + 60 + 40
+
+    def test_na_and_unscored_excluded(self, deep_tree_setup):
+        """N/A and is_scored=False leaves don't contribute to parent aggregates."""
+        ca = deep_tree_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+
+        RequirementAssessment.objects.filter(requirement__ref_id="R1").update(
+            result=RequirementAssessment.Result.NOT_APPLICABLE
+        )
+        RequirementAssessment.objects.filter(requirement__ref_id="R2").update(
+            is_scored=False
+        )
+
+        tree = self._build_tree(ca)
+
+        # S1 is now empty (R1 N/A, R2 unscored) → no aggregated_score
+        assert "aggregated_score" not in self._find(tree, "S1")
+        # S2 still has R3=40
+        assert self._find(tree, "S2")["aggregated_score"] == 40
+        # C1 falls back to S2 only
+        assert self._find(tree, "C1")["aggregated_score"] == 40
+
+    def test_weighted_avg_of_avg_respects_child_weights(self, scoring_setup):
+        """
+        Section A (w=1 each): avg = (80+60)/2 = 70
+        Section B (w=1, w=3): avg = (40+300)/4 = 85
+        Sections themselves get weight=1 (default), so parent aggregate
+        (if any) would be avg(70, 85) = 77.5 — matches the global test case.
+        """
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.save()
+
+        tree = self._build_tree(ca)
+
+        assert self._find(tree, "A")["aggregated_score"] == 70
+        assert self._find(tree, "B")["aggregated_score"] == 85

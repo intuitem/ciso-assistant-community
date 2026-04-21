@@ -19,6 +19,21 @@ from uuid import UUID
 logger = structlog.get_logger(__name__)
 
 
+def extract_node_id(urn: str | None) -> str | None:
+    """Extract the node_id (mobile part) from a URN.
+
+    URN format: urn:{org}:risk:{type}:{slug}:{node_id}
+    The node_id is everything after the 5th colon and may contain colons.
+    """
+    if not urn:
+        return None
+    parts = urn.split(":")
+    if len(parts) <= 5:
+        return None
+    node_id = ":".join(parts[5:]).strip()
+    return node_id if node_id else None
+
+
 def is_compute_result_truthy(compute_result: str | None) -> bool:
     """Return True if a QuestionChoice.compute_result value is truthy."""
     return compute_result is not None and compute_result not in ("false", "0", "")
