@@ -25,7 +25,13 @@
 		getFieldVisibility,
 		hasComputedResult,
 		hasComputedScore,
-		resolveFieldVisibility
+		resolveFieldVisibility,
+		shouldShowAutoQuestion,
+		buildAutoAlignmentQuestion,
+		alignmentValueFromChoiceUrn,
+		choiceUrnFromAlignmentValue,
+		alignmentColorMap,
+		AUTO_ALIGNMENT_QUESTION_URN
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -93,6 +99,7 @@
 	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
 	const canEditEvidences = $derived(isFieldEditable('evidences'));
 	const canEditAnswers = $derived(isFieldEditable('answers'));
+	const canEditAlignment = $derived(isFieldEditable('respondent_alignment'));
 
 	let canSubmit = $derived(
 		!isAuditor && (assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested')
@@ -262,11 +269,28 @@
 	}
 
 	// --- Progress (question-based when framework has questions, else result-based) ---
+	// Framework-less assessable RAs count as 1 virtual auto-question for both roles,
+	// so respondent and auditor see the same progress.
+	function isFrameworklessAssessableItem(item: { data: Record<string, any> }): boolean {
+		if (!item.data.requirement) return false;
+		const q = item.data.requirement.questions;
+		return (item.data.visible_questions ?? 0) === 0 && (q == null || Object.keys(q).length === 0);
+	}
 	const totalQuestions = $derived(
-		assessableItems.reduce((sum, item) => sum + (item.data.visible_questions ?? 0), 0)
+		assessableItems.reduce((sum, item) => {
+			const visible = item.data.visible_questions ?? 0;
+			if (isFrameworklessAssessableItem(item)) return sum + 1;
+			return sum + visible;
+		}, 0)
 	);
 	const answeredQuestions = $derived(
-		assessableItems.reduce((sum, item) => sum + (item.data.answered_questions ?? 0), 0)
+		assessableItems.reduce((sum, item) => {
+			const answered = item.data.answered_questions ?? 0;
+			if (isFrameworklessAssessableItem(item)) {
+				return sum + (item.data.respondent_alignment ? 1 : 0);
+			}
+			return sum + answered;
+		}, 0)
 	);
 	const useQuestionProgress = $derived(totalQuestions > 0);
 
@@ -289,6 +313,11 @@
 	function getQuestionStatus(item: { data: Record<string, any> }): string {
 		const visible = item.data.visible_questions ?? 0;
 		const answered = item.data.answered_questions ?? 0;
+		// Framework-less assessable RA: reflect respondent_alignment state
+		// for both respondent and auditor views so the ToC is accurate for everyone.
+		if (isFrameworklessAssessableItem(item)) {
+			return item.data.respondent_alignment ? '#22c55e' : '#ef4444';
+		}
 		if (visible === 0) return '#22c55e'; // no questions = complete (green)
 		if (answered >= visible) return '#22c55e'; // all answered (green)
 		if (answered > 0) return '#f59e0b'; // partial (amber)
@@ -889,6 +918,50 @@
 											update(requirementAssessment, 'answers', requirementAssessment.answers);
 										}}
 									/>
+								</div>
+							{/if}
+
+							<!-- Auto-alignment question (when no framework questions) -->
+							{#if shouldShowAutoQuestion(requirement, viewerRole, fw, complianceAssessment)}
+								<div class="flex flex-col w-full space-y-2">
+									<Question
+										questions={buildAutoAlignmentQuestion({
+											text: m.areYouAlignedWithThisRequirement(),
+											yes: m.yes(),
+											no: m.no(),
+											inProgress: m.inProgress(),
+											notApplicable: m.notApplicable()
+										})}
+										initialValue={{
+											[AUTO_ALIGNMENT_QUESTION_URN]: choiceUrnFromAlignmentValue(
+												requirementAssessment.respondent_alignment
+											)
+										}}
+										field="respondent_alignment"
+										disabled={!canEditAlignment}
+										onChange={(_urn, choiceUrn) => {
+											const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
+											requirementAssessment.respondent_alignment = newAlignment;
+											update(requirementAssessment, 'respondent_alignment');
+										}}
+									/>
+								</div>
+							{/if}
+
+							<!-- Auditor badge: respondent's alignment answer -->
+							{#if viewerRole === 'auditor' && requirementAssessment.respondent_alignment}
+								<div class="flex flex-col items-center my-2">
+									<p class="text-xs italic text-surface-600">
+										{m.respondentAnswered()}
+									</p>
+									<span
+										class="badge text-sm font-semibold text-white"
+										style="background-color: {alignmentColorMap[
+											requirementAssessment.respondent_alignment
+										]}"
+									>
+										{safeTranslate(requirementAssessment.respondent_alignment)}
+									</span>
 								</div>
 							{/if}
 

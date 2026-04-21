@@ -1086,6 +1086,7 @@ DEFAULT_FIELD_VISIBILITY = {
     "evidences": "everyone",
     "applied_controls": "auditor",
     "security_exceptions": "auditor",
+    "respondent_alignment": "everyone",
 }
 
 

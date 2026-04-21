@@ -12,7 +12,7 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getSecureRedirect, getFieldVisibility } from '$lib/utils/helpers';
+	import { getSecureRedirect, getFieldVisibility, alignmentColorMap } from '$lib/utils/helpers';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
@@ -742,6 +742,19 @@
 							label={m.status()}
 							helpText={m.requirementAssessmentStatusHelpText()}
 						/>
+					{/if}
+					{#if page.data.requirementAssessment.respondent_alignment}
+						<p class="flex flex-row items-center space-x-4">
+							<span class="text-sm italic text-surface-600">{m.respondentAnswered()}:</span>
+							<span
+								class="badge text-sm font-semibold text-white"
+								style="background-color: {alignmentColorMap[
+									page.data.requirementAssessment.respondent_alignment
+								]}"
+							>
+								{safeTranslate(page.data.requirementAssessment.respondent_alignment)}
+							</span>
+						</p>
 					{/if}
 					{#if showResult}
 						{#if computedResult}
