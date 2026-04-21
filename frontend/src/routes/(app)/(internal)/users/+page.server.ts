@@ -106,7 +106,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyCreatedObject({ object: m.serviceAccounts().toLowerCase() })
+				message: m.successfullyCreatedObject({ object: m.serviceAccount().toLowerCase() })
 			},
 			event
 		);
@@ -122,8 +122,13 @@ export const actions: Actions = {
 		});
 
 		if (!res.ok) {
-			const response = await res.json();
-			const msg = response.error ? safeTranslate(response.error) : safeTranslate(response.detail);
+			let msg = m.anErrorOccurred();
+			try {
+				const response = await res.json();
+				msg = safeTranslate(response.error ?? response.detail ?? 'anErrorOccurred');
+			} catch (e) {
+				console.error('Failed to parse error response', e);
+			}
 			setFlash({ type: 'error', message: msg }, event);
 			return fail(res.status, { form });
 		}
@@ -131,7 +136,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyDeletedObject({ object: m.serviceAccounts().toLowerCase() })
+				message: m.successfullyDeletedObject({ object: m.serviceAccount().toLowerCase() })
 			},
 			event
 		);

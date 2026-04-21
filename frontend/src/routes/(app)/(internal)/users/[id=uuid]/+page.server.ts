@@ -3,6 +3,7 @@ import { getModelInfo } from '$lib/utils/crud';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
 import { loadDetail } from '$lib/utils/load';
 import { ServiceAccountKeyCreateSchema } from '$lib/utils/schemas';
+import { safeTranslate } from '$lib/utils/i18n';
 import { type Actions, fail } from '@sveltejs/kit';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -29,10 +30,16 @@ export const actions: Actions = {
 		});
 
 		if (!res.ok) {
-			const response = await res.json();
-			Object.entries(response).forEach(([key, value]) => {
-				(form.errors as Record<string, string[]>)[key] = [String(value)];
-			});
+			try {
+				const response = await res.json();
+				Object.entries(response).forEach(([key, value]) => {
+					(form.errors as Record<string, string[]>)[key] = Array.isArray(value)
+						? value.map((v) => safeTranslate(String(v)))
+						: [safeTranslate(String(value))];
+				});
+			} catch (e) {
+				console.error('Failed to parse error response', e);
+			}
 			return fail(res.status, { form });
 		}
 

@@ -1483,6 +1483,20 @@ export const AuthTokenCreateSchema = z.object({
 	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
+const _saExpiryDate = z
+	.union([z.literal('').transform(() => null), z.iso.date()])
+	.nullish()
+	.refine(
+		(val) => {
+			if (!val) return true;
+			const expiryDate = new Date(val);
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			return expiryDate >= today;
+		},
+		{ message: 'Expiry date cannot be in the past' }
+	);
+
 export const ServiceAccountCreateSchema = z.object({
 	slug: z
 		.string()
@@ -1492,13 +1506,12 @@ export const ServiceAccountCreateSchema = z.object({
 			message: 'Lowercase alphanumeric and hyphens only, no leading/trailing hyphens'
 		}),
 	description: z.string().max(500).optional().default(''),
-	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+	expiry_date: _saExpiryDate
 });
 
 export const ServiceAccountUpdateSchema = z.object({
-	is_active: z.boolean().optional(),
 	description: z.string().max(500).optional(),
-	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+	expiry_date: _saExpiryDate
 });
 
 export const ServiceAccountKeyCreateSchema = z.object({

@@ -3836,6 +3836,7 @@
 	"serviceAccountKeys": "Clés API",
 	"serviceAccountKey": "Clé API",
 	"addServiceAccountKey": "Ajouter une clé API",
+	"serviceAccount": "Compte de service",
 	"serviceAccounts": "Comptes de service",
 	"createServiceAccount": "Créer un compte de service",
 	"serviceAccountIdentifiedAs": "Le compte de service sera identifié comme",

@@ -4000,6 +4000,7 @@
 	"serviceAccountKeys": "API keys",
 	"serviceAccountKey": "API key",
 	"addServiceAccountKey": "Add API key",
+	"serviceAccount": "Service account",
 	"serviceAccounts": "Service accounts",
 	"createServiceAccount": "Create service account",
 	"serviceAccountIdentifiedAs": "The service account will be identified as",

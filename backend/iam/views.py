@@ -498,21 +498,23 @@ class RevokeOtherSessionsView(views.APIView):
         )
 
 
-# ---------------------------------------------------------------------------
-# Service Account views
-# ---------------------------------------------------------------------------
-
-
 class ServiceAccountListCreateView(views.APIView):
     permission_classes = [permissions.IsAuthenticated, IsAdministrator]
 
     def get(self, request):
         from core.pagination import CustomLimitOffsetPagination
-        from django.db.models import Count
+        from django.db.models import Count, Q
+        from django.utils import timezone
 
         qs = (
             User.objects.filter(is_service_account=True)
-            .annotate(active_key_count=Count("auth_token_set__personalaccesstoken"))
+            .annotate(
+                active_key_count=Count(
+                    "auth_token_set__personalaccesstoken",
+                    filter=Q(auth_token_set__expiry__gt=timezone.now())
+                    | Q(auth_token_set__expiry__isnull=True),
+                )
+            )
             .order_by("email")
         )
         search = request.query_params.get("search")
@@ -632,6 +634,22 @@ class ServiceAccountKeyDetailView(views.APIView):
         key = self._get_key(sa_pk, key_pk)
         if key is None:
             return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        if "name" in request.data:
+            new_name = request.data["name"]
+            if (
+                new_name != key.name
+                and PersonalAccessToken.objects.filter(
+                    auth_token__user=key.auth_token.user, name=new_name
+                ).exists()
+            ):
+                return Response(
+                    {
+                        "name": "A key with this name already exists for this service account."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            key.name = new_name
+            key.save(update_fields=["name"])
         logger.info(
             "service account key updated",
             sa=key.auth_token.user.email,

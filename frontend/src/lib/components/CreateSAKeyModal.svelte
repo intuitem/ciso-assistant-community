@@ -35,6 +35,8 @@
 			if (form.message?.object?.token) {
 				token = form.message.object.token;
 				setTimeout(() => tokenInputElement?.select(), 0);
+			} else if (form.message?.type === 'error') {
+				console.error('Key creation error', form.message);
 			}
 		}
 	});

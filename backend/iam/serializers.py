@@ -209,7 +209,12 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
     def get_active_key_count(self, obj):
         if hasattr(obj, "active_key_count"):
             return obj.active_key_count
-        return PersonalAccessToken.objects.filter(auth_token__user=obj).count()
+        from django.utils import timezone
+
+        return PersonalAccessToken.objects.filter(
+            auth_token__user=obj,
+            auth_token__expiry__gt=timezone.now(),
+        ).count()
 
 
 class ServiceAccountUpdateSerializer(serializers.ModelSerializer):
@@ -271,11 +276,16 @@ class ServiceAccountKeyCreateSerializer(serializers.Serializer):
                     "name": "A key with this name already exists for this service account."
                 }
             )
+        from django.utils import timezone
+
         if (
-            PersonalAccessToken.objects.filter(auth_token__user=sa).count()
+            PersonalAccessToken.objects.filter(
+                auth_token__user=sa,
+                auth_token__expiry__gt=timezone.now(),
+            ).count()
             >= SA_KEY_LIMIT
         ):
             raise serializers.ValidationError(
-                f"Service account already has {SA_KEY_LIMIT} keys. Revoke one first."
+                f"Service account already has {SA_KEY_LIMIT} active keys. Revoke one first."
             )
         return attrs

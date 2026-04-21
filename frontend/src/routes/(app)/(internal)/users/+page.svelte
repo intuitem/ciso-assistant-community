@@ -27,8 +27,12 @@
 	// Use page.data to access layout-provided user info
 	const user = $derived(page.data.user);
 
-	// ── Tab state (persisted in URL) ─────────────────────────────────────
-	let tab = $state(page.url.searchParams.get('tab') ?? 'users');
+	// Tab state (persisted in URL)
+	const VALID_TABS = ['users', 'service-accounts'] as const;
+	const rawTab = page.url.searchParams.get('tab') ?? 'users';
+	let tab = $state(
+		user?.is_admin && VALID_TABS.includes(rawTab as (typeof VALID_TABS)[number]) ? rawTab : 'users'
+	);
 
 	function switchTab(value: string) {
 		tab = value;
@@ -41,7 +45,7 @@
 		goto(url.toString(), { replaceState: true, noScroll: true, keepFocus: true });
 	}
 
-	// ── User modals ────────────────────────────────────────────────────────
+	//User modals
 	function modalCreateUser() {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -55,7 +59,7 @@
 		modalStore.trigger(modal);
 	}
 
-	// ── SA modals ──────────────────────────────────────────────────────────
+	//SA modals
 	function openCreateSAModal() {
 		const modalComponent: ModalComponent = {
 			ref: CreateServiceAccountModal,
@@ -83,7 +87,7 @@
 		<Tabs.Indicator />
 	</Tabs.List>
 
-	<!-- ── Users tab ─────────────────────────────────────────────── -->
+	<!--Users tab  -->
 	<Tabs.Content value="users">
 		{#if data.table}
 			<div class="shadow-lg">
@@ -111,7 +115,7 @@
 		{/if}
 	</Tabs.Content>
 
-	<!-- ── Service accounts tab ──────────────────────────────────── -->
+	<!--Service accounts tab -->
 	{#if user?.is_admin}
 		<Tabs.Content value="service-accounts">
 			<div class="shadow-lg">
