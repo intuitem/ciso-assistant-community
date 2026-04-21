@@ -910,6 +910,7 @@
 	"requirementMappings": "Mappings des exigences",
 	"sourceFramework": "Référentiel source",
 	"targetFramework": "Référentiel cible",
+	"targetFrameworks": "Référentiels cibles",
 	"baseline": "Référentiel de base",
 	"ebiosRmBaseline": "Socle de sécurité",
 	"createAuditFromBaseline": "Appliquer un mapping",

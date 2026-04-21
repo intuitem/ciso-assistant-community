@@ -725,6 +725,7 @@
 	"requirementMappings": "Követelmény-leképezés",
 	"sourceFramework": "Forráskeret",
 	"targetFramework": "Célkeret",
+	"targetFrameworks": "Célkeretek",
 	"baseline": "Alapállapot",
 	"createAuditFromBaseline": "Audit létrehozása az alapállapotból.",
 	"coverageColon": "Lefedettség:",

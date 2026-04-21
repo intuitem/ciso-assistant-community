@@ -734,6 +734,7 @@
 	"requirementMappings": "Kravkortlægninger",
 	"sourceFramework": "Kilde-rammeværk",
 	"targetFramework": "Mål-rammeværk",
+	"targetFrameworks": "Mål-rammeværker",
 	"baseline": "Baseline",
 	"createAuditFromBaseline": "Opret revision fra baseline",
 	"coverageColon": "Dækning:",

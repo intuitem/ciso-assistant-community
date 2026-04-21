@@ -695,6 +695,7 @@
 	"requirementMappings": "Mappings de requisitos",
 	"sourceFramework": "Marco de trabajo",
 	"targetFramework": "Marco de destino",
+	"targetFrameworks": "Marcos de destino",
 	"baseline": "Base",
 	"createAuditFromBaseline": "Crear auditoría desde una base",
 	"coverageColon": "Cobertura:",
