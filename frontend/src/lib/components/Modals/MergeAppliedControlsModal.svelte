@@ -6,6 +6,7 @@
 	import type { urlModel } from '$lib/utils/types';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -16,9 +17,20 @@
 		URLModel: urlModel;
 		handler: DataHandler;
 		onClearSelection: () => void;
+		// 'merge' (default): full flow with all three target modes.
+		// 'replace': single-source "Replace A with B" flow — only the
+		//   "pick an existing control" path is exposed.
+		entryMode?: 'merge' | 'replace';
 	}
 
-	let { parent, sourceIds, URLModel, handler, onClearSelection }: Props = $props();
+	let {
+		parent,
+		sourceIds,
+		URLModel,
+		handler,
+		onClearSelection,
+		entryMode = 'merge'
+	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -29,18 +41,22 @@
 
 	let sources: SourceSummary[] = $state([]);
 	let loadingSources = $state(true);
-	// 'selected' is meaningless for a single-source flow (it would self-merge),
-	// so default to 'another' (the typical "Replace A with B" entry point).
-	let targetMode: TargetMode = $state(sourceIds.length > 1 ? 'selected' : 'another');
+	// Replace-with flow forces 'another' (pick an existing control).
+	// Otherwise: 'selected' when multiple sources are picked; 'another' when a single one is.
+	let targetMode: TargetMode = $state(
+		entryMode === 'replace' ? 'another' : sourceIds.length > 1 ? 'selected' : 'another'
+	);
 	let newTargetName = $state('');
 	let newTargetFolderId = $state('');
 	let selectedSourceId = $state('');
 	let pickedExternalId = $state('');
-	let externalControls: { id: string; name: string }[] = $state([]);
-	let loadingExternal = $state(false);
 
-	const targetNewSchema = z.object({ name: z.string(), folder: z.string() });
-	const _form = superForm(defaults({ name: '', folder: '' }, zod(targetNewSchema)), {
+	const targetNewSchema = z.object({
+		name: z.string(),
+		folder: z.string(),
+		target_id: z.string()
+	});
+	const _form = superForm(defaults({ name: '', folder: '', target_id: '' }, zod(targetNewSchema)), {
 		dataType: 'json',
 		taintedMessage: false,
 		validators: zod(targetNewSchema),
@@ -51,6 +67,7 @@
 	formStore.subscribe((v) => {
 		newTargetName = v.name ?? '';
 		newTargetFolderId = v.folder ?? '';
+		pickedExternalId = v.target_id ?? '';
 	});
 
 	let preview: any = $state(null);
@@ -91,22 +108,6 @@
 		}
 		await refreshPreview();
 	});
-
-	async function loadExternalControls() {
-		loadingExternal = true;
-		try {
-			const res = await fetch(`/${URLModel}/autocomplete`);
-			if (res.ok) {
-				const data = await res.json();
-				const items = (data?.results ?? data) as any[];
-				externalControls = items
-					.map((it: any) => ({ id: String(it.id), name: it.str ?? it.name ?? it.id }))
-					.filter((c) => !sourceIds.includes(c.id));
-			}
-		} finally {
-			loadingExternal = false;
-		}
-	}
 
 	function buildTargetPayload() {
 		if (targetMode === 'new') {
@@ -177,12 +178,6 @@
 		refreshPreview();
 	});
 
-	$effect(() => {
-		if (targetMode === 'another' && externalControls.length === 0 && !loadingExternal) {
-			loadExternalControls();
-		}
-	});
-
 	const mdConflict = $derived(preview?.managed_document_conflict ?? null);
 	const canConfirm = $derived(
 		!submitting &&
@@ -234,8 +229,11 @@
 {#if $modalStore[0]}
 	<div class={cBase} role="dialog" aria-modal="true" aria-labelledby="merge-modal-title">
 		<header id="merge-modal-title" class={cHeader} data-testid="merge-modal-title">
-			{m.mergeAppliedControls()}
+			{entryMode === 'replace' ? m.replaceWith() : m.mergeAppliedControls()}
 		</header>
+		{#if entryMode === 'replace'}
+			<p class="text-sm text-gray-600">{m.replaceWithDescription()}</p>
+		{/if}
 
 		{#if loadingSources}
 			<div class="text-sm text-gray-500">Loading…</div>
@@ -262,52 +260,64 @@
 						</label>
 					{/if}
 
-					<label class="flex items-start gap-2 cursor-pointer">
-						<input type="radio" bind:group={targetMode} value="new" class="mt-1" />
-						<div class="flex-1 space-y-2">
-							<div class="text-sm font-medium">{m.createNewMergedControl()}</div>
-							<input
-								type="text"
-								class="input w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
-								placeholder={m.name()}
-								value={$formStore.name}
-								oninput={(e) =>
-									_form.form.update((v) => ({
-										...v,
-										name: (e.currentTarget as HTMLInputElement).value
-									}))}
-								disabled={targetMode !== 'new'}
-							/>
-							<FolderTreeSelect
-								form={_form}
-								field="folder"
-								label={m.domain()}
-								disabled={targetMode !== 'new'}
-							/>
-						</div>
-					</label>
+					{#if entryMode !== 'replace'}
+						<label class="flex items-start gap-2 cursor-pointer">
+							<input type="radio" bind:group={targetMode} value="new" class="mt-1" />
+							<div class="flex-1 space-y-2">
+								<div class="text-sm font-medium">{m.createNewMergedControl()}</div>
+								<input
+									type="text"
+									class="input w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+									placeholder={m.name()}
+									value={$formStore.name}
+									oninput={(e) =>
+										_form.form.update((v) => ({
+											...v,
+											name: (e.currentTarget as HTMLInputElement).value
+										}))}
+									disabled={targetMode !== 'new'}
+								/>
+								<FolderTreeSelect
+									form={_form}
+									field="folder"
+									label={m.domain()}
+									disabled={targetMode !== 'new'}
+								/>
+							</div>
+						</label>
+					{/if}
 
-					<label class="flex items-start gap-2 cursor-pointer">
-						<input type="radio" bind:group={targetMode} value="another" class="mt-1" />
+					{#if entryMode === 'replace'}
+						<!-- Only one option in replace mode — no radio noise. -->
 						<div class="flex-1">
-							<div class="text-sm font-medium">{m.useExistingControlAsTarget()}</div>
-							{#if targetMode === 'another'}
-								{#if loadingExternal}
-									<div class="text-sm text-gray-500 mt-1">Loading…</div>
-								{:else}
-									<select
-										class="select w-full border border-gray-300 rounded px-3 py-1.5 mt-1 text-sm"
-										bind:value={pickedExternalId}
-									>
-										<option value="" disabled>--</option>
-										{#each externalControls as c}
-											<option value={c.id}>{c.name}</option>
-										{/each}
-									</select>
-								{/if}
-							{/if}
+							<AutocompleteSelect
+								form={_form}
+								field="target_id"
+								label={m.selectTargetControl()}
+								optionsEndpoint={`${URLModel}/autocomplete`}
+								optionsLabelField="str"
+								optionsSelf={sourceIds.length === 1 ? { id: sourceIds[0] } : null}
+								lazy
+							/>
 						</div>
-					</label>
+					{:else}
+						<label class="flex items-start gap-2 cursor-pointer">
+							<input type="radio" bind:group={targetMode} value="another" class="mt-1" />
+							<div class="flex-1 space-y-1">
+								<div class="text-sm font-medium">{m.useExistingControlAsTarget()}</div>
+								{#if targetMode === 'another'}
+									<AutocompleteSelect
+										form={_form}
+										field="target_id"
+										optionsEndpoint={`${URLModel}/autocomplete`}
+										optionsLabelField="str"
+										optionsSelf={sourceIds.length === 1 ? { id: sourceIds[0] } : null}
+										lazy
+									/>
+								{/if}
+							</div>
+						</label>
+					{/if}
 				</div>
 			</section>
 
@@ -400,7 +410,7 @@
 				onclick={handleConfirm}
 				data-testid="merge-confirm-button"
 			>
-				{submitting ? '…' : m.mergeConfirm()}
+				{submitting ? '…' : entryMode === 'replace' ? m.replaceWith() : m.mergeConfirm()}
 			</button>
 		</footer>
 	</div>

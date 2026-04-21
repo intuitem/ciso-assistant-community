@@ -29,7 +29,8 @@
 					sourceIds: [id],
 					URLModel: 'applied-controls',
 					handler,
-					onClearSelection: () => {}
+					onClearSelection: () => {},
+					entryMode: 'replace'
 				}
 			},
 			title: m.replaceWith()
