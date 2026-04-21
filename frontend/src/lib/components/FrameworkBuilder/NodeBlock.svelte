@@ -223,13 +223,18 @@
 
 <div
 	style="margin-left: {Math.min(node.depth, 3) * 16}px"
+	data-builder-node
 	tabindex="-1"
-	onfocusin={() =>
+	onfocusin={(e) => {
+		const target = e.target as HTMLElement;
+		const nearestWrapper = target.closest('[data-builder-node]');
+		if (nearestWrapper !== e.currentTarget) return;
 		setFocusedNode({
 			nodeId: node.node.id,
 			parent: parentId ?? null,
 			siblingIndex: indexWithinParent
-		})}
+		});
+	}}
 >
 	<div
 		class="bg-white rounded-lg shadow-sm border overflow-hidden
