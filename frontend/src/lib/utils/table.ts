@@ -2,7 +2,6 @@ import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte'
 import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 import type { urlModel } from './types';
-
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
@@ -3499,3 +3498,17 @@ export const headData = (model: urlModel) =>
 		obj[key] = listViewFields[model].head[index];
 		return obj;
 	}, {});
+
+/** Example output: ['folder', 'lc_status', 'filtering_labels'] */
+export const filterKeys = new Set<string>(
+	Object.values(listViewFields)
+		.filter((field) => field.hasOwnProperty('filters'))
+		.flatMap((field) => Object.keys(field.filters ?? {}))
+);
+
+/** Example fields: 'folder', 'lc_status', 'filtering_labels', etc. */
+export const fieldSet = new Set<string>(
+	Object.values(listViewFields)
+		.filter((field) => field.hasOwnProperty('body'))
+		.flatMap((field) => field.body)
+);

@@ -75,8 +75,6 @@ export const actions: Actions = {
 			return fail(400, { form: null });
 		}
 
-		console.log(formData);
-
 		const schema = z.object({ reset_residual: z.boolean().optional() });
 		const form = await superValidate(formData, zod(schema));
 
@@ -107,9 +105,6 @@ export const actions: Actions = {
 				event
 			);
 		}
-		const r = response.clone();
-		console.log(await r.text());
-		console.log(form.data);
 		return { form, message: { riskScenarios: await response.json() } };
 	}
 };
