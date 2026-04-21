@@ -722,6 +722,7 @@
 	"requirementMappings": "आवश्यकता मैपिंग्स",
 	"sourceFramework": "स्रोत फ्रेमवर्क",
 	"targetFramework": "लक्ष्य फ्रेमवर्क",
+	"targetFrameworks": "लक्ष्य फ्रेमवर्क्स",
 	"baseline": "आधार रेखा",
 	"createAuditFromBaseline": "आधार रेखा से ऑडिट बनाएं",
 	"coverageColon": "कवरेज:",

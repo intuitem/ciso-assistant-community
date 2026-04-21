@@ -725,6 +725,7 @@
 	"requirementMappings": "Pemetaan persyaratan",
 	"sourceFramework": "Kerangka sumber",
 	"targetFramework": "Kerangka target",
+	"targetFrameworks": "Kerangka target",
 	"baseline": "Garis dasar",
 	"createAuditFromBaseline": "Buat audit dari garis dasar",
 	"coverageColon": "Cakupan:",

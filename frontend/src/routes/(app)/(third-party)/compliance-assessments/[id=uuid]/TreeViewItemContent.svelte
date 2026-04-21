@@ -30,6 +30,8 @@
 		resultCounts: Record<string, number> | undefined;
 		assessable: boolean;
 		max_score: number;
+		aggregated_score?: number | null;
+		aggregated_documentation_score?: number | null;
 		[key: string]: any;
 	}
 
@@ -128,36 +130,20 @@
 		}
 	);
 
+	// Aggregated scores are computed on the backend (see
+	// annotate_tree_with_aggregated_scores in core/helpers.py) so the three
+	// score_calculation_methods share a single implementation with the global
+	// score. The frontend just truncates for display to match Python's int().
 	function nodeScore(): number | null {
-		if (
-			!resultCounts ||
-			!resultCounts.hasOwnProperty('total_score') ||
-			!resultCounts.hasOwnProperty('total_weight')
-		) {
-			return null;
-		}
-		if (scoreCalculationMethod === 'sum') {
-			return Math.floor(resultCounts['total_score'] * 10) / 10;
-		}
-		// Default to weighted average
-		let mean = resultCounts['total_score'] / resultCounts['total_weight'];
-		return Math.floor(mean * 10) / 10;
+		const raw = (rest as Record<string, any>).aggregated_score;
+		if (typeof raw !== 'number') return null;
+		return Math.floor(raw * 10) / 10;
 	}
 
 	function nodeDocumentationScore(): number | null {
-		if (
-			!resultCounts ||
-			!resultCounts.hasOwnProperty('total_documentation_score') ||
-			!resultCounts.hasOwnProperty('total_weight')
-		) {
-			return null;
-		}
-		if (scoreCalculationMethod === 'sum') {
-			return Math.floor(resultCounts['total_documentation_score'] * 10) / 10;
-		}
-		// Default to weighted average
-		let mean = resultCounts['total_documentation_score'] / resultCounts['total_weight'];
-		return Math.floor(mean * 10) / 10;
+		const raw = (rest as Record<string, any>).aggregated_documentation_score;
+		if (typeof raw !== 'number') return null;
+		return Math.floor(raw * 10) / 10;
 	}
 
 	function nodeTotalMaxScore(): number {

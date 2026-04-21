@@ -702,7 +702,7 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
+											{:else if key === 'description' || key === 'observation' || key === 'annotation' || key === 'justification'}
 												<MarkdownRenderer content={value} />
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
