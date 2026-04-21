@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { AuthTokenCreateSchema } from '$lib/utils/schemas';
 
 export const load: PageServerLoad = async (event) => {
+	const PATAllowed = !event.locals.user.is_third_party;
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
 	const authenticatorsResponse = await event
 		.fetch(authenticatorsEndpoint)
@@ -59,16 +60,19 @@ export const load: PageServerLoad = async (event) => {
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
 	const registerWebAuthnForm = await superValidate(zod(registerWebAuthnSchema));
-
-	const personalAccessTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
-	const personalAccessTokensResponse = await event.fetch(personalAccessTokensEndpoint);
-	if (!personalAccessTokensResponse.ok) {
-		console.error('Could not get personal access tokens', personalAccessTokensResponse);
-		throw error(personalAccessTokensResponse.status, 'Could not get personal access tokens');
-	}
-	const personalAccessTokens = await personalAccessTokensResponse.json();
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
 	const personalAccessTokenDeleteForm = await superValidate(zod(z.object({ id: z.string() })));
+	let personalAccessTokens = [];
+
+	if (PATAllowed) {
+		const personalAccessTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
+		const personalAccessTokensResponse = await event.fetch(personalAccessTokensEndpoint);
+		if (!personalAccessTokensResponse.ok) {
+			console.error('Could not get personal access tokens', personalAccessTokensResponse);
+			throw error(personalAccessTokensResponse.status, 'Could not get personal access tokens');
+		}
+		personalAccessTokens = await personalAccessTokensResponse.json();
+	}
 
 	return {
 		authenticators,
@@ -78,6 +82,7 @@ export const load: PageServerLoad = async (event) => {
 		webauthnCredentials,
 		webauthnCreationOptions,
 		registerWebAuthnForm,
+		PATAllowed,
 		personalAccessTokens,
 		personalAccessTokenCreateForm,
 		personalAccessTokenDeleteForm,
@@ -174,6 +179,10 @@ export const actions: Actions = {
 		return { recoveryCodes: response.data };
 	},
 	createPAT: async (event) => {
+		if (event.locals.user.is_third_party) {
+			return fail(403, { error: 'Forbidden' });
+		}
+
 		const formData = await event.request.formData();
 		if (!formData) return fail(400, { error: 'No form data' });
 
@@ -279,6 +288,10 @@ export const actions: Actions = {
 		return { form };
 	},
 	deletePAT: async (event) => {
+		if (event.locals.user.is_third_party) {
+			return fail(403, { error: 'Forbidden' });
+		}
+
 		const formData = await event.request.formData();
 		if (!formData) return fail(400, { error: 'No form data' });
 
