@@ -4842,6 +4842,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "security_exceptions": ["exact"],
             "owner": ["exact"],
             "findings": ["exact"],
+            "incidents": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
             "processings": ["exact"],
@@ -6246,6 +6247,7 @@ class RiskScenarioFilter(GenericFilterSet):
             "vulnerabilities": ["exact"],
             "qualifications": ["exact"],
             "filtering_labels": ["exact"],
+            "incidents": ["exact"],
         }
 
 
@@ -14415,6 +14417,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "owners",
         "entities",
         "assets",
+        "applied_controls",
+        "task_templates",
+        "risk_scenarios",
         "filtering_labels",
     ]
 
@@ -15033,6 +15038,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "next_occurrence_status",
             "evidences",
             "objectives",
+            "incidents",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
