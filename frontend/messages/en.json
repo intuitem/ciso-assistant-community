@@ -3638,6 +3638,8 @@
 	"securityAdvisories": "Security advisories",
 	"source": "Source",
 	"aliases": "Aliases",
+	"addCwe": "Add CWE",
+	"addSecurityAdvisory": "Add security advisory",
 	"cwe": "CWE",
 	"cwes": "CWEs",
 	"cvssBaseScore": "CVSS base score",
