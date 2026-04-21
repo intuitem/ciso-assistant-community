@@ -172,45 +172,57 @@
 		</span>
 		<div class="space-y-1">
 			<p class="text-md leading-5 text-gray-700">
-				<MarkdownRenderer content={`**${m.description()}**: ${data.library.description}`} />
+				<strong>{m.description()}</strong>:
 			</p>
+			<MarkdownRenderer content={data.library.description} />
+
 			<p class="text-md leading-5 text-gray-700">
-				<MarkdownRenderer content={`**${m.provider()}**: ${data.library.provider}`} />
+				<strong>{m.provider()}</strong>:
 			</p>
+			<MarkdownRenderer content={data.library.provider} />
+
 			<p class="text-md leading-5 text-gray-700">
-				<MarkdownRenderer content={`**${m.packager()}**: ${data.library.packager}`} />
+				<strong>{m.packager()}</strong>:
 			</p>
+			<MarkdownRenderer content={data.library.packager} />
+
 			<p class="text-md leading-5 text-gray-700">
-				<MarkdownRenderer content={`**${m.version()}**: ${data.library.version}`} />
+				<strong>{m.version()}</strong>:
 			</p>
+			<MarkdownRenderer content={data.library.version.toString()} />
+
 			{#if data.library.publication_date}
 				<p class="text-md leading-5 text-gray-700">
-					<MarkdownRenderer
-						content={`**${m.publicationDate()}**: ${formatDateOrDateTime(
-							data.library.publication_date,
-							getLocale()
-						)}`}
-					/>
+					<strong>{m.publicationDate()}</strong>:
 				</p>
+
+				<MarkdownRenderer
+					content={formatDateOrDateTime(data.library.publication_date, getLocale())}
+				/>
 			{/if}
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
-					<MarkdownRenderer
-						content={`**${m.dependencies()}**:\n${data.library.dependencies.map((dep) => `* ${dep.name}`).join('\n')}`}
-					/>
+					<strong>{m.dependencies()}</strong>:
 				</p>
+
+				<MarkdownRenderer
+					content={data.library.dependencies.map((dep) => `* ${dep.name}`).join('\n')}
+				/>
 			{/if}
 			{#if data.library.copyright}
 				<p class="text-md leading-5 text-gray-700">
-					<MarkdownRenderer content={`**${m.copyright()}**: ${data.library.copyright}`} />
+					<strong>{m.copyright()}</strong>:
 				</p>
+				<MarkdownRenderer content={data.library.copyright} />
 			{/if}
 			{#if data.library.filtering_labels && data.library.filtering_labels.length > 0}
 				<p class="text-md leading-5 text-gray-700">
-					<MarkdownRenderer
-						content={`**${m.labels()}**:\n${data.library.filtering_labels.map((label) => `* ${label.name}`).join('\n')}`}
-					/>
+					<strong>{m.labels()}</strong>:
 				</p>
+
+				<MarkdownRenderer
+					content={data.library.filtering_labels.map((label) => `* ${label.name}`).join('\n')}
+				/>
 			{/if}
 		</div>
 	</div>
