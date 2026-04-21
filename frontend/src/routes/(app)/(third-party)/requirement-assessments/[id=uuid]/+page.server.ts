@@ -19,7 +19,11 @@ export const load = (async ({ fetch, params }) => {
 		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/requirements_list/?assessable=true`
 	)
 		.then((res) => (res.ok ? res.json() : null))
-		.catch(() => null);
+		.catch((error) => {
+			console.error('Failed to fetch requirement viewer role:', error);
+			return null;
+		});
+	const viewerRole = requirementsListData?.viewer_role === 'auditor' ? 'auditor' : 'respondent';
 
 	const tables: Record<string, any> = {};
 
@@ -45,6 +49,6 @@ export const load = (async ({ fetch, params }) => {
 		parent,
 		tables,
 		title: requirementAssessment.name,
-		viewerRole: requirementsListData?.viewer_role ?? 'auditor'
+		viewerRole
 	};
 }) satisfies PageServerLoad;

@@ -80,9 +80,8 @@
 
 	const fw = data.requirementAssessment.compliance_assessment.framework;
 	const complianceAssessment = data.requirementAssessment.compliance_assessment;
-	const viewerRole: 'respondent' | 'auditor' = (data.viewerRole ?? 'auditor') as
-		| 'respondent'
-		| 'auditor';
+	const viewerRole: 'respondent' | 'auditor' =
+		data.viewerRole === 'auditor' ? 'auditor' : 'respondent';
 	const {
 		showAppliedControls,
 		showEvidences,
@@ -92,8 +91,10 @@
 		showDocumentationScore
 	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
 
+	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+
 	function pickDefaultTab(): string {
-		if (showAppliedControls && !page.data.user.is_third_party) return 'applied_controls';
+		if (canShowAppliedControls) return 'applied_controls';
 		if (showEvidences) return 'evidence';
 		return 'applied_controls';
 	}
@@ -131,18 +132,20 @@
 				{/each}
 			</div>
 		{/if}
-		{#if showScore && data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
-			<div class="shrink-0 relative">
-				<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
-					<Progress.Circle class="[--size:--spacing(10)]">
-						<Progress.CircleTrack />
-						<Progress.CircleRange class={displayScoreColor(score, max_score)} />
-					</Progress.Circle>
-					<div class="absolute inset-0 flex items-center justify-center">
-						<span class="text-xs font-bold">{score}</span>
-					</div>
-				</Progress>
-			</div>
+		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
+			{#if showScore}
+				<div class="shrink-0 relative">
+					<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
+						<Progress.Circle class="[--size:--spacing(10)]">
+							<Progress.CircleTrack />
+							<Progress.CircleRange class={displayScoreColor(score, max_score)} />
+						</Progress.Circle>
+						<div class="absolute inset-0 flex items-center justify-center">
+							<span class="text-xs font-bold">{score}</span>
+						</div>
+					</Progress>
+				</div>
+			{/if}
 			{#if showDocumentationScore && data.complianceAssessmentScore.show_documentation_score}
 				<div class="shrink-0 relative">
 					<Progress value={formatScoreValue(documentationScore, max_score)} min={0} max={100}>
@@ -342,7 +345,7 @@
 			{/if}
 		</div>
 	{/if}
-	{#if showAppliedControls || showEvidences}
+	{#if canShowAppliedControls || showEvidences}
 		<div>
 			<Tabs
 				value={group}
@@ -351,7 +354,7 @@
 				}}
 			>
 				<Tabs.List>
-					{#if showAppliedControls && !page.data.user.is_third_party}
+					{#if canShowAppliedControls}
 						<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
 					{/if}
 					{#if showEvidences}
@@ -359,7 +362,7 @@
 					{/if}
 					<Tabs.Indicator />
 				</Tabs.List>
-				{#if showAppliedControls && !page.data.user.is_third_party}
+				{#if canShowAppliedControls}
 					<Tabs.Content value="applied_controls">
 						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 							<i class="fa-solid fa-info-circle"></i>
