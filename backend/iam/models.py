@@ -735,12 +735,18 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         user_lang = self.get_preferences().get("lang", "en")
         uid = urlsafe_base64_encode(force_bytes(self.pk))
         token = default_token_generator.make_token(self)
+        
+        questionnaire_url = (
+            f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}"
+            if object
+            else settings.CISO_ASSISTANT_URL
+        )
 
         # Build context for the YAML template system
         context = {
             "set_password_url": f"{settings.CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
             "reset_password_url": f"{settings.CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
-            "questionnaire_url": f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}"
+            "questionnaire_url": questionnaire_url
             if object
             else settings.CISO_ASSISTANT_URL,
         }
@@ -777,6 +783,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "pk": str(pk) if pk else None,
             "object": object,
             "object_id": object_id,
+            "questionnaire_url": questionnaire_url,
         }
         with translation_override(user_lang):
             email = render_to_string(email_template_name, header)
