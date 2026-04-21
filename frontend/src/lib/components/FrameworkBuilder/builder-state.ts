@@ -122,11 +122,6 @@ export interface BuilderQuestion {
 	question: Question;
 }
 
-/** @deprecated Use BuilderNode. Kept as an alias during migration. Removed in Phase 2. */
-export type BuilderSection = BuilderNode;
-
-/** @deprecated Use BuilderNode. */
-export type BuilderRequirement = BuilderNode;
 
 // --- URN / ref_id generation utilities ---
 
@@ -611,8 +606,6 @@ export type NodePreset = 'blank' | 'group' | 'requirement' | 'splash';
 export interface BuilderStore {
 	framework: Writable<Framework>;
 	rootNodes: Writable<BuilderNode[]>;
-	/** @deprecated Use rootNodes. Removed in Phase 2. */
-	sections: Writable<BuilderNode[]>;
 	saving: Writable<boolean>;
 	errors: Writable<Map<string, string>>;
 	activeSection: Writable<string>;
@@ -624,21 +617,6 @@ export interface BuilderStore {
 	addNode: (opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) => void;
 	deleteNode: (nodeId: string) => void;
 	reorderNodes: (parentNodeId: string | null, fromIndex: number, toIndex: number) => void;
-
-	/** @deprecated */
-	addSection: (afterIndex?: number) => void;
-	/** @deprecated */
-	deleteSection: (sectionIndex: number) => void;
-	/** @deprecated */
-	addRequirement: (parentNodeId: string, parentUrn?: string) => void;
-	/** @deprecated */
-	addSplashScreen: (parentNodeId: string, parentUrn?: string) => void;
-	/** @deprecated */
-	deleteRequirement: (nodeId: string) => void;
-	/** @deprecated */
-	reorderSections: (fromIndex: number, toIndex: number) => void;
-	/** @deprecated */
-	reorderRequirements: (parentNodeId: string, fromIndex: number, toIndex: number) => void;
 
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
 	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
@@ -1534,8 +1512,6 @@ export function createBuilderState(
 	return {
 		framework,
 		rootNodes,
-		/** @deprecated Use rootNodes. Removed in Phase 2. */
-		sections: rootNodes,
 		saving,
 		errors,
 		activeSection,
@@ -1544,32 +1520,9 @@ export function createBuilderState(
 		unpublished,
 		isScrolling,
 
-		// New unified API
 		addNode,
 		deleteNode,
 		reorderNodes,
-
-		// Deprecated type-specific aliases — delegate to the unified API.
-		// Removed in Phase 2 when NodeBlock replaces the three block components.
-		/** @deprecated Use addNode({ parent: null, preset: 'group', afterIndex }). */
-		addSection: (afterIndex?: number) => addNode({ parent: null, preset: 'group', afterIndex }),
-		/** @deprecated Use deleteNode(nodeId). */
-		deleteSection: (sectionIndex: number) => {
-			const sec = get(rootNodes)[sectionIndex];
-			if (sec) deleteNode(sec.node.id);
-		},
-		/** @deprecated Use addNode({ parent: parentNodeId, preset: 'requirement' }). */
-		addRequirement: (parentNodeId: string) =>
-			addNode({ parent: parentNodeId, preset: 'requirement' }),
-		/** @deprecated Use addNode({ parent: parentNodeId, preset: 'splash' }). */
-		addSplashScreen: (parentNodeId: string) =>
-			addNode({ parent: parentNodeId, preset: 'splash' }),
-		/** @deprecated Use deleteNode(nodeId). */
-		deleteRequirement: deleteNode,
-		/** @deprecated Use reorderNodes(null, from, to). */
-		reorderSections: (from: number, to: number) => reorderNodes(null, from, to),
-		/** @deprecated Use reorderNodes(parentId, from, to). */
-		reorderRequirements: reorderNodes,
 
 		updateNode,
 		addQuestion,

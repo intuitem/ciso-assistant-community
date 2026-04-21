@@ -8,8 +8,7 @@
 		getTranslation,
 		type RequirementNode,
 		type BuilderQuestion,
-		type BuilderRequirement,
-		type BuilderSection,
+		type BuilderNode,
 		type Translations
 	} from '$lib/components/FrameworkBuilder/builder-state';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -30,7 +29,7 @@
 
 	let loading = $state(true);
 	let error = $state<string | null>(null);
-	let sections = $state<BuilderSection[]>([]);
+	let sections = $state<BuilderNode[]>([]);
 	let igDefs = $state<Array<{ ref_id: string; name: string; description?: string }>>([]);
 	let availableLanguages = $state<string[]>([]);
 	let previewLanguage = $state<string | null>(null);
@@ -79,10 +78,10 @@
 
 	// --- Linearize tree into NavItems ---
 
-	function linearize(sections: BuilderSection[]): NavItem[] {
+	function linearize(sections: BuilderNode[]): NavItem[] {
 		const items: NavItem[] = [];
 
-		function walk(reqs: BuilderRequirement[]) {
+		function walk(reqs: BuilderNode[]) {
 			for (const req of reqs) {
 				if (req.node.display_mode === 'splash') {
 					items.push({ type: 'splash', data: req.node });
@@ -99,7 +98,7 @@
 		}
 
 		for (const section of sections) {
-			walk(section.requirements);
+			walk(section.children);
 		}
 
 		return items;

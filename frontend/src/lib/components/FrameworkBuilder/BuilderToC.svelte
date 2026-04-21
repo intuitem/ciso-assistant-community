@@ -2,11 +2,11 @@
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
 
-	import type { BuilderRequirement } from './builder-state';
+	import type { BuilderNode } from './builder-state';
 
 	const builder = getBuilderContext();
 	const {
-		sections: sectionsStore,
+		rootNodes: sectionsStore,
 		activeSection: activeSectionStore,
 		isScrolling: isScrollingStore,
 		activeLanguage: activeLanguageStore
@@ -55,7 +55,7 @@
 	});
 
 	/** Check if a section has any untranslated items for the active language */
-	function hasUntranslated(reqs: BuilderRequirement[], lang: string): boolean {
+	function hasUntranslated(reqs: BuilderNode[], lang: string): boolean {
 		for (const r of reqs) {
 			if (r.node.name && !r.node.translations?.[lang]?.name) return true;
 			for (const bq of r.questions) {

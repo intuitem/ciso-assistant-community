@@ -20,7 +20,7 @@
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
-	import SectionBlock from './SectionBlock.svelte';
+	import NodeBlock from './NodeBlock.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 
@@ -81,7 +81,7 @@
 
 	const {
 		framework: frameworkStore,
-		sections: sectionsStore,
+		rootNodes: rootNodesStore,
 		errors: errorsStore,
 		saving: savingStore,
 		unsaved: unsavedStore,
@@ -197,10 +197,8 @@
 		}
 	}
 
-	// Drag state for sections
-	const sectionDrag = createHandleGatedDragHandlers((from, to) =>
-		builder.reorderSections(from, to)
-	);
+	// Drag state for root nodes
+	const rootDrag = createHandleGatedDragHandlers((from, to) => builder.reorderNodes(null, from, to));
 
 	// --- Navigation guards ---
 
@@ -272,8 +270,8 @@
 		return () => observer?.disconnect();
 	});
 
-	// Track only section IDs so the observer reconnects on structural changes, not content edits
-	let sectionIds = $derived($sectionsStore.map((s) => s.node.id).join(','));
+	// Track only root node IDs so the observer reconnects on structural changes, not content edits
+	let sectionIds = $derived($rootNodesStore.map((s) => s.node.id).join(','));
 	let prevSectionIds = '';
 
 	// Re-observe when sections change (e.g., section added/removed)
@@ -808,64 +806,52 @@
 				</div>
 
 				<hr class="border-surface-200" />
-				<!-- Sections -->
-				{#each $sectionsStore as section, sectionIndex (`section-${sectionIndex}-${section.node.id}`)}
-					<!-- Add section button between sections -->
-					{#if sectionIndex > 0}
-						<button
-							type="button"
-							class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-300 hover:text-gray-500 hover:border-gray-300 transition-colors opacity-0 hover:opacity-100"
-							onclick={() => builder.addSection(sectionIndex - 1)}
-						>
-							<i class="fa-solid fa-plus mr-1"></i>Insert section
-						</button>
-					{/if}
-
+				<!-- Root nodes -->
+				{#each $rootNodesStore as bn, i (bn.node.id)}
 					<div
-						class:opacity-50={sectionDrag.draggedIndex === sectionIndex}
+						class:opacity-50={rootDrag.draggedIndex === i}
 						draggable="true"
-						onmousedown={sectionDrag.recordMousedown}
-						ondragstart={(e) => sectionDrag.handleDragStart(e, sectionIndex)}
-						ondragover={sectionDrag.handleDragOver}
-						ondrop={(e) => sectionDrag.handleDrop(e, sectionIndex)}
-						ondragend={sectionDrag.handleDragEnd}
+						onmousedown={rootDrag.recordMousedown}
+						ondragstart={(e) => rootDrag.handleDragStart(e, i)}
+						ondragover={rootDrag.handleDragOver}
+						ondrop={(e) => rootDrag.handleDrop(e, i)}
+						ondragend={rootDrag.handleDragEnd}
 						role="listitem"
 					>
-						<SectionBlock {section} {sectionIndex} />
+						<NodeBlock node={bn} parentId={null} indexWithinParent={i} />
 					</div>
 				{/each}
 
-				<!-- Add section at bottom -->
 				<button
 					type="button"
-					class="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
-					onclick={() => builder.addSection()}
+					class="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+					onclick={() => builder.addNode({ parent: null, preset: 'blank' })}
 				>
-					<i class="fa-solid fa-plus mr-1"></i>Add section
+					<i class="fa-solid fa-plus mr-1"></i>Add top-level node
 				</button>
 
 				<!-- Empty state -->
-				{#if $sectionsStore.length === 0}
+				{#if $rootNodesStore.length === 0}
 					<div class="text-center py-16">
 						<div
 							class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center"
 						>
 							<i class="fa-solid fa-layer-group text-2xl text-gray-400"></i>
 						</div>
-						<h3 class="text-lg font-medium text-gray-600 mb-1">No sections yet</h3>
+						<h3 class="text-lg font-medium text-gray-600 mb-1">No nodes yet</h3>
 						<p class="text-sm text-gray-400 mb-4">
-							Start building your framework by adding a section.
+							Start building your framework by adding a top-level node.
 						</p>
 						<p class="text-xs text-gray-400 mb-4 max-w-md mx-auto">
-							Sections group your requirements into chapters or domains. Each section becomes a
+							Nodes group your requirements into chapters or domains. Each top-level node becomes a
 							top-level category in assessments.
 						</p>
 						<button
 							type="button"
 							class="btn preset-filled-primary-500 px-6"
-							onclick={() => builder.addSection()}
+							onclick={() => builder.addNode({ parent: null, preset: 'blank' })}
 						>
-							<i class="fa-solid fa-plus mr-2"></i>Add first section
+							<i class="fa-solid fa-plus mr-2"></i>Add first node
 						</button>
 					</div>
 				{/if}

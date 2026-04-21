@@ -159,8 +159,8 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 
 function makeSection(
 	nodeOverrides: Partial<RequirementNode> = {},
-	children: BuilderSection['children'] = []
-): BuilderSection {
+	children: BuilderNode['children'] = []
+): BuilderNode {
 	return {
 		node: makeNode({
 			id: 'section-1',
