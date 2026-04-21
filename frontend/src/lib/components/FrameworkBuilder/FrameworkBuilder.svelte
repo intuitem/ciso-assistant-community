@@ -22,6 +22,7 @@
 	import BuilderToC from './BuilderToC.svelte';
 	import NodeBlock from './NodeBlock.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
+	import EmptyState from './EmptyState.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 
@@ -808,51 +809,29 @@
 
 				<hr class="border-surface-200" />
 				<!-- Root nodes -->
-				{#each $rootNodesStore as bn, i (bn.node.id)}
-					<div
-						class:opacity-50={rootDrag.draggedIndex === i}
-						draggable="true"
-						onmousedown={rootDrag.recordMousedown}
-						ondragstart={(e) => rootDrag.handleDragStart(e, i)}
-						ondragover={rootDrag.handleDragOver}
-						ondrop={(e) => rootDrag.handleDrop(e, i)}
-						ondragend={rootDrag.handleDragEnd}
-						role="listitem"
-					>
-						<NodeBlock node={bn} parentId={null} indexWithinParent={i} />
-					</div>
-				{/each}
-
-				<AddNodeMenu
-					parent={null}
-					triggerLabel={'+ Add top-level node'}
-					triggerClass="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
-				/>
-
-				<!-- Empty state -->
 				{#if $rootNodesStore.length === 0}
-					<div class="text-center py-16">
+					<EmptyState />
+				{:else}
+					{#each $rootNodesStore as bn, i (bn.node.id)}
 						<div
-							class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center"
+							class:opacity-50={rootDrag.draggedIndex === i}
+							draggable="true"
+							onmousedown={rootDrag.recordMousedown}
+							ondragstart={(e) => rootDrag.handleDragStart(e, i)}
+							ondragover={rootDrag.handleDragOver}
+							ondrop={(e) => rootDrag.handleDrop(e, i)}
+							ondragend={rootDrag.handleDragEnd}
+							role="listitem"
 						>
-							<i class="fa-solid fa-layer-group text-2xl text-gray-400"></i>
+							<NodeBlock node={bn} parentId={null} indexWithinParent={i} />
 						</div>
-						<h3 class="text-lg font-medium text-gray-600 mb-1">No nodes yet</h3>
-						<p class="text-sm text-gray-400 mb-4">
-							Start building your framework by adding a top-level node.
-						</p>
-						<p class="text-xs text-gray-400 mb-4 max-w-md mx-auto">
-							Nodes group your requirements into chapters or domains. Each top-level node becomes a
-							top-level category in assessments.
-						</p>
-						<button
-							type="button"
-							class="btn preset-filled-primary-500 px-6"
-							onclick={() => builder.addNode({ parent: null, preset: 'blank' })}
-						>
-							<i class="fa-solid fa-plus mr-2"></i>Add first node
-						</button>
-					</div>
+					{/each}
+
+					<AddNodeMenu
+						parent={null}
+						triggerLabel={'+ Add top-level node'}
+						triggerClass="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+					/>
 				{/if}
 
 				<!-- Global errors -->
