@@ -6,7 +6,7 @@
 
 	const builder = getBuilderContext();
 	const {
-		rootNodes: sectionsStore,
+		rootNodes: rootNodesStore,
 		activeSection: activeSectionStore,
 		isScrolling: isScrollingStore,
 		activeLanguage: activeLanguageStore
@@ -21,17 +21,33 @@
 
 	const FRAMEWORK_ID = '__framework__';
 
-	let filteredSections = $derived(
+	interface TocEntry {
+		node: BuilderNode;
+		depth: number;
+	}
+
+	function flattenTree(tree: BuilderNode[], depth = 0): TocEntry[] {
+		const out: TocEntry[] = [];
+		for (const n of tree) {
+			out.push({ node: n, depth });
+			if (n.children.length > 0) out.push(...flattenTree(n.children, depth + 1));
+		}
+		return out;
+	}
+
+	let allEntries = $derived(flattenTree($rootNodesStore));
+
+	let filteredNodes = $derived(
 		searchQuery
-			? $sectionsStore.filter((s) => {
-					const label = s.node.ref_id || s.node.name || '';
+			? allEntries.filter((e) => {
+					const label = e.node.node.ref_id || e.node.node.name || '';
 					return label.toLowerCase().includes(searchQuery.toLowerCase());
 				})
-			: $sectionsStore
+			: allEntries
 	);
 
 	$effect(() => {
-		if (filteredSections.length > 0 && focusedIndex >= filteredSections.length) {
+		if (filteredNodes.length > 0 && focusedIndex >= filteredNodes.length) {
 			focusedIndex = 0;
 		}
 	});
@@ -54,9 +70,9 @@
 		return () => mq.removeEventListener('change', handler);
 	});
 
-	/** Check if a section has any untranslated items for the active language */
-	function hasUntranslated(reqs: BuilderNode[], lang: string): boolean {
-		for (const r of reqs) {
+	/** Check if a node has any untranslated items for the active language */
+	function hasUntranslated(nodes: BuilderNode[], lang: string): boolean {
+		for (const r of nodes) {
 			if (r.node.name && !r.node.translations?.[lang]?.name) return true;
 			for (const bq of r.questions) {
 				if (bq.question.text && !bq.question.translations?.[lang]?.text) return true;
@@ -69,29 +85,27 @@
 		return false;
 	}
 
-	/** Count all requirements (including nested children) in a section */
-	function countRequirements(reqs: { children: { children: unknown[] }[] }[]): number {
+	/** Count all descendants (not including self) */
+	function countDescendants(nodes: BuilderNode[]): number {
 		let count = 0;
-		for (const r of reqs) {
-			count++;
-			if (r.children?.length) {
-				count += countRequirements(r.children as typeof reqs);
-			}
+		for (const n of nodes) {
+			count += n.children.length;
+			if (n.children.length > 0) count += countDescendants(n.children);
 		}
 		return count;
 	}
 
-	function scrollToSection(sectionId: string) {
+	function scrollToNode(nodeId: string) {
 		isScrollingStore.set(true);
-		activeSectionStore.set(sectionId);
+		activeSectionStore.set(nodeId);
 
-		if (sectionId === FRAMEWORK_ID) {
+		if (nodeId === FRAMEWORK_ID) {
 			const container = document.querySelector('[data-framework-metadata]');
 			if (container) {
 				container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			}
 		} else {
-			const el = document.querySelector(`[data-section-id="${sectionId}"]`);
+			const el = document.querySelector(`[data-section-id="${nodeId}"]`);
 			if (el) {
 				el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			}
@@ -117,7 +131,7 @@
 	}
 
 	function focusItem(index: number) {
-		if (index >= 0 && index < filteredSections.length && navigationButtons[index]) {
+		if (index >= 0 && index < filteredNodes.length && navigationButtons[index]) {
 			focusedIndex = index;
 			navigationButtons[index].focus();
 			navigationButtons[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -136,8 +150,8 @@
 				break;
 			case 'ArrowDown':
 				event.preventDefault();
-				if (filteredSections.length > 0) {
-					focusItem(focusedIndex < 0 ? 0 : Math.min(focusedIndex + 1, filteredSections.length - 1));
+				if (filteredNodes.length > 0) {
+					focusItem(focusedIndex < 0 ? 0 : Math.min(focusedIndex + 1, filteredNodes.length - 1));
 				}
 				break;
 			case 'ArrowUp':
@@ -152,18 +166,18 @@
 			case 'Enter':
 				event.preventDefault();
 				if (focusedIndex >= 0) {
-					scrollToSection(filteredSections[focusedIndex].node.id);
-				} else if (filteredSections.length > 0) {
-					scrollToSection(filteredSections[0].node.id);
+					scrollToNode(filteredNodes[focusedIndex].node.node.id);
+				} else if (filteredNodes.length > 0) {
+					scrollToNode(filteredNodes[0].node.node.id);
 				}
 				break;
 			case 'Home':
 				event.preventDefault();
-				if (filteredSections.length > 0) focusItem(0);
+				if (filteredNodes.length > 0) focusItem(0);
 				break;
 			case 'End':
 				event.preventDefault();
-				if (filteredSections.length > 0) focusItem(filteredSections.length - 1);
+				if (filteredNodes.length > 0) focusItem(filteredNodes.length - 1);
 				break;
 		}
 	}
@@ -172,7 +186,7 @@
 		switch (event.key) {
 			case 'ArrowDown':
 				event.preventDefault();
-				if (index < filteredSections.length - 1) focusItem(index + 1);
+				if (index < filteredNodes.length - 1) focusItem(index + 1);
 				break;
 			case 'ArrowUp':
 				event.preventDefault();
@@ -189,7 +203,7 @@
 				break;
 			case 'End':
 				event.preventDefault();
-				focusItem(filteredSections.length - 1);
+				focusItem(filteredNodes.length - 1);
 				break;
 			case 'Escape':
 				event.preventDefault();
@@ -198,7 +212,7 @@
 			case 'Enter':
 			case ' ':
 				event.preventDefault();
-				scrollToSection(filteredSections[index].node.id);
+				scrollToNode(filteredNodes[index].node.node.id);
 				break;
 		}
 	}
@@ -233,7 +247,7 @@
 					bind:value={searchQuery}
 					onkeydown={handleSearchKeydown}
 					type="text"
-					placeholder="Search sections..."
+					placeholder="Search nodes..."
 					class="w-full px-3 py-1.5 pr-7 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
 				/>
 				<div class="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -261,7 +275,7 @@
 						{$activeSectionStore === FRAMEWORK_ID
 						? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
 						: 'text-gray-600 hover:bg-gray-100'}"
-					onclick={() => scrollToSection(FRAMEWORK_ID)}
+					onclick={() => scrollToNode(FRAMEWORK_ID)}
 					aria-current={$activeSectionStore === FRAMEWORK_ID ? 'location' : undefined}
 				>
 					<i class="fa-solid fa-file-lines text-gray-400 text-[10px]"></i>
@@ -271,45 +285,58 @@
 				<hr class="my-1 border-gray-100" />
 			{/if}
 
-			<!-- Section entries -->
-			{#each filteredSections as section, index (`toc-${index}-${section.node.id}`)}
+			<!-- Node entries -->
+			{#each filteredNodes as entry, index (`toc-${index}-${entry.node.node.id}`)}
+				{@const n = entry.node.node}
+				{@const hasChildren = entry.node.children.length > 0}
+				{@const icon = n.display_mode === 'splash'
+					? 'fa-display text-purple-400'
+					: n.assessable && hasChildren
+						? 'fa-square-check text-blue-400'
+						: n.assessable
+							? 'fa-square-check text-green-500'
+							: hasChildren
+								? 'fa-folder text-gray-400'
+								: 'fa-circle-dot text-gray-300'}
 				<button
 					bind:this={navigationButtons[index]}
-					class="w-full text-left px-2 py-2 text-xs rounded-md transition-colors flex items-center
-						{$activeSectionStore === section.node.id
-						? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
-						: 'text-gray-600 hover:bg-gray-100'}
+					class="w-full text-left py-1.5 text-xs rounded-md transition-colors flex items-center gap-1.5
+						{$activeSectionStore === n.id
+							? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
+							: 'text-gray-600 hover:bg-gray-100'}
 						{focusedIndex === index ? 'ring-2 ring-primary-300' : ''}"
+					style="padding-left: {0.5 + entry.depth * 0.75}rem"
 					onclick={() => {
 						focusedIndex = index;
-						scrollToSection(section.node.id);
+						scrollToNode(n.id);
 					}}
 					onkeydown={(e) => handleButtonKeydown(e, index)}
 					onfocus={() => (focusedIndex = index)}
-					aria-current={$activeSectionStore === section.node.id ? 'location' : undefined}
-					aria-label="Jump to section: {section.node.ref_id || section.node.name || 'Untitled'}"
+					aria-current={$activeSectionStore === n.id ? 'location' : undefined}
+					aria-label="Jump to: {n.ref_id || n.name || 'Untitled'}"
 					tabindex={focusedIndex === index ? 0 : -1}
 				>
-					<span class="truncate flex-1"
-						>{section.node.ref_id || section.node.name || 'Untitled'}</span
-					>
-					{#if $activeLanguageStore && hasUntranslated(section.children, $activeLanguageStore)}
+					<i class="fa-solid {icon} text-[10px] flex-shrink-0"></i>
+					<span class="truncate flex-1">{n.ref_id || n.name || 'Untitled'}</span>
+					{#if $activeLanguageStore && hasUntranslated([entry.node], $activeLanguageStore)}
 						<span class="text-amber-500 text-[8px] flex-shrink-0" title="Has untranslated items"
 							>&#9679;</span
 						>
 					{/if}
-					<span class="text-[10px] text-gray-400 ml-1 tabular-nums flex-shrink-0"
-						>{countRequirements(section.children)}</span
-					>
+					{#if hasChildren}
+						<span class="text-[10px] text-gray-400 ml-1 tabular-nums flex-shrink-0"
+							>{countDescendants([entry.node])}</span
+						>
+					{/if}
 				</button>
 			{/each}
 
 			<!-- Empty state -->
-			{#if $sectionsStore.length === 0}
-				<p class="text-xs text-gray-400 px-2 py-4">No sections yet</p>
-			{:else if searchQuery && filteredSections.length === 0}
+			{#if $rootNodesStore.length === 0}
+				<p class="text-xs text-gray-400 px-2 py-4">No nodes yet</p>
+			{:else if searchQuery && filteredNodes.length === 0}
 				<div class="text-center py-4">
-					<p class="text-xs text-gray-400">No matching sections</p>
+					<p class="text-xs text-gray-400">No matching nodes</p>
 					<button
 						onclick={clearSearch}
 						class="mt-1 text-xs text-primary-600 hover:text-primary-800 underline"
@@ -321,9 +348,9 @@
 		</nav>
 
 		<!-- Footer: search result count -->
-		{#if searchQuery && filteredSections.length > 0}
+		{#if searchQuery && filteredNodes.length > 0}
 			<div class="px-2 py-1.5 border-t border-gray-100 text-[10px] text-gray-400 text-center">
-				{filteredSections.length} of {$sectionsStore.length} sections
+				{filteredNodes.length} of {allEntries.length} nodes
 			</div>
 		{/if}
 	{/if}
