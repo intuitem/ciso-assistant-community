@@ -211,9 +211,36 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
-		const formData = form.data;
+		const formData: Record<string, any> = { ...form.data };
+
+		// Strip fields the backend hid from the GET response. Sending them back as
+		// empty arrays / null would silently wipe data the user could not see.
+		const currentRa = await event
+			.fetch(endpoint)
+			.then((r) => (r.ok ? r.json() : null))
+			.catch(() => null);
+		if (currentRa) {
+			const visibilityControlled = [
+				'result',
+				'status',
+				'score',
+				'is_scored',
+				'documentation_score',
+				'observation',
+				'answers',
+				'evidences',
+				'applied_controls',
+				'security_exceptions'
+			];
+			for (const key of visibilityControlled) {
+				if (!(key in currentRa)) {
+					delete formData[key];
+				}
+			}
+		}
+
 		const requestInitOptions: RequestInit = {
-			method: 'PUT',
+			method: 'PATCH',
 			body: JSON.stringify(formData)
 		};
 

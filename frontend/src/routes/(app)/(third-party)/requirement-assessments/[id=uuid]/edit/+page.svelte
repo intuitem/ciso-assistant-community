@@ -784,74 +784,78 @@
 							helpText={m.extendedResultHelpText()}
 						/>
 					{/if}
-					{#if showScore && page.data.compliance_assessment_score.scoring_enabled && computedScore !== null}
-						<div class="flex flex-row items-center space-x-4">
-							<span class="font-medium">{m.score()}</span>
-							<div class="shrink-0 relative">
-								<Progress
-									value={formatScoreValue(
-										computedScore || 0,
-										page.data.compliance_assessment_score.max_score
-									)}
-									min={0}
-									max={100}
-								>
-									<Progress.Circle class="[--size:--spacing(10)]">
-										<Progress.CircleTrack />
-										<Progress.CircleRange
-											class={displayScoreColor(
-												computedScore,
+					{#if page.data.compliance_assessment_score.scoring_enabled}
+						{#if computedScore !== null}
+							{#if showScore}
+								<div class="flex flex-row items-center space-x-4">
+									<span class="font-medium">{m.score()}</span>
+									<div class="shrink-0 relative">
+										<Progress
+											value={formatScoreValue(
+												computedScore || 0,
 												page.data.compliance_assessment_score.max_score
 											)}
-										/>
-									</Progress.Circle>
-									<div class="absolute inset-0 flex items-center justify-center">
-										<span class="text-xs font-bold">{computedScore}</span>
+											min={0}
+											max={100}
+										>
+											<Progress.Circle class="[--size:--spacing(10)]">
+												<Progress.CircleTrack />
+												<Progress.CircleRange
+													class={displayScoreColor(
+														computedScore,
+														page.data.compliance_assessment_score.max_score
+													)}
+												/>
+											</Progress.Circle>
+											<div class="absolute inset-0 flex items-center justify-center">
+												<span class="text-xs font-bold">{computedScore}</span>
+											</div>
+										</Progress>
 									</div>
-								</Progress>
-							</div>
-						</div>
-					{:else if page.data.compliance_assessment_score.scoring_enabled && data.result !== 'not_applicable'}
-						{#if showScore}
-							<div class="flex flex-col">
+								</div>
+							{/if}
+						{:else if data.result !== 'not_applicable'}
+							{#if showScore}
+								<div class="flex flex-col">
+									<Score
+										{form}
+										min_score={page.data.compliance_assessment_score.min_score}
+										max_score={page.data.compliance_assessment_score.max_score}
+										scores_definition={page.data.compliance_assessment_score.scores_definition}
+										field="score"
+										label={page.data.compliance_assessment_score.show_documentation_score
+											? m.implementationScore()
+											: m.score()}
+										disabled={!data.is_scored}
+									>
+										{#snippet left()}
+											<div>
+												<Checkbox
+													{form}
+													field="is_scored"
+													label={''}
+													helpText={m.scoringHelpText()}
+													checkboxComponent="switch"
+													classes="h-full flex flex-row items-center justify-center my-1"
+													classesContainer="h-full flex flex-row items-center space-x-4"
+												/>
+											</div>
+										{/snippet}
+									</Score>
+								</div>
+							{/if}
+							{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
 								<Score
 									{form}
 									min_score={page.data.compliance_assessment_score.min_score}
 									max_score={page.data.compliance_assessment_score.max_score}
 									scores_definition={page.data.compliance_assessment_score.scores_definition}
-									field="score"
-									label={page.data.compliance_assessment_score.show_documentation_score
-										? m.implementationScore()
-										: m.score()}
+									field="documentation_score"
+									label={m.documentationScore()}
+									isDoc={true}
 									disabled={!data.is_scored}
-								>
-									{#snippet left()}
-										<div>
-											<Checkbox
-												{form}
-												field="is_scored"
-												label={''}
-												helpText={m.scoringHelpText()}
-												checkboxComponent="switch"
-												classes="h-full flex flex-row items-center justify-center my-1"
-												classesContainer="h-full flex flex-row items-center space-x-4"
-											/>
-										</div>
-									{/snippet}
-								</Score>
-							</div>
-						{/if}
-						{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
-							<Score
-								{form}
-								min_score={page.data.compliance_assessment_score.min_score}
-								max_score={page.data.compliance_assessment_score.max_score}
-								scores_definition={page.data.compliance_assessment_score.scores_definition}
-								field="documentation_score"
-								label={m.documentationScore()}
-								isDoc={true}
-								disabled={!data.is_scored}
-							/>
+								/>
+							{/if}
 						{/if}
 					{/if}
 
