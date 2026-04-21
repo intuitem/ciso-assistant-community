@@ -9,6 +9,7 @@
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
 	import BatchActionModal from '$lib/components/Modals/BatchActionModal.svelte';
+	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
 	import type { BatchActionConfig } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types';
 	import type { DataHandler } from '@vincjo/datatables/remote';
@@ -40,6 +41,32 @@
 		closeGroup();
 		const count = selectedIds.size;
 		const ids = [...selectedIds];
+
+		if (action.type === 'merge') {
+			const minSel = action.minSelection ?? 2;
+			if (count < minSel) {
+				toastStore.trigger({
+					message: m.mergeMinSelection({ n: minSel }),
+					background: 'preset-filled-warning-500'
+				});
+				return;
+			}
+			const modal: ModalSettings = {
+				type: 'component',
+				component: {
+					ref: MergeAppliedControlsModal,
+					props: {
+						sourceIds: ids,
+						URLModel,
+						handler,
+						onClearSelection
+					}
+				},
+				title: m.mergeAppliedControls()
+			};
+			modalStore.trigger(modal);
+			return;
+		}
 
 		const modalComponent: ModalComponent = {
 			ref: BatchActionModal,

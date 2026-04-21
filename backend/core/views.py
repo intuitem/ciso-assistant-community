@@ -5030,6 +5030,41 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             return self.get_paginated_response(data)
         return Response(data)
 
+    @action(detail=False, methods=["post"], url_path="merge")
+    def merge(self, request):
+        """Merge N source applied controls into 1 target.
+
+        Payload:
+            {
+              "source_ids": ["uuid", ...],   # 1..20, deduped server-side
+              "target": {"type": "new",      "fields": {...}}
+                       | {"type": "existing", "id": "uuid"},
+              "dry_run": false,              # optional; if true, no state change
+              "managed_document_resolution": {"keep": "<doc_id>"}  # required
+                                             # on real merge if a managed-document
+                                             # conflict exists
+            }
+
+        Permission/state checks (builtin/urn rejection, RBAC on every involved
+        folder) live in the helper. ValidationError → HTTP 400, PermissionDenied
+        → HTTP 403, both handled by DRF.
+        """
+        from core.applied_controls_helper import merge_applied_controls
+        from core.serializers import AppliedControlMergeRequestSerializer
+
+        serializer = AppliedControlMergeRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = merge_applied_controls(
+            source_ids=serializer.validated_data["source_ids"],
+            target=serializer.validated_data["target"],
+            user=request.user,
+            dry_run=serializer.validated_data.get("dry_run", False),
+            managed_document_resolution=serializer.validated_data.get(
+                "managed_document_resolution"
+            ),
+        )
+        return Response(result)
+
     def perform_create(self, serializer):
         create_remote_object = serializer.validated_data.pop(
             "create_remote_object", False
