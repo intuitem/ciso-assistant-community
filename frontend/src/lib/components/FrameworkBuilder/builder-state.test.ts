@@ -314,6 +314,58 @@ describe('buildTree', () => {
 	});
 });
 
+import { createBuilderState } from './builder-state';
+
+describe('addNode', () => {
+	function newStore() {
+		const fw = makeFramework();
+		return createBuilderState(fw, [], []);
+	}
+
+	it('creates a non-assessable group when preset is "group"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const roots = get(s.rootNodes);
+		expect(roots).toHaveLength(1);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+
+	it('creates an assessable leaf when preset is "requirement"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(true);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+
+	it('creates a splash node when preset is "splash"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'splash' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('splash');
+	});
+
+	it('nests a child under a given parent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const parentId = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: parentId, preset: 'requirement' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].children).toHaveLength(1);
+		expect(roots[0].children[0].node.assessable).toBe(true);
+	});
+
+	it('defaults to a blank node (non-assessable leaf) when preset is omitted', () => {
+		const s = newStore();
+		s.addNode({ parent: null });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+});
+
 describe('serializeDraft round-trip', () => {
 	it('does not emit the same node twice for a flat framework', () => {
 		const fw = makeFramework();

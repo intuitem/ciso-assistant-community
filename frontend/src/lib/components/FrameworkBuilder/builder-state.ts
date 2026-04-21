@@ -606,6 +606,8 @@ export function buildTree(nodes: RequirementNode[], questions: Question[]): Buil
 
 const CONTEXT_KEY = 'framework-builder';
 
+export type NodePreset = 'blank' | 'group' | 'requirement' | 'splash';
+
 export interface BuilderStore {
 	framework: Writable<Framework>;
 	rootNodes: Writable<BuilderNode[]>;
@@ -618,11 +620,26 @@ export interface BuilderStore {
 	unsaved: Writable<boolean>;
 	unpublished: Writable<boolean>;
 	isScrolling: Writable<boolean>;
+
+	addNode: (opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) => void;
+	deleteNode: (nodeId: string) => void;
+	reorderNodes: (parentNodeId: string | null, fromIndex: number, toIndex: number) => void;
+
+	/** @deprecated */
 	addSection: (afterIndex?: number) => void;
+	/** @deprecated */
 	deleteSection: (sectionIndex: number) => void;
-	addRequirement: (parentNodeId: string, parentUrn: string) => void;
-	addSplashScreen: (parentNodeId: string, parentUrn: string) => void;
+	/** @deprecated */
+	addRequirement: (parentNodeId: string, parentUrn?: string) => void;
+	/** @deprecated */
+	addSplashScreen: (parentNodeId: string, parentUrn?: string) => void;
+	/** @deprecated */
 	deleteRequirement: (nodeId: string) => void;
+	/** @deprecated */
+	reorderSections: (fromIndex: number, toIndex: number) => void;
+	/** @deprecated */
+	reorderRequirements: (parentNodeId: string, fromIndex: number, toIndex: number) => void;
+
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
 	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
 	updateQuestion: (questionId: string, patch: Record<string, unknown>) => void;
@@ -630,8 +647,6 @@ export interface BuilderStore {
 	addChoice: (reqNodeId: string, qIndex: number) => void;
 	updateChoice: (choiceId: string, patch: Record<string, unknown>) => void;
 	deleteChoice: (reqNodeId: string, qIndex: number, choiceIndex: number) => void;
-	reorderSections: (fromIndex: number, toIndex: number) => void;
-	reorderRequirements: (parentNodeId: string, fromIndex: number, toIndex: number) => void;
 	reorderQuestions: (reqNodeId: string, fromIndex: number, toIndex: number) => void;
 	reorderChoices: (reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) => void;
 	updateFramework: (patch: Record<string, unknown>) => void;
@@ -826,172 +841,121 @@ export function createBuilderState(
 		// No cleanup needed — saves are now explicit
 	}
 
-	// --- Section CRUD ---
+	// --- Unified node CRUD ---
 
-	function addSection(afterIndex?: number) {
-		const currentRootNodes = get(rootNodes);
+	function presetDefaults(
+		preset: NodePreset
+	): Pick<RequirementNode, 'assessable' | 'display_mode'> {
+		switch (preset) {
+			case 'group':
+				return { assessable: false, display_mode: 'default' };
+			case 'requirement':
+				return { assessable: true, display_mode: 'default' };
+			case 'splash':
+				return { assessable: false, display_mode: 'splash' };
+			case 'blank':
+			default:
+				return { assessable: false, display_mode: 'default' };
+		}
+	}
+
+	function addNode(opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) {
+		const preset = opts.preset ?? 'blank';
+		const defaults = presetDefaults(preset);
+
+		const roots = get(rootNodes);
+		let parentBn: BuilderNode | null = null;
+		if (opts.parent) {
+			for (const r of roots) {
+				const found = findRequirement([r], opts.parent);
+				if (found) {
+					parentBn = found;
+					break;
+				}
+			}
+		}
+		const siblings = parentBn ? parentBn.children : roots;
 		const order =
-			afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : currentRootNodes.length * 100;
+			opts.afterIndex !== undefined ? (opts.afterIndex + 1) * 100 + 50 : siblings.length * 100;
+		const depth = parentBn ? parentBn.depth + 1 : 0;
 
-		const newId = crypto.randomUUID();
-		const siblingRefIds = currentRootNodes.map((s) => s.node.ref_id);
-		const refId = computeRefId(siblingRefIds, null, 'section');
-		const newUrn = generateUrn('req_node', fwSlug, refId, getUrnNs());
-		const newNode: RequirementNode = {
-			id: newId,
-			urn: newUrn,
-			ref_id: refId,
-			name: 'New Section',
-			description: null,
-			annotation: null,
-			parent_urn: null,
-			order_id: order,
-			assessable: false,
-			implementation_groups: null,
-			visibility_expression: null,
-			typical_evidence: null,
-			weight: 1,
-			importance: '',
-			display_mode: 'default',
-			framework: frameworkId,
-			folder: folderId
-		};
-		const newSection: BuilderNode = {
-			node: newNode,
-			questions: [],
-			children: [],
-			depth: 0
-		};
-		const idx = afterIndex !== undefined ? afterIndex + 1 : currentRootNodes.length;
-		rootNodes.update((s) => [...s.slice(0, idx), newSection, ...s.slice(idx)]);
-		markDirty();
-	}
-
-	function deleteSection(sectionIndex: number) {
-		const section = get(rootNodes)[sectionIndex];
-		if (!section) return;
-		rootNodes.update((s) => s.filter((_, i) => i !== sectionIndex));
-		markDirty();
-	}
-
-	// --- Requirement CRUD (node ID-based) ---
-
-	function addSplashScreen(parentNodeId: string, parentUrn: string) {
-		const parentSection = get(rootNodes).find((s) => s.node.id === parentNodeId);
-		const siblings = parentSection ? parentSection.children : [];
-		const order = siblings.length * 100;
-
-		const parentRefId = parentSection?.node.ref_id ?? null;
-		const siblingRefIds = siblings.map((r) => r.node.ref_id);
-		const refId = computeRefId(siblingRefIds, parentRefId, 'requirement');
+		const parentRefId = parentBn?.node.ref_id ?? null;
+		const siblingRefIds = siblings.map((s) => s.node.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, parentBn ? 'requirement' : 'section');
 
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
 			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
 			ref_id: refId,
-			name: 'New Splash Screen',
+			name: null,
 			description: null,
 			annotation: null,
-			parent_urn: parentUrn,
+			parent_urn: parentBn?.node.urn ?? null,
 			order_id: order,
-			assessable: false,
+			assessable: defaults.assessable,
 			implementation_groups: null,
 			visibility_expression: null,
 			typical_evidence: null,
 			weight: 1,
 			importance: '',
-			display_mode: 'splash',
+			display_mode: defaults.display_mode,
 			framework: frameworkId,
 			folder: folderId
 		};
-		const newReq: BuilderNode = {
-			node: newNode,
-			questions: [],
-			children: [],
-			depth: 0
-		};
-		rootNodes.update((s) =>
-			s.map((sec) =>
-				sec.node.id === parentNodeId ? { ...sec, children: [...sec.children, newReq] } : sec
-			)
-		);
-		markDirty();
-	}
+		const newBn: BuilderNode = { node: newNode, questions: [], children: [], depth };
 
-	function addRequirement(parentNodeId: string, parentUrn: string) {
-		const parentReq = findReqGlobal(parentNodeId);
-		const siblings = parentReq
-			? parentReq.children
-			: (() => {
-					for (const sec of get(rootNodes)) {
-						if (sec.node.id === parentNodeId) return sec.children;
+		if (parentBn) {
+			rootNodes.update((tree) =>
+				tree.map((r) => {
+					// Parent is this root node directly
+					if (r.node.id === parentBn!.node.id) {
+						return { ...r, children: [...r.children, newBn] };
 					}
-					return [];
-				})();
-		const parentDepth = parentReq ? parentReq.depth : -1;
-		const order = siblings.length * 100;
-
-		// Compute ref_id from parent and siblings
-		const parentRefId = parentReq
-			? parentReq.node.ref_id
-			: (get(rootNodes).find((s) => s.node.id === parentNodeId)?.node.ref_id ?? null);
-		const siblingRefIds = siblings.map((r) => r.node.ref_id);
-		const refId = computeRefId(siblingRefIds, parentRefId, 'requirement');
-
-		const newId = crypto.randomUUID();
-		const newNode: RequirementNode = {
-			id: newId,
-			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
-			ref_id: refId,
-			name: 'New Requirement',
-			description: null,
-			annotation: null,
-			parent_urn: parentUrn,
-			order_id: order,
-			assessable: true,
-			implementation_groups: null,
-			visibility_expression: null,
-			typical_evidence: null,
-			weight: 1,
-			importance: '',
-			display_mode: 'default',
-			framework: frameworkId,
-			folder: folderId
-		};
-		const newReq: BuilderNode = {
-			node: newNode,
-			questions: [],
-			children: [],
-			depth: parentDepth + 1
-		};
-
-		if (parentReq) {
-			rootNodes.update((s) =>
-				s.map((sec) => ({
-					...sec,
-					children: addChildToRequirement(sec.children, parentNodeId, newReq)
-				}))
+					// Parent is somewhere in this root's subtree
+					return {
+						...r,
+						children: addChildToRequirement(r.children, parentBn!.node.id, newBn)
+					};
+				})
 			);
 		} else {
-			rootNodes.update((s) =>
-				s.map((sec) =>
-					sec.node.id === parentNodeId
-						? { ...sec, children: [...sec.children, newReq] }
-						: sec
-				)
-			);
+			const idx = opts.afterIndex !== undefined ? opts.afterIndex + 1 : roots.length;
+			rootNodes.update((tree) => [...tree.slice(0, idx), newBn, ...tree.slice(idx)]);
 		}
 		markDirty();
 	}
 
-	function deleteRequirement(nodeId: string) {
-		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: removeRequirement(sec.children, nodeId)
-			}))
-		);
+	function deleteNode(nodeId: string) {
+		rootNodes.update((tree) => removeRequirement(tree, nodeId));
+		markDirty();
+	}
+
+	function reorderNodes(parentNodeId: string | null, fromIndex: number, toIndex: number) {
+		if (fromIndex === toIndex) return;
+		if (parentNodeId === null) {
+			rootNodes.update((tree) => {
+				const copy = [...tree];
+				const [moved] = copy.splice(fromIndex, 1);
+				copy.splice(toIndex, 0, moved);
+				return copy.map((bn, i) => ({ ...bn, node: { ...bn.node, order_id: i * 100 } }));
+			});
+		} else {
+			rootNodes.update((tree) =>
+				tree.map((r) => ({
+					...r,
+					children: updateRequirementById(r.children, parentNodeId, (b) => {
+						const kids = [...b.children];
+						const [moved] = kids.splice(fromIndex, 1);
+						kids.splice(toIndex, 0, moved);
+						return {
+							...b,
+							children: kids.map((k, i) => ({ ...k, node: { ...k.node, order_id: i * 100 } }))
+						};
+					})
+				}))
+			);
+		}
 		markDirty();
 	}
 
@@ -1169,58 +1133,6 @@ export function createBuilderState(
 	}
 
 	// --- Reorder ---
-
-	function reorderSections(fromIndex: number, toIndex: number) {
-		if (fromIndex === toIndex) return;
-		rootNodes.update((s) => {
-			const copy = [...s];
-			const [moved] = copy.splice(fromIndex, 1);
-			copy.splice(toIndex, 0, moved);
-			// Update order_id on all sections
-			return copy.map((sec, i) => ({
-				...sec,
-				node: { ...sec.node, order_id: i * 100 }
-			}));
-		});
-		markDirty();
-	}
-
-	function reorderRequirements(parentNodeId: string, fromIndex: number, toIndex: number) {
-		if (fromIndex === toIndex) return;
-
-		rootNodes.update((s) =>
-			s.map((sec) => {
-				if (sec.node.id === parentNodeId) {
-					const reqs = [...sec.children];
-					const [moved] = reqs.splice(fromIndex, 1);
-					reqs.splice(toIndex, 0, moved);
-					return {
-						...sec,
-						children: reqs.map((r, i) => ({
-							...r,
-							node: { ...r.node, order_id: i * 100 }
-						}))
-					};
-				}
-				return {
-					...sec,
-					children: updateRequirementById(sec.children, parentNodeId, (r) => {
-						const kids = [...r.children];
-						const [moved] = kids.splice(fromIndex, 1);
-						kids.splice(toIndex, 0, moved);
-						return {
-							...r,
-							children: kids.map((k, i) => ({
-								...k,
-								node: { ...k.node, order_id: i * 100 }
-							}))
-						};
-					})
-				};
-			})
-		);
-		markDirty();
-	}
 
 	function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
@@ -1631,11 +1543,34 @@ export function createBuilderState(
 		unsaved,
 		unpublished,
 		isScrolling,
-		addSection,
-		deleteSection,
-		addRequirement,
-		addSplashScreen,
-		deleteRequirement,
+
+		// New unified API
+		addNode,
+		deleteNode,
+		reorderNodes,
+
+		// Deprecated type-specific aliases — delegate to the unified API.
+		// Removed in Phase 2 when NodeBlock replaces the three block components.
+		/** @deprecated Use addNode({ parent: null, preset: 'group', afterIndex }). */
+		addSection: (afterIndex?: number) => addNode({ parent: null, preset: 'group', afterIndex }),
+		/** @deprecated Use deleteNode(nodeId). */
+		deleteSection: (sectionIndex: number) => {
+			const sec = get(rootNodes)[sectionIndex];
+			if (sec) deleteNode(sec.node.id);
+		},
+		/** @deprecated Use addNode({ parent: parentNodeId, preset: 'requirement' }). */
+		addRequirement: (parentNodeId: string) =>
+			addNode({ parent: parentNodeId, preset: 'requirement' }),
+		/** @deprecated Use addNode({ parent: parentNodeId, preset: 'splash' }). */
+		addSplashScreen: (parentNodeId: string) =>
+			addNode({ parent: parentNodeId, preset: 'splash' }),
+		/** @deprecated Use deleteNode(nodeId). */
+		deleteRequirement: deleteNode,
+		/** @deprecated Use reorderNodes(null, from, to). */
+		reorderSections: (from: number, to: number) => reorderNodes(null, from, to),
+		/** @deprecated Use reorderNodes(parentId, from, to). */
+		reorderRequirements: reorderNodes,
+
 		updateNode,
 		addQuestion,
 		updateQuestion,
@@ -1643,8 +1578,6 @@ export function createBuilderState(
 		addChoice,
 		updateChoice,
 		deleteChoice,
-		reorderSections,
-		reorderRequirements,
 		reorderQuestions,
 		reorderChoices,
 		updateFramework: doUpdateFramework,
