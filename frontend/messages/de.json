@@ -460,7 +460,7 @@
 	"linkHelpText": "Externe URL zur Nachverfolgung oder Referenz (z. B. SharePoint, Jira usw.)",
 	"effortHelpText": "Erforderlicher Aufwand zur Umsetzung der angewendeten Maßnahme",
 	"costHelpText": "Erforderliche Kosten zur Umsetzung der angewendeten Maßnahme",
-	"riskAcceptanceJusitficationHelpText": "Begründung der Risikoakzeptanz. Nur der Genehmiger kann dieses Feld bearbeiten.",
+	"riskAcceptanceJustificationHelpText": "Begründung der Risikoakzeptanz. Nur der Genehmiger kann dieses Feld bearbeiten.",
 	"approverHelpText": "Identität des Risikoeigners bzw. Genehmigers",
 	"riskAcceptanceRiskScenariosHelpText": "Akzeptierte Risikoszenarien",
 	"attachmentHelpText": "Datei als Nachweis (z. B. Screenshot, Protokolldatei usw.)",

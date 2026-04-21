@@ -488,7 +488,7 @@
 	"linkHelpText": "رابط خارجي للتتبع أو المرجع (مثل شيربوينت، جيرا، إلخ)",
 	"effortHelpText": "الجهد المطلوب لتنفيذ التحكم المطبق",
 	"costHelpText": "التكلفة المطلوبة لتنفيذ الرقابة المطبقة",
-	"riskAcceptanceJusitficationHelpText": "تبرير قبول المخاطر. يمكن فقط للموافق تحرير هذا الحقل.",
+	"riskAcceptanceJustificationHelpText": "تبرير قبول المخاطر. يمكن فقط للموافق تحرير هذا الحقل.",
 	"approverHelpText": "هوية مالك المخاطر والموافق",
 	"riskAcceptanceRiskScenariosHelpText": "سيناريوهات المخاطر التي تم قبولها",
 	"attachmentHelpText": "ملف دليل (مثل لقطة الشاشة، ملف السجل، إلخ.)",

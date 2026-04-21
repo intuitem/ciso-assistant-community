@@ -623,7 +623,7 @@
 	"linkHelpText": "用于跟踪或参考的外部URL（例如ITSM、SharePoint、Jira等）",
 	"effortHelpText": "实施控制措施所需的工作量",
 	"costHelpText": "实施控制措施所需的成本",
-	"riskAcceptanceJusitficationHelpText": "风险接受的理由。只有审批者可以编辑此字段。",
+	"riskAcceptanceJustificationHelpText": "风险接受的理由。只有审批者可以编辑此字段。",
 	"approverHelpText": "风险负责人和审批者身份",
 	"riskAcceptanceRiskScenariosHelpText": "被接受的风险场景",
 	"attachmentHelpText": "证据文件（例如截图、日志文件等）。选择后，您可以直接从剪贴板粘贴截图。",

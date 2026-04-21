@@ -71,8 +71,8 @@
 					{form}
 					field="justification"
 					label={m.riskAcceptanceJustificationLabel()}
-					helpText={m.riskAcceptanceJusitficationHelpText()}
-					class="shadow-sm border-red-100 hover:shadow-md hover:order-red-300 transition-all focus:border-red-100"
+					helpText={m.riskAcceptanceJustificationHelpText()}
+					class="shadow-sm border-red-100 hover:shadow-md hover:border-red-300 transition-all focus:border-red-100"
 				/>
 				<footer class="modal-footer {parent.regionFooter}">
 					<button

@@ -42,7 +42,7 @@
 		{form}
 		field="justification"
 		label={m.justification()}
-		helpText={m.riskAcceptanceJusitficationHelpText()}
+		helpText={m.riskAcceptanceJustificationHelpText()}
 		cacheLock={cacheLocks['justification']}
 		bind:cachedValue={formDataCache['justification']}
 	/>

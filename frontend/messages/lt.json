@@ -734,7 +734,7 @@
 	"linkHelpText": "Išorinė URL sekimui arba nuorodai (pvz., ITSM, SharePoint, Jira ir kt.)",
 	"effortHelpText": "Pastangos, reikalingos taikomai kontrolei įgyvendinti",
 	"costHelpText": "Kaina, reikalinga taikomai kontrolei įgyvendinti",
-	"riskAcceptanceJusitficationHelpText": "Rizikos priėmimo pagrindimas. Tik tvirtintojas gali redaguoti šį lauką.",
+	"riskAcceptanceJustificationHelpText": "Rizikos priėmimo pagrindimas. Tik tvirtintojas gali redaguoti šį lauką.",
 	"approverHelpText": "Rizikos savininko ir tvirtintojo tapatybė",
 	"riskAcceptanceRiskScenariosHelpText": "Priimami rizikos scenarijai",
 	"attachmentHelpText": "Failas kaip įrodymas (pvz., ekrano kopija, žurnalo failas ir kt.). Pasirinkus, galite tiesiogiai įklijuoti ekrano kopijas iš mainų srities.",

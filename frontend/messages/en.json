@@ -763,7 +763,7 @@
 	"riskAcceptanceNotYetSubmittedMessage": "This risk acceptance has not yet been submitted.",
 	"riskAcceptanceValidatingReviewMessage": "This risk acceptance is awaiting processing. Remember to review it before validating or rejecting it, you will not be able to go back.",
 	"riskAcceptanceMissingApproverMessage": "Approver required before submitting.",
-	"riskAcceptanceJusitficationHelpText": "Justification for the risk acceptance. Only the approver can edit this field.",
+	"riskAcceptanceJustificationHelpText": "Justification for the risk acceptance. Only the approver can edit this field.",
 	"riskAcceptanceJustificationLabel": "Risk acceptance justification",
 	"validate": "Validate",
 	"reject": "Reject",

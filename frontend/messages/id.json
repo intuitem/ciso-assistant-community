@@ -490,7 +490,7 @@
 	"linkHelpText": "URL eksternal untuk pelacakan atau referensi (mis. sharepoint, jira, dll.)",
 	"effortHelpText": "Upaya yang diperlukan untuk menerapkan kontrol",
 	"costHelpText": "Biaya yang diperlukan untuk menerapkan kontrol",
-	"riskAcceptanceJusitficationHelpText": "Justifikasi penerimaan risiko. Hanya penyetuju yang dapat mengedit bidang ini.",
+	"riskAcceptanceJustificationHelpText": "Justifikasi penerimaan risiko. Hanya penyetuju yang dapat mengedit bidang ini.",
 	"approverHelpText": "Pemilik risiko dan identitas penyetuju",
 	"riskAcceptanceRiskScenariosHelpText": "Skenario risiko yang diterima",
 	"attachmentHelpText": "File untuk bukti (contoh: tangkapan layar, file log, dll.). Setelah dipilih, Anda dapat menempelkan tangkapan layar langsung dari clipboard Anda.",

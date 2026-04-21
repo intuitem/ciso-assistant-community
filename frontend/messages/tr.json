@@ -526,7 +526,7 @@
 	"linkHelpText": "İzleme veya referans için harici URL (ör. ITSM, sharepoint, jira, vb.)",
 	"effortHelpText": "Uygulanan kontrolü uygulamak için gereken çaba",
 	"costHelpText": "Uygulanan kontrolü uygulamak için gereken maliyet",
-	"riskAcceptanceJusitficationHelpText": "Risk kabulü için gerekçe. Sadece onaylayan bu alanı düzenleyebilir.",
+	"riskAcceptanceJustificationHelpText": "Risk kabulü için gerekçe. Sadece onaylayan bu alanı düzenleyebilir.",
 	"approverHelpText": "Risk sahibi ve onaylayan kimliği",
 	"riskAcceptanceRiskScenariosHelpText": "Kabul edilen risk senaryoları",
 	"attachmentHelpText": "Kanıt için dosya (ör. ekran görüntüsü, log dosyası, vb.). Seçildiğinde, ekran görüntülerini doğrudan panonuzdan yapıştırabilirsiniz.",

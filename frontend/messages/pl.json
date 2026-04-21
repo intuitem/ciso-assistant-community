@@ -527,7 +527,7 @@
 	"linkHelpText": "Zewnętrzny URL do śledzenia lub odniesienia (np. sharepoint, jira, itp.)",
 	"effortHelpText": "Wysiłek wymagany do wdrożenia zastosowanej kontroli",
 	"costHelpText": "Koszt wymagany do wdrożenia zastosowanej kontroli",
-	"riskAcceptanceJusitficationHelpText": "Uzasadnienie akceptacji ryzyka. Tylko akceptujący może edytować to pole.",
+	"riskAcceptanceJustificationHelpText": "Uzasadnienie akceptacji ryzyka. Tylko akceptujący może edytować to pole.",
 	"approverHelpText": "Tożsamość właściciela ryzyka i akceptującego",
 	"riskAcceptanceRiskScenariosHelpText": "Scenariusze ryzyka, które są zaakceptowane",
 	"attachmentHelpText": "Plik dowodowy (np. zrzut ekranu, plik dziennika itp.)",
