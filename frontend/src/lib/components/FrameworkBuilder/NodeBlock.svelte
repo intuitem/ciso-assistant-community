@@ -9,6 +9,7 @@
 	import ConfirmAction from './ConfirmAction.svelte';
 	import QuestionEditor from './QuestionEditor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import AddNodeMenu from './AddNodeMenu.svelte';
 
 	interface Props {
 		node: BuilderNode;
@@ -719,25 +720,22 @@
 
 		<!-- Add child button -->
 		{#if node.node.urn}
-			<button
-				type="button"
-				class="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors border-t border-gray-100"
-				onclick={() => builder.addNode({ parent: node.node.id, preset: 'blank' })}
-			>
-				<i class="fa-solid fa-plus mr-1"></i>Add child
-			</button>
+			<AddNodeMenu
+				parent={node.node.id}
+				triggerLabel={'+ Add child'}
+				triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors border-t border-gray-100"
+			/>
 		{/if}
 	</div>
 
 	<!-- Add sibling below button -->
 	{#if parentId !== undefined}
-		<button
-			type="button"
-			class="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
-			onclick={() => builder.addNode({ parent: parentId, preset: 'blank', afterIndex: indexWithinParent })}
-		>
-			<i class="fa-solid fa-plus mr-1"></i>Add sibling below
-		</button>
+		<AddNodeMenu
+			parent={parentId}
+			afterIndex={indexWithinParent}
+			triggerLabel={'+ Add sibling below'}
+			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
+		/>
 	{/if}
 
 	<!-- Recursive children -->

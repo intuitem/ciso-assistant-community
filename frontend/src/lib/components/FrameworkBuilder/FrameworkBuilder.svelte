@@ -21,6 +21,7 @@
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
 	import NodeBlock from './NodeBlock.svelte';
+	import AddNodeMenu from './AddNodeMenu.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 
@@ -822,13 +823,11 @@
 					</div>
 				{/each}
 
-				<button
-					type="button"
-					class="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
-					onclick={() => builder.addNode({ parent: null, preset: 'blank' })}
-				>
-					<i class="fa-solid fa-plus mr-1"></i>Add top-level node
-				</button>
+				<AddNodeMenu
+					parent={null}
+					triggerLabel={'+ Add top-level node'}
+					triggerClass="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+				/>
 
 				<!-- Empty state -->
 				{#if $rootNodesStore.length === 0}
