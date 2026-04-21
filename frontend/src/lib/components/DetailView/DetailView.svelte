@@ -233,13 +233,16 @@
 		};
 		modalStore.trigger(modal);
 	}
-
 	function modalRiskAcceptanceApproval(id: string, name: string, action: string): void {
 		const urlModel = getModelInfo('risk-acceptances').urlModel;
 		const modalComponent: ModalComponent = {
 			ref: RiskAcceptanceModal,
 			props: {
-				_form: { id: id, urlmodel: urlModel },
+				_form: {
+					id: id,
+					urlmodel: urlModel,
+					justification: data.data?.justification ? data.data.justification : ''
+				},
 				id: id,
 				debug: false,
 				URLModel: urlModel,

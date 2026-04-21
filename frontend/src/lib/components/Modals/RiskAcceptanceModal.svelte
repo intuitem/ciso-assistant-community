@@ -36,6 +36,15 @@
 		debug = false,
 		schema
 	}: Props = $props();
+
+	let submitButtonStyle = 'preset-filled-error-500';
+	let submitButtonText = m.reject();
+	if (formAction.toString().includes('accept')) {
+		submitButtonStyle = 'preset-filled-success-500';
+		submitButtonText = m.validate();
+	} else if (formAction.toString().includes('revoke')) {
+		submitButtonText = m.revoke();
+	}
 </script>
 
 {#if $modalStore[0]}
@@ -63,16 +72,24 @@
 					field="justification"
 					label={m.riskAcceptanceJustificationLabel()}
 					helpText={m.riskAcceptanceJusitficationHelpText()}
+					class="shadow-sm border-red-100 hover:shadow-md hover:order-red-300 transition-all focus:border-red-100"
 				/>
-
 				<footer class="modal-footer {parent.regionFooter}">
-					<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
+					<button
+						type="button"
+						class="btn bg-gray-100 shadow-sm {parent.buttonNeutral}"
+						onclick={parent.onClose}
+					>
 						{m.cancel()}
 					</button>
 					<input type="hidden" name="urlmodel" value={URLModel} />
 					<input type="hidden" name="id" value={id} />
-					<button class="btn preset-filled-error-500" type="submit" onclick={parent.onConfirm}>
-						{m.submit()}
+					<button
+						class="btn border-green-900 {submitButtonStyle} shadow-sm"
+						type="submit"
+						onclick={parent.onConfirm}
+					>
+						{submitButtonText}
 					</button>
 				</footer>
 			{/snippet}
