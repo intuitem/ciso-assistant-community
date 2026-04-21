@@ -6651,7 +6651,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
         risk_acceptance = self.get_object()
         risk_acceptance.set_state("accepted")
-        risk_acceptance.justification = request.data.get("justification", "").strip()
+        risk_acceptance.justification = str(
+            request.data.get("justification", "")
+        ).strip()
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to accepted"})
 
@@ -6669,7 +6671,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
         risk_acceptance = self.get_object()
         risk_acceptance.set_state("rejected")
-        risk_acceptance.justification = request.data.get("justification", "").strip()
+        risk_acceptance.justification = str(
+            request.data.get("justification", "")
+        ).strip()
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to rejected"})
 
@@ -6686,7 +6690,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             )
         risk_acceptance = self.get_object()
         risk_acceptance.set_state("revoked")
-        risk_acceptance.justification = request.data.get("justification", "").strip()
+        risk_acceptance.justification = str(
+            request.data.get("justification", "")
+        ).strip()
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to revoked"})
 
