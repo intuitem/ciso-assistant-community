@@ -1,12 +1,16 @@
 import { describe, it, expect } from 'vitest';
+import { get } from 'svelte/store';
 import {
 	slugifyFrameworkName,
 	computeRefId,
 	generateUrn,
 	validateDraft,
+	buildTree,
+	serializeDraft,
 	type Framework,
-	type BuilderSection,
-	type RequirementNode
+	type BuilderNode,
+	type RequirementNode,
+	type Question
 } from './builder-state';
 
 const FW_ID = 'a1b2c3d4-0000-0000-0000-000000000000';
@@ -241,5 +245,100 @@ describe('validateDraft', () => {
 		const sections = [makeSection()];
 		const errors = validateDraft(fw, sections);
 		expect(errors.find((e) => e.key === 'publish')!.message).toBe('Framework name is required.');
+	});
+});
+
+describe('buildTree', () => {
+	it('preserves a single top-level assessable node as one root node (no wrapper)', () => {
+		const n: RequirementNode = {
+			id: 'n1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Top-level assessable',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const tree = buildTree([n], []);
+		expect(tree).toHaveLength(1);
+		expect(tree[0].node.id).toBe('n1');
+		expect(tree[0].node.assessable).toBe(true);
+		expect(tree[0].children).toHaveLength(0);
+	});
+
+	it('preserves an assessable parent with assessable children', () => {
+		const parent: RequirementNode = {
+			id: 'p1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Assessable parent',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const child: RequirementNode = {
+			...parent,
+			id: 'c1',
+			urn: 'urn:x:req_node:fw:1.1',
+			ref_id: '1.1',
+			parent_urn: 'urn:x:req_node:fw:1',
+			order_id: 0
+		};
+		const tree = buildTree([parent, child], []);
+		expect(tree).toHaveLength(1);
+		expect(tree[0].node.id).toBe('p1');
+		expect(tree[0].node.assessable).toBe(true);
+		expect(tree[0].children).toHaveLength(1);
+		expect(tree[0].children[0].node.id).toBe('c1');
+	});
+});
+
+describe('serializeDraft round-trip', () => {
+	it('does not emit the same node twice for a flat framework', () => {
+		const fw = makeFramework();
+		const n: RequirementNode = {
+			id: 'n1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Top-level assessable',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const tree = buildTree([n], []);
+		const draft = serializeDraft(fw, tree);
+		const ids = draft.nodes.map((x) => x.id);
+		expect(new Set(ids).size).toBe(ids.length);
+		expect(ids).toEqual(['n1']);
 	});
 });
