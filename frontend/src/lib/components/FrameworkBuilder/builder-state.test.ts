@@ -395,3 +395,143 @@ describe('serializeDraft round-trip', () => {
 		expect(ids).toEqual(['n1']);
 	});
 });
+
+describe('indentNode', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('indents a root node under its previous sibling', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' }); // idx 0
+		s.addNode({ parent: null, preset: 'requirement' }); // idx 1
+		const roots = get(s.rootNodes);
+		const id = roots[1].node.id;
+		const prevUrn = roots[0].node.urn;
+
+		const ok = s.indentNode(id);
+		expect(ok).toBe(true);
+		const after = get(s.rootNodes);
+		expect(after).toHaveLength(1);
+		expect(after[0].node.id).toBe(roots[0].node.id);
+		expect(after[0].children).toHaveLength(1);
+		expect(after[0].children[0].node.id).toBe(id);
+		expect(after[0].children[0].node.parent_urn).toBe(prevUrn);
+		expect(after[0].children[0].depth).toBe(1);
+	});
+
+	it('is a no-op for the first sibling (no previous sibling to nest under)', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		const ok = s.indentNode(id);
+		expect(ok).toBe(false);
+		expect(get(s.rootNodes)).toHaveLength(1);
+	});
+
+	it('indents a nested node under its previous sibling', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const group = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: group, preset: 'requirement' });
+		s.addNode({ parent: group, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[1].node.id;
+		const prevUrn = get(s.rootNodes)[0].children[0].node.urn;
+
+		const ok = s.indentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		expect(roots[0].children).toHaveLength(1);
+		expect(roots[0].children[0].children).toHaveLength(1);
+		expect(roots[0].children[0].children[0].node.id).toBe(targetId);
+		expect(roots[0].children[0].children[0].node.parent_urn).toBe(prevUrn);
+		expect(roots[0].children[0].children[0].depth).toBe(2);
+	});
+});
+
+describe('outdentNode', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('promotes a nested node to be a sibling of its parent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const group = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: group, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[0].node.id;
+
+		const ok = s.outdentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		expect(roots).toHaveLength(2);
+		// Outdented node lands immediately after its former parent
+		expect(roots[1].node.id).toBe(targetId);
+		expect(roots[1].node.parent_urn).toBeNull();
+		expect(roots[1].depth).toBe(0);
+		// Former parent has no more children
+		expect(roots[0].children).toHaveLength(0);
+	});
+
+	it('is a no-op for a root node (nothing to outdent to)', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		const ok = s.outdentNode(id);
+		expect(ok).toBe(false);
+		expect(get(s.rootNodes)).toHaveLength(1);
+	});
+
+	it('promotes a deeply nested node to its grandparent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const top = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: top, preset: 'group' });
+		const mid = get(s.rootNodes)[0].children[0].node.id;
+		s.addNode({ parent: mid, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[0].children[0].node.id;
+
+		const ok = s.outdentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		// Target moves from depth 2 (inside mid) to depth 1 (as sibling of mid under top)
+		expect(roots).toHaveLength(1);
+		expect(roots[0].children).toHaveLength(2);
+		expect(roots[0].children[1].node.id).toBe(targetId);
+		expect(roots[0].children[1].node.parent_urn).toBe(get(s.rootNodes)[0].node.urn);
+		expect(roots[0].children[1].depth).toBe(1);
+	});
+});
+
+describe('toggleAssessable', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('flips a group node to assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const id = get(s.rootNodes)[0].node.id;
+		expect(get(s.rootNodes)[0].node.assessable).toBe(false);
+		s.toggleAssessable(id);
+		expect(get(s.rootNodes)[0].node.assessable).toBe(true);
+	});
+
+	it('flips an assessable node back to non-assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.toggleAssessable(id);
+		expect(get(s.rootNodes)[0].node.assessable).toBe(false);
+	});
+
+	it('works on nested nodes', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const parentId = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: parentId, preset: 'group' });
+		const childId = get(s.rootNodes)[0].children[0].node.id;
+		s.toggleAssessable(childId);
+		expect(get(s.rootNodes)[0].children[0].node.assessable).toBe(true);
+	});
+});

@@ -617,6 +617,9 @@ export interface BuilderStore {
 	addNode: (opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) => void;
 	deleteNode: (nodeId: string) => void;
 	reorderNodes: (parentNodeId: string | null, fromIndex: number, toIndex: number) => void;
+	indentNode: (nodeId: string) => boolean;
+	outdentNode: (nodeId: string) => boolean;
+	toggleAssessable: (nodeId: string) => void;
 
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
 	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
@@ -935,6 +938,178 @@ export function createBuilderState(
 			);
 		}
 		markDirty();
+	}
+
+	// --- Indent / Outdent / Toggle Assessable ---
+
+	/** Recursively update the depth field on a subtree after reparenting */
+	function reDepth(nodes: BuilderNode[], depth: number): BuilderNode[] {
+		return nodes.map((n) => ({ ...n, depth, children: reDepth(n.children, depth + 1) }));
+	}
+
+	/**
+	 * Indent a node: nest it as the last child of its previous sibling.
+	 * Returns true if the tree was mutated.
+	 */
+	function indentNode(nodeId: string): boolean {
+		let changed = false;
+		rootNodes.update((tree) => {
+			function recurse(list: BuilderNode[]): BuilderNode[] {
+				const idx = list.findIndex((b) => b.node.id === nodeId);
+				if (idx > 0) {
+					// Found at this level and there is a previous sibling
+					const node = list[idx];
+					const prev = list[idx - 1];
+					const newParentUrn = prev.node.urn;
+					const newDepth = prev.depth + 1;
+					const moved: BuilderNode = {
+						...node,
+						depth: newDepth,
+						node: {
+							...node.node,
+							parent_urn: newParentUrn,
+							order_id: prev.children.length * 100
+						},
+						children: reDepth(node.children, newDepth + 1)
+					};
+					changed = true;
+					return list
+						.map((b, i) => (i === idx - 1 ? { ...b, children: [...b.children, moved] } : b))
+						.filter((_, i) => i !== idx);
+				}
+				if (idx === 0) {
+					// First sibling — can't indent; but still recurse into children of all items
+					return list.map((b) => ({ ...b, children: recurse(b.children) }));
+				}
+				// Not found at this level — recurse into children
+				return list.map((b) => ({ ...b, children: recurse(b.children) }));
+			}
+			return recurse(tree);
+		});
+		if (changed) markDirty();
+		return changed;
+	}
+
+	/**
+	 * Outdent a node: promote it to be a sibling of its parent, placed right after the parent.
+	 * Returns true if the tree was mutated.
+	 */
+	function outdentNode(nodeId: string): boolean {
+		let changed = false;
+		rootNodes.update((tree) => {
+			// Phase 1: locate the node's parent chain
+			type Hit = { parentChain: BuilderNode[]; idx: number };
+			let hit: Hit | null = null;
+
+			function locate(list: BuilderNode[], chain: BuilderNode[]) {
+				for (let i = 0; i < list.length; i++) {
+					if (list[i].node.id === nodeId) {
+						hit = { parentChain: chain, idx: i };
+						return;
+					}
+					locate(list[i].children, [...chain, list[i]]);
+					if (hit) return;
+				}
+			}
+			locate(tree, []);
+
+			// No-op if not found or already a root node
+			if (!hit || hit.parentChain.length === 0) return tree;
+
+			const parent = hit.parentChain[hit.parentChain.length - 1];
+			const grandparent =
+				hit.parentChain.length > 1 ? hit.parentChain[hit.parentChain.length - 2] : null;
+
+			const node = parent.children[hit.idx];
+			const newParentUrn = grandparent ? grandparent.node.urn : null;
+			const newDepth = parent.depth; // promoted one level up
+
+			const moved: BuilderNode = {
+				...node,
+				depth: newDepth,
+				node: {
+					...node.node,
+					parent_urn: newParentUrn,
+					order_id: 0 // will be recomputed below
+				},
+				children: reDepth(node.children, newDepth + 1)
+			};
+
+			// Phase 2: remove the node from its current parent (walk the chain)
+			function walk(list: BuilderNode[], level: number): BuilderNode[] {
+				return list.flatMap((b) => {
+					const isInChain =
+						level < hit!.parentChain.length && b === hit!.parentChain[level];
+					if (isInChain) {
+						const nextChildren =
+							level === hit!.parentChain.length - 1
+								? // This is `parent`: strip the moved node and reindex
+									b.children
+										.filter((_, i) => i !== hit!.idx)
+										.map((c, i) => ({ ...c, node: { ...c.node, order_id: i * 100 } }))
+								: walk(b.children, level + 1);
+						return [{ ...b, children: nextChildren }];
+					}
+					return [b];
+				});
+			}
+
+			const withoutTarget = walk(tree, 0);
+
+			// Phase 3: splice `moved` into grandparent's children (or root list) after `parent`
+			if (grandparent === null) {
+				const parentIdx = withoutTarget.findIndex((b) => b.node.id === parent.node.id);
+				const result = [
+					...withoutTarget.slice(0, parentIdx + 1),
+					moved,
+					...withoutTarget.slice(parentIdx + 1)
+				];
+				changed = true;
+				return result.map((b, i) => ({ ...b, node: { ...b.node, order_id: i * 100 } }));
+			}
+
+			function insertInGrandparent(list: BuilderNode[]): BuilderNode[] {
+				return list.map((b) => {
+					if (b.node.id === grandparent!.node.id) {
+						const parentIdx = b.children.findIndex((c) => c.node.id === parent.node.id);
+						const newChildren = [
+							...b.children.slice(0, parentIdx + 1),
+							moved,
+							...b.children.slice(parentIdx + 1)
+						].map((c, i) => ({ ...c, node: { ...c.node, order_id: i * 100 } }));
+						return { ...b, children: newChildren };
+					}
+					return { ...b, children: insertInGrandparent(b.children) };
+				});
+			}
+
+			changed = true;
+			return insertInGrandparent(withoutTarget);
+		});
+		if (changed) markDirty();
+		return changed;
+	}
+
+	/**
+	 * Toggle the `assessable` flag on a node.
+	 */
+	function toggleAssessable(nodeId: string) {
+		// Find current value across the full tree (including roots)
+		let current: boolean | null = null;
+		const roots = get(rootNodes);
+		function findAssessable(list: BuilderNode[]) {
+			for (const b of list) {
+				if (b.node.id === nodeId) {
+					current = b.node.assessable;
+					return;
+				}
+				findAssessable(b.children);
+				if (current !== null) return;
+			}
+		}
+		findAssessable(roots);
+		if (current === null) return;
+		updateNode(nodeId, { assessable: !current });
 	}
 
 	// --- Node update ---
@@ -1523,6 +1698,9 @@ export function createBuilderState(
 		addNode,
 		deleteNode,
 		reorderNodes,
+		indentNode,
+		outdentNode,
+		toggleAssessable,
 
 		updateNode,
 		addQuestion,
