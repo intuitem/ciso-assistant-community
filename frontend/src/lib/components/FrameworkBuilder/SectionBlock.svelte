@@ -108,7 +108,7 @@
 	<!-- Section children -->
 	{#if !collapsed}
 		<div transition:slide={{ duration: 200 }} class="space-y-4 ml-4">
-			{#each section.requirements as req, reqIndex (req.node.id)}
+			{#each section.children as req, reqIndex (req.node.id)}
 				<div
 					class:opacity-50={reqDrag.draggedIndex === reqIndex}
 					draggable="true"

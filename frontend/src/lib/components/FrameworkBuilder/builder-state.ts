@@ -104,10 +104,17 @@ export interface Framework {
 	editing_version: number;
 }
 
-export interface BuilderRequirement {
+/**
+ * A unified tree node for the builder. Replaces the old
+ * BuilderSection + BuilderRequirement split — there is no longer a
+ * distinction between "sections" and "requirements" at the tree level.
+ * A node's role is determined entirely by its `node.assessable`,
+ * `node.display_mode`, and whether it has children.
+ */
+export interface BuilderNode {
 	node: RequirementNode;
 	questions: BuilderQuestion[];
-	children: BuilderRequirement[];
+	children: BuilderNode[];
 	depth: number;
 }
 
@@ -115,11 +122,11 @@ export interface BuilderQuestion {
 	question: Question;
 }
 
-export interface BuilderSection {
-	node: RequirementNode;
-	requirements: BuilderRequirement[];
-	collapsed: boolean;
-}
+/** @deprecated Use BuilderNode. Kept as an alias during migration. Removed in Phase 2. */
+export type BuilderSection = BuilderNode;
+
+/** @deprecated Use BuilderNode. */
+export type BuilderRequirement = BuilderNode;
 
 // --- URN / ref_id generation utilities ---
 
@@ -131,7 +138,7 @@ export interface BuilderSection {
 export function slugifyFrameworkName(name: string, frameworkId: string): string {
 	const normalized = name
 		.normalize('NFKD')
-		.replace(/[\u0300-\u036f]/g, '') // strip combining diacritical marks
+		.replace(/[̀-ͯ]/g, '') // strip combining diacritical marks
 		.replace(/[^\x00-\x7F]/g, ''); // strip non-ASCII
 	let slug = normalized
 		.toLowerCase()
@@ -213,9 +220,9 @@ export function generateUrn(
 
 /** Recursively map over a requirement tree, applying fn to each requirement */
 function mapRequirements(
-	reqs: BuilderRequirement[],
-	fn: (req: BuilderRequirement) => BuilderRequirement
-): BuilderRequirement[] {
+	reqs: BuilderNode[],
+	fn: (req: BuilderNode) => BuilderNode
+): BuilderNode[] {
 	return reqs.map((req) => {
 		const updated = fn(req);
 		return { ...updated, children: mapRequirements(updated.children, fn) };
@@ -223,7 +230,7 @@ function mapRequirements(
 }
 
 /** Find a requirement by node ID in a recursive tree */
-function findRequirement(reqs: BuilderRequirement[], nodeId: string): BuilderRequirement | null {
+function findRequirement(reqs: BuilderNode[], nodeId: string): BuilderNode | null {
 	for (const req of reqs) {
 		if (req.node.id === nodeId) return req;
 		const found = findRequirement(req.children, nodeId);
@@ -233,7 +240,7 @@ function findRequirement(reqs: BuilderRequirement[], nodeId: string): BuilderReq
 }
 
 /** Remove a requirement by node ID from a recursive tree */
-function removeRequirement(reqs: BuilderRequirement[], nodeId: string): BuilderRequirement[] {
+function removeRequirement(reqs: BuilderNode[], nodeId: string): BuilderNode[] {
 	return reqs
 		.filter((req) => req.node.id !== nodeId)
 		.map((req) => ({ ...req, children: removeRequirement(req.children, nodeId) }));
@@ -241,10 +248,10 @@ function removeRequirement(reqs: BuilderRequirement[], nodeId: string): BuilderR
 
 /** Add a child requirement under a parent node ID */
 function addChildToRequirement(
-	reqs: BuilderRequirement[],
+	reqs: BuilderNode[],
 	parentNodeId: string,
-	child: BuilderRequirement
-): BuilderRequirement[] {
+	child: BuilderNode
+): BuilderNode[] {
 	return reqs.map((req) => {
 		if (req.node.id === parentNodeId) {
 			return { ...req, children: [...req.children, child] };
@@ -255,10 +262,10 @@ function addChildToRequirement(
 
 /** Apply a function to a specific requirement found by node ID */
 function updateRequirementById(
-	reqs: BuilderRequirement[],
+	reqs: BuilderNode[],
 	nodeId: string,
-	fn: (req: BuilderRequirement) => BuilderRequirement
-): BuilderRequirement[] {
+	fn: (req: BuilderNode) => BuilderNode
+): BuilderNode[] {
 	return reqs.map((req) => {
 		if (req.node.id === nodeId) return fn(req);
 		return { ...req, children: updateRequirementById(req.children, nodeId, fn) };
@@ -268,12 +275,12 @@ function updateRequirementById(
 // --- Serialization / Hydration helpers ---
 
 /** Extract a plain folder_id string from a folder that may be an object or string */
-function extractFolderId(folder: { id: string; str: string } | string): string {
+export function extractFolderId(folder: { id: string; str: string } | string): string {
 	return typeof folder === 'string' ? folder : folder.id;
 }
 
 /** Extract a plain requirement_node ID string */
-function extractRequirementNodeId(rn: string | { id: string }): string {
+export function extractRequirementNodeId(rn: string | { id: string }): string {
 	return typeof rn === 'string' ? rn : rn.id;
 }
 
@@ -300,7 +307,7 @@ export function withTranslation(
 }
 
 /** Serialize a single RequirementNode into its flat persistence shape. */
-function serializeNode(n: RequirementNode): Record<string, unknown> {
+export function serializeNode(n: RequirementNode): Record<string, unknown> {
 	return {
 		id: n.id,
 		urn: n.urn,
@@ -325,7 +332,7 @@ function serializeNode(n: RequirementNode): Record<string, unknown> {
 /**
  * Serialize the current builder state into a flat DraftJSON for persistence.
  */
-function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
+export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJSON {
 	const nodes: Record<string, unknown>[] = [];
 	const questions: Record<string, unknown>[] = [];
 	const choices: Record<string, unknown>[] = [];
@@ -337,10 +344,10 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 		nodes.push(serialized);
 	}
 
-	function collectFromRequirements(reqs: BuilderRequirement[]) {
-		for (const req of reqs) {
-			pushNode(req.node);
-			for (const bq of req.questions) {
+	function walk(tree: BuilderNode[]) {
+		for (const bn of tree) {
+			pushNode(bn.node);
+			for (const bq of bn.questions) {
 				const q = bq.question;
 				questions.push({
 					id: q.id,
@@ -370,20 +377,17 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
 						description: c.description,
 						color: c.color,
 						select_implementation_groups: c.select_implementation_groups,
-						question_id: typeof c.question === 'string' ? c.question : c.question,
+						question_id: c.question,
 						folder_id: extractFolderId(c.folder),
 						translations: c.translations ?? null
 					});
 				}
 			}
-			collectFromRequirements(req.children);
+			walk(bn.children);
 		}
 	}
 
-	for (const sec of sections) {
-		pushNode(sec.node);
-		collectFromRequirements(sec.requirements);
-	}
+	walk(rootNodes);
 
 	return {
 		framework_meta: {
@@ -515,10 +519,9 @@ export interface ValidationError {
  * Validate framework and nodes before publishing.
  * Returns an array of validation errors (empty if valid).
  */
-export function validateDraft(fw: Framework, allSections: BuilderSection[]): ValidationError[] {
+export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): ValidationError[] {
 	const errors: ValidationError[] = [];
 
-	// Validate framework name
 	if (!fw.name || fw.name.trim().length === 0) {
 		errors.push({ key: 'publish', message: 'Framework name is required.' });
 	} else if (fw.name.length > 200) {
@@ -528,11 +531,10 @@ export function validateDraft(fw: Framework, allSections: BuilderSection[]): Val
 		});
 	}
 
-	// Validate each node recursively
-	function validateNodes(reqs: BuilderRequirement[]) {
-		for (const req of reqs) {
-			const n = req.node;
-
+	function validate(tree: BuilderNode[]) {
+		for (const bn of tree) {
+			const n = bn.node;
+			const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
 			if (n.name && n.name.length > 200) {
 				errors.push({
 					key: `node-${n.id}`,
@@ -540,50 +542,64 @@ export function validateDraft(fw: Framework, allSections: BuilderSection[]): Val
 				});
 			}
 			if (n.ref_id && n.ref_id.length > 100) {
-				const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
 				errors.push({
 					key: `node-${n.id}`,
-					message: `Requirement '${label}': ref_id is ${n.ref_id.length} characters (max 100).`
+					message: `'${label}': ref_id is ${n.ref_id.length} characters (max 100).`
 				});
 			}
 			if (n.urn && n.urn.length > 255) {
-				const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
 				errors.push({
 					key: `node-${n.id}`,
-					message: `Requirement '${label}': URN is ${n.urn.length} characters (max 255).`
+					message: `'${label}': URN is ${n.urn.length} characters (max 255).`
 				});
 			}
-
-			validateNodes(req.children);
+			validate(bn.children);
 		}
 	}
 
-	for (const sec of allSections) {
-		const sn = sec.node;
-		if (sn.name && sn.name.length > 200) {
-			errors.push({
-				key: `node-${sn.id}`,
-				message: `Name exceeds 200 characters (${sn.name.length}/200). Move long text to the description field.`
-			});
-		}
-		if (sn.ref_id && sn.ref_id.length > 100) {
-			const label = sn.ref_id ?? `position ${sn.order_id ?? '?'}`;
-			errors.push({
-				key: `node-${sn.id}`,
-				message: `Section '${label}': ref_id is ${sn.ref_id.length} characters (max 100).`
-			});
-		}
-		if (sn.urn && sn.urn.length > 255) {
-			const label = sn.ref_id ?? `position ${sn.order_id ?? '?'}`;
-			errors.push({
-				key: `node-${sn.id}`,
-				message: `Section '${label}': URN is ${sn.urn.length} characters (max 255).`
-			});
-		}
-		validateNodes(sec.requirements);
-	}
-
+	validate(rootNodes);
 	return errors;
+}
+
+// --- Tree builder ---
+
+export function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderNode[] {
+	const questionsByNode = new Map<string, Question[]>();
+	for (const q of questions) {
+		const nodeId =
+			typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
+		if (!questionsByNode.has(nodeId)) questionsByNode.set(nodeId, []);
+		questionsByNode.get(nodeId)!.push(q);
+	}
+
+	const childrenByUrn = new Map<string, RequirementNode[]>();
+	for (const node of nodes) {
+		if (node.parent_urn) {
+			if (!childrenByUrn.has(node.parent_urn)) childrenByUrn.set(node.parent_urn, []);
+			childrenByUrn.get(node.parent_urn)!.push(node);
+		}
+	}
+	for (const children of childrenByUrn.values()) {
+		children.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
+	}
+
+	function build(parentUrn: string | null, depth: number): BuilderNode[] {
+		const raw = parentUrn
+			? (childrenByUrn.get(parentUrn) ?? [])
+			: nodes
+					.filter((n) => !n.parent_urn)
+					.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
+		return raw.map((n) => ({
+			node: n,
+			questions: (questionsByNode.get(n.id) ?? [])
+				.sort((a, b) => a.order - b.order)
+				.map((q) => ({ question: q })),
+			children: n.urn ? build(n.urn, depth + 1) : [],
+			depth
+		}));
+	}
+
+	return build(null, 0);
 }
 
 // --- State ---
@@ -592,7 +608,9 @@ const CONTEXT_KEY = 'framework-builder';
 
 export interface BuilderStore {
 	framework: Writable<Framework>;
-	sections: Writable<BuilderSection[]>;
+	rootNodes: Writable<BuilderNode[]>;
+	/** @deprecated Use rootNodes. Removed in Phase 2. */
+	sections: Writable<BuilderNode[]>;
 	saving: Writable<boolean>;
 	errors: Writable<Map<string, string>>;
 	activeSection: Writable<string>;
@@ -630,61 +648,6 @@ export interface BuilderStore {
 	destroy: () => void;
 }
 
-export function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSection[] {
-	const questionsByNode = new Map<string, Question[]>();
-	for (const q of questions) {
-		const nodeId = typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
-		if (!questionsByNode.has(nodeId)) {
-			questionsByNode.set(nodeId, []);
-		}
-		questionsByNode.get(nodeId)!.push(q);
-	}
-
-	const childrenByUrn = new Map<string, RequirementNode[]>();
-	for (const node of nodes) {
-		if (node.parent_urn) {
-			if (!childrenByUrn.has(node.parent_urn)) {
-				childrenByUrn.set(node.parent_urn, []);
-			}
-			childrenByUrn.get(node.parent_urn)!.push(node);
-		}
-	}
-	for (const children of childrenByUrn.values()) {
-		children.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
-	}
-
-	function buildRequirements(parentUrn: string, depth: number): BuilderRequirement[] {
-		const children = childrenByUrn.get(parentUrn) ?? [];
-		return children.map((child) => {
-			const nodeQuestions = (questionsByNode.get(child.id) ?? [])
-				.sort((a, b) => a.order - b.order)
-				.map((q) => ({ question: q }));
-			const nested = child.urn ? buildRequirements(child.urn, depth + 1) : [];
-			return { node: child, questions: nodeQuestions, children: nested, depth };
-		});
-	}
-
-	const sectionNodes = nodes
-		.filter((n) => !n.parent_urn)
-		.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
-
-	return sectionNodes.map((sectionNode) => {
-		if (sectionNode.assessable) {
-			const directQuestions = (questionsByNode.get(sectionNode.id) ?? [])
-				.sort((a, b) => a.order - b.order)
-				.map((q) => ({ question: q }));
-			return {
-				node: sectionNode,
-				requirements: [{ node: sectionNode, questions: directQuestions, children: [], depth: 0 }],
-				collapsed: false
-			};
-		}
-
-		const requirements = sectionNode.urn ? buildRequirements(sectionNode.urn, 0) : [];
-		return { node: sectionNode, requirements, collapsed: false };
-	});
-}
-
 /**
  * Create the builder state. Accepts either:
  * 1. Draft JSON (from editing_draft) -- hydrates from flat arrays
@@ -719,11 +682,11 @@ export function createBuilderState(
 	const fwSlug = slugifyFrameworkName(initialFrameworkData.name, frameworkId);
 
 	const framework = writable<Framework>(initialFrameworkData);
-	const initialSections = buildTree(initialNodes, initialQuestions);
-	const sections = writable<BuilderSection[]>(initialSections);
+	const initialRootNodes = buildTree(initialNodes, initialQuestions);
+	const rootNodes = writable<BuilderNode[]>(initialRootNodes);
 	const saving = writable(false);
 	const errors = writable<Map<string, string>>(new Map());
-	const activeSection = writable<string>(initialSections[0]?.node.id ?? '');
+	const activeSection = writable<string>(initialRootNodes[0]?.node.id ?? '');
 	const hasPendingFlush = writable(false);
 	const unsaved = writable(false); // local edits not yet saved to draft
 	// Check if the draft was marked dirty by a prior save-draft call
@@ -756,19 +719,19 @@ export function createBuilderState(
 	}
 
 	/** Map all requirements in all sections recursively */
-	function updateAllRequirements(fn: (req: BuilderRequirement) => BuilderRequirement) {
-		sections.update((s) =>
+	function updateAllRequirements(fn: (req: BuilderNode) => BuilderNode) {
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
-				requirements: mapRequirements(sec.requirements, fn)
+				children: mapRequirements(sec.children, fn)
 			}))
 		);
 	}
 
 	/** Find a requirement across all sections */
-	function findReqGlobal(nodeId: string): BuilderRequirement | null {
-		for (const sec of get(sections)) {
-			const found = findRequirement(sec.requirements, nodeId);
+	function findReqGlobal(nodeId: string): BuilderNode | null {
+		for (const sec of get(rootNodes)) {
+			const found = findRequirement(sec.children, nodeId);
 			if (found) return found;
 		}
 		return null;
@@ -783,7 +746,7 @@ export function createBuilderState(
 		saveInFlight = true;
 		saving.set(true);
 		try {
-			const draft = serializeDraft(get(framework), get(sections));
+			const draft = serializeDraft(get(framework), get(rootNodes));
 			(draft as any)._dirty = true; // mark draft as having user changes
 			await apiSaveDraft(frameworkId, draft);
 			unsaved.set(false); // saved to draft, but still unpublished
@@ -800,7 +763,7 @@ export function createBuilderState(
 
 	/** Validate all nodes and framework before publish. Returns true if valid. */
 	function validateBeforePublish(): boolean {
-		const validationErrors = validateDraft(get(framework), get(sections));
+		const validationErrors = validateDraft(get(framework), get(rootNodes));
 		for (const err of validationErrors) {
 			setError(err.key, err.message);
 		}
@@ -846,10 +809,10 @@ export function createBuilderState(
 			// Re-hydrate stores from the fresh draft
 			const hydrated = hydrateDraft(freshDraft, frameworkId);
 			const freshFramework = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
-			const freshSections = buildTree(hydrated.nodes, hydrated.questions);
+			const freshRootNodes = buildTree(hydrated.nodes, hydrated.questions);
 			framework.set(freshFramework);
-			sections.set(freshSections);
-			activeSection.set(freshSections[0]?.node.id ?? '');
+			rootNodes.set(freshRootNodes);
+			activeSection.set(freshRootNodes[0]?.node.id ?? '');
 			unsaved.set(false);
 			unpublished.set(false);
 			clearError('discard');
@@ -866,12 +829,12 @@ export function createBuilderState(
 	// --- Section CRUD ---
 
 	function addSection(afterIndex?: number) {
-		const currentSections = get(sections);
+		const currentRootNodes = get(rootNodes);
 		const order =
-			afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : currentSections.length * 100;
+			afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : currentRootNodes.length * 100;
 
 		const newId = crypto.randomUUID();
-		const siblingRefIds = currentSections.map((s) => s.node.ref_id);
+		const siblingRefIds = currentRootNodes.map((s) => s.node.ref_id);
 		const refId = computeRefId(siblingRefIds, null, 'section');
 		const newUrn = generateUrn('req_node', fwSlug, refId, getUrnNs());
 		const newNode: RequirementNode = {
@@ -893,28 +856,29 @@ export function createBuilderState(
 			framework: frameworkId,
 			folder: folderId
 		};
-		const newSection: BuilderSection = {
+		const newSection: BuilderNode = {
 			node: newNode,
-			requirements: [],
-			collapsed: false
+			questions: [],
+			children: [],
+			depth: 0
 		};
-		const idx = afterIndex !== undefined ? afterIndex + 1 : currentSections.length;
-		sections.update((s) => [...s.slice(0, idx), newSection, ...s.slice(idx)]);
+		const idx = afterIndex !== undefined ? afterIndex + 1 : currentRootNodes.length;
+		rootNodes.update((s) => [...s.slice(0, idx), newSection, ...s.slice(idx)]);
 		markDirty();
 	}
 
 	function deleteSection(sectionIndex: number) {
-		const section = get(sections)[sectionIndex];
+		const section = get(rootNodes)[sectionIndex];
 		if (!section) return;
-		sections.update((s) => s.filter((_, i) => i !== sectionIndex));
+		rootNodes.update((s) => s.filter((_, i) => i !== sectionIndex));
 		markDirty();
 	}
 
 	// --- Requirement CRUD (node ID-based) ---
 
 	function addSplashScreen(parentNodeId: string, parentUrn: string) {
-		const parentSection = get(sections).find((s) => s.node.id === parentNodeId);
-		const siblings = parentSection ? parentSection.requirements : [];
+		const parentSection = get(rootNodes).find((s) => s.node.id === parentNodeId);
+		const siblings = parentSection ? parentSection.children : [];
 		const order = siblings.length * 100;
 
 		const parentRefId = parentSection?.node.ref_id ?? null;
@@ -941,15 +905,15 @@ export function createBuilderState(
 			framework: frameworkId,
 			folder: folderId
 		};
-		const newReq: BuilderRequirement = {
+		const newReq: BuilderNode = {
 			node: newNode,
 			questions: [],
 			children: [],
 			depth: 0
 		};
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) =>
-				sec.node.id === parentNodeId ? { ...sec, requirements: [...sec.requirements, newReq] } : sec
+				sec.node.id === parentNodeId ? { ...sec, children: [...sec.children, newReq] } : sec
 			)
 		);
 		markDirty();
@@ -960,8 +924,8 @@ export function createBuilderState(
 		const siblings = parentReq
 			? parentReq.children
 			: (() => {
-					for (const sec of get(sections)) {
-						if (sec.node.id === parentNodeId) return sec.requirements;
+					for (const sec of get(rootNodes)) {
+						if (sec.node.id === parentNodeId) return sec.children;
 					}
 					return [];
 				})();
@@ -971,7 +935,7 @@ export function createBuilderState(
 		// Compute ref_id from parent and siblings
 		const parentRefId = parentReq
 			? parentReq.node.ref_id
-			: (get(sections).find((s) => s.node.id === parentNodeId)?.node.ref_id ?? null);
+			: (get(rootNodes).find((s) => s.node.id === parentNodeId)?.node.ref_id ?? null);
 		const siblingRefIds = siblings.map((r) => r.node.ref_id);
 		const refId = computeRefId(siblingRefIds, parentRefId, 'requirement');
 
@@ -995,7 +959,7 @@ export function createBuilderState(
 			framework: frameworkId,
 			folder: folderId
 		};
-		const newReq: BuilderRequirement = {
+		const newReq: BuilderNode = {
 			node: newNode,
 			questions: [],
 			children: [],
@@ -1003,17 +967,17 @@ export function createBuilderState(
 		};
 
 		if (parentReq) {
-			sections.update((s) =>
+			rootNodes.update((s) =>
 				s.map((sec) => ({
 					...sec,
-					requirements: addChildToRequirement(sec.requirements, parentNodeId, newReq)
+					children: addChildToRequirement(sec.children, parentNodeId, newReq)
 				}))
 			);
 		} else {
-			sections.update((s) =>
+			rootNodes.update((s) =>
 				s.map((sec) =>
 					sec.node.id === parentNodeId
-						? { ...sec, requirements: [...sec.requirements, newReq] }
+						? { ...sec, children: [...sec.children, newReq] }
 						: sec
 				)
 			);
@@ -1022,10 +986,10 @@ export function createBuilderState(
 	}
 
 	function deleteRequirement(nodeId: string) {
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
-				requirements: removeRequirement(sec.requirements, nodeId)
+				children: removeRequirement(sec.children, nodeId)
 			}))
 		);
 		markDirty();
@@ -1034,11 +998,11 @@ export function createBuilderState(
 	// --- Node update ---
 
 	function updateNode(nodeId: string, patch: Record<string, unknown>) {
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
 				node: sec.node.id === nodeId ? { ...sec.node, ...patch } : sec.node,
-				requirements: mapRequirements(sec.requirements, (req) => ({
+				children: mapRequirements(sec.children, (req) => ({
 					...req,
 					node: req.node.id === nodeId ? { ...req.node, ...patch } : req.node
 				}))
@@ -1075,10 +1039,10 @@ export function createBuilderState(
 			requirement_node: reqNodeId,
 			choices: []
 		};
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
-				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
 					...r,
 					questions: [...r.questions, { question: newQuestion }]
 				}))
@@ -1102,10 +1066,10 @@ export function createBuilderState(
 		const req = findReqGlobal(reqNodeId);
 		const q = req?.questions[qIndex];
 		if (!q) return;
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
-				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
 					...r,
 					questions: r.questions.filter((_, i) => i !== qIndex)
 				}))
@@ -1142,10 +1106,10 @@ export function createBuilderState(
 			folder: folderId,
 			question: q.question.id
 		};
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
-				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
 					...r,
 					questions: r.questions.map((qq, i) =>
 						i === qIndex
@@ -1182,10 +1146,10 @@ export function createBuilderState(
 		const req = findReqGlobal(reqNodeId);
 		const choice = req?.questions[qIndex]?.question.choices[choiceIndex];
 		if (!choice) return;
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
-				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
 					...r,
 					questions: r.questions.map((qq, i) =>
 						i === qIndex
@@ -1208,7 +1172,7 @@ export function createBuilderState(
 
 	function reorderSections(fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
-		sections.update((s) => {
+		rootNodes.update((s) => {
 			const copy = [...s];
 			const [moved] = copy.splice(fromIndex, 1);
 			copy.splice(toIndex, 0, moved);
@@ -1224,15 +1188,15 @@ export function createBuilderState(
 	function reorderRequirements(parentNodeId: string, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => {
 				if (sec.node.id === parentNodeId) {
-					const reqs = [...sec.requirements];
+					const reqs = [...sec.children];
 					const [moved] = reqs.splice(fromIndex, 1);
 					reqs.splice(toIndex, 0, moved);
 					return {
 						...sec,
-						requirements: reqs.map((r, i) => ({
+						children: reqs.map((r, i) => ({
 							...r,
 							node: { ...r.node, order_id: i * 100 }
 						}))
@@ -1240,7 +1204,7 @@ export function createBuilderState(
 				}
 				return {
 					...sec,
-					requirements: updateRequirementById(sec.requirements, parentNodeId, (r) => {
+					children: updateRequirementById(sec.children, parentNodeId, (r) => {
 						const kids = [...r.children];
 						const [moved] = kids.splice(fromIndex, 1);
 						kids.splice(toIndex, 0, moved);
@@ -1260,10 +1224,10 @@ export function createBuilderState(
 
 	function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
-				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => {
+				children: updateRequirementById(sec.children, reqNodeId, (r) => {
 					const qs = [...r.questions];
 					const [moved] = qs.splice(fromIndex, 1);
 					qs.splice(toIndex, 0, moved);
@@ -1282,10 +1246,10 @@ export function createBuilderState(
 
 	function reorderChoices(reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
-		sections.update((s) =>
+		rootNodes.update((s) =>
 			s.map((sec) => ({
 				...sec,
-				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
 					...r,
 					questions: r.questions.map((qq, i) => {
 						if (i !== qIndex) return qq;
@@ -1393,11 +1357,11 @@ export function createBuilderState(
 		}));
 
 		// --- Swap all node/question/choice fields ---
-		sections.update((secs) =>
+		rootNodes.update((secs) =>
 			secs.map((sec) => ({
 				...sec,
 				node: swapNodeFields(sec.node, oldLocale, newLocale),
-				requirements: swapReqFields(sec.requirements, oldLocale, newLocale)
+				children: swapReqFields(sec.children, oldLocale, newLocale)
 			}))
 		);
 
@@ -1473,10 +1437,10 @@ export function createBuilderState(
 
 	/** Recursively swap fields on all requirements */
 	function swapReqFields(
-		reqs: BuilderRequirement[],
+		reqs: BuilderNode[],
 		oldLocale: string,
 		newLocale: string
-	): BuilderRequirement[] {
+	): BuilderNode[] {
 		return reqs.map((req) => ({
 			...req,
 			node: swapNodeFields(req.node, oldLocale, newLocale),
@@ -1553,7 +1517,7 @@ export function createBuilderState(
 	function getTranslationProgress(lang: string): { translated: number; total: number } {
 		let total = 0;
 		let translated = 0;
-		const secs = get(sections);
+		const secs = get(rootNodes);
 
 		function checkNode(node: RequirementNode) {
 			if (node.name) {
@@ -1562,7 +1526,7 @@ export function createBuilderState(
 			}
 		}
 
-		function walkReqs(reqs: BuilderRequirement[]) {
+		function walkReqs(reqs: BuilderNode[]) {
 			for (const req of reqs) {
 				checkNode(req.node);
 				for (const bq of req.questions) {
@@ -1583,17 +1547,17 @@ export function createBuilderState(
 
 		for (const sec of secs) {
 			checkNode(sec.node);
-			walkReqs(sec.requirements);
+			walkReqs(sec.children);
 		}
 		return { translated, total };
 	}
 
 	function copyFromBase(lang: string) {
-		sections.update((secs) =>
+		rootNodes.update((secs) =>
 			secs.map((sec) => ({
 				...sec,
 				node: copyNodeTranslations(sec.node, lang),
-				requirements: copyReqTranslations(sec.requirements, lang)
+				children: copyReqTranslations(sec.children, lang)
 			}))
 		);
 		markDirty();
@@ -1615,7 +1579,7 @@ export function createBuilderState(
 		return { ...node, translations: { ...node.translations, [lang]: merged } };
 	}
 
-	function copyReqTranslations(reqs: BuilderRequirement[], lang: string): BuilderRequirement[] {
+	function copyReqTranslations(reqs: BuilderNode[], lang: string): BuilderNode[] {
 		return reqs.map((req) => ({
 			...req,
 			node: copyNodeTranslations(req.node, lang),
@@ -1657,7 +1621,9 @@ export function createBuilderState(
 
 	return {
 		framework,
-		sections,
+		rootNodes,
+		/** @deprecated Use rootNodes. Removed in Phase 2. */
+		sections: rootNodes,
 		saving,
 		errors,
 		activeSection,

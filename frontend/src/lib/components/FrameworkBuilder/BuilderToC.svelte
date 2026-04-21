@@ -293,13 +293,13 @@
 					<span class="truncate flex-1"
 						>{section.node.ref_id || section.node.name || 'Untitled'}</span
 					>
-					{#if $activeLanguageStore && hasUntranslated(section.requirements, $activeLanguageStore)}
+					{#if $activeLanguageStore && hasUntranslated(section.children, $activeLanguageStore)}
 						<span class="text-amber-500 text-[8px] flex-shrink-0" title="Has untranslated items"
 							>&#9679;</span
 						>
 					{/if}
 					<span class="text-[10px] text-gray-400 ml-1 tabular-nums flex-shrink-0"
-						>{countRequirements(section.requirements)}</span
+						>{countRequirements(section.children)}</span
 					>
 				</button>
 			{/each}

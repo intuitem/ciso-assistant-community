@@ -159,7 +159,7 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 
 function makeSection(
 	nodeOverrides: Partial<RequirementNode> = {},
-	requirements: BuilderSection['requirements'] = []
+	children: BuilderSection['children'] = []
 ): BuilderSection {
 	return {
 		node: makeNode({
@@ -171,8 +171,9 @@ function makeSection(
 			name: 'Section 1',
 			...nodeOverrides
 		}),
-		requirements,
-		collapsed: false
+		questions: [],
+		children,
+		depth: 0
 	};
 }
 
