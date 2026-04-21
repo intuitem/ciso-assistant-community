@@ -1548,19 +1548,10 @@ class FolderDisplayContext:
 
 
 class PersonalAccessToken(models.Model):
-    """
-    Personal Access Token model.
-    Also used as API keys for service accounts; is_active is only toggled for SA keys.
-    """
+    """Personal Access Token model. Also used as API keys for service accounts."""
 
     name = models.CharField(max_length=255)
     auth_token = models.ForeignKey(AuthToken, on_delete=models.CASCADE)
-    is_active = models.BooleanField(
-        default=True,
-        help_text=_(
-            "Soft-disable this key without revoking it. Only used for service account keys."
-        ),
-    )
 
     @property
     def created(self):

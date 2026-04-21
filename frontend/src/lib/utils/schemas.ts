@@ -1508,8 +1508,7 @@ export const ServiceAccountKeyCreateSchema = z.object({
 });
 
 export const ServiceAccountKeyUpdateSchema = z.object({
-	name: z.string().min(1).max(64).optional(),
-	is_active: z.boolean().optional()
+	name: z.string().min(1).max(64).optional()
 });
 
 export const ElementaryActionSchema = z.object({

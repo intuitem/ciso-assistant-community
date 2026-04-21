@@ -77,9 +77,4 @@ urlpatterns = [
         ServiceAccountKeyFlatDetailView.as_view(),
         name="service-account-key-flat-detail",
     ),
-    path(
-        "service-account-keys/<int:pk>/object/",
-        ServiceAccountKeyFlatDetailView.as_view(),
-        name="service-account-key-flat-object",
-    ),
 ]

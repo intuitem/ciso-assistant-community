@@ -49,20 +49,6 @@ logger = structlog.get_logger(__name__)
 User = get_user_model()
 
 
-class ServiceAccountTokenAuthentication(TokenAuthentication):
-    """Blocks requests from service accounts whose PAT key has is_active=False."""
-
-    def authenticate_credentials(self, token):
-        from rest_framework.exceptions import AuthenticationFailed
-
-        user, auth_token = super().authenticate_credentials(token)
-        if user.is_service_account:
-            pat = PersonalAccessToken.objects.filter(auth_token=auth_token).first()
-            if pat is None or not pat.is_active:
-                raise AuthenticationFailed("This API key has been disabled.")
-        return user, auth_token
-
-
 class LoginView(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = LoginSerializer
@@ -522,16 +508,11 @@ class ServiceAccountListCreateView(views.APIView):
 
     def get(self, request):
         from core.pagination import CustomLimitOffsetPagination
-        from django.db.models import Count, Q
+        from django.db.models import Count
 
         qs = (
             User.objects.filter(is_service_account=True)
-            .annotate(
-                active_key_count=Count(
-                    "auth_token_set__personalaccesstoken",
-                    filter=Q(auth_token_set__personalaccesstoken__is_active=True),
-                )
-            )
+            .annotate(active_key_count=Count("auth_token_set__personalaccesstoken"))
             .order_by("email")
         )
         search = request.query_params.get("search")
@@ -651,9 +632,6 @@ class ServiceAccountKeyDetailView(views.APIView):
         key = self._get_key(sa_pk, key_pk)
         if key is None:
             return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        if "is_active" in request.data:
-            key.is_active = request.data["is_active"]
-            key.save(update_fields=["is_active"])
         logger.info(
             "service account key updated",
             sa=key.auth_token.user.email,
@@ -744,14 +722,6 @@ class ServiceAccountKeyFlatDetailView(views.APIView):
         if key is None:
             return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
         updated = []
-        if "is_active" in request.data:
-            val = request.data["is_active"]
-            key.is_active = (
-                val
-                if isinstance(val, bool)
-                else str(val).lower() not in ("false", "0", "no")
-            )
-            updated.append("is_active")
         if "name" in request.data:
             new_name = request.data["name"]
             if (

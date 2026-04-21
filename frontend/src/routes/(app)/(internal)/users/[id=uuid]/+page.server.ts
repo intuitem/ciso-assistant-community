@@ -21,10 +21,11 @@ export const actions: Actions = {
 		const form = await superValidate(event.request, zod(ServiceAccountKeyCreateSchema));
 		if (!form.valid) return fail(400, { form });
 
-		const res = await event.fetch(`${BASE_API_URL}/iam/service-account-keys/`, {
+		const { service_account: _, ...payload } = form.data;
+		const res = await event.fetch(`${BASE_API_URL}/iam/service-accounts/${event.params.id}/keys/`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(form.data)
+			body: JSON.stringify(payload)
 		});
 
 		if (!res.ok) {

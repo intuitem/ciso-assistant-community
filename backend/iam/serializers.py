@@ -209,9 +209,7 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
     def get_active_key_count(self, obj):
         if hasattr(obj, "active_key_count"):
             return obj.active_key_count
-        return PersonalAccessToken.objects.filter(
-            auth_token__user=obj, is_active=True
-        ).count()
+        return PersonalAccessToken.objects.filter(auth_token__user=obj).count()
 
 
 class ServiceAccountUpdateSerializer(serializers.ModelSerializer):
@@ -226,7 +224,7 @@ class ServiceAccountUpdateSerializer(serializers.ModelSerializer):
         fields = ["is_active", "expiry_date", "description"]
 
 
-SA_KEY_LIMIT = 5
+SA_KEY_LIMIT = 2
 
 
 class ServiceAccountKeyReadSerializer(serializers.ModelSerializer):
@@ -237,7 +235,7 @@ class ServiceAccountKeyReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PersonalAccessToken
-        fields = ["id", "name", "is_active", "created_at", "expiry_date"]
+        fields = ["id", "name", "created_at", "expiry_date"]
 
     def get_created_at(self, obj):
         return obj.auth_token.created
@@ -259,12 +257,6 @@ class ServiceAccountKeyCreateSerializer(serializers.Serializer):
         from datetime import date
 
         sa = attrs["service_account"]
-        if not sa.is_active:
-            raise serializers.ValidationError(
-                {
-                    "service_account": "Cannot create a key for a disabled service account."
-                }
-            )
         if sa.expiry_date and sa.expiry_date < date.today():
             raise serializers.ValidationError(
                 {

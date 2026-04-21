@@ -832,7 +832,7 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'service-account-keys': {
 		endpointUrl: 'iam/service-account-keys',
-		name: 'serviceaccountkey',
+		name: 'personalaccesstoken',
 		localName: 'serviceAccountKey',
 		localNamePlural: 'serviceAccountKeys',
 		verboseName: 'API key',

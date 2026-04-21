@@ -116,7 +116,7 @@
 		<Tabs.Content value="service-accounts">
 			<div class="shadow-lg">
 				<ModelTable
-					source={data.saTable}
+					source={data.saTable ?? { head: {}, body: [], meta: [] }}
 					URLModel="users"
 					deleteForm={data.deleteForm}
 					baseEndpoint="/service-accounts"

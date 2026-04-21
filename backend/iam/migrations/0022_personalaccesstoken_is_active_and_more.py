@@ -10,14 +10,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="personalaccesstoken",
-            name="is_active",
-            field=models.BooleanField(
-                default=True,
-                help_text="Soft-disable this key without revoking it. Only used for service account keys.",
-            ),
-        ),
-        migrations.AddField(
             model_name="user",
             name="is_service_account",
             field=models.BooleanField(

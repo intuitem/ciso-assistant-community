@@ -4,6 +4,7 @@ import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema, ServiceAccountCreateSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
+import { m } from '$paraglide/messages';
 import { type Actions } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -91,16 +92,24 @@ export const actions: Actions = {
 			const response = await res.json();
 			if (response.error) {
 				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
-				return fail(400, { form });
+				return fail(res.status, { form });
 			}
 			Object.entries(response).forEach(([key, value]) => {
-				// @ts-expect-error dynamic key
-				form.errors[key] = [safeTranslate(value)];
+				const msg = Array.isArray(value)
+					? value.map((v: string) => safeTranslate(v)).join(', ')
+					: safeTranslate(value as string);
+				(form.errors as Record<string, string[]>)[key] = [msg];
 			});
-			return fail(400, { form });
+			return fail(res.status, { form });
 		}
 
-		setFlash({ type: 'success', message: 'Service account created.' }, event);
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyCreatedObject({ object: m.serviceAccounts().toLowerCase() })
+			},
+			event
+		);
 		return { form };
 	},
 
@@ -113,11 +122,19 @@ export const actions: Actions = {
 		});
 
 		if (!res.ok) {
-			setFlash({ type: 'error', message: 'Failed to delete service account.' }, event);
+			const response = await res.json();
+			const msg = response.error ? safeTranslate(response.error) : safeTranslate(response.detail);
+			setFlash({ type: 'error', message: msg }, event);
 			return fail(res.status, { form });
 		}
 
-		setFlash({ type: 'success', message: 'Service account deleted.' }, event);
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyDeletedObject({ object: m.serviceAccounts().toLowerCase() })
+			},
+			event
+		);
 		return { form };
 	}
 };

@@ -42,15 +42,15 @@ export const actions: Actions = {
 			const response = await res.json();
 			if (response.error) {
 				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
-				return fail(403, { form });
-			}
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
+				return fail(res.status, { form });
 			}
 			Object.entries(response).forEach(([key, value]) => {
-				setError(form, key, safeTranslate(value));
+				const msg = Array.isArray(value)
+					? value.map(safeTranslate).join(', ')
+					: safeTranslate(value as string);
+				setError(form, key, msg);
 			});
-			return fail(400, { form });
+			return fail(res.status, { form });
 		}
 
 		setFlash(
