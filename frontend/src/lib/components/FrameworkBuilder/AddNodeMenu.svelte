@@ -36,7 +36,7 @@
 </script>
 
 <div
-	class="relative inline-block"
+	class="relative"
 	bind:this={rootEl}
 	onfocusout={onFocusOut}
 	onkeydown={onKeydown}

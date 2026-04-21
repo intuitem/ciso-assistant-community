@@ -717,16 +717,16 @@
 				<p class="text-xs text-red-600">{$errorsStore.get(`node-${node.node.id}`)}</p>
 			</div>
 		{/if}
-
-		<!-- Add child button -->
-		{#if node.node.urn}
-			<AddNodeMenu
-				parent={node.node.id}
-				triggerLabel={'+ Add child'}
-				triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors border-t border-gray-100"
-			/>
-		{/if}
 	</div>
+
+	<!-- Add child button (outside card to avoid overflow-hidden clipping the dropdown) -->
+	{#if node.node.urn}
+		<AddNodeMenu
+			parent={node.node.id}
+			triggerLabel={'+ Add child'}
+			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
+		/>
+	{/if}
 
 	<!-- Add sibling below button -->
 	{#if parentId !== undefined}
