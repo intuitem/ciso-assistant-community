@@ -234,7 +234,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 audit.create_requirement_assessments()
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
-                audit.authors.set([rep.actor for rep in representatives])
+                audit.authors.set(
+                    [rep.actor for rep in representatives if hasattr(rep, "actor")]
+                )
                 self._create_requirement_assignment(audit, representatives)
                 instance.compliance_assessment = audit
                 instance.save()
@@ -243,7 +245,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 audit = instance.compliance_assessment
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
-                audit.authors.set([rep.actor for rep in representatives])
+                audit.authors.set(
+                    [rep.actor for rep in representatives if hasattr(rep, "actor")]
+                )
                 self._sync_requirement_assignment(audit, representatives)
             instance.save()
 

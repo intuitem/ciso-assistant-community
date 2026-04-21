@@ -2759,17 +2759,20 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "⚠️ Cannot modify the requirement when the audit is in review."
             )
 
-        # Assignment-level locking for auditee users
+        # Assignment-level and field-level guards for respondent users (auditee or third-party)
         request = self.context.get("request")
         if request and self.instance and compliance_assessment:
             from core.utils import (
                 DEFAULT_FIELD_VISIBILITY,
-                get_auditee_filtered_folder_ids,
+                get_respondent_filtered_folder_ids,
                 get_visible_fields,
             )
 
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
-            if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            respondent_folders = get_respondent_filtered_folder_ids(request.user)
+            if (
+                respondent_folders
+                and compliance_assessment.folder_id in respondent_folders
+            ):
                 locked_assignment = self.instance.assignments.filter(
                     status__in=["submitted", "closed"]
                 ).first()

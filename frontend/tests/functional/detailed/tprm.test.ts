@@ -141,7 +141,8 @@ test('user can create representatives, solutions and entity assessments inside e
 	});
 
 	await test.step('send questionnaire to third party representatives', async () => {
-		await page.goBack(); // back to entity assessment detail
+		await entityAssessmentsPage.goto();
+		await entityAssessmentsPage.viewItemDetail(entityAssessment.name);
 		await entityAssessmentsPage.hasUrl();
 		await page.getByText(m.sendQuestionnaire()).click();
 		await page.getByRole('button', { name: m.submit() }).click();

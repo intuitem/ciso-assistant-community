@@ -735,7 +735,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         user_lang = self.get_preferences().get("lang", "en")
         uid = urlsafe_base64_encode(force_bytes(self.pk))
         token = default_token_generator.make_token(self)
-        
+
         questionnaire_url = (
             f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}"
             if object
