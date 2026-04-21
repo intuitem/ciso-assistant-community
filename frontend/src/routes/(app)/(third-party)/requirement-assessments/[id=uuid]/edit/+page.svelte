@@ -775,7 +775,7 @@
 							/>
 						{/if}
 					{/if}
-					{#if page.data.requirementAssessment.compliance_assessment.extended_result_enabled}
+					{#if showResult && page.data.requirementAssessment.compliance_assessment.extended_result_enabled}
 						<Select
 							{form}
 							options={page.data.model.selectOptions['extended_result']}
