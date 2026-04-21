@@ -1509,6 +1509,9 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         }
     )
 
+    def create_context(self):
+        return None, None
+
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
         for key in self._M2M_CLEARABLE:
