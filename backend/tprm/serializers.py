@@ -244,22 +244,30 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
                 audit.authors.set([rep.actor for rep in representatives])
+                self._sync_requirement_assignment(audit, representatives)
             instance.save()
 
-    def _create_requirement_assignment(self, audit, representatives):
-        """Create a RequirementAssignment linking all requirement assessments to representative actors."""
+    def _sync_requirement_assignment(self, audit, representatives):
+        """Create or update the RequirementAssignment so its actors match the representatives."""
         actors = [rep.actor for rep in representatives if hasattr(rep, "actor")]
-        if not actors:
-            return
-        requirement_assessments = audit.requirement_assessments.all()
-        if not requirement_assessments.exists():
-            return
-        assignment = RequirementAssignment.objects.create(
-            compliance_assessment=audit,
-            folder=audit.folder,
-        )
-        assignment.actor.set(actors)
-        assignment.requirement_assessments.set(requirement_assessments)
+        assignment = audit.requirement_assignments.first()
+        if assignment is None:
+            if not actors:
+                return
+            requirement_assessments = audit.requirement_assessments.all()
+            if not requirement_assessments.exists():
+                return
+            assignment = RequirementAssignment.objects.create(
+                compliance_assessment=audit,
+                folder=audit.folder,
+            )
+            assignment.actor.set(actors)
+            assignment.requirement_assessments.set(requirement_assessments)
+        else:
+            assignment.actor.set(actors)
+
+    def _create_requirement_assignment(self, audit, representatives):
+        self._sync_requirement_assignment(audit, representatives)
 
     def _assign_third_party_respondents(
         self,
