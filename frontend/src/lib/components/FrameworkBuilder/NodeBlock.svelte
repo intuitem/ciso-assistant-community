@@ -5,6 +5,7 @@
 		withTranslation,
 		type BuilderNode
 	} from './builder-state';
+	import { setFocusedNode } from './keyboard';
 	import { createCopyHandler, createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import QuestionEditor from './QuestionEditor.svelte';
@@ -220,7 +221,16 @@
 	const isSplash = $derived(node.node.display_mode === 'splash');
 </script>
 
-<div style="margin-left: {Math.min(node.depth, 3) * 16}px">
+<div
+	style="margin-left: {Math.min(node.depth, 3) * 16}px"
+	tabindex="-1"
+	onfocusin={() =>
+		setFocusedNode({
+			nodeId: node.node.id,
+			parent: parentId ?? null,
+			siblingIndex: indexWithinParent
+		})}
+>
 	<div
 		class="bg-white rounded-lg shadow-sm border overflow-hidden
 		{isSplash ? 'border-purple-200' : 'border-gray-200'}

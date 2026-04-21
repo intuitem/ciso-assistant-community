@@ -18,6 +18,7 @@
 	} from './builder-utils.svelte';
 	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
+	import { installKeyboardHandlers } from './keyboard';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
 	import NodeBlock from './NodeBlock.svelte';
@@ -250,6 +251,8 @@
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		window.addEventListener('keydown', handleKeydown);
 
+		const cleanupKeyboard = installKeyboardHandlers(builder);
+
 		observer = new IntersectionObserver(
 			(entries) => {
 				let isScrolling = false;
@@ -269,7 +272,10 @@
 		const elements = document.querySelectorAll('[data-section-id]');
 		elements.forEach((el) => observer!.observe(el));
 
-		return () => observer?.disconnect();
+		return () => {
+			observer?.disconnect();
+			cleanupKeyboard();
+		};
 	});
 
 	// Track only root node IDs so the observer reconnects on structural changes, not content edits
