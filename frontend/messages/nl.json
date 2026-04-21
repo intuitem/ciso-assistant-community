@@ -695,6 +695,7 @@
 	"requirementMappings": "Vereistentoewijzingen",
 	"sourceFramework": "Bronkader",
 	"targetFramework": "Doelkader",
+	"targetFrameworks": "Doelkaders",
 	"baseline": "Basislijn",
 	"createAuditFromBaseline": "Creëer audit vanuit een basis",
 	"coverageColon": "Dekking:",

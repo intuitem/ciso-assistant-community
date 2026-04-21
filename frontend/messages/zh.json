@@ -878,6 +878,7 @@
 	"requirementMappings": "要求映射",
 	"sourceFramework": "源框架",
 	"targetFramework": "目标框架",
+	"targetFrameworks": "目标框架",
 	"baseline": "基线",
 	"ebiosRmBaseline": "基础",
 	"createAuditFromBaseline": "应用映射",
