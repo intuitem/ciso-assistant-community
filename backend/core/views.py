@@ -8948,19 +8948,28 @@ class FrameworkViewSet(BaseModelViewSet):
         )
         q_idx_counter = {}  # req_node_id -> next question number
         question_suffixes = {}  # q.id -> URN suffix string
+        choice_suffixes = {}  # choice.id -> URN suffix string (only choices with urn)
         for q in questions_list:
             if q.requirement_node_id not in q_idx_counter:
                 q_idx_counter[q.requirement_node_id] = 1
             q_idx = q_idx_counter[q.requirement_node_id]
             q_idx_counter[q.requirement_node_id] = q_idx + 1
+            parent_ref = computed_ref_ids.get(q.requirement_node.urn, "")
+            positional_q_suffix = (
+                f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
+            )
             source_node_id = extract_node_id(q.urn) if q.urn else None
-            if source_node_id:
-                question_suffixes[q.id] = source_node_id
-            else:
-                parent_ref = computed_ref_ids.get(q.requirement_node.urn, "")
-                question_suffixes[q.id] = (
-                    f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
-                )
+            question_suffixes[q.id] = source_node_id or positional_q_suffix
+            # Mirror the ref_id logic used when actually creating choices so
+            # collision detection sees the same URNs that will be written.
+            q_ref_id = q.ref_id or positional_q_suffix
+            c_counter = 0
+            for choice in q.choices.all():
+                c_counter += 1
+                if not choice.urn:
+                    continue
+                c_ref_id = choice.ref_id or f"{q_ref_id}-c{c_counter}"
+                choice_suffixes[choice.id] = extract_node_id(choice.urn) or c_ref_id
 
         # Build candidate URNs and check for collisions (can happen when
         # the slug truncation makes the copy slug identical to the source slug,
@@ -8981,13 +8990,22 @@ class FrameworkViewSet(BaseModelViewSet):
                 f"urn:{ns}:risk:question:{slug}:{s}" for s in question_suffixes.values()
             }
 
+        def _build_choice_candidate_urns(slug):
+            return {
+                f"urn:{ns}:risk:question_choice:{slug}:{s}"
+                for s in choice_suffixes.values()
+            }
+
         def _slug_collides(slug):
             node_map = _build_urn_map(slug)
             node_urns = {v for v in node_map.values() if v}
             q_urns = _build_question_candidate_urns(slug)
+            c_urns = _build_choice_candidate_urns(slug)
             if node_urns and RequirementNode.objects.filter(urn__in=node_urns).exists():
                 return True, node_map
             if q_urns and Question.objects.filter(urn__in=q_urns).exists():
+                return True, node_map
+            if c_urns and QuestionChoice.objects.filter(urn__in=c_urns).exists():
                 return True, node_map
             return False, node_map
 
@@ -9000,6 +9018,12 @@ class FrameworkViewSet(BaseModelViewSet):
                     fw_slug = candidate_slug
                     urn_map = candidate_map
                     break
+            else:
+                raise ValidationError(
+                    {
+                        "name": "Could not find a unique URN slug for the duplicate; rename the framework and retry."
+                    }
+                )
 
         # Clone requirement nodes
         node_id_map = {}  # old node id -> new node id

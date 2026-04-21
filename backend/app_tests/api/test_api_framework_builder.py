@@ -17,10 +17,12 @@ from core.models import (
     Perimeter,
     Question,
     QuestionChoice,
+    ReferenceControl,
     RequirementAssessment,
     RequirementNode,
     RequirementNodeAttachment,
     StoredLibrary,
+    Threat,
 )
 from iam.models import Folder
 
@@ -1001,9 +1003,10 @@ class TestFrameworkBuilderURNGeneration:
         new_fw_id = response.data["id"]
         new_questions = Question.objects.filter(
             requirement_node__framework_id=new_fw_id
-        ).order_by("order")
+        )
         assert new_questions.count() == 2
-        new_q1, new_q2 = new_questions[0], new_questions[1]
+        new_q1 = new_questions.get(ref_id="1")
+        new_q2 = new_questions.get(ref_id="2")
 
         # depends_on on the copy must point at the copy's own URNs, not source's
         assert new_q2.depends_on is not None
@@ -2361,6 +2364,10 @@ class TestFrameworkDuplicateBehavior:
             file=SimpleUploadedFile("x.png", REAL_PNG, content_type="image/png"),
             folder=folder,
         )
+        threat = Threat.objects.create(name="t1", folder=folder)
+        reference_control = ReferenceControl.objects.create(name="rc1", folder=folder)
+        rn.threats.add(threat)
+        rn.reference_controls.add(reference_control)
 
         response = authenticated_client.post(
             reverse("frameworks-duplicate", args=[fw.id]),
@@ -2370,3 +2377,5 @@ class TestFrameworkDuplicateBehavior:
         assert response.status_code == 201
         new_rn = RequirementNode.objects.get(framework_id=response.data["id"])
         assert new_rn.attachments.count() == 0
+        assert new_rn.threats.count() == 0
+        assert new_rn.reference_controls.count() == 0
