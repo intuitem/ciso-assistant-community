@@ -392,8 +392,8 @@ class ResetPasswordConfirmView(views.APIView):
         new_password = serializer.validated_data.get("new_password")
         user = self.get_user(uidb64)
         if (
-            user is not None and user.is_local
-        ):  # Only local user can reset their password.
+            user is not None and user.is_local and not user.is_service_account
+        ):  # Only local non-service users can reset their password.
             if self.token_generator.check_token(user, token):
                 user.set_password(new_password)
                 user.save()
@@ -417,6 +417,11 @@ class ChangePasswordView(views.APIView):
         serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = self.request.user
+        if user.is_service_account:
+            return Response(
+                {"error": "Service accounts cannot use password authentication."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         old_password = serializer.validated_data.get("old_password")
         new_password = serializer.validated_data.get("new_password")
         if not user.check_password(old_password):
@@ -445,6 +450,11 @@ class SetPasswordView(views.APIView):
         ):
             new_password = serializer.validated_data.get("new_password")
             user = serializer.validated_data.get("user")
+            if user.is_service_account:
+                return Response(
+                    {"error": "Service accounts cannot use password authentication."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             user.set_password(new_password)
             user.save()
             try:
@@ -598,14 +608,29 @@ class ServiceAccountKeyListCreateView(views.APIView):
         serializer = ServiceAccountKeyCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        expiry_days = serializer.validated_data["expiry_days"]
-        auth_token_instance, token_value = get_token_model().objects.create(
-            user=sa, expiry=timedelta(days=expiry_days)
-        )
-        key = PersonalAccessToken.objects.create(
-            auth_token=auth_token_instance,
-            name=serializer.validated_data["name"],
-        )
+        from django.db import transaction
+
+        with transaction.atomic():
+            locked_sa = User.objects.select_for_update().get(pk=sa_pk)
+            active_count = PersonalAccessToken.objects.filter(
+                auth_token__user=locked_sa,
+                auth_token__expiry__gt=timezone.now(),
+            ).count()
+            if active_count >= SA_KEY_LIMIT:
+                return Response(
+                    {
+                        "error": f"Service account already has {SA_KEY_LIMIT} active keys. Revoke one first."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            expiry_days = serializer.validated_data["expiry_days"]
+            auth_token_instance, token_value = get_token_model().objects.create(
+                user=locked_sa, expiry=timedelta(days=expiry_days)
+            )
+            key = PersonalAccessToken.objects.create(
+                auth_token=auth_token_instance,
+                name=serializer.validated_data["name"],
+            )
         logger.info(
             "service account key created",
             sa=sa.email,
@@ -697,14 +722,30 @@ class ServiceAccountKeyFlatListCreateView(views.APIView):
         serializer = ServiceAccountKeyCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         sa = serializer.validated_data["service_account"]
-        expiry_days = serializer.validated_data["expiry_days"]
-        auth_token_instance, token_value = get_token_model().objects.create(
-            user=sa, expiry=timedelta(days=expiry_days)
-        )
-        key = PersonalAccessToken.objects.create(
-            auth_token=auth_token_instance,
-            name=serializer.validated_data["name"],
-        )
+
+        from django.db import transaction
+
+        with transaction.atomic():
+            locked_sa = User.objects.select_for_update().get(pk=sa.pk)
+            active_count = PersonalAccessToken.objects.filter(
+                auth_token__user=locked_sa,
+                auth_token__expiry__gt=timezone.now(),
+            ).count()
+            if active_count >= SA_KEY_LIMIT:
+                return Response(
+                    {
+                        "error": f"Service account already has {SA_KEY_LIMIT} active keys. Revoke one first."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            expiry_days = serializer.validated_data["expiry_days"]
+            auth_token_instance, token_value = get_token_model().objects.create(
+                user=locked_sa, expiry=timedelta(days=expiry_days)
+            )
+            key = PersonalAccessToken.objects.create(
+                auth_token=auth_token_instance,
+                name=serializer.validated_data["name"],
+            )
         logger.info(
             "service account key created",
             sa=sa.email,

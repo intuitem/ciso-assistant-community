@@ -51,10 +51,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	}
 	model['selectOptions'] = selectOptions;
 
-	const [createSAForm, deleteSAForm] = await Promise.all([
-		superValidate(zod(ServiceAccountCreateSchema)),
-		superValidate(zod(z.object({ id: z.string().uuid() })))
-	]);
+	const createSAForm = await superValidate(zod(ServiceAccountCreateSchema));
 
 	return {
 		createForm,
@@ -63,8 +60,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		URLModel: URL_MODEL,
 		table: buildTableSource('users'),
 		saTable: buildTableSource('service-accounts'),
-		createSAForm,
-		deleteSAForm
+		createSAForm
 	};
 };
 
@@ -89,17 +85,21 @@ export const actions: Actions = {
 		});
 
 		if (!res.ok) {
-			const response = await res.json();
-			if (response.error) {
-				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
-				return fail(res.status, { form });
+			try {
+				const response = await res.json();
+				if (response.error) {
+					setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
+					return fail(res.status, { form });
+				}
+				Object.entries(response).forEach(([key, value]) => {
+					const msg = Array.isArray(value)
+						? value.map((v: string) => safeTranslate(v)).join(', ')
+						: safeTranslate(value as string);
+					(form.errors as Record<string, string[]>)[key] = [msg];
+				});
+			} catch (e) {
+				console.error('Failed to parse error response', e);
 			}
-			Object.entries(response).forEach(([key, value]) => {
-				const msg = Array.isArray(value)
-					? value.map((v: string) => safeTranslate(v)).join(', ')
-					: safeTranslate(value as string);
-				(form.errors as Record<string, string[]>)[key] = [msg];
-			});
 			return fail(res.status, { form });
 		}
 
