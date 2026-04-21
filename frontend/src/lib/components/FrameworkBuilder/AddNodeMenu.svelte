@@ -53,7 +53,7 @@
 	{#if open}
 		<div
 			role="menu"
-			class="absolute z-20 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
+			class="absolute left-1/2 -translate-x-1/2 z-20 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
 		>
 			<button
 				type="button"
