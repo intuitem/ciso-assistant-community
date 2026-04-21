@@ -178,10 +178,8 @@ export const actions: Actions = {
 		return { form };
 	},
 	reject: async ({ request, fetch, params }) => {
-		return handleRiskAcceptanceTransition(
-			{ request, fetch, params },
-			'reject',
-			(args) => m.successfullyRejectedObject(args)
+		return handleRiskAcceptanceTransition({ request, fetch, params }, 'reject', (args) =>
+			m.successfullyRejectedObject(args)
 		);
 	},
 	submit: async ({ request, fetch, params }) => {
@@ -254,17 +252,13 @@ export const actions: Actions = {
 		);
 	},
 	accept: async ({ request, fetch, params }) => {
-		return handleRiskAcceptanceTransition(
-			{ request, fetch, params },
-			'accept',
-			(args) => m.successfullyValidatedObject(args)
+		return handleRiskAcceptanceTransition({ request, fetch, params }, 'accept', (args) =>
+			m.successfullyValidatedObject(args)
 		);
 	},
 	revoke: async ({ request, fetch, params }) => {
-		return handleRiskAcceptanceTransition(
-			{ request, fetch, params },
-			'revoke',
-			(args) => m.successfullyRevokedObject(args)
+		return handleRiskAcceptanceTransition({ request, fetch, params }, 'revoke', (args) =>
+			m.successfullyRevokedObject(args)
 		);
 	}
 };
