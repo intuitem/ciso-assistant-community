@@ -2956,10 +2956,6 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
 
     def clean(self):
         super().clean()
-        if self.expiration_date and self.expiration_date < now().date():
-            raise ValidationError(
-                {"expiration_date": "Expiration date must be in the future"}
-            )
 
 
 class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
@@ -4632,6 +4628,18 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     is_bcp_activated = models.BooleanField(
         null=True, blank=True, verbose_name=_("BCP activated")
     )
+    applied_controls = models.ManyToManyField(
+        "core.AppliedControl",
+        blank=True,
+        verbose_name=_("Applied controls"),
+        related_name="incidents",
+    )
+    task_templates = models.ManyToManyField(
+        "core.TaskTemplate",
+        blank=True,
+        verbose_name=_("Task templates"),
+        related_name="incidents",
+    )
 
     fields_to_check = ["name", "ref_id"]
 
@@ -6188,6 +6196,13 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         verbose_name=_("Vulnerabilities"),
         blank=True,
         help_text=_("Vulnerabities exploited by the risk scenario"),
+        related_name="risk_scenarios",
+    )
+    incidents = models.ManyToManyField(
+        Incident,
+        verbose_name=_("Incidents"),
+        blank=True,
+        help_text=_("Incidents that materialized this risk scenario"),
         related_name="risk_scenarios",
     )
     applied_controls = models.ManyToManyField(
@@ -9450,7 +9465,7 @@ auditlog.register(
 )
 auditlog.register(
     RiskScenario,
-    m2m_fields={"owner", "applied_controls", "existing_applied_controls"},
+    m2m_fields={"owner", "applied_controls", "existing_applied_controls", "incidents"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
@@ -9495,6 +9510,7 @@ auditlog.register(
 )
 auditlog.register(
     Incident,
+    m2m_fields={"applied_controls", "task_templates"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
