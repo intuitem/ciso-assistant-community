@@ -68,7 +68,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 };
 
 export const actions: Actions = {
-	// ── Users ──────────────────────────────────────────────────────────────
+	// Users
 	create: async (event) => {
 		return defaultWriteFormAction({ event, urlModel: URL_MODEL, action: 'create' });
 	},
@@ -76,7 +76,7 @@ export const actions: Actions = {
 		return defaultDeleteFormAction({ event, urlModel: URL_MODEL });
 	},
 
-	// ── Service accounts ───────────────────────────────────────────────────
+	// Service accounts
 	createSA: async (event) => {
 		const form = await superValidate(event.request, zod(ServiceAccountCreateSchema));
 		if (!form.valid) return fail(400, { form });
@@ -110,36 +110,6 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({ object: m.serviceAccount().toLowerCase() })
-			},
-			event
-		);
-		return { form };
-	},
-
-	deleteSA: async (event) => {
-		const form = await superValidate(event.request, zod(z.object({ id: z.string().uuid() })));
-		if (!form.valid) return fail(400, { form });
-
-		const res = await event.fetch(`${BASE_API_URL}/iam/service-accounts/${form.data.id}/`, {
-			method: 'DELETE'
-		});
-
-		if (!res.ok) {
-			let msg = m.anErrorOccurred();
-			try {
-				const response = await res.json();
-				msg = safeTranslate(response.error ?? response.detail ?? 'anErrorOccurred');
-			} catch (e) {
-				console.error('Failed to parse error response', e);
-			}
-			setFlash({ type: 'error', message: msg }, event);
-			return fail(res.status, { form });
-		}
-
-		setFlash(
-			{
-				type: 'success',
-				message: m.successfullyDeletedObject({ object: m.serviceAccount().toLowerCase() })
 			},
 			event
 		);
