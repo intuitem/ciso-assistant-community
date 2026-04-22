@@ -5,15 +5,17 @@
 	}
 	let { open = $bindable(), onClose }: Props = $props();
 
-	// Detect platform for the modifier-key label
+	// Detect platform for modifier-key labels
 	const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 	const cmdKey = isMac ? '⌘' : 'Ctrl';
+	const altKey = isMac ? '⌥' : 'Alt';
+	const shiftKey = isMac ? '⇧' : 'Shift';
 
 	const shortcuts = [
-		{ keys: ['Alt', '→'], label: 'Indent node' },
-		{ keys: ['Alt', '←'], label: 'Outdent node' },
-		{ keys: ['Alt', 'Enter'], label: 'Add child' },
-		{ keys: ['Alt', 'Shift', 'Enter'], label: 'Add sibling below' },
+		{ keys: [altKey, '→'], label: 'Indent node' },
+		{ keys: [altKey, '←'], label: 'Outdent node' },
+		{ keys: [altKey, 'Enter'], label: 'Add child' },
+		{ keys: [altKey, shiftKey, 'Enter'], label: 'Add sibling below' },
 		{ keys: [cmdKey, '.'], label: 'Toggle assessable' },
 		{ keys: ['?'], label: 'Show this cheatsheet' }
 	];
