@@ -1141,5 +1141,7 @@
 	"syncAppliedControlsMessage": "Controalele aplicate care utilizează acest control de referință vor fi sincronizate cu acesta. Vă rugăm să rețineți că această acțiune nu poate fi anulată.",
 	"syncToAppliedControl": "Sincronizează cu controlul aplicat",
 	"syncToReferenceControl": "Sincronizează cu controlul de referință",
-	"exportEcosystem": "export ecosistem (XLSX)"
+	"exportEcosystem": "export ecosistem (XLSX)",
+	"expirationDate": "Data expirării",
+	"expirationDateIsInThePastWarning": "Data expirării introdusă este în trecut"
 }

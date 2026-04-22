@@ -2956,10 +2956,6 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
 
     def clean(self):
         super().clean()
-        if self.expiration_date and self.expiration_date < now().date():
-            raise ValidationError(
-                {"expiration_date": "Expiration date must be in the future"}
-            )
 
 
 class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):

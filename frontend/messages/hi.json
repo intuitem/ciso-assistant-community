@@ -1113,5 +1113,7 @@
 	"syncAppliedControlsMessage": "इस संदर्भ नियंत्रण का उपयोग करने वाले लागू नियंत्रण इसके साथ सिंक किए जाएंगे। कृपया ध्यान दें कि इसे वापस नहीं किया जा सकता।",
 	"syncToAppliedControl": "लागू नियंत्रण के साथ सिंक करें",
 	"syncToReferenceControl": "संदर्भ नियंत्रण के साथ सिंक करें",
-	"exportEcosystem": "पारिस्थितिकी तंत्र निर्यात (XLSX)"
+	"exportEcosystem": "पारिस्थितिकी तंत्र निर्यात (XLSX)",
+	"expirationDate": "समाप्ति तिथि",
+	"expirationDateIsInThePastWarning": "दर्ज की गई समाप्ति तिथि अतीत में है"
 }
