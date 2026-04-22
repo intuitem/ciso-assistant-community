@@ -6593,6 +6593,20 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     filterset_class = RiskAcceptanceFilterSet
     search_fields = ["name", "description", "justification"]
 
+    def _get_justification(self, request):
+        raw_justification = request.data.get("justification", "")
+        if not isinstance(raw_justification, str):
+            justification = ""
+        else:
+            justification = raw_justification.strip()
+        max_len = RiskAcceptance._meta.get_field("justification").max_length
+        if max_len and len(justification) > max_len:
+            return None, Response(
+                {"error": f"Justification must be at most {max_len} characters"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return justification, None
+
     def update(self, request, *args, **kwargs):
         initial_data = self.get_object()
         updated_data = request.data
@@ -6651,11 +6665,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
         risk_acceptance = self.get_object()
         risk_acceptance.set_state("accepted")
-        raw_justification = request.data.get("justification", "")
-        if not isinstance(raw_justification, str):
-            justification = ""
-        else:
-            justification = raw_justification.strip()
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
         risk_acceptance.justification = justification
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to accepted"})
@@ -6674,11 +6686,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
         risk_acceptance = self.get_object()
         risk_acceptance.set_state("rejected")
-        raw_justification = request.data.get("justification", "")
-        if not isinstance(raw_justification, str):
-            justification = ""
-        else:
-            justification = raw_justification.strip()
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
         risk_acceptance.justification = justification
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to rejected"})
@@ -6696,11 +6706,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             )
         risk_acceptance = self.get_object()
         risk_acceptance.set_state("revoked")
-        raw_justification = request.data.get("justification", "")
-        if not isinstance(raw_justification, str):
-            justification = ""
-        else:
-            justification = raw_justification.strip()
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
         risk_acceptance.justification = justification
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to revoked"})
