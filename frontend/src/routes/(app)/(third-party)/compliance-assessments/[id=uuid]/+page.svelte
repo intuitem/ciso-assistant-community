@@ -759,6 +759,14 @@
 											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 											>... {m.asWord()}</a
 										>
+										{#if data.compliance_assessment.framework?.urn === 'urn:intuitem:risk:framework:ccb-cyfun2025'}
+											<a
+												href="/compliance-assessments/{data.compliance_assessment
+													.id}/export/cyfun-xlsx"
+												class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+												>... {m.asCyFunExcel()}</a
+											>
+										{/if}
 									{/if}
 									<a
 										href="/compliance-assessments/{data.compliance_assessment.id}/export"

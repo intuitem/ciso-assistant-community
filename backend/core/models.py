@@ -2953,6 +2953,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    link = models.URLField(null=True, blank=True, verbose_name=_("Link"))
 
     fields_to_check = ["name"]
 
