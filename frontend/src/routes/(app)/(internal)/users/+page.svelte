@@ -26,12 +26,17 @@
 
 	// Use page.data to access layout-provided user info
 	const user = $derived(page.data.user);
+	const serviceAccountsEnabled = $derived(page.data.featureflags?.service_accounts ?? false);
 
 	// Tab state (persisted in URL)
 	const VALID_TABS = ['users', 'service-accounts'] as const;
 	const rawTab = page.url.searchParams.get('tab') ?? 'users';
 	let tab = $state(
-		user?.is_admin && VALID_TABS.includes(rawTab as (typeof VALID_TABS)[number]) ? rawTab : 'users'
+		user?.is_admin &&
+			serviceAccountsEnabled &&
+			VALID_TABS.includes(rawTab as (typeof VALID_TABS)[number])
+			? rawTab
+			: 'users'
 	);
 
 	function switchTab(value: string) {
@@ -79,7 +84,7 @@
 		<Tabs.Trigger value="users">
 			<i class="fa-solid fa-user mr-2"></i>{m.users()}
 		</Tabs.Trigger>
-		{#if user?.is_admin}
+		{#if user?.is_admin && serviceAccountsEnabled}
 			<Tabs.Trigger value="service-accounts">
 				<i class="fa-solid fa-robot mr-2"></i>{m.serviceAccounts()}
 			</Tabs.Trigger>
@@ -116,7 +121,7 @@
 	</Tabs.Content>
 
 	<!--Service accounts tab -->
-	{#if user?.is_admin}
+	{#if user?.is_admin && serviceAccountsEnabled}
 		<Tabs.Content value="service-accounts">
 			<div class="shadow-lg">
 				<ModelTable

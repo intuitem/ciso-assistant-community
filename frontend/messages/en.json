@@ -4002,6 +4002,7 @@
 	"addServiceAccountKey": "Add API key",
 	"serviceAccount": "Service account",
 	"serviceAccounts": "Service accounts",
+	"serviceAccountsFlagDescription": "Enable service accounts to allow API access via long-lived tokens",
 	"createServiceAccount": "Create service account",
 	"serviceAccountIdentifiedAs": "The service account will be identified as",
 	"serviceAccountSlugHelpText": "Lowercase alphanumeric and hyphens (e.g. ci-pipeline)",

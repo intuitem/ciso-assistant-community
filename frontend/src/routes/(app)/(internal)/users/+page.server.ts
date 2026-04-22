@@ -29,7 +29,7 @@ function buildTableSource(model: string) {
 	return { head: headData, body: [], meta: [] };
 }
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, locals }) => {
 	const deleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
 	const createSchema = modelSchema(URL_MODEL);
 	const createForm = await superValidate(zod(createSchema));
@@ -51,7 +51,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	}
 	model['selectOptions'] = selectOptions;
 
-	const createSAForm = await superValidate(zod(ServiceAccountCreateSchema));
+	const serviceAccountsEnabled = locals.featureflags?.service_accounts ?? false;
+	const createSAForm = serviceAccountsEnabled
+		? await superValidate(zod(ServiceAccountCreateSchema))
+		: null;
 
 	return {
 		createForm,
@@ -59,7 +62,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		model,
 		URLModel: URL_MODEL,
 		table: buildTableSource('users'),
-		saTable: buildTableSource('service-accounts'),
+		saTable: serviceAccountsEnabled ? buildTableSource('service-accounts') : null,
 		createSAForm
 	};
 };

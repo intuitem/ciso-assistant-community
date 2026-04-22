@@ -661,7 +661,8 @@ export const FeatureFlagsSchema = z.object({
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
 	journeys: z.boolean().optional(),
-	policy_documents: z.boolean().optional()
+	policy_documents: z.boolean().optional(),
+	service_accounts: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

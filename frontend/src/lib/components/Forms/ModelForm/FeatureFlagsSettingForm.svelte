@@ -234,6 +234,11 @@
 					field: 'chat_mode',
 					label: m.chatMode(),
 					description: m.chatModeDescription()
+				},
+				{
+					field: 'service_accounts',
+					label: m.serviceAccounts(),
+					description: m.serviceAccountsFlagDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		}

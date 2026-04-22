@@ -3838,6 +3838,7 @@
 	"addServiceAccountKey": "Ajouter une clé API",
 	"serviceAccount": "Compte de service",
 	"serviceAccounts": "Comptes de service",
+	"serviceAccountsFlagDescription": "Activer les comptes de service pour permettre l'accès API via des jetons à longue durée de vie",
 	"createServiceAccount": "Créer un compte de service",
 	"serviceAccountIdentifiedAs": "Le compte de service sera identifié comme",
 	"serviceAccountSlugHelpText": "Alphanumérique minuscule et tirets (ex. ci-pipeline)",
