@@ -3,7 +3,11 @@ import pytest
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
 
-from core.helpers import get_rating_options, get_rating_options_abbr
+from core.helpers import (
+    filter_graph_by_implementation_groups,
+    get_rating_options,
+    get_rating_options_abbr,
+)
 from core.models import (
     Perimeter,
     RiskAssessment,
@@ -333,3 +337,86 @@ def test_invalid_semver_format():
     version_b = "1.2.3"
     with pytest.raises(VersionFormatError):
         compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b=1)
+
+
+# --- filter_graph_by_implementation_groups ------------------------------------
+#
+# Regression coverage for the bug where an ancestor node tagged with its own
+# implementation_groups (e.g. ISO 27001's annex-a node carrying ['SoA']) would
+# hide every matching descendant when the user filtered by an IG that only the
+# descendants carried (e.g. a custom 'P1' added via the framework builder).
+
+
+def _leaf(urn: str, groups: list[str] | None) -> dict:
+    return {"urn": urn, "implementation_groups": groups, "children": {}}
+
+
+def _branch(urn: str, groups: list[str] | None, children: dict[str, dict]) -> dict:
+    return {"urn": urn, "implementation_groups": groups, "children": children}
+
+
+def test_filter_returns_graph_unchanged_when_no_selection():
+    graph = {"a": _branch("a", None, {"b": _leaf("b", ["X"])})}
+    assert filter_graph_by_implementation_groups(graph, None) is graph
+    assert filter_graph_by_implementation_groups(graph, set()) is graph
+
+
+def test_filter_keeps_ancestor_whose_descendants_match_even_if_ancestor_igs_differ():
+    # Mirrors the real-world case: annex-a is tagged ['SoA'] but the leaf below
+    # it was also tagged with a custom 'P1' via the framework builder.
+    graph = {
+        "annex-a": _branch(
+            "annex-a",
+            ["SoA"],
+            {
+                "a5": _branch(
+                    "a5",
+                    ["SoA"],
+                    {
+                        "a51": _leaf("a51", ["SoA", "P1"]),
+                        "a52": _leaf("a52", ["SoA"]),
+                    },
+                ),
+            },
+        ),
+    }
+    filtered = filter_graph_by_implementation_groups(graph, {"P1"})
+    assert "annex-a" in filtered, (
+        "ancestor with non-matching IG must be kept when a descendant matches"
+    )
+    assert "a5" in filtered["annex-a"]["children"]
+    assert "a51" in filtered["annex-a"]["children"]["a5"]["children"]
+    # Non-matching sibling is dropped.
+    assert "a52" not in filtered["annex-a"]["children"]["a5"]["children"]
+
+
+def test_filter_drops_branch_when_no_descendant_matches():
+    graph = {
+        "annex-a": _branch(
+            "annex-a",
+            ["SoA"],
+            {"a51": _leaf("a51", ["SoA"])},
+        ),
+    }
+    filtered = filter_graph_by_implementation_groups(graph, {"P1"})
+    assert filtered == {}
+
+
+def test_filter_keeps_node_whose_own_igs_match_even_if_no_children():
+    graph = {"a51": _leaf("a51", ["SoA", "P1"])}
+    filtered = filter_graph_by_implementation_groups(graph, {"P1"})
+    assert "a51" in filtered
+
+
+def test_filter_handles_empty_or_missing_igs_on_intermediate_node():
+    # An intermediate node with no IGs of its own but matching children stays.
+    graph = {
+        "section": _branch(
+            "section",
+            None,
+            {"leaf": _leaf("leaf", ["P1"])},
+        ),
+    }
+    filtered = filter_graph_by_implementation_groups(graph, {"P1"})
+    assert "section" in filtered
+    assert "leaf" in filtered["section"]["children"]
