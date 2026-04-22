@@ -40,7 +40,7 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
         "urn",
         "source",
     ]
-    search_fields = ["name", "ref_id", "description", "cvss_vector"]
+    search_fields = ["name", "ref_id", "description", "cvss_vector", "aliases"]
 
     @action(detail=False, name="Get source choices")
     def source(self, request):
