@@ -56,12 +56,20 @@ class EntityReadSerializer(BaseModelSerializer):
         """Number of solutions where this entity is declared as a subcontractor.
 
         Powers the Entity detail view's "Used as subcontractor in N solutions"
-        panel and the disabled-delete-button tooltip.
+        panel and the disabled-delete-button tooltip. Only computed on retrieve
+        — on list each row would issue a fresh COUNT (N+1).
         """
+        if self.context.get("action") != "retrieve":
+            return 0
         return obj.subcontracts.count()
 
     def get_subcontracts_usage(self, obj):
-        """Up to 50 solutions blocking deletion, with parent contract."""
+        """Up to 50 solutions blocking deletion, with parent contract.
+
+        Detail-only: on list each row would issue a fresh query (N+1).
+        """
+        if self.context.get("action") != "retrieve":
+            return []
         rows = obj.subcontracts.select_related("solution").order_by("solution__name")[
             :50
         ]
