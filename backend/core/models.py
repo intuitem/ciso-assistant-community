@@ -7441,7 +7441,7 @@ class ComplianceAssessment(Assessment):
 
         **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self`.
         """
-    
+
         color_map = {
             RequirementAssessment.Result.NOT_ASSESSED: "#d1d5db",
             RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
