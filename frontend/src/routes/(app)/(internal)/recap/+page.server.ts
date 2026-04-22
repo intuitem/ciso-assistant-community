@@ -84,25 +84,28 @@ function shapeFolderForRecap(folder: RawRecapFolder) {
 }
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-	// The backend now returns only recap raw data (counts + score summaries).
-	// Presentation details such as colors, percentages, and donut wiring are
-	// rebuilt here on the frontend side.
-	const folders = await fetch(`${BASE_API_URL}/compliance-assessments/recap/`)
-		.then(async (res) => {
-			if (!res.ok) {
-				throw new Error(`Failed to load recap data: ${res.status} ${res.statusText}`);
-			}
-			return res.json();
-		})
-		.then((data) => ((data.results ?? []) as RawRecapFolder[]).map(shapeFolderForRecap))
-		.catch((error) => {
-			// Keep the page renderable even if the recap endpoint fails temporarily.
-			console.error('Failed to load recap:', error);
-			return [];
-		});
+	const getFolders = async () => {
+		// Stream recap data so the route can render a loading state immediately
+		// after navigation, instead of blocking the whole page transition.
+		return fetch(`${BASE_API_URL}/compliance-assessments/recap/`)
+			.then(async (res) => {
+				if (!res.ok) {
+					throw new Error(`Failed to load recap data: ${res.status} ${res.statusText}`);
+				}
+				return res.json();
+			})
+			.then((data) => ((data.results ?? []) as RawRecapFolder[]).map(shapeFolderForRecap))
+			.catch((error) => {
+				// Keep the page renderable even if the recap endpoint fails temporarily.
+				console.error('Failed to load recap:', error);
+				return [];
+			});
+	};
 
 	return {
-		folders,
+		stream: {
+			folders: getFolders()
+		},
 		user: locals.user,
 		title: m.recap()
 	};
