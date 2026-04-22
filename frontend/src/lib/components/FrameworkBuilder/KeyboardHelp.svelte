@@ -11,13 +11,27 @@
 	const altKey = isMac ? '⌥' : 'Alt';
 	const shiftKey = isMac ? '⇧' : 'Shift';
 
-	const shortcuts = [
-		{ keys: [altKey, '→'], label: 'Indent node' },
-		{ keys: [altKey, '←'], label: 'Outdent node' },
-		{ keys: [altKey, 'Enter'], label: 'Add child' },
-		{ keys: [altKey, shiftKey, 'Enter'], label: 'Add sibling below' },
-		{ keys: [cmdKey, '.'], label: 'Toggle assessable' },
-		{ keys: ['?'], label: 'Show this cheatsheet' }
+	const groups = [
+		{
+			title: 'Outline editing',
+			hint: 'Apply to the last node you focused.',
+			shortcuts: [
+				{ keys: [altKey, '→'], label: 'Indent node' },
+				{ keys: [altKey, '←'], label: 'Outdent node' },
+				{ keys: [altKey, 'Enter'], label: 'Add child' },
+				{ keys: [altKey, shiftKey, 'Enter'], label: 'Add sibling below' },
+				{ keys: [cmdKey, '.'], label: 'Toggle assessable' }
+			]
+		},
+		{
+			title: 'Builder',
+			hint: null,
+			shortcuts: [
+				{ keys: [cmdKey, 'S'], label: 'Save draft' },
+				{ keys: ['?'], label: 'Show this cheatsheet' },
+				{ keys: ['Esc'], label: 'Close dialog or dropdown' }
+			]
+		}
 	];
 </script>
 
@@ -51,28 +65,38 @@
 				</button>
 			</div>
 
-			<dl class="px-5 py-4 space-y-2.5 text-sm">
-				{#each shortcuts as s}
-					<div class="flex items-center justify-between gap-6">
-						<dt class="text-gray-600">{s.label}</dt>
-						<dd class="flex items-center gap-1 shrink-0">
-							{#each s.keys as k, i}
-								{#if i > 0}
-									<span class="text-gray-300 text-xs">+</span>
-								{/if}
-								<kbd
-									class="inline-flex items-center justify-center min-w-[1.75rem] px-1.5 py-0.5 text-xs font-mono font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded"
-								>
-									{k}
-								</kbd>
+			<div class="px-5 py-4 space-y-5 text-sm">
+				{#each groups as g}
+					<div>
+						<div class="flex items-baseline justify-between mb-2">
+							<h4 class="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+								{g.title}
+							</h4>
+							{#if g.hint}
+								<span class="text-[11px] text-gray-400">{g.hint}</span>
+							{/if}
+						</div>
+						<dl class="space-y-2">
+							{#each g.shortcuts as s}
+								<div class="flex items-center justify-between gap-6">
+									<dt class="text-gray-600">{s.label}</dt>
+									<dd class="flex items-center gap-1 shrink-0">
+										{#each s.keys as k, i}
+											{#if i > 0}
+												<span class="text-gray-300 text-xs">+</span>
+											{/if}
+											<kbd
+												class="inline-flex items-center justify-center min-w-[1.75rem] px-1.5 py-0.5 text-xs font-mono font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded"
+											>
+												{k}
+											</kbd>
+										{/each}
+									</dd>
+								</div>
 							{/each}
-						</dd>
+						</dl>
 					</div>
 				{/each}
-			</dl>
-
-			<div class="px-5 py-3 border-t border-gray-100 text-xs text-gray-400">
-				Shortcuts apply to the last node you focused. Click any node, then use the shortcut.
 			</div>
 		</div>
 	</div>
