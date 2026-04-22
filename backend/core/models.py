@@ -9463,7 +9463,7 @@ auditlog.register(
 )
 auditlog.register(
     RiskScenario,
-    m2m_fields={"owner", "applied_controls", "existing_applied_controls"},
+    m2m_fields={"owner", "applied_controls", "existing_applied_controls", "incidents"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
@@ -9508,6 +9508,7 @@ auditlog.register(
 )
 auditlog.register(
     Incident,
+    m2m_fields={"applied_controls", "task_templates"},
     exclude_fields=common_exclude,
 )
 auditlog.register(

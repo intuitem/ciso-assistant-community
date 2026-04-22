@@ -4672,6 +4672,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
     ("quantitative_risk_hypotheses_removed", "CRQ Hypotheses (removed)"),
     ("assetassessment", "Asset Assessments"),
     ("task_templates", "Task Templates"),
+    ("incidents", "Incidents"),
     ("comments", "Comments"),
 ]
 
@@ -4993,6 +4994,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "has_quantitative_risk_hypotheses_removed": QuantitativeRiskHypothesis.removed_applied_controls.through,
             "has_assetassessment": AssetAssessment.associated_controls.through,
             "has_task_templates": TaskTemplate.applied_controls.through,
+            "has_incidents": Incident.applied_controls.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(appliedcontrol_id=OuterRef("pk")))

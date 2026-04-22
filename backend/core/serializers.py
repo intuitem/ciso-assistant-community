@@ -1276,6 +1276,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    incidents = FieldsRelatedField(many=True)
     reference_control = FieldsRelatedField()
     priority = serializers.CharField(source="get_priority_display")
     category = serializers.CharField(
@@ -4204,6 +4205,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
 class TaskTemplateReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    incidents = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)

@@ -131,6 +131,7 @@
 		lazy
 		{form}
 		optionsEndpoint="task-templates"
+		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
 		field="task_templates"
 		label={m.taskTemplates()}

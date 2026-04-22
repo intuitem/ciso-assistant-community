@@ -33,6 +33,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import type { ReverseForeignKeyField } from '$lib/utils/crud';
+	import { countMasked } from '$lib/utils/related-visibility';
 
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
@@ -563,7 +564,7 @@
 								disableDelete={true}
 								deleteForm={related.deleteForm}
 								URLModel={panel.urlmodel}
-								expectedCount={related.count}
+								expectedCount={countMasked(data.data?.[field.field])}
 								fields={fieldsToUse}
 							>
 								{#snippet addButton()}
