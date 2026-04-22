@@ -98,13 +98,6 @@
 			if (context != 'edit') {
 				$formData.entity = entity.name ?? entity.str ?? $formData.entity;
 			}
-			$formData.category = entity.relationship?.[0]?.id ?? $formData.category;
-			if (context === 'create' && entity.default_dependency !== undefined) {
-				$formData.current_dependency = entity.default_dependency ?? 0;
-				$formData.current_penetration = entity.default_penetration ?? 0;
-				$formData.current_maturity = entity.default_maturity ?? 1;
-				$formData.current_trust = entity.default_trust ?? 1;
-			}
 		}
 	});
 </script>
