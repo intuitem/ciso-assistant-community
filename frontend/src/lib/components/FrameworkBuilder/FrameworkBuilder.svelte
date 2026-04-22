@@ -19,6 +19,7 @@
 	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import { installKeyboardHandlers } from './keyboard';
+	import KeyboardHelp from './KeyboardHelp.svelte';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
 	import NodeBlock from './NodeBlock.svelte';
@@ -107,6 +108,7 @@
 	);
 
 	const urnCopy = createCopyHandler();
+	let helpOpen = $state(false);
 	let showSettings = $state(false);
 	let showScoringSettings = $state(false);
 	let showScalesEditor = $state(false);
@@ -244,6 +246,15 @@
 		}
 	}
 
+	// Global ? key — open keyboard cheatsheet
+	function handleGlobalKey(e: KeyboardEvent) {
+		if (e.key !== '?') return;
+		const t = e.target as HTMLElement | null;
+		if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+		helpOpen = true;
+		e.preventDefault();
+	}
+
 	// IntersectionObserver for ToC active section tracking
 	let observer: IntersectionObserver | null = null;
 
@@ -303,6 +314,8 @@
 		builder.destroy();
 	});
 </script>
+
+<svelte:window onkeydown={handleGlobalKey} />
 
 <div class="card !p-0 bg-white shadow-lg overflow-visible">
 	<BuilderMinimap frameworkId={framework.id} />
@@ -436,7 +449,21 @@
 								<span class="text-xs text-gray-400">{settingsSummary}</span>
 							{/if}
 						</div>
-						<i class="fa-solid fa-gear text-xs text-gray-400"></i>
+						<div class="flex items-center gap-1.5">
+							<button
+								type="button"
+								class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+								onclick={(e) => {
+									e.stopPropagation();
+									helpOpen = true;
+								}}
+								title="Keyboard shortcuts (?)"
+								aria-label="Show keyboard shortcuts"
+							>
+								?
+							</button>
+							<i class="fa-solid fa-gear text-xs text-gray-400"></i>
+						</div>
 					</button>
 					{#if showSettings}
 						<div class="px-4 py-4 space-y-6 border-t border-gray-200">
@@ -852,3 +879,5 @@
 		</div>
 	</div>
 </div>
+
+<KeyboardHelp bind:open={helpOpen} onClose={() => (helpOpen = false)} />
