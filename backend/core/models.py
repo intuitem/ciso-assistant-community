@@ -7090,7 +7090,7 @@ class ComplianceAssessment(Assessment):
         their scores replaced by the effective target (target_score or max_score).
         Returns a dict with all three values.
 
-        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self`.
+        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
         """
 
         base_requirements: Iterable[RequirementAssessment] = []
@@ -7113,7 +7113,6 @@ class ComplianceAssessment(Assessment):
                 if requirement.is_scored
                 or requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
             ]
-
         else:
             requirement_assessments_scored = [
                 requirement
@@ -7439,7 +7438,7 @@ class ComplianceAssessment(Assessment):
         """
         Return donut data used by the frontend `<DonutChart/>` component.
 
-        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self`.
+        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
         """
 
         color_map = {
@@ -7467,11 +7466,7 @@ class ComplianceAssessment(Assessment):
                 requirement__assessable=True,
             ).select_related("requirement")
         else:
-            base_requirements = [
-                requirement
-                for requirement in prefetched_requirements
-                if requirement.requirement.assessable
-            ]
+            base_requirements = prefetched_requirements
 
         if self.selected_implementation_groups:
             requirements = [

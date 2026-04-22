@@ -11699,9 +11699,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 Prefetch(
                     "requirement_assessments",
-                    queryset=RequirementAssessment.objects.select_related(
-                        "requirement"
-                    ),
+                    queryset=RequirementAssessment.objects.filter(
+                        requirement__assessable=True
+                    ).select_related("requirement"),
                 )
             )
         )
