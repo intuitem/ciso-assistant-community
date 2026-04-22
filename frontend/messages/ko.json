@@ -956,6 +956,7 @@
 	"requirementMappings": "요구사항 매핑",
 	"sourceFramework": "원본 프레임워크",
 	"targetFramework": "대상 프레임워크",
+	"targetFrameworks": "대상 프레임워크",
 	"baseline": "기준선",
 	"ebiosRmBaseline": "기반",
 	"createAuditFromBaseline": "매핑 적용",

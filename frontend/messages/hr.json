@@ -781,6 +781,7 @@
 	"requirementMappings": "Mapiranja zahtjeva",
 	"sourceFramework": "Izvorišni okvir",
 	"targetFramework": "Odredišni okvir",
+	"targetFrameworks": "Odredišni okviri",
 	"baseline": "Osnovna vrijednost",
 	"createAuditFromBaseline": "Mapiraj ili kloniraj audit",
 	"coverageColon": "Pokrivenost:",

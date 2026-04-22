@@ -770,6 +770,7 @@
 	"requirementMappings": "Gereksinim eşlemeleri",
 	"sourceFramework": "Kaynak çerçeve",
 	"targetFramework": "Hedef çerçeve",
+	"targetFrameworks": "Hedef çerçeveler",
 	"baseline": "Taban çizgisi",
 	"createAuditFromBaseline": "Taban çizgisinden denetim oluştur",
 	"coverageColon": "Kapsam:",

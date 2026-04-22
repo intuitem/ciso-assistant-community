@@ -723,6 +723,7 @@
 	"requirementMappings": "Mapování požadavků",
 	"sourceFramework": "Zdrojový rámec",
 	"targetFramework": "Cílový rámec",
+	"targetFrameworks": "Cílové rámce",
 	"baseline": "Základní úroveň",
 	"createAuditFromBaseline": "Vytvořit audit z základní úrovně",
 	"coverageColon": "Pokrytí:",

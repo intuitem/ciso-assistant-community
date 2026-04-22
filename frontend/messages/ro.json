@@ -722,6 +722,7 @@
 	"requirementMappings": "Mapări ale cerințelor",
 	"sourceFramework": "Cadru sursă",
 	"targetFramework": "Cadru țintă",
+	"targetFrameworks": "Cadre țintă",
 	"baseline": "Bază",
 	"createAuditFromBaseline": "Creați audit din bază",
 	"coverageColon": "Acoperire:",
