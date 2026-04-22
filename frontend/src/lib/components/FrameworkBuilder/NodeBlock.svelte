@@ -89,9 +89,7 @@
 
 	// Framework ID for splash-screen image upload proxy
 	const frameworkId =
-		typeof node.node.framework === 'string'
-			? node.node.framework
-			: (node.node.framework?.id ?? '');
+		typeof node.node.framework === 'string' ? node.node.framework : (node.node.framework?.id ?? '');
 	const proxyUrl = `/frameworks/${frameworkId}/builder`;
 
 	const allQuestions = $derived(node.questions.map((q) => q.question));
@@ -248,9 +246,7 @@
 			node.node.typical_evidence ||
 			node.node.visibility_expression ||
 			(node.node.translations &&
-				Object.values(node.node.translations).some(
-					(t) => t.annotation || t.typical_evidence
-				))
+				Object.values(node.node.translations).some((t) => t.annotation || t.typical_evidence))
 		)
 	);
 	let showAdvanced = $state(hasAdvancedContent);
@@ -308,7 +304,11 @@
 		{/if}
 
 		<!-- Status line -->
-		<div class="px-4 pt-2 text-[11px] {isSplash ? 'text-purple-400' : 'text-gray-400'} flex items-center">
+		<div
+			class="px-4 pt-2 text-[11px] {isSplash
+				? 'text-purple-400'
+				: 'text-gray-400'} flex items-center"
+		>
 			{#if hasChildren}
 				<button
 					type="button"
@@ -426,7 +426,8 @@
 							onclick={() => (showAdvanced = !showAdvanced)}
 							aria-expanded={showAdvanced}
 						>
-							<i class="fa-solid {showAdvanced ? 'fa-chevron-down' : 'fa-chevron-right'} text-[8px]"></i>
+							<i class="fa-solid {showAdvanced ? 'fa-chevron-down' : 'fa-chevron-right'} text-[8px]"
+							></i>
 							Advanced
 							{#if !showAdvanced}
 								<span class="text-gray-300 normal-case tracking-normal font-normal">
@@ -438,7 +439,9 @@
 						{#if showAdvanced}
 							<!-- Annotation side-by-side -->
 							<div>
-								<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+								<label
+									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
+								>
 									Annotation
 								</label>
 								<div class="grid grid-cols-2 gap-3">
@@ -472,7 +475,9 @@
 						{#if showAdvanced && node.node.assessable}
 							<!-- Typical evidence side-by-side -->
 							<div>
-								<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+								<label
+									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
+								>
 									Typical evidence
 								</label>
 								<div class="grid grid-cols-2 gap-3">
@@ -487,21 +492,21 @@
 										value={getTranslation(node.node.translations, lang, 'typical_evidence')}
 										placeholder="Translate typical evidence..."
 										rows="2"
-									use:autogrowAction
-									class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-									onblur={(e) =>
-										saveField(
-											'translations',
-											withTranslation(
-												node.node.translations,
-												lang,
-												'typical_evidence',
-												e.currentTarget.value
-											)
-										)}
-								></textarea>
+										use:autogrowAction
+										class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+										onblur={(e) =>
+											saveField(
+												'translations',
+												withTranslation(
+													node.node.translations,
+													lang,
+													'typical_evidence',
+													e.currentTarget.value
+												)
+											)}
+									></textarea>
+								</div>
 							</div>
-						</div>
 						{/if}
 					{/if}
 				{:else}
@@ -784,7 +789,8 @@
 						onclick={() => (showAdvanced = !showAdvanced)}
 						aria-expanded={showAdvanced}
 					>
-						<i class="fa-solid {showAdvanced ? 'fa-chevron-down' : 'fa-chevron-right'} text-[8px]"></i>
+						<i class="fa-solid {showAdvanced ? 'fa-chevron-down' : 'fa-chevron-right'} text-[8px]"
+						></i>
 						Advanced
 						{#if !showAdvanced}
 							<span class="text-gray-300 normal-case tracking-normal font-normal">
@@ -796,7 +802,9 @@
 					{#if showAdvanced}
 						<div class="space-y-2 pt-1">
 							<div>
-								<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+								<label
+									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
+								>
 									Annotation
 								</label>
 								<textarea
@@ -810,7 +818,9 @@
 							</div>
 							{#if node.node.assessable}
 								<div>
-									<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+									<label
+										class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
+									>
 										Typical evidence
 									</label>
 									<textarea
@@ -857,25 +867,25 @@
 
 		<!-- CEL visibility expression: inside Advanced for default nodes, always-on for splash -->
 		{#if isSplash || showAdvanced}
-		<div class="px-4 py-2 {isSplash ? 'border-t border-purple-100' : ''}">
-			<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block mb-1">
-				Visibility expression (CEL)
-				<span
-					class="text-gray-400 ml-1 normal-case"
-					title="CEL expression that must evaluate to true for this requirement to be visible. Example: requirements[&quot;urn:...&quot;].score > 50"
-					>&#9432;</span
-				>
-			</label>
-			<input
-				type="text"
-				class="w-full text-xs px-2 py-1 border border-gray-200 rounded font-mono bg-gray-50 focus:bg-white focus:{isSplash
-					? 'border-purple-300'
-					: 'border-blue-300'} focus:outline-none"
-				placeholder={'e.g. requirements["urn:..."].score > 50'}
-				value={node.node.visibility_expression ?? ''}
-				onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
-			/>
-		</div>
+			<div class="px-4 py-2 {isSplash ? 'border-t border-purple-100' : ''}">
+				<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block mb-1">
+					Visibility expression (CEL)
+					<span
+						class="text-gray-400 ml-1 normal-case"
+						title="CEL expression that must evaluate to true for this requirement to be visible. Example: requirements[&quot;urn:...&quot;].score > 50"
+						>&#9432;</span
+					>
+				</label>
+				<input
+					type="text"
+					class="w-full text-xs px-2 py-1 border border-gray-200 rounded font-mono bg-gray-50 focus:bg-white focus:{isSplash
+						? 'border-purple-300'
+						: 'border-blue-300'} focus:outline-none"
+					placeholder={'e.g. requirements["urn:..."].score > 50'}
+					value={node.node.visibility_expression ?? ''}
+					onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
+				/>
+			</div>
 		{/if}
 
 		<!-- Questions (only for assessable non-splash nodes) -->
@@ -960,7 +970,8 @@
 	{/if}
 	{#if node.children.length > 0 && collapsed}
 		<div class="ml-4 mt-1 text-[10px] text-gray-400 italic">
-			{node.children.length} {node.children.length === 1 ? 'child' : 'children'} hidden
+			{node.children.length}
+			{node.children.length === 1 ? 'child' : 'children'} hidden
 		</div>
 	{/if}
 </div>

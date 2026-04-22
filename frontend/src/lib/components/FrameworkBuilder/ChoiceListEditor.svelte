@@ -91,7 +91,11 @@
 		>
 			<!-- Collapsed row -->
 			<div class="flex items-center gap-2 px-3 py-2">
-				<span class="cursor-grab text-gray-300 hover:text-gray-500" data-drag-handle aria-hidden="true">
+				<span
+					class="cursor-grab text-gray-300 hover:text-gray-500"
+					data-drag-handle
+					aria-hidden="true"
+				>
 					<i class="fa-solid fa-grip-vertical text-xs"></i>
 				</span>
 

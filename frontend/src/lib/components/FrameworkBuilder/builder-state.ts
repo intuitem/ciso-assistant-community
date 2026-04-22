@@ -122,7 +122,6 @@ export interface BuilderQuestion {
 	question: Question;
 }
 
-
 // --- URN / ref_id generation utilities ---
 
 /**
@@ -561,8 +560,7 @@ export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): Validati
 export function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderNode[] {
 	const questionsByNode = new Map<string, Question[]>();
 	for (const q of questions) {
-		const nodeId =
-			typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
+		const nodeId = typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
 		if (!questionsByNode.has(nodeId)) questionsByNode.set(nodeId, []);
 		questionsByNode.get(nodeId)!.push(q);
 	}
@@ -581,9 +579,7 @@ export function buildTree(nodes: RequirementNode[], questions: Question[]): Buil
 	function build(parentUrn: string | null, depth: number): BuilderNode[] {
 		const raw = parentUrn
 			? (childrenByUrn.get(parentUrn) ?? [])
-			: nodes
-					.filter((n) => !n.parent_urn)
-					.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
+			: nodes.filter((n) => !n.parent_urn).sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
 		return raw.map((n) => ({
 			node: n,
 			questions: (questionsByNode.get(n.id) ?? [])
@@ -1041,8 +1037,7 @@ export function createBuilderState(
 			// Phase 2: remove the node from its current parent (walk the chain)
 			function walk(list: BuilderNode[], level: number): BuilderNode[] {
 				return list.flatMap((b) => {
-					const isInChain =
-						level < hit!.parentChain.length && b === hit!.parentChain[level];
+					const isInChain = level < hit!.parentChain.length && b === hit!.parentChain[level];
 					if (isInChain) {
 						const nextChildren =
 							level === hit!.parentChain.length - 1
@@ -1504,11 +1499,7 @@ export function createBuilderState(
 	}
 
 	/** Recursively swap fields on all requirements */
-	function swapReqFields(
-		reqs: BuilderNode[],
-		oldLocale: string,
-		newLocale: string
-	): BuilderNode[] {
+	function swapReqFields(reqs: BuilderNode[], oldLocale: string, newLocale: string): BuilderNode[] {
 		return reqs.map((req) => ({
 			...req,
 			node: swapNodeFields(req.node, oldLocale, newLocale),

@@ -38,12 +38,7 @@
 	}
 </script>
 
-<div
-	class="relative"
-	bind:this={rootEl}
-	onfocusout={onFocusOut}
-	onkeydown={onKeydown}
->
+<div class="relative" bind:this={rootEl} onfocusout={onFocusOut} onkeydown={onKeydown}>
 	<button
 		type="button"
 		class={triggerClass}

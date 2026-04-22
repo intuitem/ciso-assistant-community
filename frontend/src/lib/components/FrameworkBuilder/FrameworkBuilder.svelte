@@ -229,7 +229,9 @@
 	}
 
 	// Drag state for root nodes
-	const rootDrag = createHandleGatedDragHandlers((from, to) => builder.reorderNodes(null, from, to));
+	const rootDrag = createHandleGatedDragHandlers((from, to) =>
+		builder.reorderNodes(null, from, to)
+	);
 
 	// --- Navigation guards ---
 

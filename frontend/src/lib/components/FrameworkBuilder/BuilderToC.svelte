@@ -343,15 +343,16 @@
 				{@const n = entry.node.node}
 				{@const hasChildren = entry.node.children.length > 0}
 				{@const isCollapsed = tocCollapsedSet.has(n.id)}
-				{@const icon = n.display_mode === 'splash'
-					? 'fa-display text-purple-400'
-					: n.assessable && hasChildren
-						? 'fa-square-check text-blue-400'
-						: n.assessable
-							? 'fa-square-check text-green-500'
-							: hasChildren
-								? 'fa-folder text-gray-400'
-								: 'fa-circle-dot text-gray-300'}
+				{@const icon =
+					n.display_mode === 'splash'
+						? 'fa-display text-purple-400'
+						: n.assessable && hasChildren
+							? 'fa-square-check text-blue-400'
+							: n.assessable
+								? 'fa-square-check text-green-500'
+								: hasChildren
+									? 'fa-folder text-gray-400'
+									: 'fa-circle-dot text-gray-300'}
 				<div class="flex items-center" style="padding-left: {0.5 + entry.depth * 0.75}rem">
 					{#if hasChildren}
 						<button
@@ -375,8 +376,8 @@
 						bind:this={navigationButtons[index]}
 						class="flex-1 text-left py-1.5 text-xs rounded-md transition-colors flex items-center gap-1.5
 							{$activeSectionStore === n.id
-								? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
-								: 'text-gray-600 hover:bg-gray-100'}
+							? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
+							: 'text-gray-600 hover:bg-gray-100'}
 							{focusedIndex === index ? 'ring-2 ring-primary-300' : ''}"
 						onclick={() => {
 							focusedIndex = index;
