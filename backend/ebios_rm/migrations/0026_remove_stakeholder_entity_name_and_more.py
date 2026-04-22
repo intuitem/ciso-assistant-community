@@ -5,26 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0025_stakeholder_entity_name_alter_stakeholder_entity'),
-        ('tprm', '0017_entityassessment_reference_link'),
+        ("ebios_rm", "0025_stakeholder_entity_name_alter_stakeholder_entity"),
+        ("tprm", "0017_entityassessment_reference_link"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='stakeholder',
-            name='entity_name',
+            model_name="stakeholder",
+            name="entity_name",
         ),
         migrations.AddField(
-            model_name='stakeholder',
-            name='third_party_entity',
-            field=models.ForeignKey(blank=True, default='', help_text='Related thied party entity', on_delete=django.db.models.deletion.CASCADE, related_name='stakeholders', to='tprm.entity', verbose_name='Third Party Entity'),
+            model_name="stakeholder",
+            name="third_party_entity",
+            field=models.ForeignKey(
+                blank=True,
+                default="",
+                help_text="Related thied party entity",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stakeholders",
+                to="tprm.entity",
+                verbose_name="Third Party Entity",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='stakeholder',
-            name='entity',
-            field=models.TextField(verbose_name='Entity name'),
+            model_name="stakeholder",
+            name="entity",
+            field=models.TextField(verbose_name="Entity name"),
         ),
     ]

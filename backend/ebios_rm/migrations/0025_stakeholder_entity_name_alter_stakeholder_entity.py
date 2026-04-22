@@ -5,22 +5,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0024_remove_operatingmode_elementary_actions_and_more'),
-        ('tprm', '0017_entityassessment_reference_link'),
+        ("ebios_rm", "0024_remove_operatingmode_elementary_actions_and_more"),
+        ("tprm", "0017_entityassessment_reference_link"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='stakeholder',
-            name='entity_name',
-            field=models.TextField(default='Entity', verbose_name='Entity name'),
+            model_name="stakeholder",
+            name="entity_name",
+            field=models.TextField(default="Entity", verbose_name="Entity name"),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='stakeholder',
-            name='entity',
-            field=models.ForeignKey(blank=True, help_text='Entity qualified by the stakeholder', on_delete=django.db.models.deletion.CASCADE, related_name='stakeholders', to='tprm.entity', verbose_name='Entity'),
+            model_name="stakeholder",
+            name="entity",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Entity qualified by the stakeholder",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stakeholders",
+                to="tprm.entity",
+                verbose_name="Entity",
+            ),
         ),
     ]
