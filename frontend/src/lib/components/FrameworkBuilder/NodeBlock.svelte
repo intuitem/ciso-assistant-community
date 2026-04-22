@@ -61,6 +61,10 @@
 	const childDrag = createHandleGatedDragHandlers((from, to) =>
 		builder.reorderNodes(node.node.id, from, to)
 	);
+	// Drag state for questions under this node
+	const questionDrag = createHandleGatedDragHandlers((from, to) =>
+		builder.reorderQuestions(node.node.id, from, to)
+	);
 
 	async function saveField(field: string, value: unknown) {
 		await builder.updateNode(node.node.id, { [field]: value });
@@ -783,12 +787,23 @@
 		{#if node.node.assessable && !isSplash}
 			<div class="px-4 py-3 space-y-1">
 				{#each node.questions as bq, qIndex (bq.question.id)}
-					<QuestionEditor
-						question={bq.question}
-						reqNodeId={node.node.id}
-						{qIndex}
-						siblingQuestions={allQuestions}
-					/>
+					<div
+						class:opacity-50={questionDrag.draggedIndex === qIndex}
+						draggable="true"
+						onmousedown={questionDrag.recordMousedown}
+						ondragstart={(e) => questionDrag.handleDragStart(e, qIndex)}
+						ondragover={questionDrag.handleDragOver}
+						ondrop={(e) => questionDrag.handleDrop(e, qIndex)}
+						ondragend={questionDrag.handleDragEnd}
+						role="listitem"
+					>
+						<QuestionEditor
+							question={bq.question}
+							reqNodeId={node.node.id}
+							{qIndex}
+							siblingQuestions={allQuestions}
+						/>
+					</div>
 				{/each}
 
 				<button
