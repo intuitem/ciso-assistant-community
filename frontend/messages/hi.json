@@ -17,6 +17,7 @@
 	"indonesian": "इन्डोनेशियाई",
 	"danish": "डेनिश",
 	"croatian": "क्रोएशियाई",
+	"korean": "कोरियाई",
 	"addThreat": "खतरा जोड़ें",
 	"addVulnerability": "भेद्यता जोड़ें",
 	"addReferenceControl": "संदर्भ नियंत्रण जोड़ें",
@@ -721,6 +722,7 @@
 	"requirementMappings": "आवश्यकता मैपिंग्स",
 	"sourceFramework": "स्रोत फ्रेमवर्क",
 	"targetFramework": "लक्ष्य फ्रेमवर्क",
+	"targetFrameworks": "लक्ष्य फ्रेमवर्क्स",
 	"baseline": "आधार रेखा",
 	"createAuditFromBaseline": "आधार रेखा से ऑडिट बनाएं",
 	"coverageColon": "कवरेज:",
@@ -732,6 +734,7 @@
 	"maturity": "परिपक्वता",
 	"progress": "प्रगति",
 	"back": "वापस",
+	"backToWorkshop": "Ebios RM अध्ययन / पारिस्थितिकी तंत्र पर वापस जाएं",
 	"duplicate": "प्रतिलिपि",
 	"duplicateRiskAssessment": "जोखिम आकलन की प्रतिलिपि बनाएँ",
 	"duplicateAppliedControl": "लागू नियंत्रण की प्रतिलिपि बनाएँ",
@@ -1105,5 +1108,10 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "क्रम A → Z",
-	"sortDescending": "क्रम Z → A"
+	"sortDescending": "क्रम Z → A",
+	"confirmModalMessagePlural": "क्या आप सुनिश्चित हैं? इस क्रिया से निम्न वस्तुएँ स्थायी रूप से प्रभावित होंगी",
+	"syncAppliedControlsMessage": "इस संदर्भ नियंत्रण का उपयोग करने वाले लागू नियंत्रण इसके साथ सिंक किए जाएंगे। कृपया ध्यान दें कि इसे वापस नहीं किया जा सकता।",
+	"syncToAppliedControl": "लागू नियंत्रण के साथ सिंक करें",
+	"syncToReferenceControl": "संदर्भ नियंत्रण के साथ सिंक करें",
+	"exportEcosystem": "पारिस्थितिकी तंत्र निर्यात (XLSX)"
 }

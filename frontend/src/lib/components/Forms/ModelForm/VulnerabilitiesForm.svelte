@@ -85,6 +85,55 @@
 	bind:cachedValue={formDataCache['security_exceptions']}
 	label={m.securityExceptions()}
 />
+<AutocompleteSelect
+	multiple
+	lazy
+	{form}
+	optionsEndpoint="security-advisories"
+	optionsInfoFields={{
+		fields: [{ field: 'ref_id' }],
+		classes: 'text-blue-500'
+	}}
+	field="security_advisories"
+	label={m.securityAdvisories()}
+/>
+<AutocompleteSelect
+	multiple
+	lazy
+	{form}
+	optionsEndpoint="cwes"
+	optionsInfoFields={{
+		fields: [{ field: 'ref_id' }],
+		classes: 'text-blue-500'
+	}}
+	field="cwes"
+	label={m.cwes()}
+/>
+<TextField
+	type="date"
+	{form}
+	field="detected_at"
+	label={m.detectedAt()}
+	helpText={m.detectedAtHelpText()}
+	cacheLock={cacheLocks['detected_at']}
+	bind:cachedValue={formDataCache['detected_at']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="eta"
+	label={m.eta()}
+	cacheLock={cacheLocks['eta']}
+	bind:cachedValue={formDataCache['eta']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="due_date"
+	label={m.dueDate()}
+	cacheLock={cacheLocks['due_date']}
+	bind:cachedValue={formDataCache['due_date']}
+/>
 <TextField
 	{form}
 	field="ref_id"

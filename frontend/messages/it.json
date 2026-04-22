@@ -704,6 +704,7 @@
 	"requirementMappings": "Mappature requisiti",
 	"sourceFramework": "Framework sorgente",
 	"targetFramework": "Framework target",
+	"targetFrameworks": "Framework target",
 	"baseline": "Baseline",
 	"createAuditFromBaseline": "Crea audit dalla baseline",
 	"coverageColon": "Copertura:",
@@ -1553,6 +1554,7 @@
 	"authorityNotifiedOn": "Autorità notificata il",
 	"backToBaseAudit": "Torna all'audit di base",
 	"backToTable": "Torna alla tabella",
+	"backToWorkshop": "Torna allo studio Ebios RM / ecosistema",
 	"baseAudit": "Audit di base",
 	"beneficiaryEntity": "Beneficiario",
 	"breachType": "Tipo di violazione",
@@ -2076,6 +2078,7 @@
 	"translations": "Traduzioni",
 	"turkish": "Turco",
 	"ukrainian": "Ucraino",
+	"korean": "Coreano",
 	"unaffected": "Inalterato",
 	"uniqueControl": "controllo unico",
 	"uniqueControls": "controlli unici",
@@ -2369,5 +2372,10 @@
 	"serverConfigurationError": "Errore configurazione server",
 	"libraryLoadFailed": "Caricamento libreria fallito",
 	"sortAscending": "Ordina A → Z",
-	"sortDescending": "Ordina Z → A"
+	"sortDescending": "Ordina Z → A",
+	"confirmModalMessagePlural": "Sei sicuro? Questa azione avrà effetto permanente sui seguenti oggetti",
+	"syncAppliedControlsMessage": "I controlli applicati che utilizzano questo controllo di riferimento saranno sincronizzati con esso. Si prega di notare che questa operazione non può essere annullata.",
+	"syncToAppliedControl": "Sincronizza con il controllo applicato",
+	"syncToReferenceControl": "Sincronizza con il controllo di riferimento",
+	"exportEcosystem": "esportazione dell'ecosistema (XLSX)"
 }

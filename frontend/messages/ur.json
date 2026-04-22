@@ -17,6 +17,7 @@
 	"indonesian": "انڈونیشین",
 	"danish": "ڈینش",
 	"croatian": "کروشیائی",
+	"korean": "کوریائی",
 	"addThreat": "خطرہ شامل کریں",
 	"addVulnerability": "کمزوری شامل کریں",
 	"addReferenceControl": "حوالہ کنٹرول شامل کریں",
@@ -720,6 +721,7 @@
 	"requirementMappings": "ضرورت کی نقشہ سازی",
 	"sourceFramework": "ماخذ فریم ورک",
 	"targetFramework": "ہدف فریم ورک",
+	"targetFrameworks": "ہدف فریم ورکس",
 	"baseline": "بنیاد",
 	"createAuditFromBaseline": "بنیاد سے آڈٹ بنائیں",
 	"coverageColon": "کوریج:",
@@ -731,6 +733,7 @@
 	"maturity": "پختگی",
 	"progress": "پیش رفت",
 	"back": "واپس",
+	"backToWorkshop": "Ebios RM مطالعہ / ایکو سسٹم پر واپس جائیں",
 	"duplicate": "نقل کریں",
 	"duplicateRiskAssessment": "خطرے کی تشخیص کو نقل کریں",
 	"duplicateAppliedControl": "لاگو کنٹرول کی نقل تیار کریں۔",
@@ -1104,5 +1107,10 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "ترتیب الف ← ی",
-	"sortDescending": "ترتیب ی ← الف"
+	"sortDescending": "ترتیب ی ← الف",
+	"confirmModalMessagePlural": "کیا آپ کو یقین ہے؟ یہ کارروائی درج ذیل اشیاء کو مستقل طور پر متاثر کرے گی",
+	"syncAppliedControlsMessage": "اس حوالہ کنٹرول کو استعمال کرنے والے اطلاق شدہ کنٹرولز اس کے ساتھ ہم آہنگ کر دیے جائیں گے۔ براہ کرم نوٹ کریں کہ یہ عمل واپس نہیں لیا جا سکتا۔",
+	"syncToAppliedControl": "لاگو کنٹرول کے ساتھ ہم آہنگ کریں",
+	"syncToReferenceControl": "حوالہ کنٹرول کے ساتھ ہم آہنگ کریں",
+	"exportEcosystem": "ماحول کی برآمدگی (XLSX)"
 }

@@ -17,6 +17,7 @@
 	"indonesian": "indonesiska",
 	"danish": "danska",
 	"croatian": "kroatiska",
+	"korean": "Koreanska",
 	"addThreat": "Lägg till hot",
 	"addVulnerability": "Lägg till sårbarhet",
 	"addReferenceControl": "Lägg till referenskontroll",
@@ -723,6 +724,7 @@
 	"requirementMappings": "Kravkartläggningar",
 	"sourceFramework": "Källramverk",
 	"targetFramework": "Målramverk",
+	"targetFrameworks": "Målramverk",
 	"baseline": "Baslinje",
 	"createAuditFromBaseline": "Skapa revision från baslinje",
 	"coverageColon": "Täckning:",
@@ -734,6 +736,7 @@
 	"maturity": "Mognad",
 	"progress": "Framsteg",
 	"back": "Tillbaka",
+	"backToWorkshop": "Tillbaka till Ebios RM-studien / ekosystemet",
 	"duplicate": "Duplicera",
 	"duplicateRiskAssessment": "Duplicera riskbedömning",
 	"size": "Storlek",
@@ -1127,5 +1130,10 @@
 	"serverConfigurationError": "Serverkonfigurationsfel",
 	"libraryLoadFailed": "Biblioteket kunde inte laddas",
 	"sortAscending": "Sortera A → Z",
-	"sortDescending": "Sortera Z → A"
+	"sortDescending": "Sortera Z → A",
+	"confirmModalMessagePlural": "Är du säker? Denna åtgärd kommer permanent att påverka följande objekt",
+	"syncAppliedControlsMessage": "De tillämpade kontroller som använder denna referenskontroll kommer att synkroniseras med den. Observera att detta inte kan ångras.",
+	"syncToAppliedControl": "Synkronisera med tillämpad kontroll",
+	"syncToReferenceControl": "Synkronisera med referenskontroll",
+	"exportEcosystem": "ekosystemexport (XLSX)"
 }

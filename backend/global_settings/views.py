@@ -2,7 +2,6 @@ from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
 from core.serializers import SerializerFactory
@@ -15,8 +14,9 @@ from .serializers import (
     GlobalSettingsSerializer,
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
+    VulnerabilitySlaSerializer,
+    SecIntelFeedsSerializer,
 )
-from django.conf import settings
 from django.db import transaction
 from .models import GlobalSettings
 import structlog
@@ -124,6 +124,13 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        # Clear cached LLM/embedder so new settings take effect immediately
+        from django.conf import settings as django_settings
+
+        if getattr(django_settings, "ENABLE_CHAT", False):
+            from chat.providers import clear_provider_cache
+
+            clear_provider_cache()
         return Response(serializer.data)
 
     def get_object(self):
@@ -257,18 +264,68 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         return Response(interface_settings)
 
 
+class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = VulnerabilitySlaSerializer
+    queryset = GlobalSettings.objects.filter(name="vulnerability-sla")
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj, _ = self.model.objects.get_or_create(name="vulnerability-sla")
+        obj.is_published = True
+        obj.save(update_fields=["is_published"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
+class SecIntelFeedsViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = SecIntelFeedsSerializer
+    queryset = GlobalSettings.objects.filter(name="sec-intel-feeds")
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj, _ = self.model.objects.get_or_create(name="sec-intel-feeds")
+        obj.is_published = True
+        obj.save(update_fields=["is_published"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
 def get_sso_info(request):
     """
     API endpoint that returns the CSRF token.
     """
-    settings = SSOSettings.objects.get()
-    sp_entity_id = settings.settings["sp"].get("entity_id")
-    callback_url = CISO_ASSISTANT_URL + "/"
+    sso_settings = SSOSettings.objects.get()
+    sp_entity_id = sso_settings.settings["sp"].get("entity_id")
+    callback_url = settings.CISO_ASSISTANT_URL + "/"
     return Response(
         {
-            "is_enabled": settings.is_enabled,
+            "is_enabled": sso_settings.is_enabled,
             "sp_entity_id": sp_entity_id,
             "callback_url": callback_url,
         }
