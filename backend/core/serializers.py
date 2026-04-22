@@ -793,6 +793,7 @@ class AssetListSerializer(BaseModelSerializer):
     asset_class = FieldsRelatedField(["id", "name"])
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    parent_assets = FieldsRelatedField(many=True)
     type = serializers.CharField(source="get_type_display")
     security_objectives = serializers.SerializerMethodField()
     disaster_recovery_objectives = serializers.SerializerMethodField()
@@ -811,6 +812,7 @@ class AssetListSerializer(BaseModelSerializer):
             "asset_class",
             "owner",
             "filtering_labels",
+            "parent_assets",
             "security_objectives",
             "disaster_recovery_objectives",
             "created_at",
