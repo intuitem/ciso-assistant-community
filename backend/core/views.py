@@ -10291,6 +10291,211 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @action(detail=False, methods=["get"], url_path="recap")
+    def recap(self, request):
+        """Return the compact data needed by the /recap page in a single response."""
+        # /recap only renders folder groupings plus per-assessment donut/global scores.
+        # Building that payload here avoids the former frontend request fan-out:
+        # folders -> assessments per folder -> donut/global_score per assessment.
+        result_color_map = {
+            RequirementAssessment.Result.NOT_ASSESSED: "#d1d5db",
+            RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
+            RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
+            RequirementAssessment.Result.COMPLIANT: "#86efac",
+            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
+        }
+
+        def matches_selected_groups(compliance_assessment, requirement) -> bool:
+            # When an assessment targets a subset of implementation groups, recap must
+            # ignore requirements outside that subset. If no subset is configured, we
+            # keep the historical behavior and include every assessable requirement.
+            if not compliance_assessment.selected_implementation_groups:
+                return True
+            selected_groups = set(compliance_assessment.selected_implementation_groups)
+            if not selected_groups:
+                return True
+            requirement_groups = set(requirement.implementation_groups or [])
+            return bool(selected_groups & requirement_groups)
+
+        def build_result_donut(compliance_assessment, requirement_assessments):
+            # /recap only needs the "result" donut, not the full payload returned by
+            # the legacy donut_data endpoint. Recomputing the small subset here keeps
+            # the response compact and avoids a per-assessment HTTP round trip.
+            counts = {
+                result: 0 for result in RequirementAssessment.Result.values
+            }
+            for ras in requirement_assessments:
+                if matches_selected_groups(compliance_assessment, ras.requirement):
+                    counts[ras.result] = counts.get(ras.result, 0) + 1
+
+            return {
+                "values": [
+                    {
+                        "name": result,
+                        "value": counts.get(result, 0),
+                        "itemStyle": {"color": result_color_map[result]},
+                    }
+                    for result in RequirementAssessment.Result.values
+                ]
+            }
+
+        def build_global_score(compliance_assessment, requirement_assessments):
+            # Reuse the same scoring rules as the dedicated global_score endpoint.
+            # The filtering below mirrors the existing business rule around
+            # "anchor NA to target": in that mode some non-scored rows are still kept
+            # so the target anchoring stays consistent with the rest of the product.
+            if compliance_assessment.anchor_na_to_target:
+                scored = [
+                    ras
+                    for ras in requirement_assessments
+                    if not (
+                        ras.result != RequirementAssessment.Result.NOT_APPLICABLE
+                        and ras.is_scored is False
+                    )
+                ]
+            else:
+                scored = [
+                    ras
+                    for ras in requirement_assessments
+                    if ras.is_scored is not False
+                    and ras.result != RequirementAssessment.Result.NOT_APPLICABLE
+                ]
+
+            # The scoring helper accepts an optional implementation-group filter. We
+            # pass the selected groups once so both implementation and documentation
+            # scores stay aligned with the assessment configuration.
+            implementation_groups = (
+                set(compliance_assessment.selected_implementation_groups)
+                if compliance_assessment.selected_implementation_groups
+                else None
+            )
+            na_target = None
+            if compliance_assessment.anchor_na_to_target:
+                # If a custom target exists, NA answers are anchored to that target;
+                # otherwise they fall back to the framework max score.
+                na_target = (
+                    compliance_assessment.target_score
+                    if compliance_assessment.target_score is not None
+                    else compliance_assessment.max_score
+                )
+
+            implementation_score = compliance_assessment._compute_score_for_field(
+                scored, implementation_groups, "score", na_target
+            )
+
+            documentation_score = None
+            if compliance_assessment.show_documentation_score:
+                # Documentation is optional in the UI, so only compute it when this
+                # assessment is configured to display it.
+                documentation_score = compliance_assessment._compute_score_for_field(
+                    scored, implementation_groups, "documentation_score", na_target
+                )
+
+            enabled_scores = [
+                score
+                for score in [implementation_score, documentation_score]
+                if score is not None and score != -1
+            ]
+            if enabled_scores:
+                # /recap expects the same "maturity" summary as the old global_score
+                # endpoint: the mean of the enabled score dimensions, rounded to 1
+                # decimal place.
+                maturity_score = int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
+            else:
+                maturity_score = implementation_score
+
+            return {
+                "implementation_score": implementation_score,
+                "documentation_score": documentation_score,
+                "maturity_score": maturity_score,
+                "max_score": compliance_assessment.max_score,
+            }
+
+        assessments = list(
+            # Reuse get_queryset() so the endpoint keeps the same visibility rules and
+            # request-level filtering as the rest of the ComplianceAssessment API.
+            self.get_queryset()
+            .select_related("folder", "framework")
+            .prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        requirement__assessable=True
+                    ).select_related("requirement"),
+                )
+            )
+            # We need requirement on each requirement_assessment because the recap
+            # calculations inspect requirement.implementation_groups.
+            # Keep the response ordering stable so the page does not need to sort again.
+            .order_by(Lower("folder__name"), Lower("name"))
+        )
+
+        folders_map = {}
+        for assessment in assessments:
+            folder_id = str(assessment.folder_id)
+            if folder_id not in folders_map:
+                folders_map[folder_id] = {
+                    "id": folder_id,
+                    "name": assessment.folder.name,
+                    "compliance_assessments": [],
+                    # Internal accumulator used to build folder-level compliance once
+                    # all assessments inside the folder have been processed.
+                    "_overall_counts": {
+                        result: 0 for result in RequirementAssessment.Result.values
+                    },
+                }
+
+            requirement_assessments = list(assessment.requirement_assessments.all())
+            # Reuse the prefetched requirement assessments for both widgets so we do not
+            # trigger extra queries per compliance assessment.
+            result_donut = build_result_donut(assessment, requirement_assessments)
+            global_score = build_global_score(assessment, requirement_assessments)
+
+            for item in result_donut["values"]:
+                # Aggregate each assessment donut into a folder-level donut.
+                folders_map[folder_id]["_overall_counts"][item["name"]] += item["value"]
+
+            folders_map[folder_id]["compliance_assessments"].append(
+                {
+                    "id": str(assessment.id),
+                    "name": assessment.name,
+                    "framework": {
+                        "id": str(assessment.framework_id),
+                        "str": str(assessment.framework),
+                    },
+                    "donut": {"result": result_donut},
+                    "globalScore": global_score,
+                }
+            )
+
+        results = []
+        for folder in folders_map.values():
+            total = sum(folder["_overall_counts"].values())
+            # overallCompliance mirrors the previous frontend aggregation, but it is now
+            # computed once on the server from the same per-assessment donut counts.
+            folder["overallCompliance"] = {
+                "values": [
+                    {
+                        "name": result,
+                        "value": folder["_overall_counts"][result],
+                        "itemStyle": {"color": result_color_map[result]},
+                        "percentage": (
+                            # Keep the historical payload shape: percentages are sent
+                            # as formatted strings because the existing UI expects that.
+                            f"{(folder['_overall_counts'][result] / total) * 100:.1f}"
+                            if total > 0
+                            else "0"
+                        ),
+                    }
+                    for result in RequirementAssessment.Result.values
+                ],
+                "total": total,
+            }
+            del folder["_overall_counts"]
+            results.append(folder)
+
+        return Response({"results": results})
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get score calculation method choices")
     def score_calculation_method(self, request):

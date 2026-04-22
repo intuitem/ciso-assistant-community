@@ -2,148 +2,24 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 import { m } from '$paraglide/messages';
 
-const REQUIREMENT_ASSESSMENT_STATUS = [
-	'compliant',
-	'partially_compliant',
-	'in_progress',
-	'non_compliant',
-	'not_applicable',
-	'to_do'
-] as const;
-
-interface DonutItem {
-	name: string;
-	localName?: string;
-	value: number;
-	itemStyle: Record<string, unknown>;
-}
-
-interface RequirementAssessmentDonutItem extends Omit<DonutItem, 'name'> {
-	name: (typeof REQUIREMENT_ASSESSMENT_STATUS)[number];
-	percentage: string;
-}
-
-interface FolderAnalytics {
-	id: string;
-	name: string;
-	compliance_assessments: Record<string, any>[];
-	overallCompliance: {
-		values: RequirementAssessmentDonutItem[];
-		total: number;
-	};
-}
-
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-	const folders: FolderAnalytics[] = await fetch(`${BASE_API_URL}/folders/`)
-		.then((res) => res.json())
-		.then(async (folders) => {
-			if (folders && Array.isArray(folders.results)) {
-				const folderPromises = folders.results.map(async (folder) => {
-					try {
-						const complianceAssessmentsResponse = await fetch(
-							`${BASE_API_URL}/compliance-assessments/?folder=${folder.id}`
-						);
-						const complianceAssessmentsData = await complianceAssessmentsResponse.json();
-
-						if (complianceAssessmentsData && Array.isArray(complianceAssessmentsData.results)) {
-							const updatedAssessmentsPromises = complianceAssessmentsData.results.map(
-								async (complianceAssessment) => {
-									try {
-										const [donutDataResponse, globalScoreResponse] = await Promise.all([
-											fetch(
-												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/donut_data/`
-											),
-											fetch(
-												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/global_score/`
-											)
-										]);
-
-										const [donutData, globalScoreData] = await Promise.all([
-											donutDataResponse.json(),
-											globalScoreResponse.json()
-										]);
-
-										complianceAssessment.donut = donutData;
-										complianceAssessment.globalScore = globalScoreData;
-										return complianceAssessment;
-									} catch (error) {
-										console.error('Error fetching data for compliance assessment:', error);
-										throw error;
-									}
-								}
-							);
-
-							const updatedAssessments = await Promise.all(updatedAssessmentsPromises);
-							folder.compliance_assessments = updatedAssessments;
-							return folder;
-						} else {
-							folder.compliance_assessments = [];
-							return folder;
-						}
-					} catch (error) {
-						console.error('Error fetching compliance assessments:', error);
-						folder.compliance_assessments = [];
-						return folder;
-					}
-				});
-
-				return Promise.all(folderPromises);
-			} else {
-				throw new Error('Folders results not found or not an array');
+	// /recap used to trigger a request cascade:
+	// folders -> assessments per folder -> donut/global_score per assessment.
+	// The dedicated backend endpoint returns the exact shape needed by the page
+	// in one call, which removes the previous N+1 pattern from the frontend.
+	const folders = await fetch(`${BASE_API_URL}/compliance-assessments/recap/`)
+		.then(async (res) => {
+			if (!res.ok) {
+				throw new Error(`Failed to load recap data: ${res.status} ${res.statusText}`);
 			}
+			return res.json();
 		})
+		.then((data) => data.results ?? [])
 		.catch((error) => {
-			console.error('Failed to load folders:', error);
+			// Keep the page renderable even if the recap endpoint fails temporarily.
+			console.error('Failed to load recap:', error);
 			return [];
 		});
-
-	if (folders) {
-		folders.forEach((folder) => {
-			// Initialize an object to hold the aggregated donut data
-			const aggregatedDonutData: {
-				values: RequirementAssessmentDonutItem[];
-				total: number;
-			} = {
-				values: [],
-				total: 0
-			};
-
-			// Iterate through each compliance assessment of the folder
-			if (folder.compliance_assessments) {
-				folder.compliance_assessments.forEach((compliance_assessment: Record<string, any>) => {
-					// Process the donut data of each assessment
-					if (compliance_assessment.donut?.result?.values) {
-						compliance_assessment.donut.result.values.forEach(
-							(donutItem: RequirementAssessmentDonutItem) => {
-								// Find the corresponding item in the aggregated data
-								const aggregatedItem: RequirementAssessmentDonutItem | undefined =
-									aggregatedDonutData.values.find((item) => item.name === donutItem.name);
-								if (aggregatedItem) {
-									// If the item already exists, increment its value
-									aggregatedItem.value += donutItem.value;
-								} else {
-									// If it's a new item, add it to the aggregated data
-									aggregatedDonutData.values.push({ ...donutItem });
-								}
-							}
-						);
-					}
-				});
-			}
-
-			// Calculate the total sum of all values
-			const totalValue = aggregatedDonutData.values.reduce((sum, item) => sum + item.value, 0);
-
-			// Calculate and store the percentage for each item
-			aggregatedDonutData.values = aggregatedDonutData.values.map((item) => ({
-				...item,
-				percentage: totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : '0'
-			}));
-
-			// Assign the aggregated donut data to the folder
-			folder.overallCompliance = aggregatedDonutData;
-		});
-	}
 
 	return {
 		folders,
