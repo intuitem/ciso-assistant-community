@@ -573,12 +573,15 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         related_name="stakeholders",
         on_delete=models.CASCADE,
     )
-    entity = models.ForeignKey(
+    entity = models.TextField(verbose_name=_("Entity name"))
+    third_party_entity = models.ForeignKey(
         Entity,
         on_delete=models.CASCADE,
-        verbose_name=_("Entity"),
+        verbose_name=_("Third Party Entity"),
         related_name="stakeholders",
-        help_text=_("Entity qualified by the stakeholder"),
+        help_text=_("Related thied party entity"),
+        blank=True,
+        null=True,
     )
     applied_controls = models.ManyToManyField(
         AppliedControl,
@@ -655,7 +658,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def __str__(self):
-        return f"{self.entity.name} ({self.category.get_name_translated if self.category else 'N/A'})"
+        return f"{self.entity} ({self.category.get_name_translated if self.category else 'N/A'})"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder

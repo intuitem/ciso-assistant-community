@@ -500,7 +500,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             for sh in stakeholders:
                 sh_data.append(
                     {
-                        "entity": sh.entity.name if sh.entity else "",
+                        "entity": sh.entity if sh.entity else "",
                         "category": sh.category.get_name_translated
                         if sh.category
                         else "",
