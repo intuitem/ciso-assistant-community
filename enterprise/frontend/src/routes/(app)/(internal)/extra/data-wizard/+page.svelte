@@ -78,6 +78,11 @@
 			id: 'EbiosRMStudyExcel',
 			label: m.ebiosRMStudyExcel(),
 			description: m.ebiosRMStudyExcelDescription()
+		},
+		{
+			id: 'TaskTemplate',
+			label: m.taskTemplates(),
+			description: m.taskTemplatesDescription()
 		}
 	];
 
@@ -138,6 +143,7 @@
 		'TPRM',
 		'EbiosRMStudyARM',
 		'EbiosRMStudyExcel',
+		'TaskTemplate',
 		'Vulnerability'
 	];
 
