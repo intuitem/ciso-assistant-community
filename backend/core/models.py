@@ -7822,10 +7822,16 @@ class ComplianceAssessment(Assessment):
     @property
     def progress(self) -> int:
         result = RequirementAssessment.objects.aggregate(
-            total_cnt=Count("id", filter=Q(requirement__assessable=True)),
+            total_cnt=Count(
+                "id", filter=Q(compliance_assessment=self, requirement__assessable=True)
+            ),
             assessed_cnt=Count(
                 "id",
-                filter=Q(requirement__assessable=True, score__isnull=False)
+                filter=Q(
+                    compliance_assessment=self,
+                    requirement__assessable=True,
+                    score__isnull=False,
+                )
                 & ~Q(result=RequirementAssessment.Result.NOT_ASSESSED),
             ),
         )
