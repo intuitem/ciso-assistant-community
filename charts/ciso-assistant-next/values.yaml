@@ -115,12 +115,11 @@ backend:
     # -- Enable Django debug mode
     djangoDebug: false
 
-  # -- Set extra volumes
+  # -- Set extra volumes for backend
   extraVolumes: []
-    # example
-    #- name: ca-certs
-    #      secret:
-    #        secretName: my-ca-cert
+    #   - name: ca-certs
+    #     secret:
+    #       secretName: my-ca-cert
 
   # -- Set extra volume mounts for backend container
   extraVolumeMounts: []
@@ -263,14 +262,13 @@ frontend:
     # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
     bodySizeLimit: "50M"
 
-  # -- Set extra volumes
+  # -- Set extra volumes for frontend
   extraVolumes: []
-    # example
-    #- name: ca-certs
-    #      secret:
-    #        secretName: my-ca-cert
+    #   - name: ca-certs
+    #     secret:
+    #       secretName: my-ca-cert
 
-  # -- Set extra volume mounts for backend container
+  # -- Set extra volume mounts for frontend container
   extraVolumeMounts: []
     #   - name: ca-certs
     #     mountPath: /usr/local/share/ca-certificates/custom-ca.crt
@@ -376,7 +374,7 @@ ingress:
       #   ...
       #   -----END CERTIFICATE-----
 
-## DEPRECATED - Bundeled PostgreSQL database configuration (Bitnami chart)
+## DEPRECATED - Bundled PostgreSQL database configuration (Bitnami chart)
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
 ## Note: Don't enable if you use SQLite mode or external PgSQL database
 ## IMPORTANT : Bitnami PostgreSQL deployment will be removed in a future version, you should use SQLite mode or externalPgsql

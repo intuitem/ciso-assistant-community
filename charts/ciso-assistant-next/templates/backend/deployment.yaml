@@ -142,7 +142,7 @@ spec:
         - name: localstorage-data
           mountPath: /ciso/localStorage
         {{- end }}
-        {{- with .Values.backend.huey.extraVolumeMounts }}
+        {{- with .Values.backend.extraVolumeMounts }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
         ports:
@@ -265,7 +265,7 @@ spec:
         - name: sqlite-data
           mountPath: /ciso/db
         {{- end }}
-        {{- with .Values.backend.extraVolumeMounts }}
+        {{- with .Values.backend.huey.extraVolumeMounts }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- if .Values.backend.huey.resources }}
