@@ -238,6 +238,27 @@
 	// Whether THIS node is the innermost focused NodeBlock. Drives the
 	// focus ring so the user can see which node keyboard shortcuts target.
 	let isFocused = $state(false);
+
+	// Progressive disclosure for the 80% case: annotation / typical_evidence /
+	// visibility_expression are rare, so they hide behind an "Advanced" toggle.
+	// Auto-expand when any of them already has content so existing data is never hidden.
+	const hasAdvancedContent = $derived(
+		!!(
+			node.node.annotation ||
+			node.node.typical_evidence ||
+			node.node.visibility_expression ||
+			(node.node.translations &&
+				Object.values(node.node.translations).some(
+					(t) => t.annotation || t.typical_evidence
+				))
+		)
+	);
+	let showAdvanced = $state(hasAdvancedContent);
+	// Re-open if content appears (e.g., the user types into a field while it's
+	// somehow visible, or content arrives via translations update).
+	$effect(() => {
+		if (hasAdvancedContent) showAdvanced = true;
+	});
 </script>
 
 <div
@@ -366,73 +387,106 @@
 
 					{#if !isSplash}
 						<!-- Description side-by-side -->
-						<div class="grid grid-cols-2 gap-3">
-							<textarea
-								value={node.node.description ?? ''}
-								readonly
-								rows="3"
-								use:autogrowAction
-								class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
-							></textarea>
-							<textarea
-								value={getTranslation(node.node.translations, lang, 'description')}
-								placeholder="Translate description..."
-								rows="3"
-								use:autogrowAction
-								class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-								onblur={(e) =>
-									saveField(
-										'translations',
-										withTranslation(
-											node.node.translations,
-											lang,
-											'description',
-											e.currentTarget.value
-										)
-									)}
-							></textarea>
-						</div>
-						<!-- Annotation side-by-side -->
-						<div class="grid grid-cols-2 gap-3">
-							<textarea
-								value={node.node.annotation ?? ''}
-								readonly
-								rows="2"
-								use:autogrowAction
-								class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
-							></textarea>
-							<textarea
-								value={getTranslation(node.node.translations, lang, 'annotation')}
-								placeholder="Translate annotation..."
-								rows="2"
-								use:autogrowAction
-								class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-								onblur={(e) =>
-									saveField(
-										'translations',
-										withTranslation(
-											node.node.translations,
-											lang,
-											'annotation',
-											e.currentTarget.value
-										)
-									)}
-							></textarea>
-						</div>
-						{#if node.node.assessable}
-							<!-- Typical evidence side-by-side -->
+						<div>
+							<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+								Description
+							</label>
 							<div class="grid grid-cols-2 gap-3">
 								<textarea
-									value={node.node.typical_evidence ?? ''}
+									value={node.node.description ?? ''}
 									readonly
-									rows="2"
+									rows="3"
 									use:autogrowAction
 									class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
 								></textarea>
 								<textarea
-									value={getTranslation(node.node.translations, lang, 'typical_evidence')}
-									placeholder="Translate typical evidence..."
-									rows="2"
+									value={getTranslation(node.node.translations, lang, 'description')}
+									placeholder="Translate description..."
+									rows="3"
+									use:autogrowAction
+									class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									onblur={(e) =>
+										saveField(
+											'translations',
+											withTranslation(
+												node.node.translations,
+												lang,
+												'description',
+												e.currentTarget.value
+											)
+										)}
+								></textarea>
+							</div>
+						</div>
+
+						<!-- Advanced fields toggle (mirrors non-translation mode) -->
+						<button
+							type="button"
+							class="text-[10px] font-medium uppercase tracking-wider text-gray-400 hover:text-gray-600 transition-colors inline-flex items-center gap-1 mt-2"
+							onclick={() => (showAdvanced = !showAdvanced)}
+							aria-expanded={showAdvanced}
+						>
+							<i class="fa-solid {showAdvanced ? 'fa-chevron-down' : 'fa-chevron-right'} text-[8px]"></i>
+							Advanced
+							{#if !showAdvanced}
+								<span class="text-gray-300 normal-case tracking-normal font-normal">
+									— annotation{node.node.assessable ? ', evidence' : ''}
+								</span>
+							{/if}
+						</button>
+
+						{#if showAdvanced}
+							<!-- Annotation side-by-side -->
+							<div>
+								<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+									Annotation
+								</label>
+								<div class="grid grid-cols-2 gap-3">
+									<textarea
+										value={node.node.annotation ?? ''}
+										readonly
+										rows="2"
+										use:autogrowAction
+										class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
+									></textarea>
+									<textarea
+										value={getTranslation(node.node.translations, lang, 'annotation')}
+										placeholder="Translate annotation..."
+										rows="2"
+										use:autogrowAction
+										class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+										onblur={(e) =>
+											saveField(
+												'translations',
+												withTranslation(
+													node.node.translations,
+													lang,
+													'annotation',
+													e.currentTarget.value
+												)
+											)}
+									></textarea>
+								</div>
+							</div>
+						{/if}
+						{#if showAdvanced && node.node.assessable}
+							<!-- Typical evidence side-by-side -->
+							<div>
+								<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+									Typical evidence
+								</label>
+								<div class="grid grid-cols-2 gap-3">
+									<textarea
+										value={node.node.typical_evidence ?? ''}
+										readonly
+										rows="2"
+										use:autogrowAction
+										class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
+									></textarea>
+									<textarea
+										value={getTranslation(node.node.translations, lang, 'typical_evidence')}
+										placeholder="Translate typical evidence..."
+										rows="2"
 									use:autogrowAction
 									class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 									onblur={(e) =>
@@ -447,6 +501,7 @@
 										)}
 								></textarea>
 							</div>
+						</div>
 						{/if}
 					{/if}
 				{:else}
@@ -705,34 +760,70 @@
 				{/if}
 			</div>
 		{:else}
-			<!-- Default (non-splash) body: description + annotation + typical_evidence -->
+			<!-- Default (non-splash) body: description (always) + advanced section -->
 			{#if !$activeLanguageStore}
-				<div class="px-4 pt-2 pb-0 space-y-1">
-					<textarea
-						value={node.node.description ?? ''}
-						placeholder="Description (optional)"
-						rows="3"
-						use:autogrowAction
-						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-						onblur={(e) => saveField('description', e.currentTarget.value || null)}
-					></textarea>
-					<textarea
-						value={node.node.annotation ?? ''}
-						placeholder="Annotation (optional guidance notes)"
-						rows="2"
-						use:autogrowAction
-						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-						onblur={(e) => saveField('annotation', e.currentTarget.value || null)}
-					></textarea>
-					{#if node.node.assessable}
+				<div class="px-4 pt-2 pb-0 space-y-2">
+					<div>
+						<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+							Description
+						</label>
 						<textarea
-							value={node.node.typical_evidence ?? ''}
-							placeholder="Typical evidence (optional)"
-							rows="2"
+							value={node.node.description ?? ''}
+							placeholder="Optional"
+							rows="3"
 							use:autogrowAction
 							class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-							onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
+							onblur={(e) => saveField('description', e.currentTarget.value || null)}
 						></textarea>
+					</div>
+
+					<!-- Advanced fields toggle -->
+					<button
+						type="button"
+						class="text-[10px] font-medium uppercase tracking-wider text-gray-400 hover:text-gray-600 transition-colors inline-flex items-center gap-1"
+						onclick={() => (showAdvanced = !showAdvanced)}
+						aria-expanded={showAdvanced}
+					>
+						<i class="fa-solid {showAdvanced ? 'fa-chevron-down' : 'fa-chevron-right'} text-[8px]"></i>
+						Advanced
+						{#if !showAdvanced}
+							<span class="text-gray-300 normal-case tracking-normal font-normal">
+								— annotation{node.node.assessable ? ', evidence' : ''}, visibility
+							</span>
+						{/if}
+					</button>
+
+					{#if showAdvanced}
+						<div class="space-y-2 pt-1">
+							<div>
+								<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+									Annotation
+								</label>
+								<textarea
+									value={node.node.annotation ?? ''}
+									placeholder="Optional guidance notes for reviewers"
+									rows="2"
+									use:autogrowAction
+									class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									onblur={(e) => saveField('annotation', e.currentTarget.value || null)}
+								></textarea>
+							</div>
+							{#if node.node.assessable}
+								<div>
+									<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+										Typical evidence
+									</label>
+									<textarea
+										value={node.node.typical_evidence ?? ''}
+										placeholder="Examples of evidence respondents should attach"
+										rows="2"
+										use:autogrowAction
+										class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+										onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
+									></textarea>
+								</div>
+							{/if}
+						</div>
 					{/if}
 				</div>
 			{/if}
@@ -762,12 +853,13 @@
 			{/if}
 		{/if}
 
-		<!-- CEL visibility expression (shared for all node types) -->
-		<div class="px-4 py-2 border-t {isSplash ? 'border-purple-100' : 'border-gray-100'}">
-			<label class="text-xs text-gray-500 block mb-1">
+		<!-- CEL visibility expression: inside Advanced for default nodes, always-on for splash -->
+		{#if isSplash || showAdvanced}
+		<div class="px-4 py-2 {isSplash ? 'border-t border-purple-100' : ''}">
+			<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block mb-1">
 				Visibility expression (CEL)
 				<span
-					class="text-gray-400 ml-1"
+					class="text-gray-400 ml-1 normal-case"
 					title="CEL expression that must evaluate to true for this requirement to be visible. Example: requirements[&quot;urn:...&quot;].score > 50"
 					>&#9432;</span
 				>
@@ -782,6 +874,7 @@
 				onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
 			/>
 		</div>
+		{/if}
 
 		<!-- Questions (only for assessable non-splash nodes) -->
 		{#if node.node.assessable && !isSplash}
