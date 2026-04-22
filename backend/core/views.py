@@ -116,6 +116,7 @@ from weasyprint import HTML
 
 from core.helpers import *
 from core.models import (
+    duplicate_related_objects,
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
@@ -4122,73 +4123,36 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, RiskAssessment
         )
 
-        if UUID(pk) in object_ids_view:
-            risk_assessment = self.get_object()
-
-            perimeter = data.get("perimeter")
-            folder = data.get("folder")
-
-            duplicate_risk_assessment = RiskAssessment.objects.create(
-                name=data.get("name"),
-                description=data.get("description"),
-                perimeter=perimeter,
-                folder=folder,
-                version=data.get("version"),
-                risk_matrix=risk_assessment.risk_matrix,
-                ref_id=data.get("ref_id"),
-                eta=risk_assessment.eta,
-                due_date=risk_assessment.due_date,
-                status=risk_assessment.status,
-            )
-
-            duplicate_risk_assessment.authors.set(risk_assessment.authors.all())
-            duplicate_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
-
-            for scenario in risk_assessment.risk_scenarios.all():
-                duplicate_scenario = RiskScenario.objects.create(
-                    risk_assessment=duplicate_risk_assessment,
-                    name=scenario.name,
-                    description=scenario.description,
-                    treatment=scenario.treatment,
-                    current_proba=scenario.current_proba,
-                    current_impact=scenario.current_impact,
-                    residual_proba=scenario.residual_proba,
-                    residual_impact=scenario.residual_impact,
-                    strength_of_knowledge=scenario.strength_of_knowledge,
-                    justification=scenario.justification,
-                    ref_id=scenario.ref_id,
-                )
-
-                duplicate_scenario.qualifications.set(scenario.qualifications.all())
-
-                for field in [
-                    "applied_controls",
-                    "threats",
-                    "assets",
-                    "existing_applied_controls",
-                ]:
-                    duplicate_related_objects(
-                        scenario,
-                        duplicate_scenario,
-                        duplicate_risk_assessment.folder,
-                        field,
-                    )
-
-                if duplicate_risk_assessment.folder in [risk_assessment.folder] + [
-                    folder for folder in risk_assessment.folder.get_sub_folders()
-                ]:
-                    duplicate_scenario.owner.set(scenario.owner.all())
-
-                duplicate_scenario.save()
-
-            duplicate_risk_assessment.save()
+        if UUID(pk) not in object_ids_view:
             return Response(
-                {
-                    "results": RiskAssessmentReadSerializer(
-                        duplicate_risk_assessment
-                    ).data
-                }
+                {"results": "Risk assessment not found."},
+                status=status.HTTP_404_NOT_FOUND,
             )
+
+        risk_assessment = self.get_object()
+        data = request.data
+
+        name = data.get("name")
+        if name is None:
+            return Response(
+                {"results": "A 'name' field must be provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        description = data.get("description")
+        perimeter = data.get("perimeter")
+        version = data.get("version")
+        ref_id = data.get("ref_id")
+
+        perimeter = Perimeter.objects.filter(id=perimeter).first()
+
+        duplicated_risk_assessment = risk_assessment.duplicate(
+            name, description, perimeter, version, ref_id
+        )
+
+        return Response(
+            {"results": RiskAssessmentReadSerializer(duplicated_risk_assessment).data}
+        )
 
     @action(
         detail=True,
