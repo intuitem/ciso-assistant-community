@@ -388,6 +388,33 @@
 									)}
 							></textarea>
 						</div>
+						<!-- Annotation side-by-side -->
+						<div class="grid grid-cols-2 gap-3">
+							<textarea
+								value={node.node.annotation ?? ''}
+								readonly
+								rows="2"
+								use:autogrowAction
+								class="w-full text-xs text-gray-300 bg-transparent border-0 border-b border-transparent resize-none py-0.5 cursor-default"
+							></textarea>
+							<textarea
+								value={getTranslation(node.node.translations, lang, 'annotation')}
+								placeholder="Translate annotation..."
+								rows="2"
+								use:autogrowAction
+								class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+								onblur={(e) =>
+									saveField(
+										'translations',
+										withTranslation(
+											node.node.translations,
+											lang,
+											'annotation',
+											e.currentTarget.value
+										)
+									)}
+							></textarea>
+						</div>
 						{#if node.node.assessable}
 							<!-- Typical evidence side-by-side -->
 							<div class="grid grid-cols-2 gap-3">
@@ -674,7 +701,7 @@
 				{/if}
 			</div>
 		{:else}
-			<!-- Default (non-splash) body: description + typical_evidence -->
+			<!-- Default (non-splash) body: description + annotation + typical_evidence -->
 			{#if !$activeLanguageStore}
 				<div class="px-4 pt-2 pb-0 space-y-1">
 					<textarea
@@ -684,6 +711,14 @@
 						use:autogrowAction
 						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 						onblur={(e) => saveField('description', e.currentTarget.value || null)}
+					></textarea>
+					<textarea
+						value={node.node.annotation ?? ''}
+						placeholder="Annotation (optional guidance notes)"
+						rows="2"
+						use:autogrowAction
+						class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+						onblur={(e) => saveField('annotation', e.currentTarget.value || null)}
 					></textarea>
 					{#if node.node.assessable}
 						<textarea
