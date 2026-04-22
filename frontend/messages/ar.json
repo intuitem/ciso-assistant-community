@@ -751,6 +751,8 @@
 	"ownedFolders": "المجالات المملوكة",
 	"thirdParty": "طرف ثالث",
 	"thirdPartyCategory": "الأطراف الثالثة",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "تقييم الكيان",
 	"entityAssessments": "تقييمات الكيان",
 	"addEntityAssessment": "إضافة تقييم الكيان",

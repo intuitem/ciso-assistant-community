@@ -1055,6 +1055,8 @@
 	"ownedFolders": "Domaines possédés",
 	"thirdParty": "Tiers",
 	"thirdPartyCategory": "Gestion des tiers",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"thirdPartyDescription": "Gestion des entités tierces ainsi que leurs représentants, solutions et contrats associés",
 	"thirdPartiesImportHelpText": "Import des entités, solutions et contrats selon le format Excel multi-onglets",
 	"entityAssessment": "Évaluation de l'entité",

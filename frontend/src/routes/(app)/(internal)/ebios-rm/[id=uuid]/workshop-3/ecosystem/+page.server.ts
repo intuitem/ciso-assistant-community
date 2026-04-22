@@ -17,7 +17,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'stakeholders';
 	const createSchema = modelSchema(URLModel);
-	const entityCreateSchema = modelSchema('entities');
 	const objectEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/object/`;
 	const objectResponse = await fetch(objectEndpoint);
 	let object: any = {};
@@ -31,11 +30,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		folder: object.folder
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
-	const entityCreateForm = await superValidate({ folder: object.folder }, zod(entityCreateSchema), {
-		errors: false
-	});
 	const model: ModelInfo = getModelInfo(URLModel);
-	const entityModel: ModelInfo = getModelInfo('entities');
 
 	async function populateSelectOptions(targetModel: ModelInfo) {
 		const selectOptions: Record<string, any> = {};
@@ -65,7 +60,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		targetModel.selectOptions = selectOptions;
 	}
 
-	await Promise.all([populateSelectOptions(model), populateSelectOptions(entityModel)]);
+	await populateSelectOptions(model);
 
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
@@ -92,10 +87,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	return {
 		createForm,
-		entityCreateForm,
 		deleteForm,
 		model,
-		entityModel,
 		URLModel,
 		table,
 		radar,
@@ -113,13 +106,6 @@ export const actions: Actions = {
 			urlModel: 'stakeholders',
 			action: 'create'
 			// redirectToWrittenObject: redirectToWrittenObject
-		});
-	},
-	createEntity: async (event) => {
-		return defaultWriteFormAction({
-			event,
-			urlModel: 'entities',
-			action: 'create'
 		});
 	},
 	delete: async (event) => {

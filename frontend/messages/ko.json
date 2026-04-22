@@ -1099,6 +1099,8 @@
 	"ownedFolders": "소유 도메인",
 	"thirdParty": "제3자",
 	"thirdPartyCategory": "제3자",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"thirdPartyDescription": "제3자 엔터티와 그 대표자, 계약, 솔루션 및 평가를 관리합니다.",
 	"thirdPartiesImportHelpText": "다중 시트 Excel 템플릿에서 제3자의 엔터티, 솔루션 및 계약을 가져옵니다",
 	"entityAssessment": "엔터티 평가",

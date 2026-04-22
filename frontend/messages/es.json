@@ -724,6 +724,8 @@
 	"ownedFolders": "Dominios propios",
 	"thirdParty": "Tercero",
 	"thirdPartyCategory": "Terceros",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Evaluación de entidades",
 	"entityAssessments": "Evaluaciones de entidades",
 	"addEntityAssessment": "Añadir evaluación de entidad",

@@ -724,6 +724,8 @@
 	"ownedFolders": "Eigendom domeinen",
 	"thirdParty": "Derde partij",
 	"thirdPartyCategory": "Derden",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Entiteitsbeoordeling",
 	"entityAssessments": "Entiteitsbeoordelingen",
 	"addEntityAssessment": "Entiteitsbeoordeling toevoegen",

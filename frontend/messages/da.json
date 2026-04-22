@@ -764,6 +764,8 @@
 	"ownedFolders": "Ejede domæner",
 	"thirdParty": "Tredjepart",
 	"thirdPartyCategory": "Tredjeparter",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Enhedsvurdering",
 	"entityAssessments": "Enhedsvurderinger",
 	"addEntityAssessment": "Tilføj enhedsvurdering",

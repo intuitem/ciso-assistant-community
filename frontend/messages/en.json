@@ -1157,6 +1157,8 @@
 	"ownedFolders": "Owned domains",
 	"thirdParty": "Third party",
 	"thirdPartyCategory": "Third parties",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"thirdPartyDescription": "Management of third-party entities and their representatives, contracts, solutions and assessments.",
 	"thirdPartiesImportHelpText": "Import entities, solutions and contracts of your third parties from the multi-sheet excel template",
 	"entityAssessment": "Entity assessment",

@@ -755,6 +755,8 @@
 	"ownedFolders": "Saját tartományok",
 	"thirdParty": "Harmadik fél",
 	"thirdPartyCategory": "Harmadik fél",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Vállalatértékelés",
 	"entityAssessments": "Vállalatértékelések",
 	"addEntityAssessment": "Vállalatértékelés hozzáadása",

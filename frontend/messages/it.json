@@ -733,6 +733,8 @@
 	"ownedFolders": "Domini posseduti",
 	"thirdParty": "Terza parte",
 	"thirdPartyCategory": "Terze parti",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Valutazione entità",
 	"entityAssessments": "Valutazioni entità",
 	"addEntityAssessment": "Aggiungi valutazione entità",

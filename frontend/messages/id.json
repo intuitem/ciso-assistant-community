@@ -755,6 +755,8 @@
 	"ownedFolders": "Domain yang dimiliki",
 	"thirdParty": "Pihak ketiga",
 	"thirdPartyCategory": "Kategori pihak ketiga",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Penilaian entitas",
 	"entityAssessments": "Penilaian entitas",
 	"addEntityAssessment": "Tambahkan penilaian entitas",

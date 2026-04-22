@@ -799,6 +799,8 @@
 	"ownedFolders": "Τομείς υπό ιδιοκτησία",
 	"thirdParty": "Τρίτο μέρος",
 	"thirdPartyCategory": "Τρίτα μέρη",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Αξιολόγηση οντότητας",
 	"entityAssessments": "Αξιολογήσεις οντοτήτων",
 	"addEntityAssessment": "Προσθήκη αξιολόγησης οντότητας",

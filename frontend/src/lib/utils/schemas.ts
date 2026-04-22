@@ -1186,6 +1186,7 @@ export const StakeholderSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	category: z.string(),
 	entity: z.string(),
+	third_party_entity: z.string().optional().nullable(),
 	current_dependency: z.number().min(0).max(4).default(0).optional(),
 	current_penetration: z.number().min(0).max(4).default(0).optional(),
 	current_maturity: z.number().min(1).max(4).default(1).optional(),

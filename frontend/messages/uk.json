@@ -768,6 +768,8 @@
 	"ownedFolders": "Власні домени",
 	"thirdParty": "Третя сторона",
 	"thirdPartyCategory": "Треті сторони",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Оцінка об'єкта",
 	"entityAssessments": "Оцінювання об'єктів",
 	"addEntityAssessment": "Додати оцінку сутності",

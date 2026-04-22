@@ -751,6 +751,8 @@
 	"ownedFolders": "زیر ملکیت ڈومینز",
 	"thirdParty": "تیسری پارٹی",
 	"thirdPartyCategory": "تیسرے فریق",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "ہستی کی تشخیص",
 	"entityAssessments": "ہستی کے جائزے",
 	"addEntityAssessment": "ہستی کی تشخیص شامل کریں۔",

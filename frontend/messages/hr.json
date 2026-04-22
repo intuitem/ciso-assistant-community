@@ -810,6 +810,8 @@
 	"ownedFolders": "Domene u vlasništvu",
 	"thirdParty": "Treća strana",
 	"thirdPartyCategory": "Treće strane",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Procjena entiteta",
 	"entityAssessments": "Procjene entiteta",
 	"addEntityAssessment": "Dodaj procjenu entiteta",

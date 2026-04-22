@@ -752,6 +752,8 @@
 	"ownedFolders": "Domenii deținute",
 	"thirdParty": "Terț",
 	"thirdPartyCategory": "Terți",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Evaluarea entității",
 	"entityAssessments": "Evaluări ale entităților",
 	"addEntityAssessment": "Adăugați evaluarea entității",

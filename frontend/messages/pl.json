@@ -801,6 +801,8 @@
 	"ownedFolders": "Posiadane domeny",
 	"thirdParty": "Strona trzecia",
 	"thirdPartyCategory": "Strony trzecie",
+	"thirdPartyEntity": "Third party entity",
+	"thirdPartyEntityHelpText": "The third party entity you want the stakeholder to relate to.",
 	"entityAssessment": "Ocena podmiotu",
 	"entityAssessments": "Oceny podmiotów",
 	"addEntityAssessment": "Dodaj ocenę podmiotu",
