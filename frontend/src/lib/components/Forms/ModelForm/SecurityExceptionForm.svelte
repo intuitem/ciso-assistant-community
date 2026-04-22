@@ -18,6 +18,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import MarkdownField from '../MarkdownField.svelte';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -80,6 +81,19 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	function getTodayDateString(): string {
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = String(today.getMonth() + 1).padStart(2, '0');
+		const day = String(today.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	}
+
+	const { value: expirationDate } = formFieldProxy(form, 'expiration_date');
+	const today = getTodayDateString();
+
+	let isExpirationDateInPast = $derived(Boolean($expirationDate) && $expirationDate < today);
 </script>
 
 <HiddenInput {form} field="requirement_assessments" />
@@ -155,6 +169,12 @@
 	cacheLock={cacheLocks['expiration_date']}
 	bind:cachedValue={formDataCache['expiration_date']}
 />
+{#if isExpirationDateInPast}
+	<p class="mt-1 text-sm text-orange-600">
+		<i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+		{m.expirationDateIsInThePastWarning()}
+	</p>
+{/if}
 <TextField
 	{form}
 	label={m.link()}
