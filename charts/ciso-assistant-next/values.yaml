@@ -51,7 +51,7 @@ global:
   tolerations: []
 
   # -- Affinity rules for all components
-  affinity: {}
+  affinity: {} # @schema additionalProperties: true
 
 ## Service Account
 serviceAccount:
@@ -212,7 +212,7 @@ backend:
   tolerations: []
 
   # -- Affinity rules for backend
-  affinity: {}
+  affinity: {} # @schema additionalProperties: true
 
   # -- Environment variables to pass to backend
   env: []
@@ -309,7 +309,7 @@ frontend:
   tolerations: []
 
   # -- Affinity rules for frontend
-  affinity: {}
+  affinity: {} # @schema additionalProperties: true
 
   # -- Environment variables to pass to frontend
   env: []

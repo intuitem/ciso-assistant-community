@@ -7,7 +7,7 @@
             "properties": {
                 "affinity": {
                     "type": "object",
-                    "additionalProperties": false
+                    "additionalProperties": true
                 },
                 "annotations": {
                     "type": "object",
@@ -235,7 +235,7 @@
             "properties": {
                 "affinity": {
                     "type": "object",
-                    "additionalProperties": false
+                    "additionalProperties": true
                 },
                 "annotations": {
                     "type": "object",
@@ -336,7 +336,7 @@
             "properties": {
                 "affinity": {
                     "type": "object",
-                    "additionalProperties": false
+                    "additionalProperties": true
                 },
                 "clusterDomain": {
                     "type": "string"

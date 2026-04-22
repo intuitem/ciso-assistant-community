@@ -11,6 +11,18 @@
 
 {{ template "chart.sourcesSection" . }}
 
+## Development
+
+Update schema command after new updates on `values.yaml` (using https://github.com/losisin/helm-values-schema-json) :
+```
+helm schema --values values.yaml
+```
+
+Update `README.md` with helm-docs (using https://github.com/norwoodj/helm-docs) :
+```
+helm schema --values values.yaml
+```
+
 {{ template "chart.requirementsSection" . }}
 
 ## Installing the chart
@@ -27,6 +39,8 @@ To deploy the release :
 ```
 helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant -f custom.yaml
 ```
+
+
 
 {{ template "chart.valuesSection" . }}
 
