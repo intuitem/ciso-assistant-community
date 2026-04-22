@@ -7821,18 +7821,18 @@ class ComplianceAssessment(Assessment):
 
     @property
     def progress(self) -> int:
-        requirement_assessments = list(
-            self.get_requirement_assessments(include_non_assessable=False)
+        result = RequirementAssessment.objects.aggregate(
+            total_cnt=Count("id", filter=Q(requirement__assessable=True)),
+            assessed_cnt=Count(
+                "id",
+                filter=Q(requirement__assessable=True, score__isnull=False)
+                & ~Q(result=RequirementAssessment.Result.NOT_ASSESSED),
+            ),
         )
-        total_cnt = len(requirement_assessments)
-        assessed_cnt = len(
-            [
-                r
-                for r in requirement_assessments
-                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
-                or r.score != None
-            ]
-        )
+
+        total_cnt = result["total_cnt"]
+        assessed_cnt = result["assessed_cnt"]
+
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
 
     @property
