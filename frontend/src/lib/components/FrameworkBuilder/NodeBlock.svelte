@@ -234,6 +234,8 @@
 
 <div
 	style="margin-left: {Math.min(node.depth, 3) * 16}px"
+	class="scroll-mt-32"
+	data-section-id={node.node.id}
 	data-builder-node
 	tabindex="-1"
 	onfocusin={(e) => {
