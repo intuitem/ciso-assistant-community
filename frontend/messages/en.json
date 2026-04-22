@@ -2145,6 +2145,7 @@
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Add exception",
 	"expirationDate": "Expiration date",
+	"expirationDateIsInThePastWarning": "The entered expiration date is in the past",
 	"filterBy": "Filter by",
 	"demoDataAlreadyImported": "Demo data has already been imported. Delete or rename your existing DEMO domain.",
 	"finding": "Finding",
