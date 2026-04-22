@@ -2380,6 +2380,8 @@
 	"managedDocumentConflictHelp": "Multiple selected controls have managed documents attached. Pick one document to keep on the merged control; the others will be unlinked (kept in the system but no longer attached to a control).",
 	"keepThisDocument": "Keep this document",
 	"mergeMinSelection": "Select at least {n} rows to merge",
+	"mergeMaxSelection": "Select at most {n} rows to merge",
+	"replacing": "Replacing",
 	"replaceWithSuccess": "Applied control replaced successfully",
 	"replaceWithError": "Could not replace applied control",
 	"replaceWithConfirmTitle": "Confirm replace",

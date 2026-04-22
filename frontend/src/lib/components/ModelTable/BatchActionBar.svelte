@@ -44,9 +44,17 @@
 
 		if (action.type === 'merge') {
 			const minSel = action.minSelection ?? 2;
+			const maxSel = action.maxSelection;
 			if (count < minSel) {
 				toastStore.trigger({
 					message: m.mergeMinSelection({ n: minSel }),
+					background: 'preset-filled-warning-500'
+				});
+				return;
+			}
+			if (maxSel !== undefined && count > maxSel) {
+				toastStore.trigger({
+					message: m.mergeMaxSelection({ n: maxSel }),
 					background: 'preset-filled-warning-500'
 				});
 				return;

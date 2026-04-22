@@ -2944,6 +2944,7 @@ export interface BatchActionConfig {
 	multiSelect?: boolean;
 	children?: BatchActionConfig[];
 	minSelection?: number;
+	maxSelection?: number;
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
@@ -3017,7 +3018,8 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			type: 'merge',
 			label: 'mergeControls',
 			icon: 'fa-solid fa-code-merge',
-			minSelection: 2
+			minSelection: 2,
+			maxSelection: 20
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
@@ -3039,7 +3041,8 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			type: 'merge',
 			label: 'mergeControls',
 			icon: 'fa-solid fa-code-merge',
-			minSelection: 2
+			minSelection: 2,
+			maxSelection: 20
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],

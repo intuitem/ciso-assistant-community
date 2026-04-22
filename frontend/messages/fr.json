@@ -2213,6 +2213,8 @@
 	"managedDocumentConflictHelp": "Plusieurs mesures sélectionnées ont des documents gérés rattachés. Choisir le document à conserver sur la mesure fusionnée ; les autres seront détachés (conservés dans le système mais plus rattachés à une mesure).",
 	"keepThisDocument": "Conserver ce document",
 	"mergeMinSelection": "Sélectionner au moins {n} lignes pour fusionner",
+	"mergeMaxSelection": "Sélectionner au plus {n} lignes pour fusionner",
+	"replacing": "Remplace",
 	"replaceWithSuccess": "Mesure appliquée remplacée avec succès",
 	"replaceWithError": "Impossible de remplacer la mesure appliquée",
 	"replaceWithConfirmTitle": "Confirmer le remplacement",

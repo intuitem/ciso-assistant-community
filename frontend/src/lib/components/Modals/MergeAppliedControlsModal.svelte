@@ -123,6 +123,26 @@
 		return { type: 'existing', id: pickedExternalId };
 	}
 
+	function extractErrorMessage(body: any, fallback: string): string {
+		// DRF error shapes we might see: {detail: "..."}, {field: ["msg", ...]},
+		// {detail: {...}}, or SvelteKit's wrapped {body: {...}}.
+		if (!body) return fallback;
+		const inner = body?.body ?? body;
+		if (typeof inner === 'string') return inner;
+		if (typeof inner?.detail === 'string') return inner.detail;
+		if (Array.isArray(inner)) return inner.join(' ');
+		if (typeof inner === 'object') {
+			const parts: string[] = [];
+			for (const [key, val] of Object.entries(inner)) {
+				if (key === 'managed_document_conflict') continue; // noise at this layer
+				const str = Array.isArray(val) ? val.join(' ') : typeof val === 'string' ? val : '';
+				if (str) parts.push(key === 'detail' ? str : `${key}: ${str}`);
+			}
+			if (parts.length > 0) return parts.join(' — ');
+		}
+		return fallback;
+	}
+
 	async function refreshPreview() {
 		const target = buildTargetPayload();
 		// For target=new, the backend needs at least a folder (permission check).
@@ -151,7 +171,7 @@
 			});
 			if (!res.ok) {
 				const body = await res.json().catch(() => ({}));
-				previewError = body?.body?.detail || body?.detail || JSON.stringify(body);
+				previewError = extractErrorMessage(body, m.mergeError());
 				// Keep the stale preview visible rather than blanking the section.
 			} else {
 				preview = await res.json();
@@ -210,9 +230,8 @@
 			});
 			if (!res.ok) {
 				const body = await res.json().catch(() => ({}));
-				const detail = body?.body?.detail || body?.detail || body?.message || m.mergeError();
 				toastStore.trigger({
-					message: typeof detail === 'string' ? detail : m.mergeError(),
+					message: extractErrorMessage(body, m.mergeError()),
 					background: 'preset-filled-error-500'
 				});
 				return;
@@ -237,6 +256,15 @@
 		</header>
 		{#if entryMode === 'replace'}
 			<p class="text-sm text-gray-600">{m.replaceWithDescription()}</p>
+			{#if sources.length === 1}
+				<div class="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+					<span class="text-gray-500">{m.replacing()}:</span>
+					<span class="font-medium text-gray-900">{sources[0].name}</span>
+					{#if sources[0].folderName}
+						<span class="text-gray-400">— {sources[0].folderName}</span>
+					{/if}
+				</div>
+			{/if}
 		{/if}
 
 		<!-- Destructive-action warning: sources are hard-deleted. -->
