@@ -6,5 +6,9 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	const endpoint = `${BASE_API_URL}/security-advisories/source/${url.search}`;
 	const res = await fetch(endpoint);
 	const data = await res.json();
-	return json(data, { status: res.status });
+	const options =
+		typeof Object.values(data)[0] === 'string'
+			? Object.keys(data).map((key) => ({ label: data[key], value: key }))
+			: data;
+	return json(options, { status: res.status });
 };
