@@ -10198,24 +10198,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return ComplianceAssessmentListSerializer
         return super().get_serializer_class(**kwargs)
 
+    def get_queryset_minimalistic(self) -> QuerySet[ComplianceAssessment]:
+        """Get the minimalistic base viewset `QuerySet` (with no extra JOIN or secondary query)."""
+
+        qs = super().get_queryset()
+
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
+
+        return qs
+
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
         from core.models import Question
 
-        qs = (
-            super()
-            .get_queryset()
-            .select_related(
-                "folder",
-                "folder__parent_folder",  # For get_folder_full_path() optimization
-                "framework",  # Displayed in table
-                "perimeter",  # Displayed in table
-            )
-            .annotate(
-                _has_questions=Exists(
-                    Question.objects.filter(
-                        requirement_node__framework=OuterRef("framework")
-                    )
+        qs = self.get_queryset_minimalistic()
+
+        qs = qs.select_related(
+            "folder",
+            "folder__parent_folder",  # For get_folder_full_path() optimization
+            "framework",  # Displayed in table
+            "perimeter",  # Displayed in table
+        ).annotate(
+            _has_questions=Exists(
+                Question.objects.filter(
+                    requirement_node__framework=OuterRef("framework")
                 )
             )
         )
@@ -10275,14 +10287,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 distinct=True,
             ),
         )
-
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
-            user_actors = Actor.get_all_for_user(self.request.user)
-            qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
-                | Q(requirement_assignments__actor__in=user_actors)
-            ).distinct()
 
         return qs
 
@@ -11690,11 +11694,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # list[{"donut_data": {...}, "global_score": {...}, **compliance_assessment_data}]
         recap_data: list[dict[str, Any]] = []
 
-        viewable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
-        )
         compliance_assessments = (
-            ComplianceAssessment.objects.filter(id__in=viewable_ids)
+            self.get_queryset_minimalistic()
             .select_related("folder", "framework")
             .prefetch_related(
                 Prefetch(
