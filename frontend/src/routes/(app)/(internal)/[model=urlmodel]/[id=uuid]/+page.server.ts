@@ -32,7 +32,7 @@ async function handleRiskAcceptanceTransition(
 			? z.object({
 					urlmodel: z.string(),
 					id: z.string().uuid(),
-					justification: z.string().optional()
+					justification: z.string().optional().default('')
 				})
 			: z.object({ urlmodel: z.string(), id: z.string().uuid() });
 	const form = await superValidate(formData, zod(schema));

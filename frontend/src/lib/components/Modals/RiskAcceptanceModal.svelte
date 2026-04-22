@@ -65,6 +65,11 @@
 			action={formAction}
 			class="modal-form {cForm}"
 			validators={schema}
+			onUpdated={(form) => {
+				if (form.valid && !form.message?.error) {
+					parent.onConfirm();
+				}
+			}}
 		>
 			{#snippet children({ form })}
 				<TextArea
@@ -84,11 +89,7 @@
 					</button>
 					<input type="hidden" name="urlmodel" value={URLModel} />
 					<input type="hidden" name="id" value={id} />
-					<button
-						class="btn border-green-900 {submitButtonStyle} shadow-sm"
-						type="submit"
-						onclick={parent.onConfirm}
-					>
+					<button class="btn border-green-900 {submitButtonStyle} shadow-sm" type="submit">
 						{submitButtonText}
 					</button>
 				</footer>

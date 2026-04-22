@@ -241,7 +241,7 @@
 				_form: {
 					id: id,
 					urlmodel: urlModel,
-					justification: data.data?.justification ? data.data.justification : ''
+					justification: action.includes('revoke') ? (data.data.justification ?? '') : ''
 				},
 				id: id,
 				debug: false,
