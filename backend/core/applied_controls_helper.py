@@ -401,11 +401,9 @@ def merge_applied_controls(
     if missing:
         raise ValidationError({"source_ids": f"Not found: {missing}"})
 
-    for src in sources:
-        if getattr(src, "builtin", False) or getattr(src, "urn", None):
-            raise ValidationError(
-                f"Cannot merge builtin/library control '{src.name}' (urn={src.urn})."
-            )
+    # AppliedControl does not inherit from LibraryMixin, so it has no `urn` or
+    # `builtin` fields. Nothing to guard against here — kept as a comment in case
+    # those fields are ever added later.
 
     # -- 2. Resolve target ---------------------------------------------------
     target_obj, target_is_new = _resolve_target(target, dry_run=dry_run)
