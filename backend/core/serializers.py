@@ -1407,6 +1407,82 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return ret
 
 
+class AppliedControlListSerializer(BaseModelSerializer):
+    """
+    Lightweight serializer for the applied controls list view.
+
+    Drops the per-row DB-touching fields from `AppliedControlReadSerializer`
+    that the list table does not render:
+      - `findings_count` (source="findings.count" → COUNT per row)
+      - `ranking_score` (iterates non-prefetched risk_scenarios → 1 query per row)
+      - `annual_cost` / `annual_cost_display` / `currency`
+        (property hits GlobalSettings per row, called twice)
+      - `state`, `evidences`, `objectives`, `security_exceptions`, `path`
+        (not displayed on the table)
+
+    Inherits from `BaseModelSerializer` (not `AppliedControlWriteSerializer`)
+    to skip the unconditional `SyncMapping` query in Write.to_representation
+    that would otherwise also fire per row on the list.
+    """
+
+    folder = FieldsRelatedField()
+    reference_control = FieldsRelatedField()
+    priority = serializers.CharField(source="get_priority_display")
+    category = serializers.CharField(source="get_category_display")
+    csf_function = serializers.CharField(source="get_csf_function_display")
+    effort = serializers.CharField(source="get_effort_display")
+    control_impact = serializers.CharField(source="get_control_impact_display")
+    cost = serializers.JSONField()
+    owner = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    assets = FieldsRelatedField(many=True)
+    is_assigned = serializers.SerializerMethodField()
+    linked_models = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "id",
+            "ref_id",
+            "name",
+            "description",
+            "link",
+            "status",
+            "priority",
+            "category",
+            "csf_function",
+            "control_impact",
+            "effort",
+            "eta",
+            "start_date",
+            "expiry_date",
+            "cost",
+            "folder",
+            "reference_control",
+            "owner",
+            "filtering_labels",
+            "assets",
+            "is_assigned",
+            "linked_models",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_is_assigned(self, obj):
+        # `owner` is prefetched on the list path; `.all()` hits the prefetch
+        # cache, while `.exists()` (the model @property) bypasses it.
+        return bool(obj.owner.all())
+
+    def get_linked_models(self, obj):
+        from core.views import APPLIED_CONTROL_LINKED_FIELD_NAMES
+
+        return [
+            name
+            for name in APPLIED_CONTROL_LINKED_FIELD_NAMES
+            if getattr(obj, f"has_{name}", False)
+        ]
+
+
 class ActionPlanSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
