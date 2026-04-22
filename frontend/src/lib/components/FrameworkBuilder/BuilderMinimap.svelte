@@ -6,9 +6,10 @@
 
 	interface Props {
 		frameworkId: string;
+		onOpenHelp?: () => void;
 	}
 
-	let { frameworkId }: Props = $props();
+	let { frameworkId, onOpenHelp }: Props = $props();
 
 	const builder = getBuilderContext();
 	const {
@@ -194,6 +195,19 @@
 
 		<!-- Spacer -->
 		<div class="ml-auto"></div>
+
+		<!-- Keyboard shortcut help -->
+		{#if onOpenHelp}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onOpenHelp}
+				title="Keyboard shortcuts (?)"
+				aria-label="Show keyboard shortcuts"
+			>
+				?
+			</button>
+		{/if}
 
 		<!-- Save button (visible when local edits not yet saved to draft) -->
 		{#if $unsavedStore}

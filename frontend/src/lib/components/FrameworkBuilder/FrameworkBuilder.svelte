@@ -318,7 +318,7 @@
 <svelte:window onkeydown={handleGlobalKey} />
 
 <div class="card !p-0 bg-white shadow-lg overflow-visible">
-	<BuilderMinimap frameworkId={framework.id} />
+	<BuilderMinimap frameworkId={framework.id} onOpenHelp={() => (helpOpen = true)} />
 
 	<div class="flex">
 		<BuilderToC />
@@ -865,15 +865,5 @@
 		</div>
 	</div>
 </div>
-
-<button
-	type="button"
-	class="fixed bottom-4 right-4 z-30 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-md border border-gray-200 text-gray-500 hover:text-gray-700 hover:shadow-lg transition-all"
-	onclick={() => (helpOpen = true)}
-	title="Keyboard shortcuts (?)"
-	aria-label="Show keyboard shortcuts"
->
-	?
-</button>
 
 <KeyboardHelp bind:open={helpOpen} onClose={() => (helpOpen = false)} />
