@@ -280,11 +280,15 @@ def _check_permissions(
     target_is_new: bool,
 ) -> None:
     """Raise PermissionDenied if user lacks the required perm on any relevant folder."""
+    from core.models import AppliedControl
     from iam.models import RoleAssignment
 
-    change = Permission.objects.get(codename="change_appliedcontrol")
-    delete = Permission.objects.get(codename="delete_appliedcontrol")
-    add = Permission.objects.get(codename="add_appliedcontrol")
+    # Scope by content_type so a codename collision from another app can't
+    # trigger MultipleObjectsReturned.
+    ct = ContentType.objects.get_for_model(AppliedControl)
+    change = Permission.objects.get(codename="change_appliedcontrol", content_type=ct)
+    delete = Permission.objects.get(codename="delete_appliedcontrol", content_type=ct)
+    add = Permission.objects.get(codename="add_appliedcontrol", content_type=ct)
 
     for folder in source_folders:
         if not RoleAssignment.is_access_allowed(user=user, perm=change, folder=folder):
@@ -311,58 +315,6 @@ def _check_permissions(
 
 
 # ---------------------------------------------------------------------------
-# Target resolution
-# ---------------------------------------------------------------------------
-
-
-def _resolve_target(target: dict, dry_run: bool):
-    """Return (target_instance, was_created). On dry_run, target=new returns an unsaved instance."""
-    from core.models import AppliedControl
-
-    if target["type"] == "existing":
-        try:
-            return AppliedControl.objects.get(id=target["id"]), False
-        except AppliedControl.DoesNotExist:
-            raise ValidationError(
-                f"Target applied control {target['id']} does not exist."
-            )
-
-    # target.type == "new" — validate via the write serializer
-    from core.serializers import AppliedControlWriteSerializer
-
-    serializer = AppliedControlWriteSerializer(data=target.get("fields", {}))
-    serializer.is_valid(raise_exception=True)
-    if dry_run:
-        # Build an unsaved instance so we can reason about folder/permissions
-        instance = AppliedControl(
-            **{
-                k: v
-                for k, v in serializer.validated_data.items()
-                if k
-                not in (
-                    "findings",
-                    "task_templates",
-                    "integration_config",
-                    "remote_object_id",
-                    "create_remote_object",
-                    # M2Ms can't go on an unsaved instance
-                    "evidences",
-                    "assets",
-                    "owner",
-                    "security_exceptions",
-                    "objectives",
-                    "filtering_labels",
-                    "requirement_assessments",
-                    "stakeholders",
-                )
-            }
-        )
-        return instance, True
-
-    return serializer.save(), True
-
-
-# ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
 
@@ -372,6 +324,7 @@ def merge_applied_controls(
     source_ids: list,
     target: dict,
     user,
+    request=None,
     dry_run: bool = False,
     managed_document_resolution: dict | None = None,
 ) -> dict:
@@ -382,6 +335,9 @@ def merge_applied_controls(
             by the serializer and with any target id already stripped).
         target: {"type": "new", "fields": {...}} or {"type": "existing", "id": "..."}.
         user: authenticated user performing the merge.
+        request: DRF request object (optional). When provided, it is passed as
+            serializer context on target=new creation so folder-access rules that
+            depend on ``context['request']`` are enforced.
         dry_run: if True, returns the would-be response (including managed_document
             conflict info) without touching state.
         managed_document_resolution: {"keep": "<doc_id>"} — required on real merge
@@ -390,8 +346,17 @@ def merge_applied_controls(
     Returns a dict with `target_id`, `target_is_new`, `folder_mismatch`, `rewired`,
     `unioned_m2m`, `managed_documents`, `managed_document_conflict`, `sync_mappings`,
     `deleted_sources`.
+
+    Security notes:
+    - Target creation (target=new) happens inside the atomic block, **after**
+      permission checks and managed-document conflict validation, so a failure
+      never leaves an orphan AppliedControl behind.
+    - Source/target folder permissions are checked against the raw folder IDs
+      *before* any mutation; the write serializer for target=new is given request
+      context so its own folder-access rules apply.
     """
     from core.models import AppliedControl, Comment
+    from iam.models import Folder
     from webhooks.service import dispatch_webhook_event
 
     # -- 1. Fetch and validate sources ---------------------------------------
@@ -405,29 +370,44 @@ def merge_applied_controls(
     # `builtin` fields. Nothing to guard against here — kept as a comment in case
     # those fields are ever added later.
 
-    # -- 2. Resolve target ---------------------------------------------------
-    target_obj, target_is_new = _resolve_target(target, dry_run=dry_run)
+    # -- 2. Pre-validate target (no creation or mutation yet) -----------------
+    target_is_new = target["type"] == "new"
+    target_existing_obj: AppliedControl | None = None
 
-    # When target is existing, it must not also be in sources (serializer
-    # stripped it, but defend in depth).
-    if not target_is_new and str(target_obj.id) in found_ids:
-        raise ValidationError(
-            "The target applied control must not appear in source_ids."
-        )
+    if target_is_new:
+        fields = target.get("fields") or {}
+        folder_id = fields.get("folder")
+        if not folder_id:
+            raise ValidationError(
+                {"target": "fields.folder is required when target.type='new'"}
+            )
+        try:
+            target_folder = Folder.objects.get(id=folder_id)
+        except Folder.DoesNotExist:
+            raise ValidationError({"target.fields.folder": "Folder does not exist."})
+    else:
+        try:
+            existing = AppliedControl.objects.get(id=target["id"])
+        except AppliedControl.DoesNotExist:
+            raise ValidationError(
+                f"Target applied control {target['id']} does not exist."
+            )
+        # Defense in depth — serializer already stripped target from source_ids.
+        if str(existing.id) in found_ids:
+            raise ValidationError(
+                "The target applied control must not appear in source_ids."
+            )
+        target_existing_obj = existing
+        target_folder = existing.folder
 
-    # -- 3. Permissions ------------------------------------------------------
+    # -- 3. Permission checks BEFORE any mutation ---------------------------
     source_folders = [s.folder for s in sources if s.folder is not None]
-    target_folder = target_obj.folder
     _check_permissions(user, source_folders, target_folder, target_is_new)
 
     # -- 4. Managed-document conflict ---------------------------------------
     source_id_list = [s.id for s in sources]
-    md_target_id = target_obj.id if (not target_is_new or not dry_run) else None
-    md_candidates = (
-        _candidate_managed_documents(source_id_list, md_target_id)
-        if md_target_id is not None
-        else _candidate_managed_documents(source_id_list, None)
-    )
+    md_target_id = target_existing_obj.id if target_existing_obj is not None else None
+    md_candidates = _candidate_managed_documents(source_id_list, md_target_id)
     md_conflict = _detect_managed_document_conflict(
         source_id_list, md_target_id, md_candidates
     )
@@ -441,7 +421,7 @@ def merge_applied_controls(
     # -- 5. Dry-run short-circuit -------------------------------------------
     if dry_run:
         return {
-            "target_id": str(md_target_id) if md_target_id else None,
+            "target_id": str(target_existing_obj.id) if target_existing_obj else None,
             "target_is_new": target_is_new,
             "target_folder_id": str(target_folder.id) if target_folder else None,
             "source_folder_ids": sorted({str(f.id) for f in source_folders}),
@@ -449,7 +429,7 @@ def merge_applied_controls(
             "managed_document_conflict": md_conflict,
             "rewired_preview": _compute_rewire_preview(source_id_list),
             "unioned_m2m_preview": _compute_union_preview(
-                sources, target_obj, target_is_new
+                sources, target_existing_obj, target_is_new
             ),
             "deleted_sources_preview": [str(s.id) for s in sources],
         }
@@ -468,8 +448,22 @@ def merge_applied_controls(
                 }
             )
 
-    # -- 7. Atomic rewire + delete ------------------------------------------
+    # -- 7. Atomic create-target (if new) + rewire + delete -----------------
     with transaction.atomic():
+        # 7.0. Persist target now that permissions + conflict checks have passed.
+        if target_is_new:
+            from core.serializers import AppliedControlWriteSerializer
+
+            serializer_context = {"request": request} if request is not None else {}
+            serializer = AppliedControlWriteSerializer(
+                data=target.get("fields") or {}, context=serializer_context
+            )
+            serializer.is_valid(raise_exception=True)
+            target_obj = serializer.save()
+        else:
+            assert target_existing_obj is not None  # pyright hint
+            target_obj = target_existing_obj
+
         # 7a. Direct M2M union onto target
         unioned = _union_direct_m2ms(target_obj, sources)
 
@@ -514,8 +508,11 @@ def merge_applied_controls(
         # 7g. Hard-delete sources (auditlog LogEntry rows are preserved)
         AppliedControl.objects.filter(id__in=source_id_list).delete()
 
-        # 7h. Touch target so updated_at refreshes and integration sync fires
-        target_obj.save()
+        # 7h. Touch target so updated_at refreshes and integration sync fires.
+        # Skip for a freshly-created target — its initial save already did that
+        # and M2M additions don't trigger a second sync on syncable fields.
+        if not target_is_new:
+            target_obj.save()
 
         # 7i. Update webhook on target
         try:

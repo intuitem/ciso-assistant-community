@@ -2192,6 +2192,7 @@
 	"batchChangePriority": "Changer la priorité",
 	"changeAttributes": "Modifier les attributs",
 	"mergeControls": "Fusionner",
+	"mergeIrreversibleWarning": "Action permanente. {n} mesure(s) appliquée(s) seront supprimée(s) définitivement et toutes leurs références repointées vers la cible. Les mesures supprimées ne peuvent pas être restaurées.",
 	"mergeAppliedControls": "Fusionner des mesures appliquées",
 	"replaceWith": "Remplacer par…",
 	"replaceWithDescription": "Reporter toutes les références de cette mesure appliquée vers une autre mesure existante, puis supprimer celle-ci.",

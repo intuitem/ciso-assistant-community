@@ -75,6 +75,7 @@
 	let previewError: string | null = $state(null);
 	let mdKeepDocId = $state('');
 	let submitting = $state(false);
+	let confirmPhrase = $state('');
 
 	const cBase = 'card bg-white p-6 w-modal-wide max-w-4xl space-y-5';
 	const cHeader = 'text-xl font-medium text-gray-900';
@@ -179,6 +180,8 @@
 	});
 
 	const mdConflict = $derived(preview?.managed_document_conflict ?? null);
+	// Locale-aware confirm phrase — matches the batch-delete modal pattern.
+	const requiredConfirmPhrase = m.yes().toLowerCase();
 	const canConfirm = $derived(
 		!submitting &&
 			preview !== null &&
@@ -186,7 +189,8 @@
 			(targetMode !== 'new' || (newTargetName.length > 0 && newTargetFolderId.length > 0)) &&
 			(targetMode !== 'selected' || selectedSourceId.length > 0) &&
 			(targetMode !== 'another' || pickedExternalId.length > 0) &&
-			(!mdConflict || mdKeepDocId.length > 0)
+			(!mdConflict || mdKeepDocId.length > 0) &&
+			confirmPhrase.trim().toLowerCase() === requiredConfirmPhrase
 	);
 
 	async function handleConfirm() {
@@ -234,6 +238,14 @@
 		{#if entryMode === 'replace'}
 			<p class="text-sm text-gray-600">{m.replaceWithDescription()}</p>
 		{/if}
+
+		<!-- Destructive-action warning: sources are hard-deleted. -->
+		<div
+			class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900 flex items-start gap-2"
+		>
+			<i class="fa-solid fa-triangle-exclamation text-red-600 mt-0.5"></i>
+			<span>{m.mergeIrreversibleWarning({ n: sourceIds.length })}</span>
+		</div>
 
 		{#if loadingSources}
 			<div class="text-sm text-gray-500">Loading…</div>
@@ -394,7 +406,23 @@
 			{/if}
 		{/if}
 
-		<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+		<!-- Typed confirmation — matches the batch-delete safety pattern. -->
+		<div class="space-y-1 border-t border-gray-200 pt-4">
+			<label for="merge-confirm-input" class="text-sm font-medium text-red-600">
+				{m.confirmYes()}
+			</label>
+			<input
+				id="merge-confirm-input"
+				type="text"
+				data-testid="merge-confirm-input"
+				class="input w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+				bind:value={confirmPhrase}
+				placeholder={m.confirmYesPlaceHolder()}
+				autocomplete="off"
+			/>
+		</div>
+
+		<footer class="flex gap-3 justify-end pt-4">
 			<button
 				type="button"
 				class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
@@ -405,7 +433,7 @@
 			</button>
 			<button
 				type="button"
-				class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+				class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 				disabled={!canConfirm}
 				onclick={handleConfirm}
 				data-testid="merge-confirm-button"

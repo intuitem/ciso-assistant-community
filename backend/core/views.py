@@ -5058,6 +5058,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             source_ids=serializer.validated_data["source_ids"],
             target=serializer.validated_data["target"],
             user=request.user,
+            request=request,
             dry_run=serializer.validated_data.get("dry_run", False),
             managed_document_resolution=serializer.validated_data.get(
                 "managed_document_resolution"

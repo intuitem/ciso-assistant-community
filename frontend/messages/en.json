@@ -2359,6 +2359,7 @@
 	"batchChangePriority": "Change priority",
 	"changeAttributes": "Change attributes",
 	"mergeControls": "Merge",
+	"mergeIrreversibleWarning": "This action is permanent. {n} applied control(s) will be hard-deleted and all references to them repointed to the target. Deleted controls cannot be restored.",
 	"mergeAppliedControls": "Merge applied controls",
 	"replaceWith": "Replace with…",
 	"replaceWithDescription": "Move all references from this applied control onto another existing control, then delete this one.",
