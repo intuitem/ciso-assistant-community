@@ -52,7 +52,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | backend.env | list | `[]` | Environment variables to pass to backend |
 | backend.extraVolumeMounts | list | `[]` | Set extra volume mounts for backend container |
-| backend.extraVolumes | list | `[]` | Set extra volumes |
+| backend.extraVolumes | list | `[]` | Set extra volumes for backend |
 | backend.huey.env | list | `[]` | Environment variables to pass to Huey |
 | backend.huey.extraVolumeMounts | list | `[]` | Set extra volume mounts for Huey container |
 | backend.huey.name | string | `"huey"` | Huey container name |
@@ -93,8 +93,8 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
 | frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
-| frontend.extraVolumeMounts | list | `[]` | Set extra volume mounts for backend container |
-| frontend.extraVolumes | list | `[]` | Set extra volumes |
+| frontend.extraVolumeMounts | list | `[]` | Set extra volume mounts for frontend container |
+| frontend.extraVolumes | list | `[]` | Set extra volumes for frontend |
 | frontend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the frontend |
 | frontend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the frontend |
 | frontend.image.repository | string | `"intuitem/ciso-assistant-community/frontend"` | Repository to use for the frontend |

@@ -377,7 +377,7 @@ ingress:
 ## DEPRECATED - Bundled PostgreSQL database configuration (Bitnami chart)
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
 ## Note: Don't enable if you use SQLite mode or external PgSQL database
-## IMPORTANT : Bitnami PostgreSQL deployment will be removed in a future version, you should use SQLite mode or externalPgsql
+## IMPORTANT: Bitnami PostgreSQL deployment will be removed in a future version, you should use SQLite mode or externalPgsql
 postgresql: # @schema additionalProperties: true
   # -- Enable to deploy PostgreSQL.
   enabled: false

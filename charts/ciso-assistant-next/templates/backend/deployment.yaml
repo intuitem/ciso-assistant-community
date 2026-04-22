@@ -289,27 +289,27 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-      - name: tmp-data
-        emptyDir:
-          sizeLimit: 256Mi
-      {{- if .Values.backend.persistence.sqlite.enabled }}
-      - name: sqlite-data
-        persistentVolumeClaim:
-          {{- if .Values.backend.persistence.sqlite.existingClaim }}
-          claimName: {{ .Values.backend.persistence.sqlite.existingClaim }}
-          {{- else }}
-          claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
-          {{- end }}
-      {{- end }}
-      {{- if .Values.backend.persistence.localStorage.enabled }}
-      - name: localstorage-data
-        persistentVolumeClaim:
-          {{- if .Values.backend.persistence.localStorage.existingClaim }}
-          claimName: {{ .Values.backend.persistence.localStorage.existingClaim }}
-          {{- else }}
-          claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
-          {{- end }}
-      {{- end }}
-      {{- with .Values.backend.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        - name: tmp-data
+          emptyDir:
+            sizeLimit: 256Mi
+        {{- if .Values.backend.persistence.sqlite.enabled }}
+        - name: sqlite-data
+          persistentVolumeClaim:
+            {{- if .Values.backend.persistence.sqlite.existingClaim }}
+            claimName: {{ .Values.backend.persistence.sqlite.existingClaim }}
+            {{- else }}
+            claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
+            {{- end }}
+        {{- end }}
+        {{- if .Values.backend.persistence.localStorage.enabled }}
+        - name: localstorage-data
+          persistentVolumeClaim:
+            {{- if .Values.backend.persistence.localStorage.existingClaim }}
+            claimName: {{ .Values.backend.persistence.localStorage.existingClaim }}
+            {{- else }}
+            claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+            {{- end }}
+        {{- end }}
+        {{- with .Values.backend.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
