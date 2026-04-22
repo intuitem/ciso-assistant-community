@@ -449,21 +449,7 @@
 								<span class="text-xs text-gray-400">{settingsSummary}</span>
 							{/if}
 						</div>
-						<div class="flex items-center gap-1.5">
-							<button
-								type="button"
-								class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-								onclick={(e) => {
-									e.stopPropagation();
-									helpOpen = true;
-								}}
-								title="Keyboard shortcuts (?)"
-								aria-label="Show keyboard shortcuts"
-							>
-								?
-							</button>
-							<i class="fa-solid fa-gear text-xs text-gray-400"></i>
-						</div>
+						<i class="fa-solid fa-gear text-xs text-gray-400"></i>
 					</button>
 					{#if showSettings}
 						<div class="px-4 py-4 space-y-6 border-t border-gray-200">
@@ -879,5 +865,15 @@
 		</div>
 	</div>
 </div>
+
+<button
+	type="button"
+	class="fixed bottom-4 right-4 z-30 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-md border border-gray-200 text-gray-500 hover:text-gray-700 hover:shadow-lg transition-all"
+	onclick={() => (helpOpen = true)}
+	title="Keyboard shortcuts (?)"
+	aria-label="Show keyboard shortcuts"
+>
+	?
+</button>
 
 <KeyboardHelp bind:open={helpOpen} onClose={() => (helpOpen = false)} />
