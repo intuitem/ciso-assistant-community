@@ -10293,17 +10293,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="recap")
     def recap(self, request):
-        """Return the compact data needed by the /recap page in a single response."""
-        # /recap only renders folder groupings plus per-assessment donut/global scores.
-        # Building that payload here avoids the former frontend request fan-out:
+        """Return the raw data needed by the /recap page in a single response."""
+        # Keep this endpoint presentation-agnostic: it returns counts and scores, while
+        # the Svelte frontend is responsible for colors, percentages, and chart wiring.
+        # This still avoids the former frontend request fan-out:
         # folders -> assessments per folder -> donut/global_score per assessment.
-        result_color_map = {
-            RequirementAssessment.Result.NOT_ASSESSED: "#d1d5db",
-            RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
-            RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
-            RequirementAssessment.Result.COMPLIANT: "#86efac",
-            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
-        }
 
         def matches_selected_groups(compliance_assessment, requirement) -> bool:
             # When an assessment targets a subset of implementation groups, recap must
@@ -10317,10 +10311,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             requirement_groups = set(requirement.implementation_groups or [])
             return bool(selected_groups & requirement_groups)
 
-        def build_result_donut(compliance_assessment, requirement_assessments):
-            # /recap only needs the "result" donut, not the full payload returned by
-            # the legacy donut_data endpoint. Recomputing the small subset here keeps
-            # the response compact and avoids a per-assessment HTTP round trip.
+        def build_result_counts(compliance_assessment, requirement_assessments):
+            # Return only the raw result counters. The frontend can derive donuts,
+            # colors, and percentages from this compact representation.
             counts = {
                 result: 0 for result in RequirementAssessment.Result.values
             }
@@ -10328,18 +10321,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 if matches_selected_groups(compliance_assessment, ras.requirement):
                     counts[ras.result] = counts.get(ras.result, 0) + 1
 
-            return {
-                "values": [
-                    {
-                        "name": result,
-                        "value": counts.get(result, 0),
-                        "itemStyle": {"color": result_color_map[result]},
-                    }
-                    for result in RequirementAssessment.Result.values
-                ]
-            }
+            return counts
 
-        def build_global_score(compliance_assessment, requirement_assessments):
+        def build_score_summary(compliance_assessment, requirement_assessments):
             # Reuse the same scoring rules as the dedicated global_score endpoint.
             # The filtering below mirrors the existing business rule around
             # "anchor NA to target": in that mode some non-scored rows are still kept
@@ -10405,8 +10389,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 maturity_score = implementation_score
 
             return {
-                "implementation_score": implementation_score,
-                "documentation_score": documentation_score,
                 "maturity_score": maturity_score,
                 "max_score": compliance_assessment.max_score,
             }
@@ -10438,63 +10420,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "id": folder_id,
                     "name": assessment.folder.name,
                     "compliance_assessments": [],
-                    # Internal accumulator used to build folder-level compliance once
-                    # all assessments inside the folder have been processed.
-                    "_overall_counts": {
-                        result: 0 for result in RequirementAssessment.Result.values
-                    },
                 }
 
             requirement_assessments = list(assessment.requirement_assessments.all())
-            # Reuse the prefetched requirement assessments for both widgets so we do not
-            # trigger extra queries per compliance assessment.
-            result_donut = build_result_donut(assessment, requirement_assessments)
-            global_score = build_global_score(assessment, requirement_assessments)
-
-            for item in result_donut["values"]:
-                # Aggregate each assessment donut into a folder-level donut.
-                folders_map[folder_id]["_overall_counts"][item["name"]] += item["value"]
+            # Reuse the prefetched requirement assessments for both raw datasets so we
+            # do not trigger extra queries per compliance assessment.
+            result_counts = build_result_counts(assessment, requirement_assessments)
+            global_score = build_score_summary(assessment, requirement_assessments)
 
             folders_map[folder_id]["compliance_assessments"].append(
                 {
                     "id": str(assessment.id),
                     "name": assessment.name,
-                    "framework": {
-                        "id": str(assessment.framework_id),
-                        "str": str(assessment.framework),
-                    },
-                    "donut": {"result": result_donut},
-                    "globalScore": global_score,
+                    "framework_name": assessment.framework.name,
+                    "result_counts": result_counts,
+                    "global_score": global_score,
                 }
             )
 
-        results = []
-        for folder in folders_map.values():
-            total = sum(folder["_overall_counts"].values())
-            # overallCompliance mirrors the previous frontend aggregation, but it is now
-            # computed once on the server from the same per-assessment donut counts.
-            folder["overallCompliance"] = {
-                "values": [
-                    {
-                        "name": result,
-                        "value": folder["_overall_counts"][result],
-                        "itemStyle": {"color": result_color_map[result]},
-                        "percentage": (
-                            # Keep the historical payload shape: percentages are sent
-                            # as formatted strings because the existing UI expects that.
-                            f"{(folder['_overall_counts'][result] / total) * 100:.1f}"
-                            if total > 0
-                            else "0"
-                        ),
-                    }
-                    for result in RequirementAssessment.Result.values
-                ],
-                "total": total,
-            }
-            del folder["_overall_counts"]
-            results.append(folder)
-
-        return Response({"results": results})
+        return Response({"results": list(folders_map.values())})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get score calculation method choices")
