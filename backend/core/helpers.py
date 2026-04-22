@@ -1325,6 +1325,7 @@ def build_audits_stats(user, folder_id=None):
         data.append([rs[0] for rs in audit.get_requirements_result_count()])
         names.append(audit.name)
         uuids.append(audit.id)
+
     return {"data": data, "names": names, "uuids": uuids}
 
 
