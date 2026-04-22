@@ -19,6 +19,7 @@
 		errors: errorsStore,
 		unsaved: unsavedStore,
 		unpublished: unpublishedStore,
+		rootNodes: rootNodesStore,
 		framework: frameworkStore,
 		activeLanguage: activeLanguageStore
 	} = builder;
@@ -38,9 +39,13 @@
 		return builder.getTranslationProgress($activeLanguageStore);
 	});
 
-	// Publication status — editing_version increments on each publish. 1 means
-	// the framework has never been published; >1 means it exists in the library.
-	let everPublished = $derived(($frameworkStore.editing_version ?? 1) > 1);
+	// Live-vs-draft status. The framework is always pickable by audit authors;
+	// what varies is whether any live content exists and whether the draft
+	// differs from live.
+	// - hasLiveContent: true iff the framework has ever been published (editing_version > 1).
+	// - hasDraftContent: the in-editor tree has at least one node.
+	let hasLiveContent = $derived(($frameworkStore.editing_version ?? 1) > 1);
+	let hasDraftContent = $derived($rootNodesStore.length > 0);
 
 	onMount(() => {
 		const appBar = document.querySelector('[data-scope="app-bar"]');
@@ -93,30 +98,41 @@
 
 		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
-		<!-- Publication-status badge: always shown so the editor always knows. -->
-		{#if !everPublished}
+		<!--
+			Live-vs-draft status badge. The framework is always pickable by audit
+			authors; what varies is whether new audits will see the editor's work.
+		-->
+		{#if hasLiveContent && !$unpublishedStore}
 			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-flex items-center gap-1"
-				title="This framework has never been published. Live users cannot see it yet."
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
+				title="The draft matches what audit respondents see."
 			>
-				<i class="fa-solid fa-file-pen text-[10px]"></i>
-				Not published
+				<i class="fa-solid fa-circle-check text-[10px]"></i>
+				Live
 			</span>
-		{:else if $unpublishedStore}
+		{:else if hasLiveContent && $unpublishedStore}
 			<span
 				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
-				title="Published, with unpublished changes in the draft."
+				title="The draft has edits that aren't visible to audit respondents yet. Publish to apply."
 			>
 				<i class="fa-solid fa-pen-nib text-[10px]"></i>
-				Draft changes
+				Unpublished changes
+			</span>
+		{:else if hasDraftContent}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
+				title="The draft has content but nothing has been published yet. New audits will see nothing until you publish."
+			>
+				<i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+				Draft — nothing live yet
 			</span>
 		{:else}
 			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
-				title="Published and up to date. Live users see the current state."
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-flex items-center gap-1"
+				title="No requirements yet. New audits built on this framework will have nothing to answer."
 			>
-				<i class="fa-solid fa-circle-check text-[10px]"></i>
-				Published
+				<i class="fa-solid fa-file-lines text-[10px]"></i>
+				Empty
 			</span>
 		{/if}
 
