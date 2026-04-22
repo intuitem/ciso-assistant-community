@@ -42,23 +42,6 @@
 		};
 		modalStore.trigger(modal);
 	}
-
-	function modalCreateEntityForm(): void {
-		let modalComponent: ModalComponent = {
-			ref: CreateModal,
-			props: {
-				form: data.entityCreateForm,
-				formAction: '?/createEntity',
-				model: data.entityModel
-			}
-		};
-		let modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			title: safeTranslate('add-' + data.entityModel.localName)
-		};
-		modalStore.trigger(modal);
-	}
 	let value = $state(['']);
 </script>
 
@@ -126,24 +109,13 @@
 		baseEndpoint="/stakeholders?ebios_rm_study={page.params.id}"
 	>
 		{#snippet addButton()}
-			<div>
-				<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
-					<button
-						class="inline-block p-3 btn-mini-primary w-12 focus:relative border-r"
-						title={safeTranslate('add-' + data.entityModel.localName)}
-						onclick={modalCreateEntityForm}
-						data-testid="add-entity-button"
-						><i class="fa-solid fa-building"></i>
-					</button>
-					<button
-						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
-						data-testid="add-button"
-						title={safeTranslate('add-' + data.model.localName)}
-						onclick={modalCreateForm}
-						><i class="fa-solid fa-file-circle-plus"></i>
-					</button>
-				</span>
-			</div>
+			<button
+				class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+				data-testid="add-button"
+				title={safeTranslate('add-' + data.model.localName)}
+				onclick={modalCreateForm}
+				><i class="fa-solid fa-file-circle-plus"></i>
+			</button>
 		{/snippet}
 	</ModelTable>
 </div>
