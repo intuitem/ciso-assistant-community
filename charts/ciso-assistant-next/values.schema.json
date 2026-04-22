@@ -2,124 +2,32 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
-        "nameOverride": {
-            "type": "string"
-        },
-        "fullnameOverride": {
-            "type": "string"
-        },
-        "global": {
-            "type": "object",
-            "properties": {
-                "domain": {
-                    "type": "string"
-                },
-                "tls": {
-                    "type": "boolean"
-                },
-                "extraAllowedHosts": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "object",
-                    "properties": {
-                        "registry": {
-                            "type": "string"
-                        },
-                        "tag": {
-                            "type": "string"
-                        },
-                        "imagePullPolicy": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "imagePullPolicy",
-                        "registry",
-                        "tag"
-                    ]
-                },
-                "imagePullSecrets": {
-                    "type": "array"
-                },
-                "commonLabels": {
-                    "type": "object"
-                },
-                "clusterDomain": {
-                    "type": "string"
-                },
-                "securityContext": {
-                    "type": "object"
-                },
-                "nodeSelector": {
-                    "type": "object"
-                },
-                "tolerations": {
-                    "type": "array"
-                },
-                "affinity": {
-                    "type": "object"
-                }
-            },
-            "required": [
-                "affinity",
-                "clusterDomain",
-                "commonLabels",
-                "domain",
-                "extraAllowedHosts",
-                "image",
-                "imagePullSecrets",
-                "nodeSelector",
-                "securityContext",
-                "tls",
-                "tolerations"
-            ]
-        },
-        "serviceAccount": {
-            "type": "object",
-            "properties": {
-                "create": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "annotations": {
-                    "type": "object"
-                },
-                "labels": {
-                    "type": "object"
-                },
-                "automountServiceAccountToken": {
-                    "type": "boolean"
-                }
-            },
-            "required": [
-                "annotations",
-                "automountServiceAccountToken",
-                "create",
-                "labels",
-                "name"
-            ]
-        },
         "backend": {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "replicas": {
-                    "type": "integer"
+                "affinity": {
+                    "type": "object",
+                    "additionalProperties": false
                 },
                 "annotations": {
-                    "type": "object"
-                },
-                "podAnnotations": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "config": {
                     "type": "object",
                     "properties": {
+                        "databaseType": {
+                            "type": "string"
+                        },
+                        "djangoDebug": {
+                            "type": "boolean"
+                        },
+                        "djangoExistingSecretKey": {
+                            "type": "string"
+                        },
+                        "djangoSecretKey": {
+                            "type": "string"
+                        },
                         "emailAdmin": {
                             "type": "string"
                         },
@@ -135,6 +43,9 @@
                                 "host": {
                                     "type": "string"
                                 },
+                                "password": {
+                                    "type": "string"
+                                },
                                 "port": {
                                     "type": "integer"
                                 },
@@ -143,138 +54,51 @@
                                 },
                                 "username": {
                                     "type": "string"
-                                },
-                                "password": {
-                                    "type": "string"
                                 }
                             },
-                            "required": [
-                                "defaultFrom",
-                                "existingSecret",
-                                "host",
-                                "password",
-                                "port",
-                                "useTls",
-                                "username"
-                            ]
-                        },
-                        "databaseType": {
-                            "type": "string"
-                        },
-                        "djangoSecretKey": {
-                            "type": "string"
-                        },
-                        "djangoExistingSecretKey": {
-                            "type": "string"
-                        },
-                        "djangoDebug": {
-                            "type": "boolean"
+                            "additionalProperties": false
                         }
                     },
-                    "required": [
-                        "databaseType",
-                        "djangoDebug",
-                        "djangoExistingSecretKey",
-                        "djangoSecretKey",
-                        "emailAdmin",
-                        "smtp"
-                    ]
+                    "additionalProperties": false
                 },
-                "extraVolumes": {
+                "containerSecurityContext": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "env": {
                     "type": "array"
                 },
                 "extraVolumeMounts": {
                     "type": "array"
                 },
+                "extraVolumes": {
+                    "type": "array"
+                },
                 "huey": {
                     "type": "object",
                     "properties": {
-                        "name": {
-                            "type": "string"
-                        },
                         "env": {
                             "type": "array"
                         },
-                        "resources": {
-                            "type": "object"
-                        },
                         "extraVolumeMounts": {
                             "type": "array"
-                        }
-                    },
-                    "required": [
-                        "env",
-                        "extraVolumeMounts",
-                        "name",
-                        "resources"
-                    ]
-                },
-                "persistence": {
-                    "type": "object",
-                    "properties": {
-                        "sqlite": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean"
-                                },
-                                "size": {
-                                    "type": "string"
-                                },
-                                "storageClass": {
-                                    "type": "string"
-                                },
-                                "accessMode": {
-                                    "type": "string"
-                                },
-                                "existingClaim": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "accessMode",
-                                "enabled",
-                                "existingClaim",
-                                "size",
-                                "storageClass"
-                            ]
                         },
-                        "localStorage": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "resources": {
                             "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean"
-                                },
-                                "size": {
-                                    "type": "string"
-                                },
-                                "storageClass": {
-                                    "type": "string"
-                                },
-                                "accessMode": {
-                                    "type": "string"
-                                },
-                                "existingClaim": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "accessMode",
-                                "enabled",
-                                "existingClaim",
-                                "size",
-                                "storageClass"
-                            ]
+                            "additionalProperties": true
                         }
                     },
-                    "required": [
-                        "localStorage",
-                        "sqlite"
-                    ]
+                    "additionalProperties": false
                 },
                 "image": {
                     "type": "object",
                     "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
                         "registry": {
                             "type": "string"
                         },
@@ -283,47 +107,89 @@
                         },
                         "tag": {
                             "type": "string"
-                        },
-                        "imagePullPolicy": {
-                            "type": "string"
                         }
                     },
-                    "required": [
-                        "imagePullPolicy",
-                        "registry",
-                        "repository",
-                        "tag"
-                    ]
+                    "additionalProperties": false
                 },
                 "imagePullSecrets": {
                     "type": "array"
                 },
-                "resources": {
-                    "type": "object"
+                "name": {
+                    "type": "string"
                 },
                 "nodeSelector": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
-                "tolerations": {
-                    "type": "array"
+                "persistence": {
+                    "type": "object",
+                    "properties": {
+                        "localStorage": {
+                            "type": "object",
+                            "properties": {
+                                "accessMode": {
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "existingClaim": {
+                                    "type": "string"
+                                },
+                                "size": {
+                                    "type": "string"
+                                },
+                                "storageClass": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "sqlite": {
+                            "type": "object",
+                            "properties": {
+                                "accessMode": {
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "existingClaim": {
+                                    "type": "string"
+                                },
+                                "size": {
+                                    "type": "string"
+                                },
+                                "storageClass": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
                 },
-                "affinity": {
-                    "type": "object"
+                "podAnnotations": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
-                "env": {
-                    "type": "array"
+                "replicas": {
+                    "type": "integer"
                 },
-                "containerSecurityContext": {
-                    "type": "object"
+                "resources": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "service": {
                     "type": "object",
                     "properties": {
                         "annotations": {
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "labels": {
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "port": {
                             "type": "integer"
@@ -332,49 +198,48 @@
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "annotations",
-                        "labels",
-                        "port",
-                        "portName"
-                    ]
+                    "additionalProperties": false
+                },
+                "tolerations": {
+                    "type": "array"
                 }
             },
-            "required": [
-                "affinity",
-                "annotations",
-                "config",
-                "containerSecurityContext",
-                "env",
-                "extraVolumeMounts",
-                "extraVolumes",
-                "huey",
-                "image",
-                "imagePullSecrets",
-                "name",
-                "nodeSelector",
-                "persistence",
-                "podAnnotations",
-                "replicas",
-                "resources",
-                "service",
-                "tolerations"
-            ]
+            "additionalProperties": false
+        },
+        "externalPgsql": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "user": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "frontend": {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "replicas": {
-                    "type": "integer"
+                "affinity": {
+                    "type": "object",
+                    "additionalProperties": false
                 },
                 "annotations": {
-                    "type": "object"
-                },
-                "podAnnotations": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "config": {
                     "type": "object",
@@ -383,19 +248,27 @@
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "bodySizeLimit"
-                    ]
+                    "additionalProperties": false
                 },
-                "extraVolumes": {
+                "containerSecurityContext": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "env": {
                     "type": "array"
                 },
                 "extraVolumeMounts": {
                     "type": "array"
                 },
+                "extraVolumes": {
+                    "type": "array"
+                },
                 "image": {
                     "type": "object",
                     "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
                         "registry": {
                             "type": "string"
                         },
@@ -404,47 +277,41 @@
                         },
                         "tag": {
                             "type": "string"
-                        },
-                        "imagePullPolicy": {
-                            "type": "string"
                         }
                     },
-                    "required": [
-                        "imagePullPolicy",
-                        "registry",
-                        "repository",
-                        "tag"
-                    ]
+                    "additionalProperties": false
                 },
                 "imagePullSecrets": {
                     "type": "array"
                 },
-                "resources": {
-                    "type": "object"
+                "name": {
+                    "type": "string"
                 },
                 "nodeSelector": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
-                "tolerations": {
-                    "type": "array"
+                "podAnnotations": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
-                "affinity": {
-                    "type": "object"
+                "replicas": {
+                    "type": "integer"
                 },
-                "env": {
-                    "type": "array"
-                },
-                "containerSecurityContext": {
-                    "type": "object"
+                "resources": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "service": {
                     "type": "object",
                     "properties": {
                         "annotations": {
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "labels": {
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "port": {
                             "type": "integer"
@@ -453,47 +320,88 @@
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "annotations",
-                        "labels",
-                        "port",
-                        "portName"
-                    ]
+                    "additionalProperties": false
+                },
+                "tolerations": {
+                    "type": "array"
                 }
             },
-            "required": [
-                "affinity",
-                "annotations",
-                "config",
-                "containerSecurityContext",
-                "env",
-                "extraVolumeMounts",
-                "extraVolumes",
-                "image",
-                "imagePullSecrets",
-                "name",
-                "nodeSelector",
-                "podAnnotations",
-                "replicas",
-                "resources",
-                "service",
-                "tolerations"
-            ]
+            "additionalProperties": false
+        },
+        "fullnameOverride": {
+            "type": "string"
+        },
+        "global": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "type": "object",
+                    "additionalProperties": false
+                },
+                "clusterDomain": {
+                    "type": "string"
+                },
+                "commonLabels": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "extraAllowedHosts": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "securityContext": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "tls": {
+                    "type": "boolean"
+                },
+                "tolerations": {
+                    "type": "array"
+                }
+            },
+            "additionalProperties": false
         },
         "ingress": {
             "type": "object",
             "properties": {
+                "annotations": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "enabled": {
                     "type": "boolean"
                 },
-                "labels": {
-                    "type": "object"
-                },
-                "annotations": {
-                    "type": "object"
-                },
                 "ingressClassName": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "path": {
                     "type": "string"
@@ -504,32 +412,24 @@
                 "tls": {
                     "type": "object",
                     "properties": {
+                        "certificateSecret": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
                         "enabled": {
                             "type": "boolean"
                         },
                         "existingSecret": {
                             "type": "string"
-                        },
-                        "certificateSecret": {
-                            "type": "object"
                         }
                     },
-                    "required": [
-                        "certificateSecret",
-                        "enabled",
-                        "existingSecret"
-                    ]
+                    "additionalProperties": false
                 }
             },
-            "required": [
-                "annotations",
-                "enabled",
-                "ingressClassName",
-                "labels",
-                "path",
-                "pathType",
-                "tls"
-            ]
+            "additionalProperties": false
+        },
+        "nameOverride": {
+            "type": "string"
         },
         "postgresql": {
             "type": "object",
@@ -546,35 +446,26 @@
                                 "auth": {
                                     "type": "object",
                                     "properties": {
-                                        "postgresPassword": {
-                                            "type": "string"
-                                        },
                                         "database": {
-                                            "type": "string"
-                                        },
-                                        "username": {
                                             "type": "string"
                                         },
                                         "password": {
                                             "type": "string"
+                                        },
+                                        "postgresPassword": {
+                                            "type": "string"
+                                        },
+                                        "username": {
+                                            "type": "string"
                                         }
                                     },
-                                    "required": [
-                                        "database",
-                                        "password",
-                                        "postgresPassword",
-                                        "username"
-                                    ]
+                                    "additionalProperties": true
                                 }
                             },
-                            "required": [
-                                "auth"
-                            ]
+                            "additionalProperties": true
                         }
                     },
-                    "required": [
-                        "postgresql"
-                    ]
+                    "additionalProperties": true
                 },
                 "primary": {
                     "type": "object",
@@ -586,63 +477,37 @@
                                     "type": "string"
                                 }
                             },
-                            "required": [
-                                "size"
-                            ]
+                            "additionalProperties": true
                         }
                     },
-                    "required": [
-                        "persistence"
-                    ]
+                    "additionalProperties": true
                 }
             },
-            "required": [
-                "enabled",
-                "global",
-                "primary"
-            ]
+            "additionalProperties": true
         },
-        "externalPgsql": {
+        "serviceAccount": {
             "type": "object",
             "properties": {
-                "host": {
-                    "type": "string"
+                "annotations": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
-                "user": {
-                    "type": "string"
+                "automountServiceAccountToken": {
+                    "type": "boolean"
                 },
-                "password": {
-                    "type": "string"
+                "create": {
+                    "type": "boolean"
                 },
-                "existingSecret": {
-                    "type": "string"
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
-                "database": {
+                "name": {
                     "type": "string"
-                },
-                "port": {
-                    "type": "integer"
                 }
             },
-            "required": [
-                "database",
-                "existingSecret",
-                "host",
-                "password",
-                "port",
-                "user"
-            ]
+            "additionalProperties": false
         }
     },
-    "required": [
-        "backend",
-        "externalPgsql",
-        "frontend",
-        "fullnameOverride",
-        "global",
-        "ingress",
-        "nameOverride",
-        "postgresql",
-        "serviceAccount"
-    ]
+    "additionalProperties": false
 }
