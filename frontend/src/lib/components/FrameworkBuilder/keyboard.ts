@@ -41,23 +41,33 @@ export function installKeyboardHandlers(builder: BuilderStore): () => void {
 		// All other shortcuts must NOT fire when the user is typing.
 		if (isEditingText(e.target)) return;
 
+		// Use e.code (physical key) rather than e.key — on macOS, the Option
+		// modifier transforms Enter's e.key into a newline char and the arrow
+		// keys into alternate symbols. e.code stays stable: 'Enter',
+		// 'ArrowLeft', 'ArrowRight'.
 		if (e.altKey && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
-			if (e.key === 'ArrowRight') {
+			if (e.code === 'ArrowRight') {
 				if (builder.indentNode(focused.nodeId)) e.preventDefault();
 				return;
 			}
-			if (e.key === 'ArrowLeft') {
+			if (e.code === 'ArrowLeft') {
 				if (builder.outdentNode(focused.nodeId)) e.preventDefault();
 				return;
 			}
-			if (e.key === 'Enter') {
+			if (e.code === 'Enter' || e.code === 'NumpadEnter') {
 				builder.addNode({ parent: focused.nodeId, preset: 'blank' });
 				e.preventDefault();
 				return;
 			}
 		}
 
-		if (e.altKey && e.shiftKey && !e.metaKey && !e.ctrlKey && e.key === 'Enter') {
+		if (
+			e.altKey &&
+			e.shiftKey &&
+			!e.metaKey &&
+			!e.ctrlKey &&
+			(e.code === 'Enter' || e.code === 'NumpadEnter')
+		) {
 			builder.addNode({
 				parent: focused.parent,
 				preset: 'blank',
