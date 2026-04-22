@@ -828,8 +828,10 @@
 				</div>
 			{/if}
 
-			<!-- Implementation groups (only shown for assessable nodes) -->
-			{#if node.node.assessable && $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
+			<!-- Implementation groups — editable on any node, not just assessable ones.
+			     Ancestors can carry IGs (e.g. ISO 27001's annex-a has ['SoA']) and
+			     the audit-tree filter honours them. -->
+			{#if $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
 				<div class="px-4 py-2 border-b border-gray-100">
 					<span class="text-xs text-gray-500 mr-2">Implementation groups:</span>
 					{#each $frameworkStore.implementation_groups_definition as ig}
