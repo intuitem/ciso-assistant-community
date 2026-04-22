@@ -1,7 +1,16 @@
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
+from django.db.models import ProtectedError
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
-from tprm.models import Entity, EntityAssessment, Representative, Solution
+from tprm.models import (
+    Entity,
+    EntityAssessment,
+    Representative,
+    Solution,
+    SolutionSubcontractor,
+)
 from iam.models import Folder
 from core.models import Asset
 
@@ -157,3 +166,100 @@ class TestSolution(TestCase):
         self.assertEqual(solution.criticality, 4)
         self.assertEqual(solution.assets.count(), 1)
         self.assertEqual(solution.assets.first(), self.asset)
+
+
+class TestSolutionSubcontractor(TestCase):
+    def setUp(self):
+        self.folder = Folder.objects.create(name="Test Folder")
+        self.provider = Entity.objects.create(
+            name="Direct Provider", folder=self.folder
+        )
+        self.sub_a = Entity.objects.create(name="Subcontractor A", folder=self.folder)
+        self.sub_b = Entity.objects.create(name="Subcontractor B", folder=self.folder)
+        self.solution = Solution.objects.create(
+            name="Test Solution", provider_entity=self.provider
+        )
+
+    def _new(self, subcontractor, solution=None, recipient=None):
+        """Build an unsaved SolutionSubcontractor for validation testing."""
+        return SolutionSubcontractor(
+            solution=solution or self.solution,
+            subcontractor=subcontractor,
+            recipient=recipient,
+        )
+
+    # --- clean() validation -------------------------------------------------
+
+    def test_clean_rejects_subcontractor_equal_to_direct_provider(self):
+        with self.assertRaises(ValidationError) as cm:
+            self._new(self.provider).full_clean()
+        self.assertIn("subcontractor", cm.exception.message_dict)
+
+    def test_clean_accepts_valid_row(self):
+        row = self._new(self.sub_a)
+        row.full_clean()  # should not raise
+
+    # --- unique constraints -------------------------------------------------
+
+    def test_unique_subcontractor_per_solution(self):
+        self._new(self.sub_a).save()
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                self._new(self.sub_a).save()
+
+    def test_same_subcontractor_on_different_solutions(self):
+        other_solution = Solution.objects.create(
+            name="Other Solution", provider_entity=self.provider
+        )
+        self._new(self.sub_a).save()
+        # Same subcontractor on a different solution is fine.
+        self._new(self.sub_a, solution=other_solution).save()
+
+    # --- fan-out -----------------------------------------------------------
+
+    def test_fan_out_via_shared_recipient(self):
+        """Two subcontractors with the same recipient (both children of the direct provider)."""
+        self._new(self.sub_a).save()
+        self._new(self.sub_b).save()
+        self.assertEqual(self.solution.subcontracting_chain.count(), 2)
+
+    # --- reverse managers ---------------------------------------------------
+
+    def test_reverse_manager_on_entity(self):
+        row = self._new(self.sub_a)
+        row.save()
+        self.assertEqual(list(self.sub_a.subcontracts.all()), [row])
+        self.assertEqual(list(self.sub_b.subcontracts.all()), [])
+
+    # --- on_delete behaviour -----------------------------------------------
+
+    def test_cascade_on_solution_delete(self):
+        self._new(self.sub_a).save()
+        self._new(self.sub_b).save()
+        self.assertEqual(SolutionSubcontractor.objects.count(), 2)
+        self.solution.delete()
+        self.assertEqual(SolutionSubcontractor.objects.count(), 0)
+
+    def test_protect_on_subcontractor_delete(self):
+        self._new(self.sub_a).save()
+        with self.assertRaises(ProtectedError):
+            self.sub_a.delete()
+        # Entity still exists, row still exists
+        self.assertTrue(Entity.objects.filter(id=self.sub_a.id).exists())
+        self.assertEqual(SolutionSubcontractor.objects.count(), 1)
+
+    def test_subcontractor_can_be_deleted_after_chain_row_removed(self):
+        row = self._new(self.sub_a)
+        row.save()
+        row.delete()
+        # Now the Entity can be deleted.
+        self.sub_a.delete()
+        self.assertFalse(Entity.objects.filter(id=self.sub_a.id).exists())
+
+    # --- str representation -------------------------------------------------
+
+    def test_str_representation(self):
+        row = self._new(self.sub_a)
+        row.save()
+        expected = "Test Solution \u2192 Subcontractor A"
+        self.assertEqual(str(row), expected)

@@ -17,6 +17,7 @@
 	"indonesian": "الإندونيسية",
 	"danish": "دانماركي",
 	"croatian": "الكرواتية",
+	"korean": "الكورية",
 	"addThreat": "أضف تهديدًا",
 	"addVulnerability": "إضافة الضعف",
 	"addReferenceControl": "أضف تحكمًا مرجعيًا",
@@ -720,6 +721,7 @@
 	"requirementMappings": "تعيينات المتطلبات",
 	"sourceFramework": "إطار المصدر",
 	"targetFramework": "الإطار المستهدف",
+	"targetFrameworks": "الأطر المستهدفة",
 	"baseline": "خط الأساس",
 	"createAuditFromBaseline": "إنشاء التدقيق من خط الأساس",
 	"coverageColon": "التغطية:",
@@ -731,6 +733,7 @@
 	"maturity": "نضج",
 	"progress": "تقدم",
 	"back": "خلف",
+	"backToWorkshop": "العودة إلى دراسة Ebios RM / النظام البيئي",
 	"duplicate": "ينسخ",
 	"duplicateRiskAssessment": "تكرار تقييم المخاطر",
 	"duplicateAppliedControl": "تكرار عنصر التحكم المطبق",
@@ -1104,5 +1107,10 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "ترتيب أ ← ي",
-	"sortDescending": "ترتيب ي ← أ"
+	"sortDescending": "ترتيب ي ← أ",
+	"confirmModalMessagePlural": "هل أنت متأكد؟ سيؤثر هذا الإجراء بشكل دائم على الكائنات التالية",
+	"syncAppliedControlsMessage": "سيتم مزامنة عناصر التحكم المطبقة التي تستخدم عنصر التحكم المرجعي هذا معه. يرجى ملاحظة أن هذا الإجراء لا يمكن التراجع عنه.",
+	"syncToAppliedControl": "مزامنة مع التحكم المطبق",
+	"syncToReferenceControl": "مزامنة مع التحكم المرجعي",
+	"exportEcosystem": "تصدير النظام البيئي (XLSX)"
 }

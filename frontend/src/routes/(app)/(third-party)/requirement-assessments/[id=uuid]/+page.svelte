@@ -107,7 +107,7 @@
 				{/each}
 			</div>
 		{/if}
-		{#if data.requirementAssessment.is_scored}
+		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
 			<div class="shrink-0 relative">
 				<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
 					<Progress.Circle class="[--size:--spacing(10)]">

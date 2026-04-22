@@ -17,6 +17,7 @@
 	"indonesian": "Індонезійська",
 	"danish": "Данська",
 	"hungarian": "Угорська",
+	"korean": "Корейська",
 	"croatian:": "хорватська",
 	"addThreat": "Додати загрозу",
 	"addVulnerability": "Додати вразливість",
@@ -737,6 +738,7 @@
 	"requirementMappings": "Вимоги маппінгів",
 	"sourceFramework": "Вихідний фреймворк",
 	"targetFramework": "Цільовий фреймворк",
+	"targetFrameworks": "Цільові фреймворки",
 	"baseline": "База",
 	"createAuditFromBaseline": "Створити аудит з базового",
 	"coverageColon": "Покриття:",
@@ -748,6 +750,7 @@
 	"maturity": "Зрілість",
 	"progress": "Прогрес",
 	"back": "Назад",
+	"backToWorkshop": "Назад до дослідження Ebios RM / екосистеми",
 	"duplicate": "Дублікат",
 	"duplicateRiskAssessment": "Дублювати оцінку ризиків",
 	"duplicateAppliedControl": "Дублювати застосований контроль",
@@ -1655,5 +1658,10 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Сортувати А → Я",
-	"sortDescending": "Сортувати Я → А"
+	"sortDescending": "Сортувати Я → А",
+	"confirmModalMessagePlural": "Ви впевнені? Ця дія назавжди вплине на наступні об'єкти",
+	"syncAppliedControlsMessage": "Застосовані контролі, що використовують цей типовий контроль, будуть синхронізовані з ним. Зверніть увагу, що цю дію неможливо скасувати.",
+	"syncToAppliedControl": "Синхронізувати із застосованим контролем",
+	"syncToReferenceControl": "Синхронізувати з типовим контролем",
+	"exportEcosystem": "експорт екосистеми (XLSX)"
 }

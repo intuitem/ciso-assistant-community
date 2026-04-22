@@ -9,12 +9,15 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import FrameworlEquivalence from '$lib/components/FrameworkEquivalence/FrameworlEquivalence.svelte';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	let expandedNodes: string[] = $state([]);
 
 	const tree = data.tree;
 
@@ -79,7 +82,8 @@
 										{@const itemHref = `/loaded-libraries/${value.id}`}
 										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 									{:else if key === 'scores_definition'}
-										{#each Object.entries(value) as [key, definition]}
+										{@const entries = Array.isArray(value) ? value : (value?.scale ?? [])}
+										{#each entries as definition}
 											<div>
 												{definition.score}.
 												{definition.name}{definition.description
@@ -114,6 +118,16 @@
 												</li>
 											{/each}
 										</ul>
+									{:else if key === 'field_visibility'}
+										{#if Object.entries(value).length === 0}
+											--
+										{:else}
+											<ul>
+												{#each Object.entries(value) as [obj, who_can_see]}
+													<li>{obj} : {who_can_see}</li>
+												{/each}
+											</ul>
+										{/if}
 									{:else if value.str && value.id}
 										{@const itemHref = `/${
 											URL_MODEL_MAP['frameworks']['foreignKeyFields']?.find(
@@ -137,7 +151,7 @@
 				{/each}
 			</div>
 		</div>
-		<div class="">
+		<div class="flex flex-col gap-2">
 			<a
 				class="btn preset-filled-primary-500"
 				href="/frameworks/{data.framework.id}/excel-template/">Download Excel template</a
@@ -146,13 +160,16 @@
 	</div>
 
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<h4 class="h4 flex items-center font-semibold">
-			{m.associatedRequirements()}
-			<span class="badge preset-tonal-primary ml-1">
-				{assessableNodesCount(treeViewNodes)}
-			</span>
-		</h4>
-		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
+		<div class="flex items-center justify-between">
+			<h4 class="h4 flex items-center font-semibold">
+				{m.associatedRequirements()}
+				<span class="badge preset-tonal-primary ml-1">
+					{assessableNodesCount(treeViewNodes)}
+				</span>
+			</h4>
+			<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+		</div>
+		<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 	</div>
 	<!-- EQUIVALENCE WITH OTHER FRAMEWORKS -->
 	<!-- <div class="card px-6 py-4 bg-white flex flex-col shadow-lg">

@@ -6,7 +6,7 @@ import type { PageServerLoad } from './$types';
 import { type Actions, fail } from '@sveltejs/kit';
 import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async (event) => {
 	event.depends('dashboard:widgets');

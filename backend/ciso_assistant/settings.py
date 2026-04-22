@@ -17,6 +17,7 @@ import logging.config
 import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
+import ssl
 from . import meta
 
 
@@ -64,6 +65,7 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
+        "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
     },
 }
 
@@ -122,6 +124,16 @@ MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False").lower() in ("true", "1", "yes
 
 # SECURITY WARNING: Sensitive operations, such as excel file processing, can run in a sandbox.
 # The sandbox is disabled by default; set ENABLE_SANDBOX=true to enable bubblewrap isolation.
+# Chat/AI assistant module. Disabled by default to avoid disruption on SaaS.
+# Set ENABLE_CHAT=true to expose the chat feature flag, enable signals, and serve chat API.
+# The chat Django app stays in INSTALLED_APPS regardless (for migrations), but is dormant.
+ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
+
 ENABLE_SANDBOX = os.environ.get(
     "ENABLE_SANDBOX",
     "False",
@@ -240,6 +252,7 @@ INSTALLED_APPS = [
     "auditlog",
     "tailwind",
     "iam",
+    "sec_intel",
     "global_settings",
     "pmbok",
     "ebios_rm",
@@ -248,6 +261,8 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "chat",
+    "doc_management",
     "core",
     "cal",
     "django_filters",
@@ -306,13 +321,22 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
+logger.info("EMAIL_HOST: %s", EMAIL_HOST)
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
+logger.info("EMAIL_PORT: %s", EMAIL_PORT)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_TLS: %s", EMAIL_USE_TLS)
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_SSL: %s", EMAIL_USE_SSL)
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive")
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
+logger.info("EMAIL_HOST_RESCUE: %s", EMAIL_HOST_RESCUE)
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
+logger.info("EMAIL_PORT_RESCUE: %s", EMAIL_PORT_RESCUE)
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
 EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
@@ -320,8 +344,36 @@ EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() i
     "1",
     "yes",
 )
+logger.info("EMAIL_USE_TLS_RESCUE: %s", EMAIL_USE_TLS_RESCUE)
+EMAIL_USE_SSL_RESCUE = os.environ.get("EMAIL_USE_SSL_RESCUE", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_USE_SSL_RESCUE: %s", EMAIL_USE_SSL_RESCUE)
+if EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE:
+    raise ValueError(
+        "EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE are mutually exclusive"
+    )
+EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
+
+
+def _build_tls12_context():
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.maximum_version = ssl.TLSVersion.TLSv1_2
+    return context
+
+
+EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
+logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -460,6 +512,7 @@ LANGUAGES = [
     ("hr", "Croatian"),
     ("zh", "Chinese (Simplified)"),
     ("lt", "Lithuanian"),
+    ("ko", "Korean"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -569,6 +622,13 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
     },
 }
+
+# MFA / WebAuthn settings
+MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
+MFA_PASSKEY_LOGIN_ENABLED = False
+MFA_PASSKEY_SIGNUP_ENABLED = False
+MFA_ADAPTER = "iam.adapter.MFAAdapter"
 
 if MAIL_DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

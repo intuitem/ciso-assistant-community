@@ -5,7 +5,7 @@
 	import type { PageData, ActionData } from './$types';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { modelSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages.js';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -26,6 +26,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
@@ -37,7 +38,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		data: PageData;
@@ -182,6 +183,35 @@
 	});
 
 	let exportPopupOpen = $state(false);
+
+	function modalDeleteDoraReport(reportId: string, reportName: string): void {
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: {
+				_form: { id: reportId, urlmodel: 'dora-incident-reports' },
+				id: reportId,
+				URLModel: 'dora-incident-reports',
+				formAction: '?/deleteDoraReport',
+				bodyComponent: undefined
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${reportName}?`
+		};
+		modalStore.trigger(modal);
+	}
+
+	let activeTab = $state('timeline');
+
+	// DORA reports fetched server-side, sorted by creation date (newest first)
+	const doraRows: any[] = $derived(
+		[...(data.doraReports ?? [])].sort(
+			(a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		)
+	);
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -215,6 +245,12 @@
 						</Popover.Content>
 					</Popover.Positioner>
 				</Popover>
+				<a
+					href="/dora-incident-reports/new?incident={data.data.id}"
+					class="btn preset-filled-secondary-500 w-full"
+				>
+					<i class="fa-solid fa-file-shield mr-2"></i>{m.generateDoraReport()}
+				</a>
 			</div>
 		{/snippet}
 		{#snippet widgets()}
@@ -319,87 +355,171 @@
 	</DetailView>
 
 	<div class="card shadow-lg bg-white p-4 space-y-2">
-		<div class="flex flex-row justify-between items-center mb-4">
-			<h1 class="text-xl font-bold">{m.timeline()}</h1>
-			<Search {handler} />
-			<RowsPerPage {handler} />
-		</div>
-		<ol class="relative border-s border-primary-500 dark:border-primary-700">
-			{#each $rows as row, rowIndex}
-				{@const meta = row?.meta ?? row}
-				{@const actionsURLModel = 'timeline-entries'}
-				<li class="ms-4">
-					<div
-						class="absolute w-3 h-3 bg-primary-500 rounded-full mt-1.5 -start-1.5 border border-white dark:border-primary-900 dark:bg-primary-700"
-					></div>
-					<div class="flex flex-col">
-						<div class="flex flex-row items-center space-x-3 mb-1">
-							<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
-								{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta?.author
-										?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
-							>
-							<TableRowActions
-								baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
-								deleteForm={data.relatedModels['timeline-entries'].deleteForm}
-								model={model.info}
-								URLModel={actionsURLModel}
-								detailURL={`/${actionsURLModel}/${meta.id}`}
-								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
-								{row}
-								identifierField={'id'}
-								preventDelete={preventDelete(row)}
-							></TableRowActions>
-							{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
-								<span class="text-xs italic text-gray-500 dark:text-gray-400">
-									({m.edited()})
-								</span>
-							{/if}
-						</div>
-						<div class="flex mb-2">
-							<span class="text-xs font-mono bg-violet-700 text-white py-1 px-2 rounded-sm mr-1"
-								>{safeTranslate(meta.entry_type)}</span
-							>
-							<a
-								href={`/${actionsURLModel}/${meta.id}`}
-								class="font-semibold capitalize"
-								data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
-							>
-						</div>
-						<div class="py-1 mb-2">
-							{#if meta.observation}
-								<MarkdownRenderer content={meta.observation} class="bg-primary-50 rounded-lg p-2" />
-							{:else}
-								<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
-							{/if}
-						</div>
-						{#if meta.evidences && meta.evidences.length > 0}
-							<div class="mb-2">
-								<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
-								<div class="flex flex-wrap gap-1">
-									{#each meta.evidences as evidence}
-										<a
-											href={`/evidences/${evidence.id}`}
-											class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
-											title={evidence.str}
-										>
-											<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
-											<span class="truncate">{evidence.str}</span>
-										</a>
-									{/each}
+		<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)}>
+			<Tabs.List>
+				<Tabs.Trigger value="timeline">
+					<i class="fa-solid fa-timeline mr-2"></i>{m.timeline()}
+				</Tabs.Trigger>
+				<Tabs.Trigger value="dora-reports">
+					<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
+					{#if doraRows.length > 0}
+						<span
+							class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700"
+						>
+							{doraRows.length}
+						</span>
+					{/if}
+				</Tabs.Trigger>
+				<Tabs.Indicator />
+			</Tabs.List>
+
+			<Tabs.Content value="timeline" class="pt-4">
+				<div class="flex flex-row justify-between items-center mb-4">
+					<Search {handler} />
+					<RowsPerPage {handler} />
+				</div>
+				<ol class="relative border-s border-primary-500 dark:border-primary-700">
+					{#each $rows as row, rowIndex}
+						{@const meta = row?.meta ?? row}
+						{@const actionsURLModel = 'timeline-entries'}
+						<li class="ms-4">
+							<div
+								class="absolute w-3 h-3 bg-primary-500 rounded-full mt-1.5 -start-1.5 border border-white dark:border-primary-900 dark:bg-primary-700"
+							></div>
+							<div class="flex flex-col">
+								<div class="flex flex-row items-center space-x-3 mb-1">
+									<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
+										{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta
+												?.author?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
+									>
+									<TableRowActions
+										baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
+										deleteForm={data.relatedModels['timeline-entries'].deleteForm}
+										model={model.info}
+										URLModel={actionsURLModel}
+										detailURL={`/${actionsURLModel}/${meta.id}`}
+										editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
+										{row}
+										identifierField={'id'}
+										preventDelete={preventDelete(row)}
+									></TableRowActions>
+									{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
+										<span class="text-xs italic text-gray-500 dark:text-gray-400">
+											({m.edited()})
+										</span>
+									{/if}
 								</div>
+								<div class="flex mb-2">
+									<span class="text-xs font-mono bg-violet-700 text-white py-1 px-2 rounded-sm mr-1"
+										>{safeTranslate(meta.entry_type)}</span
+									>
+									<a
+										href={`/${actionsURLModel}/${meta.id}`}
+										class="font-semibold capitalize"
+										data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
+									>
+								</div>
+								<div class="py-1 mb-2">
+									{#if meta.observation}
+										<MarkdownRenderer
+											content={meta.observation}
+											class="bg-primary-50 rounded-lg p-2"
+										/>
+									{:else}
+										<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
+									{/if}
+								</div>
+								{#if meta.evidences && meta.evidences.length > 0}
+									<div class="mb-2">
+										<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
+										<div class="flex flex-wrap gap-1">
+											{#each meta.evidences as evidence}
+												<a
+													href={`/evidences/${evidence.id}`}
+													class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
+													title={evidence.str}
+												>
+													<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
+													<span class="truncate">{evidence.str}</span>
+												</a>
+											{/each}
+										</div>
+									</div>
+								{/if}
 							</div>
-						{/if}
-					</div>
-				</li>
-			{/each}
-		</ol>
-		<footer class="flex justify-between items-center space-x-8 p-2">
-			{#if pagination}
-				<RowCount {handler} />
-			{/if}
-			{#if pagination}
-				<Pagination {handler} />
-			{/if}
-		</footer>
+						</li>
+					{/each}
+				</ol>
+				<footer class="flex justify-between items-center space-x-8 p-2">
+					{#if pagination}
+						<RowCount {handler} />
+					{/if}
+					{#if pagination}
+						<Pagination {handler} />
+					{/if}
+				</footer>
+			</Tabs.Content>
+
+			<Tabs.Content value="dora-reports" class="pt-4">
+				{#if doraRows.length > 0}
+					<table class="w-full text-sm">
+						<thead>
+							<tr class="border-b text-left text-gray-500">
+								<th class="py-2 px-3">{m.incidentSubmission()}</th>
+								<th class="py-2 px-3">{safeTranslate('createdAt')}</th>
+								<th class="py-2 px-3">{safeTranslate('updatedAt')}</th>
+								<th class="py-2 px-3"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each doraRows as report}
+								<tr
+									class="border-b hover:bg-gray-50 cursor-pointer"
+									onclick={(e) => {
+										if (!(e.target as HTMLElement).closest('button')) {
+											window.location.href = `/dora-incident-reports/${report.id}`;
+										}
+									}}
+								>
+									<td class="py-2 px-3">
+										<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+											{safeTranslate(report.incident_submission)}
+										</span>
+										{#if report.is_submitted}
+											<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded ml-1">
+												<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
+											</span>
+										{:else}
+											<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-1">
+												{m.draft()}
+											</span>
+										{/if}
+									</td>
+									<td class="py-2 px-3">{formatDateOrDateTime(report.created_at, getLocale())}</td>
+									<td class="py-2 px-3">{formatDateOrDateTime(report.updated_at, getLocale())}</td>
+									<td class="py-2 px-3 text-right">
+										{#if !report.is_submitted}
+											<button
+												type="button"
+												class="text-red-500 hover:text-red-700 text-sm"
+												onclick={() =>
+													modalDeleteDoraReport(
+														report.id,
+														safeTranslate(report.incident_submission)
+													)}
+											>
+												<i class="fa-solid fa-trash"></i>
+											</button>
+										{/if}
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				{:else}
+					<p class="text-gray-500 text-sm italic py-4">{m.noResultFound()}</p>
+				{/if}
+			</Tabs.Content>
+		</Tabs>
 	</div>
 </div>

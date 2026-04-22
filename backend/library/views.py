@@ -415,6 +415,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 )
                 if not (
                     mime == "text/plain" and attachment.name.endswith((".yaml", ".yml"))
+                ) and not (
+                    mime in ("application/octet-stream", "application/zip")
+                    and attachment.name.endswith(".xlsx")
                 ):
                     return HttpResponse(
                         json.dumps({"error": "invalidFileFormat"}),
@@ -423,10 +426,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             try:
                 if attachment.name.endswith(".xlsx"):
-                    # Validate Excel MIME strictly
-                    if (
-                        mime
-                        != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    if mime not in (
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "application/octet-stream",
+                        "application/zip",
                     ):
                         return HttpResponse(
                             json.dumps({"error": "invalidFileFormat"}),
