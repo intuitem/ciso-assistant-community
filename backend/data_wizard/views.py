@@ -3801,12 +3801,14 @@ class LoadFileView(APIView):
             matrix_mappings = self._build_matrix_mappings(risk_matrix)
 
             # Process controls first - collect all unique control names
-            # Accept both the legacy column name (`additional_controls`) and the
-            # model field name (`applied_controls`, as used by the export) for the
-            # to-be-added controls column.
+            # Accept both the legacy columns name and the model fields name for the
             all_controls = set()
             for record in records:
-                existing_controls = record.get("existing_applied_controls", "").strip()
+                existing_controls = (
+                    record.get("existing_applied_controls")
+                    or record.get("existing_controls")
+                    or ""
+                ).strip()
                 additional_controls = (
                     record.get("additional_controls")
                     or record.get("applied_controls")

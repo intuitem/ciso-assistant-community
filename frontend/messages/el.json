@@ -769,6 +769,7 @@
 	"requirementMappings": "Χαρτογραφήσεις απαιτήσεων",
 	"sourceFramework": "Πηγαίο πλαίσιο",
 	"targetFramework": "Στοχευμένο πλαίσιο",
+	"targetFrameworks": "Στοχευμένα πλαίσια",
 	"baseline": "Βασική γραμμή",
 	"createAuditFromBaseline": "Δημιουργία ελέγχου από βασική γραμμή",
 	"coverageColon": "Κάλυψη:",

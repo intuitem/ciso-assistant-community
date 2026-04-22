@@ -738,6 +738,7 @@
 	"requirementMappings": "Вимоги маппінгів",
 	"sourceFramework": "Вихідний фреймворк",
 	"targetFramework": "Цільовий фреймворк",
+	"targetFrameworks": "Цільові фреймворки",
 	"baseline": "База",
 	"createAuditFromBaseline": "Створити аудит з базового",
 	"coverageColon": "Покриття:",
