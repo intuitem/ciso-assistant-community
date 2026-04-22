@@ -2673,7 +2673,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "max_score",
             "progress_status_enabled",
             "extended_result_enabled",
-            {"framework": ["implementation_groups_definition"]},
+            "field_visibility",
+            {"framework": ["implementation_groups_definition", "field_visibility"]},
         ]
     )
     folder = FieldsRelatedField()
