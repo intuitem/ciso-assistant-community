@@ -230,11 +230,15 @@
 	});
 	const collapsed = $derived(collapsedSet.has(node.node.id));
 	const hasChildren = $derived(node.children.length > 0);
+
+	// Whether THIS node is the innermost focused NodeBlock. Drives the
+	// focus ring so the user can see which node keyboard shortcuts target.
+	let isFocused = $state(false);
 </script>
 
 <div
 	style="margin-left: {Math.min(node.depth, 3) * 16}px"
-	class="scroll-mt-32"
+	class="scroll-mt-32 outline-none"
 	data-section-id={node.node.id}
 	data-builder-node
 	tabindex="-1"
@@ -242,15 +246,27 @@
 		const target = e.target as HTMLElement;
 		const nearestWrapper = target.closest('[data-builder-node]');
 		if (nearestWrapper !== e.currentTarget) return;
+		isFocused = true;
 		setFocusedNode({
 			nodeId: node.node.id,
 			parent: parentId ?? null,
 			siblingIndex: indexWithinParent
 		});
 	}}
+	onfocusout={(e) => {
+		const newTarget = e.relatedTarget as HTMLElement | null;
+		const newWrapper = newTarget?.closest('[data-builder-node]') ?? null;
+		if (newWrapper !== e.currentTarget) {
+			isFocused = false;
+		}
+		if (!newTarget || !newWrapper) {
+			setFocusedNode(null);
+		}
+	}}
 >
 	<div
-		class="bg-white rounded-lg shadow-sm border overflow-hidden
+		class="bg-white rounded-lg shadow-sm border overflow-hidden transition-shadow
+		{isFocused ? 'ring-2 ring-blue-400 ring-offset-1' : ''}
 		{isSplash ? 'border-purple-200' : 'border-gray-200'}
 		{node.depth > 0 ? 'border-l-4 ' + (isSplash ? 'border-l-purple-400' : depthColor) : ''}"
 	>

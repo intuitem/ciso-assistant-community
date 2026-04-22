@@ -14,7 +14,7 @@
 	const groups = [
 		{
 			title: 'Outline editing',
-			hint: 'Apply to the last node you focused.',
+			hint: 'Apply to the highlighted node.',
 			shortcuts: [
 				{ keys: [altKey, '→'], label: 'Indent node' },
 				{ keys: [altKey, '←'], label: 'Outdent node' },
