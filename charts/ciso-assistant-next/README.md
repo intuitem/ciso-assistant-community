@@ -13,13 +13,13 @@ A Helm chart for CISO Assistant k8s's deployment
 ## Development
 
 Update schema command after new updates on `values.yaml` (using https://github.com/losisin/helm-values-schema-json) :
-```
+```bash
 helm schema --values values.yaml
 ```
 
 Update `README.md` with helm-docs (using https://github.com/norwoodj/helm-docs) :
-```
-helm schema --values values.yaml
+```bash
+helm-docs
 ```
 
 ## Requirements
