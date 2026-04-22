@@ -4922,7 +4922,7 @@ class LoadFileView(APIView):
                             # Check for existing stakeholder
                             existing_stakeholder = Stakeholder.objects.filter(
                                 ebios_rm_study=study,
-                                entity=entity,
+                                entity__iexact=entity_name,
                                 category=category,
                             ).first()
 
@@ -4999,7 +4999,8 @@ class LoadFileView(APIView):
                             # Create the stakeholder
                             stakeholder = Stakeholder.objects.create(
                                 ebios_rm_study=study,
-                                entity=entity,
+                                entity=entity_name,
+                                third_party_entity=entity,
                                 category=category,
                                 is_selected=stakeholder_data.get("is_selected", False),
                                 current_dependency=stakeholder_data.get(
@@ -5756,7 +5757,7 @@ class LoadFileView(APIView):
                     if entity and category:
                         existing_sh = Stakeholder.objects.filter(
                             ebios_rm_study=study,
-                            entity=entity,
+                            entity__iexact=entity_name,
                             category=category,
                         ).first()
 
@@ -5812,7 +5813,8 @@ class LoadFileView(APIView):
 
                     stakeholder = Stakeholder.objects.create(
                         ebios_rm_study=study,
-                        entity=entity,
+                        entity=entity_name,
+                        third_party_entity=entity,
                         category=category,
                         current_dependency=sh_data.get("current_dependency") or 0,
                         current_penetration=sh_data.get("current_penetration") or 0,
