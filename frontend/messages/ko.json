@@ -1997,6 +1997,7 @@
 	"securityExceptions": "예외",
 	"addSecurityException": "예외 추가",
 	"expirationDate": "만료일",
+	"expirationDateIsInThePastWarning": "입력한 만료일이 이미 지났습니다",
 	"filterBy": "필터 기준",
 	"demoDataAlreadyImported": "데모 데이터가 이미 가져와졌습니다. 기존 DEMO 도메인을 삭제하거나 이름을 변경하세요.",
 	"finding": "발견 사항",
