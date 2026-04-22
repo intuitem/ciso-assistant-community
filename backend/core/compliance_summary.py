@@ -1,3 +1,7 @@
+"""
+Helper for Summary page (Compliance Section)
+"""
+
 from django.db.models import Prefetch
 from django.db.models.functions import Lower
 
