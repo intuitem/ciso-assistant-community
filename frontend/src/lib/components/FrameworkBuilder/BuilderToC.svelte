@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
+	import { getTocCollapsedContext } from './collapse-state';
 
 	import type { BuilderNode } from './builder-state';
 
@@ -12,12 +13,20 @@
 		activeLanguage: activeLanguageStore
 	} = builder;
 
+	const tocCollapsed = getTocCollapsedContext();
+
 	let collapsed = $state(false);
 	let searchQuery = $state('');
 	let focusedIndex = $state(-1);
 	let searchInput = $state<HTMLInputElement>();
 	let navigationButtons = $state<HTMLButtonElement[]>([]);
 	let topOffset = $state(0);
+
+	let tocCollapsedSet = $state(new Set<string>());
+	$effect(() => {
+		const unsub = tocCollapsed.subscribe((s) => (tocCollapsedSet = s));
+		return unsub;
+	});
 
 	const FRAMEWORK_ID = '__framework__';
 
@@ -26,15 +35,33 @@
 		depth: number;
 	}
 
+	function collectAllParentIds(tree: BuilderNode[]): string[] {
+		const ids: string[] = [];
+		function walk(list: BuilderNode[]) {
+			for (const n of list) {
+				if (n.children.length > 0) {
+					ids.push(n.node.id);
+					walk(n.children);
+				}
+			}
+		}
+		walk(tree);
+		return ids;
+	}
+
 	function flattenTree(tree: BuilderNode[], depth = 0): TocEntry[] {
 		const out: TocEntry[] = [];
 		for (const n of tree) {
 			out.push({ node: n, depth });
-			if (n.children.length > 0) out.push(...flattenTree(n.children, depth + 1));
+			if (n.children.length > 0 && !tocCollapsedSet.has(n.node.id)) {
+				out.push(...flattenTree(n.children, depth + 1));
+			}
 		}
 		return out;
 	}
 
+	// allEntries references both $rootNodesStore and tocCollapsedSet — flattenTree reads
+	// tocCollapsedSet directly so Svelte tracks it as a dependency automatically.
 	let allEntries = $derived(flattenTree($rootNodesStore));
 
 	let filteredNodes = $derived(
@@ -266,6 +293,32 @@
 			</div>
 		</div>
 
+		<!-- Bulk expand/collapse — only shown when there are collapsible branches -->
+		{#if $rootNodesStore.some((n) => n.children.length > 0)}
+			<div class="px-2 pb-1 flex items-center gap-1 border-b border-gray-100">
+				<button
+					type="button"
+					class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+					onclick={() => tocCollapsed.collapseAll(collectAllParentIds($rootNodesStore))}
+					title="Collapse all"
+					aria-label="Collapse all"
+				>
+					<i class="fa-solid fa-angles-up text-[10px]"></i>
+					<span>Collapse all</span>
+				</button>
+				<button
+					type="button"
+					class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+					onclick={() => tocCollapsed.expandAll()}
+					title="Expand all"
+					aria-label="Expand all"
+				>
+					<i class="fa-solid fa-angles-down text-[10px]"></i>
+					<span>Expand all</span>
+				</button>
+			</div>
+		{/if}
+
 		<!-- Navigation -->
 		<nav class="toc-nav p-2 space-y-0.5" role="navigation" aria-label="Table of Contents">
 			<!-- Framework metadata entry (pinned, hidden during search) -->
@@ -289,6 +342,7 @@
 			{#each filteredNodes as entry, index (`toc-${index}-${entry.node.node.id}`)}
 				{@const n = entry.node.node}
 				{@const hasChildren = entry.node.children.length > 0}
+				{@const isCollapsed = tocCollapsedSet.has(n.id)}
 				{@const icon = n.display_mode === 'splash'
 					? 'fa-display text-purple-400'
 					: n.assessable && hasChildren
@@ -298,37 +352,56 @@
 							: hasChildren
 								? 'fa-folder text-gray-400'
 								: 'fa-circle-dot text-gray-300'}
-				<button
-					bind:this={navigationButtons[index]}
-					class="w-full text-left py-1.5 text-xs rounded-md transition-colors flex items-center gap-1.5
-						{$activeSectionStore === n.id
-							? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
-							: 'text-gray-600 hover:bg-gray-100'}
-						{focusedIndex === index ? 'ring-2 ring-primary-300' : ''}"
-					style="padding-left: {0.5 + entry.depth * 0.75}rem"
-					onclick={() => {
-						focusedIndex = index;
-						scrollToNode(n.id);
-					}}
-					onkeydown={(e) => handleButtonKeydown(e, index)}
-					onfocus={() => (focusedIndex = index)}
-					aria-current={$activeSectionStore === n.id ? 'location' : undefined}
-					aria-label="Jump to: {n.ref_id || n.name || 'Untitled'}"
-					tabindex={focusedIndex === index ? 0 : -1}
-				>
-					<i class="fa-solid {icon} text-[10px] flex-shrink-0"></i>
-					<span class="truncate flex-1">{n.ref_id || n.name || 'Untitled'}</span>
-					{#if $activeLanguageStore && hasUntranslated([entry.node], $activeLanguageStore)}
-						<span class="text-amber-500 text-[8px] flex-shrink-0" title="Has untranslated items"
-							>&#9679;</span
-						>
-					{/if}
+				<div class="flex items-center" style="padding-left: {0.5 + entry.depth * 0.75}rem">
 					{#if hasChildren}
-						<span class="text-[10px] text-gray-400 ml-1 tabular-nums flex-shrink-0"
-							>{countDescendants([entry.node])}</span
+						<button
+							type="button"
+							class="flex-shrink-0 w-4 h-4 flex items-center justify-center text-gray-400 hover:text-gray-600"
+							onclick={(e) => {
+								e.stopPropagation();
+								tocCollapsed.toggle(n.id);
+							}}
+							title={isCollapsed ? 'Expand' : 'Collapse'}
+							aria-label={isCollapsed ? 'Expand' : 'Collapse'}
 						>
+							<i class="fa-solid {isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-[8px]"
+							></i>
+						</button>
+					{:else}
+						<span class="w-4 h-4 flex-shrink-0"></span>
 					{/if}
-				</button>
+
+					<button
+						bind:this={navigationButtons[index]}
+						class="flex-1 text-left py-1.5 text-xs rounded-md transition-colors flex items-center gap-1.5
+							{$activeSectionStore === n.id
+								? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
+								: 'text-gray-600 hover:bg-gray-100'}
+							{focusedIndex === index ? 'ring-2 ring-primary-300' : ''}"
+						onclick={() => {
+							focusedIndex = index;
+							scrollToNode(n.id);
+						}}
+						onkeydown={(e) => handleButtonKeydown(e, index)}
+						onfocus={() => (focusedIndex = index)}
+						aria-current={$activeSectionStore === n.id ? 'location' : undefined}
+						aria-label="Jump to: {n.ref_id || n.name || 'Untitled'}"
+						tabindex={focusedIndex === index ? 0 : -1}
+					>
+						<i class="fa-solid {icon} text-[10px] flex-shrink-0"></i>
+						<span class="truncate flex-1">{n.ref_id || n.name || 'Untitled'}</span>
+						{#if $activeLanguageStore && hasUntranslated([entry.node], $activeLanguageStore)}
+							<span class="text-amber-500 text-[8px] flex-shrink-0" title="Has untranslated items"
+								>&#9679;</span
+							>
+						{/if}
+						{#if hasChildren}
+							<span class="text-[10px] text-gray-400 ml-1 tabular-nums flex-shrink-0"
+								>{countDescendants([entry.node])}</span
+							>
+						{/if}
+					</button>
+				</div>
 			{/each}
 
 			<!-- Empty state -->

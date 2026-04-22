@@ -7,9 +7,11 @@
 	interface Props {
 		frameworkId: string;
 		onOpenHelp?: () => void;
+		onExpandAllCards?: () => void;
+		onCollapseAllCards?: () => void;
 	}
 
-	let { frameworkId, onOpenHelp }: Props = $props();
+	let { frameworkId, onOpenHelp, onExpandAllCards, onCollapseAllCards }: Props = $props();
 
 	const builder = getBuilderContext();
 	const {
@@ -195,6 +197,30 @@
 
 		<!-- Spacer -->
 		<div class="ml-auto"></div>
+
+		<!-- Collapse/expand all cards -->
+		{#if onCollapseAllCards}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onCollapseAllCards}
+				title="Collapse all cards"
+				aria-label="Collapse all cards"
+			>
+				<i class="fa-solid fa-angles-up text-[10px]"></i>
+			</button>
+		{/if}
+		{#if onExpandAllCards}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onExpandAllCards}
+				title="Expand all cards"
+				aria-label="Expand all cards"
+			>
+				<i class="fa-solid fa-angles-down text-[10px]"></i>
+			</button>
+		{/if}
 
 		<!-- Keyboard shortcut help -->
 		{#if onOpenHelp}

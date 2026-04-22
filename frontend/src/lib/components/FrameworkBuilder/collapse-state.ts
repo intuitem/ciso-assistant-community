@@ -77,3 +77,13 @@ export function setCardCollapsedContext(store: CollapsedStore) {
 export function getCardCollapsedContext(): CollapsedStore {
 	return getContext(CARD_COLLAPSED_KEY);
 }
+
+const TOC_COLLAPSED_KEY = Symbol('toc-collapsed');
+
+export function setTocCollapsedContext(store: CollapsedStore) {
+	setContext(TOC_COLLAPSED_KEY, store);
+}
+
+export function getTocCollapsedContext(): CollapsedStore {
+	return getContext(TOC_COLLAPSED_KEY);
+}

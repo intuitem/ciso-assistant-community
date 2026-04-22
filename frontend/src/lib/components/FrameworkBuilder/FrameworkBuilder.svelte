@@ -7,6 +7,7 @@
 		getTranslation,
 		withTranslation,
 		type Framework,
+		type BuilderNode,
 		type RequirementNode,
 		type Question
 	} from './builder-state';
@@ -19,7 +20,11 @@
 	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import { installKeyboardHandlers } from './keyboard';
-	import { createCollapsedStore, setCardCollapsedContext } from './collapse-state';
+	import {
+		createCollapsedStore,
+		setCardCollapsedContext,
+		setTocCollapsedContext
+	} from './collapse-state';
 	import KeyboardHelp from './KeyboardHelp.svelte';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
@@ -86,6 +91,9 @@
 
 	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);
 	setCardCollapsedContext(cardCollapsed);
+
+	const tocCollapsed = createCollapsedStore(`fw-builder:${framework.id}:toc:collapsed`);
+	setTocCollapsedContext(tocCollapsed);
 
 	const {
 		framework: frameworkStore,
@@ -206,6 +214,20 @@
 		}
 	}
 
+	function collectAllParentIds(tree: BuilderNode[]): string[] {
+		const ids: string[] = [];
+		function walk(list: BuilderNode[]) {
+			for (const n of list) {
+				if (n.children.length > 0) {
+					ids.push(n.node.id);
+					walk(n.children);
+				}
+			}
+		}
+		walk(tree);
+		return ids;
+	}
+
 	// Drag state for root nodes
 	const rootDrag = createHandleGatedDragHandlers((from, to) => builder.reorderNodes(null, from, to));
 
@@ -322,7 +344,12 @@
 <svelte:window onkeydown={handleGlobalKey} />
 
 <div class="card !p-0 bg-white shadow-lg overflow-visible">
-	<BuilderMinimap frameworkId={framework.id} onOpenHelp={() => (helpOpen = true)} />
+	<BuilderMinimap
+		frameworkId={framework.id}
+		onOpenHelp={() => (helpOpen = true)}
+		onExpandAllCards={() => cardCollapsed.expandAll()}
+		onCollapseAllCards={() => cardCollapsed.collapseAll(collectAllParentIds($rootNodesStore))}
+	/>
 
 	<div class="flex">
 		<BuilderToC />
