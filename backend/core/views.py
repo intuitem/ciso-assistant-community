@@ -4672,6 +4672,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
     ("quantitative_risk_hypotheses_removed", "CRQ Hypotheses (removed)"),
     ("assetassessment", "Asset Assessments"),
     ("task_templates", "Task Templates"),
+    ("incidents", "Incidents"),
     ("comments", "Comments"),
 ]
 
@@ -4842,6 +4843,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "security_exceptions": ["exact"],
             "owner": ["exact"],
             "findings": ["exact"],
+            "incidents": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
             "processings": ["exact"],
@@ -4992,6 +4994,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "has_quantitative_risk_hypotheses_removed": QuantitativeRiskHypothesis.removed_applied_controls.through,
             "has_assetassessment": AssetAssessment.associated_controls.through,
             "has_task_templates": TaskTemplate.applied_controls.through,
+            "has_incidents": Incident.applied_controls.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(appliedcontrol_id=OuterRef("pk")))
@@ -6246,6 +6249,7 @@ class RiskScenarioFilter(GenericFilterSet):
             "vulnerabilities": ["exact"],
             "qualifications": ["exact"],
             "filtering_labels": ["exact"],
+            "incidents": ["exact"],
         }
 
 
@@ -14415,6 +14419,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "owners",
         "entities",
         "assets",
+        "applied_controls",
+        "task_templates",
+        "risk_scenarios",
         "filtering_labels",
     ]
 
@@ -15033,6 +15040,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "next_occurrence_status",
             "evidences",
             "objectives",
+            "incidents",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):

@@ -1079,6 +1079,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     applied_controls = FieldsRelatedField(many=True)
     existing_applied_controls = FieldsRelatedField(many=True)
+    incidents = FieldsRelatedField(many=True)
 
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
@@ -1146,6 +1147,9 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
     )
+    incidents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Incident.objects.all()
+    )
     cost = serializers.JSONField(required=False, allow_null=True)
     integration_config = serializers.PrimaryKeyRelatedField(
         required=False,
@@ -1168,11 +1172,14 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
         owner_data = validated_data.get("owner", [])
         findings = validated_data.pop("findings", [])
         task_templates = validated_data.pop("task_templates", [])
+        incidents = validated_data.pop("incidents", [])
         applied_control = super().create(validated_data)
         if findings:
             applied_control.findings.set(findings)
         if task_templates:
             applied_control.task_templates.set(task_templates)
+        if incidents:
+            applied_control.incidents.set(incidents)
 
         # Send notification to newly assigned owners
         if owner_data:
@@ -1188,6 +1195,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 
         findings = validated_data.pop("findings", None)
         task_templates = validated_data.pop("task_templates", None)
+        incidents = validated_data.pop("incidents", None)
 
         updated_instance = super().update(instance, validated_data)
 
@@ -1195,6 +1203,8 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
             updated_instance.findings.set(findings)
         if task_templates is not None:
             updated_instance.task_templates.set(task_templates)
+        if incidents is not None:
+            updated_instance.incidents.set(incidents)
 
         # Get new owners after update
         new_owner_ids = set(updated_instance.owner.values_list("id", flat=True))
@@ -1266,6 +1276,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    incidents = FieldsRelatedField(many=True)
     reference_control = FieldsRelatedField()
     priority = serializers.CharField(source="get_priority_display")
     category = serializers.CharField(
@@ -4174,6 +4185,9 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     entities = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
+    risk_scenarios = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display", read_only=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     detection = serializers.CharField(source="get_detection_display", read_only=True)
@@ -4192,6 +4206,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
 class TaskTemplateReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    incidents = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -4243,6 +4258,9 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         many=True,
         required=False,
     )
+    incidents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Incident.objects.all()
+    )
 
     class Meta:
         model = TaskTemplate
@@ -4266,10 +4284,13 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         assigned_to_data = validated_data.get("assigned_to", [])
+        incidents = validated_data.pop("incidents", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
         with transaction.atomic():
             instance = super().create(validated_data)
             self._sync_task_node(instance, tasknode_data, False, instance.is_recurrent)
+            if incidents:
+                instance.incidents.set(incidents)
 
         # Send notification to newly assigned users
         if assigned_to_data:
@@ -4288,11 +4309,14 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
         was_recurrent = instance.is_recurrent  # Store the previous state
         tasknode_data = self._extract_tasknode_fields(validated_data)
+        incidents = validated_data.pop("incidents", None)
 
         with transaction.atomic():
             instance = super().update(instance, validated_data)
             now_recurrent = instance.is_recurrent
             self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+            if incidents is not None:
+                instance.incidents.set(incidents)
 
             # Update all TaskNodes' folder if the TaskTemplate's folder changed
             if old_folder_id != instance.folder_id:
