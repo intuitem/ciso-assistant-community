@@ -645,7 +645,7 @@ logger.info(
     module_paths=MODULE_PATHS,
 )
 
-LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 5))
+LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
 
 logger.info("License information", seats=LICENSE_SEATS, expiration=LICENSE_EXPIRATION)
