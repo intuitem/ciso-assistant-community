@@ -141,7 +141,7 @@ def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
                     c_criticality,
                     angle,
                     c_exposure_val,
-                    f"{sh.entity.name}-{category_name}",
+                    f"{sh.entity}-{category_name}",
                 ]
             )
 
@@ -160,7 +160,7 @@ def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
                     r_criticality,
                     angle,
                     r_exposure_val,
-                    f"{sh.entity.name}-{category_name}",
+                    f"{sh.entity}-{category_name}",
                 ]
             )
 
