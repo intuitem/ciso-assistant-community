@@ -5,16 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0026_remove_stakeholder_entity_name_and_more'),
-        ('tprm', '0017_entityassessment_reference_link'),
+        ("ebios_rm", "0026_remove_stakeholder_entity_name_and_more"),
+        ("tprm", "0017_entityassessment_reference_link"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='stakeholder',
-            name='third_party_entity',
-            field=models.ForeignKey(blank=True, help_text='Related thied party entity', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='stakeholders', to='tprm.entity', verbose_name='Third Party Entity'),
+            model_name="stakeholder",
+            name="third_party_entity",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Related thied party entity",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stakeholders",
+                to="tprm.entity",
+                verbose_name="Third Party Entity",
+            ),
         ),
     ]
