@@ -7,6 +7,7 @@
 	} from './builder-state';
 	import { setFocusedNode } from './keyboard';
 	import { createCopyHandler, createHandleGatedDragHandlers } from './builder-utils.svelte';
+	import { getCardCollapsedContext } from './collapse-state';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import QuestionEditor from './QuestionEditor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -219,6 +220,16 @@
 	}
 
 	const isSplash = $derived(node.node.display_mode === 'splash');
+
+	// Collapse/expand state
+	const cardCollapsed = getCardCollapsedContext();
+	let collapsedSet = $state(new Set<string>());
+	$effect(() => {
+		const unsub = cardCollapsed.subscribe((s) => (collapsedSet = s));
+		return unsub;
+	});
+	const collapsed = $derived(collapsedSet.has(node.node.id));
+	const hasChildren = $derived(node.children.length > 0);
 </script>
 
 <div
@@ -254,11 +265,22 @@
 		{/if}
 
 		<!-- Status line -->
-		<div class="px-4 pt-2 text-[11px] {isSplash ? 'text-purple-400' : 'text-gray-400'}">
+		<div class="px-4 pt-2 text-[11px] {isSplash ? 'text-purple-400' : 'text-gray-400'} flex items-center">
+			{#if hasChildren}
+				<button
+					type="button"
+					class="inline-flex items-center justify-center w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors mr-1"
+					onclick={() => cardCollapsed.toggle(node.node.id)}
+					title={collapsed ? 'Expand children' : 'Collapse children'}
+					aria-label={collapsed ? 'Expand children' : 'Collapse children'}
+				>
+					<i class="fa-solid {collapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-[10px]"></i>
+				</button>
+			{/if}
 			{#if isSplash}
 				<i class="fa-solid fa-display mr-1"></i>
 			{/if}
-			{statusLine}
+			<span>{statusLine}</span>
 		</div>
 
 		<!-- Header -->
@@ -740,6 +762,7 @@
 			parent={node.node.id}
 			triggerLabel={'+ Add child'}
 			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
+			onBeforeAdd={() => cardCollapsed.expand(node.node.id)}
 		/>
 	{/if}
 
@@ -754,7 +777,7 @@
 	{/if}
 
 	<!-- Recursive children -->
-	{#if node.children.length > 0}
+	{#if node.children.length > 0 && !collapsed}
 		<div class="space-y-3 mt-2">
 			{#each node.children as child, childIndex (child.node.id)}
 				<div
@@ -770,6 +793,11 @@
 					<svelte:self node={child} parentId={node.node.id} indexWithinParent={childIndex} />
 				</div>
 			{/each}
+		</div>
+	{/if}
+	{#if node.children.length > 0 && collapsed}
+		<div class="ml-4 mt-1 text-[10px] text-gray-400 italic">
+			{node.children.length} {node.children.length === 1 ? 'child' : 'children'} hidden
 		</div>
 	{/if}
 </div>

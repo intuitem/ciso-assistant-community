@@ -19,6 +19,7 @@
 	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import { installKeyboardHandlers } from './keyboard';
+	import { createCollapsedStore, setCardCollapsedContext } from './collapse-state';
 	import KeyboardHelp from './KeyboardHelp.svelte';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
@@ -82,6 +83,9 @@
 
 	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
 	setBuilderContext(builder);
+
+	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);
+	setCardCollapsedContext(cardCollapsed);
 
 	const {
 		framework: frameworkStore,

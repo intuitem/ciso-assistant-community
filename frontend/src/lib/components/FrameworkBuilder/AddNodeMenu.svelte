@@ -6,12 +6,14 @@
 		afterIndex?: number;
 		triggerLabel?: string;
 		triggerClass?: string;
+		onBeforeAdd?: () => void;
 	}
 	let {
 		parent,
 		afterIndex,
 		triggerLabel = '+ Add node',
-		triggerClass = ''
+		triggerClass = '',
+		onBeforeAdd
 	}: Props = $props();
 
 	const builder = getBuilderContext();
@@ -19,6 +21,7 @@
 	let rootEl: HTMLDivElement;
 
 	function addWith(preset: NodePreset) {
+		onBeforeAdd?.();
 		builder.addNode({ parent, afterIndex, preset });
 		open = false;
 	}
