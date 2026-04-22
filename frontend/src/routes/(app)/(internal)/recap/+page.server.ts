@@ -39,7 +39,10 @@ function buildDonutValues(resultCounts: ResultCounts) {
 }
 
 function buildOverallCompliance(complianceAssessments: RawRecapAssessment[]) {
-	const counts = Object.fromEntries(RESULT_ORDER.map((result) => [result, 0])) as Record<ResultKey, number>;
+	const counts = Object.fromEntries(RESULT_ORDER.map((result) => [result, 0])) as Record<
+		ResultKey,
+		number
+	>;
 
 	for (const assessment of complianceAssessments) {
 		for (const result of RESULT_ORDER) {
