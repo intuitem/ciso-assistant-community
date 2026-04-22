@@ -5524,7 +5524,10 @@ class Vulnerability(
             self.detected_at = date.today()
             if update_fields is not None:
                 update_fields.add("detected_at")
-        if is_new or severity_changed:
+        # Auto-apply SLA only when due_date is empty. Explicit user values
+        # (from the wizard or manual input) are preserved; the bulk
+        # refresh-due-dates action is the sole path that overrides them.
+        if (is_new or severity_changed) and not self.due_date:
             self._apply_sla_policy()
             if update_fields is not None:
                 update_fields.add("due_date")
