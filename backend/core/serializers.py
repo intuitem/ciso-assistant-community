@@ -778,6 +778,62 @@ class AssetReadSerializer(AssetWriteSerializer):
         return obj.get_recovery_objectives_comparison()
 
 
+class AssetListSerializer(BaseModelSerializer):
+    """
+    Lightweight serializer for the assets list view.
+
+    Only includes fields rendered in the assets table (see frontend `table.ts`),
+    plus the aggregated objectives that the list also displays. Capability
+    aggregates and the `*_comparison` fields are skipped here to avoid the
+    per-row graph traversals they trigger — those remain on `AssetReadSerializer`
+    for the detail view.
+    """
+
+    folder = FieldsRelatedField()
+    asset_class = FieldsRelatedField(["id", "name"])
+    owner = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    parent_assets = FieldsRelatedField(many=True)
+    type = serializers.CharField(source="get_type_display")
+    security_objectives = serializers.SerializerMethodField()
+    disaster_recovery_objectives = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Asset
+        fields = [
+            "id",
+            "ref_id",
+            "name",
+            "description",
+            "type",
+            "is_primary",
+            "is_business_function",
+            "folder",
+            "asset_class",
+            "owner",
+            "filtering_labels",
+            "parent_assets",
+            "security_objectives",
+            "disaster_recovery_objectives",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_security_objectives(self, obj):
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("security_objectives", {}).get(obj.id, [])
+        return obj.get_security_objectives_display()
+
+    def get_disaster_recovery_objectives(self, obj):
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("disaster_recovery_objectives", {}).get(
+                obj.id, []
+            )
+        return obj.get_disaster_recovery_objectives_display()
+
+
 class AssetAutocompleteSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     type = serializers.CharField(source="get_type_display")

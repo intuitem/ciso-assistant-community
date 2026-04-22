@@ -3412,37 +3412,39 @@ class Asset(
 
     @classmethod
     def _aggregate_security_capabilities(
-        cls, supporting_descendants: set, parent_asset=None
+        cls, supporting_descendants: set, parent_asset=None, parent_to_children=None
     ) -> dict:
         """
         Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
         and its descendants are excluded for that capability only (not globally).
+
+        If `parent_to_children` is provided, it is reused instead of re-running
+        `_prefetch_graph_data` — this avoids an extra full-graph prefetch per invocation
+        when the caller already built the graph for a batch of assets.
         """
         # Build descendant map with constant DB queries using prefetched graph data
         descendants_map = {}
-        if parent_asset is not None:
-            graph = cls._prefetch_graph_data([parent_asset])
-            parent_to_children = graph["parent_to_children"]
+        if parent_to_children is None and parent_asset is not None:
+            parent_to_children = cls._prefetch_graph_data([parent_asset])[
+                "parent_to_children"
+            ]
+        if parent_to_children is not None:
             for asset in supporting_descendants:
                 descendants_map[asset.id] = cls._get_all_descendants(
                     asset, parent_to_children
                 )
         else:
-            # Fallback for when parent_asset is not provided
+            # Fallback for when neither parent_asset nor parent_to_children is provided
             for asset in supporting_descendants:
                 descendants_map[asset.id] = asset.get_descendants()
 
-        # Track which capabilities are overridden by which assets
+        # Track which capabilities are overridden by which assets.
+        # Uses `.all()` (not `.values_list`) so the prefetch cache is honored.
         overrides = {}  # {cap_name: [list of assets that override it]}
         for asset in supporting_descendants:
-            overridden = asset.overridden_children_capabilities.values_list(
-                "name", flat=True
-            )
-            for cap_name in overridden:
-                if cap_name not in overrides:
-                    overrides[cap_name] = []
-                overrides[cap_name].append(asset)
+            for cap in asset.overridden_children_capabilities.all():
+                overrides.setdefault(cap.name, []).append(asset)
 
         agg_cap = {}
         for asset in supporting_descendants:
@@ -3478,37 +3480,38 @@ class Asset(
 
     @classmethod
     def _aggregate_recovery_capabilities(
-        cls, supporting_descendants: set, parent_asset=None
+        cls, supporting_descendants: set, parent_asset=None, parent_to_children=None
     ) -> dict:
         """
         Aggregates recovery capabilities from supporting descendants (highest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
         and its descendants are excluded for that capability only (not globally).
+
+        If `parent_to_children` is provided, it is reused instead of re-running
+        `_prefetch_graph_data`.
         """
         # Build descendant map with constant DB queries using prefetched graph data
         descendants_map = {}
-        if parent_asset is not None:
-            graph = cls._prefetch_graph_data([parent_asset])
-            parent_to_children = graph["parent_to_children"]
+        if parent_to_children is None and parent_asset is not None:
+            parent_to_children = cls._prefetch_graph_data([parent_asset])[
+                "parent_to_children"
+            ]
+        if parent_to_children is not None:
             for asset in supporting_descendants:
                 descendants_map[asset.id] = cls._get_all_descendants(
                     asset, parent_to_children
                 )
         else:
-            # Fallback for when parent_asset is not provided
+            # Fallback for when neither parent_asset nor parent_to_children is provided
             for asset in supporting_descendants:
                 descendants_map[asset.id] = asset.get_descendants()
 
-        # Track which capabilities are overridden by which assets
+        # Track which capabilities are overridden by which assets.
+        # Uses `.all()` (not `.values_list`) so the prefetch cache is honored.
         overrides = {}  # {cap_name: [list of assets that override it]}
         for asset in supporting_descendants:
-            overridden = asset.overridden_children_capabilities.values_list(
-                "name", flat=True
-            )
-            for cap_name in overridden:
-                if cap_name not in overrides:
-                    overrides[cap_name] = []
-                overrides[cap_name].append(asset)
+            for cap in asset.overridden_children_capabilities.all():
+                overrides.setdefault(cap.name, []).append(asset)
 
         agg_cap = {}
         for asset in supporting_descendants:
