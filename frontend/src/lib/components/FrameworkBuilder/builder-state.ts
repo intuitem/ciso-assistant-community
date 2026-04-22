@@ -789,6 +789,9 @@ export function createBuilderState(
 
 		try {
 			await apiPublishDraft(frameworkId);
+			// Reflect the server-side bump locally so reactive status (e.g.,
+			// "Live" vs "Draft — nothing live yet") updates without a refresh.
+			framework.update((f) => ({ ...f, editing_version: (f.editing_version ?? 1) + 1 }));
 			clearError('publish');
 		} catch (e) {
 			setError('publish', (e as Error).message);
