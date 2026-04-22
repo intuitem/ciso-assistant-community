@@ -142,6 +142,9 @@ spec:
         - name: localstorage-data
           mountPath: /ciso/localStorage
         {{- end }}
+        {{- with .Values.backend.huey.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         ports:
         - name: http
           containerPort: 8000
@@ -262,6 +265,9 @@ spec:
         - name: sqlite-data
           mountPath: /ciso/db
         {{- end }}
+        {{- with .Values.backend.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
           {{- toYaml .Values.backend.huey.resources | nindent 10 }}
@@ -270,12 +276,16 @@ spec:
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-      {{- with .Values.global.nodeSelector }}
+      {{- with .Values.backend.nodeSelector | default .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.global.tolerations }}
+      {{- with .Values.backend.tolerations | default .Values.global.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.affinity | default .Values.global.affinity }}
+      affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
@@ -299,4 +309,7 @@ spec:
           {{- else }}
           claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
           {{- end }}
+      {{- end }}
+      {{- with .Values.backend.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}

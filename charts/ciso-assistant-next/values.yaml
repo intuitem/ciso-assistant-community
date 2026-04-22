@@ -50,6 +50,9 @@ global:
   # -- Default tolerations for all components
   tolerations: []
 
+  # -- Affinity rules for all components
+  affinity: {}
+
 ## Service Account
 serviceAccount:
   # -- Create a service account for CISO Assistant
@@ -112,6 +115,20 @@ backend:
     # -- Enable Django debug mode
     djangoDebug: false
 
+  # -- Set extra volumes
+  extraVolumes: []
+    # example
+    #- name: ca-certs
+    #      secret:
+    #        secretName: my-ca-cert
+
+  # -- Set extra volume mounts for backend container
+  extraVolumeMounts: []
+    #   - name: ca-certs
+    #     mountPath: /usr/local/share/ca-certificates/custom-ca.crt
+    #     subPath: ca.crt
+    #     readOnly: true
+
   ## Huey config
   huey:
     # -- Huey container name
@@ -128,6 +145,13 @@ backend:
       #   limits:
       #     cpu: 256m
       #     memory: 1024Mi
+
+    # -- Set extra volume mounts for Huey container
+    extraVolumeMounts: []
+      #   - name: ca-certs
+      #     mountPath: /usr/local/share/ca-certificates/custom-ca.crt
+      #     subPath: ca.crt
+      #     readOnly: true
 
   ## Backend persistence configuration (used for sqlite DBs and local storage)
   persistence:
@@ -182,6 +206,15 @@ backend:
     #     cpu: 256m
     #     memory: 1024Mi
 
+  # -- Default node selector for backend
+  nodeSelector: {} # @schema additionalProperties: true
+
+  # -- Default tolerations for backend
+  tolerations: []
+
+  # -- Affinity rules for backend
+  affinity: {}
+
   # -- Environment variables to pass to backend
   env: []
 
@@ -230,6 +263,20 @@ frontend:
     # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
     bodySizeLimit: "50M"
 
+  # -- Set extra volumes
+  extraVolumes: []
+    # example
+    #- name: ca-certs
+    #      secret:
+    #        secretName: my-ca-cert
+
+  # -- Set extra volume mounts for backend container
+  extraVolumeMounts: []
+    #   - name: ca-certs
+    #     mountPath: /usr/local/share/ca-certificates/custom-ca.crt
+    #     subPath: ca.crt
+    #     readOnly: true
+
   ## Frontend image
   image:
     # -- Registry to use for the frontend
@@ -256,6 +303,15 @@ frontend:
     #   limits:
     #     cpu: 256m
     #     memory: 1024Mi
+
+  # -- Default node selector for frontend
+  nodeSelector: {} # @schema additionalProperties: true
+
+  # -- Default tolerations for frontend
+  tolerations: []
+
+  # -- Affinity rules for frontend
+  affinity: {}
 
   # -- Environment variables to pass to frontend
   env: []
@@ -320,9 +376,10 @@ ingress:
       #   ...
       #   -----END CERTIFICATE-----
 
-## Bundeled PostgreSQL database configuration (Bitnami chart)
+## DEPRECATED - Bundeled PostgreSQL database configuration (Bitnami chart)
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
 ## Note: Don't enable if you use SQLite mode or external PgSQL database
+## IMPORTANT : Bitnami PostgreSQL deployment will be removed in a future version, you should use SQLite mode or externalPgsql
 postgresql: # @schema additionalProperties: true
   # -- Enable to deploy PostgreSQL.
   enabled: false
