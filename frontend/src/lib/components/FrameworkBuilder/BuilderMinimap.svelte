@@ -38,6 +38,10 @@
 		return builder.getTranslationProgress($activeLanguageStore);
 	});
 
+	// Publication status — editing_version increments on each publish. 1 means
+	// the framework has never been published; >1 means it exists in the library.
+	let everPublished = $derived(($frameworkStore.editing_version ?? 1) > 1);
+
 	onMount(() => {
 		const appBar = document.querySelector('[data-scope="app-bar"]');
 		if (appBar) {
@@ -89,12 +93,30 @@
 
 		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
-		<!-- Draft badge (visible when draft differs from published state) -->
-		{#if $unpublishedStore}
+		<!-- Publication-status badge: always shown so the editor always knows. -->
+		{#if !everPublished}
 			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-flex items-center gap-1"
+				title="This framework has never been published. Live users cannot see it yet."
 			>
-				Draft
+				<i class="fa-solid fa-file-pen text-[10px]"></i>
+				Not published
+			</span>
+		{:else if $unpublishedStore}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
+				title="Published, with unpublished changes in the draft."
+			>
+				<i class="fa-solid fa-pen-nib text-[10px]"></i>
+				Draft changes
+			</span>
+		{:else}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
+				title="Published and up to date. Live users see the current state."
+			>
+				<i class="fa-solid fa-circle-check text-[10px]"></i>
+				Published
 			</span>
 		{/if}
 
