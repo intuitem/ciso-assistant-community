@@ -112,8 +112,13 @@ spec:
             value: {{ .Values.backend.config.smtp.host | quote }}
           - name: EMAIL_PORT
             value: {{ .Values.backend.config.smtp.port | quote }}
+          {{- if .Values.backend.config.smtp.useSsl }}
+          - name: EMAIL_USE_SSL
+            value: "True"
+          {{- else if .Values.backend.config.smtp.useTls }}
           - name: EMAIL_USE_TLS
-            value: {{ ternary "True" "False" .Values.backend.config.smtp.useTls | quote }}
+            value: "True"
+          {{- end }}
           {{- if .Values.backend.config.smtp.username }}
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.username | quote }}
@@ -239,8 +244,13 @@ spec:
             value: {{ .Values.backend.config.smtp.host | quote }}
           - name: EMAIL_PORT
             value: {{ .Values.backend.config.smtp.port | quote }}
+          {{- if .Values.backend.config.smtp.useSsl }}
+          - name: EMAIL_USE_SSL
+            value: "True"
+          {{- else if .Values.backend.config.smtp.useTls }}
           - name: EMAIL_USE_TLS
-            value: {{ ternary "True" "False" .Values.backend.config.smtp.useTls | quote }}
+            value: "True"
+          {{- end }}
           {{- if .Values.backend.config.smtp.username }}
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.username | quote }}

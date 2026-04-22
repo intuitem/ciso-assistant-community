@@ -96,8 +96,11 @@ backend:
       host: smtp.server.local
       # -- SMTP post
       port: 25
-      # -- Enable TLS for SMTP
+      # -- Enable TLS for SMTP (explicit TLS)
       useTls: false
+      # -- Enable SSL for SMTP (implicit TLS)
+      ## Note : useSsl option will prevail useTls if both are enabled
+      useSsl: false
       # -- SMTP username
       username: ""
       # -- SMTP password

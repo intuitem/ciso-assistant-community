@@ -59,7 +59,8 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.config.smtp.host | string | `"smtp.server.local"` | SMTP hostname |
 | backend.config.smtp.password | string | `""` | SMTP password |
 | backend.config.smtp.port | int | `25` | SMTP post |
-| backend.config.smtp.useTls | bool | `false` | Enable TLS for SMTP |
+| backend.config.smtp.useSsl | bool | `false` | Enable SSL for SMTP (implicit TLS) # Note : useSsl option will override useTls if both are enabled |
+| backend.config.smtp.useTls | bool | `false` | Enable TLS for SMTP (explicit TLS) |
 | backend.config.smtp.username | string | `""` | SMTP username |
 | backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | backend.env | list | `[]` | Environment variables to pass to backend |

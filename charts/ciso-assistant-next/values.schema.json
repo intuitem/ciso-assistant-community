@@ -49,6 +49,9 @@
                                 "port": {
                                     "type": "integer"
                                 },
+                                "useSsl": {
+                                    "type": "boolean"
+                                },
                                 "useTls": {
                                     "type": "boolean"
                                 },
