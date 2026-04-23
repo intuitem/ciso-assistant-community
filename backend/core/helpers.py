@@ -56,6 +56,7 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "avoid": "#ee6666",
     "on_hold": "#ee6666",
     "transfer": "#91cc75",
+    "cancelled": "#9ca3af",
 }
 
 
@@ -668,6 +669,7 @@ def risk_per_status(user: User):
         "accept": "#73c0de",
         "avoid": "#ee6666",
         "transfer": "#3ba272",
+        "cancelled": "#9ca3af",
     }
 
     (
@@ -1644,6 +1646,7 @@ def risk_status(user: User, risk_assessment_list):
         "accept": list(),
         "avoid": list(),
         "transfer": list(),
+        "cancelled": list(),
     }
     mtg_status_out = {
         "--": list(),
@@ -1769,10 +1772,10 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
 
     untreated = RiskScenario.objects.filter(
         risk_assessment__in=risk_assessment_list
-    ).exclude(treatment__in=["mitigate", "accept"])
+    ).exclude(treatment__in=["mitigate", "accept", "cancelled"])
     untreated_h_vh = (
         RiskScenario.objects.filter(risk_assessment__in=risk_assessment_list)
-        .exclude(treatment__in=["mitigate", "accept"])
+        .exclude(treatment__in=["mitigate", "accept", "cancelled"])
         .filter(current_level__gte=2)
     )
     accepted = RiskScenario.objects.filter(

@@ -1797,6 +1797,10 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         qs = super().get_queryset().select_related("asset_class", "folder")
         if self.action == "autocomplete":
             return qs
+        # The list view only renders objectives + a handful of lightweight M2Ms,
+        # so skip the heavier prefetches used by the detail serializer.
+        if self.action == "list":
+            return qs.prefetch_related("owner", "filtering_labels", "parent_assets")
         return qs.prefetch_related(
             "parent_assets",
             "child_assets",
@@ -1806,6 +1810,32 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             "personal_data",
             "overridden_children_capabilities",
         )
+
+    def get_serializer_class(self, **kwargs):
+        action = kwargs.get("action", self.action)
+        if action == "list":
+            from core.serializers import AssetListSerializer
+
+            return AssetListSerializer
+        return super().get_serializer_class(**kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Populate `optimized_data` for the single retrieved asset so the
+        serializer's objectives/capabilities fields reuse the graph prefetch
+        path instead of falling back to per-asset model methods."""
+        instance = self.get_object()
+        optimized_data = self._get_optimized_object_data(
+            self.model.objects.filter(pk=instance.pk)
+        )
+        context = self.get_serializer_context()
+        context["optimized_data"] = optimized_data
+        serializer = self.get_serializer(instance, context=context)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        return Response(data)
 
     def _get_optimized_object_data(self, queryset):
         """
@@ -1820,6 +1850,10 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         graph_data = Asset._prefetch_graph_data(initial_assets)
         child_to_parents = graph_data["child_to_parents"]
         parent_to_children = graph_data["parent_to_children"]
+
+        # The list view only renders objectives (not capabilities), so skip the
+        # capability aggregation there to halve the per-asset work.
+        compute_capabilities = self.action != "list"
 
         scale = Asset._get_security_objective_scale()
         sec_obj_results = {}
@@ -1836,36 +1870,50 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             ]
 
             # Calculate and store objectives.
+            sec_cap = {}
+            rec_cap = {}
             if asset.is_primary:
                 sec_obj = asset.security_objectives.get("objectives", {})
                 dro_obj = asset.disaster_recovery_objectives.get("objectives", {})
 
-                # For primary assets, aggregate capabilities from supporting descendants
-                supporting_descendants = {d for d in descendants if not d.is_primary}
-                sec_cap = Asset._aggregate_security_capabilities(
-                    supporting_descendants, asset
-                )
-                rec_cap = Asset._aggregate_recovery_capabilities(
-                    supporting_descendants, asset
-                )
+                if compute_capabilities:
+                    # For primary assets, aggregate capabilities from supporting descendants.
+                    # Reuse the already-built parent_to_children to avoid a fresh prefetch per asset.
+                    supporting_descendants = {
+                        d for d in descendants if not d.is_primary
+                    }
+                    sec_cap = Asset._aggregate_security_capabilities(
+                        supporting_descendants,
+                        asset,
+                        parent_to_children=parent_to_children,
+                    )
+                    rec_cap = Asset._aggregate_recovery_capabilities(
+                        supporting_descendants,
+                        asset,
+                        parent_to_children=parent_to_children,
+                    )
             else:
                 ancestors = Asset._get_all_ancestors(asset, child_to_parents)
                 primary_ancestors = {anc for anc in ancestors if anc.is_primary}
                 sec_obj = Asset._aggregate_security_objectives(primary_ancestors)
                 dro_obj = Asset._aggregate_dro_objectives(primary_ancestors)
 
-                # For supporting assets, use stored capabilities
-                sec_cap = asset.security_capabilities.get("objectives", {})
-                rec_cap = asset.recovery_capabilities.get("objectives", {})
+                if compute_capabilities:
+                    # For supporting assets, use stored capabilities
+                    sec_cap = asset.security_capabilities.get("objectives", {})
+                    rec_cap = asset.recovery_capabilities.get("objectives", {})
 
             sec_obj_results[asset.id] = self._format_security_objectives(sec_obj, scale)
             dro_obj_results[asset.id] = self._format_disaster_recovery_objectives(
                 dro_obj
             )
-            sec_cap_results[asset.id] = self._format_security_objectives(sec_cap, scale)
-            rec_cap_results[asset.id] = self._format_disaster_recovery_objectives(
-                rec_cap
-            )
+            if compute_capabilities:
+                sec_cap_results[asset.id] = self._format_security_objectives(
+                    sec_cap, scale
+                )
+                rec_cap_results[asset.id] = self._format_disaster_recovery_objectives(
+                    rec_cap
+                )
 
         optimized_data.update(
             {
@@ -4672,6 +4720,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
     ("quantitative_risk_hypotheses_removed", "CRQ Hypotheses (removed)"),
     ("assetassessment", "Asset Assessments"),
     ("task_templates", "Task Templates"),
+    ("incidents", "Incidents"),
     ("comments", "Comments"),
 ]
 
@@ -4842,6 +4891,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "security_exceptions": ["exact"],
             "owner": ["exact"],
             "findings": ["exact"],
+            "incidents": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
             "processings": ["exact"],
@@ -4992,6 +5042,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "has_quantitative_risk_hypotheses_removed": QuantitativeRiskHypothesis.removed_applied_controls.through,
             "has_assetassessment": AssetAssessment.associated_controls.through,
             "has_task_templates": TaskTemplate.applied_controls.through,
+            "has_incidents": Incident.applied_controls.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(appliedcontrol_id=OuterRef("pk")))
@@ -6246,6 +6297,7 @@ class RiskScenarioFilter(GenericFilterSet):
             "vulnerabilities": ["exact"],
             "qualifications": ["exact"],
             "filtering_labels": ["exact"],
+            "incidents": ["exact"],
         }
 
 
@@ -14415,6 +14467,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "owners",
         "entities",
         "assets",
+        "applied_controls",
+        "task_templates",
+        "risk_scenarios",
         "filtering_labels",
     ]
 
@@ -15033,6 +15088,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "next_occurrence_status",
             "evidences",
             "objectives",
+            "incidents",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
