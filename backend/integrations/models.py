@@ -89,13 +89,15 @@ class SyncMapping(AbstractBaseModel, FolderMixin):
         ]
 
 
-class SyncEvent(models.Model):
+class SyncEvent(AbstractBaseModel, FolderMixin):
     """Audit trail of sync operations"""
 
     class TriggeredBy(models.TextChoices):
         USER = "user"
         WEBHOOK = "webhook"
         SCHEDULED = "scheduled"
+
+    id = models.BigAutoField(primary_key=True, editable=False)
 
     mapping = models.ForeignKey(
         SyncMapping, related_name="sync_events", on_delete=models.CASCADE
