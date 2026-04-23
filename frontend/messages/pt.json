@@ -723,6 +723,7 @@
 	"requirementMappings": "Mapeamentos de requisitos",
 	"sourceFramework": "Quadro de origem",
 	"targetFramework": "Quadro de objectivos",
+	"targetFrameworks": "Quadros de objectivos",
 	"baseline": "Linha de base",
 	"createAuditFromBaseline": "Criar auditoria a partir de uma base",
 	"coverageColon": "Cobertura:",
@@ -1142,5 +1143,7 @@
 	"confirmModalMessagePlural": "Você tem certeza? Esta ação afetará permanentemente os seguintes objetos",
 	"syncAppliedControlsMessage": "Os controles aplicados que utilizam este controle de referência serão sincronizados com ele. Observe que esta ação não pode ser desfeita.",
 	"syncToAppliedControl": "Sincronizar com o controle aplicado",
-	"syncToReferenceControl": "Sincronizar com o controle de referência"
+	"syncToReferenceControl": "Sincronizar com o controle de referência",
+	"expirationDate": "Data de expiração",
+	"expirationDateIsInThePastWarning": "A data de expiração informada está no passado"
 }
