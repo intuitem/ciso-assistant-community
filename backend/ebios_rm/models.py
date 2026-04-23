@@ -576,10 +576,10 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
     entity = models.TextField(verbose_name=_("Entity name"))
     third_party_entity = models.ForeignKey(
         Entity,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Third Party Entity"),
         related_name="stakeholders",
-        help_text=_("Related thied party entity"),
+        help_text=_("Related third party entity"),
         blank=True,
         null=True,
     )
