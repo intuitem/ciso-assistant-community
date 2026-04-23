@@ -26,7 +26,7 @@ class TestStakeholder:
         )
 
         assert stakeholder in study.stakeholders.all()
-        assert stakeholder.entity == entity.name
+        assert stakeholder.entity_name == entity.name
         assert stakeholder.third_party_entity == entity
         assert stakeholder.category == category
 

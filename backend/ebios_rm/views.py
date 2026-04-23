@@ -500,7 +500,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             for sh in stakeholders:
                 sh_data.append(
                     {
-                        "entity": sh.entity if sh.entity else "",
+                        "entity_name": sh.entity_name if sh.entity_name else "",
                         "category": sh.category.get_name_translated
                         if sh.category
                         else "",
@@ -933,7 +933,7 @@ class StakeholderFilter(df.FilterSet):
             "is_selected",
             "applied_controls",
             "category",
-            "entity",
+            "entity_name",
         ]
 
     def filter_current_criticality(self, queryset, name, values):

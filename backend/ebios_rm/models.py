@@ -573,7 +573,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         related_name="stakeholders",
         on_delete=models.CASCADE,
     )
-    entity = models.TextField(verbose_name=_("Entity name"))
+    entity_name = models.TextField(verbose_name=_("Entity name"), default="")
     third_party_entity = models.ForeignKey(
         Entity,
         on_delete=models.SET_NULL,
@@ -658,7 +658,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def __str__(self):
-        return f"{self.entity} ({self.category.get_name_translated if self.category else 'N/A'})"
+        return f"{self.entity_name} ({self.category.get_name_translated if self.category else 'N/A'})"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
