@@ -10,7 +10,7 @@
 	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import { onMount, tick } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
@@ -359,9 +359,11 @@
 			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Persist all filter values (including empty) so cleared defaults stay cleared
+		// untracked so resetFilters can delete the entry without retriggering us
 		if (isStandaloneTable) {
-			$tableFilterStates[filterStoreKey] = { ...filterValues };
+			untrack(() => {
+				$tableFilterStates[filterStoreKey] = { ...filterValues };
+			});
 		}
 		setTimeout(() => {
 			handler.invalidate();
@@ -537,12 +539,10 @@
 		for (const field of filteredFields) {
 			const defaultValue = defaultFilters[field] ?? [];
 			filterValues[field] = Array.isArray(defaultValue)
-				? defaultValue.map((v: any) => ({ ...v }))
+				? defaultValue.map((v: { value: string }) => ({ ...v }))
 				: [];
 		}
 		if (!isStandaloneTable) return;
-		// Let the persistence $effect flush once on the cleared values, then wipe
-		// the cache entry so defaults (if any) can re-apply on next mount.
 		await tick();
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
