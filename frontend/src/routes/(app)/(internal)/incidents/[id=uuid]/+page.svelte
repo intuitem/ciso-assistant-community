@@ -295,7 +295,7 @@
 							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 						</span>
 					</Popover.Trigger>
-					<Popover.Positioner>
+					<Popover.Positioner class="z-50!">
 						<Popover.Content class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
 							<div>
 								<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
