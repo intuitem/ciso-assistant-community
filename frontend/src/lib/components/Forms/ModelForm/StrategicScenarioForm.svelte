@@ -23,22 +23,6 @@
 		initialData = {},
 		context
 	}: Props = $props();
-
-	function toSingleId(value: unknown): string | null {
-		if (Array.isArray(value)) {
-			return value.length > 0 && value[0] ? String(value[0]) : null;
-		}
-
-		if (value && typeof value === 'object' && 'id' in value && value.id) {
-			return String(value.id);
-		}
-
-		return value ? String(value) : null;
-	}
-
-	const selectedRoToCoupleId = $derived(
-		toSingleId(formDataCache['ro_to_couple']) ?? toSingleId(initialData.ro_to_couple)
-	);
 </script>
 
 <p class="text-sm text-gray-500">{m.strategicScenarioHelpText()}</p>
@@ -53,13 +37,13 @@
 	bind:cachedValue={formDataCache['ro_to_couple']}
 	label={m.roToCouple()}
 />
-{#key selectedRoToCoupleId}
+{#key formDataCache['ro_to_couple'] || initialData.ro_to_couple}
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="feared-events"
 		optionsDetailedUrlParameters={[
 			['ebios_rm_study', initialData.ebios_rm_study],
-			...(selectedRoToCoupleId ? [['ro_to_couples', selectedRoToCoupleId]] : [])
+			['ro_to_couples', formDataCache['ro_to_couple'] || initialData.ro_to_couple]
 		]}
 		optionsLabelField="auto"
 		field="focused_feared_event"
