@@ -1034,6 +1034,7 @@
 	"partial": "Partial",
 	"noResultFound": "No result found",
 	"filters": "Filters",
+	"resetFilters": "Reset filters",
 	"notApplicableScore": "You cannot score if the requirement assessment is not applicable",
 	"maturity": "Maturity",
 	"progress": "Progress",
