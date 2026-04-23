@@ -19,7 +19,8 @@ class TestStakeholder:
             name="supplier", field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP
         )
         stakeholder = Stakeholder.objects.create(
-            entity=entity,
+            third_party_entity=entity,
+            entity=entity.name,
             category=category,
             ebios_rm_study=study,
         )
