@@ -7900,6 +7900,8 @@ class FrameworkViewSet(BaseModelViewSet):
         """Deep-clone a framework with all requirement nodes, questions, and choices."""
         import uuid
 
+        from core.utils import extract_node_id
+
         source = self.get_object()  # checks read permission
         folder_id = request.data.get("folder", source.folder_id)
         folder = Folder.objects.get(id=folder_id)
@@ -7915,149 +7917,251 @@ class FrameworkViewSet(BaseModelViewSet):
                 }
             )
 
-        # Clone framework
-        new_name = request.data.get("name", f"{source.name} (copy)")
-        new_framework = Framework.objects.create(
-            name=new_name,
-            description=source.description,
-            annotation=source.annotation,
-            folder_id=folder_id,
-            min_score=source.min_score,
-            max_score=source.max_score,
-            scores_definition=source.scores_definition,
-            implementation_groups_definition=source.implementation_groups_definition,
-            outcomes_definition=source.outcomes_definition,
-            locale=source.locale,
-            default_locale=source.default_locale,
-            provider=source.provider,
-            urn_namespace=source.urn_namespace,
-        )
+        with transaction.atomic():
+            # Clone framework
+            new_name = request.data.get("name", f"{source.name} (copy)")
+            new_framework = Framework.objects.create(
+                name=new_name,
+                description=source.description,
+                annotation=source.annotation,
+                folder_id=folder_id,
+                min_score=source.min_score,
+                max_score=source.max_score,
+                scores_definition=source.scores_definition,
+                implementation_groups_definition=source.implementation_groups_definition,
+                outcomes_definition=source.outcomes_definition,
+                locale=source.locale,
+                default_locale=source.default_locale,
+                provider=source.provider,
+                urn_namespace=source.urn_namespace,
+            )
 
-        # Use readable slug-based URNs instead of UUIDs
-        fw_slug = self._slugify_framework_name(new_name, new_framework.id)
-        ns = new_framework.urn_namespace or "custom"
+            # Use readable slug-based URNs instead of UUIDs
+            fw_slug = self._slugify_framework_name(new_name, new_framework.id)
+            ns = new_framework.urn_namespace or "custom"
 
-        # Map old URNs to new URNs for parent_urn remapping
-        urn_map = {}
-        nodes = RequirementNode.objects.filter(framework=source).order_by(
-            F("order_id").asc(nulls_last=True)
-        )
-
-        # Compute positional ref_ids for nodes that don't have one
-        child_counter = {}  # parent_urn -> next child number
-        computed_ref_ids = {}  # node urn -> computed ref_id
-        for node in nodes:
-            if node.ref_id:
-                computed_ref_ids[node.urn] = node.ref_id
-            else:
-                parent = node.parent_urn
-                if parent not in child_counter:
-                    child_counter[parent] = 1
-                idx = child_counter[parent]
-                child_counter[parent] = idx + 1
-                parent_ref = computed_ref_ids.get(parent)
-                computed_ref_ids[node.urn] = (
-                    f"{parent_ref}.{idx}" if parent_ref else str(idx)
+            # Map old URNs to new URNs for parent_urn remapping
+            urn_map = {}
+            nodes = list(
+                RequirementNode.objects.filter(framework=source).order_by(
+                    F("order_id").asc(nulls_last=True)
                 )
-
-        for node in nodes:
-            old_urn = node.urn
-            if old_urn:
-                ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
-                new_urn = f"urn:{ns}:risk:req_node:{fw_slug}:{ref_id}"
-                urn_map[old_urn] = new_urn
-            else:
-                urn_map[old_urn] = None
-
-        # Clone requirement nodes
-        node_id_map = {}  # old node id -> new node id
-        for node in nodes:
-            old_id = node.id
-            new_node = RequirementNode.objects.create(
-                urn=urn_map.get(node.urn),
-                ref_id=node.ref_id,
-                name=node.name,
-                description=node.description,
-                annotation=node.annotation,
-                framework=new_framework,
-                parent_urn=urn_map.get(node.parent_urn, node.parent_urn),
-                order_id=node.order_id,
-                assessable=node.assessable,
-                implementation_groups=node.implementation_groups,
-                typical_evidence=node.typical_evidence,
-                weight=node.weight,
-                importance=node.importance,
-                visibility_expression=node.visibility_expression,
-                folder_id=folder_id,
-                locale=node.locale,
-                default_locale=node.default_locale,
-                translations=node.translations,
             )
-            node_id_map[old_id] = new_node.id
 
-        # Clone questions and choices
-        questions = (
-            Question.objects.filter(requirement_node__framework=source)
-            .prefetch_related("choices")
-            .order_by("order")
-        )
-        q_counter = {}  # req_node_id -> next question number
-        for q in questions:
-            new_req_node_id = node_id_map.get(q.requirement_node_id)
-            if not new_req_node_id:
-                continue
-            # Compute positional ref_id for questions without one
-            if q.ref_id:
-                q_ref_id = q.ref_id
-            else:
-                req_node = q.requirement_node
-                parent_ref = computed_ref_ids.get(req_node.urn, "")
-                if q.requirement_node_id not in q_counter:
-                    q_counter[q.requirement_node_id] = 1
-                q_idx = q_counter[q.requirement_node_id]
-                q_counter[q.requirement_node_id] = q_idx + 1
-                q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
-            new_question = Question.objects.create(
-                urn=f"urn:{ns}:risk:question:{fw_slug}:{q_ref_id}",
-                ref_id=q.ref_id or q_ref_id,
-                text=q.text,
-                annotation=q.annotation,
-                type=q.type,
-                config=q.config,
-                depends_on=q.depends_on,
-                order=q.order,
-                weight=q.weight,
-                requirement_node_id=new_req_node_id,
-                folder_id=folder_id,
-                translations=q.translations,
-            )
-            c_counter = 0
-            for choice in q.choices.all():
-                c_counter += 1
-                if choice.ref_id:
-                    c_ref_id = choice.ref_id
+            # Compute positional ref_ids for nodes that don't have one
+            child_counter = {}  # parent_urn -> next child number
+            computed_ref_ids = {}  # node urn -> computed ref_id
+            for node in nodes:
+                if node.ref_id:
+                    computed_ref_ids[node.urn] = node.ref_id
                 else:
-                    c_ref_id = f"{q_ref_id}-c{c_counter}"
-                QuestionChoice.objects.create(
-                    urn=f"urn:{ns}:risk:question_choice:{fw_slug}:{c_ref_id}"
-                    if choice.urn
-                    else None,
-                    ref_id=choice.ref_id or c_ref_id,
-                    value=choice.value,
-                    annotation=choice.annotation,
-                    add_score=choice.add_score,
-                    compute_result=choice.compute_result,
-                    order=choice.order,
-                    description=choice.description,
-                    color=choice.color,
-                    select_implementation_groups=choice.select_implementation_groups,
-                    question=new_question,
-                    folder_id=folder_id,
-                    translations=choice.translations,
-                )
+                    parent = node.parent_urn
+                    if parent not in child_counter:
+                        child_counter[parent] = 1
+                    idx = child_counter[parent]
+                    child_counter[parent] = idx + 1
+                    parent_ref = computed_ref_ids.get(parent)
+                    computed_ref_ids[node.urn] = (
+                        f"{parent_ref}.{idx}" if parent_ref else str(idx)
+                    )
 
-        serializer = FrameworkReadSerializer(new_framework)
-        return Response(serializer.data, status=201)
+            # Pre-compute each question's ref_id and URN suffix (and the same for
+            # each choice) so the creation loop below can just read from these
+            # dicts. The suffixes also participate in the slug collision check.
+            # Source node_ids are preserved when the URN fits the
+            # urn:{org}:risk:{type}:{slug}:{node_id} shape, so CEL expressions in
+            # outcomes_definition and visibility_expression that reference
+            # answers.<q_node_id> keep working on the copy.
+            questions_list = list(
+                Question.objects.filter(requirement_node__framework=source)
+                .prefetch_related("choices")
+                .order_by("order")
+            )
+            q_idx_counter = {}  # req_node_id -> next question number
+            question_ref_ids = {}  # q.id -> final ref_id
+            question_suffixes = {}  # q.id -> URN suffix string
+            choice_ref_ids = {}  # choice.id -> final ref_id
+            choice_suffixes = {}  # choice.id -> URN suffix string (only choices with urn)
+            for q in questions_list:
+                q_idx = q_idx_counter.get(q.requirement_node_id, 1)
+                q_idx_counter[q.requirement_node_id] = q_idx + 1
+                parent_ref = computed_ref_ids.get(q.requirement_node.urn, "")
+                positional_q_suffix = (
+                    f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
+                )
+                q_ref_id = q.ref_id or positional_q_suffix
+                question_ref_ids[q.id] = q_ref_id
+                source_node_id = extract_node_id(q.urn) if q.urn else None
+                question_suffixes[q.id] = source_node_id or positional_q_suffix
+                for c_counter, choice in enumerate(q.choices.all(), start=1):
+                    c_ref_id = choice.ref_id or f"{q_ref_id}-c{c_counter}"
+                    choice_ref_ids[choice.id] = c_ref_id
+                    if choice.urn:
+                        choice_suffixes[choice.id] = (
+                            extract_node_id(choice.urn) or c_ref_id
+                        )
+
+            # Build candidate URNs and check for collisions (can happen when
+            # the slug truncation makes the copy slug identical to the source slug,
+            # or when an unrelated framework happens to share the same slug+node_id)
+            def _build_urn_map(slug):
+                result = {}
+                for node in nodes:
+                    old_urn = node.urn
+                    if old_urn:
+                        ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
+                        result[old_urn] = f"urn:{ns}:risk:req_node:{slug}:{ref_id}"
+                    else:
+                        result[old_urn] = None
+                return result
+
+            def _build_question_candidate_urns(slug):
+                return {
+                    f"urn:{ns}:risk:question:{slug}:{s}"
+                    for s in question_suffixes.values()
+                }
+
+            def _build_choice_candidate_urns(slug):
+                return {
+                    f"urn:{ns}:risk:question_choice:{slug}:{s}"
+                    for s in choice_suffixes.values()
+                }
+
+            def _slug_collides(slug):
+                node_map = _build_urn_map(slug)
+                node_urns = {v for v in node_map.values() if v}
+                q_urns = _build_question_candidate_urns(slug)
+                c_urns = _build_choice_candidate_urns(slug)
+                if (
+                    node_urns
+                    and RequirementNode.objects.filter(urn__in=node_urns).exists()
+                ):
+                    return True, node_map
+                if q_urns and Question.objects.filter(urn__in=q_urns).exists():
+                    return True, node_map
+                if c_urns and QuestionChoice.objects.filter(urn__in=c_urns).exists():
+                    return True, node_map
+                return False, node_map
+
+            collides, urn_map = _slug_collides(fw_slug)
+            if collides:
+                for attempt in range(2, 100):
+                    candidate_slug = f"{fw_slug}-{attempt}"
+                    attempt_collides, candidate_map = _slug_collides(candidate_slug)
+                    if not attempt_collides:
+                        fw_slug = candidate_slug
+                        urn_map = candidate_map
+                        break
+                else:
+                    raise ValidationError(
+                        {
+                            "name": "Could not find a unique URN slug for the duplicate; rename the framework and retry."
+                        }
+                    )
+
+            # Clone requirement nodes
+            node_id_map = {}  # old node id -> new node id
+            for node in nodes:
+                old_id = node.id
+                new_node = RequirementNode.objects.create(
+                    urn=urn_map.get(node.urn),
+                    ref_id=node.ref_id,
+                    name=node.name,
+                    description=node.description,
+                    annotation=node.annotation,
+                    framework=new_framework,
+                    parent_urn=urn_map.get(node.parent_urn, node.parent_urn),
+                    order_id=node.order_id,
+                    assessable=node.assessable,
+                    implementation_groups=node.implementation_groups,
+                    typical_evidence=node.typical_evidence,
+                    weight=node.weight,
+                    importance=node.importance,
+                    visibility_expression=node.visibility_expression,
+                    folder_id=folder_id,
+                    locale=node.locale,
+                    default_locale=node.default_locale,
+                    translations=node.translations,
+                )
+                node_id_map[old_id] = new_node.id
+
+            # Clone questions and choices using the pre-computed ref_ids and URN
+            # suffixes. Node_ids are preserved from the source (CEL in
+            # outcomes_definition and visibility_expression references
+            # answers.<q_node_id> and selected_choices by choice node_id — those
+            # must match source node_ids for the copied CEL to evaluate correctly).
+            question_urn_map = {}  # old question urn -> new question urn
+            choice_urn_map = {}  # old choice urn -> new choice urn
+            questions_with_depends_on = []  # (new_question, original_depends_on)
+            for q in questions_list:
+                new_req_node_id = node_id_map.get(q.requirement_node_id)
+                if not new_req_node_id:
+                    continue
+
+                new_question_urn = (
+                    f"urn:{ns}:risk:question:{fw_slug}:{question_suffixes[q.id]}"
+                )
+                new_question = Question.objects.create(
+                    urn=new_question_urn,
+                    ref_id=question_ref_ids[q.id],
+                    text=q.text,
+                    annotation=q.annotation,
+                    type=q.type,
+                    config=q.config,
+                    depends_on=q.depends_on,
+                    order=q.order,
+                    weight=q.weight,
+                    requirement_node_id=new_req_node_id,
+                    folder_id=folder_id,
+                    translations=q.translations,
+                )
+                if q.urn:
+                    question_urn_map[q.urn] = new_question_urn
+                if q.depends_on:
+                    questions_with_depends_on.append((new_question, q.depends_on))
+                for choice in q.choices.all():
+                    if choice.urn:
+                        new_choice_urn = f"urn:{ns}:risk:question_choice:{fw_slug}:{choice_suffixes[choice.id]}"
+                    else:
+                        new_choice_urn = None
+                    QuestionChoice.objects.create(
+                        urn=new_choice_urn,
+                        ref_id=choice_ref_ids[choice.id],
+                        value=choice.value,
+                        annotation=choice.annotation,
+                        add_score=choice.add_score,
+                        compute_result=choice.compute_result,
+                        order=choice.order,
+                        description=choice.description,
+                        color=choice.color,
+                        select_implementation_groups=choice.select_implementation_groups,
+                        question=new_question,
+                        folder_id=folder_id,
+                        translations=choice.translations,
+                    )
+                    if choice.urn and new_choice_urn:
+                        choice_urn_map[choice.urn] = new_choice_urn
+
+            # Remap depends_on URNs (question + answer choices) to the copy's new
+            # URNs. Unknown URNs (e.g. cross-framework refs) are left untouched.
+            for new_question, original_depends_on in questions_with_depends_on:
+                if not isinstance(original_depends_on, dict):
+                    continue
+                remapped = dict(original_depends_on)
+                target_urn = remapped.get("question")
+                if target_urn in question_urn_map:
+                    remapped["question"] = question_urn_map[target_urn]
+                raw_answers = remapped.get("answers")
+                if isinstance(raw_answers, list):
+                    remapped["answers"] = [
+                        choice_urn_map.get(a, a) for a in raw_answers
+                    ]
+                if remapped != original_depends_on:
+                    new_question.depends_on = remapped
+                    new_question.save(update_fields=["depends_on"])
+
+            serializer = FrameworkReadSerializer(new_framework)
+            return Response(serializer.data, status=201)
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
