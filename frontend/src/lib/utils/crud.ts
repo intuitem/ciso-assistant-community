@@ -2917,7 +2917,8 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					mitigate: { text: 'mitigate', cssClasses: 'badge bg-lime-200' },
 					accept: { text: 'accept', cssClasses: 'badge bg-green-200' },
 					avoid: { text: 'avoid', cssClasses: 'badge bg-red-200' },
-					transfer: { text: 'transfer', cssClasses: 'badge bg-yellow-300' }
+					transfer: { text: 'transfer', cssClasses: 'badge bg-yellow-300' },
+					cancelled: { text: 'cancelled', cssClasses: 'badge bg-gray-300' }
 				}
 			}
 		}

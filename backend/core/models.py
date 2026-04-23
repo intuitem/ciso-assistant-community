@@ -6137,6 +6137,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         ("accept", _("Accept")),
         ("avoid", _("Avoid")),
         ("transfer", _("Transfer")),
+        ("cancelled", _("Cancelled")),
     ]
 
     DEFAULT_SOK_OPTIONS = {
