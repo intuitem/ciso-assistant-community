@@ -20,14 +20,13 @@ class Migration(migrations.Migration):
             name="third_party_entity",
             field=models.ForeignKey(
                 blank=True,
-                default="",
+                null=True,
                 help_text="Related thied party entity",
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="stakeholders",
                 to="tprm.entity",
                 verbose_name="Third Party Entity",
             ),
-            preserve_default=False,
         ),
         migrations.AlterField(
             model_name="stakeholder",
