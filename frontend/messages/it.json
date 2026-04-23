@@ -1242,6 +1242,7 @@
 	"securityExceptions": "Eccezioni di sicurezza",
 	"addSecurityException": "Aggiungi eccezione",
 	"expirationDate": "Data di scadenza",
+	"expirationDateIsInThePastWarning": "La data di scadenza inserita è nel passato",
 	"filterBy": "Filtra per",
 	"demoDataAlreadyImported": "I dati demo sono già stati importati. Elimina o rinomina il dominio DEMO esistente",
 	"finding": "Rilevamento",

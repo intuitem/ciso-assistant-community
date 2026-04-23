@@ -1417,6 +1417,7 @@
 	"securityExceptions": "Винятки",
 	"addSecurityException": "Додати виняток",
 	"expirationDate": "Термін дії",
+	"expirationDateIsInThePastWarning": "Введений термін дії вже минув",
 	"filterBy": "Фільтрувати за",
 	"demoDataAlreadyImported": "Демо-дані вже імпортовано. Видаліть або перейменуйте свій існуючий ДЕМО-домен.",
 	"finding": "Знахідка",
