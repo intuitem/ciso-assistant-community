@@ -196,7 +196,6 @@
 				<p class="text-md leading-5 text-gray-700">
 					<strong>{m.publicationDate()}</strong>:
 				</p>
-
 				<MarkdownRenderer
 					content={formatDateOrDateTime(data.library.publication_date, getLocale())}
 				/>
@@ -205,10 +204,11 @@
 				<p class="text-md leading-5 text-gray-700">
 					<strong>{m.dependencies()}</strong>:
 				</p>
-
-				<MarkdownRenderer
-					content={data.library.dependencies.map((dep) => `* ${dep.name}`).join('\n')}
-				/>
+				<ul class="list-disc list-inside">
+					{#each data.library.dependencies as dependency}
+						<li>{dependency.name}</li>
+					{/each}
+				</ul>
 			{/if}
 			{#if data.library.copyright}
 				<p class="text-md leading-5 text-gray-700">
@@ -220,10 +220,11 @@
 				<p class="text-md leading-5 text-gray-700">
 					<strong>{m.labels()}</strong>:
 				</p>
-
-				<MarkdownRenderer
-					content={data.library.filtering_labels.map((label) => `* ${label.name}`).join('\n')}
-				/>
+				<ul class="list-disc list-inside">
+					{#each data.library.filtering_labels as label}
+						<li>{label.label}</li>
+					{/each}
+				</ul>
 			{/if}
 		</div>
 	</div>
