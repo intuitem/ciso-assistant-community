@@ -661,13 +661,6 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         return f"{self.entity} ({self.category.get_name_translated if self.category else 'N/A'})"
 
     def save(self, *args, **kwargs):
-        if isinstance(self.entity, Entity):
-            if self.third_party_entity_id is None:
-                self.third_party_entity = self.entity
-            self.entity = self.entity.name
-        elif self.third_party_entity and not self.entity:
-            self.entity = self.third_party_entity.name
-
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
         EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
