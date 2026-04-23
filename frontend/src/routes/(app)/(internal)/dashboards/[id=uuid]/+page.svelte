@@ -56,4 +56,3 @@
 		{/if}
 	</div>
 </div>
-</content>
