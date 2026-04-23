@@ -6,6 +6,7 @@
 	import {
 		displayScoreColor,
 		formatScoreValue,
+		getFieldVisibility,
 		getRequirementTitle,
 		getSecureRedirect
 	} from '$lib/utils/helpers';
@@ -77,26 +78,50 @@
 
 	let expandedInferences = $state(false);
 
-	let group = $state(page.data.user.is_third_party ? 'evidence' : 'applied_controls');
+	const fw = data.requirementAssessment.compliance_assessment.framework;
+	const complianceAssessment = data.requirementAssessment.compliance_assessment;
+	const viewerRole: 'respondent' | 'auditor' =
+		data.viewerRole === 'auditor' ? 'auditor' : 'respondent';
+	const {
+		showAppliedControls,
+		showEvidences,
+		showStatus,
+		showResult,
+		showScore,
+		showDocumentationScore
+	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
+
+	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+
+	function pickDefaultTab(): string {
+		if (canShowAppliedControls) return 'applied_controls';
+		if (showEvidences) return 'evidence';
+		return 'applied_controls';
+	}
+	let group = $state(pickDefaultTab());
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
 		<code class="code">{data.requirement.urn}</code>
-		<span
-			class="badge h-fit"
-			style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
-				'#d1d5db'};"
-		>
-			{safeTranslate(data.requirementAssessment.status)}
-		</span>
-		<span
-			class="badge {classesText} h-fit"
-			style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
-				'#d1d5db'};"
-		>
-			{safeTranslate(data.requirementAssessment.result)}
-		</span>
+		{#if showStatus}
+			<span
+				class="badge h-fit"
+				style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
+					'#d1d5db'};"
+			>
+				{safeTranslate(data.requirementAssessment.status)}
+			</span>
+		{/if}
+		{#if showResult}
+			<span
+				class="badge {classesText} h-fit"
+				style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
+					'#d1d5db'};"
+			>
+				{safeTranslate(data.requirementAssessment.result)}
+			</span>
+		{/if}
 		{#if data.requirement.implementation_groups && data.requirement.implementation_groups.length > 0}
 			<div class="ml-3">
 				<b class="mr-2">{m.implementationGroups()} :</b>
@@ -108,18 +133,20 @@
 			</div>
 		{/if}
 		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
-			<div class="shrink-0 relative">
-				<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
-					<Progress.Circle class="[--size:--spacing(10)]">
-						<Progress.CircleTrack />
-						<Progress.CircleRange class={displayScoreColor(score, max_score)} />
-					</Progress.Circle>
-					<div class="absolute inset-0 flex items-center justify-center">
-						<span class="text-xs font-bold">{score}</span>
-					</div>
-				</Progress>
-			</div>
-			{#if data.complianceAssessmentScore.show_documentation_score}
+			{#if showScore}
+				<div class="shrink-0 relative">
+					<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
+						<Progress.Circle class="[--size:--spacing(10)]">
+							<Progress.CircleTrack />
+							<Progress.CircleRange class={displayScoreColor(score, max_score)} />
+						</Progress.Circle>
+						<div class="absolute inset-0 flex items-center justify-center">
+							<span class="text-xs font-bold">{score}</span>
+						</div>
+					</Progress>
+				</div>
+			{/if}
+			{#if showDocumentationScore && data.complianceAssessmentScore.show_documentation_score}
 				<div class="shrink-0 relative">
 					<Progress value={formatScoreValue(documentationScore, max_score)} min={0} max={100}>
 						<Progress.Circle class="[--size:--spacing(10)]">
@@ -318,55 +345,62 @@
 			{/if}
 		</div>
 	{/if}
-	<div>
-		<Tabs
-			value={group}
-			onValueChange={(e) => {
-				group = e.value;
-			}}
-		>
-			<Tabs.List>
-				{#if !page.data.user.is_third_party}
-					<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
+	{#if canShowAppliedControls || showEvidences}
+		<div>
+			<Tabs
+				value={group}
+				onValueChange={(e) => {
+					group = e.value;
+				}}
+			>
+				<Tabs.List>
+					{#if canShowAppliedControls}
+						<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
+					{/if}
+					{#if showEvidences}
+						<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
+					{/if}
+					<Tabs.Indicator />
+				</Tabs.List>
+				{#if canShowAppliedControls}
+					<Tabs.Content value="applied_controls">
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementAppliedControlHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['applied-controls']}
+								hideFilters={true}
+								URLModel="applied-controls"
+								expectedCount={countMasked(data.requirementAssessment.applied_controls)}
+								baseEndpoint="/applied-controls?requirement_assessments={page.data
+									.requirementAssessment.id}"
+							/>
+						</div>
+					</Tabs.Content>
 				{/if}
-				<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
-				<Tabs.Indicator />
-			</Tabs.List>
-			<Tabs.Content value="applied_controls">
-				{#if !page.data.user.is_third_party}
-					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-						<i class="fa-solid fa-info-circle"></i>
-						<p>{m.requirementAppliedControlHelpText()}</p>
-					</div>
-					<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-						<ModelTable
-							source={data.tables['applied-controls']}
-							hideFilters={true}
-							URLModel="applied-controls"
-							expectedCount={countMasked(data.requirementAssessment.applied_controls)}
-							baseEndpoint="/applied-controls?requirement_assessments={page.data
-								.requirementAssessment.id}"
-						/>
-					</div>
+				{#if showEvidences}
+					<Tabs.Content value="evidence">
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementEvidenceHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['evidences']}
+								hideFilters={true}
+								URLModel="evidences"
+								expectedCount={countMasked(data.requirementAssessment.evidences)}
+								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
+									.id}"
+							/>
+						</div>
+					</Tabs.Content>
 				{/if}
-			</Tabs.Content>
-			<Tabs.Content value="evidence">
-				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-					<i class="fa-solid fa-info-circle"></i>
-					<p>{m.requirementEvidenceHelpText()}</p>
-				</div>
-				<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-					<ModelTable
-						source={data.tables['evidences']}
-						hideFilters={true}
-						URLModel="evidences"
-						expectedCount={countMasked(data.requirementAssessment.evidences)}
-						baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
-					/>
-				</div>
-			</Tabs.Content>
-		</Tabs>
-	</div>
+			</Tabs>
+		</div>
+	{/if}
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
 		<h1 class="font-semibold text-sm">{m.questions()}</h1>
 		{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}

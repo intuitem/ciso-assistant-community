@@ -64,17 +64,21 @@
 	}
 </script>
 
-<div class="group">
+<div class="group flex items-start gap-1">
 	<!-- Collapsed view -->
 	{#if !expanded}
+		<span
+			class="text-gray-300 group-hover:text-gray-400 cursor-grab pt-2 pl-1"
+			data-drag-handle
+			aria-hidden="true"
+		>
+			<i class="fa-solid fa-grip-vertical text-xs"></i>
+		</span>
 		<button
 			type="button"
-			class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+			class="flex-1 flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
 			onclick={() => (expanded = true)}
 		>
-			<span class="text-gray-300 group-hover:text-gray-400 cursor-grab">
-				<i class="fa-solid fa-grip-vertical text-xs"></i>
-			</span>
 			<span
 				class="w-6 h-6 rounded flex items-center justify-center {TYPE_COLORS[question.type] ??
 					'text-gray-400 bg-gray-100'}"
@@ -111,9 +115,16 @@
 
 	<!-- Expanded view -->
 	{#if expanded}
+		<span
+			class="text-gray-300 group-hover:text-gray-400 cursor-grab pt-5 pl-1"
+			data-drag-handle
+			aria-hidden="true"
+		>
+			<i class="fa-solid fa-grip-vertical text-xs"></i>
+		</span>
 		<div
 			transition:slide={{ duration: 200 }}
-			class="border border-gray-200 rounded-lg p-4 space-y-3 bg-white"
+			class="flex-1 border border-gray-200 rounded-lg p-4 space-y-3 bg-white"
 		>
 			<div class="flex items-center justify-between">
 				<TypeSelector currentType={question.type} onselect={changeType} />
