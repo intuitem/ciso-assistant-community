@@ -134,7 +134,6 @@
 					bind:cachedValue={formDataCache['third_party_entity']}
 					bind:cachedOptions={selectedEntityOption}
 					label={m.thirdPartyEntity()}
-					hidden={initialData.entity}
 					helpText={m.thirdPartyEntityHelpText()}
 					includeAllOptionFields={true}
 					optionsInfoFields={{
