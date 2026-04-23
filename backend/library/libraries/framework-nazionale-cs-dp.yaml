@@ -1,16 +1,22 @@
-urn: urn:intuitem:risk:library:Framework-Nazionale-C-DP
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:framework-nazionale-c-dp
 locale: it
 ref_id: Framework-Nazionale-C-DP
 name: Framework Nazionale per la Cybersecurity e la Data Protection
-description: Il Framework Nazionale per la Cybersecurity e la Data Protection, nato
-  nel 2015 da una collaborazione sinergica tra accademia, enti pubblici, e imprese
-  private, e successivamente aggiornato nel 2019 a fronte dei requisiti introdotti
-  da GDPR in merito alla protezione dei dati personali, fornisce uno strumento operativo
-  per organizzare i processi di cybersecurity adatto alle organizzazioni pubbliche
-  e private, di qualunque dimensione. https://www.cybersecurityframework.it/
+description: "Il Framework Nazionale per la Cybersecurity e la Data Protection, nato\
+  \ nel 2015 da una collaborazione sinergica tra accademia, enti pubblici, e imprese\
+  \ private, e successivamente aggiornato nel 2019 a fronte dei requisiti introdotti\
+  \ da GDPR in merito alla protezione dei dati personali, fornisce uno strumento operativo\
+  \ per organizzare i processi di cybersecurity adatto alle organizzazioni pubbliche\
+  \ e private, di qualunque dimensione. \nhttps://www.cybersecurityframework.it/\n\
+  https://www.acn.gov.it/portale/documents/d/guest/detacn_nis_specifiche_2025_164179_allegato1\n\
+  https://www.acn.gov.it/portale/documents/d/guest/detacn_nis_specifiche_2025_164179_allegato2\n\
+  Version 2 introduces several fixes and regroups enumeration nodes, which can result\
+  \ in losing corresponding information."
 copyright: ACN
-version: 1
-publication_date: 2025-04-20
+version: 2
+publication_date: 2026-04-23
 provider: ACN
 packager: matteo.palli
 objects:
@@ -354,156 +360,17 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
       ref_id: GV.PO-01.1
-      description: 'Sono adottate e documentate politiche di sicurezza informatica
-        per almeno i seguenti ambiti:'
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.a
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.a
-      description: a) gestione del rischio;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.b
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.b
-      description: "b) ruoli e responsabilit\xE0;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.c
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.c
-      description: "c) affidabilit\xE0 delle risorse umane;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.d
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.d
-      description: "d) conformit\xE0 e audit di sicurezza;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.e
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.e
-      description: e) gestione dei rischi per la sicurezza informatica della catena
-        di approvvigionamento;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.f
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.f
-      description: f) gestione degli asset;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.g
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.g
-      description: "g) gestione delle vulnerabilit\xE0;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.h
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.h
-      description: "h) continuit\xE0 operativa, ripristino in caso di disastro e gestione\
-        \ delle crisi;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.i
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.i
-      description: "i) gestione dell'autenticazione, delle identit\xE0 digitali e\
-        \ del controllo accessi;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.j
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.j
-      description: j) sicurezza fisica;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.k
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.k
-      description: k) formazione del personale e consapevolezza;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.l
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.l
-      description: l) sicurezza dei dati;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.m
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.m
-      description: m) sviluppo, configurazione, manutenzione e dismissione dei sistemi
-        informativi e di rete;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.n
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.n
-      description: n) protezione delle reti e delle comunicazioni;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.o
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.o
-      description: o) monitoraggio degli eventi di sicurezza;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.p
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.p
-      description: p) risposta agli incidenti e ripristino.
+      description: "Sono adottate e documentate politiche di sicurezza informatica\
+        \ per almeno i seguenti ambiti:\na) gestione del rischio;\nb) ruoli e responsabilit\xE0\
+        ;\nc) affidabilit\xE0 delle risorse umane;\nd) conformit\xE0 e audit di sicurezza;\n\
+        e) gestione dei rischi per la sicurezza informatica della catena di approvvigionamento;\n\
+        f) gestione degli asset;\ng) gestione delle vulnerabilit\xE0;\nh) continuit\xE0\
+        \ operativa, ripristino in caso di disastro e gestione delle crisi;\ni) gestione\
+        \ dell'autenticazione, delle identit\xE0 digitali e del controllo accessi;\n\
+        j) sicurezza fisica;\nk) formazione del personale e consapevolezza;\nl) sicurezza\
+        \ dei dati;\nm) sviluppo, configurazione, manutenzione e dismissione dei sistemi\
+        \ informativi e di rete;\nn) protezione delle reti e delle comunicazioni;\n\
+        o) monitoraggio degli eventi di sicurezza;\np) risposta agli incidenti e ripristino."
       implementation_groups:
       - I
       - E
@@ -871,6 +738,9 @@ objects:
       ref_id: ID.AM-02
       description: Sono mantenuti gli inventari del software, dei servizi e dei sistemi
         gestiti dall'organizzazione.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-02.1
       assessable: true
       depth: 4
@@ -1166,7 +1036,7 @@ objects:
         \ della misura ID.RA-01, sono prontamente risolte attraverso aggiornamenti\
         \ di sicurezza o misure di mitigazione, ove disponibili, ovvero accettando\
         \ e documentando il rischio in accordo al piano di trattamento del rischio\
-        \ informatico di cui alla misura ID.RA-06. "
+        \ informatico di cui alla misura ID.RA-06."
       implementation_groups:
       - I
       - E
@@ -1548,9 +1418,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa
       ref_id: PR.AA-04
       description: "Le asserzioni di identit\xE0 sono protette, trasmesse e verificate."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05
       assessable: true
       depth: 3
@@ -1560,6 +1427,7 @@ objects:
         in una politica, gestiti, applicati e rivisti e incorporano i principi del
         minimo privilegio e della separazione dei compiti.
       implementation_groups:
+      - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05.1
       assessable: true
@@ -1570,6 +1438,7 @@ objects:
         \ minimo privilegio e della separazione delle funzioni, tenuto anche conto\
         \ della necessit\xE0 di conoscere (need to know)."
       implementation_groups:
+      - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05.2
       assessable: true
@@ -1580,6 +1449,7 @@ objects:
         \ privilegi amministrativi degli amministratori di sistema alle quali debbono\
         \ corrispondere credenziali diverse."
       implementation_groups:
+      - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05.3
       assessable: true
@@ -1589,6 +1459,7 @@ objects:
       description: Nel rispetto delle politiche di cui alla misura GV.PO-01, sono
         adottate e documentate le procedure in relazione ai punti PR.AA-05.1 e PR.AA-05.2.
       implementation_groups:
+      - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-06
       assessable: true
@@ -2408,56 +2279,14 @@ objects:
       description: "\xC8 definito, attuato, aggiornato e documentato un piano per\
         \ la gestione degli incidenti di sicurezza informatica e la notifica al CSIRT\
         \ Italia, in accordo a quanto previsto dall\u2019articolo 25 del decreto NIS,\
-        \ che comprende almeno:"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.a
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.a
-      description: "le fasi e le procedure di gestione e notifica degli incidenti\
-        \ con l\u2019indicazione dei relativi ruoli e delle responsabilit\xE0;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.b
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.b
-      description: "le procedure per la predisposizione e la trasmissione delle relazioni\
-        \ di cui all\u2019articolo 25, comma 5, lettere c), d) ed e) del decreto NIS;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.c
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.c
-      description: le informazioni di contatto per la segnalazione degli incidenti;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.d
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.d
-      description: "le modalit\xE0 di comunicazione interna, anche con riguardo al\
-        \ coinvolgimento degli organi di amministrazione e direttivi, ed esterna;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.e
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.e
-      description: "la reportistica da utilizzare per la documentazione dell\u2019\
-        incidente."
+        \ che comprende almeno:\na) le fasi e le procedure di gestione e notifica\
+        \ degli incidenti con l\u2019indicazione dei relativi ruoli e delle responsabilit\xE0\
+        ;\nb) le procedure per la predisposizione e la trasmissione delle relazioni\
+        \ di cui all\u2019articolo 25, comma 5, lettere c), d) ed e) del decreto NIS;\n\
+        c) le informazioni di contatto per la segnalazione degli incidenti;\nd) le\
+        \ modalit\xE0 di comunicazione interna, anche con riguardo al coinvolgimento\
+        \ degli organi di amministrazione e direttivi, ed esterna;\ne) la reportistica\
+        \ da utilizzare per la documentazione dell\u2019incidente."
       implementation_groups:
       - I
       - E
@@ -2678,18 +2507,6 @@ objects:
       ref_id: RC.RP-03
       description: "L'integrit\xE0 dei backup e delle altre risorse di ripristino\
         \ \xE8 verificata prima che siano utilizzati per il ripristino."
-      implementation_groups:
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-03.1
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-03
-      ref_id: RC.RP-03.1
-      description: "Sono adottate e documentate procedure per comunicare alle parti\
-        \ interne interessate, ivi incluse le articolazioni competenti del soggetto\
-        \ NIS, le attivit\xE0 di ripristino a seguito di un incidente."
-      implementation_groups:
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-04
       assessable: true
       depth: 3
@@ -2729,6 +2546,18 @@ objects:
       description: "Le attivit\xE0 di ripristino e i progressi nel ripristino delle\
         \ capacit\xE0 operative sono comunicati agli stakeholder interni ed esterni\
         \ designati."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co-03.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co-03
+      ref_id: RC.CO-03.1
+      description: "Sono adottate e documentate procedure per comunicare alle parti\
+        \ interne interessate, ivi incluse le articolazioni competenti del soggetto\
+        \ NIS, le attivit\xE0 di ripristino a seguito di un incidente."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co-04
       assessable: true
       depth: 3
