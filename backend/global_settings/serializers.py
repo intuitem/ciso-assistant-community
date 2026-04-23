@@ -1,7 +1,35 @@
+import uuid
+
 from django.conf import settings as django_settings
 from rest_framework import serializers
 
 from .models import GlobalSettings
+
+
+def validate_default_dashboard_value(value):
+    """Validate the default_custom_analytics_dashboard setting value.
+
+    Returns the canonical string form (UUID as str) or None if cleared.
+    Raises serializers.ValidationError on bad input.
+    Shared by GeneralSettingsSerializer.update and the
+    set_default_dashboard view action so the rules don't drift.
+    """
+    from metrology.models import Dashboard
+
+    if value in (None, ""):
+        return None
+    try:
+        uuid.UUID(str(value))
+    except (ValueError, TypeError):
+        raise serializers.ValidationError(
+            {"default_custom_analytics_dashboard": "Must be a valid UUID."}
+        )
+    if not Dashboard.objects.filter(id=value).exists():
+        raise serializers.ValidationError(
+            {"default_custom_analytics_dashboard": "Dashboard does not exist."}
+        )
+    return str(value)
+
 
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
@@ -106,27 +134,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                         }
                     )
             if key == "default_custom_analytics_dashboard":
-                # Accept null/empty (unset) or a valid UUID matching an existing Dashboard
-                if value in (None, ""):
-                    validated_data["value"][key] = None
-                else:
-                    import uuid as _uuid
-                    from metrology.models import Dashboard
-
-                    try:
-                        _uuid.UUID(str(value))
-                    except (ValueError, TypeError):
-                        raise serializers.ValidationError(
-                            {
-                                "default_custom_analytics_dashboard": "Must be a valid UUID."
-                            }
-                        )
-                    if not Dashboard.objects.filter(id=value).exists():
-                        raise serializers.ValidationError(
-                            {
-                                "default_custom_analytics_dashboard": "Dashboard does not exist."
-                            }
-                        )
+                validated_data["value"][key] = validate_default_dashboard_value(value)
             setattr(instance, "value", validated_data["value"])
 
         # Get new currency value

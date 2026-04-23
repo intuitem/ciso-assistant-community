@@ -1237,83 +1237,84 @@
 							</a>
 						</div>
 					{:else}
+						{@const currentSelectionId = customDashboard?.id ?? ''}
+						{@const filteredDashboards = (dashboardsList ?? []).filter((d: any) =>
+							d.name.toLowerCase().includes(dashboardPickerSearch.toLowerCase())
+						)}
 						<div class="space-y-4">
-							{#if customDashboard?.id}
-								{@const filteredDashboards = (dashboardsList ?? []).filter((d: any) =>
-									d.name.toLowerCase().includes(dashboardPickerSearch.toLowerCase())
-								)}
-								<div class="flex items-center justify-between gap-4 flex-wrap">
-									<div class="relative" bind:this={dashboardPickerEl}>
-										{#if canChangeSettings}
-											<button
-												type="button"
-												class="inline-flex items-center gap-1 text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors"
-												onclick={toggleDashboardPicker}
-												aria-haspopup="listbox"
-												aria-expanded={dashboardPickerOpen}
-												title={m.defaultCustomAnalyticsDashboardHelpText()}
-											>
-												{customDashboard.name}
-												<i
-													class="fa-solid text-xs text-surface-400 transition-transform"
-													class:fa-chevron-down={!dashboardPickerOpen}
-													class:fa-chevron-up={dashboardPickerOpen}
-												></i>
-											</button>
-										{:else}
-											<h3
-												class="text-base font-semibold text-gray-900 inline-flex items-center gap-1"
-											>
-												{customDashboard.name}
-												<i
-													class="fa-solid fa-lock text-xs text-surface-400 ml-1"
-													title={m.requiresChangeGlobalSettings()}
-												></i>
-											</h3>
-										{/if}
+							<!-- Unified picker: same popover whether or not a dashboard is selected. -->
+							<div class="flex items-center justify-between gap-4 flex-wrap">
+								<div class="relative" bind:this={dashboardPickerEl}>
+									{#if canChangeSettings}
+										<button
+											type="button"
+											class="inline-flex items-center gap-1 text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+											onclick={toggleDashboardPicker}
+											aria-haspopup="listbox"
+											aria-expanded={dashboardPickerOpen}
+											title={m.defaultCustomAnalyticsDashboardHelpText()}
+										>
+											{customDashboard?.name ?? m.selectADashboard()}
+											<i
+												class="fa-solid text-xs text-surface-400 transition-transform"
+												class:fa-chevron-down={!dashboardPickerOpen}
+												class:fa-chevron-up={dashboardPickerOpen}
+											></i>
+										</button>
+									{:else}
+										<h3
+											class="text-base font-semibold text-gray-900 inline-flex items-center gap-1"
+										>
+											{customDashboard?.name ?? m.noDashboardSelected?.() ?? '—'}
+											<i
+												class="fa-solid fa-lock text-xs text-surface-400 ml-1"
+												title={m.requiresChangeGlobalSettings()}
+											></i>
+										</h3>
+									{/if}
 
-										{#if dashboardPickerOpen && canChangeSettings}
-											<div
-												role="listbox"
-												class="absolute left-0 top-full mt-2 z-30 w-72 bg-white dark:bg-surface-900 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg flex flex-col max-h-96"
-											>
-												<div class="p-2 border-b border-surface-200">
-													<input
-														type="text"
-														class="input input-sm w-full"
-														placeholder={m.search()}
-														bind:value={dashboardPickerSearch}
-														autofocus
-													/>
-												</div>
-												<div class="overflow-y-auto flex-1">
-													{#if filteredDashboards.length === 0}
-														<div class="p-3 text-sm text-surface-500 text-center">
-															{m.noResultsFound?.() || 'No results'}
-														</div>
-													{:else}
-														{#each filteredDashboards as d}
-															<button
-																type="button"
-																role="option"
-																aria-selected={d.id === customDashboard.id}
-																class="w-full text-left px-3 py-2 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 flex items-center justify-between gap-2"
-																class:bg-blue-50={d.id === customDashboard.id}
-																class:font-semibold={d.id === customDashboard.id}
-																onclick={() => {
-																	closeDashboardPicker();
-																	if (d.id !== customDashboard.id)
-																		handleCustomDashboardChange(d.id);
-																}}
-															>
-																<span class="truncate">{d.name}</span>
-																{#if d.id === customDashboard.id}
-																	<i class="fa-solid fa-check text-blue-600 text-xs"></i>
-																{/if}
-															</button>
-														{/each}
-													{/if}
-												</div>
+									{#if dashboardPickerOpen && canChangeSettings}
+										<div
+											role="listbox"
+											class="absolute left-0 top-full mt-2 z-30 w-72 bg-white dark:bg-surface-900 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg flex flex-col max-h-96"
+										>
+											<div class="p-2 border-b border-surface-200">
+												<input
+													type="text"
+													class="input input-sm w-full"
+													placeholder={m.search()}
+													bind:value={dashboardPickerSearch}
+													autofocus
+												/>
+											</div>
+											<div class="overflow-y-auto flex-1">
+												{#if filteredDashboards.length === 0}
+													<div class="p-3 text-sm text-surface-500 text-center">
+														{m.noResultsFound?.() || 'No results'}
+													</div>
+												{:else}
+													{#each filteredDashboards as d}
+														<button
+															type="button"
+															role="option"
+															aria-selected={d.id === currentSelectionId}
+															class="w-full text-left px-3 py-2 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 flex items-center justify-between gap-2"
+															class:bg-blue-50={d.id === currentSelectionId}
+															class:font-semibold={d.id === currentSelectionId}
+															onclick={() => {
+																closeDashboardPicker();
+																if (d.id !== currentSelectionId) handleCustomDashboardChange(d.id);
+															}}
+														>
+															<span class="truncate">{d.name}</span>
+															{#if d.id === currentSelectionId}
+																<i class="fa-solid fa-check text-blue-600 text-xs"></i>
+															{/if}
+														</button>
+													{/each}
+												{/if}
+											</div>
+											{#if currentSelectionId}
 												<div class="border-t border-surface-200 p-2">
 													<button
 														type="button"
@@ -1327,9 +1328,11 @@
 														{m.clearDefault()}
 													</button>
 												</div>
-											</div>
-										{/if}
-									</div>
+											{/if}
+										</div>
+									{/if}
+								</div>
+								{#if customDashboard?.id}
 									<a
 										href="/dashboards/{customDashboard.id}"
 										class="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
@@ -1337,34 +1340,8 @@
 										<i class="fa-solid fa-up-right-from-square"></i>
 										{m.viewDashboard()}
 									</a>
-								</div>
-							{:else}
-								<!-- Initial state: nothing selected → keep the explicit picker -->
-								<div class="flex items-center gap-2">
-									<label for="custom-dashboard-select" class="text-sm font-medium">
-										{m.selectADashboard()}:
-									</label>
-									<select
-										id="custom-dashboard-select"
-										class="select w-72"
-										value={selectedDashboardId || ''}
-										disabled={!canChangeSettings}
-										onchange={(e) =>
-											handleCustomDashboardChange((e.target as HTMLSelectElement).value)}
-									>
-										<option value="">--</option>
-										{#each dashboardsList as d}
-											<option value={d.id}>{d.name}</option>
-										{/each}
-									</select>
-									{#if !canChangeSettings}
-										<i
-											class="fa-solid fa-lock text-surface-400"
-											title={m.requiresChangeGlobalSettings()}
-										></i>
-									{/if}
-								</div>
-							{/if}
+								{/if}
+							</div>
 
 							{#if customDashboard?.widgets?.length > 0}
 								<div class="bg-surface-50-950 rounded-lg p-4">

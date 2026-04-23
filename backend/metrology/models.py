@@ -688,7 +688,7 @@ class BuiltinMetricSample(AbstractBaseModel):
         )
 
         incidents_detection_raw = dict(
-            incidents.exclude(detection__isnull=True)
+            incidents.exclude(detection__in=[None, ""])
             .values("detection")
             .annotate(count=Count("id"))
             .values_list("detection", "count")
@@ -791,13 +791,9 @@ class BuiltinMetricSample(AbstractBaseModel):
             if is_global
             else ComplianceAssessment.objects.filter(folder=folder)
         )
-        total_frameworks_in_use = (
-            Framework.objects.filter(
-                id__in=audits_qs.values_list("framework_id", flat=True)
-            )
-            .distinct()
-            .count()
-        )
+        total_frameworks_in_use = Framework.objects.filter(
+            id__in=audits_qs.values_list("framework_id", flat=True).distinct()
+        ).count()
 
         return {
             "total_controls": total_controls,

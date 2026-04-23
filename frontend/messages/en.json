@@ -4247,5 +4247,6 @@
 	"customAnalyticsDashboard": "Custom analytics dashboard",
 	"editDashboard": "Edit dashboard",
 	"requiresChangeGlobalSettings": "Requires permission to change global settings.",
-	"clearDefault": "Clear default"
+	"clearDefault": "Clear default",
+	"noDashboardSelected": "No dashboard selected"
 }

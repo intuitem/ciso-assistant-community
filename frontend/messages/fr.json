@@ -4126,5 +4126,6 @@
 	"customAnalyticsDashboard": "Tableau de bord d'analytique personnalisée",
 	"editDashboard": "Modifier le tableau de bord",
 	"requiresChangeGlobalSettings": "Nécessite la permission de modifier les paramètres globaux.",
-	"clearDefault": "Effacer la valeur par défaut"
+	"clearDefault": "Effacer la valeur par défaut",
+	"noDashboardSelected": "Aucun tableau de bord sélectionné"
 }

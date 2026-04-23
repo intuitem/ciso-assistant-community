@@ -196,9 +196,15 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
         Guarded by change_globalsettings so non-admins can't change the
         org-wide default from the analytics Custom tab.
+
+        Note: this bypasses GeneralSettingsSerializer.update on purpose
+        because that serializer replaces the entire `value` dict with the
+        payload (no real PATCH semantics). For this single-key change we
+        merge into the existing dict. If the general settings ever grow
+        cross-key side effects beyond currency propagation, route this
+        through the serializer instead.
         """
-        import uuid as _uuid
-        from metrology.models import Dashboard
+        from .serializers import validate_default_dashboard_value
 
         perm = Permission.objects.get(codename="change_globalsettings")
         if not RoleAssignment.is_access_allowed(
@@ -211,23 +217,22 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 status=403,
             )
 
-        dashboard_id = request.data.get("dashboard_id")
-        if dashboard_id in (None, ""):
-            new_value = None
-        else:
-            try:
-                _uuid.UUID(str(dashboard_id))
-            except (ValueError, TypeError):
-                return Response({"error": "invalid uuid"}, status=400)
-            if not Dashboard.objects.filter(id=dashboard_id).exists():
-                return Response({"error": "dashboard not found"}, status=404)
-            new_value = str(dashboard_id)
+        try:
+            new_value = validate_default_dashboard_value(
+                request.data.get("dashboard_id")
+            )
+        except Exception as exc:
+            # Surface DRF ValidationError-style payloads, but stay defensive
+            detail = getattr(exc, "detail", str(exc))
+            return Response({"error": detail}, status=400)
 
         settings_obj, _ = GlobalSettings.objects.get_or_create(name="general")
         if not isinstance(settings_obj.value, dict):
             settings_obj.value = {}
         settings_obj.value["default_custom_analytics_dashboard"] = new_value
-        settings_obj.save(update_fields=["value"])
+        # Include updated_at because AbstractBaseModel uses auto_now and Django
+        # only refreshes auto_now fields named in update_fields.
+        settings_obj.save(update_fields=["value", "updated_at"])
         return Response({"default_custom_analytics_dashboard": new_value})
 
     @action(detail=True, name="Get available dashboards for the custom analytics tab")

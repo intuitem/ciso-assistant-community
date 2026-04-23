@@ -6,8 +6,13 @@ populated with widgets driven by the builtin-metrics registry on the root
 folder (i.e. whole-organization scope). Idempotent: re-running updates the
 widget set in place rather than duplicating dashboards.
 
+Seed-managed dashboards are identified by a stable `ref_id` (not by name),
+so a user-created dashboard with the same name will never be touched. Use
+--force to overwrite a dashboard that the seed owns but a user has edited.
+
 Usage:
     python manage.py seed_example_dashboards
+    python manage.py seed_example_dashboards --force
 """
 
 from django.contrib.contenttypes.models import ContentType
@@ -20,8 +25,10 @@ from metrology.models import Dashboard, DashboardWidget
 
 # Two seed dashboards. Each widget targets the root folder ("Global" scope)
 # so the metrics reflect the whole organization.
+# `ref_id` is the stable seed identifier — never reuse one across seeds.
 SEEDS = [
     {
+        "ref_id": "seed:operations-overview",
         "name": "Operations Overview",
         "description": "Incidents, controls, exceptions, tasks at a glance.",
         "widgets": [
@@ -100,6 +107,7 @@ SEEDS = [
         ],
     },
     {
+        "ref_id": "seed:compliance-snapshot",
         "name": "Compliance Snapshot",
         "description": "Frameworks in use, control coverage, risk landscape.",
         "widgets": [
@@ -180,26 +188,65 @@ class Command(BaseCommand):
             default=None,
             help="Folder ID to attach the dashboards to. Defaults to the root folder.",
         )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help=(
+                "Overwrite the layout even if the seed-managed dashboard's widget "
+                "set differs from the seed config (i.e. someone edited it)."
+            ),
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
         folder_id = options.get("folder")
+        force = options.get("force", False)
         folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
         folder_ct = ContentType.objects.get_for_model(Folder)
 
         for seed in SEEDS:
+            ref_id = seed["ref_id"]
+            seed_widgets = seed["widgets"]
+
+            # Match strictly on ref_id so user dashboards with the same name
+            # are never touched.
             dashboard, created = Dashboard.objects.get_or_create(
-                name=seed["name"],
-                folder=folder,
-                defaults={"description": seed["description"]},
+                ref_id=ref_id,
+                defaults={
+                    "name": seed["name"],
+                    "description": seed["description"],
+                    "folder": folder,
+                },
             )
-            verb = "Created" if created else "Updated"
-            # Wipe the dashboard's widgets so re-running cleanly resets the layout
-            # (without affecting user-created dashboards, which have different names).
+
+            if created:
+                verb = "Created"
+            else:
+                # Detect divergence from the seed config to catch user edits.
+                existing = list(dashboard.widgets.all())
+                seed_signature = sorted(
+                    (w["metric_key"], w["chart_type"], w["position_x"], w["position_y"])
+                    for w in seed_widgets
+                )
+                existing_signature = sorted(
+                    (w.metric_key, w.chart_type, w.position_x, w.position_y)
+                    for w in existing
+                )
+                if existing_signature != seed_signature and not force:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Skipped '{dashboard.name}' ({ref_id}) — widget set "
+                            f"differs from seed config (likely user-edited). "
+                            f"Re-run with --force to overwrite."
+                        )
+                    )
+                    continue
+                verb = "Refreshed"
+
             dashboard.widgets.all().delete()
-            for w in seed["widgets"]:
+            for w in seed_widgets:
                 DashboardWidget.objects.create(
                     dashboard=dashboard,
                     folder=folder,
@@ -210,6 +257,6 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(
                     f"{verb} dashboard '{dashboard.name}' with "
-                    f"{len(seed['widgets'])} widgets."
+                    f"{len(seed_widgets)} widgets."
                 )
             )
