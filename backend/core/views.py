@@ -7949,41 +7949,39 @@ class FrameworkViewSet(BaseModelViewSet):
                     f"{parent_ref}.{idx}" if parent_ref else str(idx)
                 )
 
-        # Pre-compute each question's URN suffix so it can participate in the
-        # slug collision check below. The suffix preserves the source node_id
-        # when extractable, so CEL expressions in outcomes_definition and
-        # visibility_expression that reference answers.<q_node_id> keep working
-        # on the copy. Falls back to a positional suffix when the source URN
-        # doesn't fit the urn:{org}:risk:{type}:{slug}:{node_id} shape.
+        # Pre-compute each question's ref_id and URN suffix (and the same for
+        # each choice) so the creation loop below can just read from these
+        # dicts. The suffixes also participate in the slug collision check.
+        # Source node_ids are preserved when the URN fits the
+        # urn:{org}:risk:{type}:{slug}:{node_id} shape, so CEL expressions in
+        # outcomes_definition and visibility_expression that reference
+        # answers.<q_node_id> keep working on the copy.
         questions_list = list(
             Question.objects.filter(requirement_node__framework=source)
             .prefetch_related("choices")
             .order_by("order")
         )
         q_idx_counter = {}  # req_node_id -> next question number
+        question_ref_ids = {}  # q.id -> final ref_id
         question_suffixes = {}  # q.id -> URN suffix string
+        choice_ref_ids = {}  # choice.id -> final ref_id
         choice_suffixes = {}  # choice.id -> URN suffix string (only choices with urn)
         for q in questions_list:
-            if q.requirement_node_id not in q_idx_counter:
-                q_idx_counter[q.requirement_node_id] = 1
-            q_idx = q_idx_counter[q.requirement_node_id]
+            q_idx = q_idx_counter.get(q.requirement_node_id, 1)
             q_idx_counter[q.requirement_node_id] = q_idx + 1
             parent_ref = computed_ref_ids.get(q.requirement_node.urn, "")
             positional_q_suffix = (
                 f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
             )
+            q_ref_id = q.ref_id or positional_q_suffix
+            question_ref_ids[q.id] = q_ref_id
             source_node_id = extract_node_id(q.urn) if q.urn else None
             question_suffixes[q.id] = source_node_id or positional_q_suffix
-            # Mirror the ref_id logic used when actually creating choices so
-            # collision detection sees the same URNs that will be written.
-            q_ref_id = q.ref_id or positional_q_suffix
-            c_counter = 0
-            for choice in q.choices.all():
-                c_counter += 1
-                if not choice.urn:
-                    continue
+            for c_counter, choice in enumerate(q.choices.all(), start=1):
                 c_ref_id = choice.ref_id or f"{q_ref_id}-c{c_counter}"
-                choice_suffixes[choice.id] = extract_node_id(choice.urn) or c_ref_id
+                choice_ref_ids[choice.id] = c_ref_id
+                if choice.urn:
+                    choice_suffixes[choice.id] = extract_node_id(choice.urn) or c_ref_id
 
         # Build candidate URNs and check for collisions (can happen when
         # the slug truncation makes the copy slug identical to the source slug,
@@ -8065,39 +8063,25 @@ class FrameworkViewSet(BaseModelViewSet):
             )
             node_id_map[old_id] = new_node.id
 
-        # Clone questions and choices. URN suffixes were pre-computed above so
-        # node_ids are preserved (CEL in outcomes_definition and
-        # visibility_expression references answers.<q_node_id> and
-        # selected_choices by choice node_id — those must match source node_ids
-        # for the copied CEL expressions to evaluate correctly).
+        # Clone questions and choices using the pre-computed ref_ids and URN
+        # suffixes. Node_ids are preserved from the source (CEL in
+        # outcomes_definition and visibility_expression references
+        # answers.<q_node_id> and selected_choices by choice node_id — those
+        # must match source node_ids for the copied CEL to evaluate correctly).
         question_urn_map = {}  # old question urn -> new question urn
         choice_urn_map = {}  # old choice urn -> new choice urn
         questions_with_depends_on = []  # (new_question, original_depends_on)
-        q_idx_counter_create = {}  # req_node_id -> next question number
         for q in questions_list:
             new_req_node_id = node_id_map.get(q.requirement_node_id)
             if not new_req_node_id:
                 continue
 
-            if q.requirement_node_id not in q_idx_counter_create:
-                q_idx_counter_create[q.requirement_node_id] = 1
-            q_idx = q_idx_counter_create[q.requirement_node_id]
-            q_idx_counter_create[q.requirement_node_id] = q_idx + 1
-
-            parent_ref = computed_ref_ids.get(q.requirement_node.urn, "")
-
-            # User-facing ref_id: preserve source value when present, else
-            # fall back to a positional label scoped to the parent node.
-            if q.ref_id:
-                q_ref_id = q.ref_id
-            else:
-                q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
-
-            urn_suffix = question_suffixes[q.id]
-            new_question_urn = f"urn:{ns}:risk:question:{fw_slug}:{urn_suffix}"
+            new_question_urn = (
+                f"urn:{ns}:risk:question:{fw_slug}:{question_suffixes[q.id]}"
+            )
             new_question = Question.objects.create(
                 urn=new_question_urn,
-                ref_id=q.ref_id or q_ref_id,
+                ref_id=question_ref_ids[q.id],
                 text=q.text,
                 annotation=q.annotation,
                 type=q.type,
@@ -8113,26 +8097,14 @@ class FrameworkViewSet(BaseModelViewSet):
                 question_urn_map[q.urn] = new_question_urn
             if q.depends_on:
                 questions_with_depends_on.append((new_question, q.depends_on))
-            c_counter = 0
             for choice in q.choices.all():
-                c_counter += 1
-                if choice.ref_id:
-                    c_ref_id = choice.ref_id
-                else:
-                    c_ref_id = f"{q_ref_id}-c{c_counter}"
-                # Preserve the source choice's node_id when the source URN is
-                # shaped like urn:{org}:risk:{type}:{slug}:{node_id}; fall
-                # back to a ref_id-based suffix for ad-hoc URNs.
                 if choice.urn:
-                    choice_node_id = extract_node_id(choice.urn) or c_ref_id
-                    new_choice_urn = (
-                        f"urn:{ns}:risk:question_choice:{fw_slug}:{choice_node_id}"
-                    )
+                    new_choice_urn = f"urn:{ns}:risk:question_choice:{fw_slug}:{choice_suffixes[choice.id]}"
                 else:
                     new_choice_urn = None
                 QuestionChoice.objects.create(
                     urn=new_choice_urn,
-                    ref_id=choice.ref_id or c_ref_id,
+                    ref_id=choice_ref_ids[choice.id],
                     value=choice.value,
                     annotation=choice.annotation,
                     add_score=choice.add_score,
