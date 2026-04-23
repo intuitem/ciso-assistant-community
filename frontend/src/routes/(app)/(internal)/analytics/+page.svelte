@@ -18,6 +18,7 @@
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
 	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
+	import DashboardGrid from '$lib/components/Dashboard/DashboardGrid.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
@@ -95,10 +96,81 @@
 	};
 
 	let group = $derived(page.url.searchParams.get('tab') || 'summary');
+	let selectedDashboardId = $derived(page.url.searchParams.get('dashboard') || '');
+	let canChangeSettings = $derived(
+		Object.hasOwn(data.user?.permissions ?? {}, 'change_globalsettings')
+	);
+
+	let dashboardPickerOpen = $state(false);
+	let dashboardPickerSearch = $state('');
+	let dashboardPickerEl: HTMLDivElement | undefined = $state();
+
+	function toggleDashboardPicker() {
+		dashboardPickerOpen = !dashboardPickerOpen;
+		if (dashboardPickerOpen) dashboardPickerSearch = '';
+	}
+
+	function closeDashboardPicker() {
+		dashboardPickerOpen = false;
+	}
+
+	function handleDashboardPickerKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') closeDashboardPicker();
+	}
+
+	function handleDashboardPickerOutsideClick(e: MouseEvent) {
+		if (dashboardPickerOpen && dashboardPickerEl && !dashboardPickerEl.contains(e.target as Node)) {
+			closeDashboardPicker();
+		}
+	}
+
+	$effect(() => {
+		if (dashboardPickerOpen) {
+			document.addEventListener('mousedown', handleDashboardPickerOutsideClick);
+			document.addEventListener('keydown', handleDashboardPickerKeydown);
+			return () => {
+				document.removeEventListener('mousedown', handleDashboardPickerOutsideClick);
+				document.removeEventListener('keydown', handleDashboardPickerKeydown);
+			};
+		}
+	});
 
 	function handleTabChange(tabValue: string): void {
 		page.url.searchParams.set('tab', tabValue);
 		goto(page.url);
+	}
+
+	async function handleCustomDashboardChange(dashboardId: string): Promise<void> {
+		// Admins persist the choice as the org-wide default. Non-admins fall through
+		// to a URL-only override (the disabled select prevents this, but kept defensive).
+		if (canChangeSettings) {
+			try {
+				const res = await fetch('/analytics?/setDefaultDashboard', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams({ dashboard_id: dashboardId || '' }).toString()
+				});
+				if (!res.ok) {
+					console.error('Failed to persist default dashboard', await res.text());
+				}
+			} catch (err) {
+				console.error('Failed to persist default dashboard', err);
+			}
+			// Clear URL override so the new global default is the source of truth
+			const url = new URL(page.url);
+			url.searchParams.set('tab', 'custom');
+			url.searchParams.delete('dashboard');
+			goto(url, { invalidateAll: true });
+		} else {
+			const url = new URL(page.url);
+			url.searchParams.set('tab', 'custom');
+			if (dashboardId) {
+				url.searchParams.set('dashboard', dashboardId);
+			} else {
+				url.searchParams.delete('dashboard');
+			}
+			goto(url, { invalidateAll: true });
+		}
 	}
 </script>
 
@@ -109,6 +181,7 @@
 		<Tabs.Trigger value="risk">{m.risk()}</Tabs.Trigger>
 		<Tabs.Trigger value="compliance">{m.compliance()}</Tabs.Trigger>
 		<Tabs.Trigger value="operations">{m.operations()}</Tabs.Trigger>
+		<Tabs.Trigger value="custom">{m.custom()}</Tabs.Trigger>
 		<Tabs.Indicator />
 	</Tabs.List>
 	{#key group}
@@ -1136,6 +1209,189 @@
 							<p class="text-sm text-red-500">Please try refreshing the page</p>
 						</div>
 					</div>
+				{/await}
+			</Tabs.Content>
+			<Tabs.Content value="custom">
+				{#await Promise.all([data.stream.dashboardsList, data.stream.customDashboard])}
+					<div class="flex items-center justify-center py-12">
+						<LoadingSpinner />
+					</div>
+				{:then [dashboardsList, customDashboard]}
+					{#if (dashboardsList || []).length === 0}
+						<div
+							class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
+						>
+							<div class="text-gray-400 mb-4">
+								<i class="fas fa-chart-line text-6xl"></i>
+							</div>
+							<div class="text-gray-600">
+								<p class="text-xl font-semibold mb-2">{m.noDashboardsAvailable()}</p>
+								<p class="text-sm text-gray-500">{m.buildYourFirstDashboard()}</p>
+							</div>
+							<a
+								href="/dashboards"
+								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							>
+								<i class="fas fa-plus text-sm"></i>
+								{m.createDashboard()}
+							</a>
+						</div>
+					{:else}
+						<div class="space-y-4">
+							{#if customDashboard?.id}
+								{@const filteredDashboards = (dashboardsList ?? []).filter((d: any) =>
+									d.name.toLowerCase().includes(dashboardPickerSearch.toLowerCase())
+								)}
+								<div class="flex items-center justify-between gap-4 flex-wrap">
+									<div class="relative" bind:this={dashboardPickerEl}>
+										{#if canChangeSettings}
+											<button
+												type="button"
+												class="inline-flex items-center gap-1 text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+												onclick={toggleDashboardPicker}
+												aria-haspopup="listbox"
+												aria-expanded={dashboardPickerOpen}
+												title={m.defaultCustomAnalyticsDashboardHelpText()}
+											>
+												{customDashboard.name}
+												<i
+													class="fa-solid text-xs text-surface-400 transition-transform"
+													class:fa-chevron-down={!dashboardPickerOpen}
+													class:fa-chevron-up={dashboardPickerOpen}
+												></i>
+											</button>
+										{:else}
+											<h3
+												class="text-base font-semibold text-gray-900 inline-flex items-center gap-1"
+											>
+												{customDashboard.name}
+												<i
+													class="fa-solid fa-lock text-xs text-surface-400 ml-1"
+													title={m.requiresChangeGlobalSettings()}
+												></i>
+											</h3>
+										{/if}
+
+										{#if dashboardPickerOpen && canChangeSettings}
+											<div
+												role="listbox"
+												class="absolute left-0 top-full mt-2 z-30 w-72 bg-white dark:bg-surface-900 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg flex flex-col max-h-96"
+											>
+												<div class="p-2 border-b border-surface-200">
+													<input
+														type="text"
+														class="input input-sm w-full"
+														placeholder={m.search()}
+														bind:value={dashboardPickerSearch}
+														autofocus
+													/>
+												</div>
+												<div class="overflow-y-auto flex-1">
+													{#if filteredDashboards.length === 0}
+														<div class="p-3 text-sm text-surface-500 text-center">
+															{m.noResultsFound?.() || 'No results'}
+														</div>
+													{:else}
+														{#each filteredDashboards as d}
+															<button
+																type="button"
+																role="option"
+																aria-selected={d.id === customDashboard.id}
+																class="w-full text-left px-3 py-2 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 flex items-center justify-between gap-2"
+																class:bg-blue-50={d.id === customDashboard.id}
+																class:font-semibold={d.id === customDashboard.id}
+																onclick={() => {
+																	closeDashboardPicker();
+																	if (d.id !== customDashboard.id)
+																		handleCustomDashboardChange(d.id);
+																}}
+															>
+																<span class="truncate">{d.name}</span>
+																{#if d.id === customDashboard.id}
+																	<i class="fa-solid fa-check text-blue-600 text-xs"></i>
+																{/if}
+															</button>
+														{/each}
+													{/if}
+												</div>
+												<div class="border-t border-surface-200 p-2">
+													<button
+														type="button"
+														class="w-full text-left px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded inline-flex items-center gap-2"
+														onclick={() => {
+															closeDashboardPicker();
+															handleCustomDashboardChange('');
+														}}
+													>
+														<i class="fa-solid fa-xmark text-xs"></i>
+														{m.clearDefault()}
+													</button>
+												</div>
+											</div>
+										{/if}
+									</div>
+									<a
+										href="/dashboards/{customDashboard.id}"
+										class="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+									>
+										<i class="fa-solid fa-up-right-from-square"></i>
+										{m.viewDashboard()}
+									</a>
+								</div>
+							{:else}
+								<!-- Initial state: nothing selected → keep the explicit picker -->
+								<div class="flex items-center gap-2">
+									<label for="custom-dashboard-select" class="text-sm font-medium">
+										{m.selectADashboard()}:
+									</label>
+									<select
+										id="custom-dashboard-select"
+										class="select w-72"
+										value={selectedDashboardId || ''}
+										disabled={!canChangeSettings}
+										onchange={(e) =>
+											handleCustomDashboardChange((e.target as HTMLSelectElement).value)}
+									>
+										<option value="">--</option>
+										{#each dashboardsList as d}
+											<option value={d.id}>{d.name}</option>
+										{/each}
+									</select>
+									{#if !canChangeSettings}
+										<i
+											class="fa-solid fa-lock text-surface-400"
+											title={m.requiresChangeGlobalSettings()}
+										></i>
+									{/if}
+								</div>
+							{/if}
+
+							{#if customDashboard?.widgets?.length > 0}
+								<div class="bg-surface-50-950 rounded-lg p-4">
+									<DashboardGrid widgets={customDashboard.widgets} />
+								</div>
+							{:else if customDashboard}
+								<div class="card p-12 bg-white dark:bg-surface-900 text-center">
+									<i class="fa-solid fa-chart-line text-8xl text-surface-300 mb-6"></i>
+									<p class="text-surface-500 text-lg mb-6">{m.noWidgetsYet()}</p>
+									<a
+										href="/dashboards/{customDashboard.id}/layout"
+										class="btn preset-filled-primary-500"
+									>
+										<i class="fa-solid fa-pen-to-square"></i>
+										{m.editLayout()}
+									</a>
+								</div>
+							{:else}
+								<div class="card p-12 bg-white dark:bg-surface-900 text-center text-surface-500">
+									<i class="fa-solid fa-hand-pointer text-6xl text-surface-300 mb-4"></i>
+									<p>{m.selectADashboard()}</p>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				{:catch}
+					<div class="text-red-500 text-center py-8">Error loading dashboards</div>
 				{/await}
 			</Tabs.Content>
 		</div>

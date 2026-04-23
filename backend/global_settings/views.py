@@ -160,6 +160,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "allow_assignments_to_entities": False,
             "enforce_mfa": False,
             "default_language": "en",
+            "default_custom_analytics_dashboard": None,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
@@ -182,6 +183,68 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get available languages")
     def default_language(self, request, pk=None):
         choices = {code: name for code, name in settings.LANGUAGES}
+        return Response(choices)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Set default custom analytics dashboard",
+        url_path="set-default-dashboard",
+    )
+    def set_default_dashboard(self, request, pk=None):
+        """Partial update of the default_custom_analytics_dashboard key.
+
+        Guarded by change_globalsettings so non-admins can't change the
+        org-wide default from the analytics Custom tab.
+        """
+        import uuid as _uuid
+        from metrology.models import Dashboard
+
+        perm = Permission.objects.get(codename="change_globalsettings")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(
+                {"error": "You do not have permission to change global settings."},
+                status=403,
+            )
+
+        dashboard_id = request.data.get("dashboard_id")
+        if dashboard_id in (None, ""):
+            new_value = None
+        else:
+            try:
+                _uuid.UUID(str(dashboard_id))
+            except (ValueError, TypeError):
+                return Response({"error": "invalid uuid"}, status=400)
+            if not Dashboard.objects.filter(id=dashboard_id).exists():
+                return Response({"error": "dashboard not found"}, status=404)
+            new_value = str(dashboard_id)
+
+        settings_obj, _ = GlobalSettings.objects.get_or_create(name="general")
+        if not isinstance(settings_obj.value, dict):
+            settings_obj.value = {}
+        settings_obj.value["default_custom_analytics_dashboard"] = new_value
+        settings_obj.save(update_fields=["value"])
+        return Response({"default_custom_analytics_dashboard": new_value})
+
+    @action(detail=True, name="Get available dashboards for the custom analytics tab")
+    def default_custom_analytics_dashboard(self, request, pk=None):
+        """Return a {dashboard_uuid: dashboard_name} map of dashboards
+        the requester can see, so an admin can pick one as the
+        instance default for the analytics Custom tab.
+        """
+        from metrology.models import Dashboard
+
+        accessible_ids, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Dashboard
+        )
+        dashboards = Dashboard.objects.filter(id__in=accessible_ids).order_by("name")
+        choices = {"": "—"}
+        for d in dashboards:
+            choices[str(d.id)] = d.name
         return Response(choices)
 
     @action(detail=True, methods=["post"], name="Force language for all users")

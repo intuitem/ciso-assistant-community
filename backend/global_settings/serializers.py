@@ -32,6 +32,7 @@ GENERAL_SETTINGS_KEYS = [
     "openai_api_base",
     "openai_model",
     "openai_api_key",
+    "default_custom_analytics_dashboard",
 ]
 
 
@@ -104,6 +105,28 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             "default_language": f"Invalid language. Must be one of: {valid_codes}"
                         }
                     )
+            if key == "default_custom_analytics_dashboard":
+                # Accept null/empty (unset) or a valid UUID matching an existing Dashboard
+                if value in (None, ""):
+                    validated_data["value"][key] = None
+                else:
+                    import uuid as _uuid
+                    from metrology.models import Dashboard
+
+                    try:
+                        _uuid.UUID(str(value))
+                    except (ValueError, TypeError):
+                        raise serializers.ValidationError(
+                            {
+                                "default_custom_analytics_dashboard": "Must be a valid UUID."
+                            }
+                        )
+                    if not Dashboard.objects.filter(id=value).exists():
+                        raise serializers.ValidationError(
+                            {
+                                "default_custom_analytics_dashboard": "Dashboard does not exist."
+                            }
+                        )
             setattr(instance, "value", validated_data["value"])
 
         # Get new currency value

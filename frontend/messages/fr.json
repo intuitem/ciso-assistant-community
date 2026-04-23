@@ -4115,5 +4115,16 @@
 	"objectsWithNoDateNotShown": "{count} objet(s) sans information de date non affiché(s).",
 	"noItemsToDisplayAdjustFilters": "Aucun élément à afficher. Ajustez vos filtres ou ajoutez des dates à vos objets.",
 	"failedToLoadTimelineData": "Échec du chargement des données du planning. Veuillez réessayer.",
-	"useCreationDateAsStart": "Utiliser la date de création comme début"
+	"useCreationDateAsStart": "Utiliser la date de création comme début",
+	"custom": "Personnalisé",
+	"selectADashboard": "Sélectionner un tableau de bord",
+	"noDashboardsAvailable": "Aucun tableau de bord disponible",
+	"buildYourFirstDashboard": "Créez votre premier tableau de bord pour l'utiliser comme onglet d'analytique personnalisée.",
+	"createDashboard": "Créer un tableau de bord",
+	"defaultCustomAnalyticsDashboard": "Tableau de bord d'analytique personnalisée par défaut",
+	"defaultCustomAnalyticsDashboardHelpText": "Choisissez le tableau de bord affiché dans l'onglet Personnalisé de la page Analytique. Les utilisateurs sans accès au tableau de bord choisi verront l'état vide.",
+	"customAnalyticsDashboard": "Tableau de bord d'analytique personnalisée",
+	"editDashboard": "Modifier le tableau de bord",
+	"requiresChangeGlobalSettings": "Nécessite la permission de modifier les paramètres globaux.",
+	"clearDefault": "Effacer la valeur par défaut"
 }
