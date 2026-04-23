@@ -754,9 +754,9 @@ def process_model_relationships(
             )
 
         case "complianceassessment":
-            _fields["perimeter"] = Perimeter.objects.get(
+            _fields["perimeter"] = Perimeter.objects.filter(
                 id=link_dump_database_ids.get(_fields["perimeter"])
-            )
+            ).first()
             _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
 
         case "appliedcontrol":

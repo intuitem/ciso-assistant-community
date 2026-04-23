@@ -1468,6 +1468,7 @@
 	"securityExceptions": "Iznimke",
 	"addSecurityException": "Dodaj iznimku",
 	"expirationDate": "Datum isteka",
+	"expirationDateIsInThePastWarning": "Uneseni datum isteka je u prošlosti",
 	"filterBy": "Filtriraj po",
 	"demoDataAlreadyImported": "Demo podaci su već učitani. Obrišite ili preimenujte vašu postojeću DEMO domenu.",
 	"finding": "Nalaz",
