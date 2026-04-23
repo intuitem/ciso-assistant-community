@@ -5057,13 +5057,14 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         target = serializer.validated_data["target"]
 
         # Policy is a proxy of AppliedControl that filters on category="policy".
-        # When the action fires via /policies/merge/ with target.type="new", the
-        # helper's write-serializer would create a plain AppliedControl without
-        # that category and the result would disappear from the Policies list.
-        # Stamp the category here so the created row remains classified as a policy.
+        # When the action fires via /policies/merge/ with target.type="new",
+        # force category="policy" so the created row stays classified as a
+        # policy — overriding any value the caller may have supplied (a plain
+        # AppliedControl category would hide the merge result from the Policies
+        # list view).
         if self.model is Policy and target["type"] == "new":
             fields = dict(target.get("fields") or {})
-            fields.setdefault("category", "policy")
+            fields["category"] = "policy"
             target = {**target, "fields": fields}
 
         result = merge_applied_controls(

@@ -431,3 +431,33 @@ def test_policy_merge_target_new_keeps_category_policy(authenticated_client, fol
     assert Policy.objects.filter(id=target_id).exists()
     assert AppliedControl.objects.get(id=target_id).category == "policy"
     assert not AppliedControl.objects.filter(id__in=[src1.id, src2.id]).exists()
+
+
+@pytest.mark.django_db
+def test_policy_merge_target_new_overrides_caller_category(
+    authenticated_client, folder
+):
+    """Even if the caller passes a non-policy category on /policies/merge/,
+    the endpoint must force category='policy' so the result stays visible in
+    the Policies list."""
+    from core.models import Policy
+
+    src = Policy.objects.create(name="pol-a", folder=folder)
+
+    payload = {
+        "source_ids": [str(src.id)],
+        "target": {
+            "type": "new",
+            "fields": {
+                "name": "still-policy",
+                "folder": str(folder.id),
+                # Caller tries to sneak in a different category.
+                "category": "technical",
+            },
+        },
+    }
+    resp = authenticated_client.post(POLICY_MERGE_URL, payload, format="json")
+    assert resp.status_code == 200, resp.json()
+    target_id = resp.json()["target_id"]
+    assert Policy.objects.filter(id=target_id).exists()
+    assert AppliedControl.objects.get(id=target_id).category == "policy"
