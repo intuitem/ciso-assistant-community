@@ -2,7 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { urlModel } from '$lib/utils/types';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
@@ -64,10 +64,16 @@
 	});
 	const formStore = _form.form;
 	// Mirror form store into local state so the preview $effect triggers on changes.
-	formStore.subscribe((v) => {
+	const unsubscribeFormStore = formStore.subscribe((v) => {
 		newTargetName = v.name ?? '';
 		newTargetFolderId = v.folder ?? '';
 		pickedExternalId = v.target_id ?? '';
+	});
+
+	onDestroy(() => {
+		unsubscribeFormStore();
+		if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
+		if (previewAbortController) previewAbortController.abort();
 	});
 
 	let preview: any = $state(null);
@@ -76,6 +82,8 @@
 	let mdKeepDocId = $state('');
 	let submitting = $state(false);
 	let confirmPhrase = $state('');
+	let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+	let previewAbortController: AbortController | null = null;
 
 	const cBase = 'card bg-white p-6 w-modal-wide max-w-4xl space-y-5';
 	const cHeader = 'text-xl font-medium text-gray-900';
@@ -143,7 +151,7 @@
 		return fallback;
 	}
 
-	async function refreshPreview() {
+	async function doRefreshPreview(signal: AbortSignal) {
 		const target = buildTargetPayload();
 		// For target=new, the backend needs at least a folder (permission check).
 		// The name is cosmetic at dry-run time, so we send a placeholder if empty.
@@ -153,12 +161,12 @@
 		) {
 			preview = null;
 			previewError = null;
+			previewLoading = false;
 			return;
 		}
 		if (target.type === 'new') {
 			target.fields = { ...target.fields, name: target.fields.name || '__preview__' };
 		}
-		previewLoading = true;
 		try {
 			const res = await fetch(`/${URLModel}/merge`, {
 				method: 'POST',
@@ -167,8 +175,10 @@
 					source_ids: sourceIds,
 					target,
 					dry_run: true
-				})
+				}),
+				signal
 			});
+			if (signal.aborted) return;
 			if (!res.ok) {
 				const body = await res.json().catch(() => ({}));
 				previewError = extractErrorMessage(body, m.mergeError());
@@ -181,10 +191,24 @@
 				}
 			}
 		} catch (e) {
+			if ((e as any)?.name === 'AbortError') return;
 			previewError = (e as Error).message;
 		} finally {
-			previewLoading = false;
+			if (!signal.aborted) previewLoading = false;
 		}
+	}
+
+	/** Debounced + abort-aware preview refresh. Rapid target changes coalesce
+	 *  into a single request and stale in-flight calls are cancelled. */
+	function refreshPreview() {
+		previewLoading = true;
+		if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
+		previewDebounceTimer = setTimeout(() => {
+			previewDebounceTimer = null;
+			if (previewAbortController) previewAbortController.abort();
+			previewAbortController = new AbortController();
+			void doRefreshPreview(previewAbortController.signal);
+		}, 200);
 	}
 
 	// Only refetch the preview when the target *identity* changes — the name is

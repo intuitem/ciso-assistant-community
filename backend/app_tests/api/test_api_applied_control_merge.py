@@ -399,3 +399,35 @@ def test_single_source_with_docs_no_conflict_just_repoints(
     doc2.refresh_from_db()
     assert doc1.policy_id == target.id
     assert doc2.policy_id == target.id
+
+
+# --- policy proxy path ------------------------------------------------------
+
+
+POLICY_MERGE_URL = "/api/policies/merge/"
+
+
+@pytest.mark.django_db
+def test_policy_merge_target_new_keeps_category_policy(authenticated_client, folder):
+    """Merging policies via /policies/merge/ with target=new must produce a row
+    classified as a policy so it still appears in the Policies list view."""
+    from core.models import Policy
+
+    src1 = Policy.objects.create(name="pol-1", folder=folder)
+    src2 = Policy.objects.create(name="pol-2", folder=folder)
+
+    payload = {
+        "source_ids": [str(src1.id), str(src2.id)],
+        "target": {
+            "type": "new",
+            "fields": {"name": "merged-policy", "folder": str(folder.id)},
+        },
+    }
+    resp = authenticated_client.post(POLICY_MERGE_URL, payload, format="json")
+
+    assert resp.status_code == 200, resp.json()
+    target_id = resp.json()["target_id"]
+    # The merged row must be visible through the Policy proxy (category='policy').
+    assert Policy.objects.filter(id=target_id).exists()
+    assert AppliedControl.objects.get(id=target_id).category == "policy"
+    assert not AppliedControl.objects.filter(id__in=[src1.id, src2.id]).exists()
