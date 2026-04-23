@@ -748,6 +748,7 @@
 	"logoHelpText": "A logó az alkalmazás fejlécében jelenik meg. Elfogadott formátumok: PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "A favicon a böngésző fülén jelenik meg. Elfogadott formátumok: ICO, PNG, JPEG, WEBP",
 	"entity": "Vállalat",
+	"entity_name": "Vállalat",
 	"entities": "Vállalatok",
 	"addEntity": "Vállalatok hozzáadása",
 	"referenceLink": "Referencia hivatkozás",

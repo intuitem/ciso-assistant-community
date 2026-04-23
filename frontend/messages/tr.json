@@ -793,6 +793,7 @@
 	"logoHelpText": "Logo, uygulamanın başlığında görüntülenecektir. Kabul edilen formatlar: PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Site simgesi tarayıcı sekmesinde görüntülenecektir. Kabul edilen formatlar: ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Kuruluş",
+	"entity_name": "Kuruluş",
 	"entities": "Kuruluşlar",
 	"addEntity": "Kuruluş ekle",
 	"referenceLink": "Referans bağlantısı",

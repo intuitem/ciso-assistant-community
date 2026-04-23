@@ -1092,6 +1092,7 @@
 	"accreditationStatus": "인가 상태",
 	"accreditationCategory": "인가 분류",
 	"entity": "엔터티",
+	"entity_name": "엔터티",
 	"entities": "엔터티",
 	"entitiesGraph": "엔터티 생태계",
 	"addEntity": "엔터티 추가",

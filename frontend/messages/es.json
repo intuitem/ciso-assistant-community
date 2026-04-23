@@ -717,6 +717,7 @@
 	"logoHelpText": "El logotipo se mostrará en el encabezado de la aplicación. Los formatos aceptados son PNG, JPEG, WEBP y SVG.",
 	"faviconHelpText": "El favicon se mostrará en la pestaña del navegador. Los formatos aceptados son ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entidad",
+	"entity_name": "Entidad",
 	"entities": "Entidades",
 	"addEntity": "Agregar entidad",
 	"referenceLink": "Enlace de referencia",

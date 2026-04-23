@@ -939,6 +939,7 @@
 	"accreditationStatus": "认证状态",
 	"accreditationCategory": "认证类别",
 	"entity": "实体",
+	"entity_name": "实体",
 	"entities": "实体",
 	"entitiesGraph": "实体生态系统",
 	"addEntity": "添加实体",

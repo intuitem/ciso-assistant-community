@@ -803,6 +803,7 @@
 	"logoHelpText": "Logo će biti prikazan u zaglavlju aplikacije. Dozvoljeni formati su PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Favicon će biti prikazan u kartici preglednika. Dozvoljeni formati su ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entitet",
+	"entity_name": "Entitet",
 	"entities": "Entiteti",
 	"addEntity": "Dodaj entitet",
 	"referenceLink": "Link za referencu",

@@ -748,6 +748,7 @@
 	"logoHelpText": "Logo akan ditampilkan di header aplikasi. Format yang diterima adalah PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Favicon akan ditampilkan di tab browser. Format yang diterima adalah ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entitas",
+	"entity_name": "Entitas",
 	"entities": "Entitas",
 	"addEntity": "Tambahkan entitas",
 	"referenceLink": "Tautan referensi",

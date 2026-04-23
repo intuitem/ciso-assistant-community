@@ -717,6 +717,7 @@
 	"logoHelpText": "Das Logo erscheint im Kopfbereich der Anwendung. Unterstützte Formate: PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Das Favicon erscheint im Browser-Tab. Unterstützte Formate: ICO, PNG, JPEG, WEBP",
 	"entity": "Entität",
+	"entity_name": "Entität",
 	"entities": "Entitäten",
 	"addEntity": "Entität hinzufügen",
 	"referenceLink": "Referenzlink",

@@ -744,6 +744,7 @@
 	"logoHelpText": "لوگو ایپلی کیشن کے ہیڈر میں دکھایا جائے گا۔ منظور شدہ فارمیٹس PNG، JPEG، WEBP، SVG ہیں۔",
 	"faviconHelpText": "فیویکن براؤزر کے ٹیب میں ظاہر ہوگا۔ قبول شدہ فارمیٹس ICO, PNG, JPEG, WEBP, SVG ہیں۔",
 	"entity": "ہستی",
+	"entity_name": "ہستی",
 	"entities": "اداروں",
 	"addEntity": "ہستی شامل کریں۔",
 	"referenceLink": "حوالہ لنک",

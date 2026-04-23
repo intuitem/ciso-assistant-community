@@ -746,6 +746,7 @@
 	"logoHelpText": "Logotypen visas i applikationens header. Accepterade format är PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Favicon visas i webbläsarens flik. Accepterade format är ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Enhet",
+	"entity_name": "Enhet",
 	"entities": "Enheter",
 	"addEntity": "Lägg till enhet",
 	"referenceLink": "Referenslänk",

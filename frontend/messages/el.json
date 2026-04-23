@@ -792,6 +792,7 @@
 	"logoHelpText": "Το λογότυπο εμφανίζεται στην κεφαλίδα. Επιτρεπόμενες μορφές: PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Το favicon εμφανίζεται στην καρτέλα του browser. Επιτρεπόμενες μορφές: ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Οντότητα",
+	"entity_name": "Οντότητα",
 	"entities": "Οντότητες",
 	"addEntity": "Προσθήκη οντότητας",
 	"referenceLink": "Σύνδεσμος αναφοράς",

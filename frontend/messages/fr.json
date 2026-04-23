@@ -1047,6 +1047,7 @@
 	"contractor": "Prestataire",
 	"entityRelationship": "Relation avec l'entité",
 	"entity": "Entité",
+	"entity_name": "Entité",
 	"entities": "Entités",
 	"entitiesGraph": "Ecosystème des entités",
 	"addEntity": "Ajouter une entité",

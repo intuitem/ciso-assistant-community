@@ -744,6 +744,7 @@
 	"logoHelpText": "سيتم عرض الشعار في رأس التطبيق. التنسيقات المقبولة هي PNG وJPEG وWEBP وSVG.",
 	"faviconHelpText": "سيتم عرض الرمز المفضل في علامة تبويب المتصفح. التنسيقات المقبولة هي ICO وPNG وJPEG وWEBP",
 	"entity": "كيان",
+	"entity_name": "كيان",
 	"entities": "الكيانات",
 	"addEntity": "إضافة كيان",
 	"referenceLink": "رابط مرجعي",
