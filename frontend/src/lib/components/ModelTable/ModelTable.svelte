@@ -10,7 +10,7 @@
 	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
@@ -533,6 +533,22 @@
 		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
 	);
 
+	async function resetFilters() {
+		for (const field of filteredFields) {
+			const defaultValue = defaultFilters[field] ?? [];
+			filterValues[field] = Array.isArray(defaultValue)
+				? defaultValue.map((v: any) => ({ ...v }))
+				: [];
+		}
+		if (!isStandaloneTable) return;
+		// Let the persistence $effect flush once on the cleared values, then wipe
+		// the cache entry so defaults (if any) can re-apply on next mount.
+		await tick();
+		const next = { ...$tableFilterStates };
+		delete next[filterStoreKey];
+		$tableFilterStates = next;
+	}
+
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
 	});
@@ -705,6 +721,21 @@
 											/>
 										{/if}
 									{/each}
+									{#if filterCount > 0}
+										<div class="flex justify-end pt-1">
+											<button
+												type="button"
+												class="btn preset-tonal-surface text-sm"
+												onclick={() => {
+													resetFilters();
+													openState = false;
+												}}
+											>
+												<i class="fa-solid fa-rotate-left mr-2"></i>
+												{m.resetFilters()}
+											</button>
+										</div>
+									{/if}
 								{/snippet}
 							</SuperForm>
 						</Popover.Content>
