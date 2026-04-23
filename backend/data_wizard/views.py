@@ -2660,8 +2660,18 @@ class LoadFileView(APIView):
         results = {"successful": 0, "failed": 0, "errors": []}
         try:
             # Get the perimeter object to extract its folder ID
-            perimeter = Perimeter.objects.get(id=perimeter_id)
-            folder_id = perimeter.folder.id
+            perimeter = None
+            if perimeter_id is not None:
+                perimeter = Perimeter.objects.get(id=perimeter_id)
+
+            if perimeter is not None:
+                folder_id = perimeter.folder.id
+            elif folder_id is None:
+                results["failed"] += 1
+                results["errors"].append(
+                    {"error": "A folder must be specified when there's no perimeter!"}
+                )
+                return results
 
             assessment_name = resolve_container_name(request, "Assessment")
 
@@ -3766,8 +3776,23 @@ class LoadFileView(APIView):
 
         try:
             # Get the perimeter and its domain
-            perimeter = Perimeter.objects.get(id=perimeter_id)
-            domain = perimeter.folder
+            perimeter = None
+            if perimeter_id is not None:
+                perimeter = Perimeter.objects.get(id=perimeter_id)
+
+            if perimeter is not None:
+                domain = perimeter.folder
+            else:
+                if folder_id is None:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "error": "A folder must be specified when there's no perimeter!"
+                        }
+                    )
+                    return results
+                else:
+                    domain = Folder.objects.get(id=folder_id)
 
             # Get the risk matrix
             risk_matrix = RiskMatrix.objects.get(id=matrix_id)
