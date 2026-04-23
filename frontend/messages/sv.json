@@ -724,6 +724,7 @@
 	"requirementMappings": "Kravkartläggningar",
 	"sourceFramework": "Källramverk",
 	"targetFramework": "Målramverk",
+	"targetFrameworks": "Målramverk",
 	"baseline": "Baslinje",
 	"createAuditFromBaseline": "Skapa revision från baslinje",
 	"coverageColon": "Täckning:",
@@ -1134,5 +1135,7 @@
 	"syncAppliedControlsMessage": "De tillämpade kontroller som använder denna referenskontroll kommer att synkroniseras med den. Observera att detta inte kan ångras.",
 	"syncToAppliedControl": "Synkronisera med tillämpad kontroll",
 	"syncToReferenceControl": "Synkronisera med referenskontroll",
-	"exportEcosystem": "ekosystemexport (XLSX)"
+	"exportEcosystem": "ekosystemexport (XLSX)",
+	"expirationDate": "Utgångsdatum",
+	"expirationDateIsInThePastWarning": "Det angivna utgångsdatumet ligger i det förflutna"
 }

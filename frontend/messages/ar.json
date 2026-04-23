@@ -721,6 +721,7 @@
 	"requirementMappings": "تعيينات المتطلبات",
 	"sourceFramework": "إطار المصدر",
 	"targetFramework": "الإطار المستهدف",
+	"targetFrameworks": "الأطر المستهدفة",
 	"baseline": "خط الأساس",
 	"createAuditFromBaseline": "إنشاء التدقيق من خط الأساس",
 	"coverageColon": "التغطية:",
@@ -1111,5 +1112,7 @@
 	"syncAppliedControlsMessage": "سيتم مزامنة عناصر التحكم المطبقة التي تستخدم عنصر التحكم المرجعي هذا معه. يرجى ملاحظة أن هذا الإجراء لا يمكن التراجع عنه.",
 	"syncToAppliedControl": "مزامنة مع التحكم المطبق",
 	"syncToReferenceControl": "مزامنة مع التحكم المرجعي",
-	"exportEcosystem": "تصدير النظام البيئي (XLSX)"
+	"exportEcosystem": "تصدير النظام البيئي (XLSX)",
+	"expirationDate": "تاريخ الانتهاء",
+	"expirationDateIsInThePastWarning": "تاريخ الانتهاء المُدخل يقع في الماضي"
 }

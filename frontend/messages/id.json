@@ -725,6 +725,7 @@
 	"requirementMappings": "Pemetaan persyaratan",
 	"sourceFramework": "Kerangka sumber",
 	"targetFramework": "Kerangka target",
+	"targetFrameworks": "Kerangka target",
 	"baseline": "Garis dasar",
 	"createAuditFromBaseline": "Buat audit dari garis dasar",
 	"coverageColon": "Cakupan:",
@@ -1328,5 +1329,7 @@
 	"syncAppliedControlsMessage": "Kontrol yang diterapkan yang menggunakan kontrol referensi ini akan disinkronkan dengannya. Harap dicatat bahwa tindakan ini tidak dapat dibatalkan.",
 	"syncToAppliedControl": "Sinkronkan dengan kontrol yang diterapkan",
 	"syncToReferenceControl": "Sinkronkan dengan kontrol referensi",
-	"exportEcosystem": "ekspor ekosistem (XLSX)"
+	"exportEcosystem": "ekspor ekosistem (XLSX)",
+	"expirationDate": "Tanggal kedaluwarsa",
+	"expirationDateIsInThePastWarning": "Tanggal kedaluwarsa yang dimasukkan berada di masa lalu"
 }

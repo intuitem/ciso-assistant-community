@@ -1580,6 +1580,14 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             "security_exceptions": security_exceptions,
         }
 
+        detected_at = _parse_date(record.get("detected_at"))
+        if detected_at:
+            data["detected_at"] = detected_at
+
+        due_date = _parse_date(record.get("due_date"))
+        if due_date:
+            data["due_date"] = due_date
+
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
@@ -3801,12 +3809,14 @@ class LoadFileView(APIView):
             matrix_mappings = self._build_matrix_mappings(risk_matrix)
 
             # Process controls first - collect all unique control names
-            # Accept both the legacy column name (`additional_controls`) and the
-            # model field name (`applied_controls`, as used by the export) for the
-            # to-be-added controls column.
+            # Accept both the legacy columns name and the model fields name for the
             all_controls = set()
             for record in records:
-                existing_controls = record.get("existing_applied_controls", "").strip()
+                existing_controls = (
+                    record.get("existing_applied_controls")
+                    or record.get("existing_controls")
+                    or ""
+                ).strip()
                 additional_controls = (
                     record.get("additional_controls")
                     or record.get("applied_controls")
