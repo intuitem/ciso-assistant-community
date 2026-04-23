@@ -215,6 +215,7 @@ export const RiskScenarioSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
+	incidents: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string().uuid().optional().nullable(),
@@ -272,6 +273,7 @@ export const AppliedControlSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional(),
 	task_templates: z.string().uuid().optional().array().optional(),
+	incidents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),
@@ -775,7 +777,13 @@ export const EntityAssessmentSchema = z.object({
 	dependency: z.number().optional(),
 	maturity: z.number().optional(),
 	trust: z.number().optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	reference_link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional()
 });
 
 export const solutionSchema = z.object({
@@ -1239,7 +1247,8 @@ export const SecurityExceptionSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	observation: z.string().optional()
+	observation: z.string().optional().nullable(),
+	link: z.string().url().optional().nullable().or(z.literal(''))
 });
 
 export const FindingSchema = z.object({
@@ -1304,6 +1313,8 @@ export const IncidentSchema = z.object({
 	qualifications: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	entities: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
+	task_templates: z.string().uuid().optional().array().optional(),
 	occurred_at: z
 		.string()
 		.datetime({ local: true })
@@ -1406,6 +1417,7 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	objectives: z.string().uuid().optional().array().optional(),
+	incidents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
 	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
