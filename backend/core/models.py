@@ -7841,20 +7841,68 @@ class ComplianceAssessment(Assessment):
         )
         return requirement_assessments, assessment_source_dict
 
+    def _get_progress_counts(self) -> tuple[int, int]:
+        """
+        Return (total, assessed) counts for assessable requirements.
+
+        This keeps the progress calculation lightweight by avoiding the
+        heavy prefetch graph used to render a full assessment tree.
+        """
+        requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        )
+
+        if not self.selected_implementation_groups:
+            # Fast path: when no IG filter is active, the DB can compute both
+            # counters directly without hydrating the requirement tree.
+            counts = requirements.aggregate(
+                total=Count("id"),
+                assessed=Count(
+                    "id",
+                    filter=~Q(result=RequirementAssessment.Result.NOT_ASSESSED)
+                    | Q(score__isnull=False),
+                ),
+            )
+            return counts["total"] or 0, counts["assessed"] or 0
+
+        selected_groups = set(self.selected_implementation_groups)
+        total = 0
+        assessed = 0
+        lightweight_requirements = (
+            # IG membership lives in a JSONField. To stay DB-portable, stream only
+            # the small set of fields needed for the progress calculation and
+            # apply the set-intersection in Python.
+            requirements.select_related("requirement")
+            .only(
+                "result",
+                "score",
+                "requirement_id",
+                "requirement__implementation_groups",
+            )
+            .iterator()
+        )
+
+        for requirement_assessment in lightweight_requirements:
+            requirement_groups = set(
+                requirement_assessment.requirement.implementation_groups or []
+            )
+            if not (selected_groups & requirement_groups):
+                continue
+
+            total += 1
+            # Keep the existing semantics: a requirement counts as "assessed"
+            # as soon as it has either a non-default result or an explicit score.
+            if (
+                requirement_assessment.result
+                != RequirementAssessment.Result.NOT_ASSESSED
+            ) or requirement_assessment.score is not None:
+                assessed += 1
+
+        return total, assessed
+
     @property
     def progress(self) -> int:
-        requirement_assessments = list(
-            self.get_requirement_assessments(include_non_assessable=False)
-        )
-        total_cnt = len(requirement_assessments)
-        assessed_cnt = len(
-            [
-                r
-                for r in requirement_assessments
-                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
-                or r.score != None
-            ]
-        )
+        total_cnt, assessed_cnt = self._get_progress_counts()
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
 
     @property
