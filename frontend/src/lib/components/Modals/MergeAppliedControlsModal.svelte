@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { getModalStore, type ModalStore } from './stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { onDestroy, onMount } from 'svelte';
@@ -410,7 +411,7 @@
 								{#each Object.entries(preview.rewired_preview ?? {}) as [k, v]}
 									{#if Number(v) > 0}
 										<li class="text-gray-700">
-											<span class="font-mono text-xs">{k}</span>: <strong>{v}</strong>
+											<span>{safeTranslate(k)}</span>: <strong>{v}</strong>
 										</li>
 									{/if}
 								{/each}
@@ -422,7 +423,7 @@
 								{#each Object.entries(preview.unioned_m2m_preview ?? {}) as [k, v]}
 									{#if Number(v) > 0}
 										<li class="text-gray-700">
-											<span class="font-mono text-xs">{k}</span>: +<strong>{v}</strong>
+											<span>{safeTranslate(k)}</span>: +<strong>{v}</strong>
 										</li>
 									{/if}
 								{/each}
