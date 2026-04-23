@@ -921,6 +921,7 @@
 	"partial": "Partielle",
 	"noResultFound": "Aucun résultat trouvé",
 	"filters": "Filtres",
+	"resetFilters": "Réinitialiser les filtres",
 	"notApplicableScore": "Vous ne pouvez pas scorer si l'évaluation des exigences n'est pas applicable",
 	"maturity": "Maturité",
 	"progress": "Progression",
