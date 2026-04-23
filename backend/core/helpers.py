@@ -1991,10 +1991,13 @@ def handle(exc, context):
     # translate django validation error which ...
     # .. causes HTTP 500 status ==> DRF validation which will cause 400 HTTP status
     if isinstance(exc, DjValidationError):
-        data = exc.message_dict
-        if DJ_NON_FIELD_ERRORS in data:
-            data[DRF_NON_FIELD_ERRORS] = data[DJ_NON_FIELD_ERRORS]
-            del data[DJ_NON_FIELD_ERRORS]
+        if hasattr(exc, "error_dict"):
+            data = exc.message_dict
+            if DJ_NON_FIELD_ERRORS in data:
+                data[DRF_NON_FIELD_ERRORS] = data[DJ_NON_FIELD_ERRORS]
+                del data[DJ_NON_FIELD_ERRORS]
+        else:
+            data = {DRF_NON_FIELD_ERRORS: exc.messages}
 
         exc = DRFValidationError(detail=data)
 
