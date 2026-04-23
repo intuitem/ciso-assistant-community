@@ -154,15 +154,14 @@
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<TextField
 						{form}
-						field="entity"
+						field="entity_name"
 						label={m.entity()}
 						classesContainer="w-full"
-						cacheLock={cacheLocks['entity']}
-						bind:cachedValue={formDataCache['entity']}
+						cacheLock={cacheLocks['entity_name']}
+						bind:cachedValue={formDataCache['entity_name']}
 					/>
 					<AutocompleteSelect
 						{form}
-						baseClass="w-full"
 						optionsEndpoint="terminologies"
 						optionsDetailedUrlParameters={[
 							['field_path', 'entity.relationship'],

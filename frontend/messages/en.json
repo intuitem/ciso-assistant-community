@@ -1196,6 +1196,7 @@
 	"accreditationStatus": "Accreditation status",
 	"accreditationCategory": "Accreditation category",
 	"entity": "Entity",
+	"entity_name": "Entity",
 	"entities": "Entities",
 	"entitiesGraph": "Entities ecosystem",
 	"addEntity": "Add entity",
