@@ -148,7 +148,7 @@ spec:
           mountPath: /ciso/localStorage
         {{- end }}
         {{- with .Values.backend.extraVolumeMounts }}
-          {{- toYaml . | nindent 10 }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
         ports:
         - name: http
@@ -276,7 +276,7 @@ spec:
           mountPath: /ciso/db
         {{- end }}
         {{- with .Values.backend.huey.extraVolumeMounts }}
-          {{- toYaml . | nindent 10 }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
