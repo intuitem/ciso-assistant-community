@@ -2066,6 +2066,52 @@ class TestFrameworkDuplicateBehavior:
 
     # --- Structural edges ---
 
+    def test_duplicate_rolls_back_on_midflight_error(
+        self, authenticated_client, app_config
+    ):
+        """If duplicate fails after Framework.objects.create (e.g. slug
+        exhaustion ValidationError, or a create error on a child), the
+        whole transaction must roll back — no empty framework left behind."""
+        from unittest.mock import patch
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Rollback FW", folder=folder, is_published=True
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:req_node:rollback:1",
+            ref_id="1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        frameworks_before = set(Framework.objects.values_list("id", flat=True))
+        nodes_before = set(RequirementNode.objects.values_list("id", flat=True))
+
+        # Force a failure AFTER the new Framework (and its children) have
+        # been persisted but BEFORE the atomic block exits, to exercise the
+        # rollback path that CodeRabbit flagged. FrameworkReadSerializer is
+        # the last call inside the atomic block — patching it to raise
+        # guarantees the failure lands inside the transaction.
+        with patch(
+            "core.views.FrameworkReadSerializer",
+            side_effect=RuntimeError("simulated mid-flight failure"),
+        ):
+            try:
+                authenticated_client.post(
+                    reverse("frameworks-duplicate", args=[fw.id]),
+                    {"name": "Rollback FW (copy)"},
+                    format="json",
+                )
+            except RuntimeError:
+                pass  # test client may propagate; side-effects below are the real check
+
+        assert (
+            set(Framework.objects.values_list("id", flat=True)) == frameworks_before
+        ), "Failed duplicate left a Framework behind (transaction.atomic missing?)"
+        assert set(RequirementNode.objects.values_list("id", flat=True)) == nodes_before
+
     def test_duplicate_framework_with_no_requirement_nodes(
         self, authenticated_client, app_config
     ):
