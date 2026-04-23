@@ -5053,19 +5053,34 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             Comment.objects.filter(applied_control_id=OuterRef("pk"))
         )
 
-        return (
-            qs.select_related("reference_control")
-            .prefetch_related(
+        qs = qs.select_related("reference_control").annotate(**annotations)
+
+        # The list serializer doesn't render findings/evidences/objectives/
+        # security_exceptions, so skip those prefetches on the list path.
+        if self.action == "list":
+            return qs.prefetch_related(
                 "owner",
-                "filtering_labels__folder",  # FieldsRelatedField includes folder
-                "findings",  # Used for findings_count
-                "evidences",  # Serialized as FieldsRelatedField
-                "objectives",  # ManyToManyField to OrganisationObjective
-                "assets",  # ManyToManyField used in table
-                "security_exceptions",  # Serialized as FieldsRelatedField
+                "filtering_labels__folder",
+                "assets",
             )
-            .annotate(**annotations)
+
+        return qs.prefetch_related(
+            "owner",
+            "filtering_labels__folder",
+            "findings",  # Used for findings_count
+            "evidences",  # Serialized as FieldsRelatedField
+            "objectives",  # ManyToManyField to OrganisationObjective
+            "assets",  # ManyToManyField used in table
+            "security_exceptions",  # Serialized as FieldsRelatedField
         )
+
+    def get_serializer_class(self, **kwargs):
+        action = kwargs.get("action", self.action)
+        if action == "list":
+            from core.serializers import AppliedControlListSerializer
+
+            return AppliedControlListSerializer
+        return super().get_serializer_class(**kwargs)
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):

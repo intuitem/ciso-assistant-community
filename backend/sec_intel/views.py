@@ -42,6 +42,23 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "ref_id", "description", "cvss_vector", "aliases"]
 
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For folder path / FieldsRelatedField
+                "library",  # FieldsRelatedField(["name", "id"])
+            )
+        )
+        if self.action == "autocomplete":
+            return qs
+        # `filtering_labels` is rendered as FieldsRelatedField(["id", "folder"]),
+        # so prefetch the nested folder too — otherwise each label fires a fresh
+        # query for its folder, producing a per-row × per-label N+1.
+        return qs.prefetch_related("filtering_labels__folder")
+
     @action(detail=False, name="Get source choices")
     def source(self, request):
         return Response(dict(SecurityAdvisory.Source.choices))
@@ -191,6 +208,16 @@ class CWEViewSet(BaseModelViewSet):
         "urn",
     ]
     search_fields = ["name", "ref_id", "description"]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("folder", "folder__parent_folder", "library")
+        )
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related("filtering_labels__folder")
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
