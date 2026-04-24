@@ -311,6 +311,8 @@ test('ebios rm study', async ({
 					timeout: 10_000
 				});
 			}
+			await page.getByTestId('form-input-entity-name').click();
+			await page.getByTestId('form-input-entity-name').fill('test stakeholder 1');
 			await page.getByTestId('form-input-category').getByRole('textbox').click();
 			await page.getByRole('option', { name: 'partner' }).click();
 			await page.getByText('4').first().click();
