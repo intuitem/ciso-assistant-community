@@ -256,7 +256,7 @@ class StakeholderReadSerializer(BaseModelSerializer):
 class StakeholderImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
-    entity = serializers.CharField(read_only=True)
+    entity_name = serializers.CharField(read_only=True)
     third_party_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     category = serializers.SlugRelatedField(slug_field="name", read_only=True)
@@ -268,7 +268,7 @@ class StakeholderImportExportSerializer(BaseModelSerializer):
             "updated_at",
             "folder",
             "ebios_rm_study",
-            "entity",
+            "entity_name",
             "third_party_entity",
             "category",
             "current_dependency",
