@@ -56,7 +56,7 @@ spec:
             containerPort: 3000
             protocol: TCP
         {{- if and .Values.frontend.extraVolumeMounts (not .Values.frontend.extraVolumes) }}
-          {{- fail "frontend.extraVolumeMounts can't be set without backend.extraVolumes" }}
+          {{- fail "frontend.extraVolumeMounts can't be set without frontend.extraVolumes" }}
         {{- end }}
         {{- with .Values.frontend.extraVolumeMounts }}
         volumeMounts:

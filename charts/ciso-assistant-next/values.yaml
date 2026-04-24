@@ -46,8 +46,9 @@ global:
 
   # NOTE: per-component affinity, nodeSelector and tolerations
   # fall back to global.affinity, global.nodeSelector, and global.tolerations
-  # respectively when left empty ({} / []). To avoid inheriting global values,
-  # either leave the global keys unset or omit the per-component (backend/frontend) keys.
+  # respectively when left empty ({} / []). To skip the global fallback,
+  # set the per-component (backend/frontend) key to a non-empty value,
+  # or leave the global keys unset.
 
   # -- Default node selector for all components
   nodeSelector: {} # @schema additionalProperties: true
