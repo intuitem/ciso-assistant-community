@@ -128,9 +128,11 @@ class TestRequirementAssessmentsAuthenticated:
                     "max_score": compliance_assessment.max_score,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 },
@@ -219,9 +221,11 @@ class TestRequirementAssessmentsAuthenticated:
                     "max_score": compliance_assessment.max_score,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 }
@@ -278,9 +282,11 @@ class TestRequirementAssessmentsAuthenticated:
                     "max_score": compliance_assessment.max_score,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 },

@@ -10,7 +10,7 @@
 	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import { onMount } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
@@ -359,9 +359,11 @@
 			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Persist all filter values (including empty) so cleared defaults stay cleared
+		// untracked so resetFilters can delete the entry without retriggering us
 		if (isStandaloneTable) {
-			$tableFilterStates[filterStoreKey] = { ...filterValues };
+			untrack(() => {
+				$tableFilterStates[filterStoreKey] = { ...filterValues };
+			});
 		}
 		setTimeout(() => {
 			handler.invalidate();
@@ -532,6 +534,20 @@
 	let filterCount = $derived(
 		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
 	);
+
+	async function resetFilters() {
+		for (const field of filteredFields) {
+			const defaultValue = defaultFilters[field] ?? [];
+			filterValues[field] = Array.isArray(defaultValue)
+				? defaultValue.map((v: { value: string }) => ({ ...v }))
+				: [];
+		}
+		if (!isStandaloneTable) return;
+		await tick();
+		const next = { ...$tableFilterStates };
+		delete next[filterStoreKey];
+		$tableFilterStates = next;
+	}
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
@@ -705,6 +721,21 @@
 											/>
 										{/if}
 									{/each}
+									{#if filterCount > 0}
+										<div class="flex justify-end pt-1">
+											<button
+												type="button"
+												class="btn preset-tonal-surface text-sm"
+												onclick={() => {
+													resetFilters();
+													openState = false;
+												}}
+											>
+												<i class="fa-solid fa-rotate-left mr-2"></i>
+												{m.resetFilters()}
+											</button>
+										</div>
+									{/if}
 								{/snippet}
 							</SuperForm>
 						</Popover.Content>
