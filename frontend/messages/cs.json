@@ -724,6 +724,7 @@
 	"requirementMappings": "Mapování požadavků",
 	"sourceFramework": "Zdrojový rámec",
 	"targetFramework": "Cílový rámec",
+	"targetFrameworks": "Cílové rámce",
 	"baseline": "Základní úroveň",
 	"createAuditFromBaseline": "Vytvořit audit z základní úrovně",
 	"coverageColon": "Pokrytí:",
@@ -1132,5 +1133,7 @@
 	"syncAppliedControlsMessage": "Použité kontroly využívající tuto referenční kontrolu s ní budou synchronizovány. Upozorňujeme, že tuto akci nelze vrátit zpět.",
 	"syncToAppliedControl": "Synchronizovat s aplikovanou kontrolou",
 	"syncToReferenceControl": "Synchronizovat s referenční kontrolou",
-	"exportEcosystem": "export ekosystému (XLSX)"
+	"exportEcosystem": "export ekosystému (XLSX)",
+	"expirationDate": "Datum vypršení platnosti",
+	"expirationDateIsInThePastWarning": "Zadané datum vypršení platnosti je v minulosti"
 }
