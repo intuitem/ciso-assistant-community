@@ -7859,7 +7859,7 @@ class ComplianceAssessment(Assessment):
                     | Q(score__isnull=False),
                 ),
             )
-            return counts["total"] or 0, counts["assessed"] or 0
+            return counts["total"], counts["assessed"]
 
         selected_groups = set(self.selected_implementation_groups)
         total = 0
@@ -7879,7 +7879,7 @@ class ComplianceAssessment(Assessment):
             requirement_groups = set(
                 requirement_assessment.requirement.implementation_groups or []
             )
-            if not (selected_groups & requirement_groups):
+            if selected_groups.isdisjoint(requirement_groups):
                 continue
 
             total += 1
