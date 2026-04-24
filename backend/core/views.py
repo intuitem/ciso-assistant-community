@@ -10257,12 +10257,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
-    @staticmethod
-    def escape_spreadsheet_cell(value):
-        if not value:
-            return ""
-        return f"'{value}" if value[0] in ("=", "+", "-", "@") else value
-
     def get_serializer_class(self, **kwargs):
         action = kwargs.get("action", self.action)
         if action == "list":
@@ -10790,9 +10784,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_assessments = compliance_assessment.get_requirement_assessments(
             include_non_assessable=False
         )
-        queryset = AppliedControl.objects.filter(
-            requirement_assessments__in=requirement_assessments
-        ).distinct()
+        queryset = (
+            AppliedControl.objects.filter(
+                requirement_assessments__in=requirement_assessments
+            )
+            .prefetch_related("evidences__revisions")
+            .distinct()
+        )
 
         # Use the same serializer to maintain consistency - to review
         serializer = ComplianceAssessmentActionPlanSerializer(
@@ -10841,12 +10839,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         [ra.get("str") for ra in item.get("requirement_assessments")]
                     ),
                     "\n".join(
-                        self.escape_spreadsheet_cell(evidence.get("str"))
+                        escape_excel_formula(evidence.get("str"))
                         for evidence in (item.get("evidences") or [])
                         if evidence.get("str")
                     ),
                     "\n".join(
-                        self.escape_spreadsheet_cell(evidence.get("filename"))
+                        escape_excel_formula(evidence.get("filename"))
                         for evidence in (item.get("evidence_attachments") or [])
                         if evidence.get("filename")
                     ),
@@ -10868,9 +10866,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_assessments = compliance_assessment.get_requirement_assessments(
             include_non_assessable=False
         )
-        queryset = AppliedControl.objects.filter(
-            requirement_assessments__in=requirement_assessments
-        ).distinct()
+        queryset = (
+            AppliedControl.objects.filter(
+                requirement_assessments__in=requirement_assessments
+            )
+            .prefetch_related("evidences__revisions")
+            .distinct()
+        )
 
         serializer = ComplianceAssessmentActionPlanSerializer(
             queryset, many=True, context={"pk": pk}
@@ -10894,12 +10896,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     [ra.get("str") for ra in item.get("requirement_assessments")]
                 ),
                 "associated_evidences": "\n".join(
-                    self.escape_spreadsheet_cell(evidence.get("str"))
+                    escape_excel_formula(evidence.get("str"))
                     for evidence in (item.get("evidences") or [])
                     if evidence.get("str")
                 ),
                 "evidence_attachments": "\n".join(
-                    self.escape_spreadsheet_cell(evidence.get("filename"))
+                    escape_excel_formula(evidence.get("filename"))
                     for evidence in (item.get("evidence_attachments") or [])
                     if evidence.get("filename")
                 ),
