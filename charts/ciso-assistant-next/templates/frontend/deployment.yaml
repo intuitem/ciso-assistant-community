@@ -52,10 +52,10 @@ spec:
           - name: BODY_SIZE_LIMIT
             value: {{ .Values.frontend.config.bodySizeLimit | quote }}
         ports:
-        - name: http
-          containerPort: 3000
-          protocol: TCP
-        {{- with .Values.frontend.extraVolumeMounts }}
+          - name: http
+            containerPort: 3000
+            protocol: TCP
+        {{- with and .Values.frontend.extraVolumes .Values.frontend.extraVolumeMounts }}
         volumeMounts:
           {{- toYaml . | nindent 10 }}
         {{- end }}

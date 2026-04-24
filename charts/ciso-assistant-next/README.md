@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.9.2](https://img.shields.io/badge/Version-0.9.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.15.9](https://img.shields.io/badge/AppVersion-v3.15.9-informational?style=flat-square)
+![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.15.9](https://img.shields.io/badge/AppVersion-v3.15.9-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -59,7 +59,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.config.smtp.host | string | `"smtp.server.local"` | SMTP hostname |
 | backend.config.smtp.password | string | `""` | SMTP password |
 | backend.config.smtp.port | int | `25` | SMTP post |
-| backend.config.smtp.useSsl | bool | `false` | Enable SSL for SMTP (implicit TLS) # Note : useSsl option will override useTls if both are enabled |
+| backend.config.smtp.useSsl | bool | `false` | Enable SSL for SMTP (implicit TLS) # Note : useSsl option will prevail useTls if both are enabled |
 | backend.config.smtp.useTls | bool | `false` | Enable TLS for SMTP (explicit TLS) |
 | backend.config.smtp.username | string | `""` | SMTP username |
 | backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |

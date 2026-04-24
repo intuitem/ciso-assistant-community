@@ -136,24 +136,24 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-primary-password
           {{- end }}
-        volumeMounts:
-        - name: tmp-data
-          mountPath: /tmp
-        {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
-        - name: sqlite-data
-          mountPath: /ciso/db
-        {{- end }}
-        {{- if .Values.backend.persistence.localStorage.enabled }}
-        - name: localstorage-data
-          mountPath: /ciso/localStorage
-        {{- end }}
-        {{- with .Values.backend.extraVolumeMounts }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
         ports:
-        - name: http
-          containerPort: 8000
-          protocol: TCP
+          - name: http
+            containerPort: 8000
+            protocol: TCP
+        volumeMounts:
+          - name: tmp-data
+            mountPath: /tmp
+          {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
+          - name: sqlite-data
+            mountPath: /ciso/db
+          {{- end }}
+          {{- if .Values.backend.persistence.localStorage.enabled }}
+          - name: localstorage-data
+            mountPath: /ciso/localStorage
+          {{- end }}
+          {{- with and .Values.backend.extraVolumes .Values.backend.extraVolumeMounts }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
         {{- if .Values.backend.resources }}
         resources:
           {{- toYaml .Values.backend.resources | nindent 10 }}
@@ -269,15 +269,15 @@ spec:
                 key: email-primary-password
           {{- end }}
         volumeMounts:
-        - name: tmp-data
-          mountPath: /tmp
-        {{- if .Values.backend.persistence.sqlite.enabled }}
-        - name: sqlite-data
-          mountPath: /ciso/db
-        {{- end }}
-        {{- with .Values.backend.huey.extraVolumeMounts }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+          - name: tmp-data
+            mountPath: /tmp
+          {{- if .Values.backend.persistence.sqlite.enabled }}
+          - name: sqlite-data
+            mountPath: /ciso/db
+          {{- end }}
+          {{- with and .Values.backend.extraVolumes .Values.backend.huey.extraVolumeMounts }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
           {{- toYaml .Values.backend.huey.resources | nindent 10 }}
