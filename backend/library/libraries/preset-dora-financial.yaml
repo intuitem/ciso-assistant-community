@@ -9,7 +9,7 @@ packager: intuitem
 translations:
   fr:
     name: "DORA — Résilience opérationnelle numérique"
-    description: "Programme de conformité au règlement européen DORA sur la résilience opérationnelle numérique. Charge le référentiel NOREA DORA-in-Control, active la gestion des tiers, le signalement des incidents et crée un parcours structuré couvrant la gestion des risques ICT, la surveillance des tiers et les tests de résilience."
+    description: "Programme de conformité au règlement européen DORA sur la résilience opérationnelle numérique. Charge le référentiel NOREA DORA-in-Control, active la gestion des tiers, le signalement des incidents et crée un parcours structuré couvrant la gestion des risques TIC, la surveillance des tiers et les tests de résilience."
 
 dependencies:
   - urn:intuitem:risk:library:norea-dora-in-control
@@ -45,7 +45,7 @@ objects:
         ref: main_ra
         translations:
           fr:
-            name: "Analyse de risques ICT"
+            name: "Analyse de risques TIC"
       - type: compliance_assessment
         name: "NOREA DORA-in-Control Assessment"
         framework: urn:intuitem:risk:library:norea-dora-in-control
@@ -69,7 +69,7 @@ objects:
         translations:
           fr:
             name: "Fournisseur d'infrastructure cloud"
-            description: "Fournisseur de services d'hébergement cloud et d'infrastructure pour les systèmes ICT critiques."
+            description: "Fournisseur de services d'hébergement cloud et d'infrastructure pour les systèmes TIC critiques."
       - type: entity
         name: "Market data provider"
         description: "External provider of market data feeds, pricing data, or reference data services."
@@ -83,7 +83,7 @@ objects:
         translations:
           fr:
             name: "Partenaire d'externalisation IT"
-            description: "Prestataire de services managés gérant les opérations ICT, l'infrastructure ou le support applicatif."
+            description: "Prestataire de services managés gérant les opérations TIC, l'infrastructure ou le support applicatif."
       - type: entity
         name: "SWIFT / payment network provider"
         description: "Provider of payment messaging, clearing, or settlement network services."
@@ -109,7 +109,7 @@ objects:
         ref: asset_network
         translations:
           fr:
-            name: "Infrastructure réseau ICT"
+            name: "Infrastructure réseau TIC"
             description: "Infrastructure réseau incluant pare-feu, commutateurs, VPN et segmentation supportant les opérations financières."
       - type: asset
         name: "Identity and access management"
@@ -148,8 +148,8 @@ objects:
         threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-003]
         translations:
           fr:
-            name: "Défaillance d'un prestataire ICT tiers"
-            description: "Un prestataire ICT tiers critique subit une panne ou une brèche, perturbant les services financiers et déclenchant les obligations de notification d'incident DORA."
+            name: "Défaillance d'un prestataire TIC tiers"
+            description: "Un prestataire TIC tiers critique subit une panne ou une brèche, perturbant les services financiers et déclenchant les obligations de notification d'incident DORA."
       - type: risk_scenario
         name: "Ransomware on core financial system"
         description: "Ransomware encrypts the core banking or trading platform, halting financial operations."
@@ -208,8 +208,8 @@ objects:
           target_model: assets
           translations:
             fr:
-              title: "Cartographier les actifs ICT et fonctions critiques"
-              description: "Identifiez et classifiez tous les actifs ICT supportant les fonctions financières critiques ou importantes"
+              title: "Cartographier les actifs TIC et fonctions critiques"
+              description: "Identifiez et classifiez tous les actifs TIC supportant les fonctions financières critiques ou importantes"
         - key: dora_assessment
           title: "Assess DORA compliance"
           description: "Go through the NOREA DORA-in-Control framework and evaluate your current posture against each requirement"
@@ -227,7 +227,7 @@ objects:
           translations:
             fr:
               title: "Mener une analyse de risque"
-              description: "Examinez les scénarios de risque ICT, évaluez la vraisemblance et l'impact, et identifiez les risques supplémentaires pour vos fonctions critiques"
+              description: "Examinez les scénarios de risque TIC, évaluez la vraisemblance et l'impact, et identifiez les risques supplémentaires pour vos fonctions critiques"
         - key: controls
           title: "Implement and track security controls"
           description: "Review the suggested controls, assign owners, and track implementation — focus on ICT risk management measures required by DORA"
@@ -235,15 +235,15 @@ objects:
           translations:
             fr:
               title: "Implémenter et suivre les mesures de sécurité"
-              description: "Examinez les mesures suggérées, assignez des responsables et suivez la mise en œuvre — concentrez-vous sur les mesures de gestion des risques ICT exigées par DORA"
+              description: "Examinez les mesures suggérées, assignez des responsables et suivez la mise en œuvre — concentrez-vous sur les mesures de gestion des risques TIC exigées par DORA"
         - key: vendors
           title: "Manage ICT third-party providers"
           description: "Review the pre-created ICT third-party entities, add missing providers, create assessments, and maintain the register of contractual arrangements"
           target_model: entities
           translations:
             fr:
-              title: "Gérer les prestataires ICT tiers"
-              description: "Examinez les entités tierces ICT pré-créées, ajoutez les prestataires manquants, créez des évaluations et maintenez le registre des arrangements contractuels"
+              title: "Gérer les prestataires TIC tiers"
+              description: "Examinez les entités tierces TIC pré-créées, ajoutez les prestataires manquants, créez des évaluations et maintenez le registre des arrangements contractuels"
         - key: roi_report
           title: "Generate the Register of Information"
           description: "Generate the DORA Register of Information (ROI) from your ICT third-party entities and contracts, and review the validation report to fix any missing or inconsistent data before regulatory submission."
@@ -251,7 +251,7 @@ objects:
           translations:
             fr:
               title: "Générer le Registre d'Information"
-              description: "Générez le Registre d'Information DORA (ROI) à partir de vos entités tierces ICT et de vos contrats, puis examinez le rapport de validation pour corriger les données manquantes ou incohérentes avant la soumission réglementaire."
+              description: "Générez le Registre d'Information DORA (ROI) à partir de vos entités tierces TIC et de vos contrats, puis examinez le rapport de validation pour corriger les données manquantes ou incohérentes avant la soumission réglementaire."
         - key: incident_reporting
           title: "Set up incident classification and reporting"
           description: "Define your ICT incident classification criteria and reporting process — DORA requires initial notification within 4 hours for major incidents"
@@ -259,7 +259,7 @@ objects:
           translations:
             fr:
               title: "Mettre en place la classification et le signalement des incidents"
-              description: "Définissez vos critères de classification des incidents ICT et votre processus de signalement — DORA exige une notification initiale sous 4 heures pour les incidents majeurs"
+              description: "Définissez vos critères de classification des incidents TIC et votre processus de signalement — DORA exige une notification initiale sous 4 heures pour les incidents majeurs"
         - key: resilience_testing
           title: "Plan resilience testing"
           description: "Define your digital operational resilience testing programme, including threat-led penetration testing (TLPT) if applicable"
