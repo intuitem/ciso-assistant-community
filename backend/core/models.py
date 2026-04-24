@@ -7845,7 +7845,7 @@ class ComplianceAssessment(Assessment):
         """
         Return (total, assessed) counts for assessable requirements
         """
-        
+
         requirements = RequirementAssessment.objects.filter(
             compliance_assessment=self, requirement__assessable=True
         )
