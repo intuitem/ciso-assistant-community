@@ -160,7 +160,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
         stakeholders = Stakeholder.objects.filter(
             ebios_rm_study=study, is_selected=True
-        ).order_by("entity__name")
+        ).order_by("entity_name")
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)

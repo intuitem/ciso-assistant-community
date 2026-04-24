@@ -4922,7 +4922,7 @@ class LoadFileView(APIView):
                             # Check for existing stakeholder
                             existing_stakeholder = Stakeholder.objects.filter(
                                 ebios_rm_study=study,
-                                entity__iexact=entity_name,
+                                entity_name__iexact=entity_name,
                                 category=category,
                             ).first()
 
@@ -5757,7 +5757,7 @@ class LoadFileView(APIView):
                     if entity and category:
                         existing_sh = Stakeholder.objects.filter(
                             ebios_rm_study=study,
-                            entity__iexact=entity_name,
+                            entity_name__iexact=entity_name,
                             category=category,
                         ).first()
 
