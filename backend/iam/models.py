@@ -14,7 +14,7 @@ from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
-from django.utils.translation import gettext_lazy as _, override as translation_override
+from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, Prefetch, QuerySet
 from knox.models import AuthToken
@@ -990,7 +990,7 @@ class Role(NameDescriptionMixin, FolderMixin):
 
     def __str__(self) -> str:
         if self.builtin:
-            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
+            return BUILTIN_ROLE_CODENAMES.get(self.name) or self.name
         return self.name
 
     fields_to_check = ["name"]
