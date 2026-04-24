@@ -11705,8 +11705,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             "observation": ac.observation or "",
                             "reference_control": {
                                 "ref_id": rc.ref_id or "",
-                                "name": rc.name or "",
-                                "description": rc.description or "",
+                                "name": get_referential_translation(rc, "name") or "",
+                                "description": get_referential_translation(
+                                    rc, "description"
+                                )
+                                or "",
                             }
                             if rc
                             else None,
@@ -11716,7 +11719,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             for ac_data in controls_map.values():
                 ac_data["risk_scenarios"] = list(ac_data["risk_scenarios"].values())
-            additional_controls = list(controls_map.values())
+
+            def _sort_key(ac):
+                ref_id = (
+                    (ac.get("reference_control") or {}).get("ref_id")
+                    or ac.get("ref_id")
+                    or ""
+                )
+                if not ref_id:
+                    return (1, [])
+                return (
+                    0,
+                    [
+                        (0, int(p)) if p.isdigit() else (1, p.lower())
+                        for p in re.split(r"(\d+)", ref_id)
+                        if p
+                    ],
+                )
+
+            additional_controls = sorted(controls_map.values(), key=_sort_key)
 
         return Response(
             {
