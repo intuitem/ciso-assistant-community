@@ -4149,7 +4149,6 @@
 	"noDashboardsAvailable": "Aucun tableau de bord disponible",
 	"buildYourFirstDashboard": "Créez votre premier tableau de bord pour l'utiliser comme onglet d'analytique personnalisée.",
 	"createDashboard": "Créer un tableau de bord",
-	"defaultCustomAnalyticsDashboard": "Tableau de bord d'analytique personnalisée par défaut",
 	"defaultCustomAnalyticsDashboardHelpText": "Choisissez le tableau de bord affiché dans l'onglet Personnalisé de la page Analytique. Les utilisateurs sans accès au tableau de bord choisi verront l'état vide.",
 	"customAnalyticsDashboard": "Tableau de bord d'analytique personnalisée",
 	"editDashboard": "Modifier le tableau de bord",
