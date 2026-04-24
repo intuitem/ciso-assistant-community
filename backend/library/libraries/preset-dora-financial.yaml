@@ -3,7 +3,7 @@ locale: en
 ref_id: preset-dora-financial
 name: "DORA — Digital Operational Resilience"
 description: "Compliance programme for the EU Digital Operational Resilience Act (DORA). Loads the NOREA DORA-in-Control framework, enables third-party risk management, incident reporting, and creates a structured journey covering ICT risk management, third-party oversight, and resilience testing."
-version: 1
+version: 2
 provider: intuitem
 packager: intuitem
 translations:
@@ -244,6 +244,14 @@ objects:
             fr:
               title: "Gérer les prestataires ICT tiers"
               description: "Examinez les entités tierces ICT pré-créées, ajoutez les prestataires manquants, créez des évaluations et maintenez le registre des arrangements contractuels"
+        - key: roi_report
+          title: "Generate the Register of Information"
+          description: "Generate the DORA Register of Information (ROI) from your ICT third-party entities and contracts, and review the validation report to fix any missing or inconsistent data before regulatory submission."
+          target_url: /reports/dora-roi
+          translations:
+            fr:
+              title: "Générer le Registre d'Information"
+              description: "Générez le Registre d'Information DORA (ROI) à partir de vos entités tierces ICT et de vos contrats, puis examinez le rapport de validation pour corriger les données manquantes ou incohérentes avant la soumission réglementaire."
         - key: incident_reporting
           title: "Set up incident classification and reporting"
           description: "Define your ICT incident classification criteria and reporting process — DORA requires initial notification within 4 hours for major incidents"
