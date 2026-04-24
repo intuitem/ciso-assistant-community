@@ -5100,3 +5100,100 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
             "size",
             "requirement_assessments",
         ]
+
+
+# ---------- Crosswalk (user-built requirement mapping sets) ----------
+
+
+class CrosswalkReadSerializer(BaseModelSerializer):
+    source_framework = FieldsRelatedField(["id", "name", "ref_id", "urn"])
+    target_framework = FieldsRelatedField(["id", "name", "ref_id", "urn"])
+    folder = FieldsRelatedField()
+    pair_count = serializers.SerializerMethodField()
+    reviewed_count = serializers.SerializerMethodField()
+
+    def get_pair_count(self, obj):
+        return obj.mappings.count()
+
+    def get_reviewed_count(self, obj):
+        return obj.mappings.filter(reviewed=True).count()
+
+    class Meta:
+        model = RequirementMappingSet
+        fields = [
+            "id",
+            "name",
+            "description",
+            "folder",
+            "source_framework",
+            "target_framework",
+            "status",
+            "embedding_model",
+            "generated_at",
+            "generation_params",
+            "generation_error",
+            "pair_count",
+            "reviewed_count",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CrosswalkWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RequirementMappingSet
+        fields = [
+            "id",
+            "name",
+            "description",
+            "folder",
+            "source_framework",
+            "target_framework",
+            "generation_params",
+            "status",
+        ]
+        read_only_fields = ["id", "status"]
+
+
+class CrosswalkMappingReadSerializer(BaseModelSerializer):
+    source_requirement = FieldsRelatedField(
+        ["id", "name", "ref_id", "urn", "description"]
+    )
+    target_requirement = FieldsRelatedField(
+        ["id", "name", "ref_id", "urn", "description"]
+    )
+    reviewed_by = FieldsRelatedField(["id", "email"])
+
+    class Meta:
+        model = RequirementMapping
+        fields = [
+            "id",
+            "mapping_set",
+            "source_requirement",
+            "target_requirement",
+            "relationship",
+            "rationale",
+            "strength_of_relationship",
+            "annotation",
+            "is_suggested",
+            "reviewed",
+            "reviewed_at",
+            "reviewed_by",
+            "suggestion_metadata",
+        ]
+        read_only_fields = ["is_suggested", "suggestion_metadata"]
+
+
+class CrosswalkMappingWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RequirementMapping
+        fields = [
+            "mapping_set",
+            "source_requirement",
+            "target_requirement",
+            "relationship",
+            "rationale",
+            "strength_of_relationship",
+            "annotation",
+            "reviewed",
+        ]
