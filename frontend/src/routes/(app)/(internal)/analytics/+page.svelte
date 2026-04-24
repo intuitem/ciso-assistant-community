@@ -24,6 +24,7 @@
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import CounterCard from './CounterCard.svelte';
@@ -33,6 +34,8 @@
 	}
 
 	let { data }: Props = $props();
+
+	const toastStore = getToastStore();
 
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
@@ -151,10 +154,18 @@
 					body: new URLSearchParams({ dashboard_id: dashboardId || '' }).toString()
 				});
 				if (!res.ok) {
-					console.error('Failed to persist default dashboard', await res.text());
+					toastStore.trigger({
+						message: `Failed to update default dashboard: ${await res.text()}`,
+						preset: 'error'
+					});
+					return;
 				}
 			} catch (err) {
-				console.error('Failed to persist default dashboard', err);
+				toastStore.trigger({
+					message: `Failed to update default dashboard: ${err}`,
+					preset: 'error'
+				});
+				return;
 			}
 			// Clear URL override so the new global default is the source of truth
 			const url = new URL(page.url);
