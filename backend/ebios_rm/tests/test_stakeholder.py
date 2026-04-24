@@ -20,7 +20,7 @@ class TestStakeholder:
         )
         stakeholder = Stakeholder.objects.create(
             third_party_entity=entity,
-            entity=entity.name,
+            entity_name=entity.name,
             category=category,
             ebios_rm_study=study,
         )
