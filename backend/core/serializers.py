@@ -1621,6 +1621,62 @@ class AppliedControlDuplicateSerializer(BaseModelSerializer):
         fields = ["name", "description", "folder", "duplicate_evidences"]
 
 
+class AppliedControlMergeTargetSerializer(serializers.Serializer):
+    type = serializers.ChoiceField(choices=["new", "existing"])
+    id = serializers.UUIDField(required=False)
+    fields = serializers.DictField(required=False)
+
+    def validate(self, attrs):
+        if attrs["type"] == "existing" and not attrs.get("id"):
+            raise serializers.ValidationError(
+                {"id": "target.id is required when type='existing'"}
+            )
+        if attrs["type"] == "new" and not attrs.get("fields"):
+            raise serializers.ValidationError(
+                {"fields": "target.fields is required when type='new'"}
+            )
+        return attrs
+
+
+class AppliedControlMergeRequestSerializer(serializers.Serializer):
+    """Shape-only validation for POST /applied-controls/merge/. Dedupes
+    source_ids, collapses target-in-sources to a survivor merge."""
+
+    MAX_SOURCES = 20
+
+    source_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        min_length=1,
+        max_length=MAX_SOURCES,
+    )
+    target = AppliedControlMergeTargetSerializer()
+    dry_run = serializers.BooleanField(default=False)
+    managed_document_resolution = serializers.DictField(required=False)
+
+    def validate_source_ids(self, value):
+        seen: set[str] = set()
+        deduped = []
+        for sid in value:
+            key = str(sid)
+            if key not in seen:
+                seen.add(key)
+                deduped.append(sid)
+        return deduped
+
+    def validate(self, attrs):
+        target = attrs["target"]
+        if target["type"] == "existing":
+            target_id = str(target["id"])
+            attrs["source_ids"] = [
+                s for s in attrs["source_ids"] if str(s) != target_id
+            ]
+            if not attrs["source_ids"]:
+                raise serializers.ValidationError(
+                    "After excluding the target from source_ids, no sources remain."
+                )
+        return attrs
+
+
 class AppliedControlImportExportSerializer(BaseModelSerializer):
     reference_control = HashSlugRelatedField(slug_field="pk", read_only=True)
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)

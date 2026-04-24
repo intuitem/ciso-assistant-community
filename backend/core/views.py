@@ -5100,6 +5100,37 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             return self.get_paginated_response(data)
         return Response(data)
 
+    @action(detail=False, methods=["post"], url_path="merge")
+    def merge(self, request):
+        """Merge N source applied controls into 1 target. See
+        applied_controls_helper.merge_applied_controls for payload + semantics."""
+        from core.applied_controls_helper import merge_applied_controls
+        from core.serializers import AppliedControlMergeRequestSerializer
+
+        serializer = AppliedControlMergeRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        target = serializer.validated_data["target"]
+
+        # Force category='policy' on /policies/merge/ so the created row stays
+        # classified as a policy even if the caller supplied a different value.
+        if self.model is Policy and target["type"] == "new":
+            fields = dict(target.get("fields") or {})
+            fields["category"] = "policy"
+            target = {**target, "fields": fields}
+
+        result = merge_applied_controls(
+            source_ids=serializer.validated_data["source_ids"],
+            target=target,
+            user=request.user,
+            request=request,
+            lookup_queryset=self.get_queryset(),
+            dry_run=serializer.validated_data.get("dry_run", False),
+            managed_document_resolution=serializer.validated_data.get(
+                "managed_document_resolution"
+            ),
+        )
+        return Response(result)
+
     def perform_create(self, serializer):
         create_remote_object = serializer.validated_data.pop(
             "create_remote_object", False
@@ -11674,8 +11705,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             "observation": ac.observation or "",
                             "reference_control": {
                                 "ref_id": rc.ref_id or "",
-                                "name": rc.name or "",
-                                "description": rc.description or "",
+                                "name": get_referential_translation(rc, "name") or "",
+                                "description": get_referential_translation(
+                                    rc, "description"
+                                )
+                                or "",
                             }
                             if rc
                             else None,
@@ -11685,7 +11719,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             for ac_data in controls_map.values():
                 ac_data["risk_scenarios"] = list(ac_data["risk_scenarios"].values())
-            additional_controls = list(controls_map.values())
+
+            def _sort_key(ac):
+                ref_id = (
+                    (ac.get("reference_control") or {}).get("ref_id")
+                    or ac.get("ref_id")
+                    or ""
+                )
+                if not ref_id:
+                    return (1, [])
+                return (
+                    0,
+                    [
+                        (0, int(p)) if p.isdigit() else (1, p.lower())
+                        for p in re.split(r"(\d+)", ref_id)
+                        if p
+                    ],
+                )
+
+            additional_controls = sorted(controls_map.values(), key=_sort_key)
 
         return Response(
             {
