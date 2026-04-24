@@ -282,9 +282,9 @@ spec:
           {{- if and .Values.backend.huey.extraVolumeMounts (not .Values.backend.extraVolumes) }}
             {{- fail "backend.huey.extraVolumeMounts can't be set without backend.extraVolumes" }}
           {{- else }}
-            {{- with .Values.backend.huey.extraVolumeMounts }}
+          {{- with .Values.backend.huey.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
-            {{- end }}
+          {{- end }}
           {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
