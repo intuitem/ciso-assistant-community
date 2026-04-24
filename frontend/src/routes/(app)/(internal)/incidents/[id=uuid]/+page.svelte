@@ -27,8 +27,13 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { getListViewFields } from '$lib/utils/table';
+	import type { ReverseForeignKeyField } from '$lib/utils/crud';
+	import { countMasked } from '$lib/utils/related-visibility';
 
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
@@ -206,6 +211,68 @@
 
 	let activeTab = $state('timeline');
 
+	function modalLinkedCreateForm(relatedModel: Record<string, any>): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: relatedModel.createForm,
+				model: relatedModel,
+				debug: false,
+				additionalInitialData: relatedModel.initialData,
+				formAction: `/${relatedModel.urlModel}?/create`
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add-' + relatedModel.info.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalSelectExisting(field: ReverseForeignKeyField): void {
+		if (!field.addExisting || !data.updateForm) return;
+		const addExisting = field.addExisting;
+		const modalComponent: ModalComponent = {
+			ref: SelectExistingModal,
+			props: {
+				form: data.updateForm,
+				urlModel: data.urlModel,
+				field: addExisting.parentField,
+				optionsEndpoint: addExisting.optionsEndpoint ?? field.endpointUrl ?? field.urlModel,
+				label: addExisting.label,
+				lazy: addExisting.lazy
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(addExisting.label ?? 'selectExisting')
+		};
+		modalStore.trigger(modal);
+	}
+
+	const linkedPanels: { tabValue: string; urlmodel: string; icon: string; labelKey: string }[] = [
+		{
+			tabValue: 'applied-controls',
+			urlmodel: 'applied-controls',
+			icon: 'fa-solid fa-shield-halved',
+			labelKey: 'appliedControls'
+		},
+		{
+			tabValue: 'task-templates',
+			urlmodel: 'task-templates',
+			icon: 'fa-solid fa-list-check',
+			labelKey: 'taskTemplates'
+		},
+		{
+			tabValue: 'risk-scenarios',
+			urlmodel: 'risk-scenarios',
+			icon: 'fa-solid fa-triangle-exclamation',
+			labelKey: 'riskScenarios'
+		}
+	];
+
 	// DORA reports fetched server-side, sorted by creation date (newest first)
 	const doraRows: any[] = $derived(
 		[...(data.doraReports ?? [])].sort(
@@ -228,7 +295,7 @@
 							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 						</span>
 					</Popover.Trigger>
-					<Popover.Positioner>
+					<Popover.Positioner class="z-50!">
 						<Popover.Content class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
 							<div>
 								<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
@@ -370,6 +437,21 @@
 						</span>
 					{/if}
 				</Tabs.Trigger>
+				{#each linkedPanels as panel}
+					{@const related = data.relatedModels?.[panel.urlmodel]}
+					{#if related}
+						<Tabs.Trigger value={panel.tabValue}>
+							<i class="{panel.icon} mr-2"></i>{safeTranslate(panel.labelKey)}
+							{#if related.count !== undefined && related.count > 0}
+								<span
+									class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700"
+								>
+									{related.count}
+								</span>
+							{/if}
+						</Tabs.Trigger>
+					{/if}
+				{/each}
 				<Tabs.Indicator />
 			</Tabs.List>
 
@@ -459,6 +541,63 @@
 					{/if}
 				</footer>
 			</Tabs.Content>
+
+			{#each linkedPanels as panel}
+				{@const related = data.relatedModels?.[panel.urlmodel]}
+				{#if related}
+					{@const field = data.model.reverseForeignKeyFields.find(
+						(f) => f.urlModel === panel.urlmodel
+					)}
+					{@const fieldsToUse =
+						field?.tableFields ||
+						getListViewFields({
+							key: panel.urlmodel,
+							featureFlags: page.data?.featureflags
+						}).body.filter((v) => v !== field.field)}
+					<Tabs.Content value={panel.tabValue} class="pt-4">
+						{#if related.table}
+							<ModelTable
+								baseEndpoint={`/${panel.urlmodel}?${field.field}=${data.data.id}`}
+								source={related.table}
+								disableCreate={!field?.addExisting}
+								disableEdit={true}
+								disableDelete={true}
+								deleteForm={related.deleteForm}
+								URLModel={panel.urlmodel}
+								expectedCount={countMasked(data.data?.[field.field])}
+								fields={fieldsToUse}
+							>
+								{#snippet addButton()}
+									{#if canEditObject && field?.addExisting}
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<button
+												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+												data-testid="select-existing-{panel.urlmodel}"
+												title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
+												onclick={() => modalSelectExisting(field)}
+												type="button"
+											>
+												<i class="fa-solid fa-hand-pointer"></i>
+											</button>
+										</span>
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<button
+												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+												data-testid="add-button-{panel.urlmodel}"
+												title={safeTranslate('add-' + related.info.localName)}
+												onclick={() => modalLinkedCreateForm(related)}
+												type="button"
+											>
+												<i class="fa-solid fa-file-circle-plus"></i>
+											</button>
+										</span>
+									{/if}
+								{/snippet}
+							</ModelTable>
+						{/if}
+					</Tabs.Content>
+				{/if}
+			{/each}
 
 			<Tabs.Content value="dora-reports" class="pt-4">
 				{#if doraRows.length > 0}
