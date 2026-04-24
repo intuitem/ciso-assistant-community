@@ -15,6 +15,7 @@
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	let { data } = $props();
 	let loading = $state({ form: false, library: '' });
@@ -171,24 +172,33 @@
 		</span>
 		<div class="space-y-1">
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.description()}</strong>: {data.library.description}
+				<strong>{m.description()}</strong>:
 			</p>
+			<MarkdownRenderer content={data.library.description} />
+
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.provider()}</strong>: {data.library.provider}
+				<strong>{m.provider()}</strong>:
 			</p>
+			<MarkdownRenderer content={data.library.provider} />
+
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.packager()}</strong>: {data.library.packager}
+				<strong>{m.packager()}</strong>:
 			</p>
+			<MarkdownRenderer content={data.library.packager} />
+
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.version()}</strong>: {data.library.version}
+				<strong>{m.version()}</strong>:
 			</p>
+			<MarkdownRenderer content={`${data.library.version}`} />
+			<!-- Value enclosed in backticks to avoid using the "toString" method. Useful if the returned "version" value becomes a string in the future -->
+
 			{#if data.library.publication_date}
 				<p class="text-md leading-5 text-gray-700">
-					<strong>{m.publicationDate()}</strong>: {formatDateOrDateTime(
-						data.library.publication_date,
-						getLocale()
-					)}
+					<strong>{m.publicationDate()}</strong>:
 				</p>
+				<MarkdownRenderer
+					content={formatDateOrDateTime(data.library.publication_date, getLocale())}
+				/>
 			{/if}
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
@@ -202,8 +212,9 @@
 			{/if}
 			{#if data.library.copyright}
 				<p class="text-md leading-5 text-gray-700">
-					<strong>{m.copyright()}</strong>: {data.library.copyright}
+					<strong>{m.copyright()}</strong>:
 				</p>
+				<MarkdownRenderer content={data.library.copyright} />
 			{/if}
 			{#if data.library.filtering_labels && data.library.filtering_labels.length > 0}
 				<p class="text-md leading-5 text-gray-700">

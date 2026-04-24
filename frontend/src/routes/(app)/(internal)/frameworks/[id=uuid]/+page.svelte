@@ -92,15 +92,22 @@
 											</div>
 										{/each}
 									{:else if key === 'implementation_groups_definition'}
-										{#each Object.entries(value) as [_, definition]}
-											<div>
-												** {definition.ref_id} **
-												{definition.name}
-												{#if Object.hasOwn(definition, 'description') && definition.description}
-													: {definition.description}
-												{/if}
-											</div>
-										{/each}
+										<div>
+											<ul class="list-disc list-inside">
+												{#each Object.entries(value) as [_, definition]}
+													<li>
+														<strong> {definition.ref_id} </strong> <br />
+														{#if Object.hasOwn(definition, 'description') && definition.description}
+															<MarkdownRenderer
+																content={definition.name + ' : ' + definition.description}
+															/>
+														{:else}
+															<MarkdownRenderer content={definition.name} />
+														{/if}
+													</li>
+												{/each}
+											</ul>
+										</div>
 									{:else if Array.isArray(value)}
 										<ul>
 											{#each value as val}
