@@ -2211,7 +2211,6 @@
 	"mergeConfirm": "Fusionner",
 	"mergeSuccess": "Mesures appliquées fusionnées avec succès",
 	"mergeError": "Impossible de fusionner les mesures appliquées",
-	"cannotMergeBuiltin": "Les mesures intégrées/de bibliothèque ne peuvent pas être fusionnées",
 	"managedDocumentConflict": "Conflit de documents gérés",
 	"managedDocumentConflictHelp": "Plusieurs mesures sélectionnées ont des documents gérés rattachés. Choisir le document à conserver sur la mesure fusionnée ; les autres seront détachés (conservés dans le système mais plus rattachés à une mesure).",
 	"keepThisDocument": "Conserver ce document",

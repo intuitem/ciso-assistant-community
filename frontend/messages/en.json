@@ -2378,7 +2378,6 @@
 	"mergeConfirm": "Merge",
 	"mergeSuccess": "Applied controls merged successfully",
 	"mergeError": "Could not merge applied controls",
-	"cannotMergeBuiltin": "Library/built-in applied controls cannot be merged",
 	"managedDocumentConflict": "Managed document conflict",
 	"managedDocumentConflictHelp": "Multiple selected controls have managed documents attached. Pick one document to keep on the merged control; the others will be unlinked (kept in the system but no longer attached to a control).",
 	"keepThisDocument": "Keep this document",

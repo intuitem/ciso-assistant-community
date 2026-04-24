@@ -287,7 +287,7 @@
 		</div>
 
 		{#if loadingSources}
-			<div class="text-sm text-gray-500">Loading…</div>
+			<div class="text-sm text-gray-500">{m.loading()}…</div>
 		{:else}
 			<section class="space-y-2">
 				<h3 class="text-sm font-semibold text-gray-700">{m.selectTargetControl()}</h3>
