@@ -67,6 +67,39 @@ DIRECT_M2M_FIELDS: tuple[str, ...] = (
 )
 
 
+def _registered_reverse_m2m_throughs() -> set:
+    return {through for through, _ in _reverse_m2m_through_tables()}
+
+
+def _expected_reverse_m2m_throughs() -> set:
+    """Introspect AppliedControl's reverse M2M relations — any through-table
+    here but not in _reverse_m2m_through_tables() would silently orphan its
+    rows during merge. Paired with a drift-guard test."""
+    from django.db.models.fields.related import ManyToManyRel
+
+    from core.models import AppliedControl
+
+    return {
+        f.through
+        for f in AppliedControl._meta.get_fields()
+        if isinstance(f, ManyToManyRel)
+    }
+
+
+def _expected_direct_m2m_fields() -> set[str]:
+    """Every M2M field declared on AppliedControl — any missing entry in
+    DIRECT_M2M_FIELDS means the target won't inherit those relations."""
+    from django.db.models import ManyToManyField
+
+    from core.models import AppliedControl
+
+    return {
+        f.name
+        for f in AppliedControl._meta.get_fields()
+        if isinstance(f, ManyToManyField)
+    }
+
+
 def _through_fk_attnames(through_model) -> tuple[str, str]:
     from core.models import AppliedControl
 
@@ -417,9 +450,11 @@ def merge_applied_controls(
             )
             serializer.is_valid(raise_exception=True)
             target_obj = serializer.save()
-        else:
-            assert target_existing_obj is not None  # pyright hint
+        elif target_existing_obj is not None:
             target_obj = target_existing_obj
+        else:
+            # Unreachable: pre-validation above guarantees one branch or the other.
+            raise RuntimeError("merge_applied_controls: target state inconsistent")
 
         unioned = _union_direct_m2ms(target_obj, sources)
 

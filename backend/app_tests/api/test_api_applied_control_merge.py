@@ -535,3 +535,37 @@ def test_merge_new_target_denied_when_user_lacks_add_on_target_folder(
     # Source untouched, no orphan target created (the security-refactor guarantee).
     assert AppliedControl.objects.filter(id=src.id).exists()
     assert AppliedControl.objects.count() == before_count
+
+
+# --- rewire-registry drift guards -------------------------------------------
+
+
+@pytest.mark.django_db
+def test_reverse_m2m_registry_covers_all_introspected_relations():
+    """Every reverse M2M on AppliedControl must be registered in
+    _reverse_m2m_through_tables(), else it will silently orphan through-rows."""
+    from core.applied_controls_helper import (
+        _expected_reverse_m2m_throughs,
+        _registered_reverse_m2m_throughs,
+    )
+
+    missing = _expected_reverse_m2m_throughs() - _registered_reverse_m2m_throughs()
+    assert not missing, (
+        f"Reverse M2M(s) on AppliedControl not registered for merge rewire: "
+        f"{[m.__name__ for m in missing]}"
+    )
+
+
+@pytest.mark.django_db
+def test_direct_m2m_fields_covers_all_declared_fields():
+    """Every M2M declared on AppliedControl must be listed in DIRECT_M2M_FIELDS
+    so the target inherits those relations during merge."""
+    from core.applied_controls_helper import (
+        DIRECT_M2M_FIELDS,
+        _expected_direct_m2m_fields,
+    )
+
+    missing = _expected_direct_m2m_fields() - set(DIRECT_M2M_FIELDS)
+    assert not missing, (
+        f"Direct M2M field(s) on AppliedControl not in DIRECT_M2M_FIELDS: {missing}"
+    )
