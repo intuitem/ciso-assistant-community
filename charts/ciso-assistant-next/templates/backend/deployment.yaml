@@ -153,10 +153,9 @@ spec:
           {{- end }}
           {{- if and .Values.backend.extraVolumeMounts (not .Values.backend.extraVolumes) }}
             {{- fail "backend.extraVolumeMounts can't be set without backend.extraVolumes" }}
-          {{- else }}
+          {{- end }}
           {{- with .Values.backend.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
-          {{- end }}
           {{- end }}
         {{- if .Values.backend.resources }}
         resources:
@@ -281,10 +280,9 @@ spec:
           {{- end }}
           {{- if and .Values.backend.huey.extraVolumeMounts (not .Values.backend.extraVolumes) }}
             {{- fail "backend.huey.extraVolumeMounts can't be set without backend.extraVolumes" }}
-          {{- else }}
+          {{- end }}
           {{- with .Values.backend.huey.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
-          {{- end }}
           {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
