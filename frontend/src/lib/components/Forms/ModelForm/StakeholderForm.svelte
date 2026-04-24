@@ -96,7 +96,7 @@
 		if (selectedEntityOption.length > 0) {
 			const entity = selectedEntityOption[0];
 			if (context != 'edit') {
-				$formData.entity = entity.name ?? entity.str ?? $formData.entity;
+				$formData.entity_name = entity.name ?? entity.str ?? $formData.entity_name;
 			}
 		}
 	});
