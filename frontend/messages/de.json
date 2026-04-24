@@ -695,6 +695,7 @@
 	"requirementMappings": "Anforderungszuordnungen",
 	"sourceFramework": "Quellreferenzwerk",
 	"targetFramework": "Zielreferenzwerk",
+	"targetFrameworks": "Zielreferenzwerke",
 	"baseline": "Baseline",
 	"createAuditFromBaseline": "Audit aus Baseline erstellen",
 	"coverageColon": "Abdeckung:",

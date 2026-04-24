@@ -724,6 +724,7 @@
 	"requirementMappings": "Kravkartläggningar",
 	"sourceFramework": "Källramverk",
 	"targetFramework": "Målramverk",
+	"targetFrameworks": "Målramverk",
 	"baseline": "Baslinje",
 	"createAuditFromBaseline": "Skapa revision från baslinje",
 	"coverageColon": "Täckning:",

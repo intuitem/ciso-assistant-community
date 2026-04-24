@@ -704,6 +704,7 @@
 	"requirementMappings": "Mappature requisiti",
 	"sourceFramework": "Framework sorgente",
 	"targetFramework": "Framework target",
+	"targetFrameworks": "Framework target",
 	"baseline": "Baseline",
 	"createAuditFromBaseline": "Crea audit dalla baseline",
 	"coverageColon": "Copertura:",

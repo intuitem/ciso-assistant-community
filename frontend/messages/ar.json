@@ -721,6 +721,7 @@
 	"requirementMappings": "تعيينات المتطلبات",
 	"sourceFramework": "إطار المصدر",
 	"targetFramework": "الإطار المستهدف",
+	"targetFrameworks": "الأطر المستهدفة",
 	"baseline": "خط الأساس",
 	"createAuditFromBaseline": "إنشاء التدقيق من خط الأساس",
 	"coverageColon": "التغطية:",
