@@ -10,8 +10,32 @@ import structlog
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import ForeignKey
+from django.db.models import ForeignKey, ManyToManyField
+from django.db.models.fields.related import ManyToManyRel
 from rest_framework.exceptions import PermissionDenied, ValidationError
+
+from core.models import (
+    AppliedControl,
+    Comment,
+    Finding,
+    Incident,
+    Policy,
+    RequirementAssessment,
+    RiskScenario,
+    TaskTemplate,
+    ValidationFlow,
+    Vulnerability,
+)
+from core.serializers import AppliedControlWriteSerializer
+from crq.models import QuantitativeRiskHypothesis
+from doc_management.models import ManagedDocument
+from ebios_rm.models import Stakeholder
+from iam.models import Folder, RoleAssignment
+from integrations.models import SyncMapping
+from pmbok.models import GenericCollection
+from privacy.models import DataBreach, Processing
+from resilience.models import AssetAssessment
+from webhooks.service import dispatch_webhook_event
 
 logger = structlog.get_logger(__name__)
 
@@ -19,18 +43,6 @@ logger = structlog.get_logger(__name__)
 # Rewire contract: every reverse M2M on AppliedControl must be listed here.
 # Keep aligned with AppliedControlViewSet.get_queryset() in views.py.
 def _reverse_m2m_through_tables() -> list[tuple[Any, str]]:
-    from core.models import (
-        Finding,
-        RequirementAssessment,
-        RiskScenario,
-        TaskTemplate,
-        Vulnerability,
-    )
-    from crq.models import QuantitativeRiskHypothesis
-    from ebios_rm.models import Stakeholder
-    from privacy.models import DataBreach, Processing
-    from resilience.models import AssetAssessment
-
     return [
         (RequirementAssessment.applied_controls.through, "RequirementAssessment"),
         (RiskScenario.applied_controls.through, "RiskScenario"),
@@ -38,6 +50,7 @@ def _reverse_m2m_through_tables() -> list[tuple[Any, str]]:
         (Finding.applied_controls.through, "Finding"),
         (Vulnerability.applied_controls.through, "Vulnerability"),
         (TaskTemplate.applied_controls.through, "TaskTemplate"),
+        (Incident.applied_controls.through, "Incident"),
         (Stakeholder.applied_controls.through, "Stakeholder"),
         (Processing.associated_controls.through, "Processing"),
         (DataBreach.remediation_measures.through, "DataBreach"),
@@ -54,6 +67,9 @@ def _reverse_m2m_through_tables() -> list[tuple[Any, str]]:
             "QuantitativeRiskHypothesis_removed",
         ),
         (AssetAssessment.associated_controls.through, "AssetAssessment"),
+        # Through Policy (a proxy of AppliedControl — same table).
+        (ValidationFlow.policies.through, "ValidationFlow_policies"),
+        (GenericCollection.policies.through, "GenericCollection_policies"),
     ]
 
 
@@ -75,10 +91,6 @@ def _expected_reverse_m2m_throughs() -> set:
     """Introspect AppliedControl's reverse M2M relations — any through-table
     here but not in _reverse_m2m_through_tables() would silently orphan its
     rows during merge. Paired with a drift-guard test."""
-    from django.db.models.fields.related import ManyToManyRel
-
-    from core.models import AppliedControl
-
     return {
         f.through
         for f in AppliedControl._meta.get_fields()
@@ -89,10 +101,6 @@ def _expected_reverse_m2m_throughs() -> set:
 def _expected_direct_m2m_fields() -> set[str]:
     """Every M2M field declared on AppliedControl — any missing entry in
     DIRECT_M2M_FIELDS means the target won't inherit those relations."""
-    from django.db.models import ManyToManyField
-
-    from core.models import AppliedControl
-
     return {
         f.name
         for f in AppliedControl._meta.get_fields()
@@ -100,14 +108,18 @@ def _expected_direct_m2m_fields() -> set[str]:
     }
 
 
-def _through_fk_attnames(through_model) -> tuple[str, str]:
-    from core.models import AppliedControl
+_TARGET_RELATED = (AppliedControl, Policy)
 
+
+def _through_fk_attnames(through_model) -> tuple[str, str]:
+    """Return (target_attname, other_attname). Policy is a proxy of
+    AppliedControl, so through-tables on Policy M2Ms carry a Policy FK that
+    points at the same underlying table."""
     fk_fields = [
         f for f in through_model._meta.get_fields() if isinstance(f, ForeignKey)
     ]
-    ac_field = next(f for f in fk_fields if f.related_model is AppliedControl)
-    other_field = next(f for f in fk_fields if f.related_model is not AppliedControl)
+    ac_field = next(f for f in fk_fields if f.related_model in _TARGET_RELATED)
+    other_field = next(f for f in fk_fields if f.related_model not in _TARGET_RELATED)
     return ac_field.attname, other_field.attname
 
 
@@ -150,9 +162,6 @@ def _rewire_fk(fk_model, fk_attname: str, source_ids: list, target_id) -> int:
 def _rewire_sync_mappings(source_ids: list, target_id) -> dict[str, int]:
     """Repoint SyncMapping GFKs, respecting the (configuration, content_type,
     local_object_id) uniqueness constraint."""
-    from core.models import AppliedControl
-    from integrations.models import SyncMapping
-
     ct = ContentType.objects.get_for_model(AppliedControl)
     target_configs = set(
         SyncMapping.objects.filter(
@@ -191,11 +200,6 @@ def _union_direct_m2ms(target, sources) -> dict[str, int]:
 
 
 def _candidate_managed_documents(source_ids: list, target_id) -> list[dict]:
-    try:
-        from doc_management.models import ManagedDocument
-    except ImportError:
-        return []
-
     policy_ids = list(source_ids)
     if target_id is not None:
         policy_ids.append(target_id)
@@ -229,11 +233,6 @@ def _apply_managed_document_resolution(
     keep_id: str | None,
 ) -> dict[str, int]:
     """Repoint the kept doc to target; unlink (policy=None) every other candidate."""
-    try:
-        from doc_management.models import ManagedDocument
-    except ImportError:
-        return {"kept": 0, "unlinked": 0, "repointed": 0}
-
     candidate_ids = {c["id"] for c in candidates}
     if keep_id is not None and keep_id not in candidate_ids:
         raise ValidationError(
@@ -256,10 +255,6 @@ def _apply_managed_document_resolution(
 
 
 def _repoint_all_managed_documents(source_ids: list, target_id) -> int:
-    try:
-        from doc_management.models import ManagedDocument
-    except ImportError:
-        return 0
     return _rewire_fk(ManagedDocument, "policy_id", source_ids, target_id)
 
 
@@ -269,9 +264,6 @@ def _check_permissions(
     target_folder,
     target_is_new: bool,
 ) -> None:
-    from core.models import AppliedControl
-    from iam.models import RoleAssignment
-
     # Scope Permission.objects.get by content_type to avoid MultipleObjectsReturned
     # on codename collisions across apps.
     ct = ContentType.objects.get_for_model(AppliedControl)
@@ -320,10 +312,6 @@ def merge_applied_controls(
     write serializer on target=new so its folder-access rules fire. Target
     creation happens inside the atomic block, after permissions and conflict
     checks, so failures never leak an orphan row."""
-    from core.models import AppliedControl, Comment
-    from iam.models import Folder
-    from webhooks.service import dispatch_webhook_event
-
     lookup_queryset = (
         lookup_queryset if lookup_queryset is not None else AppliedControl.objects.all()
     )
@@ -442,8 +430,6 @@ def merge_applied_controls(
         md_conflict = locked_conflict
 
         if target_is_new:
-            from core.serializers import AppliedControlWriteSerializer
-
             serializer_context = {"request": request} if request is not None else {}
             serializer = AppliedControlWriteSerializer(
                 data=target.get("fields") or {}, context=serializer_context
@@ -529,8 +515,6 @@ def merge_applied_controls(
 
 
 def _compute_rewire_preview(source_ids: list) -> dict[str, int]:
-    from core.models import Comment
-
     counts: dict[str, int] = {}
     for through, key in _reverse_m2m_through_tables():
         ac_attname, _ = _through_fk_attnames(through)

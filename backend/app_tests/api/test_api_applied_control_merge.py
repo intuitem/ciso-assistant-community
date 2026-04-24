@@ -1,10 +1,7 @@
-"""End-to-end tests for the AppliedControl /merge/ action.
-
-Exercises the rewire contract from core/applied_controls_helper.py: direct M2M
-union, reverse-M2M rewire, FK rewire (Comment + ManagedDocument), permission
-gating, builtin/urn rejection, dry-run preview, ManagedDocument conflict
-detection + resolution, and the cap on source count.
-"""
+"""End-to-end tests for the AppliedControl /merge/ action: direct M2M union,
+reverse-M2M rewire, FK rewire, permission gating, dry-run preview,
+ManagedDocument conflict detection + resolution, source-count cap, and
+registry-drift guards."""
 
 import pytest
 
