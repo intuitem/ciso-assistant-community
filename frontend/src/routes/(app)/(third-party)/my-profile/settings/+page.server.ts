@@ -11,7 +11,6 @@ import { z } from 'zod';
 import { AuthTokenCreateSchema } from '$lib/utils/schemas';
 
 export const load: PageServerLoad = async (event) => {
-	const PATAllowed = !event.locals.user.is_third_party;
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
 	const authenticatorsResponse = await event
 		.fetch(authenticatorsEndpoint)
@@ -62,6 +61,7 @@ export const load: PageServerLoad = async (event) => {
 	const registerWebAuthnForm = await superValidate(zod(registerWebAuthnSchema));
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
 	const personalAccessTokenDeleteForm = await superValidate(zod(z.object({ id: z.string() })));
+	const PATAllowed = !event.locals.user.is_third_party;
 	let personalAccessTokens = [];
 
 	if (PATAllowed) {
@@ -179,7 +179,8 @@ export const actions: Actions = {
 		return { recoveryCodes: response.data };
 	},
 	createPAT: async (event) => {
-		if (event.locals.user.is_third_party) {
+		const PATAllowed = !event.locals.user.is_third_party;
+		if (!PATAllowed) {
 			return fail(403, { error: 'Forbidden' });
 		}
 
@@ -288,7 +289,8 @@ export const actions: Actions = {
 		return { form };
 	},
 	deletePAT: async (event) => {
-		if (event.locals.user.is_third_party) {
+		const PATAllowed = !event.locals.user.is_third_party;
+		if (!PATAllowed) {
 			return fail(403, { error: 'Forbidden' });
 		}
 
