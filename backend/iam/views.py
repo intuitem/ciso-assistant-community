@@ -127,6 +127,12 @@ class PersonalAccessTokenViewSet(views.APIView):
         return Response(data)
 
     def post(self, request, format=None):
+        if request.user.is_third_party:
+            return Response(
+                {"error": "Forbidden"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         token_limit_per_user = self.get_token_limit_per_user()
         name = request.data.get("name")
         try:
