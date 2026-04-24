@@ -55,9 +55,13 @@ spec:
           - name: http
             containerPort: 3000
             protocol: TCP
-        {{- with and .Values.frontend.extraVolumes .Values.frontend.extraVolumeMounts }}
+        {{- if and .Values.frontend.extraVolumeMounts (not .Values.frontend.extraVolumes) }}
+          {{- fail "frontend.extraVolumeMounts can't be set without backend.extraVolumes" }}
+        {{- else }}
+        {{- with .Values.frontend.extraVolumeMounts }}
         volumeMounts:
           {{- toYaml . | nindent 10 }}
+        {{- end }}
         {{- end }}
         {{- if .Values.frontend.resources }}
         resources:
