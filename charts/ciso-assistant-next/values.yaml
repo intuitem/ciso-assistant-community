@@ -44,10 +44,10 @@ global:
   #  supplementalGroups: []
   #  fsGroup: 1001
 
-  # NOTE: per component affinity, nodeSelector and tolerations
+  # NOTE: per-component affinity, nodeSelector and tolerations
   # fall back to global.affinity, global.nodeSelector, and global.tolerations
-  # respectively when left empty ({}). To avoid inheriting global values,
-  # either leave the global keys unset or omit the backend keys.
+  # respectively when left empty ({} / []). To avoid inheriting global values,
+  # either leave the global keys unset or omit the per-component (backend/frontend) keys.
 
   # -- Default node selector for all components
   nodeSelector: {} # @schema additionalProperties: true
