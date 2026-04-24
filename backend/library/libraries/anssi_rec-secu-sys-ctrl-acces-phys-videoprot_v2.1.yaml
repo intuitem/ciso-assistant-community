@@ -1,22 +1,24 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:protocolpaladin:risk:library:anssi-rec-secu-sys-ctrl-acces-phys-videoprot
 locale: fr
-ref_id: ANSSI-REC-SECU-SYS-CTRL-PHYS-VDP
-name: "Recommandations sur la s\xE9curisation des syst\xE8mes de contr\xF4le d'acc\xE8\
-  s physique et de vid\xE9oprotection"
+ref_id: ANSSI_rec-secu-sys-ctrl-acces-phys-videoprot_v2.1
+name: "ANSSI - S\xE9curisation des syst\xE8mes de contr\xF4le d\u2019acc\xE8s physique\
+  \ et vid\xE9oprotection (v2.1) [Recommandations]"
 description: "Ce guide d\xE9veloppe les aspects d\u2019architecture et de s\xE9curit\xE9\
   \ logique propres aux syst\xE8mes de contr\xF4le d\u2019acc\xE8s utilisant des technologies\
   \ sans contact, et aux syst\xE8mes de vid\xE9oprotection.\n\nhttps://cyber.gouv.fr/sites/default/files/document/Recommandations%20sur%20la%20s%C3%A9curisation%20des%20syst%C3%A8mes%20de%20contr%C3%B4le%20d%27acc%C3%A8s%20physique%20et%20vid%C3%A9oprotection%20-%20v2.1.pdf"
 copyright: "Licence ouverte / Open Licence (\xC9talab - v2.0)"
-version: '1'
-publication_date: 2025-05-03
+version: 2
+publication_date: 2026-04-17
 provider: ANSSI
 packager: protocolpaladin
 objects:
   framework:
     urn: urn:protocolpaladin:risk:framework:anssi-rec-secu-sys-ctrl-acces-phys-videoprot
-    ref_id: ANSSI-REC-SECU-SYS-CTRL-PHYS-VDP
-    name: "Recommandations sur la s\xE9curisation des syst\xE8mes de contr\xF4le d'acc\xE8\
-      s physique et de vid\xE9oprotection"
+    ref_id: ANSSI_rec-secu-sys-ctrl-acces-phys-videoprot_v2.1
+    name: "ANSSI - S\xE9curisation des syst\xE8mes de contr\xF4le d\u2019acc\xE8s\
+      \ physique et vid\xE9oprotection (v2.1) [Recommandations]"
     description: "Ce guide d\xE9veloppe les aspects d\u2019architecture et de s\xE9\
       curit\xE9 logique propres aux syst\xE8mes de contr\xF4le d\u2019acc\xE8s utilisant\
       \ des technologies sans contact, et aux syst\xE8mes de vid\xE9oprotection.\n\
@@ -613,7 +615,7 @@ objects:
       depth: 5
       parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r24
       name: "- s\u2019assurer que les flux \xE9chang\xE9s n\u2019utilisent que les\
-        \ protocoles autoris\xE9s ;\n"
+        \ protocoles autoris\xE9s ;"
       implementation_groups:
       - R-
       - R
