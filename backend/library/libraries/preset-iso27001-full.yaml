@@ -397,7 +397,8 @@ objects:
           target_params:
             compliance_assessment: "{{ref:iso_audit}}"
             risk_assessments: "{{ref:main_ra}}"
-            implementation_groups: SoA
+            implementation_groups:
+              - SoA
           translations:
             fr:
               title: "Revue de la D\u00e9claration d\u2019Applicabilit\u00e9"
