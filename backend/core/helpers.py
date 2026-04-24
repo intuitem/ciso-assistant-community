@@ -771,9 +771,11 @@ def task_template_per_status(user: User):
     )
 
     # For non-recurrent templates, get the single node's status
-    single_node_subq = TaskNode.objects.filter(task_template=OuterRef("pk")).values(
-        "status"
-    )[:1]
+    single_node_subq = (
+        TaskNode.objects.filter(task_template=OuterRef("pk"))
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
 
     non_recurrent_with_status = (
         viewable_task_templates.filter(is_recurrent=False)

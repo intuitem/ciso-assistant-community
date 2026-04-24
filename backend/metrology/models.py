@@ -726,9 +726,11 @@ class BuiltinMetricSample(AbstractBaseModel):
             .order_by("-due_date")
             .values("status")[:1]
         )
-        single_node_subq = TaskNode.objects.filter(task_template=OuterRef("pk")).values(
-            "status"
-        )[:1]
+        single_node_subq = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"))
+            .order_by("-due_date")
+            .values("status")[:1]
+        )
 
         for status in (
             task_templates.filter(is_recurrent=True)

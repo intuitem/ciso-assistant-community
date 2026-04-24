@@ -1,4 +1,4 @@
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -221,10 +221,8 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             new_value = validate_default_dashboard_value(
                 request.data.get("dashboard_id")
             )
-        except Exception as exc:
-            # Surface DRF ValidationError-style payloads, but stay defensive
-            detail = getattr(exc, "detail", str(exc))
-            return Response({"error": detail}, status=400)
+        except serializers.ValidationError as exc:
+            return Response({"error": exc.detail}, status=400)
 
         settings_obj, _ = GlobalSettings.objects.get_or_create(name="general")
         if not isinstance(settings_obj.value, dict):
