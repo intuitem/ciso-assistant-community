@@ -461,3 +461,77 @@ def test_policy_merge_target_new_overrides_caller_category(
     target_id = resp.json()["target_id"]
     assert Policy.objects.filter(id=target_id).exists()
     assert AppliedControl.objects.get(id=target_id).category == "policy"
+
+
+# --- permission denial paths ------------------------------------------------
+
+
+def _patch_perm_denial(monkeypatch, denied_codename: str):
+    """Make RoleAssignment.is_access_allowed return False for the given
+    permission codename, True otherwise. Used to simulate a user who can see
+    the rows but lacks specific change/delete/add rights."""
+    from iam.models import RoleAssignment
+
+    def fake(user, perm, folder, **kwargs):
+        return perm.codename != denied_codename
+
+    monkeypatch.setattr(RoleAssignment, "is_access_allowed", staticmethod(fake))
+
+
+@pytest.mark.django_db
+def test_merge_denied_when_user_lacks_change_on_source_folder(
+    authenticated_client, folder, monkeypatch
+):
+    src = _make_control(folder, "src")
+    target = _make_control(folder, "tgt")
+    _patch_perm_denial(monkeypatch, "change_appliedcontrol")
+
+    payload = {
+        "source_ids": [str(src.id)],
+        "target": {"type": "existing", "id": str(target.id)},
+    }
+    resp = authenticated_client.post(MERGE_URL, payload, format="json")
+    assert resp.status_code == 403, resp.content
+    # No mutation — both controls still present
+    assert AppliedControl.objects.filter(id__in=[src.id, target.id]).count() == 2
+
+
+@pytest.mark.django_db
+def test_merge_denied_when_user_lacks_delete_on_source_folder(
+    authenticated_client, folder, monkeypatch
+):
+    src = _make_control(folder, "src")
+    target = _make_control(folder, "tgt")
+    _patch_perm_denial(monkeypatch, "delete_appliedcontrol")
+
+    payload = {
+        "source_ids": [str(src.id)],
+        "target": {"type": "existing", "id": str(target.id)},
+    }
+    resp = authenticated_client.post(MERGE_URL, payload, format="json")
+    assert resp.status_code == 403, resp.content
+    assert AppliedControl.objects.filter(id__in=[src.id, target.id]).count() == 2
+
+
+@pytest.mark.django_db
+def test_merge_new_target_denied_when_user_lacks_add_on_target_folder(
+    authenticated_client, folder, monkeypatch
+):
+    """target=new must refuse if the user can't create AppliedControls in the
+    target folder, and the new row must not be persisted."""
+    src = _make_control(folder, "src")
+    before_count = AppliedControl.objects.count()
+    _patch_perm_denial(monkeypatch, "add_appliedcontrol")
+
+    payload = {
+        "source_ids": [str(src.id)],
+        "target": {
+            "type": "new",
+            "fields": {"name": "would-be-target", "folder": str(folder.id)},
+        },
+    }
+    resp = authenticated_client.post(MERGE_URL, payload, format="json")
+    assert resp.status_code == 403, resp.content
+    # Source untouched, no orphan target created (the security-refactor guarantee).
+    assert AppliedControl.objects.filter(id=src.id).exists()
+    assert AppliedControl.objects.count() == before_count

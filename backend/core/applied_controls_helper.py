@@ -1,13 +1,6 @@
-"""Merge operations for AppliedControl.
-
-Implements the primitive: "rewire all references from N source controls to
-1 target control, union direct M2Ms onto the target, then hard-delete the
-sources." The same primitive powers the batch merge flow and the single-row
-"Replace with…" flow.
-
-Traceability comes from django-auditlog (already registered for AppliedControl)
-plus webhook "deleted"/"updated" dispatches. No dedicated merge-log model.
-"""
+"""Merge N source AppliedControls into 1 target: union direct M2Ms, rewire
+reverse relations + FKs + SyncMapping GFKs, hard-delete sources. Traceability
+via django-auditlog + webhook dispatches."""
 
 from __future__ import annotations
 
@@ -23,18 +16,9 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 logger = structlog.get_logger(__name__)
 
 
-# ---------------------------------------------------------------------------
-# Reverse-relation inventory
-# ---------------------------------------------------------------------------
-# The 13 reverse M2Ms plus 2 FKs that point at AppliedControl. This list is the
-# rewire contract — if a new relation is added on AppliedControl, it must be
-# added here as well. Keep aligned with AppliedControlViewSet.get_queryset()
-# in backend/core/views.py.
-
-
+# Rewire contract: every reverse M2M on AppliedControl must be listed here.
+# Keep aligned with AppliedControlViewSet.get_queryset() in views.py.
 def _reverse_m2m_through_tables() -> list[tuple[Any, str]]:
-    """Return [(through_model, response_key)] for every reverse M2M on AppliedControl."""
-    # Local imports to avoid load-time cycles.
     from core.models import (
         Finding,
         RequirementAssessment,
@@ -83,13 +67,7 @@ DIRECT_M2M_FIELDS: tuple[str, ...] = (
 )
 
 
-# ---------------------------------------------------------------------------
-# Rewire helpers
-# ---------------------------------------------------------------------------
-
-
 def _through_fk_attnames(through_model) -> tuple[str, str]:
-    """Return (appliedcontrol_attname, other_attname) for the through table."""
     from core.models import AppliedControl
 
     fk_fields = [
@@ -101,10 +79,7 @@ def _through_fk_attnames(through_model) -> tuple[str, str]:
 
 
 def _rewire_through(through_model, source_ids: list, target_id) -> int:
-    """Move through-rows from sources to target, dedupe against existing target pairs.
-
-    Returns the number of source-side rows that were resolved (either collapsed
-    into an existing target pair or newly repointed)."""
+    """Move through-rows to target, dedupe against existing target pairs."""
     ac_attname, other_attname = _through_fk_attnames(through_model)
 
     existing_target_others = set(
@@ -133,7 +108,6 @@ def _rewire_through(through_model, source_ids: list, target_id) -> int:
 
 
 def _rewire_fk(fk_model, fk_attname: str, source_ids: list, target_id) -> int:
-    """Bulk update an FK from source ids to target id. Returns rows updated."""
     qs = fk_model.objects.filter(**{f"{fk_attname}__in": source_ids})
     count = qs.count()
     qs.update(**{fk_attname: target_id})
@@ -141,7 +115,8 @@ def _rewire_fk(fk_model, fk_attname: str, source_ids: list, target_id) -> int:
 
 
 def _rewire_sync_mappings(source_ids: list, target_id) -> dict[str, int]:
-    """Repoint SyncMapping GFKs while respecting (configuration, content_type, local_object_id)."""
+    """Repoint SyncMapping GFKs, respecting the (configuration, content_type,
+    local_object_id) uniqueness constraint."""
     from core.models import AppliedControl
     from integrations.models import SyncMapping
 
@@ -168,7 +143,6 @@ def _rewire_sync_mappings(source_ids: list, target_id) -> dict[str, int]:
 
 
 def _union_direct_m2ms(target, sources) -> dict[str, int]:
-    """Union direct M2M fields from every source onto the target."""
     counts = {}
     for field_name in DIRECT_M2M_FIELDS:
         related = getattr(target, field_name, None)
@@ -183,13 +157,7 @@ def _union_direct_m2ms(target, sources) -> dict[str, int]:
     return counts
 
 
-# ---------------------------------------------------------------------------
-# Managed documents
-# ---------------------------------------------------------------------------
-
-
 def _candidate_managed_documents(source_ids: list, target_id) -> list[dict]:
-    """Return every ManagedDocument currently attached to any source or the target."""
     try:
         from doc_management.models import ManagedDocument
     except ImportError:
@@ -210,11 +178,8 @@ def _candidate_managed_documents(source_ids: list, target_id) -> list[dict]:
 def _detect_managed_document_conflict(
     source_ids: list, target_id, candidates: list[dict]
 ) -> dict | None:
-    """A conflict exists when 2+ distinct 'parties' (sources or target) have docs.
-
-    A single source with multiple docs is NOT a conflict — siblings from the same
-    control stay as siblings on the merged target.
-    """
+    """Conflict when 2+ distinct parties (sources or target) have docs.
+    A single source with multiple docs is not a conflict — siblings stay."""
     parties_with_docs = {d["policy_id"] for d in candidates}
     if len(parties_with_docs) < 2:
         return None
@@ -230,7 +195,7 @@ def _apply_managed_document_resolution(
     candidates: list[dict],
     keep_id: str | None,
 ) -> dict[str, int]:
-    """For the kept doc: repoint to target. For every other candidate: unlink (policy=None)."""
+    """Repoint the kept doc to target; unlink (policy=None) every other candidate."""
     try:
         from doc_management.models import ManagedDocument
     except ImportError:
@@ -244,12 +209,10 @@ def _apply_managed_document_resolution(
 
     result = {"kept": 0, "unlinked": 0, "repointed": 0}
 
-    # 1. Kept doc -> target (may already be on target; update is idempotent)
     if keep_id is not None:
         ManagedDocument.objects.filter(id=keep_id).update(policy_id=target_id)
         result["kept"] = 1
 
-    # 2. Every other candidate currently on a source or the target gets unlinked.
     unlink_qs = ManagedDocument.objects.filter(id__in=candidate_ids)
     if keep_id is not None:
         unlink_qs = unlink_qs.exclude(id=keep_id)
@@ -260,17 +223,11 @@ def _apply_managed_document_resolution(
 
 
 def _repoint_all_managed_documents(source_ids: list, target_id) -> int:
-    """No-conflict path: every source doc gets repointed to the target."""
     try:
         from doc_management.models import ManagedDocument
     except ImportError:
         return 0
     return _rewire_fk(ManagedDocument, "policy_id", source_ids, target_id)
-
-
-# ---------------------------------------------------------------------------
-# Permissions
-# ---------------------------------------------------------------------------
 
 
 def _check_permissions(
@@ -279,12 +236,11 @@ def _check_permissions(
     target_folder,
     target_is_new: bool,
 ) -> None:
-    """Raise PermissionDenied if user lacks the required perm on any relevant folder."""
     from core.models import AppliedControl
     from iam.models import RoleAssignment
 
-    # Scope by content_type so a codename collision from another app can't
-    # trigger MultipleObjectsReturned.
+    # Scope Permission.objects.get by content_type to avoid MultipleObjectsReturned
+    # on codename collisions across apps.
     ct = ContentType.objects.get_for_model(AppliedControl)
     change = Permission.objects.get(codename="change_appliedcontrol", content_type=ct)
     delete = Permission.objects.get(codename="delete_appliedcontrol", content_type=ct)
@@ -314,63 +270,37 @@ def _check_permissions(
             )
 
 
-# ---------------------------------------------------------------------------
-# Public entry point
-# ---------------------------------------------------------------------------
-
-
 def merge_applied_controls(
     *,
     source_ids: list,
     target: dict,
     user,
     request=None,
+    lookup_queryset=None,
     dry_run: bool = False,
     managed_document_resolution: dict | None = None,
 ) -> dict:
-    """Merge primitive.
+    """Merge N sources into 1 target. See module docstring for semantics.
 
-    Args:
-        source_ids: list of AppliedControl UUIDs to absorb (1..20, already deduped
-            by the serializer and with any target id already stripped).
-        target: {"type": "new", "fields": {...}} or {"type": "existing", "id": "..."}.
-        user: authenticated user performing the merge.
-        request: DRF request object (optional). When provided, it is passed as
-            serializer context on target=new creation so folder-access rules that
-            depend on ``context['request']`` are enforced.
-        dry_run: if True, returns the would-be response (including managed_document
-            conflict info) without touching state.
-        managed_document_resolution: {"keep": "<doc_id>"} — required on real merge
-            when a managed-document conflict exists.
-
-    Returns a dict with `target_id`, `target_is_new`, `folder_mismatch`, `rewired`,
-    `unioned_m2m`, `managed_documents`, `managed_document_conflict`, `sync_mappings`,
-    `deleted_sources`.
-
-    Security notes:
-    - Target creation (target=new) happens inside the atomic block, **after**
-      permission checks and managed-document conflict validation, so a failure
-      never leaves an orphan AppliedControl behind.
-    - Source/target folder permissions are checked against the raw folder IDs
-      *before* any mutation; the write serializer for target=new is given request
-      context so its own folder-access rules apply.
-    """
+    `lookup_queryset` should be the view's IAM-scoped queryset so UUIDs the
+    caller can't see are treated as "not found". `request` is passed to the
+    write serializer on target=new so its folder-access rules fire. Target
+    creation happens inside the atomic block, after permissions and conflict
+    checks, so failures never leak an orphan row."""
     from core.models import AppliedControl, Comment
     from iam.models import Folder
     from webhooks.service import dispatch_webhook_event
 
-    # -- 1. Fetch and validate sources ---------------------------------------
-    sources = list(AppliedControl.objects.filter(id__in=source_ids))
+    lookup_queryset = (
+        lookup_queryset if lookup_queryset is not None else AppliedControl.objects.all()
+    )
+
+    sources = list(lookup_queryset.filter(id__in=source_ids))
     found_ids = {str(s.id) for s in sources}
     missing = [str(sid) for sid in source_ids if str(sid) not in found_ids]
     if missing:
         raise ValidationError({"source_ids": f"Not found: {missing}"})
 
-    # AppliedControl does not inherit from LibraryMixin, so it has no `urn` or
-    # `builtin` fields. Nothing to guard against here — kept as a comment in case
-    # those fields are ever added later.
-
-    # -- 2. Pre-validate target (no creation or mutation yet) -----------------
     target_is_new = target["type"] == "new"
     target_existing_obj: AppliedControl | None = None
 
@@ -387,12 +317,11 @@ def merge_applied_controls(
             raise ValidationError({"target.fields.folder": "Folder does not exist."})
     else:
         try:
-            existing = AppliedControl.objects.get(id=target["id"])
+            existing = lookup_queryset.get(id=target["id"])
         except AppliedControl.DoesNotExist:
             raise ValidationError(
                 f"Target applied control {target['id']} does not exist."
             )
-        # Defense in depth — serializer already stripped target from source_ids.
         if str(existing.id) in found_ids:
             raise ValidationError(
                 "The target applied control must not appear in source_ids."
@@ -400,11 +329,9 @@ def merge_applied_controls(
         target_existing_obj = existing
         target_folder = existing.folder
 
-    # -- 3. Permission checks BEFORE any mutation ---------------------------
     source_folders = [s.folder for s in sources if s.folder is not None]
     _check_permissions(user, source_folders, target_folder, target_is_new)
 
-    # -- 4. Managed-document conflict ---------------------------------------
     source_id_list = [s.id for s in sources]
     md_target_id = target_existing_obj.id if target_existing_obj is not None else None
     md_candidates = _candidate_managed_documents(source_id_list, md_target_id)
@@ -418,7 +345,6 @@ def merge_applied_controls(
         for s in sources
     )
 
-    # -- 5. Dry-run short-circuit -------------------------------------------
     if dry_run:
         return {
             "target_id": str(target_existing_obj.id) if target_existing_obj else None,
@@ -434,7 +360,6 @@ def merge_applied_controls(
             "deleted_sources_preview": [str(s.id) for s in sources],
         }
 
-    # -- 6. Real merge: conflict must be resolved ---------------------------
     if md_conflict is not None:
         keep_id = (managed_document_resolution or {}).get("keep")
         if not keep_id:
@@ -448,9 +373,41 @@ def merge_applied_controls(
                 }
             )
 
-    # -- 7. Atomic create-target (if new) + rewire + delete -----------------
     with transaction.atomic():
-        # 7.0. Persist target now that permissions + conflict checks have passed.
+        # Lock sources + target and re-detect conflicts so concurrent writers
+        # can't smuggle changes in between the dry-run preview and the rewire.
+        locked_sources = list(
+            AppliedControl.objects.select_for_update().filter(id__in=source_id_list)
+        )
+        if len(locked_sources) != len(source_id_list):
+            raise ValidationError(
+                "One or more source applied controls are no longer available."
+            )
+        if target_existing_obj is not None:
+            AppliedControl.objects.select_for_update().filter(
+                id=target_existing_obj.id
+            ).first()
+
+        locked_candidates = _candidate_managed_documents(source_id_list, md_target_id)
+        locked_conflict = _detect_managed_document_conflict(
+            source_id_list, md_target_id, locked_candidates
+        )
+        if locked_conflict is not None:
+            keep_id = (managed_document_resolution or {}).get("keep")
+            if not keep_id or keep_id not in {c["id"] for c in locked_candidates}:
+                raise ValidationError(
+                    {
+                        "managed_document_resolution": (
+                            "A managed-document conflict appeared during the merge; "
+                            "please retry to pick which document to keep."
+                        ),
+                        "managed_document_conflict": locked_conflict,
+                    }
+                )
+        sources = locked_sources
+        md_candidates = locked_candidates
+        md_conflict = locked_conflict
+
         if target_is_new:
             from core.serializers import AppliedControlWriteSerializer
 
@@ -464,20 +421,15 @@ def merge_applied_controls(
             assert target_existing_obj is not None  # pyright hint
             target_obj = target_existing_obj
 
-        # 7a. Direct M2M union onto target
         unioned = _union_direct_m2ms(target_obj, sources)
 
-        # 7b. Reverse M2M rewire
         rewired: dict[str, int] = {}
         for through, key in _reverse_m2m_through_tables():
             rewired[key] = _rewire_through(through, source_id_list, target_obj.id)
-
-        # 7c. Comment FK
         rewired["Comment"] = _rewire_fk(
             Comment, "applied_control_id", source_id_list, target_obj.id
         )
 
-        # 7d. Managed documents
         if md_conflict is not None:
             md_result = _apply_managed_document_resolution(
                 source_id_list,
@@ -489,10 +441,8 @@ def merge_applied_controls(
             repointed = _repoint_all_managed_documents(source_id_list, target_obj.id)
             md_result = {"kept": 0, "unlinked": 0, "repointed": repointed}
 
-        # 7e. SyncMapping GFK
         sync_result = _rewire_sync_mappings(source_id_list, target_obj.id)
 
-        # 7f. Dispatch deletion webhooks before actually deleting
         source_snapshots = [
             {"id": str(s.id), "name": s.name, "urn": getattr(s, "urn", None)}
             for s in sources
@@ -505,16 +455,14 @@ def merge_applied_controls(
                     "Webhook dispatch failed during merge (deleted)", exc_info=True
                 )
 
-        # 7g. Hard-delete sources (auditlog LogEntry rows are preserved)
         AppliedControl.objects.filter(id__in=source_id_list).delete()
 
-        # 7h. Touch target so updated_at refreshes and integration sync fires.
-        # Skip for a freshly-created target — its initial save already did that
-        # and M2M additions don't trigger a second sync on syncable fields.
+        # Refresh updated_at + re-trigger integration sync. Skip for a new
+        # target: its initial save already did both, and M2M additions don't
+        # affect any syncable field.
         if not target_is_new:
             target_obj.save()
 
-        # 7i. Update webhook on target
         try:
             dispatch_webhook_event(target_obj, "updated")
         except Exception:
@@ -545,13 +493,7 @@ def merge_applied_controls(
     }
 
 
-# ---------------------------------------------------------------------------
-# Dry-run previews
-# ---------------------------------------------------------------------------
-
-
 def _compute_rewire_preview(source_ids: list) -> dict[str, int]:
-    """Count rows currently attached to sources, per through-table / FK."""
     from core.models import Comment
 
     counts: dict[str, int] = {}

@@ -5102,23 +5102,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="merge")
     def merge(self, request):
-        """Merge N source applied controls into 1 target.
-
-        Payload:
-            {
-              "source_ids": ["uuid", ...],   # 1..20, deduped server-side
-              "target": {"type": "new",      "fields": {...}}
-                       | {"type": "existing", "id": "uuid"},
-              "dry_run": false,              # optional; if true, no state change
-              "managed_document_resolution": {"keep": "<doc_id>"}  # required
-                                             # on real merge if a managed-document
-                                             # conflict exists
-            }
-
-        Permission/state checks (builtin/urn rejection, RBAC on every involved
-        folder) live in the helper. ValidationError → HTTP 400, PermissionDenied
-        → HTTP 403, both handled by DRF.
-        """
+        """Merge N source applied controls into 1 target. See
+        applied_controls_helper.merge_applied_controls for payload + semantics."""
         from core.applied_controls_helper import merge_applied_controls
         from core.serializers import AppliedControlMergeRequestSerializer
 
@@ -5126,12 +5111,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         serializer.is_valid(raise_exception=True)
         target = serializer.validated_data["target"]
 
-        # Policy is a proxy of AppliedControl that filters on category="policy".
-        # When the action fires via /policies/merge/ with target.type="new",
-        # force category="policy" so the created row stays classified as a
-        # policy — overriding any value the caller may have supplied (a plain
-        # AppliedControl category would hide the merge result from the Policies
-        # list view).
+        # Force category='policy' on /policies/merge/ so the created row stays
+        # classified as a policy even if the caller supplied a different value.
         if self.model is Policy and target["type"] == "new":
             fields = dict(target.get("fields") or {})
             fields["category"] = "policy"
@@ -5142,6 +5123,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             target=target,
             user=request.user,
             request=request,
+            lookup_queryset=self.get_queryset(),
             dry_run=serializer.validated_data.get("dry_run", False),
             managed_document_resolution=serializer.validated_data.get(
                 "managed_document_resolution"

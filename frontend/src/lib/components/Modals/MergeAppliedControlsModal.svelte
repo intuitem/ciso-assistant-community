@@ -18,9 +18,7 @@
 		URLModel: urlModel;
 		handler: DataHandler;
 		onClearSelection: () => void;
-		// 'merge' (default): full flow with all three target modes.
-		// 'replace': single-source "Replace A with B" flow — only the
-		//   "pick an existing control" path is exposed.
+		// 'replace' restricts the flow to "pick an existing control".
 		entryMode?: 'merge' | 'replace';
 	}
 
@@ -42,8 +40,6 @@
 
 	let sources: SourceSummary[] = $state([]);
 	let loadingSources = $state(true);
-	// Replace-with flow forces 'another' (pick an existing control).
-	// Otherwise: 'selected' when multiple sources are picked; 'another' when a single one is.
 	let targetMode: TargetMode = $state(
 		entryMode === 'replace' ? 'another' : sourceIds.length > 1 ? 'selected' : 'another'
 	);
@@ -64,7 +60,6 @@
 		SPA: true
 	});
 	const formStore = _form.form;
-	// Mirror form store into local state so the preview $effect triggers on changes.
 	const unsubscribeFormStore = formStore.subscribe((v) => {
 		newTargetName = v.name ?? '';
 		newTargetFolderId = v.folder ?? '';
@@ -133,8 +128,6 @@
 	}
 
 	function extractErrorMessage(body: any, fallback: string): string {
-		// DRF error shapes we might see: {detail: "..."}, {field: ["msg", ...]},
-		// {detail: {...}}, or SvelteKit's wrapped {body: {...}}.
 		if (!body) return fallback;
 		const inner = body?.body ?? body;
 		if (typeof inner === 'string') return inner;
@@ -154,8 +147,7 @@
 
 	async function doRefreshPreview(signal: AbortSignal) {
 		const target = buildTargetPayload();
-		// For target=new, the backend needs at least a folder (permission check).
-		// The name is cosmetic at dry-run time, so we send a placeholder if empty.
+		// Folder is required for the permission check; name is cosmetic at dry-run.
 		if (
 			(target.type === 'existing' && !target.id) ||
 			(target.type === 'new' && !newTargetFolderId)
@@ -199,8 +191,7 @@
 		}
 	}
 
-	/** Debounced + abort-aware preview refresh. Rapid target changes coalesce
-	 *  into a single request and stale in-flight calls are cancelled. */
+	/** Debounced, abort-aware preview refresh. */
 	function refreshPreview() {
 		previewLoading = true;
 		if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
@@ -212,10 +203,7 @@
 		}, 200);
 	}
 
-	// Only refetch the preview when the target *identity* changes — the name is
-	// cosmetic and doesn't affect any backend count. Keyed on targetMode +
-	// whichever id that mode uses, plus the folder id for target=new (folder is
-	// needed to satisfy permission checks server-side).
+	// Only refetch on target identity/folder changes — name is cosmetic.
 	$effect(() => {
 		void targetMode;
 		void selectedSourceId;
@@ -225,7 +213,6 @@
 	});
 
 	const mdConflict = $derived(preview?.managed_document_conflict ?? null);
-	// Locale-aware confirm phrase — matches the batch-delete modal pattern.
 	const requiredConfirmPhrase = m.yes().toLowerCase();
 	const canConfirm = $derived(
 		!submitting &&
@@ -292,7 +279,6 @@
 			{/if}
 		{/if}
 
-		<!-- Destructive-action warning: sources are hard-deleted. -->
 		<div
 			class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900 flex items-start gap-2"
 		>
@@ -303,7 +289,6 @@
 		{#if loadingSources}
 			<div class="text-sm text-gray-500">Loading…</div>
 		{:else}
-			<!-- TARGET PICKER -->
 			<section class="space-y-2">
 				<h3 class="text-sm font-semibold text-gray-700">{m.selectTargetControl()}</h3>
 				<div class="space-y-2">
@@ -353,7 +338,6 @@
 					{/if}
 
 					{#if entryMode === 'replace'}
-						<!-- Only one option in replace mode — no radio noise. -->
 						<div class="flex-1">
 							<AutocompleteSelect
 								form={_form}
@@ -386,7 +370,6 @@
 				</div>
 			</section>
 
-			<!-- PREVIEW -->
 			<section class="space-y-2 border-t border-gray-200 pt-4">
 				<div class="flex items-center gap-2">
 					<h3 class="text-sm font-semibold text-gray-700">{m.previewRewireCounts()}</h3>
@@ -439,7 +422,6 @@
 				{/if}
 			</section>
 
-			<!-- MANAGED DOCUMENT CONFLICT -->
 			{#if mdConflict}
 				<section class="space-y-2 border-t border-gray-200 pt-4">
 					<h3 class="text-sm font-semibold text-gray-700">
@@ -459,7 +441,6 @@
 			{/if}
 		{/if}
 
-		<!-- Typed confirmation — matches the batch-delete safety pattern. -->
 		<div class="space-y-1 border-t border-gray-200 pt-4">
 			<label for="merge-confirm-input" class="text-sm font-medium text-red-600">
 				{m.confirmYes()}

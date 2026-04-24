@@ -1639,18 +1639,8 @@ class AppliedControlMergeTargetSerializer(serializers.Serializer):
 
 
 class AppliedControlMergeRequestSerializer(serializers.Serializer):
-    """
-    Validates input for POST /applied-controls/merge/.
-
-    Rules enforced here (shape-only, DB-independent):
-    - 1..20 source_ids, deduplicated while preserving order
-    - target.type is 'new' (requires fields) or 'existing' (requires id)
-    - When target.type == 'existing' and target.id is among source_ids, the
-      target id is removed from source_ids (survivor-merge collapse)
-
-    Runtime checks (builtin/urn, folder permissions, existence) stay in the view
-    so they can use request.user and the IAM-filtered queryset.
-    """
+    """Shape-only validation for POST /applied-controls/merge/. Dedupes
+    source_ids, collapses target-in-sources to a survivor merge."""
 
     MAX_SOURCES = 20
 
