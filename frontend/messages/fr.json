@@ -647,6 +647,7 @@
 	"effortHelpText": "L'effort requis pour mettre en œuvre la mesure appliquée",
 	"costHelpText": "Le coût requis pour mettre en œuvre la mesure appliquée",
 	"riskAcceptanceJustificationHelpText": "Justification de l'acceptation du risque. Seul l'approbateur peut modifier ce champ.",
+	"riskAcceptanceJustificationLabel": "Justification de l'acceptation du risque",
 	"approverHelpText": "Identité du propriétaire du risque et de l’approbateur",
 	"riskAcceptanceRiskScenariosHelpText": "Les scénarios de risques acceptés",
 	"attachmentHelpText": "Fichier de preuve (ex. capture d'écran, fichier journal, etc.). Quand le champ est sélectionné, vous pouvez y coller une copie d'écran de votre presse-papiers.",

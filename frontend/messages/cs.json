@@ -491,6 +491,7 @@
 	"effortHelpText": "Úsilí potřebné k implementaci aplikované kontroly",
 	"costHelpText": "Cena potřebná k implementaci aplikované kontroly",
 	"riskAcceptanceJustificationHelpText": "Odůvodnění pro přijetí rizika. Toto pole může upravit pouze schvalovatel.",
+	"riskAcceptanceJustificationLabel": "Odůvodnění přijetí rizika",
 	"approverHelpText": "Identita vlastníka rizika a schvalovatele",
 	"riskAcceptanceRiskScenariosHelpText": "Rizikové scénáře, které jsou přijaty",
 	"attachmentHelpText": "Soubor pro důkaz (např. snímek obrazovky, protokolovací soubor atd.). Po vybrání můžete snímky obrazovky vložit přímo ze schránky.",

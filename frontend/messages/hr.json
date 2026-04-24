@@ -538,6 +538,7 @@
 	"effortHelpText": "Trud potreban za implementaciju primijenjene kontrole",
 	"costHelpText": "Trošak implementacije primijenjene kontrole",
 	"riskAcceptanceJustificationHelpText": "Opravdanje za prihvaćanje rizika. Samo odobravatelj može uređivati ovo polje.",
+	"riskAcceptanceJustificationLabel": "Obrazloženje prihvaćanja rizika",
 	"approverHelpText": "Vlasnik i odobravatelj rizika",
 	"riskAcceptanceRiskScenariosHelpText": "Scenariji rizika koji su prihvaćeni",
 	"attachmentHelpText": "Datoteka za dokaz (npr. screenshot, dnevnički zapis, itd.). Kad je odabrano, možete zalijepiti screenshot iz međuspremnika.",

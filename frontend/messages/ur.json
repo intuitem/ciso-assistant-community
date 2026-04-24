@@ -489,6 +489,7 @@
 	"effortHelpText": "لاگو کنٹرول کو لاگو کرنے کی کوشش کی ضرورت ہے",
 	"costHelpText": "لاگو کنٹرول کو لاگو کرنے کے لیے درکار لاگت",
 	"riskAcceptanceJustificationHelpText": "خطرے کی منظوری کا جواز۔ صرف منظوری دینے والا اس فیلڈ میں ترمیم کر سکتا ہے۔",
+	"riskAcceptanceJustificationLabel": "خطرے کی منظوری کا جواز",
 	"approverHelpText": "خطرے کا مالک اور منظور کنندہ کی شناخت",
 	"riskAcceptanceRiskScenariosHelpText": "وہ خطرے کے منظرنامے جو قبول کیے گئے ہیں",
 	"attachmentHelpText": "ثبوت کے لیے فائل (جیسے اسکرین شاٹ، لاگ فائل، وغیرہ)۔ منتخب ہونے پر، آپ اپنے کلپ بورڈ سے اسکرین شاٹس کو براہ راست چسپاں کر سکتے ہیں۔",

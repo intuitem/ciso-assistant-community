@@ -490,6 +490,7 @@
 	"effortHelpText": "Ansträngningen som krävs för att implementera den tillämpade kontrollen",
 	"costHelpText": "Kostnaden för att implementera den tillämpade kontrollen",
 	"riskAcceptanceJustificationHelpText": "Motivering för riskacceptans. Endast godkännaren kan redigera detta fält.",
+	"riskAcceptanceJustificationLabel": "Motivering för riskacceptans",
 	"approverHelpText": "Riskägare och godkännarens identitet",
 	"riskAcceptanceRiskScenariosHelpText": "Riskscenarier som accepteras",
 	"attachmentHelpText": "Fil för bevis (t.ex. skärmdump, loggfil, etc.). När vald kan du klistra in skärmdumpar direkt från urklippet.",

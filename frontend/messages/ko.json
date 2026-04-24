@@ -684,6 +684,7 @@
 	"effortHelpText": "적용 통제를 구현하는 데 필요한 노력",
 	"costHelpText": "적용 통제를 구현하는 데 필요한 비용",
 	"riskAcceptanceJustificationHelpText": "위험 수용에 대한 정당성입니다. 승인자만 이 필드를 편집할 수 있습니다.",
+	"riskAcceptanceJustificationLabel": "위험 수용 사유",
 	"approverHelpText": "위험 소유자 및 승인자 정보",
 	"riskAcceptanceRiskScenariosHelpText": "수용된 위험 시나리오",
 	"attachmentHelpText": "증거용 파일(예: 스크린샷, 로그 파일 등)입니다. 선택하면 클립보드에서 스크린샷을 직접 붙여넣을 수 있습니다.",

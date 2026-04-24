@@ -491,6 +491,7 @@
 	"effortHelpText": "Az alkalmazott kontroll bevezetéséhez szükséges ráfordítás",
 	"costHelpText": "Az alkalmazott kontroll bevezetéséhez szükséges költség",
 	"riskAcceptanceJustificationHelpText": "A kockázatelfogadás indoklása. Csak a jóváhagyó szerkesztheti ezt a mezőt.",
+	"riskAcceptanceJustificationLabel": "A kockázatelfogadás indoklása",
 	"approverHelpText": "A kockázat tulajdonosának és jóváhagyójának azonosítója",
 	"riskAcceptanceRiskScenariosHelpText": "Az elfogadott kockázati forgatókönyvek",
 	"attachmentHelpText": "Fájl bizonyítékként (pl. képernyőkép, naplófájl stb.)",

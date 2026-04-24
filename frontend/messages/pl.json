@@ -528,6 +528,7 @@
 	"effortHelpText": "Wysiłek wymagany do wdrożenia zastosowanej kontroli",
 	"costHelpText": "Koszt wymagany do wdrożenia zastosowanej kontroli",
 	"riskAcceptanceJustificationHelpText": "Uzasadnienie akceptacji ryzyka. Tylko akceptujący może edytować to pole.",
+	"riskAcceptanceJustificationLabel": "Uzasadnienie akceptacji ryzyka",
 	"approverHelpText": "Tożsamość właściciela ryzyka i akceptującego",
 	"riskAcceptanceRiskScenariosHelpText": "Scenariusze ryzyka, które są zaakceptowane",
 	"attachmentHelpText": "Plik dowodowy (np. zrzut ekranu, plik dziennika itp.)",

@@ -461,6 +461,7 @@
 	"effortHelpText": "El esfuerzo necesario para implementar el control aplicado",
 	"costHelpText": "El costo requerido para implementar el control aplicado.",
 	"riskAcceptanceJustificationHelpText": "Justificación para la aceptación de riesgos. Solo el aprobador puede editar este campo.",
+	"riskAcceptanceJustificationLabel": "Justificación de aceptación de riesgos",
 	"approverHelpText": "Identidad del propietario del riesgo y aprobador",
 	"riskAcceptanceRiskScenariosHelpText": "Los escenarios de riesgo que se aceptan",
 	"attachmentHelpText": "Archivo de evidencia (por ejemplo, captura de pantalla, archivo de registro, etc.)",

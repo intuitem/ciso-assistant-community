@@ -461,6 +461,7 @@
 	"effortHelpText": "Erforderlicher Aufwand zur Umsetzung der angewendeten Maßnahme",
 	"costHelpText": "Erforderliche Kosten zur Umsetzung der angewendeten Maßnahme",
 	"riskAcceptanceJustificationHelpText": "Begründung der Risikoakzeptanz. Nur der Genehmiger kann dieses Feld bearbeiten.",
+	"riskAcceptanceJustificationLabel": "Begründung der Risikoakzeptanz",
 	"approverHelpText": "Identität des Risikoeigners bzw. Genehmigers",
 	"riskAcceptanceRiskScenariosHelpText": "Akzeptierte Risikoszenarien",
 	"attachmentHelpText": "Datei als Nachweis (z. B. Screenshot, Protokolldatei usw.)",
