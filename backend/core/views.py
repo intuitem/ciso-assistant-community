@@ -6663,11 +6663,11 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 {"error": "Only the approver can accept the risk acceptance"}
             )
 
-        risk_acceptance = self.get_object()
-        risk_acceptance.set_state("accepted")
         justification, res = self._get_justification(request)
         if justification is None:
             return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.set_state("accepted")
         risk_acceptance.justification = justification
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to accepted"})
@@ -6684,11 +6684,11 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 {"error": "Only the approver can reject the risk acceptance"}
             )
 
-        risk_acceptance = self.get_object()
-        risk_acceptance.set_state("rejected")
         justification, res = self._get_justification(request)
         if justification is None:
             return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.set_state("rejected")
         risk_acceptance.justification = justification
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to rejected"})
@@ -6704,11 +6704,11 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can revoke the risk acceptance"}
             )
-        risk_acceptance = self.get_object()
-        risk_acceptance.set_state("revoked")
         justification, res = self._get_justification(request)
         if justification is None:
             return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.set_state("revoked")
         risk_acceptance.justification = justification
         risk_acceptance.save(update_fields=["justification"])
         return Response({"results": "state updated to revoked"})
