@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.9.2](https://img.shields.io/badge/Version-0.9.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.15.9](https://img.shields.io/badge/AppVersion-v3.15.9-informational?style=flat-square)
+![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.15.9](https://img.shields.io/badge/AppVersion-v3.15.9-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -9,6 +9,18 @@ A Helm chart for CISO Assistant k8s's deployment
 ## Source Code
 
 * <https://github.com/intuitem/ciso-assistant-community>
+
+## Development
+
+Update schema command after new updates on `values.yaml` (using https://github.com/losisin/helm-values-schema-json) :
+```bash
+helm schema --values values.yaml
+```
+
+Update `README.md` with helm-docs (using https://github.com/norwoodj/helm-docs) :
+```bash
+helm-docs
+```
 
 ## Requirements
 
@@ -35,8 +47,9 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| backend.affinity | object | `{}` | Affinity rules for backend |
 | backend.annotations | object | `{}` | Backend deployment annotations |
-| backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
+| backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note: PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
 | backend.config.djangoDebug | bool | `false` | Enable Django debug mode |
 | backend.config.djangoExistingSecretKey | string | `""` | Name of an existing secret resource containing the django secret in a 'django-secret-key' key |
 | backend.config.djangoSecretKey | string | `"changeme"` | Set Django secret key |
@@ -46,11 +59,15 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.config.smtp.host | string | `"smtp.server.local"` | SMTP hostname |
 | backend.config.smtp.password | string | `""` | SMTP password |
 | backend.config.smtp.port | int | `25` | SMTP post |
-| backend.config.smtp.useTls | bool | `false` | Enable TLS for SMTP |
+| backend.config.smtp.useSsl | bool | `false` | Enable SSL for SMTP (implicit TLS) # Note: useSsl takes precedence over useTls when both are enabled |
+| backend.config.smtp.useTls | bool | `false` | Enable TLS for SMTP (explicit TLS) |
 | backend.config.smtp.username | string | `""` | SMTP username |
 | backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | backend.env | list | `[]` | Environment variables to pass to backend |
+| backend.extraVolumeMounts | list | `[]` | Set extra volume mounts for backend container |
+| backend.extraVolumes | list | `[]` | Set extra volumes for backend |
 | backend.huey.env | list | `[]` | Environment variables to pass to Huey |
+| backend.huey.extraVolumeMounts | list | `[]` | Set extra volume mounts for Huey container |
 | backend.huey.name | string | `"huey"` | Huey container name |
 | backend.huey.resources | object | `{}` | Resources for Huey |
 | backend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the backend |
@@ -59,6 +76,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the backend |
 | backend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
 | backend.name | string | `"backend"` | Backend container name |
+| backend.nodeSelector | object | `{}` | Default node selector for backend |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
 | backend.persistence.localStorage.enabled | bool | `false` | Enable Local Storage persistence |
 | backend.persistence.localStorage.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC |
@@ -76,22 +94,27 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.service.labels | object | `{}` | Backend service labels |
 | backend.service.port | int | `80` | Backend service http port |
 | backend.service.portName | string | `"http"` | Backend service port name |
+| backend.tolerations | list | `[]` | Default tolerations for backend |
 | externalPgsql.database | string | `"ciso-assistant"` | Database inside an external PostgreSQL to connect |
 | externalPgsql.existingSecret | string | `""` | Secret containing the password of an external PostgreSQL instance to connect # Name of an existing secret resource containing the DB password in a 'password' key |
 | externalPgsql.host | string | `""` | Host of an external PostgreSQL instance to connect |
 | externalPgsql.password | string | `""` | Password of an external PostgreSQL instance to connect |
 | externalPgsql.port | int | `5432` | Port of an external PostgreSQL to connect |
 | externalPgsql.user | string | `"ciso-assistant"` | User of an external PostgreSQL instance to connect |
+| frontend.affinity | object | `{}` | Affinity rules for frontend |
 | frontend.annotations | object | `{}` | Frontend deployment annotations |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
 | frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
+| frontend.extraVolumeMounts | list | `[]` | Set extra volume mounts for frontend container |
+| frontend.extraVolumes | list | `[]` | Set extra volumes for frontend |
 | frontend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the frontend |
 | frontend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the frontend |
 | frontend.image.repository | string | `"intuitem/ciso-assistant-community/frontend"` | Repository to use for the frontend |
 | frontend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the frontend |
 | frontend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
 | frontend.name | string | `"frontend"` | Frontend container name |
+| frontend.nodeSelector | object | `{}` | Default node selector for frontend |
 | frontend.podAnnotations | object | `{}` | Frontend pod annotations |
 | frontend.replicas | int | `1` | The number of frontend pods to run |
 | frontend.resources | object | `{}` | Resources for the frontend |
@@ -99,7 +122,9 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | frontend.service.labels | object | `{}` | Frontend service labels |
 | frontend.service.port | int | `80` | Frontend service http port |
 | frontend.service.portName | string | `"http"` | Frontend service port name |
+| frontend.tolerations | list | `[]` | Default tolerations for frontend |
 | fullnameOverride | string | `""` | String to fully override `"ciso-assistant.fullname"` |
+| global.affinity | object | `{}` | Affinity rules for all components |
 | global.clusterDomain | string | `"cluster.local"` | Kubernetes cluster domain name |
 | global.commonLabels | object | `{}` | Labels to add to all deployed objects |
 | global.domain | string | `"octopus.foo.bar"` | Default domain used by all components # Used for ingresses, certificates, environnement vars, etc. |
