@@ -7194,7 +7194,7 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
-        Returns the tree of domains and perimeters.
+        Return the tree of domains and perimeters.
 
         Optional query param `write_perm` (e.g. write_perm=add_asset).When provided, each node in the response carries a ``writable`` boolean
         that is ``true`` only for folders where the requesting user holds that permission.
@@ -7226,7 +7226,7 @@ class FolderViewSet(BaseModelViewSet):
         writable_ids = None
         if write_perm_codename:
             perm = Permission.objects.filter(codename=write_perm_codename).first()
-            if perm:
+            if perm is not None:
                 writable_ids = {
                     f.id
                     for f in Folder.objects.filter(id__in=needed_folders)

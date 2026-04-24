@@ -4,11 +4,11 @@
 
 	export interface TreeNode {
 		name: string;
-		uuid: string | null;
-		content_type?: string;
+		uuid: string;
+		content_type: string;
 		/** When false, the node exists in the tree for navigation only and cannot be selected. */
-		writable?: boolean;
-		children?: TreeNode[];
+		writable: boolean;
+		children: TreeNode[];
 	}
 
 	interface Props {
@@ -40,9 +40,9 @@
 
 	const hasChildren = $derived((node.children ?? []).length > 0);
 
-	// Returns true if `n` or any of its descendants is writable.
+	/** Returns true if `n` or any of its descendants is writable. */
 	function subtreeHasWritable(n: TreeNode): boolean {
-		if (n.writable !== false) return true;
+		if (n.writable) return true;
 		return (n.children ?? []).some(subtreeHasWritable);
 	}
 
@@ -58,13 +58,9 @@
 	const isSelected = $derived(node.uuid !== null && focusId === String(node.uuid));
 	// Node is selectable if it has a uuid, matches the allowed content types,
 	// and — when a write_perm filter is active.
-	const isSelectable = $derived(
-		!!node.uuid &&
-			(!node.content_type || contentTypes.includes(node.content_type)) &&
-			node.writable !== false
-	);
+	const isSelectable = $derived(contentTypes.includes(node.content_type) && node.writable);
 	// Whether this node should be shown at all
-	const isVisible = $derived(!node.content_type || contentTypes.includes(node.content_type));
+	const isVisible = $derived(contentTypes.includes(node.content_type));
 
 	// Auto-expand if the selected node is somewhere in this subtree
 	const subtreeHasFocus = $derived.by(() => {

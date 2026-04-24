@@ -3,6 +3,7 @@ from collections.abc import MutableMapping
 from datetime import date, timedelta
 from typing import Optional
 from typing import Dict, List
+from uuid import UUID
 
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
@@ -1938,7 +1939,7 @@ def get_folder_content(
     include_enclaves,
     viewable_objects,
     needed_folders,
-    writable_ids=None,
+    writable_ids: Optional[set[UUID]] = None,
 ):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
@@ -1950,7 +1951,7 @@ def get_folder_content(
                 "name": f.name,
                 "uuid": f.id,
                 "viewable": viewable_objects and f.id in viewable_objects,
-                "writable": writable_ids is None or f.id in writable_ids,
+                "writable": f.id in writable_ids if writable_ids is not None else True,
                 "content_type": f.content_type,
             }
             # Add enclave-specific styling
