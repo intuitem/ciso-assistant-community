@@ -104,7 +104,7 @@ backend:
       # -- Enable TLS for SMTP (explicit TLS)
       useTls: false
       # -- Enable SSL for SMTP (implicit TLS)
-      ## Note : useSsl option will prevail useTls if both are enabled
+      ## Note: useSsl takes precedence over useTls when both are enabled
       useSsl: false
       # -- SMTP username
       username: ""
@@ -112,7 +112,7 @@ backend:
       password: ""
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
-    ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
+    ## Note: PostgreSQL database configuration at `postgresql` or `externalPgsql` section
     databaseType: sqlite
 
     # -- Set Django secret key

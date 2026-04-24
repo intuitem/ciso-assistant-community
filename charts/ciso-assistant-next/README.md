@@ -49,7 +49,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 |-----|------|---------|-------------|
 | backend.affinity | object | `{}` | Affinity rules for backend |
 | backend.annotations | object | `{}` | Backend deployment annotations |
-| backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
+| backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note: PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
 | backend.config.djangoDebug | bool | `false` | Enable Django debug mode |
 | backend.config.djangoExistingSecretKey | string | `""` | Name of an existing secret resource containing the django secret in a 'django-secret-key' key |
 | backend.config.djangoSecretKey | string | `"changeme"` | Set Django secret key |
@@ -59,7 +59,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.config.smtp.host | string | `"smtp.server.local"` | SMTP hostname |
 | backend.config.smtp.password | string | `""` | SMTP password |
 | backend.config.smtp.port | int | `25` | SMTP post |
-| backend.config.smtp.useSsl | bool | `false` | Enable SSL for SMTP (implicit TLS) # Note : useSsl option will prevail useTls if both are enabled |
+| backend.config.smtp.useSsl | bool | `false` | Enable SSL for SMTP (implicit TLS) # Note: useSsl takes precedence over useTls when both are enabled |
 | backend.config.smtp.useTls | bool | `false` | Enable TLS for SMTP (explicit TLS) |
 | backend.config.smtp.username | string | `""` | SMTP username |
 | backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
