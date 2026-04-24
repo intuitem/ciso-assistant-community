@@ -4,6 +4,20 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def backfill_stakeholder_entity_name(apps, schema_editor):
+    Stakeholder = apps.get_model("ebios_rm", "Stakeholder")
+
+    for stakeholder in Stakeholder.objects.select_related(
+        "third_party_entity"
+    ).iterator():
+        stakeholder.entity_name = (
+            stakeholder.third_party_entity.name
+            if stakeholder.third_party_entity
+            else ""
+        )
+        stakeholder.save(update_fields=["entity_name"])
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("ebios_rm", "0024_remove_operatingmode_elementary_actions_and_more"),
@@ -11,16 +25,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.RenameField(
             model_name="stakeholder",
-            name="entity",
+            old_name="entity",
+            new_name="third_party_entity",
         ),
         migrations.AddField(
             model_name="stakeholder",
             name="entity_name",
             field=models.TextField(default="", verbose_name="Entity name"),
         ),
-        migrations.AddField(
+        migrations.RunPython(
+            backfill_stakeholder_entity_name, migrations.RunPython.noop
+        ),
+        migrations.AlterField(
             model_name="stakeholder",
             name="third_party_entity",
             field=models.ForeignKey(
