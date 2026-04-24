@@ -160,7 +160,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
         stakeholders = Stakeholder.objects.filter(
             ebios_rm_study=study, is_selected=True
-        ).order_by("entity_name")
+        ).order_by("entity_name", "third_party_entity__name")
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
@@ -500,7 +500,10 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             for sh in stakeholders:
                 sh_data.append(
                     {
-                        "entity_name": sh.entity_name if sh.entity_name else "",
+                        "entity_name": sh.entity_name
+                        or (
+                            sh.third_party_entity.name if sh.third_party_entity else ""
+                        ),
                         "category": sh.category.get_name_translated
                         if sh.category
                         else "",

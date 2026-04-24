@@ -647,7 +647,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
-    fields_to_check = ["ebios_rm_study", "entity", "category"]
+    fields_to_check = ["ebios_rm_study", "third_party_entity", "category"]
 
     class Meta:
         verbose_name = _("Stakeholder")
