@@ -7843,18 +7843,14 @@ class ComplianceAssessment(Assessment):
 
     def _get_progress_counts(self) -> tuple[int, int]:
         """
-        Return (total, assessed) counts for assessable requirements.
-
-        This keeps the progress calculation lightweight by avoiding the
-        heavy prefetch graph used to render a full assessment tree.
+        Return (total, assessed) counts for assessable requirements
         """
+        
         requirements = RequirementAssessment.objects.filter(
             compliance_assessment=self, requirement__assessable=True
         )
 
         if not self.selected_implementation_groups:
-            # Fast path: when no IG filter is active, the DB can compute both
-            # counters directly without hydrating the requirement tree.
             counts = requirements.aggregate(
                 total=Count("id"),
                 assessed=Count(
@@ -7869,9 +7865,6 @@ class ComplianceAssessment(Assessment):
         total = 0
         assessed = 0
         lightweight_requirements = (
-            # IG membership lives in a JSONField. To stay DB-portable, stream only
-            # the small set of fields needed for the progress calculation and
-            # apply the set-intersection in Python.
             requirements.select_related("requirement")
             .only(
                 "result",
@@ -7890,8 +7883,6 @@ class ComplianceAssessment(Assessment):
                 continue
 
             total += 1
-            # Keep the existing semantics: a requirement counts as "assessed"
-            # as soon as it has either a non-default result or an explicit score.
             if (
                 requirement_assessment.result
                 != RequirementAssessment.Result.NOT_ASSESSED
