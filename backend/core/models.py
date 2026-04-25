@@ -979,10 +979,7 @@ class LibraryUpdater:
                     affected_cas = [
                         ca
                         for ca in compliance_assessments
-                        if (
-                            ca.min_score == prev_min
-                            and ca.max_score == prev_max
-                        )
+                        if (ca.min_score == prev_min and ca.max_score == prev_max)
                     ]
 
                     if affected_cas:
@@ -1007,8 +1004,7 @@ class LibraryUpdater:
                 for ca in compliance_assessments:
                     # preserve user overrides: update only if CA still equals previous framework defaults
                     scale_on_prev_defaults = (
-                        ca.min_score == prev_min
-                        and ca.max_score == prev_max
+                        ca.min_score == prev_min and ca.max_score == prev_max
                     )
                     definition_on_prev_defaults = ca.scores_definition == prev_def
 
