@@ -714,6 +714,7 @@ class StoredLibrary(LibraryMixin):
             library_label.garbage_collect()
 
 
+
 class LibraryUpdater:
     class ScoreChangeDetected(Exception):
         """Exception raised when score boundaries change, requiring user decision"""
@@ -966,7 +967,6 @@ class LibraryUpdater:
                 score_boundaries_changed = (
                     prev_min != new_framework.min_score
                     or prev_max != new_framework.max_score
-                    or prev_def != new_framework.scores_definition
                 )
 
                 # If scores changed and no strategy provided, raise exception for frontend to handle
