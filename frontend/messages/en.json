@@ -4264,5 +4264,16 @@
 	"objectsWithNoDateNotShown": "{count} object(s) with no date information not shown.",
 	"noItemsToDisplayAdjustFilters": "No items to display. Adjust your filters or add dates to your objects.",
 	"failedToLoadTimelineData": "Failed to load timeline data. Please try again.",
-	"useCreationDateAsStart": "Use creation date as start"
+	"useCreationDateAsStart": "Use creation date as start",
+	"custom": "Custom",
+	"selectADashboard": "Select a dashboard",
+	"noDashboardsAvailable": "No dashboards available",
+	"buildYourFirstDashboard": "Build your first dashboard to use it as a custom analytics tab.",
+	"createDashboard": "Create a dashboard",
+	"defaultCustomAnalyticsDashboardHelpText": "Pick which dashboard appears on the Custom tab of the Analytics page. Users without access to the chosen dashboard will see the empty state.",
+	"customAnalyticsDashboard": "Custom analytics dashboard",
+	"editDashboard": "Edit dashboard",
+	"requiresChangeGlobalSettings": "Requires permission to change global settings.",
+	"clearDefault": "Clear default",
+	"noDashboardSelected": "No dashboard selected"
 }

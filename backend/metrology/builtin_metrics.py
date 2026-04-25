@@ -74,6 +74,11 @@ BUILTIN_METRICS = {
             "type": METRIC_TYPE_BREAKDOWN,
             "description": _("Scenarios count per residual risk level"),
         },
+        "qualifications_breakdown": {
+            "label": _("Qualifications Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Scenarios count per qualification"),
+        },
     },
     "FindingsAssessment": {
         "total_findings": {
@@ -97,33 +102,100 @@ BUILTIN_METRICS = {
         "controls_status_breakdown": {
             "label": _("Controls Status Breakdown"),
             "type": METRIC_TYPE_BREAKDOWN,
-            "description": _("Applied controls count per status in this domain"),
+            "description": _(
+                "Applied controls count per status (root folder = whole organization)"
+            ),
         },
         "controls_category_breakdown": {
             "label": _("Controls Category Breakdown"),
             "type": METRIC_TYPE_BREAKDOWN,
-            "description": _("Applied controls count per category in this domain"),
+            "description": _(
+                "Applied controls count per category (root folder = whole organization)"
+            ),
         },
         # Incidents metrics
         "incidents_severity_breakdown": {
             "label": _("Incidents Severity Breakdown"),
             "type": METRIC_TYPE_BREAKDOWN,
-            "description": _("Incidents count per severity in this domain"),
+            "description": _(
+                "Incidents count per severity (root folder = whole organization)"
+            ),
         },
         "incidents_status_breakdown": {
             "label": _("Incidents Status Breakdown"),
             "type": METRIC_TYPE_BREAKDOWN,
-            "description": _("Incidents count per status in this domain"),
+            "description": _(
+                "Incidents count per status (root folder = whole organization)"
+            ),
+        },
+        "incidents_detection_breakdown": {
+            "label": _("Incidents Detection Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Incidents count per detection method"),
+        },
+        "incidents_qualifications_breakdown": {
+            "label": _("Incidents Qualifications Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Incidents count per qualification tag"),
         },
         "total_controls": {
             "label": _("Total Controls"),
             "type": METRIC_TYPE_NUMBER,
-            "description": _("Total applied controls in this domain"),
+            "description": _(
+                "Total applied controls (root folder = whole organization)"
+            ),
         },
         "total_incidents": {
             "label": _("Total Incidents"),
             "type": METRIC_TYPE_NUMBER,
-            "description": _("Total incidents in this domain"),
+            "description": _("Total incidents (root folder = whole organization)"),
+        },
+        # Task templates
+        "task_templates_status_breakdown": {
+            "label": _("Task Templates Status Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Task templates count per status"),
+        },
+        # Security exceptions
+        "security_exceptions_status_breakdown": {
+            "label": _("Security Exceptions Status Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Security exceptions count per status"),
+        },
+        "security_exceptions_severity_breakdown": {
+            "label": _("Security Exceptions Severity Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Security exceptions count per severity"),
+        },
+        "total_security_exceptions": {
+            "label": _("Total Security Exceptions"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Total security exceptions (root folder = whole organization)"
+            ),
+        },
+        # Risk acceptances
+        "total_risk_acceptances": {
+            "label": _("Total Risk Acceptances"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Total risk acceptances (root folder = whole organization)"
+            ),
+        },
+        # Frameworks
+        "total_frameworks_in_use": {
+            "label": _("Total Frameworks In Use"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Distinct frameworks referenced by accessible audits "
+                "(root folder = whole organization)"
+            ),
+        },
+        # Risk scenarios
+        "risk_scenarios_qualifications_breakdown": {
+            "label": _("Risk Scenarios Qualifications Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Risk scenarios count per qualification tag"),
         },
     },
 }

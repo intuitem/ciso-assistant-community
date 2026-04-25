@@ -526,6 +526,14 @@ class BuiltinMetricSample(AbstractBaseModel):
         scenarios = RiskScenario.objects.filter(risk_assessment=assessment)
         total = scenarios.count()
 
+        # Qualifications breakdown (M2M -> Terminology.name)
+        qualifications_breakdown = dict(
+            scenarios.values("qualifications__name")
+            .annotate(count=Count("id", distinct=True))
+            .filter(qualifications__name__isnull=False)
+            .values_list("qualifications__name", "count")
+        )
+
         # Treatment breakdown
         treatment_breakdown = {}
         for treatment in RiskScenario.TREATMENT_OPTIONS:
@@ -575,6 +583,7 @@ class BuiltinMetricSample(AbstractBaseModel):
             "treatment_breakdown": treatment_breakdown,
             "current_level_breakdown": current_level_breakdown,
             "residual_level_breakdown": residual_level_breakdown,
+            "qualifications_breakdown": qualifications_breakdown,
         }
 
     @classmethod
@@ -613,12 +622,34 @@ class BuiltinMetricSample(AbstractBaseModel):
 
     @classmethod
     def _compute_folder_metrics(cls, folder):
-        """Compute metrics for a Folder (domain-level aggregations)."""
-        from core.models import AppliedControl, Incident
+        """Compute metrics for a Folder.
+
+        Root folder is treated as the whole-organization scope: queries
+        are unfiltered. Other folders use direct membership only (no
+        descendant traversal), matching the existing behavior of the
+        breakdown metrics.
+        """
+        from core.models import (
+            AppliedControl,
+            ComplianceAssessment,
+            Framework,
+            Incident,
+            RiskAcceptance,
+            RiskScenario,
+            SecurityException,
+            TaskTemplate,
+            Severity,
+        )
+        from iam.models import Folder
         from django.db.models import Count
 
-        # Applied controls in this folder
-        controls = AppliedControl.objects.filter(folder=folder)
+        is_global = folder.content_type == Folder.ContentType.ROOT
+
+        def scope(qs):
+            return qs if is_global else qs.filter(folder=folder)
+
+        # Applied controls
+        controls = scope(AppliedControl.objects.all())
         total_controls = controls.count()
 
         controls_status_breakdown = dict(
@@ -633,20 +664,21 @@ class BuiltinMetricSample(AbstractBaseModel):
             .values_list("category", "count")
         )
 
-        # Incidents in this folder
-        incidents = Incident.objects.filter(folder=folder)
+        # Incidents
+        incidents = scope(Incident.objects.all())
         total_incidents = incidents.count()
 
-        incidents_severity_breakdown = dict(
+        incidents_severity_raw = dict(
             incidents.values("severity")
             .annotate(count=Count("id"))
             .values_list("severity", "count")
         )
-        # Convert severity integers to labels using Incident.Severity
-        severity_labels = {choice[0]: choice[1] for choice in Incident.Severity.choices}
+        incident_severity_labels = {
+            choice[0]: choice[1] for choice in Incident.Severity.choices
+        }
         incidents_severity_breakdown = {
-            severity_labels.get(k, str(k)): v
-            for k, v in incidents_severity_breakdown.items()
+            incident_severity_labels.get(k, str(k)): v
+            for k, v in incidents_severity_raw.items()
         }
 
         incidents_status_breakdown = dict(
@@ -655,6 +687,116 @@ class BuiltinMetricSample(AbstractBaseModel):
             .values_list("status", "count")
         )
 
+        incidents_detection_raw = dict(
+            incidents.exclude(detection__in=[None, ""])
+            .values("detection")
+            .annotate(count=Count("id"))
+            .values_list("detection", "count")
+        )
+        detection_labels = {
+            choice[0]: choice[1] for choice in Incident.Detection.choices
+        }
+        incidents_detection_breakdown = {
+            detection_labels.get(k, str(k)): v
+            for k, v in incidents_detection_raw.items()
+        }
+
+        incidents_qualifications_breakdown = dict(
+            incidents.values("qualifications__name")
+            .annotate(count=Count("id", distinct=True))
+            .filter(qualifications__name__isnull=False)
+            .values_list("qualifications__name", "count")
+        )
+
+        # Task templates: status comes from TaskNode (current node for non-recurrent,
+        # latest past occurrence for recurrent). Mirrors helpers.task_template_per_status.
+        from core.models import TaskNode
+        from django.db.models import Subquery, OuterRef
+        from django.utils import timezone as _tz
+
+        task_templates = scope(TaskTemplate.objects.all())
+        task_templates_status_breakdown = {
+            label: 0 for _key, label in TaskNode.TASK_STATUS_CHOICES
+        }
+        status_label_by_key = dict(TaskNode.TASK_STATUS_CHOICES)
+        today = _tz.localdate()
+
+        last_occurrence_subq = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=today)
+            .order_by("-due_date")
+            .values("status")[:1]
+        )
+        single_node_subq = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"))
+            .order_by("-due_date")
+            .values("status")[:1]
+        )
+
+        for status in (
+            task_templates.filter(is_recurrent=True)
+            .annotate(node_status=Subquery(last_occurrence_subq))
+            .values_list("node_status", flat=True)
+        ):
+            label = status_label_by_key.get(status or "pending", "pending")
+            task_templates_status_breakdown[label] = (
+                task_templates_status_breakdown.get(label, 0) + 1
+            )
+        for status in (
+            task_templates.filter(is_recurrent=False)
+            .annotate(node_status=Subquery(single_node_subq))
+            .values_list("node_status", flat=True)
+        ):
+            label = status_label_by_key.get(status or "pending", "pending")
+            task_templates_status_breakdown[label] = (
+                task_templates_status_breakdown.get(label, 0) + 1
+            )
+
+        # Security exceptions
+        security_exceptions = scope(SecurityException.objects.all())
+        total_security_exceptions = security_exceptions.count()
+
+        security_exceptions_status_breakdown = dict(
+            security_exceptions.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        )
+
+        sec_exc_severity_raw = dict(
+            security_exceptions.values("severity")
+            .annotate(count=Count("id"))
+            .values_list("severity", "count")
+        )
+        severity_labels = {choice[0]: choice[1] for choice in Severity.choices}
+        security_exceptions_severity_breakdown = {
+            severity_labels.get(k, str(k)): v for k, v in sec_exc_severity_raw.items()
+        }
+
+        # Risk acceptances
+        total_risk_acceptances = scope(RiskAcceptance.objects.all()).count()
+
+        # Risk scenarios qualifications (scoped via the parent risk assessment's folder)
+        risk_scenarios_qs = (
+            RiskScenario.objects.all()
+            if is_global
+            else RiskScenario.objects.filter(risk_assessment__folder=folder)
+        )
+        risk_scenarios_qualifications_breakdown = dict(
+            risk_scenarios_qs.values("qualifications__name")
+            .annotate(count=Count("id", distinct=True))
+            .filter(qualifications__name__isnull=False)
+            .values_list("qualifications__name", "count")
+        )
+
+        # Frameworks "in use" = distinct frameworks referenced by accessible audits
+        audits_qs = (
+            ComplianceAssessment.objects.all()
+            if is_global
+            else ComplianceAssessment.objects.filter(folder=folder)
+        )
+        total_frameworks_in_use = Framework.objects.filter(
+            id__in=audits_qs.values_list("framework_id", flat=True).distinct()
+        ).count()
+
         return {
             "total_controls": total_controls,
             "controls_status_breakdown": controls_status_breakdown,
@@ -662,6 +804,15 @@ class BuiltinMetricSample(AbstractBaseModel):
             "total_incidents": total_incidents,
             "incidents_severity_breakdown": incidents_severity_breakdown,
             "incidents_status_breakdown": incidents_status_breakdown,
+            "incidents_detection_breakdown": incidents_detection_breakdown,
+            "incidents_qualifications_breakdown": incidents_qualifications_breakdown,
+            "task_templates_status_breakdown": task_templates_status_breakdown,
+            "security_exceptions_status_breakdown": security_exceptions_status_breakdown,
+            "security_exceptions_severity_breakdown": security_exceptions_severity_breakdown,
+            "total_security_exceptions": total_security_exceptions,
+            "total_risk_acceptances": total_risk_acceptances,
+            "total_frameworks_in_use": total_frameworks_in_use,
+            "risk_scenarios_qualifications_breakdown": risk_scenarios_qualifications_breakdown,
         }
 
 
