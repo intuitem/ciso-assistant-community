@@ -37,4 +37,10 @@
 		link="/experimental/framework-builder"
 		tags={['frameworks', 'builder', 'editor']}
 	/>
+	<Article
+		title="Preset Editor"
+		desc="Author presets — scaffolds and steps. Create from scratch or fork a library preset."
+		link="/experimental/preset-editor"
+		tags={['presets', 'journey', 'editor']}
+	/>
 </div>

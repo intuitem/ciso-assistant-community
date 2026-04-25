@@ -130,12 +130,9 @@ router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
 router.register(r"questions", QuestionViewSet, basename="questions")
 router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
 router.register(r"answers", AnswerViewSet, basename="answers")
-router.register(r"preset-journeys", PresetJourneyViewSet, basename="preset-journeys")
-router.register(
-    r"preset-journey-steps",
-    PresetJourneyStepViewSet,
-    basename="preset-journey-steps",
-)
+router.register(r"presets", PresetViewSet, basename="presets")
+router.register(r"journeys", JourneyViewSet, basename="journeys")
+router.register(r"journey-steps", JourneyStepViewSet, basename="journey-steps")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()

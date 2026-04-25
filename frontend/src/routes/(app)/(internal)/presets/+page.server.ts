@@ -2,12 +2,12 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const presetsPromise = fetch(`${BASE_API_URL}/stored-libraries/?is_preset=true`)
+	const presetsPromise = fetch(`${BASE_API_URL}/presets/`)
 		.then((res) => res.json())
 		.then((data) => data.results ?? data)
 		.catch(() => []);
 
-	const journeysPromise = fetch(`${BASE_API_URL}/preset-journeys/`)
+	const journeysPromise = fetch(`${BASE_API_URL}/journeys/`)
 		.then((res) => res.json())
 		.then((data) => data.results ?? data)
 		.catch(() => []);
