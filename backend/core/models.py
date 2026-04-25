@@ -714,7 +714,6 @@ class StoredLibrary(LibraryMixin):
             library_label.garbage_collect()
 
 
-
 class LibraryUpdater:
     class ScoreChangeDetected(Exception):
         """Exception raised when score boundaries change, requiring user decision"""
