@@ -5470,7 +5470,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9
       ref_id: '9.1'
-      name: Monitoring, measurement, analysis, evaluation
+      name: Monitoring, measurement, analysis and evaluation
       description: "Monitor, measure, analyze, and evaluate the ISMS\u2019s performance\
         \ and effectiveness using appropriate methods aligned with the organization\u2019\
         s objectives."
@@ -7038,7 +7038,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.22
-      name: Monitor, review and change management of supplier services
+      name: Monitoring, review and change management of supplier services
       description: This control ensures supplier services are monitored, reviewed,
         and adjusted to maintain information security. Measures include service level
         agreements, periodic reviews, and contract updates.
