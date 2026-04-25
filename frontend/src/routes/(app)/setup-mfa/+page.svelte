@@ -4,7 +4,7 @@
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { activateTOTPSchema } from '../(internal)/my-profile/settings/mfa/utils/schemas';
+	import { activateTOTPSchema } from '../(third-party)/my-profile/settings/mfa/utils/schemas';
 	import { startRegistration } from '@simplewebauthn/browser';
 	import { invalidateAll } from '$app/navigation';
 
