@@ -102,6 +102,7 @@ from rest_framework.decorators import (
 from rest_framework.parsers import (
     FileUploadParser,
     FormParser,
+    JSONParser,
     MultiPartParser,
 )
 from rest_framework.renderers import JSONRenderer
@@ -109,7 +110,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import (
+    NotFound,
+    PermissionDenied,
+    ValidationError as DRFValidationError,
+)
 
 
 from weasyprint import HTML
@@ -10114,9 +10119,280 @@ class QuickStartView(APIView):
             return Response(objects, status=status.HTTP_201_CREATED)
 
 
-class PresetJourneyViewSet(BaseModelViewSet):
+class PresetViewSet(BaseModelViewSet):
+    model = Preset
+    filterset_fields = ["folder", "provider"]
+    search_fields = ["name", "description", "ref_id", "urn"]
+
+    def _editable_or_403(self, request):
+        preset = self.get_object()
+        if preset.urn is not None:
+            return preset, Response(
+                {"detail": "Library-backed presets are read-only. Duplicate first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_preset"),
+            folder=preset.folder,
+        ):
+            return preset, Response(status=status.HTTP_403_FORBIDDEN)
+        return preset, None
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        from core.preset_editor import serialize_preset_to_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            preset.editing_draft = serialize_preset_to_draft(preset)
+            preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": preset.editing_draft})
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path="save-draft",
+        parser_classes=[JSONParser],
+    )
+    def save_draft(self, request, pk=None):
+        from core.preset_editor import validate_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        normalized = validate_draft(request.data, strict=False)
+        preset.editing_draft = normalized
+        preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": preset.editing_draft})
+
+    @action(detail=True, methods=["post"], url_path="discard-draft")
+    def discard_draft(self, request, pk=None):
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        preset.editing_draft = None
+        preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": None})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft-preview")
+    def publish_draft_preview(self, request, pk=None):
+        from core.preset_editor import validate_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            return Response(
+                {"detail": "No active draft."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        normalized = validate_draft(preset.editing_draft)
+
+        live_keys = {s.get("key") for s in (preset.steps or []) if s.get("key")}
+        draft_keys = {s["key"] for s in normalized["steps"]}
+        deleted_keys = live_keys - draft_keys
+
+        warnings = []
+        for key in sorted(deleted_keys):
+            journey_steps = PresetJourneyStep.objects.filter(
+                journey__preset=preset, key=key
+            )
+            with_user_state = journey_steps.exclude(
+                status=PresetJourneyStep.Status.NOT_STARTED, notes=""
+            ).count()
+            warnings.append(
+                {
+                    "key": key,
+                    "journey_step_count": journey_steps.count(),
+                    "with_user_state": with_user_state,
+                }
+            )
+        return Response({"deleted_steps": warnings})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft")
+    def publish_draft(self, request, pk=None):
+        from core.preset_editor import validate_draft
+        from django.utils import timezone
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            return Response(
+                {"detail": "No active draft."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        normalized = validate_draft(preset.editing_draft)
+
+        snapshot = {
+            "version": preset.editing_version,
+            "name": preset.name,
+            "description": preset.description or "",
+            "scaffolded_objects": list(preset.scaffolded_objects or []),
+            "steps": list(preset.steps or []),
+            "published_at": timezone.now().isoformat(),
+        }
+        history = list(preset.editing_history or [])
+        history.append(snapshot)
+
+        preset.name = normalized["journey_meta"]["name"]
+        preset.description = normalized["journey_meta"]["description"]
+        preset.scaffolded_objects = normalized["scaffolded_objects"]
+        preset.steps = normalized["steps"]
+        preset.editing_version = preset.editing_version + 1
+        preset.version = preset.editing_version
+        preset.editing_history = history
+        preset.editing_draft = None
+        preset.save()
+
+        from core.serializers import PresetReadSerializer
+
+        return Response(PresetReadSerializer(preset).data)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="create-blank",
+        parser_classes=[JSONParser],
+    )
+    def create_blank(self, request):
+        root = Folder.get_root_folder()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_preset"),
+            folder=root,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        name = (request.data.get("name") or "").strip() or "Untitled preset"
+        description = request.data.get("description") or ""
+        preset = Preset.objects.create(
+            name=name,
+            description=description,
+            folder=root,
+            urn=None,
+            ref_id=None,
+            version=1,
+            provider=None,
+            translations={},
+            profile={},
+            feature_flags={},
+            dependencies=[],
+            scaffolded_objects=[],
+            steps=[],
+            editing_version=1,
+            editing_history=[],
+            editing_draft=None,
+        )
+        from core.serializers import PresetReadSerializer
+
+        return Response(
+            PresetReadSerializer(preset).data, status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=True, methods=["post"])
+    def duplicate(self, request, pk=None):
+        source = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_preset"),
+            folder=source.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        new_preset = Preset.objects.create(
+            name=f"{source.name} (copy)",
+            description=source.description,
+            folder=source.folder,
+            translations=dict(source.translations or {}),
+            profile=dict(source.profile or {}),
+            feature_flags=dict(source.feature_flags or {}),
+            dependencies=list(source.dependencies or []),
+            scaffolded_objects=list(source.scaffolded_objects or []),
+            steps=list(source.steps or []),
+            urn=None,
+            ref_id=None,
+            version=1,
+            provider=None,
+            editing_version=1,
+            editing_history=[],
+            editing_draft=None,
+        )
+        from core.serializers import PresetReadSerializer
+
+        return Response(
+            PresetReadSerializer(new_preset).data, status=status.HTTP_201_CREATED
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="apply",
+        parser_classes=[JSONParser],
+    )
+    def apply(self, request, pk=None):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            preset = Preset.objects.get(pk=pk)
+        except Preset.DoesNotExist:
+            return Response(data="Preset not found.", status=status.HTTP_404_NOT_FOUND)
+
+        from library.preset_executor import PresetExecutor
+
+        folder_name = request.data.get("folder_name")
+        folder_id = request.data.get("folder_id")
+        create_objects = request.data.get("create_objects", True)
+        apply_feature_flags = request.data.get("apply_feature_flags", True)
+
+        if apply_feature_flags:
+            can_change_settings = RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_globalsettings"),
+                folder=Folder.get_root_folder(),
+            )
+            if not can_change_settings:
+                apply_feature_flags = False
+
+        try:
+            executor = PresetExecutor(preset, request.user, request)
+            journey = executor.apply(
+                folder_name=folder_name,
+                folder_id=folder_id,
+                create_objects=create_objects,
+                apply_feature_flags=apply_feature_flags,
+            )
+            return Response(
+                {"journey_id": str(journey.id)},
+                status=status.HTTP_201_CREATED,
+            )
+        except (ValidationError, DRFValidationError) as e:
+            logger.error("Failed to apply preset", error=e)
+            if hasattr(e, "detail"):
+                detail = e.detail
+            elif hasattr(e, "message_dict"):
+                detail = e.message_dict
+            else:
+                detail = "Validation failed."
+            return Response(
+                {"error": detail},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        except Exception as e:
+            logger.error("Failed to apply preset", error=e)
+            return Response(
+                {"error": "Failed to apply preset."},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+
+class JourneyViewSet(BaseModelViewSet):
     model = PresetJourney
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "preset"]
     search_fields = ["name", "description"]
 
     @action(detail=True, methods=["get"])
@@ -10155,10 +10431,20 @@ class PresetJourneyViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"])
     def upgrade(self, request, pk=None):
         journey = self.get_object()
-        stored_lib = (
-            StoredLibrary.objects.filter(urn=journey.urn).order_by("-version").first()
-        )
-        if not stored_lib or stored_lib.version <= journey.version:
+        if not journey.preset:
+            return Response({"detail": "Already up to date."})
+        if journey.preset.urn:
+            stored_lib = (
+                StoredLibrary.objects.filter(urn=journey.preset.urn)
+                .order_by("-version")
+                .first()
+            )
+            if stored_lib and stored_lib.version > journey.preset.version:
+                from library.utils import upsert_preset_from_stored_library
+
+                upsert_preset_from_stored_library(stored_lib)
+                journey.preset.refresh_from_db()
+        if journey.preset.version <= journey.applied_version:
             return Response({"detail": "Already up to date."})
         from library.preset_executor import PresetExecutor
 
@@ -10168,7 +10454,7 @@ class PresetJourneyViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         )
 
-        executor = PresetExecutor(stored_lib, request.user, request)
+        executor = PresetExecutor(journey.preset, request.user, request)
         executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
         from core.serializers import PresetJourneyReadSerializer
 
@@ -10217,7 +10503,7 @@ class PresetJourneyViewSet(BaseModelViewSet):
         return stats
 
 
-class PresetJourneyStepViewSet(BaseModelViewSet):
+class JourneyStepViewSet(BaseModelViewSet):
     model = PresetJourneyStep
     filterset_fields = ["journey", "status"]
     search_fields = ["title", "description"]

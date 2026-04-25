@@ -66,7 +66,7 @@
 							});
 							if (response.ok) {
 								const result = await response.json();
-								goto(`/preset-journeys/${result.journey_id}`, {
+								goto(`/journeys/${result.journey_id}`, {
 									label: result.journey_name ?? presetName,
 									breadcrumbAction: 'push'
 								});
@@ -148,7 +148,7 @@
 	}
 
 	function hasUpgrade(journey: any): boolean {
-		return journey.latest_version && journey.latest_version > journey.version;
+		return journey.latest_version && journey.latest_version > journey.applied_version;
 	}
 </script>
 
@@ -184,7 +184,7 @@
 					{@const progress = getProgressPercent(journey)}
 					{@const counts = getStepCounts(journey)}
 					<Anchor
-						href="/preset-journeys/{journey.id}"
+						href="/journeys/{journey.id}"
 						breadcrumbAction="push"
 						label={journey.name}
 						class="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm

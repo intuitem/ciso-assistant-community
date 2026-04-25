@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const DELETE: RequestHandler = async ({ params, fetch }) => {
-	const response = await fetch(`${BASE_API_URL}/preset-journeys/${params.id}/`, {
+	const response = await fetch(`${BASE_API_URL}/journeys/${params.id}/`, {
 		method: 'DELETE'
 	});
 

@@ -7,6 +7,7 @@ from typing import List, Union
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
+    Preset,
     Question,
     QuestionChoice,
     RequirementMapping,
@@ -28,6 +29,30 @@ from django.db.utils import OperationalError
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+
+def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
+    """Create/refresh a Preset row from a library-backed preset YAML."""
+    preset_content = stored_library.content.get("preset", {}) or {}
+    journey = preset_content.get("journey", {}) or {}
+    defaults = {
+        "name": stored_library.name,
+        "description": stored_library.description or "",
+        "ref_id": stored_library.ref_id,
+        "version": stored_library.version,
+        "provider": stored_library.provider,
+        "translations": stored_library.translations or {},
+        "profile": preset_content.get("profile", {}) or {},
+        "feature_flags": preset_content.get("feature_flags", {}) or {},
+        "scaffolded_objects": preset_content.get("scaffolded_objects", []) or [],
+        "steps": journey.get("steps", []) or [],
+        "dependencies": list(stored_library.dependencies or []),
+        "folder": Folder.get_root_folder(),
+    }
+    preset, _ = Preset.objects.update_or_create(
+        urn=stored_library.urn, defaults=defaults
+    )
+    return preset
 
 
 def preview_library(framework: dict) -> dict[str, list]:
@@ -914,6 +939,8 @@ class LibraryImporter:
             library_object.dependencies.set(
                 LoadedLibrary.objects.filter(urn__in=dependencies)
             )
+        if self._library.is_preset:
+            upsert_preset_from_stored_library(self._library)
 
     def import_library(self):
         """Main method to import a library."""
