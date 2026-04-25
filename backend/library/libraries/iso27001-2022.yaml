@@ -1025,7 +1025,7 @@ objects:
           \u5E94\u534F\u8BAE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.22
     ref_id: A.5.22
-    name: Monitor, review and change management of supplier services
+    name: Monitoring, review and change management of supplier services
     category: process
     description: This control ensures supplier services are monitored, reviewed, and
       adjusted to maintain information security. Measures include service level agreements,
