@@ -19,13 +19,15 @@ class TestStakeholder:
             name="supplier", field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP
         )
         stakeholder = Stakeholder.objects.create(
-            entity=entity,
+            third_party_entity=entity,
+            entity_name=entity.name,
             category=category,
             ebios_rm_study=study,
         )
 
         assert stakeholder in study.stakeholders.all()
-        assert stakeholder.entity == entity
+        assert stakeholder.entity_name == entity.name
+        assert stakeholder.third_party_entity == entity
         assert stakeholder.category == category
 
         assert stakeholder.current_criticality == 0

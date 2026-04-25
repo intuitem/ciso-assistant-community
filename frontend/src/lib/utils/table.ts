@@ -2242,7 +2242,7 @@ export const listViewFields = {
 	stakeholders: {
 		head: [
 			'is_selected',
-			'entity',
+			'entity_name',
 			'category',
 			'current_criticality',
 			'applied_controls',
@@ -2250,7 +2250,7 @@ export const listViewFields = {
 		],
 		body: [
 			'is_selected',
-			'entity',
+			'entity_name',
 			'category',
 			'current_criticality',
 			'applied_controls',
@@ -2258,7 +2258,7 @@ export const listViewFields = {
 		],
 		filters: {
 			is_selected: IS_SELECTED_FILTER,
-			entity: ENTITY_FILTER,
+			entity_name: ENTITY_FILTER,
 			category: STAKEHOLDER_CATEGORY_FILTER
 		}
 	},
