@@ -7841,20 +7841,59 @@ class ComplianceAssessment(Assessment):
         )
         return requirement_assessments, assessment_source_dict
 
+    def _get_progress_counts(self) -> tuple[int, int]:
+        """
+        Return (total, assessed) counts for assessable requirements
+        """
+
+        requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        )
+
+        if not self.selected_implementation_groups:
+            counts = requirements.aggregate(
+                total=Count("id"),
+                assessed=Count(
+                    "id",
+                    filter=~Q(result=RequirementAssessment.Result.NOT_ASSESSED)
+                    | Q(score__isnull=False),
+                ),
+            )
+            return counts["total"], counts["assessed"]
+
+        selected_groups = set(self.selected_implementation_groups)
+        total = 0
+        assessed = 0
+        lightweight_requirements = (
+            requirements.select_related("requirement")
+            .only(
+                "result",
+                "score",
+                "requirement_id",
+                "requirement__implementation_groups",
+            )
+            .iterator()
+        )
+
+        for requirement_assessment in lightweight_requirements:
+            requirement_groups = set(
+                requirement_assessment.requirement.implementation_groups or []
+            )
+            if selected_groups.isdisjoint(requirement_groups):
+                continue
+
+            total += 1
+            if (
+                requirement_assessment.result
+                != RequirementAssessment.Result.NOT_ASSESSED
+            ) or requirement_assessment.score is not None:
+                assessed += 1
+
+        return total, assessed
+
     @property
     def progress(self) -> int:
-        requirement_assessments = list(
-            self.get_requirement_assessments(include_non_assessable=False)
-        )
-        total_cnt = len(requirement_assessments)
-        assessed_cnt = len(
-            [
-                r
-                for r in requirement_assessments
-                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
-                or r.score != None
-            ]
-        )
+        total_cnt, assessed_cnt = self._get_progress_counts()
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
 
     @property
