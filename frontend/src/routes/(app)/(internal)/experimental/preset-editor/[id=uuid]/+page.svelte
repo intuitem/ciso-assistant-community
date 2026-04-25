@@ -36,7 +36,7 @@
 		scaffolded_objects: Scaffold[];
 		steps: Step[];
 	};
-	type PointerMode = 'none' | 'model' | 'scaffold' | 'url';
+	type PointerMode = 'none' | 'model' | 'url';
 
 	const TYPE_TO_MODEL: Record<string, string> = {
 		compliance_assessment: 'compliance-assessments',
@@ -83,9 +83,6 @@
 	let confirmDiscard = $state(false);
 	let publishSuccess = $state(false);
 	let isReadOnly = $derived(!data.preset.is_user_authored);
-
-	// Per-step "type to add" selection (key = step index)
-	let addTypeByStep: Record<number, string> = $state({});
 
 	const dirty = $derived(draft != null && JSON.stringify(draft) !== initialJson);
 
@@ -228,15 +225,9 @@
 	// --- Step ops ---
 	function getPointerMode(step: Step): PointerMode {
 		// Mode is signalled by which field is a string (incl. empty string) vs null/undefined.
-		// "scaffold" mode is "model mode where target_ref points to a scaffold owned by this step."
+		// Empty string means "user picked this mode but hasn't filled it in yet."
 		if (typeof step.target_url === 'string') return 'url';
-		if (typeof step.target_model === 'string') {
-			if (step.target_ref && draft) {
-				const sc = draft.scaffolded_objects.find((s) => s.ref === step.target_ref);
-				if (sc && sc.step_ref_id === step.key) return 'scaffold';
-			}
-			return 'model';
-		}
+		if (typeof step.target_model === 'string') return 'model';
 		return 'none';
 	}
 
@@ -253,35 +244,6 @@
 			s.target_url = null;
 			s.target_params = null;
 			s.target_model = s.target_model || '';
-			// Stay in model mode even if previously focused: clear focus only if it pointed
-			// to a scaffold owned by this step (was effectively scaffold mode).
-			if (s.target_ref) {
-				const sc = draft.scaffolded_objects.find((x) => x.ref === s.target_ref);
-				if (sc && sc.step_ref_id === s.key) s.target_ref = null;
-			}
-		} else if (mode === 'scaffold') {
-			s.target_url = null;
-			s.target_params = null;
-			// If a scaffold is already focused and owned by this step, keep it.
-			let scaffold = s.target_ref
-				? draft.scaffolded_objects.find((x) => x.ref === s.target_ref)
-				: undefined;
-			if (!scaffold || scaffold.step_ref_id !== s.key) {
-				// Reuse another step-owned scaffold if any, else create one.
-				scaffold = draft.scaffolded_objects.find((x) => x.step_ref_id === s.key);
-				if (!scaffold) {
-					const type = 'compliance_assessment';
-					const ref = generateRef(`${s.key}_${type}`);
-					scaffold = {
-						...defaultsForType(type, safeTranslate(type)),
-						ref,
-						step_ref_id: s.key
-					};
-					draft.scaffolded_objects = [...draft.scaffolded_objects, scaffold];
-				}
-				s.target_ref = scaffold.ref!;
-			}
-			s.target_model = TYPE_TO_MODEL[scaffold.type] ?? s.target_model ?? '';
 		} else {
 			s.target_model = null;
 			s.target_ref = null;
@@ -291,26 +253,41 @@
 		draft.steps = next;
 	}
 
-	function focusedScaffoldOf(step: Step): Scaffold | undefined {
-		if (!draft || !step.target_ref) return undefined;
-		return draft.scaffolded_objects.find((x) => x.ref === step.target_ref);
-	}
-
-	function changeFocusedScaffoldType(stepIdx: number, newType: string) {
+	// When target_model changes, convert step-owned scaffolds to the new model's type.
+	// Preserves name/description/ref; resets type-specific fields (framework/matrix/category).
+	function changeTargetModel(i: number, newModel: string | null) {
 		if (!draft) return;
-		const step = draft.steps[stepIdx];
-		const sc = focusedScaffoldOf(step);
-		if (!sc) return;
-		const idx = draft.scaffolded_objects.indexOf(sc);
-		const reset = defaultsForType(newType, sc.name ?? safeTranslate(newType));
-		updateScaffoldByIndex(idx, {
-			...reset,
-			ref: sc.ref,
-			description: sc.description,
-			step_ref_id: sc.step_ref_id
+		const step = draft.steps[i];
+		setStepField(i, {
+			target_model: newModel,
+			// Drop focus if it pointed to a scaffold whose type no longer matches the new model
+			target_ref: (() => {
+				if (!step.target_ref) return null;
+				const sc = draft!.scaffolded_objects.find((x) => x.ref === step.target_ref);
+				if (!sc) return null;
+				const newType = MODEL_TO_TYPE[newModel ?? ''];
+				return newType && sc.type === newType ? step.target_ref : null;
+			})()
 		});
-		// Keep step.target_model aligned with the new type
-		setStepField(stepIdx, { target_model: TYPE_TO_MODEL[newType] });
+		const newType = MODEL_TO_TYPE[newModel ?? ''];
+		if (!newType) return;
+		// Convert step-owned scaffolds whose type doesn't match
+		const scaffolds = [...draft.scaffolded_objects];
+		let mutated = false;
+		for (let idx = 0; idx < scaffolds.length; idx++) {
+			const sc = scaffolds[idx];
+			if (sc.step_ref_id === step.key && sc.type !== newType) {
+				const reset = defaultsForType(newType, sc.name ?? safeTranslate(newType));
+				scaffolds[idx] = {
+					...reset,
+					ref: sc.ref,
+					description: sc.description,
+					step_ref_id: sc.step_ref_id
+				};
+				mutated = true;
+			}
+		}
+		if (mutated) draft.scaffolded_objects = scaffolds;
 	}
 
 	function setStepField(i: number, patch: Partial<Step>) {
@@ -389,18 +366,6 @@
 		return base;
 	}
 
-	function addScaffoldToStep(stepIdx: number, type: string) {
-		if (!draft) return;
-		const step = draft.steps[stepIdx];
-		const ref = generateRef(`${step.key}_${type}`);
-		const sc: Scaffold = {
-			...defaultsForType(type, `New ${safeTranslate(type)}`),
-			ref,
-			step_ref_id: step.key
-		};
-		draft.scaffolded_objects = [...draft.scaffolded_objects, sc];
-	}
-
 	function updateScaffoldByIndex(idx: number, patch: Partial<Scaffold>) {
 		if (!draft) return;
 		const scaffolds = [...draft.scaffolded_objects];
@@ -432,13 +397,42 @@
 		return draft.scaffolded_objects.indexOf(scaffold);
 	}
 
-	// Scaffolds owned by the step, excluding the one focused by its pointer
-	// (that one is rendered inline in the pointer panel when in scaffold mode).
+	// All scaffolds owned by this step (focused or not).
 	function scaffoldsForStep(step: Step): Scaffold[] {
 		if (!draft) return [];
+		return draft.scaffolded_objects.filter((s) => s.step_ref_id === step.key);
+	}
+
+	// Cross-step focus candidates: scaffolds matching the step's target_model whose
+	// step_ref_id is some OTHER step (or unset). The user picks from this dropdown
+	// to focus on a scaffold "owned" by another step (e.g. iso27001-full's iso_audit
+	// referenced by 3 different steps).
+	function crossStepCandidates(step: Step): Scaffold[] {
+		if (!draft) return [];
+		const type = MODEL_TO_TYPE[step.target_model ?? ''];
+		if (!type) return [];
 		return draft.scaffolded_objects.filter(
-			(s) => s.step_ref_id === step.key && s.ref !== step.target_ref
+			(s) => s.type === type && s.ref && s.step_ref_id !== step.key
 		);
+	}
+
+	function addObjectToStep(stepIdx: number) {
+		if (!draft) return;
+		const step = draft.steps[stepIdx];
+		const type = MODEL_TO_TYPE[step.target_model ?? ''];
+		if (!type) return;
+		const ref = generateRef(`${step.key}_${type}`);
+		const sc: Scaffold = {
+			...defaultsForType(type, safeTranslate(type)),
+			ref,
+			step_ref_id: step.key
+		};
+		draft.scaffolded_objects = [...draft.scaffolded_objects, sc];
+		// Auto-focus the first added object if no focus is set yet (covers the
+		// common "create one and open it" case in a single click).
+		if (!step.target_ref) {
+			setStepField(stepIdx, { target_ref: ref });
+		}
 	}
 
 	// Candidate refs to focus on given a target_model — across ALL scaffolds in the preset
@@ -880,21 +874,6 @@
 										</label>
 										<label
 											class="px-3 py-1.5 cursor-pointer border-l border-gray-200 transition-colors {ptrMode ===
-											'scaffold'
-												? 'bg-gray-700 text-white'
-												: 'text-gray-600 hover:bg-gray-50'}"
-										>
-											<input
-												type="radio"
-												name={`ptr-${i}`}
-												class="sr-only"
-												checked={ptrMode === 'scaffold'}
-												onchange={() => setPointerMode(i, 'scaffold')}
-											/>
-											<i class="fa-solid fa-cube mr-1 text-[10px]"></i> Scaffold
-										</label>
-										<label
-											class="px-3 py-1.5 cursor-pointer border-l border-gray-200 transition-colors {ptrMode ===
 											'url'
 												? 'bg-gray-700 text-white'
 												: 'text-gray-600 hover:bg-gray-50'}"
@@ -910,109 +889,169 @@
 										</label>
 									</div>
 									{#if ptrMode === 'model'}
-										<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+										{@const seedType = MODEL_TO_TYPE[step.target_model ?? '']}
+										{@const crossCands = crossStepCandidates(step)}
+										<div class="space-y-3">
 											<label class="flex flex-col gap-1">
 												<span class="text-xs text-gray-600">Model</span>
 												<select
 													class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 													value={step.target_model ?? ''}
 													onchange={(e) =>
-														setStepField(i, {
-															target_model: (e.target as HTMLSelectElement).value || null,
-															target_ref: null
-														})}
+														changeTargetModel(i, (e.target as HTMLSelectElement).value || null)}
 												>
 													{#each ALL_MODELS as tm (tm)}
 														<option value={tm}>{tm ? safeTranslate(tm) : '— pick one —'}</option>
 													{/each}
 												</select>
 											</label>
-											{#if candidates.length > 0}
+
+											{#if seedType}
+												<div>
+													<div
+														class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5"
+													>
+														<i class="fa-solid fa-cubes text-[10px]"></i>
+														Objects to create
+														<span class="text-gray-400 normal-case font-normal tracking-normal">
+															— created on apply; pick one to focus the step on it
+														</span>
+													</div>
+
+													<!-- "Open the list" focus option -->
+													<label
+														class="flex items-center gap-2 text-xs px-3 py-2 rounded-lg border {!step.target_ref
+															? 'border-blue-300 bg-blue-50 text-blue-800'
+															: 'border-gray-200 hover:bg-gray-50'} cursor-pointer mb-2"
+													>
+														<input
+															type="radio"
+															name={`focus-${i}`}
+															checked={!step.target_ref}
+															onchange={() => setStepField(i, { target_ref: null })}
+														/>
+														Open the list (don't open a specific scaffold)
+													</label>
+
+													<div class="space-y-2">
+														{#each ownedScaffolds as scaffold (indexOfScaffold(scaffold))}
+															{@const idx = indexOfScaffold(scaffold)}
+															{@const focused = step.target_ref === scaffold.ref}
+															<div
+																class="bg-white border rounded-lg p-3 {focused
+																	? 'border-blue-300 shadow-sm'
+																	: 'border-gray-200'}"
+															>
+																<div class="flex items-center gap-2 mb-2">
+																	<input
+																		type="radio"
+																		name={`focus-${i}`}
+																		checked={focused}
+																		onchange={() => {
+																			if (!scaffold.ref) {
+																				const ref = generateRef(`${step.key}_${scaffold.type}`);
+																				updateScaffoldByIndex(idx, { ref });
+																				setStepField(i, { target_ref: ref });
+																			} else {
+																				setStepField(i, { target_ref: scaffold.ref });
+																			}
+																		}}
+																	/>
+																	<span class="text-xs text-gray-500"
+																		>{focused ? 'Scaffold and open' : 'Scaffold'}</span
+																	>
+																	<span
+																		class="ml-auto text-[10px] uppercase text-gray-400 tracking-wider"
+																		>{safeTranslate(scaffold.type)}</span
+																	>
+																	<button
+																		type="button"
+																		class="w-7 h-7 inline-flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+																		onclick={() => removeScaffoldByIndex(idx)}
+																		title="Remove object"
+																		aria-label="Remove object"
+																	>
+																		<i class="fa-solid fa-trash text-[11px]"></i>
+																	</button>
+																</div>
+																<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+																	<label class="flex flex-col gap-1">
+																		<span class="text-xs text-gray-600">Name</span>
+																		<input
+																			class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+																			type="text"
+																			value={scaffold.name ?? ''}
+																			oninput={(e) =>
+																				updateScaffoldByIndex(idx, {
+																					name: (e.target as HTMLInputElement).value
+																				})}
+																		/>
+																	</label>
+																	<label class="flex flex-col gap-1">
+																		<span class="text-xs text-gray-600">ref_id</span>
+																		<input
+																			class="text-sm font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+																			type="text"
+																			value={scaffold.ref ?? ''}
+																			oninput={(e) =>
+																				updateScaffoldByIndex(idx, {
+																					ref: (e.target as HTMLInputElement).value || undefined
+																				})}
+																		/>
+																	</label>
+																	<label class="flex flex-col gap-1 md:col-span-2">
+																		<span class="text-xs text-gray-600">Description</span>
+																		<textarea
+																			class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors resize-y"
+																			rows="2"
+																			value={scaffold.description ?? ''}
+																			oninput={(e) =>
+																				updateScaffoldByIndex(idx, {
+																					description: (e.target as HTMLTextAreaElement).value
+																				})}
+																		></textarea>
+																	</label>
+																	{@render scaffoldFields(scaffold, idx)}
+																</div>
+															</div>
+														{/each}
+													</div>
+
+													<button
+														type="button"
+														class="mt-2 text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors inline-flex items-center gap-1.5"
+														onclick={() => addObjectToStep(i)}
+													>
+														<i class="fa-solid fa-plus text-[10px]"></i> Add {safeTranslate(
+															seedType
+														)}
+													</button>
+												</div>
+											{/if}
+
+											{#if crossCands.length > 0}
 												<label class="flex flex-col gap-1">
-													<span class="text-xs text-gray-600">Focus on (optional)</span>
+													<span class="text-xs text-gray-600"
+														>Or open a scaffold from another step</span
+													>
 													<select
 														class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
-														value={step.target_ref ?? ''}
-														onchange={(e) =>
-															setStepField(i, {
-																target_ref: (e.target as HTMLSelectElement).value || null
-															})}
+														value={crossCands.some((c) => c.ref === step.target_ref)
+															? step.target_ref
+															: ''}
+														onchange={(e) => {
+															const v = (e.target as HTMLSelectElement).value || null;
+															setStepField(i, { target_ref: v });
+														}}
 													>
-														<option value="">— open the list —</option>
-														{#each candidates as c (c.ref)}
+														<option value="">— none —</option>
+														{#each crossCands as c (c.ref)}
 															<option value={c.ref}>{c.ref} — {c.name}</option>
 														{/each}
 													</select>
 												</label>
 											{/if}
 										</div>
-									{:else if ptrMode === 'scaffold'}
-										{@const focused = focusedScaffoldOf(step)}
-										{#if focused}
-											{@const idx = indexOfScaffold(focused)}
-											<div class="bg-white border border-gray-200 rounded-lg p-3">
-												<p class="text-xs text-gray-500 mb-3">
-													This step creates the object below on apply, then opens it in the
-													journey.
-												</p>
-												<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-													<label class="flex flex-col gap-1">
-														<span class="text-xs text-gray-600">Type</span>
-														<select
-															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
-															value={focused.type}
-															onchange={(e) =>
-																changeFocusedScaffoldType(
-																	i,
-																	(e.target as HTMLSelectElement).value
-																)}
-														>
-															{#each SCAFFOLD_TYPES as t (t)}
-																<option value={t}>{safeTranslate(t)}</option>
-															{/each}
-														</select>
-													</label>
-													<label class="flex flex-col gap-1">
-														<span class="text-xs text-gray-600">Name</span>
-														<input
-															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
-															type="text"
-															value={focused.name ?? ''}
-															oninput={(e) =>
-																updateScaffoldByIndex(idx, {
-																	name: (e.target as HTMLInputElement).value
-																})}
-														/>
-													</label>
-													<label class="flex flex-col gap-1 md:col-span-2">
-														<span class="text-xs text-gray-600">Description</span>
-														<textarea
-															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors resize-y"
-															rows="2"
-															value={focused.description ?? ''}
-															oninput={(e) =>
-																updateScaffoldByIndex(idx, {
-																	description: (e.target as HTMLTextAreaElement).value
-																})}
-														></textarea>
-													</label>
-													<label class="flex flex-col gap-1">
-														<span class="text-xs text-gray-600">ref_id</span>
-														<input
-															class="text-sm font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
-															type="text"
-															value={focused.ref ?? ''}
-															oninput={(e) =>
-																updateScaffoldByIndex(idx, {
-																	ref: (e.target as HTMLInputElement).value || undefined
-																})}
-														/>
-													</label>
-													<div></div>
-													{@render scaffoldFields(focused, idx)}
-												</div>
-											</div>
-										{/if}
 									{:else if ptrMode === 'url'}
 										<div class="space-y-3">
 											<label class="flex flex-col gap-1">
@@ -1085,128 +1124,6 @@
 											</div>
 										</div>
 									{/if}
-								</div>
-
-								<!-- Scaffolded objects -->
-								<div class="bg-gray-50/60 border border-gray-100 rounded-lg p-3">
-									<div
-										class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5"
-									>
-										<i class="fa-solid fa-cubes text-[10px]"></i>
-										Additional objects
-										<span
-											class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-gray-200 text-gray-700 text-[10px] font-semibold normal-case tracking-normal"
-										>
-											{ownedScaffolds.length}
-										</span>
-										<span class="text-gray-400 normal-case font-normal tracking-normal"
-											>— extra objects created on apply (not focused by the step)</span
-										>
-									</div>
-									<div class="flex flex-col gap-3">
-										{#each ownedScaffolds as scaffold (indexOfScaffold(scaffold))}
-											{@const idx = indexOfScaffold(scaffold)}
-											<div class="bg-white border border-gray-200 rounded-lg p-3">
-												<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-													<label class="flex flex-col gap-1">
-														<span class="text-xs text-gray-600">Type</span>
-														<select
-															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
-															value={scaffold.type}
-															onchange={(e) => {
-																const newType = (e.target as HTMLSelectElement).value;
-																const prevName = scaffold.name;
-																const prevDesc = scaffold.description;
-																const prevRef = scaffold.ref;
-																const reset = defaultsForType(newType, prevName ?? '');
-																updateScaffoldByIndex(idx, {
-																	...reset,
-																	ref: prevRef,
-																	description: prevDesc,
-																	step_ref_id: scaffold.step_ref_id
-																});
-															}}
-														>
-															{#each SCAFFOLD_TYPES as t (t)}
-																<option value={t}>{safeTranslate(t)}</option>
-															{/each}
-														</select>
-													</label>
-													<label class="flex flex-col gap-1">
-														<span class="text-xs text-gray-600">Name</span>
-														<input
-															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
-															type="text"
-															value={scaffold.name ?? ''}
-															oninput={(e) =>
-																updateScaffoldByIndex(idx, {
-																	name: (e.target as HTMLInputElement).value
-																})}
-														/>
-													</label>
-													<label class="flex flex-col gap-1 md:col-span-2">
-														<span class="text-xs text-gray-600">Description</span>
-														<textarea
-															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors resize-y"
-															rows="2"
-															value={scaffold.description ?? ''}
-															oninput={(e) =>
-																updateScaffoldByIndex(idx, {
-																	description: (e.target as HTMLTextAreaElement).value
-																})}
-														></textarea>
-													</label>
-													<label class="flex flex-col gap-1">
-														<span class="text-xs text-gray-600">ref_id</span>
-														<input
-															class="text-sm font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
-															type="text"
-															value={scaffold.ref ?? ''}
-															oninput={(e) =>
-																updateScaffoldByIndex(idx, {
-																	ref: (e.target as HTMLInputElement).value || undefined
-																})}
-														/>
-													</label>
-													<div></div>
-													{@render scaffoldFields(scaffold, idx)}
-													<div class="md:col-span-2 flex justify-end">
-														<button
-															type="button"
-															class="text-xs text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg px-2.5 py-1.5 transition-colors inline-flex items-center gap-1.5"
-															onclick={() => removeScaffoldByIndex(idx)}
-														>
-															<i class="fa-solid fa-trash text-[10px]"></i>
-															Remove object
-														</button>
-													</div>
-												</div>
-											</div>
-										{/each}
-										<div class="flex items-center gap-2 pt-1">
-											<select
-												class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors max-w-xs"
-												value={addTypeByStep[i] ?? SCAFFOLD_TYPES[0]}
-												onchange={(e) => {
-													addTypeByStep = {
-														...addTypeByStep,
-														[i]: (e.target as HTMLSelectElement).value
-													};
-												}}
-											>
-												{#each SCAFFOLD_TYPES as t (t)}
-													<option value={t}>{safeTranslate(t)}</option>
-												{/each}
-											</select>
-											<button
-												type="button"
-												class="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors inline-flex items-center gap-1.5"
-												onclick={() => addScaffoldToStep(i, addTypeByStep[i] ?? SCAFFOLD_TYPES[0])}
-											>
-												<i class="fa-solid fa-plus text-[10px]"></i> Add object
-											</button>
-										</div>
-									</div>
 								</div>
 							</div>
 						</div>
