@@ -9,16 +9,26 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	}
 	const preset = await presetRes.json();
 
-	const [frameworks, riskMatrices] = await Promise.all([
-		fetch(`${BASE_API_URL}/frameworks/?ordering=name`)
+	// Use loaded-libraries (not frameworks/risk-matrices) — scaffolds reference
+	// the *library* URN, not the framework's own URN. The validator and executor
+	// resolve via LoadedLibrary.objects.filter(urn=...), so the editor must
+	// store library URNs to keep the data shape compatible with library YAMLs.
+	const [frameworks, riskMatrices, frameworkDetails] = await Promise.all([
+		fetch(`${BASE_API_URL}/loaded-libraries/?object_type=framework&ordering=name`)
 			.then((r) => r.json())
 			.then((d) => d.results ?? d)
 			.catch(() => []),
-		fetch(`${BASE_API_URL}/risk-matrices/?ordering=name`)
+		fetch(`${BASE_API_URL}/loaded-libraries/?object_type=risk_matrix&ordering=name`)
+			.then((r) => r.json())
+			.then((d) => d.results ?? d)
+			.catch(() => []),
+		// Frameworks list (separate fetch) — used to resolve implementation_groups_definition
+		// for a chosen library URN. Lookup is by library URN.
+		fetch(`${BASE_API_URL}/frameworks/?ordering=name`)
 			.then((r) => r.json())
 			.then((d) => d.results ?? d)
 			.catch(() => [])
 	]);
 
-	return { preset, frameworks, riskMatrices };
+	return { preset, frameworks, riskMatrices, frameworkDetails };
 };

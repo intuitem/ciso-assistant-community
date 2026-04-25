@@ -49,11 +49,6 @@ def backfill_presets(apps, schema_editor):
             journey.save(update_fields=["preset"])
 
 
-def unbackfill_presets(apps, schema_editor):
-    Preset = apps.get_model("core", "Preset")
-    Preset.objects.all().delete()
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0164_preset_step_url_target"),
@@ -162,7 +157,7 @@ class Migration(migrations.Migration):
                 to="core.preset",
             ),
         ),
-        migrations.RunPython(backfill_presets, unbackfill_presets),
+        migrations.RunPython(backfill_presets, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name="presetjourney",
             name="urn",

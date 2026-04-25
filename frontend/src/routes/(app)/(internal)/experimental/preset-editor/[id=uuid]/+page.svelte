@@ -36,7 +36,7 @@
 		scaffolded_objects: Scaffold[];
 		steps: Step[];
 	};
-	type PointerMode = 'none' | 'model' | 'url';
+	type PointerMode = 'none' | 'model' | 'scaffold' | 'url';
 
 	const TYPE_TO_MODEL: Record<string, string> = {
 		compliance_assessment: 'compliance-assessments',
@@ -228,9 +228,15 @@
 	// --- Step ops ---
 	function getPointerMode(step: Step): PointerMode {
 		// Mode is signalled by which field is a string (incl. empty string) vs null/undefined.
-		// Empty string means "user picked this mode but hasn't filled it in yet."
+		// "scaffold" mode is "model mode where target_ref points to a scaffold owned by this step."
 		if (typeof step.target_url === 'string') return 'url';
-		if (typeof step.target_model === 'string') return 'model';
+		if (typeof step.target_model === 'string') {
+			if (step.target_ref && draft) {
+				const sc = draft.scaffolded_objects.find((s) => s.ref === step.target_ref);
+				if (sc && sc.step_ref_id === step.key) return 'scaffold';
+			}
+			return 'model';
+		}
 		return 'none';
 	}
 
@@ -247,6 +253,35 @@
 			s.target_url = null;
 			s.target_params = null;
 			s.target_model = s.target_model || '';
+			// Stay in model mode even if previously focused: clear focus only if it pointed
+			// to a scaffold owned by this step (was effectively scaffold mode).
+			if (s.target_ref) {
+				const sc = draft.scaffolded_objects.find((x) => x.ref === s.target_ref);
+				if (sc && sc.step_ref_id === s.key) s.target_ref = null;
+			}
+		} else if (mode === 'scaffold') {
+			s.target_url = null;
+			s.target_params = null;
+			// If a scaffold is already focused and owned by this step, keep it.
+			let scaffold = s.target_ref
+				? draft.scaffolded_objects.find((x) => x.ref === s.target_ref)
+				: undefined;
+			if (!scaffold || scaffold.step_ref_id !== s.key) {
+				// Reuse another step-owned scaffold if any, else create one.
+				scaffold = draft.scaffolded_objects.find((x) => x.step_ref_id === s.key);
+				if (!scaffold) {
+					const type = 'compliance_assessment';
+					const ref = generateRef(`${s.key}_${type}`);
+					scaffold = {
+						...defaultsForType(type, safeTranslate(type)),
+						ref,
+						step_ref_id: s.key
+					};
+					draft.scaffolded_objects = [...draft.scaffolded_objects, scaffold];
+				}
+				s.target_ref = scaffold.ref!;
+			}
+			s.target_model = TYPE_TO_MODEL[scaffold.type] ?? s.target_model ?? '';
 		} else {
 			s.target_model = null;
 			s.target_ref = null;
@@ -254,6 +289,28 @@
 		}
 		next[i] = s;
 		draft.steps = next;
+	}
+
+	function focusedScaffoldOf(step: Step): Scaffold | undefined {
+		if (!draft || !step.target_ref) return undefined;
+		return draft.scaffolded_objects.find((x) => x.ref === step.target_ref);
+	}
+
+	function changeFocusedScaffoldType(stepIdx: number, newType: string) {
+		if (!draft) return;
+		const step = draft.steps[stepIdx];
+		const sc = focusedScaffoldOf(step);
+		if (!sc) return;
+		const idx = draft.scaffolded_objects.indexOf(sc);
+		const reset = defaultsForType(newType, sc.name ?? safeTranslate(newType));
+		updateScaffoldByIndex(idx, {
+			...reset,
+			ref: sc.ref,
+			description: sc.description,
+			step_ref_id: sc.step_ref_id
+		});
+		// Keep step.target_model aligned with the new type
+		setStepField(stepIdx, { target_model: TYPE_TO_MODEL[newType] });
 	}
 
 	function setStepField(i: number, patch: Partial<Step>) {
@@ -375,10 +432,13 @@
 		return draft.scaffolded_objects.indexOf(scaffold);
 	}
 
-	// Scaffolds whose step_ref_id matches this step
+	// Scaffolds owned by the step, excluding the one focused by its pointer
+	// (that one is rendered inline in the pointer panel when in scaffold mode).
 	function scaffoldsForStep(step: Step): Scaffold[] {
 		if (!draft) return [];
-		return draft.scaffolded_objects.filter((s) => s.step_ref_id === step.key);
+		return draft.scaffolded_objects.filter(
+			(s) => s.step_ref_id === step.key && s.ref !== step.target_ref
+		);
 	}
 
 	// Candidate refs to focus on given a target_model — across ALL scaffolds in the preset
@@ -389,9 +449,11 @@
 		return draft.scaffolded_objects.filter((s) => s.type === type && s.ref);
 	}
 
-	function selectedFramework(urn: string | undefined) {
-		if (!urn) return undefined;
-		return data.frameworks.find((f: any) => f.urn === urn);
+	function selectedFramework(libraryUrn: string | undefined) {
+		// scaffold.framework holds a *library* URN; look up the Framework whose
+		// library has that URN to access implementation_groups_definition.
+		if (!libraryUrn) return undefined;
+		return data.frameworkDetails.find((f: any) => f?.library?.urn === libraryUrn);
 	}
 
 	function paramsToRows(
@@ -818,6 +880,21 @@
 										</label>
 										<label
 											class="px-3 py-1.5 cursor-pointer border-l border-gray-200 transition-colors {ptrMode ===
+											'scaffold'
+												? 'bg-gray-700 text-white'
+												: 'text-gray-600 hover:bg-gray-50'}"
+										>
+											<input
+												type="radio"
+												name={`ptr-${i}`}
+												class="sr-only"
+												checked={ptrMode === 'scaffold'}
+												onchange={() => setPointerMode(i, 'scaffold')}
+											/>
+											<i class="fa-solid fa-cube mr-1 text-[10px]"></i> Scaffold
+										</label>
+										<label
+											class="px-3 py-1.5 cursor-pointer border-l border-gray-200 transition-colors {ptrMode ===
 											'url'
 												? 'bg-gray-700 text-white'
 												: 'text-gray-600 hover:bg-gray-50'}"
@@ -869,6 +946,73 @@
 												</label>
 											{/if}
 										</div>
+									{:else if ptrMode === 'scaffold'}
+										{@const focused = focusedScaffoldOf(step)}
+										{#if focused}
+											{@const idx = indexOfScaffold(focused)}
+											<div class="bg-white border border-gray-200 rounded-lg p-3">
+												<p class="text-xs text-gray-500 mb-3">
+													This step creates the object below on apply, then opens it in the
+													journey.
+												</p>
+												<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+													<label class="flex flex-col gap-1">
+														<span class="text-xs text-gray-600">Type</span>
+														<select
+															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+															value={focused.type}
+															onchange={(e) =>
+																changeFocusedScaffoldType(
+																	i,
+																	(e.target as HTMLSelectElement).value
+																)}
+														>
+															{#each SCAFFOLD_TYPES as t (t)}
+																<option value={t}>{safeTranslate(t)}</option>
+															{/each}
+														</select>
+													</label>
+													<label class="flex flex-col gap-1">
+														<span class="text-xs text-gray-600">Name</span>
+														<input
+															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+															type="text"
+															value={focused.name ?? ''}
+															oninput={(e) =>
+																updateScaffoldByIndex(idx, {
+																	name: (e.target as HTMLInputElement).value
+																})}
+														/>
+													</label>
+													<label class="flex flex-col gap-1 md:col-span-2">
+														<span class="text-xs text-gray-600">Description</span>
+														<textarea
+															class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors resize-y"
+															rows="2"
+															value={focused.description ?? ''}
+															oninput={(e) =>
+																updateScaffoldByIndex(idx, {
+																	description: (e.target as HTMLTextAreaElement).value
+																})}
+														></textarea>
+													</label>
+													<label class="flex flex-col gap-1">
+														<span class="text-xs text-gray-600">ref_id</span>
+														<input
+															class="text-sm font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+															type="text"
+															value={focused.ref ?? ''}
+															oninput={(e) =>
+																updateScaffoldByIndex(idx, {
+																	ref: (e.target as HTMLInputElement).value || undefined
+																})}
+														/>
+													</label>
+													<div></div>
+													{@render scaffoldFields(focused, idx)}
+												</div>
+											</div>
+										{/if}
 									{:else if ptrMode === 'url'}
 										<div class="space-y-3">
 											<label class="flex flex-col gap-1">
@@ -949,14 +1093,14 @@
 										class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5"
 									>
 										<i class="fa-solid fa-cubes text-[10px]"></i>
-										Scaffolded objects
+										Additional objects
 										<span
 											class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-gray-200 text-gray-700 text-[10px] font-semibold normal-case tracking-normal"
 										>
 											{ownedScaffolds.length}
 										</span>
 										<span class="text-gray-400 normal-case font-normal tracking-normal"
-											>— created when this preset is applied</span
+											>— extra objects created on apply (not focused by the step)</span
 										>
 									</div>
 									<div class="flex flex-col gap-3">
