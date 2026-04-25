@@ -7069,8 +7069,12 @@ class ActorViewSet(BaseModelViewSet):
         if not allow_entities:
             queryset = queryset.filter(entity__isnull=True)
 
-        third_parties = Actor.objects.filter(user__is_third_party=True)
-        queryset = queryset.exclude(id__in=third_parties)
+        include_third_parties = self.request.query_params.get(
+            "include_third_parties", "false"
+        )
+        if include_third_parties.lower() != "true":
+            third_parties = Actor.objects.filter(user__is_third_party=True)
+            queryset = queryset.exclude(id__in=third_parties)
 
         return queryset.order_by("type_rank", "display_name")
 
@@ -11112,18 +11116,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for author in instance.authors.all():
                 try:
                     specific = author.specific
-                    if hasattr(specific, "mailing"):
+                    if not hasattr(specific, "mailing"):
+                        logger.warning(
+                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                        )
+                        continue
+                    assignments = list(
+                        instance.requirement_assignments.filter(actor=author)
+                    )
+                    if not assignments:
+                        logger.warning(
+                            f"Actor {author} has no assignment on this audit, skipping email"
+                        )
+                        continue
+                    for assignment in assignments:
                         specific.mailing(
                             email_template_name="tprm/third_party_email.html",
                             subject=_(
                                 "CISO Assistant: A questionnaire has been assigned to you"
                             ),
-                            object="compliance-assessments",
-                            object_id=instance.id,
-                        )
-                    else:
-                        logger.warning(
-                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                            object="auditee-assessments",
+                            object_id=assignment.id,
                         )
                 except Exception as primary_exception:
                     logger.error(
@@ -11132,6 +11145,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     raise ValidationError(
                         {"error": ["An error occurred while sending the email"]}
                     )
+            draft_assignments = instance.requirement_assignments.filter(
+                status=RequirementAssignment.Status.DRAFT
+            )
+            for assignment in draft_assignments:
+                assignment.status = RequirementAssignment.Status.IN_PROGRESS
+                assignment.save(update_fields=["status"])
+                RequirementAssignmentEvent.objects.create(
+                    assignment=assignment,
+                    event_type=RequirementAssignment.Status.IN_PROGRESS,
+                    event_actor=request.user,
+                    folder=assignment.folder,
+                )
             return Response({"results": "mail sent"})
         raise ValidationError({"warning": ["noMailerConfigured"]})
 

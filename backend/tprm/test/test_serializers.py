@@ -151,8 +151,12 @@ class EntityAssessmentSerializersTestCase(TestCase):
     @patch(
         "tprm.serializers.EntityAssessmentWriteSerializer._assign_third_party_respondents"
     )
+    @patch(
+        "tprm.serializers.EntityAssessmentWriteSerializer._create_requirement_assignment"
+    )
     def test_entity_assessment_write_serializer_with_audit(
         self,
+        mock_create_requirement_assignment,
         mock_assign_third_party,
         mock_compliance_assessment,
         mock_folder_create,

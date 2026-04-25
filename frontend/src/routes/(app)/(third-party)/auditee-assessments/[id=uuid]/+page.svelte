@@ -1085,7 +1085,10 @@
 								<!-- Evidence -->
 								{#if showEvidences}
 									<Accordion.Item value="evidence">
-										<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+										<Accordion.ItemTrigger
+											class="flex w-full items-center cursor-pointer"
+											data-testid="evidence-accordion-trigger"
+										>
 											<p class="flex flex-1 items-center space-x-2 text-left">
 												<span>{m.evidence()}</span>
 												{#if requirementAssessment.evidences != null}
