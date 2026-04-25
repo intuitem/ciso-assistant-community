@@ -490,11 +490,17 @@ def filter_graph_by_implementation_groups(
         return graph
 
     def should_include_node(node: dict) -> bool:
-        node_groups = node.get("implementation_groups")
-        if node_groups:
-            return any(group in node_groups for group in implementation_groups)
-
-        # Nodes without implementation groups but with children are included
+        node_groups = node.get("implementation_groups") or []
+        # Include a node if:
+        #   - it has any matching IG of its own, OR
+        #   - any of its children survived the filter (i.e., this node is the
+        #     ancestor of a match).
+        # The prior implementation short-circuited on node_groups and dropped
+        # ancestors whose own IGs didn't match, hiding matching descendants —
+        # e.g., ISO 27001's annex-a (IGs=['SoA']) would hide leaves tagged with
+        # a custom IG added via the framework builder.
+        if any(group in node_groups for group in implementation_groups):
+            return True
         return bool(node.get("children"))
 
     filtered_graph = {}
