@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
-
+import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
@@ -43,12 +43,8 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 						const url = `${BASE_API_URL}/${urlModel}/${selectField.field}/`;
 						const response = await fetch(url);
 						if (response.ok) {
-							selectOptions[selectField.field] = await response.json().then((data) =>
-								Object.entries(data).map(([key, value]) => ({
-									label: value,
-									value: selectField.valueType === 'number' ? parseInt(key) : key
-								}))
-							);
+							const responseData = await response.json();
+							selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 						} else {
 							console.error(
 								`Failed to fetch data for ${selectField.field}: ${response.statusText}`
