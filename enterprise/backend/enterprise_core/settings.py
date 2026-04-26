@@ -249,9 +249,25 @@ elif USE_AZURE:
     AZURE_CONTAINER = os.getenv("AZURE_CONTAINER", "ciso-assistant-container")
     AZURE_CUSTOM_DOMAIN = os.getenv("AZURE_CUSTOM_DOMAIN")
 
-    if bool(AZURE_ACCOUNT_NAME) != bool(AZURE_ACCOUNT_KEY):
-        missing = "AZURE_ACCOUNT_NAME" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_KEY"
-        present = "AZURE_ACCOUNT_KEY" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_NAME"
+    using_managed_identity = os.getenv(
+        "AZURE_USE_MANAGED_IDENTITY", "False"
+    ).lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+
+    # Managed Identity uses AZURE_ACCOUNT_NAME without a key by design, so only
+    # enforce the name+key pairing when Managed Identity is not requested.
+    if not using_managed_identity and bool(AZURE_ACCOUNT_NAME) != bool(
+        AZURE_ACCOUNT_KEY
+    ):
+        missing = (
+            "AZURE_ACCOUNT_NAME" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_KEY"
+        )
+        present = (
+            "AZURE_ACCOUNT_KEY" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_NAME"
+        )
         raise ImproperlyConfigured(
             f"{present} is set but {missing} is missing. "
             "Both AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY are required for Account Key authentication."
@@ -259,13 +275,10 @@ elif USE_AZURE:
 
     using_account_key = bool(AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY)
     using_connection_string = bool(AZURE_CONNECTION_STRING)
-    using_managed_identity = os.getenv("AZURE_USE_MANAGED_IDENTITY", "False").lower() in (
-        "true",
-        "1",
-        "yes",
-    )
 
-    active_auth_methods = sum([using_account_key, using_connection_string, using_managed_identity])
+    active_auth_methods = sum(
+        [using_account_key, using_connection_string, using_managed_identity]
+    )
 
     if active_auth_methods > 1:
         raise ImproperlyConfigured(
