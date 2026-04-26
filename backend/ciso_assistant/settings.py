@@ -256,6 +256,14 @@ elif USE_AZURE:
     AZURE_CONTAINER = os.getenv("AZURE_CONTAINER", "ciso-assistant-container")
     AZURE_CUSTOM_DOMAIN = os.getenv("AZURE_CUSTOM_DOMAIN")
 
+    if bool(AZURE_ACCOUNT_NAME) != bool(AZURE_ACCOUNT_KEY):
+        missing = "AZURE_ACCOUNT_NAME" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_KEY"
+        present = "AZURE_ACCOUNT_KEY" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_NAME"
+        raise ImproperlyConfigured(
+            f"{present} is set but {missing} is missing. "
+            "Both AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY are required for Account Key authentication."
+        )
+
     using_account_key = bool(AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY)
     using_connection_string = bool(AZURE_CONNECTION_STRING)
     using_managed_identity = os.getenv("AZURE_USE_MANAGED_IDENTITY", "False").lower() in (
@@ -283,14 +291,6 @@ elif USE_AZURE:
         )
 
     if using_account_key:
-        if not AZURE_ACCOUNT_NAME:
-            raise ImproperlyConfigured(
-                "AZURE_ACCOUNT_KEY is set but AZURE_ACCOUNT_NAME is missing."
-            )
-        if not AZURE_ACCOUNT_KEY:
-            raise ImproperlyConfigured(
-                "AZURE_ACCOUNT_NAME is set but AZURE_ACCOUNT_KEY is missing."
-            )
         logger.info("Using Azure Account Key for Blob Storage authentication")
 
     elif using_connection_string:

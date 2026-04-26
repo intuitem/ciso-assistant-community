@@ -452,6 +452,7 @@ export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>  # required for S3-compatible 
 # export USE_AZURE=True
 # export AZURE_CONTAINER=<your-container-name>          # default: ciso-assistant-container
 # export AZURE_CUSTOM_DOMAIN=<your-custom-domain>       # optional, e.g., cdn.example.com
+# export AZURE_LOCATION=<path-prefix>                   # optional, path prefix within the container (e.g., "media")
 
 # Azure Authentication Option 1: Account Key
 # export AZURE_ACCOUNT_NAME=<your-storage-account-name>
