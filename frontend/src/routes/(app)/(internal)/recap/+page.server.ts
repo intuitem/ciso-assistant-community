@@ -1,152 +1,114 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL, complianceResultColorMap } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 import { m } from '$paraglide/messages';
 
-const REQUIREMENT_ASSESSMENT_STATUS = [
-	'compliant',
+const RESULT_ORDER = [
+	'not_assessed',
 	'partially_compliant',
-	'in_progress',
 	'non_compliant',
-	'not_applicable',
-	'to_do'
+	'compliant',
+	'not_applicable'
 ] as const;
 
-interface DonutItem {
-	name: string;
-	localName?: string;
-	value: number;
-	itemStyle: Record<string, unknown>;
-}
+type ResultKey = (typeof RESULT_ORDER)[number];
+type ResultCounts = Partial<Record<ResultKey, number>>;
 
-interface RequirementAssessmentDonutItem extends Omit<DonutItem, 'name'> {
-	name: (typeof REQUIREMENT_ASSESSMENT_STATUS)[number];
-	percentage: string;
-}
-
-interface FolderAnalytics {
+interface RawRecapAssessment {
 	id: string;
 	name: string;
-	compliance_assessments: Record<string, any>[];
-	overallCompliance: {
-		values: RequirementAssessmentDonutItem[];
-		total: number;
+	framework_name: string;
+	result_counts: ResultCounts;
+	global_score: {
+		maturity_score: number | null;
+		max_score: number;
+	};
+}
+
+interface RawRecapFolder {
+	id: string;
+	name: string;
+	compliance_assessments: RawRecapAssessment[];
+}
+
+function buildDonutValues(resultCounts: ResultCounts) {
+	return RESULT_ORDER.map((result) => ({
+		name: result,
+		value: resultCounts[result] ?? 0,
+		itemStyle: { color: complianceResultColorMap[result] ?? '#d1d5db' }
+	}));
+}
+
+function buildOverallCompliance(complianceAssessments: RawRecapAssessment[]) {
+	const counts = Object.fromEntries(RESULT_ORDER.map((result) => [result, 0])) as Record<
+		ResultKey,
+		number
+	>;
+
+	for (const assessment of complianceAssessments) {
+		for (const result of RESULT_ORDER) {
+			counts[result] += assessment.result_counts[result] ?? 0;
+		}
+	}
+
+	const total = Object.values(counts).reduce((sum, value) => sum + value, 0);
+
+	return {
+		values: RESULT_ORDER.map((result) => ({
+			name: result,
+			value: counts[result],
+			itemStyle: { color: complianceResultColorMap[result] ?? '#d1d5db' },
+			percentage: total > 0 ? ((counts[result] / total) * 100).toFixed(1) : '0'
+		})),
+		total
+	};
+}
+
+function shapeFolderForRecap(folder: RawRecapFolder) {
+	const complianceAssessments = folder.compliance_assessments.map((assessment) => ({
+		id: assessment.id,
+		name: assessment.name,
+		framework: {
+			str: assessment.framework_name
+		},
+		donut: {
+			result: {
+				values: buildDonutValues(assessment.result_counts)
+			}
+		},
+		globalScore: assessment.global_score
+	}));
+
+	return {
+		id: folder.id,
+		name: folder.name,
+		compliance_assessments: complianceAssessments,
+		overallCompliance: buildOverallCompliance(folder.compliance_assessments)
 	};
 }
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-	const folders: FolderAnalytics[] = await fetch(`${BASE_API_URL}/folders/`)
-		.then((res) => res.json())
-		.then(async (folders) => {
-			if (folders && Array.isArray(folders.results)) {
-				const folderPromises = folders.results.map(async (folder) => {
-					try {
-						const complianceAssessmentsResponse = await fetch(
-							`${BASE_API_URL}/compliance-assessments/?folder=${folder.id}`
-						);
-						const complianceAssessmentsData = await complianceAssessmentsResponse.json();
-
-						if (complianceAssessmentsData && Array.isArray(complianceAssessmentsData.results)) {
-							const updatedAssessmentsPromises = complianceAssessmentsData.results.map(
-								async (complianceAssessment) => {
-									try {
-										const [donutDataResponse, globalScoreResponse] = await Promise.all([
-											fetch(
-												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/donut_data/`
-											),
-											fetch(
-												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/global_score/`
-											)
-										]);
-
-										const [donutData, globalScoreData] = await Promise.all([
-											donutDataResponse.json(),
-											globalScoreResponse.json()
-										]);
-
-										complianceAssessment.donut = donutData;
-										complianceAssessment.globalScore = globalScoreData;
-										return complianceAssessment;
-									} catch (error) {
-										console.error('Error fetching data for compliance assessment:', error);
-										throw error;
-									}
-								}
-							);
-
-							const updatedAssessments = await Promise.all(updatedAssessmentsPromises);
-							folder.compliance_assessments = updatedAssessments;
-							return folder;
-						} else {
-							folder.compliance_assessments = [];
-							return folder;
-						}
-					} catch (error) {
-						console.error('Error fetching compliance assessments:', error);
-						folder.compliance_assessments = [];
-						return folder;
-					}
-				});
-
-				return Promise.all(folderPromises);
-			} else {
-				throw new Error('Folders results not found or not an array');
-			}
-		})
-		.catch((error) => {
-			console.error('Failed to load folders:', error);
-			return [];
-		});
-
-	if (folders) {
-		folders.forEach((folder) => {
-			// Initialize an object to hold the aggregated donut data
-			const aggregatedDonutData: {
-				values: RequirementAssessmentDonutItem[];
-				total: number;
-			} = {
-				values: [],
-				total: 0
-			};
-
-			// Iterate through each compliance assessment of the folder
-			if (folder.compliance_assessments) {
-				folder.compliance_assessments.forEach((compliance_assessment: Record<string, any>) => {
-					// Process the donut data of each assessment
-					if (compliance_assessment.donut?.result?.values) {
-						compliance_assessment.donut.result.values.forEach(
-							(donutItem: RequirementAssessmentDonutItem) => {
-								// Find the corresponding item in the aggregated data
-								const aggregatedItem: RequirementAssessmentDonutItem | undefined =
-									aggregatedDonutData.values.find((item) => item.name === donutItem.name);
-								if (aggregatedItem) {
-									// If the item already exists, increment its value
-									aggregatedItem.value += donutItem.value;
-								} else {
-									// If it's a new item, add it to the aggregated data
-									aggregatedDonutData.values.push({ ...donutItem });
-								}
-							}
-						);
-					}
-				});
-			}
-
-			// Calculate the total sum of all values
-			const totalValue = aggregatedDonutData.values.reduce((sum, item) => sum + item.value, 0);
-
-			// Calculate and store the percentage for each item
-			aggregatedDonutData.values = aggregatedDonutData.values.map((item) => ({
-				...item,
-				percentage: totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : '0'
-			}));
-
-			// Assign the aggregated donut data to the folder
-			folder.overallCompliance = aggregatedDonutData;
-		});
-	}
+	const getFolders = async () => {
+		// Stream recap data so the route can render a loading state immediately
+		// after navigation, instead of blocking the whole page transition.
+		return fetch(`${BASE_API_URL}/compliance-assessments/recap/`)
+			.then(async (res) => {
+				if (!res.ok) {
+					throw new Error(`Failed to load recap data: ${res.status} ${res.statusText}`);
+				}
+				return res.json();
+			})
+			.then((data) => ((data.results ?? []) as RawRecapFolder[]).map(shapeFolderForRecap))
+			.catch((error) => {
+				// Keep the page renderable even if the recap endpoint fails temporarily.
+				console.error('Failed to load recap:', error);
+				return [];
+			});
+	};
 
 	return {
-		folders,
+		stream: {
+			folders: getFolders()
+		},
 		user: locals.user,
 		title: m.recap()
 	};

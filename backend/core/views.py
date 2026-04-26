@@ -64,6 +64,7 @@ from docxtpl import DocxTemplate
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
+from .compliance_summary import build_compliance_recap_results
 from .generators import gen_audit_context
 from .serializer_fields import FieldsRelatedField
 
@@ -10492,6 +10493,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
+
+    @action(detail=False, methods=["get"], url_path="recap")
+    def recap(self, request):
+        """Return the raw data needed by the /recap page in a single response."""
+        results = build_compliance_recap_results(self.get_queryset())
+        return Response({"results": results})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get score calculation method choices")
