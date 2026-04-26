@@ -425,6 +425,9 @@ export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
 # CISO Assistant will use filesystem storage backend by default.
+# Only one cloud storage backend can be active at a time (USE_S3 and USE_AZURE are mutually exclusive).
+
+# --- AWS S3 ---
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
@@ -442,6 +445,26 @@ export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>  # required for S3-compatible 
 # No explicit configuration is needed - just ensure USE_S3=True and AWS_STORAGE_BUCKET_NAME are set.
 # export AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token
 # export AWS_ROLE_ARN=arn:aws:iam::123456789012:role/ciso-assistant-s3-role
+
+# --- Azure Blob Storage ---
+# You can use an Azure Blob Storage container instead of S3.
+# The container must be created before starting CISO Assistant.
+# export USE_AZURE=True
+# export AZURE_CONTAINER=<your-container-name>          # default: ciso-assistant-container
+# export AZURE_CUSTOM_DOMAIN=<your-custom-domain>       # optional, e.g., cdn.example.com
+# export AZURE_LOCATION=<path-prefix>                   # optional, path prefix within the container (e.g., "media")
+
+# Azure Authentication Option 1: Account Key
+# export AZURE_ACCOUNT_NAME=<your-storage-account-name>
+# export AZURE_ACCOUNT_KEY=<your-storage-account-key>
+
+# Azure Authentication Option 2: Connection String
+# export AZURE_CONNECTION_STRING=<your-connection-string>
+
+# Azure Authentication Option 3: Managed Identity (for Azure-hosted deployments)
+# Requires AZURE_ACCOUNT_NAME. The pod/VM's assigned managed identity is used automatically.
+# export AZURE_ACCOUNT_NAME=<your-storage-account-name>
+# export AZURE_USE_MANAGED_IDENTITY=True
 
 # Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
