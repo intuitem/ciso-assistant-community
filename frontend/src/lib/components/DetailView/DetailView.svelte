@@ -5,6 +5,7 @@
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import CreateSAKeyModal from '$lib/components/CreateSAKeyModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
@@ -82,7 +83,8 @@
 			'due_date',
 			'start_date',
 			'closing_date',
-			'commission_date'
+			'commission_date',
+			'date_joined'
 		],
 		widgets,
 		actions,
@@ -173,15 +175,21 @@
 		};
 	});
 
-	function modalCreateForm(model: Record<string, any>): void {
+	const customCreateComponents: Record<string, any> = {
+		'service-account-keys': CreateSAKeyModal
+	};
+
+	function modalCreateForm(model: Record<string, any>, field?: ReverseForeignKeyField): void {
+		const ref = customCreateComponents[model.urlModel] ?? CreateModal;
+		const isCustomComponent = ref !== CreateModal;
 		let modalComponent: ModalComponent = {
-			ref: CreateModal,
+			ref,
 			props: {
 				form: model.createForm,
 				model: model,
 				debug: false,
 				additionalInitialData: model.initialData,
-				formAction: `/${model.urlModel}?/create`
+				formAction: isCustomComponent ? '?/create' : `/${model.urlModel}?/create`
 			}
 		};
 		let modal: ModalSettings = {
@@ -932,7 +940,7 @@
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 												data-testid="add-button"
 												title={safeTranslate('add-' + model.info.localName)}
-												onclick={(_) => modalCreateForm(model)}
+												onclick={(_) => modalCreateForm(model, field)}
 											>
 												<i class="fa-solid fa-file-circle-plus"></i>
 											</button>
@@ -955,7 +963,7 @@
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
 											data-testid="add-button"
-											onclick={(_) => modalCreateForm(model)}
+											onclick={(_) => modalCreateForm(model, field)}
 											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
 												'add-' + model.info.localName
 											)}</button

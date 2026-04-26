@@ -641,6 +641,13 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         null=True,
         verbose_name=_("Expiry date"),
     )
+    is_service_account = models.BooleanField(
+        default=False,
+        help_text=_(
+            "Designates whether this user is a service account. "
+            "Service accounts can only authenticate via API keys, not via login form or SSO."
+        ),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -1550,9 +1557,7 @@ class FolderDisplayContext:
 
 
 class PersonalAccessToken(models.Model):
-    """
-    Personal Access Token model.
-    """
+    """Personal Access Token model. Also used as API keys for service accounts."""
 
     name = models.CharField(max_length=255)
     auth_token = models.ForeignKey(AuthToken, on_delete=models.CASCADE)
@@ -1571,6 +1576,9 @@ class PersonalAccessToken(models.Model):
 
     def __str__(self):
         return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
+
+
+SA_EMAIL_DOMAIN = "serviceaccount.ciso-assistant.com"
 
 
 common_exclude = ["created_at", "updated_at"]

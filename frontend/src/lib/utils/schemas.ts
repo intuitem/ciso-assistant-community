@@ -663,7 +663,8 @@ export const FeatureFlagsSchema = z.object({
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
 	journeys: z.boolean().optional(),
-	policy_documents: z.boolean().optional()
+	policy_documents: z.boolean().optional(),
+	service_accounts: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1495,6 +1496,47 @@ export const AuthTokenCreateSchema = z.object({
 	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
+const _saExpiryDate = z
+	.union([z.literal('').transform(() => null), z.iso.date()])
+	.nullish()
+	.refine(
+		(val) => {
+			if (!val) return true;
+			const expiryDate = new Date(val);
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			return expiryDate >= today;
+		},
+		{ message: 'Expiry date cannot be in the past' }
+	);
+
+export const ServiceAccountCreateSchema = z.object({
+	slug: z
+		.string()
+		.min(1)
+		.max(64)
+		.regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/, {
+			message: 'Lowercase alphanumeric and hyphens only, no leading/trailing hyphens'
+		}),
+	description: z.string().max(500).optional().default(''),
+	expiry_date: _saExpiryDate
+});
+
+export const ServiceAccountUpdateSchema = z.object({
+	description: z.string().max(500).optional(),
+	expiry_date: _saExpiryDate
+});
+
+export const ServiceAccountKeyCreateSchema = z.object({
+	service_account: z.string().uuid().optional(),
+	name: z.string().min(1).max(64),
+	expiry_days: z.number().int().min(1).max(365).default(30)
+});
+
+export const ServiceAccountKeyUpdateSchema = z.object({
+	name: z.string().min(1).max(64).optional()
+});
+
 export const ElementaryActionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1753,7 +1795,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
 	teams: teamSchema,
 	'managed-documents': ManagedDocumentSchema,
-	'document-revisions': DocumentRevisionSchema
+	'document-revisions': DocumentRevisionSchema,
+	'service-account-keys': ServiceAccountKeyCreateSchema
 };
 
 export const modelSchema = (model: string) => {

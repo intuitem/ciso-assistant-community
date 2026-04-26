@@ -1319,6 +1319,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_indexeddocument",
     "change_indexeddocument",
     "delete_indexeddocument",
+    "add_personalaccesstoken",
+    "view_personalaccesstoken",
+    "change_personalaccesstoken",
+    "delete_personalaccesstoken",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

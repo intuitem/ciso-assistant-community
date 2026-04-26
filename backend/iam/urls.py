@@ -9,6 +9,12 @@ from .views import (
     LoginView,
     PasswordResetView,
     ResetPasswordConfirmView,
+    ServiceAccountDetailView,
+    ServiceAccountKeyDetailView,
+    ServiceAccountKeyFlatDetailView,
+    ServiceAccountKeyFlatListCreateView,
+    ServiceAccountKeyListCreateView,
+    ServiceAccountListCreateView,
     SessionTokenView,
     SetPasswordView,
     RevokeOtherSessionsView,
@@ -39,5 +45,36 @@ urlpatterns = [
         "auth-tokens/<str:pk>/",
         AuthTokenDetailView.as_view(),
         name="auth-token-detail",
+    ),
+    # Service accounts
+    path(
+        "service-accounts/",
+        ServiceAccountListCreateView.as_view(),
+        name="service-accounts",
+    ),
+    path(
+        "service-accounts/<uuid:pk>/",
+        ServiceAccountDetailView.as_view(),
+        name="service-account-detail",
+    ),
+    path(
+        "service-accounts/<uuid:sa_pk>/keys/",
+        ServiceAccountKeyListCreateView.as_view(),
+        name="service-account-keys",
+    ),
+    path(
+        "service-accounts/<uuid:sa_pk>/keys/<int:key_pk>/",
+        ServiceAccountKeyDetailView.as_view(),
+        name="service-account-key-detail",
+    ),
+    path(
+        "service-account-keys/",
+        ServiceAccountKeyFlatListCreateView.as_view(),
+        name="service-account-keys-flat",
+    ),
+    path(
+        "service-account-keys/<int:pk>/",
+        ServiceAccountKeyFlatDetailView.as_view(),
+        name="service-account-key-flat-detail",
     ),
 ]

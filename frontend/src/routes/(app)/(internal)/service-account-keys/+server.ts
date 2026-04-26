@@ -1,0 +1,22 @@
+import { BASE_API_URL } from '$lib/utils/constants';
+import { getModelInfo } from '$lib/utils/crud';
+import { error, type NumericRange } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+export const GET: RequestHandler = async ({ fetch, url }) => {
+	const model = getModelInfo('service-account-keys');
+	const qs = url.searchParams.toString();
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${qs ? '?' + qs : ''}`;
+
+	const res = await fetch(endpoint);
+	if (!res.ok) {
+		const body = await res.json().catch(() => ({ detail: 'Request failed' }));
+		error(res.status as NumericRange<400, 599>, body);
+	}
+
+	const data = await res.json().catch(() => ({}));
+	return new Response(JSON.stringify(data), {
+		status: res.status,
+		headers: { 'Content-Type': 'application/json' }
+	});
+};

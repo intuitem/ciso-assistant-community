@@ -56,6 +56,8 @@ export const URL_MODEL = [
 	'actors',
 	'teams',
 	'users',
+	'service-accounts',
+	'service-account-keys',
 	'user-groups',
 	'roles',
 	'role-assignments',

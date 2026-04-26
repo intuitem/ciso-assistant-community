@@ -62,6 +62,14 @@
 
 	onMount(async () => {
 		try {
+			if (URLModel === 'service-account-keys') {
+				// don't fetch cascade info for service account keys, since thecascade info endpoint doesn't support them
+				cascadeInfo = {
+					deleted: { count: 0, grouped_objects: [] },
+					affected: { count: 0, grouped_objects: [] }
+				};
+				return;
+			}
 			const res = await fetch(`/fe-api/cascade-info/${URLModel}/${id}`);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			cascadeInfo = await res.json();
