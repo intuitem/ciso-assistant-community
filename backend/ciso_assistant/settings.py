@@ -156,6 +156,12 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
 
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
+USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
+
+if USE_S3 and USE_AZURE:
+    raise ImproperlyConfigured(
+        "Both USE_S3 and USE_AZURE are enabled. Please configure only one storage backend."
+    )
 
 if USE_S3:
     STORAGES = {
@@ -233,6 +239,85 @@ if USE_S3:
 
     AWS_LOCATION = os.getenv("AWS_LOCATION", "")
     AWS_S3_FILE_OVERWRITE = False
+
+elif USE_AZURE:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME")
+    AZURE_ACCOUNT_KEY = os.getenv("AZURE_ACCOUNT_KEY")
+    AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
+    AZURE_CONTAINER = os.getenv("AZURE_CONTAINER", "ciso-assistant-container")
+    AZURE_CUSTOM_DOMAIN = os.getenv("AZURE_CUSTOM_DOMAIN")
+
+    using_account_key = bool(AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY)
+    using_connection_string = bool(AZURE_CONNECTION_STRING)
+    using_managed_identity = os.getenv("AZURE_USE_MANAGED_IDENTITY", "False").lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+
+    active_auth_methods = sum([using_account_key, using_connection_string, using_managed_identity])
+
+    if active_auth_methods > 1:
+        raise ImproperlyConfigured(
+            "Ambiguous Azure credentials configuration. Please configure only one "
+            "authentication method: Account Key (AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), "
+            "Connection String (AZURE_CONNECTION_STRING), or "
+            "Managed Identity (AZURE_USE_MANAGED_IDENTITY=True)."
+        )
+
+    if active_auth_methods == 0:
+        raise ImproperlyConfigured(
+            "Azure credentials not configured. Either set AZURE_ACCOUNT_NAME and "
+            "AZURE_ACCOUNT_KEY for Account Key authentication, AZURE_CONNECTION_STRING "
+            "for Connection String authentication, or AZURE_USE_MANAGED_IDENTITY=True "
+            "for Managed Identity authentication."
+        )
+
+    if using_account_key:
+        if not AZURE_ACCOUNT_NAME:
+            raise ImproperlyConfigured(
+                "AZURE_ACCOUNT_KEY is set but AZURE_ACCOUNT_NAME is missing."
+            )
+        if not AZURE_ACCOUNT_KEY:
+            raise ImproperlyConfigured(
+                "AZURE_ACCOUNT_NAME is set but AZURE_ACCOUNT_KEY is missing."
+            )
+        logger.info("Using Azure Account Key for Blob Storage authentication")
+
+    elif using_connection_string:
+        logger.info("Using Azure Connection String for Blob Storage authentication")
+
+    else:
+        if not AZURE_ACCOUNT_NAME:
+            raise ImproperlyConfigured(
+                "AZURE_ACCOUNT_NAME is required when using Managed Identity "
+                "(AZURE_USE_MANAGED_IDENTITY=True)."
+            )
+        logger.info("Using Azure Managed Identity for Blob Storage authentication")
+        from azure.identity import ManagedIdentityCredential
+
+        AZURE_TOKEN_CREDENTIAL = ManagedIdentityCredential()
+        # Clear key/connection string so django-storages uses the token credential only
+        AZURE_ACCOUNT_KEY = None
+        AZURE_CONNECTION_STRING = None
+
+    logger.info("AZURE_CONTAINER: %s", AZURE_CONTAINER)
+    if AZURE_ACCOUNT_NAME:
+        logger.info("AZURE_ACCOUNT_NAME: %s", AZURE_ACCOUNT_NAME)
+    if AZURE_CUSTOM_DOMAIN:
+        logger.info("AZURE_CUSTOM_DOMAIN: %s", AZURE_CUSTOM_DOMAIN)
+
+    AZURE_LOCATION = os.getenv("AZURE_LOCATION", "")
+    AZURE_OVERWRITE_FILES = False
 
 else:
     MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
