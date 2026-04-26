@@ -1,11 +1,14 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import FolderTreeNode from './FolderTreeNode.svelte';
 
 	export interface TreeNode {
 		name: string;
-		uuid: string | null;
-		content_type?: string;
-		children?: TreeNode[];
+		uuid: string;
+		content_type: string;
+		/** When false, the node exists in the tree for navigation only and cannot be selected. */
+		writable: boolean;
+		children: TreeNode[];
 	}
 
 	interface Props {
@@ -36,12 +39,28 @@
 	});
 
 	const hasChildren = $derived((node.children ?? []).length > 0);
-	let isExpanded = $state(false);
+
+	/** Returns true if `n` or any of its descendants is writable. */
+	function subtreeHasWritable(n: TreeNode): boolean {
+		if (n.writable) return true;
+		return (n.children ?? []).some(subtreeHasWritable);
+	}
+
+	// Auto-expand non-writable ancestor nodes that contain writable descendants
+	// Only triggers when a write_perm filter is active (node.writable === false means
+	// a filter is in use and this node is an ancestor-only entry).
+	// Computed once at init (untrack); user collapses afterward are respected.
+	const shouldAutoExpand = untrack(
+		() => node.writable === false && (node.children ?? []).some(subtreeHasWritable)
+	);
+
+	let isExpanded = $state(shouldAutoExpand);
 	const isSelected = $derived(node.uuid !== null && focusId === String(node.uuid));
-	// Node is selectable if it has a uuid
-	const isSelectable = $derived(!!node.uuid);
+	// Node is selectable if it has a uuid, matches the allowed content types,
+	// and — when a write_perm filter is active.
+	const isSelectable = $derived(contentTypes.includes(node.content_type) && node.writable);
 	// Whether this node should be shown at all
-	const isVisible = $derived(!node.content_type || contentTypes.includes(node.content_type));
+	const isVisible = $derived(contentTypes.includes(node.content_type));
 
 	// Auto-expand if the selected node is somewhere in this subtree
 	const subtreeHasFocus = $derived.by(() => {
@@ -91,7 +110,11 @@
 				role="option"
 				aria-selected={isSelected}
 				class="flex-1 flex items-center gap-1.5 px-1.5 py-1 text-left rounded text-sm min-w-0 transition-colors
-				{isSelected ? 'bg-indigo-100 text-indigo-700' : 'text-slate-700 hover:bg-indigo-50 cursor-pointer'}"
+				{isSelected
+					? 'bg-indigo-100 text-indigo-700'
+					: isSelectable
+						? 'text-slate-700 hover:bg-indigo-50 cursor-pointer'
+						: 'text-slate-400 cursor-not-allowed'}"
 				title={node.name}
 				onclick={(e) => {
 					e.stopPropagation();

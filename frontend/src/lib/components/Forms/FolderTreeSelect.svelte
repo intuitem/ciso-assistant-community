@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import * as m from '$paraglide/messages';
 	import type { CacheLock } from '$lib/utils/types';
@@ -51,6 +51,9 @@
 		optionsSelf = null,
 		contentTypes = ['DO', 'GL']
 	}: Props = $props();
+
+	// Write permission is inferred from ModelForm context: add_<model.name>.
+	const defaultWritePermission = getContext<string | undefined>('folderTreeDefaultWritePermission');
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
@@ -114,7 +117,8 @@
 		if (!q) return null;
 		const results: SearchResult[] = [];
 		function visit(n: TreeNode, ancestors: string[]) {
-			const selectable = !n.content_type || contentTypes.includes(n.content_type);
+			const selectable =
+				(!n.content_type || contentTypes.includes(n.content_type)) && n.writable !== false;
 			if (selectable && n.uuid !== excludedId && n.uuid && n.name.toLowerCase().includes(q)) {
 				results.push({ node: n, path: ancestors });
 			}
@@ -205,8 +209,11 @@
 
 		isLoading = true;
 		const includeEnclaves = contentTypes.includes('EN');
+		const writePerm = defaultWritePermission
+			? `&write_perm=${encodeURIComponent(defaultWritePermission)}`
+			: '';
 		fetch(
-			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}`
+			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}${writePerm}`
 		)
 			.then((res) => {
 				if (res.ok) return res.json();
