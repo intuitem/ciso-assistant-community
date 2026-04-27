@@ -149,13 +149,13 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `domain` | No | Folder lookup |
 | `ref_id` | No | Reference ID |
 | `description` | No | |
-| `status` | No | |
+| `status` | No | Alias accepted (mapped to `lc_status`) |
+| `default_assignee` | No | User email or team name, comma/semicolon/pipe separated |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `reference_link` | URLField | Medium |
-| `filtering_labels` | M2M | Medium |
+| None | - | - |
 
 ---
 
