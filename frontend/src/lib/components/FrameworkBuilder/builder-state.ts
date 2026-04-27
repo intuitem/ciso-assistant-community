@@ -7,6 +7,7 @@ import {
 	apiStartEditing,
 	type DraftJSON
 } from './builder-api';
+import { m } from '$paraglide/messages';
 
 // --- Types ---
 
@@ -517,11 +518,11 @@ export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): Validati
 	const errors: ValidationError[] = [];
 
 	if (!fw.name || fw.name.trim().length === 0) {
-		errors.push({ key: 'publish', message: 'Framework name is required.' });
+		errors.push({ key: 'publish', message: m.builderFrameworkNameRequired() });
 	} else if (fw.name.length > 200) {
 		errors.push({
 			key: 'publish',
-			message: `Framework name is ${fw.name.length} characters (max 200).`
+			message: m.builderFrameworkNameTooLong({ length: fw.name.length })
 		});
 	}
 
@@ -532,19 +533,19 @@ export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): Validati
 			if (n.name && n.name.length > 200) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `Name exceeds 200 characters (${n.name.length}/200). Move long text to the description field.`
+					message: m.builderNodeNameTooLong({ length: n.name.length })
 				});
 			}
 			if (n.ref_id && n.ref_id.length > 100) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `'${label}': ref_id is ${n.ref_id.length} characters (max 100).`
+					message: m.builderRefIdTooLong({ label, length: n.ref_id.length })
 				});
 			}
 			if (n.urn && n.urn.length > 255) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `'${label}': URN is ${n.urn.length} characters (max 255).`
+					message: m.builderUrnTooLong({ label, length: n.urn.length })
 				});
 			}
 			validate(bn.children);
@@ -693,12 +694,12 @@ export function createBuilderState(
 	}
 
 	function setError(key: string, message: string) {
-		errors.update((m) => new Map(m).set(key, message));
+		errors.update((map) => new Map(map).set(key, message));
 	}
 
 	function clearError(key: string) {
-		errors.update((m) => {
-			const next = new Map(m);
+		errors.update((map) => {
+			const next = new Map(map);
 			next.delete(key);
 			return next;
 		});
@@ -765,13 +766,13 @@ export function createBuilderState(
 	async function publish() {
 		const saved = await flushDraft();
 		if (!saved) {
-			setError('publish', 'Failed to save draft before publishing.');
+			setError('publish', m.builderFailedToSaveDraftBeforePublish());
 			return;
 		}
 
 		// Clear previous node-level validation errors
-		errors.update((m) => {
-			const next = new Map(m);
+		errors.update((map) => {
+			const next = new Map(map);
 			for (const key of next.keys()) {
 				if (key.startsWith('node-')) next.delete(key);
 			}

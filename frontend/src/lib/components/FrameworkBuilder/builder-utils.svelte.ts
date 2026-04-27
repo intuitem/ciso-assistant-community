@@ -1,4 +1,5 @@
 import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+import { m } from '$paraglide/messages';
 
 // ----- locale helpers (F1) -----
 
@@ -19,38 +20,80 @@ export function localeLabel(code: string): string {
 
 export interface QuestionTypeInfo {
 	value: string;
-	label: string;
+	get label(): string;
 	icon: string;
 	color: string;
 }
 
+/** Human label for a question type, resolved against the active locale. */
+export function questionTypeLabel(type: string): string {
+	switch (type) {
+		case 'text':
+			return m.text();
+		case 'number':
+			return m.number();
+		case 'boolean':
+			return m.boolean();
+		case 'unique_choice':
+			return m.uniqueChoice();
+		case 'multiple_choice':
+			return m.multipleChoice();
+		case 'date':
+			return m.date();
+		default:
+			return type.replace('_', ' ');
+	}
+}
+
 export const QUESTION_TYPES: QuestionTypeInfo[] = [
-	{ value: 'text', label: 'Text', icon: 'fa-font', color: 'text-blue-600 bg-blue-50' },
+	{
+		value: 'text',
+		get label() {
+			return m.text();
+		},
+		icon: 'fa-font',
+		color: 'text-blue-600 bg-blue-50'
+	},
 	{
 		value: 'number',
-		label: 'Number',
+		get label() {
+			return m.number();
+		},
 		icon: 'fa-hashtag',
 		color: 'text-emerald-600 bg-emerald-50'
 	},
 	{
 		value: 'boolean',
-		label: 'Boolean',
+		get label() {
+			return m.boolean();
+		},
 		icon: 'fa-toggle-on',
 		color: 'text-green-600 bg-green-50'
 	},
 	{
 		value: 'unique_choice',
-		label: 'Single Choice',
+		get label() {
+			return m.uniqueChoice();
+		},
 		icon: 'fa-circle-dot',
 		color: 'text-violet-600 bg-violet-50'
 	},
 	{
 		value: 'multiple_choice',
-		label: 'Multiple Choice',
+		get label() {
+			return m.multipleChoice();
+		},
 		icon: 'fa-square-check',
 		color: 'text-purple-600 bg-purple-50'
 	},
-	{ value: 'date', label: 'Date', icon: 'fa-calendar', color: 'text-amber-600 bg-amber-50' }
+	{
+		value: 'date',
+		get label() {
+			return m.date();
+		},
+		icon: 'fa-calendar',
+		color: 'text-amber-600 bg-amber-50'
+	}
 ];
 
 /** Map from type value to Font Awesome icon class. */

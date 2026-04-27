@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getBuilderContext, type NodePreset } from './builder-state';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		parent: string | null;
@@ -11,7 +12,7 @@
 	let {
 		parent,
 		afterIndex,
-		triggerLabel = '+ Add node',
+		triggerLabel = m.builderAddNode(),
 		triggerClass = '',
 		onBeforeAdd
 	}: Props = $props();
@@ -59,8 +60,8 @@
 				class="w-full px-3 py-2 text-left hover:bg-gray-50"
 				onclick={() => addWith('blank')}
 			>
-				<div class="text-sm text-gray-700">Blank node</div>
-				<div class="text-xs text-gray-400">Empty — flip flags yourself</div>
+				<div class="text-sm text-gray-700">{m.builderBlankNode()}</div>
+				<div class="text-xs text-gray-400">{m.builderBlankNodeHint()}</div>
 			</button>
 			<div class="border-t border-gray-100 my-1"></div>
 			<button
@@ -70,9 +71,9 @@
 				onclick={() => addWith('group')}
 			>
 				<div class="text-sm text-gray-700">
-					<i class="fa-solid fa-folder text-gray-400 mr-1"></i>Group
+					<i class="fa-solid fa-folder text-gray-400 mr-1"></i>{m.builderGroup()}
 				</div>
-				<div class="text-xs text-gray-400">Non-assessable, for nesting</div>
+				<div class="text-xs text-gray-400">{m.builderGroupHint()}</div>
 			</button>
 			<button
 				type="button"
@@ -81,9 +82,9 @@
 				onclick={() => addWith('requirement')}
 			>
 				<div class="text-sm text-gray-700">
-					<i class="fa-solid fa-square-check text-green-500 mr-1"></i>Requirement
+					<i class="fa-solid fa-square-check text-green-500 mr-1"></i>{m.requirement()}
 				</div>
-				<div class="text-xs text-gray-400">Assessable, can still have children</div>
+				<div class="text-xs text-gray-400">{m.builderRequirementHint()}</div>
 			</button>
 			<button
 				type="button"
@@ -92,9 +93,9 @@
 				onclick={() => addWith('splash')}
 			>
 				<div class="text-sm text-gray-700">
-					<i class="fa-solid fa-display text-purple-400 mr-1"></i>Splash screen
+					<i class="fa-solid fa-display text-purple-400 mr-1"></i>{m.builderSplashScreen()}
 				</div>
-				<div class="text-xs text-gray-400">Presentational, non-assessable</div>
+				<div class="text-xs text-gray-400">{m.builderSplashScreenHint()}</div>
 			</button>
 		</div>
 	{/if}
