@@ -320,9 +320,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     security_advisories = serializers.BooleanField(
         source="value.security_advisories", required=False, default=True
     )
-    cwes = serializers.BooleanField(
-        source="value.cwes", required=False, default=True
-    )
+    cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
 
     class Meta:
         model = GlobalSettings
