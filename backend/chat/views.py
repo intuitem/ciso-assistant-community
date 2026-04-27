@@ -20,11 +20,12 @@ class ChatMessageThrottle(UserRateThrottle):
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from .constants import (
     LANG_MAP,
-    LLM_HISTORY_LIMIT,
     MODEL_CONTEXT_TOKENS,
     RAG_CONTEXT_TOKENS,
+    VERBATIM_WINDOW_TOKENS,
 )
 from .context import ContextBuilder
+from .memory import pack_verbatim_window
 from .models import ChatSession, ChatMessage, IndexedDocument
 from .page_context import parse_page_context
 from .providers import get_llm, is_ollama_available
@@ -185,9 +186,10 @@ class ChatSessionViewSet(BaseModelViewSet):
             # Combine standard tools + context-aware workflow tools
             all_tools = get_tools() + get_workflow_tools(parsed_context)
 
-            history_for_tool = list(
-                session.messages.order_by("created_at").values("role", "content")
-            )[-20:]
+            history_for_tool = pack_verbatim_window(
+                list(session.messages.order_by("created_at").values("role", "content")),
+                VERBATIM_WINDOW_TOKENS,
+            )
 
             t0 = time.time()
             tool_response = llm.tool_call(
@@ -504,8 +506,10 @@ class ChatSessionViewSet(BaseModelViewSet):
             and history_messages[-1]["content"] == user_content
         ):
             history_messages = history_messages[:-1]
-        # Keep only the last 20 messages to stay within context limits
-        history_messages = history_messages[-LLM_HISTORY_LIMIT:]
+        # Pack into the verbatim-window token budget
+        history_messages = pack_verbatim_window(
+            history_messages, VERBATIM_WINDOW_TOKENS
+        )
 
         # Assemble context with structured priorities
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]

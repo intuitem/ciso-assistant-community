@@ -8,9 +8,6 @@ MAX_MESSAGE_LENGTH = 10000
 # Max characters for page_context field values
 MAX_CONTEXT_FIELD_LENGTH = 200
 
-# Max conversation history messages sent to the LLM
-LLM_HISTORY_LIMIT = 20
-
 # Token budget knobs (env-overridable). Phase 1 uses RAG_CONTEXT_TOKENS only;
 # the rest are defined now so later phases (verbatim window, summary, tool
 # replay) don't have to touch this file again.
