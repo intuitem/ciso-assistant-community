@@ -14,6 +14,21 @@ fi
 
 cp ./docker-compose-custom.yml ../docker-compose.yml
 
+mkdir -p ./db
+
+if is_linux_gnu_stat; then
+  DB_OWNER="$(get_owner_linux ./db)"
+  if [ "$DB_OWNER" != "$EXPECTED_OWNER" ]; then
+    echo "Fixing ownership of ./db (was $DB_OWNER, expected $EXPECTED_OWNER)"
+    if ! chown -R "$EXPECTED_OWNER" ./db 2>/dev/null; then
+      echo "chown failed, retrying with sudo..."
+      sudo chown -R "$EXPECTED_OWNER" ./db
+    fi
+  fi
+else
+  echo "Non-Linux (no GNU stat detected): skipping ownership fix for ./db"
+fi
+
 echo "Starting CISO Assistant services..."
 docker compose -f ./docker-compose-custom.yml pull
 echo "Initializing the database. This can take up to 3 minutes, please wait.."
