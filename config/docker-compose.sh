@@ -1,6 +1,16 @@
 #! /bin/bash
 set -euo pipefail
 
+EXPECTED_OWNER="1001:1001"
+
+is_linux_gnu_stat() {
+  stat -c '%u:%g' . >/dev/null 2>&1
+}
+
+get_owner_linux() {
+  stat -c '%u:%g' "$1"
+}
+
 if [ ! -f ./docker-compose-custom.yml ]; then
   echo "Docker compose file doesn't exist. Run 'python3 make_config.py' first."
   exit 1
