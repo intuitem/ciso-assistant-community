@@ -305,13 +305,30 @@
 		}
 	}
 
+	function nextStepKey(): string {
+		if (!draft) return 'step_1';
+		const taken = new Set(draft.steps.map((s) => s.key));
+		let n = draft.steps.length + 1;
+		while (taken.has(`step_${n}`)) n++;
+		return `step_${n}`;
+	}
+
 	function addStep() {
+		insertStep(draft?.steps.length ?? 0);
+	}
+
+	function insertStep(at: number) {
 		if (!draft) return;
-		const key = `step_${draft.steps.length + 1}`;
-		draft.steps = [
-			...draft.steps,
-			{ id: null, key, title: safeTranslate('newStep'), description: '', target_model: null }
-		];
+		const newStep: Step = {
+			id: null,
+			key: nextStepKey(),
+			title: safeTranslate('newStep'),
+			description: '',
+			target_model: null
+		};
+		const next = [...draft.steps];
+		next.splice(Math.max(0, Math.min(at, next.length)), 0, newStep);
+		draft.steps = next;
 	}
 
 	function removeStep(i: number) {
@@ -745,7 +762,33 @@
 					</div>
 				{/if}
 
-				<div class="flex flex-col gap-4">
+				<div class="flex flex-col">
+					{#snippet inserter(at: number)}
+						<button
+							type="button"
+							class="group w-full flex items-center justify-center py-1.5 my-0.5 transition-opacity opacity-30 hover:opacity-100 focus-visible:opacity-100"
+							onclick={() => insertStep(at)}
+							title="Insert step"
+							aria-label="Insert step here"
+						>
+							<span
+								class="h-px flex-1 bg-blue-200 group-hover:bg-blue-400 transition-colors"
+							></span>
+							<span
+								class="mx-2 text-[11px] font-medium text-blue-700 px-2 py-0.5 rounded-full bg-blue-50 group-hover:bg-blue-100 transition-colors inline-flex items-center gap-1"
+							>
+								<i class="fa-solid fa-plus text-[9px]"></i> Insert step
+							</span>
+							<span
+								class="h-px flex-1 bg-blue-200 group-hover:bg-blue-400 transition-colors"
+							></span>
+						</button>
+					{/snippet}
+
+					{#if draft.steps.length > 0}
+						{@render inserter(0)}
+					{/if}
+
 					{#each draft.steps as step, i (i)}
 						{@const ptrMode = getPointerMode(step)}
 						{@const ownedScaffolds = scaffoldsForStep(step)}
@@ -1127,6 +1170,7 @@
 								</div>
 							</div>
 						</div>
+						{@render inserter(i + 1)}
 					{/each}
 				</div>
 			</section>
