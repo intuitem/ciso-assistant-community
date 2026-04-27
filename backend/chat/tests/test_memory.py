@@ -383,3 +383,12 @@ class TestBuildReplayPayload:
         assert payload is not None
         # Truncated to TOOL_REPLAY_TOKENS (default 500) → ≤ 1500 chars under heuristic
         assert len(payload["result_text"]) <= 1500
+
+    def test_propose_create_returns_none(self):
+        # Regression: propose_create has a different result shape (no
+        # 'total_count' / 'display_name'). It must never reach
+        # format_query_result via the capture path. Belt-and-suspenders:
+        # build_replay_payload itself rejects non-whitelisted tools.
+        assert build_replay_payload("propose_create", {}, "anything") is None
+        assert build_replay_payload("attach_existing", {}, "anything") is None
+        assert build_replay_payload("multi_query", {}, "anything") is None

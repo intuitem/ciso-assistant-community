@@ -329,11 +329,18 @@ class ChatSessionViewSet(BaseModelViewSet):
 
             # Build the replay payload from the *raw* result text so the next
             # turn sees evidence, not the prefixed INSTRUCTIONS preamble.
+            # Only formats result shapes that match the tool's expected
+            # output: query_objects → format_query_result (needs total_count
+            # / display_name), search_library → query_result["text"]. Other
+            # tools (propose_create, attach_existing, multi_query) have
+            # different shapes and aren't in REPLAYABLE_TOOLS anyway, so we
+            # skip them and let build_replay_payload return None.
             if query_result:
                 tool_name = tool_response["name"]
+                raw_result_text = ""
                 if tool_name == "search_library":
                     raw_result_text = query_result.get("text", "") or ""
-                else:
+                elif tool_name == "query_objects" and "total_count" in query_result:
                     raw_result_text = format_query_result(query_result)
                 tool_observation_payload = build_replay_payload(
                     tool_name,
@@ -602,6 +609,21 @@ class ChatSessionViewSet(BaseModelViewSet):
             model_context_tokens=MODEL_CONTEXT_TOKENS,
             over_budget=total_prompt_tokens > MODEL_CONTEXT_TOKENS,
         )
+
+        # High-watermark warning: catch overflow precursors. The provider may
+        # silently truncate (e.g. LM Studio's TruncateMiddle) once we cross
+        # the model's actual context, and our `over_budget` flag is only
+        # accurate when MODEL_CONTEXT_TOKENS matches the real provider limit.
+        # Warn when we're at 80% so misconfigured limits surface early.
+        if total_prompt_tokens >= int(MODEL_CONTEXT_TOKENS * 0.8):
+            logger.warning(
+                "llm_context_high_watermark",
+                total_prompt_tokens=total_prompt_tokens,
+                model_context_tokens=MODEL_CONTEXT_TOKENS,
+                utilization_pct=round(
+                    100 * total_prompt_tokens / max(MODEL_CONTEXT_TOKENS, 1), 1
+                ),
+            )
 
         def stream_response():
             """Generator for SSE streaming."""
