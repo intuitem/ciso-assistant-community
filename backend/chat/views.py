@@ -18,11 +18,17 @@ class ChatMessageThrottle(UserRateThrottle):
 
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .constants import LANG_MAP, LLM_HISTORY_LIMIT
+from .constants import (
+    LANG_MAP,
+    LLM_HISTORY_LIMIT,
+    MODEL_CONTEXT_TOKENS,
+    RAG_CONTEXT_TOKENS,
+)
 from .context import ContextBuilder
 from .models import ChatSession, ChatMessage, IndexedDocument
 from .page_context import parse_page_context
 from .providers import get_llm, is_ollama_available
+from .tokens import count_tokens
 from .serializers import (
     ChatSessionListSerializer,
     SendMessageSerializer,
@@ -505,7 +511,7 @@ class ChatSessionViewSet(BaseModelViewSet):
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
         lang_name = LANG_MAP.get(user_lang, "English")
 
-        ctx_builder = ContextBuilder(max_chars=12000)
+        ctx_builder = ContextBuilder(max_tokens=RAG_CONTEXT_TOKENS)
         ctx_builder.add(
             "language",
             f"LANGUAGE: You MUST respond in {lang_name}.",
@@ -523,20 +529,38 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         context = ctx_builder.build()
 
+        system_prompt_text = llm.system_prompt if hasattr(llm, "system_prompt") else ""
+        system_prompt_chars = len(system_prompt_text)
+        system_prompt_tokens = count_tokens(system_prompt_text)
+        context_chars = len(context)
+        context_tokens = count_tokens(context)
+        user_chars = len(user_content)
+        user_tokens = count_tokens(user_content)
+        history_chars = sum(len(m.get("content", "")) for m in history_messages)
+        history_tokens = sum(
+            count_tokens(m.get("content", "")) for m in history_messages
+        )
+        total_prompt_chars = (
+            system_prompt_chars + context_chars + user_chars + history_chars
+        )
+        total_prompt_tokens = (
+            system_prompt_tokens + context_tokens + user_tokens + history_tokens
+        )
+
         logger.info(
             "llm_context_size",
-            system_prompt_chars=len(llm.system_prompt)
-            if hasattr(llm, "system_prompt")
-            else 0,
-            context_chars=len(context),
+            system_prompt_chars=system_prompt_chars,
+            context_chars=context_chars,
             sections=ctx_builder.section_names(),
             history_messages=len(history_messages),
-            total_prompt_chars=(
-                (len(llm.system_prompt) if hasattr(llm, "system_prompt") else 0)
-                + len(context)
-                + len(user_content)
-                + sum(len(m.get("content", "")) for m in history_messages)
-            ),
+            total_prompt_chars=total_prompt_chars,
+            system_prompt_tokens=system_prompt_tokens,
+            context_tokens=context_tokens,
+            history_tokens=history_tokens,
+            user_tokens=user_tokens,
+            total_prompt_tokens=total_prompt_tokens,
+            model_context_tokens=MODEL_CONTEXT_TOKENS,
+            over_budget=total_prompt_tokens > MODEL_CONTEXT_TOKENS,
         )
 
         def stream_response():
