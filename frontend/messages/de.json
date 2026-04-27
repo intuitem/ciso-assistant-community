@@ -3028,7 +3028,7 @@
 	"syncAppliedControlsMessage": "Die angewendeten Kontrollen, die diese Referenzkontrolle verwenden, werden mit ihr synchronisiert. Bitte beachten Sie, dass dies nicht rückgängig gemacht werden kann.",
 	"syncToAppliedControl": "Mit angewendeter Maßnahme synchronisieren",
 	"syncToReferenceControl": "Mit Referenzkontrolle synchronisieren",
-	  "vulnerabilitySlaPolicyHelpText": "Definieren Sie die maximale Anzahl von Tagen zur Behebung einer Schwachstelle.",
+	"vulnerabilitySlaPolicyHelpText": "Definieren Sie die maximale Anzahl von Tagen zur Behebung einer Schwachstelle.",
 	"slaAnchor": "SLA-Startdatum",
 	"slaAnchorHelpText": "Wählen Sie den Startzeitpunkt des SLA.",
 	"slaDaysHelpText": "Tage zur Behebung",

@@ -1427,7 +1427,7 @@
 	"syncAppliedControlsMessage": "De anvendte kontroller, der bruger denne referencekontrol, vil blive synkroniseret med den. Bemærk venligst, at dette ikke kan fortrydes.",
 	"syncToAppliedControl": "Synkroniser med anvendt kontrol",
 	"syncToReferenceControl": "Synkroniser med referencekontrol",
-	  "vulnerabilitySlaPolicyHelpText": "Angiv det maksimale antal dage til at udbedre en sårbarhed baseret på alvorlighed.",
+	"vulnerabilitySlaPolicyHelpText": "Angiv det maksimale antal dage til at udbedre en sårbarhed baseret på alvorlighed.",
 	"slaAnchor": "SLA startdato",
 	"slaAnchorHelpText": "Vælg hvornår SLA starter.",
 	"slaDaysHelpText": "Antal dage til udbedring",
