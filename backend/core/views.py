@@ -4,6 +4,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 import copy
 import csv
+import hashlib
 import json
 import mimetypes
 import re
@@ -9979,6 +9980,338 @@ class EvidenceViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Evidence.Status.choices))
+
+    # --- Bulk / directory upload (experimental) -----------------------------
+
+    class BatchConflictStrategy(models.TextChoices):
+        SKIP = "skip", "Skip"
+        ADD_REVISION = "add_revision", "Add revision"
+        REPLACE = "replace", "Replace"
+        RENAME = "rename", "Rename"
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="batch-upload",
+        parser_classes=[MultiPartParser, FormParser],
+    )
+    def batch_upload(self, request):
+        """
+        Bulk-upload evidences from a multipart payload.
+
+        Form fields:
+            folder (UUID, required): target folder.
+            conflict_strategy (str, default 'skip'): one of skip / add_revision / replace / rename.
+            manifest (JSON string, required): list of {"field": "file_0", "name": "...", "rel_path": "..."}.
+            file_0 ... file_N: the actual file blobs, keyed by the manifest's "field" entries.
+
+        Returns:
+            { "summary": {...counts...}, "results": [...per-file outcomes...] }
+        """
+        valid_strategies = {c.value for c in self.BatchConflictStrategy}
+        strategy = request.data.get(
+            "conflict_strategy", self.BatchConflictStrategy.SKIP
+        )
+        if strategy not in valid_strategies:
+            return Response(
+                {
+                    "error": f"Invalid conflict_strategy '{strategy}'. Must be one of {sorted(valid_strategies)}."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        folder_id = request.data.get("folder")
+        if not folder_id:
+            return Response(
+                {"error": "folder is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+        except (ValueError, TypeError, Folder.DoesNotExist):
+            return Response(
+                {"error": "Folder not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            manifest = json.loads(request.data.get("manifest") or "[]")
+            if not isinstance(manifest, list):
+                raise ValueError("manifest must be a list")
+        except (ValueError, json.JSONDecodeError) as e:
+            return Response(
+                {"error": f"Invalid manifest JSON: {e}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # IAM: precompute folder-level perms once for the whole batch
+        try:
+            add_perm = Permission.objects.get(codename="add_evidence")
+            change_perm = Permission.objects.get(codename="change_evidence")
+        except Permission.DoesNotExist:
+            return Response(
+                {"error": "Evidence permissions are not configured"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        can_add = RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_perm, folder=folder
+        )
+        can_change = RoleAssignment.is_access_allowed(
+            user=request.user, perm=change_perm, folder=folder
+        )
+
+        summary = {
+            "total": len(manifest),
+            "created": 0,
+            "revision_added": 0,
+            "replaced": 0,
+            "renamed": 0,
+            "skipped": 0,
+            "duplicate": 0,
+            "errors": 0,
+        }
+        results = []
+
+        for entry in manifest:
+            field = entry.get("field")
+            name = (entry.get("name") or field or "").strip()
+            rel_path = entry.get("rel_path") or None
+            result = {"field": field, "name": name, "rel_path": rel_path}
+
+            upload = request.FILES.get(field) if field else None
+            if upload is None:
+                result["outcome"] = "error"
+                result["error"] = "File missing in multipart payload"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+            if not name:
+                result["outcome"] = "error"
+                result["error"] = "Evidence name is empty"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+
+            # Hash dedup — same blob already in this folder?
+            try:
+                hash_obj = hashlib.sha256()
+                for chunk in upload.chunks(chunk_size=1024 * 1024):
+                    hash_obj.update(chunk)
+                file_hash = hash_obj.hexdigest()
+                upload.seek(0)
+            except Exception as e:
+                result["outcome"] = "error"
+                result["error"] = f"Failed to hash file: {e}"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+
+            existing_dup = (
+                EvidenceRevision.objects.filter(
+                    evidence__folder=folder,
+                    attachment_hash=file_hash,
+                )
+                .select_related("evidence")
+                .first()
+            )
+            if existing_dup:
+                result["outcome"] = "duplicate"
+                result["evidence_id"] = str(existing_dup.evidence_id)
+                result["evidence_name"] = existing_dup.evidence.name
+                result["revision_id"] = str(existing_dup.id)
+                summary["duplicate"] += 1
+                results.append(result)
+                continue
+
+            # Name-based conflict
+            existing = Evidence.objects.filter(folder=folder, name=name).first()
+
+            if existing is None:
+                if not can_add:
+                    result["outcome"] = "error"
+                    result["error"] = (
+                        "Permission denied: cannot add evidence in this folder"
+                    )
+                    summary["errors"] += 1
+                else:
+                    self._batch_create_evidence(
+                        result, summary, name, folder, upload, rel_path, request
+                    )
+                results.append(result)
+                continue
+
+            if strategy == self.BatchConflictStrategy.SKIP:
+                result["outcome"] = "skipped"
+                result["evidence_id"] = str(existing.id)
+                summary["skipped"] += 1
+            elif strategy == self.BatchConflictStrategy.ADD_REVISION:
+                if not can_change:
+                    result["outcome"] = "error"
+                    result["error"] = (
+                        "Permission denied: cannot change evidence in this folder"
+                    )
+                    summary["errors"] += 1
+                else:
+                    self._batch_add_revision(
+                        result, summary, existing, upload, rel_path, request
+                    )
+            elif strategy == self.BatchConflictStrategy.REPLACE:
+                if not can_change:
+                    result["outcome"] = "error"
+                    result["error"] = (
+                        "Permission denied: cannot change evidence in this folder"
+                    )
+                    summary["errors"] += 1
+                else:
+                    self._batch_replace_revision(
+                        result, summary, existing, upload, rel_path
+                    )
+            elif strategy == self.BatchConflictStrategy.RENAME:
+                if not can_add:
+                    result["outcome"] = "error"
+                    result["error"] = (
+                        "Permission denied: cannot add evidence in this folder"
+                    )
+                    summary["errors"] += 1
+                else:
+                    new_name = self._batch_find_unique_name(name, folder)
+                    self._batch_create_evidence(
+                        result,
+                        summary,
+                        new_name,
+                        folder,
+                        upload,
+                        rel_path,
+                        request,
+                        renamed_from=name,
+                    )
+            results.append(result)
+
+        return Response(
+            {"summary": summary, "results": results}, status=status.HTTP_200_OK
+        )
+
+    # --- batch_upload helpers ---
+
+    def _batch_create_evidence(
+        self,
+        result,
+        summary,
+        name,
+        folder,
+        upload,
+        rel_path,
+        request,
+        renamed_from=None,
+    ):
+        """Create a new Evidence + v1 revision via the existing serializer (so IAM/validation reuse)."""
+        serializer = EvidenceWriteSerializer(
+            data={"name": name, "folder": str(folder.id), "attachment": upload},
+            context={"request": request},
+        )
+        if not serializer.is_valid():
+            result["outcome"] = "error"
+            result["error"] = serializer.errors
+            summary["errors"] += 1
+            return
+        try:
+            evidence = serializer.save()
+        except PermissionDenied as e:
+            result["outcome"] = "error"
+            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            summary["errors"] += 1
+            return
+        revision = evidence.revisions.first()
+        if revision and rel_path:
+            revision.observation = f"path: {rel_path}"
+            revision.save(update_fields=["observation"])
+        if renamed_from:
+            result["outcome"] = "renamed"
+            result["renamed_from"] = renamed_from
+            result["renamed_to"] = name
+            summary["renamed"] += 1
+        else:
+            result["outcome"] = "created"
+            summary["created"] += 1
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id) if revision else None
+        result["version"] = revision.version if revision else 1
+
+    def _batch_add_revision(self, result, summary, evidence, upload, rel_path, request):
+        """Create a new EvidenceRevision against an existing Evidence (auto-bumps version)."""
+        rev_serializer = EvidenceRevisionWriteSerializer(
+            data={
+                "evidence": str(evidence.id),
+                "attachment": upload,
+                "observation": f"path: {rel_path}" if rel_path else "",
+            },
+            context={"request": request},
+        )
+        if not rev_serializer.is_valid():
+            result["outcome"] = "error"
+            result["error"] = rev_serializer.errors
+            summary["errors"] += 1
+            return
+        try:
+            revision = rev_serializer.save()
+        except PermissionDenied as e:
+            result["outcome"] = "error"
+            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            summary["errors"] += 1
+            return
+        result["outcome"] = "revision_added"
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id)
+        result["version"] = revision.version
+        summary["revision_added"] += 1
+
+    def _batch_replace_revision(self, result, summary, evidence, upload, rel_path):
+        """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
+        revision = evidence.last_revision
+        if revision is None:
+            revision = EvidenceRevision(evidence=evidence)
+        old_attachment = revision.attachment
+        revision.attachment = upload
+        if rel_path:
+            revision.observation = f"path: {rel_path}"
+        try:
+            revision.full_clean(exclude=["folder", "attachment_hash"])
+        except ValidationError as e:
+            messages = []
+            if hasattr(e, "message_dict"):
+                for fld_messages in e.message_dict.values():
+                    messages.extend(fld_messages)
+            elif hasattr(e, "messages"):
+                messages = e.messages
+            else:
+                messages = [str(e)]
+            result["outcome"] = "error"
+            result["error"] = " ".join(messages)
+            summary["errors"] += 1
+            return
+        if old_attachment:
+            old_attachment.delete(save=False)
+        revision.save()
+        result["outcome"] = "replaced"
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id)
+        result["version"] = revision.version
+        summary["replaced"] += 1
+
+    @staticmethod
+    def _batch_find_unique_name(name, folder):
+        """Append ' (1)', ' (2)' ... before the extension until the name is free in folder."""
+        if "." in name:
+            base, _, ext = name.rpartition(".")
+            ext = "." + ext
+        else:
+            base, ext = name, ""
+        i = 1
+        candidate = name
+        while Evidence.objects.filter(folder=folder, name=candidate).exists():
+            candidate = f"{base} ({i}){ext}"
+            i += 1
+        return candidate
 
 
 class EvidenceRevisionViewSet(BaseModelViewSet):

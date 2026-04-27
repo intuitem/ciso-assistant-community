@@ -37,4 +37,10 @@
 		link="/experimental/framework-builder"
 		tags={['frameworks', 'builder', 'editor']}
 	/>
+	<Article
+		title="Bulk evidence upload"
+		desc="Upload multiple files or a whole directory as evidences, with conflict-resolution strategies (skip, add revision, replace, rename) and SHA-256 duplicate detection."
+		link="/experimental/evidence-bulk-upload"
+		tags={['evidences', 'bulk', 'upload']}
+	/>
 </div>
