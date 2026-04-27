@@ -8,7 +8,6 @@ body: |
   - Framework: ${framework_name}
   - Due Date: ${due_date}
 
-  Please log in to your CISO Assistant portal to begin your assessment:
-  ${ciso_assistant_url}/auditee-dashboard
+  Please log in to your CISO Assistant portal to begin your assessment: [Go to CISO Assistant](${ciso_assistant_url}/auditee-dashboard)
 
   Thank you.

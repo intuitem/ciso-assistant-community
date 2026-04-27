@@ -202,6 +202,11 @@ class Command(BaseCommand):
             )
             description += f"This vulnerability was automatically generated and should be used for testing only."
 
+            # Randomize detection date: between 120 days ago and today
+            from datetime import date, timedelta
+
+            detected_at = date.today() - timedelta(days=random.randint(0, 120))
+
             # Create vulnerability
             vuln = Vulnerability.objects.create(
                 name=name,
@@ -210,6 +215,7 @@ class Command(BaseCommand):
                 severity=random.choice(severity_choices),
                 status=random.choice(status_choices),
                 ref_id=f"TEST-VULN-{i + 1:04d}",
+                detected_at=detected_at,
             )
             vulnerabilities.append(vuln)
 

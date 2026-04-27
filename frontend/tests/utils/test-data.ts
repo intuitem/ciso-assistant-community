@@ -608,8 +608,8 @@ export default {
 		// category: 'policy',
 		// csf_function: 'govern',
 		library: {
-			name: 'Usual reference controls',
-			ref: 'doc-pol',
+			name: 'CISO Assistant Key Reference Controls',
+			ref: 'usual-controls',
 			urn: 'urn:intuitem:risk:library:doc-pol'
 		},
 		urn: 'urn:intuitem:risk:function:POL.PHYSICAL'
@@ -619,8 +619,8 @@ export default {
 		// category: 'process',
 		// csf_function: 'protect',
 		library: {
-			name: 'Usual reference controls',
-			ref: 'doc-pol',
+			name: 'CISO Assistant Key Reference Controls',
+			ref: 'usual-controls',
 			urn: 'urn:intuitem:risk:library:doc-pol'
 		},
 		urn: 'urn:intuitem:risk:function:DOC.CONTROLS'

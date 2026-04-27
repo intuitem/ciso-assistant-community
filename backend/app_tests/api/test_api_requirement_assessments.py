@@ -128,9 +128,11 @@ class TestRequirementAssessmentsAuthenticated:
                     "max_score": compliance_assessment.max_score,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 },
@@ -139,7 +141,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "urn": RequirementNode.objects.all()[0].urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
                     "name": RequirementNode.objects.all()[0].name,
-                    "questions": RequirementNode.objects.all()[0].questions,
+                    "questions": None,
                     "description": RequirementNode.objects.all()[0].description,
                     "typical_evidence": RequirementNode.objects.all()[
                         0
@@ -154,6 +156,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
+                    "display_mode": RequirementNode.objects.all()[0].display_mode,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -218,9 +221,11 @@ class TestRequirementAssessmentsAuthenticated:
                     "max_score": compliance_assessment.max_score,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 }
@@ -277,9 +282,11 @@ class TestRequirementAssessmentsAuthenticated:
                     "max_score": compliance_assessment.max_score,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 },
@@ -288,7 +295,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "urn": RequirementNode.objects.all()[0].urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
                     "name": RequirementNode.objects.all()[0].name,
-                    "questions": RequirementNode.objects.all()[0].questions,
+                    "questions": None,
                     "description": RequirementNode.objects.all()[0].description,
                     "typical_evidence": RequirementNode.objects.all()[
                         0
@@ -303,6 +310,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
+                    "display_mode": RequirementNode.objects.all()[0].display_mode,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"

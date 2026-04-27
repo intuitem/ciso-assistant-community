@@ -4,6 +4,7 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import ActionPlanBudgetOverview from '$lib/components/DataViz/ActionPlanBudgetOverview.svelte';
 	let { data } = $props();
 
 	const appliedControlsHead = {
@@ -12,8 +13,10 @@
 		status: 'status',
 		priority: 'priority',
 		category: 'category',
+		csf_function: 'csfFunction',
 		owner: 'owner',
 		eta: 'eta',
+		expiry_date: 'expiryDate',
 		control_impact: 'controlImpact',
 		effort: 'effort',
 		annual_cost: 'cost',
@@ -64,6 +67,9 @@
 		>
 	</p>
 </div>
+<ActionPlanBudgetOverview
+	budgetEndpoint={`/compliance-assessments/${page.params.id}/action-plan/budget-overview`}
+/>
 <div class="flex flex-col space-y-4 bg-white p-4 shadow-sm rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
 		<div class="flex-1">
@@ -95,8 +101,10 @@
 				'status',
 				'priority',
 				'category',
+				'csf_function',
 				'owner',
 				'eta',
+				'expiry_date',
 				'control_impact',
 				'effort',
 				'annual_cost',

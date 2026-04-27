@@ -26,11 +26,17 @@
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
 	import {
 		interceptExternalLinks,
 		setGlobalModalStore,
 		setShowWarningExternalLinks
 	} from '$lib/utils/external-links';
+
+	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+	const modifierKey = isMac ? '⌘' : 'Ctrl';
+
+	let commandPalette: ReturnType<typeof CommandPalette> | undefined = $state();
 
 	let sidebarOpen = $state(true);
 
@@ -165,18 +171,33 @@
 					</div>
 				{/if}
 			</div>
-			{#if data?.user?.is_admin}
+			<div class="flex items-center gap-2">
 				<button
-					onclick={() => getStartedTrigger.set(true)}
-					class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
+					onclick={() => commandPalette?.toggle()}
+					class="flex items-center gap-2 shrink-0 rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-1.5
+			text-xs text-gray-500 hover:bg-gray-100 hover:border-gray-300 hover:text-gray-700
+			transition-all duration-150 cursor-pointer"
+				>
+					<i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+					<span class="hidden sm:inline text-gray-400">{m.searchEllipsis()}</span>
+					<kbd
+						class="hidden sm:inline-flex items-center rounded border border-gray-200 bg-white px-1.5 py-0.5
+				font-mono text-[10px] text-gray-400">{modifierKey}K</kbd
+					>
+				</button>
+				{#if data?.user?.is_admin}
+					<button
+						onclick={() => getStartedTrigger.set(true)}
+						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
 			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
 			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
 			focus:outline-hidden focus:ring-violet-500 cursor-pointer"
-				>
-					<i class="fa-solid fa-rocket mr-1"></i>
-					{m.getStarted()}
-				</button>
-			{/if}
+					>
+						<i class="fa-solid fa-rocket mr-1"></i>
+						{m.getStarted()}
+					</button>
+				{/if}
+			</div>
 		</div>
 		<div class="px-4">
 			<hr class="my-1" />
@@ -184,7 +205,10 @@
 		</div>
 	</AppBar>
 	<!-- Router Slot -->
-	<CommandPalette />
+	<CommandPalette bind:this={commandPalette} />
+	{#if $page.data.featureflags?.chat_mode}
+		<ChatWidget />
+	{/if}
 	<main
 		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen

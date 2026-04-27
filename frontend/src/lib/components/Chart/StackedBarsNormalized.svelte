@@ -124,7 +124,7 @@
 			tooltip: {
 				trigger: 'axis',
 				axisPointer: {
-					type: 'shadow-sm'
+					type: 'shadow'
 				},
 				formatter: (params) => {
 					// Find the index of the hovered item and show full name

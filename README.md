@@ -136,6 +136,10 @@ Here is an illustration of the **decoupling** principle and its advantages:
 
 Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
+## Setting up the local AI engine 
+
+Read more here: [AI engine](backend/chat/README.md)
+
 ## Supported frameworks 🐙
 
 1. ISO 27001:2013 & 27001:2022 🌐
@@ -152,7 +156,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 12. DORA (Act, RTS, ITS and GL) 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸🤖
 14. NIST SP 800-53 rev5 🇺🇸
-15. France LPM/OIV rules 🇫🇷
+15. Règles OIV - Secteur « Activités civiles de l'Etat » (2019) 🇫🇷
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
@@ -246,6 +250,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
 108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
+109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷 
+110. Cadre Conformité Cyber France (3CF) v3.1 (2026) ✈️🇫🇷
+111. Règles OIV - Secteur « Transport aérien » (2016) ✈️🇫🇷
 
 ### Community contributions
 
@@ -275,6 +282,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 24. RBI Master Direction 2023 - india 🏦🇮🇳
 25. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
 26. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
+27. Prestataire d'audit de sécurité des systèmes d'information (PASSI) 🇫🇷
 
 <br/>
 
@@ -401,7 +409,8 @@ export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
-export EMAIL_USE_TLS=True
+export EMAIL_USE_TLS=True  # true for STARTTLS
+export EMAIL_USE_SSL=False # true for SMTPS
 ```
 
 **Other variables**
@@ -416,6 +425,9 @@ export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
 # CISO Assistant will use filesystem storage backend by default.
+# Only one cloud storage backend can be active at a time (USE_S3 and USE_AZURE are mutually exclusive).
+
+# --- AWS S3 ---
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
@@ -434,12 +446,33 @@ export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>  # required for S3-compatible 
 # export AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token
 # export AWS_ROLE_ARN=arn:aws:iam::123456789012:role/ciso-assistant-s3-role
 
+# --- Azure Blob Storage ---
+# You can use an Azure Blob Storage container instead of S3.
+# The container must be created before starting CISO Assistant.
+# export USE_AZURE=True
+# export AZURE_CONTAINER=<your-container-name>          # default: ciso-assistant-container
+# export AZURE_CUSTOM_DOMAIN=<your-custom-domain>       # optional, e.g., cdn.example.com
+# export AZURE_LOCATION=<path-prefix>                   # optional, path prefix within the container (e.g., "media")
+
+# Azure Authentication Option 1: Account Key
+# export AZURE_ACCOUNT_NAME=<your-storage-account-name>
+# export AZURE_ACCOUNT_KEY=<your-storage-account-key>
+
+# Azure Authentication Option 2: Connection String
+# export AZURE_CONNECTION_STRING=<your-connection-string>
+
+# Azure Authentication Option 3: Managed Identity (for Azure-hosted deployments)
+# Requires AZURE_ACCOUNT_NAME. The pod/VM's assigned managed identity is used automatically.
+# export AZURE_ACCOUNT_NAME=<your-storage-account-name>
+# export AZURE_USE_MANAGED_IDENTITY=True
+
 # Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
 export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
+export EMAIL_USE_SSL_RESCUE=False
 
 # You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initialization
 export CISO_SUPERUSER_EMAIL=<XXX>
@@ -617,7 +650,7 @@ When using the interactive Swagger UI, simply log in, the token will be automati
 
 ## Setting CISO Assistant for production
 
-The docker-compose-prod.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
+The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
 
 Set DJANGO_DEBUG=False for security reason.
 
@@ -626,6 +659,17 @@ Set DJANGO_DEBUG=False for security reason.
 
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
+
+> [!NOTE]
+> The docker-compose template files are now launching the backend, huey and frontend in non-root mode. If you use an old docker-compose.yml file, it is recommended to update it. The containers are compatible with both root and non-root modes.
+
+### Non-root docker containers
+
+docker-compose.yml now relies on a non-root user 1001:1001, which is available in the image. Older deployments are using root user, which is still supported. To transition to non-root, use the following steps in the host:
+- docker compose down
+- update the docker-compose.yml file
+- sudo chown -R 1001:1001 db
+- docker compose up -d 
 
 ## Supported languages 🌐
 
@@ -651,6 +695,8 @@ Set DJANGO_DEBUG=False for security reason.
 20. TR: Turkish
 21. HR: Croatian
 22. ZH: Chinese (Simplified)
+23. LT: Lithuanian
+24. KO: Korean
 
 ## Contributors 🤝
 

@@ -16,7 +16,7 @@ class Email {
 
 	async hasWelcomeEmailDetails() {
 		expect.soft(await this.getFrom()).toEqual('ciso-assistant@tests.net');
-		expect.soft(await this.getSubject()).toEqual('Welcome to Ciso Assistant!');
+		expect.soft(await this.getSubject()).toEqual('Welcome to CISO Assistant!');
 	}
 
 	async hasResetPasswordEmailDetails() {

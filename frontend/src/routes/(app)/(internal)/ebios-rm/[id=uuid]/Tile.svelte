@@ -135,9 +135,9 @@
 												{/if}
 											</div>
 										</Tooltip.Trigger>
-										<Tooltip.Positioner>
+										<Tooltip.Positioner class="!z-25">
 											<Tooltip.Content>
-												<div class="transition card bg-white shadow-lg p-4 z-20 duration-300">
+												<div class="transition card bg-white shadow-lg p-4 duration-300">
 													<p
 														data-testid="activity-tooltip"
 														class="border-l-4 {borderColor} text-gray-500 p-2"

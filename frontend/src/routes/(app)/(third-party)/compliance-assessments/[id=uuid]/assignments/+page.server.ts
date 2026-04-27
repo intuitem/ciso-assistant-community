@@ -3,7 +3,7 @@ import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 // Schema for the assignment form
 const assignmentSchema = z.object({

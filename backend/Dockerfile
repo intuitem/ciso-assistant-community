@@ -45,10 +45,19 @@ RUN apt-get update && apt-get install -y \
 COPY pyproject.toml poetry.lock ./
 
 RUN poetry install --no-root \
-  && rm -rf $POETRY_CACHE_DIR
+  && .venv/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-deps \
+  && .venv/bin/pip uninstall -y cuda-bindings cuda-pathfinder cuda-toolkit \
+     nvidia-cublas nvidia-cuda-cupti nvidia-cuda-nvrtc nvidia-cuda-runtime \
+     nvidia-cudnn-cu13 nvidia-cufft nvidia-cufile nvidia-curand nvidia-cusolver \
+     nvidia-cusparse nvidia-cusparselt-cu13 nvidia-nccl-cu13 nvidia-nvjitlink \
+     nvidia-nvshmem-cu13 nvidia-nvtx triton 2>/dev/null; \
+  rm -rf $POETRY_CACHE_DIR /root/.cache/pip
 
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
+
+RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /bin/bash app
+# USER app  # not activated by default to keep compatibility
 
 EXPOSE 8000
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]

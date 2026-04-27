@@ -163,7 +163,7 @@
 		{form}
 		translateOptions={false}
 		disableDoubleDash
-		optionsEndpoint="risk-matrices"
+		optionsEndpoint="risk-matrices?is_enabled=true"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}

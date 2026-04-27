@@ -9,6 +9,8 @@ from .views import (
     get_sso_info,
     GeneralSettingsViewSet,
     FeatureFlagsViewSet,
+    VulnerabilitySlaViewSet,
+    SecIntelFeedsViewSet,
 )
 from .routers import DefaultSettingsRouter
 
@@ -32,6 +34,18 @@ settings_router.register(
     r"feature-flags",
     FeatureFlagsViewSet,
     basename="feature-flags",
+)
+
+settings_router.register(
+    r"vulnerability-sla",
+    VulnerabilitySlaViewSet,
+    basename="vulnerability-sla",
+)
+
+settings_router.register(
+    r"sec-intel-feeds",
+    SecIntelFeedsViewSet,
+    basename="sec-intel-feeds",
 )
 
 

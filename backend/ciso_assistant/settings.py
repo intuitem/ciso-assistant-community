@@ -17,6 +17,7 @@ import logging.config
 import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
+import ssl
 from . import meta
 
 
@@ -64,6 +65,7 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
+        "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
     },
 }
 
@@ -122,6 +124,16 @@ MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False").lower() in ("true", "1", "yes
 
 # SECURITY WARNING: Sensitive operations, such as excel file processing, can run in a sandbox.
 # The sandbox is disabled by default; set ENABLE_SANDBOX=true to enable bubblewrap isolation.
+# Chat/AI assistant module. Disabled by default to avoid disruption on SaaS.
+# Set ENABLE_CHAT=true to expose the chat feature flag, enable signals, and serve chat API.
+# The chat Django app stays in INSTALLED_APPS regardless (for migrations), but is dormant.
+ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
+
 ENABLE_SANDBOX = os.environ.get(
     "ENABLE_SANDBOX",
     "False",
@@ -144,6 +156,12 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
 
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
+USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
+
+if USE_S3 and USE_AZURE:
+    raise ImproperlyConfigured(
+        "Both USE_S3 and USE_AZURE are enabled. Please configure only one storage backend."
+    )
 
 if USE_S3:
     STORAGES = {
@@ -222,6 +240,98 @@ if USE_S3:
     AWS_LOCATION = os.getenv("AWS_LOCATION", "")
     AWS_S3_FILE_OVERWRITE = False
 
+elif USE_AZURE:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME")
+    AZURE_ACCOUNT_KEY = os.getenv("AZURE_ACCOUNT_KEY")
+    AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
+    AZURE_CONTAINER = os.getenv("AZURE_CONTAINER", "ciso-assistant-container")
+    AZURE_CUSTOM_DOMAIN = os.getenv("AZURE_CUSTOM_DOMAIN")
+
+    using_managed_identity = os.getenv(
+        "AZURE_USE_MANAGED_IDENTITY", "False"
+    ).lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+
+    # Managed Identity uses AZURE_ACCOUNT_NAME without a key by design, so only
+    # enforce the name+key pairing when Managed Identity is not requested.
+    if not using_managed_identity and bool(AZURE_ACCOUNT_NAME) != bool(
+        AZURE_ACCOUNT_KEY
+    ):
+        missing = (
+            "AZURE_ACCOUNT_NAME" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_KEY"
+        )
+        present = (
+            "AZURE_ACCOUNT_KEY" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_NAME"
+        )
+        raise ImproperlyConfigured(
+            f"{present} is set but {missing} is missing. "
+            "Both AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY are required for Account Key authentication."
+        )
+
+    using_account_key = bool(AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY)
+    using_connection_string = bool(AZURE_CONNECTION_STRING)
+
+    active_auth_methods = sum(
+        [using_account_key, using_connection_string, using_managed_identity]
+    )
+
+    if active_auth_methods > 1:
+        raise ImproperlyConfigured(
+            "Ambiguous Azure credentials configuration. Please configure only one "
+            "authentication method: Account Key (AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), "
+            "Connection String (AZURE_CONNECTION_STRING), or "
+            "Managed Identity (AZURE_USE_MANAGED_IDENTITY=True)."
+        )
+
+    if active_auth_methods == 0:
+        raise ImproperlyConfigured(
+            "Azure credentials not configured. Either set AZURE_ACCOUNT_NAME and "
+            "AZURE_ACCOUNT_KEY for Account Key authentication, AZURE_CONNECTION_STRING "
+            "for Connection String authentication, or AZURE_USE_MANAGED_IDENTITY=True "
+            "for Managed Identity authentication."
+        )
+
+    if using_account_key:
+        logger.info("Using Azure Account Key for Blob Storage authentication")
+
+    elif using_connection_string:
+        logger.info("Using Azure Connection String for Blob Storage authentication")
+
+    else:
+        if not AZURE_ACCOUNT_NAME:
+            raise ImproperlyConfigured(
+                "AZURE_ACCOUNT_NAME is required when using Managed Identity "
+                "(AZURE_USE_MANAGED_IDENTITY=True)."
+            )
+        logger.info("Using Azure Managed Identity for Blob Storage authentication")
+        from azure.identity import ManagedIdentityCredential
+
+        AZURE_TOKEN_CREDENTIAL = ManagedIdentityCredential()
+        # Clear key/connection string so django-storages uses the token credential only
+        AZURE_ACCOUNT_KEY = None
+        AZURE_CONNECTION_STRING = None
+
+    logger.info("AZURE_CONTAINER: %s", AZURE_CONTAINER)
+    if AZURE_ACCOUNT_NAME:
+        logger.info("AZURE_ACCOUNT_NAME: %s", AZURE_ACCOUNT_NAME)
+    if AZURE_CUSTOM_DOMAIN:
+        logger.info("AZURE_CUSTOM_DOMAIN: %s", AZURE_CUSTOM_DOMAIN)
+
+    AZURE_LOCATION = os.getenv("AZURE_LOCATION", "")
+    AZURE_OVERWRITE_FILES = False
+
 else:
     MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
     MEDIA_URL = ""
@@ -240,6 +350,7 @@ INSTALLED_APPS = [
     "auditlog",
     "tailwind",
     "iam",
+    "sec_intel",
     "global_settings",
     "pmbok",
     "ebios_rm",
@@ -248,6 +359,8 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "chat",
+    "doc_management",
     "core",
     "cal",
     "django_filters",
@@ -306,13 +419,22 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
+logger.info("EMAIL_HOST: %s", EMAIL_HOST)
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
+logger.info("EMAIL_PORT: %s", EMAIL_PORT)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_TLS: %s", EMAIL_USE_TLS)
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_SSL: %s", EMAIL_USE_SSL)
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive")
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
+logger.info("EMAIL_HOST_RESCUE: %s", EMAIL_HOST_RESCUE)
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
+logger.info("EMAIL_PORT_RESCUE: %s", EMAIL_PORT_RESCUE)
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
 EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
@@ -320,8 +442,36 @@ EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() i
     "1",
     "yes",
 )
+logger.info("EMAIL_USE_TLS_RESCUE: %s", EMAIL_USE_TLS_RESCUE)
+EMAIL_USE_SSL_RESCUE = os.environ.get("EMAIL_USE_SSL_RESCUE", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_USE_SSL_RESCUE: %s", EMAIL_USE_SSL_RESCUE)
+if EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE:
+    raise ValueError(
+        "EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE are mutually exclusive"
+    )
+EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
+
+
+def _build_tls12_context():
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.maximum_version = ssl.TLSVersion.TLSv1_2
+    return context
+
+
+EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
+logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -460,6 +610,7 @@ LANGUAGES = [
     ("hr", "Croatian"),
     ("zh", "Chinese (Simplified)"),
     ("lt", "Lithuanian"),
+    ("ko", "Korean"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -569,6 +720,13 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
     },
 }
+
+# MFA / WebAuthn settings
+MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
+MFA_PASSKEY_LOGIN_ENABLED = False
+MFA_PASSKEY_SIGNUP_ENABLED = False
+MFA_ADAPTER = "iam.adapter.MFAAdapter"
 
 if MAIL_DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

@@ -7,7 +7,7 @@
 	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		composerForm: SuperValidated<Record<string, any>>;

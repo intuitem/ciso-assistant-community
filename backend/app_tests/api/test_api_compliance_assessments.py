@@ -201,8 +201,10 @@ class TestComplianceAssessmentsAuthenticated:
                 },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
+                    "urn": Framework.objects.all()[0].urn,
                     "str": str(Framework.objects.all()[0]),
                     "implementation_groups_definition": None,
+                    "outcomes_definition": [],
                     "reference_controls": [],
                     "min_score": Framework.objects.all()[0].min_score,
                     "max_score": Framework.objects.all()[0].max_score,

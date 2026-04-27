@@ -5,8 +5,8 @@
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import type { AnyZodObject } from 'zod';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { getModalStore, type ModalStore } from './stores';
 	import { page } from '$app/state';
 	import { invalidateAll } from '$app/navigation';
@@ -18,7 +18,7 @@
 
 	interface Props {
 		parent: any;
-		form: SuperValidated<AnyZodObject>;
+		form: SuperValidated<FormDataShape>;
 		urlModel: string;
 		field: string;
 		optionsEndpoint?: string;

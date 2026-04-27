@@ -3,6 +3,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import AttackPathGraph from '$lib/components/EbiosRM/AttackPathGraph.svelte';
 	import AttackPathFlowText from '$lib/components/EbiosRM/AttackPathFlowText.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -13,6 +14,19 @@
 
 	const focusedFearedEvent = $derived(data.data.focused_feared_event);
 </script>
+
+{#if data.data?.ebios_rm_study?.id}
+	<div class="flex items-center justify-between mb-4">
+		<Anchor
+			breadcrumbAction="push"
+			href={`/ebios-rm/${data.data?.ebios_rm_study?.id}`}
+			class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+		>
+			<i class="fa-solid fa-arrow-left"></i>
+			<p>{m.goBackToEbiosRmStudy()}</p>
+		</Anchor>
+	</div>
+{/if}
 
 <DetailView {data}>
 	{#snippet widgets()}

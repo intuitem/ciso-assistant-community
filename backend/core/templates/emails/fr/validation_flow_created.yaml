@@ -9,7 +9,6 @@ body: |
   - Date limite de validation : ${validation_deadline}
   - Domaine : ${folder_name}
 
-  Veuillez examiner et traiter cette demande de validation :
-  ${validation_url}
+  Veuillez examiner et traiter cette demande de validation : [Voir le flux de validation](${validation_url})
 
   Merci.

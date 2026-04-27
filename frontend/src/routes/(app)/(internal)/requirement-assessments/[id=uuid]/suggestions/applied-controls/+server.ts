@@ -29,5 +29,10 @@ export const GET: RequestHandler = async (event) => {
 };
 
 export const POST: RequestHandler = async (event) => {
-	return proxyRequest(event, { method: 'POST' });
+	const body = await event.request.text();
+	return proxyRequest(event, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body
+	});
 };

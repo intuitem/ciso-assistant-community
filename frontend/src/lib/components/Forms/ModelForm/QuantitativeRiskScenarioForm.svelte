@@ -105,6 +105,7 @@
 	<AutocompleteSelect
 		{form}
 		multiple
+		lazy
 		optionsEndpoint="vulnerabilities"
 		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"

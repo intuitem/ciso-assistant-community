@@ -2,7 +2,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	// import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	// const modalStore: ModalStore = getModalStore();
 
@@ -17,7 +17,7 @@
 	}
 
 	interface Props {
-		data?: SuperValidated<AnyZodObject>;
+		data?: SuperValidated<FormDataShape>;
 		dataType?: 'form' | 'json';
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		validators?: ValidationAdapter<any> | undefined;

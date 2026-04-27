@@ -8,7 +8,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import List from '../List/List.svelte';
 	import Checkbox from '../Forms/Checkbox.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 	const modalStore: ModalStore = getModalStore();
 

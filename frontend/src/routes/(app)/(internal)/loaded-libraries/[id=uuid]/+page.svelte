@@ -9,8 +9,10 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 
 	let { data } = $props();
+	let expandedNodes: string[] = $state([]);
 
 	const showRisks = true;
 
@@ -180,16 +182,17 @@
 	{/if}
 
 	{#if framework}
-		<h4 class="h4 font-medium">{m.framework()}</h4>
 		{#await data.tree}
 			<span data-testid="loading-field">
 				{m.loading()}...
 			</span>
 		{:then tree}
-			<RecursiveTreeView
-				nodes={transformToTreeView(Object.entries(tree))}
-				hover="hover:bg-initial"
-			/>
+			{@const treeViewNodes = transformToTreeView(Object.entries(tree))}
+			<div class="flex items-center justify-between">
+				<h4 class="h4 font-medium">{m.framework()}</h4>
+				<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+			</div>
+			<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 		{/await}
 	{/if}
 </div>

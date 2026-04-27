@@ -5,7 +5,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import { m } from '$paraglide/messages';
 import type { Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
@@ -20,9 +20,12 @@ export const load = (async ({ fetch, params }) => {
 		)
 	);
 
-	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
-	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
-	compliance_assessment.framework = framework;
+	const frameworkId = compliance_assessment.framework?.id;
+	if (frameworkId) {
+		const frameworkEndpoint = `${BASE_API_URL}/frameworks/${frameworkId}/`;
+		const framework = await fetch(frameworkEndpoint).then((res) => res.json());
+		compliance_assessment.framework = framework;
+	}
 
 	const measureModel = getModelInfo('applied-controls');
 	const measureCreateSchema = modelSchema('applied-controls');
@@ -71,8 +74,12 @@ export const load = (async ({ fetch, params }) => {
 				folder: requirementAssessment.folder.id,
 				requirement: requirementAssessment.requirement.id,
 				compliance_assessment: requirementAssessment.compliance_assessment.id,
-				evidences: requirementAssessment.evidences.map((evidence) => evidence.id),
-				applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				...(requirementAssessment.evidences !== undefined && {
+					evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
+				}),
+				...(requirementAssessment.applied_controls !== undefined && {
+					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				})
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
@@ -111,6 +118,7 @@ export const load = (async ({ fetch, params }) => {
 		requirements,
 		measureModel,
 		evidenceModel,
+		viewerRole: tableMode.viewer_role ?? 'auditor',
 		title: m.tableMode()
 	};
 }) satisfies PageServerLoad;
@@ -128,7 +136,8 @@ export const actions: Actions = {
 		};
 
 		const res = await event.fetch(endpoint, requestInitOptions);
-		return { status: res.status, body: await res.json() };
+		const body = await res.json();
+		return { status: res.status, body };
 	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });

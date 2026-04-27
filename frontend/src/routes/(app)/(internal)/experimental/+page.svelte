@@ -26,9 +26,15 @@
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
 	<Article
-		title="Yearly Tasks Review"
-		desc="Review all recurrent tasks grouped by folder for yearly planning"
-		link="/experimental/yearly-tasks-review"
-		tags={['tasks', 'planning', 'review', 'PRO']}
+		title={m.matrixEditor()}
+		desc={m.matrixEditorDescription()}
+		link="/experimental/matrix-editor"
+		tags={['risk', 'matrix', 'editor']}
+	/>
+	<Article
+		title="Framework Builder"
+		desc="Create and edit compliance frameworks with a visual builder"
+		link="/experimental/framework-builder"
+		tags={['frameworks', 'builder', 'editor']}
 	/>
 </div>

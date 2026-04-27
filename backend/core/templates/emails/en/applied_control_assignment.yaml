@@ -12,7 +12,6 @@ body: |
   - ETA: ${control_eta}
   - Domain: ${folder_name}
 
-  Log in to your CISO Assistant portal to view and manage this control:
-  ${ciso_assistant_url}
+  Log in to your CISO Assistant portal to view and manage this control: [Go to CISO Assistant](${ciso_assistant_url})
 
   Thank you.

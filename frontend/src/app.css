@@ -77,6 +77,23 @@
 	}
 }
 
+/* AutocompleteSelect: collapse overflow chips when chip-max-N class is on outerDiv.
+   Uses position/size instead of display:none to avoid Tailwind v4 @layer !important cascade. */
+.chip-max-1 ul.selected > li:nth-child(n + 3),
+.chip-max-2 ul.selected > li:nth-child(n + 4),
+.chip-max-3 ul.selected > li:nth-child(n + 5),
+.chip-max-4 ul.selected > li:nth-child(n + 6),
+.chip-max-5 ul.selected > li:nth-child(n + 7) {
+	position: absolute !important;
+	width: 0 !important;
+	height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
+}
+
 .hide-scrollbar {
 	scrollbar-width: none;
 	-ms-overflow-style: none;

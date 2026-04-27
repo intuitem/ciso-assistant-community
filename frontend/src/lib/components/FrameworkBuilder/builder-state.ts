@@ -1,0 +1,1729 @@
+import { getContext, setContext } from 'svelte';
+import { writable, type Writable } from 'svelte/store';
+import {
+	apiSaveDraft,
+	apiPublishDraft,
+	apiDiscardDraft,
+	apiStartEditing,
+	type DraftJSON
+} from './builder-api';
+
+// --- Types ---
+
+export type Translations = Record<string, Record<string, string>>;
+
+export interface QuestionChoice {
+	id: string;
+	urn: string | null;
+	ref_id: string | null;
+	value: string | null;
+	annotation: string | null;
+	add_score: number | null;
+	compute_result: string | null;
+	order: number;
+	description: string | null;
+	color: string | null;
+	select_implementation_groups: string[] | null;
+	translations?: Translations | null;
+	folder: { id: string; str: string } | string;
+	question: string;
+}
+
+export interface Question {
+	id: string;
+	urn: string;
+	ref_id: string | null;
+	text: string | null;
+	annotation: string | null;
+	type: 'text' | 'number' | 'boolean' | 'unique_choice' | 'multiple_choice' | 'date';
+	config: Record<string, unknown> | null;
+	depends_on: Record<string, unknown> | null;
+	order: number;
+	weight: number;
+	translations?: Translations | null;
+	folder: { id: string; str: string } | string;
+	requirement_node: string;
+	choices: QuestionChoice[];
+}
+
+export interface RequirementNode {
+	id: string;
+	urn: string | null;
+	ref_id: string | null;
+	name: string | null;
+	description: string | null;
+	annotation: string | null;
+	parent_urn: string | null;
+	order_id: number | null;
+	assessable: boolean;
+	implementation_groups: string[] | null;
+	visibility_expression: string | null;
+	typical_evidence: string | null;
+	weight: number;
+	importance: string;
+	display_mode: 'default' | 'splash';
+	translations?: Translations | null;
+	framework: string | { id: string };
+	folder: { id: string; str: string } | string;
+}
+
+export interface OutcomeRule {
+	ref_id: string;
+	annotation: string;
+	color: string | null;
+	expression: string;
+	translations?: Translations | null;
+}
+
+export interface ImplementationGroup {
+	ref_id: string;
+	name: string;
+	description: string;
+	default_selected?: boolean;
+	translations?: Translations | null;
+}
+
+export interface Framework {
+	id: string;
+	name: string;
+	description: string | null;
+	annotation: string | null;
+	folder: { id: string; str: string };
+	library: { id: string; str: string } | null;
+	min_score: number;
+	max_score: number;
+	scores_definition: Record<string, unknown> | null;
+	implementation_groups_definition: Record<string, unknown>[] | null;
+	outcomes_definition: OutcomeRule[] | null;
+	field_visibility: Record<string, string>;
+	locale?: string;
+	translations?: Translations | null;
+	available_languages?: string[];
+	urn: string | null;
+	urn_namespace: string;
+	editing_version: number;
+}
+
+/**
+ * A unified tree node for the builder. Replaces the old
+ * BuilderSection + BuilderRequirement split — there is no longer a
+ * distinction between "sections" and "requirements" at the tree level.
+ * A node's role is determined entirely by its `node.assessable`,
+ * `node.display_mode`, and whether it has children.
+ */
+export interface BuilderNode {
+	node: RequirementNode;
+	questions: BuilderQuestion[];
+	children: BuilderNode[];
+	depth: number;
+}
+
+export interface BuilderQuestion {
+	question: Question;
+}
+
+// --- URN / ref_id generation utilities ---
+
+/**
+ * Slugify a framework name into a URL-safe namespace for URNs.
+ * Uses NFKD normalization to strip accents, then ASCII-only filtering.
+ * Falls back to first 8 chars of frameworkId for CJK-only names.
+ */
+export function slugifyFrameworkName(name: string, frameworkId: string): string {
+	const normalized = name
+		.normalize('NFKD')
+		.replace(/[̀-ͯ]/g, '') // strip combining diacritical marks
+		.replace(/[^\x00-\x7F]/g, ''); // strip non-ASCII
+	let slug = normalized
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/-{2,}/g, '-')
+		.replace(/^-+|-+$/g, '');
+	if (slug.length > 60) slug = slug.slice(0, 60).replace(/-+$/, '');
+	if (!slug) slug = frameworkId.slice(0, 8);
+	return slug;
+}
+
+/**
+ * Compute a ref_id for a new item based on its siblings and parent.
+ * Uses max(existing numeric last segments) + 1 to avoid reusing deleted IDs.
+ */
+export function computeRefId(
+	siblingRefIds: (string | null)[],
+	parentRefId: string | null,
+	type: 'section' | 'requirement' | 'question' | 'choice'
+): string {
+	const separator = type === 'question' ? '-q' : type === 'choice' ? '-c' : '.';
+	const prefix =
+		type === 'section'
+			? ''
+			: parentRefId
+				? `${parentRefId}${separator}`
+				: `${separator === '.' ? '' : ''}`;
+
+	// Extract numeric last segments from sibling ref_ids
+	const nums: number[] = [];
+	for (const refId of siblingRefIds) {
+		if (!refId) continue;
+		let lastPart: string;
+		if (type === 'question') {
+			const match = refId.match(/-q(\d+)$/);
+			if (match) nums.push(parseInt(match[1], 10));
+			continue;
+		} else if (type === 'choice') {
+			const match = refId.match(/-c(\d+)$/);
+			if (match) nums.push(parseInt(match[1], 10));
+			continue;
+		} else {
+			// section or requirement: take the last dot-segment
+			const parts = refId.split('.');
+			lastPart = parts[parts.length - 1];
+		}
+		const n = parseInt(lastPart, 10);
+		if (!isNaN(n)) nums.push(n);
+	}
+
+	const next =
+		nums.length > 0
+			? Math.max(...nums) + 1
+			: siblingRefIds.length > 0
+				? siblingRefIds.length + 1
+				: 1;
+
+	if (type === 'section') return String(next);
+	if (parentRefId) return `${parentRefId}${separator}${next}`;
+	// Fallback when parent has no ref_id
+	if (type === 'question') return `q${next}`;
+	if (type === 'choice') return `c${next}`;
+	return `${next}`;
+}
+
+/**
+ * Generate a URN for a framework item.
+ */
+export function generateUrn(
+	type: 'req_node' | 'question' | 'question_choice',
+	slug: string,
+	refId: string,
+	urnNamespace: string = 'custom'
+): string {
+	return `urn:${urnNamespace}:risk:${type}:${slug}:${refId}`;
+}
+
+// --- Recursive helpers ---
+
+/** Recursively map over a requirement tree, applying fn to each requirement */
+function mapRequirements(
+	reqs: BuilderNode[],
+	fn: (req: BuilderNode) => BuilderNode
+): BuilderNode[] {
+	return reqs.map((req) => {
+		const updated = fn(req);
+		return { ...updated, children: mapRequirements(updated.children, fn) };
+	});
+}
+
+/** Find a requirement by node ID in a recursive tree */
+function findRequirement(reqs: BuilderNode[], nodeId: string): BuilderNode | null {
+	for (const req of reqs) {
+		if (req.node.id === nodeId) return req;
+		const found = findRequirement(req.children, nodeId);
+		if (found) return found;
+	}
+	return null;
+}
+
+/** Remove a requirement by node ID from a recursive tree */
+function removeRequirement(reqs: BuilderNode[], nodeId: string): BuilderNode[] {
+	return reqs
+		.filter((req) => req.node.id !== nodeId)
+		.map((req) => ({ ...req, children: removeRequirement(req.children, nodeId) }));
+}
+
+/** Add a child requirement under a parent node ID */
+function addChildToRequirement(
+	reqs: BuilderNode[],
+	parentNodeId: string,
+	child: BuilderNode
+): BuilderNode[] {
+	return reqs.map((req) => {
+		if (req.node.id === parentNodeId) {
+			return { ...req, children: [...req.children, child] };
+		}
+		return { ...req, children: addChildToRequirement(req.children, parentNodeId, child) };
+	});
+}
+
+/** Apply a function to a specific requirement found by node ID */
+function updateRequirementById(
+	reqs: BuilderNode[],
+	nodeId: string,
+	fn: (req: BuilderNode) => BuilderNode
+): BuilderNode[] {
+	return reqs.map((req) => {
+		if (req.node.id === nodeId) return fn(req);
+		return { ...req, children: updateRequirementById(req.children, nodeId, fn) };
+	});
+}
+
+// --- Serialization / Hydration helpers ---
+
+/** Extract a plain folder_id string from a folder that may be an object or string */
+export function extractFolderId(folder: { id: string; str: string } | string): string {
+	return typeof folder === 'string' ? folder : folder.id;
+}
+
+/** Extract a plain requirement_node ID string */
+export function extractRequirementNodeId(rn: string | { id: string }): string {
+	return typeof rn === 'string' ? rn : rn.id;
+}
+
+/** Get a translated field value */
+export function getTranslation(
+	translations: Translations | null | undefined,
+	lang: string,
+	field: string
+): string {
+	return translations?.[lang]?.[field] ?? '';
+}
+
+/** Return a new translations dict with one field updated */
+export function withTranslation(
+	translations: Translations | null | undefined,
+	lang: string,
+	field: string,
+	value: string
+): Translations {
+	const current = translations ?? {};
+	const langDict = { ...current[lang], [field]: value };
+	if (!value) delete langDict[field];
+	return { ...current, [lang]: langDict };
+}
+
+/** Serialize a single RequirementNode into its flat persistence shape. */
+export function serializeNode(n: RequirementNode): Record<string, unknown> {
+	return {
+		id: n.id,
+		urn: n.urn,
+		ref_id: n.ref_id,
+		name: n.name,
+		description: n.description,
+		annotation: n.annotation,
+		parent_urn: n.parent_urn,
+		order_id: n.order_id,
+		assessable: n.assessable,
+		implementation_groups: n.implementation_groups,
+		visibility_expression: n.visibility_expression,
+		typical_evidence: n.typical_evidence,
+		weight: n.weight,
+		importance: n.importance,
+		display_mode: n.display_mode,
+		folder_id: extractFolderId(n.folder),
+		translations: n.translations ?? null
+	};
+}
+
+/**
+ * Serialize the current builder state into a flat DraftJSON for persistence.
+ */
+export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJSON {
+	const nodes: Record<string, unknown>[] = [];
+	const questions: Record<string, unknown>[] = [];
+	const choices: Record<string, unknown>[] = [];
+	let globalOrder = 0;
+
+	function pushNode(n: RequirementNode) {
+		const serialized = serializeNode(n);
+		serialized.order_id = globalOrder++;
+		nodes.push(serialized);
+	}
+
+	function walk(tree: BuilderNode[]) {
+		for (const bn of tree) {
+			pushNode(bn.node);
+			for (const bq of bn.questions) {
+				const q = bq.question;
+				questions.push({
+					id: q.id,
+					urn: q.urn,
+					ref_id: q.ref_id,
+					text: q.text,
+					annotation: q.annotation,
+					type: q.type,
+					config: q.config,
+					depends_on: q.depends_on,
+					order: q.order,
+					weight: q.weight,
+					requirement_node_id: extractRequirementNodeId(q.requirement_node),
+					folder_id: extractFolderId(q.folder),
+					translations: q.translations ?? null
+				});
+				for (const c of q.choices) {
+					choices.push({
+						id: c.id,
+						urn: c.urn,
+						ref_id: c.ref_id,
+						value: c.value,
+						annotation: c.annotation,
+						add_score: c.add_score,
+						compute_result: c.compute_result,
+						order: c.order,
+						description: c.description,
+						color: c.color,
+						select_implementation_groups: c.select_implementation_groups,
+						question_id: c.question,
+						folder_id: extractFolderId(c.folder),
+						translations: c.translations ?? null
+					});
+				}
+			}
+			walk(bn.children);
+		}
+	}
+
+	walk(rootNodes);
+
+	return {
+		framework_meta: {
+			name: fw.name,
+			description: fw.description,
+			annotation: fw.annotation,
+			locale: fw.locale,
+			translations: fw.translations ?? {},
+			available_languages: fw.available_languages ?? [],
+			min_score: fw.min_score,
+			max_score: fw.max_score,
+			scores_definition: fw.scores_definition,
+			implementation_groups_definition: fw.implementation_groups_definition,
+			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
+			field_visibility: fw.field_visibility,
+			urn_namespace: fw.urn_namespace
+		},
+		nodes,
+		questions,
+		choices
+	};
+}
+
+/**
+ * Hydrate draft JSON (flat arrays with _id suffixed FK fields) into
+ * the RequirementNode[] and Question[] format expected by buildTree.
+ */
+export function hydrateDraft(
+	draft: DraftJSON,
+	frameworkId: string
+): {
+	frameworkPatch: Partial<Framework>;
+	nodes: RequirementNode[];
+	questions: Question[];
+} {
+	const meta = draft.framework_meta;
+	const frameworkPatch: Partial<Framework> = {
+		name: meta.name,
+		description: meta.description,
+		annotation: meta.annotation ?? null,
+		locale: meta.locale ?? 'en',
+		translations: meta.translations ?? {},
+		available_languages: meta.available_languages ?? [],
+		min_score: meta.min_score,
+		max_score: meta.max_score,
+		scores_definition: meta.scores_definition,
+		implementation_groups_definition: meta.implementation_groups_definition,
+		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
+		field_visibility: meta.field_visibility ?? {},
+		urn_namespace: meta.urn_namespace ?? 'custom'
+	};
+
+	// Build a lookup from question_id to choices
+	const choicesByQuestion = new Map<string, QuestionChoice[]>();
+	for (const c of draft.choices) {
+		const qId = (c.question_id ?? c.question) as string;
+		if (!choicesByQuestion.has(qId)) choicesByQuestion.set(qId, []);
+		choicesByQuestion.get(qId)!.push({
+			id: c.id as string,
+			urn: (c.urn ?? null) as string | null,
+			ref_id: (c.ref_id ?? null) as string | null,
+			value: (c.value ?? null) as string | null,
+			annotation: (c.annotation ?? null) as string | null,
+			add_score: (c.add_score ?? null) as number | null,
+			compute_result: (c.compute_result ?? null) as string | null,
+			order: (c.order ?? 0) as number,
+			description: (c.description ?? null) as string | null,
+			color: (c.color ?? null) as string | null,
+			select_implementation_groups: (c.select_implementation_groups ?? null) as string[] | null,
+			translations: (c.translations ?? null) as Translations | null,
+			folder: (c.folder_id ?? c.folder ?? '') as string,
+			question: qId
+		});
+	}
+
+	const questions: Question[] = draft.questions.map((q) => {
+		const nodeId = (q.requirement_node_id ?? q.requirement_node) as string;
+		const qId = q.id as string;
+		return {
+			id: qId,
+			urn: (q.urn ?? '') as string,
+			ref_id: (q.ref_id ?? null) as string | null,
+			text: (q.text ?? null) as string | null,
+			annotation: (q.annotation ?? null) as string | null,
+			type: (q.type ?? 'text') as Question['type'],
+			config: (q.config ?? null) as Record<string, unknown> | null,
+			depends_on: (q.depends_on ?? null) as Record<string, unknown> | null,
+			order: (q.order ?? 0) as number,
+			weight: (q.weight ?? 1) as number,
+			translations: (q.translations ?? null) as Translations | null,
+			folder: (q.folder_id ?? q.folder ?? '') as string,
+			requirement_node: nodeId,
+			choices: (choicesByQuestion.get(qId) ?? []).sort((a, b) => a.order - b.order)
+		};
+	});
+
+	const nodes: RequirementNode[] = draft.nodes.map((n) => ({
+		id: n.id as string,
+		urn: (n.urn ?? null) as string | null,
+		ref_id: (n.ref_id ?? null) as string | null,
+		name: (n.name ?? null) as string | null,
+		description: (n.description ?? null) as string | null,
+		annotation: (n.annotation ?? null) as string | null,
+		parent_urn: (n.parent_urn ?? null) as string | null,
+		order_id: (n.order_id ?? null) as number | null,
+		assessable: (n.assessable ?? false) as boolean,
+		implementation_groups: (n.implementation_groups ?? null) as string[] | null,
+		visibility_expression: (n.visibility_expression ?? null) as string | null,
+		typical_evidence: (n.typical_evidence ?? null) as string | null,
+		weight: (n.weight ?? 1) as number,
+		importance: (n.importance ?? '') as string,
+		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
+		translations: (n.translations ?? null) as Translations | null,
+		framework: (n.framework ?? frameworkId) as string,
+		folder: (n.folder_id ?? n.folder ?? '') as string
+	}));
+
+	return { frameworkPatch, nodes, questions };
+}
+
+// --- Pre-publish validation (exported for testing) ---
+
+export interface ValidationError {
+	key: string;
+	message: string;
+}
+
+/**
+ * Validate framework and nodes before publishing.
+ * Returns an array of validation errors (empty if valid).
+ */
+export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): ValidationError[] {
+	const errors: ValidationError[] = [];
+
+	if (!fw.name || fw.name.trim().length === 0) {
+		errors.push({ key: 'publish', message: 'Framework name is required.' });
+	} else if (fw.name.length > 200) {
+		errors.push({
+			key: 'publish',
+			message: `Framework name is ${fw.name.length} characters (max 200).`
+		});
+	}
+
+	function validate(tree: BuilderNode[]) {
+		for (const bn of tree) {
+			const n = bn.node;
+			const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
+			if (n.name && n.name.length > 200) {
+				errors.push({
+					key: `node-${n.id}`,
+					message: `Name exceeds 200 characters (${n.name.length}/200). Move long text to the description field.`
+				});
+			}
+			if (n.ref_id && n.ref_id.length > 100) {
+				errors.push({
+					key: `node-${n.id}`,
+					message: `'${label}': ref_id is ${n.ref_id.length} characters (max 100).`
+				});
+			}
+			if (n.urn && n.urn.length > 255) {
+				errors.push({
+					key: `node-${n.id}`,
+					message: `'${label}': URN is ${n.urn.length} characters (max 255).`
+				});
+			}
+			validate(bn.children);
+		}
+	}
+
+	validate(rootNodes);
+	return errors;
+}
+
+// --- Tree builder ---
+
+export function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderNode[] {
+	const questionsByNode = new Map<string, Question[]>();
+	for (const q of questions) {
+		const nodeId = typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
+		if (!questionsByNode.has(nodeId)) questionsByNode.set(nodeId, []);
+		questionsByNode.get(nodeId)!.push(q);
+	}
+
+	const childrenByUrn = new Map<string, RequirementNode[]>();
+	for (const node of nodes) {
+		if (node.parent_urn) {
+			if (!childrenByUrn.has(node.parent_urn)) childrenByUrn.set(node.parent_urn, []);
+			childrenByUrn.get(node.parent_urn)!.push(node);
+		}
+	}
+	for (const children of childrenByUrn.values()) {
+		children.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
+	}
+
+	function build(parentUrn: string | null, depth: number): BuilderNode[] {
+		const raw = parentUrn
+			? (childrenByUrn.get(parentUrn) ?? [])
+			: nodes.filter((n) => !n.parent_urn).sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
+		return raw.map((n) => ({
+			node: n,
+			questions: (questionsByNode.get(n.id) ?? [])
+				.sort((a, b) => a.order - b.order)
+				.map((q) => ({ question: q })),
+			children: n.urn ? build(n.urn, depth + 1) : [],
+			depth
+		}));
+	}
+
+	return build(null, 0);
+}
+
+// --- State ---
+
+const CONTEXT_KEY = 'framework-builder';
+
+export type NodePreset = 'blank' | 'group' | 'requirement' | 'splash';
+
+export interface BuilderStore {
+	framework: Writable<Framework>;
+	rootNodes: Writable<BuilderNode[]>;
+	saving: Writable<boolean>;
+	errors: Writable<Map<string, string>>;
+	activeSection: Writable<string>;
+	hasPendingFlush: Writable<boolean>;
+	unsaved: Writable<boolean>;
+	unpublished: Writable<boolean>;
+	isScrolling: Writable<boolean>;
+
+	addNode: (opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) => void;
+	deleteNode: (nodeId: string) => void;
+	reorderNodes: (parentNodeId: string | null, fromIndex: number, toIndex: number) => void;
+	indentNode: (nodeId: string) => boolean;
+	outdentNode: (nodeId: string) => boolean;
+	toggleAssessable: (nodeId: string) => void;
+
+	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
+	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
+	updateQuestion: (questionId: string, patch: Record<string, unknown>) => void;
+	deleteQuestion: (reqNodeId: string, qIndex: number) => void;
+	addChoice: (reqNodeId: string, qIndex: number) => void;
+	updateChoice: (choiceId: string, patch: Record<string, unknown>) => void;
+	deleteChoice: (reqNodeId: string, qIndex: number, choiceIndex: number) => void;
+	reorderQuestions: (reqNodeId: string, fromIndex: number, toIndex: number) => void;
+	reorderChoices: (reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) => void;
+	updateFramework: (patch: Record<string, unknown>) => void;
+	activeLanguage: Writable<string | null>;
+	setActiveLanguage: (lang: string | null) => void;
+	getTranslationProgress: (lang: string) => { translated: number; total: number };
+	copyFromBase: (lang: string) => void;
+	addLanguage: (lang: string) => void;
+	removeLanguage: (lang: string) => void;
+	setBaseLocale: (locale: string) => void;
+	flushDraft: () => Promise<void>;
+	publish: () => Promise<void>;
+	discard: () => Promise<void>;
+	destroy: () => void;
+}
+
+/**
+ * Create the builder state. Accepts either:
+ * 1. Draft JSON (from editing_draft) -- hydrates from flat arrays
+ * 2. Relational data (frameworkData, nodes, questions) -- builds tree directly
+ */
+export function createBuilderState(
+	frameworkData: Framework,
+	nodes: RequirementNode[],
+	questions: Question[],
+	editingDraft?: DraftJSON | null
+): BuilderStore {
+	const folderId =
+		typeof frameworkData.folder === 'string' ? frameworkData.folder : frameworkData.folder.id;
+	const frameworkId = frameworkData.id;
+	function getUrnNs(): string {
+		return get(framework).urn_namespace || 'custom';
+	}
+
+	// If we have a draft, hydrate from it; otherwise use relational data
+	let initialNodes = nodes;
+	let initialQuestions = questions;
+	let initialFrameworkData = frameworkData;
+
+	if (editingDraft) {
+		const hydrated = hydrateDraft(editingDraft, frameworkId);
+		initialNodes = hydrated.nodes;
+		initialQuestions = hydrated.questions;
+		initialFrameworkData = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
+	}
+
+	// Cache the slug after hydration so renamed drafts use the updated name
+	const fwSlug = slugifyFrameworkName(initialFrameworkData.name, frameworkId);
+
+	const framework = writable<Framework>(initialFrameworkData);
+	const initialRootNodes = buildTree(initialNodes, initialQuestions);
+	const rootNodes = writable<BuilderNode[]>(initialRootNodes);
+	const saving = writable(false);
+	const errors = writable<Map<string, string>>(new Map());
+	const activeSection = writable<string>(initialRootNodes[0]?.node.id ?? '');
+	const hasPendingFlush = writable(false);
+	const unsaved = writable(false); // local edits not yet saved to draft
+	// Check if the draft was marked dirty by a prior save-draft call
+	const draftMarkedDirty = editingDraft && (editingDraft as any)._dirty === true;
+	const unpublished = writable(!!draftMarkedDirty);
+	const isScrolling = writable(false);
+	const activeLanguage = writable<string | null>(null);
+
+	function markDirty() {
+		unsaved.set(true);
+		unpublished.set(true);
+	}
+
+	function setError(key: string, message: string) {
+		errors.update((m) => new Map(m).set(key, message));
+	}
+
+	function clearError(key: string) {
+		errors.update((m) => {
+			const next = new Map(m);
+			next.delete(key);
+			return next;
+		});
+	}
+
+	function get<T>(store: Writable<T>): T {
+		let value: T;
+		store.subscribe((v) => (value = v))();
+		return value!;
+	}
+
+	/** Map all requirements in all sections recursively */
+	function updateAllRequirements(fn: (req: BuilderNode) => BuilderNode) {
+		rootNodes.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				children: mapRequirements(sec.children, fn)
+			}))
+		);
+	}
+
+	/** Find a requirement across all sections */
+	function findReqGlobal(nodeId: string): BuilderNode | null {
+		for (const sec of get(rootNodes)) {
+			const found = findRequirement(sec.children, nodeId);
+			if (found) return found;
+		}
+		return null;
+	}
+
+	// --- Draft save (explicit, triggered by Save button) ---
+
+	let saveInFlight = false;
+
+	async function flushDraft(): Promise<boolean> {
+		if (saveInFlight) return false;
+		saveInFlight = true;
+		saving.set(true);
+		try {
+			const draft = serializeDraft(get(framework), get(rootNodes));
+			(draft as any)._dirty = true; // mark draft as having user changes
+			await apiSaveDraft(frameworkId, draft);
+			unsaved.set(false); // saved to draft, but still unpublished
+			clearError('save-draft');
+			return true;
+		} catch (e) {
+			setError('save-draft', (e as Error).message);
+			return false;
+		} finally {
+			saving.set(false);
+			saveInFlight = false;
+		}
+	}
+
+	/** Validate all nodes and framework before publish. Returns true if valid. */
+	function validateBeforePublish(): boolean {
+		const validationErrors = validateDraft(get(framework), get(rootNodes));
+		for (const err of validationErrors) {
+			setError(err.key, err.message);
+		}
+		return validationErrors.length === 0;
+	}
+
+	async function publish() {
+		const saved = await flushDraft();
+		if (!saved) {
+			setError('publish', 'Failed to save draft before publishing.');
+			return;
+		}
+
+		// Clear previous node-level validation errors
+		errors.update((m) => {
+			const next = new Map(m);
+			for (const key of next.keys()) {
+				if (key.startsWith('node-')) next.delete(key);
+			}
+			return next;
+		});
+		clearError('publish');
+
+		if (!validateBeforePublish()) {
+			return;
+		}
+
+		try {
+			await apiPublishDraft(frameworkId);
+			// Reflect the server-side bump locally so reactive status (e.g.,
+			// "Live" vs "Draft — nothing live yet") updates without a refresh.
+			framework.update((f) => ({ ...f, editing_version: (f.editing_version ?? 1) + 1 }));
+			clearError('publish');
+		} catch (e) {
+			setError('publish', (e as Error).message);
+			throw e;
+		}
+	}
+
+	async function discard() {
+		try {
+			// Clear the draft on the server
+			await apiDiscardDraft(frameworkId);
+			// Re-create a fresh draft from live relational data
+			const { draft: freshDraft } = await apiStartEditing(frameworkId);
+			// Re-hydrate stores from the fresh draft
+			const hydrated = hydrateDraft(freshDraft, frameworkId);
+			const freshFramework = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
+			const freshRootNodes = buildTree(hydrated.nodes, hydrated.questions);
+			framework.set(freshFramework);
+			rootNodes.set(freshRootNodes);
+			activeSection.set(freshRootNodes[0]?.node.id ?? '');
+			unsaved.set(false);
+			unpublished.set(false);
+			clearError('discard');
+		} catch (e) {
+			setError('discard', (e as Error).message);
+			throw e;
+		}
+	}
+
+	function destroy() {
+		// No cleanup needed — saves are now explicit
+	}
+
+	// --- Unified node CRUD ---
+
+	function presetDefaults(
+		preset: NodePreset
+	): Pick<RequirementNode, 'assessable' | 'display_mode'> {
+		switch (preset) {
+			case 'group':
+				return { assessable: false, display_mode: 'default' };
+			case 'requirement':
+				return { assessable: true, display_mode: 'default' };
+			case 'splash':
+				return { assessable: false, display_mode: 'splash' };
+			case 'blank':
+			default:
+				return { assessable: false, display_mode: 'default' };
+		}
+	}
+
+	function addNode(opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) {
+		const preset = opts.preset ?? 'blank';
+		const defaults = presetDefaults(preset);
+
+		const roots = get(rootNodes);
+		let parentBn: BuilderNode | null = null;
+		if (opts.parent) {
+			for (const r of roots) {
+				const found = findRequirement([r], opts.parent);
+				if (found) {
+					parentBn = found;
+					break;
+				}
+			}
+		}
+		const siblings = parentBn ? parentBn.children : roots;
+		const order =
+			opts.afterIndex !== undefined ? (opts.afterIndex + 1) * 100 + 50 : siblings.length * 100;
+		const depth = parentBn ? parentBn.depth + 1 : 0;
+
+		const parentRefId = parentBn?.node.ref_id ?? null;
+		const siblingRefIds = siblings.map((s) => s.node.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, parentBn ? 'requirement' : 'section');
+
+		const newId = crypto.randomUUID();
+		const newNode: RequirementNode = {
+			id: newId,
+			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
+			ref_id: refId,
+			name: null,
+			description: null,
+			annotation: null,
+			parent_urn: parentBn?.node.urn ?? null,
+			order_id: order,
+			assessable: defaults.assessable,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: defaults.display_mode,
+			framework: frameworkId,
+			folder: folderId
+		};
+		const newBn: BuilderNode = { node: newNode, questions: [], children: [], depth };
+
+		if (parentBn) {
+			rootNodes.update((tree) =>
+				tree.map((r) => {
+					// Parent is this root node directly
+					if (r.node.id === parentBn!.node.id) {
+						return { ...r, children: [...r.children, newBn] };
+					}
+					// Parent is somewhere in this root's subtree
+					return {
+						...r,
+						children: addChildToRequirement(r.children, parentBn!.node.id, newBn)
+					};
+				})
+			);
+		} else {
+			const idx = opts.afterIndex !== undefined ? opts.afterIndex + 1 : roots.length;
+			rootNodes.update((tree) => [...tree.slice(0, idx), newBn, ...tree.slice(idx)]);
+		}
+		markDirty();
+	}
+
+	function deleteNode(nodeId: string) {
+		rootNodes.update((tree) => removeRequirement(tree, nodeId));
+		markDirty();
+	}
+
+	function reorderNodes(parentNodeId: string | null, fromIndex: number, toIndex: number) {
+		if (fromIndex === toIndex) return;
+		if (parentNodeId === null) {
+			rootNodes.update((tree) => {
+				const copy = [...tree];
+				const [moved] = copy.splice(fromIndex, 1);
+				copy.splice(toIndex, 0, moved);
+				return copy.map((bn, i) => ({ ...bn, node: { ...bn.node, order_id: i * 100 } }));
+			});
+		} else {
+			rootNodes.update((tree) =>
+				tree.map((r) => ({
+					...r,
+					children: updateRequirementById(r.children, parentNodeId, (b) => {
+						const kids = [...b.children];
+						const [moved] = kids.splice(fromIndex, 1);
+						kids.splice(toIndex, 0, moved);
+						return {
+							...b,
+							children: kids.map((k, i) => ({ ...k, node: { ...k.node, order_id: i * 100 } }))
+						};
+					})
+				}))
+			);
+		}
+		markDirty();
+	}
+
+	// --- Indent / Outdent / Toggle Assessable ---
+
+	/** Recursively update the depth field on a subtree after reparenting */
+	function reDepth(nodes: BuilderNode[], depth: number): BuilderNode[] {
+		return nodes.map((n) => ({ ...n, depth, children: reDepth(n.children, depth + 1) }));
+	}
+
+	/**
+	 * Indent a node: nest it as the last child of its previous sibling.
+	 * Returns true if the tree was mutated.
+	 */
+	function indentNode(nodeId: string): boolean {
+		let changed = false;
+		rootNodes.update((tree) => {
+			function recurse(list: BuilderNode[]): BuilderNode[] {
+				const idx = list.findIndex((b) => b.node.id === nodeId);
+				if (idx > 0) {
+					// Found at this level and there is a previous sibling
+					const node = list[idx];
+					const prev = list[idx - 1];
+					const newParentUrn = prev.node.urn;
+					const newDepth = prev.depth + 1;
+					const moved: BuilderNode = {
+						...node,
+						depth: newDepth,
+						node: {
+							...node.node,
+							parent_urn: newParentUrn,
+							order_id: prev.children.length * 100
+						},
+						children: reDepth(node.children, newDepth + 1)
+					};
+					changed = true;
+					return list
+						.map((b, i) => (i === idx - 1 ? { ...b, children: [...b.children, moved] } : b))
+						.filter((_, i) => i !== idx);
+				}
+				if (idx === 0) {
+					// First sibling — can't indent; but still recurse into children of all items
+					return list.map((b) => ({ ...b, children: recurse(b.children) }));
+				}
+				// Not found at this level — recurse into children
+				return list.map((b) => ({ ...b, children: recurse(b.children) }));
+			}
+			return recurse(tree);
+		});
+		if (changed) markDirty();
+		return changed;
+	}
+
+	/**
+	 * Outdent a node: promote it to be a sibling of its parent, placed right after the parent.
+	 * Returns true if the tree was mutated.
+	 */
+	function outdentNode(nodeId: string): boolean {
+		let changed = false;
+		rootNodes.update((tree) => {
+			// Phase 1: locate the node's parent chain
+			type Hit = { parentChain: BuilderNode[]; idx: number };
+			let hit: Hit | null = null;
+
+			function locate(list: BuilderNode[], chain: BuilderNode[]) {
+				for (let i = 0; i < list.length; i++) {
+					if (list[i].node.id === nodeId) {
+						hit = { parentChain: chain, idx: i };
+						return;
+					}
+					locate(list[i].children, [...chain, list[i]]);
+					if (hit) return;
+				}
+			}
+			locate(tree, []);
+
+			// No-op if not found or already a root node
+			if (!hit || hit.parentChain.length === 0) return tree;
+
+			const parent = hit.parentChain[hit.parentChain.length - 1];
+			const grandparent =
+				hit.parentChain.length > 1 ? hit.parentChain[hit.parentChain.length - 2] : null;
+
+			const node = parent.children[hit.idx];
+			const newParentUrn = grandparent ? grandparent.node.urn : null;
+			const newDepth = parent.depth; // promoted one level up
+
+			const moved: BuilderNode = {
+				...node,
+				depth: newDepth,
+				node: {
+					...node.node,
+					parent_urn: newParentUrn,
+					order_id: 0 // will be recomputed below
+				},
+				children: reDepth(node.children, newDepth + 1)
+			};
+
+			// Phase 2: remove the node from its current parent (walk the chain)
+			function walk(list: BuilderNode[], level: number): BuilderNode[] {
+				return list.flatMap((b) => {
+					const isInChain = level < hit!.parentChain.length && b === hit!.parentChain[level];
+					if (isInChain) {
+						const nextChildren =
+							level === hit!.parentChain.length - 1
+								? // This is `parent`: strip the moved node and reindex
+									b.children
+										.filter((_, i) => i !== hit!.idx)
+										.map((c, i) => ({ ...c, node: { ...c.node, order_id: i * 100 } }))
+								: walk(b.children, level + 1);
+						return [{ ...b, children: nextChildren }];
+					}
+					return [b];
+				});
+			}
+
+			const withoutTarget = walk(tree, 0);
+
+			// Phase 3: splice `moved` into grandparent's children (or root list) after `parent`
+			if (grandparent === null) {
+				const parentIdx = withoutTarget.findIndex((b) => b.node.id === parent.node.id);
+				const result = [
+					...withoutTarget.slice(0, parentIdx + 1),
+					moved,
+					...withoutTarget.slice(parentIdx + 1)
+				];
+				changed = true;
+				return result.map((b, i) => ({ ...b, node: { ...b.node, order_id: i * 100 } }));
+			}
+
+			function insertInGrandparent(list: BuilderNode[]): BuilderNode[] {
+				return list.map((b) => {
+					if (b.node.id === grandparent!.node.id) {
+						const parentIdx = b.children.findIndex((c) => c.node.id === parent.node.id);
+						const newChildren = [
+							...b.children.slice(0, parentIdx + 1),
+							moved,
+							...b.children.slice(parentIdx + 1)
+						].map((c, i) => ({ ...c, node: { ...c.node, order_id: i * 100 } }));
+						return { ...b, children: newChildren };
+					}
+					return { ...b, children: insertInGrandparent(b.children) };
+				});
+			}
+
+			changed = true;
+			return insertInGrandparent(withoutTarget);
+		});
+		if (changed) markDirty();
+		return changed;
+	}
+
+	/**
+	 * Toggle the `assessable` flag on a node.
+	 */
+	function toggleAssessable(nodeId: string) {
+		// Find current value across the full tree (including roots)
+		let current: boolean | null = null;
+		const roots = get(rootNodes);
+		function findAssessable(list: BuilderNode[]) {
+			for (const b of list) {
+				if (b.node.id === nodeId) {
+					current = b.node.assessable;
+					return;
+				}
+				findAssessable(b.children);
+				if (current !== null) return;
+			}
+		}
+		findAssessable(roots);
+		if (current === null) return;
+		updateNode(nodeId, { assessable: !current });
+	}
+
+	// --- Node update ---
+
+	function updateNode(nodeId: string, patch: Record<string, unknown>) {
+		rootNodes.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				node: sec.node.id === nodeId ? { ...sec.node, ...patch } : sec.node,
+				children: mapRequirements(sec.children, (req) => ({
+					...req,
+					node: req.node.id === nodeId ? { ...req.node, ...patch } : req.node
+				}))
+			}))
+		);
+		markDirty();
+	}
+
+	// --- Question CRUD (node ID-based) ---
+
+	function addQuestion(reqNodeId: string, type: Question['type'] = 'text') {
+		const req = findReqGlobal(reqNodeId);
+		if (!req) return;
+		const order = req.questions.length * 100;
+		const newId = crypto.randomUUID();
+
+		const parentRefId = req.node.ref_id ?? null;
+		const siblingRefIds = req.questions.map((bq) => bq.question.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'question');
+		const urn = generateUrn('question', fwSlug, refId, getUrnNs());
+
+		const newQuestion: Question = {
+			id: newId,
+			urn,
+			ref_id: refId,
+			text: '',
+			annotation: null,
+			type,
+			config: null,
+			depends_on: null,
+			order,
+			weight: 1,
+			folder: folderId,
+			requirement_node: reqNodeId,
+			choices: []
+		};
+		rootNodes.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
+					...r,
+					questions: [...r.questions, { question: newQuestion }]
+				}))
+			}))
+		);
+		markDirty();
+	}
+
+	function updateQuestion(questionId: string, patch: Record<string, unknown>) {
+		updateAllRequirements((req) => ({
+			...req,
+			questions: req.questions.map((q) => ({
+				...q,
+				question: q.question.id === questionId ? { ...q.question, ...patch } : q.question
+			}))
+		}));
+		markDirty();
+	}
+
+	function deleteQuestion(reqNodeId: string, qIndex: number) {
+		const req = findReqGlobal(reqNodeId);
+		const q = req?.questions[qIndex];
+		if (!q) return;
+		rootNodes.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
+					...r,
+					questions: r.questions.filter((_, i) => i !== qIndex)
+				}))
+			}))
+		);
+		markDirty();
+	}
+
+	// --- Choice CRUD (node ID-based) ---
+
+	function addChoice(reqNodeId: string, qIndex: number) {
+		const req = findReqGlobal(reqNodeId);
+		const q = req?.questions[qIndex];
+		if (!q) return;
+		const order = q.question.choices.length * 100;
+		const newId = crypto.randomUUID();
+
+		const parentRefId = q.question.ref_id ?? null;
+		const siblingRefIds = q.question.choices.map((c) => c.ref_id);
+		const refId = computeRefId(siblingRefIds, parentRefId, 'choice');
+
+		const newChoice: QuestionChoice = {
+			id: newId,
+			urn: generateUrn('question_choice', fwSlug, refId, getUrnNs()),
+			ref_id: refId,
+			value: '',
+			annotation: null,
+			add_score: null,
+			compute_result: null,
+			order,
+			description: null,
+			color: null,
+			select_implementation_groups: null,
+			folder: folderId,
+			question: q.question.id
+		};
+		rootNodes.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
+					...r,
+					questions: r.questions.map((qq, i) =>
+						i === qIndex
+							? {
+									...qq,
+									question: {
+										...qq.question,
+										choices: [...qq.question.choices, newChoice]
+									}
+								}
+							: qq
+					)
+				}))
+			}))
+		);
+		markDirty();
+	}
+
+	function updateChoice(choiceId: string, patch: Record<string, unknown>) {
+		updateAllRequirements((req) => ({
+			...req,
+			questions: req.questions.map((q) => ({
+				...q,
+				question: {
+					...q.question,
+					choices: q.question.choices.map((c) => (c.id === choiceId ? { ...c, ...patch } : c))
+				}
+			}))
+		}));
+		markDirty();
+	}
+
+	function deleteChoice(reqNodeId: string, qIndex: number, choiceIndex: number) {
+		const req = findReqGlobal(reqNodeId);
+		const choice = req?.questions[qIndex]?.question.choices[choiceIndex];
+		if (!choice) return;
+		rootNodes.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
+					...r,
+					questions: r.questions.map((qq, i) =>
+						i === qIndex
+							? {
+									...qq,
+									question: {
+										...qq.question,
+										choices: qq.question.choices.filter((_, ci) => ci !== choiceIndex)
+									}
+								}
+							: qq
+					)
+				}))
+			}))
+		);
+		markDirty();
+	}
+
+	// --- Reorder ---
+
+	function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
+		if (fromIndex === toIndex) return;
+		rootNodes.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				children: updateRequirementById(sec.children, reqNodeId, (r) => {
+					const qs = [...r.questions];
+					const [moved] = qs.splice(fromIndex, 1);
+					qs.splice(toIndex, 0, moved);
+					return {
+						...r,
+						questions: qs.map((q, i) => ({
+							...q,
+							question: { ...q.question, order: i * 100 }
+						}))
+					};
+				})
+			}))
+		);
+		markDirty();
+	}
+
+	function reorderChoices(reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) {
+		if (fromIndex === toIndex) return;
+		rootNodes.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
+					...r,
+					questions: r.questions.map((qq, i) => {
+						if (i !== qIndex) return qq;
+						const choices = [...qq.question.choices];
+						const [moved] = choices.splice(fromIndex, 1);
+						choices.splice(toIndex, 0, moved);
+						return {
+							...qq,
+							question: {
+								...qq.question,
+								choices: choices.map((c, ci) => ({ ...c, order: ci * 100 }))
+							}
+						};
+					})
+				}))
+			}))
+		);
+		markDirty();
+	}
+
+	function doUpdateFramework(patch: Record<string, unknown>) {
+		framework.update((f) => ({ ...f, ...patch }) as Framework);
+		markDirty();
+	}
+
+	function setActiveLanguage(lang: string | null) {
+		activeLanguage.set(lang);
+	}
+
+	function addLanguage(lang: string) {
+		const code = lang.trim().toLowerCase();
+		if (!code) return;
+		framework.update((f) => {
+			const langs = new Set(f.available_languages ?? []);
+			langs.add(code);
+			return { ...f, available_languages: [...langs].sort() };
+		});
+		markDirty();
+	}
+
+	function removeLanguage(lang: string) {
+		framework.update((f) => ({
+			...f,
+			available_languages: (f.available_languages ?? []).filter((l) => l !== lang)
+		}));
+		// Deselect if currently active
+		const currentLang = get(activeLanguage);
+		if (currentLang === lang) activeLanguage.set(null);
+		markDirty();
+	}
+
+	function setBaseLocale(newLocale: string) {
+		const fw = get(framework);
+		const oldLocale = fw.locale ?? 'en';
+		if (newLocale === oldLocale) return;
+
+		// --- Swap framework meta fields ---
+		const fwTrans = { ...fw.translations };
+		// Demote current base fields into translations[oldLocale]
+		const demoted: Record<string, string> = {};
+		if (fw.name) demoted.name = fw.name;
+		if (fw.description) demoted.description = fw.description;
+		if (fw.annotation) demoted.annotation = fw.annotation;
+		fwTrans[oldLocale] = demoted;
+		// Promote translations[newLocale] to base fields
+		const promoted = fwTrans[newLocale] ?? {};
+		delete fwTrans[newLocale];
+
+		// Swap nested translations in scores_definition entries
+		const swappedScores = swapJsonEntryTranslations(fw.scores_definition, oldLocale, newLocale, [
+			'name',
+			'description'
+		]);
+		// Swap nested translations in implementation_groups_definition entries
+		const swappedIgs = swapJsonArrayTranslations(
+			fw.implementation_groups_definition,
+			oldLocale,
+			newLocale,
+			['name', 'description']
+		);
+		// Swap nested translations in outcomes_definition entries
+		const swappedOutcomes = swapJsonArrayTranslations(
+			fw.outcomes_definition as Record<string, unknown>[] | null,
+			oldLocale,
+			newLocale,
+			['annotation']
+		);
+
+		// Update available_languages
+		const langs = new Set(fw.available_languages ?? []);
+		langs.delete(newLocale);
+		langs.add(oldLocale);
+
+		framework.update((f) => ({
+			...f,
+			locale: newLocale,
+			name: promoted.name || f.name,
+			description: promoted.description || f.description,
+			annotation: promoted.annotation || f.annotation,
+			translations: fwTrans,
+			scores_definition: swappedScores,
+			implementation_groups_definition: swappedIgs,
+			outcomes_definition: swappedOutcomes as typeof f.outcomes_definition,
+			available_languages: [...langs].sort()
+		}));
+
+		// --- Swap all node/question/choice fields ---
+		rootNodes.update((secs) =>
+			secs.map((sec) => ({
+				...sec,
+				node: swapNodeFields(sec.node, oldLocale, newLocale),
+				children: swapReqFields(sec.children, oldLocale, newLocale)
+			}))
+		);
+
+		// If we were translating into the new base, deselect
+		const currentLang = get(activeLanguage);
+		if (currentLang === newLocale) activeLanguage.set(null);
+		markDirty();
+	}
+
+	/** Swap base ↔ translation fields on a RequirementNode */
+	function swapNodeFields(
+		node: RequirementNode,
+		oldLocale: string,
+		newLocale: string
+	): RequirementNode {
+		const trans = { ...node.translations };
+		// Demote current base fields
+		const demoted: Record<string, string> = {};
+		if (node.name) demoted.name = node.name;
+		if (node.description) demoted.description = node.description;
+		if (node.annotation) demoted.annotation = node.annotation;
+		if (node.typical_evidence) demoted.typical_evidence = node.typical_evidence;
+		trans[oldLocale] = demoted;
+		// Promote new locale
+		const promoted = trans[newLocale] ?? {};
+		delete trans[newLocale];
+		return {
+			...node,
+			name: promoted.name || node.name,
+			description: promoted.description || node.description,
+			annotation: promoted.annotation || node.annotation,
+			typical_evidence: promoted.typical_evidence || node.typical_evidence,
+			translations: trans
+		};
+	}
+
+	/** Swap base ↔ translation fields on a Question */
+	function swapQuestionFields(q: Question, oldLocale: string, newLocale: string): Question {
+		const trans = { ...q.translations };
+		const demoted: Record<string, string> = {};
+		if (q.text) demoted.text = q.text;
+		trans[oldLocale] = demoted;
+		const promoted = trans[newLocale] ?? {};
+		delete trans[newLocale];
+		return {
+			...q,
+			text: promoted.text || q.text,
+			translations: trans,
+			choices: q.choices.map((c) => swapChoiceFields(c, oldLocale, newLocale))
+		};
+	}
+
+	/** Swap base ↔ translation fields on a QuestionChoice */
+	function swapChoiceFields(
+		c: QuestionChoice,
+		oldLocale: string,
+		newLocale: string
+	): QuestionChoice {
+		const trans = { ...c.translations };
+		const demoted: Record<string, string> = {};
+		if (c.value) demoted.value = c.value;
+		if (c.description) demoted.description = c.description;
+		trans[oldLocale] = demoted;
+		const promoted = trans[newLocale] ?? {};
+		delete trans[newLocale];
+		return {
+			...c,
+			value: promoted.value || c.value,
+			description: promoted.description || c.description,
+			translations: trans
+		};
+	}
+
+	/** Recursively swap fields on all requirements */
+	function swapReqFields(reqs: BuilderNode[], oldLocale: string, newLocale: string): BuilderNode[] {
+		return reqs.map((req) => ({
+			...req,
+			node: swapNodeFields(req.node, oldLocale, newLocale),
+			questions: req.questions.map((bq) => ({
+				...bq,
+				question: swapQuestionFields(bq.question, oldLocale, newLocale)
+			})),
+			children: swapReqFields(req.children, oldLocale, newLocale)
+		}));
+	}
+
+	/**
+	 * Swap translations in a scores_definition JSON (handles both array and {scale:[...]} shapes).
+	 * Each entry has name/description + nested translations.
+	 */
+	function swapJsonEntryTranslations(
+		def: Record<string, unknown> | null,
+		oldLocale: string,
+		newLocale: string,
+		fields: string[]
+	): Record<string, unknown> | null {
+		if (!def) return def;
+		if (Array.isArray(def)) {
+			return def.map((e) =>
+				swapSingleEntryTranslations(e as Record<string, unknown>, oldLocale, newLocale, fields)
+			) as unknown as Record<string, unknown>;
+		}
+		if ('scale' in def && Array.isArray(def.scale)) {
+			return {
+				...def,
+				scale: (def.scale as Record<string, unknown>[]).map((e) =>
+					swapSingleEntryTranslations(e, oldLocale, newLocale, fields)
+				)
+			};
+		}
+		return def;
+	}
+
+	/** Swap translations in an array of JSON objects (IG defs, outcome defs) */
+	function swapJsonArrayTranslations(
+		arr: Record<string, unknown>[] | null,
+		oldLocale: string,
+		newLocale: string,
+		fields: string[]
+	): Record<string, unknown>[] | null {
+		if (!arr) return arr;
+		return arr.map((e) => swapSingleEntryTranslations(e, oldLocale, newLocale, fields));
+	}
+
+	/** Swap base ↔ translation on a single JSON entry with a translations sub-dict */
+	function swapSingleEntryTranslations(
+		entry: Record<string, unknown>,
+		oldLocale: string,
+		newLocale: string,
+		fields: string[]
+	): Record<string, unknown> {
+		const trans = { ...(entry.translations as Record<string, Record<string, string>>) };
+		// Demote current base fields
+		const demoted: Record<string, string> = {};
+		for (const f of fields) {
+			if (entry[f]) demoted[f] = entry[f] as string;
+		}
+		trans[oldLocale] = demoted;
+		// Promote new locale
+		const promoted = trans[newLocale] ?? {};
+		delete trans[newLocale];
+		const result = { ...entry, translations: trans };
+		for (const f of fields) {
+			if (promoted[f]) result[f] = promoted[f];
+		}
+		return result;
+	}
+
+	function getTranslationProgress(lang: string): { translated: number; total: number } {
+		let total = 0;
+		let translated = 0;
+		const secs = get(rootNodes);
+
+		function checkNode(node: RequirementNode) {
+			if (node.name) {
+				total++;
+				if (node.translations?.[lang]?.name) translated++;
+			}
+		}
+
+		function walkReqs(reqs: BuilderNode[]) {
+			for (const req of reqs) {
+				checkNode(req.node);
+				for (const bq of req.questions) {
+					if (bq.question.text) {
+						total++;
+						if (bq.question.translations?.[lang]?.text) translated++;
+					}
+					for (const c of bq.question.choices) {
+						if (c.value) {
+							total++;
+							if (c.translations?.[lang]?.value) translated++;
+						}
+					}
+				}
+				walkReqs(req.children);
+			}
+		}
+
+		for (const sec of secs) {
+			checkNode(sec.node);
+			walkReqs(sec.children);
+		}
+		return { translated, total };
+	}
+
+	function copyFromBase(lang: string) {
+		rootNodes.update((secs) =>
+			secs.map((sec) => ({
+				...sec,
+				node: copyNodeTranslations(sec.node, lang),
+				children: copyReqTranslations(sec.children, lang)
+			}))
+		);
+		markDirty();
+	}
+
+	function copyNodeTranslations(node: RequirementNode, lang: string): RequirementNode {
+		const fields: Record<string, string> = {};
+		if (node.name) fields.name = node.name;
+		if (node.description) fields.description = node.description;
+		if (node.annotation) fields.annotation = node.annotation;
+		if (node.typical_evidence) fields.typical_evidence = node.typical_evidence;
+		if (Object.keys(fields).length === 0) return node;
+		const existing = node.translations?.[lang] ?? {};
+		// Only copy fields that are not already translated
+		const merged: Record<string, string> = { ...fields };
+		for (const [k, v] of Object.entries(existing)) {
+			if (v) merged[k] = v;
+		}
+		return { ...node, translations: { ...node.translations, [lang]: merged } };
+	}
+
+	function copyReqTranslations(reqs: BuilderNode[], lang: string): BuilderNode[] {
+		return reqs.map((req) => ({
+			...req,
+			node: copyNodeTranslations(req.node, lang),
+			questions: req.questions.map((bq) => ({
+				...bq,
+				question: copyQuestionTranslations(bq.question, lang)
+			})),
+			children: copyReqTranslations(req.children, lang)
+		}));
+	}
+
+	function copyQuestionTranslations(q: Question, lang: string): Question {
+		const fields: Record<string, string> = {};
+		if (q.text) fields.text = q.text;
+		if (Object.keys(fields).length === 0 && q.choices.length === 0) return q;
+		const existing = q.translations?.[lang] ?? {};
+		const merged: Record<string, string> = { ...fields };
+		for (const [k, v] of Object.entries(existing)) {
+			if (v) merged[k] = v;
+		}
+		return {
+			...q,
+			translations:
+				Object.keys(merged).length > 0 ? { ...q.translations, [lang]: merged } : q.translations,
+			choices: q.choices.map((c) => {
+				const cFields: Record<string, string> = {};
+				if (c.value) cFields.value = c.value;
+				if (c.description) cFields.description = c.description;
+				if (Object.keys(cFields).length === 0) return c;
+				const cExisting = c.translations?.[lang] ?? {};
+				const cMerged: Record<string, string> = { ...cFields };
+				for (const [k, v] of Object.entries(cExisting)) {
+					if (v) cMerged[k] = v;
+				}
+				return { ...c, translations: { ...c.translations, [lang]: cMerged } };
+			})
+		};
+	}
+
+	return {
+		framework,
+		rootNodes,
+		saving,
+		errors,
+		activeSection,
+		hasPendingFlush,
+		unsaved,
+		unpublished,
+		isScrolling,
+
+		addNode,
+		deleteNode,
+		reorderNodes,
+		indentNode,
+		outdentNode,
+		toggleAssessable,
+
+		updateNode,
+		addQuestion,
+		updateQuestion,
+		deleteQuestion,
+		addChoice,
+		updateChoice,
+		deleteChoice,
+		reorderQuestions,
+		reorderChoices,
+		updateFramework: doUpdateFramework,
+		activeLanguage,
+		setActiveLanguage,
+		getTranslationProgress,
+		copyFromBase,
+		addLanguage,
+		removeLanguage,
+		setBaseLocale,
+		flushDraft,
+		publish,
+		discard,
+		destroy
+	};
+}
+
+export function setBuilderContext(store: BuilderStore) {
+	setContext(CONTEXT_KEY, store);
+}
+
+export function getBuilderContext(): BuilderStore {
+	return getContext<BuilderStore>(CONTEXT_KEY);
+}

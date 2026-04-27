@@ -106,6 +106,11 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         blank=True,
         help_text="Accreditation authority entity",
     )
+    authority_name = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Free-text authority name, for authorities not registered as entities",
+    )
     status = models.ForeignKey(
         Terminology,
         on_delete=models.PROTECT,
@@ -135,6 +140,22 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         null=True,
         blank=True,
         related_name="accreditation_checklist",
+    )
+    commission_date = models.DateField(
+        blank=True,
+        null=True,
+        help_text="Date of the accreditation commission decision",
+    )
+    duration_months = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text="Accreditation validity duration in months",
+    )
+    decision_evidence = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        related_name="accreditation_decisions",
+        help_text="Evidence documents for the accreditation decision (e.g. minutes/PV)",
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 

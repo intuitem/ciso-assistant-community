@@ -7,7 +7,7 @@ import {
 } from '$lib/utils/actions';
 import { modelSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
@@ -80,6 +80,21 @@ export const load: PageServerLoad = async (event) => {
 	data['evidenceModel'] = evidenceModel;
 	data['evidenceCreateForm'] = evidenceCreateForm;
 
+	// Fetch DORA incident reports for this incident
+	let doraReports: any[] = [];
+	try {
+		const doraRes = await event.fetch(
+			`${BASE_API_URL}/resilience/dora-incident-reports/?incident=${event.params.id}`
+		);
+		if (doraRes.ok) {
+			const doraData = await doraRes.json();
+			doraReports = doraData.results ?? doraData ?? [];
+		}
+	} catch {
+		// DORA reports fetch is optional
+	}
+	data['doraReports'] = doraReports;
+
 	return data;
 };
 
@@ -101,5 +116,8 @@ export const actions: Actions = {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
 		if (result.form) return { form: result.form, newEvidence: result.form.message.object.id };
 		else return result;
+	},
+	deleteDoraReport: async (event) => {
+		return nestedDeleteFormAction({ event });
 	}
 };

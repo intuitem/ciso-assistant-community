@@ -1,5 +1,5 @@
 from django.db import models
-from iam.models import User, FolderMixin
+from iam.models import User, FolderMixin, PublishInRootFolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
@@ -48,13 +48,21 @@ ART9_SPECIAL_CATEGORY_CONDITION_CHOICES = (
 # Chapter V Transfer Mechanisms (Articles 45-49)
 TRANSFER_MECHANISM_CHOICES = (
     ("privacy_adequacy_decision", "Adequacy Decision (Art. 45)"),
+    (
+        "privacy_standard_contractual_clauses",
+        "Standard Contractual Clauses (Art. 46.2c)",
+    ),
     ("privacy_appropriate_safeguards", "Appropriate Safeguards (Art. 46)"),
     ("privacy_binding_corporate_rules", "Binding Corporate Rules (Art. 47)"),
+    ("privacy_codes_of_conduct", "Codes of Conduct (Art. 46.2e)"),
+    ("privacy_certification_mechanisms", "Certification Mechanisms (Art. 46.2f)"),
     ("privacy_derogation", "Derogation for Specific Situations (Art. 49)"),
 )
 
 
-class ProcessingNature(ReferentialObjectMixin, I18nObjectMixin):
+class ProcessingNature(
+    ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin
+):
     DEFAULT_PROCESSING_NATURE = [
         "privacy_collection",
         "privacy_recording",
@@ -82,6 +90,7 @@ class ProcessingNature(ReferentialObjectMixin, I18nObjectMixin):
         for value in cls.DEFAULT_PROCESSING_NATURE:
             ProcessingNature.objects.update_or_create(
                 name=value,
+                defaults={"is_published": True},
             )
 
     class Meta:
@@ -266,6 +275,20 @@ class PersonalData(NameDescriptionFolderMixin):
     is_sensitive = models.BooleanField(default=False)
     assets = models.ManyToManyField(Asset, blank=True, related_name="personal_data")
 
+    # GDPR Article 9 special categories + Article 10 criminal data
+    SENSITIVE_CATEGORIES = {
+        "privacy_health_data",
+        "privacy_genetic_data",
+        "privacy_biometric_data",
+        "privacy_racial_ethnic_origin",
+        "privacy_political_opinions",
+        "privacy_religious_beliefs",
+        "privacy_trade_union_membership",
+        "privacy_sexual_orientation",
+        "privacy_sex_life_data",
+        "privacy_criminal_records",
+    }
+
     fields_to_check = ["name", "category", "processing"]
 
     def __str__(self):
@@ -273,6 +296,8 @@ class PersonalData(NameDescriptionFolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
+        if self.category in self.SENSITIVE_CATEGORIES:
+            self.is_sensitive = True
         super().save(*args, **kwargs)
 
         # Update the processing's sensitive data flag if needed
@@ -426,7 +451,7 @@ class DataContractor(NameDescriptionFolderMixin):
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True)
 
-    fields_to_check = ["name", "relationship_type", "processing"]
+    fields_to_check = ["entity", "relationship_type", "processing"]
 
     def __str__(self):
         return self.name if self.name else self.relationship_type
@@ -457,7 +482,7 @@ class DataTransfer(NameDescriptionFolderMixin):
     guarantees = models.TextField(blank=True)
     documentation_link = models.URLField(blank=True)
 
-    fields_to_check = ["name", "country", "processing"]
+    fields_to_check = ["entity", "country", "processing"]
 
     def __str__(self):
         return self.name if self.name else self.country

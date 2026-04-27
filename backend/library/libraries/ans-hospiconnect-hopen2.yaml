@@ -1,0 +1,189 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility Mode}'
+urn: urn:lulustucru-dsn:risk:library:ans-hospiconnect-hopen2
+locale: fr
+ref_id: HospiConnect-Hopen2
+name: "Programme HospiConnect - HOP'EN2 : S\xE9curisation et simplification de l\u2019acc\xE8s au SIH et aux services num\xE9riques externes"
+description: "R\xE9f\xE9rentiel d'audit du programme HospiConnect - HOP'EN2 (H\xF4pital num\xE9rique ouvert sur son environnement). Exigences publi\xE9es par l'Agence du Num\xE9rique en Sant\xE9 (ANS)."
+copyright: "Loi fran\xE7aise et europ\xE9enne"
+version: 1
+publication_date: 2026-04-03
+provider: "Agence du Num\xE9rique en Sant\xE9"
+packager: lulustucru-dsn
+objects:
+  framework:
+    urn: urn:lulustucru-dsn:risk:framework:ans-hospiconnect-hopen2
+    ref_id: HospiConnect-Hopen2
+    name: "Programme HospiConnect - HOP'EN2 : S\xE9curisation et simplification de l\u2019acc\xE8s au SIH et aux services num\xE9riques externes"
+    description: "R\xE9f\xE9rentiel d'audit du programme HospiConnect - HOP'EN2 (H\xF4pital num\xE9rique ouvert sur son environnement). Exigences publi\xE9es par l'Agence du Num\xE9rique en Sant\xE9 (ANS)."
+    requirement_nodes:
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2026
+      assessable: false
+      depth: 1
+      ref_id: h2.2026
+      description: "Objectifs HospiConnect 2026"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2026.cadrage
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2026
+      ref_id: h2.2026.cadrage
+      name: "Note de cadrage du projet HospiConnect"
+      description: "La note de cadrage devra contenir un certain nombre d'informations sur un format d\xE9fini :\n - Contexte et enjeux du projet HospiConnect (incluant la partie Consultation Mon espace sant\xE9)\n - Objectifs op\xE9rationnels du projet, indicateurs de suivi et cibles \xE0 atteindre\n - Organisation du projet : gouvernance (pilotage interne, implication des directions) et \xE9quipe projet, modalit\xE9 de coordination et communication\n - Calendrier pr\xE9visionnel : phases et jalons cl\xE9s\n - Compte-rendu de la / les pr\xE9c\xE9dentes r\xE9unions de cadrage\n - Suivi et \xE9valuation : modalit\xE9 de suivi des indicateurs, outils de reporting\n - Communication aux professionnels de sant\xE9"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2026.maturite
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2026
+      ref_id: h2.2026.maturite
+      name: "Questionnaire indicateurs de maturit\xE9"
+      description: "Le questionnaire Indicateurs de maturit\xE9 devra \xEAtre compl\xE9t\xE9 dans son int\xE9gralit\xE9 \xE0 l'\xE9chelle de l'EJ sur la plateforme Convergence https://convergence.esante.gouv.fr/"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027
+      assessable: false
+      depth: 1
+      ref_id: h2.2027
+      description: "Objectifs HospiConnect 2027"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.obligatoire
+      assessable: false
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027
+      description: "Objectif obligatoire"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.1-0
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.obligatoire
+      ref_id: h2.2027.1-0
+      name: "1.0 - Mise en conformit\xE9 PGSSI-S"
+      description: "Mettre \xE0 jour la PSSI en incluant le r\xE9f\xE9rentiel d'identification \xE9lectronique de la PGSSI-S d\xE9crivant les exigences de s\xE9curit\xE9 pour les Moyens d'Identifications Electroniques\nPV de d\xE9cision de la commission d'homologation des MIE (PGSSI-S) (avec ou sans r\xE9serve)\nMise \xE0 jour des indicateurs de maturit\xE9"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.identification
+      assessable: false
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027
+      description: "Ma\xEEtriser la cha\xEEne de gestion des identit\xE9s et des acc\xE8s au SIH"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.identification
+      ref_id: h2.2027.1-1
+      name: "1.1 \u2013 Gestion des identit\xE9s : l'identifiant RPPS des utilisateurs est connu du Dossier Patient Informatis\xE9 (DPI)"
+      description: "L'identifiant RPPS des professions \xE0 Ordre et enregistr\xE9es par l'ARS est connu du DPI pour l'ensemble des utilisateurs concern\xE9s (d\xE8s la cr\xE9ation du compte utilisateur)"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.identification
+      ref_id: h2.2027.1-2
+      name: "1.2 \u2013 Gestion des comptes : les permissions d'acc\xE8s au DPI sont mises \xE0 jour lors des mouvements de personnel"
+      description: "La proc\xE9dure de mise \xE0 jour des comptes utilisateurs est d\xE9crite et op\xE9rationnelle (automatique ou manuelle), notamment pour la gestion des habilitations lors des arriv\xE9es, d\xE9parts et changement de services. Une revue manuelle ou automatique des comptes et des habilitations est effectu\xE9e au minimum chaque ann\xE9e."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.identification
+      ref_id: h2.2027.1-3
+      name: "1.3 \u2013 Utilisation d'un moyen d'identification \xE9lectronique \xE0 double facteur (MIE 2FA) pour l'acc\xE8s au DPI (homologu\xE9 RIE)"
+      description: "Les m\xE9decins et IDE sont \xE9quip\xE9s d'un MIE 2FA utilisable pour l'authentification au DPI (directement ou via SSO)"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.1-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.identification
+      ref_id: h2.2027.1-4
+      name: "1.4 \u2013 Acc\xE8s possible des utilisateurs du DPI au DMP en mode int\xE9gr\xE9 : ES homologu\xE9 AIR simplifi\xE9 (ou API PSC)"
+      description: "Les m\xE9decins et IDE peuvent acc\xE9der \xE0 la consultation du DMP des patients ayant consenti depuis le DPI en int\xE9gr\xE9 en mode AIR Simplifi\xE9 ou par API PSC."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.acces-dmp
+      assessable: false
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027
+      description: "Rendre effectif l'acc\xE8s automatique au DMP pour les professionnels autoris\xE9s"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.acces-dmp
+      ref_id: h2.2027.2-1
+      name: "2.1 \u2013 Le consentement \xE0 la consultation du DMP des patients est recueilli"
+      description: "L'organisation mise en place permet de recueillir le consentement ou l'opposition du patient, en amont ou lors de la prise en charge, pour 75% du flux mensuel de patients"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2027.acces-dmp
+      ref_id: h2.2027.2-2
+      name: "2.2 \u2013 La consultation du DMP est 'effective' pour les patients ayant donn\xE9 leur consentement dont l'INS est qualifi\xE9e, pour le PS habilit\xE9"
+      description: "40% des utilisateurs habilit\xE9s du DPI a consult\xE9 le DMP d'un patient par une transaction automatique (TD3.1) au DMP dans le mois"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028
+      assessable: false
+      depth: 1
+      ref_id: h2.2028
+      description: "Objectifs HospiConnect 2028"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.obligatoire
+      assessable: false
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028
+      description: "Objectif obligatoire"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-0
+      assessable: false
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.obligatoire
+      ref_id: h2.2028.1-0
+      name: "1.0 - Mise en conformit\xE9 PGSSI-S"
+      description: "Mettre \xE0 jour la PSSI en incluant le r\xE9f\xE9rentiel d'identification \xE9lectronique de la PGSSI-S d\xE9crivant les exigences de s\xE9curit\xE9 pour les Moyens d'Identifications Electroniques"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-0.pv
+      assessable: true
+      depth: 4
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-0
+      ref_id: h2.2028.1-0.pv
+      name: "1.0 - PV de d\xE9cision de la commission d'homologation des MIE"
+      description: "PV de d\xE9cision de la commission d'homologation des MIE (PGSSI-S) sans r\xE9serve"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-0.maturite
+      assessable: true
+      depth: 4
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-0
+      ref_id: h2.2028.1-0.maturite
+      name: "1.0 - Questionnaire indicateurs de maturit\xE9"
+      description: "Mise \xE0 jour des indicateurs de maturit\xE9"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.identification
+      assessable: false
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028
+      description: "Ma\xEEtriser la cha\xEEne de gestion des identit\xE9s et des acc\xE8s au SIH"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.identification
+      ref_id: h2.2028.1-1
+      name: "1.1 \u2013 Gestion des identit\xE9s : l'identifiant RPPS des utilisateurs est connu du Dossier Patient Informatis\xE9 (DPI)"
+      description: "L'identifiant RPPS est associ\xE9 \xE0 tous les utilisateurs du DPI, y compris les utilisateurs devant faire l'objet d'un enregistrement au RPPS par l'employeur (ES)"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.identification
+      ref_id: h2.2028.1-2
+      name: "1.2 \u2013 Gestion des comptes : les permissions d'acc\xE8s au DPI sont mises \xE0 jour lors des mouvements de personnel"
+      description: "La proc\xE9dure de mise \xE0 jour des comptes est automatique lors des arriv\xE9es/d\xE9parts et changements de services (GRH), \xE0 partir d'une base de compte centralis\xE9e pour le SIH. Les activit\xE9s du RPPS sont mises \xE0 jour au sein du SIH. Une revue automatique des comptes et des habilitations est effectu\xE9e au minimum chaque ann\xE9e."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.identification
+      ref_id: h2.2028.1-3
+      name: "1.3 \u2013 Utilisation d'un moyen d'identification \xE9lectronique \xE0 double facteur (MIE 2FA) pour l'acc\xE8s au DPI (homologu\xE9 RIE)"
+      description: "Tous les utilisateurs du DPI s'authentifient avec un MIE 2FA en mode nominal. La prise en charge des modes d\xE9grad\xE9s sont \xE0 d\xE9crire"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.1-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.identification
+      ref_id: h2.2028.1-4
+      name: "1.4 \u2013 Acc\xE8s possible des utilisateurs du DPI au DMP en mode int\xE9gr\xE9 : ES homologu\xE9 AIR simplifi\xE9 (ou API PSC)"
+      description: "Tous les utilisateurs du DPI disposant d'une habilitation \xE0 la consultation du DMP acc\xE8dent au DMP de leurs patients depuis le DPI."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.acces-dmp
+      assessable: false
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028
+      description: "Rendre effectif l'acc\xE8s automatique au DMP pour les professionnels autoris\xE9s"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.acces-dmp
+      ref_id: h2.2028.2-1
+      name: "2.1 \u2013 Le consentement \xE0 la consultation du DMP des patients est recueilli"
+      description: "L'organisation mise en place permet de recueillir le consentement ou opposition du patient pour 90% du flux mensuel de patients"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-hospiconnect:h2.2028.acces-dmp
+      ref_id: h2.2028.2-2
+      name: "2.2 \u2013 La consultation du DMP est 'effective' pour les patients ayant donn\xE9 leur consentement dont l'INS est qualifi\xE9e, pour le PS habilit\xE9"
+      description: "60% des utilisateurs habilit\xE9s du DPI a consult\xE9 le DMP d'un patient par une transaction automatique (TD3.1) au DMP dans le mois"

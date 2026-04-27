@@ -5,7 +5,7 @@
 
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { activateTOTPSchema } from '../utils/schemas';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import { superForm } from 'sveltekit-superforms';

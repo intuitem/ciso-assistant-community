@@ -6,6 +6,7 @@ from .views import (
     QuantitativeRiskScenarioViewSet,
     QuantitativeRiskStudyViewSet,
     QuantitativeRiskStudyActionPlanList,
+    QuantitativeRiskStudyActionPlanBudgetOverview,
 )
 
 router = DefaultRouter()
@@ -31,5 +32,10 @@ urlpatterns = [
         "quantitative-risk-studies/<uuid:pk>/action-plan/",
         QuantitativeRiskStudyActionPlanList.as_view(),
         name="quantitative-risk-study-action-plan",
+    ),
+    path(
+        "quantitative-risk-studies/<uuid:pk>/action-plan/budget-overview/",
+        QuantitativeRiskStudyActionPlanBudgetOverview.as_view(),
+        name="quantitative-risk-study-action-plan-budget-overview",
     ),
 ]

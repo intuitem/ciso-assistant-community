@@ -8,7 +8,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { getSecureRedirect } from './helpers';
 
@@ -235,6 +235,13 @@ export async function defaultDeleteFormAction({
 	const res = await event.fetch(endpoint, requestInitOptions);
 	if (!res.ok) {
 		const response = await res.json();
+		// 409 Conflict: backend blocks deletion (e.g. Entity referenced as
+		// subcontractor). Body shape: { detail: "...", blocking_subcontracts: [...] }.
+		// Surface the detail message so the user sees why deletion was refused.
+		if (res.status === 409 && response.detail) {
+			setFlash({ type: 'error', message: response.detail }, event);
+			return message(deleteForm, { status: res.status });
+		}
 		if (response.error) {
 			const errorMessages = Array.isArray(response.error) ? response.error : [response.error];
 			errorMessages.forEach((error) => {

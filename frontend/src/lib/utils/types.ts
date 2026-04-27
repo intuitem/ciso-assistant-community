@@ -78,6 +78,8 @@ export const URL_MODEL = [
 	'contracts',
 	'representatives',
 	'vulnerabilities',
+	'security-advisories',
+	'cwes',
 	'filtering-labels',
 	'library-filtering-labels',
 	// 'ebios-rm',
@@ -115,6 +117,7 @@ export const URL_MODEL = [
 	'business-impact-analysis',
 	'escalation-thresholds',
 	'asset-assessments',
+	'dora-incident-reports',
 	'asset-class',
 	'asset-capabilities',
 	// campaigns,
@@ -141,7 +144,10 @@ export const URL_MODEL = [
 	'dashboards',
 	'dashboard-widgets',
 	'dashboard-text-widgets',
-	'dashboard-builtin-widgets'
+	'dashboard-builtin-widgets',
+	// policy documents
+	'managed-documents',
+	'document-revisions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

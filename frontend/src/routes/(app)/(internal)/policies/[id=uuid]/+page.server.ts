@@ -1,5 +1,6 @@
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail, loadValidationFlowFormData } from '$lib/utils/load';
+import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 import { type Actions } from '@sveltejs/kit';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
@@ -18,10 +19,41 @@ export const load: PageServerLoad = async (event) => {
 		targetIds: [event.params.id]
 	});
 
+	// Load policy document + current revision for inline preview (locale-aware)
+	let policyDocument = null;
+	let currentRevisionContent = null;
+	try {
+		const userLocale = event.cookies.get('LOCALE') || 'en';
+		const docRes = await event.fetch(
+			`${BASE_API_URL}/managed-documents/?policy=${event.params.id}`
+		);
+		if (docRes.ok) {
+			const docData = await docRes.json();
+			const allDocs = docData.results || [];
+			policyDocument =
+				allDocs.find((d: any) => d.locale === userLocale) ||
+				allDocs.find((d: any) => d.default_locale) ||
+				allDocs[0] ||
+				null;
+			if (policyDocument?.current_revision?.id) {
+				const revRes = await event.fetch(
+					`${BASE_API_URL}/document-revisions/${policyDocument.current_revision.id}/`
+				);
+				if (revRes.ok) {
+					currentRevisionContent = await revRes.json();
+				}
+			}
+		}
+	} catch {
+		// Silently ignore — document feature is optional
+	}
+
 	return {
 		...detailData,
 		validationFlowForm,
-		validationFlowModel
+		validationFlowModel,
+		policyDocument,
+		currentRevisionContent
 	};
 };
 

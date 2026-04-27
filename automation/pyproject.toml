@@ -9,4 +9,6 @@ dependencies = [
     "icecream>=2.1.4",
     "pandas>=2.3.0",
     "prefect>=3.4.5",
+    # Mitigate GHSA-847c-xrmv-hj3h by forcing a patched Lupa
+    "lupa>=2.6.1",
 ]

@@ -1,0 +1,15 @@
+import { BASE_API_URL } from '$lib/utils/constants';
+import type { PageServerLoad } from './$types';
+
+export const load = (async ({ fetch }) => {
+	// Load all risk matrices (published ones for "clone from", ones with editing_draft for "resume")
+	const matricesRes = await fetch(`${BASE_API_URL}/risk-matrices/`);
+	const matricesData = await matricesRes.json();
+	const allMatrices = matricesData.results || matricesData;
+
+	// Split: released matrices (for clone/edit) vs matrices with active drafts
+	const matrices = allMatrices.filter((m: any) => m.is_enabled);
+	const drafts = allMatrices.filter((m: any) => m.has_editing_draft);
+
+	return { matrices, drafts };
+}) satisfies PageServerLoad;

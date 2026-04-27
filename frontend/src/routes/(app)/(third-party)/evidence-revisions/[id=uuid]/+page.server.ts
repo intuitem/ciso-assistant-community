@@ -6,7 +6,7 @@ import { m } from '$paraglide/messages';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import { nestedDeleteFormAction } from '$lib/utils/actions';

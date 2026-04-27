@@ -8,7 +8,6 @@ body: |
   - Submitted by: ${actor_names}
   - Requirements assessed: ${requirement_count}
 
-  Please log in to your CISO Assistant portal to review the submission:
-  ${ciso_assistant_url}
+  Please log in to your CISO Assistant portal to review the submission: [Go to CISO Assistant](${ciso_assistant_url})
 
   Thank you.

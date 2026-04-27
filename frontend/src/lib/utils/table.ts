@@ -12,7 +12,10 @@ import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeS
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
+import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
+import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -554,6 +557,18 @@ export const LINKED_MODELS_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'linkedModels',
 		optionsEndpoint: 'validation-flows/linked_models',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const APPLIED_CONTROL_LINKED_MODELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'linkedModels',
+		optionsEndpoint: 'applied-controls/linked_models',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
@@ -1234,6 +1249,24 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'security-advisories',
+		label: 'securityAdvisory',
+		multiple: true
+	}
+};
+
+export const CWE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'cwes',
+		label: 'cwe',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
@@ -1263,24 +1296,44 @@ export const listViewFields = {
 		body: ['label']
 	},
 	'risk-matrices': {
-		head: ['name', 'description', 'provider', 'domain'],
-		body: ['name', 'description', 'provider', 'folder'],
+		head: ['name', 'description', 'provider', 'domain', 'isEnabled'],
+		body: ['name', 'description', 'provider', 'folder', 'is_enabled'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'risk-matrices/provider' }
+			},
+			is_enabled: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'isEnabled',
+					options: YES_NO_OPTIONS,
+					multiple: false
+				}
 			}
 		}
 	},
 	vulnerabilities: {
-		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'sla',
+			'dueDate',
+			'applied_controls',
+			'folder',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'status',
 			'severity',
+			'state',
+			'due_date',
 			'applied_controls',
 			'folder',
 			'filtering_labels'
@@ -1289,7 +1342,10 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
 			status: VULNERABILITY_STATUS_FILTER,
-			severity: VULNERABILITY_SEVERITY_FILTER
+			severity: VULNERABILITY_SEVERITY_FILTER,
+			assets: ASSET_FILTER,
+			security_advisories: SECURITY_ADVISORY_FILTER,
+			cwes: CWE_FILTER
 		}
 	},
 	'risk-assessments': {
@@ -1333,11 +1389,63 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'security-advisories': {
+		head: [
+			'ref_id',
+			'name',
+			'source',
+			'description',
+			'cvssBaseScore',
+			'epssScore',
+			'isActivelyExploited',
+			'publishedDate',
+			'domain',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'source',
+			'description',
+			'cvss_base_score',
+			'epss_score',
+			'is_actively_exploited',
+			'published_date',
+			'folder',
+			'filtering_labels'
+		],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			source: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'security-advisories/source',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'source',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	cwes: {
+		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
 	'risk-scenarios': {
 		head: [
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
@@ -1351,6 +1459,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
@@ -1365,6 +1474,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			treatment: TREATMENT_FILTER,
 			risk_assessment: RISK_ASSESSMENT_FILTER,
+			owner: OWNER_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
@@ -1429,8 +1539,10 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csfFunction',
 			'eta',
@@ -1438,13 +1550,16 @@ export const listViewFields = {
 			'owner',
 			'controlImpact',
 			'effort',
+			'linkedModels',
 			'labels'
 		],
 		body: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csf_function',
 			'eta',
@@ -1452,11 +1567,13 @@ export const listViewFields = {
 			'owner',
 			'control_impact',
 			'effort',
+			'linked_models',
 			'filtering_labels'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
+			assets: ASSET_FILTER,
 			category: APPLIED_CONTROL_CATEGORY_FILTER,
 			csf_function: APPLIED_CONTROL_CSF_FUNCTION_FILTER,
 			priority: PRIORITY_FILTER,
@@ -1466,7 +1583,8 @@ export const listViewFields = {
 			reference_control: REFERENCE_CONTROL_FILTER,
 			eta__lte: undefined,
 			is_assigned: IS_ASSIGNED_FILTER,
-			owner: OWNER_FILTER
+			owner: OWNER_FILTER,
+			linked_models: APPLIED_CONTROL_LINKED_MODELS_FILTER
 		}
 	},
 	policies: {
@@ -1689,6 +1807,14 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'document-revisions': {
+		head: ['versionNumber', 'status', 'author', 'changeSummary', 'createdAt'],
+		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
+	},
+	'managed-documents': {
+		head: ['name', 'documentType', 'policy', 'locale', 'domain'],
+		body: ['name', 'document_type', 'policy', 'locale', 'folder']
+	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],
@@ -1882,6 +2008,27 @@ export const listViewFields = {
 		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'impactOn', 'justification'],
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
+	'dora-incident-reports': {
+		head: [
+			'incident',
+			'incidentSubmission',
+			'reportCurrency',
+			'submittingEntity',
+			'folder',
+			'createdAt'
+		],
+		body: [
+			'incident',
+			'incident_submission',
+			'report_currency',
+			'submitting_entity',
+			'folder',
+			'created_at'
+		],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	processings: {
 		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
@@ -2030,7 +2177,9 @@ export const listViewFields = {
 		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
-			category: PERSONAL_DATA_CATEGORY_FILTER
+			category: PERSONAL_DATA_CATEGORY_FILTER,
+			deletion_policy: { hide: true } as ListViewFilterConfig,
+			is_sensitive: { hide: true } as ListViewFilterConfig
 		}
 	},
 	'data-subjects': {
@@ -2047,11 +2196,22 @@ export const listViewFields = {
 	},
 	'data-transfers': {
 		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
-		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link'],
+		filters: {
+			transfer_mechanism: { hide: true } as ListViewFilterConfig
+		}
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
-		body: ['name', 'description', 'folder', 'quotation_method', 'created_at', 'updated_at'],
+		head: ['name', 'description', 'domain', 'status', 'quotationMethod', 'createdAt', 'updatedAt'],
+		body: [
+			'name',
+			'description',
+			'folder',
+			'status',
+			'quotation_method',
+			'created_at',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
@@ -2254,6 +2414,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'description',
 			'findings_assessment',
 			'severity',
 			'priority',
@@ -2265,6 +2426,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'description',
 			'findings_assessment',
 			'severity',
 			'priority',
@@ -2753,7 +2915,8 @@ export const contextMenuActions = {
 		{ component: ChangeImpact, props: {} },
 		{ component: ChangeEffort, props: {} },
 		{ component: ChangePriority, props: {} },
-		{ component: ChangeCsfFunction, props: {} }
+		{ component: ChangeCsfFunction, props: {} },
+		{ component: ReplaceWith, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
@@ -2762,34 +2925,63 @@ export const contextMenuActions = {
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
 	'operational-scenarios': [{ component: SelectObject, props: {} }],
-	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }],
+	vulnerabilities: [
+		{ component: VulnerabilityChangeStatus, props: {} },
+		{ component: VulnerabilityChangeSeverity, props: {} }
+	]
 };
 
 // Batch action configuration
 export interface BatchActionConfig {
-	type: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
+	type:
+		| 'delete'
+		| 'change_field'
+		| 'change_m2m'
+		| 'add_m2m'
+		| 'remove_m2m'
+		| 'change_folder'
+		| 'group'
+		| 'merge';
 	label: string;
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
 	multiSelect?: boolean;
+	children?: BatchActionConfig[];
+	minSelection?: number;
+	maxSelection?: number;
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	'applied-controls': [
 		{
-			type: 'change_field',
-			label: 'changeStatus',
-			icon: 'fa-solid fa-arrow-right-arrow-left',
-			field: 'status',
-			optionsEndpoint: 'applied-controls/status'
-		},
-		{
-			type: 'change_field',
-			label: 'batchChangePriority',
-			icon: 'fa-solid fa-arrow-up-wide-short',
-			field: 'priority',
-			optionsEndpoint: 'applied-controls/priority'
+			type: 'group',
+			label: 'changeAttributes',
+			icon: 'fa-solid fa-sliders',
+			children: [
+				{
+					type: 'change_field',
+					label: 'changeStatus',
+					icon: 'fa-solid fa-arrow-right-arrow-left',
+					field: 'status',
+					optionsEndpoint: 'applied-controls/status'
+				},
+				{
+					type: 'change_field',
+					label: 'batchChangePriority',
+					icon: 'fa-solid fa-arrow-up-wide-short',
+					field: 'priority',
+					optionsEndpoint: 'applied-controls/priority'
+				},
+				{
+					type: 'change_field',
+					label: 'changeCsfFunction',
+					icon: 'fa-solid fa-shield-halved',
+					field: 'csf_function',
+					optionsEndpoint: 'applied-controls/csf_function'
+				}
+			]
 		},
 		{
 			type: 'change_m2m',
@@ -2800,10 +2992,40 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			multiSelect: true
 		},
 		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
+		},
+		{
 			type: 'change_folder',
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{
+			type: 'merge',
+			label: 'mergeControls',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
@@ -2820,6 +3042,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{
+			type: 'merge',
+			label: 'mergeControls',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
@@ -2946,6 +3175,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			multiSelect: true
 		},
 		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
+		},
+		{
 			type: 'change_folder',
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
@@ -3054,6 +3306,31 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'vulnerabilities/status'
 		},
 		{
+			type: 'change_field',
+			label: 'changeSeverity',
+			icon: 'fa-solid fa-arrow-up-wide-short',
+			field: 'severity',
+			optionsEndpoint: 'vulnerabilities/severity'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'security-advisories': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	cwes: [
+		{
 			type: 'change_folder',
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
@@ -3125,6 +3402,33 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'data-transfers': [
+		{
+			type: 'change_field',
+			label: 'changeTransferMechanism',
+			icon: 'fa-solid fa-right-left',
+			field: 'transfer_mechanism',
+			optionsEndpoint: 'data-transfers/transfer_mechanism'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'personal-data': [
+		{
+			type: 'change_field',
+			label: 'changeDeletionPolicy',
+			icon: 'fa-solid fa-clock-rotate-left',
+			field: 'deletion_policy',
+			optionsEndpoint: 'personal-data/deletion_policy'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsSensitive',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'is_sensitive',
+			optionsEndpoint: 'personal-data/is_sensitive'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	processings: [
 		{
 			type: 'change_field',

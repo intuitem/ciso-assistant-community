@@ -167,8 +167,7 @@
 				buttonTextCancel: m.ebiosRmCreateNew(),
 				response: (confirmed: boolean | undefined) => {
 					if (confirmed === true) {
-						// Sync existing - navigate to sync
-						window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessment.id}`;
+						showSyncPreview(riskAssessment.id);
 					} else if (confirmed === false) {
 						// Create new
 						modalCreateForm();
@@ -181,6 +180,51 @@
 			// No existing assessment, just create
 			modalCreateForm();
 		}
+	}
+
+	function showSyncPreview(riskAssessmentId: string): void {
+		const preview = data.syncPreview;
+
+		if (!preview || preview.error) {
+			const previewErrorModal: ModalSettings = {
+				type: 'alert',
+				title: m.ebiosRmSyncPreviewTitle(),
+				body: preview?.error || m.ebiosRmSyncPreviewError()
+			};
+			modalStore.trigger(previewErrorModal);
+			return;
+		}
+
+		const syncModeMessages: Record<string, (args: { count: number }) => string> = {
+			operational_scenarios: m.ebiosRmSyncModeOperationalScenarios,
+			attack_paths: m.ebiosRmSyncModeAttackPaths,
+			strategic_scenarios: m.ebiosRmSyncModeStrategicScenarios,
+			feared_events: m.ebiosRmSyncModeFearedEvents,
+			mixed: m.ebiosRmSyncModeMixed
+		};
+		const syncModeMessage = (syncModeMessages[preview.sync_mode] ?? syncModeMessages.mixed)({
+			count: preview.count
+		});
+
+		const sourceList = preview.source_objects
+			.map((obj: { name: string; impact: { name: string } | null }) => {
+				const impact = obj.impact ? ` [${obj.impact.name}]` : '';
+				return `• ${obj.name}${impact}`;
+			})
+			.join('\n');
+
+		const previewModal: ModalSettings = {
+			type: 'confirm',
+			title: m.ebiosRmSyncPreviewTitle(),
+			body: `${syncModeMessage}\n\n${sourceList}`,
+			buttonTextConfirm: m.ebiosRmSyncConfirm(),
+			response: (confirmed: boolean | undefined) => {
+				if (confirmed === true) {
+					window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessmentId}`;
+				}
+			}
+		};
+		modalStore.trigger(previewModal);
 	}
 
 	function modalCreateForm(): void {

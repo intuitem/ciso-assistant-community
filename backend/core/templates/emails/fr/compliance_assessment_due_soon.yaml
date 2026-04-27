@@ -6,7 +6,6 @@ body: |
 
   ${assessment_list}
 
-  Veuillez vous connecter à votre portail CISO Assistant pour réviser et compléter ces audits:
-  ${ciso_assistant_url}
+  Veuillez vous connecter à votre portail CISO Assistant pour réviser et compléter ces audits : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.

@@ -1,6 +1,7 @@
 # === Python standard library ===
 import json
 from datetime import datetime, timedelta, timezone
+from django.conf import settings
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.http.response import Http404
 from django.urls import reverse
@@ -71,6 +72,7 @@ class ACSView(SAMLViewMixin, View):
 class FinishACSView(SAMLViewMixin, View):
     def dispatch(self, request, organization_slug):
         error = None
+        token = None
         next_url = "/"
         if len(SSOSettings.objects.all()) == 0:
             raise Http404()
@@ -179,7 +181,9 @@ class FinishACSView(SAMLViewMixin, View):
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.save()
             token = generate_token(user)
-            login.state["next"] += f"sso/authenticate/{token}"
+            login.state["next"] = (
+                f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate"
+            )
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
@@ -216,7 +220,17 @@ class FinishACSView(SAMLViewMixin, View):
                 email_object.verified = True
                 email_object.save()
                 logger.info("Email verified", user=user)
-        return HttpResponseRedirect(next_url)
+        response = HttpResponseRedirect(next_url)
+        if not error and token:
+            response.set_cookie(
+                "token",
+                token,
+                httponly=True,
+                secure=settings.CISO_ASSISTANT_URL.startswith("https"),
+                samesite="Lax",
+                path="/",
+            )
+        return response
 
 
 class GenerateSAMLKeyView(SAMLViewMixin, APIView):
@@ -273,9 +287,9 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
         advanced_settings["x509cert"] = cert_pem.decode("utf-8")
 
         # Re-injects the dict into the application configuration
-        settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
-        settings.value["settings"]["advanced"] = advanced_settings
-        settings.save()
+        sso_settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+        sso_settings.value["settings"]["advanced"] = advanced_settings
+        sso_settings.save()
 
         return Response(
             {

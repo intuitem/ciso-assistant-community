@@ -9,7 +9,6 @@ body: |
   - Validation Deadline: ${validation_deadline}
   - Domain: ${folder_name}
 
-  Please review and take action on this validation request:
-  ${validation_url}
+  Please review and take action on this validation request: [View the validation flow](${validation_url})
 
   Thank you.

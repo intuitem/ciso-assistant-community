@@ -10,28 +10,57 @@ const nextMonth = (month: number): string => {
 };
 
 export const load = (async ({ fetch, locals, params }) => {
-	const appliedControlsEndpoint = `${BASE_API_URL}/applied-controls/?eta__year=${params.year}&eta__month=${params.month}`;
-	const riskAcceptancesEndpoint = `${BASE_API_URL}/risk-acceptances/?expiry_date__year=${params.year}&expiry_date__month=${params.month}`;
-	const auditsEndpoint = `${BASE_API_URL}/compliance-assessments/?due_date__year=${params.year}&due_date__month=${params.month}`;
-	const tasksEndpoint = `${BASE_API_URL}/task-templates/calendar/${params.year}-${params.month.padStart(2, '0')}-01/${nextMonth(parseInt(params.month)) === '01' ? parseInt(params.year) + 1 : params.year}-${nextMonth(parseInt(params.month))}-01`;
+	const year = params.year;
+	const month = params.month.padStart(2, '0');
+	const nextMonthStr = nextMonth(parseInt(params.month));
+	const nextYear = nextMonthStr === '01' ? parseInt(year) + 1 : parseInt(year);
 
-	const appliedControlsResponse = await fetch(appliedControlsEndpoint);
-	const appliedControls = await appliedControlsResponse.json().then((res) => res.results);
+	const endpoints = {
+		appliedControls: `${BASE_API_URL}/applied-controls/?eta__year=${year}&eta__month=${params.month}`,
+		riskAcceptances: `${BASE_API_URL}/risk-acceptances/?expiry_date__year=${year}&expiry_date__month=${params.month}`,
+		audits: `${BASE_API_URL}/compliance-assessments/?due_date__year=${year}&due_date__month=${params.month}`,
+		tasks: `${BASE_API_URL}/task-templates/calendar/${year}-${month}-01/${nextYear}-${nextMonthStr}-01`,
+		contracts: `${BASE_API_URL}/contracts/?end_date__year=${year}&end_date__month=${params.month}`,
+		securityExceptions: `${BASE_API_URL}/security-exceptions/?expiration_date__year=${year}&expiration_date__month=${params.month}`,
+		findings: `${BASE_API_URL}/findings/?due_date__year=${year}&due_date__month=${params.month}`,
+		riskAssessments: `${BASE_API_URL}/risk-assessments/?due_date__year=${year}&due_date__month=${params.month}`
+	};
 
-	const riskAcceptancesResponse = await fetch(riskAcceptancesEndpoint);
-	const riskAcceptances = await riskAcceptancesResponse.json().then((res) => res.results);
+	// Fetch actor IDs for the current user (including team memberships)
+	const actorIdsPromise = fetch(`${BASE_API_URL}/folders/my_assignments/?include_teams=true`)
+		.then((res) => res.json())
+		.then((data) => data.actor_ids ?? [])
+		.catch(() => []);
 
-	const auditsResponse = await fetch(auditsEndpoint);
-	const audits = await auditsResponse.json().then((res) => res.results);
+	const keys = Object.keys(endpoints) as (keyof typeof endpoints)[];
+	const [actorIds, ...results] = await Promise.all([
+		actorIdsPromise,
+		...keys.map((key) =>
+			Promise.resolve(fetch(endpoints[key]).then((res) => res.json())).catch(() => null)
+		)
+	]);
 
-	const tasksResponse = await fetch(tasksEndpoint);
-	const tasks = await tasksResponse.json();
+	const data: Record<string, any[]> = {};
+	keys.forEach((key, i) => {
+		const result = results[i];
+		if (result) {
+			// tasks endpoint returns array directly, others return { results: [...] }
+			data[key] = key === 'tasks' ? result : (result.results ?? []);
+		} else {
+			data[key] = [];
+		}
+	});
 
 	return {
-		appliedControls,
-		riskAcceptances,
-		audits,
-		tasks,
+		appliedControls: data.appliedControls,
+		riskAcceptances: data.riskAcceptances,
+		audits: data.audits,
+		tasks: data.tasks,
+		contracts: data.contracts,
+		securityExceptions: data.securityExceptions,
+		findings: data.findings,
+		riskAssessments: data.riskAssessments,
+		actorIds: actorIds as string[],
 		title: 'calendar'
 	};
 }) satisfies PageServerLoad;

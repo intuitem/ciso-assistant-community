@@ -4,16 +4,25 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 
+	interface Approver {
+		id: string;
+		email: string;
+		first_name?: string;
+		last_name?: string;
+	}
+
 	interface ValidationFlow {
 		id: string;
 		ref_id: string;
-		status: string;
-		approver: {
-			id: string;
-			email: string;
-			first_name?: string;
-			last_name?: string;
-		};
+		status:
+			| 'submitted'
+			| 'accepted'
+			| 'rejected'
+			| 'revoked'
+			| 'expired'
+			| 'dropped'
+			| 'change_requested';
+		approver: Approver | null;
 	}
 
 	interface Props {
@@ -45,20 +54,12 @@
 
 	// Get approver display name
 	function getApproverName(approver: ValidationFlow['approver']): string {
+		if (approver === null) return m.undefined();
 		if (approver.first_name || approver.last_name) {
 			return `${approver.first_name || ''} ${approver.last_name || ''}`.trim();
 		}
 		return approver.email;
 	}
-
-	// Build header text with status icons
-	let headerContent = $derived.by(() => {
-		const statusIcons = validationFlows
-			.slice(0, 3)
-			.map((vf) => `<i class="fa-solid ${getStatusIcon(vf.status)} text-sm"></i>`)
-			.join(' ');
-		return `${m.validationFlows()} (${validationFlows.length}) ${statusIcons}`;
-	});
 </script>
 
 {#if validationFlows && validationFlows.length > 0}

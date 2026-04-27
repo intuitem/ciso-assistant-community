@@ -11,6 +11,8 @@
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
+	import SecurityAdvisoryForm from './ModelForm/SecurityAdvisoryForm.svelte';
+	import CWEForm from './ModelForm/CWEForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
 	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
@@ -33,6 +35,8 @@
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
+	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
+	import SecIntelFeedsSettingForm from './ModelForm/SecIntelFeedsSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
@@ -84,11 +88,11 @@
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
@@ -98,7 +102,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
-		form: SuperValidated<AnyZodObject>;
+		form: SuperValidated<FormDataShape>;
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		taintedMessage?: string | boolean;
 		model: ModelInfo;
@@ -149,7 +153,7 @@
 			if (nextValue) goto(nextValue);
 		}
 	}
-	let shape = $derived(schema.shape || schema._def.schema.shape);
+	let shape = $derived(schema.shape || schema._def?.schema?.shape);
 	let updated_fields = new Set();
 
 	function makeCacheLock(): CacheLock {
@@ -376,6 +380,10 @@
 			/>
 		{:else if URLModel === 'threats'}
 			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'security-advisories'}
+			<SecurityAdvisoryForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'cwes'}
+			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'risk-scenarios'}
 			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
@@ -501,6 +509,10 @@
 			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'feature-flags'}
 			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+		{:else if URLModel === 'vulnerability-sla'}
+			<VulnerabilitySlaSettingForm {form} {model} />
+		{:else if URLModel === 'sec-intel-feeds'}
+			<SecIntelFeedsSettingForm {form} {model} />
 		{:else if URLModel === 'filtering-labels'}
 			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'business-impact-analysis'}

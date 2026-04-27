@@ -108,12 +108,12 @@
 								</div>
 
 								<div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-									{#if assessment.globalScore.score >= 0}
+									{#if assessment.globalScore.maturity_score >= 0}
 										<div class="flex justify-center items-center lg:order-1">
 											<div class="relative">
 												<Progress
 													value={formatScoreValue(
-														assessment.globalScore.score,
+														assessment.globalScore.maturity_score,
 														assessment.globalScore.max_score
 													)}
 													min={0}
@@ -123,13 +123,15 @@
 														<Progress.CircleTrack />
 														<Progress.CircleRange
 															class={displayScoreColor(
-																assessment.globalScore.score,
+																assessment.globalScore.maturity_score,
 																assessment.globalScore.max_score
 															)}
 														/>
 													</Progress.Circle>
 													<div class="absolute inset-0 flex items-center justify-center">
-														<p class="font-semibold text-2xl">{assessment.globalScore.score}</p>
+														<p class="font-semibold text-2xl">
+															{assessment.globalScore.maturity_score}
+														</p>
 													</div>
 												</Progress>
 											</div>

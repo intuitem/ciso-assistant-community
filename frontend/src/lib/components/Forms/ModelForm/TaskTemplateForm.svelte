@@ -225,7 +225,6 @@
 	helpText={m.taskTemplateEvidenceHelpText()}
 	field="evidences"
 	label={m.evidences()}
-	allowUserOptions="append"
 	translateOptions={false}
 />
 <AutocompleteSelect

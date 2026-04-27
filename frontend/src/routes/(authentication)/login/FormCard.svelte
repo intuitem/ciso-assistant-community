@@ -7,7 +7,7 @@
 
 	import { page } from '$app/state';
 	import { redirectToProvider } from '$lib/allauth.js';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
 	import { m } from '$paraglide/messages';
 	import {
@@ -27,11 +27,13 @@
 	const modalStore: ModalStore = getModalStore();
 
 	function modalMFAAuthenticate(): void {
+		const mfaTypes: string[] = form?.mfaFlow?.types ?? ['totp'];
 		const modalComponent: ModalComponent = {
 			ref: MfaAuthenticateModal,
 			props: {
 				_form: data.mfaAuthenticateForm,
-				formAction: '?/mfaAuthenticate'
+				formAction: '?/mfaAuthenticate',
+				mfaTypes
 			}
 		};
 		const modal: ModalSettings = {

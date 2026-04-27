@@ -101,7 +101,8 @@ export const LOCALE_DISPLAY_MAP = {
 	tr: '🇹🇷 Türkçe',
 	hr: '🇭🇷 Hrvatski',
 	zh: '🇨🇳 简体中文',
-	lt: '🇱🇹 Lietuvių'
+	lt: '🇱🇹 Lietuvių',
+	ko: '🇰🇷 한국어'
 };
 
 export const ISO_8601_REGEX =

@@ -55,11 +55,23 @@
 		}
 	};
 
+	// Matches only our internal image-serving proxy URLs:
+	// /frameworks/{uuid}/builder?_action=serve-image&...
+	// /policies/{uuid}/document?_action=serve-image&...
+	const INTERNAL_IMG_RE =
+		/src="(\/(frameworks|policies)\/[a-f0-9-]+\/[a-z]+\?_action=serve-image&[^"]*)"/g;
+	const INTERNAL_PLACEHOLDER = 'https://__ciso-internal__';
+
 	function processContent(content: string | null | undefined): string {
 		if (!content || content.trim() === '') return '';
 
 		let html = marked(content) as string;
+
+		// Temporarily give internal image URLs an https scheme so they survive
+		// sanitize-html's allowedSchemes check, then strip the fake origin after.
+		html = html.replace(INTERNAL_IMG_RE, (_, path) => `src="${INTERNAL_PLACEHOLDER}${path}"`);
 		html = sanitizeHtml(html, sanitizeConfig);
+		html = html.replace(new RegExp(`src="${INTERNAL_PLACEHOLDER}`, 'g'), 'src="');
 
 		// Clean up excessive spacing
 		html = html

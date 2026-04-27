@@ -6,7 +6,7 @@
 	import Typewriter from 'sv-typewriter';
 
 	import { m } from '$paraglide/messages.js';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import Logo from '$lib/components/Logo/Logo.svelte';
 
 	interface Props {

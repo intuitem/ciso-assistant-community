@@ -11,7 +11,6 @@ body: |
   - Treatment: ${scenario_treatment}
   - Domain: ${folder_name}
 
-  Log in to your CISO Assistant portal to view and manage this risk scenario:
-  ${ciso_assistant_url}
+  Log in to your CISO Assistant portal to view and manage this risk scenario: [Go to CISO Assistant](${ciso_assistant_url})
 
   Thank you.

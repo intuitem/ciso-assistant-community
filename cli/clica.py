@@ -202,6 +202,7 @@ def upload_data_wizard_file(
     requires_perimeter: bool,
     requires_framework: bool,
     requires_matrix: bool,
+    name: Optional[str] = None,
 ):
     if not TOKEN:
         print(
@@ -237,6 +238,8 @@ def upload_data_wizard_file(
         headers["X-Matrix-Id"] = matrix_id
     if on_conflict and on_conflict != "stop":
         headers["X-On-Conflict"] = on_conflict
+    if name:
+        headers["X-Name"] = name
 
     url = f"{API_URL}/data-wizard/load-file/"
     with open(file_path, "rb") as payload:
@@ -564,6 +567,15 @@ DATA_WIZARD_COMMANDS = [
         "requires_matrix": True,
     },
     {
+        "command": "import_vulnerabilities",
+        "model_type": "Vulnerability",
+        "help": "Import vulnerabilities using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
         "command": "import_bia",
         "model_type": "BusinessImpactAnalysis",
         "help": (
@@ -611,6 +623,13 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
     show_perimeter_option = config.get("show_perimeter_option", requires_perimeter)
     show_framework_option = config.get("show_framework_option", requires_framework)
     show_matrix_option = config.get("show_matrix_option", requires_matrix)
+    supports_name_option = model_type in {
+        "ComplianceAssessment",
+        "RiskAssessment",
+        "FindingsAssessment",
+        "EbiosRMStudyARM",
+        "EbiosRMStudyExcel",
+    }
 
     @cli.command(name=cli_name, help=help_text)
     @click.option(
@@ -650,6 +669,13 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
         help="How to handle existing records: stop (default), skip, or update.",
         hidden=not supports_conflict,
     )
+    @click.option(
+        "--name",
+        "name",
+        default=None,
+        help="Name for the created object. Defaults to an auto-generated timestamped name.",
+        hidden=not supports_name_option,
+    )
     def command(
         file,
         folder,
@@ -657,6 +683,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
         framework,
         matrix,
         on_conflict,
+        name,
         _model=model_type,
         _requires_folder=requires_folder,
         _requires_perimeter=requires_perimeter,
@@ -675,6 +702,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
             requires_perimeter=_requires_perimeter,
             requires_framework=_requires_framework,
             requires_matrix=_requires_matrix,
+            name=name,
         )
 
     globals()[command_name] = command

@@ -11,7 +11,6 @@ body: |
   - Traitement : ${scenario_treatment}
   - Domaine : ${folder_name}
 
-  Connectez-vous à votre portail CISO Assistant pour consulter et gérer ce scénario de risque :
-  ${ciso_assistant_url}
+  Connectez-vous à votre portail CISO Assistant pour consulter et gérer ce scénario de risque : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.

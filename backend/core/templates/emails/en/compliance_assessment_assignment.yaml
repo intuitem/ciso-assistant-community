@@ -11,7 +11,6 @@ body: |
   - Due Date: ${assessment_due_date}
   - Domain: ${folder_name}
 
-  Log in to your CISO Assistant portal to view and manage this audit:
-  ${ciso_assistant_url}
+  Log in to your CISO Assistant portal to view and manage this audit: [Go to CISO Assistant](${ciso_assistant_url})
 
   Thank you.

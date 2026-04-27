@@ -11,7 +11,6 @@ body: |
   - Récurrente : ${is_recurrent}
   - Domaine : ${folder_name}
 
-  Connectez-vous à votre portail CISO Assistant pour consulter et gérer cette tâche :
-  ${ciso_assistant_url}
+  Connectez-vous à votre portail CISO Assistant pour consulter et gérer cette tâche : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.

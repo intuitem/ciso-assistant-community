@@ -1,0 +1,228 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:lulustucru-dsn:risk:library:ans-care-domaine2
+locale: fr
+ref_id: CaRE-D2
+name: "Programme CaRE - Domaine 2 : Continuit\xE9 et reprise d'activit\xE9, sauvegarde\
+  \ et restauration"
+description: "R\xE9f\xE9rentiel d'audit du programme CaRE (Cybers\xE9curit\xE9 Acc\xE9\
+  l\xE9ration et R\xE9silience des \xC9tablissements) - Domaine 2. Exigences publi\xE9\
+  es par l'Agence du Num\xE9rique en Sant\xE9 (ANS)."
+copyright: "Loi fran\xE7aise et europ\xE9enne"
+version: 1
+publication_date: 2026-03-14
+provider: "Agence du Num\xE9rique en Sant\xE9"
+packager: lulustucru-dsn
+objects:
+  framework:
+    urn: urn:lulustucru-dsn:risk:framework:ans-care:d2
+    ref_id: CaRE-D2
+    name: "Programme CaRE - Domaine 2 : Continuit\xE9 et reprise d'activit\xE9, sauvegarde\
+      \ et restauration"
+    description: "R\xE9f\xE9rentiel d'audit du programme CaRE (Cybers\xE9curit\xE9\
+      \ Acc\xE9l\xE9ration et R\xE9silience des \xC9tablissements) - Domaine 2. Exigences\
+      \ publi\xE9es par l'Agence du Num\xE9rique en Sant\xE9 (ANS)."
+    requirement_nodes:
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.p
+      assessable: false
+      depth: 1
+      ref_id: d2.p
+      name: "Pr\xE9requis"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.p1
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.p
+      ref_id: d2.p1
+      name: "Disposer d'une Politique de S\xE9curit\xE9 des Syst\xE8mes d'Information\
+        \ (PSSI) formalis\xE9e et \xE0 jour"
+      description: "Le candidat doit fournir sa politique de s\xE9curit\xE9 des syst\xE8\
+        mes d'information (PSSI) valid\xE9e par le repr\xE9sentant l\xE9gal du candidat\
+        \ et revue entre le 16 juillet 2022 et la date de d\xE9p\xF4t du dossier de\
+        \ candidature."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.p2
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.p
+      ref_id: d2.p2
+      name: "D\xE9crire l'organisation pr\xE9vue pour la mise en \u0153uvre du Plan\
+        \ de Continuit\xE9 et de Reprise d'Activit\xE9"
+      description: "Le candidat doit d\xE9crire l'organisation projet mise en place\
+        \ pour assurer la construction et le maintien dans le temps de son plan de\
+        \ continuit\xE9 et de reprise d'activit\xE9.\nL'\xE9criture des plans de continuit\xE9\
+        \ et de reprise d'activit\xE9 est exig\xE9e dans le cadre de l'objectif D2.\
+        \ O1 du pr\xE9sent domaine, et le candidat doit donc d\xE9montrer qu'il a\
+        \ pr\xE9vu l'organisation permettant d'atteindre cet objectif.\nLa d\xE9signation\
+        \ d'un responsable du plan de continuit\xE9 et de reprise de l'activit\xE9\
+        \ (RPCRA) est recommand\xE9e dans cette organisation, mais elle n'est pas\
+        \ obligatoire pour l'atteinte de ce pr\xE9requis."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1
+      assessable: false
+      depth: 1
+      ref_id: d2.o1
+      name: "Inclure la gestion de la Continuit\xE9 et Reprise d'activit\xE9 dans\
+        \ la gouvernance des \xE9tablissements"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1
+      ref_id: d2.o1.a
+      name: "Mettre en place une gouvernance pour la Continuit\xE9 et la Reprise d'Activit\xE9"
+      description: "Le candidat doit \xE9laborer un sch\xE9ma de gouvernance d\xE9\
+        crivant la d\xE9marche mise en place pour la continuit\xE9 et la reprise d'activit\xE9\
+        ."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1
+      ref_id: d2.o1.b
+      name: "D\xE9crire les proc\xE9dures de r\xE9ponse \xE0 la gestion de crise cyber"
+      description: "Le candidat doit :\n- Int\xE9grer les risques num\xE9riques dans\
+        \ le plan blanc.\n- Formaliser ou revoir les proc\xE9dures de crise cyber,\
+        \ incluant l'organisation de la cellule de crise et les modalit\xE9s de signalement."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1
+      ref_id: d2.o1.c
+      name: "Formaliser un plan de continuit\xE9 d'activit\xE9 (PCA) et un plan de\
+        \ reprise d'activit\xE9 (PRA)"
+      description: "Le candidat doit formaliser un Plan de Continuit\xE9 et de Reprise\
+        \ d'Activit\xE9 (PCRA) en s'appuyant sur la r\xE9alisation de bilans d'impacts\
+        \ sur l'activit\xE9, a minima sur les p\xE9rim\xE8tres suivants s'ils existent\
+        \ au sein de la structure du candidat :\n-Un service de soins ayant un impact\
+        \ majeur sur la prise en charge du patient.\n-Le processus administratif le\
+        \ plus critique pour l'\xE9tablissement (exemples paie, comptabilit\xE9, gestion\
+        \ des fournisseurs, etc.).\n-Plateau technique en lien avec le parcours de\
+        \ soins tel que la pharmacie, l'imagerie, la biologie.\nPour les GHT avec\
+        \ plusieurs entit\xE9s juridiques (FINESS EJ) :\n-Les BIA et les PCRA doivent\
+        \ \xEAtre formalis\xE9s pour un nombre d'EJ repr\xE9sentant au moins 66 %\
+        \ de l'activit\xE9 combin\xE9e du candidat.\nPour les candidats hors GHT ayant\
+        \ plusieurs entit\xE9s g\xE9ographiques (FINESS EG) :\n-Les BIA et les PCRA\
+        \ doivent \xEAtre formalis\xE9s pour un nombre d'EG repr\xE9sentant au moins\
+        \ 66 % de l'activit\xE9 combin\xE9e du candidat."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o1
+      ref_id: d2.o1.d
+      name: "Tester la mise en \u0153uvre d'un Plan de Continuit\xE9 d'Activit\xE9\
+        \ (PCA) dans un exercice terrain"
+      description: "Le candidat doit :\n-Effectuer un test pour la mise en \u0153\
+        uvre d'au moins un PCA sur un p\xE9rim\xE8tre d\xE9fini par le candidat (*)\
+        \ dans le cadre d'un exercice terrain adapt\xE9 pendant la phase op\xE9rationnelle\
+        \ (**).\n-Etablir un planning de test des autres exercices de PCA.\nPour les\
+        \ GHT avec plusieurs entit\xE9s juridiques (FINESS EJ) :\n-Le test de PCA\
+        \ doit \xEAtre r\xE9alis\xE9 pour un nombre d'EJ repr\xE9sentant au moins\
+        \ 66 % de l'activit\xE9 combin\xE9e du candidat.\nPour les candidats hors\
+        \ GHT ayant plusieurs entit\xE9s g\xE9ographiques (FINESS EG) :\n-Le test\
+        \ de PCA doit \xEAtre r\xE9alis\xE9 pour un nombre d'EG repr\xE9sentant au\
+        \ moins 66 % de l'activit\xE9 combin\xE9e du candidat.\n(*) En fonction de\
+        \ ses priorit\xE9s et de sa capacit\xE9 op\xE9rationnelle avec a minima un\
+        \ service/ p\xE9rim\xE8tre test\xE9.\n(**) Phase op\xE9rationnelle : phase\
+        \ comprise entre :\n\u2022 La publication de l'arr\xEAt\xE9 relatif \xE0 la\
+        \ fonction \xAB Strat\xE9gie de continuit\xE9 et de reprise d'activit\xE9\
+        \ \xBB\n\u2022 Le d\xE9p\xF4t de la d\xE9claration d'atteinte des objectifs\
+        \ par le candidat sur le guichet d\xE9di\xE9."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o2
+      assessable: false
+      depth: 1
+      ref_id: d2.o2
+      name: "D\xE9finir, documenter et tenir \xE0 jour la politique et le (s) plan\
+        \ (s) de sauvegarde et de restauration"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o2.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o2
+      ref_id: d2.o2.a
+      name: "D\xE9finir une politique de sauvegarde et de restauration et la maintenir\
+        \ \xE0 jour"
+      description: "Le candidat doit fournir sa politique de sauvegarde et de restauration\
+        \ valid\xE9e.\nElle doit pouvoir s'appliquer aux prestations externalis\xE9\
+        es et aux applications g\xE9r\xE9es en mode SaaS par le biais de clauses contractuelles\
+        \ avec le prestataire, et doit avoir \xE9t\xE9 mise \xE0 jour entre le 16\
+        \ juillet 2022 et la date de d\xE9p\xF4t du dossier d'atteinte des objectifs."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o2.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o2
+      ref_id: d2.o2.b
+      name: "Formaliser un/ des plan (s) de sauvegarde et de restauration et le (s)\
+        \ maintenir \xE0 jour"
+      description: "Le candidat doit fournir les plans de sauvegarde de ses syst\xE8\
+        mes d'information critiques, tels qu'identifi\xE9s dans le sous-objectif D2.\
+        \ O1. C, ainsi que les proc\xE9dures de leur mise \xE0 jour."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3
+      assessable: false
+      depth: 1
+      ref_id: d2.o3
+      name: "Construire un syst\xE8me de sauvegarde s\xE9curis\xE9"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3
+      ref_id: d2.o3.a
+      name: "Mettre en \u0153uvre une authentification s\xE9curis\xE9e pour les infrastructures\
+        \ de sauvegarde"
+      description: "Le candidat doit disposer d'un syst\xE8me d'authentification ind\xE9\
+        pendant (AD d\xE9di\xE9, comptes locaux, \u2026) pour ses infrastructures\
+        \ de sauvegarde.\nLe candidat doit s'assurer :\n-D'une gestion fine des r\xF4\
+        les pour l'acc\xE8s \xE0 la sauvegarde, avec un r\xF4le minimis\xE9 au strict\
+        \ n\xE9cessaire pour l'op\xE9rateur de sauvegarde.\n-De l'utilisation d'une\
+        \ authentification \xE0 double facteurs si la solution de sauvegarde le permet.\n\
+        En cas d'un syst\xE8me d'authentification de la sauvegarde port\xE9 par un\
+        \ Active Directory ind\xE9pendant, un audit ADS (r\xE9alis\xE9 par l'ANSSI)\
+        \ doit \xEAtre r\xE9alis\xE9 sur l'AD utilis\xE9 pour l'administration de\
+        \ la sauvegarde durant la phase op\xE9rationnelle et un score minimum de 3\
+        \ doit \xEAtre obtenu \xE0 la fin de la p\xE9riode op\xE9rationnelle."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3
+      ref_id: d2.o3.b
+      name: S'inscrire dans une trajectoire pour un cloisonnement de son infrastructure
+        de sauvegarde
+      description: "Le candidat doit s'inscrire dans une d\xE9marche visant \xE0 cloisonner\
+        \ les infrastructures de sauvegarde au sein du syst\xE8me d'information et\
+        \ disposer d'une capacit\xE9 technique d'isolation en cas d'incident (mode\
+        \ \xAB bouton rouge \xBB)."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3
+      ref_id: d2.o3.c
+      name: "S'inscrire dans une trajectoire pour la mise en \u0153uvre du 3-2-1"
+      description: "Le candidat doit s'inscrire dans une d\xE9marche pour la mise\
+        \ en \u0153uvre du 3-2-1 (*) avec une trajectoire d\xE9finie et des jalons\
+        \ cl\xE9s.\nCette d\xE9marche vise \xE0 mettre en place une copie immuable\
+        \ de ses sauvegardes hors ligne ou hors site (dans deux b\xE2timents distincts,\
+        \ si applicable par l'\xE9tablissement, chez un h\xE9bergeur tiers, etc.).\n\
+        (*) D\xE9finition disponible dans le glossaire en annexe du guide des pr\xE9\
+        requis et objectifs disponible sur le site ANS du Programme CaRE"
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o3
+      ref_id: d2.o3.d
+      name: Mettre en place une supervision des sauvegardes
+      description: "Le candidat doit instaurer et documenter une organisation pour\
+        \ assurer le suivi efficace des sauvegardes, incluant un plan d'actions pour\
+        \ v\xE9rifier leur bonne ex\xE9cution et des proc\xE9dures \xE0 suivre en\
+        \ cas d'\xE9chec.\nSp\xE9cificit\xE9s pour les GHT :\n- Le GHT, conform\xE9\
+        ment \xE0 sa feuille de route d\xE9crite dans l'objectif D2. O2. A, doit mettre\
+        \ en place une gouvernance de contr\xF4le, centraliser les alertes et permettre\
+        \ au RSSI d'effectuer les contr\xF4les n\xE9cessaires.\n- Le GHT doit avoir\
+        \ une proc\xE9dure formalis\xE9e pour traiter les alertes non r\xE9solues\
+        \ par un ou plusieurs \xE9tablissements."
+    - urn: urn:lulustucru-dsn:risk:req_node:ans-care:d2.o4
+      assessable: true
+      depth: 1
+      ref_id: d2.o4
+      name: Tester la sauvegarde et la restauration
+      description: "Le candidat doit :\n-R\xE9aliser au moins un test technique de\
+        \ bon fonctionnement des sauvegardes et de remise en production des restaurations\
+        \ dans le syst\xE8me pendant la phase op\xE9rationnelle sur un p\xE9rim\xE8\
+        tre d'un SI concourant \xE0 une des activit\xE9s identifi\xE9es dans le cadre\
+        \ de l'objectif D2. O1. C.\n-Identifier au minimum un r\xE9f\xE9rent ou correspondant\
+        \ m\xE9tier en pr\xE9vision de la r\xE9alisation des tests fonctionnels sur\
+        \ les applications m\xE9tiers critiques telles qu'identifi\xE9es dans le sous-objectif\
+        \ D2. O1. C."

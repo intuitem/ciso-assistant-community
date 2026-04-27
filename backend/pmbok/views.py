@@ -56,7 +56,7 @@ class AccreditationViewSet(BaseModelViewSet):
         "checklist",
         "filtering_labels",
     ]
-    search_fields = ["name", "description", "ref_id", "authority"]
+    search_fields = ["name", "description", "ref_id", "authority", "authority_name"]
     ordering = ["created_at"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

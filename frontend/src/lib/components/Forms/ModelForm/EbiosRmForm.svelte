@@ -75,6 +75,14 @@
 		cacheLock={cacheLocks['quotation_method']}
 		bind:cachedValue={formDataCache['quotation_method']}
 	/>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
 	<FolderTreeSelect
 		{form}
 		field="folder"
@@ -84,7 +92,7 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="risk-matrices"
+		optionsEndpoint="risk-matrices?is_enabled=true"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}
@@ -104,9 +112,17 @@
 		>
 			{m.activityOne()}
 		</p>
+		<Select
+			{form}
+			options={model.selectOptions['status']}
+			field="status"
+			label={m.status()}
+			cacheLock={cacheLocks['status']}
+			bind:cachedValue={formDataCache['status']}
+		/>
 		<AutocompleteSelect
 			{form}
-			optionsEndpoint="risk-matrices"
+			optionsEndpoint="risk-matrices?is_enabled=true"
 			field="risk_matrix"
 			cacheLock={cacheLocks['risk_matrix']}
 			bind:cachedValue={formDataCache['risk_matrix']}

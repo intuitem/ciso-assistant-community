@@ -28,8 +28,8 @@
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import z from 'zod';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	interface Props {
 		data: PageData;

@@ -17,6 +17,6 @@ dependencies = [
 [dependency-groups]
 dev = [
     "packaging>=24.2",
-    "pytest>=8.3.5",
+    "pytest>=9.0.3",
     "testcontainers[kafka]>=4.9.2",
 ]

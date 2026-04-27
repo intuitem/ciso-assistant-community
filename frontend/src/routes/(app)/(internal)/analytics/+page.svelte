@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
 	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
@@ -17,11 +18,13 @@
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
 	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
+	import DashboardGrid from '$lib/components/Dashboard/DashboardGrid.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import CounterCard from './CounterCard.svelte';
@@ -32,8 +35,25 @@
 
 	let { data }: Props = $props();
 
+	const toastStore = getToastStore();
+
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
+
+	let threatTreemapExpanded = $state(false);
+	let threatTreemapDialog: HTMLDialogElement | undefined = $state();
+	let threatTreeData: any[] = $state([]);
+
+	function openThreatTreemap(tree: any[]) {
+		threatTreeData = tree;
+		threatTreemapExpanded = true;
+		setTimeout(() => threatTreemapDialog?.showModal(), 0);
+	}
+
+	function closeThreatTreemap() {
+		threatTreemapExpanded = false;
+		threatTreemapDialog?.close();
+	}
 
 	function localizeChartLabels(labels: string[]): string[] {
 		return labels.map((label) => safeTranslate(label));
@@ -79,10 +99,89 @@
 	};
 
 	let group = $derived(page.url.searchParams.get('tab') || 'summary');
+	let selectedDashboardId = $derived(page.url.searchParams.get('dashboard') || '');
+	let canChangeSettings = $derived(
+		Object.hasOwn(data.user?.permissions ?? {}, 'change_globalsettings')
+	);
+
+	let dashboardPickerOpen = $state(false);
+	let dashboardPickerSearch = $state('');
+	let dashboardPickerEl: HTMLDivElement | undefined = $state();
+
+	function toggleDashboardPicker() {
+		dashboardPickerOpen = !dashboardPickerOpen;
+		if (dashboardPickerOpen) dashboardPickerSearch = '';
+	}
+
+	function closeDashboardPicker() {
+		dashboardPickerOpen = false;
+	}
+
+	function handleDashboardPickerKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') closeDashboardPicker();
+	}
+
+	function handleDashboardPickerOutsideClick(e: MouseEvent) {
+		if (dashboardPickerOpen && dashboardPickerEl && !dashboardPickerEl.contains(e.target as Node)) {
+			closeDashboardPicker();
+		}
+	}
+
+	$effect(() => {
+		if (dashboardPickerOpen) {
+			document.addEventListener('mousedown', handleDashboardPickerOutsideClick);
+			document.addEventListener('keydown', handleDashboardPickerKeydown);
+			return () => {
+				document.removeEventListener('mousedown', handleDashboardPickerOutsideClick);
+				document.removeEventListener('keydown', handleDashboardPickerKeydown);
+			};
+		}
+	});
 
 	function handleTabChange(tabValue: string): void {
 		page.url.searchParams.set('tab', tabValue);
 		goto(page.url);
+	}
+
+	async function handleCustomDashboardChange(dashboardId: string): Promise<void> {
+		// Admins persist the choice as the org-wide default. Non-admins fall through
+		// to a URL-only override (the disabled select prevents this, but kept defensive).
+		if (canChangeSettings) {
+			try {
+				const res = await fetch('/analytics?/setDefaultDashboard', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams({ dashboard_id: dashboardId || '' }).toString()
+				});
+				if (!res.ok) {
+					toastStore.trigger({
+						message: `Failed to update default dashboard: ${await res.text()}`,
+						preset: 'error'
+					});
+					return;
+				}
+			} catch (err) {
+				toastStore.trigger({
+					message: `Failed to update default dashboard: ${err}`,
+					preset: 'error'
+				});
+				return;
+			}
+			// Clear URL override so the new global default is the source of truth
+			const url = new URL(page.url);
+			url.searchParams.set('tab', 'custom');
+			url.searchParams.delete('dashboard');
+			goto(url, { invalidateAll: true });
+		} else {
+			const url = new URL(page.url);
+			url.searchParams.set('tab', 'custom');
+			if (dashboardId) {
+				url.searchParams.set('dashboard', dashboardId);
+			} else {
+				url.searchParams.delete('dashboard');
+			}
+			goto(url, { invalidateAll: true });
+		}
 	}
 </script>
 
@@ -93,6 +192,7 @@
 		<Tabs.Trigger value="risk">{m.risk()}</Tabs.Trigger>
 		<Tabs.Trigger value="compliance">{m.compliance()}</Tabs.Trigger>
 		<Tabs.Trigger value="operations">{m.operations()}</Tabs.Trigger>
+		<Tabs.Trigger value="custom">{m.custom()}</Tabs.Trigger>
 		<Tabs.Indicator />
 	</Tabs.List>
 	{#key group}
@@ -123,6 +223,11 @@
 											href="/applied-controls/?status=active"
 										/>
 										<SimpleCard
+											count={metrics.controls?.degraded}
+											label={m.sumpageDegraded()}
+											href="/applied-controls/?status=degraded"
+										/>
+										<SimpleCard
 											count={metrics.controls?.deprecated}
 											label={m.sumpageDeprecated()}
 											href="/applied-controls/?status=deprecated"
@@ -145,7 +250,7 @@
 										<SimpleCard
 											count={metrics.controls?.p1}
 											label={m.sumpageP1()}
-											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
+											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=degraded&status=on_hold&status=in_progress&status=--"
 											emphasis={true}
 										/>
 										<SimpleCard
@@ -219,7 +324,7 @@
 										<SimpleCard
 											count={metrics.compliance?.non_compliant_items}
 											label={m.sumpageNonCompliantItems()}
-											href="#"
+											href="/requirement-assessments?result=non_compliant"
 										/>
 										<SimpleCard
 											count={metrics.compliance?.evidences}
@@ -581,17 +686,25 @@
 						</div>
 					{:then [threatsCount, qualificationsCount, risksCountPerLevel]}
 						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-							{#if threatsCount?.results?.labels?.length > 0}
+							{#if threatsCount?.results?.tree?.length > 0}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-									<h3 class="text-lg font-semibold text-gray-900 mb-2">
-										{m.threatRadarChart()}
-									</h3>
+									<div class="flex items-center justify-between mb-2">
+										<h3 class="text-lg font-semibold text-gray-900">
+											{m.threatsBreakdown()}
+										</h3>
+										<button
+											class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+											onclick={() => openThreatTreemap(threatsCount.results.tree)}
+											title="Expand"
+										>
+											<i class="fa-solid fa-expand text-sm"></i>
+										</button>
+									</div>
 									<div class="h-96">
-										<RadarChart
-											name="threatRadar"
-											title=""
-											labels={threatsCount?.results?.labels ?? []}
-											values={threatsCount?.results?.values ?? []}
+										<TreemapChart
+											name="threatTreemap"
+											tree={threatsCount.results.tree}
+											translate={true}
 										/>
 									</div>
 								</div>
@@ -603,18 +716,28 @@
 								</div>
 							{/if}
 							{#if qualificationsCount?.results?.labels?.length > 0}
+								{@const qPaired = (qualificationsCount?.results?.labels ?? [])
+									.map((l, i) => ({
+										label: safeTranslate(l),
+										value: (qualificationsCount?.results?.values ?? [])[i] ?? 0
+									}))
+									.sort((a, b) => a.value - b.value)}
+								{@const qLabels = qPaired.map((p) => p.label)}
+								{@const qValues = qPaired.map((p) => p.value)}
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 									<h3 class="text-lg font-semibold text-gray-900 mb-4">
 										{m.qualificationsChartTitle()}
 									</h3>
-									<div class="h-80">
-										<BarChart
-											name="qualificationsBar"
-											title=""
-											labels={localizeChartLabels(qualificationsCount?.results?.labels ?? [])}
-											values={qualificationsCount?.results?.values ?? []}
-											horizontal={true}
-										/>
+									<div class="overflow-y-auto max-h-[500px]">
+										<div style="height: {Math.max(224, qLabels.length * 28)}px">
+											<BarChart
+												name="qualificationsBar"
+												title=""
+												labels={qLabels}
+												values={qValues}
+												horizontal={true}
+											/>
+										</div>
 									</div>
 								</div>
 							{:else}
@@ -1099,6 +1222,187 @@
 					</div>
 				{/await}
 			</Tabs.Content>
+			<Tabs.Content value="custom">
+				{#await Promise.all([data.stream.dashboardsList, data.stream.customDashboard])}
+					<div class="flex items-center justify-center py-12">
+						<LoadingSpinner />
+					</div>
+				{:then [dashboardsList, customDashboard]}
+					{#if (dashboardsList || []).length === 0}
+						<div
+							class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
+						>
+							<div class="text-gray-400 mb-4">
+								<i class="fas fa-chart-line text-6xl"></i>
+							</div>
+							<div class="text-gray-600">
+								<p class="text-xl font-semibold mb-2">{m.noDashboardsAvailable()}</p>
+								<p class="text-sm text-gray-500">{m.buildYourFirstDashboard()}</p>
+							</div>
+							<a
+								href="/dashboards"
+								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							>
+								<i class="fas fa-plus text-sm"></i>
+								{m.createDashboard()}
+							</a>
+						</div>
+					{:else}
+						{@const currentSelectionId = customDashboard?.id ?? ''}
+						{@const filteredDashboards = (dashboardsList ?? []).filter((d: any) =>
+							d.name.toLowerCase().includes(dashboardPickerSearch.toLowerCase())
+						)}
+						<div class="space-y-4">
+							<!-- Unified picker: same popover whether or not a dashboard is selected. -->
+							<div class="flex items-center justify-between gap-4 flex-wrap">
+								<div class="relative" bind:this={dashboardPickerEl}>
+									{#if canChangeSettings}
+										<button
+											type="button"
+											class="inline-flex items-center gap-1 text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+											onclick={toggleDashboardPicker}
+											aria-haspopup="listbox"
+											aria-expanded={dashboardPickerOpen}
+											title={m.defaultCustomAnalyticsDashboardHelpText()}
+										>
+											{customDashboard?.name ?? m.selectADashboard()}
+											<i
+												class="fa-solid text-xs text-surface-400 transition-transform"
+												class:fa-chevron-down={!dashboardPickerOpen}
+												class:fa-chevron-up={dashboardPickerOpen}
+											></i>
+										</button>
+									{:else}
+										<h3
+											class="text-base font-semibold text-gray-900 inline-flex items-center gap-1"
+										>
+											{customDashboard?.name ?? m.noDashboardSelected?.() ?? '—'}
+											<i
+												class="fa-solid fa-lock text-xs text-surface-400 ml-1"
+												title={m.requiresChangeGlobalSettings()}
+											></i>
+										</h3>
+									{/if}
+
+									{#if dashboardPickerOpen && canChangeSettings}
+										<div
+											role="listbox"
+											class="absolute left-0 top-full mt-2 z-30 w-72 bg-white dark:bg-surface-900 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg flex flex-col max-h-96"
+										>
+											<div class="p-2 border-b border-surface-200">
+												<input
+													type="text"
+													class="input input-sm w-full"
+													placeholder={m.search()}
+													bind:value={dashboardPickerSearch}
+													autofocus
+												/>
+											</div>
+											<div class="overflow-y-auto flex-1">
+												{#if filteredDashboards.length === 0}
+													<div class="p-3 text-sm text-surface-500 text-center">
+														{m.noResultsFound?.() || 'No results'}
+													</div>
+												{:else}
+													{#each filteredDashboards as d}
+														<button
+															type="button"
+															role="option"
+															aria-selected={d.id === currentSelectionId}
+															class="w-full text-left px-3 py-2 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 flex items-center justify-between gap-2"
+															class:bg-blue-50={d.id === currentSelectionId}
+															class:font-semibold={d.id === currentSelectionId}
+															onclick={() => {
+																closeDashboardPicker();
+																if (d.id !== currentSelectionId) handleCustomDashboardChange(d.id);
+															}}
+														>
+															<span class="truncate">{d.name}</span>
+															{#if d.id === currentSelectionId}
+																<i class="fa-solid fa-check text-blue-600 text-xs"></i>
+															{/if}
+														</button>
+													{/each}
+												{/if}
+											</div>
+											{#if currentSelectionId}
+												<div class="border-t border-surface-200 p-2">
+													<button
+														type="button"
+														class="w-full text-left px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded inline-flex items-center gap-2"
+														onclick={() => {
+															closeDashboardPicker();
+															handleCustomDashboardChange('');
+														}}
+													>
+														<i class="fa-solid fa-xmark text-xs"></i>
+														{m.clearDefault()}
+													</button>
+												</div>
+											{/if}
+										</div>
+									{/if}
+								</div>
+								{#if customDashboard?.id}
+									<a
+										href="/dashboards/{customDashboard.id}"
+										class="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+									>
+										<i class="fa-solid fa-up-right-from-square"></i>
+										{m.viewDashboard()}
+									</a>
+								{/if}
+							</div>
+
+							{#if customDashboard?.widgets?.length > 0}
+								<div class="bg-surface-50-950 rounded-lg p-4">
+									<DashboardGrid widgets={customDashboard.widgets} />
+								</div>
+							{:else if customDashboard}
+								<div class="card p-12 bg-white dark:bg-surface-900 text-center">
+									<i class="fa-solid fa-chart-line text-8xl text-surface-300 mb-6"></i>
+									<p class="text-surface-500 text-lg mb-6">{m.noWidgetsYet()}</p>
+									<a
+										href="/dashboards/{customDashboard.id}/layout"
+										class="btn preset-filled-primary-500"
+									>
+										<i class="fa-solid fa-pen-to-square"></i>
+										{m.editLayout()}
+									</a>
+								</div>
+							{:else}
+								<div class="card p-12 bg-white dark:bg-surface-900 text-center text-surface-500">
+									<i class="fa-solid fa-hand-pointer text-6xl text-surface-300 mb-4"></i>
+									<p>{m.selectADashboard()}</p>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				{:catch}
+					<div class="text-red-500 text-center py-8">Error loading dashboards</div>
+				{/await}
+			</Tabs.Content>
 		</div>
 	{/key}
 </Tabs>
+
+{#if threatTreemapExpanded}
+	<dialog
+		bind:this={threatTreemapDialog}
+		class="fixed inset-0 m-auto w-[92vw] max-w-7xl h-[88vh] rounded-2xl bg-white shadow-2xl border border-gray-200 p-0 overflow-hidden backdrop:bg-black/40"
+		onclose={() => (threatTreemapExpanded = false)}
+	>
+		<div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+			<h3 class="text-lg font-bold text-gray-900">{m.threatsBreakdown()}</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+				onclick={closeThreatTreemap}
+			>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+		<div class="p-4 h-[calc(88vh-64px)]">
+			<TreemapChart name="threatTreemapExpanded" tree={threatTreeData} translate={true} />
+		</div>
+	</dialog>
+{/if}

@@ -8,7 +8,6 @@ body: |
   - Décision : ${decision}
   ${reviewer_observation}
 
-  Veuillez vous connecter à votre portail CISO Assistant pour plus de détails :
-  ${ciso_assistant_url}/auditee-dashboard
+  Veuillez vous connecter à votre portail CISO Assistant pour plus de détails : [Accéder à CISO Assistant](${ciso_assistant_url}/auditee-dashboard)
 
   Merci.

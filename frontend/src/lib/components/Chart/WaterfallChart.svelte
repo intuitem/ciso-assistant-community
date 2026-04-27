@@ -28,7 +28,7 @@
 			tooltip: {
 				trigger: 'axis',
 				axisPointer: {
-					type: 'shadow-sm'
+					type: 'shadow'
 				},
 				formatter: function (params) {
 					var tar = params[1];

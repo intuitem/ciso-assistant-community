@@ -1,0 +1,579 @@
+"""Tests for scoring logic with the new relational Question/Answer models."""
+
+import pytest
+from core.models import (
+    Answer,
+    ComplianceAssessment,
+    Framework,
+    Question,
+    QuestionChoice,
+    RequirementAssessment,
+    RequirementNode,
+)
+from iam.models import Folder
+
+
+@pytest.fixture
+def scoring_setup(db):
+    """Set up a framework with scored questions for testing."""
+    folder = Folder.get_root_folder()
+    fw = Framework.objects.create(
+        name="Scoring Test Framework",
+        folder=folder,
+        is_published=True,
+        min_score=0,
+        max_score=100,
+    )
+    rn = RequirementNode.objects.create(
+        framework=fw,
+        urn="urn:test:score:req:001",
+        ref_id="SCORE-REQ",
+        assessable=True,
+        folder=folder,
+        is_published=True,
+    )
+    q1 = Question.objects.create(
+        requirement_node=rn,
+        urn="urn:test:sq1",
+        ref_id="SQ1",
+        text="Question 1",
+        type=Question.Type.UNIQUE_CHOICE,
+        order=0,
+        weight=1,
+        folder=folder,
+        is_published=True,
+    )
+    choice_good = QuestionChoice.objects.create(
+        question=q1,
+        urn="urn:test:choice:sq1:sc1a",
+        ref_id="SC1A",
+        value="Good",
+        add_score=10,
+        compute_result="true",
+        order=0,
+        folder=folder,
+        is_published=True,
+    )
+    choice_bad = QuestionChoice.objects.create(
+        question=q1,
+        urn="urn:test:choice:sq1:sc1b",
+        ref_id="SC1B",
+        value="Bad",
+        add_score=0,
+        compute_result="false",
+        order=1,
+        folder=folder,
+        is_published=True,
+    )
+
+    from core.models import Perimeter
+
+    perimeter = Perimeter.objects.create(name="Score Perim", folder=folder)
+    ca = ComplianceAssessment.objects.create(
+        name="Score CA",
+        framework=fw,
+        folder=folder,
+        perimeter=perimeter,
+        is_published=True,
+        min_score=0,
+        max_score=100,
+    )
+    ra = RequirementAssessment.objects.create(
+        compliance_assessment=ca,
+        requirement=rn,
+        folder=folder,
+    )
+    return {
+        "framework": fw,
+        "requirement_node": rn,
+        "question": q1,
+        "choice_good": choice_good,
+        "choice_bad": choice_bad,
+        "ca": ca,
+        "ra": ra,
+        "folder": folder,
+    }
+
+
+@pytest.mark.django_db
+class TestScoring:
+    def test_single_choice_scoring_compliant(self, scoring_setup):
+        data = scoring_setup
+        ra = data["ra"]
+        q = data["question"]
+        folder = data["folder"]
+
+        answer = Answer.objects.create(
+            requirement_assessment=ra,
+            question=q,
+            folder=folder,
+        )
+        answer.selected_choices.set([data["choice_good"]])  # score=10, result=true
+
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+
+        assert ra.score == 10
+        assert ra.result == "compliant"
+        assert ra.is_scored is True
+
+    def test_single_choice_scoring_non_compliant(self, scoring_setup):
+        data = scoring_setup
+        ra = data["ra"]
+        q = data["question"]
+        folder = data["folder"]
+
+        answer = Answer.objects.create(
+            requirement_assessment=ra,
+            question=q,
+            folder=folder,
+        )
+        answer.selected_choices.set([data["choice_bad"]])  # score=0, result=false
+
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+
+        assert ra.score == 0
+        assert ra.result == "non_compliant"
+
+    def test_no_visible_questions_gives_not_applicable(self, db):
+        """A requirement node with no questions -> not_applicable."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Empty Q FW",
+            folder=folder,
+            is_published=True,
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:empty:req:001",
+            ref_id="EMP-REQ",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+
+        from core.models import Perimeter
+
+        perimeter = Perimeter.objects.create(name="Empty Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Empty CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+        )
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=rn,
+            folder=folder,
+        )
+
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+        assert ra.result == "not_applicable"
+
+    def test_unanswered_questions_gives_not_assessed(self, scoring_setup):
+        """When not all visible questions are answered -> not_assessed."""
+        data = scoring_setup
+        ra = data["ra"]
+        q = data["question"]
+        folder = data["folder"]
+
+        # Create answer with no selected choices (unanswered single choice)
+        Answer.objects.create(
+            requirement_assessment=ra,
+            question=q,
+            folder=folder,
+        )
+
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+        assert ra.result == "not_assessed"
+
+    def test_weight_aware_scoring(self, db):
+        """Test that scoring respects question weights."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Weight FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:weight:req:001",
+            ref_id="W-REQ",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+
+        # Question with weight=3
+        q1 = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:wq1",
+            ref_id="WQ1",
+            type=Question.Type.UNIQUE_CHOICE,
+            order=0,
+            weight=3,
+            folder=folder,
+            is_published=True,
+        )
+        choice_yes = QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:test:choice:wq1:wc1a",
+            ref_id="WC1A",
+            value="Yes",
+            add_score=10,
+            compute_result="true",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:test:choice:wq1:wc1b",
+            ref_id="WC1B",
+            value="No",
+            add_score=0,
+            compute_result="false",
+            order=1,
+            folder=folder,
+            is_published=True,
+        )
+
+        from core.models import Perimeter
+
+        perimeter = Perimeter.objects.create(name="Weight Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Weight CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=rn,
+            folder=folder,
+        )
+
+        answer = Answer.objects.create(
+            requirement_assessment=ra,
+            question=q1,
+            folder=folder,
+        )
+        answer.selected_choices.set(
+            [choice_yes]
+        )  # score=10, weight=3 -> total_score=30
+
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+
+        # With mean aggregation: 30 / 3 = 10
+        assert ra.score == 10
+
+    def test_depends_on_visibility(self, db):
+        """Test depends_on hides questions correctly."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Depends FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:depends:req:001",
+            ref_id="DEP-REQ",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+
+        # Q1: single_choice
+        q1 = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:dq1",
+            ref_id="DQ1",
+            type=Question.Type.UNIQUE_CHOICE,
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:test:choice:dq1:dc1a",
+            ref_id="DC1A",
+            value="Yes",
+            add_score=10,
+            compute_result="true",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        choice_no = QuestionChoice.objects.create(
+            question=q1,
+            urn="urn:test:choice:dq1:dc1b",
+            ref_id="DC1B",
+            value="No",
+            add_score=0,
+            compute_result="true",
+            order=1,
+            folder=folder,
+            is_published=True,
+        )
+
+        # Q2: depends on Q1 answer being "DC1A"
+        q2 = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:dq2",
+            ref_id="DQ2",
+            type=Question.Type.UNIQUE_CHOICE,
+            depends_on={
+                "question": "urn:test:dq1",
+                "answers": ["urn:test:choice:dq1:dc1a"],
+                "condition": "any",
+            },
+            order=1,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q2,
+            urn="urn:test:choice:dq2:dc2a",
+            ref_id="DC2A",
+            value="Sub-Yes",
+            add_score=5,
+            compute_result="true",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        QuestionChoice.objects.create(
+            question=q2,
+            urn="urn:test:choice:dq2:dc2b",
+            ref_id="DC2B",
+            value="Sub-No",
+            add_score=0,
+            compute_result="false",
+            order=1,
+            folder=folder,
+            is_published=True,
+        )
+
+        from core.models import Perimeter
+
+        perimeter = Perimeter.objects.create(name="Dep Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Dep CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=rn,
+            folder=folder,
+        )
+
+        # Answer Q1 with "DC1B" -> Q2 should be hidden
+        answer = Answer.objects.create(
+            requirement_assessment=ra,
+            question=q1,
+            folder=folder,
+        )
+        answer.selected_choices.set([choice_no])
+
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+
+        # Only Q1 is visible (answered "No"), Q2 is hidden
+        # result = compliant (Q1 compute_result is true)
+        assert ra.result == "compliant"
+
+    def test_multiple_choice_scoring(self, db):
+        """Test scoring with multiple choice questions using M2M."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Multi FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:multi:req:001",
+            ref_id="MULTI-REQ",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:mq1",
+            ref_id="MQ1",
+            type=Question.Type.MULTIPLE_CHOICE,
+            order=0,
+            weight=1,
+            folder=folder,
+            is_published=True,
+        )
+        c1 = QuestionChoice.objects.create(
+            question=q,
+            urn="urn:test:choice:mq1:mc1",
+            ref_id="MC1",
+            value="A",
+            add_score=5,
+            compute_result="true",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        c2 = QuestionChoice.objects.create(
+            question=q,
+            urn="urn:test:choice:mq1:mc2",
+            ref_id="MC2",
+            value="B",
+            add_score=3,
+            compute_result="true",
+            order=1,
+            folder=folder,
+            is_published=True,
+        )
+
+        from core.models import Perimeter
+
+        perimeter = Perimeter.objects.create(name="Multi Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Multi CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=rn,
+            folder=folder,
+        )
+
+        answer = Answer.objects.create(
+            requirement_assessment=ra,
+            question=q,
+            folder=folder,
+        )
+        answer.selected_choices.set([c1, c2])
+
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+
+        # Both choices selected: each match adds score*weight and weight.
+        # total_score = 5*1 + 3*1 = 8, total_weight = 1+1 = 2, mean = 8/2 = 4
+        assert ra.score == 4
+        assert ra.result == "compliant"
+
+
+@pytest.mark.django_db
+class TestGlobalScoreQueryPerformance:
+    """Regression tests ensuring get_global_score uses select_related to avoid N+1 queries."""
+
+    def test_global_score_bounded_queries(self, scoring_setup):
+        """get_global_score() should use a bounded number of queries regardless of RA count."""
+        from django.test.utils import override_settings
+
+        data = scoring_setup
+        ca = data["ca"]
+        folder = data["folder"]
+        fw = data["framework"]
+
+        # Create multiple requirement nodes and assessments
+        for i in range(20):
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"urn:test:perf:req:{i:03d}",
+                ref_id=f"PERF-{i}",
+                assessable=True,
+                folder=folder,
+                is_published=True,
+            )
+            ra = RequirementAssessment.objects.create(
+                compliance_assessment=ca,
+                requirement=rn,
+                folder=folder,
+                score=50,
+                result=RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                is_scored=True,
+            )
+
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+
+        # get_global_score should use select_related("requirement"),
+        # producing a constant number of queries (not scaling with RA count)
+        with CaptureQueriesContext(connection) as ctx:
+            score = ca.get_global_score()
+
+        # With select_related, we expect 1 query (the main SELECT with JOIN).
+        # Without it, we'd see 1 + N queries (1 base + 1 per RA for requirement).
+        # Allow up to 3 queries for safety margin (e.g. if implementation changes slightly).
+        assert len(ctx.captured_queries) <= 3, (
+            f"get_global_score() produced {len(ctx.captured_queries)} queries "
+            f"(expected <=3). Likely missing select_related. "
+            f"Queries: {[q['sql'][:100] for q in ctx.captured_queries]}"
+        )
+        assert (
+            score["maturity_score"] != -1
+        )  # Sanity check: score was actually computed
+
+    def test_total_max_score_bounded_queries(self, scoring_setup):
+        """get_total_max_score() should use a bounded number of queries."""
+        data = scoring_setup
+        ca = data["ca"]
+        folder = data["folder"]
+        fw = data["framework"]
+
+        # Set SUM mode so the method actually queries RAs
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
+        ca.save()
+
+        for i in range(20):
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"urn:test:perf2:req:{i:03d}",
+                ref_id=f"PERF2-{i}",
+                assessable=True,
+                folder=folder,
+                is_published=True,
+            )
+            RequirementAssessment.objects.create(
+                compliance_assessment=ca,
+                requirement=rn,
+                folder=folder,
+                score=50,
+                result=RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                is_scored=True,
+            )
+
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+
+        with CaptureQueriesContext(connection) as ctx:
+            max_score = ca.get_total_max_score()
+
+        assert len(ctx.captured_queries) <= 3, (
+            f"get_total_max_score() produced {len(ctx.captured_queries)} queries "
+            f"(expected <=3). Likely missing select_related. "
+            f"Queries: {[q['sql'][:100] for q in ctx.captured_queries]}"
+        )

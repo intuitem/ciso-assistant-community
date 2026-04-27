@@ -424,6 +424,37 @@ def resolve_library_id(library_urn_or_id: str) -> str:
     return str(libraries[0]["id"])
 
 
+def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
+    """Helper function to resolve vulnerability name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in vulnerability_name_or_id and len(vulnerability_name_or_id) == 36:
+        return vulnerability_name_or_id
+
+    # Otherwise, look up by name
+    res = make_get_request("/vulnerabilities/", params={"name": vulnerability_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Vulnerability '{vulnerability_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    vulnerabilities = get_paginated_results(data)
+
+    if not vulnerabilities:
+        raise ValueError(f"Vulnerability '{vulnerability_name_or_id}' not found")
+
+    if len(vulnerabilities) > 1:
+        vuln_names = [v["name"] for v in vulnerabilities[:3]]
+        raise ValueError(
+            f"Ambiguous vulnerability name '{vulnerability_name_or_id}', found {len(vulnerabilities)}: {vuln_names}"
+        )
+
+    return str(vulnerabilities[0]["id"])
+
+
 def resolve_task_template_id(task_name_or_id: str) -> str:
     """Helper function to resolve task template name to UUID
     If already a UUID, returns it. If a name, looks it up via API.

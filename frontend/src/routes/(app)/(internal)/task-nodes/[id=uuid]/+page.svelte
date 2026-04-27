@@ -4,7 +4,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import { superValidate } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { modelSchema } from '$lib/utils/schemas';
 	import { getModelInfo } from '$lib/utils/crud';
@@ -175,17 +175,32 @@
 			</div>
 		</div>
 
-		<!-- Due date -->
-		<div class="space-y-1">
-			<p class="text-gray-700 text-md font-medium tracking-wide">
-				{m.occurrenceDueDate()}
-			</p>
-			<input
-				type="date"
-				class="px-2 py-1 border rounded text-md font-semibold"
-				bind:value={taskNode.due_date}
-				onchange={(e) => submitDueDateChange(e.target.value)}
-			/>
+		<!-- Dates -->
+		<div class="flex flex-row gap-6">
+			{#if taskNode.scheduled_date && taskNode.scheduled_date !== taskNode.due_date}
+				<div class="space-y-1 items-center flex flex-col">
+					<p class="text-surface-600 text-md font-medium tracking-wide">
+						{m.scheduledDate()}
+					</p>
+					<input
+						type="date"
+						class="px-2 py-1 border border-surface-300 rounded text-md font-semibold text-surface-500"
+						value={taskNode.scheduled_date}
+						disabled
+					/>
+				</div>
+			{/if}
+			<div class="space-y-1 items-center flex flex-col">
+				<p class="text-surface-600 text-md font-medium tracking-wide">
+					{m.occurrenceDueDate()}
+				</p>
+				<input
+					type="date"
+					class="px-2 py-1 border border-surface-300 rounded text-md font-semibold"
+					bind:value={taskNode.due_date}
+					onchange={(e) => submitDueDateChange(e.target.value)}
+				/>
+			</div>
 		</div>
 	</div>
 

@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { getContext } from 'svelte';
 	import type { Writable } from 'svelte/store';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		name: string;
@@ -171,7 +172,7 @@
 						: 'text-gray-600'}"
 			>
 				{#if node_content}
-					{node_content}
+					<MarkdownRenderer content={node_content} />
 				{:else}
 					{name}
 				{/if}

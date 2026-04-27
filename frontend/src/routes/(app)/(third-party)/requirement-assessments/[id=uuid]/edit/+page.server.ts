@@ -11,7 +11,7 @@ import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 
@@ -59,8 +59,9 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const schema = modelSchema(URLModel);
-	object.evidences = object.evidences.map((evidence) => evidence.id);
-	object.applied_controls = object.applied_controls.map((applied_control) => applied_control.id);
+	object.evidences = object.evidences?.map((evidence) => evidence.id) ?? [];
+	object.applied_controls =
+		object.applied_controls?.map((applied_control) => applied_control.id) ?? [];
 	object.security_exceptions =
 		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
 	object.nextRequirementAssessmentId = nextRequirementAssessmentId;
@@ -193,7 +194,8 @@ export const load = (async ({ fetch, params }) => {
 		securityExceptionModel,
 		securityExceptionCreateForm,
 		tables,
-		nextRequirementAssessmentId
+		nextRequirementAssessmentId,
+		viewerRole: requirementsListData?.viewer_role === 'auditor' ? 'auditor' : 'respondent'
 	};
 }) satisfies PageServerLoad;
 
@@ -209,9 +211,48 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
-		const formData = form.data;
+		const formData: Record<string, any> = { ...form.data };
+
+		// Strip fields the backend hid from the GET response. Sending them back as
+		// empty arrays / null would silently wipe data the user could not see.
+		// Fail closed: if we cannot fetch the current state, abort rather than risk
+		// a PATCH that clears hidden relations.
+		let currentRa: Record<string, any>;
+		try {
+			const currentRaResponse = await event.fetch(endpoint);
+			if (!currentRaResponse.ok) {
+				return handleErrorResponse({ event, response: currentRaResponse, form });
+			}
+			currentRa = await currentRaResponse.json();
+		} catch (error) {
+			console.error('Failed to fetch requirement assessment before update', error);
+			return fail(502, { form });
+		}
+
+		const visibilityControlled = [
+			'result',
+			'status',
+			'score',
+			'is_scored',
+			'documentation_score',
+			'observation',
+			'answers',
+			'evidences',
+			'applied_controls',
+			'security_exceptions'
+		];
+		for (const key of visibilityControlled) {
+			if (!(key in currentRa)) {
+				delete formData[key];
+			}
+		}
+		// extended_result is a qualifier on result — strip it alongside a hidden result.
+		if (!('result' in currentRa)) {
+			delete formData.extended_result;
+		}
+
 		const requestInitOptions: RequestInit = {
-			method: 'PUT',
+			method: 'PATCH',
 			body: JSON.stringify(formData)
 		};
 

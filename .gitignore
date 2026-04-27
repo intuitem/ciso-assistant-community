@@ -22,4 +22,7 @@ charts/ciso-assistant-next/custom.yaml
 .history/
 __pycache__
 cli/db_backup
-/.claude
+# Ignore everything under .claude/ by default (personal settings, agents, etc.)
+# but track .claude/skills/ so project-shared skills ship with the repo.
+/.claude/*
+!/.claude/skills/

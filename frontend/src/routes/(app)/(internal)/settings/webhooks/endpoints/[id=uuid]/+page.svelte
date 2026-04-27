@@ -4,7 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { webhookEndpointSchema } from '$lib/utils/schemas';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import ListSelector from '$lib/components/Forms/ListSelector.svelte';

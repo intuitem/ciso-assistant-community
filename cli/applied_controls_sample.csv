@@ -1,0 +1,21 @@
+name,description,category,csf_function,ref_id,status,priority,effort,control_impact,link,start_date,eta,expiry_date,observation,filtering_labels,reference_control,amortization_period,build_fixed_cost,build_people_days,run_fixed_cost,run_people_days
+Firewall,Monitors and controls incoming and outgoing network traffic.,technical,protect,AC-001,active,2,M,3,https://wiki.example.com/firewall,2025-01-15,2025-06-30,,Deployed on all perimeters,network|infrastructure,,3,15000,10,5000,2
+Disaster Recovery Plan,Provides steps for recovering from a major disaster.,policy,recover,AC-002,in_progress,1,XL,4,,2025-02-01,2025-12-31,,Annual review pending,continuity,,5,8000,30,1000,5
+Vulnerability Scanning,Identifies vulnerabilities in systems and applications.,process,identify,AC-003,active,2,S,2,,2025-03-01,,,,security|scanning,,1,2000,3,500,1
+Security Information and Event Management (SIEM),Aggregates and analyzes security activity.,technical,detect,AC-004,active,1,L,5,https://wiki.example.com/siem,2024-06-01,,,Core monitoring platform,monitoring|soc,,3,50000,40,12000,5
+Encryption,Secures data by converting it into unreadable code.,technical,protect,AC-005,active,3,S,3,,2025-01-01,,,,cryptography,,,,,,
+Door and Facility Locks,Restricts physical access to sensitive areas.,physical,protect,AC-006,active,4,XS,2,,,,2026-12-31,Maintenance contract expires end of 2026,physical-security,,,,,,
+Business Continuity Plan,Ensures that critical business functions continue during a disaster.,policy,recover,AC-007,to_do,1,L,4,,,,,,continuity|governance,,5,5000,20,500,3
+Multi-Factor Authentication (MFA),Requires two or more verification methods for access.,process,protect,AC-008,active,2,M,4,,2025-01-01,,,,authentication|identity,,2,3000,5,1200,1
+Physical Security Controls,Secures physical access to critical systems.,physical,protect,,active,3,S,2,,,,,Covers all data centers,physical-security,,,,,,
+Access Control Policy,Defines access privileges for employees.,policy,protect,,to_do,2,M,3,,,,,,governance|identity,,1,0,15,0,2
+Intrusion Detection System (IDS),Detects suspicious activity and anomalies in the network.,technical,detect,,active,2,M,3,,2025-04-01,,,,network|detection,,2,8000,5,3000,1
+Incident Response Plan,Provides guidelines for responding to security incidents.,policy,respond,,in_progress,1,L,4,,,,,,governance|incident,,1,0,25,0,5
+Backup and Restore Procedures,Outlines steps to back up and restore data.,process,recover,,active,3,S,2,,,,,,continuity,,1,4000,3,2000,1
+Patch Management,Regularly updates software to fix security vulnerabilities.,process,protect,,active,2,M,3,,,,,,operations,,1,1000,2,500,2
+Network Segmentation,Divides networks into segments to limit access.,technical,protect,,active,2,L,4,,2024-09-01,,,,network|infrastructure,,5,20000,15,2000,1
+Data Loss Prevention (DLP),Prevents sensitive data from being accessed or leaked.,technical,protect,,to_do,1,XL,5,,,,,,data-protection,,3,30000,20,8000,3
+Intrusion Prevention System (IPS),Automatically blocks suspicious activity in the network.,technical,protect,,active,2,M,3,,,,,,network|detection,,2,10000,5,4000,1
+Endpoint Detection and Response (EDR),Provides real-time monitoring and response to endpoint threats.,technical,detect,,active,1,L,4,,2025-02-01,,,,endpoint|soc,,3,25000,10,10000,2
+Anti-Virus Software,Detects and removes malicious software.,technical,protect,,active,3,XS,2,,,,,,endpoint,,1,5000,1,3000,0
+Security Awareness Training,Educates employees on security best practices.,process,protect,,active,2,M,3,,,,,,governance|training,,1,2000,10,2000,10
