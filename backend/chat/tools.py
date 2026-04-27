@@ -995,6 +995,14 @@ def _build_attach_proposal(
     }
 
 
+# Tools whose raw output is safe and useful to replay to the LLM in the next
+# 1–2 turns (so it can reason over the actual evidence, not just its own
+# paraphrase). Whitelist-only — propose_*, attach_existing, multi_query, and
+# extract_entities (later) deliberately stay out: their outputs become
+# AgentActions / Review-page artifacts, not chat-context replays.
+REPLAYABLE_TOOLS: frozenset[str] = frozenset({"query_objects", "search_library"})
+
+
 def dispatch_tool_call(
     tool_name: str,
     arguments: dict,

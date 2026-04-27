@@ -31,6 +31,24 @@ class ChatSession(AbstractBaseModel, FolderMixin):
             "Cleared when the workflow completes or the session is reset."
         ),
     )
+    summary = models.TextField(
+        blank=True,
+        default="",
+        verbose_name=_("Rolling summary"),
+        help_text=_(
+            "Compact summary of older exchanges that have fallen off the "
+            "verbatim window. Updated incrementally one exchange at a time."
+        ),
+    )
+    summary_until_ts = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Summarized up to"),
+        help_text=_(
+            "Watermark — created_at of the most recent message folded into "
+            "the rolling summary. Null = nothing folded yet."
+        ),
+    )
 
     class Meta:
         verbose_name = _("Chat session")
@@ -64,6 +82,18 @@ class ChatMessage(models.Model):
         blank=True,
         verbose_name=_("Context references"),
         help_text=_("Objects retrieved or cited: [{type, id, name, score}]"),
+    )
+    # Truncated raw tool result, replayed for the next 2 turns to give the
+    # LLM access to evidence beyond its own paraphrase. Whitelist-gated to
+    # read-only tools — propose_* / extract_entities never populate this.
+    tool_observation = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_("Tool observation"),
+        help_text=_(
+            "Captured read-only tool result (tool name, args, truncated text). "
+            "Replayed in the next ~2 turns; not enforced beyond that window."
+        ),
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
 

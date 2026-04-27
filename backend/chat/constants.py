@@ -17,6 +17,22 @@ SUMMARY_TOKEN_CAP = int(os.environ.get("CHAT_SUMMARY_TOKEN_CAP", 400))
 TOOL_REPLAY_TOKENS = int(os.environ.get("CHAT_TOOL_REPLAY_TOKENS", 500))
 VERBATIM_WINDOW_TOKENS = int(os.environ.get("CHAT_VERBATIM_WINDOW_TOKENS", 3000))
 
+# Truthy values for boolean env flags (mirrors ENABLE_CHAT in settings.py)
+_TRUTHY = ("true", "1", "yes", "on")
+
+# Phase 3: rolling summary on/off and tunables
+CHAT_SESSION_SUMMARY_ENABLED = (
+    os.environ.get("CHAT_SESSION_SUMMARY", "true").strip().lower() in _TRUTHY
+)
+# Cap on the assistant message text we feed into the summary update prompt
+SUMMARY_INPUT_TOKEN_CAP = int(os.environ.get("CHAT_SUMMARY_INPUT_TOKEN_CAP", 1500))
+
+# Phase 4: tool-observation replay window (in turns) and on/off
+CHAT_TOOL_REPLAY_ENABLED = (
+    os.environ.get("CHAT_TOOL_REPLAY", "true").strip().lower() in _TRUTHY
+)
+TOOL_REPLAY_TURNS = int(os.environ.get("CHAT_TOOL_REPLAY_TURNS", 2))
+
 # ISO language code → English name (for LLM instructions)
 LANG_MAP = {
     "fr": "French",

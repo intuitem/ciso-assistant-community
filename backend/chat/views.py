@@ -25,7 +25,13 @@ from .constants import (
     VERBATIM_WINDOW_TOKENS,
 )
 from .context import ContextBuilder
-from .memory import pack_verbatim_window
+from .memory import (
+    build_replay_payload,
+    inject_summary,
+    inject_tool_replays,
+    pack_verbatim_window,
+    update_summary_for_session,
+)
 from .models import ChatSession, ChatMessage, IndexedDocument
 from .page_context import parse_page_context
 from .providers import get_llm, is_ollama_available
@@ -190,6 +196,10 @@ class ChatSessionViewSet(BaseModelViewSet):
                 list(session.messages.order_by("created_at").values("role", "content")),
                 VERBATIM_WINDOW_TOKENS,
             )
+            # Prepend the rolling summary so the tool-router has long-session
+            # context. Tool replays are intentionally NOT injected here —
+            # tool routing has its own system prompt and we keep it lean.
+            history_for_tool = inject_summary(history_for_tool, session.summary)
 
             t0 = time.time()
             tool_response = llm.tool_call(
@@ -296,6 +306,11 @@ class ChatSessionViewSet(BaseModelViewSet):
                 response["X-Accel-Buffering"] = "no"
                 return response
 
+        # Captured tool observation (Phase 4) — populated after dispatch for
+        # whitelisted read-only tools, persisted on the assistant message,
+        # replayed for ~2 turns as a system note.
+        tool_observation_payload: dict | None = None
+
         if tool_response and tool_response.get("name"):
             logger.info(
                 "Tool call: %s(%s)",
@@ -311,6 +326,20 @@ class ChatSessionViewSet(BaseModelViewSet):
                 user_message=user_content,
             )
             logger.info("tool_dispatch_complete", duration=round(time.time() - t1, 2))
+
+            # Build the replay payload from the *raw* result text so the next
+            # turn sees evidence, not the prefixed INSTRUCTIONS preamble.
+            if query_result:
+                tool_name = tool_response["name"]
+                if tool_name == "search_library":
+                    raw_result_text = query_result.get("text", "") or ""
+                else:
+                    raw_result_text = format_query_result(query_result)
+                tool_observation_payload = build_replay_payload(
+                    tool_name,
+                    tool_response.get("arguments", {}),
+                    raw_result_text,
+                )
 
         # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
@@ -497,7 +526,9 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         # Build conversation history for the LLM (exclude the message we just saved)
         history_messages = list(
-            session.messages.order_by("created_at").values("role", "content")
+            session.messages.order_by("created_at").values(
+                "role", "content", "tool_observation"
+            )
         )
         # Remove the last entry (the user message we just created) — it's passed separately
         if (
@@ -510,6 +541,11 @@ class ChatSessionViewSet(BaseModelViewSet):
         history_messages = pack_verbatim_window(
             history_messages, VERBATIM_WINDOW_TOKENS
         )
+        # Replay recent tool observations as synthetic system notes so the LLM
+        # can reason over raw evidence (not just its own paraphrase). Then
+        # prepend the rolling summary so older context is still present.
+        history_messages = inject_tool_replays(history_messages)
+        history_messages = inject_summary(history_messages, session.summary)
 
         # Assemble context with structured priorities
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
@@ -653,12 +689,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                     tokens_per_s=tps,
                 )
 
-                # Save assistant message
+                # Save assistant message — including any whitelisted tool
+                # observation captured this turn (Phase 4).
                 ChatMessage.objects.create(
                     session=session,
                     role=ChatMessage.Role.ASSISTANT,
                     content=full_response,
                     context_refs=context_refs,
+                    tool_observation=tool_observation_payload,
                 )
 
                 # Send completion event with context refs
@@ -669,6 +707,19 @@ class ChatSessionViewSet(BaseModelViewSet):
                     }
                 )
                 yield f"data: {done_data}\n\n"
+
+                # Phase 3: fold the oldest fallen-off exchange into the rolling
+                # summary, if any. Synchronous but the SSE 'done' has already
+                # flushed, so the user has seen the answer. Failures are
+                # logged and swallowed; the next turn re-tries naturally.
+                try:
+                    update_summary_for_session(session, llm)
+                except Exception as e:
+                    logger.warning(
+                        "summary_compaction_failed",
+                        session_id=str(session.pk),
+                        error=str(e),
+                    )
 
             except Exception as e:
                 logger.error("Chat stream error: %s", e)
