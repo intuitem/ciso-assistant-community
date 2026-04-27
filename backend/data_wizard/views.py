@@ -1036,23 +1036,21 @@ class PerimeterRecordConsumer(RecordConsumer[None]):
         "lc_status": ("lc_status", "status"),
         "default_assignee": ("default_assignee",),
     }
+    _LC_STATUS_BY_KEY: ClassVar[dict[str, str]] = {
+        key.lower(): key for key, _ in Perimeter.PRJ_LC_STATUS
+    }
+    _LC_STATUS_BY_LABEL: ClassVar[dict[str, str]] = {
+        str(label).strip().lower(): key for key, label in Perimeter.PRJ_LC_STATUS
+    }
 
-    @staticmethod
-    def _normalize_lc_status(value: str) -> Optional[str]:
+    @classmethod
+    def _normalize_lc_status(cls, value: str) -> Optional[str]:
         normalized = value.strip().lower()
         if not normalized:
             return None
-
-        # Support canonical model keys (e.g. in_prod)
-        by_key = {key.lower(): key for key, _label in Perimeter.PRJ_LC_STATUS}
-        if normalized in by_key:
-            return by_key[normalized]
-
-        # Support display labels (e.g. Production), localized by current language
-        by_label = {
-            str(label).strip().lower(): key for key, label in Perimeter.PRJ_LC_STATUS
-        }
-        return by_label.get(normalized)
+        return cls._LC_STATUS_BY_KEY.get(normalized) or cls._LC_STATUS_BY_LABEL.get(
+            normalized
+        )
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
@@ -1069,9 +1067,7 @@ class PerimeterRecordConsumer(RecordConsumer[None]):
         if not isinstance(value, str):
             return []
 
-        entries = [
-            entry.strip() for entry in re.split(r"[;,|]", value) if entry.strip()
-        ]
+        entries = [entry.strip() for entry in value.split(";") if entry.strip()]
         actor_ids = []
 
         for entry in entries:
@@ -1082,7 +1078,8 @@ class PerimeterRecordConsumer(RecordConsumer[None]):
                 actor_ids.append(actor.id)
             else:
                 logger.warning(
-                    "Could not resolve a perimeter default assignee reference; skipping."
+                    "Could not resolve perimeter default assignee %r; skipping.",
+                    entry,
                 )
 
         return actor_ids

@@ -150,9 +150,10 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `ref_id` | No | Reference ID |
 | `description` | No | |
 | `status` | No | Alias accepted (mapped to `lc_status`) |
-| `default_assignee` | No | User email or team name, comma/semicolon/pipe separated |
+| `default_assignee` | No | User email or team name, semicolon-separated |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
 | None | - | - |

@@ -321,7 +321,7 @@ DATA_WIZARD_COMMANDS = [
             "Import perimeters using the Data Wizard backend.\n"
             "\nRequired columns: name\n"
             "Optional columns: ref_id, description, domain, lc_status (or status), "
-            "default_assignee (user email or team name; supports comma/semicolon/pipe separators)\n"
+            "default_assignee (user email or team name; supports semicolon)\n"
         ),
         "requires_folder": True,
         "requires_perimeter": False,
