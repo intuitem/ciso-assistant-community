@@ -31,6 +31,7 @@
 	"addDomain": "Tilføj domæne",
 	"createIamGroups": "Opret IAM-grupper",
 	"iamGroups": "IAM-grupper",
+	"info": "Information",
 	"whenEnabledIamGroupsAreCreatedAutomatically": "IAM-grupper bruges til at tildele roller til brugere",
 	"globalFolderMustKeepIamGroupsEnabled": "Den globale mappe skal beholde IAM-grupper aktiveret.",
 	"cannotDisableIamGroupsAssignedUsers": "IAM-grupper kan ikke deaktiveres, mens de er tildelt brugere.",

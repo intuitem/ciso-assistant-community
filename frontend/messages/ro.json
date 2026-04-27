@@ -1107,6 +1107,7 @@
 	"viewQuantitativeRiskStudy": "Vizualizați studiul de risc cantitativ",
 	"dueDateUpdatedSuccessfully": "Data limită a fost actualizată cu succes",
 	"taskScheduleInfo": "Aparițiile trecute sunt protejate împotriva schimbărilor de programare. Doar sarcinile viitoare vor fi recalculate.",
+	"info": "Informație",
 	"cascadeDeleteWarning": "Avertizare: Ștergerea acestuia va șterge și {count} obiect(e) asociat(e):",
 	"errorFetching": "Nu se poate încărca informația în cascadă. Vă rugăm să încercați din nou.",
 	"cascadeAffectedNotice": [

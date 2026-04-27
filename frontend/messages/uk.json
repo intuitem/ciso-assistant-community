@@ -1622,6 +1622,7 @@
 	"taskScheduleInfo": "Минулі випадки захищені від змін розкладу. Лише майбутні завдання будуть перераховані.",
 	"cascadeDeleteWarning": "Увага: Видалення цього також призведе до постійного видалення {count} пов'язаних об'єктів:",
 	"errorFetching": "Не вдалося завантажити інформацію про каскад. Будь ласка, спробуйте ще раз.",
+	"info": "Інформація",
 	"cascadeAffectedNotice": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

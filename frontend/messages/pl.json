@@ -1855,6 +1855,7 @@
 	"viewQuantitativeRiskStudy": "Zobacz badanie ilościowe ryzyka",
 	"dueDateUpdatedSuccessfully": "Termin zaktualizowany pomyślnie",
 	"taskScheduleInfo": "Wcześniejsze wystąpienia są chronione przed zmianami harmonogramu. Tylko nadchodzące zadania zostaną przeliczone.",
+	"info": "Informacja",
 	"cascadeDeleteWarning": "Uwaga: Usunięcie tego spowoduje również trwałe usunięcie {count} powiązanych obiektów:",
 	"errorFetching": "Nie można załadować informacji o kaskadzie. Spróbuj ponownie.",
 	"cascadeAffectedNotice": [

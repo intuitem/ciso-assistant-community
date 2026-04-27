@@ -27,6 +27,7 @@
 	"addRiskScenario": "أضف سيناريو المخاطر",
 	"addRiskAcceptance": "أضف قبول المخاطر",
 	"addComplianceAssessment": "ابدأ التدقيق",
+	"info": "معلومة",
 	"addEvidence": "أضف دليلًا",
 	"addDomain": "أضف نطاقًا",
 	"createIamGroups": "إنشاء مجموعات IAM",

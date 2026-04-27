@@ -1155,6 +1155,7 @@
 	"viewQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány megtekintése",
 	"dueDateUpdatedSuccessfully": "Határidő sikeresen frissítve",
 	"taskScheduleInfo": "A múltbéli előfordulások védettek az ütemezési változásokkal szemben. Csak jövőbeli feladatok kerülnek újraszámításra.",
+	"info": "Információ",
 	"cascadeDeleteWarning": "Figyelmeztetés: A törlés véglegesen törölni fogja {count} kapcsolódó objektumot:",
 	"errorFetching": "Nem sikerült betölteni a láncolt információkat. Kérjük, próbálja újra.",
 	"cascadeAffectedNotice": [

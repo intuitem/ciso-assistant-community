@@ -1110,6 +1110,7 @@
 	"viewQuantitativeRiskStudy": "Ver estudo de quantificação de risco",
 	"dueDateUpdatedSuccessfully": "Data de vencimento atualizada com sucesso",
 	"taskScheduleInfo": "As ocorrências passadas estão protegidas de alterações de agendamento. Apenas tarefas futuras serão recalculadas.",
+	"info": "Informação",
 	"cascadeDeleteWarning": "Aviso: Excluir isso também excluirá permanentemente {count} objeto(s) relacionado(s):",
 	"errorFetching": "Não foi possível carregar as informações de cascata. Por favor, tente novamente.",
 	"cascadeAffectedNotice": [
