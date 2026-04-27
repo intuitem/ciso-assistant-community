@@ -282,8 +282,11 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     if not isinstance(value, str):
         return []
 
-    separator = "|" if "|" in value else ","
-    label_names = set(name.strip() for name in value.split(separator))
+    value = value.strip()
+    if not value:
+        return []
+
+    label_names = set(name.strip() for name in re.split(r"[|,]", value) if name.strip())
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
