@@ -1685,7 +1685,7 @@ class ThreatViewSet(BaseModelViewSet):
         "filtering_labels",
         "urn",
     ]
-    search_fields = ["name", "provider", "description"]
+    search_fields = ["ref_id", "name", "provider", "description"]
 
     def get_queryset(self):
         return (
