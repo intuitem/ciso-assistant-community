@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		.then((data) => data.results ?? data)
 		.catch(() => []);
 
-	const journeysPromise = fetch(`${BASE_API_URL}/journeys/`)
+	const journeysPromise = fetch(`${BASE_API_URL}/journeys/?ordering=-updated_at&limit=10`)
 		.then((res) => res.json())
 		.then((data) => data.results ?? data)
 		.catch(() => []);

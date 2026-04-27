@@ -2815,6 +2815,28 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'time_range', valueType: 'string', detail: false },
 			{ field: 'aggregation', valueType: 'string', detail: false }
 		]
+	},
+	journeys: {
+		name: 'presetjourney',
+		localName: 'journey',
+		localNamePlural: 'journeys',
+		verboseName: 'Journey',
+		verboseNamePlural: 'Journeys',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'preset', urlModel: 'presets' }
+		],
+		filters: [{ field: 'folder' }, { field: 'preset' }]
+	},
+	presets: {
+		name: 'preset',
+		localName: 'preset',
+		localNamePlural: 'presets',
+		verboseName: 'Preset',
+		verboseNamePlural: 'Presets',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
 	}
 };
 

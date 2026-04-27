@@ -189,6 +189,15 @@
 								</a>
 								<button
 									type="button"
+									class="btn btn-sm variant-soft"
+									onclick={() => fork(p.id)}
+									disabled={busy}
+									title="Create an editable copy"
+								>
+									Duplicate
+								</button>
+								<button
+									type="button"
 									class="btn btn-sm variant-soft-error"
 									onclick={() => remove(p.id, p.name)}
 									disabled={busy}

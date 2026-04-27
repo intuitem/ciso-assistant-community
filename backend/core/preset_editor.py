@@ -32,7 +32,9 @@ ALLOWED_TARGET_MODELS = {
     "perimeters",
     "policies",
     "processings",
+    "risk-acceptances",
     "risk-assessments",
+    "security-exceptions",
     "task-templates",
 }
 

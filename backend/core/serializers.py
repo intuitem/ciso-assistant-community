@@ -4161,17 +4161,21 @@ class PresetJourneyStepWriteSerializer(BaseModelSerializer):
                 validated_data["completed_by"] = None
 
         with transaction.atomic():
+            journey = instance.journey
+            update_fields = ["updated_at"]
             # Sync target_ref change to parent journey's object_refs
             if "target_ref" in validated_data:
                 new_ref = validated_data["target_ref"]
-                journey = instance.journey
                 object_refs = dict(journey.object_refs or {})
                 if new_ref:
                     object_refs[instance.key] = new_ref
                 else:
                     object_refs.pop(instance.key, None)
                 journey.object_refs = object_refs
-                journey.save(update_fields=["object_refs"])
+                update_fields.append("object_refs")
+            # Bump journey.updated_at on every step edit so the catalog's
+            # "recently active" list surfaces it.
+            journey.save(update_fields=update_fields)
 
             return super().update(instance, validated_data)
 
@@ -4180,6 +4184,7 @@ class PresetJourneyReadSerializer(BaseModelSerializer):
     steps = PresetJourneyStepReadSerializer(many=True, read_only=True)
     folder = FieldsRelatedField()
     preset = FieldsRelatedField(["id", "name", "urn", "version"])
+    applied_by = FieldsRelatedField(["id", "email"])
     latest_version = serializers.SerializerMethodField()
 
     class Meta:

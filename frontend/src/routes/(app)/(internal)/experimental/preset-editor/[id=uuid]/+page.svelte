@@ -17,6 +17,7 @@
 		risk_matrix?: string;
 		implementation_groups?: string[];
 		category?: string;
+		asset_type?: string;
 		step_ref_id?: string;
 		[k: string]: any;
 	};
@@ -49,7 +50,8 @@
 		task_template: 'task-templates',
 		organisation_objective: 'organisation-objectives',
 		organisation_issue: 'organisation-issues',
-		perimeter: 'perimeters'
+		perimeter: 'perimeters',
+		asset: 'assets'
 	};
 	const MODEL_TO_TYPE: Record<string, string> = Object.fromEntries(
 		Object.entries(TYPE_TO_MODEL).map(([t, m]) => [m, t])
@@ -60,17 +62,22 @@
 		'accreditations',
 		'actors',
 		'applied-controls',
-		'assets',
 		'evidences',
 		'incidents',
 		'metric-instances',
-		'policies'
+		'policies',
+		'risk-acceptances',
+		'security-exceptions'
 	];
 	const ALL_MODELS = ['', ...NAV_ONLY_MODELS, ...Object.values(TYPE_TO_MODEL)].sort((a, b) =>
 		a.localeCompare(b)
 	);
 
 	const FINDINGS_CATEGORIES = ['pentest', 'audit', 'review', 'other'];
+	const ASSET_TYPES = [
+		{ value: 'SP', labelKey: 'support' },
+		{ value: 'PR', labelKey: 'primary' }
+	];
 
 	let draft: Draft | null = $state(null);
 	let initialJson = $state('');
@@ -380,6 +387,7 @@
 		)
 			return { ...base, risk_matrix: '' };
 		if (type === 'findings_assessment') return { ...base, category: 'pentest' };
+		if (type === 'asset') return { ...base, asset_type: 'SP' };
 		return base;
 	}
 
@@ -568,6 +576,20 @@
 			>
 				{#each FINDINGS_CATEGORIES as c (c)}
 					<option value={c}>{safeTranslate(c)}</option>
+				{/each}
+			</select>
+		</label>
+	{:else if scaffold.type === 'asset'}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="text-xs text-gray-600">Asset type</span>
+			<select
+				class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				value={scaffold.asset_type ?? 'SP'}
+				onchange={(e) =>
+					updateScaffoldByIndex(idx, { asset_type: (e.target as HTMLSelectElement).value })}
+			>
+				{#each ASSET_TYPES as t (t.value)}
+					<option value={t.value}>{safeTranslate(t.labelKey)}</option>
 				{/each}
 			</select>
 		</label>
@@ -771,16 +793,14 @@
 							title="Insert step"
 							aria-label="Insert step here"
 						>
-							<span
-								class="h-px flex-1 bg-blue-200 group-hover:bg-blue-400 transition-colors"
+							<span class="h-px flex-1 bg-blue-200 group-hover:bg-blue-400 transition-colors"
 							></span>
 							<span
 								class="mx-2 text-[11px] font-medium text-blue-700 px-2 py-0.5 rounded-full bg-blue-50 group-hover:bg-blue-100 transition-colors inline-flex items-center gap-1"
 							>
 								<i class="fa-solid fa-plus text-[9px]"></i> Insert step
 							</span>
-							<span
-								class="h-px flex-1 bg-blue-200 group-hover:bg-blue-400 transition-colors"
+							<span class="h-px flex-1 bg-blue-200 group-hover:bg-blue-400 transition-colors"
 							></span>
 						</button>
 					{/snippet}

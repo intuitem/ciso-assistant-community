@@ -159,7 +159,7 @@
 			<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100">
 				<i class="fa-solid fa-route text-indigo-600 text-sm"></i>
 			</div>
-			<h2 class="text-lg font-semibold text-gray-800">{m.activeJourneys()}</h2>
+			<h2 class="text-lg font-semibold text-gray-800">{m.recentlyActiveJourneys()}</h2>
 			{#if data.journeys.length > 0}
 				<span
 					class="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700"
@@ -167,6 +167,12 @@
 					{data.journeys.length}
 				</span>
 			{/if}
+			<a
+				href="/journeys"
+				class="ml-auto text-xs text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1"
+			>
+				{m.viewAll()} <i class="fa-solid fa-arrow-right text-[10px]"></i>
+			</a>
 		</div>
 
 		{#if data.journeys.length === 0}

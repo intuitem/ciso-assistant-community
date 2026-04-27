@@ -2900,6 +2900,13 @@ export const listViewFields = {
 			gravity: undefined
 		},
 		body: ['users']
+	},
+	journeys: {
+		head: ['name', 'preset', 'folder', 'appliedVersion', 'appliedAt', 'appliedBy'],
+		body: ['name', 'preset', 'folder', 'applied_version', 'applied_at', 'applied_by'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
 	}
 } as const satisfies ListViewFieldsConfig;
 
