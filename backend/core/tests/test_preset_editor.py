@@ -37,6 +37,22 @@ def admin_client(app_config):
 
 
 @pytest.fixture
+def reader_client(app_config):
+    """Builtin BI-RL-AUD (reader) role — has view_preset but not add/change/delete."""
+    reader = User.objects.create_user(
+        "reader@preset-editor-tests.com", is_published=True
+    )
+    reader_group = UserGroup.objects.get(name="BI-UG-GAD")
+    reader.folder = reader_group.folder
+    reader.save()
+    reader_group.user_set.add(reader)
+    client = APIClient()
+    token = AuthToken.objects.create(user=reader)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
+    return client
+
+
+@pytest.fixture
 def loaded_libs(app_config):
     """Create a loaded framework + risk matrix so CA/RA scaffolds can resolve."""
     root = Folder.get_root_folder()
@@ -350,3 +366,82 @@ class TestEditorEndpoints:
         assert "target_url" not in saved["steps"][0]
         assert saved["steps"][1]["target_url"] == ""
         assert "target_model" not in saved["steps"][1]
+
+
+@pytest.mark.django_db
+class TestEditorRBAC:
+    """Reader role (BI-RL-AUD) has view_preset but no add/change/delete.
+    Every mutation endpoint must reject; reads should still work."""
+
+    def _make_user_authored_preset(self, admin_client) -> str:
+        r = admin_client.post(
+            "/api/presets/create-blank/", {"name": "RBAC source"}, format="json"
+        )
+        assert r.status_code == 201
+        return r.data["id"]
+
+    def test_reader_can_list_presets(self, admin_client, reader_client):
+        # Admin creates a user-authored preset
+        self._make_user_authored_preset(admin_client)
+        r = reader_client.get("/api/presets/")
+        assert r.status_code == 200
+
+    def test_reader_cannot_create_blank(self, reader_client):
+        r = reader_client.post(
+            "/api/presets/create-blank/", {"name": "Hax"}, format="json"
+        )
+        assert r.status_code == 403
+
+    def test_reader_cannot_start_editing(self, admin_client, reader_client):
+        pid = self._make_user_authored_preset(admin_client)
+        r = reader_client.post(f"/api/presets/{pid}/start-editing/")
+        assert r.status_code == 403
+
+    def test_reader_cannot_save_draft(self, admin_client, reader_client):
+        pid = self._make_user_authored_preset(admin_client)
+        admin_client.post(f"/api/presets/{pid}/start-editing/")
+        r = reader_client.patch(
+            f"/api/presets/{pid}/save-draft/",
+            {
+                "journey_meta": {"name": "x", "description": ""},
+                "scaffolded_objects": [],
+                "steps": [],
+            },
+            format="json",
+        )
+        assert r.status_code == 403
+
+    def test_reader_cannot_publish(self, admin_client, reader_client):
+        pid = self._make_user_authored_preset(admin_client)
+        admin_client.post(f"/api/presets/{pid}/start-editing/")
+        r = reader_client.post(f"/api/presets/{pid}/publish-draft/")
+        assert r.status_code == 403
+
+    def test_reader_cannot_discard(self, admin_client, reader_client):
+        pid = self._make_user_authored_preset(admin_client)
+        admin_client.post(f"/api/presets/{pid}/start-editing/")
+        r = reader_client.post(f"/api/presets/{pid}/discard-draft/")
+        assert r.status_code == 403
+
+    def test_reader_cannot_duplicate(self, admin_client, reader_client):
+        pid = self._make_user_authored_preset(admin_client)
+        r = reader_client.post(f"/api/presets/{pid}/duplicate/")
+        assert r.status_code == 403
+
+    def test_reader_cannot_apply(self, admin_client, reader_client):
+        pid = self._make_user_authored_preset(admin_client)
+        r = reader_client.post(
+            f"/api/presets/{pid}/apply/",
+            {"folder_name": "Hax", "apply_feature_flags": False},
+            format="json",
+        )
+        assert r.status_code == 403
+
+    def test_apply_uses_get_object_filtering(self, admin_client, reader_client):
+        """Regression: previously apply did Preset.objects.get(pk=pk) bypassing
+        DRF's RBAC queryset. With the fix, a UUID-guessing reader still 403s
+        because either the perm-gate or get_object's queryset filter rejects."""
+        pid = self._make_user_authored_preset(admin_client)
+        r = reader_client.post(f"/api/presets/{pid}/apply/", {}, format="json")
+        assert r.status_code in (403, 404)
+        assert r.status_code != 201

@@ -10235,6 +10235,11 @@ class PresetViewSet(BaseModelViewSet):
         }
         history = list(preset.editing_history or [])
         history.append(snapshot)
+        # Cap to last 20 snapshots so the JSONField doesn't grow unboundedly
+        # under heavy editing.
+        EDITING_HISTORY_CAP = 20
+        if len(history) > EDITING_HISTORY_CAP:
+            history = history[-EDITING_HISTORY_CAP:]
 
         preset.name = normalized["journey_meta"]["name"]
         preset.description = normalized["journey_meta"]["description"]
@@ -10337,10 +10342,9 @@ class PresetViewSet(BaseModelViewSet):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        try:
-            preset = Preset.objects.get(pk=pk)
-        except Preset.DoesNotExist:
-            return Response(data="Preset not found.", status=status.HTTP_404_NOT_FOUND)
+        # Use get_object() so the queryset filters by view_preset RBAC —
+        # prevents UUID-guessing applies of presets the user can't view.
+        preset = self.get_object()
 
         from library.preset_executor import PresetExecutor
 
