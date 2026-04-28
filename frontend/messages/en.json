@@ -3711,6 +3711,8 @@
 	"nvdEnrichEnabledHelpText": "Automatically fetch CVE details (CVSS, description, dates) from NVD when a new CVE is created. Single lookup per CVE.",
 	"networkTimeout": "Network timeout (seconds)",
 	"networkTimeoutHelpText": "Maximum time to wait for external feed responses",
+	"feedOutboundHostsTitle": "Outbound hosts",
+	"feedOutboundHostsHelpText": "If outbound traffic is restricted, allow these hosts so the enabled feeds can reach their data sources.",
 	"expectedEvidence": "Expected Evidences",
 	"taskNodeLegacyEvidence": "The old evidence field is deprecated. Evidence is now task-level and shared across occurrences waiting for revisions.\n To move them to expected evidence or remove them from the occurrence, use the buttons",
 	"taskNodeNewEvidence": "Evidence globally linked to the task and spread to occurrences. You can add a revision in the 'Evidences' tab below",

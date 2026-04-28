@@ -18,11 +18,26 @@ class ChatMessageThrottle(UserRateThrottle):
 
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .constants import LANG_MAP, LLM_HISTORY_LIMIT
+from .constants import (
+    CHAT_SESSION_SUMMARY_ASYNC,
+    LANG_MAP,
+    MODEL_CONTEXT_TOKENS,
+    RAG_CONTEXT_TOKENS,
+    VERBATIM_WINDOW_TOKENS,
+)
 from .context import ContextBuilder
+from .memory import (
+    build_replay_payload,
+    inject_summary,
+    inject_tool_replays,
+    pack_verbatim_window,
+    update_summary_for_session,
+)
+from .metrics import build_turn_metrics, record_metric
 from .models import ChatSession, ChatMessage, IndexedDocument
 from .page_context import parse_page_context
 from .providers import get_llm, is_ollama_available
+from .tokens import count_tokens
 from .serializers import (
     ChatSessionListSerializer,
     SendMessageSerializer,
@@ -181,7 +196,19 @@ class ChatSessionViewSet(BaseModelViewSet):
 
             history_for_tool = list(
                 session.messages.order_by("created_at").values("role", "content")
-            )[-20:]
+            )
+            # The current user message is passed separately via tool_prompt
+            if (
+                history_for_tool
+                and history_for_tool[-1]["role"] == "user"
+                and history_for_tool[-1]["content"] == user_content
+            ):
+                history_for_tool = history_for_tool[:-1]
+            history_for_tool = pack_verbatim_window(
+                history_for_tool, VERBATIM_WINDOW_TOKENS
+            )
+            # Tool routing gets the summary but no tool replays (lean prompt)
+            history_for_tool = inject_summary(history_for_tool, session.summary)
 
             t0 = time.time()
             tool_response = llm.tool_call(
@@ -211,7 +238,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                     and wf_history[-1]["content"] == user_content
                 ):
                     wf_history = wf_history[:-1]
-                wf_history = wf_history[-20:]
+                wf_history = pack_verbatim_window(wf_history, VERBATIM_WINDOW_TOKENS)
 
                 wf_ctx = WorkflowContext(
                     user_message=user_content,
@@ -288,6 +315,8 @@ class ChatSessionViewSet(BaseModelViewSet):
                 response["X-Accel-Buffering"] = "no"
                 return response
 
+        tool_observation_payload: dict | None = None
+
         if tool_response and tool_response.get("name"):
             logger.info(
                 "Tool call: %s(%s)",
@@ -303,6 +332,21 @@ class ChatSessionViewSet(BaseModelViewSet):
                 user_message=user_content,
             )
             logger.info("tool_dispatch_complete", duration=round(time.time() - t1, 2))
+
+            # Only query_objects/search_library have the right shape;
+            # other tools fall through to build_replay_payload returning None
+            if query_result:
+                tool_name = tool_response["name"]
+                raw_result_text = ""
+                if tool_name == "search_library":
+                    raw_result_text = query_result.get("text", "") or ""
+                elif tool_name == "query_objects" and "total_count" in query_result:
+                    raw_result_text = format_query_result(query_result)
+                tool_observation_payload = build_replay_payload(
+                    tool_name,
+                    tool_response.get("arguments", {}),
+                    raw_result_text,
+                )
 
         # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
@@ -489,7 +533,9 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         # Build conversation history for the LLM (exclude the message we just saved)
         history_messages = list(
-            session.messages.order_by("created_at").values("role", "content")
+            session.messages.order_by("created_at").values(
+                "role", "content", "tool_observation"
+            )
         )
         # Remove the last entry (the user message we just created) — it's passed separately
         if (
@@ -498,14 +544,18 @@ class ChatSessionViewSet(BaseModelViewSet):
             and history_messages[-1]["content"] == user_content
         ):
             history_messages = history_messages[:-1]
-        # Keep only the last 20 messages to stay within context limits
-        history_messages = history_messages[-LLM_HISTORY_LIMIT:]
+        history_messages = pack_verbatim_window(
+            history_messages, VERBATIM_WINDOW_TOKENS
+        )
+        # Replays before summary so notes attach to the right messages
+        history_messages = inject_tool_replays(history_messages)
+        history_messages = inject_summary(history_messages, session.summary)
 
         # Assemble context with structured priorities
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
         lang_name = LANG_MAP.get(user_lang, "English")
 
-        ctx_builder = ContextBuilder(max_chars=12000)
+        ctx_builder = ContextBuilder(max_tokens=RAG_CONTEXT_TOKENS)
         ctx_builder.add(
             "language",
             f"LANGUAGE: You MUST respond in {lang_name}.",
@@ -523,21 +573,70 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         context = ctx_builder.build()
 
+        system_prompt_text = llm.system_prompt if hasattr(llm, "system_prompt") else ""
+        system_prompt_chars = len(system_prompt_text)
+        system_prompt_tokens = count_tokens(system_prompt_text)
+        context_chars = len(context)
+        context_tokens = count_tokens(context)
+        user_chars = len(user_content)
+        user_tokens = count_tokens(user_content)
+        history_chars = sum(len(m.get("content", "")) for m in history_messages)
+        history_tokens = sum(
+            count_tokens(m.get("content", "")) for m in history_messages
+        )
+        total_prompt_chars = (
+            system_prompt_chars + context_chars + user_chars + history_chars
+        )
+        total_prompt_tokens = (
+            system_prompt_tokens + context_tokens + user_tokens + history_tokens
+        )
+
+        # One dict, three sinks: structlog event, JSONL file, ChatMessage.metrics
+        summary_tokens_now = count_tokens(session.summary or "")
+        turn_metrics = build_turn_metrics(
+            prompt_tokens=total_prompt_tokens,
+            model_context_tokens=MODEL_CONTEXT_TOKENS,
+            system_prompt_tokens=system_prompt_tokens,
+            context_tokens=context_tokens,
+            history_tokens=history_tokens,
+            user_tokens=user_tokens,
+            summary_tokens=summary_tokens_now,
+            history_messages=len(history_messages),
+            section_names=ctx_builder.section_names(),
+        )
+
         logger.info(
             "llm_context_size",
-            system_prompt_chars=len(llm.system_prompt)
-            if hasattr(llm, "system_prompt")
-            else 0,
-            context_chars=len(context),
-            sections=ctx_builder.section_names(),
-            history_messages=len(history_messages),
-            total_prompt_chars=(
-                (len(llm.system_prompt) if hasattr(llm, "system_prompt") else 0)
-                + len(context)
-                + len(user_content)
-                + sum(len(m.get("content", "")) for m in history_messages)
-            ),
+            system_prompt_chars=system_prompt_chars,
+            context_chars=context_chars,
+            sections=turn_metrics["sections"],
+            history_messages=turn_metrics["history_messages"],
+            total_prompt_chars=total_prompt_chars,
+            system_prompt_tokens=system_prompt_tokens,
+            context_tokens=context_tokens,
+            history_tokens=history_tokens,
+            user_tokens=user_tokens,
+            summary_tokens=summary_tokens_now,
+            total_prompt_tokens=total_prompt_tokens,
+            model_context_tokens=MODEL_CONTEXT_TOKENS,
+            over_budget=turn_metrics["over_budget"],
         )
+
+        record_metric(
+            "llm_context_size",
+            session_id=str(session.pk),
+            **turn_metrics,
+        )
+
+        # Warn at 80% — provider may silently truncate before our `over_budget`
+        # fires if MODEL_CONTEXT_TOKENS exceeds the real provider limit
+        if turn_metrics["high_watermark"]:
+            logger.warning(
+                "llm_context_high_watermark",
+                total_prompt_tokens=total_prompt_tokens,
+                model_context_tokens=MODEL_CONTEXT_TOKENS,
+                utilization_pct=turn_metrics["utilization_pct"],
+            )
 
         def stream_response():
             """Generator for SSE streaming."""
@@ -625,12 +724,13 @@ class ChatSessionViewSet(BaseModelViewSet):
                     tokens_per_s=tps,
                 )
 
-                # Save assistant message
                 ChatMessage.objects.create(
                     session=session,
                     role=ChatMessage.Role.ASSISTANT,
                     content=full_response,
                     context_refs=context_refs,
+                    tool_observation=tool_observation_payload,
+                    metrics=turn_metrics,
                 )
 
                 # Send completion event with context refs
@@ -641,6 +741,21 @@ class ChatSessionViewSet(BaseModelViewSet):
                     }
                 )
                 yield f"data: {done_data}\n\n"
+
+                # Compaction runs after 'done' flushed; failures retried next turn
+                try:
+                    if CHAT_SESSION_SUMMARY_ASYNC:
+                        from .tasks import update_session_summary
+
+                        update_session_summary(str(session.pk))
+                    else:
+                        update_summary_for_session(session, llm)
+                except Exception as e:
+                    logger.warning(
+                        "summary_compaction_failed",
+                        session_id=str(session.pk),
+                        error=str(e),
+                    )
 
             except Exception as e:
                 logger.error("Chat stream error: %s", e)
