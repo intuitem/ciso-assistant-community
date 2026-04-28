@@ -966,7 +966,6 @@ class LibraryUpdater:
                 score_boundaries_changed = (
                     prev_min != new_framework.min_score
                     or prev_max != new_framework.max_score
-                    or prev_def != new_framework.scores_definition
                 )
 
                 # If scores changed and no strategy provided, raise exception for frontend to handle
@@ -9401,6 +9400,8 @@ class PresetJourneyStep(AbstractBaseModel):
     translations = models.JSONField(null=True, blank=True)
     target_model = models.CharField(max_length=100, blank=True, null=True)
     target_ref = models.CharField(max_length=100, blank=True, null=True)
+    target_url = models.CharField(max_length=255, blank=True, null=True)
+    target_params = models.JSONField(null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.NOT_STARTED
     )

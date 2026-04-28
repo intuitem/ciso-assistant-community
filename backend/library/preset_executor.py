@@ -1,7 +1,47 @@
+import re
+
 import structlog
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import get_language
+
+_PARAM_REF_RE = re.compile(r"^\{\{ref:([A-Za-z0-9_]+)\}\}$")
+
+
+def _resolve_param_refs(params: dict | None, object_refs: dict) -> dict | None:
+    """Substitute {{ref:<name>}} placeholders in target_params with UUIDs from object_refs.
+
+    - A string value matching "{{ref:<name>}}" is replaced with object_refs[<name>],
+      or the key is dropped entirely if the ref is unresolved.
+    - List values have each element substituted the same way; unresolved elements are
+      filtered out, and the key is dropped if the resulting list is empty.
+    - Other values are passed through unchanged.
+    """
+    if not params:
+        return params
+
+    def _sub(value):
+        if isinstance(value, str):
+            m = _PARAM_REF_RE.match(value)
+            if m:
+                resolved = object_refs.get(m.group(1))
+                return resolved if resolved else None
+            return value
+        return value
+
+    result: dict = {}
+    for key, value in params.items():
+        if isinstance(value, list):
+            resolved = [_sub(v) for v in value]
+            resolved = [v for v in resolved if v is not None]
+            if resolved:
+                result[key] = resolved
+        else:
+            resolved = _sub(value)
+            if resolved is not None:
+                result[key] = resolved
+    return result or None
+
 
 from core.models import (
     StoredLibrary,
@@ -191,6 +231,10 @@ class PresetExecutor:
                 resolved_ref if resolved_ref else ("" if target_ref_key else None)
             )
 
+            resolved_params = _resolve_param_refs(
+                step_def.get("target_params"), object_refs
+            )
+
             if key in existing_steps:
                 step = existing_steps[key]
                 step.order = order
@@ -199,6 +243,8 @@ class PresetExecutor:
                 step.translations = step_def.get("translations")
                 step.target_model = step_def.get("target_model")
                 step.target_ref = step_target_ref
+                step.target_url = step_def.get("target_url")
+                step.target_params = resolved_params
                 to_update.append(step)
             else:
                 PresetJourneyStep.objects.create(
@@ -210,6 +256,8 @@ class PresetExecutor:
                     translations=step_def.get("translations"),
                     target_model=step_def.get("target_model"),
                     target_ref=step_target_ref,
+                    target_url=step_def.get("target_url"),
+                    target_params=resolved_params,
                     status=PresetJourneyStep.Status.NOT_STARTED,
                 )
 
@@ -223,6 +271,8 @@ class PresetExecutor:
                     "translations",
                     "target_model",
                     "target_ref",
+                    "target_url",
+                    "target_params",
                 ],
             )
 
@@ -457,6 +507,10 @@ class PresetExecutor:
                     "framework": str(framework.id),
                     "name": name,
                 }
+                if item.get("implementation_groups") is not None:
+                    data["selected_implementation_groups"] = item[
+                        "implementation_groups"
+                    ]
                 serializer = ComplianceAssessmentWriteSerializer(
                     data=data, context=context
                 )
@@ -703,5 +757,9 @@ class PresetExecutor:
                 translations=step_def.get("translations"),
                 target_model=step_def.get("target_model"),
                 target_ref=step_target_ref,
+                target_url=step_def.get("target_url"),
+                target_params=_resolve_param_refs(
+                    step_def.get("target_params"), object_refs
+                ),
                 status=PresetJourneyStep.Status.NOT_STARTED,
             )
