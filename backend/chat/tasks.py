@@ -465,3 +465,17 @@ def index_library_knowledge_base():
         total_indexed=total_indexed,
         duration=round(time.time() - t0, 2),
     )
+
+
+@db_task()
+def update_session_summary(session_id: str):
+    """Async wrapper around memory.update_summary_for_session."""
+    from .memory import update_summary_for_session
+    from .models import ChatSession
+    from .providers import get_llm
+
+    try:
+        session = ChatSession.objects.get(pk=session_id)
+    except ChatSession.DoesNotExist:
+        return
+    update_summary_for_session(session, get_llm())
