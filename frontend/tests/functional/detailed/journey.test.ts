@@ -11,22 +11,30 @@ test.describe('Journeys', () => {
 		await test.step('navigate to journeys page', async () => {
 			await page.goto('/presets');
 			await expect(page).toHaveURL(/.*presets.*/);
-			await expect(page.getByText('Available Templates')).toBeVisible();
+			await expect(page.getByTestId('available-templates-heading')).toBeVisible();
 		});
 
 		await test.step('filter by BE', async () => {
-			await page.getByRole('button', { name: /🇧🇪.*BE/i }).click();
+			await page.getByTestId('filter-be').click();
 			await expect(
-				page.locator('h3').filter({ hasText: 'Belgian Organisation - CyFun 2025' }).first()
+				page
+					.locator('[data-testid^="preset-name-"]')
+					.filter({ hasText: JOURNEY_FOLDER_NAME })
+					.first()
 			).toBeVisible();
 		});
 
 		await test.step('start a journey for Belgian Organisation - CyFun 2025', async () => {
 			const cyfunCard = page
-				.locator('.group')
-				.filter({ hasText: 'Belgian Organisation - CyFun 2025' })
+				.locator('[data-testid^="preset-card-"]')
+				.filter({
+					has: page
+						.locator('[data-testid^="preset-name-"]')
+						.filter({ hasText: JOURNEY_FOLDER_NAME })
+				})
 				.first();
-			const applyBtn = cyfunCard.locator('button').last();
+
+			const applyBtn = cyfunCard.getByTestId(/^preset-apply-/);
 			await expect(applyBtn).toBeVisible({ timeout: 10_000 });
 			await applyBtn.click();
 			await page.waitForLoadState('networkidle');
