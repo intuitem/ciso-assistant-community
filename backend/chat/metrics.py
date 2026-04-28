@@ -26,8 +26,8 @@ def _resolve_path() -> Optional[Path]:
             from django.conf import settings
 
             p = Path(settings.BASE_DIR) / p
-        except Exception:
-            pass
+        except (ImportError, AttributeError) as e:
+            logger.warning("metrics_path_basedir_resolve_failed", error=str(e))
     return p
 
 

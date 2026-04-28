@@ -1,6 +1,7 @@
 """Verbatim window packing, rolling summary, tool-observation replay."""
 
 import json
+import re
 from datetime import datetime
 from typing import Optional
 
@@ -206,8 +207,25 @@ def inject_tool_replays(
                 f"{result_text}\n"
                 "[/TOOL OBSERVATION]"
             )
-            out.append({"role": "system", "content": note})
+            # user role, not system — replay carries (potentially) user-data text
+            out.append({"role": "user", "content": note})
     return out
+
+
+# Strip role/delimiter markers that could let attacker-controlled tool data
+# escape framing. Mirrors views._INJECTION_PATTERNS plus our own wrappers.
+_REPLAY_INJECTION_PATTERNS = re.compile(
+    r"(?:"
+    r"\[/?(?:SYSTEM|CONTEXT|INST|SESSION SUMMARY|TOOL OBSERVATION)\]"
+    r"|<\|(?:im_start|im_end|system)\|>"
+    r"|```\s*(?:system|tool_call)"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def _sanitize_replay_text(text: str) -> str:
+    return _REPLAY_INJECTION_PATTERNS.sub("", text or "")
 
 
 def build_replay_payload(
@@ -224,8 +242,9 @@ def build_replay_payload(
         return None
     if not formatted_result:
         return None
+    sanitized = _sanitize_replay_text(formatted_result)
     return {
         "tool": tool_name,
         "args": tool_args or {},
-        "result_text": truncate_to_tokens(formatted_result, TOOL_REPLAY_TOKENS),
+        "result_text": truncate_to_tokens(sanitized, TOOL_REPLAY_TOKENS),
     }

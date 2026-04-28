@@ -90,3 +90,11 @@ class TestContextBuilder:
         # Result must fit budget (allow small slack for separator approximation)
         assert count_tokens(result) <= 25
         assert "(truncated)" in result
+
+    def test_tiny_budget_smaller_than_tail(self):
+        # Budget too small for the truncation tail — must not append tail-only
+        ctx = ContextBuilder(max_tokens=2)
+        ctx.add("big", "Z" * 500, priority=5)
+        result = ctx.build()
+        # Either empty (section dropped) or under budget; never tail-only overflow
+        assert count_tokens(result) <= 2

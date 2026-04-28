@@ -194,9 +194,18 @@ class ChatSessionViewSet(BaseModelViewSet):
             # Combine standard tools + context-aware workflow tools
             all_tools = get_tools() + get_workflow_tools(parsed_context)
 
+            history_for_tool = list(
+                session.messages.order_by("created_at").values("role", "content")
+            )
+            # The current user message is passed separately via tool_prompt
+            if (
+                history_for_tool
+                and history_for_tool[-1]["role"] == "user"
+                and history_for_tool[-1]["content"] == user_content
+            ):
+                history_for_tool = history_for_tool[:-1]
             history_for_tool = pack_verbatim_window(
-                list(session.messages.order_by("created_at").values("role", "content")),
-                VERBATIM_WINDOW_TOKENS,
+                history_for_tool, VERBATIM_WINDOW_TOKENS
             )
             # Tool routing gets the summary but no tool replays (lean prompt)
             history_for_tool = inject_summary(history_for_tool, session.summary)

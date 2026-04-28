@@ -89,7 +89,7 @@ class Command(BaseCommand):
         high_watermark = 0
         per_session: dict[str, list[int]] = defaultdict(list)
         sessions_seen: set[str] = set()
-        model_ctx = 0
+        model_ctx_values: set[int] = set()
 
         for row in qs:
             m = row["metrics"] or {}
@@ -104,10 +104,14 @@ class Command(BaseCommand):
             sid = str(row["session_id"])
             per_session[sid].append(pt)
             sessions_seen.add(sid)
-            if not model_ctx:
-                model_ctx = int(m.get("model_context_tokens", 0) or 0)
+            mc = int(m.get("model_context_tokens", 0) or 0)
+            if mc:
+                model_ctx_values.add(mc)
 
         turns = len(prompt_tokens)
+        # Use max so utilization% is anchored to the largest observed capacity
+        # (deterministic regardless of iteration order)
+        model_ctx = max(model_ctx_values, default=0)
 
         agg = {
             "since": opts["since"],

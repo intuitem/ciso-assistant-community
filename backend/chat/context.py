@@ -68,11 +68,13 @@ class ContextBuilder:
             content = section.content
             section_tokens = count_tokens(content)
             if section_tokens > remaining:
-                content = (
-                    truncate_to_tokens(content, remaining - _TAIL_TOKENS)
-                    + _TRUNCATED_TAIL
-                )
+                available = remaining - _TAIL_TOKENS
+                if available <= 0:
+                    break
+                content = truncate_to_tokens(content, available) + _TRUNCATED_TAIL
                 section_tokens = count_tokens(content)
+                if section_tokens > remaining:
+                    break
             parts.append(content)
             remaining -= section_tokens + _SEP_TOKENS
 
