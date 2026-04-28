@@ -1,0 +1,3149 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility Mode}'
+urn: urn:intuitem:risk:library:iec-62443-series
+locale: en
+ref_id: iec-62443-series
+name: ISA/IEC 62443 — Series of standards for IACS cybersecurity (outline bundle)
+description: 'Bundle of the six normative IS parts of the ISA/IEC 62443 series, packaged in a single library file but exposed as six independent Framework objects so each stays selectable individually for ComplianceAssessment.
+
+
+  Included parts:
+
+  - IEC 62443-2-1:2024 — Asset owner security program (Ed.2)
+
+  - IEC 62443-2-4:2023 — Service provider security program (Ed.2)
+
+  - IEC 62443-3-2:2020 — System risk assessment (Ed.1)
+
+  - IEC 62443-3-3:2013 — System security requirements (Ed.1; Ed.2 in committee)
+
+  - IEC 62443-4-1:2018 — Secure product development lifecycle (Ed.1; CENELEC amendment AA:2026 in DIS)
+
+  - IEC 62443-4-2:2019 — Component security requirements (Ed.1; CENELEC amendment AA:2026 in DIS)
+
+
+  Each framework keeps its own score scale (SL 1-4 for 3-3/4-2, ML 1-4 for 4-1/2-1/2-4) and its own implementation groups. Outline only (ref_id + clause name); purchase the standards for normative text.'
+copyright: IEC - Purchase the standards for the full normative text.
+version: 1
+publication_date: '2026-04-28'
+provider: IEC
+packager: intuitem
+objects:
+  frameworks:
+  - urn: urn:intuitem:risk:framework:iec-62443-3-3-2013
+    ref_id: iec-62443-3-3-2013
+    name: IEC 62443-3-3:2013 — System security requirements and security levels (outline)
+    description: Targets system integrators and asset owners. Each SR has 0..N Requirement Enhancements (REs) and a per-Security-Level (SL 1-4) gate published in Annex B of the standard - not reproduced in this outline.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: ccsc
+      name: Common Control System Security Constraints
+      description: Clause 4 framing constraints (essential functions, compensating countermeasures, least privilege).
+    - ref_id: system_requirements
+      name: System Requirements
+      description: FR1-FR7 system requirements (clauses 5-11).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Common control system security constraints
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:4
+      ref_id: '4.2'
+      name: Support of essential functions
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:4
+      ref_id: '4.3'
+      name: Compensating countermeasures
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:4
+      ref_id: '4.4'
+      name: Least privilege
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: FR 1 - Identification and authentication control
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.1
+      name: Human user identification and authentication
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.2
+      name: Software process and device identification and authentication
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.3
+      name: Account management
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.4
+      name: Identifier management
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.5
+      name: Authenticator management
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.6
+      name: Wireless access management
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.7
+      name: Strength of password-based authentication
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.8
+      name: Public key infrastructure (PKI) certificates
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.9
+      name: Strength of public key authentication
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.10
+      name: Authenticator feedback
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.11
+      name: Unsuccessful login attempts
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.12
+      name: System use notification
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:5
+      ref_id: SR 1.13
+      name: Access via untrusted networks
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: FR 2 - Use control
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.1
+      name: Authorization enforcement
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.2
+      name: Wireless use control
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.3
+      name: Use control for portable and mobile devices
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.4
+      name: Mobile code
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.5
+      name: Session lock
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.6
+      name: Remote session termination
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.7
+      name: Concurrent session control
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.8
+      name: Auditable events
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.9
+      name: Audit storage capacity
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.10
+      name: Response to audit processing failures
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.11
+      name: Timestamps
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:6
+      ref_id: SR 2.12
+      name: Non-repudiation
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: FR 3 - System integrity
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.1
+      name: Communication integrity
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.2
+      name: Malicious code protection
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.3
+      name: Security functionality verification
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.4
+      name: Software and information integrity
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.5
+      name: Input validation
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.6
+      name: Deterministic output
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.7
+      name: Error handling
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.8
+      name: Session integrity
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-3.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:7
+      ref_id: SR 3.9
+      name: Protection of audit information
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: FR 4 - Data confidentiality
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:8
+      ref_id: SR 4.1
+      name: Information confidentiality
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:8
+      ref_id: SR 4.2
+      name: Information persistence
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:8
+      ref_id: SR 4.3
+      name: Use of cryptography
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: FR 5 - Restricted data flow
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:9
+      ref_id: SR 5.1
+      name: Network segmentation
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:9
+      ref_id: SR 5.2
+      name: Zone boundary protection
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:9
+      ref_id: SR 5.3
+      name: General purpose person-to-person communication restrictions
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:9
+      ref_id: SR 5.4
+      name: Application partitioning
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: FR 6 - Timely response to events
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:10
+      ref_id: SR 6.1
+      name: Audit log accessibility
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:10
+      ref_id: SR 6.2
+      name: Continuous monitoring
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: FR 7 - Resource availability
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      ref_id: SR 7.1
+      name: Denial of service protection
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      ref_id: SR 7.2
+      name: Resource management
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      ref_id: SR 7.3
+      name: Control system backup
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      ref_id: SR 7.4
+      name: Control system recovery and reconstitution
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      ref_id: SR 7.5
+      name: Emergency power
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      ref_id: SR 7.6
+      name: Network and security configuration settings
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      ref_id: SR 7.7
+      name: Least functionality
+      implementation_groups:
+      - system_requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:11
+      ref_id: SR 7.8
+      name: Control system component inventory
+      implementation_groups:
+      - system_requirements
+  - urn: urn:intuitem:risk:framework:iec-62443-4-1-2018
+    ref_id: iec-62443-4-1-2018
+    name: IEC 62443-4-1:2018 — Secure product development lifecycle requirements (outline)
+    description: Targets product suppliers. The standard rates each Practice on a CMMI-DEV-derived Maturity Level scale ML1 (Initial) to ML4 (Improving), per Annex A. ML scoring is not reproduced in this outline.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: sdl_practices
+      name: SDL Practices
+      description: 8 secure-development-lifecycle practices (SM, SR, SD, SI, SVV, DM, SUM, SG).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Practice 1 - Security management
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-1
+      name: Development process
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-2
+      name: Identification of responsibilities
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-3
+      name: Identification of applicability
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-4
+      name: Security expertise
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-5
+      name: Process scoping
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-6
+      name: File integrity
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-7
+      name: Development environment security
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-8
+      name: Controls for private keys
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-9
+      name: Security requirements for externally provided components
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-10
+      name: Custom developed components from third-party suppliers
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-11
+      name: Assessing and addressing security-related issues
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-12
+      name: Process verification
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-13
+      name: Continuous improvement
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Practice 2 - Specification of security requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-1
+      name: Product security context
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-2
+      name: Threat model
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-3
+      name: Product security requirements
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-4
+      name: Product security requirements content
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-5
+      name: Security requirements review
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Practice 3 - Secure by design
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      ref_id: SD-1
+      name: Secure design principles
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      ref_id: SD-2
+      name: Defense in depth design
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      ref_id: SD-3
+      name: Security design review
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      ref_id: SD-4
+      name: Secure design best practices
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Practice 4 - Secure implementation
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
+      ref_id: SI-1
+      name: Security implementation review
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
+      ref_id: SI-2
+      name: Secure coding standards
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Practice 5 - Security verification and validation testing
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-1
+      name: Security requirements testing
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-2
+      name: Threat mitigation testing
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-3
+      name: Vulnerability testing
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-4
+      name: Penetration testing
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-5
+      name: Independence of testers
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Practice 6 - Management of security-related issues
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-1
+      name: Receiving notifications of security-related issues
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-2
+      name: Reviewing security-related issues
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-3
+      name: Assessing security-related issues
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-4
+      name: Addressing security-related issues
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-5
+      name: Disclosing security-related issues
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-6
+      name: Periodic review of security defect management practice
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: Practice 7 - Security update management
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-1
+      name: Security update qualification
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-2
+      name: Security update documentation
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-3
+      name: Dependent component or operating system security update documentation
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-4
+      name: Security update delivery
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-5
+      name: Timely delivery of security patches
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: Practice 8 - Security guidelines
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-1
+      name: Product defense in depth
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-2
+      name: Defense in depth measures expected in the environment
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-3
+      name: Security hardening guidelines
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-4
+      name: Secure disposal guidelines
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-5
+      name: Secure operation guidelines
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-6
+      name: Account management guidelines
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-7
+      name: Documentation review
+      implementation_groups:
+      - sdl_practices
+  - urn: urn:intuitem:risk:framework:iec-62443-4-2-2019
+    ref_id: iec-62443-4-2-2019
+    name: IEC 62443-4-2:2019 — Technical security requirements for IACS components (outline)
+    description: 'Use implementation-group filtering to scope by component type: select ''cr'' + ''software_app'' / ''embedded_device'' / ''host_device'' / ''network_device'' depending on what is being certified. Always include ''ccsc''.'
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: ccsc
+      name: Common Component Security Constraints
+      description: 4 framing constraints (clause 4) - mandatory for all components.
+    - ref_id: cr
+      name: Component Requirements
+      description: 58 CRs across FR1-FR7 (clauses 5-11) - mandatory for all components.
+    - ref_id: software_app
+      name: Software Application Requirements
+      description: 2 SARs specific to software applications (clause 12).
+    - ref_id: embedded_device
+      name: Embedded Device Requirements
+      description: 8 EDRs specific to embedded devices (clause 13).
+    - ref_id: host_device
+      name: Host Device Requirements
+      description: 8 HDRs specific to host devices (clause 14).
+    - ref_id: network_device
+      name: Network Device Requirements
+      description: 12 NDRs specific to network devices (clause 15).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Common component security constraints
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      ref_id: CCSC 1
+      name: Support of essential functions
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      ref_id: CCSC 2
+      name: Compensating countermeasures
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      ref_id: CCSC 3
+      name: Least privilege
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      ref_id: CCSC 4
+      name: Software development process
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: FR 1 - Identification and authentication control
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.1
+      name: Human user identification and authentication
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.2
+      name: Software process and device identification and authentication
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.3
+      name: Account management
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.4
+      name: Identifier management
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.5
+      name: Authenticator management
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.6
+      name: Wireless access management
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.7
+      name: Strength of password-based authentication
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.8
+      name: Public key infrastructure certificates
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.9
+      name: Strength of public key-based authentication
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.10
+      name: Authenticator feedback
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.11
+      name: Unsuccessful login attempts
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.12
+      name: System use notification
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.13
+      name: Access via untrusted networks
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.14
+      name: Strength of symmetric key-based authentication
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: FR 2 - Use control
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.1
+      name: Authorization enforcement
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.2
+      name: Wireless use control
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.3
+      name: Use control for portable and mobile devices
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.4
+      name: Mobile code
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.5
+      name: Session lock
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.6
+      name: Remote session termination
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.7
+      name: Concurrent session control
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.8
+      name: Auditable events
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.9
+      name: Audit storage capacity
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.10
+      name: Response to audit processing failures
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.11
+      name: Timestamps
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.12
+      name: Non-repudiation
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.13
+      name: Use of physical diagnostic and test interfaces
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: FR 3 - System integrity
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.1
+      name: Communication integrity
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.2
+      name: Protection from malicious code
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.3
+      name: Security functionality verification
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.4
+      name: Software and information integrity
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.5
+      name: Input validation
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.6
+      name: Deterministic output
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.7
+      name: Error handling
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.8
+      name: Session integrity
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.9
+      name: Protection of audit information
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.10
+      name: Support for updates
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.11
+      name: Physical tamper resistance and detection
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.12
+      name: Provisioning product supplier roots of trust
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.13
+      name: Provisioning asset owner roots of trust
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.14
+      name: Integrity of the boot process
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: FR 4 - Data confidentiality
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
+      ref_id: CR 4.1
+      name: Information confidentiality
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
+      ref_id: CR 4.2
+      name: Information persistence
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
+      ref_id: CR 4.3
+      name: Use of cryptography
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: FR 5 - Restricted data flow
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      ref_id: CR 5.1
+      name: Network segmentation
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      ref_id: CR 5.2
+      name: Zone boundary protection
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      ref_id: CR 5.3
+      name: General-purpose person-to-person communication restrictions
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      ref_id: CR 5.4
+      name: Application partitioning
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: FR 6 - Timely response to events
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
+      ref_id: CR 6.1
+      name: Audit log accessibility
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
+      ref_id: CR 6.2
+      name: Continuous monitoring
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: FR 7 - Resource availability
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.1
+      name: Denial of service protection
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.2
+      name: Resource management
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.3
+      name: Control system backup
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.4
+      name: Control system recovery and reconstitution
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.5
+      name: Emergency power
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.6
+      name: Network and security configuration settings
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.7
+      name: Least functionality
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.8
+      name: Control system component inventory
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: Software application requirements (SAR)
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:sar-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
+      ref_id: SAR 2.4
+      name: Mobile code (software application)
+      implementation_groups:
+      - software_app
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:sar-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
+      ref_id: SAR 3.2
+      name: Protection from malicious code (software application)
+      implementation_groups:
+      - software_app
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: Embedded device requirements (EDR)
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 2.4
+      name: Mobile code (embedded device)
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 2.13
+      name: Use of physical diagnostic and test interfaces (embedded device)
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.2
+      name: Protection from malicious code (embedded device)
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.10
+      name: Support for updates (embedded device)
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.11
+      name: Physical tamper resistance and detection (embedded device)
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.12
+      name: Provisioning product supplier roots of trust (embedded device)
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.13
+      name: Provisioning asset owner roots of trust (embedded device)
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.14
+      name: Integrity of the boot process (embedded device)
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      assessable: false
+      depth: 1
+      ref_id: '14'
+      name: Host device requirements (HDR)
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 2.4
+      name: Mobile code (host device)
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 2.13
+      name: Use of physical diagnostic and test interfaces (host device)
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.2
+      name: Protection from malicious code (host device)
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.10
+      name: Support for updates (host device)
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.11
+      name: Physical tamper resistance and detection (host device)
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.12
+      name: Provisioning product supplier roots of trust (host device)
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.13
+      name: Provisioning asset owner roots of trust (host device)
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.14
+      name: Integrity of the boot process (host device)
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      assessable: false
+      depth: 1
+      ref_id: '15'
+      name: Network device requirements (NDR)
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 1.6
+      name: Wireless access management (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-1.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 1.13
+      name: Access via untrusted networks (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 2.4
+      name: Mobile code (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 2.13
+      name: Use of physical diagnostic and test interfaces (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.2
+      name: Protection from malicious code (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.10
+      name: Support for updates (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.11
+      name: Physical tamper resistance and detection (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.12
+      name: Provisioning product supplier roots of trust (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.13
+      name: Provisioning asset owner roots of trust (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.14
+      name: Integrity of the boot process (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 5.2
+      name: Zone boundary protection (network device)
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 5.3
+      name: General purpose, person-to-person communication restrictions (network device)
+      implementation_groups:
+      - network_device
+  - urn: urn:intuitem:risk:framework:iec-62443-3-2-2020
+    ref_id: iec-62443-3-2-2020
+    name: IEC 62443-3-2:2020 — Security risk assessment for system design (outline)
+    description: Workflow for partitioning the System under Consideration (SUC) into zones and conduits and conducting initial + detailed cyber security risk assessments. ZCR 5.6 outputs the SL-T (target Security Level) per zone/conduit consumed by 62443-3-3.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: zcr
+      name: Zone, Conduit and Risk Assessment Requirements
+      description: All 32 ZCR sub-requirements (clause 4).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Zone, conduit and risk assessment requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 1
+      name: Identify the SUC
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1
+      ref_id: ZCR 1.1
+      name: Identify the SUC perimeter and access points
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 2
+      name: Initial cyber security risk assessment
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2
+      ref_id: ZCR 2.1
+      name: Perform initial cyber security risk assessment
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 3
+      name: Partition the SUC into zones and conduits
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.1
+      name: Establish zones and conduits
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.2
+      name: Separate business and IACS assets
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.3
+      name: Separate safety related assets
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.4
+      name: Separate temporarily connected devices
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.5
+      name: Separate wireless devices
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.6
+      name: Separate devices connected via external networks
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 4
+      name: Risk comparison
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4
+      ref_id: ZCR 4.1
+      name: Compare initial risk to tolerable risk
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 5
+      name: Perform a detailed cyber security risk assessment
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.1
+      name: Identify threats
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.2
+      name: Identify vulnerabilities
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.3
+      name: Determine consequence and impact
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.4
+      name: Determine unmitigated likelihood
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.5
+      name: Determine unmitigated cyber security risk
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.6
+      name: Determine SL-T
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.7
+      name: Compare unmitigated risk with tolerable risk
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.8
+      name: Identify and evaluate existing countermeasures
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.9
+      name: Reevaluate likelihood and impact
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.10
+      name: Determine residual risk
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.11
+      name: Compare residual risk with tolerable risk
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.12
+      name: Identify additional cyber security countermeasures
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.13
+      name: Document and communicate results
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 6
+      name: Document cyber security requirements, assumptions and constraints
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.1
+      name: Cyber security requirements specification
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.2
+      name: SUC description
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.3
+      name: Zone and conduit drawings
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.4
+      name: Zone and conduit characteristics
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.5
+      name: Operating environment assumptions
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.6
+      name: Threat environment
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.7
+      name: Organizational security policies
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.8
+      name: Tolerable risk
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.9
+      name: Regulatory requirements
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 7
+      name: Asset owner approval
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7
+      ref_id: ZCR 7.1
+      name: Attain asset owner approval
+      implementation_groups:
+      - zcr
+  - urn: urn:intuitem:risk:framework:iec-62443-2-4-2023
+    ref_id: iec-62443-2-4-2023
+    name: IEC 62443-2-4:2023 — Security program for IACS service providers (functional-area outline)
+    description: v0 outline at functional-area granularity. Each row corresponds to a SP.aa functional area; BR-level (SP.aa.bb) rows are pending full Ed.2 text access.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: functional_areas
+      name: Functional Areas
+      description: 12 functional areas SP.01-SP.12 (Annex A Table A.1).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      assessable: false
+      depth: 1
+      ref_id: A
+      name: Annex A (normative) - Security requirements
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.01
+      name: Solution staffing
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.02
+      name: Assurance
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.03
+      name: Architecture
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.04
+      name: Wireless
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.05
+      name: SIS (Safety Instrumented Systems)
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.06
+      name: Configuration management
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.07
+      name: Remote access
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.08
+      name: Event management
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.09
+      name: Account management
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.10
+      name: Malware protection
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.11
+      name: Patch management
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.12
+      name: Backup/restore
+      implementation_groups:
+      - functional_areas
+  - urn: urn:intuitem:risk:framework:iec-62443-2-1-2024
+    ref_id: iec-62443-2-1-2024
+    name: IEC 62443-2-1:2024 — Security program for IACS asset owners (outline)
+    description: Targets asset owners / operators (railway operators, chemical plants, energy utilities, etc.). Audited via the ISASecure ACSSA scheme alongside 62443-2-4, 62443-3-2 and 62443-3-3.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: spe
+      name: Security Program Elements
+      description: All 87 sub-elements across SPE 1-8 (clauses 6-13).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: SPE 1 - Organizational security measures
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:6
+      ref_id: ORG 1
+      name: Security related organization and policies
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
+      ref_id: ORG 1.1
+      name: Information security management system (ISMS)
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
+      ref_id: ORG 1.2
+      name: Background checks
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
+      ref_id: ORG 1.3
+      name: Security roles and responsibilities
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
+      ref_id: ORG 1.4
+      name: Security awareness training
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
+      ref_id: ORG 1.5
+      name: Security responsibilities training
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
+      ref_id: ORG 1.6
+      name: Supply chain security
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:6
+      ref_id: ORG 2
+      name: Security assessments and reviews
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
+      ref_id: ORG 2.1
+      name: Security risk mitigation
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
+      ref_id: ORG 2.2
+      name: Processes for discovery of security anomalies
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
+      ref_id: ORG 2.3
+      name: Secure development and support
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
+      ref_id: ORG 2.4
+      name: SP reviews
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:6
+      ref_id: ORG 3
+      name: Security of physical access
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-3
+      ref_id: ORG 3.1
+      name: Physical access control
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: SPE 2 - Configuration management
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:7
+      ref_id: CM 1
+      name: Inventory management of IACS hardware/software components and network communications
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
+      ref_id: CM 1.1
+      name: Asset inventory baseline
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
+      ref_id: CM 1.2
+      name: Infrastructure drawings/documentation
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
+      ref_id: CM 1.3
+      name: Configuration settings
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
+      ref_id: CM 1.4
+      name: Change control
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: SPE 3 - Network and communications security
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
+      ref_id: NET 1
+      name: System segmentation
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.1
+      name: Segmentation from non-IACS zones
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.2
+      name: Documentation of zones and network zone interconnections
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.3
+      name: Network segmentation from safety systems
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.4
+      name: Network autonomy
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.5
+      name: Network disconnection from external networks
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.6
+      name: Internal network access control
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.7
+      name: Network accessible services
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.8
+      name: User messaging
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
+      ref_id: NET 1.9
+      name: Network time distribution
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
+      ref_id: NET 2
+      name: Secure wireless access
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
+      ref_id: NET 2.1
+      name: Wireless protocols
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
+      ref_id: NET 2.2
+      name: Wireless network segmentation
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
+      ref_id: NET 2.3
+      name: Wireless properties and addresses
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
+      ref_id: NET 3
+      name: Secure remote access
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
+      ref_id: NET 3.1
+      name: Remote access applications
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
+      ref_id: NET 3.2
+      name: Remote access connections
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
+      ref_id: NET 3.3
+      name: Remote access termination
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: SPE 4 - Component security
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
+      ref_id: COMP 1
+      name: Components and portable media
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1
+      ref_id: COMP 1.1
+      name: Component hardening
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1
+      ref_id: COMP 1.2
+      name: Dedicated portable media
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
+      ref_id: COMP 2
+      name: Malware protection
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
+      ref_id: COMP 2.1
+      name: Malware free
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
+      ref_id: COMP 2.2
+      name: Malware protection
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
+      ref_id: COMP 2.3
+      name: Malware protection software validation and installation
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
+      ref_id: COMP 3
+      name: Patch management
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
+      ref_id: COMP 3.1
+      name: Security patch authenticity/integrity
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
+      ref_id: COMP 3.2
+      name: Security patch validation and installation
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
+      ref_id: COMP 3.3
+      name: Security patch status
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
+      ref_id: COMP 3.4
+      name: Security patching retention of security
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
+      ref_id: COMP 3.5
+      name: Security patch mitigation
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: SPE 5 - Protection of data
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:10
+      ref_id: DATA 1
+      name: Protection of data
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
+      ref_id: DATA 1.1
+      name: Data classification
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
+      ref_id: DATA 1.2
+      name: Data confidentiality
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
+      ref_id: DATA 1.3
+      name: Safety system configuration mode
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
+      ref_id: DATA 1.4
+      name: Data retention policy
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
+      ref_id: DATA 1.5
+      name: Cryptographic mechanisms
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
+      ref_id: DATA 1.6
+      name: Key management
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
+      ref_id: DATA 1.7
+      name: Data integrity
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: SPE 6 - User access control
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:11
+      ref_id: USER 1
+      name: Identification and authentication
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.1
+      name: User identity assignment
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.2
+      name: User identity removal
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.3
+      name: User identity persistence
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.4
+      name: Access rights assignment
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.5
+      name: Least privilege
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.6
+      name: Software service authentication
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.7
+      name: Software services interactive login rights
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.8
+      name: Human user authentication
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.9
+      name: Multifactor authentication (MFA)
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.10
+      name: Mutual authentication
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.11
+      name: Password protection
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.12
+      name: Shared and disclosed/compromised passwords
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.13
+      name: User login display information
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.14
+      name: User login failure displays
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.15
+      name: Consecutive login failures
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.16
+      name: Session integrity
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.17
+      name: Concurrent sessions
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.18
+      name: Screen lock
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
+      ref_id: USER 1.19
+      name: Component authentication
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:11
+      ref_id: USER 2
+      name: Authorization and access control
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
+      ref_id: USER 2.1
+      name: Authorization
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
+      ref_id: USER 2.2
+      name: Separation of duties
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
+      ref_id: USER 2.3
+      name: Multiple approvals
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
+      ref_id: USER 2.4
+      name: Manual elevation of privileges
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: SPE 7 - Event and incident management
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:12
+      ref_id: EVENT 1
+      name: Event and incident management
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.1
+      name: Event detection
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.2
+      name: Event reporting
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.3
+      name: Event reporting interfaces
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.4
+      name: Logging
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.5
+      name: Log entries
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.6
+      name: Log access
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.7
+      name: Event analysis
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.8
+      name: Incident handling and response
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
+      ref_id: EVENT 1.9
+      name: Vulnerability handling
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: SPE 8 - System integrity and availability
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:13
+      ref_id: AVAIL 1
+      name: System availability and intended functionality
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1
+      ref_id: AVAIL 1.1
+      name: Continuity management
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1
+      ref_id: AVAIL 1.2
+      name: Resource availability management
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1
+      ref_id: AVAIL 1.3
+      name: Failure-state
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:13
+      ref_id: AVAIL 2
+      name: Backup/restore/archive
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
+      ref_id: AVAIL 2.1
+      name: Backup
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
+      ref_id: AVAIL 2.2
+      name: Backup non-interference
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
+      ref_id: AVAIL 2.3
+      name: Backup verification
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
+      ref_id: AVAIL 2.4
+      name: Backup media
+      implementation_groups:
+      - spe
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
+      ref_id: AVAIL 2.5
+      name: Backup restoration
+      implementation_groups:
+      - spe
