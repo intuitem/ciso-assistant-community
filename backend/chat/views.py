@@ -197,9 +197,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                 list(session.messages.order_by("created_at").values("role", "content")),
                 VERBATIM_WINDOW_TOKENS,
             )
-            # Prepend the rolling summary so the tool-router has long-session
-            # context. Tool replays are intentionally NOT injected here —
-            # tool routing has its own system prompt and we keep it lean.
+            # Tool routing gets the summary but no tool replays (lean prompt)
             history_for_tool = inject_summary(history_for_tool, session.summary)
 
             t0 = time.time()
@@ -307,9 +305,6 @@ class ChatSessionViewSet(BaseModelViewSet):
                 response["X-Accel-Buffering"] = "no"
                 return response
 
-        # Captured tool observation (Phase 4) — populated after dispatch for
-        # whitelisted read-only tools, persisted on the assistant message,
-        # replayed for ~2 turns as a system note.
         tool_observation_payload: dict | None = None
 
         if tool_response and tool_response.get("name"):
@@ -328,14 +323,8 @@ class ChatSessionViewSet(BaseModelViewSet):
             )
             logger.info("tool_dispatch_complete", duration=round(time.time() - t1, 2))
 
-            # Build the replay payload from the *raw* result text so the next
-            # turn sees evidence, not the prefixed INSTRUCTIONS preamble.
-            # Only formats result shapes that match the tool's expected
-            # output: query_objects → format_query_result (needs total_count
-            # / display_name), search_library → query_result["text"]. Other
-            # tools (propose_create, attach_existing, multi_query) have
-            # different shapes and aren't in REPLAYABLE_TOOLS anyway, so we
-            # skip them and let build_replay_payload return None.
+            # Only query_objects/search_library have the right shape;
+            # other tools fall through to build_replay_payload returning None
             if query_result:
                 tool_name = tool_response["name"]
                 raw_result_text = ""
@@ -545,13 +534,10 @@ class ChatSessionViewSet(BaseModelViewSet):
             and history_messages[-1]["content"] == user_content
         ):
             history_messages = history_messages[:-1]
-        # Pack into the verbatim-window token budget
         history_messages = pack_verbatim_window(
             history_messages, VERBATIM_WINDOW_TOKENS
         )
-        # Replay recent tool observations as synthetic system notes so the LLM
-        # can reason over raw evidence (not just its own paraphrase). Then
-        # prepend the rolling summary so older context is still present.
+        # Replays before summary so notes attach to the right messages
         history_messages = inject_tool_replays(history_messages)
         history_messages = inject_summary(history_messages, session.summary)
 
@@ -595,9 +581,7 @@ class ChatSessionViewSet(BaseModelViewSet):
             system_prompt_tokens + context_tokens + user_tokens + history_tokens
         )
 
-        # Build the per-turn metrics dict once — reused for the structlog
-        # event, the JSONL metrics file (Level 1), and the assistant message
-        # row (Level 2).
+        # One dict, three sinks: structlog event, JSONL file, ChatMessage.metrics
         summary_tokens_now = count_tokens(session.summary or "")
         turn_metrics = build_turn_metrics(
             prompt_tokens=total_prompt_tokens,
@@ -628,20 +612,14 @@ class ChatSessionViewSet(BaseModelViewSet):
             over_budget=turn_metrics["over_budget"],
         )
 
-        # Level 1: persist this snapshot to the chat metrics JSONL log so
-        # `tail -f | jq` works retroactively across restarts (within log
-        # retention).
         record_metric(
             "llm_context_size",
             session_id=str(session.pk),
             **turn_metrics,
         )
 
-        # High-watermark warning: catch overflow precursors. The provider may
-        # silently truncate (e.g. LM Studio's TruncateMiddle) once we cross
-        # the model's actual context, and our `over_budget` flag is only
-        # accurate when MODEL_CONTEXT_TOKENS matches the real provider limit.
-        # Warn when we're at 80% so misconfigured limits surface early.
+        # Warn at 80% — provider may silently truncate before our `over_budget`
+        # fires if MODEL_CONTEXT_TOKENS exceeds the real provider limit
         if turn_metrics["high_watermark"]:
             logger.warning(
                 "llm_context_high_watermark",
@@ -736,10 +714,6 @@ class ChatSessionViewSet(BaseModelViewSet):
                     tokens_per_s=tps,
                 )
 
-                # Save assistant message — including the whitelisted tool
-                # observation (Phase 4) and the per-turn metrics snapshot
-                # (Level 2). Metrics are captured here so the assistant row
-                # is the canonical per-turn record for aggregation.
                 ChatMessage.objects.create(
                     session=session,
                     role=ChatMessage.Role.ASSISTANT,
@@ -758,10 +732,8 @@ class ChatSessionViewSet(BaseModelViewSet):
                 )
                 yield f"data: {done_data}\n\n"
 
-                # Phase 3: fold the oldest fallen-off exchange into the rolling
-                # summary, if any. Synchronous but the SSE 'done' has already
-                # flushed, so the user has seen the answer. Failures are
-                # logged and swallowed; the next turn re-tries naturally.
+                # Compaction runs after 'done' is flushed; failures swallowed,
+                # next turn re-tries naturally
                 try:
                     update_summary_for_session(session, llm)
                 except Exception as e:

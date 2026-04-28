@@ -83,9 +83,6 @@ class ChatMessage(models.Model):
         verbose_name=_("Context references"),
         help_text=_("Objects retrieved or cited: [{type, id, name, score}]"),
     )
-    # Truncated raw tool result, replayed for the next 2 turns to give the
-    # LLM access to evidence beyond its own paraphrase. Whitelist-gated to
-    # read-only tools — propose_* / extract_entities never populate this.
     tool_observation = models.JSONField(
         null=True,
         blank=True,
@@ -95,9 +92,6 @@ class ChatMessage(models.Model):
             "Replayed in the next ~2 turns; not enforced beyond that window."
         ),
     )
-    # Per-turn token / context metrics, persisted on the assistant message
-    # that completes the turn. Source of truth for the `chat_metrics`
-    # management command and any future admin dashboard.
     metrics = models.JSONField(
         null=True,
         blank=True,

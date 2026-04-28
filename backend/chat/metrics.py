@@ -1,14 +1,4 @@
-"""
-Chat memory metrics helpers (Levels 1 + 2).
-
-Level 1: append a JSON line per turn to a log file (env-configurable). Useful
-for live tailing and post-hoc analysis with `jq`/`awk`. Failures are swallowed
-so observability never breaks the chat.
-
-Level 2: produce the per-message metrics dict that gets persisted on
-`ChatMessage.metrics` for SQL-driven aggregation by the `chat_metrics`
-management command.
-"""
+"""Per-turn metrics: JSONL log writer + dict shape persisted on ChatMessage.metrics."""
 
 import json
 import os
@@ -25,14 +15,7 @@ _DEFAULT_PATH = "logs/chat_metrics.jsonl"
 
 
 def _resolve_path() -> Optional[Path]:
-    """
-    Return the configured metrics log path or None if disabled.
-
-    `CHAT_METRICS_LOG_PATH` env var:
-      - empty / "off" / "false" / "0" → disabled
-      - any other value → that path (relative to cwd)
-      - unset → default `logs/chat_metrics.jsonl`
-    """
+    """Return path, or None if CHAT_METRICS_LOG_PATH is empty/off/false/0/disabled."""
     raw = os.environ.get("CHAT_METRICS_LOG_PATH", _DEFAULT_PATH).strip()
     if not raw or raw.lower() in ("off", "false", "0", "disabled"):
         return None
@@ -51,10 +34,6 @@ def build_turn_metrics(
     history_messages: int,
     section_names: list[str],
 ) -> dict:
-    """
-    Bundle the per-turn metrics into a stable dict shape, used both by the
-    Level 1 JSONL writer and as the value persisted on `ChatMessage.metrics`.
-    """
     over_budget = prompt_tokens > model_context_tokens
     high_watermark = prompt_tokens >= int(model_context_tokens * 0.8)
     utilization_pct = round(100 * prompt_tokens / max(model_context_tokens, 1), 1)
@@ -75,10 +54,7 @@ def build_turn_metrics(
 
 
 def record_metric(event: str, **fields) -> None:
-    """
-    Append one JSON line to the chat metrics log file. Fail-soft: a write
-    error logs a warning but never raises.
-    """
+    """Append one JSON line. Fail-soft: write errors log warning, never raise."""
     path = _resolve_path()
     if path is None:
         return
