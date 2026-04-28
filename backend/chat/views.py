@@ -32,6 +32,7 @@ from .memory import (
     pack_verbatim_window,
     update_summary_for_session,
 )
+from .metrics import build_turn_metrics, record_metric
 from .models import ChatSession, ChatMessage, IndexedDocument
 from .page_context import parse_page_context
 from .providers import get_llm, is_ollama_available
@@ -594,20 +595,46 @@ class ChatSessionViewSet(BaseModelViewSet):
             system_prompt_tokens + context_tokens + user_tokens + history_tokens
         )
 
+        # Build the per-turn metrics dict once — reused for the structlog
+        # event, the JSONL metrics file (Level 1), and the assistant message
+        # row (Level 2).
+        summary_tokens_now = count_tokens(session.summary or "")
+        turn_metrics = build_turn_metrics(
+            prompt_tokens=total_prompt_tokens,
+            model_context_tokens=MODEL_CONTEXT_TOKENS,
+            system_prompt_tokens=system_prompt_tokens,
+            context_tokens=context_tokens,
+            history_tokens=history_tokens,
+            user_tokens=user_tokens,
+            summary_tokens=summary_tokens_now,
+            history_messages=len(history_messages),
+            section_names=ctx_builder.section_names(),
+        )
+
         logger.info(
             "llm_context_size",
             system_prompt_chars=system_prompt_chars,
             context_chars=context_chars,
-            sections=ctx_builder.section_names(),
-            history_messages=len(history_messages),
+            sections=turn_metrics["sections"],
+            history_messages=turn_metrics["history_messages"],
             total_prompt_chars=total_prompt_chars,
             system_prompt_tokens=system_prompt_tokens,
             context_tokens=context_tokens,
             history_tokens=history_tokens,
             user_tokens=user_tokens,
+            summary_tokens=summary_tokens_now,
             total_prompt_tokens=total_prompt_tokens,
             model_context_tokens=MODEL_CONTEXT_TOKENS,
-            over_budget=total_prompt_tokens > MODEL_CONTEXT_TOKENS,
+            over_budget=turn_metrics["over_budget"],
+        )
+
+        # Level 1: persist this snapshot to the chat metrics JSONL log so
+        # `tail -f | jq` works retroactively across restarts (within log
+        # retention).
+        record_metric(
+            "llm_context_size",
+            session_id=str(session.pk),
+            **turn_metrics,
         )
 
         # High-watermark warning: catch overflow precursors. The provider may
@@ -615,14 +642,12 @@ class ChatSessionViewSet(BaseModelViewSet):
         # the model's actual context, and our `over_budget` flag is only
         # accurate when MODEL_CONTEXT_TOKENS matches the real provider limit.
         # Warn when we're at 80% so misconfigured limits surface early.
-        if total_prompt_tokens >= int(MODEL_CONTEXT_TOKENS * 0.8):
+        if turn_metrics["high_watermark"]:
             logger.warning(
                 "llm_context_high_watermark",
                 total_prompt_tokens=total_prompt_tokens,
                 model_context_tokens=MODEL_CONTEXT_TOKENS,
-                utilization_pct=round(
-                    100 * total_prompt_tokens / max(MODEL_CONTEXT_TOKENS, 1), 1
-                ),
+                utilization_pct=turn_metrics["utilization_pct"],
             )
 
         def stream_response():
@@ -711,14 +736,17 @@ class ChatSessionViewSet(BaseModelViewSet):
                     tokens_per_s=tps,
                 )
 
-                # Save assistant message — including any whitelisted tool
-                # observation captured this turn (Phase 4).
+                # Save assistant message — including the whitelisted tool
+                # observation (Phase 4) and the per-turn metrics snapshot
+                # (Level 2). Metrics are captured here so the assistant row
+                # is the canonical per-turn record for aggregation.
                 ChatMessage.objects.create(
                     session=session,
                     role=ChatMessage.Role.ASSISTANT,
                     content=full_response,
                     context_refs=context_refs,
                     tool_observation=tool_observation_payload,
+                    metrics=turn_metrics,
                 )
 
                 # Send completion event with context refs

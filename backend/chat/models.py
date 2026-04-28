@@ -95,6 +95,18 @@ class ChatMessage(models.Model):
             "Replayed in the next ~2 turns; not enforced beyond that window."
         ),
     )
+    # Per-turn token / context metrics, persisted on the assistant message
+    # that completes the turn. Source of truth for the `chat_metrics`
+    # management command and any future admin dashboard.
+    metrics = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_("Turn metrics"),
+        help_text=_(
+            "Token utilization snapshot for this turn (prompt/context/"
+            "history/summary tokens, over_budget, high_watermark)."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
 
     class Meta:
