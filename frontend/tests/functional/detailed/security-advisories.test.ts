@@ -17,26 +17,21 @@ test.describe('Security Advisories', () => {
 		});
 
 		await test.step('confirm pull in modal', async () => {
-			// Modal appears — wait for it
 			const modal = page.getByTestId('modal');
 			await expect(modal).toBeVisible({ timeout: 10_000 });
 			await expect(modal.getByText('Pull external catalog')).toBeVisible();
 
-			// Click Confirm button
 			await modal.getByRole('button', { name: /confirm/i }).click();
 			await expect(modal).not.toBeVisible({ timeout: 30_000 });
 
-			// Wait for the table to reload with new data
 			await page.waitForLoadState('networkidle');
 		});
 
 		await test.step('verify at least one advisory is present in the table', async () => {
-			// After KEV sync there should be rows in the table — reload if needed
 			await page.waitForTimeout(3_000);
 			await page.reload();
 			await page.waitForLoadState('networkidle');
 
-			// Debug: count rows
 			const rowCount = await page.getByTestId('tablerow-detail-button').count();
 			console.log('tablerow-detail-button count:', rowCount);
 
@@ -49,7 +44,6 @@ test.describe('Security Advisories', () => {
 			const detailBtn = page.getByTestId('tablerow-detail-button').first();
 			await expect(detailBtn).toBeVisible();
 
-			// Use href navigation instead of click to ensure full navigation
 			const href = await detailBtn.getAttribute('href');
 			console.log('detail href:', href);
 			if (href) {
@@ -62,7 +56,6 @@ test.describe('Security Advisories', () => {
 		});
 
 		await test.step('note existing field values before enrichment', async () => {
-			// Record CVSS score before enrichment — may be empty before NVD enrich
 			const cvssField = page.getByTestId('cvss-base_score-field-value');
 			const cvssText = await cvssField.textContent().catch(() => '--');
 			console.log('CVSS before enrich:', cvssText?.trim());
@@ -73,17 +66,14 @@ test.describe('Security Advisories', () => {
 			await expect(enrichBtn).toBeVisible();
 			await enrichBtn.click();
 
-			// Wait for the enrich request to complete
 			await page.waitForLoadState('networkidle');
 			await page.waitForTimeout(2_000);
 		});
 
 		await test.step('verify fields have been updated after enrichment', async () => {
-			// After NVD enrichment, CVSS score and vector should be populated
 			const cvssScore = page.getByTestId('cvss-base_score-field-value');
 			const cvssVector = page.getByTestId('cvss-vector-field-value');
 
-			// Fields should no longer be empty/-- after enrichment
 			await expect(cvssScore).not.toHaveText('--');
 			await expect(cvssVector).not.toHaveText('--');
 
@@ -98,7 +88,6 @@ test.describe('Security Advisories', () => {
 		test.setTimeout(120_000);
 
 		await test.step('navigate to CWEs via sidebar', async () => {
-			// Open the Catalog accordion then click CWEs
 			await page.goto('/analytics');
 			await page.waitForLoadState('networkidle');
 			await page.getByTestId('accordion-item-catalog').click();
@@ -115,7 +104,6 @@ test.describe('Security Advisories', () => {
 		});
 
 		await test.step('wait for CWE sync to complete and verify rows', async () => {
-			// Sync can take several seconds — wait then reload
 			await page.waitForTimeout(5_000);
 			await page.reload();
 			await page.waitForLoadState('networkidle');
@@ -142,7 +130,6 @@ test.describe('Security Advisories', () => {
 		});
 
 		await test.step('verify CWE detail page loaded', async () => {
-			// CWE detail should show ref_id and name fields
 			await expect(page.getByTestId('ref-id-field-value')).toBeVisible();
 			await expect(page.getByTestId('name-field-value')).toBeVisible();
 
