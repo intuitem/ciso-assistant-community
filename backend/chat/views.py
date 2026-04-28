@@ -19,6 +19,7 @@ class ChatMessageThrottle(UserRateThrottle):
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from .constants import (
+    CHAT_SESSION_SUMMARY_ASYNC,
     LANG_MAP,
     MODEL_CONTEXT_TOKENS,
     RAG_CONTEXT_TOKENS,
@@ -228,7 +229,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                     and wf_history[-1]["content"] == user_content
                 ):
                     wf_history = wf_history[:-1]
-                wf_history = wf_history[-20:]
+                wf_history = pack_verbatim_window(wf_history, VERBATIM_WINDOW_TOKENS)
 
                 wf_ctx = WorkflowContext(
                     user_message=user_content,
@@ -732,10 +733,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                 )
                 yield f"data: {done_data}\n\n"
 
-                # Compaction runs after 'done' is flushed; failures swallowed,
-                # next turn re-tries naturally
+                # Compaction runs after 'done' flushed; failures retried next turn
                 try:
-                    update_summary_for_session(session, llm)
+                    if CHAT_SESSION_SUMMARY_ASYNC:
+                        from .tasks import update_session_summary
+
+                        update_session_summary(str(session.pk))
+                    else:
+                        update_summary_for_session(session, llm)
                 except Exception as e:
                     logger.warning(
                         "summary_compaction_failed",

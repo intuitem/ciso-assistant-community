@@ -91,9 +91,9 @@ class TestPackVerbatimWindow:
         assert result[1]["ts"] == 12345
 
     def test_handles_missing_content(self):
-        # Defensive: dict without 'content' key shouldn't crash
+        # Missing-content counted as 0 tokens — both fit in a 1-token budget
         msgs = [{"role": "user"}, _msg("assistant", "hi")]
-        result = pack_verbatim_window(msgs, 1000)
+        result = pack_verbatim_window(msgs, 1)
         assert len(result) == 2
 
     def test_handles_none_content(self):
@@ -178,6 +178,24 @@ class TestDetectFalloffPair:
         ]
         # Huge first message gets dropped, no assistant pair → None
         assert detect_falloff_pair(msgs, None, 10) is None
+
+    def test_mid_history_orphan_skipped(self):
+        # Orphan user must NOT mis-pair with a later valid assistant
+        base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        msgs = [
+            _msg_ts("user", "Q_orphan: " + "X" * 200, base),
+            _msg_ts("user", "Q_b: " + "X" * 200, base + timedelta(seconds=1)),
+            _msg_ts("assistant", "A_b: " + "Y" * 200, base + timedelta(seconds=2)),
+            _msg_ts("user", "Q_c: " + "X" * 200, base + timedelta(seconds=3)),
+            _msg_ts("assistant", "A_c: " + "Y" * 200, base + timedelta(seconds=4)),
+            _msg_ts("user", "live", base + timedelta(seconds=5)),
+        ]
+        # Budget keeps the last ~3 messages; orphan + (Q_b, A_b) fall off
+        pair = detect_falloff_pair(msgs, None, 200)
+        assert pair is not None
+        user, asst = pair
+        assert "Q_b:" in user["content"]
+        assert "A_b:" in asst["content"]
 
 
 class TestInjectSummary:

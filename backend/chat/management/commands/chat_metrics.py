@@ -89,6 +89,7 @@ class Command(BaseCommand):
         high_watermark = 0
         per_session: dict[str, list[int]] = defaultdict(list)
         sessions_seen: set[str] = set()
+        model_ctx = 0
 
         for row in qs:
             m = row["metrics"] or {}
@@ -103,17 +104,10 @@ class Command(BaseCommand):
             sid = str(row["session_id"])
             per_session[sid].append(pt)
             sessions_seen.add(sid)
+            if not model_ctx:
+                model_ctx = int(m.get("model_context_tokens", 0) or 0)
 
         turns = len(prompt_tokens)
-        # Avg / max model_context observed (in case it's been retuned mid-window)
-        model_ctx = next(
-            (
-                int((row["metrics"] or {}).get("model_context_tokens", 0))
-                for row in qs
-                if (row["metrics"] or {}).get("model_context_tokens")
-            ),
-            0,
-        )
 
         agg = {
             "since": opts["since"],

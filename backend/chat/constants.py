@@ -21,6 +21,10 @@ _TRUTHY = ("true", "1", "yes", "on")
 CHAT_SESSION_SUMMARY_ENABLED = (
     os.environ.get("CHAT_SESSION_SUMMARY", "true").strip().lower() in _TRUTHY
 )
+# Async via Huey when true (needs a running worker); sync inline when false
+CHAT_SESSION_SUMMARY_ASYNC = (
+    os.environ.get("CHAT_SESSION_SUMMARY_ASYNC", "false").strip().lower() in _TRUTHY
+)
 SUMMARY_INPUT_TOKEN_CAP = int(os.environ.get("CHAT_SUMMARY_INPUT_TOKEN_CAP", 1500))
 
 CHAT_TOOL_REPLAY_ENABLED = (

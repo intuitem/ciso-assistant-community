@@ -19,7 +19,16 @@ def _resolve_path() -> Optional[Path]:
     raw = os.environ.get("CHAT_METRICS_LOG_PATH", _DEFAULT_PATH).strip()
     if not raw or raw.lower() in ("off", "false", "0", "disabled"):
         return None
-    return Path(raw)
+    p = Path(raw)
+    if not p.is_absolute():
+        # Resolve relative paths against BASE_DIR (CWD differs across runserver/Huey)
+        try:
+            from django.conf import settings
+
+            p = Path(settings.BASE_DIR) / p
+        except Exception:
+            pass
+    return p
 
 
 def build_turn_metrics(

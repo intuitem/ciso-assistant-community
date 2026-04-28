@@ -83,17 +83,12 @@ def detect_falloff_pair(
     if not candidates:
         return None
 
-    user_msg = next((m for m in candidates if m["role"] == "user"), None)
-    if user_msg is None:
-        return None
-    user_idx = candidates.index(user_msg)
-    asst_msg = next(
-        (m for m in candidates[user_idx + 1 :] if m["role"] == "assistant"),
-        None,
-    )
-    if asst_msg is None:
-        return None
-    return (user_msg, asst_msg)
+    # Only consecutive (user, assistant) pairs — orphans (errored gens) stay unfolded
+    for i in range(len(candidates) - 1):
+        cur, nxt = candidates[i], candidates[i + 1]
+        if cur["role"] == "user" and nxt["role"] == "assistant":
+            return (cur, nxt)
+    return None
 
 
 def update_summary_for_session(session, llm) -> bool:
