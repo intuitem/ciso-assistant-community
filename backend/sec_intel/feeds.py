@@ -175,7 +175,7 @@ class EPSSFeed:
             return None
 
     def fetch(self) -> bytes:
-        """Fetch gzipped CSV from FIRST EPSS feed or read local file."""
+        """Fetch gzipped EPSS CSV from Empirical Security (canonical FIRST EPSS host) or read local file."""
         if self.file_path:
             return self.file_path.read_bytes()
         resp = httpx.get(EPSS_URL, timeout=_get_timeout(), follow_redirects=True)
@@ -341,7 +341,7 @@ class NVDFeed:
                 if current != v:
                     setattr(cve_instance, k, v)
                     update_fields.append(k)
-            elif current in (None, "", 0):
+            elif current in (None, "", 0, []):
                 setattr(cve_instance, k, v)
                 update_fields.append(k)
 
