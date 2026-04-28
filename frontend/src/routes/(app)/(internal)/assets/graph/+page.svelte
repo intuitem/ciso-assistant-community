@@ -35,7 +35,7 @@
 	</div>
 	<div class="w-full h-screen">
 		<GraphExplorer
-			title="Assets Explorer"
+			title={m.assetsExplorer()}
 			data={data.data}
 			edgeLength={100}
 			maxLegendItems={15}

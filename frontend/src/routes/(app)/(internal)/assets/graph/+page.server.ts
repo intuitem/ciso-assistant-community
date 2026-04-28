@@ -9,5 +9,5 @@ export const load = (async ({ fetch, url }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
-	return { data, hideDomains, title: 'Assets Explorer' };
+	return { data, hideDomains, title: 'assetsExplorer' };
 }) satisfies PageServerLoad;
