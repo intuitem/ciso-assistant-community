@@ -6,7 +6,6 @@ const JOURNEY_FOLDER_NAME = 'Belgian Organisation - CyFun 2025';
 
 test.describe('Journeys', () => {
 	test('journeys - belgian cyfun 2025', async ({ logedPage, page }) => {
-		// 3 minutes — preset apply loads libraries and creates objects
 		test.setTimeout(180_000);
 
 		await test.step('navigate to journeys page', async () => {
@@ -27,7 +26,6 @@ test.describe('Journeys', () => {
 				.locator('.group')
 				.filter({ hasText: 'Belgian Organisation - CyFun 2025' })
 				.first();
-			// Wait for the card and its button to be fully rendered
 			const applyBtn = cyfunCard.locator('button').last();
 			await expect(applyBtn).toBeVisible({ timeout: 10_000 });
 			await applyBtn.click();
@@ -35,18 +33,15 @@ test.describe('Journeys', () => {
 		});
 
 		await test.step('confirm journey creation in modal', async () => {
-			// Modal appears — wait up to 5s, then check if already navigated
 			const modal = page.getByTestId('modal-component');
 			const modalVisible = await modal.isVisible({ timeout: 5_000 }).catch(() => false);
 
 			if (modalVisible) {
-				// The confirm button is type=submit inside a form
 				const submitBtn = modal.locator('button[type=submit]');
 				await expect(submitBtn).toBeVisible();
 				await submitBtn.click();
 			}
 
-			// Preset apply loads libraries & creates objects — can take up to 90s
 			await page.waitForURL(/.*preset-journeys\/[a-z0-9-]+.*/, { timeout: 120_000 });
 			await page.waitForLoadState('networkidle');
 		});
@@ -54,17 +49,14 @@ test.describe('Journeys', () => {
 		await test.step('verify journey dashboard loaded', async () => {
 			await expect(page).toHaveURL(/.*preset-journeys.*/);
 
-			// Wait for full client-side hydration
 			await page.waitForLoadState('networkidle');
 			await page.waitForTimeout(2_000);
 
-			// Debug: log all data-testid attributes present on the page
 			const testIds = await page
 				.locator('[data-testid]')
 				.evaluateAll((els) => els.map((el) => el.getAttribute('data-testid')));
 			console.log('data-testid found on page:', JSON.stringify(testIds));
 
-			// Check the h2 text directly as fallback debug
 			const h2Text = await page
 				.locator('h2')
 				.first()
