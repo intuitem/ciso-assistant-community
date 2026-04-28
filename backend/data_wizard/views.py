@@ -1032,6 +1032,57 @@ class UserRecordConsumer(RecordConsumer[None]):
 
 class PerimeterRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = PerimeterWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "lc_status": ("lc_status", "status"),
+        "default_assignee": ("default_assignee",),
+    }
+    _LC_STATUS_BY_KEY: ClassVar[dict[str, str]] = {
+        key.lower(): key for key, _ in Perimeter.PRJ_LC_STATUS
+    }
+    _LC_STATUS_BY_LABEL: ClassVar[dict[str, str]] = {
+        str(label).strip().lower(): key for key, label in Perimeter.PRJ_LC_STATUS
+    }
+
+    @classmethod
+    def _normalize_lc_status(cls, value: str) -> Optional[str]:
+        normalized = value.strip().lower()
+        if not normalized:
+            return None
+        return cls._LC_STATUS_BY_KEY.get(normalized) or cls._LC_STATUS_BY_LABEL.get(
+            normalized
+        )
+
+    def _build_update_data(self, record: dict, record_data: dict) -> dict:
+        update_data = super()._build_update_data(record, record_data)
+
+        # Keep parity with AppliedControl.owner behavior: if the column is
+        # present (even empty), propagate it so UPDATE mode can clear stale M2M.
+        if "default_assignee" not in update_data and "default_assignee" in record:
+            update_data["default_assignee"] = record_data.get("default_assignee", [])
+
+        return update_data
+
+    @staticmethod
+    def _resolve_default_assignees(value) -> list[UUID]:
+        if not isinstance(value, str):
+            return []
+
+        entries = [entry.strip() for entry in value.split(";") if entry.strip()]
+        actor_ids = []
+
+        for entry in entries:
+            actor = Actor.objects.filter(user__email__iexact=entry).first()
+            if actor is None:
+                actor = Actor.objects.filter(team__name__iexact=entry).first()
+            if actor is not None:
+                actor_ids.append(actor.id)
+            else:
+                logger.warning(
+                    "Could not resolve perimeter default assignee %r; skipping.",
+                    entry,
+                )
+
+        return actor_ids
 
     def create_context(self):
         return None, None
@@ -1048,13 +1099,37 @@ class PerimeterRecordConsumer(RecordConsumer[None]):
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        return {
+        raw_lc_status = record.get("lc_status") or record.get("status")
+        lc_status = "in_design"
+        if raw_lc_status not in (None, ""):
+            normalized_status = self._normalize_lc_status(str(raw_lc_status))
+            if normalized_status is None:
+                allowed = ", ".join(k for k, _ in Perimeter.PRJ_LC_STATUS)
+                return {}, Error(
+                    record=record,
+                    error=(
+                        f"Unsupported perimeter status '{raw_lc_status}'. "
+                        f"Allowed values: {allowed}"
+                    ),
+                )
+            lc_status = normalized_status
+
+        default_assignee = self._resolve_default_assignees(
+            record.get("default_assignee")
+        )
+
+        data = {
             "name": name,
             "folder": domain,
             "ref_id": record.get("ref_id", ""),
             "description": record.get("description", ""),
-            "status": record.get("status"),
-        }, None
+            "lc_status": lc_status,
+        }
+
+        if "default_assignee" in record:
+            data["default_assignee"] = default_assignee
+
+        return data, None
 
 
 class ThreatRecordConsumer(RecordConsumer[None]):
