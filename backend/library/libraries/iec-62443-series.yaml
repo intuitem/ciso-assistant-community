@@ -631,12 +631,14 @@ objects:
       depth: 1
       ref_id: '5'
       name: Practice 1 - Security management
+      description: The product supplier maintains a documented secure development process applied across all relevant products.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-1
       name: Development process
+      description: 'Practice: A documented secure development process is in place and is applied to every product within the SDLC scope. Evidence: The documented process exists, is current, and is referenced in product development records.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-2
@@ -645,6 +647,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-2
       name: Identification of responsibilities
+      description: 'Practice: Roles and responsibilities for executing the secure development process are documented and assigned. Evidence: A RACI or role map names individuals or roles for each process step; gaps are tracked and closed.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-3
@@ -653,6 +656,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-3
       name: Identification of applicability
+      description: 'Practice: For each product, applicability of the SDLC requirements is documented (which apply, which don''t, which are tailored, with justification). Evidence: A per-product applicability statement exists with rationale for any tailoring.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-4
@@ -661,6 +665,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-4
       name: Security expertise
+      description: 'Practice: Personnel performing security-relevant SDLC activities have demonstrable competence in product cybersecurity. Evidence: Training records, certifications, and experience matrices map to the SDLC roles defined in SM-2.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-5
@@ -669,6 +674,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-5
       name: Process scoping
+      description: 'Practice: The boundary between the secure development process and other organizational processes (sales, support, manufacturing) is documented and managed. Evidence: Process scope documents show interfaces and handoffs between the SDLC and adjacent processes.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-6
@@ -677,6 +683,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-6
       name: File integrity
+      description: 'Practice: Source code, design documents, build artifacts, CI/CD pipeline definitions, and security-relevant files are protected against unauthorized modification. Evidence: Version control with access control; signed commits or signed build artifacts; pipeline-definition changes go through review; provenance is auditable end-to-end (SLSA-style attestations where applicable).'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-7
@@ -685,6 +692,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-7
       name: Development environment security
+      description: 'Practice: Development, build, and test environments — including build clusters, package proxies / artifact caches, container registries, and signing infrastructure — are secured (access control, malware protection, segregation from production). Evidence: Hardened development infrastructure with documented controls and monitoring; environment-access reviews; build-server and dependency-cache integrity is verifiable (recent supply-chain attack patterns covered).'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-8
@@ -693,6 +701,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-8
       name: Controls for private keys
+      description: 'Practice: Code-signing and other product-related private keys are stored, accessed, rotated, and revoked under documented controls (HSM, sealed access); a documented key-compromise procedure covers detection, immediate rotation, certificate revocation, and customer notification. Evidence: Private-key management policy with auditable access logs; HSM/secure-storage attestation; key-compromise runbook with notification-timeline commitments. NIST 800-53: SC-12.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-9
@@ -701,6 +710,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-9
       name: Security requirements for externally provided components
+      description: 'Practice: Security requirements are placed on external components (commercial, open-source) entering the product, with documented selection, vetting, and SBOM tracking. Evidence: Component intake process; SBOM (e.g. SPDX, CycloneDX) with provenance; vulnerability-monitoring feed for tracked components.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-10
@@ -709,6 +719,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-10
       name: Custom developed components from third-party suppliers
+      description: 'Practice: When custom components are developed by third parties, security obligations flow down contractually to sub-contractors as well, and the primary supplier verifies sub-contractor compliance. Evidence: Supplier contracts with cybersecurity clauses requiring flow-down to sub-contractors; supplier-audit or attestation records; risk register for third-party components; source-code escrow or equivalent continuity arrangement for critical custom work.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-11
@@ -717,6 +728,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-11
       name: Assessing and addressing security-related issues
+      description: 'Practice: Security issues identified throughout the lifecycle (defects, vulnerabilities, deviations) are tracked, prioritized, and addressed under a documented process. Evidence: Defect/vulnerability tracker with severity, status, owner, and remediation timeline.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-12
@@ -725,6 +737,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-12
       name: Process verification
+      description: 'Practice: Independent personnel periodically verify that the secure development process is being followed (audits, gate reviews). Evidence: Process-verification audit reports with findings and corrective actions tracked to closure.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-13
@@ -733,6 +746,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
       ref_id: SM-13
       name: Continuous improvement
+      description: 'Practice: The secure development process is periodically reviewed and improved based on lessons learned, incidents, and external developments. Evidence: Review records (cadence, participants, outcomes); changes to the process are version-controlled.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
@@ -740,12 +754,14 @@ objects:
       depth: 1
       ref_id: '6'
       name: Practice 2 - Specification of security requirements
+      description: Security requirements for each product are explicitly specified, threat-modeled, reviewed, and traceable through development.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
       ref_id: SR-1
       name: Product security context
+      description: 'Practice: For each product, the intended operational environment, intended use cases, and assumed external security context are documented. Evidence: A product security context document covering intended deployment zones, user roles, and threat assumptions per product.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-2
@@ -754,6 +770,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
       ref_id: SR-2
       name: Threat model
+      description: 'Practice: A threat model for each product is created, maintained, and updated as the product evolves. Evidence: Threat-model artifacts (data-flow diagrams, attack trees, STRIDE/PASTA tables) with traceability to mitigations.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-3
@@ -762,6 +779,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
       ref_id: SR-3
       name: Product security requirements
+      description: 'Practice: Security requirements derived from the threat model are documented for each product, traceable to features and tests. Evidence: A product security requirement specification; each requirement traces to a design element and a verification test.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-4
@@ -770,6 +788,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
       ref_id: SR-4
       name: Product security requirements content
+      description: 'Practice: Security requirements are written with sufficient detail to be testable (no vague ''be secure'' language). Evidence: Each security requirement has a measurable acceptance criterion and references applicable 62443-3-3 SRs or 62443-4-2 CRs.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-5
@@ -778,6 +797,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
       ref_id: SR-5
       name: Security requirements review
+      description: 'Practice: Security requirements are reviewed by qualified personnel (including independent reviewers) before development proceeds. Evidence: Review records with reviewer identities, dates, findings, and dispositions.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
@@ -785,12 +805,14 @@ objects:
       depth: 1
       ref_id: '7'
       name: Practice 3 - Secure by design
+      description: 'Product designs incorporate security from the start: defense in depth, secure-design principles, and design review.'
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
       ref_id: SD-1
       name: Secure design principles
+      description: 'Practice: Designs apply documented secure-design principles (least privilege, defense in depth, fail secure, complete mediation, economy of mechanism). Evidence: Design documents reference and apply named principles; deviations are justified.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-2
@@ -799,6 +821,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
       ref_id: SD-2
       name: Defense in depth design
+      description: 'Practice: Product designs implement multiple layers of defense so that compromise of one component does not compromise the system. Evidence: Architecture diagrams identify defense layers; threat models map attacks against each layer.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-3
@@ -807,6 +830,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
       ref_id: SD-3
       name: Security design review
+      description: 'Practice: Designs are subject to security review (peer or independent) at defined milestones. Evidence: Design-review records covering security topics, with findings and dispositions tracked to closure.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-4
@@ -815,6 +839,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
       ref_id: SD-4
       name: Secure design best practices
+      description: 'Practice: Designs follow industry secure-design best practices applicable to the product class (cryptography choices, secure boot, sandboxing, isolation). Evidence: Design documents reference applicable best-practice sources (NIST, OWASP, CERT, ENISA) and explicitly justify any deviations.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
@@ -822,12 +847,14 @@ objects:
       depth: 1
       ref_id: '8'
       name: Practice 4 - Secure implementation
+      description: Code is implemented to documented secure-coding standards with implementation review.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
       ref_id: SI-1
       name: Security implementation review
+      description: 'Practice: Code is reviewed for security defects before being released, using qualified reviewers and/or automated tooling. Evidence: Code-review records (manual review checklists + SAST tool reports) covering all release-bound code; review findings tracked to closure.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
@@ -836,6 +863,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
       ref_id: SI-2
       name: Secure coding standards
+      description: 'Practice: Documented secure coding standards exist and are followed for the product''s languages and frameworks (e.g. CERT C/C++, MISRA, OWASP for web). Evidence: Documented coding standards; CI enforces a baseline (linters, SAST); deviations are tracked and justified.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
@@ -843,12 +871,14 @@ objects:
       depth: 1
       ref_id: '9'
       name: Practice 5 - Security verification and validation testing
+      description: Testing covers security requirements, threat mitigations, vulnerability discovery, and penetration testing, with appropriate independence.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
       ref_id: SVV-1
       name: Security requirements testing
+      description: 'Practice: Each security requirement (SR-3) has corresponding verification tests covering positive and negative cases. Evidence: Test plans and results trace 1:1 to security requirements.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-2
@@ -857,6 +887,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
       ref_id: SVV-2
       name: Threat mitigation testing
+      description: 'Practice: Threat mitigations identified in the threat model (SR-2) are explicitly tested. Evidence: A test matrix maps each mitigation to test cases with executed results.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-3
@@ -865,6 +896,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
       ref_id: SVV-3
       name: Vulnerability testing
+      description: 'Practice: Vulnerability identification activities (SAST, DAST, fuzzing, dependency scanning) are performed before release. Evidence: Vulnerability scan reports run against release candidates; findings tracked to closure or accepted with rationale.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-4
@@ -873,6 +905,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
       ref_id: SVV-4
       name: Penetration testing
+      description: 'Practice: Penetration testing exercises the product against realistic attacker techniques before release. Evidence: Pentest reports (internal or third-party) with scope, findings, severity, and remediation status.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-5
@@ -881,6 +914,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
       ref_id: SVV-5
       name: Independence of testers
+      description: 'Practice: Persons performing security testing are sufficiently independent from the developers (organizational separation or third-party). Evidence: Tester role assignments demonstrate independence; reporting line is documented.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
@@ -888,12 +922,14 @@ objects:
       depth: 1
       ref_id: '10'
       name: Practice 6 - Management of security-related issues
+      description: Externally reported and internally discovered security issues are received, reviewed, assessed, addressed, disclosed, and the process is itself reviewed.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
       ref_id: DM-1
       name: Receiving notifications of security-related issues
+      description: 'Practice: A documented intake channel (security@..., PSIRT contact, security.txt) receives external reports and routes them to the right team. Evidence: A published vulnerability-reporting channel; incoming reports are logged; SLA for acknowledgement is defined and met.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-2
@@ -902,6 +938,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
       ref_id: DM-2
       name: Reviewing security-related issues
+      description: 'Practice: Reported issues are reviewed for validity, scope, and applicability under a documented process. Evidence: Issue tracker entries show review timestamps, reviewer, and validity disposition.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-3
@@ -910,6 +947,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
       ref_id: DM-3
       name: Assessing security-related issues
+      description: 'Practice: Valid issues are assessed for severity (e.g. CVSS), exploitability, and impact across affected products. Evidence: Each valid issue has a severity rationale and an impact-analysis record covering all affected product versions.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-4
@@ -918,6 +956,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
       ref_id: DM-4
       name: Addressing security-related issues
+      description: 'Practice: Issues are addressed (fix, mitigation, workaround) with timelines proportional to severity. Evidence: Remediation plans with target dates per severity; actual closure metrics reported.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-5
@@ -926,6 +965,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
       ref_id: DM-5
       name: Disclosing security-related issues
+      description: 'Practice: Security issues are disclosed to affected customers and the public per a documented coordinated-disclosure policy. Evidence: Published advisories (CVE/CSAF), customer communications, and a disclosure-timeline policy.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-6
@@ -934,6 +974,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
       ref_id: DM-6
       name: Periodic review of security defect management practice
+      description: 'Practice: The defect-management practice is reviewed periodically and improved based on metrics and incidents. Evidence: Review records covering SLA attainment, false-positive rate, time-to-fix, and improvement actions.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
@@ -941,12 +982,14 @@ objects:
       depth: 1
       ref_id: '11'
       name: Practice 7 - Security update management
+      description: Security updates are qualified, documented, distributed, and delivered in a timely manner.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
       ref_id: SUM-1
       name: Security update qualification
+      description: 'Practice: Each security update is qualified (regression tested, integration tested) before release to ensure it does not destabilize deployed systems. Evidence: Qualification test plans and results per update; rollback plan included.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-2
@@ -955,6 +998,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
       ref_id: SUM-2
       name: Security update documentation
+      description: 'Practice: Each security update is accompanied by documentation (what''s fixed, severity, prerequisites, side effects, install instructions). Evidence: Release notes / advisory templates with all required content fields.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-3
@@ -963,6 +1007,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
       ref_id: SUM-3
       name: Dependent component or operating system security update documentation
+      description: 'Practice: For updates that depend on components outside the supplier''s control (OS, third-party libraries), the dependency relationship and tested versions are documented. Evidence: Compatibility matrices listing tested OS / dependency versions per product release.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-4
@@ -971,6 +1016,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
       ref_id: SUM-4
       name: Security update delivery
+      description: 'Practice: Updates are delivered via authenticated, integrity-protected mechanisms to authorized customers. Evidence: Signed update packages, authenticated distribution channels, and download/verification documentation.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-5
@@ -979,6 +1025,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
       ref_id: SUM-5
       name: Timely delivery of security patches
+      description: 'Practice: Security patches are delivered within timeframes proportional to severity, per a documented policy; an out-of-cycle / emergency-patch path exists for high-impact zero-days (Log4Shell-class events) with a target measured in hours, not days. Evidence: Patch SLA policy (e.g. critical = N days, high = M days) plus emergency-patch SLA; metrics show SLA attainment for both routine and emergency releases.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
@@ -986,12 +1033,14 @@ objects:
       depth: 1
       ref_id: '12'
       name: Practice 8 - Security guidelines
+      description: Documentation guides the customer on deploying, operating, and decommissioning the product securely.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
       ref_id: SG-1
       name: Product defense in depth
+      description: 'Practice: Documentation describes the product''s defense-in-depth design, including the security responsibilities the customer must implement to complete the picture. Evidence: A ''security overview'' document per product covering layered defenses and customer-side obligations.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-2
@@ -1000,6 +1049,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
       ref_id: SG-2
       name: Defense in depth measures expected in the environment
+      description: 'Practice: Documentation specifies environmental security measures the product depends on (network segmentation, authentication infrastructure, time sources). Evidence: Environmental prerequisites are documented; deployment guides require confirmation.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-3
@@ -1008,6 +1058,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
       ref_id: SG-3
       name: Security hardening guidelines
+      description: 'Practice: Hardening guidelines tell the customer how to configure the product securely (services to disable, ports to close, accounts to remove, secure baselines). Evidence: A hardening guide aligned with documented secure baselines (CIS benchmarks where applicable).'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-4
@@ -1016,6 +1067,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
       ref_id: SG-4
       name: Secure disposal guidelines
+      description: 'Practice: End-of-life and disposal guidelines tell the customer how to securely retire the product (sanitize storage, revoke certificates, decommission accounts). Evidence: A disposal procedure document; field decommissioning kits or scripts where applicable.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-5
@@ -1024,6 +1076,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
       ref_id: SG-5
       name: Secure operation guidelines
+      description: 'Practice: Operation guidelines cover security-relevant operational tasks (account management, log review, patch application). Evidence: An operations guide with security-task playbooks.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-6
@@ -1032,6 +1085,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
       ref_id: SG-6
       name: Account management guidelines
+      description: 'Practice: Documentation covers customer-side account management (default account list, role assignments, password-policy support). Evidence: A documented account-management section listing default accounts and recommended customer practice.'
       implementation_groups:
       - sdl_practices
     - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-7
@@ -1040,6 +1094,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
       ref_id: SG-7
       name: Documentation review
+      description: 'Practice: All security-related customer documentation is reviewed for accuracy, completeness, and consistency before release. Evidence: Document-review records covering security guides; revisions are tracked under change control.'
       implementation_groups:
       - sdl_practices
   - urn: urn:intuitem:risk:framework:iec-62443-4-2-2019
@@ -1092,12 +1147,14 @@ objects:
       depth: 1
       ref_id: '4'
       name: Common component security constraints
+      description: Foundational constraints applying to every component requirement; must hold for any SL-C(component) claim.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
       ref_id: CCSC 1
       name: Support of essential functions
+      description: 'Control: Component security mechanisms do not impair the operation of essential functions of the broader control system, including under degraded conditions or failure of the security mechanism itself. Verify: Component behavior under security-mechanism failure (auth server unreachable, certificate expired) is documented and acceptable; essential-function trace exists.'
       implementation_groups:
       - ccsc
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-2
@@ -1106,6 +1163,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
       ref_id: CCSC 2
       name: Compensating countermeasures
+      description: 'Control: Where a component requirement cannot be met directly, compensating countermeasures provide equivalent capability at the target SL-C(component) for the affected zone. Verify: Each compensating countermeasure is documented with the CR it offsets, equivalent SL-C analysis, asset-owner approval, and effectiveness evidence.'
       implementation_groups:
       - ccsc
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-3
@@ -1114,6 +1172,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
       ref_id: CCSC 3
       name: Least privilege
+      description: 'Control: Component access controls grant users, processes, and connected devices only the privileges required for authorized component functions. Verify: Component role/permission definitions are minimal-privilege; service accounts run with restricted rights; emergency elevations are logged.'
       implementation_groups:
       - ccsc
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-4
@@ -1122,6 +1181,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
       ref_id: CCSC 4
       name: Software development process
+      description: 'Control: The component is developed under a secure development process meeting IEC 62443-4-1. Verify: The supplier holds an SDLA certification or equivalent attestation against 62443-4-1; supporting process artifacts are referenced.'
       implementation_groups:
       - ccsc
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
@@ -1129,12 +1189,14 @@ objects:
       depth: 1
       ref_id: '5'
       name: FR 1 - Identification and authentication control
+      description: The component identifies and authenticates all human users, software processes, and devices before granting access.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.1
       name: Human user identification and authentication
+      description: 'Control: The component identifies and authenticates each human user before granting access on every interface (local console, remote, configuration tool). Verify: Each human user has a unique identity for non-shared use; where shared/role accounts are operationally required they are documented with compensating controls. NIST 800-53: IA-2.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.2
@@ -1143,6 +1205,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.2
       name: Software process and device identification and authentication
+      description: 'Control: The component identifies and authenticates software processes and connected devices before granting them access. Verify: Each non-human entity has a distinct identity used during authentication. NIST 800-53: IA-3, IA-9.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.3
@@ -1151,6 +1214,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.3
       name: Account management
+      description: 'Control: Component accounts (operator, engineer, admin, service, vendor) are created, modified, enabled, disabled, and removed under a documented account-management process. Verify: Component supports the account-lifecycle steps; vendor and maintenance accounts have documented offboarding. NIST 800-53: AC-2.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.4
@@ -1159,6 +1223,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.4
       name: Identifier management
+      description: 'Control: Component identifiers (user IDs, device IDs) are unique over the system lifetime, non-reusable for a defined period after retirement, and traceable in audit records. Verify: Identifier-management policy is documented and enforced by the component. NIST 800-53: IA-4.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.5
@@ -1167,6 +1232,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.5
       name: Authenticator management
+      description: 'Control: The component supports issuing, distributing, storing protected (hashed/encrypted, never plaintext), rotating, and revoking authenticators; default credentials are changed before commissioning. Verify: Authenticator storage uses appropriate protection; rotation/revocation is supported; default credentials can be (and are) changed before production. NIST 800-53: IA-5.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.6
@@ -1175,6 +1241,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.6
       name: Wireless access management
+      description: 'Control: Wireless connections to the component are authorized, identified, authenticated, encrypted, and segregated from wired networks. Verify: Component supports authenticated/encrypted wireless protocols; rogue-AP detection coordinates with the broader system. NIST 800-53: AC-18.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.7
@@ -1183,6 +1250,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.7
       name: Strength of password-based authentication
+      description: 'Control: Component password-based authentication uses configurable strength rules (length, complexity, lifetime, history) appropriate to the assigned SL-C(component). Verify: Password policy is enforced and configurable on the component. NIST 800-53: IA-5(1).'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.8
@@ -1191,6 +1259,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.8
       name: Public key infrastructure certificates
+      description: 'Control: Where PKI is used, the component supports certificate issuance, validation, revocation checking, and trust-chain management. Verify: Component validates certificates (path, expiry, CRL/OCSP) on every authentication attempt. NIST 800-53: IA-5(2).'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.9
@@ -1199,6 +1268,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.9
       name: Strength of public key-based authentication
+      description: 'Control: Component public-key authentication uses key strengths and algorithms appropriate to the assigned SL-C (e.g. RSA-2048+, ECDSA P-256+). Verify: Key sizes and algorithms in use meet documented minimums and are upgradable. NIST 800-53: SC-12, SC-13.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.10
@@ -1207,6 +1277,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.10
       name: Authenticator feedback
+      description: 'Control: Component authentication input (e.g. typed passwords) is obscured and authentication errors do not disclose which factor was incorrect. Verify: Password fields obscure input; failure messages are generic. NIST 800-53: IA-6.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.11
@@ -1215,6 +1286,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.11
       name: Unsuccessful login attempts
+      description: 'Control: Component limits consecutive failed login attempts and takes a defined action (lockout, alert) when the threshold is reached, balanced against essential-function continuity. Verify: Failed-attempt threshold is configurable; lockout is logged and has a recovery procedure. NIST 800-53: AC-7.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.12
@@ -1223,6 +1295,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.12
       name: System use notification
+      description: 'Control: Component displays an authorized-use banner before granting access. Verify: Banner is configurable and displayed on all interactive sessions. NIST 800-53: AC-8.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.13
@@ -1231,6 +1304,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.13
       name: Access via untrusted networks
+      description: 'Control: Component access from untrusted networks is monitored, individually authorized, terminated at a controlled boundary, and protected by additional safeguards. Verify: Untrusted-network access paths are documented; safeguards exceed intra-zone authentication. NIST 800-53: AC-17.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.14
@@ -1239,6 +1313,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
       ref_id: CR 1.14
       name: Strength of symmetric key-based authentication
+      description: 'Control: Component symmetric-key authentication uses key strengths and algorithms appropriate to the assigned SL-C. Verify: Symmetric primitives in use are documented, current, and key management is documented. NIST 800-53: SC-12, SC-13.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
@@ -1246,12 +1321,14 @@ objects:
       depth: 1
       ref_id: '6'
       name: FR 2 - Use control
+      description: The component restricts what authenticated users, processes, and devices can do.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.1
       name: Authorization enforcement
+      description: 'Control: Component enforces authorizations on every protected action — view-only, operate, configure, override — per role assigned. Verify: Component supports a role-to-action matrix; access decisions match assignments. NIST 800-53: AC-3.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.2
@@ -1260,6 +1337,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.2
       name: Wireless use control
+      description: 'Control: Wireless connections to the component are subject to the same use-control authorizations as wired access. Verify: Wireless access does not bypass authorization checks present on wired interfaces.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.3
@@ -1268,6 +1346,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.3
       name: Use control for portable and mobile devices
+      description: 'Control: Portable and mobile devices connected to the component are authorized, monitored, and constrained. Verify: Component logs portable-device connections; unauthorized devices are blocked. NIST 800-53: MP-7.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.4
@@ -1276,6 +1355,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.4
       name: Mobile code
+      description: 'Control: Component restricts mobile code (interpreters, scripts, plugins) to authorized types and trusted sources. Verify: Allowed mobile-code types/sources are documented; unauthorized code is blocked. NIST 800-53: SC-18.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.5
@@ -1284,6 +1364,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.5
       name: Session lock
+      description: 'Control: Component session locks after configurable inactivity and requires re-authentication to resume. Verify: Session-lock timeout is configurable on the component. NIST 800-53: AC-11.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.6
@@ -1292,6 +1373,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.6
       name: Remote session termination
+      description: 'Control: Remote sessions on the component are terminated automatically after defined inactivity or upon logout. Verify: Remote-session termination is configurable, enforced, and logged. NIST 800-53: AC-12.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.7
@@ -1300,6 +1382,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.7
       name: Concurrent session control
+      description: 'Control: Component limits concurrent sessions per user/device to a configurable value. Verify: Concurrent-session limit is configurable and enforced. NIST 800-53: AC-10.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.8
@@ -1308,6 +1391,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.8
       name: Auditable events
+      description: 'Control: Component records audit events covering authentication, authorization, account changes, privilege escalations, and configuration changes (including changes to the audit configuration itself). Verify: Auditable-event catalog is documented and the component captures each listed event class. NIST 800-53: AU-2, AU-3.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.9
@@ -1316,6 +1400,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.9
       name: Audit storage capacity
+      description: 'Control: Component provides sufficient audit storage to retain records for the required retention period under expected event rates. Verify: Storage sizing and overflow handling (rotation, alarms) are documented. NIST 800-53: AU-4.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.10
@@ -1324,6 +1409,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.10
       name: Response to audit processing failures
+      description: 'Control: Component takes a configured response to audit-processing failures (logger crash, storage exhaustion): alarm, halt, or controlled overwrite. Verify: Failure response is documented and tested. NIST 800-53: AU-5.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.11
@@ -1332,6 +1418,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.11
       name: Timestamps
+      description: 'Control: Component uses synchronized, accurate timestamps for audit records and inter-component sequencing. Verify: Component is time-synchronized to a documented reference; clock drift is bounded. NIST 800-53: AU-8.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.12
@@ -1340,6 +1427,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.12
       name: Non-repudiation
+      description: 'Control: Component binds audit records and security-critical actions to the originating identity such that the originator cannot plausibly deny the action. Verify: Audit identifiers map uniquely to authenticated users/devices; audit integrity is protected. NIST 800-53: AU-10.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.13
@@ -1348,6 +1436,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
       ref_id: CR 2.13
       name: Use of physical diagnostic and test interfaces
+      description: 'Control: Component physical diagnostic/test interfaces (JTAG, UART, debug ports, programming headers) are protected against unauthorized use after development (disabled, locked, or authentication-protected). Verify: Production components have diagnostic interfaces disabled or authenticated; field-debug access is logged.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
@@ -1355,12 +1444,14 @@ objects:
       depth: 1
       ref_id: '7'
       name: FR 3 - System integrity
+      description: The component protects its own software, configuration, and security-critical data from unauthorized modification.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.1
       name: Communication integrity
+      description: 'Control: Component protects communications against unauthorized modification (cryptographic integrity codes, trusted-channel protocols); legacy protocols without native integrity are wrapped. Verify: Each communication channel uses an integrity mechanism appropriate to its target SL. NIST 800-53: SC-8, SC-8(1).'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.2
@@ -1369,6 +1460,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.2
       name: Protection from malicious code
+      description: 'Control: Component implements detection and response measures against malicious code suited to its operational context (allowlisting, anti-malware, integrity checks). Verify: Documented malicious-code defense is in place and does not conflict with essential functions. NIST 800-53: SI-3.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.3
@@ -1377,6 +1469,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.3
       name: Security functionality verification
+      description: 'Control: Component supports operator-initiated tests confirming that security functions operate as intended. Verify: Security-functionality tests exist, are documented, and are executable on the component. NIST 800-53: SI-6.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.4
@@ -1385,6 +1478,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.4
       name: Software and information integrity
+      description: 'Control: Component detects unauthorized changes to software, configuration, and security-critical information. Verify: Integrity monitoring (file-integrity, signed firmware checks) is configured and alerts on deviations. NIST 800-53: SI-7.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.5
@@ -1393,6 +1487,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.5
       name: Input validation
+      description: 'Control: Component validates inputs to security-relevant interfaces (operator commands, network messages, configuration imports) against expected syntax and semantics. Verify: Input-validation rules are documented per interface; malformed inputs are rejected and logged. NIST 800-53: SI-10.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.6
@@ -1401,6 +1496,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.6
       name: Deterministic output
+      description: 'Control: Under abnormal conditions (failure, fault), component outputs are placed in a documented, predetermined state to maintain process safety. Verify: Fail-safe / fail-fixed behavior is documented per output and validated under test.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.7
@@ -1409,6 +1505,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.7
       name: Error handling
+      description: 'Control: Component handles errors without exposing sensitive information or destabilizing operation. Verify: Error messages disclose only what is needed; no leakage of credentials, paths, or internal configuration. NIST 800-53: SI-11.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.8
@@ -1417,6 +1514,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.8
       name: Session integrity
+      description: 'Control: Component sessions are protected against hijacking, replay, and unauthorized re-use (unpredictable tokens, timeouts, source binding). Verify: Session tokens are unpredictable, expire, and are invalidated on logout. NIST 800-53: SC-23.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.9
@@ -1425,6 +1523,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.9
       name: Protection of audit information
+      description: 'Control: Component audit records and audit tooling are protected from unauthorized access, modification, and deletion. Verify: Audit data has restricted access; integrity is enforced (write-once or signed). NIST 800-53: AU-9.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.10
@@ -1433,6 +1532,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.10
       name: Support for updates
+      description: 'Control: Component supports authenticated, integrity-protected updates throughout its lifecycle. Verify: Update mechanism uses signed packages; update history is auditable; update failure is handled gracefully (rollback, atomic install). NIST 800-53: SI-2.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.11
@@ -1441,6 +1541,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.11
       name: Physical tamper resistance and detection
+      description: 'Control: Component resists (where SL requires) and detects physical tamper attempts. Verify: Tamper-resistance and tamper-detection mechanisms are documented per SL; tamper events are logged or trigger key zeroization. NIST 800-53: PE-3, SC-12(8).'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.12
@@ -1449,6 +1550,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.12
       name: Provisioning product supplier roots of trust
+      description: 'Control: Roots of trust originating from the product supplier (signing keys, factory certificates) are provisioned and protected. Verify: Provisioning process is documented and audited; supplier root-of-trust integrity is verifiable from firmware.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.13
@@ -1457,6 +1559,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.13
       name: Provisioning asset owner roots of trust
+      description: 'Control: Roots of trust originating from the asset owner (customer CAs, configuration-signing keys) can be provisioned, replacing or augmenting supplier defaults. Verify: Documented procedure exists for asset-owner root-of-trust provisioning; supplier defaults can be removed.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.14
@@ -1465,6 +1568,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
       ref_id: CR 3.14
       name: Integrity of the boot process
+      description: 'Control: Component boot process verifies the integrity of firmware, bootloader, and OS images using cryptographic mechanisms (secure boot). Verify: Secure boot is enabled by default in production; boot-failure response (halt, alert, recovery) is documented.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
@@ -1472,12 +1576,14 @@ objects:
       depth: 1
       ref_id: '8'
       name: FR 4 - Data confidentiality
+      description: The component protects data at rest and in transit from unauthorized disclosure.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
       ref_id: CR 4.1
       name: Information confidentiality
+      description: 'Control: Component protects information classified as confidential against unauthorized disclosure both at rest and in transit. Verify: Encryption at rest, encryption/trusted channel in transit, and access control match the classification scheme. NIST 800-53: SC-8, SC-28.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.2
@@ -1486,6 +1592,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
       ref_id: CR 4.2
       name: Information persistence
+      description: 'Control: Component sanitizes or renders unreadable data that persists in any storage medium beyond its operational need — including NVRAM, flash, EEPROM, removable storage, swap files, configuration backups, and decommissioning paths. Verify: Data-disposal procedure is documented per medium type and supported by the component (factory-reset, secure-erase, key-zeroization). NIST 800-53: MP-6.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.3
@@ -1494,6 +1601,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
       ref_id: CR 4.3
       name: Use of cryptography
+      description: 'Control: Cryptographic mechanisms in the component follow approved algorithms, modes, and key-length minimums appropriate to the assigned SL. Verify: Cryptographic primitives are documented, current, and key management is documented. NIST 800-53: SC-13.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
@@ -1501,12 +1609,14 @@ objects:
       depth: 1
       ref_id: '9'
       name: FR 5 - Restricted data flow
+      description: The component supports the zone-and-conduit data-flow model defined for the system.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
       ref_id: CR 5.1
       name: Network segmentation
+      description: 'Control: Component supports network segmentation (e.g. multiple network interfaces, VLAN tagging) consistent with the zone-and-conduit design. Verify: Component segmentation capabilities match the documented zone diagram. NIST 800-53: SC-7.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.2
@@ -1515,6 +1625,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
       ref_id: CR 5.2
       name: Zone boundary protection
+      description: 'Control: Component (when acting as a boundary) enforces the documented inter-zone data-flow policy. Verify: Boundary rules implemented by the component match the zone-and-conduit design; rule changes go through change control. NIST 800-53: SC-7.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.3
@@ -1523,6 +1634,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
       ref_id: CR 5.3
       name: General-purpose person-to-person communication restrictions
+      description: 'Control: Component restricts general-purpose person-to-person communications (email, chat, browsing) on or through it. Verify: Such applications are not installed on the component, or their network access is blocked at the boundary.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.4
@@ -1531,6 +1643,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
       ref_id: CR 5.4
       name: Application partitioning
+      description: 'Control: Component application functions are partitioned so compromise of one component-internal function does not propagate freely to others. Verify: Application functions run in isolated execution environments (separate processes, accounts) per documented design. NIST 800-53: SC-2, SC-3.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
@@ -1538,12 +1651,14 @@ objects:
       depth: 1
       ref_id: '10'
       name: FR 6 - Timely response to events
+      description: The component supports detecting and reporting security-relevant events.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-6.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
       ref_id: CR 6.1
       name: Audit log accessibility
+      description: 'Control: Authorized personnel can read and analyze component audit records via a defined interface. Verify: Audit-data access is provisioned for security and operations staff; read access does not interfere with workload. NIST 800-53: AU-6, AU-7.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-6.2
@@ -1552,6 +1667,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
       ref_id: CR 6.2
       name: Continuous monitoring
+      description: 'Control: Component supports continuous monitoring by forwarding security-relevant events to a central facility (SIEM, monitoring station). Verify: Monitoring path exists and is operational; monitored event categories cover the auditable-events catalog. NIST 800-53: SI-4, CA-7.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
@@ -1559,12 +1675,14 @@ objects:
       depth: 1
       ref_id: '11'
       name: FR 7 - Resource availability
+      description: The component maintains the availability of its resources during normal and adverse conditions.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
       ref_id: CR 7.1
       name: Denial of service protection
+      description: 'Control: Component maintains operational state under defined denial-of-service conditions through resource limits, rate limits, and segmentation. Verify: DoS protections are configured and tested; essential functions remain available. NIST 800-53: SC-5.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.2
@@ -1573,6 +1691,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
       ref_id: CR 7.2
       name: Resource management
+      description: 'Control: Component reserves or prioritizes resources for security-relevant and safety-relevant functions over non-essential workloads. Verify: Resource limits are documented per process; monitoring detects exhaustion. NIST 800-53: SC-6.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.3
@@ -1581,6 +1700,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
       ref_id: CR 7.3
       name: Control system backup
+      description: 'Control: Component supports backup of its state (configuration, applications, programs) on a defined schedule with secure storage. Verify: Backup scope is documented; backups are completed and integrity-verified. NIST 800-53: CP-9.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.4
@@ -1589,6 +1709,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
       ref_id: CR 7.4
       name: Control system recovery and reconstitution
+      description: 'Control: Component supports recovery to a known-good operational state after a disruption using available backups. Verify: Documented recovery procedures exist and have been tested end-to-end. NIST 800-53: CP-10.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.5
@@ -1597,6 +1718,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
       ref_id: CR 7.5
       name: Emergency power
+      description: 'Control: Component supports operation through an emergency power source sized for the required hold-up time (where applicable). Verify: Emergency power coverage is documented; hold-up time is tested on a schedule. NIST 800-53: PE-11.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.6
@@ -1605,6 +1727,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
       ref_id: CR 7.6
       name: Network and security configuration settings
+      description: 'Control: Component ships with a secure-by-default configuration (no unnecessary services enabled, no default credentials in production, encryption on by default); on-site changes are managed under configuration control against a documented secure baseline. Verify: Out-of-the-box configuration meets a documented secure baseline; deviations applied during deployment are reviewed and approved; default credentials are forced-changed at first use. NIST 800-53: CM-6.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.7
@@ -1613,6 +1736,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
       ref_id: CR 7.7
       name: Least functionality
+      description: 'Control: Component is configured to provide only the network ports, services, and applications required for its authorized functions. Verify: Installed services and open ports are documented and minimized; unused services are disabled. NIST 800-53: CM-7.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.8
@@ -1621,6 +1745,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
       ref_id: CR 7.8
       name: Control system component inventory
+      description: 'Control: Component supports being inventoried (hardware identifiers, firmware versions, software versions) by the broader IACS asset-management system. Verify: Inventory data is exposed via a documented interface; reconciles with the deployed component state. NIST 800-53: CM-8.'
       implementation_groups:
       - cr
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
@@ -1628,12 +1753,14 @@ objects:
       depth: 1
       ref_id: '12'
       name: Software application requirements (SAR)
+      description: Component-type-specific overlays for software applications. Apply when certifying a software-application component.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:sar-2.4
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
       ref_id: SAR 2.4
       name: Mobile code (software application)
+      description: 'Control: For software applications, mobile-code restrictions cover the application''s runtime — embedded interpreters, scripting hosts, plugin systems. Verify: Application mobile-code execution paths are documented and constrained per allowlist.'
       implementation_groups:
       - software_app
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:sar-3.2
@@ -1642,6 +1769,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
       ref_id: SAR 3.2
       name: Protection from malicious code (software application)
+      description: 'Control: Software application provides hooks for malicious-code protection (allowlisting, integrity validation) compatible with its runtime. Verify: Application-level integrity checks (manifest verification, code signing, plugin signing) are documented.'
       implementation_groups:
       - software_app
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
@@ -1649,12 +1777,14 @@ objects:
       depth: 1
       ref_id: '13'
       name: Embedded device requirements (EDR)
+      description: Component-type-specific overlays for embedded devices (PLCs, RTUs, IEDs). Apply when certifying an embedded-device component.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-2.4
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
       ref_id: EDR 2.4
       name: Mobile code (embedded device)
+      description: 'Control: Embedded device mobile-code restrictions cover firmware-loaded scripts, interpreters, and dynamically loaded code. Verify: Firmware does not load unsigned dynamic code; allowed-types list is documented.'
       implementation_groups:
       - embedded_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-2.13
@@ -1663,6 +1793,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
       ref_id: EDR 2.13
       name: Use of physical diagnostic and test interfaces (embedded device)
+      description: 'Control: Embedded device debug interfaces (JTAG, UART, programming headers) are disabled or authentication-locked in production. Verify: Production firmware disables debug interfaces; access requires an authenticated procedure.'
       implementation_groups:
       - embedded_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.2
@@ -1671,6 +1802,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
       ref_id: EDR 3.2
       name: Protection from malicious code (embedded device)
+      description: 'Control: Embedded device firmware integrity is verified (signed firmware, secure boot); the device does not execute unsigned code. Verify: Firmware signing is enforced at boot; signing-key management is documented.'
       implementation_groups:
       - embedded_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.10
@@ -1679,6 +1811,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
       ref_id: EDR 3.10
       name: Support for updates (embedded device)
+      description: 'Control: Embedded device firmware updates are authenticated, integrity-protected, and survive interruption (atomic install / dual-bank). Verify: Update mechanism uses signed firmware; partial-update failure does not brick the device.'
       implementation_groups:
       - embedded_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.11
@@ -1687,6 +1820,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
       ref_id: EDR 3.11
       name: Physical tamper resistance and detection (embedded device)
+      description: 'Control: Embedded device tamper-resistance mechanisms (potting, mesh, sensors) match the SL-C; tamper events are logged or trigger key zeroization. Verify: Physical-tamper testing has been performed; tamper-response behavior is documented.'
       implementation_groups:
       - embedded_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.12
@@ -1695,6 +1829,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
       ref_id: EDR 3.12
       name: Provisioning product supplier roots of trust (embedded device)
+      description: 'Control: Supplier roots of trust are provisioned in a secure factory environment and protected in hardware (secure element, fuses, OTP). Verify: Factory provisioning has documented controls; supplier roots are stored in tamper-resistant storage.'
       implementation_groups:
       - embedded_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.13
@@ -1703,6 +1838,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
       ref_id: EDR 3.13
       name: Provisioning asset owner roots of trust (embedded device)
+      description: 'Control: Asset-owner roots can be provisioned through an authenticated procedure; supplier defaults can be replaced. Verify: A documented owner-provisioning procedure exists; ownership-transfer steps are auditable.'
       implementation_groups:
       - embedded_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.14
@@ -1711,6 +1847,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
       ref_id: EDR 3.14
       name: Integrity of the boot process (embedded device)
+      description: 'Control: Embedded device secure boot validates firmware authenticity from the immutable hardware root of trust through bootloader and OS. Verify: Secure-boot chain is documented; boot-failure behavior (halt, recovery) is defined.'
       implementation_groups:
       - embedded_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
@@ -1718,12 +1855,14 @@ objects:
       depth: 1
       ref_id: '14'
       name: Host device requirements (HDR)
+      description: Component-type-specific overlays for host devices (engineering workstations, servers, HMI hosts). Apply when certifying a host-device component.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-2.4
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
       ref_id: HDR 2.4
       name: Mobile code (host device)
+      description: 'Control: Host device mobile-code restrictions cover OS-level interpreters, drivers, plugins, and scripts. Verify: Host-OS configurations restrict mobile-code execution per documented allowlist.'
       implementation_groups:
       - host_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-2.13
@@ -1732,6 +1871,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
       ref_id: HDR 2.13
       name: Use of physical diagnostic and test interfaces (host device)
+      description: 'Control: Host device physical interfaces (USB, serial, JTAG) are managed (disabled where not needed, authentication-locked otherwise). Verify: Physical-interface policy is documented and enforced via OS or hardware controls.'
       implementation_groups:
       - host_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.2
@@ -1740,6 +1880,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
       ref_id: HDR 3.2
       name: Protection from malicious code (host device)
+      description: 'Control: Host devices implement malicious-code protection appropriate to a general-purpose OS (anti-malware, allowlisting, integrity monitoring). Verify: Host-OS protection is configured, current, and monitored.'
       implementation_groups:
       - host_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.10
@@ -1748,6 +1889,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
       ref_id: HDR 3.10
       name: Support for updates (host device)
+      description: 'Control: Host-OS and application updates are authenticated and integrity-protected. Verify: OS and application updates are signed; update mechanism is documented.'
       implementation_groups:
       - host_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.11
@@ -1756,6 +1898,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
       ref_id: HDR 3.11
       name: Physical tamper resistance and detection (host device)
+      description: 'Control: Host devices implement physical access controls and tamper detection (chassis intrusion, boot-time integrity). Verify: Tamper-detection events are logged; physical-access controls are documented.'
       implementation_groups:
       - host_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.12
@@ -1764,6 +1907,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
       ref_id: HDR 3.12
       name: Provisioning product supplier roots of trust (host device)
+      description: 'Control: Host devices ship with supplier roots of trust protected by hardware (TPM, OS keys). Verify: TPM/HSM provenance is documented; supplier-root integrity is verifiable.'
       implementation_groups:
       - host_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.13
@@ -1772,6 +1916,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
       ref_id: HDR 3.13
       name: Provisioning asset owner roots of trust (host device)
+      description: 'Control: Asset owners can provision their own roots of trust onto the host (TPM ownership transfer, custom CA install). Verify: Owner-provisioning procedure is documented; supplier defaults can be replaced.'
       implementation_groups:
       - host_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.14
@@ -1780,6 +1925,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
       ref_id: HDR 3.14
       name: Integrity of the boot process (host device)
+      description: 'Control: Host secure boot (UEFI Secure Boot, measured boot) validates the host boot chain from hardware root of trust. Verify: Secure boot is enabled in production; boot-time integrity is measurable (e.g. via TPM PCR values).'
       implementation_groups:
       - host_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
@@ -1787,12 +1933,14 @@ objects:
       depth: 1
       ref_id: '15'
       name: Network device requirements (NDR)
+      description: Component-type-specific overlays for network devices (switches, routers, firewalls, gateways). Apply when certifying a network-device component.
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-1.6
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 1.6
       name: Wireless access management (network device)
+      description: 'Control: Network devices providing wireless access (APs) implement wireless-specific authentication, encryption, and segregation. Verify: Wireless-AP configurations are documented (SSIDs, encryption, auth methods); wireless segments are isolated.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-1.13
@@ -1801,6 +1949,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 1.13
       name: Access via untrusted networks (network device)
+      description: 'Control: Network devices acting as boundaries between trusted and untrusted zones implement the additional safeguards required for untrusted-network access. Verify: Boundary configurations match the documented inter-zone policy; untrusted-side access requires elevated safeguards.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-2.4
@@ -1809,6 +1958,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 2.4
       name: Mobile code (network device)
+      description: 'Control: Mobile-code execution on network devices (embedded scripting, automation) is restricted to authorized types and sources. Verify: Network-device scripting/automation is constrained per documented allowlist.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-2.13
@@ -1817,6 +1967,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 2.13
       name: Use of physical diagnostic and test interfaces (network device)
+      description: 'Control: Network device physical interfaces (console, USB, JTAG) are managed and physical access is controlled. Verify: Console/management ports require authentication; out-of-band access is protected.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.2
@@ -1825,6 +1976,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 3.2
       name: Protection from malicious code (network device)
+      description: 'Control: Network device firmware integrity is verified; unauthorized firmware will not load. Verify: Firmware signing is enforced; firmware-update history is auditable.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.10
@@ -1833,6 +1985,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 3.10
       name: Support for updates (network device)
+      description: 'Control: Network device firmware updates are authenticated, integrity-protected, and minimize service disruption (e.g. ISSU, graceful failover). Verify: Update mechanism is documented; failover/rollback procedures are tested.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.11
@@ -1841,6 +1994,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 3.11
       name: Physical tamper resistance and detection (network device)
+      description: 'Control: Network devices implement physical access controls suited to their deployment (locked enclosures, intrusion sensors). Verify: Physical-security requirements are documented per deployment scenario.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.12
@@ -1849,6 +2003,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 3.12
       name: Provisioning product supplier roots of trust (network device)
+      description: 'Control: Supplier roots of trust are protected in network device hardware (TPM, secure element). Verify: Supplier root-of-trust storage is documented; provenance is verifiable.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.13
@@ -1857,6 +2012,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 3.13
       name: Provisioning asset owner roots of trust (network device)
+      description: 'Control: Asset-owner roots can be provisioned onto network devices (custom CAs, signed configurations). Verify: Owner-provisioning procedure exists; supplier defaults can be replaced.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.14
@@ -1865,6 +2021,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 3.14
       name: Integrity of the boot process (network device)
+      description: 'Control: Network device secure boot validates firmware from hardware root of trust. Verify: Secure-boot chain is documented and enforced in production.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-5.2
@@ -1873,6 +2030,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 5.2
       name: Zone boundary protection (network device)
+      description: 'Control: Network devices enforcing zone boundaries (firewalls, gateways, data diodes) implement the documented inter-zone data-flow policy. Verify: Boundary rules match the zone-and-conduit design; rule changes go through change control. NIST 800-53: SC-7.'
       implementation_groups:
       - network_device
     - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-5.3
@@ -1881,6 +2039,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
       ref_id: NDR 5.3
       name: General purpose, person-to-person communication restrictions (network device)
+      description: 'Control: Network devices block general-purpose person-to-person communications (email, chat, browsing) at boundaries between control zones and external networks. Verify: Boundary policies block general-purpose comms protocols/ports between control zones and corporate/Internet zones.'
       implementation_groups:
       - network_device
   - urn: urn:intuitem:risk:framework:iec-62443-3-2-2020
@@ -1918,18 +2077,21 @@ objects:
       depth: 1
       ref_id: '4'
       name: Zone, conduit and risk assessment requirements
+      description: Workflow for defining the System under Consideration, partitioning it into zones and conduits, and conducting initial + detailed risk assessments to derive the target Security Level (SL-T) and Cybersecurity Requirements Specification (CRS).
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
       ref_id: ZCR 1
       name: Identify the SUC
+      description: Define what is and is not in scope of the cyber risk assessment.
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1
       ref_id: ZCR 1.1
       name: Identify the SUC perimeter and access points
+      description: 'Step: Identify the boundary of the System under Consideration (SUC), including all external access points (network connections, USB, vendor remote, wireless, physical). Output: SUC boundary diagram listing every access point with its protocol, direction, and counterparty.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2
@@ -1938,12 +2100,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
       ref_id: ZCR 2
       name: Initial cyber security risk assessment
+      description: High-level initial risk assessment to decide whether detailed assessment is needed per zone.
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2
       ref_id: ZCR 2.1
       name: Perform initial cyber security risk assessment
+      description: 'Step: For each candidate zone, identify worst-case scenarios and impact and compare against the asset owner''s tolerable-risk threshold. Output: Initial risk-assessment record with worst-case impact, frequency assumptions, and a gating decision (proceed to detailed RA or not).'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
@@ -1952,12 +2116,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
       ref_id: ZCR 3
       name: Partition the SUC into zones and conduits
+      description: Group SUC assets into zones and document the conduits (communication paths) connecting them.
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
       ref_id: ZCR 3.1
       name: Establish zones and conduits
+      description: 'Step: Document zone-grouping criteria (function, criticality, ownership, access-control needs) and create the zone-and-conduit model. Output: Documented zones, conduits, and the criteria used to define them.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
@@ -1966,6 +2132,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
       ref_id: ZCR 3.2
       name: Separate business and IACS assets
+      description: 'Step: Place business/IT assets and IACS assets in separate zones with controlled conduits between them. Output: Business and IACS zones are clearly delineated; inter-zone conduits are documented.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.3
@@ -1974,6 +2141,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
       ref_id: ZCR 3.3
       name: Separate safety related assets
+      description: 'Step: Place safety-related assets (SIS, ESD) in separate zones from non-safety assets, aligning the cybersecurity zone boundary with the safety integrity boundary (SIL per IEC 61508/61511). Output: Safety zones are documented separately with restricted conduits to control zones; the SIL of the safety zone is recorded and the cyber boundary respects it.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.4
@@ -1982,6 +2150,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
       ref_id: ZCR 3.4
       name: Separate temporarily connected devices
+      description: 'Step: Account for transient devices (engineer laptops, vendor laptops, USB drives, mobile diagnostic tools) as their own zone class or with documented connection controls. Output: Temporary-device handling is documented in the zone-and-conduit model.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.5
@@ -1990,6 +2159,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
       ref_id: ZCR 3.5
       name: Separate wireless devices
+      description: 'Step: Wireless-only zones are established or wireless devices are clearly placed within a zone with documented isolation. Output: Wireless devices are accounted for in the zone-and-conduit diagram.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.6
@@ -1998,6 +2168,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
       ref_id: ZCR 3.6
       name: Separate devices connected via external networks
+      description: 'Step: Devices reachable from external networks (Internet, corporate IT, partner networks, vendor remote) are placed in zones reflecting their elevated exposure. Output: External-connectivity zones are documented with their exposure characteristics.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4
@@ -2006,12 +2177,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
       ref_id: ZCR 4
       name: Risk comparison
+      description: Compare the initial risk against the asset owner's tolerable-risk threshold to decide whether detailed risk assessment is needed.
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4
       ref_id: ZCR 4.1
       name: Compare initial risk to tolerable risk
+      description: 'Step: For each zone, decide whether further (detailed) risk assessment is needed based on whether initial risk exceeds tolerable risk. Output: Per-zone decision documented (proceed to detailed RA, accept, transfer, or avoid).'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
@@ -2020,12 +2193,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
       ref_id: ZCR 5
       name: Perform a detailed cyber security risk assessment
+      description: For each zone where ZCR 4 indicates need, conduct detailed risk assessment per the next 13 sub-steps.
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.1
       name: Identify threats
+      description: 'Step: Identify threats applicable to each zone and conduit (threat actors, scenarios, attack patterns) drawing on MITRE ATT&CK for ICS, CISA / SANS top-OT-threat lists, sector ISACs (E-ISAC, WaterISAC, Auto-ISAC), and current threat-intelligence feeds. Output: Threat catalog per zone, traceable to specific TTPs / ATT&CK techniques.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.2
@@ -2034,6 +2209,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.2
       name: Identify vulnerabilities
+      description: 'Step: Identify vulnerabilities (known CVEs, design weaknesses, configuration issues) applicable to assets in each zone. Output: Vulnerability inventory per zone, periodically refreshed.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.3
@@ -2042,6 +2218,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.3
       name: Determine consequence and impact
+      description: 'Step: For each zone, determine the consequence and impact of a successful compromise (safety, environmental, operational, financial, regulatory, reputational). Output: Impact-rating record per zone.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.4
@@ -2050,6 +2227,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.4
       name: Determine unmitigated likelihood
+      description: 'Step: Estimate the likelihood of compromise without considering existing countermeasures, based on threat capability and vulnerability exposure. Output: Unmitigated-likelihood rating per threat-zone pairing.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.5
@@ -2058,6 +2236,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.5
       name: Determine unmitigated cyber security risk
+      description: 'Step: Combine unmitigated likelihood and impact to compute unmitigated risk per zone. Output: Unmitigated risk record per zone.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.6
@@ -2066,6 +2245,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.6
       name: Determine SL-T
+      description: 'Step: Determine the target Security Level (SL-T) per Foundational Requirement (FR1-FR7) per zone, based on the risk-reduction needed. Output: SL-T vector (SL-T(IAC), SL-T(UC), SL-T(SI), SL-T(DC), SL-T(RDF), SL-T(TRE), SL-T(RA)) per zone — consumed by 62443-3-3.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.7
@@ -2074,6 +2254,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.7
       name: Compare unmitigated risk with tolerable risk
+      description: 'Step: Compare unmitigated risk against tolerable risk to identify the gap requiring mitigation. Output: Risk-gap analysis per zone.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.8
@@ -2082,6 +2263,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.8
       name: Identify and evaluate existing countermeasures
+      description: 'Step: Identify and evaluate the effectiveness of countermeasures already in place (technical, procedural, compensating). Output: Existing-countermeasure inventory with effectiveness ratings.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.9
@@ -2090,6 +2272,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.9
       name: Reevaluate likelihood and impact
+      description: 'Step: Reevaluate likelihood and impact taking existing countermeasures into account. Output: Mitigated likelihood and impact ratings per zone.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.10
@@ -2098,6 +2281,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.10
       name: Determine residual risk
+      description: 'Step: Compute residual risk after existing countermeasures. Output: Residual-risk record per zone.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.11
@@ -2106,6 +2290,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.11
       name: Compare residual risk with tolerable risk
+      description: 'Step: Compare residual risk against tolerable risk to identify any remaining gap. Output: Residual-vs-tolerable decision per zone.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.12
@@ -2114,6 +2299,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.12
       name: Identify additional cyber security countermeasures
+      description: 'Step: Where residual risk exceeds tolerable risk, identify additional countermeasures (technical, procedural, compensating) to close the gap. Output: Recommended additional-countermeasure list per zone.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.13
@@ -2122,6 +2308,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
       ref_id: ZCR 5.13
       name: Document and communicate results
+      description: 'Step: Document the detailed risk-assessment results and communicate them to the named stakeholder set: asset owner (decision authority), system integrator (design input), SOC / monitoring team (detection priorities), safety engineering (joint risk picture), and product suppliers (procurement requirements). Output: Detailed risk-assessment report per zone with audience-specific summaries (executive, technical, safety, supplier-procurement).'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
@@ -2130,12 +2317,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
       ref_id: ZCR 6
       name: Document cyber security requirements, assumptions and constraints
+      description: Capture the cybersecurity requirements, assumptions, and constraints derived from the risk assessment as the input to system design — the Cybersecurity Requirements Specification (CRS).
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.1
       name: Cyber security requirements specification
+      description: 'Step: Produce a Cybersecurity Requirements Specification (CRS) covering the per-zone cybersecurity requirements. Output: CRS document per zone with traceability to risk-assessment outputs.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.2
@@ -2144,6 +2333,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.2
       name: SUC description
+      description: 'Step: Document the SUC as part of the CRS context (scope, perimeter, architecture). Output: SUC description in the CRS.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.3
@@ -2152,6 +2342,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.3
       name: Zone and conduit drawings
+      description: 'Step: Include zone-and-conduit diagrams in the CRS. Output: Zone-and-conduit drawings as CRS deliverables.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.4
@@ -2160,6 +2351,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.4
       name: Zone and conduit characteristics
+      description: 'Step: Document characteristics of each zone and conduit (function, criticality, SL-T, throughput, latency, reliability). Output: Per-zone and per-conduit characteristic table.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.5
@@ -2168,6 +2360,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.5
       name: Operating environment assumptions
+      description: 'Step: Document assumptions about the operating environment (physical security, organizational controls, neighboring systems). Output: Operating-environment assumption list in the CRS.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.6
@@ -2176,6 +2369,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.6
       name: Threat environment
+      description: 'Step: Document the assumed threat environment (threat actors, capabilities, motivations). Output: Threat-environment description in the CRS.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.7
@@ -2184,6 +2378,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.7
       name: Organizational security policies
+      description: 'Step: Reference the applicable organizational security policies in the CRS. Output: Policy-reference list in the CRS.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.8
@@ -2192,6 +2387,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.8
       name: Tolerable risk
+      description: 'Step: Document the tolerable-risk thresholds used in the risk assessment. Output: Tolerable-risk criteria captured in the CRS.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.9
@@ -2200,6 +2396,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
       ref_id: ZCR 6.9
       name: Regulatory requirements
+      description: 'Step: Document applicable regulatory and contractual requirements affecting the SUC. Output: Regulatory-requirement list in the CRS.'
       implementation_groups:
       - zcr
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7
@@ -2208,18 +2405,20 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
       ref_id: ZCR 7
       name: Asset owner approval
+      description: Obtain asset owner formal approval of the risk assessment outputs and CRS.
     - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7
       ref_id: ZCR 7.1
       name: Attain asset owner approval
+      description: 'Step: Present the risk-assessment results, CRS, and recommended countermeasures to the asset owner for formal approval. Output: Signed asset-owner approval record.'
       implementation_groups:
       - zcr
   - urn: urn:intuitem:risk:framework:iec-62443-2-4-2023
     ref_id: iec-62443-2-4-2023
     name: IEC 62443-2-4:2023 — Security program for IACS service providers (functional-area outline)
-    description: v0 outline at functional-area granularity. Each row corresponds to a SP.aa functional area; BR-level (SP.aa.bb) rows are pending full Ed.2 text access.
+    description: v0 outline at functional-area granularity in procurement tone (what the service provider does + what the asset owner asks for). Each row corresponds to a SP.aa functional area; BR-level (SP.aa.bb) rows are pending full Ed.2 text access.
     min_score: 0
     max_score: 5
     scores_definition:
@@ -2251,12 +2450,14 @@ objects:
       depth: 1
       ref_id: A
       name: Annex A (normative) - Security requirements
+      description: Service-provider security capabilities organized by 12 functional areas; each area carries multiple Base Requirements (BRs) and Requirement Enhancements (REs) — paywalled, not in this v0 outline.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.01
       name: Solution staffing
+      description: 'Service capability: The service provider''s staff working on IACS solutions are competent, screened, and have role-specific cybersecurity training. Asset owner asks: Background-check policy and records, cybersecurity training records, role-competency matrix mapping staff to engagement responsibilities.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
@@ -2265,6 +2466,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.02
       name: Assurance
+      description: 'Service capability: The service provider executes its services under documented assurance practices (quality, security, change control, defect tracking). Asset owner asks: Assurance documentation, internal-audit reports, defect-tracking metrics, certifications (e.g. ISASecure, ISO 9001/27001).'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
@@ -2273,6 +2475,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.03
       name: Architecture
+      description: 'Service capability: The service provider designs IACS architectures aligned with the asset owner''s cybersecurity requirements (62443-3-2 zones and conduits, 62443-3-3 SL-T). Asset owner asks: Architecture-review records, evidence that the design honors the zone-and-conduit model and target Security Levels.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.04
@@ -2281,6 +2484,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.04
       name: Wireless
+      description: 'Service capability: The service provider deploys wireless capabilities under documented secure-wireless practices (authentication, encryption, segregation, rogue-AP detection). Asset owner asks: Wireless deployment standards and configurations; segmentation evidence; protocol/encryption choices.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.05
@@ -2289,6 +2493,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.05
       name: SIS (Safety Instrumented Systems)
+      description: 'Service capability: The service provider handles safety-instrumented systems with heightened controls — documented separation aligned with the SIL boundary, dual approval (safety + cybersecurity) for any change, testing in a separate environment, reversibility requirements, and coordination with the asset owner''s safety lifecycle (IEC 61511 management of change). Asset owner asks: SIS-handling procedures with explicit dual-approval workflow, SIL-aware separation evidence, change-control records, evidence of integration with the asset owner''s IEC 61511 MoC.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
@@ -2297,6 +2502,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.06
       name: Configuration management
+      description: 'Service capability: The service provider maintains documented configuration management for delivered solutions (inventory, baselines, change control, version tracking). Asset owner asks: Configuration-management plans, baselines, change records, version-control evidence.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
@@ -2305,6 +2511,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.07
       name: Remote access
+      description: 'Service capability: The service provider''s remote-access activities follow asset-owner-approved procedures (authentication, time-bounding, session recording, supervised access). Asset owner asks: Remote-access policy, approved-tool list, session logs, evidence of compliance with the asset owner''s remote-access rules.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
@@ -2313,6 +2520,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.08
       name: Event management
+      description: 'Service capability: The service provider monitors, records, and reports security-relevant events from delivered solutions, integrating with the asset owner''s monitoring where applicable, with a documented incident-handoff procedure (who calls whom, escalation thresholds, contractual response times) coordinating with the asset owner''s IR team. Asset owner asks: Event-management procedures, integration with asset-owner SOC if applicable, IR-handoff runbook with named contacts and contractual response SLAs, joint-exercise records.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.09
@@ -2321,6 +2529,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.09
       name: Account management
+      description: 'Service capability: The service provider manages accounts (its own and customer-supplied) under documented account-management practices including offboarding SLAs for service-provider personnel. Asset owner asks: Account-management procedures, vendor-account inventory, offboarding records, evidence that departed personnel lose access promptly.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
@@ -2329,6 +2538,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.10
       name: Malware protection
+      description: 'Service capability: The service provider''s deployed and operated malware-protection capabilities are documented and operational on every component class. Asset owner asks: Malware-protection approach per component type, signature-update process, scan history.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
@@ -2337,6 +2547,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.11
       name: Patch management
+      description: 'Service capability: The service provider qualifies, distributes, and applies patches per documented procedures aligned with the asset owner''s change-control. Asset owner asks: Patch-qualification procedure, patch-status reports, deferred-patch mitigation register, integration with the asset owner''s change-control.'
       implementation_groups:
       - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
@@ -2345,6 +2556,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       ref_id: SP.12
       name: Backup/restore
+      description: 'Service capability: The service provider provides backup and restore capabilities for delivered solutions, with documented scope, schedule, verification, and media protection. Asset owner asks: Backup scope and schedule, restoration test records, media handling and protection, recovery-time evidence.'
       implementation_groups:
       - functional_areas
   - urn: urn:intuitem:risk:framework:iec-62443-2-1-2024
@@ -2382,18 +2594,21 @@ objects:
       depth: 1
       ref_id: '6'
       name: SPE 1 - Organizational security measures
+      description: Governance, policies, training, supply-chain, and physical-access foundation of the IACS security programme.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:6
       ref_id: ORG 1
       name: Security related organization and policies
+      description: Documented organizational policies, roles, training, and supply-chain rules.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
       ref_id: ORG 1.1
       name: Information security management system (ISMS)
+      description: 'Programme: An ISMS covering the IACS exists, is documented, and is integrated with the organization''s broader ISMS (ISO 27001-aligned acceptable). Verify: ISMS scope explicitly covers IACS; governance, roles, and review cycles are documented.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.2
@@ -2402,6 +2617,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
       ref_id: ORG 1.2
       name: Background checks
+      description: 'Programme: Background checks are performed on personnel with access to the IACS, proportional to access level and applicable law. Verify: Documented background-check policy; records exist for IACS-access personnel; renewal cadence is defined.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.3
@@ -2410,6 +2626,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
       ref_id: ORG 1.3
       name: Security roles and responsibilities
+      description: 'Programme: Cybersecurity roles and responsibilities for the IACS are documented and assigned (CISO, ICS security lead, system owner, operator security duties). Verify: A RACI or role map exists covering IACS cybersecurity; gaps are tracked and closed.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.4
@@ -2418,6 +2635,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
       ref_id: ORG 1.4
       name: Security awareness training
+      description: 'Programme: General cybersecurity awareness training is provided to all personnel with IACS access. Verify: Training catalogue exists; completion records are maintained; refresh cadence is documented.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.5
@@ -2426,6 +2644,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
       ref_id: ORG 1.5
       name: Security responsibilities training
+      description: 'Programme: Role-specific cybersecurity training is provided to personnel with cybersecurity responsibilities (operators, engineers, security staff). Verify: Role-specific training records exist; training maps to the responsibilities defined in ORG 1.3.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.6
@@ -2434,6 +2653,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1
       ref_id: ORG 1.6
       name: Supply chain security
+      description: 'Programme: Supply-chain cybersecurity requirements are placed on suppliers (procurement language, evaluation, periodic review). Verify: Procurement contracts include cybersecurity clauses; supplier evaluation records exist (e.g. requiring 62443-2-4 / 4-1 certifications, SBOM).'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
@@ -2442,12 +2662,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:6
       ref_id: ORG 2
       name: Security assessments and reviews
+      description: Periodic assessments, anomaly discovery, secure-development support, and programme reviews verify the programme's effectiveness.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
       ref_id: ORG 2.1
       name: Security risk mitigation
+      description: 'Programme: Cybersecurity risks identified through risk assessments (62443-3-2) are tracked through to mitigation. Verify: A risk register exists; mitigation actions have owners, dates, and tracked status.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.2
@@ -2456,6 +2678,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
       ref_id: ORG 2.2
       name: Processes for discovery of security anomalies
+      description: 'Programme: Documented processes exist to discover security anomalies (vulnerability scans, penetration tests, threat hunting, log review). Verify: Anomaly-discovery activities are scheduled and produce records; findings are routed into the risk register.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.3
@@ -2464,6 +2687,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
       ref_id: ORG 2.3
       name: Secure development and support
+      description: 'Programme: For internally developed or modified IACS components, the asset owner applies (or requires of contractors) secure development practices. Verify: Internal development follows a documented SDLC; contractor work is bound to equivalent expectations (e.g. flow-down of 62443-4-1).'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.4
@@ -2472,6 +2696,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
       ref_id: ORG 2.4
       name: SP reviews
+      description: 'Programme: The security programme itself is reviewed periodically for adequacy and effectiveness. Verify: Programme reviews are scheduled; review records show participants, scope, findings, and corrective actions.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-3
@@ -2480,12 +2705,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:6
       ref_id: ORG 3
       name: Security of physical access
+      description: Physical access to IACS components is controlled and monitored.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-3.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-3
       ref_id: ORG 3.1
       name: Physical access control
+      description: 'Programme: Physical access to IACS components (control rooms, field cabinets, engineering rooms) is restricted, logged, and monitored. Verify: Physical-access policy is documented; access lists are maintained; physical-access events are logged where applicable.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:7
@@ -2493,18 +2720,21 @@ objects:
       depth: 1
       ref_id: '7'
       name: SPE 2 - Configuration management
+      description: Inventory, baselines, drawings, and change control for IACS components.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:7
       ref_id: CM 1
       name: Inventory management of IACS hardware/software components and network communications
+      description: Configuration management starts with knowing what is deployed, what its baseline is, and how changes are controlled.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
       ref_id: CM 1.1
       name: Asset inventory baseline
+      description: 'Programme: A current inventory of IACS hardware, software, and network communications exists. Verify: Inventory is reconciled with deployed reality on a defined cadence; covers hardware, firmware versions, software versions, and inter-component communications.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.2
@@ -2513,6 +2743,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
       ref_id: CM 1.2
       name: Infrastructure drawings/documentation
+      description: 'Programme: Infrastructure drawings (network diagrams, control architecture, zone-and-conduit diagrams) are maintained and current. Verify: Drawings exist, are version-controlled, and match deployed reality at a defined cadence.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.3
@@ -2521,6 +2752,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
       ref_id: CM 1.3
       name: Configuration settings
+      description: 'Programme: Configuration settings for IACS components are defined, documented, and maintained against secure baselines. Verify: Per-component-type baselines are documented and deviations are tracked.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.4
@@ -2529,6 +2761,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1
       ref_id: CM 1.4
       name: Change control
+      description: 'Programme: Changes to IACS configurations go through a documented change-control process covering review, approval, testing, and back-out. Verify: Change records show the documented steps; emergency changes have a documented after-the-fact review.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
@@ -2536,18 +2769,21 @@ objects:
       depth: 1
       ref_id: '8'
       name: SPE 3 - Network and communications security
+      description: Network segmentation, secure wireless, and secure remote access enforce the zone-and-conduit boundaries.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
       ref_id: NET 1
       name: System segmentation
+      description: Network segmentation enforces zone-and-conduit boundaries from the 62443-3-2 design.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.1
       name: Segmentation from non-IACS zones
+      description: 'Programme: IACS zones are segmented from non-IACS networks (corporate IT, Internet) per the documented zone-and-conduit design. Verify: Boundary devices match the zone diagram; rules are reviewed periodically.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.2
@@ -2556,6 +2792,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.2
       name: Documentation of zones and network zone interconnections
+      description: 'Programme: Zones and inter-zone connections are documented with protocols, directions, and authorized counterparts. Verify: Inter-zone documentation matches deployed reality.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.3
@@ -2564,6 +2801,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.3
       name: Network segmentation from safety systems
+      description: 'Programme: Safety systems are segmented from non-safety networks, with safety-specific access controls on connections to non-safety zones. Verify: Safety-network segmentation is documented and verifiable; non-safety access goes through controlled boundaries.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.4
@@ -2572,6 +2810,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.4
       name: Network autonomy
+      description: 'Programme: IACS networks operate autonomously from external/corporate networks during outages of those external networks. Verify: Autonomy testing has been performed; documented behavior under loss of upstream connectivity is acceptable.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.5
@@ -2580,6 +2819,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.5
       name: Network disconnection from external networks
+      description: 'Programme: A documented capability exists to disconnect the IACS from external networks if needed (kill-switch, manual disconnection procedure). Verify: Disconnect capability is documented, tested, and authorized for use under defined conditions.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.6
@@ -2588,6 +2828,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.6
       name: Internal network access control
+      description: 'Programme: Internal IACS network access is controlled through documented access-control mechanisms (NAC, port security, MAC filtering). Verify: Internal network access controls are documented and operational.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.7
@@ -2596,6 +2837,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.7
       name: Network accessible services
+      description: 'Programme: Network-accessible services on IACS components are minimized to those required for authorized functions, enforced through deny-by-default firewall and host-firewall rules with explicit allowlists per zone and conduit. Verify: Per-component allowed-services list is documented; firewall and host-firewall rules deny by default; unused services are disabled at the component level (defense in depth, not boundary-only).'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.8
@@ -2604,6 +2846,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.8
       name: User messaging
+      description: 'Programme: User-messaging facilities (broadcast, multicast operator messages) are controlled to prevent abuse. Verify: User-messaging policy is documented; abuse-prevention controls are in place.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.9
@@ -2612,6 +2855,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1
       ref_id: NET 1.9
       name: Network time distribution
+      description: 'Programme: A documented, secure network time source (NTP, PTP) is provided to IACS components. Verify: Time source is authoritative, redundant where required, and time synchronization is monitored.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
@@ -2620,12 +2864,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
       ref_id: NET 2
       name: Secure wireless access
+      description: Wireless access (where used) follows authenticated, encrypted, segregated practices.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
       ref_id: NET 2.1
       name: Wireless protocols
+      description: 'Programme: Wireless protocols in use are documented and use authenticated, encrypted modes (WPA2/WPA3-Enterprise, WirelessHART, ISA100.11a). Verify: Wireless protocol inventory exists; legacy/unsecured protocols are not in use or are explicitly compensated.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2.2
@@ -2634,6 +2880,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
       ref_id: NET 2.2
       name: Wireless network segmentation
+      description: 'Programme: Wireless networks are segmented from wired control networks at a documented boundary. Verify: Wireless segmentation matches the zone-and-conduit design.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2.3
@@ -2642,6 +2889,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
       ref_id: NET 2.3
       name: Wireless properties and addresses
+      description: 'Programme: Wireless network identifiers (SSIDs, MAC addresses, frequencies) are managed and documented. Verify: Wireless properties are inventoried; rogue-AP detection is in place.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
@@ -2650,12 +2898,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
       ref_id: NET 3
       name: Secure remote access
+      description: Remote access is authenticated, monitored, and time-bounded — particularly for vendor support.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
       ref_id: NET 3.1
       name: Remote access applications
+      description: 'Programme: Authorized remote-access applications are documented (jump host, VPN client, vendor remote tool). Verify: Remote-access application inventory exists; only documented tools are permitted.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3.2
@@ -2664,6 +2914,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
       ref_id: NET 3.2
       name: Remote access connections
+      description: 'Programme: Remote-access connections are authenticated, encrypted, and individually authorized; vendor connections are time-bounded. Verify: Connection logs show authenticated identities and durations; vendor sessions are recorded or supervised.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3.3
@@ -2672,6 +2923,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
       ref_id: NET 3.3
       name: Remote access termination
+      description: 'Programme: Remote-access sessions terminate automatically after defined inactivity or upon disconnection. Verify: Termination is enforced and logged; abandoned sessions are detected.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
@@ -2679,18 +2931,21 @@ objects:
       depth: 1
       ref_id: '9'
       name: SPE 4 - Component security
+      description: Component hardening, portable-media control, malware protection, and patch management.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
       ref_id: COMP 1
       name: Components and portable media
+      description: Components are hardened and portable-media use is controlled.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1
       ref_id: COMP 1.1
       name: Component hardening
+      description: 'Programme: IACS components are hardened against documented secure baselines (CIS, vendor hardening guides). Verify: Per-component-type hardening baselines exist; deployed components conform; deviations are tracked.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1.2
@@ -2699,6 +2954,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1
       ref_id: COMP 1.2
       name: Dedicated portable media
+      description: 'Programme: Portable media (USB drives, optical media) used in the IACS are dedicated, authorized, and controlled (e.g. scanned at a kiosk before use). Verify: Portable-media policy exists; sanitization or scanning is performed before use; uncontrolled media are rejected.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
@@ -2707,12 +2963,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
       ref_id: COMP 2
       name: Malware protection
+      description: IACS components are protected against malicious code with mechanisms compatible with operational constraints.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
       ref_id: COMP 2.1
       name: Malware free
+      description: 'Programme: IACS components are commissioned in a known-malware-free state. Verify: Pre-commissioning malware scans / integrity checks are performed and documented.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2.2
@@ -2721,6 +2979,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
       ref_id: COMP 2.2
       name: Malware protection
+      description: 'Programme: Operational malware-protection mechanisms (anti-malware, allowlisting, integrity checks) appropriate to each component type are in place. Verify: Per-component-type malware-protection approach is documented; signatures/baselines are kept current.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2.3
@@ -2729,6 +2988,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
       ref_id: COMP 2.3
       name: Malware protection software validation and installation
+      description: 'Programme: Anti-malware software updates and installations are validated against IACS compatibility before deployment. Verify: Update-validation procedure exists; updates are tested before production rollout.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
@@ -2737,12 +2997,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
       ref_id: COMP 3
       name: Patch management
+      description: Patches are validated, scheduled, applied, monitored, and where deferred, mitigated.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
       ref_id: COMP 3.1
       name: Security patch authenticity/integrity
+      description: 'Programme: Patches applied to IACS components are authenticated and integrity-verified (signed packages, vendor channels). Verify: Patch-acquisition process verifies authenticity; cryptographic signatures are checked.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.2
@@ -2751,6 +3013,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
       ref_id: COMP 3.2
       name: Security patch validation and installation
+      description: 'Programme: Patches are validated for IACS compatibility before installation; installation follows change-control. Verify: Patch-validation and installation procedures are documented; change-control records exist.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.3
@@ -2759,6 +3022,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
       ref_id: COMP 3.3
       name: Security patch status
+      description: 'Programme: The patch status (applied, pending, deferred, N/A) of each IACS component is tracked. Verify: Patch-status dashboard or report exists per component class.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.4
@@ -2767,6 +3031,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
       ref_id: COMP 3.4
       name: Security patching retention of security
+      description: 'Programme: Patching does not introduce new security weaknesses; patch results are checked for regressions. Verify: Post-patch security validation is documented.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.5
@@ -2775,6 +3040,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
       ref_id: COMP 3.5
       name: Security patch mitigation
+      description: 'Programme: Where patches are deferred or N/A, compensating mitigations (network controls, monitoring, configuration changes) are applied. Verify: Deferred-patch register lists each item with the applied mitigation and a re-evaluation date.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:10
@@ -2782,18 +3048,21 @@ objects:
       depth: 1
       ref_id: '10'
       name: SPE 5 - Protection of data
+      description: Data classification, confidentiality, integrity, retention, cryptography, and key management.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:10
       ref_id: DATA 1
       name: Protection of data
+      description: Sensitive IACS data is classified, protected, retained, and integrity-checked.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
       ref_id: DATA 1.1
       name: Data classification
+      description: 'Programme: A data-classification scheme exists and is applied to IACS-related data. Verify: Classification scheme is documented; classified data is identified and labeled.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.2
@@ -2802,6 +3071,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
       ref_id: DATA 1.2
       name: Data confidentiality
+      description: 'Programme: Confidential IACS data is protected from unauthorized disclosure at rest and in transit. Verify: Encryption / access-control mechanisms match the classification scheme.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.3
@@ -2810,6 +3080,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
       ref_id: DATA 1.3
       name: Safety system configuration mode
+      description: 'Programme: Safety-system configuration mode is protected against unauthorized changes (key-switch, password, hardware lock). Verify: Safety-system configuration changes are restricted, documented, and audit-logged.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.4
@@ -2818,6 +3089,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
       ref_id: DATA 1.4
       name: Data retention policy
+      description: 'Programme: Data retention requirements are documented and enforced (legal, regulatory, operational). Verify: Retention policy exists per data class; lifecycle (retain, archive, delete) is enforced.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.5
@@ -2826,6 +3098,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
       ref_id: DATA 1.5
       name: Cryptographic mechanisms
+      description: 'Programme: Cryptographic mechanisms used for IACS data follow approved algorithms and key lengths. Verify: Cryptographic inventory exists; deprecated algorithms are not used or are documented as legacy with mitigations.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.6
@@ -2834,6 +3107,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
       ref_id: DATA 1.6
       name: Key management
+      description: 'Programme: Cryptographic keys are managed throughout their lifecycle (generation, distribution, storage, rotation, revocation). Verify: Key-management policy is documented; key-access is audit-logged.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.7
@@ -2842,6 +3116,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1
       ref_id: DATA 1.7
       name: Data integrity
+      description: 'Programme: IACS data integrity is protected (signing, hashing, controlled write paths). Verify: Integrity controls are documented per data class; integrity events are logged.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:11
@@ -2849,18 +3124,21 @@ objects:
       depth: 1
       ref_id: '11'
       name: SPE 6 - User access control
+      description: Identification, authentication, and authorization for users across the IACS.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:11
       ref_id: USER 1
       name: Identification and authentication
+      description: User identity, authentication strength, and feedback are managed across the IACS.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.1
       name: User identity assignment
+      description: 'Programme: User identities are assigned to specific individuals or documented roles. Verify: User-identity records exist with assignment to person or named role.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.2
@@ -2869,6 +3147,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.2
       name: User identity removal
+      description: 'Programme: User identities are removed (or disabled) when no longer needed (offboarding, role change). Verify: Removal SLA is documented; offboarding records are cross-checked against active accounts; vendor accounts in particular have a documented disable-on-departure step.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.3
@@ -2877,6 +3156,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.3
       name: User identity persistence
+      description: 'Programme: User identities persist over the system lifetime such that audit records remain traceable. Verify: Identity-reuse policy is documented; post-removal reuse is delayed for the audit-trace window.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.4
@@ -2885,6 +3165,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.4
       name: Access rights assignment
+      description: 'Programme: User access rights are assigned per documented role definitions. Verify: Role catalog exists; access assignments are reviewed periodically; emergency access is documented.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.5
@@ -2893,6 +3174,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.5
       name: Least privilege
+      description: 'Programme: User access operates at the minimum privileges needed for authorized functions. Verify: Privilege reviews are performed; standing administrative privileges are limited and time-bounded where possible.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.6
@@ -2901,6 +3183,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.6
       name: Software service authentication
+      description: 'Programme: Software services (background processes, agents) authenticate to the system. Verify: Service-account inventory exists; service authentication is documented per service.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.7
@@ -2909,6 +3192,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.7
       name: Software services interactive login rights
+      description: 'Programme: Software service accounts cannot interactively log in (or interactive-login is restricted under documented controls). Verify: Service accounts are configured non-interactive; exceptions are documented and approved.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.8
@@ -2917,6 +3201,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.8
       name: Human user authentication
+      description: 'Programme: Human users authenticate before accessing the IACS. Verify: Authentication is enforced on every access path (HMI, EWS, remote, configuration tool).'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.9
@@ -2925,6 +3210,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.9
       name: Multifactor authentication (MFA)
+      description: 'Programme: MFA is used for human user authentication where the SL-T or risk requires it (remote access, privileged accounts); a documented exemption process covers cases where MFA is not feasible (industrial keypads, embedded HMIs, physical-access-only consoles), with compensating controls and asset-owner approval. Verify: MFA coverage is documented; MFA is in place for documented cases; exemptions have documented compensating controls.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.10
@@ -2933,6 +3219,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.10
       name: Mutual authentication
+      description: 'Programme: Where session integrity demands it, parties mutually authenticate (e.g. mutual TLS for component-to-component). Verify: Mutual-authentication scope is documented; mechanisms are in use.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.11
@@ -2941,6 +3228,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.11
       name: Password protection
+      description: 'Programme: Passwords are protected — never stored in plaintext, never transmitted in clear. Verify: Password storage uses hashing (bcrypt/scrypt/argon2 or vendor equivalent); transmission is encrypted.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.12
@@ -2949,6 +3237,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.12
       name: Shared and disclosed/compromised passwords
+      description: 'Programme: Shared passwords are minimized; disclosed/compromised passwords are detected and rotated. Verify: Password-sharing policy is documented; breach-monitoring or proactive rotation is in place.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.13
@@ -2957,6 +3246,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.13
       name: User login display information
+      description: 'Programme: User-login displays do not reveal sensitive information (last-login banner, etc., per policy). Verify: Login-display policy is documented and enforced.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.14
@@ -2965,6 +3255,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.14
       name: User login failure displays
+      description: 'Programme: Login-failure displays do not reveal which factor failed. Verify: Failure messages are generic and tested.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.15
@@ -2973,6 +3264,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.15
       name: Consecutive login failures
+      description: 'Programme: Consecutive login failures trigger a documented response (lockout, alert) balanced against essential-function continuity. Verify: Threshold and response are configurable and tested; recovery procedure is defined.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.16
@@ -2981,6 +3273,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.16
       name: Session integrity
+      description: 'Programme: Sessions are protected against hijacking and replay. Verify: Session-token unpredictability and expiry are documented and tested.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.17
@@ -2989,6 +3282,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.17
       name: Concurrent sessions
+      description: 'Programme: Concurrent-session limits are configurable and applied. Verify: Concurrent-session limits are configured per user/account class.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.18
@@ -2997,6 +3291,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.18
       name: Screen lock
+      description: 'Programme: Inactive sessions lock automatically after a defined period. Verify: Screen-lock timeout is configured; bypass requires re-authentication.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.19
@@ -3005,6 +3300,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1
       ref_id: USER 1.19
       name: Component authentication
+      description: 'Programme: Components authenticate to one another where security architecture requires. Verify: Component-authentication scope is documented and operational.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
@@ -3013,12 +3309,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:11
       ref_id: USER 2
       name: Authorization and access control
+      description: Authorization is enforced, separated by duty, and elevated under controlled conditions.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
       ref_id: USER 2.1
       name: Authorization
+      description: 'Programme: User authorization is enforced on every protected action — view-only / operate / configure / override / safety-bypass. Verify: Authorization decisions match the documented role-action matrix.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.2
@@ -3027,6 +3325,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
       ref_id: USER 2.2
       name: Separation of duties
+      description: 'Programme: Critical actions require separation of duties (e.g. configuration change requires reviewer + implementer). Verify: SoD policy is documented and enforced for critical actions.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.3
@@ -3035,6 +3334,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
       ref_id: USER 2.3
       name: Multiple approvals
+      description: 'Programme: High-risk actions require multiple approvals before execution. Verify: Multi-approval scope is documented; approval workflow is enforced.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.4
@@ -3043,6 +3343,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
       ref_id: USER 2.4
       name: Manual elevation of privileges
+      description: 'Programme: Privilege elevation (sudo, RunAs) is controlled, logged, and time-bounded. Verify: Elevation events are logged; elevation policy is documented.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:12
@@ -3050,18 +3351,21 @@ objects:
       depth: 1
       ref_id: '12'
       name: SPE 7 - Event and incident management
+      description: Detect, report, log, analyze, and respond to security-relevant events.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:12
       ref_id: EVENT 1
       name: Event and incident management
+      description: Events and incidents are detected, reported, logged, analyzed, and responded to.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.1
       name: Event detection
+      description: 'Programme: Security-relevant events are detected and surfaced for review using a combination of IT-flavored tools (SIEM, log monitoring) and OT-aware monitoring — passive industrial-protocol IDS that understand Modbus, DNP3, OPC, IEC 60870-5-104, S7 etc., since IT-only tools miss most OT-relevant signals. Verify: Event-detection coverage matches the auditable-events catalog; OT-aware sensors are deployed at zone boundaries; detection mechanisms are operational.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.2
@@ -3070,6 +3374,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.2
       name: Event reporting
+      description: 'Programme: Events are reported to designated personnel within defined SLAs. Verify: Reporting paths and SLAs are documented; reports are produced.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.3
@@ -3078,6 +3383,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.3
       name: Event reporting interfaces
+      description: 'Programme: Event reporting interfaces (operator screens, ticketing, paging) are documented. Verify: Reporting interfaces are configured and tested.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.4
@@ -3086,6 +3392,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.4
       name: Logging
+      description: 'Programme: IACS components log security-relevant events. Verify: Logging is enabled per the auditable-events catalog; logs are forwarded to a central facility.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.5
@@ -3094,6 +3401,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.5
       name: Log entries
+      description: 'Programme: Log entries contain sufficient information for analysis (timestamp, identity, action, outcome). Verify: Sample log entries cover the required fields per category.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.6
@@ -3102,6 +3410,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.6
       name: Log access
+      description: 'Programme: Log access is restricted to authorized personnel. Verify: Log-access roles are documented and enforced; access events are themselves logged.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.7
@@ -3110,6 +3419,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.7
       name: Event analysis
+      description: 'Programme: Events are analyzed to detect security incidents. Verify: Event-analysis cadence is documented; analyst role and tooling are defined.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.8
@@ -3118,6 +3428,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.8
       name: Incident handling and response
+      description: 'Programme: A documented incident-response process covers detection, containment, eradication, recovery, and lessons learned; cyber IR is coordinated with safety incident response (joint plan, joint exercises, defined handoffs between cyber-IR and safety-IR roles) since OT incidents often have safety implications and vice versa. Verify: IR playbook exists with safety-coordination procedures; joint cyber+safety tabletop or live exercises are performed; handoff thresholds and authority are documented.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.9
@@ -3126,6 +3437,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1
       ref_id: EVENT 1.9
       name: Vulnerability handling
+      description: 'Programme: Vulnerabilities discovered or reported are tracked, assessed, and remediated. Verify: Vulnerability tracker exists; SLA per severity is documented; remediation is tracked.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:13
@@ -3133,18 +3445,21 @@ objects:
       depth: 1
       ref_id: '13'
       name: SPE 8 - System integrity and availability
+      description: Continuity, resource availability, failure-state behavior, and backup/restore.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:13
       ref_id: AVAIL 1
       name: System availability and intended functionality
+      description: Availability is preserved through continuity management, resource availability, and fail-state behavior.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1
       ref_id: AVAIL 1.1
       name: Continuity management
+      description: 'Programme: Business and operational continuity for the IACS is documented, exercised, and integrated with broader organizational continuity. Verify: BCP/DRP exists with IACS scope; exercise records are maintained.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1.2
@@ -3153,6 +3468,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1
       ref_id: AVAIL 1.2
       name: Resource availability management
+      description: 'Programme: IACS resources (compute, storage, network) are managed to remain available under load and failure. Verify: Resource limits and monitoring are documented; alerting is in place.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1.3
@@ -3161,6 +3477,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1
       ref_id: AVAIL 1.3
       name: Failure-state
+      description: 'Programme: Failure-state behavior of IACS components is documented and acceptable to the asset owner. Verify: Failure modes are documented per component; behavior under failure is predictable and acceptable.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
@@ -3169,12 +3486,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:13
       ref_id: AVAIL 2
       name: Backup/restore/archive
+      description: Backups, restoration, and archives provide recoverability.
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
       ref_id: AVAIL 2.1
       name: Backup
+      description: 'Programme: Backups of IACS state are taken on a defined schedule covering documented scope (PLC programs, HMI projects, historian databases, engineering tool configs, network device configs). Verify: Backup scope is documented and matches the asset inventory; backups are scheduled and completed.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.2
@@ -3183,6 +3502,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
       ref_id: AVAIL 2.2
       name: Backup non-interference
+      description: 'Programme: Backup processes do not interfere with IACS operations. Verify: Backup-window scheduling is documented; resource impact is monitored.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.3
@@ -3191,6 +3511,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
       ref_id: AVAIL 2.3
       name: Backup verification
+      description: 'Programme: Backups are verified for restorability on a defined cadence. Verify: Verification records (test restores, integrity checks) exist.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.4
@@ -3199,6 +3520,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
       ref_id: AVAIL 2.4
       name: Backup media
+      description: 'Programme: Backup media are protected against loss, theft, and tampering. Verify: Media protection (encryption, physical access control) is documented and enforced.'
       implementation_groups:
       - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.5
@@ -3207,5 +3529,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
       ref_id: AVAIL 2.5
       name: Backup restoration
+      description: 'Programme: Documented procedures restore IACS state from backups, satisfying both the recovery-time objective (RTO — how fast) and the recovery-point objective (RPO — how much state loss is acceptable); for continuous-process plants RPO often matters more than RTO. Verify: Restoration procedures exist, are tested end-to-end, and meet documented RTO and RPO targets per asset class.'
       implementation_groups:
       - spe
