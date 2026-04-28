@@ -10830,7 +10830,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 if ra.score is not None:
                     ws.cell(row=row, column=8, value=ra.score)
             if ra.observation:
-                ws.cell(row=row, column=13, value=ra.observation)  # Column M: comments
+                ws.cell(
+                    row=row, column=13, value=escape_excel_formula(ra.observation)
+                )  # Column M: comments
 
         buffer = io.BytesIO()
         wb.save(buffer)
