@@ -18,8 +18,18 @@ def backfill_presets(apps, schema_editor):
         content = lib.content or {}
         if not isinstance(content, dict) or "preset" not in content:
             continue
-        preset_content = content.get("preset", {}) or {}
-        journey_content = preset_content.get("journey", {}) or {}
+        preset_content = content.get("preset")
+        if not isinstance(preset_content, dict):
+            # Malformed library row (preset key present but not an object).
+            # Skip rather than crash the whole migration.
+            continue
+        journey_content = preset_content.get("journey")
+        if not isinstance(journey_content, dict):
+            journey_content = {}
+        profile = preset_content.get("profile")
+        feature_flags = preset_content.get("feature_flags")
+        scaffolded_objects = preset_content.get("scaffolded_objects")
+        steps = journey_content.get("steps")
         Preset.objects.update_or_create(
             urn=lib.urn,
             defaults={
@@ -29,11 +39,14 @@ def backfill_presets(apps, schema_editor):
                 "version": lib.version,
                 "provider": lib.provider,
                 "translations": lib.translations or {},
-                "profile": preset_content.get("profile", {}) or {},
-                "feature_flags": preset_content.get("feature_flags", {}) or {},
-                "scaffolded_objects": preset_content.get("scaffolded_objects", [])
-                or [],
-                "steps": journey_content.get("steps", []) or [],
+                "profile": profile if isinstance(profile, dict) else {},
+                "feature_flags": feature_flags
+                if isinstance(feature_flags, dict)
+                else {},
+                "scaffolded_objects": scaffolded_objects
+                if isinstance(scaffolded_objects, list)
+                else [],
+                "steps": steps if isinstance(steps, list) else [],
                 "dependencies": list(lib.dependencies or []),
                 "folder": root_folder,
             },

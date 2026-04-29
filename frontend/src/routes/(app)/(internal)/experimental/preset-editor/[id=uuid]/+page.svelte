@@ -125,20 +125,24 @@
 	async function loadDraft() {
 		loading = true;
 		errorMsg = '';
-		const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action: 'start-editing' })
-		});
-		if (!r.ok) {
-			errorMsg = `Failed to load draft: ${r.status}`;
+		try {
+			const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'start-editing' })
+			});
+			if (!r.ok) {
+				errorMsg = `Failed to load draft: ${r.status}`;
+				return;
+			}
+			const j = await r.json();
+			draft = normalize(j.editing_draft);
+			initialJson = JSON.stringify(draft);
+		} catch (e) {
+			errorMsg = `Failed to load draft: ${(e as Error).message ?? e}`;
+		} finally {
 			loading = false;
-			return;
 		}
-		const j = await r.json();
-		draft = normalize(j.editing_draft);
-		initialJson = JSON.stringify(draft);
-		loading = false;
 	}
 
 	function normalize(d: any): Draft {
@@ -169,20 +173,24 @@
 		if (!draft) return;
 		saving = true;
 		errorMsg = '';
-		const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(draft)
-		});
-		const j = await r.json();
-		if (!r.ok) {
-			errorMsg = formatError(j);
+		try {
+			const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(draft)
+			});
+			const j = await r.json().catch(() => ({}));
+			if (!r.ok) {
+				errorMsg = formatError(j) || `Failed to save draft: ${r.status}`;
+				return;
+			}
+			draft = normalize(j.editing_draft);
+			initialJson = JSON.stringify(draft);
+		} catch (e) {
+			errorMsg = `Failed to save draft: ${(e as Error).message ?? e}`;
+		} finally {
 			saving = false;
-			return;
 		}
-		draft = normalize(j.editing_draft);
-		initialJson = JSON.stringify(draft);
-		saving = false;
 	}
 
 	async function discard() {
@@ -219,19 +227,24 @@
 		showPreview = false;
 		publishing = true;
 		errorMsg = '';
-		const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action: 'publish' })
-		});
-		const j = await r.json();
-		publishing = false;
-		if (!r.ok) {
-			errorMsg = formatError(j);
-			return;
+		try {
+			const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'publish' })
+			});
+			const j = await r.json().catch(() => ({}));
+			if (!r.ok) {
+				errorMsg = formatError(j) || `Failed to publish: ${r.status}`;
+				return;
+			}
+			publishSuccess = true;
+			setTimeout(() => (publishSuccess = false), 3000);
+		} catch (e) {
+			errorMsg = `Failed to publish: ${(e as Error).message ?? e}`;
+		} finally {
+			publishing = false;
 		}
-		publishSuccess = true;
-		setTimeout(() => (publishSuccess = false), 3000);
 		await loadDraft();
 	}
 
