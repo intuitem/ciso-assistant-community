@@ -4173,6 +4173,8 @@
 	"nvdEnrichEnabledHelpText": "Récupère automatiquement les détails des CVE (CVSS, description, dates) depuis le NVD lors de la création d’un nouveau CVE. Une seule requête par CVE.",
 	"networkTimeout": "Délai d’expiration réseau (secondes)",
 	"networkTimeoutHelpText": "Temps maximal d’attente pour les réponses des flux externes",
+	"feedOutboundHostsTitle": "Hôtes sortants",
+	"feedOutboundHostsHelpText": "Si le trafic sortant est restreint, autorisez ces hôtes afin que les flux activés puissent atteindre leurs sources de données.",
 	"securityAdvisories": "Avis de sécurité",
 	"cve": "CVE",
 	"cves": "CVE",
