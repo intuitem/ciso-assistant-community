@@ -296,6 +296,47 @@ class TestEditorEndpoints:
         assert r.status_code == 400
         assert "library" in str(r.data).lower()
 
+    def test_library_preset_standard_crud_blocked(self, admin_client):
+        """Even an admin cannot mutate a library-backed preset via the standard
+        DRF endpoints (PATCH/PUT/DELETE) — the urn-is-not-None guard runs at the
+        dispatch layer, not just inside our @action endpoints."""
+        root = Folder.get_root_folder()
+        lib = Preset.objects.create(
+            name="Lib CRUD",
+            folder=root,
+            urn="urn:test:lib-crud",
+            version=2,
+            steps=[{"key": "from_yaml", "title": "From YAML"}],
+            scaffolded_objects=[{"type": "processing", "name": "Yaml proc"}],
+        )
+
+        # PATCH should be rejected
+        r = admin_client.patch(
+            f"/api/presets/{lib.id}/",
+            {"steps": [], "scaffolded_objects": []},
+            format="json",
+        )
+        assert r.status_code == 400, r.data
+        assert "library" in str(r.data).lower()
+
+        # PUT should be rejected
+        r = admin_client.put(
+            f"/api/presets/{lib.id}/",
+            {"name": "Hijacked", "folder": str(root.id)},
+            format="json",
+        )
+        assert r.status_code == 400, r.data
+
+        # DELETE should be rejected
+        r = admin_client.delete(f"/api/presets/{lib.id}/")
+        assert r.status_code == 400, r.data
+
+        # Verify the library preset's structure is unchanged
+        lib.refresh_from_db()
+        assert lib.name == "Lib CRUD"
+        assert len(lib.steps) == 1
+        assert len(lib.scaffolded_objects) == 1
+
     def test_apply_user_authored_creates_linked_journey(
         self, admin_client, loaded_libs
     ):
