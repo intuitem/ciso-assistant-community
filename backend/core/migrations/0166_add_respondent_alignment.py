@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0161_securityexception_link"),
+        ("core", "0165_preset_split"),
     ]
 
     operations = [

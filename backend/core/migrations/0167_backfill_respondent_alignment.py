@@ -40,7 +40,7 @@ def reverse_backfill(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0162_add_respondent_alignment"),
+        ("core", "0166_add_respondent_alignment"),
     ]
 
     operations = [
