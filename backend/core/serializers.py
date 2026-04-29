@@ -2063,7 +2063,7 @@ class FolderImportExportSerializer(BaseModelSerializer):
 
 class FrameworkReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "id"])
+    library = FieldsRelatedField(["name", "id", "urn"])
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
@@ -4076,6 +4076,62 @@ class FindingReadSerializer(FindingWriteSerializer):
         fields = "__all__"
 
 
+class PresetReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    is_user_authored = serializers.SerializerMethodField()
+    scaffolded_objects = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Preset
+        fields = [
+            "id",
+            "name",
+            "description",
+            "urn",
+            "ref_id",
+            "version",
+            "editing_version",
+            "provider",
+            "translations",
+            "profile",
+            "feature_flags",
+            "dependencies",
+            "folder",
+            "is_user_authored",
+            "scaffolded_objects",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_is_user_authored(self, obj) -> bool:
+        return obj.urn is None
+
+    def get_scaffolded_objects(self, obj):
+        items = obj.scaffolded_objects or []
+        if not items:
+            return []
+        from collections import Counter
+
+        counts = Counter(item.get("type") for item in items if item.get("type"))
+        return [{"type": t, "count": c} for t, c in counts.items()]
+
+
+class PresetWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Preset
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "translations",
+            "profile",
+            "feature_flags",
+            "dependencies",
+            "scaffolded_objects",
+            "steps",
+        ]
+
+
 class PresetJourneyStepReadSerializer(BaseModelSerializer):
     title = serializers.CharField(source="get_title_translated")
     description = serializers.CharField(
@@ -4106,17 +4162,21 @@ class PresetJourneyStepWriteSerializer(BaseModelSerializer):
                 validated_data["completed_by"] = None
 
         with transaction.atomic():
+            journey = instance.journey
+            update_fields = ["updated_at"]
             # Sync target_ref change to parent journey's object_refs
             if "target_ref" in validated_data:
                 new_ref = validated_data["target_ref"]
-                journey = instance.journey
                 object_refs = dict(journey.object_refs or {})
                 if new_ref:
                     object_refs[instance.key] = new_ref
                 else:
                     object_refs.pop(instance.key, None)
                 journey.object_refs = object_refs
-                journey.save(update_fields=["object_refs"])
+                update_fields.append("object_refs")
+            # Bump journey.updated_at on every step edit so the catalog's
+            # "recently active" list surfaces it.
+            journey.save(update_fields=update_fields)
 
             return super().update(instance, validated_data)
 
@@ -4124,6 +4184,8 @@ class PresetJourneyStepWriteSerializer(BaseModelSerializer):
 class PresetJourneyReadSerializer(BaseModelSerializer):
     steps = PresetJourneyStepReadSerializer(many=True, read_only=True)
     folder = FieldsRelatedField()
+    preset = FieldsRelatedField(["id", "name", "urn", "version"])
+    applied_by = FieldsRelatedField(["id", "email"])
     latest_version = serializers.SerializerMethodField()
 
     class Meta:
@@ -4131,12 +4193,9 @@ class PresetJourneyReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def get_latest_version(self, obj):
-        return (
-            StoredLibrary.objects.filter(urn=obj.urn)
-            .order_by("-version")
-            .values_list("version", flat=True)
-            .first()
-        )
+        if not obj.preset:
+            return obj.applied_version
+        return obj.preset.version
 
 
 class PresetJourneyWriteSerializer(BaseModelSerializer):

@@ -19,8 +19,7 @@
 		"postinstall": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "^2.1.0",
-		"@inlang/plugin-message-format": "^2.2.0",
+		"@inlang/paraglide-js": "^2.17.0",
 		"@playwright/test": "^1.55.1",
 		"@skeletonlabs/skeleton": "^4.0.0",
 		"@skeletonlabs/skeleton-svelte": "^4.0.0",

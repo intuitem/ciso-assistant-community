@@ -56,7 +56,7 @@
 	};
 
 	async function updateStepStatus(stepId: string, newStatus: string) {
-		await fetch(`/preset-journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ status: newStatus })
@@ -150,7 +150,7 @@
 	});
 
 	async function updateStepTargetRef(stepId: string, targetRef: string | null) {
-		await fetch(`/preset-journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ target_ref: targetRef })
@@ -172,7 +172,7 @@
 			renaming = false;
 			return;
 		}
-		await fetch(`/preset-journeys/${$page.params.id}/rename`, {
+		await fetch(`/journeys/${$page.params.id}/rename`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ name: trimmed })
@@ -187,7 +187,7 @@
 	async function upgradeJourney() {
 		upgrading = true;
 		try {
-			const response = await fetch(`/preset-journeys/${$page.params.id}/upgrade`, {
+			const response = await fetch(`/journeys/${$page.params.id}/upgrade`, {
 				method: 'POST'
 			});
 			if (response.ok) {
@@ -213,7 +213,7 @@
 			},
 			response: async (confirmed: boolean) => {
 				if (!confirmed) return;
-				const response = await fetch(`/preset-journeys/${$page.params.id}`, {
+				const response = await fetch(`/journeys/${$page.params.id}`, {
 					method: 'DELETE'
 				});
 				if (response.ok) {
@@ -309,7 +309,7 @@
 				</div>
 				<!-- Toolbar -->
 				<div class="flex items-center gap-2 px-4 py-2.5">
-					{#if data.journey.latest_version && data.journey.latest_version > data.journey.version}
+					{#if data.journey.latest_version && data.journey.latest_version > data.journey.applied_version}
 						<button
 							type="button"
 							class="btn btn-sm preset-filled-warning-500"
