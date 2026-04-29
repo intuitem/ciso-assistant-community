@@ -56,6 +56,7 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "avoid": "#ee6666",
     "on_hold": "#ee6666",
     "transfer": "#91cc75",
+    "cancelled": "#9ca3af",
 }
 
 
@@ -668,6 +669,7 @@ def risk_per_status(user: User):
         "accept": "#73c0de",
         "avoid": "#ee6666",
         "transfer": "#3ba272",
+        "cancelled": "#9ca3af",
     }
 
     (
@@ -769,9 +771,11 @@ def task_template_per_status(user: User):
     )
 
     # For non-recurrent templates, get the single node's status
-    single_node_subq = TaskNode.objects.filter(task_template=OuterRef("pk")).values(
-        "status"
-    )[:1]
+    single_node_subq = (
+        TaskNode.objects.filter(task_template=OuterRef("pk"))
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
 
     non_recurrent_with_status = (
         viewable_task_templates.filter(is_recurrent=False)
@@ -1309,22 +1313,54 @@ def build_audits_tree_metrics(user):
     return tree
 
 
-def build_audits_stats(user, folder_id=None):
-    scoped_folder = (
-        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+def build_audits_stats(user, folder_id=None, object_ids=None):
+    if object_ids is None:
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, user, ComplianceAssessment
+        )
+    top_audits = list(
+        ComplianceAssessment.objects.filter(id__in=object_ids)
+        .order_by("-updated_at")
+        .only("id", "name", "selected_implementation_groups")[:10]
     )
-    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, ComplianceAssessment
+    if not top_audits:
+        return {"data": [], "names": [], "uuids": []}
+
+    # Single fetch for all RAs across the top 10 audits, then aggregate
+    # in Python so each audit's selected_implementation_groups filter is
+    # honored (replaces 10× get_requirements_result_count()).
+    top_ids = [a.id for a in top_audits]
+    ig_by_audit = {
+        a.id: set(a.selected_implementation_groups)
+        if a.selected_implementation_groups
+        else None
+        for a in top_audits
+    }
+    counts_by_audit: dict = {aid: {} for aid in top_ids}
+    ra_qs = RequirementAssessment.objects.filter(
+        compliance_assessment_id__in=top_ids,
+        requirement__assessable=True,
+    ).values_list(
+        "compliance_assessment_id",
+        "result",
+        "requirement__implementation_groups",
     )
-    data = list()
-    names = list()
-    uuids = list()
-    for audit in ComplianceAssessment.objects.filter(id__in=object_ids).order_by(
-        "-updated_at"
-    )[:10]:
-        data.append([rs[0] for rs in audit.get_requirements_result_count()])
-        names.append(audit.name)
-        uuids.append(audit.id)
+    for ca_id, result, req_igs in ra_qs:
+        ig = ig_by_audit[ca_id]
+        if ig is not None and not (req_igs and ig & set(req_igs)):
+            continue
+        bucket = counts_by_audit[ca_id]
+        bucket[result] = bucket.get(result, 0) + 1
+
+    results_order = list(RequirementAssessment.Result)
+    data = [
+        [counts_by_audit[a.id].get(r, 0) for r in results_order] for a in top_audits
+    ]
+    names = [a.name for a in top_audits]
+    uuids = [a.id for a in top_audits]
     return {"data": data, "names": names, "uuids": uuids}
 
 
@@ -1420,6 +1456,49 @@ def get_metrics(user: User, folder_id):
     return data
 
 
+def _compute_progress_by_assessment(assessment_ids):
+    """
+    Bulk-compute progress (% assessed) for a set of ComplianceAssessment ids,
+    honoring each assessment's selected_implementation_groups. Mirrors the
+    .progress property semantics (assessed = result != NOT_ASSESSED OR score
+    is not None) but in two queries instead of N heavy prefetched ones.
+    """
+    assessment_ids = list(assessment_ids)
+    if not assessment_ids:
+        return {}
+
+    ig_by_audit = {
+        ca_id: set(igs) if igs else None
+        for ca_id, igs in ComplianceAssessment.objects.filter(
+            id__in=assessment_ids
+        ).values_list("id", "selected_implementation_groups")
+    }
+
+    totals = {aid: 0 for aid in assessment_ids}
+    assessed = {aid: 0 for aid in assessment_ids}
+    rows = RequirementAssessment.objects.filter(
+        compliance_assessment_id__in=assessment_ids,
+        requirement__assessable=True,
+    ).values_list(
+        "compliance_assessment_id",
+        "result",
+        "score",
+        "requirement__implementation_groups",
+    )
+    for ca_id, result, score, req_igs in rows:
+        ig = ig_by_audit.get(ca_id)
+        if ig is not None and not (req_igs and ig & set(req_igs)):
+            continue
+        totals[ca_id] += 1
+        if result != RequirementAssessment.Result.NOT_ASSESSED or score is not None:
+            assessed[ca_id] += 1
+
+    return {
+        aid: int((assessed[aid] / totals[aid]) * 100) if totals[aid] else 0
+        for aid in assessment_ids
+    }
+
+
 def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
@@ -1427,15 +1506,11 @@ def get_audits_metrics(user: User, folder_id=None):
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         scoped_folder, user, ComplianceAssessment
     )
-    viewable_compliance_assessments = ComplianceAssessment.objects.filter(
-        id__in=object_ids
-    )
-    progress_avg = math.ceil(
-        mean([x.progress for x in viewable_compliance_assessments] or [0])
-    )
+    progresses = list(_compute_progress_by_assessment(object_ids).values())
+    progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {
         "progress_avg": progress_avg,
-        "audits_stats": build_audits_stats(user, folder_id),
+        "audits_stats": build_audits_stats(user, folder_id, object_ids=object_ids),
     }
 
 
@@ -1479,28 +1554,14 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         return model.objects.filter(id__in=object_ids)
 
-    # Get viewable compliance assessments with related data and progress annotation
-    from django.db.models import Count, Q, F, Value, IntegerField, ExpressionWrapper
-    from django.db.models.functions import Greatest, Coalesce
-
-    viewable_assessments = (
-        viewable_items(ComplianceAssessment, folder_id)
-        .select_related("framework", "folder", "perimeter")
-        .annotate(
-            total_requirements=Count(
-                "requirement_assessments",
-                filter=Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
-            assessed_requirements=Count(
-                "requirement_assessments",
-                filter=~Q(
-                    requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                )
-                & Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
+    viewable_assessments = list(
+        viewable_items(ComplianceAssessment, folder_id).select_related(
+            "framework", "folder", "perimeter"
         )
+    )
+
+    progress_by_id = _compute_progress_by_assessment(
+        [a.id for a in viewable_assessments]
     )
 
     framework_data = {}
@@ -1515,7 +1576,6 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         perimeter_id = str(assessment.perimeter.id) if assessment.perimeter else None
 
-        # Initialize framework if not exists
         if framework_name not in framework_data:
             framework_data[framework_name] = {
                 "framework_id": framework_id,
@@ -1523,7 +1583,6 @@ def get_compliance_analytics(user: User, folder_id=None):
                 "domains": {},
             }
 
-        # Initialize domain if not exists
         if domain_name not in framework_data[framework_name]["domains"]:
             framework_data[framework_name]["domains"][domain_name] = {
                 "domain_id": domain_id,
@@ -1531,12 +1590,11 @@ def get_compliance_analytics(user: User, folder_id=None):
                 "assessments": [],
             }
 
-        # Add assessment data using annotated progress
         framework_data[framework_name]["domains"][domain_name]["assessments"].append(
             {
                 "assessment_id": str(assessment.id),
                 "assessment_name": assessment.name,
-                "progress": assessment.progress,
+                "progress": progress_by_id.get(assessment.id, 0),
                 "perimeter": perimeter_name,
                 "perimeter_id": perimeter_id,
                 "status": assessment.status,
@@ -1643,6 +1701,7 @@ def risk_status(user: User, risk_assessment_list):
         "accept": list(),
         "avoid": list(),
         "transfer": list(),
+        "cancelled": list(),
     }
     mtg_status_out = {
         "--": list(),
@@ -1768,10 +1827,10 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
 
     untreated = RiskScenario.objects.filter(
         risk_assessment__in=risk_assessment_list
-    ).exclude(treatment__in=["mitigate", "accept"])
+    ).exclude(treatment__in=["mitigate", "accept", "cancelled"])
     untreated_h_vh = (
         RiskScenario.objects.filter(risk_assessment__in=risk_assessment_list)
-        .exclude(treatment__in=["mitigate", "accept"])
+        .exclude(treatment__in=["mitigate", "accept", "cancelled"])
         .filter(current_level__gte=2)
     )
     accepted = RiskScenario.objects.filter(
@@ -1988,10 +2047,13 @@ def handle(exc, context):
     # translate django validation error which ...
     # .. causes HTTP 500 status ==> DRF validation which will cause 400 HTTP status
     if isinstance(exc, DjValidationError):
-        data = exc.message_dict
-        if DJ_NON_FIELD_ERRORS in data:
-            data[DRF_NON_FIELD_ERRORS] = data[DJ_NON_FIELD_ERRORS]
-            del data[DJ_NON_FIELD_ERRORS]
+        if hasattr(exc, "error_dict"):
+            data = exc.message_dict
+            if DJ_NON_FIELD_ERRORS in data:
+                data[DRF_NON_FIELD_ERRORS] = data[DJ_NON_FIELD_ERRORS]
+                del data[DJ_NON_FIELD_ERRORS]
+        else:
+            data = {DRF_NON_FIELD_ERRORS: exc.messages}
 
         exc = DRFValidationError(detail=data)
 

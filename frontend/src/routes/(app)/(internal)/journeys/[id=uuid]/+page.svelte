@@ -56,7 +56,7 @@
 	};
 
 	async function updateStepStatus(stepId: string, newStatus: string) {
-		await fetch(`/preset-journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ status: newStatus })
@@ -64,16 +64,46 @@
 		invalidateAll();
 	}
 
+	function buildQueryString(params: Record<string, unknown> | null | undefined): string {
+		if (!params || typeof params !== 'object') return '';
+		const parts: string[] = [];
+		for (const [key, value] of Object.entries(params)) {
+			if (value == null) continue;
+			if (Array.isArray(value)) {
+				const joined = value
+					.filter((v) => v != null)
+					.map((v) => String(v))
+					.join(',');
+				if (joined) parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(joined)}`);
+			} else {
+				parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
+			}
+		}
+		return parts.length ? `?${parts.join('&')}` : '';
+	}
+
+	function isSafeInternalUrl(url: string): boolean {
+		// Must be a rooted, same-origin path. Reject protocol-relative "//..." and any scheme.
+		return url.startsWith('/') && !url.startsWith('//') && !/^\w+:/.test(url);
+	}
+
 	function getStepLink(step: any): string | null {
+		// target_url takes precedence: supports generic routes like /reporting or /settings.
+		if (step.target_url && typeof step.target_url === 'string') {
+			if (!isSafeInternalUrl(step.target_url)) return null;
+			return `${step.target_url}${buildQueryString(step.target_params)}`;
+		}
 		if (!step.target_model) return null;
 		const folderId = data.journey?.folder?.id;
+		const extraQs = buildQueryString(step.target_params);
 		if (step.target_ref) {
-			return `/${step.target_model}/${step.target_ref}`;
+			return `/${step.target_model}/${step.target_ref}${extraQs}`;
 		}
 		if (folderId) {
-			return `/${step.target_model}?folder=${folderId}`;
+			const sep = extraQs ? '&' : '';
+			return `/${step.target_model}?folder=${folderId}${sep}${extraQs.slice(1)}`;
 		}
-		return `/${step.target_model}`;
+		return `/${step.target_model}${extraQs}`;
 	}
 
 	// --- Edit mode for step links ---
@@ -120,7 +150,7 @@
 	});
 
 	async function updateStepTargetRef(stepId: string, targetRef: string | null) {
-		await fetch(`/preset-journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ target_ref: targetRef })
@@ -142,7 +172,7 @@
 			renaming = false;
 			return;
 		}
-		await fetch(`/preset-journeys/${$page.params.id}/rename`, {
+		await fetch(`/journeys/${$page.params.id}/rename`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ name: trimmed })
@@ -157,7 +187,7 @@
 	async function upgradeJourney() {
 		upgrading = true;
 		try {
-			const response = await fetch(`/preset-journeys/${$page.params.id}/upgrade`, {
+			const response = await fetch(`/journeys/${$page.params.id}/upgrade`, {
 				method: 'POST'
 			});
 			if (response.ok) {
@@ -183,7 +213,7 @@
 			},
 			response: async (confirmed: boolean) => {
 				if (!confirmed) return;
-				const response = await fetch(`/preset-journeys/${$page.params.id}`, {
+				const response = await fetch(`/journeys/${$page.params.id}`, {
 					method: 'DELETE'
 				});
 				if (response.ok) {
@@ -279,7 +309,7 @@
 				</div>
 				<!-- Toolbar -->
 				<div class="flex items-center gap-2 px-4 py-2.5">
-					{#if data.journey.latest_version && data.journey.latest_version > data.journey.version}
+					{#if data.journey.latest_version && data.journey.latest_version > data.journey.applied_version}
 						<button
 							type="button"
 							class="btn btn-sm preset-filled-warning-500"

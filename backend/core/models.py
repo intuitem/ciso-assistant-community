@@ -962,12 +962,12 @@ class LibraryUpdater:
                 order_id = 0
                 all_fields_to_update = set()
 
-                # Check if score boundaries changed
+                # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
                     prev_min != new_framework.min_score
                     or prev_max != new_framework.max_score
-                    or prev_def != new_framework.scores_definition
                 )
+                scores_definition_changed = prev_def != new_framework.scores_definition
 
                 # If scores changed and no strategy provided, raise exception for frontend to handle
                 if (
@@ -979,11 +979,7 @@ class LibraryUpdater:
                     affected_cas = [
                         ca
                         for ca in compliance_assessments
-                        if (
-                            ca.min_score == prev_min
-                            and ca.max_score == prev_max
-                            and ca.scores_definition == prev_def
-                        )
+                        if (ca.min_score == prev_min and ca.max_score == prev_max)
                     ]
 
                     if affected_cas:
@@ -1004,19 +1000,25 @@ class LibraryUpdater:
 
                 # Update compliance assessments score boundaries
                 compliance_assessments_to_update = []
+                ca_with_scale_change = []
                 ca_bounds = {}
                 for ca in compliance_assessments:
                     # preserve user overrides: update only if CA still equals previous framework defaults
-                    still_on_prev_defaults = (
-                        ca.min_score == prev_min
-                        and ca.max_score == prev_max
-                        and ca.scores_definition == prev_def
+                    scale_on_prev_defaults = (
+                        ca.min_score == prev_min and ca.max_score == prev_max
                     )
+                    definition_on_prev_defaults = ca.scores_definition == prev_def
 
-                    if still_on_prev_defaults and score_boundaries_changed:
+                    needs_update = False
+                    if scale_on_prev_defaults and score_boundaries_changed:
                         ca.min_score = new_framework.min_score
                         ca.max_score = new_framework.max_score
+                        needs_update = True
+                        ca_with_scale_change.append(ca)
+                    if definition_on_prev_defaults and scores_definition_changed:
                         ca.scores_definition = new_framework.scores_definition
+                        needs_update = True
+                    if needs_update:
                         compliance_assessments_to_update.append(ca)
 
                 if compliance_assessments_to_update:
@@ -1046,7 +1048,7 @@ class LibraryUpdater:
                                 )
                             ),
                         )
-                        for ca in compliance_assessments_to_update
+                        for ca in ca_with_scale_change
                     }
 
                 # main loop by requirement_node
@@ -1125,8 +1127,7 @@ class LibraryUpdater:
                         if (
                             ra.is_scored
                             and ra.score is not None
-                            and ra.compliance_assessment
-                            in compliance_assessments_to_update
+                            and ra.compliance_assessment in ca_with_scale_change
                         ):
                             default_min = (
                                 0
@@ -3412,37 +3413,39 @@ class Asset(
 
     @classmethod
     def _aggregate_security_capabilities(
-        cls, supporting_descendants: set, parent_asset=None
+        cls, supporting_descendants: set, parent_asset=None, parent_to_children=None
     ) -> dict:
         """
         Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
         and its descendants are excluded for that capability only (not globally).
+
+        If `parent_to_children` is provided, it is reused instead of re-running
+        `_prefetch_graph_data` — this avoids an extra full-graph prefetch per invocation
+        when the caller already built the graph for a batch of assets.
         """
         # Build descendant map with constant DB queries using prefetched graph data
         descendants_map = {}
-        if parent_asset is not None:
-            graph = cls._prefetch_graph_data([parent_asset])
-            parent_to_children = graph["parent_to_children"]
+        if parent_to_children is None and parent_asset is not None:
+            parent_to_children = cls._prefetch_graph_data([parent_asset])[
+                "parent_to_children"
+            ]
+        if parent_to_children is not None:
             for asset in supporting_descendants:
                 descendants_map[asset.id] = cls._get_all_descendants(
                     asset, parent_to_children
                 )
         else:
-            # Fallback for when parent_asset is not provided
+            # Fallback for when neither parent_asset nor parent_to_children is provided
             for asset in supporting_descendants:
                 descendants_map[asset.id] = asset.get_descendants()
 
-        # Track which capabilities are overridden by which assets
+        # Track which capabilities are overridden by which assets.
+        # Uses `.all()` (not `.values_list`) so the prefetch cache is honored.
         overrides = {}  # {cap_name: [list of assets that override it]}
         for asset in supporting_descendants:
-            overridden = asset.overridden_children_capabilities.values_list(
-                "name", flat=True
-            )
-            for cap_name in overridden:
-                if cap_name not in overrides:
-                    overrides[cap_name] = []
-                overrides[cap_name].append(asset)
+            for cap in asset.overridden_children_capabilities.all():
+                overrides.setdefault(cap.name, []).append(asset)
 
         agg_cap = {}
         for asset in supporting_descendants:
@@ -3478,37 +3481,38 @@ class Asset(
 
     @classmethod
     def _aggregate_recovery_capabilities(
-        cls, supporting_descendants: set, parent_asset=None
+        cls, supporting_descendants: set, parent_asset=None, parent_to_children=None
     ) -> dict:
         """
         Aggregates recovery capabilities from supporting descendants (highest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
         and its descendants are excluded for that capability only (not globally).
+
+        If `parent_to_children` is provided, it is reused instead of re-running
+        `_prefetch_graph_data`.
         """
         # Build descendant map with constant DB queries using prefetched graph data
         descendants_map = {}
-        if parent_asset is not None:
-            graph = cls._prefetch_graph_data([parent_asset])
-            parent_to_children = graph["parent_to_children"]
+        if parent_to_children is None and parent_asset is not None:
+            parent_to_children = cls._prefetch_graph_data([parent_asset])[
+                "parent_to_children"
+            ]
+        if parent_to_children is not None:
             for asset in supporting_descendants:
                 descendants_map[asset.id] = cls._get_all_descendants(
                     asset, parent_to_children
                 )
         else:
-            # Fallback for when parent_asset is not provided
+            # Fallback for when neither parent_asset nor parent_to_children is provided
             for asset in supporting_descendants:
                 descendants_map[asset.id] = asset.get_descendants()
 
-        # Track which capabilities are overridden by which assets
+        # Track which capabilities are overridden by which assets.
+        # Uses `.all()` (not `.values_list`) so the prefetch cache is honored.
         overrides = {}  # {cap_name: [list of assets that override it]}
         for asset in supporting_descendants:
-            overridden = asset.overridden_children_capabilities.values_list(
-                "name", flat=True
-            )
-            for cap_name in overridden:
-                if cap_name not in overrides:
-                    overrides[cap_name] = []
-                overrides[cap_name].append(asset)
+            for cap in asset.overridden_children_capabilities.all():
+                overrides.setdefault(cap.name, []).append(asset)
 
         agg_cap = {}
         for asset in supporting_descendants:
@@ -4624,6 +4628,18 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     resolution = models.TextField(null=True, blank=True, verbose_name=_("Resolution"))
     is_bcp_activated = models.BooleanField(
         null=True, blank=True, verbose_name=_("BCP activated")
+    )
+    applied_controls = models.ManyToManyField(
+        "core.AppliedControl",
+        blank=True,
+        verbose_name=_("Applied controls"),
+        related_name="incidents",
+    )
+    task_templates = models.ManyToManyField(
+        "core.TaskTemplate",
+        blank=True,
+        verbose_name=_("Task templates"),
+        related_name="incidents",
     )
 
     fields_to_check = ["name", "ref_id"]
@@ -6122,6 +6138,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         ("accept", _("Accept")),
         ("avoid", _("Avoid")),
         ("transfer", _("Transfer")),
+        ("cancelled", _("Cancelled")),
     ]
 
     DEFAULT_SOK_OPTIONS = {
@@ -6181,6 +6198,13 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         verbose_name=_("Vulnerabilities"),
         blank=True,
         help_text=_("Vulnerabities exploited by the risk scenario"),
+        related_name="risk_scenarios",
+    )
+    incidents = models.ManyToManyField(
+        Incident,
+        verbose_name=_("Incidents"),
+        blank=True,
+        help_text=_("Incidents that materialized this risk scenario"),
         related_name="risk_scenarios",
     )
     applied_controls = models.ManyToManyField(
@@ -9341,11 +9365,38 @@ class Actor(AbstractBaseModel):
         return str(self.specific)
 
 
+class Preset(NameDescriptionMixin, FolderMixin, EditableMixin):
+    """Template definition. Library-backed (urn set) or user-authored (urn null)."""
+
+    urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    ref_id = models.CharField(max_length=255, null=True, blank=True)
+    version = models.IntegerField(default=1)
+    provider = models.CharField(max_length=255, null=True, blank=True)
+    translations = models.JSONField(default=dict, blank=True)
+    profile = models.JSONField(default=dict, blank=True)
+    feature_flags = models.JSONField(default=dict, blank=True)
+    scaffolded_objects = models.JSONField(default=list, blank=True)
+    steps = models.JSONField(default=list, blank=True)
+    dependencies = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class PresetJourney(NameDescriptionMixin, FolderMixin):
     """Instance created when a user applies a preset definition."""
 
-    urn = models.CharField(max_length=255)
-    version = models.IntegerField(default=1)
+    preset = models.ForeignKey(
+        Preset,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="journeys",
+    )
+    applied_version = models.IntegerField(default=1)
     object_refs = models.JSONField(default=dict)
     applied_at = models.DateTimeField(auto_now_add=True)
     applied_by = models.ForeignKey(
@@ -9378,6 +9429,8 @@ class PresetJourneyStep(AbstractBaseModel):
     translations = models.JSONField(null=True, blank=True)
     target_model = models.CharField(max_length=100, blank=True, null=True)
     target_ref = models.CharField(max_length=100, blank=True, null=True)
+    target_url = models.CharField(max_length=255, blank=True, null=True)
+    target_params = models.JSONField(null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.NOT_STARTED
     )
@@ -9443,7 +9496,7 @@ auditlog.register(
 )
 auditlog.register(
     RiskScenario,
-    m2m_fields={"owner", "applied_controls", "existing_applied_controls"},
+    m2m_fields={"owner", "applied_controls", "existing_applied_controls", "incidents"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
@@ -9488,6 +9541,7 @@ auditlog.register(
 )
 auditlog.register(
     Incident,
+    m2m_fields={"applied_controls", "task_templates"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
@@ -9530,6 +9584,10 @@ auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
     m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    Preset,
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     PresetJourney,

@@ -6,7 +6,7 @@
 		withTranslation,
 		type QuestionChoice
 	} from './builder-state';
-	import { createDragHandlers } from './builder-utils.svelte';
+	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 
 	interface Props {
@@ -29,7 +29,7 @@
 
 	const builder = getBuilderContext();
 	const { errors: errorsStore, activeLanguage: activeLanguageStore } = builder;
-	const drag = createDragHandlers((from, to) =>
+	const drag = createHandleGatedDragHandlers((from, to) =>
 		builder.reorderChoices(reqNodeId, qIndex, from, to)
 	);
 	let expandedIndex: number | null = $state(null);
@@ -82,7 +82,8 @@
 				? 'opacity-50'
 				: ''}"
 			draggable="true"
-			ondragstart={() => drag.handleDragStart(index)}
+			onmousedown={drag.recordMousedown}
+			ondragstart={(e) => drag.handleDragStart(e, index)}
 			ondragover={drag.handleDragOver}
 			ondrop={(e) => drag.handleDrop(e, index)}
 			ondragend={drag.handleDragEnd}
@@ -90,7 +91,11 @@
 		>
 			<!-- Collapsed row -->
 			<div class="flex items-center gap-2 px-3 py-2">
-				<span class="cursor-grab text-gray-300 hover:text-gray-500">
+				<span
+					class="cursor-grab text-gray-300 hover:text-gray-500"
+					data-drag-handle
+					aria-hidden="true"
+				>
 					<i class="fa-solid fa-grip-vertical text-xs"></i>
 				</span>
 
