@@ -139,4 +139,129 @@ test.describe('Security Advisories', () => {
 			console.log('CWE name:', name?.trim());
 		});
 	});
+
+	test('vulnerability SLA settings - set values, save, reset to defaults', async ({
+		logedPage,
+		page
+	}) => {
+		test.setTimeout(60_000);
+
+		await test.step('navigate to settings Vulnerability SLA tab', async () => {
+			await page.goto('/settings');
+			await page.waitForLoadState('networkidle');
+			await page.locator('[data-value="vulnerabilitySla"]').click();
+			await page.waitForTimeout(300);
+			await expect(page.getByTestId('form-input-critical')).toBeVisible();
+		});
+
+		await test.step('set SLA anchor to Published date and all severities to 20', async () => {
+			await page.getByTestId('form-input-sla-anchor').selectOption('published_date');
+			for (const field of ['critical', 'high', 'medium', 'low', 'info']) {
+				await page.getByTestId(`form-input-${field}`).fill('20');
+			}
+		});
+
+		await test.step('save and verify toast', async () => {
+			await page.locator('form[action*="vulnerabilitySla"] [data-testid="save-button"]').click();
+			await expect(page.getByTestId('toast')).toBeVisible({ timeout: 10_000 });
+			await page.waitForLoadState('networkidle');
+		});
+
+		await test.step('verify values persisted', async () => {
+			await page.reload();
+			await page.waitForLoadState('networkidle');
+			await page.locator('[data-value="vulnerabilitySla"]').click();
+			await page.waitForTimeout(300);
+			for (const field of ['critical', 'high', 'medium', 'low', 'info']) {
+				await expect(page.getByTestId(`form-input-${field}`)).toHaveValue('20');
+			}
+		});
+
+		await test.step('click Reset to defaults and verify default values (15/30/90/180/365)', async () => {
+			await page.getByRole('button', { name: /reset to defaults/i }).click();
+			await page.waitForTimeout(300);
+			const defaults: Record<string, string> = {
+				critical: '15',
+				high: '30',
+				medium: '90',
+				low: '180',
+				info: '365'
+			};
+			for (const [field, value] of Object.entries(defaults)) {
+				await expect(page.getByTestId(`form-input-${field}`)).toHaveValue(value);
+			}
+		});
+
+		await test.step('save defaults back', async () => {
+			await page.locator('form[action*="vulnerabilitySla"] [data-testid="save-button"]').click();
+			await expect(page.getByTestId('toast')).toBeVisible({ timeout: 10_000 });
+		});
+	});
+
+	test('vulnerability feeds settings - enable all, save, disable all, save', async ({
+		logedPage,
+		page
+	}) => {
+		test.setTimeout(60_000);
+
+		const FEEDS = [
+			'form-input-kev-feed-enabled',
+			'form-input-epss-feed-enabled',
+			'form-input-nvd-enrich-enabled'
+		];
+
+		const gotoFeedsTab = async () => {
+			await page.goto('/settings');
+			await page.waitForLoadState('networkidle');
+			await page.locator('[data-value="secIntelFeeds"]').click();
+			await page.waitForTimeout(300);
+			await expect(page.getByTestId('form-input-kev-feed-enabled')).toBeVisible();
+		};
+
+		await test.step('navigate to Vulnerability Feeds tab', gotoFeedsTab);
+
+		await test.step('enable all feeds', async () => {
+			for (const testid of FEEDS) {
+				const checkbox = page.getByTestId(testid);
+				if (!(await checkbox.isChecked())) {
+					await checkbox.click();
+				}
+			}
+		});
+
+		await test.step('save with all feeds enabled', async () => {
+			await page.locator('form[action*="secIntelFeeds"] [data-testid="save-button"]').click();
+			await expect(page.getByTestId('toast')).toBeVisible({ timeout: 10_000 });
+			await page.waitForLoadState('networkidle');
+		});
+
+		await test.step('verify all feeds checked after reload', async () => {
+			await gotoFeedsTab();
+			for (const testid of FEEDS) {
+				await expect(page.getByTestId(testid)).toBeChecked();
+			}
+		});
+
+		await test.step('disable all feeds', async () => {
+			for (const testid of FEEDS) {
+				const checkbox = page.getByTestId(testid);
+				if (await checkbox.isChecked()) {
+					await checkbox.click();
+				}
+			}
+		});
+
+		await test.step('save with all feeds disabled', async () => {
+			await page.locator('form[action*="secIntelFeeds"] [data-testid="save-button"]').click();
+			await expect(page.getByTestId('toast')).toBeVisible({ timeout: 10_000 });
+			await page.waitForLoadState('networkidle');
+		});
+
+		await test.step('verify all feeds unchecked after reload', async () => {
+			await gotoFeedsTab();
+			for (const testid of FEEDS) {
+				await expect(page.getByTestId(testid)).not.toBeChecked();
+			}
+		});
+	});
 });
