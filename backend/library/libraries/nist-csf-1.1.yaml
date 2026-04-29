@@ -6,7 +6,7 @@ description: National Institute of Standards and Technology - Cybersecurity Fram
   (CSF 1.1)
 copyright: With the exception of material marked as copyrighted, information presented
   on NIST sites are considered public information and may be distributed or copied.
-version: 5
+version: 6
 publication_date: 2025-05-22
 provider: NIST
 packager: intuitem
@@ -122,6 +122,10 @@ objects:
           name: null
           description: "D\xE9veloppez un processus d\u2019inventaire garantissant\
             \ en permanence un recensement exhaustif de vos \xE9quipements TIC (Asset)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:tech.asset_discovery
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-2
       assessable: true
       depth: 3
@@ -134,6 +138,10 @@ objects:
           name: null
           description: Inventoriez toutes les plateformes, licences et applications
             logicielles dans votre entreprise.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:tech.sw_inventory
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-3
       assessable: true
       depth: 3
@@ -145,6 +153,9 @@ objects:
           name: null
           description: "Listez tous les flux de communication et de transferts de\
             \ donn\xE9es en interne."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-4
       assessable: true
       depth: 3
@@ -155,6 +166,9 @@ objects:
         fr:
           name: null
           description: "Listez tous les syst\xE8mes TIC externes."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-5
       assessable: true
       depth: 3
@@ -169,6 +183,10 @@ objects:
           description: "Etablissez des priorit\xE9s pour les ressources inventori\xE9\
             es (\xE9quipements, donn\xE9es, temps, personnel et applications) selon\
             \ leur criticit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.classif
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:doc.bia
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-6
       assessable: true
       depth: 3
@@ -181,6 +199,10 @@ objects:
           name: null
           description: "D\xE9finissez clairement les r\xF4les et les responsabilit\xE9\
             s en mati\xE8re de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:doc.controls
+      - urn:intuitem:risk:function:doc-pol:pol.main
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
       assessable: false
       depth: 2
@@ -203,6 +225,9 @@ objects:
           name: null
           description: "D\xE9finissez, documentez et communiquez le r\xF4le exact\
             \ de votre entreprise dans la cha\xEEne d\u2019approvisionnement (critique)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.overview
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-2
       assessable: true
       depth: 3
@@ -216,6 +241,9 @@ objects:
           description: "Identifiez et communiquez l\u2019importance de votre entreprise\
             \ en tant qu\u2019infrastructure vitale et sa position dans le secteur\
             \ critique."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.overview
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-3
       assessable: true
       depth: 3
@@ -228,6 +256,10 @@ objects:
           name: null
           description: "Evaluez et hi\xE9rarchisez les objectifs, les t\xE2ches et\
             \ les activit\xE9s dans l\u2019entreprise."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.so_register
+      - urn:intuitem:risk:function:doc-pol:doc.scope
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-4
       assessable: true
       depth: 3
@@ -240,6 +272,9 @@ objects:
           name: null
           description: "Identifiez et formalisez les d\xE9pendances et les fonctions\
             \ critiques n\xE9cessaires \xE0 la fourniture des services essentiels."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.bia
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-5
       assessable: true
       depth: 3
@@ -255,6 +290,9 @@ objects:
             s de l'entreprise dans toutes les situations op\xE9rationnelles (par exemple\
             \ pendant une prise d'otage ou une attaque, en cas de reprise, en r\xE9\
             gime nominal)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:doc.bia
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
       assessable: false
       depth: 2
@@ -276,6 +314,8 @@ objects:
           name: null
           description: "\xC9dictez une politique de s\xE9curit\xE9 informatique dans\
             \ votre entreprise."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
       assessable: true
       depth: 3
@@ -289,6 +329,9 @@ objects:
           description: "Convenir entre les responsables internes (gestion des risques\
             \ par ex.) et des partenaires externes, des r\xF4les et des responsabilit\xE9\
             s en mati\xE8re de s\xE9curit\xE9 informatique."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:doc.controls
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-3
       assessable: true
       depth: 3
@@ -302,6 +345,10 @@ objects:
           description: "V\xE9rifiez que votre entreprise respecte toutes les exigences\
             \ l\xE9gales et r\xE9glementaires en mati\xE8re de cybers\xE9curit\xE9\
             , y compris au niveau de la protection des donn\xE9es."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.legal
+      - urn:intuitem:risk:function:doc-pol:train.legal
+      - urn:intuitem:risk:function:doc-pol:pol.privacy
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-4
       assessable: true
       depth: 3
@@ -314,6 +361,9 @@ objects:
           name: null
           description: "Assurez-vous que les cyber-risques sont bien int\xE9gr\xE9\
             s dans la gestion des risques pour toute l\u2019entreprise."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:pol.main
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
       assessable: false
       depth: 2
@@ -335,6 +385,9 @@ objects:
           name: null
           description: "Identifiez les faiblesses (techniques) de vos \xE9quipements\
             \ et documentez-les."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-2
       assessable: true
       depth: 3
@@ -347,6 +400,9 @@ objects:
           name: null
           description: "Participez \xE0 des forums et \xE0 des r\xE9unions d\u2019\
             experts pour \xE9changer des informations et \xEAtre au courant des cybermenaces."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-3
       assessable: true
       depth: 3
@@ -358,6 +414,10 @@ objects:
           name: null
           description: "Identifiez et documentez les cybermenaces, aussi bien internes\
             \ qu\u2019externes."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
+      - urn:intuitem:risk:function:doc-pol:proc.threat_modeling
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-4
       assessable: true
       depth: 3
@@ -369,6 +429,9 @@ objects:
           name: null
           description: "Identifiez l\u2019impact potentiel des cybermenaces sur vos\
             \ activit\xE9s et \xE9valuez leur probabilit\xE9 d\u2019occurrence."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.bia
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-5
       assessable: true
       depth: 3
@@ -382,6 +445,9 @@ objects:
           description: "\xC9valuez les risques pour votre entreprise en fonction des\
             \ menaces, des vuln\xE9rabilit\xE9s, de l\u2019impact (sur ses activit\xE9\
             s) et de leur probabilit\xE9 d\u2019occurrence."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-6
       assessable: true
       depth: 3
@@ -393,6 +459,9 @@ objects:
           name: null
           description: "D\xE9finissez les mesures \xE0 prendre imm\xE9diatement lorsqu\u2019\
             un risque se concr\xE9tise et fixez des priorit\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
       assessable: false
       depth: 2
@@ -416,6 +485,8 @@ objects:
           description: "D\xE9finissez les processus de gestion des risques, g\xE9\
             rez-les activement et faites-les confirmer par les personnes impliqu\xE9\
             es ou les parties prenantes."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-2
       assessable: true
       depth: 3
@@ -427,6 +498,9 @@ objects:
           name: null
           description: "D\xE9finissez et communiquez les risques supportables pour\
             \ votre entreprise."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.risk_appetite
+      - urn:intuitem:risk:function:doc-pol:pol.risk
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-3
       assessable: true
       depth: 3
@@ -441,6 +515,9 @@ objects:
             s en prenant en compte l\u2019importance de votre entreprise du fait qu\u2019\
             elle exploite une infrastructure critique. Prenez \xE9galement en consid\xE9\
             ration, dans votre analyse, les risques propres au secteur."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.risk_appetite
+      - urn:intuitem:risk:function:doc-pol:doc.context
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
       assessable: false
       depth: 2
@@ -465,6 +542,9 @@ objects:
             \ li\xE9s \xE0 une perturbation dans la cha\xEEne d\u2019approvisionnement.\
             \ Faites contr\xF4ler et valider ces processus par toutes les parties\
             \ prenantes."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:pol.risk
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
       assessable: true
       depth: 3
@@ -479,6 +559,10 @@ objects:
           description: "Identifiez les fournisseurs et les prestataires de services\
             \ cruciaux pour vos syst\xE8mes, composants et services critiques \xE0\
             \ partir des processus d\xE9finis ci-dessus et fixez les priorit\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-3
       assessable: true
       depth: 3
@@ -494,6 +578,9 @@ objects:
             ils s\u2019engagent contractuellement \xE0 d\xE9velopper et mettre en\
             \ oeuvre des mesures appropri\xE9es pour atteindre les objectifs du processus\
             \ pour g\xE9rer les risques li\xE9s \xE0 la cha\xEEne d\u2019approvisionnement."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-4
       assessable: true
       depth: 3
@@ -509,6 +596,9 @@ objects:
             \ vos fournisseurs et prestataires de services remplissent leurs obligations\
             \ conform\xE9ment aux exigences. Faites-le v\xE9rifier r\xE9guli\xE8rement\
             \ par des rapports d\u2019audit ou par les r\xE9sultats des tests techniques."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+      - urn:intuitem:risk:function:doc-pol:pol.audit
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-5
       assessable: true
       depth: 3
@@ -522,6 +612,10 @@ objects:
           description: "D\xE9finissez avec vos fournisseurs et prestataires les processus\
             \ pour r\xE9agir et r\xE9cup\xE9rer apr\xE8s des probl\xE8mes de cybers\xE9\
             curit\xE9. Validez ces processus par des simulations."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
       assessable: false
       depth: 1
@@ -555,6 +649,10 @@ objects:
           description: "D\xE9finissez un processus clair pour octroyer et g\xE9rer\
             \ les autorisations et les donn\xE9es d\u2019identification pour utilisateurs,\
             \ appareils/machines et processus."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.iam
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-2
       assessable: true
       depth: 3
@@ -568,6 +666,10 @@ objects:
             \ acc\xE8s aux \xE9quipements TIC. Prenez des mesures concr\xE8tes pour\
             \ garantir que les ressources TIC sont prot\xE9g\xE9es contre tout acc\xE8\
             s physique non autoris\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.physical
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
+      - urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
       assessable: true
       depth: 3
@@ -579,6 +681,11 @@ objects:
           name: null
           description: "D\xE9finissez les processus pour g\xE9rer les acc\xE8s \xE0\
             \ distance."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
+      - urn:intuitem:risk:function:doc-pol:tech.ztna
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-4
       assessable: true
       depth: 3
@@ -591,6 +698,11 @@ objects:
           name: null
           description: "D\xE9finissez les niveaux d\u2019autorisation en \xE9tant\
             \ le plus restrictif possible et s\xE9parez les fonctions."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:pol.seg_duty
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-5
       assessable: true
       depth: 3
@@ -604,6 +716,11 @@ objects:
           description: "V\xE9rifiez que l\u2019int\xE9grit\xE9 de votre r\xE9seau\
             \ est prot\xE9g\xE9e. S\xE9parez votre r\xE9seau au niveau logique comme\
             \ physique, si c\u2019est n\xE9cessaire et judicieux."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+      - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-6
       assessable: true
       depth: 3
@@ -617,6 +734,10 @@ objects:
           description: "N\u2019attribuez des identit\xE9s num\xE9riques qu\u2019\xE0\
             \ des personnes ou \xE0 des processus que vous avez clairement identifi\xE9\
             s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.iam
+      - urn:intuitem:risk:function:doc-pol:tech.pki
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-7
       assessable: true
       depth: 3
@@ -631,6 +752,10 @@ objects:
           description: "Les utilisateurs, \xE9quipements et autres biens sont authentif\xE9\
             s avec un niveau de s\xE9curit\xE9 (simple facteur, multi-facteur) coh\xE9\
             rent avec le risque encouru. "
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
+      - urn:intuitem:risk:function:doc-pol:tech.iam
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
       assessable: false
       depth: 2
@@ -652,6 +777,10 @@ objects:
           name: null
           description: "Veillez \xE0 ce que tous vos collaborateurs soient sensibilis\xE9\
             s et form\xE9s en mati\xE8re de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:doc.educ_register
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-2
       assessable: true
       depth: 3
@@ -664,6 +793,10 @@ objects:
           description: "Veillez \xE0 ce que les utilisateurs ayant des niveaux d\u2019\
             autorisation \xE9lev\xE9s soient conscients de leur r\xF4le et de leurs\
             \ responsabilit\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:train.iam
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-3
       assessable: true
       depth: 3
@@ -677,6 +810,9 @@ objects:
           description: "Veillez \xE0 ce que tous les acteurs ext\xE9rieurs \xE0 votre\
             \ entreprise (fournisseurs, clients, partenaires) soient conscients de\
             \ leur r\xF4le et de leurs responsabilit\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-4
       assessable: true
       depth: 3
@@ -688,6 +824,9 @@ objects:
           name: null
           description: "Veillez \xE0 ce que tous les cadres soient conscients de leurs\
             \ r\xF4les sp\xE9cifiques et de leurs responsabilit\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.raci
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-5
       assessable: true
       depth: 3
@@ -701,6 +840,10 @@ objects:
           description: "Veillez \xE0 ce que les responsables de la s\xE9curit\xE9\
             \ physique et de la s\xE9curit\xE9 informatique soient conscients de leurs\
             \ r\xF4les sp\xE9cifiques et de leurs responsabilit\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:train.mcs
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
       assessable: false
       depth: 2
@@ -723,6 +866,10 @@ objects:
           description: "Assurez-vous que les donn\xE9es stock\xE9es sont prot\xE9\
             g\xE9es (contre toute atteinte ou pr\xE9judice en termes de confidentialit\xE9\
             , d\u2019int\xE9grit\xE9 et de disponibilit\xE9)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+      - urn:intuitem:risk:function:doc-pol:tech.file_encryption
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-2
       assessable: true
       depth: 3
@@ -735,6 +882,10 @@ objects:
           description: "Assurez-vous que les donn\xE9es sont prot\xE9g\xE9es pendant\
             \ leur transmission (contre toute atteinte ou pr\xE9judice en termes de\
             \ confidentialit\xE9, d\u2019int\xE9grit\xE9 et de disponibilit\xE9)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:pol.transfer
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-3
       assessable: true
       depth: 3
@@ -749,6 +900,10 @@ objects:
             \ pour votre mat\xE9riel TIC afin de prot\xE9ger les donn\xE9es lorsque\
             \ des \xE9quipements sont supprim\xE9s, d\xE9plac\xE9s ou remplac\xE9\
             s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
+      - urn:intuitem:risk:function:doc-pol:phys.equipment_disposal
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-4
       assessable: true
       depth: 3
@@ -761,6 +916,8 @@ objects:
           description: "Veillez \xE0 ce que vos \xE9quipements TIC aient une r\xE9\
             serve de capacit\xE9 suffisante afin que vos donn\xE9es soient toujours\
             \ disponibles."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.capacity_mgmt
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
       assessable: true
       depth: 3
@@ -772,6 +929,9 @@ objects:
           name: null
           description: "Assurez-vous que des mesures appropri\xE9es sont mises en\
             \ oeuvre contre les fuites de donn\xE9es."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.dlp
+      - urn:intuitem:risk:function:doc-pol:pol.classif
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-6
       assessable: true
       depth: 3
@@ -785,6 +945,10 @@ objects:
           description: "D\xE9finissez un processus pour v\xE9rifier l\u2019int\xE9\
             grit\xE9 du micrologiciel, des syst\xE8mes d\u2019exploitation, des logiciels\
             \ d\u2019application et des donn\xE9es."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-7
       assessable: true
       depth: 3
@@ -797,6 +961,9 @@ objects:
           name: null
           description: "Pour le d\xE9veloppement et les tests, ayez un environnement\
             \ informatique totalement ind\xE9pendant des syst\xE8mes de production."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.secdev
+      - urn:intuitem:risk:function:doc-pol:proc.sdlc
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-8
       assessable: true
       depth: 3
@@ -808,6 +975,9 @@ objects:
           name: null
           description: "D\xE9finissez un processus pour v\xE9rifier l\u2019int\xE9\
             grit\xE9 du mat\xE9riel utilis\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       assessable: false
       depth: 2
@@ -834,6 +1004,9 @@ objects:
             mes de contr\xF4le industriels. Assurez-vous que cette configuration par\
             \ d\xE9faut ob\xE9it aux r\xE8gles usuelles de s\xE9curit\xE9 (par ex.\
             \ redondance N-1, configuration minimale, etc.)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:train.hardening
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-2
       assessable: true
       depth: 3
@@ -845,6 +1018,9 @@ objects:
           name: null
           description: "D\xE9finissez un processus \xAB cycle de vie \xBB pour l\u2019\
             utilisation des \xE9quipements TIC."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.secdev
+      - urn:intuitem:risk:function:doc-pol:proc.sdlc
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-3
       assessable: true
       depth: 3
@@ -856,6 +1032,9 @@ objects:
           name: null
           description: "D\xE9finissez un processus pour contr\xF4ler les changements\
             \ de configuration."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.change_mgmt
+      - urn:intuitem:risk:function:doc-pol:proc.change_mgmt
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-4
       assessable: true
       depth: 3
@@ -868,6 +1047,9 @@ objects:
           description: "Assurez-vous que des sauvegardes informatiques (backups) sont\
             \ effectu\xE9es, g\xE9r\xE9es et test\xE9es r\xE9guli\xE8rement (+ qu\u2019\
             on peut restaurer les donn\xE9es sauvegard\xE9es)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-5
       assessable: true
       depth: 3
@@ -881,6 +1063,10 @@ objects:
           description: "Veillez \xE0 ce que toutes les exigences (r\xE9glementaires)\
             \ et les directives concernant les \xE9quipements \xAB physiques \xBB\
             \ soient respect\xE9es."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.physical
+      - urn:intuitem:risk:function:doc-pol:phys.power_env
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-6
       assessable: true
       depth: 3
@@ -892,6 +1078,10 @@ objects:
           name: null
           description: "Veillez \xE0 ce que les donn\xE9es soient toujours d\xE9truites\
             \ selon les prescriptions."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.retention
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
+      - urn:intuitem:risk:function:doc-pol:phys.equipment_disposal
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-7
       assessable: true
       depth: 3
@@ -903,6 +1093,9 @@ objects:
           name: null
           description: "D\xE9veloppez et am\xE9liorez r\xE9guli\xE8rement vos processus\
             \ de s\xE9curit\xE9 informatique."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-8
       assessable: true
       depth: 3
@@ -914,6 +1107,9 @@ objects:
           name: null
           description: "Discutez de l\u2019efficacit\xE9 des diff\xE9rentes technologies\
             \ de protection avec vos partenaires."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-9
       assessable: true
       depth: 3
@@ -928,6 +1124,11 @@ objects:
           description: "Instaurez des processus pour r\xE9agir aux cyberincidents.\
             \ (Incident Response-Planing, Business Continuity Management, Incident\
             \ Recovery, Disaster Recovery)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:proc.drp
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-10
       assessable: true
       depth: 3
@@ -938,6 +1139,9 @@ objects:
         fr:
           name: null
           description: "Testez les plans de r\xE9action et de r\xE9cup\xE9ration."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-11
       assessable: true
       depth: 3
@@ -951,6 +1155,10 @@ objects:
           description: "Tenez compte de la cybers\xE9curit\xE9 d\xE8s le processus\
             \ de recrutement (en v\xE9rifiant les ant\xE9c\xE9dents ou par des contr\xF4\
             les de s\xE9curit\xE9 personnels, par ex.)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+      - urn:intuitem:risk:function:doc-pol:proc.bg_screening
+      - urn:intuitem:risk:function:doc-pol:proc.disciplinary
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-12
       assessable: true
       depth: 3
@@ -962,6 +1170,10 @@ objects:
           name: null
           description: "D\xE9veloppez et mettez en oeuvre un processus pour traiter\
             \ les failles rep\xE9r\xE9es."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma
       assessable: false
       depth: 2
@@ -987,6 +1199,8 @@ objects:
             s et document\xE9s (journalisation). Assurez-vous qu\u2019elles sont effectu\xE9\
             es rapidement et en ne recourant qu\u2019\xE0 des moyens test\xE9s et\
             \ approuv\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-2
       assessable: true
       depth: 3
@@ -1000,6 +1214,10 @@ objects:
           description: "Enregistrez et documentez \xE9galement les travaux de maintenance\
             \ de vos syst\xE8mes distants. Assurez-vous qu\u2019aucun acc\xE8s non\
             \ autoris\xE9 n\u2019est possible."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
       assessable: false
       depth: 2
@@ -1022,6 +1240,10 @@ objects:
           name: null
           description: "G\xE9n\xE9rez et v\xE9rifiez ces fichiers r\xE9guli\xE8rement,\
             \ selon les exigences et les directives."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.access_log
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-2
       assessable: true
       depth: 3
@@ -1034,6 +1256,8 @@ objects:
           name: null
           description: "Assurez-vous que les supports amovibles sont prot\xE9g\xE9\
             s et que leur utilisation se fait dans le strict respect des directives."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.removable_media
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-3
       assessable: true
       depth: 3
@@ -1046,6 +1270,10 @@ objects:
           name: null
           description: "Veillez \xE0 ce que votre syst\xE8me soit configur\xE9 pour\
             \ toujours fonctionner, m\xEAme en mode d\xE9grad\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-4
       assessable: true
       depth: 3
@@ -1057,6 +1285,9 @@ objects:
           name: null
           description: "Assurez la protection de vos r\xE9seaux de communication et\
             \ de contr\xF4le."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-5
       assessable: true
       depth: 3
@@ -1071,6 +1302,9 @@ objects:
             \ de fonctionnement de vos syst\xE8mes. Par ex. : fonctionnalit\xE9s en\
             \ cas d\u2019attaque, fonctionnalit\xE9s pendant la phase de r\xE9cup\xE9\
             ration, fonctionnalit\xE9s normales pendant l\u2019exploitation."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:tech.dr_site
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
       assessable: false
       depth: 1
@@ -1103,6 +1337,10 @@ objects:
           description: "D\xE9finissez des valeurs par d\xE9faut pour les op\xE9rations\
             \ r\xE9seau licites et les flux de donn\xE9es pr\xE9vus pour les utilisateurs\
             \ et les syst\xE8mes. Surveillez ces valeurs en permanence."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-2
       assessable: true
       depth: 3
@@ -1114,6 +1352,10 @@ objects:
           name: null
           description: "Assurez-vous que les incidents de cybers\xE9curit\xE9 d\xE9\
             tect\xE9s sont analys\xE9s quant \xE0 leurs objectifs et m\xE9thodes."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.threat_hunt
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-3
       assessable: true
       depth: 3
@@ -1127,6 +1369,9 @@ objects:
           description: "Assurez-vous que les informations sur les incidents de cybers\xE9\
             curit\xE9 provenant de diff\xE9rentes sources et capteurs sont compil\xE9\
             es et exploit\xE9es."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-4
       assessable: true
       depth: 3
@@ -1137,6 +1382,9 @@ objects:
         fr:
           name: null
           description: "D\xE9terminez les cons\xE9quences probables des incidents."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.bia
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-5
       assessable: true
       depth: 3
@@ -1148,6 +1396,9 @@ objects:
           name: null
           description: "D\xE9finissez les valeurs limites au-del\xE0 desquelles les\
             \ incidents de cybers\xE9curit\xE9 doivent g\xE9n\xE9rer des alertes."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
       assessable: false
       depth: 2
@@ -1169,6 +1420,10 @@ objects:
           name: null
           description: "Mettez en place une surveillance permanente du r\xE9seau pour\
             \ d\xE9tecter les incidents de cybers\xE9curit\xE9 potentiels."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:tech.ids
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-2
       assessable: true
       depth: 3
@@ -1182,6 +1437,10 @@ objects:
           description: "Mettez en place une surveillance continue (monitorage) de\
             \ tous les \xE9quipements et des b\xE2timents pour d\xE9tecter les incidents\
             \ de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.physical
+      - urn:intuitem:risk:function:doc-pol:phys.cctv
+      - urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-3
       assessable: true
       depth: 3
@@ -1195,6 +1454,10 @@ objects:
           description: "Mettez en place un monitorage de l\u2019utilisation des TIC\
             \ par les employ\xE9s pour d\xE9tecter les incidents de cybers\xE9curit\xE9\
             \ potentiels."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:proc.insider_threat
+      - urn:intuitem:risk:function:doc-pol:tech.dlp
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-4
       assessable: true
       depth: 3
@@ -1205,6 +1468,10 @@ objects:
         fr:
           name: null
           description: "Veillez \xE0 pouvoir d\xE9tecter les maliciels."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.malware
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      - urn:intuitem:risk:function:doc-pol:tech.network_antivirus
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-5
       assessable: true
       depth: 3
@@ -1216,6 +1483,10 @@ objects:
           name: null
           description: "Veillez \xE0 pouvoir d\xE9tecter les maliciels sur les appareils\
             \ mobiles."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.malware
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:tech.web_proxy
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-6
       assessable: true
       depth: 3
@@ -1229,6 +1500,10 @@ objects:
           description: "Assurez-vous que les activit\xE9s des prestataires de services\
             \ externes sont surveill\xE9es (monitor\xE9es) pour d\xE9tecter d\u2019\
             \xE9ventuels incidents de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
       assessable: true
       depth: 3
@@ -1242,6 +1517,10 @@ objects:
           description: "Surveillez votre syst\xE8me en permanence pour \xEAtre certain\
             \ que des activit\xE9s ou acc\xE8s li\xE9s \xE0 des personnes, \xE9quipements\
             \ ou logiciels non autoris\xE9s seront d\xE9tect\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:tech.asset_discovery
+      - urn:intuitem:risk:function:doc-pol:tech.nac
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-8
       assessable: true
       depth: 3
@@ -1252,6 +1531,9 @@ objects:
         fr:
           name: null
           description: "Proc\xE9dez \xE0 des tests de vuln\xE9rabilit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
       assessable: false
       depth: 2
@@ -1275,6 +1557,9 @@ objects:
           description: "D\xE9finissez clairement les r\xF4les et les responsabilit\xE9\
             s pour que tous sachent bien qui est responsable de quoi et qui a telles\
             \ ou telles comp\xE9tences."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-2
       assessable: true
       depth: 3
@@ -1286,6 +1571,9 @@ objects:
           name: null
           description: "Assurez-vous que les processus de d\xE9tection correspondent\
             \ aux exigences et conditions fix\xE9es."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.legal
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-3
       assessable: true
       depth: 3
@@ -1296,6 +1584,9 @@ objects:
         fr:
           name: null
           description: "Testez vos processus de d\xE9tection."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.pentest
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-4
       assessable: true
       depth: 3
@@ -1308,6 +1599,9 @@ objects:
           description: "Communiquez aux personnes concern\xE9es (par ex. fournisseurs,\
             \ clients, partenaires, autorit\xE9s) les incidents que vous avez d\xE9\
             tect\xE9s."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.com
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-5
       assessable: true
       depth: 3
@@ -1318,6 +1612,9 @@ objects:
         fr:
           name: null
           description: "Am\xE9liorez en permanence vos processus de d\xE9tection."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
+      - urn:intuitem:risk:function:doc-pol:pol.audit
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
       assessable: false
       depth: 1
@@ -1349,6 +1646,9 @@ objects:
           description: "Assurez-vous que le plan d\u2019intervention est correctement\
             \ suivi et rapidement ex\xE9cut\xE9 si un incident de cybers\xE9curit\xE9\
             \ est d\xE9tect\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
       assessable: false
       depth: 2
@@ -1372,6 +1672,9 @@ objects:
           description: "Assurez-vous que toutes les personnes connaissent leurs t\xE2\
             ches et la marche \xE0 suivre lorsqu\u2019elles doivent r\xE9agir \xE0\
             \ un incident de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.raci
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-2
       assessable: true
       depth: 3
@@ -1384,6 +1687,9 @@ objects:
           description: "D\xE9finissez des crit\xE8res pour les communications et assurez-vous\
             \ que les incidents de cybers\xE9curit\xE9 sont signal\xE9s et trait\xE9\
             s conform\xE9ment \xE0 ces crit\xE8res."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.incident_register
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-3
       assessable: true
       depth: 3
@@ -1396,6 +1702,9 @@ objects:
           description: "Partagez les informations sur les incidents de cybers\xE9\
             curit\xE9 relev\xE9s \u2013 ainsi que les enseignements qui en d\xE9coulent\
             \ \u2013 selon ces crit\xE8res pr\xE9d\xE9finis."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.com
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-4
       assessable: true
       depth: 3
@@ -1408,6 +1717,10 @@ objects:
           name: null
           description: "Coordonnez-vous avec les parties prenantes selon ces crit\xE8\
             res."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:doc.com
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-5
       assessable: true
       depth: 3
@@ -1420,6 +1733,9 @@ objects:
           name: null
           description: "Am\xE9liorez la sensibilisation aux incidents de cybers\xE9\
             curit\xE9 gr\xE2ce \xE0 des \xE9changes r\xE9guliers avec vos partenaires."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
       assessable: false
       depth: 2
@@ -1441,6 +1757,9 @@ objects:
           name: null
           description: "Assurez-vous que les alertes \xE9manant de syst\xE8mes de\
             \ d\xE9tection sont prises en compte et d\xE9clenchent des enqu\xEAtes.\_"
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
       assessable: true
       depth: 3
@@ -1452,6 +1771,9 @@ objects:
           name: null
           description: "Veillez \xE0 pouvoir \xE9valuer correctement l\u2019impact\
             \ d\u2019un incident de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.bia
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-3
       assessable: true
       depth: 3
@@ -1462,6 +1784,8 @@ objects:
         fr:
           name: null
           description: "Effectuez une analyse technique apr\xE8s chaque incident."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.forensics
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-4
       assessable: true
       depth: 3
@@ -1473,6 +1797,9 @@ objects:
           name: null
           description: "Classez les incidents selon les exigences du plan de r\xE9\
             action."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.incident_register
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-5
       assessable: true
       depth: 3
@@ -1488,6 +1815,9 @@ objects:
             \ les failles report\xE9es \xE0 l'organisation par des sources internes\
             \ et externes (par exemple lors de tests d'intrusion, via des bulletins\
             \ de s\xE9curit\xE9 ou des chercheurs en s\xE9curit\xE9)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.vuln_disclosure
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
       assessable: false
       depth: 2
@@ -1509,6 +1839,8 @@ objects:
           name: null
           description: "Assurez-vous que les incidents de cybers\xE9curit\xE9 peuvent\
             \ \xEAtre circonscrits et que vous pouvez stopper leur propagation."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-2
       assessable: true
       depth: 3
@@ -1520,6 +1852,8 @@ objects:
           name: null
           description: "Assurez-vous de pouvoir r\xE9duire l\u2019impact des incidents\
             \ de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-3
       assessable: true
       depth: 3
@@ -1532,6 +1866,10 @@ objects:
           name: null
           description: "Veillez \xE0 r\xE9duire au maximum les failles r\xE9cemment\
             \ d\xE9couvertes ou r\xE9f\xE9rencez-les comme des risques acceptables."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
       assessable: false
       depth: 2
@@ -1554,6 +1892,9 @@ objects:
           description: "Assurez-vous que les enseignements tir\xE9s des pr\xE9c\xE9\
             dents incidents de cybers\xE9curit\xE9 sont int\xE9gr\xE9s \xE0 vos plans\
             \ d\u2019intervention."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-2
       assessable: true
       depth: 3
@@ -1564,6 +1905,9 @@ objects:
         fr:
           name: null
           description: "Actualisez vos strat\xE9gies de r\xE9action."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
       assessable: false
       depth: 1
@@ -1594,6 +1938,10 @@ objects:
           name: null
           description: "Assurez-vous que le plan de r\xE9cup\xE9ration est suivi \xE0\
             \ la lettre en cas d\u2019incident de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:tech.dr_site
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
       assessable: false
       depth: 2
@@ -1616,6 +1964,9 @@ objects:
           description: "Assurez-vous que les enseignements tir\xE9s des pr\xE9c\xE9\
             dents incidents de cybers\xE9curit\xE9 sont int\xE9gr\xE9s \xE0 vos plans\
             \ de r\xE9cup\xE9ration."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-2
       assessable: true
       depth: 3
@@ -1626,6 +1977,9 @@ objects:
         fr:
           name: null
           description: "Actualisez vos strat\xE9gies de r\xE9cup\xE9ration."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
       assessable: false
       depth: 2
@@ -1647,6 +2001,9 @@ objects:
           name: null
           description: "Anticipez les r\xE9actions du public pour ne pas d\xE9grader\
             \ la r\xE9putation de votre entreprise."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.com
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-2
       assessable: true
       depth: 3
@@ -1658,6 +2015,9 @@ objects:
           name: null
           description: "Veillez \xE0 ce que votre entreprise retrouve vite une image\
             \ positive apr\xE8s un incident de cybers\xE9curit\xE9."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:doc.com
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-3
       assessable: true
       depth: 3
@@ -1671,3 +2031,9 @@ objects:
           description: "Communiquez \xE0 l\u2019interne aux parties prenantes tout\
             \ ce que vous avez entrepris en mati\xE8re de r\xE9cup\xE9ration, sans\
             \ oublier les cadres et la direction."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.com
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+dependencies:
+- urn:intuitem:risk:library:doc-pol
