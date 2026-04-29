@@ -86,9 +86,6 @@ importers:
       '@inlang/paraglide-js':
         specifier: ^2.17.0
         version: 2.17.0(babel-plugin-macros@3.1.0)
-      '@inlang/plugin-message-format':
-        specifier: ^2.2.0
-        version: 2.2.0
       '@playwright/test':
         specifier: ^1.55.1
         version: 1.56.1
@@ -603,9 +600,6 @@ packages:
   '@inlang/paraglide-js@2.17.0':
     resolution: {integrity: sha512-dY4yoQkQkF1En1m3qpO22cVGubluU2W78fatLb33s8qe6K8wDqP0mIGZ/oZ0/h609YC8/Y0CkceaLcYeJTcpwg==}
     hasBin: true
-
-  '@inlang/plugin-message-format@2.2.0':
-    resolution: {integrity: sha512-6MJLExr3OLqbR8gCP4UEgNMgdaJFFCug2GLmFwid7Ana4kObnbCA33YN3m3eN8p+lmnv7zpfW7oeyTZXZLoptg==}
 
   '@inlang/recommend-sherlock@0.2.1':
     resolution: {integrity: sha512-ckv8HvHy/iTqaVAEKrr+gnl+p3XFNwe5D2+6w6wJk2ORV2XkcRkKOJ/XsTUJbPSiyi4PI+p+T3bqbmNx/rDUlg==}
@@ -3816,8 +3810,6 @@ snapshots:
       urlpattern-polyfill: 10.1.0
     transitivePeerDependencies:
       - babel-plugin-macros
-
-  '@inlang/plugin-message-format@2.2.0': {}
 
   '@inlang/recommend-sherlock@0.2.1':
     dependencies:
