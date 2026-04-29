@@ -50,6 +50,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `observation` | No | Free text |
 | `parent_assets` | No | Comma/pipe-separated ref_ids (linked in second pass) |
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
+| `is_business_function`| No | DORA specific field. Either `true`/`yes` or `false`/`no` |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -148,13 +149,14 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `domain` | No | Folder lookup |
 | `ref_id` | No | Reference ID |
 | `description` | No | |
-| `status` | No | |
+| `status` | No | Alias accepted (mapped to `lc_status`) |
+| `default_assignee` | No | User email or team name, semicolon-separated |
 
 **Missing Fields from Model:**
+
 | Field | Type | Priority |
 |-------|------|----------|
-| `reference_link` | URLField | Medium |
-| `filtering_labels` | M2M | Medium |
+| None | - | - |
 
 ---
 

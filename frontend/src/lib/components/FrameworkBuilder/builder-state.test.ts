@@ -1,12 +1,16 @@
 import { describe, it, expect } from 'vitest';
+import { get } from 'svelte/store';
 import {
 	slugifyFrameworkName,
 	computeRefId,
 	generateUrn,
 	validateDraft,
+	buildTree,
+	serializeDraft,
 	type Framework,
-	type BuilderSection,
-	type RequirementNode
+	type BuilderNode,
+	type RequirementNode,
+	type Question
 } from './builder-state';
 
 const FW_ID = 'a1b2c3d4-0000-0000-0000-000000000000';
@@ -155,8 +159,8 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 
 function makeSection(
 	nodeOverrides: Partial<RequirementNode> = {},
-	requirements: BuilderSection['requirements'] = []
-): BuilderSection {
+	children: BuilderNode['children'] = []
+): BuilderNode {
 	return {
 		node: makeNode({
 			id: 'section-1',
@@ -167,8 +171,9 @@ function makeSection(
 			name: 'Section 1',
 			...nodeOverrides
 		}),
-		requirements,
-		collapsed: false
+		questions: [],
+		children,
+		depth: 0
 	};
 }
 
@@ -241,5 +246,292 @@ describe('validateDraft', () => {
 		const sections = [makeSection()];
 		const errors = validateDraft(fw, sections);
 		expect(errors.find((e) => e.key === 'publish')!.message).toBe('Framework name is required.');
+	});
+});
+
+describe('buildTree', () => {
+	it('preserves a single top-level assessable node as one root node (no wrapper)', () => {
+		const n: RequirementNode = {
+			id: 'n1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Top-level assessable',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const tree = buildTree([n], []);
+		expect(tree).toHaveLength(1);
+		expect(tree[0].node.id).toBe('n1');
+		expect(tree[0].node.assessable).toBe(true);
+		expect(tree[0].children).toHaveLength(0);
+	});
+
+	it('preserves an assessable parent with assessable children', () => {
+		const parent: RequirementNode = {
+			id: 'p1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Assessable parent',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const child: RequirementNode = {
+			...parent,
+			id: 'c1',
+			urn: 'urn:x:req_node:fw:1.1',
+			ref_id: '1.1',
+			parent_urn: 'urn:x:req_node:fw:1',
+			order_id: 0
+		};
+		const tree = buildTree([parent, child], []);
+		expect(tree).toHaveLength(1);
+		expect(tree[0].node.id).toBe('p1');
+		expect(tree[0].node.assessable).toBe(true);
+		expect(tree[0].children).toHaveLength(1);
+		expect(tree[0].children[0].node.id).toBe('c1');
+	});
+});
+
+import { createBuilderState } from './builder-state';
+
+describe('addNode', () => {
+	function newStore() {
+		const fw = makeFramework();
+		return createBuilderState(fw, [], []);
+	}
+
+	it('creates a non-assessable group when preset is "group"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const roots = get(s.rootNodes);
+		expect(roots).toHaveLength(1);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+
+	it('creates an assessable leaf when preset is "requirement"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(true);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+
+	it('creates a splash node when preset is "splash"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'splash' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('splash');
+	});
+
+	it('nests a child under a given parent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const parentId = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: parentId, preset: 'requirement' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].children).toHaveLength(1);
+		expect(roots[0].children[0].node.assessable).toBe(true);
+	});
+
+	it('defaults to a blank node (non-assessable leaf) when preset is omitted', () => {
+		const s = newStore();
+		s.addNode({ parent: null });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+});
+
+describe('serializeDraft round-trip', () => {
+	it('does not emit the same node twice for a flat framework', () => {
+		const fw = makeFramework();
+		const n: RequirementNode = {
+			id: 'n1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Top-level assessable',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const tree = buildTree([n], []);
+		const draft = serializeDraft(fw, tree);
+		const ids = draft.nodes.map((x) => x.id);
+		expect(new Set(ids).size).toBe(ids.length);
+		expect(ids).toEqual(['n1']);
+	});
+});
+
+describe('indentNode', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('indents a root node under its previous sibling', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' }); // idx 0
+		s.addNode({ parent: null, preset: 'requirement' }); // idx 1
+		const roots = get(s.rootNodes);
+		const id = roots[1].node.id;
+		const prevUrn = roots[0].node.urn;
+
+		const ok = s.indentNode(id);
+		expect(ok).toBe(true);
+		const after = get(s.rootNodes);
+		expect(after).toHaveLength(1);
+		expect(after[0].node.id).toBe(roots[0].node.id);
+		expect(after[0].children).toHaveLength(1);
+		expect(after[0].children[0].node.id).toBe(id);
+		expect(after[0].children[0].node.parent_urn).toBe(prevUrn);
+		expect(after[0].children[0].depth).toBe(1);
+	});
+
+	it('is a no-op for the first sibling (no previous sibling to nest under)', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		const ok = s.indentNode(id);
+		expect(ok).toBe(false);
+		expect(get(s.rootNodes)).toHaveLength(1);
+	});
+
+	it('indents a nested node under its previous sibling', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const group = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: group, preset: 'requirement' });
+		s.addNode({ parent: group, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[1].node.id;
+		const prevUrn = get(s.rootNodes)[0].children[0].node.urn;
+
+		const ok = s.indentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		expect(roots[0].children).toHaveLength(1);
+		expect(roots[0].children[0].children).toHaveLength(1);
+		expect(roots[0].children[0].children[0].node.id).toBe(targetId);
+		expect(roots[0].children[0].children[0].node.parent_urn).toBe(prevUrn);
+		expect(roots[0].children[0].children[0].depth).toBe(2);
+	});
+});
+
+describe('outdentNode', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('promotes a nested node to be a sibling of its parent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const group = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: group, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[0].node.id;
+
+		const ok = s.outdentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		expect(roots).toHaveLength(2);
+		// Outdented node lands immediately after its former parent
+		expect(roots[1].node.id).toBe(targetId);
+		expect(roots[1].node.parent_urn).toBeNull();
+		expect(roots[1].depth).toBe(0);
+		// Former parent has no more children
+		expect(roots[0].children).toHaveLength(0);
+	});
+
+	it('is a no-op for a root node (nothing to outdent to)', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		const ok = s.outdentNode(id);
+		expect(ok).toBe(false);
+		expect(get(s.rootNodes)).toHaveLength(1);
+	});
+
+	it('promotes a deeply nested node to its grandparent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const top = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: top, preset: 'group' });
+		const mid = get(s.rootNodes)[0].children[0].node.id;
+		s.addNode({ parent: mid, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[0].children[0].node.id;
+
+		const ok = s.outdentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		// Target moves from depth 2 (inside mid) to depth 1 (as sibling of mid under top)
+		expect(roots).toHaveLength(1);
+		expect(roots[0].children).toHaveLength(2);
+		expect(roots[0].children[1].node.id).toBe(targetId);
+		expect(roots[0].children[1].node.parent_urn).toBe(get(s.rootNodes)[0].node.urn);
+		expect(roots[0].children[1].depth).toBe(1);
+	});
+});
+
+describe('toggleAssessable', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('flips a group node to assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const id = get(s.rootNodes)[0].node.id;
+		expect(get(s.rootNodes)[0].node.assessable).toBe(false);
+		s.toggleAssessable(id);
+		expect(get(s.rootNodes)[0].node.assessable).toBe(true);
+	});
+
+	it('flips an assessable node back to non-assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.toggleAssessable(id);
+		expect(get(s.rootNodes)[0].node.assessable).toBe(false);
+	});
+
+	it('works on nested nodes', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const parentId = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: parentId, preset: 'group' });
+		const childId = get(s.rootNodes)[0].children[0].node.id;
+		s.toggleAssessable(childId);
+		expect(get(s.rootNodes)[0].children[0].node.assessable).toBe(true);
 	});
 });

@@ -653,6 +653,16 @@ class AssetRecordConsumer(RecordConsumer[list]):
                 asset_type.lower().strip(), asset_type.upper()
             )
 
+        record_is_business_function = record.get("is_business_function", False)
+        is_business_function = False
+        if isinstance(record_is_business_function, str):
+            is_business_function = record_is_business_function.strip().lower() in [
+                "true",
+                "yes",
+            ]
+        elif isinstance(record_is_business_function, bool):
+            is_business_function = record_is_business_function
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
@@ -663,6 +673,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
             "reference_link": record.get("reference_link", "")
             or record.get("link", ""),
             "observation": record.get("observation", ""),
+            "is_business_function": is_business_function,
         }
 
         raw_labels = (
@@ -1021,6 +1032,57 @@ class UserRecordConsumer(RecordConsumer[None]):
 
 class PerimeterRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = PerimeterWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "lc_status": ("lc_status", "status"),
+        "default_assignee": ("default_assignee",),
+    }
+    _LC_STATUS_BY_KEY: ClassVar[dict[str, str]] = {
+        key.lower(): key for key, _ in Perimeter.PRJ_LC_STATUS
+    }
+    _LC_STATUS_BY_LABEL: ClassVar[dict[str, str]] = {
+        str(label).strip().lower(): key for key, label in Perimeter.PRJ_LC_STATUS
+    }
+
+    @classmethod
+    def _normalize_lc_status(cls, value: str) -> Optional[str]:
+        normalized = value.strip().lower()
+        if not normalized:
+            return None
+        return cls._LC_STATUS_BY_KEY.get(normalized) or cls._LC_STATUS_BY_LABEL.get(
+            normalized
+        )
+
+    def _build_update_data(self, record: dict, record_data: dict) -> dict:
+        update_data = super()._build_update_data(record, record_data)
+
+        # Keep parity with AppliedControl.owner behavior: if the column is
+        # present (even empty), propagate it so UPDATE mode can clear stale M2M.
+        if "default_assignee" not in update_data and "default_assignee" in record:
+            update_data["default_assignee"] = record_data.get("default_assignee", [])
+
+        return update_data
+
+    @staticmethod
+    def _resolve_default_assignees(value) -> list[UUID]:
+        if not isinstance(value, str):
+            return []
+
+        entries = [entry.strip() for entry in value.split(";") if entry.strip()]
+        actor_ids = []
+
+        for entry in entries:
+            actor = Actor.objects.filter(user__email__iexact=entry).first()
+            if actor is None:
+                actor = Actor.objects.filter(team__name__iexact=entry).first()
+            if actor is not None:
+                actor_ids.append(actor.id)
+            else:
+                logger.warning(
+                    "Could not resolve perimeter default assignee %r; skipping.",
+                    entry,
+                )
+
+        return actor_ids
 
     def create_context(self):
         return None, None
@@ -1037,13 +1099,37 @@ class PerimeterRecordConsumer(RecordConsumer[None]):
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        return {
+        raw_lc_status = record.get("lc_status") or record.get("status")
+        lc_status = "in_design"
+        if raw_lc_status not in (None, ""):
+            normalized_status = self._normalize_lc_status(str(raw_lc_status))
+            if normalized_status is None:
+                allowed = ", ".join(k for k, _ in Perimeter.PRJ_LC_STATUS)
+                return {}, Error(
+                    record=record,
+                    error=(
+                        f"Unsupported perimeter status '{raw_lc_status}'. "
+                        f"Allowed values: {allowed}"
+                    ),
+                )
+            lc_status = normalized_status
+
+        default_assignee = self._resolve_default_assignees(
+            record.get("default_assignee")
+        )
+
+        data = {
             "name": name,
             "folder": domain,
             "ref_id": record.get("ref_id", ""),
             "description": record.get("description", ""),
-            "status": record.get("status"),
-        }, None
+            "lc_status": lc_status,
+        }
+
+        if "default_assignee" in record:
+            data["default_assignee"] = default_assignee
+
+        return data, None
 
 
 class ThreatRecordConsumer(RecordConsumer[None]):
@@ -1568,6 +1654,14 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             "assets": assets,
             "security_exceptions": security_exceptions,
         }
+
+        detected_at = _parse_date(record.get("detected_at"))
+        if detected_at:
+            data["detected_at"] = detected_at
+
+        due_date = _parse_date(record.get("due_date"))
+        if due_date:
+            data["due_date"] = due_date
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
@@ -2641,8 +2735,18 @@ class LoadFileView(APIView):
         results = {"successful": 0, "failed": 0, "errors": []}
         try:
             # Get the perimeter object to extract its folder ID
-            perimeter = Perimeter.objects.get(id=perimeter_id)
-            folder_id = perimeter.folder.id
+            perimeter = None
+            if perimeter_id is not None:
+                perimeter = Perimeter.objects.get(id=perimeter_id)
+
+            if perimeter is not None:
+                folder_id = perimeter.folder.id
+            elif folder_id is None:
+                results["failed"] += 1
+                results["errors"].append(
+                    {"error": "A folder must be specified when there's no perimeter!"}
+                )
+                return results
 
             assessment_name = resolve_container_name(request, "Assessment")
 
@@ -3747,8 +3851,23 @@ class LoadFileView(APIView):
 
         try:
             # Get the perimeter and its domain
-            perimeter = Perimeter.objects.get(id=perimeter_id)
-            domain = perimeter.folder
+            perimeter = None
+            if perimeter_id is not None:
+                perimeter = Perimeter.objects.get(id=perimeter_id)
+
+            if perimeter is not None:
+                domain = perimeter.folder
+            else:
+                if folder_id is None:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "error": "A folder must be specified when there's no perimeter!"
+                        }
+                    )
+                    return results
+                else:
+                    domain = Folder.objects.get(id=folder_id)
 
             # Get the risk matrix
             risk_matrix = RiskMatrix.objects.get(id=matrix_id)
@@ -3790,12 +3909,14 @@ class LoadFileView(APIView):
             matrix_mappings = self._build_matrix_mappings(risk_matrix)
 
             # Process controls first - collect all unique control names
-            # Accept both the legacy column name (`additional_controls`) and the
-            # model field name (`applied_controls`, as used by the export) for the
-            # to-be-added controls column.
+            # Accept both the legacy columns name and the model fields name for the
             all_controls = set()
             for record in records:
-                existing_controls = record.get("existing_applied_controls", "").strip()
+                existing_controls = (
+                    record.get("existing_applied_controls")
+                    or record.get("existing_controls")
+                    or ""
+                ).strip()
                 additional_controls = (
                     record.get("additional_controls")
                     or record.get("applied_controls")

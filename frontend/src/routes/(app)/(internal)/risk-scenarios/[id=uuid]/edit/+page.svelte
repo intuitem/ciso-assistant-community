@@ -261,6 +261,16 @@
 					/>
 					<AutocompleteSelect
 						multiple
+						lazy
+						form={_form}
+						optionsEndpoint="incidents"
+						optionsLabelField="auto"
+						optionsExtraFields={[['folder', 'str']]}
+						field="incidents"
+						label={m.incidents()}
+					/>
+					<AutocompleteSelect
+						multiple
 						form={_form}
 						optionsEndpoint="security-exceptions"
 						optionsExtraFields={[['folder', 'str']]}

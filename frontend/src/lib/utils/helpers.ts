@@ -395,7 +395,9 @@ export function getFieldVisibility(
 	viewerRole: 'respondent' | 'auditor' = 'auditor'
 ): {
 	showResult: boolean;
+	showStatus: boolean;
 	showScore: boolean;
+	showDocumentationScore: boolean;
 	showObservation: boolean;
 	showAppliedControls: boolean;
 	showEvidences: boolean;
@@ -403,7 +405,14 @@ export function getFieldVisibility(
 } {
 	return {
 		showResult: isFieldVisible(framework, complianceAssessment, 'result', viewerRole),
+		showStatus: isFieldVisible(framework, complianceAssessment, 'status', viewerRole),
 		showScore: isFieldVisible(framework, complianceAssessment, 'score', viewerRole),
+		showDocumentationScore: isFieldVisible(
+			framework,
+			complianceAssessment,
+			'documentation_score',
+			viewerRole
+		),
 		showObservation: isFieldVisible(framework, complianceAssessment, 'observation', viewerRole),
 		showAppliedControls: isFieldVisible(
 			framework,

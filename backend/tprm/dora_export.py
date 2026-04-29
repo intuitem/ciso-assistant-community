@@ -1136,7 +1136,7 @@ def generate_b_05_01_provider_details(
             [
                 provider_code,  # c0010
                 code_type,  # c0020
-                "0",  # c0030: Additional identification code (typed dimension eba_typ:IS — "0" = not applicable)
+                "",  # c0030: Additional identification code (optional metric — empty when not applicable)
                 "",  # c0040: Type of additional identification code (enumeration metric — empty)
                 provider_name,  # c0050
                 provider_name,  # c0060: Name in Latin alphabet TODO: add Entity.latin_name DB column, equals Entity.name by default, to be displayed in EntityForm if name contains non-Latin characters
