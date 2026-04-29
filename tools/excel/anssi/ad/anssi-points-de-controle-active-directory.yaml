@@ -12496,7 +12496,10 @@ objects:
       ref_id: vuln_sd_failed_sd_read_on_priv-l3
       name: "Comptes privil\xE9gi\xE9s pour lesquels des informations critiques sont\
         \ manquantes (Niveau 3)"
-      description: "# Description de la vuln\xE9rabilit\xE9"
+      description: "# Description de la vuln\xE9rabilit\xE9\n\nCertaines informations\
+        \ relatives aux comptes privil\xE9gi\xE9s font d\xE9faut. Par cons\xE9quent,\
+        \ l'analyse et le niveau de s\xE9curit\xE9 indiqu\xE9s dans le pr\xE9sent\
+        \ rapport pourraient \xEAtre erron\xE9s."
       annotation: "# Recommandation\n\nIdentifier les raisons pour lesquelles les\
         \ droits appliqu\xE9s et les propri\xE9t\xE9s de ces comptes privil\xE9gi\xE9\
         s n'ont pu \xEAtre relev\xE9s. Cela peut \xEAtre d\xFB soit \xE0 des droits\
