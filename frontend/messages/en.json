@@ -4085,7 +4085,6 @@
 	"ctrlEnterToPost": "Ctrl+Enter to post",
 	"confirmModalMessagePlural": "Are you sure? This action will permanently affect the following objects",
 	"syncAppliedControlsMessage": "The applied controls using this reference control will be synced to it. Please note that this cannot be undone.",
-	"presets": "Journeys",
 	"presetsDescription": "Follow guided journeys to set up your security program step by step. You can also explore the platform freely and unlock all capabilities from the settings.",
 	"availablePresets": "Available Templates",
 	"activeJourneys": "Active Journeys",

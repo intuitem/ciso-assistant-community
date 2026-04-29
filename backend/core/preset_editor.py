@@ -51,6 +51,16 @@ def serialize_preset_to_draft(preset: Preset) -> dict:
     }
 
 
+def _coerce_str(value: Any, path: str, *, trim: bool = False) -> str:
+    """Defensive coercion: surface ValidationError on non-string scalars
+    instead of letting .strip()/regex raise AttributeError/TypeError (→ 500)."""
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise ValidationError({path: "Must be a string."})
+    return value.strip() if trim else value
+
+
 def validate_draft(draft: Any, strict: bool = True) -> dict:
     """Return a normalized draft dict or raise ValidationError.
 
@@ -61,20 +71,29 @@ def validate_draft(draft: Any, strict: bool = True) -> dict:
     if not isinstance(draft, dict):
         raise ValidationError({"draft": "Draft must be an object."})
 
-    meta = draft.get("journey_meta") or {}
+    # Distinguish absent (None) from invalid-but-falsy (e.g. journey_meta=[],
+    # scaffolded_objects={}). Defaulting via `or {}` would silently coerce
+    # invalid types into empty containers.
+    meta = draft.get("journey_meta")
+    if meta is None:
+        meta = {}
     if not isinstance(meta, dict):
         raise ValidationError({"journey_meta": "Must be an object."})
-    name = (meta.get("name") or "").strip()
+    name = _coerce_str(meta.get("name"), "journey_meta.name", trim=True)
     if not name and strict:
         raise ValidationError({"journey_meta.name": "Name is required."})
-    description = meta.get("description") or ""
+    description = _coerce_str(meta.get("description"), "journey_meta.description")
 
-    scaffolds_in = draft.get("scaffolded_objects") or []
+    scaffolds_in = draft.get("scaffolded_objects")
+    if scaffolds_in is None:
+        scaffolds_in = []
     if not isinstance(scaffolds_in, list):
         raise ValidationError({"scaffolded_objects": "Must be a list."})
     scaffolds, refs = _validate_scaffolds(scaffolds_in, strict=strict)
 
-    steps_in = draft.get("steps") or []
+    steps_in = draft.get("steps")
+    if steps_in is None:
+        steps_in = []
     if not isinstance(steps_in, list):
         raise ValidationError({"steps": "Must be a list."})
     steps = _validate_steps(steps_in, refs, strict=strict)
@@ -102,14 +121,14 @@ def _validate_scaffolds(scaffolds: list, strict: bool = True) -> tuple[list, set
     for i, item in enumerate(scaffolds):
         if not isinstance(item, dict):
             raise ValidationError({f"scaffolded_objects[{i}]": "Must be an object."})
-        scaffold_type = item.get("type")
+        scaffold_type = _coerce_str(item.get("type"), f"scaffolded_objects[{i}].type")
         if not scaffold_type:
             raise ValidationError(
                 {f"scaffolded_objects[{i}].type": "Type is required."}
             )
         if scaffold_type not in ALLOWED_SCAFFOLD_TYPES:
             normalized = dict(item)
-            ref = item.get("ref") or ""
+            ref = _coerce_str(item.get("ref"), f"scaffolded_objects[{i}].ref")
             if ref:
                 if not REF_RE.match(ref):
                     raise ValidationError(
@@ -122,7 +141,7 @@ def _validate_scaffolds(scaffolds: list, strict: bool = True) -> tuple[list, set
                 seen_refs.add(ref)
             out.append(normalized)
             continue
-        ref = item.get("ref") or ""
+        ref = _coerce_str(item.get("ref"), f"scaffolded_objects[{i}].ref")
         if not REF_RE.match(ref):
             raise ValidationError(
                 {f"scaffolded_objects[{i}].ref": "Must match [A-Za-z0-9_]+."}
@@ -132,7 +151,7 @@ def _validate_scaffolds(scaffolds: list, strict: bool = True) -> tuple[list, set
                 {f"scaffolded_objects[{i}].ref": f"Duplicate ref '{ref}'."}
             )
         seen_refs.add(ref)
-        name = (item.get("name") or "").strip()
+        name = _coerce_str(item.get("name"), f"scaffolded_objects[{i}].name", trim=True)
         if not name and strict:
             raise ValidationError(
                 {f"scaffolded_objects[{i}].name": "Name is required."}
@@ -205,7 +224,7 @@ def _validate_steps(steps: list, scaffold_refs: set[str], strict: bool = True) -
     for i, step in enumerate(steps):
         if not isinstance(step, dict):
             raise ValidationError({f"steps[{i}]": "Must be an object."})
-        key = (step.get("key") or "").strip()
+        key = _coerce_str(step.get("key"), f"steps[{i}].key", trim=True)
         if not key or not KEY_RE.match(key):
             raise ValidationError(
                 {f"steps[{i}].key": "Required, must match [A-Za-z0-9_-]+."}
@@ -214,7 +233,7 @@ def _validate_steps(steps: list, scaffold_refs: set[str], strict: bool = True) -
             raise ValidationError({f"steps[{i}].key": f"Duplicate key '{key}'."})
         seen_keys.add(key)
 
-        title = (step.get("title") or "").strip()
+        title = _coerce_str(step.get("title"), f"steps[{i}].title", trim=True)
         if not title and strict:
             raise ValidationError({f"steps[{i}].title": "Title is required."})
 
@@ -222,14 +241,16 @@ def _validate_steps(steps: list, scaffold_refs: set[str], strict: bool = True) -
             "id": _coerce_step_id(step.get("id"), i),
             "key": key,
             "title": title,
-            "description": step.get("description") or "",
+            "description": _coerce_str(
+                step.get("description"), f"steps[{i}].description"
+            ),
         }
 
         # Pointer mode is signalled by presence (string) vs absence (None) of
         # target_model / target_url. Empty string = "user is in this mode but
         # hasn't picked a value yet" — preserve through round-trip.
         if "target_model" in step and step["target_model"] is not None:
-            target_model = step["target_model"]
+            target_model = _coerce_str(step["target_model"], f"steps[{i}].target_model")
             if target_model and target_model not in ALLOWED_TARGET_MODELS:
                 raise ValidationError(
                     {
@@ -243,6 +264,8 @@ def _validate_steps(steps: list, scaffold_refs: set[str], strict: bool = True) -
             normalized["target_model"] = target_model
 
         target_ref = step.get("target_ref")
+        if target_ref is not None and not isinstance(target_ref, str):
+            raise ValidationError({f"steps[{i}].target_ref": "Must be a string."})
         if target_ref:
             if target_ref not in scaffold_refs:
                 # Allow raw uuids too — but in editor we only use scaffold refs.

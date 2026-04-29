@@ -4090,6 +4090,7 @@ class PresetReadSerializer(BaseModelSerializer):
             "urn",
             "ref_id",
             "version",
+            "editing_version",
             "provider",
             "translations",
             "profile",

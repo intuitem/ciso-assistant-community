@@ -9393,7 +9393,7 @@ class PresetJourney(NameDescriptionMixin, FolderMixin):
         Preset,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="journeys",
     )
     applied_version = models.IntegerField(default=1)
@@ -9584,6 +9584,10 @@ auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
     m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    Preset,
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     PresetJourney,

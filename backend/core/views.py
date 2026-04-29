@@ -10245,6 +10245,11 @@ class PresetViewSet(BaseModelViewSet):
         preset.description = normalized["journey_meta"]["description"]
         preset.scaffolded_objects = normalized["scaffolded_objects"]
         preset.steps = normalized["steps"]
+        # Clear translations on publish: the editor doesn't surface a per-locale
+        # editor today, so any inherited library translations would otherwise
+        # keep materializing stale localized strings via the executor's locale
+        # lookups. Re-add later when the translations editor lands.
+        preset.translations = {}
         preset.editing_version = preset.editing_version + 1
         preset.version = preset.editing_version
         preset.editing_history = history
@@ -10386,11 +10391,14 @@ class PresetViewSet(BaseModelViewSet):
                 {"error": detail},
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
-        except Exception as e:
-            logger.error("Failed to apply preset", error=e)
+        except Exception:
+            # Unexpected server-side failure — keep the response body generic
+            # so we don't leak internals, but record the traceback and return a
+            # 5xx so callers don't treat this as bad input.
+            logger.exception("Failed to apply preset")
             return Response(
                 {"error": "Failed to apply preset."},
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -10444,6 +10452,21 @@ class JourneyViewSet(BaseModelViewSet):
                 .first()
             )
             if stored_lib and stored_lib.version > journey.preset.version:
+                # The upsert mutates the global library-backed Preset row, so
+                # gate it behind the same library-write permission `apply()`
+                # uses. Without this, any caller with `change_journey` could
+                # trigger global library state changes via upgrade.
+                if not RoleAssignment.is_access_allowed(
+                    user=request.user,
+                    perm=Permission.objects.get(codename="add_loadedlibrary"),
+                    folder=Folder.get_root_folder(),
+                ):
+                    return Response(
+                        {
+                            "detail": "Library upgrade requires permission to load libraries."
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
                 from library.utils import upsert_preset_from_stored_library
 
                 upsert_preset_from_stored_library(stored_lib)

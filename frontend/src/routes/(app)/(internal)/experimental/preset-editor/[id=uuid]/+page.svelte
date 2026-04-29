@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { pageTitle } from '$lib/utils/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -97,12 +97,29 @@
 		if (dirty && !confirm('You have unsaved changes. Leave anyway?')) cancel();
 	});
 
+	// beforeNavigate only catches in-app route changes; tab close, refresh, or
+	// URL-bar navigation needs the native beforeunload prompt.
+	function handleBeforeUnload(event: BeforeUnloadEvent) {
+		if (!dirty) return;
+		event.preventDefault();
+		event.returnValue = '';
+	}
+
 	onMount(async () => {
+		if (typeof window !== 'undefined') {
+			window.addEventListener('beforeunload', handleBeforeUnload);
+		}
 		if (isReadOnly) {
 			loading = false;
 			return;
 		}
 		await loadDraft();
+	});
+
+	onDestroy(() => {
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		}
 	});
 
 	async function loadDraft() {

@@ -39,14 +39,29 @@ def backfill_presets(apps, schema_editor):
             },
         )
 
+    unmatched = []
     for journey in PresetJourney.objects.all():
         urn = getattr(journey, "urn", None)
         if not urn:
             continue
         preset = Preset.objects.filter(urn=urn).first()
-        if preset:
-            journey.preset = preset
-            journey.save(update_fields=["preset"])
+        if preset is None:
+            unmatched.append((str(journey.pk), urn))
+            continue
+        journey.preset = preset
+        journey.save(update_fields=["preset"])
+
+    if unmatched:
+        # Fail-fast: dropping PresetJourney.urn next would permanently strand
+        # these rows with no template reference. Resolve by ensuring every
+        # referenced StoredLibrary is loaded, then re-run the migration.
+        details = ", ".join(f"{pk}->{urn}" for pk, urn in unmatched[:10])
+        raise RuntimeError(
+            f"Cannot drop PresetJourney.urn: {len(unmatched)} journey(s) "
+            f"reference URNs not backfilled to Preset rows ({details}"
+            f"{'…' if len(unmatched) > 10 else ''}). Load the missing library "
+            f"libraries before re-running this migration."
+        )
 
 
 class Migration(migrations.Migration):
@@ -152,7 +167,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
+                on_delete=django.db.models.deletion.PROTECT,
                 related_name="journeys",
                 to="core.preset",
             ),
