@@ -130,7 +130,6 @@ test.describe('Security Advisories', () => {
 		});
 
 		await test.step('verify CWE detail page loaded', async () => {
-			// CWE detail should show ref_id and name fields
 			await expect(page.getByTestId('ref-id-field-value')).toBeVisible();
 			await expect(page.getByTestId('name-field-value')).toBeVisible();
 
@@ -147,56 +146,80 @@ test.describe('Security Advisories', () => {
 	}) => {
 		test.setTimeout(60_000);
 
-		await test.step('navigate to settings Vulnerability SLA tab', async () => {
+		const fields = ['critical', 'high', 'medium', 'low', 'info'] as const;
+		const initialValues: Record<string, string> = {};
+		let initialAnchor = '';
+
+		const gotoSlaTab = async () => {
 			await page.goto('/settings');
 			await page.waitForLoadState('networkidle');
 			await page.locator('[data-value="vulnerabilitySla"]').click();
 			await page.waitForTimeout(300);
 			await expect(page.getByTestId('form-input-critical')).toBeVisible();
-		});
+		};
 
-		await test.step('set SLA anchor to Published date and all severities to 20', async () => {
-			await page.getByTestId('form-input-sla-anchor').selectOption('published_date');
-			for (const field of ['critical', 'high', 'medium', 'low', 'info']) {
-				await page.getByTestId(`form-input-${field}`).fill('20');
-			}
-		});
-
-		await test.step('save and verify toast', async () => {
+		const saveSlaForm = async () => {
 			await page.locator('form[action*="vulnerabilitySla"] [data-testid="save-button"]').click();
 			await expect(page.getByTestId('toast')).toBeVisible({ timeout: 10_000 });
 			await page.waitForLoadState('networkidle');
-		});
+		};
 
-		await test.step('verify values persisted', async () => {
-			await page.reload();
-			await page.waitForLoadState('networkidle');
-			await page.locator('[data-value="vulnerabilitySla"]').click();
-			await page.waitForTimeout(300);
-			for (const field of ['critical', 'high', 'medium', 'low', 'info']) {
-				await expect(page.getByTestId(`form-input-${field}`)).toHaveValue('20');
+		await test.step('navigate to settings Vulnerability SLA tab', gotoSlaTab);
+
+		await test.step('snapshot initial SLA settings', async () => {
+			initialAnchor = await page.getByTestId('form-input-sla-anchor').inputValue();
+			for (const field of fields) {
+				initialValues[field] = await page.getByTestId(`form-input-${field}`).inputValue();
 			}
+			console.log('Initial SLA anchor:', initialAnchor, 'values:', initialValues);
 		});
 
-		await test.step('click Reset to defaults and verify default values (15/30/90/180/365)', async () => {
-			await page.getByRole('button', { name: /reset to defaults/i }).click();
-			await page.waitForTimeout(300);
-			const defaults: Record<string, string> = {
-				critical: '15',
-				high: '30',
-				medium: '90',
-				low: '180',
-				info: '365'
-			};
-			for (const [field, value] of Object.entries(defaults)) {
-				await expect(page.getByTestId(`form-input-${field}`)).toHaveValue(value);
-			}
-		});
+		try {
+			await test.step('set SLA anchor to Published date and all severities to 20', async () => {
+				await page.getByTestId('form-input-sla-anchor').selectOption('published_date');
+				for (const field of fields) {
+					await page.getByTestId(`form-input-${field}`).fill('20');
+				}
+			});
 
-		await test.step('save defaults back', async () => {
-			await page.locator('form[action*="vulnerabilitySla"] [data-testid="save-button"]').click();
-			await expect(page.getByTestId('toast')).toBeVisible({ timeout: 10_000 });
-		});
+			await test.step('save and verify toast', saveSlaForm);
+
+			await test.step('verify values persisted', async () => {
+				await page.reload();
+				await page.waitForLoadState('networkidle');
+				await page.locator('[data-value="vulnerabilitySla"]').click();
+				await page.waitForTimeout(300);
+				for (const field of fields) {
+					await expect(page.getByTestId(`form-input-${field}`)).toHaveValue('20');
+				}
+			});
+
+			await test.step('click Reset to defaults and verify default values (15/30/90/180/365)', async () => {
+				await page.getByRole('button', { name: /reset to defaults/i }).click();
+				await page.waitForTimeout(300);
+				const defaults: Record<string, string> = {
+					critical: '15',
+					high: '30',
+					medium: '90',
+					low: '180',
+					info: '365'
+				};
+				for (const [field, value] of Object.entries(defaults)) {
+					await expect(page.getByTestId(`form-input-${field}`)).toHaveValue(value);
+				}
+			});
+		} finally {
+			await test.step('restore original SLA settings', async () => {
+				await gotoSlaTab();
+				if (initialAnchor) {
+					await page.getByTestId('form-input-sla-anchor').selectOption(initialAnchor);
+				}
+				for (const field of fields) {
+					await page.getByTestId(`form-input-${field}`).fill(initialValues[field] ?? '');
+				}
+				await saveSlaForm();
+			});
+		}
 	});
 
 	test('vulnerability feeds settings - enable all, save, disable all, save', async ({
