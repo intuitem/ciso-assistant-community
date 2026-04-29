@@ -205,7 +205,10 @@ class TestComplianceAssessmentsAuthenticated:
                     "str": str(Framework.objects.all()[0]),
                     "implementation_groups_definition": None,
                     "outcomes_definition": [],
-                    "reference_controls": [],
+                    "reference_controls": [
+                        {"id": str(rc["id"]), "str": rc["str"], "urn": rc["urn"]}
+                        for rc in Framework.objects.all()[0].reference_controls
+                    ],
                     "min_score": Framework.objects.all()[0].min_score,
                     "max_score": Framework.objects.all()[0].max_score,
                     "ref_id": str(Framework.objects.all()[0].ref_id),

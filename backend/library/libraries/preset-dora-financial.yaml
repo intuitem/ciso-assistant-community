@@ -255,7 +255,7 @@ objects:
         - key: incident_reporting
           title: "Set up incident classification and reporting"
           description: "Define your ICT incident classification criteria and reporting process — DORA requires initial notification within 4 hours for major incidents"
-          target_model: applied-controls
+          target_model: incidents
           translations:
             fr:
               title: "Mettre en place la classification et le signalement des incidents"
