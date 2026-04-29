@@ -89,7 +89,8 @@
 		showStatus,
 		showResult,
 		showScore,
-		showDocumentationScore
+		showDocumentationScore,
+		showRespondentAlignment
 	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
@@ -123,7 +124,7 @@
 				{safeTranslate(data.requirementAssessment.result)}
 			</span>
 		{/if}
-		{#if data.requirementAssessment.respondent_alignment}
+		{#if showRespondentAlignment && data.requirementAssessment.respondent_alignment}
 			<span class="flex items-center gap-1 text-xs">
 				<span class="italic text-surface-600">{m.respondentAnswered()}:</span>
 				<span

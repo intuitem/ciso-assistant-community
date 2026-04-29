@@ -67,6 +67,7 @@
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
+	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 
 	// Single assignment — the URL param (params.id) IS the assignment ID
 	let assignment = $derived(data.assignment);
@@ -949,7 +950,7 @@
 							{/if}
 
 							<!-- Auditor badge: respondent's alignment answer -->
-							{#if viewerRole === 'auditor' && requirementAssessment.respondent_alignment}
+							{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
 								<div class="flex flex-col items-center my-2">
 									<p class="text-xs italic text-surface-600">
 										{m.respondentAnswered()}

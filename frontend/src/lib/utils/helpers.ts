@@ -402,6 +402,7 @@ export function getFieldVisibility(
 	showAppliedControls: boolean;
 	showEvidences: boolean;
 	showSecurityExceptions: boolean;
+	showRespondentAlignment: boolean;
 } {
 	return {
 		showResult: isFieldVisible(framework, complianceAssessment, 'result', viewerRole),
@@ -425,6 +426,12 @@ export function getFieldVisibility(
 			framework,
 			complianceAssessment,
 			'security_exceptions',
+			viewerRole
+		),
+		showRespondentAlignment: isFieldVisible(
+			framework,
+			complianceAssessment,
+			'respondent_alignment',
 			viewerRole
 		)
 	};

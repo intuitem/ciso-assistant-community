@@ -266,7 +266,8 @@
 		showObservation,
 		showAppliedControls,
 		showEvidences,
-		showSecurityExceptions
+		showSecurityExceptions,
+		showRespondentAlignment
 	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
@@ -752,7 +753,7 @@
 							helpText={m.requirementAssessmentStatusHelpText()}
 						/>
 					{/if}
-					{#if page.data.requirementAssessment.respondent_alignment}
+					{#if showRespondentAlignment && page.data.requirementAssessment.respondent_alignment}
 						<p class="flex flex-row items-center space-x-4">
 							<span class="text-sm italic text-surface-600">{m.respondentAnswered()}:</span>
 							<span

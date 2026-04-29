@@ -3137,8 +3137,13 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "not_applicable": RequirementAssessment.Result.NOT_APPLICABLE,
             }
             requirement_has_questions = instance.requirement.questions.exists()
+            # Skip auto-map when the auditor explicitly sets result in the same
+            # request: SuperForm round-trips the existing respondent_alignment
+            # on every submit, and we must not clobber an auditor-edited result
+            # (or zero it to NOT_ASSESSED if the respondent never answered).
             if (
                 "respondent_alignment" in validated_data
+                and "result" not in validated_data
                 and not requirement_has_questions
             ):
                 new_alignment = validated_data.get("respondent_alignment")
@@ -3146,9 +3151,15 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                     instance.result = ALIGNMENT_TO_RESULT[new_alignment]
                     instance.save(update_fields=["result"])
                 elif not new_alignment:
-                    # Deselection: reset result to not_assessed
+                    # Deselection: reset result and scores so the RA is truly
+                    # unassessed (progress() flags an RA as assessed when score
+                    # is set, even if result is NOT_ASSESSED).
                     instance.result = RequirementAssessment.Result.NOT_ASSESSED
-                    instance.save(update_fields=["result"])
+                    instance.score = None
+                    instance.documentation_score = None
+                    instance.save(
+                        update_fields=["result", "score", "documentation_score"]
+                    )
 
             return instance
 
