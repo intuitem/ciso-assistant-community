@@ -799,7 +799,7 @@ def task_template_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def get_governance_calendar_data(user: User, year: int = None):
+def get_governance_calendar_data(user: User, year: int = None, folder_id=None):
     """
     Generate calendar heatmap data for governance activities.
     Returns activity counts per date for:
@@ -827,27 +827,31 @@ def get_governance_calendar_data(user: User, year: int = None):
     start_date = datetime(year, 1, 1).date()
     end_date = datetime(year, 12, 31).date()
 
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+
     # Dictionary to accumulate activity counts per date
     activity_counts = defaultdict(int)
 
     # Get accessible objects for each model
     (task_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, TaskNode
+        scoped_folder, user, TaskNode
     )
     (control_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )
     (acceptance_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
+        scoped_folder, user, RiskAcceptance
     )
     (risk_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAssessment
+        scoped_folder, user, RiskAssessment
     )
     (compliance_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, ComplianceAssessment
+        scoped_folder, user, ComplianceAssessment
     )
     (findings_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, FindingsAssessment
+        scoped_folder, user, FindingsAssessment
     )
 
     # Count TaskNode due dates
@@ -941,12 +945,16 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def combined_assessments_per_status(user: User):
+def combined_assessments_per_status(user: User, folder_id=None):
     """
     Returns assessment counts grouped by status for all three assessment types:
     RiskAssessment, ComplianceAssessment, and FindingsAssessment
     """
     from .models import RiskAssessment, ComplianceAssessment, FindingsAssessment
+
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
 
     # Get all unique statuses across all assessment types
     # Using RiskAssessment.Status as they should all share the same status choices
@@ -970,7 +978,7 @@ def combined_assessments_per_status(user: User):
     for series_name, model in assessment_types:
         # Get accessible objects
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, model
+            scoped_folder, user, model
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
 
@@ -1213,10 +1221,14 @@ def risks_per_perimeter_groups(user: User):
     return output
 
 
-def get_counters(user: User):
+def get_counters(user: User, folder_id=None):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+
     # Get all accessible applied controls
     applied_controls_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )[0]
 
     # Count policies and non-policies separately
@@ -1226,24 +1238,22 @@ def get_counters(user: User):
 
     # Get accessible frameworks
     frameworks_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Framework
+        scoped_folder, user, Framework
     )[0]
 
     # Get accessible risk acceptances
     risk_acceptances_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
+        scoped_folder, user, RiskAcceptance
     )[0]
 
     # Get accessible security exceptions
     security_exceptions_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityException
+        scoped_folder, user, SecurityException
     )[0]
 
     return {
         "domains": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Folder
-            )[0]
+            RoleAssignment.get_accessible_object_ids(scoped_folder, user, Folder)[0]
         ),
         "frameworks": len(frameworks_ids),
         "applied_controls": applied_controls_count,
