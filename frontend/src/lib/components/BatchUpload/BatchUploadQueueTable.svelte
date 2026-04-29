@@ -66,9 +66,7 @@
 						<td class="px-3 py-2 text-gray-600">{fmtSize(entry.size)}</td>
 						<td class="px-3 py-2">
 							{#if entry.status === 'pending'}
-								<span class="text-gray-500"
-									><i class="fa-regular fa-clock mr-1"></i>Pending</span
-								>
+								<span class="text-gray-500"><i class="fa-regular fa-clock mr-1"></i>Pending</span>
 							{:else if entry.status === 'uploading'}
 								<span class="text-indigo-600"
 									><i class="fa-solid fa-spinner fa-spin mr-1"></i>Uploading</span

@@ -10043,9 +10043,10 @@ class EvidenceViewSet(BaseModelViewSet):
             manifest = json.loads(request.data.get("manifest") or "[]")
             if not isinstance(manifest, list):
                 raise ValueError("manifest must be a list")
-        except (ValueError, json.JSONDecodeError) as e:
+        except (ValueError, json.JSONDecodeError):
+            logger.exception("Invalid manifest JSON received in batch upload")
             return Response(
-                {"error": f"Invalid manifest JSON: {e}"},
+                {"error": "Invalid manifest JSON"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -10104,9 +10105,14 @@ class EvidenceViewSet(BaseModelViewSet):
                     hash_obj.update(chunk)
                 file_hash = hash_obj.hexdigest()
                 upload.seek(0)
-            except Exception as e:
+            except Exception:
+                logger.exception(
+                    "Failed to hash uploaded file in batch upload",
+                    field=field,
+                    name=name,
+                )
                 result["outcome"] = "error"
-                result["error"] = f"Failed to hash file: {e}"
+                result["error"] = "Failed to hash file"
                 summary["errors"] += 1
                 results.append(result)
                 continue

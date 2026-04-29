@@ -147,9 +147,9 @@
 				<i class="fa-solid fa-cloud-arrow-up mr-2"></i>Bulk evidence upload
 			</h4>
 			<p class="text-sm text-gray-600">
-				Upload multiple files (or a whole directory) as evidences in one shot. Duplicate files
-				(same SHA-256 inside the target folder) are detected automatically. Name collisions are
-				resolved according to the strategy you pick below.
+				Upload multiple files (or a whole directory) as evidences in one shot. Duplicate files (same
+				SHA-256 inside the target folder) are detected automatically. Name collisions are resolved
+				according to the strategy you pick below.
 			</p>
 		</div>
 
