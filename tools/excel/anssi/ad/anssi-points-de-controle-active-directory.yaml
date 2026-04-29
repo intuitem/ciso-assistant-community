@@ -28,7 +28,7 @@ description: "L'annuaire Active Directory, centre n\xE9vralgique de la s\xE9curi
   \ en fonction des travaux de recherche, des pratiques constat\xE9es en audit, et\
   \ de l'analyse des modes op\xE9ratoires adverses."
 copyright: ANSSI
-version: 1
+version: 2
 publication_date: 2026-04-29
 provider: ANSSI
 packager: intuitem
