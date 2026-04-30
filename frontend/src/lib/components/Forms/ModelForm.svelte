@@ -321,7 +321,7 @@
 										name: shouldUpdateName ? r.name : currentData.name,
 										category: r.category,
 										csf_function: r.csf_function,
-										ref_id: r.ref_id
+										ref_id: r.ref_id ?? currentData.ref_id ?? ''
 									};
 								});
 							});
