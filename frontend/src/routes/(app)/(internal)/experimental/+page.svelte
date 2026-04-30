@@ -49,4 +49,10 @@
 		link="/experimental/preset-editor"
 		tags={['presets', 'journey', 'editor']}
 	/>
+	<Article
+		title="Multi-file evidence (UX prototype)"
+		desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend."
+		link="/experimental/evidence-multifile"
+		tags={['evidences', 'history', 'ux', 'prototype']}
+	/>
 </div>
