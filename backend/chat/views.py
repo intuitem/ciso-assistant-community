@@ -6,6 +6,7 @@ import time
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.http import StreamingHttpResponse
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -34,7 +35,15 @@ from .memory import (
     update_summary_for_session,
 )
 from .metrics import build_turn_metrics, record_metric
-from .models import ChatSession, ChatMessage, IndexedDocument
+from .models import (
+    ChatSession,
+    ChatMessage,
+    IndexedDocument,
+    QuestionnaireRun,
+    QuestionnaireQuestion,
+    AgentRun,
+    AgentAction,
+)
 from .page_context import parse_page_context
 from .providers import get_llm, is_ollama_available
 from .tokens import count_tokens
@@ -821,6 +830,293 @@ class IndexedDocumentViewSet(BaseModelViewSet):
 
     model = IndexedDocument
     filterset_fields = ["folder", "source_type", "status"]
+
+
+class QuestionnaireRunViewSet(BaseModelViewSet):
+    """Experimental: questionnaire prefill runs."""
+
+    model = QuestionnaireRun
+    filterset_fields = ["folder", "status"]
+    search_fields = ["title", "filename"]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    @action(detail=False, methods=["post"], url_path="upload")
+    def upload(self, request):
+        """Multipart upload entry point: file + folder + optional title.
+
+        Creates the run in PENDING and queues the parse task. Frontend then
+        polls the detail endpoint for status to flip to PARSED.
+        """
+        file = request.FILES.get("file")
+        folder_id = request.data.get("folder")
+        title = (request.data.get("title") or "").strip()
+
+        if not file:
+            return Response(
+                {"detail": "No file provided."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if not folder_id:
+            return Response(
+                {"detail": "folder is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from iam.models import Folder, RoleAssignment
+
+        try:
+            folder = Folder.objects.get(id=folder_id)
+        except (Folder.DoesNotExist, ValueError):
+            return Response(
+                {"detail": "Folder not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        readable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Folder
+        )
+        if folder.id not in readable_ids:
+            return Response(
+                {"detail": "You do not have access to this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        run = QuestionnaireRun.objects.create(
+            folder=folder,
+            owner=request.user,
+            title=title,
+            file=file,
+            filename=file.name,
+        )
+
+        from .tasks import parse_questionnaire
+
+        parse_questionnaire(str(run.id))
+
+        return Response(
+            {"id": str(run.id), "status": run.status},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="extract-questions")
+    def extract_questions(self, request, pk=None):
+        """Materialize QuestionnaireQuestion rows from parsed_data + column_mapping.
+
+        Idempotent: re-running deletes prior extracted rows. Refuses to run if
+        any agent run already targets this questionnaire (would orphan
+        AgentActions referencing deleted question rows).
+        """
+        run = self.get_object()
+        if run.status != QuestionnaireRun.Status.PARSED:
+            return Response(
+                {"detail": f"Run must be parsed; currently {run.status}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        mapping = run.column_mapping or {}
+        if "sheet" not in mapping or "question_col" not in mapping:
+            return Response(
+                {"detail": "Column mapping not yet saved."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        existing_agent_runs = AgentRun.objects.filter(
+            target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+            target_object_id=run.id,
+        )
+        if existing_agent_runs.exists():
+            return Response(
+                {
+                    "detail": "Cannot re-extract: one or more agent runs already "
+                    "reference this questionnaire."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        sheet_name = mapping["sheet"]
+        sheet = next(
+            (s for s in run.parsed_data.get("sheets", []) if s["name"] == sheet_name),
+            None,
+        )
+        if not sheet:
+            return Response(
+                {"detail": f"Sheet '{sheet_name}' not found in parsed data."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from .tasks import extract_questions_from_sheet
+
+        QuestionnaireQuestion.objects.filter(questionnaire_run=run).delete()
+        created = extract_questions_from_sheet(run, sheet, mapping)
+
+        return Response(
+            {"questionnaire_run": str(run.id), "extracted": created},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["patch"], url_path="mapping")
+    def set_mapping(self, request, pk=None):
+        """Persist the user's column-mapping choice for this run."""
+        from .serializers import QuestionnaireRunMappingSerializer
+
+        run = self.get_object()
+        if run.status != QuestionnaireRun.Status.PARSED:
+            return Response(
+                {"detail": f"Run is {run.status}; mapping requires 'parsed'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = QuestionnaireRunMappingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        mapping = {k: v for k, v in serializer.validated_data.items() if v is not None}
+
+        sheet_names = [s["name"] for s in run.parsed_data.get("sheets", [])]
+        if mapping["sheet"] not in sheet_names:
+            return Response(
+                {"detail": f"Unknown sheet '{mapping['sheet']}'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        run.column_mapping = mapping
+        run.save(update_fields=["column_mapping", "updated_at"])
+        return Response({"column_mapping": run.column_mapping})
+
+
+class QuestionnaireQuestionViewSet(BaseModelViewSet):
+    model = QuestionnaireQuestion
+    filterset_fields = ["questionnaire_run"]
+    search_fields = ["text", "ref_id", "section"]
+
+
+class AgentRunViewSet(BaseModelViewSet):
+    model = AgentRun
+    filterset_fields = ["folder", "kind", "status", "target_object_id"]
+    search_fields = ["current_step_label"]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    @action(detail=False, methods=["post"], url_path="start-questionnaire-prefill")
+    def start_questionnaire_prefill(self, request):
+        """Create + enqueue an AgentRun for prefilling a questionnaire.
+
+        Body: {questionnaire_run, strictness}.
+        """
+        from .serializers import StartQuestionnairePrefillSerializer
+
+        serializer = StartQuestionnairePrefillSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        try:
+            qr = QuestionnaireRun.objects.get(id=data["questionnaire_run"])
+        except QuestionnaireRun.DoesNotExist:
+            return Response(
+                {"detail": "Questionnaire run not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        from iam.models import Folder, RoleAssignment
+
+        readable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Folder
+        )
+        if qr.folder_id not in readable_ids:
+            return Response(
+                {"detail": "You do not have access to this questionnaire's folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        question_count = qr.questions.count()
+        if question_count == 0:
+            return Response(
+                {"detail": "No questions extracted yet — extract first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        active = AgentRun.objects.filter(
+            target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+            target_object_id=qr.id,
+            status__in=[AgentRun.Status.QUEUED, AgentRun.Status.RUNNING],
+        )
+        if active.exists():
+            return Response(
+                {
+                    "detail": "An agent run is already in progress for this questionnaire."
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        agent_run = AgentRun.objects.create(
+            owner=request.user,
+            folder=qr.folder,
+            kind=AgentRun.Kind.QUESTIONNAIRE_PREFILL,
+            strictness=data["strictness"],
+            target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+            target_object_id=qr.id,
+            total_steps=question_count,
+        )
+
+        from .tasks import run_questionnaire_prefill
+
+        run_questionnaire_prefill(str(agent_run.id))
+
+        return Response(
+            {"id": str(agent_run.id), "status": agent_run.status},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="cancel")
+    def cancel(self, request, pk=None):
+        """Mark an active run as cancelled. The worker checks before each step."""
+        run = self.get_object()
+        if run.status not in (AgentRun.Status.QUEUED, AgentRun.Status.RUNNING):
+            return Response(
+                {"detail": f"Run is already {run.status}; cannot cancel."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        run.status = AgentRun.Status.CANCELLED
+        run.finished_at = timezone.now()
+        run.save(update_fields=["status", "finished_at", "updated_at"])
+        return Response({"status": run.status})
+
+
+class AgentActionViewSet(BaseModelViewSet):
+    model = AgentAction
+    filterset_fields = [
+        "agent_run",
+        "kind",
+        "state",
+        "target_content_type",
+        "target_object_id",
+    ]
+
+    @action(detail=True, methods=["post"], url_path="approve")
+    def approve(self, request, pk=None):
+        action_obj = self.get_object()
+        if action_obj.state != AgentAction.State.PROPOSED:
+            return Response(
+                {"detail": f"Action is {action_obj.state}; cannot approve."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        action_obj.state = AgentAction.State.APPROVED
+        action_obj.approved_by = request.user
+        action_obj.approved_at = timezone.now()
+        action_obj.save(
+            update_fields=["state", "approved_by", "approved_at", "updated_at"]
+        )
+        return Response({"state": action_obj.state})
+
+    @action(detail=True, methods=["post"], url_path="reject")
+    def reject(self, request, pk=None):
+        action_obj = self.get_object()
+        if action_obj.state != AgentAction.State.PROPOSED:
+            return Response(
+                {"detail": f"Action is {action_obj.state}; cannot reject."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        action_obj.state = AgentAction.State.REJECTED
+        action_obj.save(update_fields=["state", "updated_at"])
+        return Response({"state": action_obj.state})
 
 
 @api_view(["GET"])

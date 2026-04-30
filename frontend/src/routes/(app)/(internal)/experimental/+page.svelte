@@ -43,4 +43,10 @@
 		link="/experimental/preset-editor"
 		tags={['presets', 'journey', 'editor']}
 	/>
+	<Article
+		title="Questionnaire Autopilot"
+		desc="Upload a customer security questionnaire (.xlsx), scope it to a folder, then map its columns. LLM prefill comes next."
+		link="/experimental/questionnaire-autopilot"
+		tags={['agentic', 'questionnaire', 'vendor-due-diligence']}
+	/>
 </div>

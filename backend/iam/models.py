@@ -1327,6 +1327,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_iter = object_type.objects.filter(
                     journey__folder_id__in=folder_ids
                 ).values_list("id", "journey__folder_id")
+            elif hasattr(object_type, "questionnaire_run"):
+                objects_iter = object_type.objects.filter(
+                    questionnaire_run__folder_id__in=folder_ids
+                ).values_list("id", "questionnaire_run__folder_id")
+            elif hasattr(object_type, "agent_run"):
+                objects_iter = object_type.objects.filter(
+                    agent_run__folder_id__in=folder_ids
+                ).values_list("id", "agent_run__folder_id")
             else:
                 raise NotImplementedError("type not supported")
 
