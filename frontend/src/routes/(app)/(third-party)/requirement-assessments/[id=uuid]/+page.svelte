@@ -8,7 +8,8 @@
 		formatScoreValue,
 		getFieldVisibility,
 		getRequirementTitle,
-		getSecureRedirect
+		getSecureRedirect,
+		alignmentColorMap
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales';
@@ -88,7 +89,8 @@
 		showStatus,
 		showResult,
 		showScore,
-		showDocumentationScore
+		showDocumentationScore,
+		showRespondentAlignment
 	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
@@ -120,6 +122,19 @@
 					'#d1d5db'};"
 			>
 				{safeTranslate(data.requirementAssessment.result)}
+			</span>
+		{/if}
+		{#if showRespondentAlignment && data.requirementAssessment.respondent_alignment}
+			<span class="flex items-center gap-1 text-xs">
+				<span class="italic text-surface-600">{m.respondentAnswered()}:</span>
+				<span
+					class="badge text-xs font-semibold text-white"
+					style="background-color: {alignmentColorMap[
+						data.requirementAssessment.respondent_alignment
+					]}"
+				>
+					{safeTranslate(data.requirementAssessment.respondent_alignment)}
+				</span>
 			</span>
 		{/if}
 		{#if data.requirement.implementation_groups && data.requirement.implementation_groups.length > 0}

@@ -2959,19 +2959,45 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "⚠️ Cannot modify the requirement when the audit is in review."
             )
 
-        # Assignment-level locking for auditee users
+        # Assignment-level and field-level guards for respondent users (auditee or third-party)
         request = self.context.get("request")
         if request and self.instance and compliance_assessment:
-            from core.utils import get_auditee_filtered_folder_ids
+            from core.utils import (
+                DEFAULT_FIELD_VISIBILITY,
+                get_respondent_filtered_folder_ids,
+                get_visible_fields,
+            )
 
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
-            if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            respondent_folders = get_respondent_filtered_folder_ids(request.user)
+            if (
+                respondent_folders
+                and compliance_assessment.folder_id in respondent_folders
+            ):
                 locked_assignment = self.instance.assignments.filter(
                     status__in=["submitted", "closed"]
                 ).first()
                 if locked_assignment:
                     raise serializers.ValidationError(
                         "Cannot modify: this requirement's assignment has been submitted or closed."
+                    )
+
+                # Field-level visibility: respondents can only write "everyone"-visible fields
+                visible = get_visible_fields(
+                    compliance_assessment.framework,
+                    compliance_assessment,
+                    viewer_role="respondent",
+                )
+                forbidden = [
+                    name
+                    for name in attrs.keys()
+                    if name in DEFAULT_FIELD_VISIBILITY and name not in visible
+                ]
+                if forbidden:
+                    raise serializers.ValidationError(
+                        {
+                            name: "This field is not editable by respondents."
+                            for name in forbidden
+                        }
                     )
 
         # Validate extended_result against result
@@ -3126,6 +3152,40 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
                 if has_score_or_result:
                     instance.compute_score_and_result()
+
+            # Auto-map respondent_alignment to result.
+            # Skipped when framework questions already drive the result, to avoid
+            # the alignment silently overwriting an answer-computed value.
+            ALIGNMENT_TO_RESULT = {
+                "yes": RequirementAssessment.Result.COMPLIANT,
+                "no": RequirementAssessment.Result.NON_COMPLIANT,
+                "in_progress": RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                "not_applicable": RequirementAssessment.Result.NOT_APPLICABLE,
+            }
+            requirement_has_questions = instance.requirement.questions.exists()
+            # Skip auto-map when the auditor explicitly sets result in the same
+            # request: SuperForm round-trips the existing respondent_alignment
+            # on every submit, and we must not clobber an auditor-edited result
+            # (or zero it to NOT_ASSESSED if the respondent never answered).
+            if (
+                "respondent_alignment" in validated_data
+                and "result" not in validated_data
+                and not requirement_has_questions
+            ):
+                new_alignment = validated_data.get("respondent_alignment")
+                if new_alignment and new_alignment in ALIGNMENT_TO_RESULT:
+                    instance.result = ALIGNMENT_TO_RESULT[new_alignment]
+                    instance.save(update_fields=["result"])
+                elif not new_alignment:
+                    # Deselection: reset result and scores so the RA is truly
+                    # unassessed (progress() flags an RA as assessed when score
+                    # is set, even if result is NOT_ASSESSED).
+                    instance.result = RequirementAssessment.Result.NOT_ASSESSED
+                    instance.score = None
+                    instance.documentation_score = None
+                    instance.save(
+                        update_fields=["result", "score", "documentation_score"]
+                    )
 
             return instance
 

@@ -431,6 +431,7 @@ export const RequirementAssessmentSchema = z.object({
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
+	respondent_alignment: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	noRedirect: z.boolean().default(false),
 	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
@@ -663,7 +664,9 @@ export const FeatureFlagsSchema = z.object({
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
 	journeys: z.boolean().optional(),
-	policy_documents: z.boolean().optional()
+	policy_documents: z.boolean().optional(),
+	security_advisories: z.boolean().optional(),
+	cwes: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
