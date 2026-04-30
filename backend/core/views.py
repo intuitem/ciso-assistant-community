@@ -1,7 +1,7 @@
 from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Font
 import copy
 import csv
 import json
@@ -7761,6 +7761,173 @@ def get_governance_calendar_data_view(request):
     if year:
         year = int(year)
     return Response({"results": get_governance_calendar_data(request.user, year)})
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def get_analytics_export_xlsx(request):
+    """
+    Export all analytics dashboard data as a multi-sheet XLSX file.
+    Sheets: Summary, Risk Levels, Compliance, Controls, Incidents.
+    """
+    user = request.user
+    today = date.today()
+
+    wb = Workbook()
+    wb.remove(wb.active)
+
+    header_font = Font(bold=True)
+    center = Alignment(horizontal="center", vertical="center")
+
+    def style_header_row(ws):
+        for cell in ws[1]:
+            cell.font = header_font
+            cell.alignment = center
+
+    def auto_width(ws):
+        for col in ws.columns:
+            max_len = max((len(str(c.value or "")) for c in col), default=10)
+            ws.column_dimensions[get_column_letter(col[0].column)].width = min(
+                max_len + 4, 60
+            )
+
+    # --- Sheet 1: Summary KPIs ---
+    metrics = get_metrics(user, folder_id=None)
+    ws1 = wb.create_sheet(title="Summary")
+    ws1.append(["Category", "Metric", "Value"])
+    style_header_row(ws1)
+    if metrics:
+        for category, values in metrics.items():
+            if isinstance(values, dict):
+                for key, val in values.items():
+                    ws1.append(
+                        [
+                            category,
+                            key,
+                            str(val)
+                            if not isinstance(val, (int, float, str, type(None)))
+                            else val,
+                        ]
+                    )
+            elif isinstance(values, list):
+                for item in values:
+                    if isinstance(item, dict):
+                        ws1.append(
+                            [category, item.get("name", ""), item.get("value", "")]
+                        )
+                    else:
+                        ws1.append([category, "", str(item)])
+            else:
+                ws1.append([category, "", values])
+    auto_width(ws1)
+
+    # --- Sheet 2: Risk Levels ---
+    risk_levels = risks_count_per_level(user)
+    ws2 = wb.create_sheet(title="Risk Levels")
+    ws2.append(["Type", "Level", "Count"])
+    style_header_row(ws2)
+    for entry in risk_levels.get("current", []):
+        ws2.append(["Current", entry.get("name", ""), entry.get("value", 0)])
+    for entry in risk_levels.get("residual", []):
+        ws2.append(["Residual", entry.get("name", ""), entry.get("value", 0)])
+    auto_width(ws2)
+
+    # --- Sheet 3: Compliance by Framework ---
+    compliance = get_compliance_analytics(user)
+    ws3 = wb.create_sheet(title="Compliance")
+    ws3.append(
+        ["Framework", "Domain", "Assessment", "Perimeter", "Progress (%)", "Status"]
+    )
+    style_header_row(ws3)
+    if isinstance(compliance, dict):
+        for framework_name, fw_data in compliance.items():
+            for domain in fw_data.get("domains", []):
+                for assessment in domain.get("assessments", []):
+                    ws3.append(
+                        [
+                            framework_name,
+                            domain.get("domain", ""),
+                            assessment.get("assessment_name", ""),
+                            assessment.get("perimeter", ""),
+                            assessment.get("progress", 0),
+                            assessment.get("status", ""),
+                        ]
+                    )
+    auto_width(ws3)
+
+    # --- Sheet 4: Applied Controls ---
+    (viewable_controls, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )
+    controls_qs = AppliedControl.objects.filter(id__in=viewable_controls).values(
+        "name", "status", "priority", "eta", "folder__name"
+    )
+    ws4 = wb.create_sheet(title="Controls")
+    ws4.append(["Name", "Status", "Priority", "ETA", "Domain"])
+    style_header_row(ws4)
+    for ctrl in controls_qs:
+        ws4.append(
+            [
+                ctrl.get("name", ""),
+                ctrl.get("status", ""),
+                ctrl.get("priority", ""),
+                str(ctrl.get("eta", "") or ""),
+                ctrl.get("folder__name", ""),
+            ]
+        )
+    auto_width(ws4)
+
+    # --- Sheet 5: Incidents ---
+    (viewable_incidents, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Incident
+    )
+    incidents_qs = Incident.objects.filter(id__in=viewable_incidents)
+    ws5 = wb.create_sheet(title="Incidents")
+    ws5.append(
+        [
+            "Name",
+            "Status",
+            "Severity",
+            "Detection",
+            "Reported At",
+            "Resolved At",
+            "Domain",
+        ]
+    )
+    style_header_row(ws5)
+    for inc in incidents_qs.values(
+        "name",
+        "status",
+        "severity",
+        "detection",
+        "reported_at",
+        "resolved_at",
+        "folder__name",
+    ):
+        ws5.append(
+            [
+                inc.get("name", ""),
+                inc.get("status", ""),
+                inc.get("severity", ""),
+                inc.get("detection", ""),
+                str(inc.get("reported_at", "") or ""),
+                str(inc.get("resolved_at", "") or ""),
+                inc.get("folder__name", ""),
+            ]
+        )
+    auto_width(ws5)
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"ciso-assistant-analytics-{today.isoformat()}.xlsx"
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 # TODO: Add all the proper docstrings for the following list of functions
