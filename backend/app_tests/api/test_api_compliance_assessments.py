@@ -400,8 +400,7 @@ class TestComplianceAssessmentListProgress:
         audit.create_requirement_assessments()
 
         ras_by_ref = {
-            ra.requirement.ref_id: ra
-            for ra in audit.requirement_assessments.all()
+            ra.requirement.ref_id: ra for ra in audit.requirement_assessments.all()
         }
         ras_by_ref["G1-0"].result = RequirementAssessment.Result.COMPLIANT
         ras_by_ref["G1-0"].save(update_fields=["result"])
