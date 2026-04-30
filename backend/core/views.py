@@ -883,11 +883,78 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 field_models[name] = related_model
         return field_models
 
+    def _user_can_view_all(self, model) -> bool:
+        """Whether the current user has unrestricted view access to `model`.
+
+        When True, the IAM post-filter has nothing to mask for that model
+        and can be skipped — both the per-related-model RBAC scan in
+        `_get_accessible_ids_map` and the per-row mask walk in
+        `_filter_related_fields`. Reads only the IAM snapshot caches; no
+        DB queries.
+        """
+        user = self.request.user
+        if not getattr(user, "is_authenticated", False):
+            return False
+
+        name = model.__name__.lower()
+
+        # Actor splits into User/Team/Entity in get_accessible_object_ids;
+        # mirror that decomposition.
+        if name == "actor":
+            from core.models import Team
+            from tprm.models import Entity
+
+            return all(self._user_can_view_all(m) for m in (User, Team, Entity))
+
+        from iam.cache_builders import (
+            get_folder_state,
+            get_roles_state,
+            iter_descendant_ids,
+        )
+        from iam.models import _iter_assignment_lites_for_user
+
+        roles_state = get_roles_state()
+        view_code = f"view_{name}"
+        if view_code not in roles_state.permission_ids_by_codename:
+            # Mirror get_accessible_object_ids: when the view permission
+            # is not registered for the model, that helper returns
+            # ([], [], []) — i.e. "the user can see nothing", which means
+            # the post-filter MUST mask everything. Returning False here
+            # falls through to the slow path so the masking happens.
+            return False
+
+        state = get_folder_state()
+        all_folder_ids = frozenset(state.folders.keys())
+        covered: set = set()
+        for a in _iter_assignment_lites_for_user(user):
+            role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
+            if "view_folder" not in role_perms or view_code not in role_perms:
+                continue
+            if a.is_recursive:
+                for pf_id in a.perimeter_folder_ids:
+                    covered.update(
+                        iter_descendant_ids(state, pf_id, include_start=True)
+                    )
+            else:
+                covered.update(a.perimeter_folder_ids)
+            if all_folder_ids.issubset(covered):
+                return True
+        return False
+
     def _get_accessible_ids_map(self, related_models):
-        """Return visible object IDs per related model for the current user."""
+        """Return visible object IDs per related model for the current user.
+
+        Returns `None` for models the user can fully view (post-filter
+        skips them) or for models that aren't IAM-scoped at all.
+        """
         root_folder = Folder.get_root_folder()
         allowed = {}
         for model in related_models:
+            # Fast path: skip the IAM scan when the user can see every
+            # instance of this model.
+            if self._user_can_view_all(model):
+                allowed[model] = None
+                continue
             try:
                 ids = RoleAssignment.get_accessible_object_ids(
                     root_folder, self.request.user, model
@@ -917,6 +984,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def _filter_related_fields(self, data, field_models, allowed_ids):
         """Mask related fields the current user is not allowed to see."""
+        # Fast path: nothing to mask if every related model is unrestricted
+        # for this user — avoids the per-row Python walk on list responses.
+        if not any(v is not None for v in allowed_ids.values()):
+            return data
         if isinstance(data, list):
             return [
                 self._filter_related_fields(item, field_models, allowed_ids)
