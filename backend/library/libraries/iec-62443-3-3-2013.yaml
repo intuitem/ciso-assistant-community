@@ -127,7 +127,7 @@ objects:
         B REs). Verify: Each human user has a unique identity for non-shared use;
         where shared/role accounts are operationally required (e.g. operator console)
         they are documented with compensating controls; authentication is enforced
-        on every access path. NIST 800-53: IA-2.'
+        on every access path. NIST 800-53: IA-2, IA-5, IA-8.'
       implementation_groups:
       - system_requirements
     - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-1.2
@@ -394,7 +394,7 @@ objects:
         \ catalog is documented and the configured logger captures each listed event\
         \ class \u2014 particularly changes to the audit configuration and any privilege-elevation\
         \ actions, since silently disabling logging is a common attack pattern. NIST\
-        \ 800-53: AU-2, AU-3."
+        \ 800-53: AU-2, AU-3, AU-12."
       implementation_groups:
       - system_requirements
     - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.9
@@ -430,7 +430,7 @@ objects:
       description: 'Control: The control system uses synchronized, accurate timestamps
         for audit records and inter-component sequencing. Verify: All components are
         time-synchronized to a documented reference; clock drift is monitored. NIST
-        800-53: AU-8.'
+        800-53: AU-8, SC-45.'
       implementation_groups:
       - system_requirements
     - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-2.12
@@ -625,7 +625,8 @@ objects:
       description: 'Control: Logical or physical network segmentation separates the
         control system into zones consistent with the IEC 62443-3-2 zone-and-conduit
         design. Verify: Deployed segmentation matches the documented zone diagram;
-        inter-zone traffic is constrained to defined conduits. NIST 800-53: SC-7.'
+        inter-zone traffic is constrained to defined conduits. NIST 800-53: SC-7,
+        SC-32, AC-4.'
       implementation_groups:
       - system_requirements
     - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-5.2
@@ -638,7 +639,7 @@ objects:
         external networks) are protected by mechanisms that enforce the documented
         data-flow policy. Verify: Boundary devices (firewalls, data diodes, gateways)
         implement the documented inter-zone rules; rule changes go through change
-        control. NIST 800-53: SC-7.'
+        control. NIST 800-53: SC-7, SC-46.'
       implementation_groups:
       - system_requirements
     - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-5.3
@@ -740,7 +741,7 @@ objects:
         (account databases, certificates). Verify: Backup scope is documented per
         asset class and matches the control-system inventory (SR 7.8); backups are
         scheduled, completed, integrity-verified, and stored under access control;
-        restoration sources are identified. NIST 800-53: CP-9.'
+        restoration sources are identified. NIST 800-53: CP-9, CP-6.'
       implementation_groups:
       - system_requirements
     - urn: urn:intuitem:risk:req_node:iec-62443-3-3-2013:sr-7.4
