@@ -10819,6 +10819,46 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return ComplianceAssessmentListSerializer
         return super().get_serializer_class(**kwargs)
 
+    def _get_optimized_object_data(self, queryset):
+        """Compute per-page requirement counts in one bounded GROUP BY,
+        replacing the Count(distinct=True) annotations dropped from the
+        list queryset. Bounded by `len(queryset)` (≤ page size), so the
+        cost is independent of the total RA table size.
+
+        Only the no-implementation-groups case is computed here; audits
+        with `selected_implementation_groups` still rely on the prefetched
+        `requirement_assessments` for in-Python IG filtering inside
+        `ComplianceAssessmentListSerializer.get_progress`.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        audit_ids = [a.id for a in queryset]
+        if not audit_ids:
+            return optimized_data
+
+        not_assessed = RequirementAssessment.Result.NOT_ASSESSED
+        rows = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=audit_ids,
+                requirement__assessable=True,
+            )
+            .values("compliance_assessment_id")
+            .annotate(
+                total=Count("id"),
+                assessed=Count(
+                    "id",
+                    filter=~Q(result=not_assessed) | Q(score__isnull=False),
+                ),
+            )
+        )
+        total_map: dict = {}
+        assessed_map: dict = {}
+        for r in rows:
+            total_map[r["compliance_assessment_id"]] = r["total"]
+            assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+        optimized_data["total_requirements"] = total_map
+        optimized_data["assessed_requirements"] = assessed_map
+        return optimized_data
+
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
         from core.models import Question
@@ -10876,26 +10916,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # Custom detail actions (tree, global_score, donut_data, etc.)
         # use lightweight querysets — they don't need full prefetches.
 
-        qs = qs.annotate(
-            total_requirements=Count(
-                "requirement_assessments",
-                filter=Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
-            assessed_requirements=Count(
-                "requirement_assessments",
-                filter=Q(
-                    Q(
-                        ~Q(
-                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                        )
-                    )
-                    | Q(requirement_assessments__score__isnull=False),
-                    requirement_assessments__requirement__assessable=True,
+        # The `total_requirements` / `assessed_requirements` Count(distinct=True)
+        # annotations are catastrophic on the list path: each one forces
+        # SQLite to materialise a temp B-tree over the full LEFT JOIN of
+        # the requirement_assessments table per row, and the two together
+        # account for the ~2.7s single-query cost on /compliance-assessments/.
+        # On the list path we compute the same numbers in `_get_optimized_object_data`
+        # via a single GROUP BY bounded by the page (≤ page_size audits).
+        # Retrieve still uses the annotations because the cost is trivial
+        # at one row.
+        if self.action != "list":
+            qs = qs.annotate(
+                total_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(requirement_assessments__requirement__assessable=True),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-        )
+                assessed_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(
+                        Q(
+                            ~Q(
+                                requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                            )
+                        )
+                        | Q(requirement_assessments__score__isnull=False),
+                        requirement_assessments__requirement__assessable=True,
+                    ),
+                    distinct=True,
+                ),
+            )
 
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
         if auditee_folders:
