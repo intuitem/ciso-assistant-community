@@ -1225,23 +1225,23 @@
 										</Accordion.ItemContent>
 									</Accordion.Item>
 								{/if}
-								</Accordion>
+							</Accordion>
 
-								<!-- Observation (always visible, never collapsible) -->
-								{#if showObservation}
-									<div class="flex flex-col w-full space-y-1 pt-2">
-										<p class="font-medium text-sm">{m.observation()}</p>
-										<TableMarkdownField
-											bind:value={requirementAssessment.observation}
-											disabled={!canEditObservation}
-											onSave={async (newValue) => {
-												await update(requirementAssessment, 'observation');
-												requirementAssessment.observationBuffer = newValue;
-											}}
-										/>
-									</div>
-								{/if}
-							</form>
+							<!-- Observation (always visible, never collapsible) -->
+							{#if showObservation}
+								<div class="flex flex-col w-full space-y-1 pt-2">
+									<p class="font-medium text-sm">{m.observation()}</p>
+									<TableMarkdownField
+										bind:value={requirementAssessment.observation}
+										disabled={!canEditObservation}
+										onSave={async (newValue) => {
+											await update(requirementAssessment, 'observation');
+											requirementAssessment.observationBuffer = newValue;
+										}}
+									/>
+								</div>
+							{/if}
+						</form>
 					{/key}
 				{/if}
 				{#if page.data?.featureflags?.comments}
