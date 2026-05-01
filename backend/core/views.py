@@ -10054,7 +10054,8 @@ class EvidenceViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # IAM: precompute folder-level perms once for the whole batch
+        # Gate the whole request before any folder lookup so dedup/name
+        # queries can't leak folder contents to unauthorized callers.
         try:
             add_perm = Permission.objects.get(codename="add_evidence")
             change_perm = Permission.objects.get(codename="change_evidence")
@@ -10063,12 +10064,25 @@ class EvidenceViewSet(BaseModelViewSet):
                 {"error": "Evidence permissions are not configured"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        can_add = RoleAssignment.is_access_allowed(
+        if not RoleAssignment.is_access_allowed(
             user=request.user, perm=add_perm, folder=folder
-        )
-        can_change = RoleAssignment.is_access_allowed(
+        ):
+            return Response(
+                {"error": "You do not have permission to add evidence in this folder"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if strategy in (
+            self.BatchConflictStrategy.ADD_REVISION,
+            self.BatchConflictStrategy.REPLACE,
+        ) and not RoleAssignment.is_access_allowed(
             user=request.user, perm=change_perm, folder=folder
-        )
+        ):
+            return Response(
+                {
+                    "error": "You do not have permission to change evidence in this folder"
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         summary = {
             "total": len(manifest),
@@ -10142,16 +10156,9 @@ class EvidenceViewSet(BaseModelViewSet):
             existing = Evidence.objects.filter(folder=folder, name=name).first()
 
             if existing is None:
-                if not can_add:
-                    result["outcome"] = "error"
-                    result["error"] = (
-                        "Permission denied: cannot add evidence in this folder"
-                    )
-                    summary["errors"] += 1
-                else:
-                    self._batch_create_evidence(
-                        result, summary, name, folder, upload, rel_path, request
-                    )
+                self._batch_create_evidence(
+                    result, summary, name, folder, upload, rel_path, request
+                )
                 results.append(result)
                 continue
 
@@ -10160,46 +10167,25 @@ class EvidenceViewSet(BaseModelViewSet):
                 result["evidence_id"] = str(existing.id)
                 summary["skipped"] += 1
             elif strategy == self.BatchConflictStrategy.ADD_REVISION:
-                if not can_change:
-                    result["outcome"] = "error"
-                    result["error"] = (
-                        "Permission denied: cannot change evidence in this folder"
-                    )
-                    summary["errors"] += 1
-                else:
-                    self._batch_add_revision(
-                        result, summary, existing, upload, rel_path, request
-                    )
+                self._batch_add_revision(
+                    result, summary, existing, upload, rel_path, request
+                )
             elif strategy == self.BatchConflictStrategy.REPLACE:
-                if not can_change:
-                    result["outcome"] = "error"
-                    result["error"] = (
-                        "Permission denied: cannot change evidence in this folder"
-                    )
-                    summary["errors"] += 1
-                else:
-                    self._batch_replace_revision(
-                        result, summary, existing, upload, rel_path
-                    )
+                self._batch_replace_revision(
+                    result, summary, existing, upload, rel_path
+                )
             elif strategy == self.BatchConflictStrategy.RENAME:
-                if not can_add:
-                    result["outcome"] = "error"
-                    result["error"] = (
-                        "Permission denied: cannot add evidence in this folder"
-                    )
-                    summary["errors"] += 1
-                else:
-                    new_name = self._batch_find_unique_name(name, folder)
-                    self._batch_create_evidence(
-                        result,
-                        summary,
-                        new_name,
-                        folder,
-                        upload,
-                        rel_path,
-                        request,
-                        renamed_from=name,
-                    )
+                new_name = self._batch_find_unique_name(name, folder)
+                self._batch_create_evidence(
+                    result,
+                    summary,
+                    new_name,
+                    folder,
+                    upload,
+                    rel_path,
+                    request,
+                    renamed_from=name,
+                )
             results.append(result)
 
         return Response(
@@ -10304,9 +10290,9 @@ class EvidenceViewSet(BaseModelViewSet):
             result["error"] = " ".join(messages)
             summary["errors"] += 1
             return
+        revision.save()
         if old_attachment:
             old_attachment.delete(save=False)
-        revision.save()
         result["outcome"] = "replaced"
         result["evidence_id"] = str(evidence.id)
         result["revision_id"] = str(revision.id)

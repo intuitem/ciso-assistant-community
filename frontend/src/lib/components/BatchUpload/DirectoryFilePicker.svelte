@@ -22,11 +22,13 @@
 	function ingest(fileList: FileList | null) {
 		if (!fileList) return;
 		const additions: FileEntry[] = [];
-		const seen = new Set(entries.map((e) => `${e.relPath}::${e.name}::${e.size}`));
+		const seen = new Set(
+			entries.map((e) => `${e.relPath}::${e.name}::${e.size}::${e.file.lastModified}`)
+		);
 		for (let i = 0; i < fileList.length; i++) {
 			const f = fileList[i];
 			const relPath = (f as File & { webkitRelativePath?: string }).webkitRelativePath || '';
-			const key = `${relPath}::${f.name}::${f.size}`;
+			const key = `${relPath}::${f.name}::${f.size}::${f.lastModified}`;
 			if (seen.has(key)) continue;
 			seen.add(key);
 			additions.push({
