@@ -266,10 +266,13 @@
 		showObservation,
 		showAppliedControls,
 		showEvidences,
-		showSecurityExceptions,
 		showRespondentAlignment,
 		showComments
 	} = getFieldVisibility(complianceAssessment, viewerRole);
+
+	// Security exceptions are auditor-only conceptually — they aren't part of
+	// the per-CA visibility model, so we gate purely on viewer role.
+	const showSecurityExceptions = viewerRole === 'auditor';
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
 

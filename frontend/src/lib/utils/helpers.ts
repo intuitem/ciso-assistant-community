@@ -422,7 +422,6 @@ export function getFieldVisibility(
 	showObservation: boolean;
 	showAppliedControls: boolean;
 	showEvidences: boolean;
-	showSecurityExceptions: boolean;
 	showRespondentAlignment: boolean;
 	showComments: boolean;
 	showExtendedResult: boolean;
@@ -435,7 +434,6 @@ export function getFieldVisibility(
 		showObservation: isFieldVisible(complianceAssessment, 'observation', viewerRole),
 		showAppliedControls: isFieldVisible(complianceAssessment, 'applied_controls', viewerRole),
 		showEvidences: isFieldVisible(complianceAssessment, 'evidences', viewerRole),
-		showSecurityExceptions: isFieldVisible(complianceAssessment, 'security_exceptions', viewerRole),
 		showRespondentAlignment: isFieldVisible(
 			complianceAssessment,
 			'respondent_alignment',

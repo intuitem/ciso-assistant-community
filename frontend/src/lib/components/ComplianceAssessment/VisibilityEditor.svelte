@@ -141,6 +141,7 @@
 							role="radio"
 							aria-checked={pill === option.v}
 							disabled={optionDisabled}
+							data-testid={`visibility-${field}-${option.v}`}
 							onclick={() => setVisibility(field, option.v)}
 							class="px-2.5 py-0.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed {pill ===
 							option.v

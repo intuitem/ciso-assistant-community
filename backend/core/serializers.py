@@ -2690,14 +2690,13 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         validated_data.pop("create_applied_controls_from_suggestions", None)
         authors_data = validated_data.get("authors", [])
 
-        # Seed field_visibility from code defaults + framework template, unless
-        # the caller explicitly supplied a value.
-        if not validated_data.get("field_visibility"):
-            from core.utils import build_initial_field_visibility
+        # Always merge the caller's partial field_visibility with code defaults
+        # + framework template so the new CA is stored as a complete snapshot.
+        from core.utils import build_initial_field_visibility
 
-            validated_data["field_visibility"] = build_initial_field_visibility(
-                validated_data.get("framework")
-            )
+        defaults = build_initial_field_visibility(validated_data.get("framework"))
+        provided = validated_data.get("field_visibility") or {}
+        validated_data["field_visibility"] = {**defaults, **provided}
 
         assessment = super().create(validated_data)
 
@@ -2737,6 +2736,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             new_perimeter = validated_data["perimeter"]
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
+
+        # PATCH semantics for field_visibility: merge incoming partial map onto
+        # the existing one so a request that only sets a few keys doesn't wipe
+        # the rest of the snapshot.
+        if "field_visibility" in validated_data:
+            existing = instance.field_visibility or {}
+            provided = validated_data["field_visibility"] or {}
+            validated_data["field_visibility"] = {**existing, **provided}
 
         old_scoring_enabled = instance.scoring_enabled
 

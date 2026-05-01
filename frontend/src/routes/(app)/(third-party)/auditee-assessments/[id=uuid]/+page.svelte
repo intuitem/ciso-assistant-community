@@ -1060,11 +1060,7 @@
 
 							<!-- Score -->
 							{#if showScore}
-								<div
-									class="flex flex-col w-full place-items-center {!canEditScore
-										? 'pointer-events-none opacity-60'
-										: ''}"
-								>
+								<div class="flex flex-col w-full place-items-center">
 									{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
 										<div class="flex flex-row items-center space-x-4">
 											<span class="font-medium">{m.score()}</span>

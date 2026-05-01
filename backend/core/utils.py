@@ -1161,13 +1161,22 @@ DEFAULT_VISIBILITY = {
 def resolve_field_visibility(compliance_assessment, field_name):
     """Return the per-role visibility pair for a field.
 
-    Shape: {role: 'edit'|'read'|'hidden'}. Missing field → all roles edit.
+    Shape: {role: 'edit'|'read'|'hidden'}.
+
+    Lookup order:
+      1. Explicit override on the compliance assessment.
+      2. DEFAULT_VISIBILITY (backstop in case a new field was added in code
+         without a migration to backfill existing CAs).
+      3. EVERYONE_EDIT (truly unknown field).
     """
     overrides = getattr(compliance_assessment, "field_visibility", None) or {}
     pair = overrides.get(field_name)
-    if not isinstance(pair, dict):
-        return dict(EVERYONE_EDIT)
-    return pair
+    if isinstance(pair, dict):
+        return pair
+    fallback = DEFAULT_VISIBILITY.get(field_name)
+    if isinstance(fallback, dict):
+        return dict(fallback)
+    return dict(EVERYONE_EDIT)
 
 
 def _role_access(compliance_assessment, field_name, role):
@@ -1188,11 +1197,18 @@ def is_field_editable_by(compliance_assessment, field_name, role):
 def build_initial_field_visibility(framework):
     """Build the initial `field_visibility` map for a new CA.
 
-    Layered: code defaults overridden by the framework's own map.
+    Layered per-role: code defaults are seeded for every known field, then the
+    framework's overrides are merged on top — but per-role, so a framework that
+    only specifies a single role (e.g. {"score": {"auditor": "edit"}}) does not
+    erase the default value for the other roles.
     """
     fw_overrides = getattr(framework, "field_visibility", None) or {}
     merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
     for key, pair in fw_overrides.items():
-        if isinstance(pair, dict):
-            merged[key] = dict(pair)
+        if not isinstance(pair, dict):
+            continue
+        # Ensure the field has a starting pair (DEFAULT_VISIBILITY may not
+        # cover every key the framework configures).
+        merged.setdefault(key, dict(EVERYONE_EDIT))
+        merged[key].update(pair)
     return merged
