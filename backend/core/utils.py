@@ -1139,7 +1139,7 @@ DEFAULT_FIELD_VISIBILITY = {
     "status": "auditor",
     "score": "everyone",
     "is_scored": "everyone",
-    "documentation_score": "auditor",
+    "documentation_score": "everyone",
     "observation": "everyone",
     "answers": "everyone",
     "evidences": "everyone",
