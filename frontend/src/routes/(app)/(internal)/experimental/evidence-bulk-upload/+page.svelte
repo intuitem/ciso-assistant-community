@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { pageTitle } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
 	import DirectoryFilePicker from '$lib/components/BatchUpload/DirectoryFilePicker.svelte';
 	import ConflictStrategyPicker from '$lib/components/BatchUpload/ConflictStrategyPicker.svelte';
 	import BatchUploadQueueTable from '$lib/components/BatchUpload/BatchUploadQueueTable.svelte';
@@ -21,7 +22,7 @@
 
 	let { data }: Props = $props();
 
-	$pageTitle = 'Bulk evidence upload';
+	$pageTitle = m.bulkEvidenceUpload();
 
 	const toastStore = getToastStore();
 
@@ -35,20 +36,24 @@
 		entries = entries.filter((e) => e.id !== id);
 	}
 
+	function clearQueue() {
+		entries = [];
+		summary = null;
+	}
+
 	async function submit() {
 		if (!folderId) {
-			toastStore.trigger({ message: 'Pick a target folder first.' });
+			toastStore.trigger({ message: m.pickTargetDomainFirst() });
 			return;
 		}
 		if (entries.length === 0) {
-			toastStore.trigger({ message: 'Pick at least one file.' });
+			toastStore.trigger({ message: m.pickAtLeastOneFile() });
 			return;
 		}
 
 		busy = true;
 		summary = null;
 
-		// Assign multipart field names + flip every row to "uploading"
 		const fd = new FormData();
 		fd.append('folder', folderId);
 		fd.append('conflict_strategy', strategy);
@@ -62,17 +67,14 @@
 			return { field, name: e.name, rel_path: e.relPath || null };
 		});
 		fd.append('manifest', JSON.stringify(manifest));
-		entries = [...entries]; // trigger reactivity
+		entries = [...entries];
 
 		try {
-			const res = await fetch('', {
-				method: 'POST',
-				body: fd
-			});
+			const res = await fetch('', { method: 'POST', body: fd });
 			const payload = (await res.json()) as BatchResponse | { error?: string };
 
 			if (!res.ok) {
-				const msg = (payload as { error?: string }).error || 'Upload failed';
+				const msg = (payload as { error?: string }).error || m.uploadFailed();
 				toastStore.trigger({ message: msg });
 				for (const e of entries) {
 					e.status = 'error';
@@ -86,7 +88,6 @@
 			const ok = payload as BatchResponse;
 			summary = ok.summary;
 
-			// Map results back to entries by `field`
 			const byField = new Map<string, BatchResultRow>();
 			for (const r of ok.results) byField.set(r.field, r);
 
@@ -95,7 +96,7 @@
 				if (!r) {
 					e.status = 'error';
 					e.outcome = 'error';
-					e.message = 'No result returned for this file';
+					e.message = m.noResultReturnedForFile();
 					continue;
 				}
 				e.outcome = r.outcome;
@@ -109,18 +110,25 @@
 				} else {
 					e.status = 'done';
 					if (r.outcome === 'duplicate' && r.evidence_name) {
-						e.message = `Same content as "${r.evidence_name}"`;
+						e.message = m.sameContentAs({ name: r.evidence_name });
 					}
 				}
 			}
 			entries = [...entries];
 
 			toastStore.trigger({
-				message: `Done — ${summary.created} created, ${summary.revision_added} revisions, ${summary.replaced} replaced, ${summary.renamed} renamed, ${summary.skipped + summary.duplicate} unchanged, ${summary.errors} error(s).`
+				message: m.batchDoneSummary({
+					created: summary.created,
+					revisions: summary.revision_added,
+					replaced: summary.replaced,
+					renamed: summary.renamed,
+					unchanged: summary.skipped + summary.duplicate,
+					errors: summary.errors
+				})
 			});
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : String(err);
-			toastStore.trigger({ message: `Network error: ${msg}` });
+			toastStore.trigger({ message: m.networkErrorWithMessage({ message: msg }) });
 			for (const e of entries) {
 				if (e.status === 'uploading') {
 					e.status = 'error';
@@ -133,52 +141,48 @@
 			busy = false;
 		}
 	}
-
-	function reset() {
-		entries = [];
-		summary = null;
-	}
 </script>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-	<div class="lg:col-span-2 bg-white shadow-sm py-4 px-6 space-y-4 card">
-		<div>
-			<h4 class="h4 font-bold">
-				<i class="fa-solid fa-cloud-arrow-up mr-2"></i>Bulk evidence upload
+	<!-- Form -->
+	<section class="lg:col-span-2 bg-white shadow-sm py-5 px-6 space-y-5 card">
+		<header>
+			<h4 class="h4 font-bold flex items-center gap-2">
+				<i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i>
+				{m.bulkEvidenceUpload()}
 			</h4>
-			<p class="text-sm text-gray-600">
-				Upload multiple files (or a whole directory) as evidences in one shot. Duplicate files (same
-				SHA-256 inside the target folder) are detected automatically. Name collisions are resolved
-				according to the strategy you pick below.
-			</p>
-		</div>
+			<p class="text-sm text-gray-600 mt-1">{m.bulkEvidenceUploadDescription()}</p>
+		</header>
 
-		<div class="space-y-2">
-			<label for="folder" class="block text-sm font-medium text-gray-900">Target domain *</label>
+		<div class="space-y-1.5">
+			<label for="folder" class="block text-sm font-medium text-gray-900">
+				{m.targetDomain()} <span class="text-red-500">*</span>
+			</label>
 			<select
 				id="folder"
 				bind:value={folderId}
 				disabled={busy}
 				class="w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
 			>
-				<option value="">Select a domain</option>
+				<option value="">{m.selectADomain()}</option>
 				{#each data.folders as folder}
 					<option value={folder.id}>{folder.str || folder.name}</option>
 				{/each}
 			</select>
 		</div>
 
-		<div class="space-y-2">
-			<div class="block text-sm font-medium text-gray-900">Conflict strategy *</div>
+		<div class="space-y-1.5">
+			<div class="block text-sm font-medium text-gray-900">
+				{m.conflictStrategy()} <span class="text-red-500">*</span>
+			</div>
 			<ConflictStrategyPicker bind:strategy disabled={busy} />
 		</div>
 
-		<div class="space-y-2">
-			<div class="block text-sm font-medium text-gray-900">Files</div>
+		<div class="space-y-1.5">
 			<DirectoryFilePicker bind:entries disabled={busy} />
 		</div>
 
-		<div class="flex gap-2 pt-2">
+		<div class="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
 			<button
 				type="button"
 				class="btn preset-filled"
@@ -186,37 +190,54 @@
 				disabled={busy || entries.length === 0 || !folderId}
 			>
 				{#if busy}
-					<i class="fa-solid fa-spinner fa-spin mr-2"></i>Uploading…
+					<i class="fa-solid fa-spinner fa-spin mr-2"></i>{m.uploading()}
 				{:else}
-					<i class="fa-solid fa-upload mr-2"></i>Upload {entries.length} file{entries.length === 1
-						? ''
-						: 's'}
+					<i class="fa-solid fa-upload mr-2"></i>{m.uploadNFiles({ count: entries.length })}
 				{/if}
 			</button>
-			<button type="button" class="btn preset-outlined" onclick={reset} disabled={busy}>
-				Reset
+			<button
+				type="button"
+				class="btn preset-outlined"
+				onclick={clearQueue}
+				disabled={busy || (entries.length === 0 && !summary)}
+			>
+				<i class="fa-solid fa-broom mr-2"></i>{m.reset()}
 			</button>
-			<button type="button" class="btn" onclick={() => goto('/experimental')} disabled={busy}>
-				Cancel
+			<button
+				type="button"
+				class="btn"
+				onclick={() => goto('/experimental')}
+				disabled={busy}
+			>
+				{m.cancel()}
 			</button>
 		</div>
-	</div>
+	</section>
 
-	<div class="lg:col-span-1 bg-white shadow-sm py-4 px-6 space-y-4 card">
-		<h5 class="font-semibold">Results</h5>
+	<!-- Results panel -->
+	<aside class="lg:col-span-1 bg-white shadow-sm py-5 px-6 space-y-3 card">
+		<h5 class="font-semibold text-sm uppercase tracking-wide text-gray-500">{m.results()}</h5>
 		{#if summary}
 			<BatchUploadResults {summary} />
 		{:else}
-			<p class="text-sm text-gray-500">A summary will appear here once the batch completes.</p>
+			<p class="text-sm text-gray-500">{m.summaryWillAppearHere()}</p>
 		{/if}
-	</div>
+	</aside>
 
-	<div class="lg:col-span-3 bg-white shadow-sm py-4 px-6 space-y-2 card">
-		<h5 class="font-semibold">Queue</h5>
+	<!-- Queue (full width) -->
+	<section class="lg:col-span-3 bg-white shadow-sm py-5 px-6 space-y-3 card">
+		<div class="flex items-center justify-between">
+			<h5 class="font-semibold text-sm uppercase tracking-wide text-gray-500">
+				{m.queue()}
+				{#if entries.length > 0}
+					<span class="ml-1 text-gray-400 normal-case tracking-normal">({entries.length})</span>
+				{/if}
+			</h5>
+		</div>
 		{#if entries.length === 0}
-			<p class="text-sm text-gray-500">No files queued yet.</p>
+			<p class="text-sm text-gray-500">{m.noFilesQueuedYet()}</p>
 		{:else}
 			<BatchUploadQueueTable {entries} onRemove={removeEntry} disabled={busy} />
 		{/if}
-	</div>
+	</section>
 </div>

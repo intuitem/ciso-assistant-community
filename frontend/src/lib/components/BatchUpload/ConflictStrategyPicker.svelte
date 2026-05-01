@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$paraglide/messages';
 	import type { ConflictStrategy } from './types';
 
 	interface Option {
@@ -15,30 +16,15 @@
 	}
 
 	const defaultOptions: Option[] = [
-		{
-			value: 'skip',
-			label: 'Skip',
-			desc: 'Leave the existing evidence untouched.',
-			icon: 'fa-forward'
-		},
+		{ value: 'skip', label: m.skip(), desc: m.skipDescription(), icon: 'fa-forward' },
 		{
 			value: 'add_revision',
-			label: 'Add revision',
-			desc: 'Keep the existing evidence; attach the new file as a new version.',
+			label: m.addRevision(),
+			desc: m.addRevisionDescription(),
 			icon: 'fa-code-branch'
 		},
-		{
-			value: 'replace',
-			label: 'Replace',
-			desc: "Overwrite the latest revision's file. Keeps the evidence ID and links.",
-			icon: 'fa-rotate'
-		},
-		{
-			value: 'rename',
-			label: 'Rename',
-			desc: 'Append " (1)", " (2)" etc. so the new evidence coexists with the old one.',
-			icon: 'fa-pen'
-		}
+		{ value: 'replace', label: m.replace(), desc: m.replaceDescription(), icon: 'fa-rotate' },
+		{ value: 'rename', label: m.rename(), desc: m.renameDescription(), icon: 'fa-pen' }
 	];
 
 	let {
