@@ -282,6 +282,29 @@ class QuestionnaireQuestion(AbstractBaseModel):
     )
     text = models.TextField(verbose_name=_("Question text"))
 
+    answer_candidates = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Answer candidates"),
+        help_text=_(
+            "Controlled vocabulary the customer expects in this question's "
+            "answer cell, captured from the Excel data-validation list (or "
+            "distinct existing values). Empty list = free-text cell."
+        ),
+    )
+    answer_mapping = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Answer mapping"),
+        help_text=_(
+            "{yes, partial, no, source} mapping our internal status onto this "
+            "question's vocabulary. Filled by suggest_value_mapping after "
+            "extract; export uses it per-question (rather than the run-level "
+            "value_mapping) so questionnaires with mixed vocabularies still "
+            "produce a clean fill."
+        ),
+    )
+
     class Meta:
         verbose_name = _("Questionnaire question")
         verbose_name_plural = _("Questionnaire questions")

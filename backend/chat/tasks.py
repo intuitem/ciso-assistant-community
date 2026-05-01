@@ -35,16 +35,16 @@ Reply with a single JSON object, no prose:
 
 @db_task()
 def suggest_value_mapping(run_id: str):
-    """Use the LLM to map internal statuses onto the customer's vocabulary.
+    """Compute per-question value mappings for a run.
 
-    Reads the answer column's detected candidates, asks the LLM, validates
-    that each suggestion is one of the candidates, and stores the mapping on
-    QuestionnaireRun.value_mapping. If no candidates were detected, marks
-    the mapping as 'fallback' so the export uses internal labels.
+    Walks the run's questions, groups them by their detected
+    ``answer_candidates`` signature, runs the LLM once per distinct
+    vocabulary, and persists each question's ``answer_mapping``. Also fills
+    ``QuestionnaireRun.value_mapping`` with a summary (the dominant
+    vocabulary, or a flag indicating multiple) so the UI can hint at what
+    the export will write.
     """
-    import time
-
-    from .models import QuestionnaireRun
+    from .models import QuestionnaireRun, QuestionnaireQuestion
     from .providers import get_llm
 
     try:
@@ -53,49 +53,102 @@ def suggest_value_mapping(run_id: str):
         logger.error("QuestionnaireRun %s not found", run_id)
         return
 
-    mapping = run.column_mapping or {}
-    answer_col = mapping.get("answer_col")
-    sheet_name = mapping.get("sheet")
-    if answer_col is None or not sheet_name:
+    questions = list(QuestionnaireQuestion.objects.filter(questionnaire_run=run))
+    if not questions:
         logger.info(
-            "suggest_value_mapping skipped: no answer column for run %s", run_id
+            "suggest_value_mapping: no questions for run %s yet — nothing to map",
+            run_id,
         )
         return
 
-    sheet = next(
-        (s for s in run.parsed_data.get("sheets", []) if s["name"] == sheet_name),
-        None,
-    )
-    if not sheet:
-        return
+    # Group questions by their candidate vocabulary. Empty candidates means
+    # free-text answer cell — those questions just use internal labels.
+    groups: dict[tuple[str, ...], list[QuestionnaireQuestion]] = {}
+    for q in questions:
+        sig = tuple(q.answer_candidates or [])
+        groups.setdefault(sig, []).append(q)
 
-    column_candidates = sheet.get("column_candidates") or {}
-    # JSONField round-trip turns int keys into strings; tolerate both
-    candidate_entry = column_candidates.get(answer_col) or column_candidates.get(
-        str(answer_col)
+    try:
+        llm = get_llm()
+    except Exception as e:
+        logger.warning("LLM unavailable for value mapping: %s", e)
+        llm = None
+
+    summary_mappings: list[dict] = []
+    for sig, group_questions in groups.items():
+        if not sig:
+            # Free-text questions — use fallback internal labels
+            mapping_for_group = {
+                "yes": "Yes",
+                "partial": "Partial",
+                "no": "No",
+                "candidates": [],
+                "source": "fallback",
+            }
+        else:
+            candidates = list(sig)
+            mapping_for_group = _llm_map_candidates(llm, candidates)
+
+        # Persist on each question in the group
+        ids = [q.id for q in group_questions]
+        QuestionnaireQuestion.objects.filter(id__in=ids).update(
+            answer_mapping=mapping_for_group
+        )
+        summary_mappings.append(
+            {**mapping_for_group, "question_count": len(group_questions)}
+        )
+
+    # Build the run-level summary. Most common vocab wins for the UI hint.
+    summary_mappings.sort(key=lambda m: m.get("question_count", 0), reverse=True)
+    primary = summary_mappings[0] if summary_mappings else {}
+
+    distinct_non_fallback = sum(
+        1 for m in summary_mappings if m.get("source") not in (None, "fallback")
     )
-    if not candidate_entry or not candidate_entry.get("values"):
-        # No customer vocabulary detected — fall back to internal labels for
-        # yes/partial/no. needs_info always exports as a blank cell, so we
-        # don't carry a label for it.
-        run.value_mapping = {
+    has_multiple_distinct_vocabs = (
+        sum(1 for m in summary_mappings if m.get("candidates")) > 1
+    )
+
+    run_summary = {
+        "yes": primary.get("yes", "Yes"),
+        "partial": primary.get("partial", "Partial"),
+        "no": primary.get("no", "No"),
+        "candidates": primary.get("candidates", []),
+        "source": primary.get("source", "fallback"),
+        "vocab_count": len(summary_mappings),
+        "has_multiple_vocabs": has_multiple_distinct_vocabs,
+    }
+    run.value_mapping = run_summary
+    run.save(update_fields=["value_mapping", "updated_at"])
+
+    logger.info(
+        "Value mapping done for run %s: %d question(s) across %d vocab(s) "
+        "(%d non-fallback)",
+        run_id,
+        len(questions),
+        len(summary_mappings),
+        distinct_non_fallback,
+    )
+
+
+def _llm_map_candidates(llm, candidates: list[str]) -> dict:
+    """LLM-driven mapping of yes/partial/no onto a candidate list, with retries.
+
+    Returns the mapping dict to store on a question (or all questions sharing
+    this vocabulary). Falls back to internal labels with ``source='fallback'``
+    if the LLM is unavailable or doesn't produce a valid mapping after retries.
+    """
+    import time
+
+    if llm is None or not candidates:
+        return {
             "yes": "Yes",
             "partial": "Partial",
             "no": "No",
-            "candidates": [],
+            "candidates": candidates,
             "source": "fallback",
         }
-        run.save(update_fields=["value_mapping", "updated_at"])
-        logger.info(
-            "No customer vocabulary detected for run %s — using fallback", run_id
-        )
-        return
 
-    candidates = candidate_entry["values"]
-    source = candidate_entry.get("source", "distinct_values")
-
-    # Try the LLM up to MAX_ATTEMPTS times before giving up. A single
-    # transient failure shouldn't lock us into fallback for the run.
     MAX_ATTEMPTS = 3
     BACKOFF_SECONDS = (0, 2, 5)
     candidate_set = {c.lower(): c for c in candidates}
@@ -112,17 +165,6 @@ def suggest_value_mapping(run_id: str):
     for attempt in range(MAX_ATTEMPTS):
         if attempt > 0:
             time.sleep(BACKOFF_SECONDS[attempt])
-
-        try:
-            llm = get_llm()
-        except Exception as e:
-            logger.warning(
-                "LLM unavailable for value mapping (attempt %d/%d): %s",
-                attempt + 1,
-                MAX_ATTEMPTS,
-                e,
-            )
-            continue
 
         prompt = VALUE_MAPPING_PROMPT.format(candidates=json_dumps(candidates))
         try:
@@ -142,56 +184,37 @@ def suggest_value_mapping(run_id: str):
         partial = pick(parsed, "partial")
         no = pick(parsed, "no")
         if all([yes, partial, no]):
-            # needs_info is intentionally not mapped — export leaves those
-            # cells blank rather than risk writing "N/A" / "Not Applicable",
-            # which is a legitimate compliance answer with a different meaning.
-            run.value_mapping = {
+            # We deliberately do NOT include needs_info — export leaves those
+            # cells blank rather than risk auto-mapping to "N/A" (which is a
+            # legitimate "Not Applicable" answer, not "I don't know").
+            return {
                 "yes": yes,
                 "partial": partial,
                 "no": no,
                 "candidates": candidates,
-                "source": source,
+                # Vocabulary came from a non-empty answer cell (data validation
+                # or distinct existing values); export honors it.
+                "source": "data_validation",
             }
-            run.save(update_fields=["value_mapping", "updated_at"])
-            logger.info(
-                "Value mapping set for run %s (source=%s, attempt %d/%d)",
-                run_id,
-                source,
-                attempt + 1,
-                MAX_ATTEMPTS,
-            )
-            return
         logger.info(
-            "LLM produced incomplete mapping for run %s "
-            "(attempt %d/%d, raw=%r) — retrying",
-            run_id,
+            "LLM produced incomplete mapping (attempt %d/%d, raw=%r) — retrying",
             attempt + 1,
             MAX_ATTEMPTS,
             (raw or "")[:200],
         )
 
-    # All attempts exhausted: keep the candidates so the export knows the
-    # column has a controlled vocabulary it must respect.
-    run.value_mapping = {
+    logger.warning(
+        "Value mapping fallback after %d attempts (last raw=%r)",
+        MAX_ATTEMPTS,
+        last_raw[:200],
+    )
+    return {
         "yes": "Yes",
         "partial": "Partial",
         "no": "No",
         "candidates": candidates,
         "source": "fallback",
     }
-    run.save(update_fields=["value_mapping", "updated_at"])
-    logger.warning(
-        "Value mapping fallback for run %s after %d attempts (last raw=%r)",
-        run_id,
-        MAX_ATTEMPTS,
-        last_raw[:200],
-    )
-    logger.info(
-        "Value mapping set for run %s (source=%s): %s",
-        run_id,
-        source,
-        run.value_mapping,
-    )
 
 
 def json_dumps(obj):
@@ -204,8 +227,10 @@ def json_dumps(obj):
 def extract_questions_from_sheet(run, sheet: dict, mapping: dict) -> int:
     """Materialize QuestionnaireQuestion rows from a sheet preview + mapping.
 
-    Synchronous helper, called from the API. Reads from `sheet['rows_preview']`
-    PLUS re-opens the workbook to capture rows beyond the preview window.
+    Synchronous helper, called from the API. Walks the workbook to capture
+    every question-bearing row. For each row, also detects the answer cell's
+    data-validation vocabulary so a per-question mapping can be computed
+    (some questionnaires use different dropdowns per row range).
     Returns the count of created questions.
     """
     import io
@@ -214,13 +239,16 @@ def extract_questions_from_sheet(run, sheet: dict, mapping: dict) -> int:
     from .models import QuestionnaireQuestion
 
     q_col = mapping["question_col"]
+    answer_col = mapping.get("answer_col")
     section_col = mapping.get("section_col")
     sheet_name = sheet["name"]
     header_row = sheet["header_row"]
 
     with run.file.open("rb") as fp:
         content = fp.read()
-    wb = openpyxl.load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+    # Not read_only: ws.data_validations is only accessible on a fully
+    # loaded workbook, and we need it for per-cell vocabulary detection.
+    wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
     ws = wb[sheet_name]
     header_count = len(sheet["headers"])
 
@@ -246,13 +274,12 @@ def extract_questions_from_sheet(run, sheet: dict, mapping: dict) -> int:
             if section_val not in (None, ""):
                 section = str(section_val).strip()[:200]
 
-        # ref_id heuristic: if the question text starts with a short token
-        # ending in colon, treat that as a reference id. Pure parsing — no
-        # keyword matching.
         ref_id = ""
-        # If first column is short and ALL questions seem to share the same
-        # "pattern", caller can re-extract with mapping change. For now, keep ref
-        # in section_col fallback.
+
+        # Per-cell vocabulary: openpyxl uses 1-indexed Excel rows.
+        candidates: list[str] = []
+        if answer_col is not None:
+            candidates = _detect_cell_vocabulary(ws, idx + 1, answer_col)
 
         rows_to_create.append(
             QuestionnaireQuestion(
@@ -261,12 +288,43 @@ def extract_questions_from_sheet(run, sheet: dict, mapping: dict) -> int:
                 ref_id=ref_id,
                 section=section,
                 text=text,
+                answer_candidates=candidates,
             )
         )
         ord_idx += 1
 
     QuestionnaireQuestion.objects.bulk_create(rows_to_create)
     return len(rows_to_create)
+
+
+def _detect_cell_vocabulary(ws, excel_row: int, col_idx: int) -> list[str]:
+    """Return the data-validation list values that apply to one cell, or [].
+
+    Scans ``ws.data_validations`` for a list-type validation whose ``sqref``
+    covers the cell at (excel_row, col_idx). Returns the verbatim values from
+    the validation's formula1 (inline or range-referenced).
+    """
+    import openpyxl.utils
+
+    col_letter = openpyxl.utils.get_column_letter(col_idx + 1)
+    coord = f"{col_letter}{excel_row}"
+    try:
+        for dv in ws.data_validations.dataValidation:
+            if getattr(dv, "type", None) != "list":
+                continue
+            sqref = getattr(dv, "sqref", None)
+            try:
+                covers = bool(sqref) and coord in sqref
+            except Exception:
+                covers = False
+            if not covers:
+                continue
+            values = _parse_data_validation_list(ws, dv.formula1)
+            if values:
+                return values
+    except Exception as e:
+        logger.debug("cell_vocabulary_detection_failed %s: %s", coord, e)
+    return []
 
 
 @db_task()
@@ -1214,7 +1272,92 @@ def _resolve_folder_id(obj) -> str:
 
 
 def _build_object_text(obj, model_name: str) -> str:
-    """Build a searchable text representation of a model object."""
+    """Build a searchable text representation of a model object.
+
+    For the questionnaire-prefill use case, RequirementAssessment and
+    AppliedControl get a deliberately narrow shape — only the fields that
+    bear on the verdict. Other indexed models keep the broader, generic
+    representation so existing chat features aren't disturbed.
+    """
+    if model_name == "RequirementAssessment":
+        return _text_for_requirement_assessment(obj)
+    if model_name == "AppliedControl":
+        return _text_for_applied_control(obj)
+    return _text_for_generic_model(obj, model_name)
+
+
+def _text_for_requirement_assessment(obj) -> str:
+    """Identity (so retrieval can match by question wording) + verdict + narrative.
+
+    Per first-user feedback, the verdict signal lives in `result` and the
+    narrative in `observation`; everything else (descriptions, categories,
+    linked controls, etc.) is noise for the questionnaire-answering task.
+    """
+    parts = ["Type: Requirement assessment"]
+
+    requirement = getattr(obj, "requirement", None)
+    if requirement is not None:
+        req_ref = (getattr(requirement, "ref_id", "") or "").strip()
+        req_name = (getattr(requirement, "name", "") or "").strip()
+        req_desc = (getattr(requirement, "description", "") or "").strip()
+        if req_ref:
+            parts.append(f"Requirement ref: {req_ref}")
+        if req_name and req_name != req_ref:
+            parts.append(f"Requirement: {req_name}")
+        if req_desc:
+            parts.append(f"Requirement text: {req_desc}")
+        framework = getattr(requirement, "framework", None)
+        framework_name = getattr(framework, "name", "") if framework else ""
+        if framework_name:
+            parts.append(f"Framework: {framework_name}")
+
+    result = getattr(obj, "result", None)
+    if result:
+        result_display = (
+            obj.get_result_display() if hasattr(obj, "get_result_display") else result
+        )
+        parts.append(f"Result: {result_display}")
+
+    observation = (getattr(obj, "observation", None) or "").strip()
+    if observation:
+        parts.append(f"Observation: {observation}")
+
+    return "\n".join(parts)
+
+
+def _text_for_applied_control(obj) -> str:
+    """Identity + verdict (status) + narrative (observation).
+
+    Same rationale as RequirementAssessment — keep retrieval focused on
+    fields that decide whether the control answers the question.
+    """
+    parts = ["Type: Applied control"]
+
+    name = (getattr(obj, "name", "") or "").strip()
+    if name:
+        parts.append(f"Name: {name}")
+    ref_id = (getattr(obj, "ref_id", "") or "").strip()
+    if ref_id:
+        parts.append(f"Reference: {ref_id}")
+
+    status = getattr(obj, "status", None)
+    if status:
+        status_display = (
+            obj.get_status_display() if hasattr(obj, "get_status_display") else status
+        )
+        parts.append(f"Status: {status_display}")
+
+    observation = (getattr(obj, "observation", None) or "").strip()
+    if observation:
+        parts.append(f"Observation: {observation}")
+
+    return "\n".join(parts)
+
+
+def _text_for_generic_model(obj, model_name: str) -> str:
+    """Broader representation for other indexed models (RiskScenario, Asset,
+    Threat, ComplianceAssessment, RiskAssessment).
+    """
     parts = [f"Type: {model_name.replace('_', ' ').title()}"]
 
     name = getattr(obj, "name", None)
@@ -1229,48 +1372,10 @@ def _build_object_text(obj, model_name: str) -> str:
     if description:
         parts.append(f"Description: {description}")
 
-    # AppliedControl + RequirementAssessment + others: observation is the
-    # narrative field where humans describe what's actually been done.
     observation = getattr(obj, "observation", None)
     if observation:
         parts.append(f"Observation: {observation}")
 
-    # RequirementAssessment-specific: pull in the requirement node text and
-    # framework name so retrieval can match by question wording rather than
-    # only by the human's free-text observation.
-    if model_name == "RequirementAssessment":
-        requirement = getattr(obj, "requirement", None)
-        if requirement is not None:
-            req_name = getattr(requirement, "name", "") or ""
-            req_ref = getattr(requirement, "ref_id", "") or ""
-            req_desc = getattr(requirement, "description", "") or ""
-            if req_ref:
-                parts.append(f"Requirement ref: {req_ref}")
-            if req_name and req_name != req_ref:
-                parts.append(f"Requirement: {req_name}")
-            if req_desc:
-                parts.append(f"Requirement text: {req_desc}")
-            framework = getattr(requirement, "framework", None)
-            framework_name = getattr(framework, "name", "") if framework else ""
-            if framework_name:
-                parts.append(f"Framework: {framework_name}")
-        result = getattr(obj, "result", None)
-        if result:
-            result_display = (
-                obj.get_result_display()
-                if hasattr(obj, "get_result_display")
-                else result
-            )
-            parts.append(f"Result: {result_display}")
-        # Names of linked applied controls — short, useful for retrieval
-        try:
-            ac_names = list(obj.applied_controls.values_list("name", flat=True)[:10])
-            if ac_names:
-                parts.append(f"Linked controls: {'; '.join(ac_names)}")
-        except Exception:
-            pass
-
-    # Model-specific fields
     if hasattr(obj, "current_level"):
         parts.append(
             f"Current risk level: {obj.get_current_level_display() if hasattr(obj, 'get_current_level_display') else obj.current_level}"

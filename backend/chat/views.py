@@ -948,10 +948,15 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        from .tasks import extract_questions_from_sheet
+        from .tasks import extract_questions_from_sheet, suggest_value_mapping
 
         QuestionnaireQuestion.objects.filter(questionnaire_run=run).delete()
         created = extract_questions_from_sheet(run, sheet, mapping)
+
+        # Each question now carries its detected answer_candidates. Group +
+        # LLM-map them in the background so per-question mappings are ready
+        # by the time the user clicks Start prefill / Download.
+        suggest_value_mapping(str(run.id))
 
         return Response(
             {"questionnaire_run": str(run.id), "extracted": created},
@@ -984,12 +989,9 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
         run.column_mapping = mapping
         run.save(update_fields=["column_mapping", "updated_at"])
 
-        # Kick off the value-mapping suggestion in the background. By the
-        # time the user reaches Start prefill / Download, it's usually done.
-        from .tasks import suggest_value_mapping
-
-        suggest_value_mapping(str(run.id))
-
+        # Note: value mapping is now triggered post-extract (it depends on
+        # per-question answer_candidates which only exist once questions
+        # have been materialized).
         return Response({"column_mapping": run.column_mapping})
 
     @action(detail=True, methods=["get"], url_path="export")
@@ -1080,15 +1082,6 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
             "partial": "Partial",
             "no": "No",
         }
-        vm = run.value_mapping or {}
-        vm_source = vm.get("source")
-        vm_candidates = vm.get("candidates") or []
-        fallback_with_dropdown = vm_source == "fallback" and bool(vm_candidates)
-        STATUS_LABELS = {
-            "yes": vm.get("yes") or DEFAULT_LABELS["yes"],
-            "partial": vm.get("partial") or DEFAULT_LABELS["partial"],
-            "no": vm.get("no") or DEFAULT_LABELS["no"],
-        }
 
         sheet_meta = next(
             (
@@ -1147,15 +1140,40 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
             # openpyxl is 1-indexed; column indices in mapping are 0-indexed
             excel_row = excel_row_idx_zero_based + 1
 
+            # Per-question mapping is the source of truth. Three cases:
+            #   1. Mapping computed cleanly → write the customer term.
+            #   2. Cell has a dropdown but mapping isn't ready / failed →
+            #      leave the cell blank to avoid violating the dropdown.
+            #   3. No dropdown on this cell → internal labels are safe.
+            # In every case we never auto-write needs_info (legitimate
+            # "Not Applicable" answers should be human-picked).
+            qm = question.answer_mapping or {}
+            qm_source = qm.get("source")
+            if qm_source and qm_source != "fallback":
+                cell_status_labels = {
+                    "yes": qm.get("yes"),
+                    "partial": qm.get("partial"),
+                    "no": qm.get("no"),
+                }
+                skip_answer_cell = False
+            elif question.answer_candidates:
+                # Dropdown present but no clean mapping yet — don't pollute it.
+                cell_status_labels = {}
+                skip_answer_cell = True
+            else:
+                cell_status_labels = dict(DEFAULT_LABELS)
+                skip_answer_cell = False
+
             should_write_answer = (
-                status_key in STATUS_LABELS  # never write needs_info
-                and not fallback_with_dropdown  # never violate the dropdown
+                not skip_answer_cell
+                and status_key in cell_status_labels
+                and bool(cell_status_labels[status_key])
             )
             if should_write_answer:
                 ws.cell(
                     row=excel_row,
                     column=a_col + 1,
-                    value=STATUS_LABELS[status_key],
+                    value=cell_status_labels[status_key],
                 )
             if c_col is not None and comment:
                 ws.cell(row=excel_row, column=c_col + 1, value=comment)

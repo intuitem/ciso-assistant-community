@@ -34,6 +34,8 @@
 			no?: string;
 			candidates?: string[];
 			source?: 'data_validation' | 'distinct_values' | 'fallback';
+			vocab_count?: number;
+			has_multiple_vocabs?: boolean;
 		};
 		created_at: string;
 	}
@@ -44,6 +46,14 @@
 		ref_id: string;
 		section: string;
 		text: string;
+		answer_candidates?: string[];
+		answer_mapping?: {
+			yes?: string;
+			partial?: string;
+			no?: string;
+			candidates?: string[];
+			source?: 'data_validation' | 'distinct_values' | 'fallback';
+		};
 	}
 
 	interface AgentRunState {
@@ -408,6 +418,10 @@
 
 	const pendingCount = $derived(questions.length - answeredCount);
 
+	// Confidence threshold above which we treat the answer as "good to go" by
+	// default. The reviewer can still expand the auto-accepted band to spot-check.
+	const AUTO_ACCEPT_THRESHOLD = 0.85;
+
 	const sortedQuestions = $derived.by(() => {
 		// Order by confidence ascending (worst first), then by ord
 		return [...questions].sort((a, b) => {
@@ -417,6 +431,20 @@
 			return a.ord - b.ord;
 		});
 	});
+
+	const needsReviewQuestions = $derived(
+		sortedQuestions.filter((q) => {
+			const c = actionByQuestion[q.id]?.confidence;
+			return c == null || c < AUTO_ACCEPT_THRESHOLD;
+		})
+	);
+	const autoAcceptedQuestions = $derived(
+		sortedQuestions.filter((q) => {
+			const c = actionByQuestion[q.id]?.confidence;
+			return c != null && c >= AUTO_ACCEPT_THRESHOLD;
+		})
+	);
+	let autoAcceptedExpanded = $state(false);
 
 	function statusPill(status: string) {
 		const map: Record<string, string> = {
@@ -792,7 +820,7 @@
 
 		{#if answeredCount > 0}
 			{@render statsBreakdown()}
-			{@render reviewList('Answers drafted so far — populating live')}
+			{@render bandedReview('Answers drafted so far — populating live')}
 		{/if}
 	{:else if phase === 'review' && agentRun}
 		<div class="bg-white shadow-sm py-4 px-6 card space-y-3">
@@ -847,7 +875,7 @@
 		</div>
 
 		{@render statsBreakdown()}
-		{@render reviewList('Sorted by confidence ascending — the gnarly ones come first.')}
+		{@render bandedReview('Sorted by confidence ascending — the gnarly ones come first.')}
 	{:else if phase === 'run_ended' && agentRun}
 		<div class="bg-white shadow-sm py-4 px-6 card border-l-4 border-red-500 space-y-3">
 			<div class="flex items-start justify-between gap-4">
@@ -913,20 +941,108 @@
 
 		{#if answeredCount > 0}
 			{@render statsBreakdown()}
-			{@render reviewList(
+			{@render bandedReview(
 				`${answeredCount} partial answer${answeredCount === 1 ? '' : 's'} drafted before the run stopped.`
 			)}
 		{/if}
 	{/if}
 </div>
 
-{#snippet reviewList(headerText: string)}
+{#snippet bandedReview(needsReviewHeader: string)}
+	{#if needsReviewQuestions.length > 0}
+		{@render reviewList(needsReviewHeader, needsReviewQuestions)}
+	{/if}
+
+	{#if autoAcceptedQuestions.length > 0}
+		<div class="bg-white shadow-sm card overflow-hidden">
+			<button
+				type="button"
+				class="w-full flex items-center justify-between px-6 py-3 bg-green-50
+					hover:bg-green-100 text-left transition-colors"
+				onclick={() => (autoAcceptedExpanded = !autoAcceptedExpanded)}
+			>
+				<div class="flex items-center gap-2">
+					<i class="fa-solid fa-circle-check text-green-600"></i>
+					<span class="text-sm font-medium text-green-900">
+						Auto-accepted — {autoAcceptedQuestions.length}
+						{autoAcceptedQuestions.length === 1 ? 'answer' : 'answers'}
+					</span>
+					<span class="text-xs text-green-700">
+						confidence ≥ {AUTO_ACCEPT_THRESHOLD.toFixed(2)}
+					</span>
+				</div>
+				<i
+					class="fa-solid {autoAcceptedExpanded
+						? 'fa-chevron-up'
+						: 'fa-chevron-down'} text-green-700 text-xs"
+				></i>
+			</button>
+			{#if autoAcceptedExpanded}
+				<div class="divide-y divide-gray-200">
+					{#each autoAcceptedQuestions as question}
+						{@const action = actionByQuestion[question.id]}
+						{@const bar = confidenceBar(action?.confidence ?? null)}
+						<div class="px-6 py-4 space-y-2">
+							<div class="flex items-start justify-between gap-4">
+								<div class="flex-1">
+									<div class="flex items-center gap-2 text-xs text-gray-500">
+										{#if question.section}
+											<span class="font-medium">{question.section}</span>
+										{/if}
+										{#if question.ref_id}
+											<span class="font-mono">{question.ref_id}</span>
+										{/if}
+									</div>
+									<div class="text-sm mt-1">{question.text}</div>
+								</div>
+								{#if action}
+									<div class="flex flex-col items-end gap-1 min-w-[140px]">
+										<span
+											class="text-xs px-2 py-0.5 rounded font-medium uppercase tracking-wide
+											{statusPill(action.payload.status || 'needs_info')}"
+										>
+											{action.payload.status ?? 'needs_info'}
+										</span>
+										<div class="w-32">
+											<div class="flex justify-between text-[10px] text-gray-500">
+												<span>conf.</span>
+												<span>
+													{action.confidence != null
+														? action.confidence.toFixed(2)
+														: '—'}
+												</span>
+											</div>
+											<div
+												class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"
+											>
+												<div class="{bar.color} h-1.5" style="width: {bar.width}"></div>
+											</div>
+										</div>
+									</div>
+								{/if}
+							</div>
+							{#if action}
+								<div
+									class="text-sm bg-gray-50 px-3 py-2 rounded whitespace-pre-wrap"
+								>
+									{action.payload.comment || '(no comment)'}
+								</div>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	{/if}
+{/snippet}
+
+{#snippet reviewList(headerText: string, qList: Question[])}
 	<div class="bg-white shadow-sm card overflow-hidden">
 		<div class="px-6 py-3 bg-gray-50 text-xs text-gray-600 border-b">
 			{headerText}
 		</div>
 		<div class="divide-y divide-gray-200">
-			{#each sortedQuestions as question}
+			{#each qList as question}
 				{@const action = actionByQuestion[question.id]}
 				{@const bar = confidenceBar(action?.confidence ?? null)}
 				<div class="px-6 py-4 space-y-2">
@@ -995,10 +1111,23 @@
 
 {#snippet statsBreakdown()}
 	<div class="bg-white shadow-sm py-4 px-6 card space-y-3">
-		<div class="flex items-center justify-between">
+		<div class="flex items-center justify-between gap-2">
 			<div class="font-semibold text-sm">Answer breakdown</div>
-			<div class="text-xs text-gray-500">
-				{answeredCount} answered{pendingCount > 0 ? ` · ${pendingCount} pending` : ''}
+			<div class="text-xs text-gray-500 text-right">
+				<div>
+					{answeredCount} answered{pendingCount > 0 ? ` · ${pendingCount} pending` : ''}
+				</div>
+				{#if answeredCount > 0}
+					<div class="mt-0.5">
+						<span class="text-amber-700">
+							{needsReviewQuestions.filter((q) => actionByQuestion[q.id]).length} to review
+						</span>
+						·
+						<span class="text-green-700">
+							{autoAcceptedQuestions.length} auto-accepted
+						</span>
+					</div>
+				{/if}
 			</div>
 		</div>
 
@@ -1031,7 +1160,20 @@
 {/snippet}
 
 {#snippet valueMappingHint()}
-	{#if run.value_mapping && run.value_mapping.source && run.value_mapping.source !== 'fallback'}
+	{#if run.value_mapping?.has_multiple_vocabs}
+		<div
+			class="text-[11px] text-gray-500 max-w-[280px] text-right leading-snug"
+			title="The questionnaire uses {run.value_mapping
+				.vocab_count} different answer vocabularies — each question writes its own value."
+		>
+			<i class="fa-solid fa-language mr-1"></i>
+			{run.value_mapping.vocab_count} answer vocabularies detected — each question writes its own
+			value.
+			<div class="text-[10px] text-gray-400 mt-0.5">
+				Needs info → cell left blank for manual review.
+			</div>
+		</div>
+	{:else if run.value_mapping && run.value_mapping.source && run.value_mapping.source !== 'fallback'}
 		<div
 			class="text-[11px] text-gray-500 max-w-[280px] text-right leading-snug"
 			title="Yes → {run.value_mapping.yes} · Partial → {run.value_mapping.partial} · No → {run
