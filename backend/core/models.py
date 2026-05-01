@@ -2325,7 +2325,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'."
+            "Per-field visibility template seeded into new CAs: "
+            "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
         ),
     )
     urn_namespace = models.CharField(
@@ -6653,8 +6654,9 @@ class ComplianceAssessment(Assessment):
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Per-field visibility map: {field_name: 'everyone' | 'auditor' | 'hidden'}. "
-            "Missing keys resolve to 'everyone'."
+            "Per-field visibility map: "
+            "{field_name: {role: 'edit' | 'read' | 'hidden'}}. "
+            "Missing keys resolve to 'edit' for every role."
         ),
     )
 

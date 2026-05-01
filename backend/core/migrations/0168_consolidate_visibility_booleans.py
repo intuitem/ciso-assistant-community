@@ -24,6 +24,35 @@ def _normalize(value):
     return None
 
 
+def normalize_framework_field_visibility(apps, schema_editor):
+    """Translate any legacy string values on Framework.field_visibility to pairs.
+
+    Frameworks seed new CAs with their `field_visibility`, so a leftover
+    single-string entry (legacy 0157 format) would silently be treated as
+    `EVERYONE_EDIT` by the new resolver.
+    """
+    Framework = apps.get_model("core", "Framework")
+    batch = []
+    fields = ["field_visibility"]
+    for fw in Framework.objects.all().iterator():
+        raw = fw.field_visibility or {}
+        if not raw:
+            continue
+        normalized = {}
+        for key, value in raw.items():
+            norm = _normalize(value)
+            if norm is not None:
+                normalized[key] = norm
+        if normalized != raw:
+            fw.field_visibility = normalized
+            batch.append(fw)
+        if len(batch) >= 1000:
+            Framework.objects.bulk_update(batch, fields)
+            batch = []
+    if batch:
+        Framework.objects.bulk_update(batch, fields)
+
+
 def booleans_to_field_visibility(apps, schema_editor):
     """Translate legacy boolean toggles into per-role field_visibility entries.
 
@@ -124,6 +153,20 @@ class Migration(migrations.Migration):
                 verbose_name="Field visibility",
             ),
         ),
+        migrations.AlterField(
+            model_name="framework",
+            name="field_visibility",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text=(
+                    "Per-field visibility template seeded into new CAs: "
+                    "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
+                ),
+                verbose_name="Field visibility",
+            ),
+        ),
+        migrations.RunPython(normalize_framework_field_visibility, reverse_noop),
         migrations.RunPython(booleans_to_field_visibility, reverse_noop),
         migrations.RemoveField(
             model_name="complianceassessment",
