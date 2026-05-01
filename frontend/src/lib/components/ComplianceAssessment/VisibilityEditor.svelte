@@ -100,7 +100,7 @@
 		const target = OPTIONS.find((o) => o.v === pill);
 		if (!target) return;
 		formData.update((data) => {
-			const current = { ...((data.field_visibility as Record<string, Pair>) ?? {}) };
+			const current = { ...(data.field_visibility as Record<string, Pair>) };
 			const writePair = (key: string, p: Pair) => {
 				current[key] = { ...p };
 			};
