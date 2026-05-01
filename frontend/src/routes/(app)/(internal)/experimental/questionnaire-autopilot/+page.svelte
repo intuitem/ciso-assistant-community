@@ -28,6 +28,51 @@
 
 	let deletingId = $state<string | null>(null);
 
+	// File picker / drop zone state
+	let fileInputEl: HTMLInputElement | null = $state(null);
+	let selectedFile = $state<File | null>(null);
+	let isDraggingOver = $state(false);
+
+	function onFileChange(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		selectedFile = input.files?.[0] ?? null;
+	}
+
+	function clearSelectedFile(event: MouseEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		selectedFile = null;
+		if (fileInputEl) fileInputEl.value = '';
+	}
+
+	function onDropZoneDragOver(event: DragEvent) {
+		event.preventDefault();
+		isDraggingOver = true;
+	}
+
+	function onDropZoneDragLeave() {
+		isDraggingOver = false;
+	}
+
+	function onDropZoneDrop(event: DragEvent) {
+		event.preventDefault();
+		isDraggingOver = false;
+		const file = event.dataTransfer?.files?.[0];
+		if (!file || !fileInputEl) return;
+		// Push the dropped file into the native input so the form action
+		// picks it up as if the user had clicked browse.
+		const dt = new DataTransfer();
+		dt.items.add(file);
+		fileInputEl.files = dt.files;
+		selectedFile = file;
+	}
+
+	function formatBytes(n: number): string {
+		if (n < 1024) return `${n} B`;
+		if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+		return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
 	async function deleteRun(run: { id: string; title: string; filename: string }) {
 		const label = run.title || run.filename || 'this run';
 		if (
@@ -134,18 +179,63 @@
 				/>
 			</div>
 
-			<div class="rounded-lg p-4 border-2 border-pink-500">
-				<label for="file" class="block text-sm font-medium text-gray-900">
+			<div>
+				<label for="file" class="block text-sm font-medium text-gray-900 mb-1.5">
 					Questionnaire file (.xlsx) *
 				</label>
-				<input
-					id="file"
-					name="file"
-					type="file"
-					accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-					class="mt-1.5 w-full text-sm"
-					required
-				/>
+				<label
+					for="file"
+					ondragover={onDropZoneDragOver}
+					ondragleave={onDropZoneDragLeave}
+					ondrop={onDropZoneDrop}
+					class="flex flex-col items-center justify-center gap-2 px-4 py-8 rounded-lg
+						border-2 border-dashed cursor-pointer transition-colors
+						{isDraggingOver
+						? 'border-pink-500 bg-pink-50'
+						: selectedFile
+							? 'border-green-500 bg-green-50'
+							: 'border-gray-300 bg-gray-50 hover:border-pink-400 hover:bg-pink-50/40'}"
+				>
+					{#if selectedFile}
+						<i class="fa-solid fa-file-excel text-3xl text-green-600"></i>
+						<div class="text-center">
+							<div class="text-sm font-medium text-gray-900 truncate max-w-[420px]">
+								{selectedFile.name}
+							</div>
+							<div class="text-xs text-gray-500 mt-0.5">
+								{formatBytes(selectedFile.size)} · click to change or
+								<button
+									type="button"
+									onclick={clearSelectedFile}
+									class="text-red-600 hover:text-red-700 underline"
+								>
+									remove
+								</button>
+							</div>
+						</div>
+					{:else}
+						<i
+							class="fa-solid {isDraggingOver ? 'fa-arrow-down' : 'fa-cloud-arrow-up'} text-3xl
+								{isDraggingOver ? 'text-pink-600' : 'text-gray-400'}"
+						></i>
+						<div class="text-center">
+							<div class="text-sm font-medium text-gray-700">
+								{isDraggingOver ? 'Drop the file here' : 'Click to choose a file or drop it here'}
+							</div>
+							<div class="text-xs text-gray-500 mt-0.5">.xlsx only</div>
+						</div>
+					{/if}
+					<input
+						id="file"
+						name="file"
+						type="file"
+						accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+						class="sr-only"
+						required
+						bind:this={fileInputEl}
+						onchange={onFileChange}
+					/>
+				</label>
 			</div>
 
 			<div class="flex gap-2">
@@ -177,13 +267,18 @@
 					>
 						<a href="/experimental/questionnaire-autopilot/{run.id}" class="block pr-7">
 							<div class="flex justify-between items-start gap-2">
-								<div class="text-sm font-medium truncate">
+								<div class="text-sm font-medium truncate font-mono">
 									{run.title || run.filename}
 								</div>
 								<span class="text-xs px-2 py-0.5 rounded {statusBadge(run.status)}">
 									{run.status}
 								</span>
 							</div>
+							{#if run.title && run.filename && run.title !== run.filename}
+								<div class="text-xs text-gray-500 mt-0.5 truncate" title={run.filename}>
+									{run.filename}
+								</div>
+							{/if}
 							<div class="text-xs text-gray-500 mt-1 truncate">
 								{run.folder?.str || run.folder?.name || '—'}
 							</div>

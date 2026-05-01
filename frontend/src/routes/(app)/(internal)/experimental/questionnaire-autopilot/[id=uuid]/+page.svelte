@@ -449,8 +449,13 @@
 			>
 				<i class="fa-solid fa-chevron-left mr-1"></i>All runs
 			</a>
-			<h4 class="h4 font-bold mt-1">{run.title || run.filename}</h4>
-			<div class="text-xs text-gray-500">
+			<h4 class="h4 font-bold mt-1 font-mono">{run.title || run.filename}</h4>
+			{#if run.title && run.filename && run.title !== run.filename}
+				<div class="text-xs text-gray-500 mt-0.5">
+					<i class="fa-solid fa-file-excel mr-1"></i>{run.filename}
+				</div>
+			{/if}
+			<div class="text-xs text-gray-500 mt-1">
 				Folder: {run.folder?.str || run.folder?.name || '—'} · Uploaded
 				{new Date(run.created_at).toLocaleString()}
 			</div>

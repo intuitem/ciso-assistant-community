@@ -881,6 +881,11 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        if not title:
+            from core.utils import generate_friendly_name
+
+            title = generate_friendly_name()
+
         run = QuestionnaireRun.objects.create(
             folder=folder,
             owner=request.user,
