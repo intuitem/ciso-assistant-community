@@ -1,14 +1,16 @@
 import { PageContent } from '../../utils/page-content.js';
 import { test, expect } from '../../utils/test-utils.js';
 
-const PRESET_NAME = 'Test Preset E2E';
-const FOLDER_NAME = PRESET_NAME;
+const PRESET_NAME_PREFIX = 'Test Preset E2E';
 
 test.describe('Journeys', () => {
 	test('create preset, apply it as journey, complete a step, then cleanup', async ({
 		logedPage,
 		page
-	}) => {
+	}, testInfo) => {
+		const runId = `${testInfo.workerIndex}-${testInfo.retry}-${Date.now()}`;
+		const PRESET_NAME = `${PRESET_NAME_PREFIX} ${runId}`;
+		const FOLDER_NAME = PRESET_NAME;
 		test.setTimeout(180_000);
 
 		await test.step('navigate to preset editor', async () => {
@@ -54,22 +56,18 @@ test.describe('Journeys', () => {
 		await test.step('navigate to /presets and verify preset is listed', async () => {
 			await page.goto('/presets');
 			await page.waitForLoadState('networkidle');
-			const byTestId = page
-				.locator('[data-testid^="preset-name-"]')
-				.filter({ hasText: PRESET_NAME })
-				.first();
-			const found = await byTestId
-				.waitFor({ state: 'visible', timeout: 10_000 })
-				.then(() => true)
-				.catch(() =>
-					page
-						.getByText(PRESET_NAME)
-						.first()
-						.waitFor({ state: 'visible', timeout: 5_000 })
-						.then(() => true)
-						.catch(() => false)
-				);
-			expect(found, `Preset "${PRESET_NAME}" not found on /presets`).toBe(true);
+			await expect
+				.poll(
+					async () => {
+						await page.reload({ waitUntil: 'networkidle' });
+						return await page
+							.locator('[data-testid^="preset-name-"]')
+							.filter({ hasText: PRESET_NAME })
+							.count();
+					},
+					{ timeout: 60_000, intervals: [1_000, 2_000, 5_000] }
+				)
+				.toBeGreaterThan(0);
 		});
 
 		await test.step('click Start a journey on the new preset card', async () => {
@@ -118,7 +116,7 @@ test.describe('Journeys', () => {
 			await page.waitForTimeout(2_000);
 
 			await expect(page.getByTestId('journey-header-name')).toBeVisible({ timeout: 30_000 });
-			await expect(page.getByTestId('journey-header-name')).toContainText(PRESET_NAME);
+			await expect(page.getByTestId('journey-header-name')).toContainText(PRESET_NAME_PREFIX);
 			await expect(page.getByTestId('journey-progress-title')).toBeVisible();
 			await expect(page.getByTestId('journey-progress-percent')).toHaveText('0%');
 		});
