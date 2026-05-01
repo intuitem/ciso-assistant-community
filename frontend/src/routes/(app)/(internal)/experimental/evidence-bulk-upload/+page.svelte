@@ -203,12 +203,7 @@
 			>
 				<i class="fa-solid fa-broom mr-2"></i>{m.reset()}
 			</button>
-			<button
-				type="button"
-				class="btn"
-				onclick={() => goto('/experimental')}
-				disabled={busy}
-			>
+			<button type="button" class="btn" onclick={() => goto('/experimental')} disabled={busy}>
 				{m.cancel()}
 			</button>
 		</div>

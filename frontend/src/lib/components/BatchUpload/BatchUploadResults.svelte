@@ -9,14 +9,24 @@
 	let { summary }: Props = $props();
 
 	const cells = $derived([
-		{ key: 'created', label: m.created(), cls: 'bg-green-50 text-green-800', icon: 'fa-circle-plus' },
+		{
+			key: 'created',
+			label: m.created(),
+			cls: 'bg-green-50 text-green-800',
+			icon: 'fa-circle-plus'
+		},
 		{
 			key: 'revision_added',
 			label: m.revisions(),
 			cls: 'bg-blue-50 text-blue-800',
 			icon: 'fa-code-branch'
 		},
-		{ key: 'replaced', label: m.replaced(), cls: 'bg-violet-50 text-violet-800', icon: 'fa-rotate' },
+		{
+			key: 'replaced',
+			label: m.replaced(),
+			cls: 'bg-violet-50 text-violet-800',
+			icon: 'fa-rotate'
+		},
 		{ key: 'renamed', label: m.renamed(), cls: 'bg-amber-50 text-amber-800', icon: 'fa-pen' },
 		{ key: 'skipped', label: m.skipped(), cls: 'bg-gray-50 text-gray-700', icon: 'fa-forward' },
 		{ key: 'duplicate', label: m.duplicates(), cls: 'bg-cyan-50 text-cyan-800', icon: 'fa-clone' },

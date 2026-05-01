@@ -211,9 +211,7 @@
 			removed: 2,
 			unchanged: 3
 		};
-		return rows.sort(
-			(a, b) => order[a.state] - order[b.state] || a.name.localeCompare(b.name)
-		);
+		return rows.sort((a, b) => order[a.state] - order[b.state] || a.name.localeCompare(b.name));
 	}
 
 	function diffSummary(rows: DiffRow[]) {
@@ -380,10 +378,7 @@
 			// 2. Same hash as an inherited file (different name)? Still add as new — we don't
 			//    auto-rename — but flag it so the user can decide.
 			// 3. Otherwise: a genuinely new file.
-			draftAdditions = [
-				...draftAdditions,
-				{ name: file.name, size: file.size, hash }
-			];
+			draftAdditions = [...draftAdditions, { name: file.name, size: file.size, hash }];
 			hashing[recordIdx] = { ...hashing[recordIdx], progress: 'done' };
 		}
 	}
@@ -401,8 +396,7 @@
 				...e,
 				action,
 				newSize: Math.round(e.baseSize * (0.85 + Math.random() * 0.4)),
-				newHash:
-					'ffeeddccbbaa9988ffeeddccbbaa9988ffeeddccbbaa9988ffeeddccbbaa9988'
+				newHash: 'ffeeddccbbaa9988ffeeddccbbaa9988ffeeddccbbaa9988ffeeddccbbaa9988'
 			};
 		} else {
 			draftEntries[idx] = { ...e, action, newSize: undefined, newHash: undefined };
@@ -459,7 +453,9 @@
 	</div>
 
 	<!-- Admin / instance setting strip -->
-	<div class="rounded border bg-slate-900 text-white px-4 py-3 text-sm flex items-center justify-between">
+	<div
+		class="rounded border bg-slate-900 text-white px-4 py-3 text-sm flex items-center justify-between"
+	>
 		<div class="flex items-center gap-2">
 			<i class="fa-solid fa-shield-halved text-amber-400"></i>
 			<span class="text-xs uppercase tracking-wide text-slate-300">Instance setting</span>
@@ -482,10 +478,9 @@
 	</div>
 	<div class="text-xs text-gray-600 -mt-4 px-1">
 		Set once by the admin, applies to all evidences. <strong>Lightweight</strong>: every new
-		revision is recorded as <em>approved</em> with the uploader as their own reviewer — no
-		friction added to the simple "refresh once a year" case. <strong>Audit-strict</strong>:
-		new revisions land as <em>in_review</em> and need explicit Approve / Reject. Toggle to see
-		both demos below react.
+		revision is recorded as <em>approved</em> with the uploader as their own reviewer — no friction
+		added to the simple "refresh once a year" case. <strong>Audit-strict</strong>: new revisions
+		land as <em>in_review</em> and need explicit Approve / Reject. Toggle to see both demos below react.
 	</div>
 
 	<!-- ───── SIMPLE CASE DEMO ───── -->
@@ -515,9 +510,7 @@
 							: statusStyle.approved}"
 					>
 						<i
-							class="fa-solid {instanceRequiresReview
-								? statusIcon.in_review
-								: statusIcon.approved}"
+							class="fa-solid {instanceRequiresReview ? statusIcon.in_review : statusIcon.approved}"
 						></i>
 						{instanceRequiresReview ? statusLabel.in_review : statusLabel.approved}
 					</span>
@@ -540,8 +533,9 @@
 
 		<div class="flex items-center justify-between">
 			<div class="text-xs text-gray-600 italic">
-				1-file evidence: <strong>no inherit/replace dialog</strong>. Clicking <em>Upload new
-				revision</em> opens the file picker directly. Same 2 clicks as today.
+				1-file evidence: <strong>no inherit/replace dialog</strong>. Clicking
+				<em>Upload new revision</em>
+				opens the file picker directly. Same 2 clicks as today.
 				{#if instanceRequiresReview}
 					New revision will land as <em>in_review</em>.
 				{:else}
@@ -613,12 +607,7 @@
 
 	<!-- Tabs -->
 	<nav class="flex gap-1 border-b">
-		{#each [
-			{ id: 'current', label: 'Current revision', icon: 'fa-folder-open' },
-			{ id: 'history', label: 'History', icon: 'fa-clock-rotate-left' },
-			{ id: 'compare', label: 'Compare', icon: 'fa-code-compare' },
-			{ id: 'new', label: 'New revision', icon: 'fa-plus' }
-		] as t}
+		{#each [{ id: 'current', label: 'Current revision', icon: 'fa-folder-open' }, { id: 'history', label: 'History', icon: 'fa-clock-rotate-left' }, { id: 'compare', label: 'Compare', icon: 'fa-code-compare' }, { id: 'new', label: 'New revision', icon: 'fa-plus' }] as t}
 			<button
 				class="px-3 py-2 text-sm border-b-2 -mb-px {tab === t.id
 					? 'border-blue-600 text-blue-700 font-medium'
@@ -637,9 +626,7 @@
 				<div>
 					<h2 class="text-lg font-semibold flex items-center gap-2">
 						v{current.version}
-						<span class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800">
-							current
-						</span>
+						<span class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800"> current </span>
 						<span
 							class="text-xs px-2 py-0.5 rounded border inline-flex items-center gap-1 {statusStyle[
 								displayCurrent.status
@@ -661,10 +648,14 @@
 						<i class="fa-solid fa-plus mr-1"></i>Upload new revision
 					</button>
 					{#if displayCurrent.status === 'in_review'}
-						<button class="px-3 py-1.5 rounded border text-sm bg-green-50 text-green-800 border-green-300">
+						<button
+							class="px-3 py-1.5 rounded border text-sm bg-green-50 text-green-800 border-green-300"
+						>
 							<i class="fa-solid fa-circle-check mr-1"></i>Approve…
 						</button>
-						<button class="px-3 py-1.5 rounded border text-sm bg-red-50 text-red-800 border-red-300">
+						<button
+							class="px-3 py-1.5 rounded border text-sm bg-red-50 text-red-800 border-red-300"
+						>
 							<i class="fa-solid fa-circle-xmark mr-1"></i>Reject…
 						</button>
 					{/if}
@@ -740,8 +731,8 @@
 		<section>
 			<div class="flex items-center justify-between mb-4">
 				<p class="text-sm text-gray-600">
-					Each revision is an immutable snapshot. File identity is by name — same name with a
-					new hash is a <em>replacement</em>, not a separate file.
+					Each revision is an immutable snapshot. File identity is by name — same name with a new
+					hash is a <em>replacement</em>, not a separate file.
 				</p>
 				<label class="text-xs flex items-center gap-1">
 					<input type="checkbox" bind:checked={showUnchanged} />
@@ -752,8 +743,7 @@
 			<ol class="relative border-l-2 border-gray-200 ml-3 space-y-6">
 				{#each [...revisions].reverse() as rawRev, idx}
 					{@const rev = displayRev(rawRev)}
-					{@const prev =
-						revisions.find((r) => r.version === rev.version - 1) ?? null}
+					{@const prev = revisions.find((r) => r.version === rev.version - 1) ?? null}
 					{@const rows = diff(prev, rev)}
 					{@const summary = diffSummary(rows)}
 					{@const isCurrent = rev.version === current.version}
@@ -918,24 +908,22 @@
 			<div class="flex items-end gap-3">
 				<label class="text-sm">
 					<span class="block text-xs text-gray-500 mb-1">Base</span>
-					<select
-						bind:value={baseVersion}
-						class="border rounded px-2 py-1.5 text-sm bg-white"
-					>
+					<select bind:value={baseVersion} class="border rounded px-2 py-1.5 text-sm bg-white">
 						{#each revisions as r}
-							<option value={r.version}>v{r.version} — {r.uploadedAt} ({statusLabel[r.status]})</option>
+							<option value={r.version}
+								>v{r.version} — {r.uploadedAt} ({statusLabel[r.status]})</option
+							>
 						{/each}
 					</select>
 				</label>
 				<i class="fa-solid fa-arrow-right text-gray-400 mb-2"></i>
 				<label class="text-sm">
 					<span class="block text-xs text-gray-500 mb-1">Target</span>
-					<select
-						bind:value={targetVersion}
-						class="border rounded px-2 py-1.5 text-sm bg-white"
-					>
+					<select bind:value={targetVersion} class="border rounded px-2 py-1.5 text-sm bg-white">
 						{#each revisions as r}
-							<option value={r.version}>v{r.version} — {r.uploadedAt} ({statusLabel[r.status]})</option>
+							<option value={r.version}
+								>v{r.version} — {r.uploadedAt} ({statusLabel[r.status]})</option
+							>
 						{/each}
 					</select>
 				</label>
@@ -986,9 +974,9 @@
 			</div>
 
 			<div class="text-xs text-gray-500">
-				File identity is matched by <strong>name</strong>. A same-name file with a different hash
-				is shown as <em>replaced</em>; a hash-identical match is <em>unchanged</em>. Renames are
-				not detected (would need a heuristic — out of scope here).
+				File identity is matched by <strong>name</strong>. A same-name file with a different hash is
+				shown as <em>replaced</em>; a hash-identical match is <em>unchanged</em>. Renames are not
+				detected (would need a heuristic — out of scope here).
 			</div>
 		</section>
 	{/if}
@@ -997,10 +985,10 @@
 	{#if tab === 'new'}
 		<section class="space-y-4">
 			<div class="text-sm text-gray-700">
-				This will become <strong>v{current.version + 1}</strong>. By default, all files from
-				v{current.version} are inherited. Untick to remove, click <em>Replace</em> to upload a new
-				version of an existing file (filename is preserved → it shows as <em>replaced</em> in
-				history), or drop new files at the bottom.
+				This will become <strong>v{current.version + 1}</strong>. By default, all files from v{current.version}
+				are inherited. Untick to remove, click <em>Replace</em> to upload a new version of an
+				existing file (filename is preserved → it shows as <em>replaced</em> in history), or drop new
+				files at the bottom.
 			</div>
 
 			<!-- Inherit / replace / remove list -->
@@ -1084,7 +1072,9 @@
 				role="button"
 				tabindex="0"
 			>
-				<div class="text-xs uppercase tracking-wide text-gray-600 mb-2 flex items-center justify-between">
+				<div
+					class="text-xs uppercase tracking-wide text-gray-600 mb-2 flex items-center justify-between"
+				>
 					<span>Add files</span>
 					<span class="text-gray-400 normal-case">
 						SHA-256 is computed in your browser — no upload yet.
@@ -1094,7 +1084,9 @@
 					<ul class="text-sm divide-y mb-2">
 						{#each draftAdditions as a, idx}
 							<li class="py-1 flex items-center gap-2">
-								<span class="font-mono text-xs px-1.5 py-0.5 rounded border text-green-700 bg-green-50 border-green-200">
+								<span
+									class="font-mono text-xs px-1.5 py-0.5 rounded border text-green-700 bg-green-50 border-green-200"
+								>
 									new
 								</span>
 								<i class="fa-solid fa-file text-gray-400"></i>
@@ -1225,20 +1217,21 @@
 					</div>
 					<ol class="list-decimal ml-5">
 						<li>
-							<strong>Client side</strong> (browser): each file is SHA-256 hashed via Web
-							Crypto before any upload. The browser then asks the server "do you already have
-							these hashes?" — only files marked unknown are uploaded.
+							<strong>Client side</strong> (browser): each file is SHA-256 hashed via Web Crypto before
+							any upload. The browser then asks the server "do you already have these hashes?" — only
+							files marked unknown are uploaded.
 						</li>
 						<li>
-							<strong>Server side</strong>: every uploaded file is re-hashed on receipt and
-							compared to the claimed hash. Lookup is scoped to the user's reachable evidence
-							(same evidence's prior revisions by default; cross-evidence dedup is a separate
-							policy decision with RBAC implications).
+							<strong>Server side</strong>: every uploaded file is re-hashed on receipt and compared
+							to the claimed hash. Lookup is scoped to the user's reachable evidence (same
+							evidence's prior revisions by default; cross-evidence dedup is a separate policy
+							decision with RBAC implications).
 						</li>
 					</ol>
 					<div>
-						Result for this revision: <strong>only the new + replaced bytes are sent over the
-						wire</strong>. Inherited files are link-only.
+						Result for this revision: <strong
+							>only the new + replaced bytes are sent over the wire</strong
+						>. Inherited files are link-only.
 					</div>
 				</div>
 			</div>
@@ -1255,12 +1248,12 @@
 			<div class="text-xs text-gray-500 italic">
 				{#if instanceRequiresReview}
 					Instance setting <strong>requires review</strong> — the new revision lands as
-					<em>in_review</em> and needs explicit Approve / Reject. The previous revision keeps
-					its status; history is never rewritten.
+					<em>in_review</em> and needs explicit Approve / Reject. The previous revision keeps its status;
+					history is never rewritten.
 				{:else}
-					Instance setting allows <strong>auto-approve</strong> — the new revision is recorded
-					as <em>approved</em> with you (the uploader) as its own reviewer. No review cycle is
-					imposed; the audit trail still shows who uploaded what, when.
+					Instance setting allows <strong>auto-approve</strong> — the new revision is recorded as
+					<em>approved</em> with you (the uploader) as its own reviewer. No review cycle is imposed;
+					the audit trail still shows who uploaded what, when.
 				{/if}
 			</div>
 		</section>
@@ -1278,43 +1271,41 @@
 				reviewer / approval timestamps are revision-level.
 			</li>
 			<li>
-				<strong>Upload model</strong>: inherit-by-default with explicit Keep / Replace / Remove
-				+ a drop zone for genuinely new files. Same-name file → auto-promote to Replace.
+				<strong>Upload model</strong>: inherit-by-default with explicit Keep / Replace / Remove + a
+				drop zone for genuinely new files. Same-name file → auto-promote to Replace.
 			</li>
 			<li>
 				<strong>Client-side dedup</strong>: SHA-256 in the browser via Web Crypto, server
 				re-verifies on receipt. Scope = same evidence's prior revisions.
 			</li>
 			<li>
-				<strong>Approval workflow as instance setting</strong> (above). Lightweight by default
-				so the simple "refresh once a year" case has zero added friction.
+				<strong>Approval workflow as instance setting</strong> (above). Lightweight by default so the
+				simple "refresh once a year" case has zero added friction.
 			</li>
 			<li>
-				<strong>Simple case stays simple</strong>: 1-file evidence skips the inherit dialog and
-				goes straight to the file picker (see top demo).
+				<strong>Simple case stays simple</strong>: 1-file evidence skips the inherit dialog and goes
+				straight to the file picker (see top demo).
 			</li>
 		</ul>
 
 		<div class="text-sm font-semibold text-blue-900 mt-3 mb-1">Still open</div>
 		<ul class="list-disc ml-5 space-y-1 text-blue-900">
 			<li>
-				History as a <strong>vertical timeline</strong> vs a flat sortable table — timeline
-				wins for ≤20 revisions; should we offer a table fallback for very long histories?
+				History as a <strong>vertical timeline</strong> vs a flat sortable table — timeline wins for
+				≤20 revisions; should we offer a table fallback for very long histories?
 			</li>
 			<li>
-				File identity = filename. Drop a renamed-file detector entirely, or add a "rename"
-				badge later via name+hash heuristic?
+				File identity = filename. Drop a renamed-file detector entirely, or add a "rename" badge
+				later via name+hash heuristic?
+			</li>
+			<li>"Restore as new revision" replaces "rollback" — explicit, no history lost. OK?</li>
+			<li>
+				Manifest hash visibility: footer-only as here, or surfaced more prominently for audit-trail
+				reassurance?
 			</li>
 			<li>
-				"Restore as new revision" replaces "rollback" — explicit, no history lost. OK?
-			</li>
-			<li>
-				Manifest hash visibility: footer-only as here, or surfaced more prominently for
-				audit-trail reassurance?
-			</li>
-			<li>
-				Approver as Actor reference (per revision) so "things I approved" becomes a filterable
-				query — worth the extra FK or overkill?
+				Approver as Actor reference (per revision) so "things I approved" becomes a filterable query
+				— worth the extra FK or overkill?
 			</li>
 		</ul>
 	</aside>

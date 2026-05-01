@@ -22,19 +22,21 @@
 		return `${(n / 1024 / 1024).toFixed(1)} MB`;
 	}
 
-	const outcomeBadge: Record<BatchOutcome, { label: string; cls: string; icon: string }> = $derived({
-		created: { label: m.created(), cls: 'bg-green-100 text-green-800', icon: 'fa-circle-plus' },
-		revision_added: {
-			label: m.revisionAdded(),
-			cls: 'bg-blue-100 text-blue-800',
-			icon: 'fa-code-branch'
-		},
-		replaced: { label: m.replaced(), cls: 'bg-violet-100 text-violet-800', icon: 'fa-rotate' },
-		renamed: { label: m.renamed(), cls: 'bg-amber-100 text-amber-800', icon: 'fa-pen' },
-		skipped: { label: m.skipped(), cls: 'bg-gray-100 text-gray-700', icon: 'fa-forward' },
-		duplicate: { label: m.duplicate(), cls: 'bg-cyan-100 text-cyan-800', icon: 'fa-clone' },
-		error: { label: m.error(), cls: 'bg-red-100 text-red-800', icon: 'fa-triangle-exclamation' }
-	});
+	const outcomeBadge: Record<BatchOutcome, { label: string; cls: string; icon: string }> = $derived(
+		{
+			created: { label: m.created(), cls: 'bg-green-100 text-green-800', icon: 'fa-circle-plus' },
+			revision_added: {
+				label: m.revisionAdded(),
+				cls: 'bg-blue-100 text-blue-800',
+				icon: 'fa-code-branch'
+			},
+			replaced: { label: m.replaced(), cls: 'bg-violet-100 text-violet-800', icon: 'fa-rotate' },
+			renamed: { label: m.renamed(), cls: 'bg-amber-100 text-amber-800', icon: 'fa-pen' },
+			skipped: { label: m.skipped(), cls: 'bg-gray-100 text-gray-700', icon: 'fa-forward' },
+			duplicate: { label: m.duplicate(), cls: 'bg-cyan-100 text-cyan-800', icon: 'fa-clone' },
+			error: { label: m.error(), cls: 'bg-red-100 text-red-800', icon: 'fa-triangle-exclamation' }
+		}
+	);
 </script>
 
 {#if entries.length > 0}
