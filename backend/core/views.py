@@ -9894,15 +9894,17 @@ class RequirementViewSet(BaseModelViewSet):
 
                 for ca in compliance_assessments:
                     fv = ca["compliance_assessment__field_visibility"] or {}
+                    doc_pair = fv.get("documentation_score") or {}
+                    show_doc = (
+                        not isinstance(doc_pair, dict)
+                        or doc_pair.get("auditor", "edit") != "hidden"
+                    )
                     perimeter_entry["compliance_assessments"].append(
                         {
                             "id": ca["compliance_assessment__id"],
                             "name": ca["compliance_assessment__name"],
                             "version": ca["compliance_assessment__version"],
-                            "show_documentation_score": fv.get(
-                                "documentation_score", "everyone"
-                            )
-                            != "hidden",
+                            "show_documentation_score": show_doc,
                             "max_score": ca["compliance_assessment__max_score"],
                         }
                     )

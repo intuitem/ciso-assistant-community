@@ -341,8 +341,11 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 /**
  * Field names that the CA-level visibility editor knows about.
- * The audit's `field_visibility` is the single source of truth at runtime;
- * a missing key resolves to 'everyone'.
+ * The audit's `field_visibility` is the single source of truth at runtime.
+ *
+ * Storage shape: {fieldName: {role: 'edit' | 'read' | 'hidden'}}.
+ * Roles known today: 'auditor', 'respondent'. A missing field key — or a
+ * missing role within the pair — resolves to 'edit'.
  */
 // Order matches the rendering sequence in the respondent (auditee) view.
 export const VISIBILITY_FIELDS = [
@@ -361,30 +364,48 @@ export const VISIBILITY_FIELDS = [
 
 export type VisibilityField = (typeof VISIBILITY_FIELDS)[number];
 
-/**
- * Resolve effective visibility for a field on a compliance assessment.
- * Returns 'everyone', 'auditor', or 'hidden'. Missing key → 'everyone'.
- */
+export type RoleAccess = 'edit' | 'read' | 'hidden';
+export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
+
+const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
+
+/** Return the per-role visibility pair for a field. Missing → all roles edit. */
 export function resolveFieldVisibility(
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string
-): string {
-	return complianceAssessment?.field_visibility?.[fieldName] ?? 'everyone';
+): VisibilityPair {
+	const raw = complianceAssessment?.field_visibility?.[fieldName];
+	if (!raw || typeof raw !== 'object') return { ...EDIT_PAIR };
+	return {
+		auditor: (raw.auditor as RoleAccess) ?? 'edit',
+		respondent: (raw.respondent as RoleAccess) ?? 'edit'
+	};
 }
 
-/**
- * Check if a field is visible for the given viewer role.
- * viewerRole: 'respondent' or 'auditor'
- */
+function roleAccess(
+	complianceAssessment: Record<string, any> | null | undefined,
+	fieldName: string,
+	role: 'auditor' | 'respondent'
+): RoleAccess {
+	return resolveFieldVisibility(complianceAssessment, fieldName)[role];
+}
+
+/** Whether a field is readable by the given role. */
 export function isFieldVisible(
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string,
 	viewerRole: 'respondent' | 'auditor' = 'auditor'
 ): boolean {
-	const vis = resolveFieldVisibility(complianceAssessment, fieldName);
-	if (vis === 'hidden') return false;
-	if (vis === 'auditor' && viewerRole === 'respondent') return false;
-	return true;
+	return roleAccess(complianceAssessment, fieldName, viewerRole) !== 'hidden';
+}
+
+/** Whether a field is writable by the given role. */
+export function isFieldEditable(
+	complianceAssessment: Record<string, any> | null | undefined,
+	fieldName: string,
+	viewerRole: 'respondent' | 'auditor' = 'auditor'
+): boolean {
+	return roleAccess(complianceAssessment, fieldName, viewerRole) === 'edit';
 }
 
 /**
@@ -521,5 +542,5 @@ export function shouldShowAutoQuestion(
 	const hasQuestions =
 		requirement.questions != null && Object.keys(requirement.questions).length > 0;
 	if (hasQuestions) return false;
-	return resolveFieldVisibility(ca, 'respondent_alignment') === 'everyone';
+	return isFieldEditable(ca, 'respondent_alignment', 'respondent');
 }

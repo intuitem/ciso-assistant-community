@@ -2903,8 +2903,10 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         overrides = getattr(ca, "field_visibility", None) or {}
 
         # Strip fields the viewer is not allowed to read. Empty overrides → no strip.
-        for field_name, vis in overrides.items():
-            if vis == "hidden" or (vis == "auditor" and viewer_role == "respondent"):
+        for field_name, pair in overrides.items():
+            if not isinstance(pair, dict):
+                continue
+            if pair.get(viewer_role, "edit") == "hidden":
                 data.pop(field_name, None)
 
         return data
@@ -2934,7 +2936,8 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 data = {
                     k: v
                     for k, v in data.items()
-                    if overrides.get(k, "everyone") == "everyone"
+                    if not isinstance(overrides.get(k), dict)
+                    or overrides[k].get("respondent", "edit") == "edit"
                 }
         return super().to_internal_value(data)
 
@@ -2984,7 +2987,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 # turn unrelated edits into 400s. The fields stay unchanged.
                 overrides = compliance_assessment.field_visibility or {}
                 for name in list(attrs.keys()):
-                    if overrides.get(name, "everyone") != "everyone":
+                    pair = overrides.get(name)
+                    if (
+                        isinstance(pair, dict)
+                        and pair.get("respondent", "edit") != "edit"
+                    ):
                         attrs.pop(name)
 
         # Validate extended_result against result

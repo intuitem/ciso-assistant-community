@@ -1137,34 +1137,52 @@ def get_auditee_filtered_folder_ids(user) -> set:
 # The compliance assessment's `field_visibility` is the single source of truth
 # at runtime. It is populated at CA creation from DEFAULT_VISIBILITY merged with
 # the framework's `field_visibility`, and can be edited per-CA from then on.
-# A missing key resolves to "everyone".
+#
+# Storage shape: {field_name: {role: 'edit'|'read'|'hidden'}}
+# Roles known today: 'auditor', 'respondent'. Future roles slot in alongside.
+# A missing field key, or a missing role within a field's pair, resolves to 'edit'
+# (matching the "no restriction" default).
+
+EVERYONE_EDIT = {"auditor": "edit", "respondent": "edit"}
+AUDITOR_ONLY = {"auditor": "edit", "respondent": "hidden"}
+AUDITOR_READ_ONLY = {"auditor": "read", "respondent": "hidden"}
+HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
 
 DEFAULT_VISIBILITY = {
-    "score": "hidden",
-    "is_scored": "hidden",
-    "documentation_score": "hidden",
-    "status": "auditor",
-    "extended_result": "auditor",
+    "score": HIDDEN,
+    "is_scored": HIDDEN,
+    "documentation_score": HIDDEN,
+    "status": AUDITOR_ONLY,
+    "extended_result": AUDITOR_ONLY,
+    "respondent_alignment": AUDITOR_ONLY,
 }
 
 
 def resolve_field_visibility(compliance_assessment, field_name):
-    """Resolve the visibility level for a field on a compliance assessment.
+    """Return the per-role visibility pair for a field.
 
-    Returns: "everyone", "auditor", or "hidden"
+    Shape: {role: 'edit'|'read'|'hidden'}. Missing field → all roles edit.
     """
     overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    return overrides.get(field_name, "everyone")
+    pair = overrides.get(field_name)
+    if not isinstance(pair, dict):
+        return dict(EVERYONE_EDIT)
+    return pair
 
 
-def is_field_visible_to(compliance_assessment, field_name, viewer_role):
-    """Whether a field is visible to a given viewer role on a CA."""
-    vis = resolve_field_visibility(compliance_assessment, field_name)
-    if vis == "hidden":
-        return False
-    if vis == "auditor" and viewer_role == "respondent":
-        return False
-    return True
+def _role_access(compliance_assessment, field_name, role):
+    pair = resolve_field_visibility(compliance_assessment, field_name)
+    return pair.get(role, "edit")
+
+
+def is_field_visible_to(compliance_assessment, field_name, role):
+    """Whether a field is readable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) != "hidden"
+
+
+def is_field_editable_by(compliance_assessment, field_name, role):
+    """Whether a field is writable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) == "edit"
 
 
 def build_initial_field_visibility(framework):
@@ -1173,4 +1191,8 @@ def build_initial_field_visibility(framework):
     Layered: code defaults overridden by the framework's own map.
     """
     fw_overrides = getattr(framework, "field_visibility", None) or {}
-    return {**DEFAULT_VISIBILITY, **fw_overrides}
+    merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    for key, pair in fw_overrides.items():
+        if isinstance(pair, dict):
+            merged[key] = dict(pair)
+    return merged

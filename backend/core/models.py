@@ -6685,52 +6685,55 @@ class ComplianceAssessment(Assessment):
         verbose_name_plural = _("Compliance assessments")
 
     # --- Visibility-derived booleans ---
-    # These mirror legacy boolean fields. Storage is `field_visibility`; reads
-    # treat anything other than 'hidden' as enabled, writes pop or set 'hidden'.
+    # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
+    # per-role pairs ({role: 'edit'|'read'|'hidden'}); the legacy booleans read
+    # the auditor axis (the field exists at all if auditor isn't 'hidden').
 
-    def _vis(self, field):
-        return (self.field_visibility or {}).get(field, "everyone")
+    def _auditor_visible(self, field):
+        pair = (self.field_visibility or {}).get(field)
+        if not isinstance(pair, dict):
+            return True
+        return pair.get("auditor", "edit") != "hidden"
 
-    def _set_hidden(self, field, hidden):
+    def _set_field_hidden(self, field, hidden):
+        from core.utils import EVERYONE_EDIT, HIDDEN
+
         fv = dict(self.field_visibility or {})
-        if hidden:
-            fv[field] = "hidden"
-        else:
-            fv.pop(field, None)
+        fv[field] = dict(HIDDEN) if hidden else dict(EVERYONE_EDIT)
         self.field_visibility = fv
 
     @property
     def scoring_enabled(self):
-        return self._vis("score") != "hidden"
+        return self._auditor_visible("score")
 
     @scoring_enabled.setter
     def scoring_enabled(self, value):
-        self._set_hidden("score", not value)
-        self._set_hidden("is_scored", not value)
+        self._set_field_hidden("score", not value)
+        self._set_field_hidden("is_scored", not value)
 
     @property
     def show_documentation_score(self):
-        return self._vis("documentation_score") != "hidden"
+        return self._auditor_visible("documentation_score")
 
     @show_documentation_score.setter
     def show_documentation_score(self, value):
-        self._set_hidden("documentation_score", not value)
+        self._set_field_hidden("documentation_score", not value)
 
     @property
     def extended_result_enabled(self):
-        return self._vis("extended_result") != "hidden"
+        return self._auditor_visible("extended_result")
 
     @extended_result_enabled.setter
     def extended_result_enabled(self, value):
-        self._set_hidden("extended_result", not value)
+        self._set_field_hidden("extended_result", not value)
 
     @property
     def progress_status_enabled(self):
-        return self._vis("status") != "hidden"
+        return self._auditor_visible("status")
 
     @progress_status_enabled.setter
     def progress_status_enabled(self, value):
-        self._set_hidden("status", not value)
+        self._set_field_hidden("status", not value)
 
     def upsert_daily_metrics(self):
         per_status = {item[1]: item[0] for item in self.get_requirements_status_count()}

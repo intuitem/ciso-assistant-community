@@ -25,7 +25,7 @@
 		getFieldVisibility,
 		hasComputedResult,
 		hasComputedScore,
-		resolveFieldVisibility,
+		isFieldEditable as isFieldEditableHelper,
 		shouldShowAutoQuestion,
 		buildAutoAlignmentQuestion,
 		alignmentValueFromChoiceUrn,
@@ -96,21 +96,15 @@
 
 	function isFieldEditable(fieldName: string): boolean {
 		if (complianceAssessment.is_locked || complianceAssessment.status === 'in_review') return false;
-		const vis = resolveFieldVisibility(complianceAssessment, fieldName);
-		if (vis === 'hidden') return false;
-		if (isAuditor) {
-			// Auditor can edit auditor-owned fields
-			return vis === 'auditor';
-		} else {
-			// Respondent can edit everyone-visible fields (when assignment status allows)
+		if (!isAuditor) {
 			if (
 				assignmentStatus === 'draft' ||
 				assignmentStatus === 'submitted' ||
 				assignmentStatus === 'closed'
 			)
 				return false;
-			return vis === 'everyone';
 		}
+		return isFieldEditableHelper(complianceAssessment, fieldName, viewerRole);
 	}
 
 	const canEditResult = $derived(isFieldEditable('result'));
