@@ -154,14 +154,14 @@
 		</div>
 
 		<div class="space-y-2">
-			<label for="folder" class="block text-sm font-medium text-gray-900">Target folder *</label>
+			<label for="folder" class="block text-sm font-medium text-gray-900">Target domain *</label>
 			<select
 				id="folder"
 				bind:value={folderId}
 				disabled={busy}
 				class="w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
 			>
-				<option value="">Select a folder</option>
+				<option value="">Select a domain</option>
 				{#each data.folders as folder}
 					<option value={folder.id}>{folder.str || folder.name}</option>
 				{/each}
