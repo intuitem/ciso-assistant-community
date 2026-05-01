@@ -6622,9 +6622,6 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
-    scoring_enabled = models.BooleanField(default=False)
-    show_documentation_score = models.BooleanField(default=False)
-
     computed_outcome = models.JSONField(null=True, blank=True)
 
     assets = models.ManyToManyField(
@@ -6651,15 +6648,13 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
-    extended_result_enabled = models.BooleanField(default=False)
-    progress_status_enabled = models.BooleanField(default=True)
-
     field_visibility = models.JSONField(
         default=dict,
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Override visibility per field for this assessment. Overrides framework defaults."
+            "Per-field visibility map: {field_name: 'everyone' | 'auditor' | 'hidden'}. "
+            "Missing keys resolve to 'everyone'."
         ),
     )
 
@@ -6688,6 +6683,54 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+
+    # --- Visibility-derived booleans ---
+    # These mirror legacy boolean fields. Storage is `field_visibility`; reads
+    # treat anything other than 'hidden' as enabled, writes pop or set 'hidden'.
+
+    def _vis(self, field):
+        return (self.field_visibility or {}).get(field, "everyone")
+
+    def _set_hidden(self, field, hidden):
+        fv = dict(self.field_visibility or {})
+        if hidden:
+            fv[field] = "hidden"
+        else:
+            fv.pop(field, None)
+        self.field_visibility = fv
+
+    @property
+    def scoring_enabled(self):
+        return self._vis("score") != "hidden"
+
+    @scoring_enabled.setter
+    def scoring_enabled(self, value):
+        self._set_hidden("score", not value)
+        self._set_hidden("is_scored", not value)
+
+    @property
+    def show_documentation_score(self):
+        return self._vis("documentation_score") != "hidden"
+
+    @show_documentation_score.setter
+    def show_documentation_score(self, value):
+        self._set_hidden("documentation_score", not value)
+
+    @property
+    def extended_result_enabled(self):
+        return self._vis("extended_result") != "hidden"
+
+    @extended_result_enabled.setter
+    def extended_result_enabled(self, value):
+        self._set_hidden("extended_result", not value)
+
+    @property
+    def progress_status_enabled(self):
+        return self._vis("status") != "hidden"
+
+    @progress_status_enabled.setter
+    def progress_status_enabled(self, value):
+        self._set_hidden("status", not value)
 
     def upsert_daily_metrics(self):
         per_status = {item[1]: item[0] for item in self.get_requirements_status_count()}

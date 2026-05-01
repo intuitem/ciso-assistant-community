@@ -1133,67 +1133,44 @@ def get_auditee_filtered_folder_ids(user) -> set:
 
 
 # --- Field Visibility ---
+#
+# The compliance assessment's `field_visibility` is the single source of truth
+# at runtime. It is populated at CA creation from DEFAULT_VISIBILITY merged with
+# the framework's `field_visibility`, and can be edited per-CA from then on.
+# A missing key resolves to "everyone".
 
-DEFAULT_FIELD_VISIBILITY = {
-    "result": "everyone",
+DEFAULT_VISIBILITY = {
+    "score": "hidden",
+    "is_scored": "hidden",
+    "documentation_score": "hidden",
     "status": "auditor",
-    "score": "everyone",
-    "is_scored": "everyone",
-    "documentation_score": "everyone",
-    "observation": "everyone",
-    "answers": "everyone",
-    "evidences": "everyone",
-    "applied_controls": "everyone",
-    "security_exceptions": "auditor",
-    "respondent_alignment": "everyone",
+    "extended_result": "auditor",
 }
 
 
-def resolve_field_visibility(framework, compliance_assessment, field_name):
-    """Resolve the visibility level for a field using the three-tier cascade.
-
-    Priority: CA override > Framework override > Code default > "auditor" (safe fallback).
+def resolve_field_visibility(compliance_assessment, field_name):
+    """Resolve the visibility level for a field on a compliance assessment.
 
     Returns: "everyone", "auditor", or "hidden"
     """
-    # Tier 1: CA-level override (highest priority)
-    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    if field_name in ca_overrides:
-        return ca_overrides[field_name]
-
-    # Tier 2: Framework-level override
-    fw_overrides = getattr(framework, "field_visibility", None) or {}
-    if field_name in fw_overrides:
-        return fw_overrides[field_name]
-
-    # Tier 3: Code-level default
-    return DEFAULT_FIELD_VISIBILITY.get(field_name, "auditor")
+    overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    return overrides.get(field_name, "everyone")
 
 
-def get_visible_fields(framework, compliance_assessment, viewer_role="auditor"):
-    """Get the set of field names visible to the given role.
+def is_field_visible_to(compliance_assessment, field_name, viewer_role):
+    """Whether a field is visible to a given viewer role on a CA."""
+    vis = resolve_field_visibility(compliance_assessment, field_name)
+    if vis == "hidden":
+        return False
+    if vis == "auditor" and viewer_role == "respondent":
+        return False
+    return True
 
-    viewer_role: "respondent" or "auditor"
 
-    Returns a set of field names that should be included in the response.
+def build_initial_field_visibility(framework):
+    """Build the initial `field_visibility` map for a new CA.
+
+    Layered: code defaults overridden by the framework's own map.
     """
-    all_fields = set(DEFAULT_FIELD_VISIBILITY.keys())
-
-    # Also include any fields mentioned in overrides
     fw_overrides = getattr(framework, "field_visibility", None) or {}
-    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    all_fields.update(fw_overrides.keys())
-    all_fields.update(ca_overrides.keys())
-
-    visible = set()
-    for field in all_fields:
-        visibility = resolve_field_visibility(framework, compliance_assessment, field)
-        if visibility == "hidden":
-            continue  # hidden from everyone
-        if visibility == "everyone":
-            visible.add(field)
-        elif visibility == "auditor" and viewer_role == "auditor":
-            visible.add(field)
-        # "auditor" + viewer_role="respondent" -> not visible
-
-    return visible
+    return {**DEFAULT_VISIBILITY, **fw_overrides}

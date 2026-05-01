@@ -267,8 +267,9 @@
 		showAppliedControls,
 		showEvidences,
 		showSecurityExceptions,
-		showRespondentAlignment
-	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
+		showRespondentAlignment,
+		showComments
+	} = getFieldVisibility(complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
 
@@ -904,7 +905,7 @@
 			{/snippet}
 		</SuperForm>
 	</div>
-	{#if page.data?.featureflags?.comments}
+	{#if page.data?.featureflags?.comments && showComments}
 		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
 	{/if}
 </div>

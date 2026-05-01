@@ -8633,8 +8633,6 @@ class FrameworkViewSet(BaseModelViewSet):
         if framework.translations and isinstance(framework.translations, dict):
             available_languages.update(framework.translations.keys())
 
-        from core.utils import DEFAULT_FIELD_VISIBILITY
-
         draft = {
             "framework_meta": {
                 "name": framework.name,
@@ -8647,10 +8645,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "scores_definition": framework.scores_definition,
                 "implementation_groups_definition": framework.implementation_groups_definition,
                 "outcomes_definition": framework.outcomes_definition,
-                "field_visibility": {
-                    **DEFAULT_FIELD_VISIBILITY,
-                    **(framework.field_visibility or {}),
-                },
+                "field_visibility": framework.field_visibility or {},
                 "urn_namespace": framework.urn_namespace or "custom",
             },
             "nodes": nodes,
@@ -9891,21 +9886,23 @@ class RequirementViewSet(BaseModelViewSet):
                         "compliance_assessment__id",
                         "compliance_assessment__name",
                         "compliance_assessment__version",
-                        "compliance_assessment__show_documentation_score",
+                        "compliance_assessment__field_visibility",
                         "compliance_assessment__max_score",
                     )
                     .distinct()
                 )
 
                 for ca in compliance_assessments:
+                    fv = ca["compliance_assessment__field_visibility"] or {}
                     perimeter_entry["compliance_assessments"].append(
                         {
                             "id": ca["compliance_assessment__id"],
                             "name": ca["compliance_assessment__name"],
                             "version": ca["compliance_assessment__version"],
-                            "show_documentation_score": ca[
-                                "compliance_assessment__show_documentation_score"
-                            ],
+                            "show_documentation_score": fv.get(
+                                "documentation_score", "everyone"
+                            )
+                            != "hidden",
                             "max_score": ca["compliance_assessment__max_score"],
                         }
                     )
@@ -10741,7 +10738,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "genericcollection",
-        "extended_result_enabled",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 

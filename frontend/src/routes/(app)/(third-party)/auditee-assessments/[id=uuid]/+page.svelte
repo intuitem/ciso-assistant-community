@@ -55,13 +55,28 @@
 		{ id: 'compliant', label: m.compliant() },
 		{ id: 'not_applicable', label: m.notApplicable() }
 	];
+
+	const status_options = [
+		{ id: 'to_do', label: m.toDo() },
+		{ id: 'in_progress', label: m.inProgress() },
+		{ id: 'in_review', label: m.inReview() },
+		{ id: 'done', label: m.done() }
+	];
+
+	const extended_result_options = [
+		{ id: 'major_nonconformity', label: m.majorNonconformity() },
+		{ id: 'minor_nonconformity', label: m.minorNonconformity() },
+		{ id: 'observation_sensitive_point', label: m.observationSensitivePoint() },
+		{ id: 'opportunity_for_improvement', label: m.opportunityForImprovement() },
+		{ id: 'good_practice', label: m.goodPractice() }
+	];
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
 
 	// Field visibility based on viewer role (respondent if assigned actor, auditor otherwise)
 	const fw = $derived(complianceAssessment.framework);
 	const viewerRole = $derived((data.viewerRole ?? 'respondent') as 'respondent' | 'auditor');
-	const fieldVis = $derived(getFieldVisibility(fw, complianceAssessment, viewerRole));
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
@@ -69,6 +84,9 @@
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	const showComments = $derived(fieldVis.showComments);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
 
 	// Single assignment — the URL param (params.id) IS the assignment ID
 	let assignment = $derived(data.assignment);
@@ -78,7 +96,7 @@
 
 	function isFieldEditable(fieldName: string): boolean {
 		if (complianceAssessment.is_locked || complianceAssessment.status === 'in_review') return false;
-		const vis = resolveFieldVisibility(fw, complianceAssessment, fieldName);
+		const vis = resolveFieldVisibility(complianceAssessment, fieldName);
 		if (vis === 'hidden') return false;
 		if (isAuditor) {
 			// Auditor can edit auditor-owned fields
@@ -103,6 +121,8 @@
 	const canEditEvidences = $derived(isFieldEditable('evidences'));
 	const canEditAnswers = $derived(isFieldEditable('answers'));
 	const canEditAlignment = $derived(isFieldEditable('respondent_alignment'));
+	const canEditStatus = $derived(isFieldEditable('status'));
+	const canEditExtendedResult = $derived(isFieldEditable('extended_result'));
 
 	let canSubmit = $derived(
 		!isAuditor && (assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested')
@@ -922,7 +942,7 @@
 							{/if}
 
 							<!-- Auto-alignment question (when no framework questions) -->
-							{#if shouldShowAutoQuestion(requirement, viewerRole, fw, complianceAssessment)}
+							{#if shouldShowAutoQuestion(requirement, viewerRole, complianceAssessment)}
 								<div class="flex flex-col w-full space-y-2">
 									<Question
 										questions={buildAutoAlignmentQuestion({
@@ -965,6 +985,27 @@
 								</div>
 							{/if}
 
+							<!-- Status -->
+							{#if showStatus}
+								<div class="flex flex-col items-center w-full my-2">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.status()}
+									</p>
+									<RadioGroup
+										possibleOptions={status_options}
+										key="id"
+										labelKey="label"
+										field="status"
+										disabled={!canEditStatus}
+										initialValue={requirementAssessment.status ?? 'to_do'}
+										onChange={(newValue) => {
+											requirementAssessment.status = newValue;
+											update(requirementAssessment, 'status');
+										}}
+									/>
+								</div>
+							{/if}
+
 							<!-- Result -->
 							{#if showResult || hasComputedResult(requirement.questions)}
 								<div class="flex flex-col items-center w-full my-2">
@@ -997,6 +1038,29 @@
 											}}
 										/>
 									{/if}
+								</div>
+							{/if}
+
+							<!-- Extended result -->
+							{#if showExtendedResult}
+								<div class="flex flex-col items-center w-full my-2">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.extendedResult()}
+									</p>
+									<RadioGroup
+										possibleOptions={extended_result_options}
+										key="id"
+										labelKey="label"
+										field="extended_result"
+										disabled={!canEditExtendedResult}
+										initialValue={requirementAssessment.extended_result ?? null}
+										onChange={(newValue) => {
+											const next =
+												requirementAssessment.extended_result === newValue ? null : newValue;
+											requirementAssessment.extended_result = next;
+											update(requirementAssessment, 'extended_result');
+										}}
+									/>
 								</div>
 							{/if}
 
@@ -1244,7 +1308,7 @@
 						</form>
 					{/key}
 				{/if}
-				{#if page.data?.featureflags?.comments}
+				{#if page.data?.featureflags?.comments && showComments}
 					<CommentsPanel parentType="requirement_assessment" parentId={requirementAssessment.id} />
 				{/if}
 			</div>

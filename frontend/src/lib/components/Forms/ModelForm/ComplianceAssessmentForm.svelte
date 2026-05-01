@@ -11,6 +11,7 @@
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
+	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -256,54 +257,8 @@
 				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
 			/>
 		{/if}
-		<Checkbox
-			{form}
-			field="scoring_enabled"
-			label={m.scoringEnabled()}
-			helpText={m.scoringEnabledHelpText()}
-			cacheLock={cacheLocks['scoring_enabled']}
-			bind:cachedValue={formDataCache['scoring_enabled']}
-			onChange={(value) => {
-				if (!value) {
-					form.form.update((currentData) => ({
-						...currentData,
-						show_documentation_score: false
-					}));
-				}
-			}}
-		/>
-		<Checkbox
-			{form}
-			field="show_documentation_score"
-			label={m.useDocumentationScore()}
-			helpText={m.useDocumentationScoreHelpText()}
-			cacheLock={cacheLocks['show_documentation_score']}
-			bind:cachedValue={formDataCache['show_documentation_score']}
-			onChange={(value) => {
-				if (value) {
-					form.form.update((currentData) => ({
-						...currentData,
-						scoring_enabled: true
-					}));
-				}
-			}}
-		/>
-		<Checkbox
-			{form}
-			field="extended_result_enabled"
-			label={m.extendedResultEnabled()}
-			helpText={m.extendedResultEnabledHelpText()}
-			cacheLock={cacheLocks['extended_result_enabled']}
-			bind:cachedValue={formDataCache['extended_result_enabled']}
-		/>
-		<Checkbox
-			{form}
-			field="progress_status_enabled"
-			label={m.progressStatusEnabled()}
-			helpText={m.progressStatusEnabledHelpText()}
-			cacheLock={cacheLocks['progress_status_enabled']}
-			bind:cachedValue={formDataCache['progress_status_enabled']}
-		/>
+		<VisibilityEditor {form} disabled={object?.is_locked} />
+
 		<Select
 			{form}
 			options={model.selectOptions['score_calculation_method']}

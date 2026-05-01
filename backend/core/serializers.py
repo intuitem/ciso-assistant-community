@@ -2079,16 +2079,6 @@ class FrameworkReadSerializer(ReferentialSerializer):
             return sd["scale"]
         return sd
 
-    def to_representation(self, instance):
-        from core.utils import DEFAULT_FIELD_VISIBILITY
-
-        data = super().to_representation(instance)
-        data["field_visibility"] = {
-            **DEFAULT_FIELD_VISIBILITY,
-            **(data.get("field_visibility") or {}),
-        }
-        return data
-
     class Meta:
         model = Framework
         exclude = ["translations", "editing_draft", "editing_history"]
@@ -2561,6 +2551,14 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return sd["scale"]
         return sd
 
+    # Derived booleans, kept in the API for backwards compatibility. The actual
+    # storage is `field_visibility`; clients that want to change these should
+    # PATCH `field_visibility` directly.
+    scoring_enabled = serializers.BooleanField(read_only=True)
+    show_documentation_score = serializers.BooleanField(read_only=True)
+    extended_result_enabled = serializers.BooleanField(read_only=True)
+    progress_status_enabled = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
@@ -2691,6 +2689,16 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
         authors_data = validated_data.get("authors", [])
+
+        # Seed field_visibility from code defaults + framework template, unless
+        # the caller explicitly supplied a value.
+        if not validated_data.get("field_visibility"):
+            from core.utils import build_initial_field_visibility
+
+            validated_data["field_visibility"] = build_initial_field_visibility(
+                validated_data.get("framework")
+            )
+
         assessment = super().create(validated_data)
 
         # Send notification to newly assigned authors
@@ -2732,19 +2740,6 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
         old_scoring_enabled = instance.scoring_enabled
 
-        # Enabling documentation score implies scoring must be on
-        if validated_data.get("show_documentation_score") and not validated_data.get(
-            "scoring_enabled", instance.scoring_enabled
-        ):
-            validated_data["scoring_enabled"] = True
-
-        # Disabling scoring implies documentation score must be off
-        if (
-            "scoring_enabled" in validated_data
-            and not validated_data["scoring_enabled"]
-        ):
-            validated_data["show_documentation_score"] = False
-
         with transaction.atomic():
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
@@ -2755,7 +2750,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     compliance_assessment=updated_instance
                 ).update(folder=updated_instance.folder)
 
-            # Toggle is_scored on all requirement assessments when scoring_enabled changes
+            # Toggle is_scored on all requirement assessments when scoring visibility flips
             if updated_instance.scoring_enabled != old_scoring_enabled:
                 assessable_ras = RequirementAssessment.objects.filter(
                     compliance_assessment=updated_instance,
@@ -2841,7 +2836,6 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "scores_definition",
-            "scoring_enabled",
             "score_calculation_method",
             "target_score",
             "anchor_na_to_target",
@@ -2905,37 +2899,13 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         data = super().to_representation(instance)
 
         viewer_role = self.context.get("viewer_role", "auditor")
-        framework = getattr(instance, "compliance_assessment", None)
-        ca = framework  # compliance_assessment
-        framework = getattr(ca, "framework", None) if ca else None
+        ca = getattr(instance, "compliance_assessment", None)
+        overrides = getattr(ca, "field_visibility", None) or {}
 
-        if framework and ca:
-            from core.utils import (
-                DEFAULT_FIELD_VISIBILITY,
-                resolve_field_visibility,
-            )
-
-            # Enrich nested framework.field_visibility so the frontend always
-            # receives the full configuration rather than a sparse delta.
-            ca_data = data.get("compliance_assessment")
-            if isinstance(ca_data, dict):
-                fw_data = ca_data.get("framework")
-                if isinstance(fw_data, dict):
-                    fw_data["field_visibility"] = {
-                        **DEFAULT_FIELD_VISIBILITY,
-                        **(fw_data.get("field_visibility") or {}),
-                    }
-
-            # Strip fields that the viewer is not allowed to read.
-            # Respondents may not see "auditor"-visibility fields; everyone
-            # is denied "hidden" fields.
-            for field_name in list(data.keys()):
-                if field_name in DEFAULT_FIELD_VISIBILITY:
-                    vis = resolve_field_visibility(framework, ca, field_name)
-                    if vis == "hidden":
-                        data.pop(field_name, None)
-                    elif vis == "auditor" and viewer_role == "respondent":
-                        data.pop(field_name, None)
+        # Strip fields the viewer is not allowed to read. Empty overrides → no strip.
+        for field_name, vis in overrides.items():
+            if vis == "hidden" or (vis == "auditor" and viewer_role == "respondent"):
+                data.pop(field_name, None)
 
         return data
 
@@ -2949,32 +2919,22 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     answers = serializers.JSONField(required=False, write_only=True)
 
     def to_internal_value(self, data):
-        # Strip auditor-only fields before DRF validates individual field choices,
-        # so an invalid placeholder value (e.g. from a disabled select) never
-        # causes a 400. The actual security enforcement is in validate().
+        # Strip fields the respondent isn't allowed to write before DRF validates
+        # individual field choices — a placeholder value in a disabled select
+        # would otherwise trip choice validation. Security enforcement is repeated
+        # in validate() since to_internal_value runs before object-level checks.
         request = self.context.get("request")
         if request and self.instance:
-            from core.utils import (
-                DEFAULT_FIELD_VISIBILITY,
-                get_respondent_filtered_folder_ids,
-                get_visible_fields,
-            )
+            from core.utils import get_respondent_filtered_folder_ids
 
-            compliance_assessment = self.instance.compliance_assessment
+            ca = self.instance.compliance_assessment
             respondent_folders = get_respondent_filtered_folder_ids(request.user)
-            if (
-                respondent_folders
-                and compliance_assessment.folder_id in respondent_folders
-            ):
-                visible = get_visible_fields(
-                    compliance_assessment.framework,
-                    compliance_assessment,
-                    viewer_role="respondent",
-                )
+            if respondent_folders and ca.folder_id in respondent_folders:
+                overrides = ca.field_visibility or {}
                 data = {
                     k: v
                     for k, v in data.items()
-                    if k not in DEFAULT_FIELD_VISIBILITY or k in visible
+                    if overrides.get(k, "everyone") == "everyone"
                 }
         return super().to_internal_value(data)
 
@@ -3004,11 +2964,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # Assignment-level and field-level guards for respondent users (auditee or third-party)
         request = self.context.get("request")
         if request and self.instance and compliance_assessment:
-            from core.utils import (
-                DEFAULT_FIELD_VISIBILITY,
-                get_respondent_filtered_folder_ids,
-                get_visible_fields,
-            )
+            from core.utils import get_respondent_filtered_folder_ids
 
             respondent_folders = get_respondent_filtered_folder_ids(request.user)
             if (
@@ -3023,17 +2979,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         "Cannot modify: this requirement's assignment has been submitted or closed."
                     )
 
-                # Field-level visibility: silently drop auditor-only fields so that
-                # a full PUT body (which always carries all fields) doesn't fail
-                # because of fields the respondent never intended to change.
-                # The security property is preserved: those fields won't be updated.
-                visible = get_visible_fields(
-                    compliance_assessment.framework,
-                    compliance_assessment,
-                    viewer_role="respondent",
-                )
+                # Silently drop fields the respondent isn't allowed to write —
+                # full PUT bodies always carry every field, so raising here would
+                # turn unrelated edits into 400s. The fields stay unchanged.
+                overrides = compliance_assessment.field_visibility or {}
                 for name in list(attrs.keys()):
-                    if name in DEFAULT_FIELD_VISIBILITY and name not in visible:
+                    if overrides.get(name, "everyone") != "everyone":
                         attrs.pop(name)
 
         # Validate extended_result against result

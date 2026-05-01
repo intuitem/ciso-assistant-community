@@ -8,7 +8,6 @@ from core.models import (
     Framework,
 )
 from core.models import Perimeter, AppliedControl
-from core.utils import DEFAULT_FIELD_VISIBILITY
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
@@ -133,10 +132,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
-                        "field_visibility": {
-                            **DEFAULT_FIELD_VISIBILITY,
-                            **(compliance_assessment.framework.field_visibility or {}),
-                        },
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 },
@@ -229,10 +225,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
-                        "field_visibility": {
-                            **DEFAULT_FIELD_VISIBILITY,
-                            **(compliance_assessment.framework.field_visibility or {}),
-                        },
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 }
@@ -293,10 +286,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
-                        "field_visibility": {
-                            **DEFAULT_FIELD_VISIBILITY,
-                            **(compliance_assessment.framework.field_visibility or {}),
-                        },
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 },
