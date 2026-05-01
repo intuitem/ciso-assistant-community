@@ -5,41 +5,78 @@ EVERYONE_EDIT = {"auditor": "edit", "respondent": "edit"}
 AUDITOR_ONLY = {"auditor": "edit", "respondent": "hidden"}
 HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
 
+# Translate legacy single-string field_visibility values (introduced in
+# migration 0157) to the new per-role pair shape.
+LEGACY_STRING_TO_PAIR = {
+    "everyone": EVERYONE_EDIT,
+    "auditor": AUDITOR_ONLY,
+    "hidden": HIDDEN,
+}
+
+
+def _normalize(value):
+    """Coerce a stored entry to a per-role pair, or return None if uninterpretable."""
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        pair = LEGACY_STRING_TO_PAIR.get(value)
+        return dict(pair) if pair else None
+    return None
+
 
 def booleans_to_field_visibility(apps, schema_editor):
     """Translate legacy boolean toggles into per-role field_visibility entries.
 
     Storage shape: {field_name: {role: 'edit' | 'read' | 'hidden'}}.
-    Existing entries on field_visibility are preserved; only missing keys are filled.
+    Any pre-existing single-string entry (legacy 0157 format) is normalized to
+    the new pair shape. When a legacy boolean toggle is off (e.g. scoring_enabled
+    is False), the corresponding fields are forced to HIDDEN — the boolean was
+    the canonical control, so a stale "everyone" override on field_visibility
+    would have been a no-op anyway.
     """
     CA = apps.get_model("core", "ComplianceAssessment")
     RA = apps.get_model("core", "RequirementAssessment")
     batch = []
     fields = ["field_visibility"]
     for ca in CA.objects.all().iterator():
-        fv = dict(ca.field_visibility or {})
-        before = dict(fv)
+        raw = ca.field_visibility or {}
+        before = dict(raw)
 
+        # Normalize any legacy string entries to per-role pairs; drop unknowns.
+        fv = {}
+        for key, value in raw.items():
+            norm = _normalize(value)
+            if norm is not None:
+                fv[key] = norm
+
+        # Legacy booleans were the canonical control. Off → force HIDDEN.
+        # On → preserve any explicit override; otherwise default to AUDITOR_ONLY,
+        # which matches the historical pre-PR default (`'auditor'`) — i.e. the
+        # field was visible to auditors and hidden from respondents.
         if not ca.scoring_enabled:
-            fv.setdefault("score", dict(HIDDEN))
-            fv.setdefault("is_scored", dict(HIDDEN))
+            fv["score"] = dict(HIDDEN)
+            fv["is_scored"] = dict(HIDDEN)
+        else:
+            fv.setdefault("score", dict(AUDITOR_ONLY))
+            fv.setdefault("is_scored", dict(AUDITOR_ONLY))
+
         if not ca.show_documentation_score:
-            fv.setdefault("documentation_score", dict(HIDDEN))
+            fv["documentation_score"] = dict(HIDDEN)
+        else:
+            fv.setdefault("documentation_score", dict(AUDITOR_ONLY))
 
-        # status and extended_result historically rendered for auditors only;
-        # preserve that by defaulting to AUDITOR_ONLY when enabled, HIDDEN when not.
-        fv.setdefault(
-            "extended_result",
-            dict(AUDITOR_ONLY) if ca.extended_result_enabled else dict(HIDDEN),
-        )
-        fv.setdefault(
-            "status",
-            dict(AUDITOR_ONLY) if ca.progress_status_enabled else dict(HIDDEN),
-        )
+        if not ca.extended_result_enabled:
+            fv["extended_result"] = dict(HIDDEN)
+        else:
+            fv.setdefault("extended_result", dict(AUDITOR_ONLY))
 
-        # respondent_alignment: keep visible only on CAs that already use it.
-        # New default is AUDITOR_ONLY (opt-in); CAs with any non-null alignment
-        # value on a child RequirementAssessment are considered active users.
+        if not ca.progress_status_enabled:
+            fv["status"] = dict(HIDDEN)
+        else:
+            fv.setdefault("status", dict(AUDITOR_ONLY))
+
+        # respondent_alignment has no legacy boolean. Keep visible only on CAs
+        # that actively use it (any RA with a non-null alignment value).
         alignment_in_use = RA.objects.filter(
             compliance_assessment_id=ca.id,
             respondent_alignment__isnull=False,
