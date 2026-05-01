@@ -356,6 +356,51 @@
 	});
 	const answeredCount = $derived(Object.keys(actionByQuestion).length);
 
+	const statusBreakdown = $derived.by(() => {
+		const counts: Record<string, number> = { yes: 0, partial: 0, no: 0, needs_info: 0 };
+		for (const q of questions) {
+			const a = actionByQuestion[q.id];
+			if (!a) continue;
+			const s = a.payload.status || 'needs_info';
+			if (s in counts) counts[s] += 1;
+			else counts['needs_info'] += 1;
+		}
+		const order: Array<'yes' | 'partial' | 'no' | 'needs_info'> = [
+			'yes',
+			'partial',
+			'no',
+			'needs_info'
+		];
+		const labels: Record<string, string> = {
+			yes: 'Yes',
+			partial: 'Partial',
+			no: 'No',
+			needs_info: 'Needs info'
+		};
+		const colors: Record<string, string> = {
+			yes: 'bg-green-500',
+			partial: 'bg-yellow-500',
+			no: 'bg-red-500',
+			needs_info: 'bg-gray-400'
+		};
+		const pillColors: Record<string, string> = {
+			yes: 'bg-green-100 text-green-800',
+			partial: 'bg-yellow-100 text-yellow-800',
+			no: 'bg-red-100 text-red-800',
+			needs_info: 'bg-gray-100 text-gray-700'
+		};
+		return order.map((s) => ({
+			status: s,
+			label: labels[s],
+			color: colors[s],
+			pillColor: pillColors[s],
+			count: counts[s],
+			pct: answeredCount > 0 ? Math.round((counts[s] / answeredCount) * 100) : 0
+		}));
+	});
+
+	const pendingCount = $derived(questions.length - answeredCount);
+
 	const sortedQuestions = $derived.by(() => {
 		// Order by confidence ascending (worst first), then by ord
 		return [...questions].sort((a, b) => {
@@ -731,6 +776,7 @@
 		</div>
 
 		{#if answeredCount > 0}
+			{@render statsBreakdown()}
 			{@render reviewList('Answers drafted so far — populating live')}
 		{/if}
 	{:else if phase === 'review' && agentRun}
@@ -751,30 +797,40 @@
 						{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
 					</div>
 				</div>
-				<div class="flex flex-col items-end gap-1 text-xs">
-					<div class="text-gray-500">Run again with:</div>
-					<div class="flex gap-2">
-						<button
-							type="button"
-							class="btn btn-sm preset-tonal"
-							disabled={startBusy}
-							onclick={() => runAgain('fast')}
-						>
-							<i class="fa-solid fa-bolt mr-1"></i>Fast
-						</button>
-						<button
-							type="button"
-							class="btn btn-sm preset-tonal"
-							disabled={startBusy}
-							onclick={() => runAgain('thorough')}
-						>
-							<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
-						</button>
+				<div class="flex flex-col items-end gap-2 text-xs">
+					<a
+						href="/experimental/questionnaire-autopilot/{run.id}/export"
+						download
+						class="btn btn-sm preset-filled"
+					>
+						<i class="fa-solid fa-file-arrow-down mr-1"></i>Download filled xlsx
+					</a>
+					<div class="flex flex-col items-end gap-1">
+						<div class="text-gray-500">Run again with:</div>
+						<div class="flex gap-2">
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal"
+								disabled={startBusy}
+								onclick={() => runAgain('fast')}
+							>
+								<i class="fa-solid fa-bolt mr-1"></i>Fast
+							</button>
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal"
+								disabled={startBusy}
+								onclick={() => runAgain('thorough')}
+							>
+								<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
+		{@render statsBreakdown()}
 		{@render reviewList('Sorted by confidence ascending — the gnarly ones come first.')}
 	{:else if phase === 'run_ended' && agentRun}
 		<div class="bg-white shadow-sm py-4 px-6 card border-l-4 border-red-500 space-y-3">
@@ -796,25 +852,36 @@
 						Completed {agentRun.completed_steps} of {agentRun.total_steps} questions before stopping.
 					</div>
 				</div>
-				<div class="flex flex-col items-end gap-1 text-xs">
-					<div class="text-gray-500">Run again with:</div>
-					<div class="flex gap-2">
-						<button
-							type="button"
-							class="btn btn-sm preset-tonal"
-							disabled={startBusy}
-							onclick={() => runAgain('fast')}
+				<div class="flex flex-col items-end gap-2 text-xs">
+					{#if answeredCount > 0}
+						<a
+							href="/experimental/questionnaire-autopilot/{run.id}/export"
+							download
+							class="btn btn-sm preset-filled"
 						>
-							<i class="fa-solid fa-bolt mr-1"></i>Fast
-						</button>
-						<button
-							type="button"
-							class="btn btn-sm preset-tonal"
-							disabled={startBusy}
-							onclick={() => runAgain('thorough')}
-						>
-							<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
-						</button>
+							<i class="fa-solid fa-file-arrow-down mr-1"></i>Download partial xlsx
+						</a>
+					{/if}
+					<div class="flex flex-col items-end gap-1">
+						<div class="text-gray-500">Run again with:</div>
+						<div class="flex gap-2">
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal"
+								disabled={startBusy}
+								onclick={() => runAgain('fast')}
+							>
+								<i class="fa-solid fa-bolt mr-1"></i>Fast
+							</button>
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal"
+								disabled={startBusy}
+								onclick={() => runAgain('thorough')}
+							>
+								<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -828,6 +895,7 @@
 		</div>
 
 		{#if answeredCount > 0}
+			{@render statsBreakdown()}
 			{@render reviewList(
 				`${answeredCount} partial answer${answeredCount === 1 ? '' : 's'} drafted before the run stopped.`
 			)}
@@ -902,6 +970,43 @@
 							</details>
 						{/if}
 					{/if}
+				</div>
+			{/each}
+		</div>
+	</div>
+{/snippet}
+
+{#snippet statsBreakdown()}
+	<div class="bg-white shadow-sm py-4 px-6 card space-y-3">
+		<div class="flex items-center justify-between">
+			<div class="font-semibold text-sm">Answer breakdown</div>
+			<div class="text-xs text-gray-500">
+				{answeredCount} answered{pendingCount > 0 ? ` · ${pendingCount} pending` : ''}
+			</div>
+		</div>
+
+		<div class="flex w-full h-3 rounded-full overflow-hidden bg-gray-100">
+			{#each statusBreakdown as item}
+				{#if item.count > 0}
+					<div
+						class={item.color}
+						style="width: {item.pct}%"
+						title="{item.label}: {item.count} ({item.pct}%)"
+					></div>
+				{/if}
+			{/each}
+		</div>
+
+		<div class="grid grid-cols-4 gap-2 text-xs">
+			{#each statusBreakdown as item}
+				<div class="rounded p-2 {item.pillColor}">
+					<div class="font-semibold uppercase tracking-wide text-[10px]">
+						{item.label}
+					</div>
+					<div class="flex items-baseline gap-1 mt-1">
+						<span class="text-lg font-bold leading-none">{item.count}</span>
+						<span class="text-[11px]">({item.pct}%)</span>
+					</div>
 				</div>
 			{/each}
 		</div>

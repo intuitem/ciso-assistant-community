@@ -980,6 +980,166 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
         run.save(update_fields=["column_mapping", "updated_at"])
         return Response({"column_mapping": run.column_mapping})
 
+    @action(detail=True, methods=["get"], url_path="export")
+    def export_filled(self, request, pk=None):
+        """Stream a copy of the original xlsx with response/comment columns
+        filled from the latest non-expired propose_answer AgentActions.
+
+        Walks the original sheet using the same row-skip logic as the extract
+        step, so the answer/comment cells line up exactly with the extracted
+        QuestionnaireQuestions. Original formatting, cover sheet, and any
+        unmapped columns are preserved untouched.
+        """
+        import io
+        import openpyxl
+
+        from django.http import HttpResponse
+
+        from .models import QuestionnaireQuestion, AgentRun, AgentAction
+
+        run = self.get_object()
+        mapping = run.column_mapping or {}
+        if "sheet" not in mapping or "answer_col" not in mapping:
+            return Response(
+                {
+                    "detail": "Mapping incomplete — at least an answer column "
+                    "must be mapped to export."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        questions_by_ord = {
+            q.ord: q
+            for q in QuestionnaireQuestion.objects.filter(questionnaire_run=run)
+        }
+        if not questions_by_ord:
+            return Response(
+                {"detail": "No questions extracted yet."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Latest agent run that has produced answers (any terminal state).
+        agent_run = (
+            AgentRun.objects.filter(
+                target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+                target_object_id=run.id,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if not agent_run:
+            return Response(
+                {"detail": "No agent run found for this questionnaire."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        qq_ct = ContentType.objects.get_for_model(QuestionnaireQuestion)
+        actions_qs = (
+            AgentAction.objects.filter(
+                agent_run=agent_run,
+                kind=AgentAction.Kind.PROPOSE_ANSWER,
+                target_content_type=qq_ct,
+            )
+            .exclude(state=AgentAction.State.EXPIRED)
+            .order_by("target_object_id", "-iteration")
+        )
+
+        # Latest iteration per question
+        action_by_question: dict = {}
+        for a in actions_qs:
+            qid = str(a.target_object_id)
+            if qid not in action_by_question:
+                action_by_question[qid] = a
+
+        STATUS_LABELS = {
+            "yes": "Yes",
+            "partial": "Partial",
+            "no": "No",
+            "needs_info": "Needs info",
+        }
+
+        sheet_meta = next(
+            (
+                s
+                for s in run.parsed_data.get("sheets", [])
+                if s["name"] == mapping["sheet"]
+            ),
+            None,
+        )
+        if not sheet_meta:
+            return Response(
+                {"detail": f"Sheet '{mapping['sheet']}' not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        header_row = sheet_meta["header_row"]
+        header_count = len(sheet_meta["headers"])
+        q_col = mapping["question_col"]
+        a_col = mapping["answer_col"]
+        c_col = mapping.get("comment_col")
+
+        with run.file.open("rb") as fp:
+            content = fp.read()
+        wb = openpyxl.load_workbook(io.BytesIO(content))
+        ws = wb[mapping["sheet"]]
+
+        # Walk the same way extract does, in parallel with the in-memory ord index.
+        ord_idx = 0
+        for excel_row_idx_zero_based, row in enumerate(
+            ws.iter_rows(values_only=True, max_row=ws.max_row)
+        ):
+            if excel_row_idx_zero_based <= header_row:
+                continue
+            cells = list(row[:header_count])
+            if all(c in (None, "") for c in cells):
+                continue
+            text = cells[q_col] if q_col < len(cells) else None
+            if text in (None, ""):
+                ord_idx += 1
+                continue
+            text = str(text).strip()
+            if not text:
+                ord_idx += 1
+                continue
+
+            question = questions_by_ord.get(ord_idx)
+            ord_idx += 1
+            if question is None:
+                continue
+            action = action_by_question.get(str(question.id))
+            if action is None:
+                continue
+
+            payload = action.payload or {}
+            status_key = (payload.get("status") or "needs_info").lower()
+            status_label = STATUS_LABELS.get(status_key, status_key)
+            comment = (payload.get("comment") or "").strip()
+
+            # openpyxl is 1-indexed; column indices in mapping are 0-indexed
+            excel_row = excel_row_idx_zero_based + 1
+            ws.cell(row=excel_row, column=a_col + 1, value=status_label)
+            if c_col is not None and comment:
+                ws.cell(row=excel_row, column=c_col + 1, value=comment)
+
+        out = io.BytesIO()
+        wb.save(out)
+        out.seek(0)
+
+        original_name = run.filename or "questionnaire.xlsx"
+        if original_name.lower().endswith(".xlsx"):
+            stem = original_name[:-5]
+        else:
+            stem = original_name
+        download_name = f"{stem}__prefilled.xlsx"
+
+        response = HttpResponse(
+            out.getvalue(),
+            content_type=(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ),
+        )
+        response["Content-Disposition"] = f'attachment; filename="{download_name}"'
+        return response
+
 
 class QuestionnaireQuestionViewSet(BaseModelViewSet):
     model = QuestionnaireQuestion
