@@ -978,6 +978,13 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
 
         run.column_mapping = mapping
         run.save(update_fields=["column_mapping", "updated_at"])
+
+        # Kick off the value-mapping suggestion in the background. By the
+        # time the user reaches Start prefill / Download, it's usually done.
+        from .tasks import suggest_value_mapping
+
+        suggest_value_mapping(str(run.id))
+
         return Response({"column_mapping": run.column_mapping})
 
     @action(detail=True, methods=["get"], url_path="export")
@@ -1051,11 +1058,31 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
             if qid not in action_by_question:
                 action_by_question[qid] = a
 
-        STATUS_LABELS = {
+        # Honor the customer's vocabulary if we computed one; otherwise fall
+        # back to internal labels for yes/partial/no.
+        #
+        # Two cases where we deliberately leave the answer cell blank:
+        # 1. status == needs_info — never auto-write anything. Mapping it to
+        #    "N/A" / "Not Applicable" is a real semantic mistake (those mean
+        #    the requirement does not apply, not "I don't know"). Reviewer
+        #    fills the cell manually.
+        # 2. The column has a customer dropdown (candidates non-empty) but
+        #    suggest_value_mapping is in fallback state — writing internal
+        #    labels would violate the dropdown.
+        # In both cases the comment cell still fills with the agent's text.
+        DEFAULT_LABELS = {
             "yes": "Yes",
             "partial": "Partial",
             "no": "No",
-            "needs_info": "Needs info",
+        }
+        vm = run.value_mapping or {}
+        vm_source = vm.get("source")
+        vm_candidates = vm.get("candidates") or []
+        fallback_with_dropdown = vm_source == "fallback" and bool(vm_candidates)
+        STATUS_LABELS = {
+            "yes": vm.get("yes") or DEFAULT_LABELS["yes"],
+            "partial": vm.get("partial") or DEFAULT_LABELS["partial"],
+            "no": vm.get("no") or DEFAULT_LABELS["no"],
         }
 
         sheet_meta = next(
@@ -1111,12 +1138,20 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
 
             payload = action.payload or {}
             status_key = (payload.get("status") or "needs_info").lower()
-            status_label = STATUS_LABELS.get(status_key, status_key)
             comment = (payload.get("comment") or "").strip()
-
             # openpyxl is 1-indexed; column indices in mapping are 0-indexed
             excel_row = excel_row_idx_zero_based + 1
-            ws.cell(row=excel_row, column=a_col + 1, value=status_label)
+
+            should_write_answer = (
+                status_key in STATUS_LABELS  # never write needs_info
+                and not fallback_with_dropdown  # never violate the dropdown
+            )
+            if should_write_answer:
+                ws.cell(
+                    row=excel_row,
+                    column=a_col + 1,
+                    value=STATUS_LABELS[status_key],
+                )
             if c_col is not None and comment:
                 ws.cell(row=excel_row, column=c_col + 1, value=comment)
 

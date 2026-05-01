@@ -18,3 +18,14 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	const data = await res.json().catch(() => ({}));
 	return json(data, { status: res.status });
 };
+
+export const DELETE: RequestHandler = async ({ fetch, params }) => {
+	const res = await fetch(`${BASE_API_URL}/chat/questionnaire-runs/${params.id}/`, {
+		method: 'DELETE'
+	});
+	if (res.status === 204) {
+		return new Response(null, { status: 204 });
+	}
+	const data = await res.json().catch(() => ({}));
+	return json(data, { status: res.status });
+};

@@ -233,6 +233,18 @@ class QuestionnaireRun(AbstractBaseModel, FolderMixin):
             "Indices are 0-based positions inside that sheet's headers."
         ),
     )
+    value_mapping = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Value mapping"),
+        help_text=_(
+            "{yes, partial, no, needs_info, source} — maps internal status "
+            "labels onto the customer's vocabulary, plus a 'source' tag "
+            "('data_validation' | 'distinct_values' | 'fallback'). Computed "
+            "asynchronously after column mapping is saved; export uses it "
+            "when present."
+        ),
+    )
 
     class Meta:
         verbose_name = _("Questionnaire run")

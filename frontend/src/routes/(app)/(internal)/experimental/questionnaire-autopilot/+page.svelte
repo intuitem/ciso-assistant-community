@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { pageTitle } from '$lib/utils/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import type { PageData } from './$types';
@@ -25,6 +25,34 @@
 			toast.trigger({ message: form.error });
 		}
 	});
+
+	let deletingId = $state<string | null>(null);
+
+	async function deleteRun(run: { id: string; title: string; filename: string }) {
+		const label = run.title || run.filename || 'this run';
+		if (
+			!confirm(
+				`Delete "${label}"? This removes the questionnaire, its extracted questions, and any agent runs / proposals attached to it.`
+			)
+		) {
+			return;
+		}
+		deletingId = run.id;
+		try {
+			const res = await fetch(`/experimental/questionnaire-autopilot/${run.id}`, {
+				method: 'DELETE'
+			});
+			if (res.status === 204 || res.ok) {
+				toast.trigger({ message: `Deleted "${label}".` });
+				await invalidateAll();
+			} else {
+				const data = await res.json().catch(() => ({}));
+				toast.trigger({ message: data.detail || 'Failed to delete the run.' });
+			}
+		} finally {
+			deletingId = null;
+		}
+	}
 
 	const statusBadge = (status: string) => {
 		switch (status) {
@@ -144,25 +172,40 @@
 		{:else}
 			<div class="space-y-2">
 				{#each data.runs as run}
-					<a
-						href="/experimental/questionnaire-autopilot/{run.id}"
-						class="block p-3 bg-white rounded shadow-sm hover:shadow-md transition-shadow"
+					<div
+						class="group relative p-3 bg-white rounded shadow-sm hover:shadow-md transition-shadow"
 					>
-						<div class="flex justify-between items-start gap-2">
-							<div class="text-sm font-medium truncate">
-								{run.title || run.filename}
+						<a href="/experimental/questionnaire-autopilot/{run.id}" class="block pr-7">
+							<div class="flex justify-between items-start gap-2">
+								<div class="text-sm font-medium truncate">
+									{run.title || run.filename}
+								</div>
+								<span class="text-xs px-2 py-0.5 rounded {statusBadge(run.status)}">
+									{run.status}
+								</span>
 							</div>
-							<span class="text-xs px-2 py-0.5 rounded {statusBadge(run.status)}">
-								{run.status}
-							</span>
-						</div>
-						<div class="text-xs text-gray-500 mt-1 truncate">
-							{run.folder?.str || run.folder?.name || '—'}
-						</div>
-						<div class="text-xs text-gray-400">
-							{new Date(run.created_at).toLocaleString()}
-						</div>
-					</a>
+							<div class="text-xs text-gray-500 mt-1 truncate">
+								{run.folder?.str || run.folder?.name || '—'}
+							</div>
+							<div class="text-xs text-gray-400">
+								{new Date(run.created_at).toLocaleString()}
+							</div>
+						</a>
+						<button
+							type="button"
+							class="absolute top-2 right-2 text-gray-300 hover:text-red-600 transition-colors disabled:opacity-50"
+							title="Delete this run"
+							aria-label="Delete this run"
+							disabled={deletingId === run.id}
+							onclick={() => deleteRun(run)}
+						>
+							{#if deletingId === run.id}
+								<i class="fa-solid fa-spinner fa-spin"></i>
+							{:else}
+								<i class="fa-solid fa-trash text-xs"></i>
+							{/if}
+						</button>
+					</div>
 				{/each}
 			</div>
 		{/if}

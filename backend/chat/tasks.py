@@ -11,6 +11,196 @@ from huey.contrib.djhuey import db_task
 logger = structlog.get_logger(__name__)
 
 
+VALUE_MAPPING_PROMPT = """A customer security questionnaire uses a controlled \
+vocabulary in its answer column: {candidates}.
+
+Map each of these three internal status labels to whichever customer value \
+best expresses the same idea:
+- "yes": we fully meet the requirement
+- "partial": we partially meet the requirement
+- "no": we do not meet the requirement
+
+IMPORTANT: do NOT include "needs_info" in your mapping. When the agent cannot \
+answer, the cell will be left blank for human review — never auto-mapped to \
+"N/A" or "Not Applicable" (which is a legitimate compliance answer meaning \
+the requirement does not apply, not "I don't know").
+
+Each mapped value MUST be exactly one of the strings from the customer list \
+(verbatim). If no customer value reasonably expresses one of the labels, \
+reuse the closest one.
+
+Reply with a single JSON object, no prose:
+{{"yes": "...", "partial": "...", "no": "..."}}"""
+
+
+@db_task()
+def suggest_value_mapping(run_id: str):
+    """Use the LLM to map internal statuses onto the customer's vocabulary.
+
+    Reads the answer column's detected candidates, asks the LLM, validates
+    that each suggestion is one of the candidates, and stores the mapping on
+    QuestionnaireRun.value_mapping. If no candidates were detected, marks
+    the mapping as 'fallback' so the export uses internal labels.
+    """
+    import time
+
+    from .models import QuestionnaireRun
+    from .providers import get_llm
+
+    try:
+        run = QuestionnaireRun.objects.get(id=run_id)
+    except QuestionnaireRun.DoesNotExist:
+        logger.error("QuestionnaireRun %s not found", run_id)
+        return
+
+    mapping = run.column_mapping or {}
+    answer_col = mapping.get("answer_col")
+    sheet_name = mapping.get("sheet")
+    if answer_col is None or not sheet_name:
+        logger.info(
+            "suggest_value_mapping skipped: no answer column for run %s", run_id
+        )
+        return
+
+    sheet = next(
+        (s for s in run.parsed_data.get("sheets", []) if s["name"] == sheet_name),
+        None,
+    )
+    if not sheet:
+        return
+
+    column_candidates = sheet.get("column_candidates") or {}
+    # JSONField round-trip turns int keys into strings; tolerate both
+    candidate_entry = column_candidates.get(answer_col) or column_candidates.get(
+        str(answer_col)
+    )
+    if not candidate_entry or not candidate_entry.get("values"):
+        # No customer vocabulary detected — fall back to internal labels for
+        # yes/partial/no. needs_info always exports as a blank cell, so we
+        # don't carry a label for it.
+        run.value_mapping = {
+            "yes": "Yes",
+            "partial": "Partial",
+            "no": "No",
+            "candidates": [],
+            "source": "fallback",
+        }
+        run.save(update_fields=["value_mapping", "updated_at"])
+        logger.info(
+            "No customer vocabulary detected for run %s — using fallback", run_id
+        )
+        return
+
+    candidates = candidate_entry["values"]
+    source = candidate_entry.get("source", "distinct_values")
+
+    # Try the LLM up to MAX_ATTEMPTS times before giving up. A single
+    # transient failure shouldn't lock us into fallback for the run.
+    MAX_ATTEMPTS = 3
+    BACKOFF_SECONDS = (0, 2, 5)
+    candidate_set = {c.lower(): c for c in candidates}
+
+    def pick(parsed: dict, label: str) -> str | None:
+        v = parsed.get(label)
+        if not isinstance(v, str):
+            return None
+        if v in candidates:
+            return v
+        return candidate_set.get(v.lower())
+
+    last_raw = ""
+    for attempt in range(MAX_ATTEMPTS):
+        if attempt > 0:
+            time.sleep(BACKOFF_SECONDS[attempt])
+
+        try:
+            llm = get_llm()
+        except Exception as e:
+            logger.warning(
+                "LLM unavailable for value mapping (attempt %d/%d): %s",
+                attempt + 1,
+                MAX_ATTEMPTS,
+                e,
+            )
+            continue
+
+        prompt = VALUE_MAPPING_PROMPT.format(candidates=json_dumps(candidates))
+        try:
+            raw = llm.generate(prompt=prompt, context="", history=[])
+        except Exception as e:
+            logger.warning(
+                "LLM call failed for value mapping (attempt %d/%d): %s",
+                attempt + 1,
+                MAX_ATTEMPTS,
+                e,
+            )
+            continue
+
+        last_raw = raw or ""
+        parsed = _parse_json_response(raw) or {}
+        yes = pick(parsed, "yes")
+        partial = pick(parsed, "partial")
+        no = pick(parsed, "no")
+        if all([yes, partial, no]):
+            # needs_info is intentionally not mapped — export leaves those
+            # cells blank rather than risk writing "N/A" / "Not Applicable",
+            # which is a legitimate compliance answer with a different meaning.
+            run.value_mapping = {
+                "yes": yes,
+                "partial": partial,
+                "no": no,
+                "candidates": candidates,
+                "source": source,
+            }
+            run.save(update_fields=["value_mapping", "updated_at"])
+            logger.info(
+                "Value mapping set for run %s (source=%s, attempt %d/%d)",
+                run_id,
+                source,
+                attempt + 1,
+                MAX_ATTEMPTS,
+            )
+            return
+        logger.info(
+            "LLM produced incomplete mapping for run %s "
+            "(attempt %d/%d, raw=%r) — retrying",
+            run_id,
+            attempt + 1,
+            MAX_ATTEMPTS,
+            (raw or "")[:200],
+        )
+
+    # All attempts exhausted: keep the candidates so the export knows the
+    # column has a controlled vocabulary it must respect.
+    run.value_mapping = {
+        "yes": "Yes",
+        "partial": "Partial",
+        "no": "No",
+        "candidates": candidates,
+        "source": "fallback",
+    }
+    run.save(update_fields=["value_mapping", "updated_at"])
+    logger.warning(
+        "Value mapping fallback for run %s after %d attempts (last raw=%r)",
+        run_id,
+        MAX_ATTEMPTS,
+        last_raw[:200],
+    )
+    logger.info(
+        "Value mapping set for run %s (source=%s): %s",
+        run_id,
+        source,
+        run.value_mapping,
+    )
+
+
+def json_dumps(obj):
+    """Stable JSON for prompt embedding."""
+    import json
+
+    return json.dumps(obj, ensure_ascii=False)
+
+
 def extract_questions_from_sheet(run, sheet: dict, mapping: dict) -> int:
     """Materialize QuestionnaireQuestion rows from a sheet preview + mapping.
 
@@ -104,13 +294,18 @@ def parse_questionnaire(run_id: str):
         with run.file.open("rb") as fp:
             content = fp.read()
 
-        wb = openpyxl.load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+        # Not read_only: we need access to data_validations (Excel dropdowns)
+        # which are only exposed on a fully-loaded workbook.
+        wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
 
         sheets = []
         for sheet_name in wb.sheetnames:
             ws = wb[sheet_name]
             header_row_idx, headers = _detect_headers(ws)
             row_count, rows_preview = _collect_rows(ws, header_row_idx, len(headers))
+            column_candidates = _detect_all_column_candidates(
+                ws, headers, header_row_idx
+            )
             sheets.append(
                 {
                     "name": sheet_name,
@@ -118,6 +313,7 @@ def parse_questionnaire(run_id: str):
                     "headers": headers,
                     "row_count": row_count,
                     "rows_preview": rows_preview,
+                    "column_candidates": column_candidates,
                 }
             )
 
@@ -173,6 +369,126 @@ def _collect_rows(ws, header_row_idx: int, header_count: int, preview_size: int 
         if len(preview) < preview_size:
             preview.append(["" if c is None else str(c) for c in cells])
     return total, preview
+
+
+def _detect_all_column_candidates(ws, headers: list, header_row_idx: int) -> dict:
+    """Per column, find the controlled vocabulary the customer expects.
+
+    Returns {col_idx: {"values": [...], "source": "data_validation"|"distinct_values"}}.
+    Columns with no controlled vocabulary (free text, single value, too many
+    distinct values) are simply absent from the dict — that's the signal to
+    fall back to internal labels later.
+    """
+    out: dict = {}
+    if not headers:
+        return out
+    for col_idx in range(len(headers)):
+        candidates = _detect_column_candidates(ws, col_idx, header_row_idx)
+        if candidates:
+            out[col_idx] = candidates
+    return out
+
+
+def _detect_column_candidates(
+    ws, col_idx: int, header_row_idx: int, max_distinct: int = 20
+) -> dict | None:
+    """Return {"values": [...], "source": "..."} for a single column, or None."""
+    import openpyxl.utils
+
+    target_col_letter = openpyxl.utils.get_column_letter(col_idx + 1)
+
+    # 1. Excel data validation list constraint — the customer's authored vocab.
+    try:
+        for dv in ws.data_validations.dataValidation:
+            if getattr(dv, "type", None) != "list":
+                continue
+            # Probe two cells inside this column to see if the validation applies
+            probe_cells = [
+                f"{target_col_letter}{header_row_idx + 2}",
+                f"{target_col_letter}{header_row_idx + 3}",
+            ]
+            sqref = getattr(dv, "sqref", None)
+            try:
+                covers = any(c in sqref for c in probe_cells) if sqref else False
+            except Exception:
+                covers = False
+            if not covers:
+                continue
+            values = _parse_data_validation_list(ws, dv.formula1)
+            if values:
+                return {"values": values, "source": "data_validation"}
+    except Exception as e:
+        logger.debug("data_validation_check_failed col=%s: %s", col_idx, e)
+
+    # 2. Distinct existing values in the column.
+    distinct: list[str] = []
+    seen: set[str] = set()
+    for row_idx, row in enumerate(ws.iter_rows(values_only=True)):
+        if row_idx <= header_row_idx:
+            continue
+        if col_idx >= len(row):
+            continue
+        cell = row[col_idx]
+        if cell in (None, ""):
+            continue
+        s = str(cell).strip()
+        if not s:
+            continue
+        if s in seen:
+            continue
+        seen.add(s)
+        distinct.append(s)
+        if len(distinct) > max_distinct:
+            return None  # likely free text — not a controlled vocab
+    if 2 <= len(distinct) <= max_distinct:
+        return {"values": distinct, "source": "distinct_values"}
+    return None
+
+
+def _parse_data_validation_list(ws, formula1) -> list:
+    """Best-effort parsing of the formula1 of a list-type data validation.
+
+    Inline:    '"Yes,No,Partial"' → ['Yes', 'No', 'Partial']
+    Range ref: 'Sheet1!$A$1:$A$5' → values from that range
+    """
+    if formula1 is None:
+        return []
+    s = str(formula1).strip()
+    if not s:
+        return []
+    # Inline quoted list
+    if s.startswith('"') and s.endswith('"'):
+        inner = s[1:-1]
+        return [v.strip() for v in inner.split(",") if v.strip()]
+    # Range reference, optionally cross-sheet
+    try:
+        if "!" in s:
+            sheet_name, range_str = s.split("!", 1)
+            sheet_name = sheet_name.strip().strip("'")
+            target_ws = ws.parent[sheet_name]
+        else:
+            target_ws = ws
+            range_str = s
+        range_str = range_str.replace("$", "")
+        cells = target_ws[range_str]
+        values: list[str] = []
+        # cells can be a single cell, a tuple (1D range), or tuple-of-tuples (2D)
+        if not isinstance(cells, tuple):
+            cells = (cells,)
+        for row in cells:
+            if isinstance(row, tuple):
+                for c in row:
+                    v = getattr(c, "value", None)
+                    if v not in (None, ""):
+                        values.append(str(v).strip())
+            else:
+                v = getattr(row, "value", None)
+                if v not in (None, ""):
+                    values.append(str(v).strip())
+        return values
+    except Exception as e:
+        logger.debug("data_validation_range_parse_failed formula=%s: %s", s, e)
+        return []
 
 
 ANSWER_PROMPT = """You are answering a customer security questionnaire on \

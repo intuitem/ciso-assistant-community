@@ -28,6 +28,13 @@
 			comment_col?: number;
 			section_col?: number;
 		};
+		value_mapping?: {
+			yes?: string;
+			partial?: string;
+			no?: string;
+			candidates?: string[];
+			source?: 'data_validation' | 'distinct_values' | 'fallback';
+		};
 		created_at: string;
 	}
 
@@ -421,10 +428,13 @@
 		return map[status] || 'bg-gray-100 text-gray-700';
 	}
 
+	// Confidence uses a mono-indigo intensity scale so it visually reads as a
+	// meter ("how sure the agent is"), distinct from the status pills' green /
+	// yellow / red / gray which encode the verdict ("what the answer is").
 	function confidenceBar(c: number | null) {
-		if (c == null) return { width: '0%', color: 'bg-gray-300' };
+		if (c == null) return { width: '0%', color: 'bg-gray-200' };
 		const pct = Math.max(0, Math.min(1, c)) * 100;
-		const color = c >= 0.8 ? 'bg-green-500' : c >= 0.5 ? 'bg-yellow-500' : 'bg-red-500';
+		const color = c >= 0.8 ? 'bg-indigo-600' : c >= 0.5 ? 'bg-indigo-400' : 'bg-indigo-200';
 		return { width: `${pct.toFixed(0)}%`, color };
 	}
 </script>
@@ -805,6 +815,7 @@
 					>
 						<i class="fa-solid fa-file-arrow-down mr-1"></i>Download filled xlsx
 					</a>
+					{@render valueMappingHint()}
 					<div class="flex flex-col items-end gap-1">
 						<div class="text-gray-500">Run again with:</div>
 						<div class="flex gap-2">
@@ -861,6 +872,7 @@
 						>
 							<i class="fa-solid fa-file-arrow-down mr-1"></i>Download partial xlsx
 						</a>
+						{@render valueMappingHint()}
 					{/if}
 					<div class="flex flex-col items-end gap-1">
 						<div class="text-gray-500">Run again with:</div>
@@ -1011,4 +1023,41 @@
 			{/each}
 		</div>
 	</div>
+{/snippet}
+
+{#snippet valueMappingHint()}
+	{#if run.value_mapping && run.value_mapping.source && run.value_mapping.source !== 'fallback'}
+		<div
+			class="text-[11px] text-gray-500 max-w-[280px] text-right leading-snug"
+			title="Yes → {run.value_mapping.yes} · Partial → {run.value_mapping.partial} · No → {run
+				.value_mapping.no} · Needs info → blank for review"
+		>
+			<i class="fa-solid fa-language mr-1"></i>
+			{#if run.value_mapping.source === 'data_validation'}
+				Mapped to customer dropdown:
+			{:else}
+				Mapped to customer values:
+			{/if}
+			<span class="font-mono">{run.value_mapping.yes}</span> /
+			<span class="font-mono">{run.value_mapping.partial}</span> /
+			<span class="font-mono">{run.value_mapping.no}</span>
+			<div class="text-[10px] text-gray-400 mt-0.5">
+				Needs info → cell left blank for manual review.
+			</div>
+		</div>
+	{:else if run.value_mapping && run.value_mapping.source === 'fallback' && run.value_mapping.candidates && run.value_mapping.candidates.length > 0}
+		<div
+			class="text-[11px] text-amber-600 max-w-[280px] text-right leading-snug"
+			title="Customer expects: {(run.value_mapping.candidates ?? []).join(' / ')}"
+		>
+			<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+			Customer dropdown detected but mapping unavailable — answer cells will be left blank for manual
+			review.
+		</div>
+	{:else if run.value_mapping && run.value_mapping.source === 'fallback'}
+		<div class="text-[11px] text-gray-400 max-w-[280px] text-right leading-snug">
+			<i class="fa-solid fa-language mr-1"></i>Using internal labels (no customer vocabulary
+			detected). Needs info cells are left blank.
+		</div>
+	{/if}
 {/snippet}
