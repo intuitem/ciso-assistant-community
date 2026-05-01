@@ -2926,13 +2926,15 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                         **(fw_data.get("field_visibility") or {}),
                     }
 
-            # Strip "hidden" fields for everyone; "auditor" fields are readable by
-            # respondents (so the form can round-trip them) but not writable
-            # (enforced by RequirementAssessmentWriteSerializer.validate).
+            # Strip fields that the viewer is not allowed to read.
+            # Respondents may not see "auditor"-visibility fields; everyone
+            # is denied "hidden" fields.
             for field_name in list(data.keys()):
                 if field_name in DEFAULT_FIELD_VISIBILITY:
                     vis = resolve_field_visibility(framework, ca, field_name)
                     if vis == "hidden":
+                        data.pop(field_name, None)
+                    elif vis == "auditor" and viewer_role == "respondent":
                         data.pop(field_name, None)
 
         return data

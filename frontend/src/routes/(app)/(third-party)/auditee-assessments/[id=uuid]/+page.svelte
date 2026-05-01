@@ -64,6 +64,7 @@
 	const fieldVis = $derived(getFieldVisibility(fw, complianceAssessment, viewerRole));
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
@@ -96,6 +97,7 @@
 
 	const canEditResult = $derived(isFieldEditable('result'));
 	const canEditScore = $derived(isFieldEditable('score'));
+	const canEditDocumentationScore = $derived(isFieldEditable('documentation_score'));
 	const canEditObservation = $derived(isFieldEditable('observation'));
 	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
 	const canEditEvidences = $derived(isFieldEditable('evidences'));
@@ -1068,7 +1070,7 @@
 												</div>
 											{/snippet}
 										</Score>
-										{#if complianceAssessment.show_documentation_score}
+										{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 											<Score
 												form={docScoreForms[requirementAssessment.id]}
 												min_score={complianceAssessment.min_score}
@@ -1082,7 +1084,7 @@
 													requirementAssessment.documentation_score = newScore;
 													updateScore(requirementAssessment);
 												}}
-												disabled={!canEditScore || !requirementAssessment.is_scored}
+												disabled={!canEditDocumentationScore || !requirementAssessment.is_scored}
 											/>
 										{/if}
 									{/if}
