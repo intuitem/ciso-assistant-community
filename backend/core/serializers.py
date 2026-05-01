@@ -2079,6 +2079,16 @@ class FrameworkReadSerializer(ReferentialSerializer):
             return sd["scale"]
         return sd
 
+    def to_representation(self, instance):
+        from core.utils import DEFAULT_FIELD_VISIBILITY
+
+        data = super().to_representation(instance)
+        data["field_visibility"] = {
+            **DEFAULT_FIELD_VISIBILITY,
+            **(data.get("field_visibility") or {}),
+        }
+        return data
+
     class Meta:
         model = Framework
         exclude = ["translations", "editing_draft", "editing_history"]
@@ -2902,27 +2912,27 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         if framework and ca:
             from core.utils import (
                 DEFAULT_FIELD_VISIBILITY,
-                get_visible_fields,
                 resolve_field_visibility,
             )
 
-            if viewer_role == "auditor":
-                # Auditors see everything except "hidden" fields
-                for field_name in list(data.keys()):
-                    if field_name in DEFAULT_FIELD_VISIBILITY:
-                        vis = resolve_field_visibility(framework, ca, field_name)
-                        if vis == "hidden":
-                            data.pop(field_name, None)
-            else:
-                # Respondents only see "everyone" fields
-                visible = get_visible_fields(framework, ca, viewer_role="respondent")
-                # Only strip fields that are in DEFAULT_FIELD_VISIBILITY
-                # Don't strip structural fields like 'id', 'requirement', 'compliance_assessment'
-                for field_name in list(data.keys()):
-                    if (
-                        field_name in DEFAULT_FIELD_VISIBILITY
-                        and field_name not in visible
-                    ):
+            # Enrich nested framework.field_visibility so the frontend always
+            # receives the full configuration rather than a sparse delta.
+            ca_data = data.get("compliance_assessment")
+            if isinstance(ca_data, dict):
+                fw_data = ca_data.get("framework")
+                if isinstance(fw_data, dict):
+                    fw_data["field_visibility"] = {
+                        **DEFAULT_FIELD_VISIBILITY,
+                        **(fw_data.get("field_visibility") or {}),
+                    }
+
+            # Strip "hidden" fields for everyone; "auditor" fields are readable by
+            # respondents (so the form can round-trip them) but not writable
+            # (enforced by RequirementAssessmentWriteSerializer.validate).
+            for field_name in list(data.keys()):
+                if field_name in DEFAULT_FIELD_VISIBILITY:
+                    vis = resolve_field_visibility(framework, ca, field_name)
+                    if vis == "hidden":
                         data.pop(field_name, None)
 
         return data
@@ -2935,6 +2945,36 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     requirement = serializers.PrimaryKeyRelatedField(read_only=True)
     answers = serializers.JSONField(required=False, write_only=True)
+
+    def to_internal_value(self, data):
+        # Strip auditor-only fields before DRF validates individual field choices,
+        # so an invalid placeholder value (e.g. from a disabled select) never
+        # causes a 400. The actual security enforcement is in validate().
+        request = self.context.get("request")
+        if request and self.instance:
+            from core.utils import (
+                DEFAULT_FIELD_VISIBILITY,
+                get_respondent_filtered_folder_ids,
+                get_visible_fields,
+            )
+
+            compliance_assessment = self.instance.compliance_assessment
+            respondent_folders = get_respondent_filtered_folder_ids(request.user)
+            if (
+                respondent_folders
+                and compliance_assessment.folder_id in respondent_folders
+            ):
+                visible = get_visible_fields(
+                    compliance_assessment.framework,
+                    compliance_assessment,
+                    viewer_role="respondent",
+                )
+                data = {
+                    k: v
+                    for k, v in data.items()
+                    if k not in DEFAULT_FIELD_VISIBILITY or k in visible
+                }
+        return super().to_internal_value(data)
 
     def validate_answers(self, value):
         if value is not None and not isinstance(value, dict):
@@ -2981,24 +3021,18 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         "Cannot modify: this requirement's assignment has been submitted or closed."
                     )
 
-                # Field-level visibility: respondents can only write "everyone"-visible fields
+                # Field-level visibility: silently drop auditor-only fields so that
+                # a full PUT body (which always carries all fields) doesn't fail
+                # because of fields the respondent never intended to change.
+                # The security property is preserved: those fields won't be updated.
                 visible = get_visible_fields(
                     compliance_assessment.framework,
                     compliance_assessment,
                     viewer_role="respondent",
                 )
-                forbidden = [
-                    name
-                    for name in attrs.keys()
-                    if name in DEFAULT_FIELD_VISIBILITY and name not in visible
-                ]
-                if forbidden:
-                    raise serializers.ValidationError(
-                        {
-                            name: "This field is not editable by respondents."
-                            for name in forbidden
-                        }
-                    )
+                for name in list(attrs.keys()):
+                    if name in DEFAULT_FIELD_VISIBILITY and name not in visible:
+                        attrs.pop(name)
 
         # Validate extended_result against result
         extended_result = attrs.get("extended_result")

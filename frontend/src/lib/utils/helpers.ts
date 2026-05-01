@@ -339,22 +339,9 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	return { score: totalScore, result };
 }
 
-export const DEFAULT_FIELD_VISIBILITY: Record<string, string> = {
-	result: 'auditor',
-	status: 'auditor',
-	score: 'auditor',
-	is_scored: 'auditor',
-	documentation_score: 'auditor',
-	observation: 'everyone',
-	answers: 'everyone',
-	evidences: 'everyone',
-	applied_controls: 'auditor',
-	security_exceptions: 'auditor',
-	respondent_alignment: 'everyone'
-};
-
 /**
- * Resolve effective visibility for a field using CA override > Framework override > default.
+ * Resolve effective visibility for a field.
+ * Priority: CA override > framework (always carries the full config) > 'auditor' safety fallback.
  * Returns 'everyone', 'auditor', or 'hidden'.
  */
 export function resolveFieldVisibility(
@@ -364,9 +351,7 @@ export function resolveFieldVisibility(
 ): string {
 	const caVis = complianceAssessment?.field_visibility?.[fieldName];
 	if (caVis) return caVis;
-	const fwVis = framework?.field_visibility?.[fieldName];
-	if (fwVis) return fwVis;
-	return DEFAULT_FIELD_VISIBILITY[fieldName] ?? 'auditor';
+	return framework?.field_visibility?.[fieldName] ?? 'auditor';
 }
 
 /**

@@ -1135,15 +1135,15 @@ def get_auditee_filtered_folder_ids(user) -> set:
 # --- Field Visibility ---
 
 DEFAULT_FIELD_VISIBILITY = {
-    "result": "auditor",
+    "result": "everyone",
     "status": "auditor",
-    "score": "auditor",
-    "is_scored": "auditor",
+    "score": "everyone",
+    "is_scored": "everyone",
     "documentation_score": "auditor",
     "observation": "everyone",
     "answers": "everyone",
     "evidences": "everyone",
-    "applied_controls": "auditor",
+    "applied_controls": "everyone",
     "security_exceptions": "auditor",
     "respondent_alignment": "everyone",
 }

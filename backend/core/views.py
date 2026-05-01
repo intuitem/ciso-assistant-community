@@ -8633,6 +8633,8 @@ class FrameworkViewSet(BaseModelViewSet):
         if framework.translations and isinstance(framework.translations, dict):
             available_languages.update(framework.translations.keys())
 
+        from core.utils import DEFAULT_FIELD_VISIBILITY
+
         draft = {
             "framework_meta": {
                 "name": framework.name,
@@ -8645,7 +8647,10 @@ class FrameworkViewSet(BaseModelViewSet):
                 "scores_definition": framework.scores_definition,
                 "implementation_groups_definition": framework.implementation_groups_definition,
                 "outcomes_definition": framework.outcomes_definition,
-                "field_visibility": framework.field_visibility or {},
+                "field_visibility": {
+                    **DEFAULT_FIELD_VISIBILITY,
+                    **(framework.field_visibility or {}),
+                },
                 "urn_namespace": framework.urn_namespace or "custom",
             },
             "nodes": nodes,

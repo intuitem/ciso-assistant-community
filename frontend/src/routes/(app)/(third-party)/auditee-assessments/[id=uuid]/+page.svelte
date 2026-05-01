@@ -473,16 +473,13 @@
 		});
 	});
 
-	let accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
+	let accordionItems: Record<string, string[]> = $state(
 		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce(
 			(acc, requirementAssessment) => {
-				return {
-					...acc,
-					[requirementAssessment.id]: ['']
-				};
+				return { ...acc, [requirementAssessment.id]: [] };
 			},
-			{} as Record<string, ['' | 'observation' | 'evidence']>
+			{} as Record<string, string[]>
 		)
 	);
 
@@ -1093,6 +1090,7 @@
 							{/if}
 
 							<Accordion
+								multiple
 								value={accordionItems[requirementAssessment.id]}
 								onValueChange={(e) => (accordionItems[requirementAssessment.id] = e.value)}
 							>
@@ -1225,40 +1223,23 @@
 										</Accordion.ItemContent>
 									</Accordion.Item>
 								{/if}
+								</Accordion>
 
-								<!-- Observation -->
+								<!-- Observation (always visible, never collapsible) -->
 								{#if showObservation}
-									<Accordion.Item value="observation">
-										<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-											<p class="flex flex-1 text-left">{m.observation()}</p>
-
-											<Accordion.ItemIndicator
-												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-												><svg
-													xmlns="http://www.w3.org/2000/svg"
-													width="14px"
-													height="14px"
-													viewBox="0 0 448 512"
-													><path
-														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-													/></svg
-												></Accordion.ItemIndicator
-											>
-										</Accordion.ItemTrigger>
-										<Accordion.ItemContent>
-											<TableMarkdownField
-												bind:value={requirementAssessment.observation}
-												disabled={!canEditObservation}
-												onSave={async (newValue) => {
-													await update(requirementAssessment, 'observation');
-													requirementAssessment.observationBuffer = newValue;
-												}}
-											/>
-										</Accordion.ItemContent>
-									</Accordion.Item>
+									<div class="flex flex-col w-full space-y-1 pt-2">
+										<p class="font-medium text-sm">{m.observation()}</p>
+										<TableMarkdownField
+											bind:value={requirementAssessment.observation}
+											disabled={!canEditObservation}
+											onSave={async (newValue) => {
+												await update(requirementAssessment, 'observation');
+												requirementAssessment.observationBuffer = newValue;
+											}}
+										/>
+									</div>
 								{/if}
-							</Accordion>
-						</form>
+							</form>
 					{/key}
 				{/if}
 				{#if page.data?.featureflags?.comments}

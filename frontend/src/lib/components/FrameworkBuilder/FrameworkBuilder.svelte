@@ -17,7 +17,6 @@
 		createCopyHandler,
 		createHandleGatedDragHandlers
 	} from './builder-utils.svelte';
-	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
@@ -61,20 +60,13 @@
 	};
 
 	function getFieldVisibility(field: string): string {
-		return (
-			$frameworkStore.field_visibility?.[field] ?? DEFAULT_FIELD_VISIBILITY[field] ?? 'auditor'
-		);
+		return $frameworkStore.field_visibility?.[field] ?? 'auditor';
 	}
 
 	function setFieldVisibility(field: string, value: string) {
-		const current = { ...$frameworkStore.field_visibility };
-		// If the value matches the code default, remove the override to keep it clean
-		if (value === (DEFAULT_FIELD_VISIBILITY[field] ?? 'auditor')) {
-			delete current[field];
-		} else {
-			current[field] = value;
-		}
-		builder.updateFramework({ field_visibility: current });
+		builder.updateFramework({
+			field_visibility: { ...$frameworkStore.field_visibility, [field]: value }
+		});
 	}
 
 	interface Props {
