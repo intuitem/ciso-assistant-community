@@ -52,6 +52,7 @@ Key Notes for Developers
 
 Run:
     python anssi_ad_framework_builder.py
+    python anssi_ad_framework_builder.py --keep-temp
 """
 
 
@@ -60,7 +61,10 @@ import os
 import re
 import sys
 import json
+import argparse
+from datetime import date
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 from openpyxl import load_workbook
@@ -90,6 +94,9 @@ EXCEL_FILE_NAME = "anssi-points-de-controle-active-directory.xlsx"
 
 JSON_FR = f"checklist_markdown{'_' + FILES_SUFFIX_FR}.json"
 JSON_EN = f"checklist_markdown{'_' + FILES_SUFFIX_EN}.json"
+
+MARKDOWN_FR = f"checklist_{FILES_SUFFIX_FR}.md"
+MARKDOWN_EN = f"checklist_{FILES_SUFFIX_EN}.md"
 
 # Metadata
 fw_urn = "anssi-points-de-controle-active-directory"
@@ -183,6 +190,10 @@ def clean_level_bullet(line: str) -> str:
     # Remove leading <span ...>X</span> (the colored level number)
     s = re.sub(r'^<span[^>]*>[^<]*</span>\s*', "", s)
 
+    # Fallback for cases where the scraper could not inline CSS colors and the
+    # level is rendered as plain text.
+    s = re.sub(r"^\d+\s+", "", s)
+
     # Remove any remaining HTML tags (if any)
     s = re.sub(r"<[^>]+>", "", s)
 
@@ -238,9 +249,72 @@ def strip_first_markdown_block(md: str) -> str:
     return md.strip()
 
 
+def month_year_label(locale: Literal["fr", "en"], today: date | None = None) -> str:
+    """
+    Return a localized month/year label such as "Avril 2026" or "April 2026".
+    """
+    current_date = today or date.today()
+
+    months = {
+        "fr": [
+            "Janvier",
+            "Février",
+            "Mars",
+            "Avril",
+            "Mai",
+            "Juin",
+            "Juillet",
+            "Août",
+            "Septembre",
+            "Octobre",
+            "Novembre",
+            "Décembre",
+        ],
+        "en": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ],
+    }
+
+    month_names = months.get(locale)
+    if month_names is None:
+        raise ValueError(f"Unsupported locale for month/year label: {locale}")
+
+    return f"{month_names[current_date.month - 1]} {current_date.year}"
+
+
 # -------------------------------------------------------------------
 # Excel helpers
 # -------------------------------------------------------------------
+
+def legacy_support_for_reversible_password_ref_id(row: dict[str, str]) -> dict[str, str]:
+    """
+    Preserve the historical URN for the renamed reversible password control.
+    """
+    if row.get("ref_id") == "vuln_reversible_password_priv_uac-l3":
+        row["node_id"] = "vuln_reversible_password-l3"
+
+    return row
+
+
+def legacy_support(row: dict[str, str]) -> dict[str, str]:
+    """
+    Apply exceptional backward-compatibility mappings needed after ANSSI updates.
+    """
+    row = legacy_support_for_reversible_password_ref_id(row)
+
+    return row
+
 
 def write_framework_content_to_excel(df: pd.DataFrame, excel_file_name: str) -> None:
     """
@@ -302,7 +376,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
     columns = [
         "assessable",
         "depth",
-        "urn_id",
+        "node_id",
         "ref_id",
         "name",
         "description",
@@ -335,7 +409,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
         row = {
             "assessable": str(replace_non_breaking_space(assessable)) if assessable is not None else "",
             "depth": str(depth) if depth is not None else "",
-            "urn_id": str(urn_id) if urn_id is not None else "",
+            "node_id": str(urn_id) if urn_id is not None else "",
             "ref_id": str(ref_id) if ref_id is not None else "",
             "name": str(replace_non_breaking_space(name)) if name is not None else "",
             "description": str(replace_non_breaking_space(description)) if description is not None else "",
@@ -345,11 +419,12 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
             "description[en]": str(replace_non_breaking_space(description_en)) if description_en is not None else "",
             "annotation[en]": str(replace_non_breaking_space(annotation_en)) if annotation_en is not None else "",
         }
+        row = legacy_support(row)
         rows.append(row)
 
     # ---------- 1) intro ----------
 
-    # depth = 1 ; ref_id = "intro" ; name/name[en]
+    # depth = 1 ; node_id = "intro" ; name/name[en]
     add_row(
         depth="1",
         urn_id="intro",
@@ -357,7 +432,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
         name_en="Introduction",
     )
 
-    # depth = 2 ; ref_id = "intro_text" ; description/description[en]
+    # depth = 2 ; node_id = "intro_text" ; description/description[en]
     add_row(
         depth="2",
         urn_id="intro_text",
@@ -367,7 +442,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
 
     # ---------- 2) about_ctrl_points ----------
 
-    # depth = 1 ; ref_id = "about_assessment_item_list"
+    # depth = 1 ; node_id = "about_assessment_item_list"
     add_row(
         depth="1",
         urn_id="about_assessment_item_list",
@@ -375,7 +450,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
         name_en="About Assessment Item List",
     )
 
-    # depth = 2 ; ref_id = "about_assessment_item_list_text" ; description/description[en]
+    # depth = 2 ; node_id = "about_assessment_item_list_text" ; description/description[en]
     add_row(
         depth="2",
         urn_id="about_assessment_item_list_text",
@@ -462,13 +537,15 @@ def build_yaml_config_content(
     ig_level_2 = "level_2"
     ig_level_3 = "level_3"
     ig_level_4 = "level_4"
+    framework_date_FR = month_year_label("fr")
+    framework_date_EN = month_year_label("en")
 
     yaml_config_file = f"""
 # --- Metadata sheets ---
 urn_root: {fw_urn}
 locale: "fr"
 ref_id: {fw_id}
-framework_name: "Points de contrôle Active Directory (AD)"
+framework_name: "ANSSI - Points de contrôle Active Directory (AD) [{framework_date_FR}]"
 description: |
   {'\n  '.join(fw_desc_FR)}
 
@@ -506,7 +583,7 @@ implementation_groups:
 # --- To enable extra locales (localized framework versions), uncomment the block below ---
 extra_locales:
   - en:
-      framework_name: ANSSI Active Directory (AD) Security Assessment Checklist
+      framework_name: "ANSSI - Active Directory (AD) Security Assessment Checklist [{framework_date_EN}]"
       description: |
         {'\n        '.join(fw_desc_EN)}
 
@@ -541,11 +618,11 @@ extra_locales:
 # STEP 1: Extraction from website
 # -------------------------------------------------------------------
 
-def step1_extract_checklists() -> None:
+def step1_extract_checklists(keep_temp: bool = False) -> None:
     """
     Step 1:
       - Extract French and English checklists from the website
-      - Remove intermediate Markdown files.
+      - Remove intermediate Markdown files unless keep_temp is enabled.
     """
     
     print("\n#####################################################################################################################################")
@@ -561,10 +638,16 @@ def step1_extract_checklists() -> None:
     # Extract English
     framework_extractor(True, FILES_SUFFIX_EN)
 
-    # Remove useless Markdown files
-    print("\n[MAIN] ▶️  Removing useless Markdown files...")
-    os.remove(f"checklist_{FILES_SUFFIX_FR}.md")
-    os.remove(f"checklist_{FILES_SUFFIX_EN}.md")
+    if keep_temp:
+        print(
+            "\n[MAIN] ℹ️  Keeping scraper Markdown files: "
+            f'"{MARKDOWN_FR}", "{MARKDOWN_EN}"'
+        )
+    else:
+        # Remove useless Markdown files
+        print("\n[MAIN] ▶️  Removing useless Markdown files...")
+        os.remove(MARKDOWN_FR)
+        os.remove(MARKDOWN_EN)
 
     print("[MAIN] ✅ [STEP 1] Completed!")
 
@@ -573,14 +656,14 @@ def step1_extract_checklists() -> None:
 # STEP 2: Create Excel from JSONs
 # -------------------------------------------------------------------
 
-def step2_build_excel() -> None:
+def step2_build_excel(keep_temp: bool = False) -> None:
     """
     Step 2:
       - Load extracted JSONs
       - Create a YAML config
       - Generate a base Excel from YAML
       - Build framework_content sheet from FR/EN JSON
-      - Cleanup temporary files
+      - Remove scraper JSON files unless keep_temp is enabled.
     """
     
     print("\n##############################################")
@@ -628,10 +711,16 @@ def step2_build_excel() -> None:
     print("[MAIN] ▶️  Creating Framework Excel sheet...")
     build_framework_content(json_framework_fr, json_framework_en, EXCEL_FILE_NAME)
 
-    # --- Remove JSON files ---
-    print("[MAIN] ▶️  Removing JSON files...")
-    os.remove(JSON_FR)
-    os.remove(JSON_EN)
+    if keep_temp:
+        print(
+            "[MAIN] ℹ️  Keeping scraper JSON files: "
+            f'"{JSON_FR}", "{JSON_EN}"'
+        )
+    else:
+        # --- Remove JSON files ---
+        print("[MAIN] ▶️  Removing JSON files...")
+        os.remove(JSON_FR)
+        os.remove(JSON_EN)
 
     print("[MAIN] ✅ [STEP 2] Completed!")
     print(f'[MAIN] ✅ Excel file saved successfully: "{EXCEL_FILE_NAME}"')
@@ -661,11 +750,30 @@ def step3_build_yaml_framework():
 # Main entrypoint
 # -------------------------------------------------------------------
 
-def main():
-    step1_extract_checklists()
-    step2_build_excel()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Build the ANSSI Active Directory framework from the online checklist."
+        )
+    )
+    parser.add_argument(
+        "-k",
+        "--keep-temp",
+        action="store_true",
+        help=(
+            "Keep scraper artifacts generated during extraction "
+            f"({MARKDOWN_FR}, {MARKDOWN_EN}, {JSON_FR}, {JSON_EN})."
+        ),
+    )
+    return parser.parse_args()
+
+
+def main(keep_temp: bool = False):
+    step1_extract_checklists(keep_temp=keep_temp)
+    step2_build_excel(keep_temp=keep_temp)
     step3_build_yaml_framework()
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(keep_temp=args.keep_temp)

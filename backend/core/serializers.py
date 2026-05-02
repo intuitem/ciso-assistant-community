@@ -2567,9 +2567,13 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
 
     def get_progress(self, obj):
         if not obj.selected_implementation_groups:
-            # Fast path: use SQL annotations (no implementation group filtering needed)
-            total = getattr(obj, "total_requirements", 0)
-            assessed = getattr(obj, "assessed_requirements", 0)
+            # Fast path: read page-scoped counts from optimized_data
+            # (computed in ComplianceAssessmentViewSet._get_optimized_object_data
+            # via a single bounded GROUP BY query, replacing the previous
+            # Count(distinct=True) annotations).
+            optimized_data = self.context.get("optimized_data") or {}
+            total = optimized_data.get("total_requirements", {}).get(obj.id, 0)
+            assessed = optimized_data.get("assessed_requirements", {}).get(obj.id, 0)
         else:
             # Use prefetched requirement_assessments filtered by implementation groups
             selected_groups = set(obj.selected_implementation_groups)
