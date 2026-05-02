@@ -111,7 +111,7 @@
 	function setVisibility(field: string, pill: PillValue) {
 		const target = OPTIONS.find((o) => o.v === pill);
 		if (!target) return;
-		const next: VisibilityMap = { ...(value ?? {}) };
+		const next: VisibilityMap = { ...value };
 		next[field] = { ...target.pair };
 		// is_scored has no independent meaning — it always tracks score
 		if (field === 'score') {
