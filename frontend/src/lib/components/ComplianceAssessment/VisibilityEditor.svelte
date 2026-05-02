@@ -94,7 +94,16 @@
 		extended_result: 'result'
 	};
 
+	// Per-field pill exclusions: pills that don't make semantic sense for a given
+	// field. respondent_alignment with AUDITOR_ONLY is incoherent — the field is
+	// only ever populated by the respondent answering the auto-question, so
+	// auditor-only would prevent it from being filled in at all.
+	const DISALLOWED_PILLS: Record<string, PillValue[]> = {
+		respondent_alignment: ['auditor']
+	};
+
 	function isOptionAllowed(field: string, optionValue: PillValue): boolean {
+		if (DISALLOWED_PILLS[field]?.includes(optionValue)) return false;
 		const parent = PARENT_OF[field];
 		if (!parent) return true;
 		const parentPill = pillFor(parent);

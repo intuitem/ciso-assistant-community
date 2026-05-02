@@ -1154,7 +1154,11 @@ DEFAULT_VISIBILITY = {
     "documentation_score": HIDDEN,
     "status": AUDITOR_ONLY,
     "extended_result": AUDITOR_ONLY,
-    "respondent_alignment": AUDITOR_ONLY,
+    # respondent_alignment is only ever populated by the respondent answering
+    # the auto-question. AUDITOR_ONLY would prevent that, so the auditor's
+    # badge would never render — functionally equivalent to HIDDEN. Default
+    # off; auditors who want it explicitly flip to "Auditor + Respondent".
+    "respondent_alignment": HIDDEN,
 }
 
 

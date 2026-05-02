@@ -112,7 +112,7 @@ def booleans_to_field_visibility(apps, schema_editor):
         ).exists()
         fv.setdefault(
             "respondent_alignment",
-            dict(EVERYONE_EDIT) if alignment_in_use else dict(AUDITOR_ONLY),
+            dict(EVERYONE_EDIT) if alignment_in_use else dict(HIDDEN),
         )
 
         if fv != before:
