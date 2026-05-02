@@ -6698,10 +6698,16 @@ class ComplianceAssessment(Assessment):
         return pair.get("auditor", "edit") != "hidden"
 
     def _set_field_hidden(self, field, hidden):
-        from core.utils import EVERYONE_EDIT, HIDDEN
+        # When un-hiding via the legacy boolean setters (scoring_enabled,
+        # show_documentation_score, extended_result_enabled, progress_status_enabled),
+        # restore AUDITOR_ONLY rather than EVERYONE_EDIT — the historical "True"
+        # value of those booleans only meant "auditor sees it", and the migration
+        # backfills existing CAs to AUDITOR_ONLY for the same reason. Writing
+        # EVERYONE_EDIT here would silently widen access to respondents.
+        from core.utils import AUDITOR_ONLY, HIDDEN
 
         fv = dict(self.field_visibility or {})
-        fv[field] = dict(HIDDEN) if hidden else dict(EVERYONE_EDIT)
+        fv[field] = dict(HIDDEN) if hidden else dict(AUDITOR_ONLY)
         self.field_visibility = fv
 
     @property

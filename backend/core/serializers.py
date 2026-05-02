@@ -2850,6 +2850,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "score_calculation_method",
             "target_score",
             "anchor_na_to_target",
+            "field_visibility",
             "created_at",
             "updated_at",
         ]

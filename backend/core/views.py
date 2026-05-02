@@ -10778,6 +10778,8 @@ class CampaignViewSet(BaseModelViewSet):
                         for group in campaign.selected_implementation_groups
                         if group["framework"] == str(framework.id)
                     ]
+                from core.utils import build_initial_field_visibility
+
                 compliance_assessment = ComplianceAssessment.objects.create(
                     name=f"{campaign.name} - {perimeter.name} - {framework.name}",
                     campaign=campaign,
@@ -10787,6 +10789,7 @@ class CampaignViewSet(BaseModelViewSet):
                     selected_implementation_groups=framework_implementation_groups
                     if framework_implementation_groups
                     else None,
+                    field_visibility=build_initial_field_visibility(framework),
                 )
                 compliance_assessment.create_requirement_assessments()
 
