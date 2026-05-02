@@ -1189,5 +1189,12 @@
 	"enrichFromEUVD": "Enriquecer EUVD",
 	"syncCweCatalog": "Obter CWE",
 	"syncCweCatalogFailed": "Erro CWE",
-	"expirationDateIsInThePastWarning": "A data de expiração informada está no passado"
+	"expirationDateIsInThePastWarning": "A data de expiração informada está no passado",
+	"fieldVisibility": "Visibilidade de campos",
+	"fieldVisibilityHelpText": "Controle quais campos cada papel pode ver e editar.",
+	"visibilityAuditorRespondent": "Auditor + Respondente",
+	"visibilityAuditorOnly": "Apenas auditor",
+	"visibilityHidden": "Oculto",
+	"answers": "Respostas",
+	"respondentAlignment": "Alinhamento do respondente"
 }

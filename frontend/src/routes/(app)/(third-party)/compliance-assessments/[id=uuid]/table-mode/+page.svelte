@@ -33,8 +33,7 @@
 		alignmentValueFromChoiceUrn,
 		choiceUrnFromAlignmentValue,
 		alignmentColorMap,
-		AUTO_ALIGNMENT_QUESTION_URN,
-		resolveFieldVisibility
+		AUTO_ALIGNMENT_QUESTION_URN
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -98,9 +97,7 @@
 	const viewerRole: 'respondent' | 'auditor' = $derived(
 		(data.viewerRole ?? 'auditor') as 'respondent' | 'auditor'
 	);
-	const fieldVis = $derived(
-		getFieldVisibility(complianceAssessment.framework, complianceAssessment, viewerRole)
-	);
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showObservation = $derived(fieldVis.showObservation);
@@ -694,7 +691,7 @@
 											</div>
 										{/if}
 										<!-- Auto-alignment question (when no framework questions) -->
-										{#if shouldShowAutoQuestion(requirementAssessment.requirement, viewerRole, complianceAssessment.framework, complianceAssessment)}
+										{#if shouldShowAutoQuestion(requirementAssessment.requirement, viewerRole, complianceAssessment)}
 											<div class="flex flex-col w-full space-y-2">
 												<Question
 													questions={buildAutoAlignmentQuestion({

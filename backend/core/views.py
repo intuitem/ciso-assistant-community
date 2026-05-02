@@ -9958,21 +9958,26 @@ class RequirementViewSet(BaseModelViewSet):
                         "compliance_assessment__id",
                         "compliance_assessment__name",
                         "compliance_assessment__version",
-                        "compliance_assessment__show_documentation_score",
+                        "compliance_assessment__field_visibility",
                         "compliance_assessment__max_score",
                     )
                     .distinct()
                 )
 
+                from core.utils import resolve_visibility_from_overrides
+
                 for ca in compliance_assessments:
+                    fv = ca["compliance_assessment__field_visibility"]
+                    doc_pair = resolve_visibility_from_overrides(
+                        fv, "documentation_score"
+                    )
+                    show_doc = doc_pair.get("auditor", "edit") != "hidden"
                     perimeter_entry["compliance_assessments"].append(
                         {
                             "id": ca["compliance_assessment__id"],
                             "name": ca["compliance_assessment__name"],
                             "version": ca["compliance_assessment__version"],
-                            "show_documentation_score": ca[
-                                "compliance_assessment__show_documentation_score"
-                            ],
+                            "show_documentation_score": show_doc,
                             "max_score": ca["compliance_assessment__max_score"],
                         }
                     )
@@ -11099,6 +11104,8 @@ class CampaignViewSet(BaseModelViewSet):
                         for group in campaign.selected_implementation_groups
                         if group["framework"] == str(framework.id)
                     ]
+                from core.utils import build_initial_field_visibility
+
                 compliance_assessment = ComplianceAssessment.objects.create(
                     name=f"{campaign.name} - {perimeter.name} - {framework.name}",
                     campaign=campaign,
@@ -11108,6 +11115,7 @@ class CampaignViewSet(BaseModelViewSet):
                     selected_implementation_groups=framework_implementation_groups
                     if framework_implementation_groups
                     else None,
+                    field_visibility=build_initial_field_visibility(framework),
                 )
                 compliance_assessment.create_requirement_assessments()
 
@@ -11132,7 +11140,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "genericcollection",
-        "extended_result_enabled",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 

@@ -3071,5 +3071,12 @@
 	"enrichFromEUVD": "Aus EUVD anreichern",
 	"syncCweCatalog": "CWE abrufen",
 	"syncCweCatalogFailed": "CWE Fehler",
-	"exportEcosystem": "Ökosystem-Export (XLSX)"
+	"exportEcosystem": "Ökosystem-Export (XLSX)",
+	"fieldVisibility": "Feldsichtbarkeit",
+	"fieldVisibilityHelpText": "Steuern Sie, welche Felder jede Rolle sehen und bearbeiten kann.",
+	"visibilityAuditorRespondent": "Prüfer + Befragter",
+	"visibilityAuditorOnly": "Nur Prüfer",
+	"visibilityHidden": "Ausgeblendet",
+	"answers": "Antworten",
+	"respondentAlignment": "Abstimmung des Befragten"
 }

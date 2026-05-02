@@ -4247,5 +4247,12 @@
 	"sameContentAs": "Contenu identique à « {name} »",
 	"networkErrorWithMessage": "Erreur réseau : {message}",
 	"batchDoneSummary": "Terminé — {created} créée(s), {revisions} révision(s), {replaced} remplacée(s), {renamed} renommée(s), {unchanged} inchangée(s), {errors} erreur(s).",
-	"skip": "Ignorer"
+	"skip": "Ignorer",
+	"fieldVisibility": "Visibilité des champs",
+	"fieldVisibilityHelpText": "Contrôle quels champs d'évaluation chaque rôle peut voir et éditer.",
+	"visibilityAuditorRespondent": "Auditeur + Répondant",
+	"visibilityAuditorOnly": "Auditeur uniquement",
+	"visibilityHidden": "Masqué",
+	"answers": "Réponses",
+	"respondentAlignment": "Alignement du répondant"
 }

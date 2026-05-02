@@ -1708,5 +1708,12 @@
 	"enrichFromEUVD": "Збагачення EUVD",
 	"syncCweCatalog": "Отримати CWE",
 	"syncCweCatalogFailed": "Помилка CWE",
-	"exportEcosystem": "експорт екосистеми (XLSX)"
+	"exportEcosystem": "експорт екосистеми (XLSX)",
+	"fieldVisibility": "Видимість полів",
+	"fieldVisibilityHelpText": "Контролюйте, які поля може бачити та редагувати кожна роль.",
+	"visibilityAuditorRespondent": "Аудитор + Респондент",
+	"visibilityAuditorOnly": "Лише аудитор",
+	"visibilityHidden": "Приховано",
+	"answers": "Відповіді",
+	"respondentAlignment": "Узгодження респондента"
 }

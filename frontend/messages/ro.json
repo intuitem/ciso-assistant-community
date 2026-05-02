@@ -1187,5 +1187,12 @@
 	"enrichFromEUVD": "Îmbogățire EUVD",
 	"syncCweCatalog": "Preluare CWE",
 	"syncCweCatalogFailed": "Eroare CWE",
-	"expirationDateIsInThePastWarning": "Data expirării introdusă este în trecut"
+	"expirationDateIsInThePastWarning": "Data expirării introdusă este în trecut",
+	"fieldVisibility": "Vizibilitatea câmpurilor",
+	"fieldVisibilityHelpText": "Controlați ce câmpuri poate vedea și edita fiecare rol.",
+	"visibilityAuditorRespondent": "Auditor + Respondent",
+	"visibilityAuditorOnly": "Doar auditor",
+	"visibilityHidden": "Ascuns",
+	"answers": "Răspunsuri",
+	"respondentAlignment": "Aliniere respondent"
 }

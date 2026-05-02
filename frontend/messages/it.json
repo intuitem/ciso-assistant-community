@@ -2428,5 +2428,12 @@
 	"syncCweCatalog": "Recupera catalogo CWE di MITRE",
 	"syncCweCatalogFailed": "Errore nel recupero del catalogo CWE",
 	"syncToReferenceControl": "Sincronizza con il controllo di riferimento",
-	"exportEcosystem": "esportazione dell'ecosistema (XLSX)"
+	"exportEcosystem": "esportazione dell'ecosistema (XLSX)",
+	"fieldVisibility": "Visibilità dei campi",
+	"fieldVisibilityHelpText": "Controlla quali campi ogni ruolo può vedere e modificare.",
+	"visibilityAuditorRespondent": "Revisore + Rispondente",
+	"visibilityAuditorOnly": "Solo revisore",
+	"visibilityHidden": "Nascosto",
+	"answers": "Risposte",
+	"respondentAlignment": "Allineamento del rispondente"
 }

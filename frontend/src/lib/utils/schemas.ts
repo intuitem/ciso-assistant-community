@@ -508,10 +508,16 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
-	scoring_enabled: z.boolean().optional().default(false),
-	show_documentation_score: z.boolean().optional().default(false),
-	extended_result_enabled: z.boolean().optional().default(false),
-	progress_status_enabled: z.boolean().optional().default(true),
+	field_visibility: z
+		.record(
+			z.string(),
+			z.object({
+				auditor: z.enum(['edit', 'read', 'hidden']),
+				respondent: z.enum(['edit', 'read', 'hidden'])
+			})
+		)
+		.optional()
+		.default({}),
 	score_calculation_method: z.string().optional().default('average'),
 	target_score: z.number().optional().nullable(),
 	anchor_na_to_target: z.boolean().optional().default(false),

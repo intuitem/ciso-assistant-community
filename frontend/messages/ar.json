@@ -1162,5 +1162,12 @@
 	"syncCweCatalogFailed": "فشل جلب CWE",
 	"exportEcosystem": "تصدير النظام البيئي (XLSX)",
 	"expirationDate": "تاريخ الانتهاء",
-	"expirationDateIsInThePastWarning": "تاريخ الانتهاء المُدخل يقع في الماضي"
+	"expirationDateIsInThePastWarning": "تاريخ الانتهاء المُدخل يقع في الماضي",
+	"fieldVisibility": "إظهار الحقول",
+	"fieldVisibilityHelpText": "تحكم في الحقول التي يمكن لكل دور رؤيتها وتحريرها.",
+	"visibilityAuditorRespondent": "المدقق + المُجيب",
+	"visibilityAuditorOnly": "المدقق فقط",
+	"visibilityHidden": "مخفي",
+	"answers": "الإجابات",
+	"respondentAlignment": "توافق المُجيب"
 }

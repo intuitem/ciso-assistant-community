@@ -1159,5 +1159,12 @@
 	"enrichFromEUVD": "EUVD से समृद्ध करें",
 	"syncCweCatalog": "CWE प्राप्त करें",
 	"syncCweCatalogFailed": "CWE त्रुटि",
-	"expirationDateIsInThePastWarning": "दर्ज की गई समाप्ति तिथि अतीत में है"
+	"expirationDateIsInThePastWarning": "दर्ज की गई समाप्ति तिथि अतीत में है",
+	"fieldVisibility": "फ़ील्ड दृश्यता",
+	"fieldVisibilityHelpText": "नियंत्रित करें कि कौन से फ़ील्ड प्रत्येक भूमिका देख और संपादित कर सकती है।",
+	"visibilityAuditorRespondent": "ऑडिटर + प्रत्युत्तरकर्ता",
+	"visibilityAuditorOnly": "केवल ऑडिटर",
+	"visibilityHidden": "छिपा हुआ",
+	"answers": "उत्तर",
+	"respondentAlignment": "प्रत्युत्तरकर्ता संरेखण"
 }
