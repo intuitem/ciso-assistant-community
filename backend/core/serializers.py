@@ -2912,13 +2912,18 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
         viewer_role = self.context.get("viewer_role", "auditor")
         ca = getattr(instance, "compliance_assessment", None)
-        overrides = getattr(ca, "field_visibility", None) or {}
+        if ca is None:
+            return data
 
-        # Strip fields the viewer is not allowed to read. Empty overrides → no strip.
-        for field_name, pair in overrides.items():
-            if not isinstance(pair, dict):
-                continue
-            if pair.get(viewer_role, "edit") == "hidden":
+        # Strip fields the viewer is not allowed to read. Resolve through the
+        # cascade (CA overrides → DEFAULT_VISIBILITY → EVERYONE_EDIT) so that
+        # default-hidden keys like `score` are stripped even when the CA has
+        # an empty/incomplete field_visibility map. Structural fields (id,
+        # name, etc.) resolve to EVERYONE_EDIT and are never stripped.
+        from core.utils import is_field_visible_to
+
+        for field_name in list(data.keys()):
+            if not is_field_visible_to(ca, field_name, viewer_role):
                 data.pop(field_name, None)
 
         return data
@@ -2939,17 +2944,17 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # in validate() since to_internal_value runs before object-level checks.
         request = self.context.get("request")
         if request and self.instance:
-            from core.utils import get_respondent_filtered_folder_ids
+            from core.utils import get_respondent_filtered_folder_ids, is_field_editable_by
 
             ca = self.instance.compliance_assessment
             respondent_folders = get_respondent_filtered_folder_ids(request.user)
             if respondent_folders and ca.folder_id in respondent_folders:
-                overrides = ca.field_visibility or {}
+                # Cascade through DEFAULT_VISIBILITY so default-hidden keys are
+                # stripped from a respondent's payload even when the CA has an
+                # empty field_visibility. Structural fields (id, requirement,
+                # etc.) resolve to EVERYONE_EDIT and pass through unchanged.
                 data = {
-                    k: v
-                    for k, v in data.items()
-                    if not isinstance(overrides.get(k), dict)
-                    or overrides[k].get("respondent", "edit") == "edit"
+                    k: v for k, v in data.items() if is_field_editable_by(ca, k, "respondent")
                 }
         return super().to_internal_value(data)
 
@@ -2997,13 +3002,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 # Silently drop fields the respondent isn't allowed to write —
                 # full PUT bodies always carry every field, so raising here would
                 # turn unrelated edits into 400s. The fields stay unchanged.
-                overrides = compliance_assessment.field_visibility or {}
+                # Cascade through DEFAULT_VISIBILITY so a CA with an empty
+                # field_visibility still gates the respondent.
+                from core.utils import is_field_editable_by
+
                 for name in list(attrs.keys()):
-                    pair = overrides.get(name)
-                    if (
-                        isinstance(pair, dict)
-                        and pair.get("respondent", "edit") != "edit"
-                    ):
+                    if not is_field_editable_by(compliance_assessment, name, "respondent"):
                         attrs.pop(name)
 
         # Validate extended_result against result
