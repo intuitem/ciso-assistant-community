@@ -37,10 +37,7 @@ test('CA visibility editor: pill selection round-trips through save/reload', asy
 
 	// Default state assertions.
 	// score defaults to HIDDEN → the "hidden" pill is checked.
-	await expect(page.getByTestId('visibility-score-hidden')).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
+	await expect(page.getByTestId('visibility-score-hidden')).toHaveAttribute('aria-checked', 'true');
 	// status defaults to AUDITOR_ONLY.
 	await expect(page.getByTestId('visibility-status-auditor')).toHaveAttribute(
 		'aria-checked',
