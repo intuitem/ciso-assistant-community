@@ -137,8 +137,9 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 			'i'
 		);
 
-		// Visibility editor only renders on edit, so enable scoring after creation.
-		await complianceAssessmentsPage.viewItemDetail('Mapped-' + vars.assessmentName);
+		// Save navigates to the new CA's detail page; enable scoring there.
+		// Visibility editor only renders on edit, not at create time.
+		await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 		await page.getByTestId('edit-button').click();
 		await page.getByText('More').click();
 		await page.getByTestId('visibility-score-everyone').click();
