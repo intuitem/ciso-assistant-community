@@ -4208,5 +4208,12 @@
 	"enrichFromEUVD": "Enrichir depuis EUVD",
 	"syncCweCatalog": "Récupérer le catalogue CWE de MITRE",
 	"syncCweCatalogFailed": "Échec de la récupération du catalogue CWE",
-	"noDashboardSelected": "Aucun tableau de bord sélectionné"
+	"noDashboardSelected": "Aucun tableau de bord sélectionné",
+	"fieldVisibility": "Visibilité des champs",
+	"fieldVisibilityHelpText": "Contrôle quels champs d'évaluation chaque rôle peut voir et éditer.",
+	"visibilityAuditorRespondent": "Auditeur + Répondant",
+	"visibilityAuditorOnly": "Auditeur uniquement",
+	"visibilityHidden": "Masqué",
+	"answers": "Réponses",
+	"respondentAlignment": "Alignement du répondant"
 }

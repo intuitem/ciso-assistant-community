@@ -4289,5 +4289,12 @@
 	"editDashboard": "Edit dashboard",
 	"requiresChangeGlobalSettings": "Requires permission to change global settings.",
 	"clearDefault": "Clear default",
-	"noDashboardSelected": "No dashboard selected"
+	"noDashboardSelected": "No dashboard selected",
+	"fieldVisibility": "Field visibility",
+	"fieldVisibilityHelpText": "Control which assessment fields each viewer role can see and edit.",
+	"visibilityAuditorRespondent": "Auditor + Respondent",
+	"visibilityAuditorOnly": "Auditor only",
+	"visibilityHidden": "Hidden",
+	"answers": "Answers",
+	"respondentAlignment": "Respondent alignment"
 }

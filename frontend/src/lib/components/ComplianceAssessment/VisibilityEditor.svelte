@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
+	import { m } from '$paraglide/messages';
 	import type { SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
@@ -10,18 +11,18 @@
 
 	let { form, disabled = false }: Props = $props();
 
-	const FIELD_LABELS: Record<string, string> = {
-		result: 'Result',
-		status: 'Status',
-		score: 'Score',
-		documentation_score: 'Documentation score',
-		extended_result: 'Extended result',
-		observation: 'Observation',
-		answers: 'Answers',
-		evidences: 'Evidences',
-		applied_controls: 'Applied controls',
-		respondent_alignment: 'Respondent alignment',
-		comments: 'Comments'
+	const FIELD_LABELS: Record<string, () => string> = {
+		result: m.result,
+		status: m.status,
+		score: m.score,
+		documentation_score: m.documentationScore,
+		extended_result: m.extendedResult,
+		observation: m.observation,
+		answers: m.answers,
+		evidences: m.evidences,
+		applied_controls: m.appliedControls,
+		respondent_alignment: m.respondentAlignment,
+		comments: m.comments
 	};
 
 	const FEATURE_FLAG_BY_FIELD: Record<string, string> = { comments: 'comments' };
@@ -39,22 +40,22 @@
 	// The 3 pills the editor exposes today, each backed by a per-role pair.
 	// Future PRs may add more pills (e.g. auditor_only_edit, respondent_only_edit)
 	// without changing storage shape.
-	const OPTIONS: { v: PillValue; label: string; pair: Pair; activeClass: string }[] = [
+	const OPTIONS: { v: PillValue; label: () => string; pair: Pair; activeClass: string }[] = [
 		{
 			v: 'everyone',
-			label: 'Auditor + Respondent',
+			label: m.visibilityAuditorRespondent,
 			pair: { auditor: 'edit', respondent: 'edit' },
 			activeClass: 'bg-green-100 text-green-800 border-green-300'
 		},
 		{
 			v: 'auditor',
-			label: 'Auditor only',
+			label: m.visibilityAuditorOnly,
 			pair: { auditor: 'edit', respondent: 'hidden' },
 			activeClass: 'bg-amber-100 text-amber-800 border-amber-300'
 		},
 		{
 			v: 'hidden',
-			label: 'Hidden',
+			label: m.visibilityHidden,
 			pair: { auditor: 'hidden', respondent: 'hidden' },
 			activeClass: 'bg-rose-100 text-rose-800 border-rose-300'
 		}
@@ -120,19 +121,18 @@
 </script>
 
 <div class="space-y-1">
-	<h3 class="font-semibold text-sm">Field visibility</h3>
-	<p class="text-xs text-gray-500 mb-2">
-		Control which assessment fields each viewer role can see and edit.
-	</p>
+	<h3 class="font-semibold text-sm">{m.fieldVisibility()}</h3>
+	<p class="text-xs text-gray-500 mb-2">{m.fieldVisibilityHelpText()}</p>
 	<div class="max-w-xl">
 		{#each visibleFields as field}
 			{@const pill = pillFor(field)}
+			{@const label = FIELD_LABELS[field]?.() ?? field}
 			<div class="flex items-center justify-between gap-3 py-1">
-				<span class="text-sm text-gray-700">{FIELD_LABELS[field] ?? field}</span>
+				<span class="text-sm text-gray-700">{label}</span>
 				<div
 					class="inline-flex shrink-0 rounded-md border border-gray-200 bg-gray-50 p-0.5"
 					role="radiogroup"
-					aria-label={FIELD_LABELS[field] ?? field}
+					aria-label={label}
 				>
 					{#each OPTIONS as option}
 						{@const optionDisabled = disabled || !isOptionAllowed(field, option.v)}
@@ -148,7 +148,7 @@
 								? `${option.activeClass} shadow-sm`
 								: 'text-gray-600 hover:text-gray-900 border-transparent'}"
 						>
-							{option.label}
+							{option.label()}
 						</button>
 					{/each}
 				</div>
