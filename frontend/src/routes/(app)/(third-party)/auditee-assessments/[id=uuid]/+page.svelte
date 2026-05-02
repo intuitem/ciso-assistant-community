@@ -1001,7 +1001,7 @@
 							{/if}
 
 							<!-- Result -->
-							{#if showResult || hasComputedResult(requirement.questions)}
+							{#if showResult}
 								<div class="flex flex-col items-center w-full my-2">
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
