@@ -84,7 +84,7 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 				timeout: 10_000
 			});
 		}
-		await page.getByTestId('form-input-scoring-enabled').check();
+		await page.getByTestId('visibility-score-everyone').click();
 		await page.getByTestId('save-button').click();
 
 		await page.waitForTimeout(5000);
@@ -131,7 +131,7 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 			framework: vars.framework.name
 		});
 		await page.getByText('More').click();
-		await page.getByTestId('form-input-scoring-enabled').check();
+		await page.getByTestId('visibility-score-everyone').click();
 		await applyMappingForm.saveButton.click();
 		await expect(applyMappingForm.formTitle).not.toBeVisible();
 		await complianceAssessmentsPage.isToastVisible(
