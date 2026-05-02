@@ -6692,9 +6692,9 @@ class ComplianceAssessment(Assessment):
     # the auditor axis (the field exists at all if auditor isn't 'hidden').
 
     def _auditor_visible(self, field):
-        pair = (self.field_visibility or {}).get(field)
-        if not isinstance(pair, dict):
-            return True
+        from core.utils import resolve_field_visibility
+
+        pair = resolve_field_visibility(self, field)
         return pair.get("auditor", "edit") != "hidden"
 
     def _set_field_hidden(self, field, hidden):
