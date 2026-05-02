@@ -130,14 +130,20 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 			folder: vars.folderName,
 			framework: vars.framework.name
 		});
-		await page.getByText('More').click();
-		await page.getByTestId('visibility-score-everyone').click();
 		await applyMappingForm.saveButton.click();
 		await expect(applyMappingForm.formTitle).not.toBeVisible();
 		await complianceAssessmentsPage.isToastVisible(
 			'The audit object has been successfully created',
 			'i'
 		);
+
+		// Visibility editor only renders on edit, so enable scoring after creation.
+		await complianceAssessmentsPage.viewItemDetail('Mapped-' + vars.assessmentName);
+		await page.getByTestId('edit-button').click();
+		await page.getByText('More').click();
+		await page.getByTestId('visibility-score-everyone').click();
+		await page.getByTestId('save-button').click();
+		await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 	});
 	await test.step('verify that mapping worked correctly', async () => {
 		const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [

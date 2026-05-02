@@ -259,11 +259,13 @@
 				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
 			/>
 		{/if}
-		<VisibilityEditor
-			value={$formData.field_visibility}
-			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
-			disabled={object?.is_locked}
-		/>
+		{#if context === 'edit' && object?.id}
+			<VisibilityEditor
+				value={$formData.field_visibility}
+				onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
+				disabled={object?.is_locked}
+			/>
+		{/if}
 
 		<Select
 			{form}
