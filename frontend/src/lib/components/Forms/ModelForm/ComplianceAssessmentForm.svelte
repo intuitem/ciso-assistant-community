@@ -33,6 +33,8 @@
 		context
 	}: Props = $props();
 
+	const formData = form.form;
+
 	let suggestions = $state(false);
 
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
@@ -257,7 +259,11 @@
 				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
 			/>
 		{/if}
-		<VisibilityEditor {form} disabled={object?.is_locked} />
+		<VisibilityEditor
+			value={$formData.field_visibility}
+			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
+			disabled={object?.is_locked}
+		/>
 
 		<Select
 			{form}

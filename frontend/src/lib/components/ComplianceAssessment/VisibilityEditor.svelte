@@ -2,14 +2,17 @@
 	import { VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
-	import type { SuperForm } from 'sveltekit-superforms';
+
+	type Pair = { auditor: RoleAccess; respondent: RoleAccess };
+	type VisibilityMap = Record<string, Pair>;
 
 	interface Props {
-		form: SuperForm<any>;
+		value: VisibilityMap | null | undefined;
+		onChange: (next: VisibilityMap) => void;
 		disabled?: boolean;
 	}
 
-	let { form, disabled = false }: Props = $props();
+	let { value, onChange, disabled = false }: Props = $props();
 
 	const FIELD_LABELS: Record<string, () => string> = {
 		result: m.result,
@@ -34,7 +37,6 @@
 		})
 	);
 
-	type Pair = { auditor: RoleAccess; respondent: RoleAccess };
 	type PillValue = 'everyone' | 'auditor' | 'hidden';
 
 	// The 3 pills the editor exposes today, each backed by a per-role pair.
@@ -61,10 +63,8 @@
 		}
 	];
 
-	const formData = form.form;
-
 	function readPair(field: string): Pair {
-		const raw = ($formData.field_visibility as Record<string, any> | undefined)?.[field];
+		const raw = (value ?? {})[field] as any;
 		if (raw && typeof raw === 'object') {
 			return {
 				auditor: (raw.auditor as RoleAccess) ?? 'edit',
@@ -87,36 +87,44 @@
 		return pairToPill(readPair(field));
 	}
 
+	// Per-field constraint: a child field's visibility cannot exceed its parent's.
+	// Extends naturally if more parent/child relationships are added.
+	const PARENT_OF: Record<string, string> = {
+		documentation_score: 'score',
+		extended_result: 'result'
+	};
+
 	function isOptionAllowed(field: string, optionValue: PillValue): boolean {
-		// Documentation score visibility cannot exceed implementation score visibility.
-		if (field === 'documentation_score') {
-			const scorePill = pillFor('score');
-			if (scorePill === null) return true; // unknown future shape — don't constrain
-			return VISIBILITY_RANK[optionValue] <= VISIBILITY_RANK[scorePill];
-		}
-		return true;
+		const parent = PARENT_OF[field];
+		if (!parent) return true;
+		const parentPill = pillFor(parent);
+		if (parentPill === null) return true; // unknown future shape — don't constrain
+		return VISIBILITY_RANK[optionValue] <= VISIBILITY_RANK[parentPill];
 	}
+
+	// Children that should be clamped down whenever their parent's permissiveness drops.
+	const CHILDREN_OF: Record<string, string[]> = {
+		score: ['documentation_score'],
+		result: ['extended_result']
+	};
 
 	function setVisibility(field: string, pill: PillValue) {
 		const target = OPTIONS.find((o) => o.v === pill);
 		if (!target) return;
-		formData.update((data) => {
-			const current = { ...(data.field_visibility as Record<string, Pair>) };
-			const writePair = (key: string, p: Pair) => {
-				current[key] = { ...p };
-			};
-			writePair(field, target.pair);
-			// is_scored has no independent meaning — it always tracks score
-			if (field === 'score') {
-				writePair('is_scored', target.pair);
-				// Documentation score cannot exceed score's permissiveness; clamp down.
-				const docPill = pillFor('documentation_score');
-				if (docPill !== null && VISIBILITY_RANK[docPill] > VISIBILITY_RANK[pill]) {
-					writePair('documentation_score', target.pair);
-				}
+		const next: VisibilityMap = { ...(value ?? {}) };
+		next[field] = { ...target.pair };
+		// is_scored has no independent meaning — it always tracks score
+		if (field === 'score') {
+			next['is_scored'] = { ...target.pair };
+		}
+		// Clamp any child fields that would now exceed the parent's permissiveness.
+		for (const child of CHILDREN_OF[field] ?? []) {
+			const childPill = pairToPill(readPair(child));
+			if (childPill !== null && VISIBILITY_RANK[childPill] > VISIBILITY_RANK[pill]) {
+				next[child] = { ...target.pair };
 			}
-			return { ...data, field_visibility: current };
-		});
+		}
+		onChange(next);
 	}
 </script>
 
