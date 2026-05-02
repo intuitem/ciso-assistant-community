@@ -63,14 +63,15 @@ class TestResolveFieldVisibility:
         assert resolve_field_visibility(ca, "score") == HIDDEN
 
     def test_default_visibility_constants_match_documented_shape(self):
-        # If these change, the migration's setdefault logic and the editor
-        # cascade rules need to be revisited together.
+        # If these change, the migration's setdefault logic, the frontend
+        # DEFAULT_VISIBILITY mirror in helpers.ts, and the editor cascade
+        # rules all need to be revisited together.
         assert DEFAULT_VISIBILITY["score"] == HIDDEN
         assert DEFAULT_VISIBILITY["is_scored"] == HIDDEN
         assert DEFAULT_VISIBILITY["documentation_score"] == HIDDEN
         assert DEFAULT_VISIBILITY["extended_result"] == AUDITOR_ONLY
         assert DEFAULT_VISIBILITY["status"] == AUDITOR_ONLY
-        assert DEFAULT_VISIBILITY["respondent_alignment"] == AUDITOR_ONLY
+        assert DEFAULT_VISIBILITY["respondent_alignment"] == HIDDEN
 
 
 # ---------------------------------------------------------------------------

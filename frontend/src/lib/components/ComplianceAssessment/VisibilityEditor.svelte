@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
+	import { DEFAULT_VISIBILITY, VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
@@ -71,6 +71,11 @@
 				respondent: (raw.respondent as RoleAccess) ?? 'edit'
 			};
 		}
+		// No explicit override yet (e.g. fresh create form). Fall back to the
+		// frontend mirror of the backend's DEFAULT_VISIBILITY so the displayed
+		// pill matches what the API will actually save.
+		const fallback = DEFAULT_VISIBILITY[field];
+		if (fallback) return { ...fallback };
 		return { auditor: 'edit', respondent: 'edit' };
 	}
 

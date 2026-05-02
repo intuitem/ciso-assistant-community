@@ -259,13 +259,14 @@
 				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
 			/>
 		{/if}
-		{#if context === 'edit' && object?.id}
-			<VisibilityEditor
-				value={$formData.field_visibility}
-				onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
-				disabled={object?.is_locked}
-			/>
-		{/if}
+		<!-- Visibility editor is shown on create too. The pills fall back to
+		     the frontend DEFAULT_VISIBILITY mirror, so what the user sees matches
+		     what the backend will save when no explicit override is provided. -->
+		<VisibilityEditor
+			value={$formData.field_visibility}
+			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
+			disabled={object?.is_locked}
+		/>
 
 		<Select
 			{form}
