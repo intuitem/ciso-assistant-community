@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DEFAULT_VISIBILITY, VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
+	import { VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
@@ -10,9 +10,15 @@
 		value: VisibilityMap | null | undefined;
 		onChange: (next: VisibilityMap) => void;
 		disabled?: boolean;
+		// Framework's effective_field_visibility — the complete map a new CA
+		// would inherit from this framework (DEFAULT_VISIBILITY ⊕ framework's
+		// own overrides, computed on the backend). Used as fallback for missing
+		// keys in `value`, so pills on a fresh create form display what the
+		// API will actually save.
+		frameworkDefaults?: VisibilityMap | null;
 	}
 
-	let { value, onChange, disabled = false }: Props = $props();
+	let { value, onChange, disabled = false, frameworkDefaults = null }: Props = $props();
 
 	const FIELD_LABELS: Record<string, () => string> = {
 		result: m.result,
@@ -72,10 +78,15 @@
 			};
 		}
 		// No explicit override yet (e.g. fresh create form). Fall back to the
-		// frontend mirror of the backend's DEFAULT_VISIBILITY so the displayed
-		// pill matches what the API will actually save.
-		const fallback = DEFAULT_VISIBILITY[field];
-		if (fallback) return { ...fallback };
+		// framework's effective_field_visibility — the complete map the backend
+		// will use as the base when seeding the new CA's field_visibility.
+		const fallback = frameworkDefaults?.[field];
+		if (fallback && typeof fallback === 'object') {
+			return {
+				auditor: (fallback.auditor as RoleAccess) ?? 'edit',
+				respondent: (fallback.respondent as RoleAccess) ?? 'edit'
+			};
+		}
 		return { auditor: 'edit', respondent: 'edit' };
 	}
 

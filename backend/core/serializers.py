@@ -2069,6 +2069,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
     has_update = serializers.BooleanField(read_only=True)
     has_editing_draft = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
+    # The complete per-role visibility map a new CA created from this framework
+    # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
+    # CA-creation form's editor reads this so its pills always reflect what
+    # the backend will actually save.
+    effective_field_visibility = serializers.SerializerMethodField()
 
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
@@ -2078,6 +2083,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
         if isinstance(sd, dict) and "scale" in sd:
             return sd["scale"]
         return sd
+
+    def get_effective_field_visibility(self, obj):
+        from core.utils import build_initial_field_visibility
+
+        return build_initial_field_visibility(obj)
 
     class Meta:
         model = Framework

@@ -85,6 +85,8 @@
 		}
 	}
 
+	let frameworkDefaults = $state<Record<string, any> | null>(null);
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
@@ -97,6 +99,11 @@
 						value: group.ref_id
 					}));
 					suggestions = r['reference_controls'].length > 0;
+
+					// Effective per-role visibility map this framework would seed into a
+					// new CA. The visibility editor uses this as fallback for keys the
+					// user hasn't explicitly overridden in the form.
+					frameworkDefaults = r['effective_field_visibility'] ?? null;
 
 					defaultImplementationGroups = implementation_groups
 						.filter((group) => group.default_selected)
@@ -259,13 +266,15 @@
 				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
 			/>
 		{/if}
-		<!-- Visibility editor is shown on create too. The pills fall back to
-		     the frontend DEFAULT_VISIBILITY mirror, so what the user sees matches
-		     what the backend will save when no explicit override is provided. -->
+		<!-- Visibility editor renders for both create and edit. On create, pills
+		     fall back to the framework's `effective_field_visibility` (served by
+		     the backend), so what the user sees always matches what the backend
+		     will save when no explicit override is provided. -->
 		<VisibilityEditor
 			value={$formData.field_visibility}
 			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
 			disabled={object?.is_locked}
+			{frameworkDefaults}
 		/>
 
 		<Select

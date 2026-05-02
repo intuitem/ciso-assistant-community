@@ -368,25 +368,6 @@ export type RoleAccess = 'edit' | 'read' | 'hidden';
 export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
 
 const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
-const AUDITOR_ONLY_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'hidden' };
-const HIDDEN_PAIR: VisibilityPair = { auditor: 'hidden', respondent: 'hidden' };
-
-/**
- * ⚠️ MUST stay in sync with backend `core.utils.DEFAULT_VISIBILITY`. ⚠️
- *
- * Used only by the editor when displaying a fresh create form, before the
- * backend has seeded `field_visibility` from `build_initial_field_visibility()`.
- * If you change the backend default, change this map too — otherwise the
- * editor will display pills that don't match what the API will actually save.
- */
-export const DEFAULT_VISIBILITY: Record<string, VisibilityPair> = {
-	score: HIDDEN_PAIR,
-	is_scored: HIDDEN_PAIR,
-	documentation_score: HIDDEN_PAIR,
-	status: AUDITOR_ONLY_PAIR,
-	extended_result: AUDITOR_ONLY_PAIR,
-	respondent_alignment: HIDDEN_PAIR
-};
 
 /** Return the per-role visibility pair for a field. Missing → all roles edit. */
 export function resolveFieldVisibility(
