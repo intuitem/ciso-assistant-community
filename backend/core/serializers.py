@@ -2944,7 +2944,10 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # in validate() since to_internal_value runs before object-level checks.
         request = self.context.get("request")
         if request and self.instance:
-            from core.utils import get_respondent_filtered_folder_ids, is_field_editable_by
+            from core.utils import (
+                get_respondent_filtered_folder_ids,
+                is_field_editable_by,
+            )
 
             ca = self.instance.compliance_assessment
             respondent_folders = get_respondent_filtered_folder_ids(request.user)
@@ -2954,7 +2957,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 # empty field_visibility. Structural fields (id, requirement,
                 # etc.) resolve to EVERYONE_EDIT and pass through unchanged.
                 data = {
-                    k: v for k, v in data.items() if is_field_editable_by(ca, k, "respondent")
+                    k: v
+                    for k, v in data.items()
+                    if is_field_editable_by(ca, k, "respondent")
                 }
         return super().to_internal_value(data)
 
@@ -3007,7 +3012,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 from core.utils import is_field_editable_by
 
                 for name in list(attrs.keys()):
-                    if not is_field_editable_by(compliance_assessment, name, "respondent"):
+                    if not is_field_editable_by(
+                        compliance_assessment, name, "respondent"
+                    ):
                         attrs.pop(name)
 
         # Validate extended_result against result

@@ -1158,25 +1158,33 @@ DEFAULT_VISIBILITY = {
 }
 
 
-def resolve_field_visibility(compliance_assessment, field_name):
-    """Return the per-role visibility pair for a field.
+def resolve_visibility_from_overrides(overrides, field_name):
+    """Resolve a field's visibility pair from a raw `field_visibility` dict.
 
     Shape: {role: 'edit'|'read'|'hidden'}.
 
     Lookup order:
-      1. Explicit override on the compliance assessment.
+      1. Explicit override in `overrides`.
       2. DEFAULT_VISIBILITY (backstop in case a new field was added in code
          without a migration to backfill existing CAs).
       3. EVERYONE_EDIT (truly unknown field).
+
+    Use this when you have a raw dict (e.g. from a queryset `.values()` call).
+    For a model instance, prefer `resolve_field_visibility(ca, field)`.
     """
-    overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    pair = overrides.get(field_name)
+    pair = (overrides or {}).get(field_name)
     if isinstance(pair, dict):
         return pair
     fallback = DEFAULT_VISIBILITY.get(field_name)
     if isinstance(fallback, dict):
         return dict(fallback)
     return dict(EVERYONE_EDIT)
+
+
+def resolve_field_visibility(compliance_assessment, field_name):
+    """Return the per-role visibility pair for a field on a CA instance."""
+    overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    return resolve_visibility_from_overrides(overrides, field_name)
 
 
 def _role_access(compliance_assessment, field_name, role):

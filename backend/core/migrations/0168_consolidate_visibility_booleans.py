@@ -148,7 +148,10 @@ class Migration(migrations.Migration):
                 help_text=(
                     "Per-field visibility map: "
                     "{field_name: {role: 'edit' | 'read' | 'hidden'}}. "
-                    "Missing keys resolve to 'edit' for every role."
+                    "Missing keys cascade through core.utils.DEFAULT_VISIBILITY "
+                    "(e.g. score/documentation_score default to hidden, "
+                    "status/extended_result to auditor-only) and finally to 'edit' "
+                    "for every role for unknown fields."
                 ),
                 verbose_name="Field visibility",
             ),

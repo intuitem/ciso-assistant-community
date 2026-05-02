@@ -9963,13 +9963,14 @@ class RequirementViewSet(BaseModelViewSet):
                     .distinct()
                 )
 
+                from core.utils import resolve_visibility_from_overrides
+
                 for ca in compliance_assessments:
-                    fv = ca["compliance_assessment__field_visibility"] or {}
-                    doc_pair = fv.get("documentation_score") or {}
-                    show_doc = (
-                        not isinstance(doc_pair, dict)
-                        or doc_pair.get("auditor", "edit") != "hidden"
+                    fv = ca["compliance_assessment__field_visibility"]
+                    doc_pair = resolve_visibility_from_overrides(
+                        fv, "documentation_score"
                     )
+                    show_doc = doc_pair.get("auditor", "edit") != "hidden"
                     perimeter_entry["compliance_assessments"].append(
                         {
                             "id": ca["compliance_assessment__id"],
