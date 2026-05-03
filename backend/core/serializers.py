@@ -2069,6 +2069,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
     has_update = serializers.BooleanField(read_only=True)
     has_editing_draft = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
+    # The complete per-role visibility map a new CA created from this framework
+    # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
+    # CA-creation form's editor reads this so its pills always reflect what
+    # the backend will actually save.
+    effective_field_visibility = serializers.SerializerMethodField()
 
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
@@ -2078,6 +2083,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
         if isinstance(sd, dict) and "scale" in sd:
             return sd["scale"]
         return sd
+
+    def get_effective_field_visibility(self, obj):
+        from core.utils import build_initial_field_visibility
+
+        return build_initial_field_visibility(obj)
 
     class Meta:
         model = Framework
@@ -2551,6 +2561,14 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return sd["scale"]
         return sd
 
+    # Derived booleans, kept in the API for backwards compatibility. The actual
+    # storage is `field_visibility`; clients that want to change these should
+    # PATCH `field_visibility` directly.
+    scoring_enabled = serializers.BooleanField(read_only=True)
+    show_documentation_score = serializers.BooleanField(read_only=True)
+    extended_result_enabled = serializers.BooleanField(read_only=True)
+    progress_status_enabled = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
@@ -2567,9 +2585,13 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
 
     def get_progress(self, obj):
         if not obj.selected_implementation_groups:
-            # Fast path: use SQL annotations (no implementation group filtering needed)
-            total = getattr(obj, "total_requirements", 0)
-            assessed = getattr(obj, "assessed_requirements", 0)
+            # Fast path: read page-scoped counts from optimized_data
+            # (computed in ComplianceAssessmentViewSet._get_optimized_object_data
+            # via a single bounded GROUP BY query, replacing the previous
+            # Count(distinct=True) annotations).
+            optimized_data = self.context.get("optimized_data") or {}
+            total = optimized_data.get("total_requirements", {}).get(obj.id, 0)
+            assessed = optimized_data.get("assessed_requirements", {}).get(obj.id, 0)
         else:
             # Use prefetched requirement_assessments filtered by implementation groups
             selected_groups = set(obj.selected_implementation_groups)
@@ -2681,6 +2703,15 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
         authors_data = validated_data.get("authors", [])
+
+        # Always merge the caller's partial field_visibility with code defaults
+        # + framework template so the new CA is stored as a complete snapshot.
+        from core.utils import build_initial_field_visibility
+
+        defaults = build_initial_field_visibility(validated_data.get("framework"))
+        provided = validated_data.get("field_visibility") or {}
+        validated_data["field_visibility"] = {**defaults, **provided}
+
         assessment = super().create(validated_data)
 
         # Send notification to newly assigned authors
@@ -2720,20 +2751,15 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
 
+        # PATCH semantics for field_visibility: merge incoming partial map onto
+        # the existing one so a request that only sets a few keys doesn't wipe
+        # the rest of the snapshot.
+        if "field_visibility" in validated_data:
+            existing = instance.field_visibility or {}
+            provided = validated_data["field_visibility"] or {}
+            validated_data["field_visibility"] = {**existing, **provided}
+
         old_scoring_enabled = instance.scoring_enabled
-
-        # Enabling documentation score implies scoring must be on
-        if validated_data.get("show_documentation_score") and not validated_data.get(
-            "scoring_enabled", instance.scoring_enabled
-        ):
-            validated_data["scoring_enabled"] = True
-
-        # Disabling scoring implies documentation score must be off
-        if (
-            "scoring_enabled" in validated_data
-            and not validated_data["scoring_enabled"]
-        ):
-            validated_data["show_documentation_score"] = False
 
         with transaction.atomic():
             # Perform the main update (fields + M2M)
@@ -2745,7 +2771,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     compliance_assessment=updated_instance
                 ).update(folder=updated_instance.folder)
 
-            # Toggle is_scored on all requirement assessments when scoring_enabled changes
+            # Toggle is_scored on all requirement assessments when scoring visibility flips
             if updated_instance.scoring_enabled != old_scoring_enabled:
                 assessable_ras = RequirementAssessment.objects.filter(
                     compliance_assessment=updated_instance,
@@ -2831,10 +2857,10 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "scores_definition",
-            "scoring_enabled",
             "score_calculation_method",
             "target_score",
             "anchor_na_to_target",
+            "field_visibility",
             "created_at",
             "updated_at",
         ]
@@ -2895,35 +2921,20 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         data = super().to_representation(instance)
 
         viewer_role = self.context.get("viewer_role", "auditor")
-        framework = getattr(instance, "compliance_assessment", None)
-        ca = framework  # compliance_assessment
-        framework = getattr(ca, "framework", None) if ca else None
+        ca = getattr(instance, "compliance_assessment", None)
+        if ca is None:
+            return data
 
-        if framework and ca:
-            from core.utils import (
-                DEFAULT_FIELD_VISIBILITY,
-                get_visible_fields,
-                resolve_field_visibility,
-            )
+        # Strip fields the viewer is not allowed to read. Resolve through the
+        # cascade (CA overrides → DEFAULT_VISIBILITY → EVERYONE_EDIT) so that
+        # default-hidden keys like `score` are stripped even when the CA has
+        # an empty/incomplete field_visibility map. Structural fields (id,
+        # name, etc.) resolve to EVERYONE_EDIT and are never stripped.
+        from core.utils import is_field_visible_to
 
-            if viewer_role == "auditor":
-                # Auditors see everything except "hidden" fields
-                for field_name in list(data.keys()):
-                    if field_name in DEFAULT_FIELD_VISIBILITY:
-                        vis = resolve_field_visibility(framework, ca, field_name)
-                        if vis == "hidden":
-                            data.pop(field_name, None)
-            else:
-                # Respondents only see "everyone" fields
-                visible = get_visible_fields(framework, ca, viewer_role="respondent")
-                # Only strip fields that are in DEFAULT_FIELD_VISIBILITY
-                # Don't strip structural fields like 'id', 'requirement', 'compliance_assessment'
-                for field_name in list(data.keys()):
-                    if (
-                        field_name in DEFAULT_FIELD_VISIBILITY
-                        and field_name not in visible
-                    ):
-                        data.pop(field_name, None)
+        for field_name in list(data.keys()):
+            if not is_field_visible_to(ca, field_name, viewer_role):
+                data.pop(field_name, None)
 
         return data
 
@@ -2935,6 +2946,32 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     requirement = serializers.PrimaryKeyRelatedField(read_only=True)
     answers = serializers.JSONField(required=False, write_only=True)
+
+    def to_internal_value(self, data):
+        # Strip fields the respondent isn't allowed to write before DRF validates
+        # individual field choices — a placeholder value in a disabled select
+        # would otherwise trip choice validation. Security enforcement is repeated
+        # in validate() since to_internal_value runs before object-level checks.
+        request = self.context.get("request")
+        if request and self.instance:
+            from core.utils import (
+                get_respondent_filtered_folder_ids,
+                is_field_editable_by,
+            )
+
+            ca = self.instance.compliance_assessment
+            respondent_folders = get_respondent_filtered_folder_ids(request.user)
+            if respondent_folders and ca.folder_id in respondent_folders:
+                # Cascade through DEFAULT_VISIBILITY so default-hidden keys are
+                # stripped from a respondent's payload even when the CA has an
+                # empty field_visibility. Structural fields (id, requirement,
+                # etc.) resolve to EVERYONE_EDIT and pass through unchanged.
+                data = {
+                    k: v
+                    for k, v in data.items()
+                    if is_field_editable_by(ca, k, "respondent")
+                }
+        return super().to_internal_value(data)
 
     def validate_answers(self, value):
         if value is not None and not isinstance(value, dict):
@@ -2962,11 +2999,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # Assignment-level and field-level guards for respondent users (auditee or third-party)
         request = self.context.get("request")
         if request and self.instance and compliance_assessment:
-            from core.utils import (
-                DEFAULT_FIELD_VISIBILITY,
-                get_respondent_filtered_folder_ids,
-                get_visible_fields,
-            )
+            from core.utils import get_respondent_filtered_folder_ids
 
             respondent_folders = get_respondent_filtered_folder_ids(request.user)
             if (
@@ -2981,24 +3014,18 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         "Cannot modify: this requirement's assignment has been submitted or closed."
                     )
 
-                # Field-level visibility: respondents can only write "everyone"-visible fields
-                visible = get_visible_fields(
-                    compliance_assessment.framework,
-                    compliance_assessment,
-                    viewer_role="respondent",
-                )
-                forbidden = [
-                    name
-                    for name in attrs.keys()
-                    if name in DEFAULT_FIELD_VISIBILITY and name not in visible
-                ]
-                if forbidden:
-                    raise serializers.ValidationError(
-                        {
-                            name: "This field is not editable by respondents."
-                            for name in forbidden
-                        }
-                    )
+                # Silently drop fields the respondent isn't allowed to write —
+                # full PUT bodies always carry every field, so raising here would
+                # turn unrelated edits into 400s. The fields stay unchanged.
+                # Cascade through DEFAULT_VISIBILITY so a CA with an empty
+                # field_visibility still gates the respondent.
+                from core.utils import is_field_editable_by
+
+                for name in list(attrs.keys()):
+                    if not is_field_editable_by(
+                        compliance_assessment, name, "respondent"
+                    ):
+                        attrs.pop(name)
 
         # Validate extended_result against result
         extended_result = attrs.get("extended_result")

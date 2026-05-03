@@ -3224,5 +3224,12 @@
 	"enrichFromEUVD": "从EUVD丰富",
 	"syncCweCatalog": "拉取CWE",
 	"syncCweCatalogFailed": "CWE失败",
-	"exportEcosystem": "生态系统导出 (XLSX)"
+	"exportEcosystem": "生态系统导出 (XLSX)",
+	"fieldVisibility": "字段可见性",
+	"fieldVisibilityHelpText": "控制每个角色可以查看和编辑哪些字段。",
+	"visibilityAuditorRespondent": "审计员 + 回应者",
+	"visibilityAuditorOnly": "仅审计员",
+	"visibilityHidden": "隐藏",
+	"answers": "答案",
+	"respondentAlignment": "回应者一致性"
 }

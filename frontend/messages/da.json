@@ -1471,5 +1471,12 @@
 	"enrichFromEUVD": "Berig EUVD",
 	"syncCweCatalog": "Hent CWE",
 	"syncCweCatalogFailed": "CWE fejl",
-	"exportEcosystem": "økosystem-eksport (XLSX)"
+	"exportEcosystem": "økosystem-eksport (XLSX)",
+	"fieldVisibility": "Felternes synlighed",
+	"fieldVisibilityHelpText": "Bestem hvilke felter hver rolle kan se og redigere.",
+	"visibilityAuditorRespondent": "Revisor + Respondent",
+	"visibilityAuditorOnly": "Kun revisor",
+	"visibilityHidden": "Skjult",
+	"answers": "Svar",
+	"respondentAlignment": "Respondentens overensstemmelse"
 }

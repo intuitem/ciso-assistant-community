@@ -1933,5 +1933,12 @@
 	"syncAppliedControlsMessage": "Zastosowane kontrole korzystające z tej kontroli referencyjnej zostaną z nią zsynchronizowane. Należy pamiętać, że tej operacji nie można cofnąć.",
 	"syncToAppliedControl": "Synchronizuj z zastosowaną kontrolą",
 	"syncToReferenceControl": "Synchronizuj z kontrolą referencyjną",
-	"exportEcosystem": "eksport ekosystemu (XLSX)"
+	"exportEcosystem": "eksport ekosystemu (XLSX)",
+	"fieldVisibility": "Widoczność pól",
+	"fieldVisibilityHelpText": "Kontroluj, które pola każda rola może zobaczyć i edytować.",
+	"visibilityAuditorRespondent": "Audytor + Respondent",
+	"visibilityAuditorOnly": "Tylko audytor",
+	"visibilityHidden": "Ukryte",
+	"answers": "Odpowiedzi",
+	"respondentAlignment": "Zgodność respondenta"
 }

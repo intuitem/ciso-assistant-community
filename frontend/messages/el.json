@@ -1888,5 +1888,12 @@
 	"syncCweCatalog": "Λήψη CWE",
 	"syncCweCatalogFailed": "Σφάλμα CWE",
 	"syncToReferenceControl": "Συγχρονισμός με τον πρότυπο έλεγχο",
-	"exportEcosystem": "εξαγωγή οικοσυστήματος (XLSX)"
+	"exportEcosystem": "εξαγωγή οικοσυστήματος (XLSX)",
+	"fieldVisibility": "Ορατότητα πεδίων",
+	"fieldVisibilityHelpText": "Ελέγξτε ποια πεδία μπορεί να βλέπει και να επεξεργάζεται κάθε ρόλος.",
+	"visibilityAuditorRespondent": "Ελεγκτής + Ερωτώμενος",
+	"visibilityAuditorOnly": "Μόνο ελεγκτής",
+	"visibilityHidden": "Κρυφό",
+	"answers": "Απαντήσεις",
+	"respondentAlignment": "Συμφωνία ερωτώμενου"
 }
