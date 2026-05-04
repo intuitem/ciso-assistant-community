@@ -224,18 +224,38 @@
 			if (commentCol !== '') body.comment_col = commentCol;
 			if (sectionCol !== '') body.section_col = sectionCol;
 
-			const res = await fetch(`/experimental/questionnaire-autopilot/${run.id}`, {
+			const saveRes = await fetch(`/experimental/questionnaire-autopilot/${run.id}`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(body)
 			});
-			const result = await res.json();
-			if (!res.ok) {
-				toast.trigger({ message: result.detail || 'Failed to save mapping.' });
+			const saveResult = await saveRes.json();
+			if (!saveRes.ok) {
+				toast.trigger({ message: saveResult.detail || 'Failed to save mapping.' });
 				return;
 			}
-			polledRun = { ...run, column_mapping: result.column_mapping };
-			toast.trigger({ message: 'Column mapping saved.' });
+			polledRun = { ...run, column_mapping: saveResult.column_mapping };
+
+			// Chain the extract step so the user lands directly in the
+			// configure-run phase. Failures here are surfaced but don't roll
+			// back the mapping save.
+			const extractRes = await fetch(
+				`/experimental/questionnaire-autopilot/${run.id}/extract`,
+				{ method: 'POST' }
+			);
+			const extractResult = await extractRes.json();
+			if (!extractRes.ok) {
+				toast.trigger({
+					message:
+						extractResult.detail ||
+						'Mapping saved, but extracting the questions failed.'
+				});
+				return;
+			}
+			toast.trigger({
+				message: `Mapping saved · extracted ${extractResult.extracted} questions.`
+			});
+			await invalidateAll();
 		} finally {
 			saving = false;
 		}
@@ -620,7 +640,7 @@
 							disabled={!canSaveMapping}
 							onclick={saveMapping}
 						>
-							{saving ? 'Saving…' : 'Save mapping'}
+							{saving ? 'Saving & extracting…' : 'Save mapping & extract questions'}
 						</button>
 					</div>
 				{/if}
