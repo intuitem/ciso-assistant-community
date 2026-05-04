@@ -1158,5 +1158,12 @@
 	"enrichFromEUVD": "EUVD سے افزودگی",
 	"syncCweCatalog": "CWE حاصل کریں",
 	"syncCweCatalogFailed": "CWE خرابی",
-	"expirationDateIsInThePastWarning": "درج کی گئی میعاد ختم کی تاریخ ماضی میں ہے"
+	"expirationDateIsInThePastWarning": "درج کی گئی میعاد ختم کی تاریخ ماضی میں ہے",
+	"fieldVisibility": "فیلڈ کی مرئیت",
+	"fieldVisibilityHelpText": "کنٹرول کریں کہ ہر کردار کون سے فیلڈز دیکھ اور ترمیم کر سکتا ہے۔",
+	"visibilityAuditorRespondent": "آڈیٹر + جواب دہندہ",
+	"visibilityAuditorOnly": "صرف آڈیٹر",
+	"visibilityHidden": "چھپا ہوا",
+	"answers": "جوابات",
+	"respondentAlignment": "جواب دہندہ کی صف بندی"
 }

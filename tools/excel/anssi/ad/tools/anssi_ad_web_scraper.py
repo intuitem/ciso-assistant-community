@@ -85,6 +85,11 @@ def has_class_prefix(tag: Tag, prefix: str) -> bool:
     return any(c.startswith(prefix) for c in classes)
 
 
+def has_any_class_prefix(tag: Tag, prefixes: tuple[str, ...]) -> bool:
+    classes = tag.get("class") or []
+    return any(c.startswith(prefix) for c in classes for prefix in prefixes)
+
+
 def is_inline_tag(tag_name: str) -> bool:
     """Tags considered inline for spacing logic."""
     return tag_name in {
@@ -188,8 +193,18 @@ def render_inline(tag: Tag) -> str:
         # Detect "code-like" spans
         is_code_like = (
             "hljs-built_in" in classes
-            or has_class_prefix(tag, "sc-iBzDrC")
-            or has_class_prefix(tag, "sc-jcwoBj")
+            or has_any_class_prefix(
+                tag,
+                (
+                    "hljs-",
+                    # Historical ANSSI generated classes.
+                    "sc-iBzDrC",
+                    "sc-jcwoBj",
+                    # Current ANSSI generated classes.
+                    "sc-fsjlER",
+                    "sc-jxyWrI",
+                ),
+            )
         )
 
 
@@ -212,7 +227,7 @@ def render_inline(tag: Tag) -> str:
 
         # ------------------------------------------------------
         # Case: WORD + DEFINITION spans (spanWord + spanDef)
-        # (single definition item inside sc-hiKeQa)
+        # (single definition item inside the generated definition span)
         # ------------------------------------------------------
         """"
         # Structure:
@@ -224,7 +239,7 @@ def render_inline(tag: Tag) -> str:
         # Markdown result:
         # *word-text* (definition text)
         """
-        if "sc-gXfWyg" in classes:
+        if "sc-gXfWyg" in classes or "sc-dCVDEO" in classes:
 
             # get all leaf spans (spans without nested spans)
             leaf_spans = []
@@ -257,7 +272,7 @@ def render_inline(tag: Tag) -> str:
                         if rendered:
                             word_parts.append(rendered)
 
-                word_text = " ".join(word_parts).strip()
+                word_text = smart_join(word_parts).strip()
 
                 if word_text and definition_text:
                     return f"*{word_text}* ({definition_text})"
@@ -331,7 +346,7 @@ def render_inline(tag: Tag) -> str:
 
 def render_block(node: Tag) -> str:
     """
-    Render a block-level node (p, h1, h2, ul, ol, table, div[variant=code], etc.)
+    Render a block-level node (p, h1, h2, h3, ul, ol, table, div[variant=code], etc.)
     to Markdown, including trailing newlines.
     """
     name = node.name.lower()
@@ -350,7 +365,7 @@ def render_block(node: Tag) -> str:
         inner = inner[0].upper() + inner[1:]
         return f"# {inner}\n\n"
 
-    if name == "h2":
+    if name in ("h2", "h3"):
         inner = render_inline_children(node)
         if not inner:
             return ""
@@ -708,20 +723,49 @@ def extract_checklist(framework_in_english : bool = False):
             print("> ✅ Using default language for page (French)")
         
         
-        # > Specific code for span in order to give them colors in the Markdown 
-        # Inject computed background-color as inline style on level spans
+        # > Specific code for span in order to give them colors in the Markdown
+        # Inject computed background-color as inline style on level and badge spans.
         page.evaluate(
             """
             () => {
-                // Select spans that get color from CSS based on "level" and class families
-                const spans = document.querySelectorAll(
-                    'span[level].sc-jJMFAr, span[level].sc-bBjSGg, span.sc-cOifbb, span[level].sc-ArjuK'
+                // Select spans that get color from CSS based on "level" or badge wrappers.
+                // ANSSI uses generated styled-components class names, so the
+                // stable selectors are semantic attributes plus wrappers around
+                // code-like spans with a visible computed background.
+                const codeLikeClassPrefixes = [
+                    'hljs-',
+                    'sc-iBzDrC',
+                    'sc-jcwoBj',
+                    'sc-fsjlER',
+                    'sc-jxyWrI',
+                ];
+
+                const hasVisibleBackground = (cs) => (
+                    cs
+                    && cs.backgroundColor
+                    && cs.backgroundColor !== 'transparent'
+                    && cs.backgroundColor !== 'rgba(0, 0, 0, 0)'
                 );
 
-                // Take "color" and "background-color" of spans to add those colors in Markdown 
-                spans.forEach(span => {
+                const hasCodeLikeChild = (span) => Array.from(span.children).some(child => (
+                    child.tagName === 'SPAN'
+                    && Array.from(child.classList).some(cls => (
+                        codeLikeClassPrefixes.some(prefix => cls.startsWith(prefix))
+                    ))
+                ));
+
+                const spans = Array.from(document.querySelectorAll('span[level], span[type^="badge"]'));
+                document.querySelectorAll('span').forEach(span => {
                     const cs = window.getComputedStyle(span);
-                    if (cs && cs.backgroundColor && !span.style.backgroundColor) {
+                    if (hasCodeLikeChild(span) && hasVisibleBackground(cs)) {
+                        spans.push(span);
+                    }
+                });
+
+                // Take "color" and "background-color" of spans to add those colors in Markdown 
+                new Set(spans).forEach(span => {
+                    const cs = window.getComputedStyle(span);
+                    if (hasVisibleBackground(cs) && !span.style.backgroundColor) {
                         span.style.backgroundColor = cs.backgroundColor;
                     }
                     if (cs.color && !span.style.color) {
@@ -765,9 +809,23 @@ def extract_checklist(framework_in_english : bool = False):
 
 
         # --- Table with all vulnerabilities ---
-        
-        # Retrieve all TR elements
-        rows = page.query_selector_all("div#root > div > table > tbody > tr")
+
+        checklist_table = None
+        for table in page.query_selector_all("div#root table"):
+            headers = [
+                (th.inner_text() or "").strip().lower()
+                for th in table.query_selector_all(":scope > thead th")
+            ]
+            if any(header in ("niveau", "level", "grade") for header in headers) and "id" in headers:
+                checklist_table = table
+                break
+
+        if checklist_table is None:
+            raise RuntimeError("Could not find the checklist table in the rendered ANSSI page.")
+
+        # Retrieve only the top-level rows of the checklist table. Some detail
+        # cells contain nested tables that must not be interpreted as controls.
+        rows = checklist_table.query_selector_all(":scope > tbody > tr")
 
         i = 0
         while i < len(rows):

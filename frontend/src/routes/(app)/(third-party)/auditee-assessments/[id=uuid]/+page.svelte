@@ -25,7 +25,7 @@
 		getFieldVisibility,
 		hasComputedResult,
 		hasComputedScore,
-		resolveFieldVisibility,
+		isFieldEditable as isFieldEditableHelper,
 		shouldShowAutoQuestion,
 		buildAutoAlignmentQuestion,
 		alignmentValueFromChoiceUrn,
@@ -55,19 +55,38 @@
 		{ id: 'compliant', label: m.compliant() },
 		{ id: 'not_applicable', label: m.notApplicable() }
 	];
+
+	const status_options = [
+		{ id: 'to_do', label: m.toDo() },
+		{ id: 'in_progress', label: m.inProgress() },
+		{ id: 'in_review', label: m.inReview() },
+		{ id: 'done', label: m.done() }
+	];
+
+	const extended_result_options = [
+		{ id: 'major_nonconformity', label: m.majorNonconformity() },
+		{ id: 'minor_nonconformity', label: m.minorNonconformity() },
+		{ id: 'observation_sensitive_point', label: m.observationSensitivePoint() },
+		{ id: 'opportunity_for_improvement', label: m.opportunityForImprovement() },
+		{ id: 'good_practice', label: m.goodPractice() }
+	];
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
 
 	// Field visibility based on viewer role (respondent if assigned actor, auditor otherwise)
 	const fw = $derived(complianceAssessment.framework);
 	const viewerRole = $derived((data.viewerRole ?? 'respondent') as 'respondent' | 'auditor');
-	const fieldVis = $derived(getFieldVisibility(fw, complianceAssessment, viewerRole));
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	const showComments = $derived(fieldVis.showComments);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
 
 	// Single assignment — the URL param (params.id) IS the assignment ID
 	let assignment = $derived(data.assignment);
@@ -77,30 +96,27 @@
 
 	function isFieldEditable(fieldName: string): boolean {
 		if (complianceAssessment.is_locked || complianceAssessment.status === 'in_review') return false;
-		const vis = resolveFieldVisibility(fw, complianceAssessment, fieldName);
-		if (vis === 'hidden') return false;
-		if (isAuditor) {
-			// Auditor can edit auditor-owned fields
-			return vis === 'auditor';
-		} else {
-			// Respondent can edit everyone-visible fields (when assignment status allows)
+		if (!isAuditor) {
 			if (
 				assignmentStatus === 'draft' ||
 				assignmentStatus === 'submitted' ||
 				assignmentStatus === 'closed'
 			)
 				return false;
-			return vis === 'everyone';
 		}
+		return isFieldEditableHelper(complianceAssessment, fieldName, viewerRole);
 	}
 
 	const canEditResult = $derived(isFieldEditable('result'));
 	const canEditScore = $derived(isFieldEditable('score'));
+	const canEditDocumentationScore = $derived(isFieldEditable('documentation_score'));
 	const canEditObservation = $derived(isFieldEditable('observation'));
 	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
 	const canEditEvidences = $derived(isFieldEditable('evidences'));
 	const canEditAnswers = $derived(isFieldEditable('answers'));
 	const canEditAlignment = $derived(isFieldEditable('respondent_alignment'));
+	const canEditStatus = $derived(isFieldEditable('status'));
+	const canEditExtendedResult = $derived(isFieldEditable('extended_result'));
 
 	let canSubmit = $derived(
 		!isAuditor && (assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested')
@@ -473,16 +489,13 @@
 		});
 	});
 
-	let accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
+	let accordionItems: Record<string, string[]> = $state(
 		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce(
 			(acc, requirementAssessment) => {
-				return {
-					...acc,
-					[requirementAssessment.id]: ['']
-				};
+				return { ...acc, [requirementAssessment.id]: [] };
 			},
-			{} as Record<string, ['' | 'observation' | 'evidence']>
+			{} as Record<string, string[]>
 		)
 	);
 
@@ -923,7 +936,7 @@
 							{/if}
 
 							<!-- Auto-alignment question (when no framework questions) -->
-							{#if shouldShowAutoQuestion(requirement, viewerRole, fw, complianceAssessment)}
+							{#if shouldShowAutoQuestion(requirement, viewerRole, complianceAssessment)}
 								<div class="flex flex-col w-full space-y-2">
 									<Question
 										questions={buildAutoAlignmentQuestion({
@@ -966,8 +979,29 @@
 								</div>
 							{/if}
 
+							<!-- Status -->
+							{#if showStatus}
+								<div class="flex flex-col items-center w-full my-2">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.status()}
+									</p>
+									<RadioGroup
+										possibleOptions={status_options}
+										key="id"
+										labelKey="label"
+										field="status"
+										disabled={!canEditStatus}
+										initialValue={requirementAssessment.status ?? 'to_do'}
+										onChange={(newValue) => {
+											requirementAssessment.status = newValue;
+											update(requirementAssessment, 'status');
+										}}
+									/>
+								</div>
+							{/if}
+
 							<!-- Result -->
-							{#if showResult || hasComputedResult(requirement.questions)}
+							{#if showResult}
 								<div class="flex flex-col items-center w-full my-2">
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
@@ -1001,13 +1035,32 @@
 								</div>
 							{/if}
 
+							<!-- Extended result -->
+							{#if showExtendedResult}
+								<div class="flex flex-col items-center w-full my-2">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.extendedResult()}
+									</p>
+									<RadioGroup
+										possibleOptions={extended_result_options}
+										key="id"
+										labelKey="label"
+										field="extended_result"
+										disabled={!canEditExtendedResult}
+										initialValue={requirementAssessment.extended_result ?? null}
+										onChange={(newValue) => {
+											const next =
+												requirementAssessment.extended_result === newValue ? null : newValue;
+											requirementAssessment.extended_result = next;
+											update(requirementAssessment, 'extended_result');
+										}}
+									/>
+								</div>
+							{/if}
+
 							<!-- Score -->
 							{#if showScore}
-								<div
-									class="flex flex-col w-full place-items-center {!canEditScore
-										? 'pointer-events-none opacity-60'
-										: ''}"
-								>
+								<div class="flex flex-col w-full place-items-center">
 									{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
 										<div class="flex flex-row items-center space-x-4">
 											<span class="font-medium">{m.score()}</span>
@@ -1071,7 +1124,7 @@
 												</div>
 											{/snippet}
 										</Score>
-										{#if complianceAssessment.show_documentation_score}
+										{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 											<Score
 												form={docScoreForms[requirementAssessment.id]}
 												min_score={complianceAssessment.min_score}
@@ -1085,7 +1138,7 @@
 													requirementAssessment.documentation_score = newScore;
 													updateScore(requirementAssessment);
 												}}
-												disabled={!canEditScore || !requirementAssessment.is_scored}
+												disabled={!canEditDocumentationScore || !requirementAssessment.is_scored}
 											/>
 										{/if}
 									{/if}
@@ -1093,6 +1146,7 @@
 							{/if}
 
 							<Accordion
+								multiple
 								value={accordionItems[requirementAssessment.id]}
 								onValueChange={(e) => (accordionItems[requirementAssessment.id] = e.value)}
 							>
@@ -1225,43 +1279,26 @@
 										</Accordion.ItemContent>
 									</Accordion.Item>
 								{/if}
-
-								<!-- Observation -->
-								{#if showObservation}
-									<Accordion.Item value="observation">
-										<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-											<p class="flex flex-1 text-left">{m.observation()}</p>
-
-											<Accordion.ItemIndicator
-												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-												><svg
-													xmlns="http://www.w3.org/2000/svg"
-													width="14px"
-													height="14px"
-													viewBox="0 0 448 512"
-													><path
-														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-													/></svg
-												></Accordion.ItemIndicator
-											>
-										</Accordion.ItemTrigger>
-										<Accordion.ItemContent>
-											<TableMarkdownField
-												bind:value={requirementAssessment.observation}
-												disabled={!canEditObservation}
-												onSave={async (newValue) => {
-													await update(requirementAssessment, 'observation');
-													requirementAssessment.observationBuffer = newValue;
-												}}
-											/>
-										</Accordion.ItemContent>
-									</Accordion.Item>
-								{/if}
 							</Accordion>
+
+							<!-- Observation (always visible, never collapsible) -->
+							{#if showObservation}
+								<div class="flex flex-col w-full space-y-1 pt-2">
+									<p class="font-medium text-sm">{m.observation()}</p>
+									<TableMarkdownField
+										bind:value={requirementAssessment.observation}
+										disabled={!canEditObservation}
+										onSave={async (newValue) => {
+											await update(requirementAssessment, 'observation');
+											requirementAssessment.observationBuffer = newValue;
+										}}
+									/>
+								</div>
+							{/if}
 						</form>
 					{/key}
 				{/if}
-				{#if page.data?.featureflags?.comments}
+				{#if page.data?.featureflags?.comments && showComments}
 					<CommentsPanel parentType="requirement_assessment" parentId={requirementAssessment.id} />
 				{/if}
 			</div>

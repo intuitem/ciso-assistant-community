@@ -1181,5 +1181,12 @@
 	"syncCweCatalog": "Hämta CWE",
 	"syncCweCatalogFailed": "CWE fel",
 	"expirationDate": "Utgångsdatum",
-	"expirationDateIsInThePastWarning": "Det angivna utgångsdatumet ligger i det förflutna"
+	"expirationDateIsInThePastWarning": "Det angivna utgångsdatumet ligger i det förflutna",
+	"fieldVisibility": "Fältens synlighet",
+	"fieldVisibilityHelpText": "Bestäm vilka fält varje roll kan se och redigera.",
+	"visibilityAuditorRespondent": "Revisor + Svarande",
+	"visibilityAuditorOnly": "Endast revisor",
+	"visibilityHidden": "Dold",
+	"answers": "Svar",
+	"respondentAlignment": "Svarandes inriktning"
 }

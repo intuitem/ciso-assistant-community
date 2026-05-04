@@ -3076,5 +3076,12 @@
 	"syncCweCatalog": "MITRE CWE-catalogus ophalen",
 	"syncCweCatalogFailed": "Ophalen van CWE-catalogus mislukt",
 	"syncToReferenceControl": "Synchroniseren met referentiecontrole",
-	"exportEcosystem": "ecosysteem export (XLSX)"
+	"exportEcosystem": "ecosysteem export (XLSX)",
+	"fieldVisibility": "Veldzichtbaarheid",
+	"fieldVisibilityHelpText": "Bepaal welke velden elke rol kan zien en bewerken.",
+	"visibilityAuditorRespondent": "Auditor + Respondent",
+	"visibilityAuditorOnly": "Alleen auditor",
+	"visibilityHidden": "Verborgen",
+	"answers": "Antwoorden",
+	"respondentAlignment": "Afstemming respondent"
 }
