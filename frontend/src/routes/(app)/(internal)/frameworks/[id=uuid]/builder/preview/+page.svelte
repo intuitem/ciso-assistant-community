@@ -8,8 +8,7 @@
 		getTranslation,
 		type RequirementNode,
 		type BuilderQuestion,
-		type BuilderRequirement,
-		type BuilderSection,
+		type BuilderNode,
 		type Translations
 	} from '$lib/components/FrameworkBuilder/builder-state';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -30,7 +29,7 @@
 
 	let loading = $state(true);
 	let error = $state<string | null>(null);
-	let sections = $state<BuilderSection[]>([]);
+	let rootNodes = $state<BuilderNode[]>([]);
 	let igDefs = $state<Array<{ ref_id: string; name: string; description?: string }>>([]);
 	let availableLanguages = $state<string[]>([]);
 	let previewLanguage = $state<string | null>(null);
@@ -44,7 +43,7 @@
 		try {
 			const result = await apiStartEditing(data.framework.id);
 			const { frameworkPatch, nodes, questions } = hydrateDraft(result.draft, data.framework.id);
-			sections = buildTree(nodes, questions);
+			rootNodes = buildTree(nodes, questions);
 
 			// Merge implementation_groups_definition from draft meta or framework data
 			const igSource =
@@ -79,28 +78,26 @@
 
 	// --- Linearize tree into NavItems ---
 
-	function linearize(sections: BuilderSection[]): NavItem[] {
+	function linearize(tree: BuilderNode[]): NavItem[] {
 		const items: NavItem[] = [];
 
-		function walk(reqs: BuilderRequirement[]) {
-			for (const req of reqs) {
-				if (req.node.display_mode === 'splash') {
-					items.push({ type: 'splash', data: req.node });
-				} else if (req.node.assessable) {
+		function walk(nodes: BuilderNode[]) {
+			for (const n of nodes) {
+				if (n.node.display_mode === 'splash') {
+					items.push({ type: 'splash', data: n.node });
+				} else if (n.node.assessable) {
 					items.push({
 						type: 'requirement',
-						data: { node: req.node, questions: req.questions }
+						data: { node: n.node, questions: n.questions }
 					});
 				}
-				if (req.children.length > 0) {
-					walk(req.children);
+				if (n.children.length > 0) {
+					walk(n.children);
 				}
 			}
 		}
 
-		for (const section of sections) {
-			walk(section.requirements);
-		}
+		walk(tree);
 
 		return items;
 	}
@@ -150,7 +147,7 @@
 
 	// --- Derived ---
 
-	let allNavItems = $derived(linearize(sections));
+	let allNavItems = $derived(linearize(rootNodes));
 	let navItems = $derived(allNavItems.filter((item) => passesIgFilter(getNavItemNode(item))));
 	let currentItem = $derived(navItems[currentIndex] ?? null);
 

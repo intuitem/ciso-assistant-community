@@ -15,6 +15,16 @@ export const load = (async ({ fetch, params }) => {
 	const requirement = requirementAssessment.requirement;
 	const parent = requirementAssessment.requirement.parent_requirement;
 
+	const requirementsListData = await fetch(
+		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/requirements_list/?assessable=true`
+	)
+		.then((res) => (res.ok ? res.json() : null))
+		.catch((error) => {
+			console.error('Failed to fetch requirement viewer role:', error);
+			return null;
+		});
+	const viewerRole = requirementsListData?.viewer_role === 'auditor' ? 'auditor' : 'respondent';
+
 	const tables: Record<string, any> = {};
 
 	for (const key of ['applied-controls', 'evidences'] as urlModel[]) {
@@ -38,6 +48,7 @@ export const load = (async ({ fetch, params }) => {
 		requirement,
 		parent,
 		tables,
-		title: requirementAssessment.name
+		title: requirementAssessment.name,
+		viewerRole
 	};
 }) satisfies PageServerLoad;

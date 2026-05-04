@@ -317,7 +317,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_perimeters",
         "model_type": "Perimeter",
-        "help": "Import perimeters using the Data Wizard backend.",
+        "help": (
+            "Import perimeters using the Data Wizard backend.\n"
+            "\nRequired columns: name\n"
+            "Optional columns: ref_id, description, domain, lc_status (or status), "
+            "default_assignee (user email or team name; supports semicolon)\n"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -328,7 +333,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "ComplianceAssessment",
         "help": "Import compliance assessments using the Data Wizard backend.",
         "requires_folder": False,
-        "requires_perimeter": True,
+        "requires_perimeter": False,
         "requires_framework": True,
         "requires_matrix": False,
     },
@@ -346,7 +351,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "RiskAssessment",
         "help": "Import risk assessments using the Data Wizard backend.",
         "requires_folder": False,
-        "requires_perimeter": True,
+        "requires_perimeter": False,
         "requires_framework": False,
         "requires_matrix": True,
     },

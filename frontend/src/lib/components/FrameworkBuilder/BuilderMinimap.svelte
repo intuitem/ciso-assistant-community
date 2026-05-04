@@ -6,9 +6,12 @@
 
 	interface Props {
 		frameworkId: string;
+		onOpenHelp?: () => void;
+		onExpandAllCards?: () => void;
+		onCollapseAllCards?: () => void;
 	}
 
-	let { frameworkId }: Props = $props();
+	let { frameworkId, onOpenHelp, onExpandAllCards, onCollapseAllCards }: Props = $props();
 
 	const builder = getBuilderContext();
 	const {
@@ -16,6 +19,7 @@
 		errors: errorsStore,
 		unsaved: unsavedStore,
 		unpublished: unpublishedStore,
+		rootNodes: rootNodesStore,
 		framework: frameworkStore,
 		activeLanguage: activeLanguageStore
 	} = builder;
@@ -34,6 +38,14 @@
 		if (!$activeLanguageStore) return null;
 		return builder.getTranslationProgress($activeLanguageStore);
 	});
+
+	// Live-vs-draft status. The framework is always pickable by audit authors;
+	// what varies is whether any live content exists and whether the draft
+	// differs from live.
+	// - hasLiveContent: true iff the framework has ever been published (editing_version > 1).
+	// - hasDraftContent: the in-editor tree has at least one node.
+	let hasLiveContent = $derived(($frameworkStore.editing_version ?? 1) > 1);
+	let hasDraftContent = $derived($rootNodesStore.length > 0);
 
 	onMount(() => {
 		const appBar = document.querySelector('[data-scope="app-bar"]');
@@ -86,12 +98,41 @@
 
 		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
-		<!-- Draft badge (visible when draft differs from published state) -->
-		{#if $unpublishedStore}
+		<!--
+			Live-vs-draft status badge. The framework is always pickable by audit
+			authors; what varies is whether new audits will see the editor's work.
+		-->
+		{#if hasLiveContent && !$unpublishedStore}
 			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
+				title="The draft matches what audit respondents see."
 			>
-				Draft
+				<i class="fa-solid fa-circle-check text-[10px]"></i>
+				Live
+			</span>
+		{:else if hasLiveContent && $unpublishedStore}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
+				title="The draft has edits that aren't visible to audit respondents yet. Publish to apply."
+			>
+				<i class="fa-solid fa-pen-nib text-[10px]"></i>
+				Unpublished changes
+			</span>
+		{:else if hasDraftContent}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
+				title="The draft has content but nothing has been published yet. New audits will see nothing until you publish."
+			>
+				<i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+				Draft — nothing live yet
+			</span>
+		{:else}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-flex items-center gap-1"
+				title="No requirements yet. New audits built on this framework will have nothing to answer."
+			>
+				<i class="fa-solid fa-file-lines text-[10px]"></i>
+				Empty
 			</span>
 		{/if}
 
@@ -194,6 +235,43 @@
 
 		<!-- Spacer -->
 		<div class="ml-auto"></div>
+
+		<!-- Collapse/expand all cards -->
+		{#if onCollapseAllCards}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onCollapseAllCards}
+				title="Collapse all cards"
+				aria-label="Collapse all cards"
+			>
+				<i class="fa-solid fa-angles-up text-[10px]"></i>
+			</button>
+		{/if}
+		{#if onExpandAllCards}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onExpandAllCards}
+				title="Expand all cards"
+				aria-label="Expand all cards"
+			>
+				<i class="fa-solid fa-angles-down text-[10px]"></i>
+			</button>
+		{/if}
+
+		<!-- Keyboard shortcut help -->
+		{#if onOpenHelp}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onOpenHelp}
+				title="Keyboard shortcuts (?)"
+				aria-label="Show keyboard shortcuts"
+			>
+				?
+			</button>
+		{/if}
 
 		<!-- Save button (visible when local edits not yet saved to draft) -->
 		{#if $unsavedStore}

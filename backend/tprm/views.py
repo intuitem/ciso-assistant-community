@@ -187,7 +187,27 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
 
     def get_queryset(self):
         """Add annotations for default_criticality sorting and legal identifier search."""
-        qs = super().get_queryset()
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",
+                "parent_entity",
+            )
+        )
+
+        # Skip the heavier prefetches on autocomplete (lightweight payload).
+        if self.action != "autocomplete":
+            # M2Ms / reverse FKs rendered as FieldsRelatedField on
+            # EntityReadSerializer — without these every row issues a fresh query.
+            qs = qs.prefetch_related(
+                "owned_folders",
+                "branches",
+                "relationship",
+                "contracts",
+                "filtering_labels",
+            )
 
         # Cast legal_identifiers JSON to text so DRF SearchFilter can icontains on it.
         # Works on both SQLite (JSON stored as text) and PostgreSQL (jsonb → text cast).
