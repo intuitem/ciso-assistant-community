@@ -4166,5 +4166,12 @@
 	"allRequirements": "Visi reikalavimai",
 	"riskCoverage": "Rizikos aprėptis",
 	"soaSelectRiskDescription": "Pasirinkus rizikos vertinimus, taikymo pareiškimas bus praturtintas susietais rizikos scenarijais ir apdorojimo sprendimais",
-	"exportEcosystem": "ekosistemos eksportas (XLSX)"
+	"exportEcosystem": "ekosistemos eksportas (XLSX)",
+	"fieldVisibility": "Laukų matomumas",
+	"fieldVisibilityHelpText": "Valdykite, kuriuos laukus kiekvienas vaidmuo gali matyti ir redaguoti.",
+	"visibilityAuditorRespondent": "Auditorius + Respondentas",
+	"visibilityAuditorOnly": "Tik auditorius",
+	"visibilityHidden": "Paslėpta",
+	"answers": "Atsakymai",
+	"respondentAlignment": "Respondento suderinimas"
 }

@@ -2943,11 +2943,15 @@ class LoadFileView(APIView):
                                     enable_doc_score
                                     and not compliance_assessment.show_documentation_score
                                 ):
+                                    # show_documentation_score is a @property
+                                    # backed by `field_visibility`; the setter
+                                    # mutates that JSON column, so update_fields
+                                    # must point at the actual concrete field.
                                     compliance_assessment.show_documentation_score = (
                                         True
                                     )
                                     compliance_assessment.save(
-                                        update_fields=["show_documentation_score"]
+                                        update_fields=["field_visibility"]
                                     )
                                 results["successful"] += 1
                             else:

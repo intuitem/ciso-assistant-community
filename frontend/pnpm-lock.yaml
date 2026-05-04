@@ -84,11 +84,8 @@ importers:
         version: 2.3.0
     devDependencies:
       '@inlang/paraglide-js':
-        specifier: ^2.1.0
-        version: 2.1.0(babel-plugin-macros@3.1.0)
-      '@inlang/plugin-message-format':
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: ^2.17.0
+        version: 2.17.0(babel-plugin-macros@3.1.0)
       '@playwright/test':
         specifier: ^1.55.1
         version: 1.56.1
@@ -600,19 +597,16 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@inlang/paraglide-js@2.1.0':
-    resolution: {integrity: sha512-hpj5AglQphR91IH2qXPRp78fTkRVdhlNl09rZZBTtB18fcmJpCScDFckUEaR0UhOARySd4SiH/7/GbVenFcrbQ==}
+  '@inlang/paraglide-js@2.17.0':
+    resolution: {integrity: sha512-dY4yoQkQkF1En1m3qpO22cVGubluU2W78fatLb33s8qe6K8wDqP0mIGZ/oZ0/h609YC8/Y0CkceaLcYeJTcpwg==}
     hasBin: true
-
-  '@inlang/plugin-message-format@2.2.0':
-    resolution: {integrity: sha512-6MJLExr3OLqbR8gCP4UEgNMgdaJFFCug2GLmFwid7Ana4kObnbCA33YN3m3eN8p+lmnv7zpfW7oeyTZXZLoptg==}
 
   '@inlang/recommend-sherlock@0.2.1':
     resolution: {integrity: sha512-ckv8HvHy/iTqaVAEKrr+gnl+p3XFNwe5D2+6w6wJk2ORV2XkcRkKOJ/XsTUJbPSiyi4PI+p+T3bqbmNx/rDUlg==}
 
-  '@inlang/sdk@2.4.9':
-    resolution: {integrity: sha512-cvz/C1rF5WBxzHbEoiBoI6Sz6q6M+TdxfWkEGBYTD77opY8i8WN01prUWXEM87GPF4SZcyIySez9U0Ccm12oFQ==}
-    engines: {node: '>=18.0.0'}
+  '@inlang/sdk@2.9.2':
+    resolution: {integrity: sha512-H/iVZEcOtbowKaiq6yirnUR9eyffAOsXpgwWr4eAe45H7l1f1A1Wowb7hVkWQcAE62sL1g76qN4XkyOx2BkV2w==}
+    engines: {node: '>=20.0.0'}
 
   '@internationalized/date@3.10.1':
     resolution: {integrity: sha512-oJrXtQiAXLvT9clCf1K4kxp3eKsQhIaZqxEyowkBcsvZDdZkbWrVmnGknxs5flTD0VGsxrxKgBCZty1EzoiMzA==}
@@ -663,8 +657,8 @@ packages:
   '@juggle/resize-observer@3.4.0':
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
 
-  '@lix-js/sdk@0.4.7':
-    resolution: {integrity: sha512-pRbW+joG12L0ULfMiWYosIW0plmW4AsUdiPCp+Z8rAsElJ+wJ6in58zhD3UwUcd4BNcpldEGjg6PdA7e0RgsDQ==}
+  '@lix-js/sdk@0.4.10':
+    resolution: {integrity: sha512-0dMInAJK/67guTG5rRZaCEhvzC5cCXENOjaePA5AqMXrCE97kaY7SRor9e2vnoGsFIiGqXKlT0MCIoZj36G0gg==}
     engines: {node: '>=18'}
 
   '@lix-js/server-protocol-schema@0.1.1':
@@ -3264,8 +3258,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  uuid@10.0.0:
-    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+  uuid@14.0.0:
+    resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
     hasBin: true
 
   valibot@1.2.0:
@@ -3805,10 +3799,10 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@inlang/paraglide-js@2.1.0(babel-plugin-macros@3.1.0)':
+  '@inlang/paraglide-js@2.17.0(babel-plugin-macros@3.1.0)':
     dependencies:
       '@inlang/recommend-sherlock': 0.2.1
-      '@inlang/sdk': 2.4.9(babel-plugin-macros@3.1.0)
+      '@inlang/sdk': 2.9.2(babel-plugin-macros@3.1.0)
       commander: 11.1.0
       consola: 3.4.0
       json5: 2.2.3
@@ -3817,19 +3811,17 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@inlang/plugin-message-format@2.2.0': {}
-
   '@inlang/recommend-sherlock@0.2.1':
     dependencies:
       comment-json: 4.2.5
 
-  '@inlang/sdk@2.4.9(babel-plugin-macros@3.1.0)':
+  '@inlang/sdk@2.9.2(babel-plugin-macros@3.1.0)':
     dependencies:
-      '@lix-js/sdk': 0.4.7(babel-plugin-macros@3.1.0)
+      '@lix-js/sdk': 0.4.10(babel-plugin-macros@3.1.0)
       '@sinclair/typebox': 0.31.28
       kysely: 0.28.14
       sqlite-wasm-kysely: 0.3.0(kysely@0.28.14)
-      uuid: 10.0.0
+      uuid: 14.0.0
     transitivePeerDependencies:
       - babel-plugin-macros
 
@@ -3888,7 +3880,7 @@ snapshots:
 
   '@juggle/resize-observer@3.4.0': {}
 
-  '@lix-js/sdk@0.4.7(babel-plugin-macros@3.1.0)':
+  '@lix-js/sdk@0.4.10(babel-plugin-macros@3.1.0)':
     dependencies:
       '@lix-js/server-protocol-schema': 0.1.1
       dedent: 1.5.1(babel-plugin-macros@3.1.0)
@@ -3896,7 +3888,7 @@ snapshots:
       js-sha256: 0.11.1
       kysely: 0.28.14
       sqlite-wasm-kysely: 0.3.0(kysely@0.28.14)
-      uuid: 10.0.0
+      uuid: 14.0.0
     transitivePeerDependencies:
       - babel-plugin-macros
 
@@ -6782,7 +6774,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  uuid@10.0.0: {}
+  uuid@14.0.0: {}
 
   valibot@1.2.0(typescript@5.8.3):
     optionalDependencies:
