@@ -343,10 +343,10 @@ DATA_WIZARD_COMMANDS = [
         "command": "import_perimeters",
         "model_type": "Perimeter",
         "help": (
-            "Import perimeters from CSV/Excel.\n"
-            "\nRequired columns: name\n\n"
-            "Optional columns: ref_id, description, status, domain\n"
-            "\nConflict detection: by name + folder"
+            "Import perimeters using the Data Wizard backend.\n"
+            "\nRequired columns: name\n"
+            "Optional columns: ref_id, description, domain, lc_status (or status), "
+            "default_assignee (user email or team name; supports semicolon)\n"
         ),
         "requires_folder": True,
         "requires_perimeter": False,
@@ -365,7 +365,7 @@ DATA_WIZARD_COMMANDS = [
             "\nNote: always creates a new assessment; conflict management is not applicable."
         ),
         "requires_folder": False,
-        "requires_perimeter": True,
+        "requires_perimeter": False,
         "requires_framework": True,
         "requires_matrix": False,
         "supports_conflict": False,
@@ -401,7 +401,7 @@ DATA_WIZARD_COMMANDS = [
             "\nNote: always creates a new risk assessment; conflict management is not applicable."
         ),
         "requires_folder": False,
-        "requires_perimeter": True,
+        "requires_perimeter": False,
         "requires_framework": False,
         "requires_matrix": True,
         "supports_conflict": False,

@@ -4,6 +4,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 import copy
 import csv
+import hashlib
 import json
 import mimetypes
 import re
@@ -102,6 +103,7 @@ from rest_framework.decorators import (
 from rest_framework.parsers import (
     FileUploadParser,
     FormParser,
+    JSONParser,
     MultiPartParser,
 )
 from rest_framework.renderers import JSONRenderer
@@ -109,7 +111,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import (
+    NotFound,
+    PermissionDenied,
+    ValidationError as DRFValidationError,
+)
 
 
 from weasyprint import HTML
@@ -878,11 +884,78 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 field_models[name] = related_model
         return field_models
 
+    def _user_can_view_all(self, model) -> bool:
+        """Whether the current user has unrestricted view access to `model`.
+
+        When True, the IAM post-filter has nothing to mask for that model
+        and can be skipped — both the per-related-model RBAC scan in
+        `_get_accessible_ids_map` and the per-row mask walk in
+        `_filter_related_fields`. Reads only the IAM snapshot caches; no
+        DB queries.
+        """
+        user = self.request.user
+        if not getattr(user, "is_authenticated", False):
+            return False
+
+        name = model.__name__.lower()
+
+        # Actor splits into User/Team/Entity in get_accessible_object_ids;
+        # mirror that decomposition.
+        if name == "actor":
+            from core.models import Team
+            from tprm.models import Entity
+
+            return all(self._user_can_view_all(m) for m in (User, Team, Entity))
+
+        from iam.cache_builders import (
+            get_folder_state,
+            get_roles_state,
+            iter_descendant_ids,
+        )
+        from iam.models import _iter_assignment_lites_for_user
+
+        roles_state = get_roles_state()
+        view_code = f"view_{name}"
+        if view_code not in roles_state.permission_ids_by_codename:
+            # Mirror get_accessible_object_ids: when the view permission
+            # is not registered for the model, that helper returns
+            # ([], [], []) — i.e. "the user can see nothing", which means
+            # the post-filter MUST mask everything. Returning False here
+            # falls through to the slow path so the masking happens.
+            return False
+
+        state = get_folder_state()
+        all_folder_ids = frozenset(state.folders.keys())
+        covered: set = set()
+        for a in _iter_assignment_lites_for_user(user):
+            role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
+            if "view_folder" not in role_perms or view_code not in role_perms:
+                continue
+            if a.is_recursive:
+                for pf_id in a.perimeter_folder_ids:
+                    covered.update(
+                        iter_descendant_ids(state, pf_id, include_start=True)
+                    )
+            else:
+                covered.update(a.perimeter_folder_ids)
+            if all_folder_ids.issubset(covered):
+                return True
+        return False
+
     def _get_accessible_ids_map(self, related_models):
-        """Return visible object IDs per related model for the current user."""
+        """Return visible object IDs per related model for the current user.
+
+        Returns `None` for models the user can fully view (post-filter
+        skips them) or for models that aren't IAM-scoped at all.
+        """
         root_folder = Folder.get_root_folder()
         allowed = {}
         for model in related_models:
+            # Fast path: skip the IAM scan when the user can see every
+            # instance of this model.
+            if self._user_can_view_all(model):
+                allowed[model] = None
+                continue
             try:
                 ids = RoleAssignment.get_accessible_object_ids(
                     root_folder, self.request.user, model
@@ -912,6 +985,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def _filter_related_fields(self, data, field_models, allowed_ids):
         """Mask related fields the current user is not allowed to see."""
+        # Fast path: nothing to mask if every related model is unrestricted
+        # for this user — avoids the per-row Python walk on list responses.
+        if not any(v is not None for v in allowed_ids.values()):
+            return data
         if isinstance(data, list):
             return [
                 self._filter_related_fields(item, field_models, allowed_ids)
@@ -1680,7 +1757,7 @@ class ThreatViewSet(BaseModelViewSet):
         "filtering_labels",
         "urn",
     ]
-    search_fields = ["name", "provider", "description"]
+    search_fields = ["ref_id", "name", "provider", "description"]
 
     def get_queryset(self):
         return (
@@ -7069,8 +7146,12 @@ class ActorViewSet(BaseModelViewSet):
         if not allow_entities:
             queryset = queryset.filter(entity__isnull=True)
 
-        third_parties = Actor.objects.filter(user__is_third_party=True)
-        queryset = queryset.exclude(id__in=third_parties)
+        include_third_parties = self.request.query_params.get(
+            "include_third_parties", "false"
+        )
+        if include_third_parties.lower() != "true":
+            third_parties = Actor.objects.filter(user__is_third_party=True)
+            queryset = queryset.exclude(id__in=third_parties)
 
         return queryset.order_by("type_rank", "display_name")
 
@@ -9877,21 +9958,26 @@ class RequirementViewSet(BaseModelViewSet):
                         "compliance_assessment__id",
                         "compliance_assessment__name",
                         "compliance_assessment__version",
-                        "compliance_assessment__show_documentation_score",
+                        "compliance_assessment__field_visibility",
                         "compliance_assessment__max_score",
                     )
                     .distinct()
                 )
 
+                from core.utils import resolve_visibility_from_overrides
+
                 for ca in compliance_assessments:
+                    fv = ca["compliance_assessment__field_visibility"]
+                    doc_pair = resolve_visibility_from_overrides(
+                        fv, "documentation_score"
+                    )
+                    show_doc = doc_pair.get("auditor", "edit") != "hidden"
                     perimeter_entry["compliance_assessments"].append(
                         {
                             "id": ca["compliance_assessment__id"],
                             "name": ca["compliance_assessment__name"],
                             "version": ca["compliance_assessment__version"],
-                            "show_documentation_score": ca[
-                                "compliance_assessment__show_documentation_score"
-                            ],
+                            "show_documentation_score": show_doc,
                             "max_score": ca["compliance_assessment__max_score"],
                         }
                     )
@@ -9979,6 +10065,330 @@ class EvidenceViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Evidence.Status.choices))
+
+    # --- Bulk / directory upload (experimental) -----------------------------
+
+    class BatchConflictStrategy(models.TextChoices):
+        SKIP = "skip", "Skip"
+        ADD_REVISION = "add_revision", "Add revision"
+        REPLACE = "replace", "Replace"
+        RENAME = "rename", "Rename"
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="batch-upload",
+        parser_classes=[MultiPartParser, FormParser],
+    )
+    def batch_upload(self, request):
+        """
+        Bulk-upload evidences from a multipart payload.
+
+        Form fields:
+            folder (UUID, required): target folder.
+            conflict_strategy (str, default 'skip'): one of skip / add_revision / replace / rename.
+            manifest (JSON string, required): list of {"field": "file_0", "name": "...", "rel_path": "..."}.
+            file_0 ... file_N: the actual file blobs, keyed by the manifest's "field" entries.
+
+        Returns:
+            { "summary": {...counts...}, "results": [...per-file outcomes...] }
+        """
+        valid_strategies = {c.value for c in self.BatchConflictStrategy}
+        strategy = request.data.get(
+            "conflict_strategy", self.BatchConflictStrategy.SKIP
+        )
+        if strategy not in valid_strategies:
+            return Response(
+                {
+                    "error": f"Invalid conflict_strategy '{strategy}'. Must be one of {sorted(valid_strategies)}."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        folder_id = request.data.get("folder")
+        if not folder_id:
+            return Response(
+                {"error": "folder is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+        except (ValueError, TypeError, Folder.DoesNotExist):
+            return Response(
+                {"error": "Folder not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            manifest = json.loads(request.data.get("manifest") or "[]")
+            if not isinstance(manifest, list):
+                raise ValueError("manifest must be a list")
+        except (ValueError, json.JSONDecodeError):
+            logger.exception("Invalid manifest JSON received in batch upload")
+            return Response(
+                {"error": "Invalid manifest JSON"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Gate the whole request before any folder lookup so dedup/name
+        # queries can't leak folder contents to unauthorized callers.
+        try:
+            add_perm = Permission.objects.get(codename="add_evidence")
+            change_perm = Permission.objects.get(codename="change_evidence")
+        except Permission.DoesNotExist:
+            return Response(
+                {"error": "Evidence permissions are not configured"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_perm, folder=folder
+        ):
+            return Response(
+                {"error": "You do not have permission to add evidence in this folder"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if strategy in (
+            self.BatchConflictStrategy.ADD_REVISION,
+            self.BatchConflictStrategy.REPLACE,
+        ) and not RoleAssignment.is_access_allowed(
+            user=request.user, perm=change_perm, folder=folder
+        ):
+            return Response(
+                {
+                    "error": "You do not have permission to change evidence in this folder"
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        summary = {
+            "total": len(manifest),
+            "created": 0,
+            "revision_added": 0,
+            "replaced": 0,
+            "renamed": 0,
+            "skipped": 0,
+            "duplicate": 0,
+            "errors": 0,
+        }
+        results = []
+
+        for entry in manifest:
+            field = entry.get("field")
+            name = (entry.get("name") or field or "").strip()
+            rel_path = entry.get("rel_path") or None
+            result = {"field": field, "name": name, "rel_path": rel_path}
+
+            upload = request.FILES.get(field) if field else None
+            if upload is None:
+                result["outcome"] = "error"
+                result["error"] = "File missing in multipart payload"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+            if not name:
+                result["outcome"] = "error"
+                result["error"] = "Evidence name is empty"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+
+            # Hash dedup — same blob already in this folder?
+            try:
+                hash_obj = hashlib.sha256()
+                for chunk in upload.chunks(chunk_size=1024 * 1024):
+                    hash_obj.update(chunk)
+                file_hash = hash_obj.hexdigest()
+                upload.seek(0)
+            except Exception:
+                logger.exception(
+                    "Failed to hash uploaded file in batch upload",
+                    field=field,
+                    name=name,
+                )
+                result["outcome"] = "error"
+                result["error"] = "Failed to hash file"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+
+            existing_dup = (
+                EvidenceRevision.objects.filter(
+                    evidence__folder=folder,
+                    attachment_hash=file_hash,
+                )
+                .select_related("evidence")
+                .first()
+            )
+            if existing_dup:
+                result["outcome"] = "duplicate"
+                result["evidence_id"] = str(existing_dup.evidence_id)
+                result["evidence_name"] = existing_dup.evidence.name
+                result["revision_id"] = str(existing_dup.id)
+                summary["duplicate"] += 1
+                results.append(result)
+                continue
+
+            # Name-based conflict
+            existing = Evidence.objects.filter(folder=folder, name=name).first()
+
+            if existing is None:
+                self._batch_create_evidence(
+                    result, summary, name, folder, upload, rel_path, request
+                )
+                results.append(result)
+                continue
+
+            if strategy == self.BatchConflictStrategy.SKIP:
+                result["outcome"] = "skipped"
+                result["evidence_id"] = str(existing.id)
+                summary["skipped"] += 1
+            elif strategy == self.BatchConflictStrategy.ADD_REVISION:
+                self._batch_add_revision(
+                    result, summary, existing, upload, rel_path, request
+                )
+            elif strategy == self.BatchConflictStrategy.REPLACE:
+                self._batch_replace_revision(
+                    result, summary, existing, upload, rel_path
+                )
+            elif strategy == self.BatchConflictStrategy.RENAME:
+                new_name = self._batch_find_unique_name(name, folder)
+                self._batch_create_evidence(
+                    result,
+                    summary,
+                    new_name,
+                    folder,
+                    upload,
+                    rel_path,
+                    request,
+                    renamed_from=name,
+                )
+            results.append(result)
+
+        return Response(
+            {"summary": summary, "results": results}, status=status.HTTP_200_OK
+        )
+
+    # --- batch_upload helpers ---
+
+    def _batch_create_evidence(
+        self,
+        result,
+        summary,
+        name,
+        folder,
+        upload,
+        rel_path,
+        request,
+        renamed_from=None,
+    ):
+        """Create a new Evidence + v1 revision via the existing serializer (so IAM/validation reuse)."""
+        serializer = EvidenceWriteSerializer(
+            data={"name": name, "folder": str(folder.id), "attachment": upload},
+            context={"request": request},
+        )
+        if not serializer.is_valid():
+            result["outcome"] = "error"
+            result["error"] = serializer.errors
+            summary["errors"] += 1
+            return
+        try:
+            evidence = serializer.save()
+        except PermissionDenied as e:
+            result["outcome"] = "error"
+            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            summary["errors"] += 1
+            return
+        revision = evidence.revisions.first()
+        if revision and rel_path:
+            revision.observation = f"path: {rel_path}"
+            revision.save(update_fields=["observation"])
+        if renamed_from:
+            result["outcome"] = "renamed"
+            result["renamed_from"] = renamed_from
+            result["renamed_to"] = name
+            summary["renamed"] += 1
+        else:
+            result["outcome"] = "created"
+            summary["created"] += 1
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id) if revision else None
+        result["version"] = revision.version if revision else 1
+
+    def _batch_add_revision(self, result, summary, evidence, upload, rel_path, request):
+        """Create a new EvidenceRevision against an existing Evidence (auto-bumps version)."""
+        rev_serializer = EvidenceRevisionWriteSerializer(
+            data={
+                "evidence": str(evidence.id),
+                "attachment": upload,
+                "observation": f"path: {rel_path}" if rel_path else "",
+            },
+            context={"request": request},
+        )
+        if not rev_serializer.is_valid():
+            result["outcome"] = "error"
+            result["error"] = rev_serializer.errors
+            summary["errors"] += 1
+            return
+        try:
+            revision = rev_serializer.save()
+        except PermissionDenied as e:
+            result["outcome"] = "error"
+            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            summary["errors"] += 1
+            return
+        result["outcome"] = "revision_added"
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id)
+        result["version"] = revision.version
+        summary["revision_added"] += 1
+
+    def _batch_replace_revision(self, result, summary, evidence, upload, rel_path):
+        """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
+        revision = evidence.last_revision
+        if revision is None:
+            revision = EvidenceRevision(evidence=evidence)
+        old_attachment = revision.attachment
+        revision.attachment = upload
+        if rel_path:
+            revision.observation = f"path: {rel_path}"
+        try:
+            revision.full_clean(exclude=["folder", "attachment_hash"])
+        except ValidationError as e:
+            messages = []
+            if hasattr(e, "message_dict"):
+                for fld_messages in e.message_dict.values():
+                    messages.extend(fld_messages)
+            elif hasattr(e, "messages"):
+                messages = e.messages
+            else:
+                messages = [str(e)]
+            result["outcome"] = "error"
+            result["error"] = " ".join(messages)
+            summary["errors"] += 1
+            return
+        revision.save()
+        if old_attachment:
+            old_attachment.delete(save=False)
+        result["outcome"] = "replaced"
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id)
+        result["version"] = revision.version
+        summary["replaced"] += 1
+
+    @staticmethod
+    def _batch_find_unique_name(name, folder):
+        """Append ' (1)', ' (2)' ... before the extension until the name is free in folder."""
+        if "." in name:
+            base, _, ext = name.rpartition(".")
+            ext = "." + ext
+        else:
+            base, ext = name, ""
+        i = 1
+        candidate = name
+        while Evidence.objects.filter(folder=folder, name=candidate).exists():
+            candidate = f"{base} ({i}){ext}"
+            i += 1
+        return candidate
 
 
 class EvidenceRevisionViewSet(BaseModelViewSet):
@@ -10114,9 +10524,323 @@ class QuickStartView(APIView):
             return Response(objects, status=status.HTTP_201_CREATED)
 
 
-class PresetJourneyViewSet(BaseModelViewSet):
+class PresetViewSet(BaseModelViewSet):
+    model = Preset
+    filterset_fields = ["folder", "provider"]
+    search_fields = ["name", "description", "ref_id", "urn"]
+
+    def _reject_if_library_backed(self):
+        """Library-backed Presets (urn != None) are read-only by contract.
+        Standard CRUD endpoints (update/partial_update/destroy) inherit from
+        BaseModelViewSet and bypass our @action-level guard, so we re-enforce
+        the rule at the dispatch layer too."""
+        instance = self.get_object()
+        if instance.urn is not None:
+            return Response(
+                {"detail": "Library-backed presets are read-only. Duplicate first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return None
+
+    def update(self, request, *args, **kwargs):
+        denied = self._reject_if_library_backed()
+        if denied is not None:
+            return denied
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        denied = self._reject_if_library_backed()
+        if denied is not None:
+            return denied
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        denied = self._reject_if_library_backed()
+        if denied is not None:
+            return denied
+        return super().destroy(request, *args, **kwargs)
+
+    def _editable_or_403(self, request):
+        preset = self.get_object()
+        if preset.urn is not None:
+            return preset, Response(
+                {"detail": "Library-backed presets are read-only. Duplicate first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_preset"),
+            folder=preset.folder,
+        ):
+            return preset, Response(status=status.HTTP_403_FORBIDDEN)
+        return preset, None
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        from core.preset_editor import serialize_preset_to_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            preset.editing_draft = serialize_preset_to_draft(preset)
+            preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": preset.editing_draft})
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path="save-draft",
+        parser_classes=[JSONParser],
+    )
+    def save_draft(self, request, pk=None):
+        from core.preset_editor import validate_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        normalized = validate_draft(request.data, strict=False)
+        preset.editing_draft = normalized
+        preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": preset.editing_draft})
+
+    @action(detail=True, methods=["post"], url_path="discard-draft")
+    def discard_draft(self, request, pk=None):
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        preset.editing_draft = None
+        preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": None})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft-preview")
+    def publish_draft_preview(self, request, pk=None):
+        from core.preset_editor import validate_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            return Response(
+                {"detail": "No active draft."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        normalized = validate_draft(preset.editing_draft)
+
+        live_keys = {s.get("key") for s in (preset.steps or []) if s.get("key")}
+        draft_keys = {s["key"] for s in normalized["steps"]}
+        deleted_keys = live_keys - draft_keys
+
+        warnings = []
+        for key in sorted(deleted_keys):
+            journey_steps = PresetJourneyStep.objects.filter(
+                journey__preset=preset, key=key
+            )
+            with_user_state = journey_steps.exclude(
+                status=PresetJourneyStep.Status.NOT_STARTED, notes=""
+            ).count()
+            warnings.append(
+                {
+                    "key": key,
+                    "journey_step_count": journey_steps.count(),
+                    "with_user_state": with_user_state,
+                }
+            )
+        return Response({"deleted_steps": warnings})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft")
+    def publish_draft(self, request, pk=None):
+        from core.preset_editor import validate_draft
+        from django.utils import timezone
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            return Response(
+                {"detail": "No active draft."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        normalized = validate_draft(preset.editing_draft)
+
+        snapshot = {
+            "version": preset.editing_version,
+            "name": preset.name,
+            "description": preset.description or "",
+            "scaffolded_objects": list(preset.scaffolded_objects or []),
+            "steps": list(preset.steps or []),
+            "published_at": timezone.now().isoformat(),
+        }
+        history = list(preset.editing_history or [])
+        history.append(snapshot)
+        # Cap to last 20 snapshots so the JSONField doesn't grow unboundedly
+        # under heavy editing.
+        EDITING_HISTORY_CAP = 20
+        if len(history) > EDITING_HISTORY_CAP:
+            history = history[-EDITING_HISTORY_CAP:]
+
+        preset.name = normalized["journey_meta"]["name"]
+        preset.description = normalized["journey_meta"]["description"]
+        preset.scaffolded_objects = normalized["scaffolded_objects"]
+        preset.steps = normalized["steps"]
+        # Clear translations on publish: the editor doesn't surface a per-locale
+        # editor today, so any inherited library translations would otherwise
+        # keep materializing stale localized strings via the executor's locale
+        # lookups. Re-add later when the translations editor lands.
+        preset.translations = {}
+        preset.editing_version = preset.editing_version + 1
+        preset.version = preset.editing_version
+        preset.editing_history = history
+        preset.editing_draft = None
+        preset.save()
+
+        from core.serializers import PresetReadSerializer
+
+        return Response(PresetReadSerializer(preset).data)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="create-blank",
+        parser_classes=[JSONParser],
+    )
+    def create_blank(self, request):
+        root = Folder.get_root_folder()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_preset"),
+            folder=root,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        name = (request.data.get("name") or "").strip() or "Untitled preset"
+        description = request.data.get("description") or ""
+        preset = Preset.objects.create(
+            name=name,
+            description=description,
+            folder=root,
+            urn=None,
+            ref_id=None,
+            version=1,
+            provider=None,
+            translations={},
+            profile={},
+            feature_flags={},
+            dependencies=[],
+            scaffolded_objects=[],
+            steps=[],
+            editing_version=1,
+            editing_history=[],
+            editing_draft=None,
+        )
+        from core.serializers import PresetReadSerializer
+
+        return Response(
+            PresetReadSerializer(preset).data, status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=True, methods=["post"])
+    def duplicate(self, request, pk=None):
+        source = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_preset"),
+            folder=source.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        new_preset = Preset.objects.create(
+            name=f"{source.name} (copy)",
+            description=source.description,
+            folder=source.folder,
+            translations=dict(source.translations or {}),
+            profile=dict(source.profile or {}),
+            feature_flags=dict(source.feature_flags or {}),
+            dependencies=list(source.dependencies or []),
+            scaffolded_objects=list(source.scaffolded_objects or []),
+            steps=list(source.steps or []),
+            urn=None,
+            ref_id=None,
+            version=1,
+            provider=None,
+            editing_version=1,
+            editing_history=[],
+            editing_draft=None,
+        )
+        from core.serializers import PresetReadSerializer
+
+        return Response(
+            PresetReadSerializer(new_preset).data, status=status.HTTP_201_CREATED
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="apply",
+        parser_classes=[JSONParser],
+    )
+    def apply(self, request, pk=None):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Use get_object() so the queryset filters by view_preset RBAC —
+        # prevents UUID-guessing applies of presets the user can't view.
+        preset = self.get_object()
+
+        from library.preset_executor import PresetExecutor
+
+        folder_name = request.data.get("folder_name")
+        folder_id = request.data.get("folder_id")
+        create_objects = request.data.get("create_objects", True)
+        apply_feature_flags = request.data.get("apply_feature_flags", True)
+
+        if apply_feature_flags:
+            can_change_settings = RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_globalsettings"),
+                folder=Folder.get_root_folder(),
+            )
+            if not can_change_settings:
+                apply_feature_flags = False
+
+        try:
+            executor = PresetExecutor(preset, request.user, request)
+            journey = executor.apply(
+                folder_name=folder_name,
+                folder_id=folder_id,
+                create_objects=create_objects,
+                apply_feature_flags=apply_feature_flags,
+            )
+            return Response(
+                {"journey_id": str(journey.id)},
+                status=status.HTTP_201_CREATED,
+            )
+        except (ValidationError, DRFValidationError) as e:
+            logger.error("Failed to apply preset", error=e)
+            if hasattr(e, "detail"):
+                detail = e.detail
+            elif hasattr(e, "message_dict"):
+                detail = e.message_dict
+            else:
+                detail = "Validation failed."
+            return Response(
+                {"error": detail},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        except Exception:
+            # Unexpected server-side failure — keep the response body generic
+            # so we don't leak internals, but record the traceback and return a
+            # 5xx so callers don't treat this as bad input.
+            logger.exception("Failed to apply preset")
+            return Response(
+                {"error": "Failed to apply preset."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class JourneyViewSet(BaseModelViewSet):
     model = PresetJourney
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "preset"]
     search_fields = ["name", "description"]
 
     @action(detail=True, methods=["get"])
@@ -10155,10 +10879,35 @@ class PresetJourneyViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"])
     def upgrade(self, request, pk=None):
         journey = self.get_object()
-        stored_lib = (
-            StoredLibrary.objects.filter(urn=journey.urn).order_by("-version").first()
-        )
-        if not stored_lib or stored_lib.version <= journey.version:
+        if not journey.preset:
+            return Response({"detail": "Already up to date."})
+        if journey.preset.urn:
+            stored_lib = (
+                StoredLibrary.objects.filter(urn=journey.preset.urn)
+                .order_by("-version")
+                .first()
+            )
+            if stored_lib and stored_lib.version > journey.preset.version:
+                # The upsert mutates the global library-backed Preset row, so
+                # gate it behind the same library-write permission `apply()`
+                # uses. Without this, any caller with `change_journey` could
+                # trigger global library state changes via upgrade.
+                if not RoleAssignment.is_access_allowed(
+                    user=request.user,
+                    perm=Permission.objects.get(codename="add_loadedlibrary"),
+                    folder=Folder.get_root_folder(),
+                ):
+                    return Response(
+                        {
+                            "detail": "Library upgrade requires permission to load libraries."
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                from library.utils import upsert_preset_from_stored_library
+
+                upsert_preset_from_stored_library(stored_lib)
+                journey.preset.refresh_from_db()
+        if journey.preset.version <= journey.applied_version:
             return Response({"detail": "Already up to date."})
         from library.preset_executor import PresetExecutor
 
@@ -10168,7 +10917,7 @@ class PresetJourneyViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         )
 
-        executor = PresetExecutor(stored_lib, request.user, request)
+        executor = PresetExecutor(journey.preset, request.user, request)
         executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
         from core.serializers import PresetJourneyReadSerializer
 
@@ -10217,7 +10966,7 @@ class PresetJourneyViewSet(BaseModelViewSet):
         return stats
 
 
-class PresetJourneyStepViewSet(BaseModelViewSet):
+class JourneyStepViewSet(BaseModelViewSet):
     model = PresetJourneyStep
     filterset_fields = ["journey", "status"]
     search_fields = ["title", "description"]
@@ -10355,6 +11104,8 @@ class CampaignViewSet(BaseModelViewSet):
                         for group in campaign.selected_implementation_groups
                         if group["framework"] == str(framework.id)
                     ]
+                from core.utils import build_initial_field_visibility
+
                 compliance_assessment = ComplianceAssessment.objects.create(
                     name=f"{campaign.name} - {perimeter.name} - {framework.name}",
                     campaign=campaign,
@@ -10364,6 +11115,7 @@ class CampaignViewSet(BaseModelViewSet):
                     selected_implementation_groups=framework_implementation_groups
                     if framework_implementation_groups
                     else None,
+                    field_visibility=build_initial_field_visibility(framework),
                 )
                 compliance_assessment.create_requirement_assessments()
 
@@ -10388,7 +11140,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "genericcollection",
-        "extended_result_enabled",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
@@ -10399,6 +11150,46 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             return ComplianceAssessmentListSerializer
         return super().get_serializer_class(**kwargs)
+
+    def _get_optimized_object_data(self, queryset):
+        """Compute per-page requirement counts in one bounded GROUP BY,
+        replacing the Count(distinct=True) annotations dropped from the
+        list queryset. Bounded by `len(queryset)` (≤ page size), so the
+        cost is independent of the total RA table size.
+
+        Only the no-implementation-groups case is computed here; audits
+        with `selected_implementation_groups` still rely on the prefetched
+        `requirement_assessments` for in-Python IG filtering inside
+        `ComplianceAssessmentListSerializer.get_progress`.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        audit_ids = [a.id for a in queryset]
+        if not audit_ids:
+            return optimized_data
+
+        not_assessed = RequirementAssessment.Result.NOT_ASSESSED
+        rows = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=audit_ids,
+                requirement__assessable=True,
+            )
+            .values("compliance_assessment_id")
+            .annotate(
+                total=Count("id"),
+                assessed=Count(
+                    "id",
+                    filter=~Q(result=not_assessed) | Q(score__isnull=False),
+                ),
+            )
+        )
+        total_map: dict = {}
+        assessed_map: dict = {}
+        for r in rows:
+            total_map[r["compliance_assessment_id"]] = r["total"]
+            assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+        optimized_data["total_requirements"] = total_map
+        optimized_data["assessed_requirements"] = assessed_map
+        return optimized_data
 
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
@@ -10457,26 +11248,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # Custom detail actions (tree, global_score, donut_data, etc.)
         # use lightweight querysets — they don't need full prefetches.
 
-        qs = qs.annotate(
-            total_requirements=Count(
-                "requirement_assessments",
-                filter=Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
-            assessed_requirements=Count(
-                "requirement_assessments",
-                filter=Q(
-                    Q(
-                        ~Q(
-                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                        )
-                    )
-                    | Q(requirement_assessments__score__isnull=False),
-                    requirement_assessments__requirement__assessable=True,
+        # The `total_requirements` / `assessed_requirements` Count(distinct=True)
+        # annotations are catastrophic on the list path: each one forces
+        # SQLite to materialise a temp B-tree over the full LEFT JOIN of
+        # the requirement_assessments table per row, and the two together
+        # account for the ~2.7s single-query cost on /compliance-assessments/.
+        # On the list path we compute the same numbers in `_get_optimized_object_data`
+        # via a single GROUP BY bounded by the page (≤ page_size audits).
+        # Retrieve still uses the annotations because the cost is trivial
+        # at one row.
+        if self.action != "list":
+            qs = qs.annotate(
+                total_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(requirement_assessments__requirement__assessable=True),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-        )
+                assessed_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(
+                        Q(
+                            ~Q(
+                                requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                            )
+                        )
+                        | Q(requirement_assessments__score__isnull=False),
+                        requirement_assessments__requirement__assessable=True,
+                    ),
+                    distinct=True,
+                ),
+            )
 
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
         if auditee_folders:
@@ -10829,6 +11630,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ws.cell(row=row, column=7, value=ra.documentation_score)
                 if ra.score is not None:
                     ws.cell(row=row, column=8, value=ra.score)
+            if ra.observation:
+                ws.cell(
+                    row=row, column=13, value=escape_excel_formula(ra.observation)
+                )  # Column M: comments
 
         buffer = io.BytesIO()
         wb.save(buffer)
@@ -11112,18 +11917,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for author in instance.authors.all():
                 try:
                     specific = author.specific
-                    if hasattr(specific, "mailing"):
+                    if not hasattr(specific, "mailing"):
+                        logger.warning(
+                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                        )
+                        continue
+                    assignments = list(
+                        instance.requirement_assignments.filter(actor=author)
+                    )
+                    if not assignments:
+                        logger.warning(
+                            f"Actor {author} has no assignment on this audit, skipping email"
+                        )
+                        continue
+                    for assignment in assignments:
                         specific.mailing(
                             email_template_name="tprm/third_party_email.html",
                             subject=_(
                                 "CISO Assistant: A questionnaire has been assigned to you"
                             ),
-                            object="compliance-assessments",
-                            object_id=instance.id,
-                        )
-                    else:
-                        logger.warning(
-                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                            object="auditee-assessments",
+                            object_id=assignment.id,
                         )
                 except Exception as primary_exception:
                     logger.error(
@@ -11132,6 +11946,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     raise ValidationError(
                         {"error": ["An error occurred while sending the email"]}
                     )
+            draft_assignments = instance.requirement_assignments.filter(
+                status=RequirementAssignment.Status.DRAFT
+            )
+            for assignment in draft_assignments:
+                assignment.status = RequirementAssignment.Status.IN_PROGRESS
+                assignment.save(update_fields=["status"])
+                RequirementAssignmentEvent.objects.create(
+                    assignment=assignment,
+                    event_type=RequirementAssignment.Status.IN_PROGRESS,
+                    event_actor=request.user,
+                    folder=assignment.folder,
+                )
             return Response({"results": "mail sent"})
         raise ValidationError({"warning": ["noMailerConfigured"]})
 
