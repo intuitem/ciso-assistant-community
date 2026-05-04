@@ -12,7 +12,7 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getSecureRedirect, getFieldVisibility } from '$lib/utils/helpers';
+	import { getSecureRedirect, getFieldVisibility, alignmentColorMap } from '$lib/utils/helpers';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
@@ -266,15 +266,18 @@
 		showObservation,
 		showAppliedControls,
 		showEvidences,
-		showSecurityExceptions
-	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
+		showRespondentAlignment,
+		showComments
+	} = getFieldVisibility(complianceAssessment, viewerRole);
 
+	const isAuditor = viewerRole === 'auditor';
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
 		if (showEvidences) return 'evidences';
-		if (showSecurityExceptions) return 'security_exceptions';
+		// Security exceptions are auditor-only — not part of the per-CA visibility model.
+		if (isAuditor) return 'security_exceptions';
 		return 'applied_controls';
 	}
 	let group = $state(pickDefaultTab());
@@ -571,7 +574,7 @@
 			{...rest}
 		>
 			{#snippet children({ form, data })}
-				{#if canShowAppliedControls || showEvidences || showSecurityExceptions}
+				{#if canShowAppliedControls || showEvidences || isAuditor}
 					<div class="card shadow-lg bg-white">
 						<Tabs
 							value={group}
@@ -586,7 +589,7 @@
 								{#if showEvidences}
 									<Tabs.Trigger value="evidences">{m.evidences()}</Tabs.Trigger>
 								{/if}
-								{#if showSecurityExceptions}
+								{#if isAuditor}
 									<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
 								{/if}
 								<Tabs.Indicator />
@@ -694,7 +697,7 @@
 									</div>
 								</Tabs.Content>
 							{/if}
-							{#if showSecurityExceptions}
+							{#if isAuditor}
 								<Tabs.Content value="security_exceptions">
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 										<span class="flex flex-row justify-end items-center">
@@ -751,6 +754,19 @@
 							label={m.status()}
 							helpText={m.requirementAssessmentStatusHelpText()}
 						/>
+					{/if}
+					{#if showRespondentAlignment && page.data.requirementAssessment.respondent_alignment}
+						<p class="flex flex-row items-center space-x-4">
+							<span class="text-sm italic text-surface-600">{m.respondentAnswered()}:</span>
+							<span
+								class="badge text-sm font-semibold text-white"
+								style="background-color: {alignmentColorMap[
+									page.data.requirementAssessment.respondent_alignment
+								]}"
+							>
+								{safeTranslate(page.data.requirementAssessment.respondent_alignment)}
+							</span>
+						</p>
 					{/if}
 					{#if showResult}
 						{#if computedResult}
@@ -890,7 +906,7 @@
 			{/snippet}
 		</SuperForm>
 	</div>
-	{#if page.data?.featureflags?.comments}
+	{#if page.data?.featureflags?.comments && showComments}
 		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
 	{/if}
 </div>

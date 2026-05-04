@@ -42,6 +42,9 @@
 	"associatedAssets": "Activos asociados",
 	"associatedRiskAssessments": "Evaluaciones de riesgos asociadas",
 	"associatedRiskScenarios": "Escenarios de riesgo asociados",
+	"CatalogDescription": "El catálogo es el lugar donde importa repositorios, amenazas, matrices y otros objetos predefinidos",
+	"securityAdvisoriesDescription": "Los avisos de seguridad son notificaciones sobre vulnerabilidades",
+	"cweDescription": "lista de debilidades de seguridad en software (CWE)",
 	"associatedRiskAcceptances": "Aceptaciones de riesgo asociadas",
 	"associatedComplianceAssessments": "Auditorías asociadas",
 	"associatedRequirementAssessments": "Requisitos asociados",
@@ -3216,5 +3219,12 @@
 	"syncCweCatalog": "Obtener catálogo CWE de MITRE",
 	"syncCweCatalogFailed": "Error al obtener el catálogo CWE",
 	"syncToReferenceControl": "Sincronizar con el control de referencia",
-	"exportEcosystem": "exportación de ecosistema (XLSX)"
+	"exportEcosystem": "exportación de ecosistema (XLSX)",
+	"fieldVisibility": "Visibilidad de campos",
+	"fieldVisibilityHelpText": "Controle qué campos puede ver y editar cada rol.",
+	"visibilityAuditorRespondent": "Auditor + Encuestado",
+	"visibilityAuditorOnly": "Solo auditor",
+	"visibilityHidden": "Oculto",
+	"answers": "Respuestas",
+	"respondentAlignment": "Alineación del encuestado"
 }
