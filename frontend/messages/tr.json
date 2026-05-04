@@ -1926,5 +1926,12 @@
 	"enrichFromEUVD": "EUVD'den zenginleştir",
 	"syncCweCatalog": "CWE çek",
 	"syncCweCatalogFailed": "CWE hatası",
-	"exportEcosystem": "ekosistem dışa aktarımı (XLSX)"
+	"exportEcosystem": "ekosistem dışa aktarımı (XLSX)",
+	"fieldVisibility": "Alan görünürlüğü",
+	"fieldVisibilityHelpText": "Her rolün hangi alanları görebileceğini ve düzenleyebileceğini kontrol edin.",
+	"visibilityAuditorRespondent": "Denetçi + Yanıtlayan",
+	"visibilityAuditorOnly": "Yalnızca denetçi",
+	"visibilityHidden": "Gizli",
+	"answers": "Yanıtlar",
+	"respondentAlignment": "Yanıtlayan uyumu"
 }

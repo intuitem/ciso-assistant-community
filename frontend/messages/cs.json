@@ -1178,5 +1178,12 @@
 	"enrichFromEUVD": "Obohatit EUVD",
 	"syncCweCatalog": "Načíst CWE",
 	"syncCweCatalogFailed": "Chyba CWE",
-	"expirationDateIsInThePastWarning": "Zadané datum vypršení platnosti je v minulosti"
+	"expirationDateIsInThePastWarning": "Zadané datum vypršení platnosti je v minulosti",
+	"fieldVisibility": "Viditelnost polí",
+	"fieldVisibilityHelpText": "Určete, která pole mohou jednotlivé role vidět a upravovat.",
+	"visibilityAuditorRespondent": "Auditor + Respondent",
+	"visibilityAuditorOnly": "Pouze auditor",
+	"visibilityHidden": "Skryto",
+	"answers": "Odpovědi",
+	"respondentAlignment": "Shoda respondenta"
 }

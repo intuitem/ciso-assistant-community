@@ -1,7 +1,12 @@
+import uuid
+
 import pytest
+from knox.models import AuthToken
+from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import Asset
-from iam.models import Folder
+from core.utils import RoleCodename
+from iam.models import Folder, Role, RoleAssignment, User
 
 from test_utils import EndpointTestsQueries
 
@@ -198,4 +203,73 @@ class TestAssetsAuthenticated:
 
         EndpointTestsQueries.Auth.get_object_options(
             test.client, "Assets", "type", Asset.Type.choices
+        )
+
+
+# ---------------------------------------------------------------------------
+# IAM-scoped visibility on /api/assets/.
+#
+# Locks down the queryset-level filter (`BaseModelViewSet.get_queryset`
+# materialising `RoleAssignment.get_accessible_object_ids`) for a reader
+# scoped to a single domain folder: an asset in a sibling folder must
+# not appear in their list at all (and a fortiori not as a masked
+# placeholder — masking is for related-field references, not list rows).
+# ---------------------------------------------------------------------------
+
+
+def _client_for(user):
+    client = APIClient()
+    _, token = AuthToken.objects.create(user=user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+    return client
+
+
+def _make_scoped_reader(folder):
+    user = User.objects.create_user(
+        f"reader-{uuid.uuid4().hex[:6]}@perf.test", is_published=True
+    )
+    role = Role.objects.get(name=RoleCodename.READER.value)
+    ra = RoleAssignment.objects.create(
+        user=user,
+        role=role,
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    )
+    ra.perimeter_folders.add(folder)
+    return user
+
+
+@pytest.mark.django_db
+class TestAssetListIAMScope:
+    def test_scoped_reader_does_not_see_cross_folder_asset(self, authenticated_client):
+        """Reader scoped to folder A must not see an asset in folder B
+        in `/api/assets/` results — that asset is outside their scope at
+        the queryset level (handled by `get_accessible_object_ids`,
+        before any post-filter masking)."""
+        root = Folder.get_root_folder()
+        folder_a = Folder.objects.create(
+            name=f"perf-test-A-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        folder_b = Folder.objects.create(
+            name=f"perf-test-B-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        asset_in_b = Asset.objects.create(
+            folder=folder_b,
+            name=f"asset-B-{uuid.uuid4().hex[:6]}",
+            type=Asset.Type.PRIMARY,
+        )
+
+        client = _client_for(_make_scoped_reader(folder_a))
+        r = client.get("/api/assets/")
+        assert r.status_code == status.HTTP_200_OK, r.content
+        body = r.json()
+        results = body.get("results", body) if isinstance(body, dict) else body
+        ids = {it["id"] for it in results}
+        assert str(asset_in_b.id) not in ids, (
+            f"scoped reader saw asset {asset_in_b.id} from another folder; "
+            f"results: {ids}"
         )

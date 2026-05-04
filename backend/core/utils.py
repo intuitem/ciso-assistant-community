@@ -1025,6 +1025,65 @@ def _resolve_auditee_role_ids():
     return auditee_id, higher_ids
 
 
+def _resolve_respondent_role_ids():
+    """Resolve role IDs for respondent roles (auditee + third-party respondent) + higher roles."""
+    from iam.cache_builders import get_roles_state
+
+    role_id_by_name = get_roles_state().role_id_by_name
+    respondent_ids = frozenset(
+        role_id_by_name[rc.value]
+        for rc in (RoleCodename.AUDITEE, RoleCodename.THIRD_PARTY_RESPONDENT)
+        if rc.value in role_id_by_name
+    )
+    higher_ids = frozenset(
+        role_id_by_name[rc.value]
+        for rc in (
+            RoleCodename.ANALYST,
+            RoleCodename.DOMAIN_MANAGER,
+            RoleCodename.ADMINISTRATOR,
+        )
+        if rc.value in role_id_by_name
+    )
+    return respondent_ids, higher_ids
+
+
+def get_respondent_filtered_folder_ids(user) -> set:
+    """Return folder IDs where *user* holds a respondent role (auditee or third-party
+    respondent) but NO higher role. Mirrors :func:`get_auditee_filtered_folder_ids`
+    but widens the role set so third-party respondents are also guarded.
+    """
+    from iam.models import _iter_assignment_lites_for_user
+    from iam.cache_builders import (
+        get_folder_state,
+        iter_descendant_ids,
+    )
+
+    respondent_role_ids, higher_role_ids = _resolve_respondent_role_ids()
+    if not respondent_role_ids:
+        return set()
+
+    state = get_folder_state()
+    folder_roles: dict[UUID, set] = {}
+
+    for a in _iter_assignment_lites_for_user(user):
+        role_id = a.role_id
+        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
+            continue
+        for pf_id in a.perimeter_folder_ids:
+            if a.is_recursive:
+                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
+            else:
+                target_ids = (pf_id,)
+            for fid in target_ids:
+                folder_roles.setdefault(fid, set()).add(role_id)
+
+    return {
+        fid
+        for fid, role_ids in folder_roles.items()
+        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
+    }
+
+
 def get_auditee_filtered_folder_ids(user) -> set:
     """Return folder IDs where *user* holds the auditee role but NO higher role.
 
@@ -1074,66 +1133,94 @@ def get_auditee_filtered_folder_ids(user) -> set:
 
 
 # --- Field Visibility ---
+#
+# The compliance assessment's `field_visibility` is the single source of truth
+# at runtime. It is populated at CA creation from DEFAULT_VISIBILITY merged with
+# the framework's `field_visibility`, and can be edited per-CA from then on.
+#
+# Storage shape: {field_name: {role: 'edit'|'read'|'hidden'}}
+# Roles known today: 'auditor', 'respondent'. Future roles slot in alongside.
+# A missing field key, or a missing role within a field's pair, resolves to 'edit'
+# (matching the "no restriction" default).
 
-DEFAULT_FIELD_VISIBILITY = {
-    "result": "auditor",
-    "status": "auditor",
-    "score": "auditor",
-    "is_scored": "auditor",
-    "documentation_score": "auditor",
-    "observation": "everyone",
-    "answers": "everyone",
-    "evidences": "everyone",
-    "applied_controls": "auditor",
-    "security_exceptions": "auditor",
+EVERYONE_EDIT = {"auditor": "edit", "respondent": "edit"}
+AUDITOR_ONLY = {"auditor": "edit", "respondent": "hidden"}
+AUDITOR_READ_ONLY = {"auditor": "read", "respondent": "hidden"}
+HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
+
+DEFAULT_VISIBILITY = {
+    "score": HIDDEN,
+    "is_scored": HIDDEN,
+    "documentation_score": HIDDEN,
+    "status": AUDITOR_ONLY,
+    "extended_result": AUDITOR_ONLY,
+    # respondent_alignment is only ever populated by the respondent answering
+    # the auto-question. AUDITOR_ONLY would prevent that, so the auditor's
+    # badge would never render — functionally equivalent to HIDDEN. Default
+    # off; auditors who want it explicitly flip to "Auditor + Respondent".
+    "respondent_alignment": HIDDEN,
 }
 
 
-def resolve_field_visibility(framework, compliance_assessment, field_name):
-    """Resolve the visibility level for a field using the three-tier cascade.
+def resolve_visibility_from_overrides(overrides, field_name):
+    """Resolve a field's visibility pair from a raw `field_visibility` dict.
 
-    Priority: CA override > Framework override > Code default > "auditor" (safe fallback).
+    Shape: {role: 'edit'|'read'|'hidden'}.
 
-    Returns: "everyone", "auditor", or "hidden"
+    Lookup order:
+      1. Explicit override in `overrides`.
+      2. DEFAULT_VISIBILITY (backstop in case a new field was added in code
+         without a migration to backfill existing CAs).
+      3. EVERYONE_EDIT (truly unknown field).
+
+    Use this when you have a raw dict (e.g. from a queryset `.values()` call).
+    For a model instance, prefer `resolve_field_visibility(ca, field)`.
     """
-    # Tier 1: CA-level override (highest priority)
-    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    if field_name in ca_overrides:
-        return ca_overrides[field_name]
-
-    # Tier 2: Framework-level override
-    fw_overrides = getattr(framework, "field_visibility", None) or {}
-    if field_name in fw_overrides:
-        return fw_overrides[field_name]
-
-    # Tier 3: Code-level default
-    return DEFAULT_FIELD_VISIBILITY.get(field_name, "auditor")
+    pair = (overrides or {}).get(field_name)
+    if isinstance(pair, dict):
+        return pair
+    fallback = DEFAULT_VISIBILITY.get(field_name)
+    if isinstance(fallback, dict):
+        return dict(fallback)
+    return dict(EVERYONE_EDIT)
 
 
-def get_visible_fields(framework, compliance_assessment, viewer_role="auditor"):
-    """Get the set of field names visible to the given role.
+def resolve_field_visibility(compliance_assessment, field_name):
+    """Return the per-role visibility pair for a field on a CA instance."""
+    overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    return resolve_visibility_from_overrides(overrides, field_name)
 
-    viewer_role: "respondent" or "auditor"
 
-    Returns a set of field names that should be included in the response.
+def _role_access(compliance_assessment, field_name, role):
+    pair = resolve_field_visibility(compliance_assessment, field_name)
+    return pair.get(role, "edit")
+
+
+def is_field_visible_to(compliance_assessment, field_name, role):
+    """Whether a field is readable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) != "hidden"
+
+
+def is_field_editable_by(compliance_assessment, field_name, role):
+    """Whether a field is writable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) == "edit"
+
+
+def build_initial_field_visibility(framework):
+    """Build the initial `field_visibility` map for a new CA.
+
+    Layered per-role: code defaults are seeded for every known field, then the
+    framework's overrides are merged on top — but per-role, so a framework that
+    only specifies a single role (e.g. {"score": {"auditor": "edit"}}) does not
+    erase the default value for the other roles.
     """
-    all_fields = set(DEFAULT_FIELD_VISIBILITY.keys())
-
-    # Also include any fields mentioned in overrides
     fw_overrides = getattr(framework, "field_visibility", None) or {}
-    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    all_fields.update(fw_overrides.keys())
-    all_fields.update(ca_overrides.keys())
-
-    visible = set()
-    for field in all_fields:
-        visibility = resolve_field_visibility(framework, compliance_assessment, field)
-        if visibility == "hidden":
-            continue  # hidden from everyone
-        if visibility == "everyone":
-            visible.add(field)
-        elif visibility == "auditor" and viewer_role == "auditor":
-            visible.add(field)
-        # "auditor" + viewer_role="respondent" -> not visible
-
-    return visible
+    merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    for key, pair in fw_overrides.items():
+        if not isinstance(pair, dict):
+            continue
+        # Ensure the field has a starting pair (DEFAULT_VISIBILITY may not
+        # cover every key the framework configures).
+        merged.setdefault(key, dict(EVERYONE_EDIT))
+        merged[key].update(pair)
+    return merged
