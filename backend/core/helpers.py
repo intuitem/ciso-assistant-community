@@ -1,6 +1,7 @@
 import json
+from collections import defaultdict
 from collections.abc import MutableMapping
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Optional
 from typing import Dict, List
 
@@ -771,9 +772,11 @@ def task_template_per_status(user: User):
     )
 
     # For non-recurrent templates, get the single node's status
-    single_node_subq = TaskNode.objects.filter(task_template=OuterRef("pk")).values(
-        "status"
-    )[:1]
+    single_node_subq = (
+        TaskNode.objects.filter(task_template=OuterRef("pk"))
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
 
     non_recurrent_with_status = (
         viewable_task_templates.filter(is_recurrent=False)
@@ -797,7 +800,9 @@ def task_template_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def get_governance_calendar_data(user: User, year: int = None):
+def get_governance_calendar_data(
+    user: User, year: Optional[int] = None, folder_id: Optional[str] = None
+) -> list:
     """
     Generate calendar heatmap data for governance activities.
     Returns activity counts per date for:
@@ -808,16 +813,6 @@ def get_governance_calendar_data(user: User, year: int = None):
     - ComplianceAssessment due dates and ETAs
     - FindingsAssessment due dates and ETAs
     """
-    from core.models import (
-        TaskNode,
-        AppliedControl,
-        RiskAcceptance,
-        RiskAssessment,
-        ComplianceAssessment,
-        FindingsAssessment,
-    )
-    from datetime import datetime
-    from collections import defaultdict
 
     if year is None:
         year = datetime.now().year
@@ -825,27 +820,31 @@ def get_governance_calendar_data(user: User, year: int = None):
     start_date = datetime(year, 1, 1).date()
     end_date = datetime(year, 12, 31).date()
 
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+
     # Dictionary to accumulate activity counts per date
     activity_counts = defaultdict(int)
 
     # Get accessible objects for each model
     (task_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, TaskNode
+        scoped_folder, user, TaskNode
     )
     (control_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )
     (acceptance_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
+        scoped_folder, user, RiskAcceptance
     )
     (risk_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAssessment
+        scoped_folder, user, RiskAssessment
     )
     (compliance_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, ComplianceAssessment
+        scoped_folder, user, ComplianceAssessment
     )
     (findings_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, FindingsAssessment
+        scoped_folder, user, FindingsAssessment
     )
 
     # Count TaskNode due dates
@@ -939,12 +938,16 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def combined_assessments_per_status(user: User):
+def combined_assessments_per_status(
+    user: User, folder_id: Optional[str] = None
+) -> dict:
     """
     Returns assessment counts grouped by status for all three assessment types:
     RiskAssessment, ComplianceAssessment, and FindingsAssessment
     """
-    from .models import RiskAssessment, ComplianceAssessment, FindingsAssessment
+    scoped_folder = (
+        Folder.objects.filter(id=folder_id).first() if folder_id else None
+    ) or Folder.get_root_folder()
 
     # Get all unique statuses across all assessment types
     # Using RiskAssessment.Status as they should all share the same status choices
@@ -968,7 +971,7 @@ def combined_assessments_per_status(user: User):
     for series_name, model in assessment_types:
         # Get accessible objects
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, model
+            scoped_folder, user, model
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
 
@@ -1211,10 +1214,14 @@ def risks_per_perimeter_groups(user: User):
     return output
 
 
-def get_counters(user: User):
+def get_counters(user: User, folder_id: Optional[str] = None) -> dict:
+    scoped_folder = (
+        Folder.objects.filter(id=folder_id).first() if folder_id else None
+    ) or Folder.get_root_folder()
+
     # Get all accessible applied controls
     applied_controls_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )[0]
 
     # Count policies and non-policies separately
@@ -1224,24 +1231,22 @@ def get_counters(user: User):
 
     # Get accessible frameworks
     frameworks_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Framework
+        scoped_folder, user, Framework
     )[0]
 
     # Get accessible risk acceptances
     risk_acceptances_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
+        scoped_folder, user, RiskAcceptance
     )[0]
 
     # Get accessible security exceptions
     security_exceptions_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityException
+        scoped_folder, user, SecurityException
     )[0]
 
     return {
         "domains": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Folder
-            )[0]
+            RoleAssignment.get_accessible_object_ids(scoped_folder, user, Folder)[0]
         ),
         "frameworks": len(frameworks_ids),
         "applied_controls": applied_controls_count,
@@ -1311,22 +1316,54 @@ def build_audits_tree_metrics(user):
     return tree
 
 
-def build_audits_stats(user, folder_id=None):
-    scoped_folder = (
-        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+def build_audits_stats(user, folder_id=None, object_ids=None):
+    if object_ids is None:
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, user, ComplianceAssessment
+        )
+    top_audits = list(
+        ComplianceAssessment.objects.filter(id__in=object_ids)
+        .order_by("-updated_at")
+        .only("id", "name", "selected_implementation_groups")[:10]
     )
-    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, ComplianceAssessment
+    if not top_audits:
+        return {"data": [], "names": [], "uuids": []}
+
+    # Single fetch for all RAs across the top 10 audits, then aggregate
+    # in Python so each audit's selected_implementation_groups filter is
+    # honored (replaces 10× get_requirements_result_count()).
+    top_ids = [a.id for a in top_audits]
+    ig_by_audit = {
+        a.id: set(a.selected_implementation_groups)
+        if a.selected_implementation_groups
+        else None
+        for a in top_audits
+    }
+    counts_by_audit: dict = {aid: {} for aid in top_ids}
+    ra_qs = RequirementAssessment.objects.filter(
+        compliance_assessment_id__in=top_ids,
+        requirement__assessable=True,
+    ).values_list(
+        "compliance_assessment_id",
+        "result",
+        "requirement__implementation_groups",
     )
-    data = list()
-    names = list()
-    uuids = list()
-    for audit in ComplianceAssessment.objects.filter(id__in=object_ids).order_by(
-        "-updated_at"
-    )[:10]:
-        data.append([rs[0] for rs in audit.get_requirements_result_count()])
-        names.append(audit.name)
-        uuids.append(audit.id)
+    for ca_id, result, req_igs in ra_qs:
+        ig = ig_by_audit[ca_id]
+        if ig is not None and not (req_igs and ig & set(req_igs)):
+            continue
+        bucket = counts_by_audit[ca_id]
+        bucket[result] = bucket.get(result, 0) + 1
+
+    results_order = list(RequirementAssessment.Result)
+    data = [
+        [counts_by_audit[a.id].get(r, 0) for r in results_order] for a in top_audits
+    ]
+    names = [a.name for a in top_audits]
+    uuids = [a.id for a in top_audits]
     return {"data": data, "names": names, "uuids": uuids}
 
 
@@ -1422,6 +1459,49 @@ def get_metrics(user: User, folder_id):
     return data
 
 
+def _compute_progress_by_assessment(assessment_ids):
+    """
+    Bulk-compute progress (% assessed) for a set of ComplianceAssessment ids,
+    honoring each assessment's selected_implementation_groups. Mirrors the
+    .progress property semantics (assessed = result != NOT_ASSESSED OR score
+    is not None) but in two queries instead of N heavy prefetched ones.
+    """
+    assessment_ids = list(assessment_ids)
+    if not assessment_ids:
+        return {}
+
+    ig_by_audit = {
+        ca_id: set(igs) if igs else None
+        for ca_id, igs in ComplianceAssessment.objects.filter(
+            id__in=assessment_ids
+        ).values_list("id", "selected_implementation_groups")
+    }
+
+    totals = {aid: 0 for aid in assessment_ids}
+    assessed = {aid: 0 for aid in assessment_ids}
+    rows = RequirementAssessment.objects.filter(
+        compliance_assessment_id__in=assessment_ids,
+        requirement__assessable=True,
+    ).values_list(
+        "compliance_assessment_id",
+        "result",
+        "score",
+        "requirement__implementation_groups",
+    )
+    for ca_id, result, score, req_igs in rows:
+        ig = ig_by_audit.get(ca_id)
+        if ig is not None and not (req_igs and ig & set(req_igs)):
+            continue
+        totals[ca_id] += 1
+        if result != RequirementAssessment.Result.NOT_ASSESSED or score is not None:
+            assessed[ca_id] += 1
+
+    return {
+        aid: int((assessed[aid] / totals[aid]) * 100) if totals[aid] else 0
+        for aid in assessment_ids
+    }
+
+
 def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
@@ -1429,15 +1509,11 @@ def get_audits_metrics(user: User, folder_id=None):
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         scoped_folder, user, ComplianceAssessment
     )
-    viewable_compliance_assessments = ComplianceAssessment.objects.filter(
-        id__in=object_ids
-    )
-    progress_avg = math.ceil(
-        mean([x.progress for x in viewable_compliance_assessments] or [0])
-    )
+    progresses = list(_compute_progress_by_assessment(object_ids).values())
+    progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {
         "progress_avg": progress_avg,
-        "audits_stats": build_audits_stats(user, folder_id),
+        "audits_stats": build_audits_stats(user, folder_id, object_ids=object_ids),
     }
 
 
@@ -1481,28 +1557,14 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         return model.objects.filter(id__in=object_ids)
 
-    # Get viewable compliance assessments with related data and progress annotation
-    from django.db.models import Count, Q, F, Value, IntegerField, ExpressionWrapper
-    from django.db.models.functions import Greatest, Coalesce
-
-    viewable_assessments = (
-        viewable_items(ComplianceAssessment, folder_id)
-        .select_related("framework", "folder", "perimeter")
-        .annotate(
-            total_requirements=Count(
-                "requirement_assessments",
-                filter=Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
-            assessed_requirements=Count(
-                "requirement_assessments",
-                filter=~Q(
-                    requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                )
-                & Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
+    viewable_assessments = list(
+        viewable_items(ComplianceAssessment, folder_id).select_related(
+            "framework", "folder", "perimeter"
         )
+    )
+
+    progress_by_id = _compute_progress_by_assessment(
+        [a.id for a in viewable_assessments]
     )
 
     framework_data = {}
@@ -1517,7 +1579,6 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         perimeter_id = str(assessment.perimeter.id) if assessment.perimeter else None
 
-        # Initialize framework if not exists
         if framework_name not in framework_data:
             framework_data[framework_name] = {
                 "framework_id": framework_id,
@@ -1525,7 +1586,6 @@ def get_compliance_analytics(user: User, folder_id=None):
                 "domains": {},
             }
 
-        # Initialize domain if not exists
         if domain_name not in framework_data[framework_name]["domains"]:
             framework_data[framework_name]["domains"][domain_name] = {
                 "domain_id": domain_id,
@@ -1533,12 +1593,11 @@ def get_compliance_analytics(user: User, folder_id=None):
                 "assessments": [],
             }
 
-        # Add assessment data using annotated progress
         framework_data[framework_name]["domains"][domain_name]["assessments"].append(
             {
                 "assessment_id": str(assessment.id),
                 "assessment_name": assessment.name,
-                "progress": assessment.progress,
+                "progress": progress_by_id.get(assessment.id, 0),
                 "perimeter": perimeter_name,
                 "perimeter_id": perimeter_id,
                 "status": assessment.status,

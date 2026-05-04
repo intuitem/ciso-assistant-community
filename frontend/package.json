@@ -19,8 +19,7 @@
 		"postinstall": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "^2.1.0",
-		"@inlang/plugin-message-format": "^2.2.0",
+		"@inlang/paraglide-js": "^2.17.0",
 		"@playwright/test": "^1.55.1",
 		"@skeletonlabs/skeleton": "^4.0.0",
 		"@skeletonlabs/skeleton-svelte": "^4.0.0",
@@ -69,8 +68,8 @@
 		"@floating-ui/dom": "^1.7.1",
 		"@fortawesome/fontawesome-free": "^6.7.2",
 		"@simplewebauthn/browser": "^13.3.0",
-		"@unovis/svelte": "1.6.4",
-		"@unovis/ts": "1.6.4",
+		"@unovis/svelte": "1.6.5",
+		"@unovis/ts": "1.6.5",
 		"@xyflow/svelte": "^1.5.1",
 		"bits-ui": "^2.15.4",
 		"dotenv": "^16.5.0",
@@ -84,7 +83,7 @@
 		"svelte-persisted-store": "^0.12.0",
 		"wx-svelte-grid": "^2.3.0"
 	},
-	"packageManager": "pnpm@10.33.0",
+	"packageManager": "pnpm@10.33.2",
 	"pnpm": {
 		"overrides": {
 			"esbuild": "^0.27.3",
@@ -106,7 +105,8 @@
 			"effect": "^3.21.0",
 			"picomatch": "^4.0.4",
 			"yaml": "^1.10.3",
-			"brace-expansion": "^5.0.5"
+			"brace-expansion": "^5.0.5",
+			"postcss": "^8.5.10"
 		}
 	}
 }

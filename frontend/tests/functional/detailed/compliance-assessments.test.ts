@@ -53,10 +53,11 @@ test('compliance assessments scoring is working properly', async ({
 		testObjectsData.complianceAssessmentsPage.build.name
 	);
 
-	// Enable scoring on the compliance assessment
+	// Enable scoring on the compliance assessment via the visibility editor
+	// (auditor edit access on the score field).
 	await page.getByTestId('edit-button').click();
 	await page.getByText('More').click();
-	await page.getByTestId('form-input-scoring-enabled').check();
+	await page.getByTestId('visibility-score-everyone').click();
 	await page.getByTestId('save-button').click();
 	await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 

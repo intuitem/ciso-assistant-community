@@ -491,7 +491,8 @@
 	});
 
 	run(() => {
-		cachedValue = selected.map((option) => option.value);
+		const mapped = selected.map((option) => option.value);
+		cachedValue = mapped.length > 0 ? mapped : undefined;
 		cachedOptions = selected;
 	});
 

@@ -962,12 +962,12 @@ class LibraryUpdater:
                 order_id = 0
                 all_fields_to_update = set()
 
-                # Check if score boundaries changed
+                # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
                     prev_min != new_framework.min_score
                     or prev_max != new_framework.max_score
-                    or prev_def != new_framework.scores_definition
                 )
+                scores_definition_changed = prev_def != new_framework.scores_definition
 
                 # If scores changed and no strategy provided, raise exception for frontend to handle
                 if (
@@ -979,11 +979,7 @@ class LibraryUpdater:
                     affected_cas = [
                         ca
                         for ca in compliance_assessments
-                        if (
-                            ca.min_score == prev_min
-                            and ca.max_score == prev_max
-                            and ca.scores_definition == prev_def
-                        )
+                        if (ca.min_score == prev_min and ca.max_score == prev_max)
                     ]
 
                     if affected_cas:
@@ -1004,19 +1000,25 @@ class LibraryUpdater:
 
                 # Update compliance assessments score boundaries
                 compliance_assessments_to_update = []
+                ca_with_scale_change = []
                 ca_bounds = {}
                 for ca in compliance_assessments:
                     # preserve user overrides: update only if CA still equals previous framework defaults
-                    still_on_prev_defaults = (
-                        ca.min_score == prev_min
-                        and ca.max_score == prev_max
-                        and ca.scores_definition == prev_def
+                    scale_on_prev_defaults = (
+                        ca.min_score == prev_min and ca.max_score == prev_max
                     )
+                    definition_on_prev_defaults = ca.scores_definition == prev_def
 
-                    if still_on_prev_defaults and score_boundaries_changed:
+                    needs_update = False
+                    if scale_on_prev_defaults and score_boundaries_changed:
                         ca.min_score = new_framework.min_score
                         ca.max_score = new_framework.max_score
+                        needs_update = True
+                        ca_with_scale_change.append(ca)
+                    if definition_on_prev_defaults and scores_definition_changed:
                         ca.scores_definition = new_framework.scores_definition
+                        needs_update = True
+                    if needs_update:
                         compliance_assessments_to_update.append(ca)
 
                 if compliance_assessments_to_update:
@@ -1046,7 +1048,7 @@ class LibraryUpdater:
                                 )
                             ),
                         )
-                        for ca in compliance_assessments_to_update
+                        for ca in ca_with_scale_change
                     }
 
                 # main loop by requirement_node
@@ -1125,8 +1127,7 @@ class LibraryUpdater:
                         if (
                             ra.is_scored
                             and ra.score is not None
-                            and ra.compliance_assessment
-                            in compliance_assessments_to_update
+                            and ra.compliance_assessment in ca_with_scale_change
                         ):
                             default_min = (
                                 0
@@ -2324,7 +2325,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'."
+            "Per-field visibility template seeded into new CAs: "
+            "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
         ),
     )
     urn_namespace = models.CharField(
@@ -6621,9 +6623,6 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
-    scoring_enabled = models.BooleanField(default=False)
-    show_documentation_score = models.BooleanField(default=False)
-
     computed_outcome = models.JSONField(null=True, blank=True)
 
     assets = models.ManyToManyField(
@@ -6650,15 +6649,17 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
-    extended_result_enabled = models.BooleanField(default=False)
-    progress_status_enabled = models.BooleanField(default=True)
-
     field_visibility = models.JSONField(
         default=dict,
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Override visibility per field for this assessment. Overrides framework defaults."
+            "Per-field visibility map: "
+            "{field_name: {role: 'edit' | 'read' | 'hidden'}}. "
+            "Missing keys cascade through core.utils.DEFAULT_VISIBILITY "
+            "(e.g. score/documentation_score default to hidden, "
+            "status/extended_result to auditor-only) and finally to 'edit' "
+            "for every role for unknown fields."
         ),
     )
 
@@ -6687,6 +6688,63 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+
+    # --- Visibility-derived booleans ---
+    # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
+    # per-role pairs ({role: 'edit'|'read'|'hidden'}); the legacy booleans read
+    # the auditor axis (the field exists at all if auditor isn't 'hidden').
+
+    def _auditor_visible(self, field):
+        from core.utils import resolve_field_visibility
+
+        pair = resolve_field_visibility(self, field)
+        return pair.get("auditor", "edit") != "hidden"
+
+    def _set_field_hidden(self, field, hidden):
+        # When un-hiding via the legacy boolean setters (scoring_enabled,
+        # show_documentation_score, extended_result_enabled, progress_status_enabled),
+        # restore AUDITOR_ONLY rather than EVERYONE_EDIT — the historical "True"
+        # value of those booleans only meant "auditor sees it", and the migration
+        # backfills existing CAs to AUDITOR_ONLY for the same reason. Writing
+        # EVERYONE_EDIT here would silently widen access to respondents.
+        from core.utils import AUDITOR_ONLY, HIDDEN
+
+        fv = dict(self.field_visibility or {})
+        fv[field] = dict(HIDDEN) if hidden else dict(AUDITOR_ONLY)
+        self.field_visibility = fv
+
+    @property
+    def scoring_enabled(self):
+        return self._auditor_visible("score")
+
+    @scoring_enabled.setter
+    def scoring_enabled(self, value):
+        self._set_field_hidden("score", not value)
+        self._set_field_hidden("is_scored", not value)
+
+    @property
+    def show_documentation_score(self):
+        return self._auditor_visible("documentation_score")
+
+    @show_documentation_score.setter
+    def show_documentation_score(self, value):
+        self._set_field_hidden("documentation_score", not value)
+
+    @property
+    def extended_result_enabled(self):
+        return self._auditor_visible("extended_result")
+
+    @extended_result_enabled.setter
+    def extended_result_enabled(self, value):
+        self._set_field_hidden("extended_result", not value)
+
+    @property
+    def progress_status_enabled(self):
+        return self._auditor_visible("status")
+
+    @progress_status_enabled.setter
+    def progress_status_enabled(self, value):
+        self._set_field_hidden("status", not value)
 
     def upsert_daily_metrics(self):
         per_status = {item[1]: item[0] for item in self.get_requirements_status_count()}
@@ -7950,6 +8008,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         )
         GOOD_PRACTICE = "good_practice", "Good practice"
 
+    class RespondentAlignment(models.TextChoices):
+        YES = "yes", _("Yes")
+        NO = "no", _("No")
+        IN_PROGRESS = "in_progress", _("In progress")
+        NOT_APPLICABLE = "not_applicable", _("Not applicable")
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -7988,6 +8052,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         related_name="requirement_assessments",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    respondent_alignment = models.CharField(
+        max_length=32,
+        choices=RespondentAlignment.choices,
+        blank=True,
+        null=True,
+        verbose_name=_("Respondent alignment"),
+    )
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
         on_delete=models.CASCADE,
@@ -9403,11 +9474,38 @@ class Actor(AbstractBaseModel):
         return str(self.specific)
 
 
+class Preset(NameDescriptionMixin, FolderMixin, EditableMixin):
+    """Template definition. Library-backed (urn set) or user-authored (urn null)."""
+
+    urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    ref_id = models.CharField(max_length=255, null=True, blank=True)
+    version = models.IntegerField(default=1)
+    provider = models.CharField(max_length=255, null=True, blank=True)
+    translations = models.JSONField(default=dict, blank=True)
+    profile = models.JSONField(default=dict, blank=True)
+    feature_flags = models.JSONField(default=dict, blank=True)
+    scaffolded_objects = models.JSONField(default=list, blank=True)
+    steps = models.JSONField(default=list, blank=True)
+    dependencies = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class PresetJourney(NameDescriptionMixin, FolderMixin):
     """Instance created when a user applies a preset definition."""
 
-    urn = models.CharField(max_length=255)
-    version = models.IntegerField(default=1)
+    preset = models.ForeignKey(
+        Preset,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="journeys",
+    )
+    applied_version = models.IntegerField(default=1)
     object_refs = models.JSONField(default=dict)
     applied_at = models.DateTimeField(auto_now_add=True)
     applied_by = models.ForeignKey(
@@ -9440,6 +9538,8 @@ class PresetJourneyStep(AbstractBaseModel):
     translations = models.JSONField(null=True, blank=True)
     target_model = models.CharField(max_length=100, blank=True, null=True)
     target_ref = models.CharField(max_length=100, blank=True, null=True)
+    target_url = models.CharField(max_length=255, blank=True, null=True)
+    target_params = models.JSONField(null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.NOT_STARTED
     )
@@ -9593,6 +9693,10 @@ auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
     m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    Preset,
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     PresetJourney,
