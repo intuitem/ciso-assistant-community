@@ -1819,7 +1819,7 @@ class ElementaryActionRecordConsumer(RecordConsumer):
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
-        if not domain_name:
+        if domain_name:
             domain = self.folders_map.get(str(domain_name).lower(), self.folder_id)
 
         name = record.get("name")
@@ -1866,6 +1866,12 @@ class ProcessingRecordConsumer(RecordConsumer):
             "filtering_labels": ["labels"],
         }
     )
+    _STATUS_KEYS: ClassVar[frozenset[str]] = frozenset(
+        k for k, _ in Processing.STATUS_CHOICES
+    )
+    _STATUS_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {v.lower(): k for k, v in Processing.STATUS_CHOICES}
+    )
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
@@ -1881,20 +1887,21 @@ class ProcessingRecordConsumer(RecordConsumer):
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
-        if not domain_name:
+        if domain_name:
             domain = self.folders_map.get(str(domain_name).lower(), self.folder_id)
 
         name = record.get("name")
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        # Accept display value or raw key for status
-        status_mapping = {v: k for k, v in Processing.STATUS_CHOICES}
-        record_status_value = record.get("status", "privacy_draft")
-        status_value = None
-
-        if record_status_value in status_mapping:
-            status_value = status_mapping[record_status_value]
+        # Accept both raw key (e.g. "privacy_draft") and display label (e.g. "Draft")
+        record_status_value = record.get("status", "")
+        if record_status_value in self._STATUS_KEYS:
+            status_value = record_status_value
+        elif str(record_status_value).lower() in self._STATUS_BY_DISPLAY:
+            status_value = self._STATUS_BY_DISPLAY[str(record_status_value).lower()]
+        else:
+            status_value = "privacy_draft"
 
         data = {
             "name": name,
