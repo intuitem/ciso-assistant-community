@@ -1375,5 +1375,12 @@
 	"enrichFromEUVD": "Perkaya EUVD",
 	"syncCweCatalog": "Ambil CWE",
 	"syncCweCatalogFailed": "Gagal CWE",
-	"expirationDateIsInThePastWarning": "Tanggal kedaluwarsa yang dimasukkan berada di masa lalu"
+	"expirationDateIsInThePastWarning": "Tanggal kedaluwarsa yang dimasukkan berada di masa lalu",
+	"fieldVisibility": "Visibilitas bidang",
+	"fieldVisibilityHelpText": "Kontrol bidang mana yang dapat dilihat dan diedit oleh setiap peran.",
+	"visibilityAuditorRespondent": "Auditor + Responden",
+	"visibilityAuditorOnly": "Hanya auditor",
+	"visibilityHidden": "Tersembunyi",
+	"answers": "Jawaban",
+	"respondentAlignment": "Penyelarasan responden"
 }

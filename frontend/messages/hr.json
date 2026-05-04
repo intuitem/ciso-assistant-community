@@ -3703,5 +3703,12 @@
 	"syncCweCatalogFailed": "CWE pogreška",
 	"tasksReview": "Pregled zadataka",
 	"yearlyTasksReview": "Pregled agregiranih zadataka",
-	"exportEcosystem": "izvoz ekosustava (XLSX)"
+	"exportEcosystem": "izvoz ekosustava (XLSX)",
+	"fieldVisibility": "Vidljivost polja",
+	"fieldVisibilityHelpText": "Kontrolirajte koja polja svaka uloga može vidjeti i uređivati.",
+	"visibilityAuditorRespondent": "Revizor + Ispitanik",
+	"visibilityAuditorOnly": "Samo revizor",
+	"visibilityHidden": "Skriveno",
+	"answers": "Odgovori",
+	"respondentAlignment": "Usklađenost ispitanika"
 }

@@ -2173,8 +2173,24 @@ export const listViewFields = {
 		}
 	},
 	'personal-data': {
-		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', 'customName', 'processing'],
-		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
+		head: [
+			'category',
+			'isSensitive',
+			'retention',
+			'deletionPolicy',
+			'customName',
+			'assets',
+			'processing'
+		],
+		body: [
+			'category',
+			'is_sensitive',
+			'retention',
+			'deletion_policy',
+			'name',
+			'assets',
+			'processing'
+		],
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER,
@@ -2900,6 +2916,13 @@ export const listViewFields = {
 			gravity: undefined
 		},
 		body: ['users']
+	},
+	journeys: {
+		head: ['name', 'preset', 'folder', 'appliedVersion', 'appliedAt', 'appliedBy'],
+		body: ['name', 'preset', 'folder', 'applied_version', 'applied_at', 'applied_by'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
 	}
 } as const satisfies ListViewFieldsConfig;
 
