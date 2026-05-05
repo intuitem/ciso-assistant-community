@@ -205,6 +205,30 @@ class TestAssetsAuthenticated:
             test.client, "Assets", "type", Asset.Type.choices
         )
 
+    def test_export_filtered_assets(self, test):
+        """Export should honor the same filters as the assets list."""
+
+        pr_asset = Asset.objects.create(
+            name="filtered-pr-asset",
+            description=ASSET_DESCRIPTION,
+            type=ASSET_TYPE[0],
+            folder=test.folder,
+        )
+        Asset.objects.create(
+            name="filtered-sp-asset",
+            description=ASSET_DESCRIPTION,
+            type=ASSET_TYPE2[0],
+            folder=test.folder,
+        )
+
+        response = test.client.get("/api/assets/export/?type=PR")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response["Content-Type"] == "text/csv"
+        content = response.content.decode("utf-8")
+        assert "filtered-pr-asset" in content
+        assert "filtered-sp-asset" not in content
+
 
 # ---------------------------------------------------------------------------
 # IAM-scoped visibility on /api/assets/.
