@@ -207,8 +207,7 @@
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}));
 				const msg =
-					(err && (err.parent_assets || err.detail || err.non_field_errors)) ??
-					'Update failed';
+					(err && (err.parent_assets || err.detail || err.non_field_errors)) ?? 'Update failed';
 				toastStore.trigger({
 					message: typeof msg === 'string' ? msg : JSON.stringify(msg),
 					background: 'preset-tonal-error'
@@ -238,7 +237,9 @@
 
 	async function handleConnect(connection: Connection) {
 		if (!connection.source || !connection.target) return;
-		const newParents = Array.from(new Set([...currentParentsOf(connection.target), connection.source]));
+		const newParents = Array.from(
+			new Set([...currentParentsOf(connection.target), connection.source])
+		);
 		const ok = await patchParentAssets(connection.target, newParents);
 		if (!ok) {
 			// Revert: drop this edge from local state
@@ -389,9 +390,7 @@
 			}
 			// Locally update the visible label so the change shows immediately,
 			// then re-fetch to keep the server state authoritative.
-			nodes = nodes.map((n) =>
-				n.id === assetId ? { ...n, data: { ...n.data, label: name } } : n
-			);
+			nodes = nodes.map((n) => (n.id === assetId ? { ...n, data: { ...n.data, label: name } } : n));
 			void invalidateAll();
 			return true;
 		} catch {

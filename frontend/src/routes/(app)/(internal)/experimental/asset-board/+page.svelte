@@ -28,7 +28,9 @@
 		<h4 class="font-bold text-surface-800">
 			<i class="fa-solid fa-diagram-project mr-2"></i>Asset whiteboard
 		</h4>
-		<span class="text-xs text-surface-500 px-2 py-0.5 rounded bg-surface-100 border border-surface-200">
+		<span
+			class="text-xs text-surface-500 px-2 py-0.5 rounded bg-surface-100 border border-surface-200"
+		>
 			experimental
 		</span>
 		<div class="flex-1"></div>
