@@ -7802,15 +7802,14 @@ class UserPreferencesView(APIView):
         return Response({}, status=status.HTTP_200_OK)
 
 
-@cache_page(60 * SHORT_CACHE_TTL)
-@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_counters_view(request):
     """
     API endpoint that returns the counters
     """
-    return Response({"results": get_counters(request.user)})
+    folder_id = request.query_params.get("folder", None)
+    return Response({"results": get_counters(request.user, folder_id)})
 
 
 @api_view(["GET"])
@@ -7841,7 +7840,10 @@ def get_combined_assessments_status_view(request):
     API endpoint that returns combined assessment counts per status
     for RiskAssessment, ComplianceAssessment, and FindingsAssessment
     """
-    return Response({"results": combined_assessments_per_status(request.user)})
+    folder_id = request.query_params.get("folder", None)
+    return Response(
+        {"results": combined_assessments_per_status(request.user, folder_id)}
+    )
 
 
 @api_view(["GET"])
@@ -7854,7 +7856,10 @@ def get_governance_calendar_data_view(request):
     year = request.query_params.get("year", None)
     if year:
         year = int(year)
-    return Response({"results": get_governance_calendar_data(request.user, year)})
+    folder_id = request.query_params.get("folder", None)
+    return Response(
+        {"results": get_governance_calendar_data(request.user, year, folder_id)}
+    )
 
 
 # TODO: Add all the proper docstrings for the following list of functions
