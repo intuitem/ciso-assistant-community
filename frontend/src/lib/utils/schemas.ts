@@ -1792,6 +1792,6 @@ export const activateTOTPSchema: ZodSchema = z.object({
 });
 
 export const registerWebAuthnSchema: ZodSchema = z.object({
-	name: z.string().max(100),
+	name: z.string().min(1).max(100),
 	credential: z.any()
 });

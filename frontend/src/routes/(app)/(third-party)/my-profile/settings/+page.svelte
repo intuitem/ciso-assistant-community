@@ -327,7 +327,8 @@
 														onclick={(_) => {
 															modalConfirmPATDelete(pat.digest);
 														}}
-														onkeydown={() => modalConfirmPATDelete(pat.digest)}
+														aria-label={m.deletePersonalAccessToken()}
+														title={m.deletePersonalAccessToken()}
 														class="cursor-pointer hover:text-primary-500"
 														data-testid="tablerow-delete-button"
 														><i class="fa-solid fa-trash"></i></button
