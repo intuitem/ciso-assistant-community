@@ -171,6 +171,11 @@ class PersonalAccessTokenViewSet(views.APIView):
 
 class AuthTokenDetailView(views.APIView):
     def delete(self, request, *args, **kwargs):
+        if request.user.is_third_party:
+            return Response(
+                {"error": "Forbidden"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         try:
             token = AuthToken.objects.get(digest=kwargs["pk"])
             if token.user != request.user:

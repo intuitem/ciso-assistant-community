@@ -1,7 +1,7 @@
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { activateTOTPSchema, registerWebAuthnSchema } from './mfa/utils/schemas';
+import { activateTOTPSchema, registerWebAuthnSchema } from '$lib/utils/schemas';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -61,10 +61,10 @@ export const load: PageServerLoad = async (event) => {
 	const registerWebAuthnForm = await superValidate(zod(registerWebAuthnSchema));
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
 	const personalAccessTokenDeleteForm = await superValidate(zod(z.object({ id: z.string() })));
-	const PATAllowed = !event.locals.user.is_third_party;
+	const patAllowed = !event.locals.user.is_third_party;
 	let personalAccessTokens = [];
 
-	if (PATAllowed) {
+	if (patAllowed) {
 		const personalAccessTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
 		const personalAccessTokensResponse = await event.fetch(personalAccessTokensEndpoint);
 		if (!personalAccessTokensResponse.ok) {
@@ -82,7 +82,7 @@ export const load: PageServerLoad = async (event) => {
 		webauthnCredentials,
 		webauthnCreationOptions,
 		registerWebAuthnForm,
-		PATAllowed,
+		patAllowed,
 		personalAccessTokens,
 		personalAccessTokenCreateForm,
 		personalAccessTokenDeleteForm,
@@ -179,8 +179,8 @@ export const actions: Actions = {
 		return { recoveryCodes: response.data };
 	},
 	createPAT: async (event) => {
-		const PATAllowed = !event.locals.user.is_third_party;
-		if (!PATAllowed) {
+		const patAllowed = !event.locals.user.is_third_party;
+		if (!patAllowed) {
 			return fail(403, { error: 'Forbidden' });
 		}
 
@@ -289,8 +289,8 @@ export const actions: Actions = {
 		return { form };
 	},
 	deletePAT: async (event) => {
-		const PATAllowed = !event.locals.user.is_third_party;
-		if (!PATAllowed) {
+		const patAllowed = !event.locals.user.is_third_party;
+		if (!patAllowed) {
 			return fail(403, { error: 'Forbidden' });
 		}
 
