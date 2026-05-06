@@ -9470,52 +9470,71 @@ class FrameworkViewSet(BaseModelViewSet):
             draft_choice_map = {c["id"]: c for c in draft_choices}
 
             # --- 5. UPDATE+CREATE nodes ---
+            # Skip rows whose draft payload already equals the DB row — this
+            # avoids feeding unchanged rows into a 1000-deep CASE-WHEN UPDATE
+            # that SQLite handles poorly. Common case: open the builder and
+            # publish without editing → zero-cost UPDATE.
+            NODE_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "name",
+                "description",
+                "annotation",
+                "parent_urn",
+                "order_id",
+                "assessable",
+                "implementation_groups",
+                "visibility_expression",
+                "typical_evidence",
+                "weight",
+                "importance",
+                "display_mode",
+                "folder_id",
+                "translations",
+            ]
             if existing_node_ids:
+                db_nodes_map = {
+                    row["id"]: row
+                    for row in RequirementNode.objects.filter(
+                        id__in=existing_node_ids
+                    ).values("id", *NODE_UPDATE_FIELDS)
+                }
                 nodes_to_update = []
                 for node_id in existing_node_ids:
                     data = draft_node_map[str(node_id)]
-                    node = RequirementNode(
-                        id=node_id,
-                        framework=framework,
-                        urn=data.get("urn") or None,
-                        ref_id=data.get("ref_id") or None,
-                        name=data.get("name") or None,
-                        description=data.get("description") or None,
-                        annotation=data.get("annotation") or None,
-                        parent_urn=data.get("parent_urn") or None,
-                        order_id=data.get("order_id"),
-                        assessable=data.get("assessable", False),
-                        implementation_groups=data.get("implementation_groups"),
-                        visibility_expression=data.get("visibility_expression") or None,
-                        typical_evidence=data.get("typical_evidence") or None,
-                        weight=data.get("weight", 1),
-                        importance=data.get("importance", "undefined"),
-                        display_mode=data.get("display_mode", "default"),
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                    payload = {
+                        "urn": data.get("urn") or None,
+                        "ref_id": data.get("ref_id") or None,
+                        "name": data.get("name") or None,
+                        "description": data.get("description") or None,
+                        "annotation": data.get("annotation") or None,
+                        "parent_urn": data.get("parent_urn") or None,
+                        "order_id": data.get("order_id"),
+                        "assessable": data.get("assessable", False),
+                        "implementation_groups": data.get("implementation_groups"),
+                        "visibility_expression": data.get("visibility_expression")
+                        or None,
+                        "typical_evidence": data.get("typical_evidence") or None,
+                        "weight": data.get("weight", 1),
+                        "importance": data.get("importance", "undefined"),
+                        "display_mode": data.get("display_mode", "default"),
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_nodes_map.get(node_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in NODE_UPDATE_FIELDS
+                    ):
+                        continue
+                    nodes_to_update.append(
+                        RequirementNode(
+                            id=node_id, framework=framework, **payload
+                        )
                     )
-                    nodes_to_update.append(node)
-                RequirementNode.objects.bulk_update(
-                    nodes_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "name",
-                        "description",
-                        "annotation",
-                        "parent_urn",
-                        "order_id",
-                        "assessable",
-                        "implementation_groups",
-                        "visibility_expression",
-                        "typical_evidence",
-                        "weight",
-                        "importance",
-                        "display_mode",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
+                if nodes_to_update:
+                    RequirementNode.objects.bulk_update(
+                        nodes_to_update, NODE_UPDATE_FIELDS
+                    )
 
             new_node_ids = draft_node_ids - db_node_ids
             if new_node_ids:
@@ -9555,7 +9574,27 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
             # --- 6. UPDATE+CREATE questions (with FK validation) ---
+            QUESTION_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "text",
+                "annotation",
+                "type",
+                "config",
+                "depends_on",
+                "order",
+                "weight",
+                "requirement_node_id",
+                "folder_id",
+                "translations",
+            ]
             if existing_question_ids:
+                db_questions_map = {
+                    row["id"]: row
+                    for row in Question.objects.filter(
+                        id__in=existing_question_ids
+                    ).values("id", *QUESTION_UPDATE_FIELDS)
+                }
                 questions_to_update = []
                 for question_id in existing_question_ids:
                     data = draft_question_map[str(question_id)]
@@ -9564,39 +9603,30 @@ class FrameworkViewSet(BaseModelViewSet):
                         raise DraftValidationError(
                             "Question references requirement_node not in this framework."
                         )
-                    question = Question(
-                        id=question_id,
-                        urn=data.get("urn"),
-                        ref_id=data.get("ref_id") or None,
-                        text=data.get("text") or None,
-                        annotation=data.get("annotation") or None,
-                        type=data.get("type", "text"),
-                        config=data.get("config"),
-                        depends_on=data.get("depends_on"),
-                        order=data.get("order", 0),
-                        weight=data.get("weight", 1),
-                        requirement_node_id=req_node_id,
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                    payload = {
+                        "urn": data.get("urn"),
+                        "ref_id": data.get("ref_id") or None,
+                        "text": data.get("text") or None,
+                        "annotation": data.get("annotation") or None,
+                        "type": data.get("type", "text"),
+                        "config": data.get("config"),
+                        "depends_on": data.get("depends_on"),
+                        "order": data.get("order", 0),
+                        "weight": data.get("weight", 1),
+                        "requirement_node_id": req_node_id,
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_questions_map.get(question_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in QUESTION_UPDATE_FIELDS
+                    ):
+                        continue
+                    questions_to_update.append(Question(id=question_id, **payload))
+                if questions_to_update:
+                    Question.objects.bulk_update(
+                        questions_to_update, QUESTION_UPDATE_FIELDS
                     )
-                    questions_to_update.append(question)
-                Question.objects.bulk_update(
-                    questions_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "text",
-                        "annotation",
-                        "type",
-                        "config",
-                        "depends_on",
-                        "order",
-                        "weight",
-                        "requirement_node_id",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
 
             new_question_ids = draft_question_ids - db_question_ids
             if new_question_ids:
@@ -9635,7 +9665,28 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
             # --- 7. UPDATE+CREATE choices (with FK validation) ---
+            CHOICE_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "value",
+                "annotation",
+                "add_score",
+                "compute_result",
+                "order",
+                "description",
+                "color",
+                "select_implementation_groups",
+                "question_id",
+                "folder_id",
+                "translations",
+            ]
             if existing_choice_ids:
+                db_choices_map = {
+                    row["id"]: row
+                    for row in QuestionChoice.objects.filter(
+                        id__in=existing_choice_ids
+                    ).values("id", *CHOICE_UPDATE_FIELDS)
+                }
                 choices_to_update = []
                 for choice_id in existing_choice_ids:
                     data = draft_choice_map[str(choice_id)]
@@ -9644,43 +9695,35 @@ class FrameworkViewSet(BaseModelViewSet):
                         raise DraftValidationError(
                             "Choice references question not in this framework."
                         )
-                    choice = QuestionChoice(
-                        id=choice_id,
-                        urn=data.get("urn") or None,
-                        ref_id=data.get("ref_id") or None,
-                        value=data.get("value") or None,
-                        annotation=data.get("annotation") or None,
-                        add_score=data.get("add_score"),
-                        compute_result=data.get("compute_result") or None,
-                        order=data.get("order", 0),
-                        description=data.get("description") or None,
-                        color=data.get("color") or None,
-                        select_implementation_groups=data.get(
+                    payload = {
+                        "urn": data.get("urn") or None,
+                        "ref_id": data.get("ref_id") or None,
+                        "value": data.get("value") or None,
+                        "annotation": data.get("annotation") or None,
+                        "add_score": data.get("add_score"),
+                        "compute_result": data.get("compute_result") or None,
+                        "order": data.get("order", 0),
+                        "description": data.get("description") or None,
+                        "color": data.get("color") or None,
+                        "select_implementation_groups": data.get(
                             "select_implementation_groups"
                         ),
-                        question_id=q_id,
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                        "question_id": q_id,
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_choices_map.get(choice_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in CHOICE_UPDATE_FIELDS
+                    ):
+                        continue
+                    choices_to_update.append(
+                        QuestionChoice(id=choice_id, **payload)
                     )
-                    choices_to_update.append(choice)
-                QuestionChoice.objects.bulk_update(
-                    choices_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "value",
-                        "annotation",
-                        "add_score",
-                        "compute_result",
-                        "order",
-                        "description",
-                        "color",
-                        "select_implementation_groups",
-                        "question_id",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
+                if choices_to_update:
+                    QuestionChoice.objects.bulk_update(
+                        choices_to_update, CHOICE_UPDATE_FIELDS
+                    )
 
             new_choice_ids = draft_choice_ids - db_choice_ids
             if new_choice_ids:
