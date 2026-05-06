@@ -101,7 +101,9 @@ export interface Framework {
 	available_languages?: string[];
 	urn: string | null;
 	urn_namespace: string;
+	ref_id: string | null;
 	editing_version: number;
+	has_compliance_assessments: boolean;
 }
 
 /**
@@ -397,7 +399,8 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 			implementation_groups_definition: fw.implementation_groups_definition,
 			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
 			field_visibility: fw.field_visibility,
-			urn_namespace: fw.urn_namespace
+			urn_namespace: fw.urn_namespace,
+			ref_id: fw.ref_id
 		},
 		nodes,
 		questions,
@@ -431,7 +434,8 @@ export function hydrateDraft(
 		implementation_groups_definition: meta.implementation_groups_definition,
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
 		field_visibility: meta.field_visibility ?? {},
-		urn_namespace: meta.urn_namespace ?? 'custom'
+		urn_namespace: meta.urn_namespace ?? 'custom',
+		ref_id: meta.ref_id ?? null
 	};
 
 	// Build a lookup from question_id to choices
@@ -670,8 +674,14 @@ export function createBuilderState(
 		initialFrameworkData = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
 	}
 
-	// Cache the slug after hydration so renamed drafts use the updated name
-	const fwSlug = slugifyFrameworkName(initialFrameworkData.name, frameworkId);
+	// Reactive slug: prefer the user-typed ref_id (mid-session rename), fall
+	// back to slugify(name) for legacy frameworks where ref_id is null.
+	function getFwSlug(): string {
+		const fw = get(framework);
+		const refId = fw.ref_id;
+		if (refId && refId.length > 0) return refId;
+		return slugifyFrameworkName(fw.name, frameworkId);
+	}
 
 	const framework = writable<Framework>(initialFrameworkData);
 	const initialRootNodes = buildTree(initialNodes, initialQuestions);
@@ -866,7 +876,7 @@ export function createBuilderState(
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
+			urn: generateUrn('req_node', getFwSlug(), refId, getUrnNs()),
 			ref_id: refId,
 			name: null,
 			description: null,
@@ -1137,7 +1147,7 @@ export function createBuilderState(
 		const parentRefId = req.node.ref_id ?? null;
 		const siblingRefIds = req.questions.map((bq) => bq.question.ref_id);
 		const refId = computeRefId(siblingRefIds, parentRefId, 'question');
-		const urn = generateUrn('question', fwSlug, refId, getUrnNs());
+		const urn = generateUrn('question', getFwSlug(), refId, getUrnNs());
 
 		const newQuestion: Question = {
 			id: newId,
@@ -1208,7 +1218,7 @@ export function createBuilderState(
 
 		const newChoice: QuestionChoice = {
 			id: newId,
-			urn: generateUrn('question_choice', fwSlug, refId, getUrnNs()),
+			urn: generateUrn('question_choice', getFwSlug(), refId, getUrnNs()),
 			ref_id: refId,
 			value: '',
 			annotation: null,

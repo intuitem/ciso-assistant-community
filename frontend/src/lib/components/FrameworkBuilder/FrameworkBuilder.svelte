@@ -79,6 +79,8 @@
 	const urnCopy = createCopyHandler();
 	let helpOpen = $state(false);
 	let showSettings = $state(false);
+	// Compliance assessments lock the URN namespace + ref_id inputs once present.
+	let lockUrnEdits = $derived($frameworkStore.has_compliance_assessments);
 	let showScoringSettings = $state(false);
 	let showScalesEditor = $state(false);
 	let newLangCode = $state('');
@@ -459,34 +461,58 @@
 								></textarea>
 							</div>
 
-							<!-- URN namespace -->
+							<!-- URN namespace + ref_id -->
 							<div>
-								<label class="block">
-									<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
-										>URN namespace</span
-									>
-									<input
-										type="text"
-										value={$frameworkStore.urn_namespace ?? 'custom'}
-										placeholder="custom"
-										pattern="[a-zA-Z0-9_-]+"
-										class="mt-1 w-48 text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {$frameworkStore.editing_version >
-										1
-											? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-											: ''}"
-										readonly={$frameworkStore.editing_version > 1}
-										onblur={(e) => {
-											if ($frameworkStore.editing_version > 1) return;
-											const val = e.currentTarget.value.replace(/[^a-zA-Z0-9_-]/g, '') || 'custom';
-											builder.updateFramework({ urn_namespace: val });
-										}}
-									/>
-								</label>
+								<div class="flex gap-3">
+									<label class="block">
+										<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
+											>URN namespace</span
+										>
+										<input
+											type="text"
+											value={$frameworkStore.urn_namespace ?? 'custom'}
+											placeholder="custom"
+											pattern="[a-zA-Z0-9_-]+"
+											class="mt-1 w-48 text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
+												? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+												: ''}"
+											readonly={lockUrnEdits}
+											onblur={(e) => {
+												if (lockUrnEdits) return;
+												const val =
+													e.currentTarget.value.replace(/[^a-zA-Z0-9_-]/g, '') || 'custom';
+												builder.updateFramework({ urn_namespace: val });
+											}}
+										/>
+									</label>
+									<label class="block">
+										<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
+											>Ref ID</span
+										>
+										<input
+											type="text"
+											value={$frameworkStore.ref_id ?? ''}
+											placeholder="my-framework"
+											pattern="[a-zA-Z0-9_-]+"
+											class="mt-1 w-48 text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
+												? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+												: ''}"
+											readonly={lockUrnEdits}
+											onblur={(e) => {
+												if (lockUrnEdits) return;
+												const val = e.currentTarget.value.replace(/[^a-zA-Z0-9_-]/g, '');
+												builder.updateFramework({ ref_id: val || null });
+											}}
+										/>
+									</label>
+								</div>
 								<p class="text-[10px] text-gray-400 mt-0.5">
-									Organization in URN prefix (urn:<b>{$frameworkStore.urn_namespace ?? 'custom'}</b
-									>:risk:...).
-									{#if $frameworkStore.editing_version > 1}
-										Locked after first publish.
+									URN preview: <code
+										>urn:{$frameworkStore.urn_namespace ?? 'custom'}:risk:framework:{$frameworkStore.ref_id ||
+											'…'}</code
+									>
+									{#if lockUrnEdits}
+										Locked — a compliance assessment uses this framework.
 									{/if}
 								</p>
 							</div>
