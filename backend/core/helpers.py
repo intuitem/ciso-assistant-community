@@ -1,8 +1,10 @@
 import json
+from collections import defaultdict
 from collections.abc import MutableMapping
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Optional
 from typing import Dict, List
+from uuid import UUID
 
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
@@ -799,7 +801,9 @@ def task_template_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def get_governance_calendar_data(user: User, year: int = None):
+def get_governance_calendar_data(
+    user: User, year: Optional[int] = None, folder_id: Optional[str] = None
+) -> list:
     """
     Generate calendar heatmap data for governance activities.
     Returns activity counts per date for:
@@ -810,16 +814,6 @@ def get_governance_calendar_data(user: User, year: int = None):
     - ComplianceAssessment due dates and ETAs
     - FindingsAssessment due dates and ETAs
     """
-    from core.models import (
-        TaskNode,
-        AppliedControl,
-        RiskAcceptance,
-        RiskAssessment,
-        ComplianceAssessment,
-        FindingsAssessment,
-    )
-    from datetime import datetime
-    from collections import defaultdict
 
     if year is None:
         year = datetime.now().year
@@ -827,27 +821,31 @@ def get_governance_calendar_data(user: User, year: int = None):
     start_date = datetime(year, 1, 1).date()
     end_date = datetime(year, 12, 31).date()
 
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+
     # Dictionary to accumulate activity counts per date
     activity_counts = defaultdict(int)
 
     # Get accessible objects for each model
     (task_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, TaskNode
+        scoped_folder, user, TaskNode
     )
     (control_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )
     (acceptance_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
+        scoped_folder, user, RiskAcceptance
     )
     (risk_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAssessment
+        scoped_folder, user, RiskAssessment
     )
     (compliance_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, ComplianceAssessment
+        scoped_folder, user, ComplianceAssessment
     )
     (findings_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, FindingsAssessment
+        scoped_folder, user, FindingsAssessment
     )
 
     # Count TaskNode due dates
@@ -941,12 +939,16 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def combined_assessments_per_status(user: User):
+def combined_assessments_per_status(
+    user: User, folder_id: Optional[str] = None
+) -> dict:
     """
     Returns assessment counts grouped by status for all three assessment types:
     RiskAssessment, ComplianceAssessment, and FindingsAssessment
     """
-    from .models import RiskAssessment, ComplianceAssessment, FindingsAssessment
+    scoped_folder = (
+        Folder.objects.filter(id=folder_id).first() if folder_id else None
+    ) or Folder.get_root_folder()
 
     # Get all unique statuses across all assessment types
     # Using RiskAssessment.Status as they should all share the same status choices
@@ -970,7 +972,7 @@ def combined_assessments_per_status(user: User):
     for series_name, model in assessment_types:
         # Get accessible objects
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, model
+            scoped_folder, user, model
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
 
@@ -1213,10 +1215,14 @@ def risks_per_perimeter_groups(user: User):
     return output
 
 
-def get_counters(user: User):
+def get_counters(user: User, folder_id: Optional[str] = None) -> dict:
+    scoped_folder = (
+        Folder.objects.filter(id=folder_id).first() if folder_id else None
+    ) or Folder.get_root_folder()
+
     # Get all accessible applied controls
     applied_controls_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )[0]
 
     # Count policies and non-policies separately
@@ -1226,24 +1232,22 @@ def get_counters(user: User):
 
     # Get accessible frameworks
     frameworks_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Framework
+        scoped_folder, user, Framework
     )[0]
 
     # Get accessible risk acceptances
     risk_acceptances_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
+        scoped_folder, user, RiskAcceptance
     )[0]
 
     # Get accessible security exceptions
     security_exceptions_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityException
+        scoped_folder, user, SecurityException
     )[0]
 
     return {
         "domains": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Folder
-            )[0]
+            RoleAssignment.get_accessible_object_ids(scoped_folder, user, Folder)[0]
         ),
         "frameworks": len(frameworks_ids),
         "applied_controls": applied_controls_count,
@@ -1997,6 +2001,7 @@ def get_folder_content(
     include_enclaves,
     viewable_objects,
     needed_folders,
+    writable_ids: Optional[set[UUID]] = None,
 ):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
@@ -2008,6 +2013,7 @@ def get_folder_content(
                 "name": f.name,
                 "uuid": f.id,
                 "viewable": viewable_objects and f.id in viewable_objects,
+                "writable": f.id in writable_ids if writable_ids is not None else True,
                 "content_type": f.content_type,
             }
             # Add enclave-specific styling
@@ -2025,6 +2031,7 @@ def get_folder_content(
                 include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
+                writable_ids=writable_ids,
             )
             if len(children) > 0:
                 entry.update({"children": children})

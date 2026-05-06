@@ -11,6 +11,7 @@
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
+	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -31,6 +32,8 @@
 		object = {},
 		context
 	}: Props = $props();
+
+	const formData = form.form;
 
 	let suggestions = $state(false);
 
@@ -82,6 +85,8 @@
 		}
 	}
 
+	let frameworkDefaults = $state<Record<string, any> | null>(null);
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
@@ -94,6 +99,11 @@
 						value: group.ref_id
 					}));
 					suggestions = r['reference_controls'].length > 0;
+
+					// Effective per-role visibility map this framework would seed into a
+					// new CA. The visibility editor uses this as fallback for keys the
+					// user hasn't explicitly overridden in the form.
+					frameworkDefaults = r['effective_field_visibility'] ?? null;
 
 					defaultImplementationGroups = implementation_groups
 						.filter((group) => group.default_selected)
@@ -256,54 +266,17 @@
 				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
 			/>
 		{/if}
-		<Checkbox
-			{form}
-			field="scoring_enabled"
-			label={m.scoringEnabled()}
-			helpText={m.scoringEnabledHelpText()}
-			cacheLock={cacheLocks['scoring_enabled']}
-			bind:cachedValue={formDataCache['scoring_enabled']}
-			onChange={(value) => {
-				if (!value) {
-					form.form.update((currentData) => ({
-						...currentData,
-						show_documentation_score: false
-					}));
-				}
-			}}
+		<!-- Visibility editor renders for both create and edit. On create, pills
+		     fall back to the framework's `effective_field_visibility` (served by
+		     the backend), so what the user sees always matches what the backend
+		     will save when no explicit override is provided. -->
+		<VisibilityEditor
+			value={$formData.field_visibility}
+			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
+			disabled={object?.is_locked}
+			{frameworkDefaults}
 		/>
-		<Checkbox
-			{form}
-			field="show_documentation_score"
-			label={m.useDocumentationScore()}
-			helpText={m.useDocumentationScoreHelpText()}
-			cacheLock={cacheLocks['show_documentation_score']}
-			bind:cachedValue={formDataCache['show_documentation_score']}
-			onChange={(value) => {
-				if (value) {
-					form.form.update((currentData) => ({
-						...currentData,
-						scoring_enabled: true
-					}));
-				}
-			}}
-		/>
-		<Checkbox
-			{form}
-			field="extended_result_enabled"
-			label={m.extendedResultEnabled()}
-			helpText={m.extendedResultEnabledHelpText()}
-			cacheLock={cacheLocks['extended_result_enabled']}
-			bind:cachedValue={formDataCache['extended_result_enabled']}
-		/>
-		<Checkbox
-			{form}
-			field="progress_status_enabled"
-			label={m.progressStatusEnabled()}
-			helpText={m.progressStatusEnabledHelpText()}
-			cacheLock={cacheLocks['progress_status_enabled']}
-			bind:cachedValue={formDataCache['progress_status_enabled']}
-		/>
+
 		<Select
 			{form}
 			options={model.selectOptions['score_calculation_method']}

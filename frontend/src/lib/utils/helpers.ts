@@ -339,58 +339,79 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	return { score: totalScore, result };
 }
 
-export const DEFAULT_FIELD_VISIBILITY: Record<string, string> = {
-	result: 'auditor',
-	status: 'auditor',
-	score: 'auditor',
-	is_scored: 'auditor',
-	documentation_score: 'auditor',
-	observation: 'everyone',
-	answers: 'everyone',
-	evidences: 'everyone',
-	applied_controls: 'auditor',
-	security_exceptions: 'auditor',
-	respondent_alignment: 'everyone'
-};
-
 /**
- * Resolve effective visibility for a field using CA override > Framework override > default.
- * Returns 'everyone', 'auditor', or 'hidden'.
+ * Field names that the CA-level visibility editor knows about.
+ * The audit's `field_visibility` is the single source of truth at runtime.
+ *
+ * Storage shape: {fieldName: {role: 'edit' | 'read' | 'hidden'}}.
+ * Roles known today: 'auditor', 'respondent'. A missing field key — or a
+ * missing role within the pair — resolves to 'edit'.
  */
+// Order matches the rendering sequence in the respondent (auditee) view.
+export const VISIBILITY_FIELDS = [
+	'answers',
+	'respondent_alignment',
+	'status',
+	'result',
+	'extended_result',
+	'score',
+	'documentation_score',
+	'applied_controls',
+	'evidences',
+	'observation',
+	'comments'
+] as const;
+
+export type VisibilityField = (typeof VISIBILITY_FIELDS)[number];
+
+export type RoleAccess = 'edit' | 'read' | 'hidden';
+export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
+
+const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
+
+/** Return the per-role visibility pair for a field. Missing → all roles edit. */
 export function resolveFieldVisibility(
-	framework: Record<string, any> | null | undefined,
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string
-): string {
-	const caVis = complianceAssessment?.field_visibility?.[fieldName];
-	if (caVis) return caVis;
-	const fwVis = framework?.field_visibility?.[fieldName];
-	if (fwVis) return fwVis;
-	return DEFAULT_FIELD_VISIBILITY[fieldName] ?? 'auditor';
+): VisibilityPair {
+	const raw = complianceAssessment?.field_visibility?.[fieldName];
+	if (!raw || typeof raw !== 'object') return { ...EDIT_PAIR };
+	return {
+		auditor: (raw.auditor as RoleAccess) ?? 'edit',
+		respondent: (raw.respondent as RoleAccess) ?? 'edit'
+	};
 }
 
-/**
- * Check if a field is visible for the given viewer role.
- * viewerRole: 'respondent' or 'auditor'
- */
+function roleAccess(
+	complianceAssessment: Record<string, any> | null | undefined,
+	fieldName: string,
+	role: 'auditor' | 'respondent'
+): RoleAccess {
+	return resolveFieldVisibility(complianceAssessment, fieldName)[role];
+}
+
+/** Whether a field is readable by the given role. */
 export function isFieldVisible(
-	framework: Record<string, any> | null | undefined,
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string,
 	viewerRole: 'respondent' | 'auditor' = 'auditor'
 ): boolean {
-	const vis = resolveFieldVisibility(framework, complianceAssessment, fieldName);
-	if (vis === 'hidden') return false;
-	if (vis === 'auditor' && viewerRole === 'respondent') return false;
-	return true;
+	return roleAccess(complianceAssessment, fieldName, viewerRole) !== 'hidden';
+}
+
+/** Whether a field is writable by the given role. */
+export function isFieldEditable(
+	complianceAssessment: Record<string, any> | null | undefined,
+	fieldName: string,
+	viewerRole: 'respondent' | 'auditor' = 'auditor'
+): boolean {
+	return roleAccess(complianceAssessment, fieldName, viewerRole) === 'edit';
 }
 
 /**
  * Return visibility flags for all standard assessment fields at once.
- * Avoids repeating 5-6 individual `isFieldVisible()` calls across route files.
  */
 export function getFieldVisibility(
-	framework: Record<string, any> | null | undefined,
 	complianceAssessment: Record<string, any> | null | undefined,
 	viewerRole: 'respondent' | 'auditor' = 'auditor'
 ): {
@@ -401,39 +422,25 @@ export function getFieldVisibility(
 	showObservation: boolean;
 	showAppliedControls: boolean;
 	showEvidences: boolean;
-	showSecurityExceptions: boolean;
 	showRespondentAlignment: boolean;
+	showComments: boolean;
+	showExtendedResult: boolean;
 } {
 	return {
-		showResult: isFieldVisible(framework, complianceAssessment, 'result', viewerRole),
-		showStatus: isFieldVisible(framework, complianceAssessment, 'status', viewerRole),
-		showScore: isFieldVisible(framework, complianceAssessment, 'score', viewerRole),
-		showDocumentationScore: isFieldVisible(
-			framework,
-			complianceAssessment,
-			'documentation_score',
-			viewerRole
-		),
-		showObservation: isFieldVisible(framework, complianceAssessment, 'observation', viewerRole),
-		showAppliedControls: isFieldVisible(
-			framework,
-			complianceAssessment,
-			'applied_controls',
-			viewerRole
-		),
-		showEvidences: isFieldVisible(framework, complianceAssessment, 'evidences', viewerRole),
-		showSecurityExceptions: isFieldVisible(
-			framework,
-			complianceAssessment,
-			'security_exceptions',
-			viewerRole
-		),
+		showResult: isFieldVisible(complianceAssessment, 'result', viewerRole),
+		showStatus: isFieldVisible(complianceAssessment, 'status', viewerRole),
+		showScore: isFieldVisible(complianceAssessment, 'score', viewerRole),
+		showDocumentationScore: isFieldVisible(complianceAssessment, 'documentation_score', viewerRole),
+		showObservation: isFieldVisible(complianceAssessment, 'observation', viewerRole),
+		showAppliedControls: isFieldVisible(complianceAssessment, 'applied_controls', viewerRole),
+		showEvidences: isFieldVisible(complianceAssessment, 'evidences', viewerRole),
 		showRespondentAlignment: isFieldVisible(
-			framework,
 			complianceAssessment,
 			'respondent_alignment',
 			viewerRole
-		)
+		),
+		showComments: isFieldVisible(complianceAssessment, 'comments', viewerRole),
+		showExtendedResult: isFieldVisible(complianceAssessment, 'extended_result', viewerRole)
 	};
 }
 
@@ -521,19 +528,17 @@ export function choiceUrnFromAlignmentValue(value: string | null): string | unde
 
 /**
  * Whether the auto-alignment question should be shown for a given requirement.
- * Conditions: no framework questions, result hidden from respondent, viewer is respondent.
+ * Visible to respondents when respondent_alignment visibility includes them and
+ * the requirement has no framework questions of its own.
  */
 export function shouldShowAutoQuestion(
 	requirement: Record<string, any>,
 	viewerRole: string,
-	fw: Record<string, any> | null | undefined,
 	ca: Record<string, any> | null | undefined
 ): boolean {
 	if (viewerRole !== 'respondent') return false;
 	const hasQuestions =
 		requirement.questions != null && Object.keys(requirement.questions).length > 0;
 	if (hasQuestions) return false;
-	if (resolveFieldVisibility(fw, ca, 'result') === 'everyone') return false;
-	// Don't render a non-editable synthetic question to respondents
-	return resolveFieldVisibility(fw, ca, 'respondent_alignment') === 'everyone';
+	return isFieldEditable(ca, 'respondent_alignment', 'respondent');
 }

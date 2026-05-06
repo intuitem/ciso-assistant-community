@@ -3880,5 +3880,12 @@
 	"searchFor": "에 대한",
 	"searchPrompt": "모든 객체에서 검색할 질의를 입력하세요",
 	"all": "전체",
-	"exportEcosystem": "생태계 내보내기 (XLSX)"
+	"exportEcosystem": "생태계 내보내기 (XLSX)",
+	"fieldVisibility": "필드 가시성",
+	"fieldVisibilityHelpText": "각 역할이 볼 수 있고 편집할 수 있는 필드를 제어합니다.",
+	"visibilityAuditorRespondent": "감사자 + 응답자",
+	"visibilityAuditorOnly": "감사자 전용",
+	"visibilityHidden": "숨김",
+	"answers": "답변",
+	"respondentAlignment": "응답자 정렬"
 }

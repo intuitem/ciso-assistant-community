@@ -2325,7 +2325,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'."
+            "Per-field visibility template seeded into new CAs: "
+            "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
         ),
     )
     urn_namespace = models.CharField(
@@ -2419,15 +2420,6 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
-
-    def save(self, *args, **kwargs):
-        from core.mappings.engine import engine
-
-        obj = super().save(*args, **kwargs)
-
-        if self.urn not in engine.frameworks:
-            transaction.on_commit(lambda: engine.load_frameworks())
-        return obj
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -6622,9 +6614,6 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
-    scoring_enabled = models.BooleanField(default=False)
-    show_documentation_score = models.BooleanField(default=False)
-
     computed_outcome = models.JSONField(null=True, blank=True)
 
     assets = models.ManyToManyField(
@@ -6651,15 +6640,17 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
-    extended_result_enabled = models.BooleanField(default=False)
-    progress_status_enabled = models.BooleanField(default=True)
-
     field_visibility = models.JSONField(
         default=dict,
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Override visibility per field for this assessment. Overrides framework defaults."
+            "Per-field visibility map: "
+            "{field_name: {role: 'edit' | 'read' | 'hidden'}}. "
+            "Missing keys cascade through core.utils.DEFAULT_VISIBILITY "
+            "(e.g. score/documentation_score default to hidden, "
+            "status/extended_result to auditor-only) and finally to 'edit' "
+            "for every role for unknown fields."
         ),
     )
 
@@ -6688,6 +6679,63 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+
+    # --- Visibility-derived booleans ---
+    # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
+    # per-role pairs ({role: 'edit'|'read'|'hidden'}); the legacy booleans read
+    # the auditor axis (the field exists at all if auditor isn't 'hidden').
+
+    def _auditor_visible(self, field):
+        from core.utils import resolve_field_visibility
+
+        pair = resolve_field_visibility(self, field)
+        return pair.get("auditor", "edit") != "hidden"
+
+    def _set_field_hidden(self, field, hidden):
+        # When un-hiding via the legacy boolean setters (scoring_enabled,
+        # show_documentation_score, extended_result_enabled, progress_status_enabled),
+        # restore AUDITOR_ONLY rather than EVERYONE_EDIT — the historical "True"
+        # value of those booleans only meant "auditor sees it", and the migration
+        # backfills existing CAs to AUDITOR_ONLY for the same reason. Writing
+        # EVERYONE_EDIT here would silently widen access to respondents.
+        from core.utils import AUDITOR_ONLY, HIDDEN
+
+        fv = dict(self.field_visibility or {})
+        fv[field] = dict(HIDDEN) if hidden else dict(AUDITOR_ONLY)
+        self.field_visibility = fv
+
+    @property
+    def scoring_enabled(self):
+        return self._auditor_visible("score")
+
+    @scoring_enabled.setter
+    def scoring_enabled(self, value):
+        self._set_field_hidden("score", not value)
+        self._set_field_hidden("is_scored", not value)
+
+    @property
+    def show_documentation_score(self):
+        return self._auditor_visible("documentation_score")
+
+    @show_documentation_score.setter
+    def show_documentation_score(self, value):
+        self._set_field_hidden("documentation_score", not value)
+
+    @property
+    def extended_result_enabled(self):
+        return self._auditor_visible("extended_result")
+
+    @extended_result_enabled.setter
+    def extended_result_enabled(self, value):
+        self._set_field_hidden("extended_result", not value)
+
+    @property
+    def progress_status_enabled(self):
+        return self._auditor_visible("status")
+
+    @progress_status_enabled.setter
+    def progress_status_enabled(self, value):
+        self._set_field_hidden("status", not value)
 
     def upsert_daily_metrics(self):
         per_status = {item[1]: item[0] for item in self.get_requirements_status_count()}
@@ -7842,20 +7890,59 @@ class ComplianceAssessment(Assessment):
         )
         return requirement_assessments, assessment_source_dict
 
+    def _get_progress_counts(self) -> tuple[int, int]:
+        """
+        Return (total, assessed) counts for assessable requirements
+        """
+
+        requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        )
+
+        if not self.selected_implementation_groups:
+            counts = requirements.aggregate(
+                total=Count("id"),
+                assessed=Count(
+                    "id",
+                    filter=~Q(result=RequirementAssessment.Result.NOT_ASSESSED)
+                    | Q(score__isnull=False),
+                ),
+            )
+            return counts["total"], counts["assessed"]
+
+        selected_groups = set(self.selected_implementation_groups)
+        total = 0
+        assessed = 0
+        lightweight_requirements = (
+            requirements.select_related("requirement")
+            .only(
+                "result",
+                "score",
+                "requirement_id",
+                "requirement__implementation_groups",
+            )
+            .iterator()
+        )
+
+        for requirement_assessment in lightweight_requirements:
+            requirement_groups = set(
+                requirement_assessment.requirement.implementation_groups or []
+            )
+            if selected_groups.isdisjoint(requirement_groups):
+                continue
+
+            total += 1
+            if (
+                requirement_assessment.result
+                != RequirementAssessment.Result.NOT_ASSESSED
+            ) or requirement_assessment.score is not None:
+                assessed += 1
+
+        return total, assessed
+
     @property
     def progress(self) -> int:
-        requirement_assessments = list(
-            self.get_requirement_assessments(include_non_assessable=False)
-        )
-        total_cnt = len(requirement_assessments)
-        assessed_cnt = len(
-            [
-                r
-                for r in requirement_assessments
-                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
-                or r.score != None
-            ]
-        )
+        total_cnt, assessed_cnt = self._get_progress_counts()
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
 
     @property
