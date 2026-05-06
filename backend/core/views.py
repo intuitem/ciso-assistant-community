@@ -133,9 +133,11 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
+    REWRITABLE_URN_TYPES,
     build_answers_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
+    rewrite_child_urns,
     _generate_occurrences,
     _create_task_dict,
 )
@@ -8361,7 +8363,9 @@ class FrameworkViewSet(BaseModelViewSet):
         """Export a framework as a library-compatible YAML file."""
         framework = self.get_object()
 
-        slug = self._slugify_framework_name(framework.name, framework.id)
+        slug = framework.ref_id or self._slugify_framework_name(
+            framework.name, framework.id
+        )
 
         # Query all nodes ordered by DFS order
         nodes = list(
@@ -8732,6 +8736,24 @@ class FrameworkViewSet(BaseModelViewSet):
         if framework.translations and isinstance(framework.translations, dict):
             available_languages.update(framework.translations.keys())
 
+        seed_ref_id = framework.ref_id
+        if not seed_ref_id:
+            for record in nodes + questions + choices:
+                u = record.get("urn") or ""
+                parts = u.split(":")
+                if (
+                    len(parts) >= 5
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                ):
+                    seed_ref_id = parts[4]
+                    break
+            if not seed_ref_id:
+                seed_ref_id = self._slugify_framework_name(
+                    framework.name, framework.id
+                )
+
         draft = {
             "framework_meta": {
                 "name": framework.name,
@@ -8746,6 +8768,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "outcomes_definition": framework.outcomes_definition,
                 "field_visibility": framework.field_visibility or {},
                 "urn_namespace": framework.urn_namespace or "custom",
+                "ref_id": seed_ref_id,
             },
             "nodes": nodes,
             "questions": questions,
@@ -9122,6 +9145,130 @@ class FrameworkViewSet(BaseModelViewSet):
                     raise DraftValidationError(
                         f"Question '{label}' depends on a choice that does not exist in this framework."
                     )
+
+        # --- 0c. Apply URN rename (urn_namespace / ref_id) before any sync. ---
+        new_namespace_raw = fw_meta.get("urn_namespace")
+        new_namespace = (
+            new_namespace_raw.strip() if isinstance(new_namespace_raw, str) else ""
+        ) or None
+        raw_ref_id = fw_meta.get("ref_id")
+        new_ref_id = raw_ref_id.strip() if isinstance(raw_ref_id, str) else None
+
+        ns_changed = bool(new_namespace) and new_namespace != framework.urn_namespace
+        ref_changed = new_ref_id is not None and new_ref_id != (framework.ref_id or "")
+
+        new_urn_namespace = framework.urn_namespace
+        new_framework_ref_id = framework.ref_id
+
+        if ns_changed or ref_changed:
+            if framework.complianceassessment_set.exists():
+                raise DraftValidationError(
+                    "Cannot change URN namespace or ref_id while a compliance assessment uses this framework."
+                )
+            if ref_changed and (
+                not new_ref_id or not re.fullmatch(r"[A-Za-z0-9_-]+", new_ref_id)
+            ):
+                raise DraftValidationError(
+                    "ref_id must be non-empty and may only contain letters, digits, '-' or '_'."
+                )
+
+            # Reject legacy URN shapes that the rewrite helper can't safely
+            # update (e.g. 5-segment `urn:ns:risk:type:<per-node-uuid>` from
+            # older duplicate flows — no slug position to write into). Any
+            # candidate URN must be `urn:_:risk:<rewritable-type>:_:_...` with
+            # at least 6 segments. Failing fast here prevents the framework
+            # metadata from drifting away from its child URNs.
+            def _is_legacy_child_urn(u):
+                if not isinstance(u, str):
+                    return False
+                parts = u.split(":")
+                return (
+                    len(parts) >= 4
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                    and len(parts) < 6
+                )
+
+            legacy_urns: list[str] = []
+            for n in draft_nodes:
+                if _is_legacy_child_urn(n.get("urn")):
+                    legacy_urns.append(n["urn"])
+                if _is_legacy_child_urn(n.get("parent_urn")):
+                    legacy_urns.append(n["parent_urn"])
+            for q in draft_questions:
+                if _is_legacy_child_urn(q.get("urn")):
+                    legacy_urns.append(q["urn"])
+                dep = q.get("depends_on")
+                if isinstance(dep, dict):
+                    if _is_legacy_child_urn(dep.get("question")):
+                        legacy_urns.append(dep["question"])
+                    if isinstance(dep.get("answers"), list):
+                        legacy_urns.extend(
+                            a for a in dep["answers"] if _is_legacy_child_urn(a)
+                        )
+            for c in draft_choices:
+                if _is_legacy_child_urn(c.get("urn")):
+                    legacy_urns.append(c["urn"])
+            if legacy_urns:
+                sample = legacy_urns[0]
+                raise DraftValidationError(
+                    "This framework contains legacy URNs that cannot be renamed "
+                    f"(e.g. '{sample}'). Re-duplicate it from a library-backed "
+                    "source before changing its URN namespace or ref_id."
+                )
+
+            new_ns = new_namespace or framework.urn_namespace or "custom"
+
+            current_slug = None
+            for n in draft_nodes + draft_questions + draft_choices:
+                u = n.get("urn") or ""
+                parts = u.split(":")
+                if (
+                    len(parts) >= 6
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                ):
+                    current_slug = parts[4]
+                    break
+            if not current_slug:
+                current_slug = framework.ref_id or self._slugify_framework_name(
+                    framework.name, framework.id
+                )
+            new_slug = new_ref_id if ref_changed else current_slug
+
+            rewrite_child_urns(draft, new_ns, new_slug)
+            # draft_nodes/questions/choices are aliases of draft["..."] lists, so they
+            # already see the rewritten URNs.
+
+            sample_node_prefix = f"urn:{new_ns}:risk:req_node:{new_slug}:"
+            sample_question_prefix = f"urn:{new_ns}:risk:question:{new_slug}:"
+            sample_choice_prefix = f"urn:{new_ns}:risk:question_choice:{new_slug}:"
+            collision = (
+                RequirementNode.objects.exclude(framework=framework)
+                .filter(urn__startswith=sample_node_prefix)
+                .exists()
+                or Question.objects.exclude(
+                    requirement_node__framework=framework
+                )
+                .filter(urn__startswith=sample_question_prefix)
+                .exists()
+                or QuestionChoice.objects.exclude(
+                    question__requirement_node__framework=framework
+                )
+                .filter(urn__startswith=sample_choice_prefix)
+                .exists()
+            )
+            if collision:
+                raise DraftValidationError(
+                    f"Another framework already uses urn_namespace='{new_ns}' with ref_id='{new_slug}'. "
+                    "Pick a different ref_id."
+                )
+
+            new_urn_namespace = new_ns
+            if ref_changed:
+                new_framework_ref_id = new_ref_id
 
         with transaction.atomic():
             # --- 1. Collect existing DB IDs ---
@@ -9591,9 +9738,11 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework.translations = meta.get(
                     "translations", framework.translations
                 )
-                # urn_namespace is only settable before first publish
-                if framework.editing_version <= 1 and meta.get("urn_namespace"):
-                    framework.urn_namespace = meta["urn_namespace"]
+                # urn_namespace + ref_id are gated on absence of compliance
+                # assessments; the gate, validation, and child-URN rewrite all
+                # happened up in section 0c.
+                framework.urn_namespace = new_urn_namespace
+                framework.ref_id = new_framework_ref_id
 
             # --- 9. Sync RequirementAssessments for existing audits ---
             # New requirement nodes need RA + Answer rows in every existing CA.
@@ -9722,6 +9871,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "locale",
                     "translations",
                     "urn_namespace",
+                    "ref_id",
                     "editing_draft",
                     "editing_version",
                     "editing_history",
