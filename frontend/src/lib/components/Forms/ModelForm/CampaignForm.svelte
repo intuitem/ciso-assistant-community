@@ -58,7 +58,7 @@
 	field="frameworks"
 	cacheLock={cacheLocks['frameworks']}
 	bind:cachedValue={formDataCache['frameworks']}
-	label={m.targetFramework()}
+	label={m.targetFrameworks()}
 	hidden={initialData.frameworks}
 	onChange={async (e) => handleFrameworkChange(e)}
 	mount={async (e) => handleFrameworkChange(e)}

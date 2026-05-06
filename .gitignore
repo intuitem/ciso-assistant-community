@@ -26,3 +26,4 @@ cli/db_backup
 # but track .claude/skills/ so project-shared skills ship with the repo.
 /.claude/*
 !/.claude/skills/
+/frontend/project.inlang/cache

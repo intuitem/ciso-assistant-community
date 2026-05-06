@@ -144,6 +144,9 @@
 	}: Props = $props();
 
 	const URLModel = model.urlModel as urlModel;
+	const defaultFolderWritePermission =
+		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
+	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
 
 	function cancel(): void {
 		if (browser) {
@@ -321,7 +324,7 @@
 										name: shouldUpdateName ? r.name : currentData.name,
 										category: r.category,
 										csf_function: r.csf_function,
-										ref_id: r.ref_id
+										ref_id: r.ref_id ?? currentData.ref_id ?? ''
 									};
 								});
 							});

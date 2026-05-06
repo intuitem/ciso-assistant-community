@@ -7,6 +7,7 @@
 		getTranslation,
 		withTranslation,
 		type Framework,
+		type BuilderNode,
 		type RequirementNode,
 		type Question
 	} from './builder-state';
@@ -16,56 +17,22 @@
 		createCopyHandler,
 		createHandleGatedDragHandlers
 	} from './builder-utils.svelte';
-	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
+	import { installKeyboardHandlers } from './keyboard';
+	import {
+		createCollapsedStore,
+		setCardCollapsedContext,
+		setTocCollapsedContext
+	} from './collapse-state';
+	import KeyboardHelp from './KeyboardHelp.svelte';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import BuilderToC from './BuilderToC.svelte';
-	import SectionBlock from './SectionBlock.svelte';
+	import NodeBlock from './NodeBlock.svelte';
+	import AddNodeMenu from './AddNodeMenu.svelte';
+	import EmptyState from './EmptyState.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
-
-	const CONFIGURABLE_FIELDS = [
-		'result',
-		'status',
-		'score',
-		'is_scored',
-		'documentation_score',
-		'observation',
-		'answers',
-		'evidences',
-		'applied_controls',
-		'security_exceptions'
-	] as const;
-
-	const FIELD_LABELS: Record<string, string> = {
-		result: 'Result',
-		status: 'Status',
-		score: 'Score',
-		is_scored: 'Is Scored',
-		documentation_score: 'Documentation Score',
-		observation: 'Observation',
-		answers: 'Answers',
-		evidences: 'Evidences',
-		applied_controls: 'Applied Controls',
-		security_exceptions: 'Security Exceptions'
-	};
-
-	function getFieldVisibility(field: string): string {
-		return (
-			$frameworkStore.field_visibility?.[field] ?? DEFAULT_FIELD_VISIBILITY[field] ?? 'auditor'
-		);
-	}
-
-	function setFieldVisibility(field: string, value: string) {
-		const current = { ...$frameworkStore.field_visibility };
-		// If the value matches the code default, remove the override to keep it clean
-		if (value === (DEFAULT_FIELD_VISIBILITY[field] ?? 'auditor')) {
-			delete current[field];
-		} else {
-			current[field] = value;
-		}
-		builder.updateFramework({ field_visibility: current });
-	}
+	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 
 	interface Props {
 		framework: Framework;
@@ -79,9 +46,15 @@
 	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
 	setBuilderContext(builder);
 
+	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);
+	setCardCollapsedContext(cardCollapsed);
+
+	const tocCollapsed = createCollapsedStore(`fw-builder:${framework.id}:toc:collapsed`);
+	setTocCollapsedContext(tocCollapsed);
+
 	const {
 		framework: frameworkStore,
-		sections: sectionsStore,
+		rootNodes: rootNodesStore,
 		errors: errorsStore,
 		saving: savingStore,
 		unsaved: unsavedStore,
@@ -104,6 +77,7 @@
 	);
 
 	const urnCopy = createCopyHandler();
+	let helpOpen = $state(false);
 	let showSettings = $state(false);
 	let showScoringSettings = $state(false);
 	let showScalesEditor = $state(false);
@@ -197,9 +171,23 @@
 		}
 	}
 
-	// Drag state for sections
-	const sectionDrag = createHandleGatedDragHandlers((from, to) =>
-		builder.reorderSections(from, to)
+	function collectAllParentIds(tree: BuilderNode[]): string[] {
+		const ids: string[] = [];
+		function walk(list: BuilderNode[]) {
+			for (const n of list) {
+				if (n.children.length > 0) {
+					ids.push(n.node.id);
+					walk(n.children);
+				}
+			}
+		}
+		walk(tree);
+		return ids;
+	}
+
+	// Drag state for root nodes
+	const rootDrag = createHandleGatedDragHandlers((from, to) =>
+		builder.reorderNodes(null, from, to)
 	);
 
 	// --- Navigation guards ---
@@ -243,12 +231,23 @@
 		}
 	}
 
+	// Global ? key — open keyboard cheatsheet
+	function handleGlobalKey(e: KeyboardEvent) {
+		if (e.key !== '?') return;
+		const t = e.target as HTMLElement | null;
+		if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+		helpOpen = true;
+		e.preventDefault();
+	}
+
 	// IntersectionObserver for ToC active section tracking
 	let observer: IntersectionObserver | null = null;
 
 	onMount(() => {
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		window.addEventListener('keydown', handleKeydown);
+
+		const cleanupKeyboard = installKeyboardHandlers(builder);
 
 		observer = new IntersectionObserver(
 			(entries) => {
@@ -269,11 +268,14 @@
 		const elements = document.querySelectorAll('[data-section-id]');
 		elements.forEach((el) => observer!.observe(el));
 
-		return () => observer?.disconnect();
+		return () => {
+			observer?.disconnect();
+			cleanupKeyboard();
+		};
 	});
 
-	// Track only section IDs so the observer reconnects on structural changes, not content edits
-	let sectionIds = $derived($sectionsStore.map((s) => s.node.id).join(','));
+	// Track only root node IDs so the observer reconnects on structural changes, not content edits
+	let sectionIds = $derived($rootNodesStore.map((s) => s.node.id).join(','));
 	let prevSectionIds = '';
 
 	// Re-observe when sections change (e.g., section added/removed)
@@ -298,8 +300,15 @@
 	});
 </script>
 
+<svelte:window onkeydown={handleGlobalKey} />
+
 <div class="card !p-0 bg-white shadow-lg overflow-visible">
-	<BuilderMinimap frameworkId={framework.id} />
+	<BuilderMinimap
+		frameworkId={framework.id}
+		onOpenHelp={() => (helpOpen = true)}
+		onExpandAllCards={() => cardCollapsed.expandAll()}
+		onCollapseAllCards={() => cardCollapsed.collapseAll(collectAllParentIds($rootNodesStore))}
+	/>
 
 	<div class="flex">
 		<BuilderToC />
@@ -716,28 +725,10 @@
 							/>
 
 							<!-- Field Visibility -->
-							<div class="space-y-1.5">
-								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-									>Field Visibility</span
-								>
-								<p class="text-xs text-gray-400">
-									Control which fields are visible to respondents vs auditors.
-								</p>
-								{#each CONFIGURABLE_FIELDS as field}
-									<div class="flex items-center justify-between py-1">
-										<span class="text-sm text-gray-600">{FIELD_LABELS[field]}</span>
-										<select
-											value={getFieldVisibility(field)}
-											class="text-xs border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
-											onchange={(e) => setFieldVisibility(field, e.currentTarget.value)}
-										>
-											<option value="everyone">Everyone</option>
-											<option value="auditor">Auditor only</option>
-											<option value="hidden">Hidden</option>
-										</select>
-									</div>
-								{/each}
-							</div>
+							<VisibilityEditor
+								value={$frameworkStore.field_visibility}
+								onChange={(next) => builder.updateFramework({ field_visibility: next })}
+							/>
 
 							<!-- Languages -->
 							<div class="space-y-1.5">
@@ -808,66 +799,30 @@
 				</div>
 
 				<hr class="border-surface-200" />
-				<!-- Sections -->
-				{#each $sectionsStore as section, sectionIndex (`section-${sectionIndex}-${section.node.id}`)}
-					<!-- Add section button between sections -->
-					{#if sectionIndex > 0}
-						<button
-							type="button"
-							class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-300 hover:text-gray-500 hover:border-gray-300 transition-colors opacity-0 hover:opacity-100"
-							onclick={() => builder.addSection(sectionIndex - 1)}
-						>
-							<i class="fa-solid fa-plus mr-1"></i>Insert section
-						</button>
-					{/if}
-
-					<div
-						class:opacity-50={sectionDrag.draggedIndex === sectionIndex}
-						draggable="true"
-						onmousedown={sectionDrag.recordMousedown}
-						ondragstart={(e) => sectionDrag.handleDragStart(e, sectionIndex)}
-						ondragover={sectionDrag.handleDragOver}
-						ondrop={(e) => sectionDrag.handleDrop(e, sectionIndex)}
-						ondragend={sectionDrag.handleDragEnd}
-						role="listitem"
-					>
-						<SectionBlock {section} {sectionIndex} />
-					</div>
-				{/each}
-
-				<!-- Add section at bottom -->
-				<button
-					type="button"
-					class="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
-					onclick={() => builder.addSection()}
-				>
-					<i class="fa-solid fa-plus mr-1"></i>Add section
-				</button>
-
-				<!-- Empty state -->
-				{#if $sectionsStore.length === 0}
-					<div class="text-center py-16">
+				<!-- Root nodes -->
+				{#if $rootNodesStore.length === 0}
+					<EmptyState />
+				{:else}
+					{#each $rootNodesStore as bn, i (bn.node.id)}
 						<div
-							class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center"
+							class:opacity-50={rootDrag.draggedIndex === i}
+							draggable="true"
+							onmousedown={rootDrag.recordMousedown}
+							ondragstart={(e) => rootDrag.handleDragStart(e, i)}
+							ondragover={rootDrag.handleDragOver}
+							ondrop={(e) => rootDrag.handleDrop(e, i)}
+							ondragend={rootDrag.handleDragEnd}
+							role="listitem"
 						>
-							<i class="fa-solid fa-layer-group text-2xl text-gray-400"></i>
+							<NodeBlock node={bn} parentId={null} indexWithinParent={i} />
 						</div>
-						<h3 class="text-lg font-medium text-gray-600 mb-1">No sections yet</h3>
-						<p class="text-sm text-gray-400 mb-4">
-							Start building your framework by adding a section.
-						</p>
-						<p class="text-xs text-gray-400 mb-4 max-w-md mx-auto">
-							Sections group your requirements into chapters or domains. Each section becomes a
-							top-level category in assessments.
-						</p>
-						<button
-							type="button"
-							class="btn preset-filled-primary-500 px-6"
-							onclick={() => builder.addSection()}
-						>
-							<i class="fa-solid fa-plus mr-2"></i>Add first section
-						</button>
-					</div>
+					{/each}
+
+					<AddNodeMenu
+						parent={null}
+						triggerLabel={'+ Add top-level node'}
+						triggerClass="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+					/>
 				{/if}
 
 				<!-- Global errors -->
@@ -882,3 +837,5 @@
 		</div>
 	</div>
 </div>
+
+<KeyboardHelp bind:open={helpOpen} onClose={() => (helpOpen = false)} />
