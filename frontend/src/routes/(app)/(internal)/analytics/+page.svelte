@@ -192,7 +192,7 @@
 		download
 	>
 		<i class="fa-solid fa-file-excel text-green-600"></i>
-		Export to Excel
+		{m.exportButton() + ' ' + m.asXLSX()}
 	</a>
 </div>
 
