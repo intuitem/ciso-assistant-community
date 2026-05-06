@@ -33,7 +33,8 @@ DEFAULT_PDF = (
     / "recommandations-sur-la-sécurisation-des-systèmes-de-contrôle-d_acces-physique-et-vidéoprotection-v2.2.pdf"
 )
 DEFAULT_OUTPUT = (
-    FRAMEWORK_DIR / "anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2.xlsx"
+    FRAMEWORK_DIR
+    / "anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2.xlsx"
 )
 DEFAULT_GS_TEXT_FORMAT = 3
 
@@ -56,7 +57,9 @@ COLUMNS = [
 IMP_GRP_COLUMNS = ["ref_id", "name", "description"]
 URN_ROOT = "anssi_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2"
 FRAMEWORK_REF_ID = "ANSSI_rec-secu-sys-ctrl-acces-phys-videoprot_v2.2"
-FRAMEWORK_NAME = "ANSSI - Sécurisation des systèmes de contrôle d’accès physique et vidéoprotection (v2.2) [Recommandations]"
+FRAMEWORK_NAME = (
+    "ANSSI - Sécurisation des systèmes de contrôle d’accès physique et vidéoprotection (v2.2) [Recommandations]"
+)
 FRAMEWORK_DESCRIPTION = dedent(
     """
     Ce guide développe les aspects d’architecture et de sécurité logique propres aux systèmes de contrôle d’accès utilisant des technologies sans contact, et aux systèmes de vidéoprotection. Comme lors de la rédaction du premier guide, l’ANSSI s’est associée au CNPP pour mener une réflexion intégrant l’ensemble des éléments qui composent ces systèmes. Ce guide est ainsi complémentaire aux référentiels CNPP intitulés :
@@ -198,7 +201,6 @@ class PypdfRecommendationBlock:
 # CLI
 # ============================================================================
 
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdf", type=Path, default=DEFAULT_PDF)
@@ -209,7 +211,6 @@ def parse_args() -> argparse.Namespace:
 # ============================================================================
 # PDF extraction and parsing functions
 # ============================================================================
-
 
 def extract_pdf_text(pdf_path: Path) -> str:
     if not pdf_path.exists():
@@ -378,13 +379,9 @@ def normalize_inline_spacing(text: str) -> str:
         if bullet_prefix_match:
             bullet_prefix = bullet_prefix_match.group(0)
             bullet_content = raw_line[len(bullet_prefix) :]
-            bullet_content = re.sub(
-                r"(?<=[,.;:!?])(?=[A-Za-zÀ-ÿ])", " ", bullet_content
-            )
+            bullet_content = re.sub(r"(?<=[,.;:!?])(?=[A-Za-zÀ-ÿ])", " ", bullet_content)
             bullet_content = re.sub(r"(?<=[»\]])(?=[A-Za-zÀ-ÿ])", " ", bullet_content)
-            normalized_lines.append(
-                bullet_prefix + fix_text(cleanup_text(bullet_content))
-            )
+            normalized_lines.append(bullet_prefix + fix_text(cleanup_text(bullet_content)))
             continue
         line = re.sub(r"(?<=[,.;:!?])(?=[A-Za-zÀ-ÿ])", " ", raw_line)
         line = re.sub(r"(?<=[»\]])(?=[A-Za-zÀ-ÿ])", " ", line)
@@ -409,9 +406,7 @@ def extract_toc_lines(lines: list[str]) -> list[str]:
             end = index
             break
     if start is None or end is None:
-        raise ValueError(
-            "Unable to isolate the table of contents in the PDF extraction"
-        )
+        raise ValueError("Unable to isolate the table of contents in the PDF extraction")
     return lines[start:end]
 
 
@@ -619,9 +614,7 @@ def is_recommendation_line(line: str) -> bool:
 def is_section_heading_line(line: str, known_ids: set[str]) -> bool:
     match = SECTION_RE.match(line)
     return bool(
-        match
-        and indentation(line) <= MAX_HEADING_INDENT
-        and match.group(1) in known_ids
+        match and indentation(line) <= MAX_HEADING_INDENT and match.group(1) in known_ids
     )
 
 
@@ -647,9 +640,7 @@ def next_boundary_index(
     return end_index
 
 
-def detect_content_indent(
-    lines: list[str], start_index: int, end_index: int
-) -> int | None:
+def detect_content_indent(lines: list[str], start_index: int, end_index: int) -> int | None:
     for probe in range(start_index, end_index):
         line = lines[probe]
         stripped = line.strip()
@@ -735,9 +726,7 @@ def split_description_and_annotation(
             description_lines.append(stripped)
 
     if current_annotation_label is not None:
-        annotation_blocks.append(
-            (current_annotation_label, current_annotation_lines[:])
-        )
+        annotation_blocks.append((current_annotation_label, current_annotation_lines[:]))
 
     return description_lines, annotation_blocks
 
@@ -1007,9 +996,7 @@ def split_pypdf_page(page_text: str) -> tuple[list[str], dict[int, str]]:
     return body_lines, footnotes
 
 
-def extract_pypdf_pages(
-    pdf_path: Path,
-) -> tuple[list[tuple[int, str]], dict[int, dict[int, str]]]:
+def extract_pypdf_pages(pdf_path: Path) -> tuple[list[tuple[int, str]], dict[int, dict[int, str]]]:
     page_lines: list[tuple[int, str]] = []
     page_footnotes: dict[int, dict[int, str]] = {}
 
@@ -1211,9 +1198,7 @@ def parse_ghostscript_recommendations_precise(
         while post_lines and looks_like_title_continuation(post_lines[0]):
             title_suffix.append(post_lines.pop(0))
 
-        description_lines, annotation_blocks = split_description_and_annotation(
-            post_lines
-        )
+        description_lines, annotation_blocks = split_description_and_annotation(post_lines)
         name = join_wrapped_lines([*title_prefix, *title_suffix])
         description = format_content_lines(description_lines)
         annotation = format_annotation_blocks(annotation_blocks)
@@ -1345,10 +1330,7 @@ def trim_text_with_ghostscript_boundary(pypdf_text: str, ghostscript_text: str) 
             continue
         # Trim pypdf at the last coherent ending found on the Ghostscript side.
         end_position = positions[match_index + len(candidate_normalized) - 1] + 1
-        while (
-            end_position < len(pypdf_text)
-            and pypdf_text[end_position] in "])}>»'\".,;:!?"
-        ):
+        while end_position < len(pypdf_text) and pypdf_text[end_position] in "])}>»'\".,;:!?":
             end_position += 1
         footnote_suffix = re.match(
             r'(?:(?:\s*[)\]}>»\'"]*)?\s+\d{1,2}(?:\s*[.,;:!?])?)+',
@@ -1482,9 +1464,7 @@ def build_rows_hybrid(
 # ============================================================================
 
 
-def write_kv_sheet(
-    wb: Workbook, sheet_name: str, rows: Iterable[tuple[str, str]]
-) -> None:
+def write_kv_sheet(wb: Workbook, sheet_name: str, rows: Iterable[tuple[str, str]]) -> None:
     ws = wb.create_sheet(title=sheet_name)
     for key, value in rows:
         ws.append([key, value])
@@ -1569,9 +1549,7 @@ def main() -> None:
     save_workbook(args.output, rows)
 
     kept_sections = sum(1 for row in rows if not row[0])
-    annotations = sum(
-        1 for recommendation in recommendations if recommendation.annotation
-    )
+    annotations = sum(1 for recommendation in recommendations if recommendation.annotation)
     print(f"Sections kept: {kept_sections}")
     print(f"Recommendations: {len(recommendations)}")
     print(

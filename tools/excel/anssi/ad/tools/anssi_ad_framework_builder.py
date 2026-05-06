@@ -55,6 +55,8 @@ Run:
     python anssi_ad_framework_builder.py --keep-temp
 """
 
+
+
 import os
 import re
 import sys
@@ -106,7 +108,6 @@ packager = "intuitem"
 # -------------------------------------------------------------------
 # Utility functions for text / Markdown processing
 # -------------------------------------------------------------------
-
 
 def replace_non_breaking_space(string: str) -> str | None:
     """
@@ -187,7 +188,7 @@ def clean_level_bullet(line: str) -> str:
         s = s[2:].lstrip()
 
     # Remove leading <span ...>X</span> (the colored level number)
-    s = re.sub(r"^<span[^>]*>[^<]*</span>\s*", "", s)
+    s = re.sub(r'^<span[^>]*>[^<]*</span>\s*', "", s)
 
     # Fallback for cases where the scraper could not inline CSS colors and the
     # level is rendered as plain text.
@@ -296,10 +297,7 @@ def month_year_label(locale: Literal["fr", "en"], today: date | None = None) -> 
 # Excel helpers
 # -------------------------------------------------------------------
 
-
-def legacy_support_for_reversible_password_ref_id(
-    row: dict[str, str],
-) -> dict[str, str]:
+def legacy_support_for_reversible_password_ref_id(row: dict[str, str]) -> dict[str, str]:
     """
     Preserve the historical URN for the renamed reversible password control.
     """
@@ -341,9 +339,7 @@ def write_framework_content_to_excel(df: pd.DataFrame, excel_file_name: str) -> 
     wb.save(excel_file_name)
 
 
-def build_framework_content(
-    json_fr: dict, json_en: dict, base_excel_file_name: str
-) -> None:
+def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: str) -> None:
     """
     Read French and English JSON exports, build the 'framework_content' sheet,
     and write it into the given Excel file.
@@ -367,9 +363,7 @@ def build_framework_content(
         raise ValueError("Missing 'intro' root_element in json_fr or json_en.")
 
     if about_fr is None or about_en is None:
-        raise ValueError(
-            "Missing 'about_ctrl_points' root_element in json_fr or json_en."
-        )
+        raise ValueError("Missing 'about_ctrl_points' root_element in json_fr or json_en.")
 
     # Extract bodies (content_markdown without the first heading block)
     intro_body_fr = strip_first_markdown_block(intro_fr.get("content_markdown", ""))
@@ -413,31 +407,17 @@ def build_framework_content(
         and cleaning non-breaking spaces for text fields.
         """
         row = {
-            "assessable": str(replace_non_breaking_space(assessable))
-            if assessable is not None
-            else "",
+            "assessable": str(replace_non_breaking_space(assessable)) if assessable is not None else "",
             "depth": str(depth) if depth is not None else "",
             "node_id": str(urn_id) if urn_id is not None else "",
             "ref_id": str(ref_id) if ref_id is not None else "",
             "name": str(replace_non_breaking_space(name)) if name is not None else "",
-            "description": str(replace_non_breaking_space(description))
-            if description is not None
-            else "",
-            "annotation": str(replace_non_breaking_space(annotation))
-            if annotation is not None
-            else "",
-            "implementation_groups": str(implementation_groups)
-            if implementation_groups is not None
-            else "",
-            "name[en]": str(replace_non_breaking_space(name_en))
-            if name_en is not None
-            else "",
-            "description[en]": str(replace_non_breaking_space(description_en))
-            if description_en is not None
-            else "",
-            "annotation[en]": str(replace_non_breaking_space(annotation_en))
-            if annotation_en is not None
-            else "",
+            "description": str(replace_non_breaking_space(description)) if description is not None else "",
+            "annotation": str(replace_non_breaking_space(annotation)) if annotation is not None else "",
+            "implementation_groups": str(implementation_groups) if implementation_groups is not None else "",
+            "name[en]": str(replace_non_breaking_space(name_en)) if name_en is not None else "",
+            "description[en]": str(replace_non_breaking_space(description_en)) if description_en is not None else "",
+            "annotation[en]": str(replace_non_breaking_space(annotation_en)) if annotation_en is not None else "",
         }
         row = legacy_support(row)
         rows.append(row)
@@ -543,7 +523,6 @@ def build_framework_content(
 # YAML config for base Excel generation
 # -------------------------------------------------------------------
 
-
 def build_yaml_config_content(
     fw_desc_FR: list[str],
     fw_desc_EN: list[str],
@@ -553,7 +532,7 @@ def build_yaml_config_content(
     """
     Build the YAML configuration content used to generate the base Excel file.
     """
-
+    
     ig_level_1 = "level_1"
     ig_level_2 = "level_2"
     ig_level_3 = "level_3"
@@ -568,7 +547,7 @@ locale: "fr"
 ref_id: {fw_id}
 framework_name: "ANSSI - Points de contrôle Active Directory (AD) [{framework_date_FR}]"
 description: |
-  {"\n  ".join(fw_desc_FR)}
+  {'\n  '.join(fw_desc_FR)}
 
 copyright: {copyright}
 provider: {provider}
@@ -606,7 +585,7 @@ extra_locales:
   - en:
       framework_name: "ANSSI - Active Directory (AD) Security Assessment Checklist [{framework_date_EN}]"
       description: |
-        {"\n        ".join(fw_desc_EN)}
+        {'\n        '.join(fw_desc_EN)}
 
       copyright: {copyright}
 
@@ -639,23 +618,16 @@ extra_locales:
 # STEP 1: Extraction from website
 # -------------------------------------------------------------------
 
-
 def step1_extract_checklists(keep_temp: bool = False) -> None:
     """
     Step 1:
       - Extract French and English checklists from the website
       - Remove intermediate Markdown files unless keep_temp is enabled.
     """
-
-    print(
-        "\n#####################################################################################################################################"
-    )
-    print(
-        '##### [STEP 1] Extract French & English version of "ANSSI Active Directory (AD) Security Assessment Checklist" from the website #####'
-    )
-    print(
-        "#####################################################################################################################################\n"
-    )
+    
+    print("\n#####################################################################################################################################")
+    print('##### [STEP 1] Extract French & English version of "ANSSI Active Directory (AD) Security Assessment Checklist" from the website #####')
+    print("#####################################################################################################################################\n")
 
     print("[MAIN] ▶️  Extracting French & English from website...\n")
 
@@ -684,7 +656,6 @@ def step1_extract_checklists(keep_temp: bool = False) -> None:
 # STEP 2: Create Excel from JSONs
 # -------------------------------------------------------------------
 
-
 def step2_build_excel(keep_temp: bool = False) -> None:
     """
     Step 2:
@@ -694,7 +665,7 @@ def step2_build_excel(keep_temp: bool = False) -> None:
       - Build framework_content sheet from FR/EN JSON
       - Remove scraper JSON files unless keep_temp is enabled.
     """
-
+    
     print("\n##############################################")
     print("##### [STEP 2] Create Excel from scratch #####")
     print("##############################################\n")
@@ -741,7 +712,10 @@ def step2_build_excel(keep_temp: bool = False) -> None:
     build_framework_content(json_framework_fr, json_framework_en, EXCEL_FILE_NAME)
 
     if keep_temp:
-        print(f'[MAIN] ℹ️  Keeping scraper JSON files: "{JSON_FR}", "{JSON_EN}"')
+        print(
+            "[MAIN] ℹ️  Keeping scraper JSON files: "
+            f'"{JSON_FR}", "{JSON_EN}"'
+        )
     else:
         # --- Remove JSON files ---
         print("[MAIN] ▶️  Removing JSON files...")
@@ -756,18 +730,18 @@ def step2_build_excel(keep_temp: bool = False) -> None:
 # STEP 3: Create YAML Framework from Excel
 # -------------------------------------------------------------------
 
-
 def step3_build_yaml_framework():
+    
     print("\n#####################################################")
     print("##### [STEP 3] Create YAML Framework from Excel #####")
     print("#####################################################\n")
-
+    
     # --- Convert Excel to YAML Framework ---
     print("[MAIN] ▶️  Converting Excel to YAML Framework...\n")
-
-    yaml_framework_filename = EXCEL_FILE_NAME.split(".")[0] + ".yaml"
+    
+    yaml_framework_filename = EXCEL_FILE_NAME.split('.')[0] + ".yaml"
     convert_excel_to_yaml(EXCEL_FILE_NAME, yaml_framework_filename)
-
+    
     print("\n[MAIN] ✅ [STEP 3] Completed!")
     print(f'[MAIN] ✅ YAML file saved successfully: "{yaml_framework_filename}"')
 
@@ -775,7 +749,6 @@ def step3_build_yaml_framework():
 # -------------------------------------------------------------------
 # Main entrypoint
 # -------------------------------------------------------------------
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(

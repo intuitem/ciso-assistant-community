@@ -1,59 +1,61 @@
 """
-ANSSI Active Directory (AD) Security Assessment Checklist Extractor
--------------------------------------------------------------------
+    ANSSI Active Directory (AD) Security Assessment Checklist Extractor
+    -------------------------------------------------------------------
 
-This script programmatically extracts the full content of the ANSSI "Active Directory
-Control Points" checklist (https://www.cert.ssi.gouv.fr/uploads/ad_checklist.html).
-It loads the dynamic React page via Playwright, switches to the English version if
-requested, expands all interactive sections, retrieves the HTML structure, and converts
-it into structured Markdown and JSON.
+    This script programmatically extracts the full content of the ANSSI "Active Directory
+    Control Points" checklist (https://www.cert.ssi.gouv.fr/uploads/ad_checklist.html).
+    It loads the dynamic React page via Playwright, switches to the English version if
+    requested, expands all interactive sections, retrieves the HTML structure, and converts
+    it into structured Markdown and JSON.
 
-The extractor reproduces:
-    * Control point headers (Level, Title, Identifier)
-    * Vulnerability descriptions and recommendations
-    * Rich formatting (headings, paragraphs, spans, hyperlinks, code blocks)
-    * Nested lists (ul/ol)
-    * Formatted tables with checkbox rendering
-    * Colorized spans extracted from runtime CSS
-    * Special span logic (legend formatting, word+definition pairs)
-    * Root-section metadata (intro + about control points)
+    The extractor reproduces:
+        * Control point headers (Level, Title, Identifier)
+        * Vulnerability descriptions and recommendations
+        * Rich formatting (headings, paragraphs, spans, hyperlinks, code blocks)
+        * Nested lists (ul/ol)
+        * Formatted tables with checkbox rendering
+        * Colorized spans extracted from runtime CSS
+        * Special span logic (legend formatting, word+definition pairs)
+        * Root-section metadata (intro + about control points)
 
-Results are exported as:
-    * checklist.md              -> Complete Markdown export
-    * checklist_markdown.json   -> Structured JSON preserving all fields
+    Results are exported as:
+        * checklist.md              -> Complete Markdown export
+        * checklist_markdown.json   -> Structured JSON preserving all fields
 
-/!\\ [IMPORTANT] Playwright installation /!\\ :
----------------------------------------------
-Playwright requires browser binaries to be installed **separately** from the Python package.
-To install everything correctly:
+    /!\\ [IMPORTANT] Playwright installation /!\\ :
+    ---------------------------------------------
+    Playwright requires browser binaries to be installed **separately** from the Python package.
+    To install everything correctly:
 
-    pip install playwright
-    playwright install-deps
-    playwright install          # downloads Chromium, Firefox, WebKit
+        pip install playwright
+        playwright install-deps
+        playwright install          # downloads Chromium, Firefox, WebKit
 
-If running inside a virtual environment:
-    python -m playwright install firefox
+    If running inside a virtual environment:
+        python -m playwright install firefox
 
-Running the extractor:
-----------------------
-Simply execute:
+    Running the extractor:
+    ----------------------
+    Simply execute:
 
-    python anssi_ad_web_scraper.py
+        python anssi_ad_web_scraper.py
 
-Playwright will launch Firefox in headless mode, simulate the language switch,
-collect the rendered HTML, and generate the Markdown/JSON output files.
+    Playwright will launch Firefox in headless mode, simulate the language switch,
+    collect the rendered HTML, and generate the Markdown/JSON output files.
 
-Notes for developers:
----------------------
-* The script relies heavily on Playwright's dynamic DOM evaluation and BeautifulSoup parsing.
-* CSS class names on the website are auto-generated; avoid targeting them directly.
-* Extraction logic is based on semantic structure (e.g., table headers, variant attributes),
-special cases (legend spans, code blocks), and stable DOM patterns rather than CSS classes.
-* If ANSSI updates the website, adjust the DOM selectors in extract_checklist().
-* The formatting layer is modular (render_inline, render_block, list rendering, code extraction)
-and can be extended easily if new HTML patterns appear.
+    Notes for developers:
+    ---------------------
+    * The script relies heavily on Playwright's dynamic DOM evaluation and BeautifulSoup parsing.
+    * CSS class names on the website are auto-generated; avoid targeting them directly.
+    * Extraction logic is based on semantic structure (e.g., table headers, variant attributes),
+    special cases (legend spans, code blocks), and stable DOM patterns rather than CSS classes.
+    * If ANSSI updates the website, adjust the DOM selectors in extract_checklist().
+    * The formatting layer is modular (render_inline, render_block, list rendering, code extraction)
+    and can be extended easily if new HTML patterns appear.
 
 """
+
+
 
 import json
 from playwright.sync_api import sync_playwright
@@ -66,8 +68,8 @@ URL = "https://www.cert.ssi.gouv.fr/uploads/ad_checklist.html"
 FRAMEWORK_IN_ENGLISH = False
 
 
-# ---------------- Markdown formatting helpers ---------------- #
 
+# ---------------- Markdown formatting helpers ---------------- #
 
 def text_of(node) -> str:
     """Get plain text of a node, stripped."""
@@ -91,13 +93,7 @@ def has_any_class_prefix(tag: Tag, prefixes: tuple[str, ...]) -> bool:
 def is_inline_tag(tag_name: str) -> bool:
     """Tags considered inline for spacing logic."""
     return tag_name in {
-        "b",
-        "strong",
-        "a",
-        "span",
-        "code",
-        "em",
-        "i",
+        "b", "strong", "a", "span", "code", "em", "i",
     }
 
 
@@ -163,7 +159,7 @@ def render_inline(tag: Tag) -> str:
     according to the rules.
     """
     name = tag.name.lower()
-
+    
     # Ignore <button> elements completely
     if name == "button":
         return ""
@@ -183,9 +179,9 @@ def render_inline(tag: Tag) -> str:
             return ""
         if href:
             # if "href" is an anchor, add link of the website
-            if href.startswith("#"):
-                href = URL + href
-
+            if href.startswith('#'):
+                href = URL + href 
+            
             return f"[{inner}]({href})"
         return inner
 
@@ -193,20 +189,24 @@ def render_inline(tag: Tag) -> str:
     if name == "span":
         classes = tag.get("class") or []
         style = tag.get("style") or ""
-
+        
         # Detect "code-like" spans
-        is_code_like = "hljs-built_in" in classes or has_any_class_prefix(
-            tag,
-            (
-                "hljs-",
-                # Historical ANSSI generated classes.
-                "sc-iBzDrC",
-                "sc-jcwoBj",
-                # Current ANSSI generated classes.
-                "sc-fsjlER",
-                "sc-jxyWrI",
-            ),
+        is_code_like = (
+            "hljs-built_in" in classes
+            or has_any_class_prefix(
+                tag,
+                (
+                    "hljs-",
+                    # Historical ANSSI generated classes.
+                    "sc-iBzDrC",
+                    "sc-jcwoBj",
+                    # Current ANSSI generated classes.
+                    "sc-fsjlER",
+                    "sc-jxyWrI",
+                ),
+            )
         )
+
 
         # Extract background-color and color from inline style if present (will be applied for simple spans only)
         bg_color = None
@@ -224,6 +224,7 @@ def render_inline(tag: Tag) -> str:
                     _, value = part.split(":", 1)
                     fg_color = value.strip()
 
+
         # ------------------------------------------------------
         # Case: WORD + DEFINITION spans (spanWord + spanDef)
         # (single definition item inside the generated definition span)
@@ -239,6 +240,7 @@ def render_inline(tag: Tag) -> str:
         # *word-text* (definition text)
         """
         if "sc-gXfWyg" in classes or "sc-dCVDEO" in classes:
+
             # get all leaf spans (spans without nested spans)
             leaf_spans = []
             for s in tag.find_all("span", recursive=True):
@@ -275,6 +277,8 @@ def render_inline(tag: Tag) -> str:
                 if word_text and definition_text:
                     return f"*{word_text}* ({definition_text})"
 
+
+
         # Special case: phrase + list of spans -> "Phrase: item1, item2, ..."
         """
         # Example:
@@ -306,6 +310,7 @@ def render_inline(tag: Tag) -> str:
                 # Example: "Legend: Item 1, Item 2, Item 3"
                 return f"{phrase}: {', '.join(leaf_spans)}"
 
+
         ### > Generic span fallback: inline content, possibly code-like, possibly colored
         inner = render_inline_children(tag)
         if not inner:
@@ -325,14 +330,15 @@ def render_inline(tag: Tag) -> str:
             if fg_color:
                 style_bits.append(f"color:{fg_color}")
             style_attr = ";".join(style_bits)
-
+            
             if "`" in content:
-                return f'<code style="{style_attr}">{content.replace("`", "")}</code>'
+                return f"<code style=\"{style_attr}\">{content.replace("`", "")}</code>"
             else:
-                return f'<span style="{style_attr}">{content}</span>'
+                return f"<span style=\"{style_attr}\">{content}</span>"
 
         return content
         ### > [END] Generic span fallback:
+
 
     # Anything else inline-like -> render its children
     return render_inline_children(tag)
@@ -344,7 +350,7 @@ def render_block(node: Tag) -> str:
     to Markdown, including trailing newlines.
     """
     name = node.name.lower()
-
+    
     # Ignore <button> and its entire subtree
     if name == "button":
         return ""
@@ -354,7 +360,7 @@ def render_block(node: Tag) -> str:
         inner = render_inline_children(node)
         if not inner:
             return ""
-
+        
         # Capitalize first letter only
         inner = inner[0].upper() + inner[1:]
         return f"# {inner}\n\n"
@@ -363,7 +369,7 @@ def render_block(node: Tag) -> str:
         inner = render_inline_children(node)
         if not inner:
             return ""
-
+        
         # Capitalize first letter only
         inner = inner[0].upper() + inner[1:]
         return f"## {inner}\n\n"
@@ -385,12 +391,13 @@ def render_block(node: Tag) -> str:
 
     # Tables -> Markdown table with empty header
     if name == "table":
+        
         table_body = node.find("tbody")
-
+        
         rows = table_body.find_all("tr", recursive=False)
         if not rows:
             return ""
-
+        
         # Remove 1st row because it contains a button
         rows = rows[1:]
 
@@ -517,7 +524,7 @@ def render_table_cell(td: Tag) -> str:
             if inp.has_attr("checked"):
                 attrs.append("checked")
 
-            checkbox_html = f"<input {' '.join(attrs)} />"
+            checkbox_html = f"<input {" ".join(attrs)} />"
             parts.append(checkbox_html)
 
         # Try to get associated label text(s)
@@ -552,10 +559,11 @@ def extract_code_from_variant_div(node: Tag) -> str:
         if isinstance(element, NavigableString):
             # Keep raw text, including spaces
             buffer.append(str(element))
-
+            
         elif isinstance(element, Tag):
+            
             name = element.name.lower()
-
+            
             if name == "br":
                 # Flush current buffer as a line
                 line = "".join(buffer)
@@ -568,14 +576,14 @@ def extract_code_from_variant_div(node: Tag) -> str:
     if buffer:
         line = "".join(buffer)
         line = line.replace("\xa0", " ").rstrip()
-
+        
         if line:
             lines.append(line)
 
     # Remove leading/trailing empty lines, just in case
     while lines and not lines[0].strip():
         lines.pop(0)
-
+        
     while lines and not lines[-1].strip():
         lines.pop()
 
@@ -632,7 +640,12 @@ def format_description_html(html: str) -> str:
         # Normal element (p, h1, ul, table, or even nested div)
         main_parts.append(render_block(child))
 
-    return ("".join(main_parts) + "".join(secondary_divs) + "".join(info_divs)).strip()
+    return (
+        "".join(main_parts)
+        + "".join(secondary_divs)
+        + "".join(info_divs)
+    ).strip()
+
 
 
 def format_recommendation_html(html: str) -> str:
@@ -662,13 +675,17 @@ def format_recommendation_html(html: str) -> str:
         # normal item (p, h1, table, …)
         main_parts.append(render_block(child))
 
-    return ("".join(main_parts) + "".join(extra_divs)).strip()
+    return (
+        "".join(main_parts)
+        + "".join(extra_divs)
+    ).strip()
+
+
 
 
 # ---------------- Checklist extraction with Playwright ---------------- #
 
-
-def extract_checklist(framework_in_english: bool = False):
+def extract_checklist(framework_in_english : bool = False):
     results = []
 
     with sync_playwright() as p:
@@ -679,14 +696,14 @@ def extract_checklist(framework_in_english: bool = False):
 
         # Wait until at least one header TR is mounted
         page.wait_for_selector("div#root table tbody tr td:nth-child(2)")
-
+        
         use_english = False
-
+        
         if framework_in_english is not None:
             use_english = framework_in_english
         else:
             use_english = FRAMEWORK_IN_ENGLISH
-
+            
         if use_english:
             print("> ⌛ Switching page to English...")
             # Find the button whose inner text contains "EN"
@@ -698,13 +715,14 @@ def extract_checklist(framework_in_english: bool = False):
 
                 # Wait for the language to switch (e.g. title changes)
                 page.wait_for_timeout(1000)  # small delay to allow refresh
-
+                
                 print("> ✅ Page switched to English !")
             else:
                 print("> ⚠️ English switch button not found")
         else:
             print("> ✅ Using default language for page (French)")
-
+        
+        
         # > Specific code for span in order to give them colors in the Markdown
         # Inject computed background-color as inline style on level and badge spans.
         page.evaluate(
@@ -744,7 +762,7 @@ def extract_checklist(framework_in_english: bool = False):
                     }
                 });
 
-                // Take "color" and "background-color" of spans to add those colors in Markdown
+                // Take "color" and "background-color" of spans to add those colors in Markdown 
                 new Set(spans).forEach(span => {
                     const cs = window.getComputedStyle(span);
                     if (hasVisibleBackground(cs) && !span.style.backgroundColor) {
@@ -757,16 +775,15 @@ def extract_checklist(framework_in_english: bool = False):
             }
             """
         )
-
+        
+        
         # --- Root-level secondary divs: intro and about_ctrl_points ---
         root_intro_md = ""
         root_about_md = ""
         root_elements = []
 
         # Find all secondary variant divs inside #root (global ones are first)
-        root_secondary_divs = page.query_selector_all(
-            "div#root div[variant='secondary']"
-        )
+        root_secondary_divs = page.query_selector_all("div#root div[variant='secondary']")
 
         if len(root_secondary_divs) >= 1:
             intro_html = root_secondary_divs[0].inner_html()
@@ -790,6 +807,7 @@ def extract_checklist(framework_in_english: bool = False):
                     }
                 )
 
+
         # --- Table with all vulnerabilities ---
 
         checklist_table = None
@@ -798,17 +816,12 @@ def extract_checklist(framework_in_english: bool = False):
                 (th.inner_text() or "").strip().lower()
                 for th in table.query_selector_all(":scope > thead th")
             ]
-            if (
-                any(header in ("niveau", "level", "grade") for header in headers)
-                and "id" in headers
-            ):
+            if any(header in ("niveau", "level", "grade") for header in headers) and "id" in headers:
                 checklist_table = table
                 break
 
         if checklist_table is None:
-            raise RuntimeError(
-                "Could not find the checklist table in the rendered ANSSI page."
-            )
+            raise RuntimeError("Could not find the checklist table in the rendered ANSSI page.")
 
         # Retrieve only the top-level rows of the checklist table. Some detail
         # cells contain nested tables that must not be interpreted as controls.
@@ -862,6 +875,7 @@ def extract_checklist(framework_in_english: bool = False):
 
         browser.close()
 
+
     # Form complete website
     complete_website = {
         "root_elements": root_elements,
@@ -873,27 +887,26 @@ def extract_checklist(framework_in_english: bool = False):
 
 # ---------------- Main ---------------- #
 
-
 # A 2nd "framework_in_english" has been added to let external calls to select a language (the default one will be used if no boolean given)
 def main(framework_in_english: bool = False, files_suffix: str = None):
-    print(f'⌛ Extracting Framework from website "{URL}"...')
-
+    
+    print(f"⌛ Extracting Framework from website \"{URL}\"...")
+    
     data = extract_checklist(framework_in_english)
-
+    
     print(f"✅ Extraction finished!\n")
-
+    
     root_elements = data.get("root_elements", [])
     checklist = data.get("checklist", [])
-
+    
     print(f"ℹ️  Elements found in checklist: {len(checklist)} ")
-
-    markdown_filename = f"checklist{'_' + files_suffix if files_suffix else ''}.md"
-    json_filename = (
-        f"checklist_markdown{'_' + files_suffix if files_suffix else ''}.json"
-    )
+    
+    markdown_filename = f"checklist{'_' + files_suffix if files_suffix else ""}.md"
+    json_filename = f"checklist_markdown{'_' + files_suffix if files_suffix else ""}.json"
 
     # --- Save everything into a single Markdown file ---
     with open(markdown_filename, "w", encoding="utf-8") as f:
+
         # 1) Root-level elements (intro + about_ctrl_points)
         for root in root_elements:
             f.write(f"# ROOT: {root['root_element']}\n\n")
@@ -913,13 +926,14 @@ def main(framework_in_english: bool = False, files_suffix: str = None):
             f.write(entry["recommendation_markdown"])
             f.write("\n\n---\n\n")
 
-    print(f'✅ Markdown file saved: "{markdown_filename}"')
+    print(f"✅ Markdown file saved: \"{markdown_filename}\"")
 
     # --- Save JSON ---
     with open(json_filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print(f'✅ JSON file saved: "{json_filename}"')
+    print(f"✅ JSON file saved: \"{json_filename}\"")
+
 
 
 if __name__ == "__main__":
