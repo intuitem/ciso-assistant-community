@@ -3,6 +3,10 @@
 	import { invalidateAll } from '$app/navigation';
 	import { pageTitle } from '$lib/utils/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import type { PageData } from './$types';
 
 	interface Sheet {
@@ -91,6 +95,36 @@
 	}
 
 	let { data }: { data: PageData } = $props();
+
+	// Map a citation `kind` (snake_case from the indexer) to a frontend route.
+	// Returns null when the kind has no direct detail page (e.g. requirement_node lives in a framework,
+	// document_chunk has no standalone view).
+	const CITATION_KIND_TO_URLMODEL: Record<string, string> = {
+		applied_control: 'applied-controls',
+		risk_scenario: 'risk-scenarios',
+		asset: 'assets',
+		evidence: 'evidences',
+		reference_control: 'reference-controls',
+		requirement_assessment: 'requirement-assessments',
+		vulnerability: 'vulnerabilities',
+		incident: 'incidents',
+		framework: 'frameworks',
+		threat: 'threats',
+		library_threat: 'threats',
+		entity: 'entities',
+		solution: 'solutions',
+		feared_event: 'feared-events',
+		ebios_rm_study: 'ebios-rm',
+		compliance_assessment: 'compliance-assessments',
+		risk_assessment: 'risk-assessments'
+	};
+
+	function getCitationHref(ref: { kind: string; id: string }): string | null {
+		if (!ref?.id) return null;
+		const urlModel = CITATION_KIND_TO_URLMODEL[ref.kind];
+		if (!urlModel) return null;
+		return `/${urlModel}/${ref.id}`;
+	}
 
 	// Polling override layers — when the client polls, we override server-side
 	// load data without losing the ability to react to invalidateAll().
@@ -312,14 +346,195 @@
 		await startPrefill(newStrictness);
 	}
 
+	// --- Per-question retry: attach existing control / suggest a new one ----
+
+	interface ControlDraft {
+		name: string;
+		ref_id?: string;
+		description: string;
+		observation: string;
+		status: string;
+		category: string;
+		csf_function: string;
+	}
+
+	let retryBusyForQuestion = $state<string | null>(null);
+
+	let pickerOpenForQuestion = $state<string | null>(null);
+	let pickerSelectedId = $state<string | null>(null);
+
+	// SuperForm wrapper so we can drive the standard AutocompleteSelect
+	// component (which expects a SuperForm). One-field schema, client-only.
+	const pickerSchema = z.object({
+		applied_control_id: z.string().nullable().optional()
+	});
+	const pickerForm = superForm(
+		defaults({ applied_control_id: null }, zod(pickerSchema)),
+		{
+			dataType: 'json',
+			taintedMessage: false,
+			SPA: true,
+			validators: zod(pickerSchema)
+		}
+	);
+	const _pickerStoreUnsub = pickerForm.form.subscribe((v: any) => {
+		pickerSelectedId = v?.applied_control_id ?? null;
+	});
+	onDestroy(_pickerStoreUnsub);
+
+	let suggestOpenForQuestion = $state<string | null>(null);
+	let suggestLoading = $state(false);
+	let suggestDraft = $state<ControlDraft | null>(null);
+
+	// Looked up against the live questions list so the modal stays in sync
+	// even if polling refreshes the list while a modal is open.
+	const pickerQuestion = $derived(
+		pickerOpenForQuestion
+			? (questions.find((q) => q.id === pickerOpenForQuestion) ?? null)
+			: null
+	);
+	const suggestQuestion = $derived(
+		suggestOpenForQuestion
+			? (questions.find((q) => q.id === suggestOpenForQuestion) ?? null)
+			: null
+	);
+
+	function openPicker(question: Question) {
+		pickerOpenForQuestion = question.id;
+		pickerForm.form.set({ applied_control_id: null });
+	}
+
+	function closePicker() {
+		pickerOpenForQuestion = null;
+		pickerForm.form.set({ applied_control_id: null });
+	}
+
+	async function applyPickedControl() {
+		if (!pickerOpenForQuestion || !pickerSelectedId) return;
+		const questionId = pickerOpenForQuestion;
+		const controlId = pickerSelectedId;
+		retryBusyForQuestion = questionId;
+		closePicker();
+		try {
+			const res = await fetch(
+				`/experimental/questionnaire-autopilot/${run.id}/q/${questionId}/retry-with-control`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ applied_control_id: controlId })
+				}
+			);
+			const data = await res.json();
+			if (!res.ok) {
+				toast.trigger({ message: data.detail || 'Retry failed.' });
+				return;
+			}
+			toast.trigger({
+				message: `Re-tried with hint · confidence ${
+					typeof data.confidence === 'number' ? data.confidence.toFixed(2) : '—'
+				}`
+			});
+			await refreshAgentRunOrInvalidate();
+		} finally {
+			retryBusyForQuestion = null;
+		}
+	}
+
+	async function openSuggest(question: Question) {
+		suggestOpenForQuestion = question.id;
+		suggestLoading = true;
+		suggestDraft = null;
+		try {
+			const res = await fetch(
+				`/experimental/questionnaire-autopilot/${run.id}/q/${question.id}/suggest-control`,
+				{ method: 'POST' }
+			);
+			const data = await res.json();
+			if (!res.ok) {
+				toast.trigger({ message: data.detail || 'Failed to draft a control.' });
+				suggestOpenForQuestion = null;
+				return;
+			}
+			suggestDraft = {
+				name: data.name || '',
+				ref_id: '',
+				description: data.description || '',
+				observation: data.observation || '',
+				status: data.status || 'to_do',
+				category: data.category || '',
+				csf_function: data.csf_function || ''
+			};
+		} finally {
+			suggestLoading = false;
+		}
+	}
+
+	function closeSuggest() {
+		suggestOpenForQuestion = null;
+		suggestDraft = null;
+	}
+
+	async function commitSuggested() {
+		if (!suggestOpenForQuestion || !suggestDraft) return;
+		if (!suggestDraft.name.trim()) {
+			toast.trigger({ message: 'Name is required.' });
+			return;
+		}
+		const questionId = suggestOpenForQuestion;
+		const draft = suggestDraft;
+		retryBusyForQuestion = questionId;
+		closeSuggest();
+		try {
+			const res = await fetch(
+				`/experimental/questionnaire-autopilot/${run.id}/q/${questionId}/create-and-retry`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(draft)
+				}
+			);
+			const data = await res.json();
+			if (!res.ok && res.status !== 207) {
+				toast.trigger({ message: data.detail || 'Failed to create the control.' });
+				return;
+			}
+			if (res.status === 207) {
+				toast.trigger({
+					message: `Control created — but retry failed: ${data.detail ?? ''}`
+				});
+			} else {
+				toast.trigger({
+					message: `Control created & retry done · confidence ${
+						typeof data.confidence === 'number' ? data.confidence.toFixed(2) : '—'
+					}`
+				});
+			}
+			await refreshAgentRunOrInvalidate();
+		} finally {
+			retryBusyForQuestion = null;
+		}
+	}
+
+	async function refreshAgentRunOrInvalidate() {
+		// Easiest: pull fresh agent state if we have a run; otherwise invalidate the
+		// page-server load. Either way the row redraws.
+		if (agentRun) {
+			await refreshAgentRun();
+		}
+		await invalidateAll();
+	}
+
 	async function cancelRun() {
 		if (!agentRun) return;
 		cancelBusy = true;
 		try {
-			const res = await fetch(`/api/chat/agent-runs/${agentRun.id}/cancel/`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
-			});
+			const res = await fetch(
+				`/experimental/questionnaire-autopilot/${run.id}/cancel-agent?run_id=${agentRun.id}`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				}
+			);
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}));
 				toast.trigger({ message: err.detail || 'Failed to cancel.' });
@@ -452,15 +667,24 @@
 		});
 	});
 
+	// `needs_info` always lands in the review band even with high confidence:
+	// the agent might be very sure we *don't* have evidence, but the human
+	// still has to act on it (attach a control, suggest one, leave blank).
 	const needsReviewQuestions = $derived(
 		sortedQuestions.filter((q) => {
-			const c = actionByQuestion[q.id]?.confidence;
+			const a = actionByQuestion[q.id];
+			if (!a) return true;
+			if (a.payload?.status === 'needs_info') return true;
+			const c = a.confidence;
 			return c == null || c < AUTO_ACCEPT_THRESHOLD;
 		})
 	);
 	const autoAcceptedQuestions = $derived(
 		sortedQuestions.filter((q) => {
-			const c = actionByQuestion[q.id]?.confidence;
+			const a = actionByQuestion[q.id];
+			if (!a) return false;
+			if (a.payload?.status === 'needs_info') return false;
+			const c = a.confidence;
 			return c != null && c >= AUTO_ACCEPT_THRESHOLD;
 		})
 	);
@@ -726,6 +950,13 @@
 					Pick how the agent should work, then start the prefill. You'll see live progress — no need
 					to keep this page focused.
 				</p>
+				<p class="text-xs text-gray-500 mt-2 flex items-start gap-1.5">
+					<i class="fa-solid fa-arrows-rotate mt-0.5 text-blue-500"></i>
+					<span>
+						When you start, we first refresh the folder's vector index (drops stale entries, picks
+						up new controls). Adds ~10–30 s before answering begins.
+					</span>
+				</p>
 			</div>
 			<div class="space-y-2">
 				<label
@@ -889,6 +1120,10 @@
 								<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
 							</button>
 						</div>
+						<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
+							<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
+							Re-runs the folder index refresh first, then the prefill.
+						</div>
 					</div>
 				</div>
 			</div>
@@ -947,6 +1182,10 @@
 								<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
 							</button>
 						</div>
+						<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
+							<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
+							Re-runs the folder index refresh first, then the prefill.
+						</div>
 					</div>
 				</div>
 			</div>
@@ -967,6 +1206,175 @@
 		{/if}
 	{/if}
 </div>
+
+<!-- ============== Pick existing control modal ============== -->
+{#if pickerOpenForQuestion}
+	<div
+		class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+		role="dialog"
+		aria-modal="true"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) closePicker();
+		}}
+	>
+		<div class="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col">
+			<div class="px-6 py-4 border-b">
+				<h4 class="font-semibold">Use an existing applied control</h4>
+				<p class="text-xs text-gray-500 mt-1">
+					Pick a control in this folder. The agent will re-run the question with it as
+					priority context.
+				</p>
+			</div>
+			{#if pickerQuestion}
+				<div class="px-6 py-3 bg-gray-50 border-b">
+					<div class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">
+						Question
+					</div>
+					<div class="text-sm mt-1">{pickerQuestion.text}</div>
+					{#if pickerQuestion.section || pickerQuestion.ref_id}
+						<div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+							{#if pickerQuestion.section}
+								<span>{pickerQuestion.section}</span>
+							{/if}
+							{#if pickerQuestion.ref_id}
+								<span class="font-mono">· {pickerQuestion.ref_id}</span>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/if}
+			<div class="px-6 py-4">
+				<AutocompleteSelect
+					form={pickerForm}
+					field="applied_control_id"
+					optionsEndpoint="applied-controls"
+					optionsDetailedUrlParameters={[['folder', run.folder.id]]}
+					optionsExtraFields={[['folder', 'str']]}
+					label="Applied control"
+				/>
+			</div>
+			<div class="px-6 py-3 border-t flex justify-end gap-2">
+				<button type="button" class="btn" onclick={closePicker}>Cancel</button>
+				<button
+					type="button"
+					class="btn preset-filled"
+					onclick={applyPickedControl}
+					disabled={!pickerSelectedId}
+				>
+					<i class="fa-solid fa-rotate mr-1"></i>Re-try with this control
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- ============== Suggest a new control modal ============== -->
+{#if suggestOpenForQuestion}
+	<div
+		class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+		role="dialog"
+		aria-modal="true"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) closeSuggest();
+		}}
+	>
+		<div
+			class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+		>
+			<div class="px-6 py-4 border-b">
+				<h4 class="font-semibold">Suggest a control to create</h4>
+				<p class="text-xs text-gray-500 mt-1">
+					Review the draft, edit anything, then create. We'll add the control to the
+					folder and immediately re-try the question with it.
+				</p>
+			</div>
+			{#if suggestQuestion}
+				<div class="px-6 py-3 bg-gray-50 border-b">
+					<div class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">
+						Question
+					</div>
+					<div class="text-sm mt-1">{suggestQuestion.text}</div>
+					{#if suggestQuestion.section || suggestQuestion.ref_id}
+						<div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+							{#if suggestQuestion.section}
+								<span>{suggestQuestion.section}</span>
+							{/if}
+							{#if suggestQuestion.ref_id}
+								<span class="font-mono">· {suggestQuestion.ref_id}</span>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/if}
+
+			{#if suggestLoading || !suggestDraft}
+				<div class="px-6 py-12 text-center text-sm text-gray-500">
+					<i class="fa-solid fa-wand-magic-sparkles fa-pulse mr-2 text-blue-500"></i>
+					Drafting a control from the question…
+				</div>
+			{:else}
+				<div class="flex-1 overflow-y-auto px-6 py-4 space-y-3 text-sm">
+					<div>
+						<label for="d-name" class="block text-xs font-medium text-gray-700">
+							Name *
+						</label>
+						<input
+							id="d-name"
+							type="text"
+							bind:value={suggestDraft.name}
+							maxlength="200"
+							class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+						/>
+					</div>
+					<div>
+						<label for="d-desc" class="block text-xs font-medium text-gray-700">
+							Description
+						</label>
+						<textarea
+							id="d-desc"
+							bind:value={suggestDraft.description}
+							rows="3"
+							class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+						></textarea>
+					</div>
+					<div>
+						<label for="d-status" class="block text-xs font-medium text-gray-700">
+							Status
+						</label>
+						<select
+							id="d-status"
+							bind:value={suggestDraft.status}
+							class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+						>
+							<option value="to_do">To do</option>
+							<option value="in_progress">In progress</option>
+							<option value="active">Active</option>
+							<option value="on_hold">On hold</option>
+							<option value="degraded">Degraded</option>
+						</select>
+					</div>
+					<p class="text-[11px] text-gray-400">
+						The agent's drafted observation, category and CSF function will be saved
+						along with the control — you can refine them later from the Applied
+						Controls page.
+					</p>
+				</div>
+			{/if}
+
+			<div class="px-6 py-3 border-t flex justify-end gap-2">
+				<button type="button" class="btn" onclick={closeSuggest}>Cancel</button>
+				<button
+					type="button"
+					class="btn preset-filled"
+					onclick={commitSuggested}
+					disabled={!suggestDraft || !suggestDraft.name?.trim() || suggestLoading}
+				>
+					<i class="fa-solid fa-plus mr-1"></i>Create &amp; retry
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 {#snippet bandedReview(needsReviewHeader: string)}
 	{#if needsReviewQuestions.length > 0}
@@ -1113,14 +1521,57 @@
 								</summary>
 								<div class="mt-2 space-y-1 pl-4">
 									{#each action.source_refs as ref}
+										{@const href = getCitationHref(ref)}
 										<div class="text-gray-700">
 											<span class="font-mono text-gray-400">[{ref.index}]</span>
-											<span class="font-medium">{ref.name || ref.kind || 'passage'}</span>
+											{#if href}
+												<a
+													{href}
+													target="_blank"
+													rel="noopener"
+													class="font-medium text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1"
+													title="Open {ref.kind.replace(/_/g, ' ')} in a new tab"
+												>
+													{ref.name || ref.kind || 'passage'}
+													<i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+												</a>
+											{:else}
+												<span class="font-medium">{ref.name || ref.kind || 'passage'}</span>
+											{/if}
 											<div class="text-gray-500 italic mt-0.5">{ref.snippet}</div>
 										</div>
 									{/each}
 								</div>
 							</details>
+						{/if}
+						{#if action.payload.status === 'needs_info' || (action.confidence != null && action.confidence < AUTO_ACCEPT_THRESHOLD)}
+							<div class="flex items-center gap-3 text-xs pt-1">
+								{#if retryBusyForQuestion === question.id}
+									<span class="text-gray-500">
+										<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+										Re-trying with hint…
+									</span>
+								{:else}
+									<button
+										type="button"
+										class="text-blue-600 hover:text-blue-800"
+										onclick={() => openPicker(question)}
+										disabled={retryBusyForQuestion !== null}
+									>
+										<i class="fa-solid fa-link mr-1"></i>Use an existing control
+									</button>
+									<span class="text-gray-300">·</span>
+									<button
+										type="button"
+										class="text-blue-600 hover:text-blue-800"
+										onclick={() => openSuggest(question)}
+										disabled={retryBusyForQuestion !== null}
+									>
+										<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
+										Suggest a control to create
+									</button>
+								{/if}
+							</div>
 						{/if}
 					{/if}
 				</div>

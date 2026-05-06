@@ -262,6 +262,8 @@ class Folder(NameDescriptionMixin):
             ["solution", "provider_entity", "folder"],
             ["processing", "folder"],
             ["journey", "folder"],
+            ["questionnaire_run", "folder"],
+            ["agent_run", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.

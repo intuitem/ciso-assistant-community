@@ -553,6 +553,40 @@ ANSWER_PROMPT = """You are answering a customer security questionnaire on \
 behalf of an organization. Use ONLY the provided context to write your answer. \
 If the context does not support an answer, set status to "needs_info".
 
+What counts as evidence (in order of priority):
+
+1. **Applied controls** — the verdict is in their **Status** + **Observation**. \
+Other fields (name, reference, description) describe what the control is, not \
+whether we do it.
+2. **Requirement assessments** — the verdict is in their **Result** + \
+**Observation**. The requirement ref / requirement text / framework name \
+attached to an assessment describe what's being assessed (the question, in \
+effect); they are NOT evidence we comply. Cite an RA only when its Result \
+genuinely supports the answer.
+
+How to map evidence to verdict:
+
+- **Status: Active** (applied control) or **Result: Compliant** (requirement \
+assessment) — real, currently-in-place evidence; can support "yes".
+- **Status: In progress** or **Result: Partially compliant** — these support \
+**"partial"**, not "needs_info". If you cite an in-progress / partially \
+compliant item, the answer is at minimum "partial" — explain in the comment \
+what's in place and what's missing rather than hedging to needs_info.
+- **Status: To do**, **Status: On hold**, **Result: Non compliant**, \
+**Result: Not assessed** — control is planned, paused, or unverified; do NOT \
+justify "yes". Use "partial" only if there is also active/compliant evidence; \
+otherwise prefer "needs_info" or "no".
+- **Status: Deprecated** — ignore as evidence.
+- A compliance assessment with **Status: In progress** or **In review** means \
+we are actively working through that framework — supports "partial" for \
+"do you have a process/policy" questions; for "do you HOLD certificate X" \
+questions, it supports "no" (we're working toward it but don't hold it yet).
+- "needs_info" is correct when **no** relevant evidence is cited, or when the \
+question asks for a specific value (e.g. exact RTO, exact frequency) that the \
+cited evidence doesn't pin down — but if any cited evidence is at least \
+in-progress / partially compliant, prefer "partial" + explain the gap in the \
+comment.
+
 Question:
 {question}
 
@@ -570,6 +604,18 @@ markers like [1] [2] referring to the numbered context passages>",
 CRITIC_PROMPT = """You are reviewing a draft answer to a customer security \
 questionnaire. Score how well the cited context supports the answer (0.0 = \
 contradicted or unsupported, 1.0 = fully supported and on-topic).
+
+Pay particular attention to the status of each cited passage:
+
+- A "yes" verdict requires at least one cited passage with **Status: Active** \
+or **Result: Compliant**. If the draft says "yes" while citing only "To do", \
+"On hold", "In progress", "Non compliant", "Not assessed" or "Deprecated" \
+items, score below 0.4 and explain that planned/non-active items do not \
+support "yes".
+- A "partial" verdict needs evidence that something is actually in place \
+(active/compliant or in-progress) — it should not be used to dress up a "no".
+- "needs_info" is correct when no relevant active/compliant evidence is \
+cited; do not penalize it for that reason alone.
 
 Question:
 {question}
@@ -594,12 +640,136 @@ FAST_MODE_DEFAULT_CONFIDENCE = 0.5
 PER_QUESTION_TIMEOUT_SEC = 90
 
 
+def _extract_status_marker(text: str) -> str:
+    """Pull the verdict-bearing field out of an indexed passage's text body.
+
+    The indexer (see _text_for_applied_control / _text_for_requirement_assessment)
+    writes lines like "Status: To do" or "Result: Partially compliant".
+    Surfacing this in the context label makes it visible at a glance to the
+    LLM rather than buried mid-paragraph. Returns e.g. "status=to_do" or
+    "result=partially_compliant", or "" when neither marker is present.
+    """
+    if not text:
+        return ""
+    # Result wins over Status when both appear (RA carries both; Result is
+    # the verdict-bearing one).
+    result_value = ""
+    status_value = ""
+    for line in text.split("\n"):
+        stripped = line.strip()
+        lower = stripped.lower()
+        if not result_value and lower.startswith("result:"):
+            result_value = stripped.split(":", 1)[1].strip()
+        elif not status_value and lower.startswith("status:"):
+            status_value = stripped.split(":", 1)[1].strip()
+    chosen = result_value or status_value
+    if not chosen:
+        return ""
+    key = "result" if result_value else "status"
+    normalized = chosen.lower().replace(" ", "_").replace("-", "_")
+    return f"{key}={normalized}"
+
+
+def _search_folder_evidence(query: str, folder_id: str, top_k: int = 6) -> list[dict]:
+    """Folder-scoped, library-excluded RAG search for the questionnaire agent.
+
+    Differences vs ``chat.rag.search``:
+      - Hard-scoped to ONE folder (the questionnaire's). The general search
+        scopes by the *user's accessible perimeter* — that pulls in evidence
+        from sibling folders (e.g. Starter MFA assessments leaking into a
+        DEMO run). For prefill we want only the questionnaire's folder.
+      - Excludes the library partition. RequirementNodes describe what
+        *should* be done, not what we *do*; they're metadata, not verdict
+        evidence. Including them in context invites the LLM to over-weight
+        framework text it can't use to judge compliance.
+
+    Returns the same flat-dict shape as ``chat.rag.search`` so existing
+    callers (``_build_context_block``) consume it unchanged.
+    """
+    from qdrant_client.models import FieldCondition, Filter, MatchValue
+
+    from .providers import get_embedder
+    from .rag import COLLECTION_NAME, _get_reranker, get_qdrant_client
+
+    try:
+        client = get_qdrant_client()
+        embedder = get_embedder()
+    except Exception as e:
+        logger.warning("folder_evidence_search: infra unavailable (%s)", e)
+        return []
+
+    folder_id_str = str(folder_id)
+    fetch_limit = max(top_k * 3, top_k)
+
+    try:
+        query_vector = embedder.embed_query(query)
+    except Exception as e:
+        logger.warning("folder_evidence_search: embed_query failed (%s)", e)
+        return []
+
+    qfilter = Filter(
+        must=[FieldCondition(key="folder_id", match=MatchValue(value=folder_id_str))]
+    )
+
+    try:
+        result = client.query_points(
+            collection_name=COLLECTION_NAME,
+            query=query_vector,
+            limit=fetch_limit,
+            query_filter=qfilter,
+        )
+        candidates = list(result.points)
+    except Exception as e:
+        logger.warning("folder_evidence_search: query failed (%s)", e)
+        return []
+
+    # Cross-encoder rerank when we have more than we need.
+    reranker = _get_reranker()
+    if reranker and len(candidates) > top_k:
+        try:
+            pairs = [
+                (query, (c.payload or {}).get("text", "")[:512]) for c in candidates
+            ]
+            scores = reranker.predict(pairs)
+            candidates = [
+                p
+                for _, p in sorted(
+                    zip(scores, candidates), key=lambda x: x[0], reverse=True
+                )[:top_k]
+            ]
+        except Exception as e:
+            logger.warning("folder_evidence_search: rerank failed (%s)", e)
+            candidates = candidates[:top_k]
+    else:
+        candidates = candidates[:top_k]
+
+    return [
+        {
+            "id": str(c.id),
+            "score": getattr(c, "score", 0.0),
+            "text": (c.payload or {}).get("text", ""),
+            "source_type": (c.payload or {}).get("source_type", ""),
+            "object_type": (c.payload or {}).get("object_type", ""),
+            "object_id": (c.payload or {}).get("object_id"),
+            "name": (c.payload or {}).get("name", ""),
+            "ref_id": (c.payload or {}).get("ref_id", ""),
+            "framework": (c.payload or {}).get("framework", ""),
+            "urn": (c.payload or {}).get("urn", ""),
+        }
+        for c in candidates
+    ]
+
+
 def _build_context_block(results: list[dict]) -> tuple[str, list[dict]]:
     """Format retrieval results as numbered passages + return source_refs.
 
     `chat.rag.search` returns flat dicts with fields at the top level
     (id, score, text, source_type, object_type, name, ref_id, …).
     Don't try to read them from a nested "payload" key — there isn't one.
+
+    The status / result of status-bearing models (AppliedControl,
+    RequirementAssessment) is lifted into the visible label so the LLM
+    sees `status=to_do` right next to the passage marker, not mid-text.
     """
     lines = []
     refs = []
@@ -612,6 +782,7 @@ def _build_context_block(results: list[dict]) -> tuple[str, list[dict]]:
         name = r.get("name") or ""
         object_type = r.get("object_type") or ""
         ref_id = r.get("ref_id") or ""
+        status_marker = _extract_status_marker(text)
         label_bits = []
         if object_type:
             label_bits.append(object_type)
@@ -619,6 +790,8 @@ def _build_context_block(results: list[dict]) -> tuple[str, list[dict]]:
             label_bits.append(ref_id)
         elif name:
             label_bits.append(name[:60])
+        if status_marker:
+            label_bits.append(status_marker)
         label = " · ".join(label_bits) or "passage"
         lines.append(f"[{i}] ({label}) {snippet}")
         refs.append(
@@ -630,6 +803,7 @@ def _build_context_block(results: list[dict]) -> tuple[str, list[dict]]:
                 "ref_id": ref_id,
                 "score": float(score) if score is not None else None,
                 "snippet": snippet,
+                "status_marker": status_marker,
             }
         )
     return "\n".join(lines), refs
@@ -673,6 +847,170 @@ def _heartbeat(run, label: str | None = None) -> bool:
         update_fields.append("current_step_label")
     run.save(update_fields=update_fields + ["updated_at"])
     return True
+
+
+def refresh_folder_index(folder_id: str) -> dict:
+    """Prune stale model points + (re)index live model objects in a folder.
+
+    Run as the first step of a questionnaire prefill so the LLM only sees
+    citations that resolve to real, current objects. Idempotent —
+    embed+upsert overwrites by deterministic point id.
+
+    Returns ``{"pruned": <count>, "indexed": <count>}``.
+    """
+    import uuid as _uuid
+
+    from django.apps import apps
+    from qdrant_client.models import (
+        FieldCondition,
+        Filter,
+        MatchValue,
+        PointStruct,
+    )
+
+    from .providers import get_embedder
+    from .rag import COLLECTION_NAME, get_qdrant_client
+    from .signals import INDEXED_MODELS
+
+    folder_id_str = str(folder_id)
+
+    try:
+        client = get_qdrant_client()
+    except Exception as e:
+        logger.warning("refresh_folder_index: qdrant unavailable (%s)", e)
+        return {"pruned": 0, "indexed": 0, "skipped": True}
+
+    scroll_filter = Filter(
+        must=[
+            FieldCondition(key="folder_id", match=MatchValue(value=folder_id_str)),
+            FieldCondition(key="source_type", match=MatchValue(value="model")),
+        ]
+    )
+
+    # 1. Walk every existing model point in the folder so we know which IDs
+    # the index currently holds. Tuples of (qdrant_point_id, object_id).
+    points_in_folder: list[tuple] = []
+    next_offset = None
+    while True:
+        try:
+            batch, next_offset = client.scroll(
+                collection_name=COLLECTION_NAME,
+                scroll_filter=scroll_filter,
+                limit=500,
+                offset=next_offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+        except Exception as e:
+            logger.warning("refresh_folder_index: scroll failed (%s)", e)
+            break
+        for p in batch or []:
+            payload = getattr(p, "payload", {}) or {}
+            obj_id = payload.get("object_id")
+            if obj_id:
+                points_in_folder.append((p.id, str(obj_id)))
+        if not next_offset:
+            break
+
+    # 2. Walk the indexed model classes for live objects scoped to the folder.
+    live_object_ids: set = set()
+    indexable_rows: list[tuple] = []  # (app_label, model_name, obj)
+    for model_path in INDEXED_MODELS:
+        try:
+            app_label, model_name = model_path.split(".")
+            model_class = apps.get_model(app_label, model_name)
+        except (LookupError, ValueError):
+            continue
+        try:
+            qs = model_class.objects.filter(folder_id=folder_id_str)
+        except Exception:
+            # Model isn't folder-scoped this way — skip; refresh covers
+            # FolderMixin'd models which is what we actually need here.
+            continue
+        for obj in qs.iterator():
+            live_object_ids.add(str(obj.id))
+            indexable_rows.append((app_label, model_name, obj))
+
+    # 3. Drop points whose object_id is no longer in the live set.
+    stale_point_ids = [
+        pid for (pid, oid) in points_in_folder if oid not in live_object_ids
+    ]
+    if stale_point_ids:
+        try:
+            client.delete(
+                collection_name=COLLECTION_NAME,
+                points_selector=stale_point_ids,
+            )
+        except Exception as e:
+            logger.warning("refresh_folder_index: delete failed (%s)", e)
+
+    # 4. Re-embed and upsert live objects in batches.
+    if not indexable_rows:
+        return {"pruned": len(stale_point_ids), "indexed": 0}
+
+    try:
+        embedder = get_embedder()
+    except Exception as e:
+        logger.warning("refresh_folder_index: embedder unavailable (%s)", e)
+        return {"pruned": len(stale_point_ids), "indexed": 0, "skipped": True}
+
+    BATCH_SIZE = 100
+    indexed_count = 0
+    pending_text: list[str] = []
+    pending_meta: list[tuple] = []  # (app_label, model_name, obj)
+
+    def _flush() -> int:
+        if not pending_text:
+            return 0
+        embeddings = embedder.embed(pending_text)
+        points = []
+        for (app_label, model_name, obj), vector, text in zip(
+            pending_meta, embeddings, pending_text
+        ):
+            point_id = str(
+                _uuid.uuid5(
+                    _uuid.NAMESPACE_URL,
+                    f"{app_label}.{model_name}:{obj.id}",
+                )
+            )
+            points.append(
+                PointStruct(
+                    id=point_id,
+                    vector=vector,
+                    payload={
+                        "text": text,
+                        "folder_id": folder_id_str,
+                        "source_type": "model",
+                        "object_type": _normalize_model_name(model_name),
+                        "object_id": str(obj.id),
+                        "name": str(obj),
+                        "ref_id": getattr(obj, "ref_id", "") or "",
+                    },
+                )
+            )
+        try:
+            client.upsert(collection_name=COLLECTION_NAME, points=points)
+        except Exception as e:
+            logger.warning("refresh_folder_index: upsert failed (%s)", e)
+            pending_text.clear()
+            pending_meta.clear()
+            return 0
+        n = len(points)
+        pending_text.clear()
+        pending_meta.clear()
+        return n
+
+    for app_label, model_name, obj in indexable_rows:
+        text = _build_object_text(obj, model_name)
+        if not text:
+            continue
+        pending_text.append(text)
+        pending_meta.append((app_label, model_name, obj))
+        if len(pending_text) >= BATCH_SIZE:
+            indexed_count += _flush()
+    indexed_count += _flush()
+
+    return {"pruned": len(stale_point_ids), "indexed": indexed_count}
 
 
 @db_task()
@@ -722,6 +1060,24 @@ def run_questionnaire_prefill(agent_run_id: str):
             "updated_at",
         ]
     )
+
+    # Refresh the folder's vector index before answering. Two reasons:
+    # (1) Prune stale points whose underlying object was deleted — the LLM
+    # would otherwise cite ghost evidence the post-processor can't verify;
+    # (2) Pick up controls/assessments created since the last index pass.
+    run.current_step_label = "Refreshing folder index…"
+    run.last_heartbeat_at = timezone.now()
+    run.save(update_fields=["current_step_label", "last_heartbeat_at", "updated_at"])
+    try:
+        refresh_stats = refresh_folder_index(str(run.folder_id))
+        logger.info(
+            "Folder index refreshed for run %s: pruned=%d indexed=%d",
+            run.id,
+            refresh_stats.get("pruned", 0),
+            refresh_stats.get("indexed", 0),
+        )
+    except Exception as e:
+        logger.warning("Folder index refresh failed for run %s: %s", run.id, e)
 
     questions = list(
         QuestionnaireQuestion.objects.filter(
@@ -842,9 +1198,9 @@ def _process_question(
     t0 = time.time()
     query = question.text
     try:
-        results = rag_search(query, run.owner, top_k=6)
+        results = _search_folder_evidence(query, run.folder_id, top_k=6)
     except Exception as e:
-        logger.error("RAG search failed for q %s: %s", question.id, e)
+        logger.error("Folder-scoped search failed for q %s: %s", question.id, e)
         results = []
     duration_ms = int((time.time() - t0) * 1000)
 
@@ -932,6 +1288,373 @@ def _process_question(
     AgentAction.objects.filter(id=proposed["action_id"]).update(confidence=confidence)
 
 
+SUGGEST_CONTROL_PROMPT = """A customer security questionnaire is asking us \
+this question:
+
+"{question_text}"
+
+We do not currently have an applied control documenting how we address it. \
+Draft a realistic applied control that would let us answer it — something \
+concrete and well-known in security practice.
+
+Reply with a single JSON object, no prose:
+{{
+  "name": "<short, capitalized name (max 80 chars)>",
+  "description": "<one sentence summarizing what this control is>",
+  "observation": "<two or three sentences a security team would write \
+describing how it's actually implemented and verified — be concrete with \
+technologies, frequencies, owners>",
+  "status": "to_do",
+  "category": "technical" | "process" | "governance",
+  "csf_function": "govern" | "identify" | "protect" | "detect" | "respond" | "recover"
+}}"""
+
+
+# AppliedControl.category accepts a closed list — values that don't match
+# fall back to empty string at create time.
+_VALID_AC_CATEGORIES = {"policy", "process", "technical", "physical", "procedure"}
+_VALID_AC_CSF_FUNCTIONS = {
+    "govern",
+    "identify",
+    "protect",
+    "detect",
+    "respond",
+    "recover",
+}
+_VALID_AC_STATUSES = {
+    "to_do",
+    "in_progress",
+    "on_hold",
+    "active",
+    "degraded",
+    "deprecated",
+    "--",
+}
+
+
+def draft_applied_control_for_question(question_text: str) -> dict:
+    """Synchronous LLM call producing a draft AppliedControl for the question.
+
+    Returns ``{name, description, observation, status, category, csf_function}``.
+    Falls back to a minimal stub if the LLM fails — the user can still edit
+    and create from there.
+    """
+    from .providers import get_llm
+
+    fallback = {
+        "name": "",
+        "description": "",
+        "observation": "",
+        "status": "to_do",
+        "category": "",
+        "csf_function": "",
+    }
+    try:
+        llm = get_llm()
+    except Exception as e:
+        logger.warning("LLM unavailable for control suggestion: %s", e)
+        return fallback
+
+    prompt = SUGGEST_CONTROL_PROMPT.format(question_text=question_text)
+    try:
+        raw = llm.generate(prompt=prompt, context="", history=[])
+    except Exception as e:
+        logger.warning("LLM call failed for control suggestion: %s", e)
+        return fallback
+
+    parsed = _parse_json_response(raw) or {}
+    name = (parsed.get("name") or "").strip()[:200]
+    description = (parsed.get("description") or "").strip()
+    observation = (parsed.get("observation") or "").strip()
+    status_raw = (parsed.get("status") or "to_do").strip().lower()
+    category_raw = (parsed.get("category") or "").strip().lower()
+    csf_raw = (parsed.get("csf_function") or "").strip().lower()
+
+    return {
+        "name": name,
+        "description": description,
+        "observation": observation,
+        "status": status_raw if status_raw in _VALID_AC_STATUSES else "to_do",
+        "category": category_raw if category_raw in _VALID_AC_CATEGORIES else "",
+        "csf_function": csf_raw if csf_raw in _VALID_AC_CSF_FUNCTIONS else "",
+    }
+
+
+def retry_question_with_hints(
+    *,
+    question_id: str,
+    hint_applied_control_ids: list[str],
+) -> dict:
+    """Synchronous re-run of one question's answer pipeline with hint controls.
+
+    Used by the review UI when a user attaches an existing AppliedControl as
+    priority context for an unanswered or low-confidence question. Hint
+    controls are formatted as the top-priority context passages (numbered
+    [1], [2], …) and the LLM is instructed via critic_hint to use them.
+
+    Marks the previous `propose_answer` for this question as expired and
+    creates a fresh one (iteration += 1). Returns ``{action_id, confidence,
+    iteration}`` so the caller can update the UI immediately.
+    """
+    from django.contrib.contenttypes.models import ContentType
+
+    from core.models import AppliedControl
+
+    from .models import (
+        AgentAction,
+        AgentRun,
+        QuestionnaireQuestion,
+        QuestionnaireRun,
+    )
+    from .providers import get_llm
+    from .rag import search as rag_search
+    from .tokens import count_tokens
+
+    question = QuestionnaireQuestion.objects.get(id=question_id)
+    qq_ct = ContentType.objects.get_for_model(QuestionnaireQuestion)
+    qr_ct = ContentType.objects.get_for_model(QuestionnaireRun)
+
+    run = (
+        AgentRun.objects.filter(
+            target_content_type=qr_ct,
+            target_object_id=question.questionnaire_run_id,
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    if not run:
+        raise ValueError("No agent run found for this questionnaire.")
+
+    # Resolve hint controls; skip silently any that no longer exist or are
+    # outside the run's folder (defense in depth — view does the perm check).
+    hint_controls = list(
+        AppliedControl.objects.filter(
+            id__in=hint_applied_control_ids, folder=run.folder
+        )
+    )
+    hint_dicts = [_applied_control_to_rag_dict(ac) for ac in hint_controls]
+
+    try:
+        rag_results = _search_folder_evidence(question.text, run.folder_id, top_k=4)
+    except Exception as e:
+        logger.error(
+            "Folder-scoped search failed during retry for q %s: %s",
+            question.id,
+            e,
+        )
+        rag_results = []
+
+    combined = hint_dicts + list(rag_results)
+    context_block, source_refs = _build_context_block(combined)
+
+    llm = get_llm()
+
+    # Highest current iteration on this question; the new attempt sits above it.
+    from django.db.models import Max
+
+    max_iter = AgentAction.objects.filter(
+        agent_run=run,
+        kind=AgentAction.Kind.PROPOSE_ANSWER,
+        target_content_type=qq_ct,
+        target_object_id=question.id,
+    ).aggregate(m=Max("iteration"))["m"]
+    next_iter = (max_iter or 0) + 1
+
+    hint_summary = (
+        ", ".join(f"{ac.ref_id or ac.name[:40]}" for ac in hint_controls if ac)
+        or "(no hint controls resolved)"
+    )
+    proposed = _answer_iteration(
+        run=run,
+        question=question,
+        qq_ct=qq_ct,
+        llm=llm,
+        context_block=context_block,
+        source_refs=source_refs,
+        critic_hint=(
+            f"Reviewer attached priority control(s): {hint_summary}. "
+            "Lean on these passages first; only fall back to other context if "
+            "they don't address the question."
+        ),
+        iteration=next_iter,
+        count_tokens=count_tokens,
+    )
+
+    critic = _critique(
+        run=run,
+        question=question,
+        qq_ct=qq_ct,
+        llm=llm,
+        answer_payload=proposed["payload"],
+        context_block=context_block,
+        cited_indices=proposed["cited_indices"],
+        iteration=next_iter,
+        count_tokens=count_tokens,
+    )
+
+    AgentAction.objects.filter(id=proposed["action_id"]).update(
+        confidence=critic["score"]
+    )
+
+    # Expire any earlier proposed/active answers for this question — review UI
+    # only shows the latest non-expired one.
+    AgentAction.objects.filter(
+        agent_run=run,
+        kind=AgentAction.Kind.PROPOSE_ANSWER,
+        target_content_type=qq_ct,
+        target_object_id=question.id,
+        state=AgentAction.State.PROPOSED,
+    ).exclude(id=proposed["action_id"]).update(state=AgentAction.State.EXPIRED)
+
+    return {
+        "action_id": str(proposed["action_id"]),
+        "confidence": critic["score"],
+        "iteration": next_iter,
+    }
+
+
+def _applied_control_to_rag_dict(ac) -> dict:
+    """Format an AppliedControl as a dict matching ``rag.search`` results.
+
+    Lets us prepend hand-picked controls onto a RAG result list and run them
+    through the same context-formatting code, so citation numbering stays
+    consistent.
+    """
+    return {
+        "id": str(ac.id),
+        "score": 1.0,
+        "text": _text_for_applied_control(ac),
+        "source_type": "model",
+        "object_type": "applied_control",
+        "object_id": str(ac.id),
+        "name": ac.name or "",
+        "ref_id": ac.ref_id or "",
+        "framework": "",
+        "urn": "",
+    }
+
+
+def _refine_verdict_against_citations(
+    answer_status: str,
+    cited_indices: list,
+    source_refs: list[dict],
+) -> tuple[str, str]:
+    """Deterministic post-processing: downgrade verdicts that aren't supported
+    by their citations. Belt-and-braces guard for cases where the LLM cites
+    only planned/unverified evidence yet still claims yes/partial.
+
+    Returns ``(refined_status, downgrade_note)``. When the verdict is left
+    untouched, the note is empty.
+
+    Rules (mirror the answer prompt):
+      - 'yes' requires at least one cited model item with status=active or
+        result=compliant.
+      - 'partial' requires at least one with status in {active, in_progress}
+        or result in {compliant, partially_compliant}.
+      - Citations to non-status-bearing items (document chunks, library
+        requirement nodes) are treated as neutral and don't trigger a
+        downgrade — those can legitimately support a yes.
+    """
+    from core.models import (
+        AppliedControl,
+        ComplianceAssessment,
+        RequirementAssessment,
+    )
+
+    if answer_status not in ("yes", "partial"):
+        return answer_status, ""
+    if not cited_indices:
+        return answer_status, ""
+
+    has_active = False
+    has_partial = False
+    has_status_bearing_only = False
+    has_document_evidence = False  # uploaded evidence chunks — real internal evidence
+    has_library_only = False  # library requirement nodes etc. — reference, not evidence
+
+    cited_index_set = set(cited_indices)
+    for ref in source_refs:
+        if ref.get("index") not in cited_index_set:
+            continue
+        ref_id = ref.get("id") or ""
+        ref_kind = (ref.get("kind") or "").lower()
+        if not ref_id:
+            # No id usually means a non-model passage. Treat by kind below.
+            if ref_kind == "document":
+                has_document_evidence = True
+            else:
+                has_library_only = True
+            continue
+        ac = AppliedControl.objects.filter(id=ref_id).only("status").first()
+        if ac is not None:
+            if ac.status == "active":
+                has_active = True
+            elif ac.status == "in_progress":
+                has_partial = True
+            else:
+                has_status_bearing_only = True
+            continue
+        ra = RequirementAssessment.objects.filter(id=ref_id).only("result").first()
+        if ra is not None:
+            if ra.result == "compliant":
+                has_active = True
+            elif ra.result == "partially_compliant":
+                has_partial = True
+            else:
+                has_status_bearing_only = True
+            continue
+        ca = ComplianceAssessment.objects.filter(id=ref_id).only("status").first()
+        if ca is not None:
+            # CA represents the audit itself, not the org's compliance.
+            # `done` ≈ assessment finished; `in_progress`/`in_review` ≈ engaged.
+            # Neither directly equals "we're compliant" — both are at-best
+            # partial signals. `planned`/`deprecated` carry no support.
+            if ca.status in ("in_progress", "in_review", "done"):
+                has_partial = True
+            else:
+                has_status_bearing_only = True
+            continue
+        # Not AC, not RA, not CA. Distinguish uploaded evidence from library
+        # reference: document chunks are real internal evidence; library
+        # requirement nodes / reference controls describe what *should* be
+        # done — they are not evidence that we actually do it.
+        if ref_kind == "document":
+            has_document_evidence = True
+        else:
+            has_library_only = True
+
+    # Active/compliant evidence or uploaded documents support the verdict.
+    if has_active or has_document_evidence:
+        return answer_status, ""
+
+    if answer_status == "yes":
+        if has_partial:
+            return (
+                "partial",
+                "Auto-downgraded yes→partial: cited evidence is in progress / "
+                "partially compliant, not active.",
+            )
+        if has_status_bearing_only or has_library_only:
+            return (
+                "needs_info",
+                "Auto-downgraded yes→needs_info: cited evidence is planned, "
+                "unverified, or only references the requirement itself "
+                "without evidence of practice.",
+            )
+    elif answer_status == "partial":
+        if has_partial:
+            return answer_status, ""  # in_progress/partially_compliant supports partial
+        if has_status_bearing_only or has_library_only:
+            return (
+                "needs_info",
+                "Auto-downgraded partial→needs_info: cited evidence is "
+                "planned, unverified, or only references the requirement "
+                "itself without evidence of practice.",
+            )
+
+    return answer_status, ""
+
+
 def _answer_iteration(
     *,
     run,
@@ -984,6 +1707,23 @@ def _answer_iteration(
     cited_indices = parsed.get("citation_indices") or []
     if not isinstance(cited_indices, list):
         cited_indices = []
+
+    # Deterministic guard: if the cited evidence is only planned / unverified,
+    # downgrade the verdict regardless of what the LLM said.
+    refined_status, downgrade_note = _refine_verdict_against_citations(
+        answer_status, cited_indices, source_refs
+    )
+    if refined_status != answer_status:
+        logger.info(
+            "verdict_downgraded q=%s %s→%s (%s)",
+            question.id,
+            answer_status,
+            refined_status,
+            downgrade_note,
+        )
+        answer_status = refined_status
+        if downgrade_note:
+            comment = (comment + ("\n\n" if comment else "") + downgrade_note).strip()
 
     used_refs = [r for r in source_refs if r["index"] in set(cited_indices)]
 

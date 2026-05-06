@@ -1204,6 +1204,178 @@ class QuestionnaireQuestionViewSet(BaseModelViewSet):
     filterset_fields = ["questionnaire_run"]
     search_fields = ["text", "ref_id", "section"]
 
+    @action(detail=True, methods=["post"], url_path="retry-with-control")
+    def retry_with_control(self, request, pk=None):
+        """Re-run a single question's answer pipeline with a chosen
+        AppliedControl as priority context.
+
+        Body: ``{applied_control_id}`` (a single id is the common case;
+        accepts ``applied_control_ids`` list too).
+        Synchronous — caller is the user clicking a button on the review row.
+        """
+        question = self.get_object()
+        ids = request.data.get("applied_control_ids")
+        single = request.data.get("applied_control_id")
+        if not ids and single:
+            ids = [single]
+        if not ids or not isinstance(ids, list):
+            return Response(
+                {"detail": "applied_control_id (or applied_control_ids) required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from core.models import AppliedControl
+        from iam.models import Folder, RoleAssignment
+
+        # The question's questionnaire run carries the folder; only allow
+        # controls in that same folder, and only those the user can read.
+        run_folder = question.questionnaire_run.folder
+        readable_ac_ids, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        ids_set = set(str(i) for i in ids) & set(str(i) for i in readable_ac_ids)
+        valid_acs = AppliedControl.objects.filter(id__in=ids_set, folder=run_folder)
+        valid_ids = [str(a.id) for a in valid_acs]
+        if not valid_ids:
+            return Response(
+                {
+                    "detail": "No accessible AppliedControl in this folder matched "
+                    "the supplied id(s)."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from .tasks import retry_question_with_hints
+
+        try:
+            result = retry_question_with_hints(
+                question_id=str(question.id),
+                hint_applied_control_ids=valid_ids,
+            )
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error("retry_with_control failed for q %s: %s", question.id, e)
+            return Response(
+                {"detail": f"Retry failed: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="suggest-control")
+    def suggest_control(self, request, pk=None):
+        """Synchronous LLM call: draft an AppliedControl that would let us
+        answer this question. Returns the draft as JSON for the user to edit
+        before creating.
+        """
+        question = self.get_object()
+        from .tasks import draft_applied_control_for_question
+
+        draft = draft_applied_control_for_question(question.text)
+        return Response(draft, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="create-and-retry")
+    def create_and_retry(self, request, pk=None):
+        """Create an AppliedControl in the question's folder from a (possibly
+        user-edited) draft, then immediately retry the question with the new
+        control as priority context.
+        """
+        from core.models import AppliedControl
+        from iam.models import Folder, RoleAssignment
+
+        question = self.get_object()
+        folder = question.questionnaire_run.folder
+
+        # User must be able to read the folder. We rely on subsequent serializer
+        # validation for the AppliedControl write itself.
+        readable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Folder
+        )
+        if folder.id not in readable_ids:
+            return Response(
+                {"detail": "You do not have access to this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        name = (request.data.get("name") or "").strip()
+        if not name:
+            return Response(
+                {"detail": "name is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        description = (request.data.get("description") or "").strip()
+        observation = (request.data.get("observation") or "").strip()
+        ref_id = (request.data.get("ref_id") or "").strip()[:100]
+        status_value = (request.data.get("status") or "to_do").strip().lower()
+        category = (request.data.get("category") or "").strip().lower()
+        csf_function = (request.data.get("csf_function") or "").strip().lower()
+
+        from .tasks import (
+            _VALID_AC_CATEGORIES,
+            _VALID_AC_CSF_FUNCTIONS,
+            _VALID_AC_STATUSES,
+        )
+
+        if status_value not in _VALID_AC_STATUSES:
+            status_value = "to_do"
+        if category and category not in _VALID_AC_CATEGORIES:
+            category = ""
+        if csf_function and csf_function not in _VALID_AC_CSF_FUNCTIONS:
+            csf_function = ""
+
+        ac_kwargs = {
+            "folder": folder,
+            "name": name[:200],
+            "description": description,
+            "observation": observation,
+            "status": status_value,
+        }
+        if ref_id:
+            ac_kwargs["ref_id"] = ref_id
+        if category:
+            ac_kwargs["category"] = category
+        if csf_function:
+            ac_kwargs["csf_function"] = csf_function
+
+        ac = AppliedControl.objects.create(**ac_kwargs)
+        logger.info(
+            "Created AppliedControl %s from question %s suggestion",
+            ac.id,
+            question.id,
+        )
+
+        from .tasks import retry_question_with_hints
+
+        try:
+            result = retry_question_with_hints(
+                question_id=str(question.id),
+                hint_applied_control_ids=[str(ac.id)],
+            )
+        except Exception as e:
+            logger.error(
+                "create_and_retry: retry failed for q %s after creating "
+                "AppliedControl %s: %s",
+                question.id,
+                ac.id,
+                e,
+            )
+            # The control was created successfully; retry can be re-issued
+            # via the existing retry-with-control endpoint.
+            return Response(
+                {
+                    "applied_control_id": str(ac.id),
+                    "retry_failed": True,
+                    "detail": str(e),
+                },
+                status=status.HTTP_207_MULTI_STATUS,
+            )
+
+        return Response(
+            {"applied_control_id": str(ac.id), **result},
+            status=status.HTTP_201_CREATED,
+        )
+
 
 class AgentRunViewSet(BaseModelViewSet):
     model = AgentRun
