@@ -15,13 +15,13 @@
 	let { id, data }: Props = $props();
 
 	const board = getContext<{
-		openDetail: (id: string) => void;
 		showExternalLinks: (id: string) => void;
 		renameAsset: (id: string, name: string) => Promise<boolean>;
 		toggleAssetType: (id: string) => Promise<boolean>;
 	}>('assetBoard');
 
-	const isPrimary = $derived(data.type === 'PR' || data.type === 'Primary');
+	// `data.type` is always the raw code 'PR' or 'SP' (set by AssetBoard from `is_primary`).
+	const isPrimary = $derived(data.type === 'PR');
 
 	const accentClass = $derived(isPrimary ? 'bg-primary-400' : 'bg-tertiary-400');
 	const borderClass = $derived(isPrimary ? 'border-primary-300' : 'border-tertiary-300');
@@ -155,14 +155,18 @@
 	{/if}
 
 	{#if hovered}
-		<button
-			type="button"
-			aria-label="Open asset detail"
+		<a
+			href="/assets/{id}"
+			target="_blank"
+			rel="noopener"
+			aria-label="Open asset detail in new tab"
+			title="Open in new tab"
 			class="nopan nodrag absolute -top-2 -left-2 w-4 h-4 rounded-full bg-surface-200 hover:bg-surface-300 text-surface-700 text-[8px] flex items-center justify-center cursor-pointer shadow"
-			onclick={() => board?.openDetail(id)}
+			onclick={(e) => e.stopPropagation()}
+			onmousedown={(e) => e.stopPropagation()}
 		>
 			<i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
-		</button>
+		</a>
 	{/if}
 
 	<Handle

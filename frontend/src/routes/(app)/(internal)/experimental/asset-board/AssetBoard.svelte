@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setContext, untrack } from 'svelte';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -36,7 +36,10 @@
 		id: string;
 		name: string;
 		ref_id?: string | null;
+		// `type` from AssetListSerializer is `get_type_display()` — a TRANSLATED string
+		// like "Primary"/"Primaire". Don't parse it; rely on `is_primary` instead.
 		type: string;
+		is_primary: boolean;
 		folder?: { id: string; str?: string } | string | null;
 		parent_assets?: Array<{ id: string; str?: string } | string>;
 	}
@@ -94,7 +97,8 @@
 				data: {
 					label: a.name,
 					refId: a.ref_id ?? '',
-					type: a.type,
+					// Always store the raw code on the node so locale never matters
+					type: a.is_primary ? 'PR' : 'SP',
 					externalLinkCount: externalParentCount[a.id] ?? 0
 				},
 				draggable: true,
@@ -338,9 +342,10 @@
 	}
 
 	async function toggleAssetType(assetId: string): Promise<boolean> {
-		const current = assets.find((a) => a.id === assetId);
-		if (!current) return false;
-		const currentType = current.type === 'PR' || current.type === 'Primary' ? 'PR' : 'SP';
+		// Node data.type is always the raw 'PR' or 'SP' code (set in buildGraph from
+		// `is_primary`), so locale-translated values like "Primaire" never reach here.
+		const node = nodes.find((n) => n.id === assetId);
+		const currentType = (node?.data as any)?.type === 'PR' ? 'PR' : 'SP';
 		const nextType = currentType === 'PR' ? 'SP' : 'PR';
 		try {
 			const res = await fetch(`/assets/${assetId}`, {
@@ -357,10 +362,24 @@
 				});
 				return false;
 			}
-			// Update displayed type immediately
+			// AssetWriteSerializer returns the raw code, so a strict equality check
+			// surfaces silent server-side rejections.
+			const body = await res.json().catch(() => ({}) as any);
+			const returned = body?.type;
+			if (returned && returned !== nextType) {
+				toastStore.trigger({
+					message: `Server kept type as "${returned}" — change not applied`,
+					background: 'preset-tonal-error'
+				});
+				return false;
+			}
 			nodes = nodes.map((n) =>
 				n.id === assetId ? { ...n, data: { ...n.data, type: nextType } } : n
 			);
+			toastStore.trigger({
+				message: `Type set to ${nextType === 'PR' ? 'Primary' : 'Support'}`,
+				background: 'preset-tonal-success'
+			});
 			void invalidateAll();
 			return true;
 		} catch {
@@ -403,7 +422,6 @@
 	}
 
 	setContext('assetBoard', {
-		openDetail: (id: string) => goto(`/assets/${id}`),
 		showExternalLinks: (id: string) => {
 			const child = assets.find((a) => a.id === id);
 			const external =
