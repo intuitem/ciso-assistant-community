@@ -34,6 +34,24 @@
 		question.type === 'unique_choice' || question.type === 'multiple_choice'
 	);
 
+	const supportsSlider = $derived(
+		question.type === 'number' || question.type === 'unique_choice'
+	);
+
+	const sliderEnabled = $derived(
+		(question.config as { widget?: string } | null)?.widget === 'slider'
+	);
+
+	const sliderMin = $derived(
+		Number((question.config as { min?: number } | null)?.min ?? 0)
+	);
+	const sliderMax = $derived(
+		Number((question.config as { max?: number } | null)?.max ?? 100)
+	);
+	const sliderStep = $derived(
+		Number((question.config as { step?: number } | null)?.step ?? 1)
+	);
+
 	const dependsOnLabel = $derived.by(() => {
 		if (!question.depends_on) return null;
 		const dep = question.depends_on as { question: string; answers: string[] };
@@ -60,7 +78,26 @@
 		) {
 			if (!confirm('Changing type will delete existing choices. Continue?')) return;
 		}
-		await saveField('type', newType);
+		// Slider config is tied to the data shape — wipe it on any type change.
+		await builder.updateQuestion(question.id, { type: newType, config: null });
+	}
+
+	function enableSlider() {
+		const config =
+			question.type === 'number'
+				? { widget: 'slider', min: 0, max: 100, step: 1 }
+				: { widget: 'slider' };
+		saveField('config', config);
+	}
+
+	function disableSlider() {
+		saveField('config', null);
+	}
+
+	function updateSliderConfig(patch: Record<string, number>) {
+		const current =
+			(question.config as Record<string, unknown> | null) ?? { widget: 'slider' };
+		saveField('config', { ...current, ...patch });
 	}
 </script>
 
@@ -145,6 +182,76 @@
 					</button>
 				</div>
 			</div>
+
+			{#if supportsSlider}
+				<div class="flex items-center gap-2 text-xs text-gray-600">
+					<span class="font-medium">Widget:</span>
+					<div class="inline-flex rounded border border-gray-200 overflow-hidden">
+						<button
+							type="button"
+							class="px-2 py-0.5 transition-colors {!sliderEnabled
+								? 'bg-blue-500 text-white'
+								: 'bg-white text-gray-600 hover:bg-gray-50'}"
+							onclick={() => {
+								if (sliderEnabled) disableSlider();
+							}}
+						>
+							Input
+						</button>
+						<button
+							type="button"
+							class="px-2 py-0.5 transition-colors {sliderEnabled
+								? 'bg-blue-500 text-white'
+								: 'bg-white text-gray-600 hover:bg-gray-50'}"
+							onclick={() => {
+								if (!sliderEnabled) enableSlider();
+							}}
+						>
+							Slider
+						</button>
+					</div>
+				</div>
+
+				{#if sliderEnabled && question.type === 'number'}
+					<div class="grid grid-cols-3 gap-2">
+						<label class="block">
+							<span class="text-xs text-gray-500">Min</span>
+							<input
+								type="number"
+								value={sliderMin}
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								onblur={(e) => updateSliderConfig({ min: Number(e.currentTarget.value) })}
+							/>
+						</label>
+						<label class="block">
+							<span class="text-xs text-gray-500">Max</span>
+							<input
+								type="number"
+								value={sliderMax}
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								onblur={(e) => updateSliderConfig({ max: Number(e.currentTarget.value) })}
+							/>
+						</label>
+						<label class="block">
+							<span class="text-xs text-gray-500">Step</span>
+							<input
+								type="number"
+								value={sliderStep}
+								min="0"
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								onblur={(e) => updateSliderConfig({ step: Number(e.currentTarget.value) })}
+							/>
+						</label>
+					</div>
+				{/if}
+
+				{#if sliderEnabled && question.type === 'unique_choice' && question.choices.length < 2}
+					<p class="text-xs text-amber-600">
+						<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+						Slider needs at least 2 choices.
+					</p>
+				{/if}
+			{/if}
 
 			<!-- Question text -->
 			{#if $activeLanguageStore}
