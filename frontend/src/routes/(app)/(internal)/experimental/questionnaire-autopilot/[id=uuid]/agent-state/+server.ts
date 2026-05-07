@@ -19,11 +19,25 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 		return json({ detail: 'agent run not found' }, { status: runRes.status });
 	}
 	const agentRun = await runRes.json();
-	const actionsData = await actionsRes.json().catch(() => ({}));
-	const actions = actionsData?.results ?? actionsData ?? [];
+
+	// The actions request is best-effort: a non-OK response, an unparseable
+	// body, or a non-paginated JSON error like {"detail": "..."} should all
+	// degrade to "no actions yet" rather than 500-ing the whole polling
+	// endpoint. Normalize to an array before .filter().
+	let actions: unknown[] = [];
+	if (actionsRes.ok) {
+		const actionsData = await actionsRes.json().catch(() => null);
+		const candidate =
+			actionsData && typeof actionsData === 'object' && 'results' in actionsData
+				? (actionsData as { results: unknown }).results
+				: actionsData;
+		if (Array.isArray(candidate)) {
+			actions = candidate;
+		}
+	}
 
 	// Filter to currently active proposals (drop expired iterations)
-	const activeActions = actions.filter((a: any) => a.state !== 'expired');
+	const activeActions = actions.filter((a: any) => a?.state !== 'expired');
 
 	return json({ agentRun, actions: activeActions });
 };

@@ -207,6 +207,12 @@ class AgentRunListSerializer(BaseModelSerializer):
 
 
 class AgentRunWriteSerializer(BaseModelSerializer):
+    """Belt-and-braces: generic create/update on AgentRun is already 405'd at
+    the ViewSet, but if a future contributor re-enables it, the writable
+    surface here is locked down so a client can never aim a run at an
+    arbitrary object or stuff worker-owned counters.
+    """
+
     class Meta:
         model = AgentRun
         exclude = [
@@ -225,6 +231,36 @@ class AgentRunWriteSerializer(BaseModelSerializer):
             "finished_at",
             "error_message",
         ]
+        # Targeting + scope fields are set by the spawn action only.
+        read_only_fields = [
+            "kind",
+            "target_content_type",
+            "target_object_id",
+            "chat_session",
+            "folder",
+        ]
+
+
+class AgentActionWriteSerializer(BaseModelSerializer):
+    """Same defence-in-depth as AgentRunWriteSerializer. Agent actions are
+    AI proposals: the worker creates them, users only flip ``state`` via
+    approve/reject, and the rest of the row is immutable audit data.
+    """
+
+    class Meta:
+        model = AgentAction
+        exclude = ["created_at", "updated_at", "approved_by", "approved_at"]
+        read_only_fields = [
+            "agent_run",
+            "kind",
+            "target_content_type",
+            "target_object_id",
+            "payload",
+            "rationale",
+            "source_refs",
+            "confidence",
+            "iteration",
+        ]
 
 
 class AgentActionReadSerializer(BaseModelSerializer):
@@ -234,12 +270,6 @@ class AgentActionReadSerializer(BaseModelSerializer):
     class Meta:
         model = AgentAction
         exclude = []
-
-
-class AgentActionWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = AgentAction
-        exclude = ["created_at", "updated_at", "approved_by", "approved_at"]
 
 
 class StartQuestionnairePrefillSerializer(serializers.Serializer):

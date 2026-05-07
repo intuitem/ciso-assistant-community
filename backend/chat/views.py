@@ -886,8 +886,18 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
         try:
             validate_questionnaire_upload(file)
         except DjValidationError as e:
+            # ``validate_questionnaire_upload`` raises ValidationError with
+            # curated, user-safe messages (e.g. "Not a valid .xlsx file"). If
+            # ``messages`` is empty (shouldn't happen — defence in depth),
+            # fall back to a static message and log the real exception
+            # server-side rather than echoing arbitrary text to the client.
+            if e.messages:
+                detail = e.messages[0]
+            else:
+                logger.warning("upload_validation_unexpected", exc_info=True)
+                detail = "Uploaded file failed validation."
             return Response(
-                {"detail": e.messages[0] if e.messages else str(e)},
+                {"detail": detail},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -1293,12 +1303,26 @@ class QuestionnaireQuestionViewSet(BaseModelViewSet):
                 question_id=str(question.id),
                 hint_applied_control_ids=valid_ids,
             )
-        except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error("retry_with_control failed for q %s: %s", question.id, e)
+        except ValueError:
+            # ValueErrors here are controlled, user-safe ("No agent run found
+            # for this questionnaire.") — but we don't echo them to avoid
+            # leaking future raises that might carry internal state. Log the
+            # original on the server, return a static message.
+            logger.warning(
+                "retry_with_control_invalid_state",
+                question_id=str(question.id),
+                exc_info=True,
+            )
             return Response(
-                {"detail": f"Retry failed: {e}"},
+                {"detail": "Cannot retry this question in its current state."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
+            logger.error(
+                "retry_with_control_failed", question_id=str(question.id), exc_info=True
+            )
+            return Response(
+                {"detail": "Retry failed. Check server logs."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -1405,21 +1429,23 @@ class QuestionnaireQuestionViewSet(BaseModelViewSet):
                 question_id=str(question.id),
                 hint_applied_control_ids=[str(ac.id)],
             )
-        except Exception as e:
+        except Exception:
             logger.error(
-                "create_and_retry: retry failed for q %s after creating "
-                "AppliedControl %s: %s",
-                question.id,
-                ac.id,
-                e,
+                "create_and_retry_retry_failed",
+                question_id=str(question.id),
+                applied_control_id=str(ac.id),
+                exc_info=True,
             )
             # The control was created successfully; retry can be re-issued
-            # via the existing retry-with-control endpoint.
+            # via the existing retry-with-control endpoint. Suppress the
+            # exception detail to avoid leaking internals — the control id
+            # is enough for the client to retry.
             return Response(
                 {
                     "applied_control_id": str(ac.id),
                     "retry_failed": True,
-                    "detail": str(e),
+                    "detail": "Control created, but the retry step failed. "
+                    "Use the existing-control retry to try again.",
                 },
                 status=status.HTTP_207_MULTI_STATUS,
             )
@@ -1477,9 +1503,20 @@ class AgentRunViewSet(BaseModelViewSet):
     model = AgentRun
     filterset_fields = ["folder", "kind", "status", "target_object_id"]
     search_fields = ["current_step_label"]
+    # Agent runs are server-spawned: generic POST/PUT/PATCH/DELETE would let
+    # a client point a run at any ContentType+UUID and bypass the per-folder
+    # add_agentrun + per-target read checks done in start_questionnaire_prefill.
+    # PUT/PATCH/DELETE dropped entirely; POST stays only for @action routes.
+    http_method_names = ["get", "head", "options", "post"]
 
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {
+                "detail": "Use /chat/agent-runs/start-questionnaire-prefill/ "
+                "to start an agent run.",
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1600,6 +1637,17 @@ class AgentActionViewSet(BaseModelViewSet):
         "target_content_type",
         "target_object_id",
     ]
+    # Agent actions are the AI audit trail. The worker creates them; users
+    # only transition state via approve/reject. Block generic mutation paths.
+    http_method_names = ["get", "head", "options", "post"]
+
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {
+                "detail": "Agent actions are created by the agent, not via this endpoint.",
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
 
     @action(detail=True, methods=["post"], url_path="approve")
     def approve(self, request, pk=None):

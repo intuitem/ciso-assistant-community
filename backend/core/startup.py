@@ -119,22 +119,13 @@ READER_PERMISSIONS_LIST = [
     "delete_chatsession",
     "view_chatmessage",
     "view_indexeddocument",
-    "add_questionnairerun",
+    # Questionnaire Autopilot — read-only at this role. AgentAction is the
+    # AI's audit trail and must stay immutable; QuestionnaireRun is shared
+    # across users in a domain. Write permissions live in ANALYST and up.
     "view_questionnairerun",
-    "change_questionnairerun",
-    "delete_questionnairerun",
-    "add_questionnairequestion",
     "view_questionnairequestion",
-    "change_questionnairequestion",
-    "delete_questionnairequestion",
-    "add_agentrun",
     "view_agentrun",
-    "change_agentrun",
-    "delete_agentrun",
-    "add_agentaction",
     "view_agentaction",
-    "change_agentaction",
-    "delete_agentaction",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -233,22 +224,13 @@ APPROVER_PERMISSIONS_LIST = [
     "delete_chatsession",
     "view_chatmessage",
     "view_indexeddocument",
-    "add_questionnairerun",
+    # Questionnaire Autopilot — read-only at this role. AgentAction is the
+    # AI's audit trail and must stay immutable; QuestionnaireRun is shared
+    # across users in a domain. Write permissions live in ANALYST and up.
     "view_questionnairerun",
-    "change_questionnairerun",
-    "delete_questionnairerun",
-    "add_questionnairequestion",
     "view_questionnairequestion",
-    "change_questionnairequestion",
-    "delete_questionnairequestion",
-    "add_agentrun",
     "view_agentrun",
-    "change_agentrun",
-    "delete_agentrun",
-    "add_agentaction",
     "view_agentaction",
-    "change_agentaction",
-    "delete_agentaction",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
