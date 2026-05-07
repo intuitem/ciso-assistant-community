@@ -17,6 +17,7 @@
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
+	import { breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { m } from '$paraglide/messages';
 	import { countMasked } from '$lib/utils/related-visibility';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
@@ -331,6 +332,13 @@
 
 	$effect(() => {
 		if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
+	});
+
+	$effect(() => {
+		breadcrumbs.updateCrumb(/^\/requirement-assessments\/[^/]+\/edit/, {
+			label: data.requirementAssessment.name,
+			href: page.url.pathname + page.url.search
+		});
 	});
 
 	let computedScoreAndResult = $derived(
