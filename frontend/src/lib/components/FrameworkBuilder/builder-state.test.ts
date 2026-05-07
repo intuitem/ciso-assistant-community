@@ -157,6 +157,54 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 	};
 }
 
+function makeQuestion(overrides: Partial<Question> = {}): Question {
+	return {
+		id: 'q-1',
+		urn: 'urn:custom:risk:question:fw:1-q1',
+		ref_id: '1-q1',
+		text: 'Q?',
+		annotation: null,
+		type: 'number',
+		config: null,
+		depends_on: null,
+		order: 0,
+		weight: 1,
+		folder: 'folder-1',
+		requirement_node: 'node-1',
+		choices: [],
+		...overrides
+	};
+}
+
+function makeChoice(id: string, order: number) {
+	return {
+		id,
+		urn: `urn:custom:risk:question_choice:fw:1-q1-c${order}`,
+		ref_id: `1-q1-c${order}`,
+		value: `Choice ${order}`,
+		annotation: null,
+		add_score: null,
+		compute_result: null,
+		order,
+		description: null,
+		color: null,
+		select_implementation_groups: null,
+		folder: 'folder-1',
+		question: 'q-1'
+	};
+}
+
+function makeSectionWithQuestion(question: Question): BuilderNode {
+	return makeSection({}, [
+		{
+			node: makeNode({}),
+			questions: [{ question }],
+			children: [],
+			depth: 1
+		}
+	]);
+}
+
 function makeSection(
 	nodeOverrides: Partial<RequirementNode> = {},
 	children: BuilderNode['children'] = []
@@ -246,6 +294,86 @@ describe('validateDraft', () => {
 		const sections = [makeSection()];
 		const errors = validateDraft(fw, sections);
 		expect(errors.find((e) => e.key === 'publish')!.message).toBe('Framework name is required.');
+	});
+
+	it('rejects number slider with min >= max', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 10, max: 5, step: 1 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'slider min must be less than max'
+		);
+	});
+
+	it('rejects number slider with non-positive step', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 10, step: 0 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'slider step must be greater than 0'
+		);
+	});
+
+	it('rejects number slider with step larger than range', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 10, step: 20 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'slider step cannot exceed (max - min)'
+		);
+	});
+
+	it('accepts a valid number slider', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 100, step: 5 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
+	});
+
+	it('rejects unique_choice slider with fewer than 2 choices', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'unique_choice',
+			config: { widget: 'slider' },
+			choices: [makeChoice('c-1', 1)]
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'slider needs at least 2 choices'
+		);
+	});
+
+	it('accepts a valid unique_choice slider', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'unique_choice',
+			config: { widget: 'slider' },
+			choices: [makeChoice('c-1', 1), makeChoice('c-2', 2)]
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
+	});
+
+	it('ignores config validation for non-slider widgets', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: null
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
 	});
 });
 

@@ -12,6 +12,21 @@ import {
 
 export type Translations = Record<string, Record<string, string>>;
 
+// --- Question widget config ---
+
+export interface SliderConfig {
+	widget: 'slider';
+	min?: number; // number questions only
+	max?: number; // number questions only
+	step?: number; // number questions only
+}
+
+export function isSliderConfig(
+	config: Record<string, unknown> | null | undefined
+): config is SliderConfig {
+	return !!config && (config as { widget?: unknown }).widget === 'slider';
+}
+
 export interface QuestionChoice {
 	id: string;
 	urn: string | null;
@@ -551,6 +566,40 @@ export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): Validati
 					message: `'${label}': URN is ${n.urn.length} characters (max 255).`
 				});
 			}
+
+			for (const bq of bn.questions) {
+				const q = bq.question;
+				if (isSliderConfig(q.config)) {
+					const qLabel = q.ref_id ?? q.urn ?? q.id;
+					if (q.type === 'number') {
+						const { min, max, step } = q.config;
+						if (typeof min !== 'number' || typeof max !== 'number' || min >= max) {
+							errors.push({
+								key: `question-${q.id}`,
+								message: `'${qLabel}': slider min must be less than max.`
+							});
+						} else if (typeof step !== 'number' || step <= 0) {
+							errors.push({
+								key: `question-${q.id}`,
+								message: `'${qLabel}': slider step must be greater than 0.`
+							});
+						} else if (step > max - min) {
+							errors.push({
+								key: `question-${q.id}`,
+								message: `'${qLabel}': slider step cannot exceed (max - min).`
+							});
+						}
+					} else if (q.type === 'unique_choice') {
+						if (q.choices.length < 2) {
+							errors.push({
+								key: `question-${q.id}`,
+								message: `'${qLabel}': slider needs at least 2 choices.`
+							});
+						}
+					}
+				}
+			}
+
 			validate(bn.children);
 		}
 	}
