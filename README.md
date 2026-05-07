@@ -399,10 +399,22 @@ If you want to develop the project without WSL2, you will need to install [MSYS2
 pacman -S mingw-w64-ucrt-x86_64-file mingw-w64-ucrt-x86_64-pango
 ```
 
-You will also have to add this system environment variable after installing the dependencies:
+You will also have to add those 2 system environment variables after installing the dependencies:
 ```conf
-WEASYPRINT_DLL_DIRECTORIES = Same path as your MSYS2 UCRT64 binaries
+MAGIC=Full path to the `magic.msc` file (usually `C:\msys64\ucrt64\share\misc\magic.mgc`)
+WEASYPRINT_DLL_DIRECTORIES=Same path as your MSYS2 UCRT64 binaries
 ``` 
+
+
+Given that the default encoding on Windows isn't `UTF-8` but `cp1252`, certain python script printing `UTF-8` characters such as emojis may cause the backend crash or malfunction in some cases (e.g. library importation).
+To avoid this issue with this project, enforce the `UTF-8` encoding by adding these 2 user environment variables:
+```conf
+PYTHONUTF8=1
+PYTHONIOENCODING=utf-8:replace
+``` 
+
+> [!NOTE] Known issues
+> - The `libmagic` library on Windows (MIME detection) struggles to recognize an Excel file (`.xlsx`) by reading its first `2048` bits as it returns `application/octet-stream` most of the time when importing an Excel library (backend displays the warning message `[warning  ] Invalid MIME type`). This doesn't prevent the Excel file from being imported thanks to the fallback method in `backend/library/views.py:StoredLibraryViewSet.upload_library`.
 
 </details>
 
