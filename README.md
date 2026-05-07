@@ -377,9 +377,9 @@ For the following executions, use "docker compose up" directly.
 > ### Important note for Windows users
 > The best working solution for users developing on **Windows** is to use [Ubuntu](https://apps.microsoft.com/detail/9pdxgncfsczv) installed on [WSL2](https://apps.microsoft.com/detail/9p9tqf7mrm4r) (Docker is not required).
 >
-> It is now also possible to run and develop CISO Assistant natively on Windows without WSL2 nor Docker, but it will requires some extra steps.
-> Please note that the native running on Widows is still in **EXPERIMENTAL PHASE** and should **NOT** be used if you are unsure of what you are doing, or if you want to ensure stability throughout development.
-> Nevertheless, we would love to hear any suggestions in order to enhance the development experience for Windows users. Please fell free to open an Issue/PR about it!
+> It is now also possible to run and develop CISO Assistant natively on Windows without WSL2 nor Docker, but it will require some extra steps.
+> Please note that the native running on Windows is still in **EXPERIMENTAL PHASE** and should **NOT** be used if you are unsure of what you are doing, or if you want to ensure stability throughout development.
+> Nevertheless, we would love to hear any suggestions in order to enhance the development experience for Windows users. Please feel free to open an Issue/PR about it!
 
 
 ### Requirements
@@ -403,7 +403,7 @@ pacman -S mingw-w64-ucrt-x86_64-file mingw-w64-ucrt-x86_64-pango
 
 You will also have to add those 2 system environment variables after installing the dependencies:
 ```conf
-MAGIC=Full path to the `magic.msc` file (usually `C:\msys64\ucrt64\share\misc\magic.mgc`)
+MAGIC=Full path to the `magic.mgc` file (usually `C:\msys64\ucrt64\share\misc\magic.mgc`)
 WEASYPRINT_DLL_DIRECTORIES=Same path as your MSYS2 UCRT64 binaries
 ``` 
 
