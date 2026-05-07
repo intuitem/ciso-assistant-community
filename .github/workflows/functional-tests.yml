@@ -51,7 +51,7 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10
 
@@ -97,7 +97,7 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10
 
@@ -243,7 +243,7 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10
 
@@ -424,7 +424,7 @@ jobs:
         run: make pre-build
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10
 
