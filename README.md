@@ -395,7 +395,7 @@ For the following executions, use "docker compose up" directly.
 <details>
 <summary>[EXPERIMENTAL] Additional requirements for development on Windows without WSL2</summary>
 
-If you want to develop the project without WSL2, you will need to install [MSYS2](https://www.msys2.org/), add the `MSYS2 UCRT64` binaries to your [system PATH environment variable](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.6#set-environment-variables-in-the-system-control-panel) (usually, the binaries are in `C:\msys64\ucrt64\bin`) and then install the following dependencies via `pacman` using `MSY2 UCRT64`.
+If you want to develop the project without WSL2, you will need to install [MSYS2](https://www.msys2.org/), add the `MSYS2 UCRT64` binaries to your [system PATH environment variable](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.6#set-environment-variables-in-the-system-control-panel) (usually, the binaries are in `C:\msys64\ucrt64\bin`) and then install the following dependencies via `pacman` using `MSYS2 UCRT64`.
 
 ```sh
 pacman -S mingw-w64-ucrt-x86_64-file mingw-w64-ucrt-x86_64-pango
