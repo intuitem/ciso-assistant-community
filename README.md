@@ -69,21 +69,22 @@ Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your wo
 
 clone the repo:
 
-```
+```sh
 git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
 ```
 
 and run the starter script
 
 ```sh
-./docker-compose.sh
+./docker-compose.sh     # Linux/MacOS
+./docker-compose.ps1    # Windows
 ```
 
 If you are looking for other installation options for self-hosting, check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
 
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
-> If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+> If you're using **Windows**, make sure to have [Docker Desktop with WSL2](https://www.docker.com/products/docker-desktop/) installed and trigger the PowerShell script. It will feed Docker Desktop on your behalf.
 
 The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
 
@@ -353,13 +354,15 @@ cd ciso-assistant-community
 2. Launch docker-compose script for prebuilt images:
 
 ```sh
-./docker-compose.sh
+./docker-compose.sh     # Linux/MacOS
+./docker-compose.ps1    # Windows
 ```
 
 _Alternatively_, you can use this variant to build the docker images for your specific architecture:
 
 ```sh
-./docker-compose-build.sh
+./docker-compose-build.sh     # Linux/MacOS
+./docker-compose-build.ps1    # Windows
 ```
 
 When asked for, enter your email and password for your superuser.
@@ -370,6 +373,13 @@ For the following executions, use "docker compose up" directly.
 
 ## Setting up CISO Assistant for development
 
+> [!WARNING] Important note for Windows users
+> The best working solution for users developing on **Windows** is to use [Ubuntu](https://apps.microsoft.com/detail/9pdxgncfsczv) installed on [WSL2](https://apps.microsoft.com/detail/9p9tqf7mrm4r) (Docker is not required).
+>
+> It is now also possible to run and develop CISO Assistant natively on Windows without WSL2 nor Docker, but it will requires some extra steps. Please note that the native running on Widows is still in **EXPERIMENTAL PHASE** and should **NOT** be used if you are unsure of what you are doing, or if you want to ensure stability throughout development.
+> Nevertheless, we would love to hear any suggestions/proposals for improvement in order to enhance the development experience for Windows users. Please fell free to open an Issue/PR about it!
+
+
 ### Requirements
 
 - Python 3.14+
@@ -379,6 +389,23 @@ For the following executions, use "docker compose up" directly.
 - npm 10.2+
 - pnpm 10.30+
 - yaml-cpp (`brew install yaml-cpp libyaml` or `apt install libyaml-cpp-dev`)
+
+<details>
+<summary>[EXPERIMENTAL] Additional requirements for development on Windows without WSL2</summary>
+
+If you want to develop the project without WSL2, you will need to install [MSYS2](https://www.msys2.org/), add the `MSYS2 UCRT64` binaries to your [system PATH environment variable](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.6#set-environment-variables-in-the-system-control-panel) (usually, the binaries are in `C:\msys64\ucrt64\bin`) and then install the following dependencies via `pacman` using `MSY2 UCRT64`.
+
+```sh
+pacman -S mingw-w64-ucrt-x86_64-file mingw-w64-ucrt-x86_64-pango
+```
+
+You will also have to add this system environment variable after installing the dependencies:
+```conf
+WEASYPRINT_DLL_DIRECTORIES = Same path as your MSYS2 UCRT64 binaries
+``` 
+
+</details>
+
 
 ### Running the backend
 
@@ -501,6 +528,17 @@ export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seco
 
 Visit the poetry website for instructions: <https://python-poetry.org/docs/#installation>
 
+<details>
+<summary>[EXPERIMENTAL] How to install Poetry natively on Windows?</summary>
+
+```shell
+python -m pip install --user pipx
+pipx install poetry
+```
+
+</details>
+
+
 4. Install required dependencies.
 
 ```sh
@@ -590,11 +628,11 @@ pnpm run dev
 
 All variables in the frontend have handy default values.
 
-If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is <http://localhost:8000/api>.
+If you move the frontend on another host, you should set the following variable: `PUBLIC_BACKEND_API_URL`. Its default value is <http://localhost:8000/api>.
 
-The PUBLIC_BACKEND_API_EXPOSED_URL is necessary for proper functioning of the SSO. It points to the URL of the API as seen from the browser. It should be equal to the concatenation of CISO_ASSISTANT_URL (in the backend) with "/api".
+The `PUBLIC_BACKEND_API_EXPOSED_URL` is necessary for proper functioning of the SSO. It points to the URL of the API as seen from the browser. It should be equal to the concatenation of `CISO_ASSISTANT_URL` (in the backend) with "/api".
 
-When you launch "node server" instead of "pnpm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
+When you launch "node server" instead of "pnpm run dev", you need to set the ORIGIN variable to the same value as `CISO_ASSISTANT_URL` in the backend (e.g. <http://localhost:3000>).
 
 ### Managing migrations
 
@@ -620,7 +658,7 @@ These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type "poetry run pytest" in a shell in the backend folder.
+To run API tests on the backend, simply type `poetry run pytest` in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 
@@ -652,13 +690,13 @@ When using the interactive Swagger UI, simply log in, the token will be automati
 
 The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
 
-Set DJANGO_DEBUG=False for security reason.
+Set `DJANGO_DEBUG=False` for security reason.
 
 > [!NOTE]
-> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the `HOST_HEADER` and `PROTOCOL_HEADER` variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
 
 > [!NOTE]
-> Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
+> Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in `CISO_ASSISTANT_URL`), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
 
 > [!NOTE]
 > The docker-compose template files are now launching the backend, huey and frontend in non-root mode. If you use an old docker-compose.yml file, it is recommended to update it. The containers are compatible with both root and non-root modes.
