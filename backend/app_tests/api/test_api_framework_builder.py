@@ -2693,9 +2693,7 @@ class TestFrameworkBuilderUrnRename:
         assert fw.urn_namespace == "custom"
         assert fw.ref_id == "renamable-fw"
 
-    def test_rename_blocked_on_legacy_5_segment_urns(
-        self, authenticated_client
-    ):
+    def test_rename_blocked_on_legacy_5_segment_urns(self, authenticated_client):
         """Frameworks with 5-segment URNs (no slug, no node_id) — produced by
         an older duplicate flow — cannot be renamed. The reconcile rename
         branch must raise a clear DraftValidationError before any state
@@ -2913,9 +2911,7 @@ class TestFrameworkBuilderUrnRename:
         evaluate_outcomes(ca_before)
         ca_before.refresh_from_db()
         pre_outcome = ca_before.computed_outcome
-        assert pre_outcome == {
-            "compliant": {"result": "pass", "label": "Compliant"}
-        }
+        assert pre_outcome == {"compliant": {"result": "pass", "label": "Compliant"}}
 
         # Drop the CA so the rename gate allows the change.
         ca_before.delete()

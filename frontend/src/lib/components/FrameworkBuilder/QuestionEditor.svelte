@@ -34,23 +34,15 @@
 		question.type === 'unique_choice' || question.type === 'multiple_choice'
 	);
 
-	const supportsSlider = $derived(
-		question.type === 'number' || question.type === 'unique_choice'
-	);
+	const supportsSlider = $derived(question.type === 'number' || question.type === 'unique_choice');
 
 	const sliderEnabled = $derived(
 		(question.config as { widget?: string } | null)?.widget === 'slider'
 	);
 
-	const sliderMin = $derived(
-		Number((question.config as { min?: number } | null)?.min ?? 0)
-	);
-	const sliderMax = $derived(
-		Number((question.config as { max?: number } | null)?.max ?? 100)
-	);
-	const sliderStep = $derived(
-		Number((question.config as { step?: number } | null)?.step ?? 1)
-	);
+	const sliderMin = $derived(Number((question.config as { min?: number } | null)?.min ?? 0));
+	const sliderMax = $derived(Number((question.config as { max?: number } | null)?.max ?? 100));
+	const sliderStep = $derived(Number((question.config as { step?: number } | null)?.step ?? 1));
 
 	const dependsOnLabel = $derived.by(() => {
 		if (!question.depends_on) return null;
@@ -95,8 +87,7 @@
 	}
 
 	function updateSliderConfig(patch: Record<string, number>) {
-		const current =
-			(question.config as Record<string, unknown> | null) ?? { widget: 'slider' };
+		const current = (question.config as Record<string, unknown> | null) ?? { widget: 'slider' };
 		saveField('config', { ...current, ...patch });
 	}
 </script>

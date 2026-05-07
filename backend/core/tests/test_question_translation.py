@@ -203,9 +203,7 @@ class TestGetQuestionsTranslatedConfig:
 
     def test_includes_config_when_present(self, db):
         folder = Folder.get_root_folder()
-        fw = Framework.objects.create(
-            name="Cfg FW", folder=folder, is_published=True
-        )
+        fw = Framework.objects.create(name="Cfg FW", folder=folder, is_published=True)
         rn = RequirementNode.objects.create(
             framework=fw,
             urn="urn:test:cfg:r1",
@@ -234,9 +232,7 @@ class TestGetQuestionsTranslatedConfig:
 
     def test_omits_config_when_absent(self, db):
         folder = Folder.get_root_folder()
-        fw = Framework.objects.create(
-            name="NoCfg FW", folder=folder, is_published=True
-        )
+        fw = Framework.objects.create(name="NoCfg FW", folder=folder, is_published=True)
         rn = RequirementNode.objects.create(
             framework=fw,
             urn="urn:test:nocfg:r1",

@@ -113,9 +113,7 @@
 			{#if mode === 'choice' && choiceCount > 0}
 				<div class="flex justify-between pointer-events-none px-1.5" aria-hidden="true">
 					{#each Array(choiceCount + 1) as _, i (i)}
-						<span
-							class="w-px h-1.5 {i === sliderPosition ? 'bg-blue-500' : 'bg-gray-400'}"
-						></span>
+						<span class="w-px h-1.5 {i === sliderPosition ? 'bg-blue-500' : 'bg-gray-400'}"></span>
 					{/each}
 				</div>
 			{/if}

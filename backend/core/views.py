@@ -8750,9 +8750,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     seed_ref_id = parts[4]
                     break
             if not seed_ref_id:
-                seed_ref_id = self._slugify_framework_name(
-                    framework.name, framework.id
-                )
+                seed_ref_id = self._slugify_framework_name(framework.name, framework.id)
 
         draft = {
             "framework_meta": {
@@ -9249,9 +9247,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 RequirementNode.objects.exclude(framework=framework)
                 .filter(urn__startswith=sample_node_prefix)
                 .exists()
-                or Question.objects.exclude(
-                    requirement_node__framework=framework
-                )
+                or Question.objects.exclude(requirement_node__framework=framework)
                 .filter(urn__startswith=sample_question_prefix)
                 .exists()
                 or QuestionChoice.objects.exclude(
@@ -9527,9 +9523,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     ):
                         continue
                     nodes_to_update.append(
-                        RequirementNode(
-                            id=node_id, framework=framework, **payload
-                        )
+                        RequirementNode(id=node_id, framework=framework, **payload)
                     )
                 if nodes_to_update:
                     RequirementNode.objects.bulk_update(
@@ -9717,9 +9711,7 @@ class FrameworkViewSet(BaseModelViewSet):
                         payload[f] == existing[f] for f in CHOICE_UPDATE_FIELDS
                     ):
                         continue
-                    choices_to_update.append(
-                        QuestionChoice(id=choice_id, **payload)
-                    )
+                    choices_to_update.append(QuestionChoice(id=choice_id, **payload))
                 if choices_to_update:
                     QuestionChoice.objects.bulk_update(
                         choices_to_update, CHOICE_UPDATE_FIELDS

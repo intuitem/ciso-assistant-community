@@ -508,8 +508,8 @@
 								</div>
 								<p class="text-[10px] text-gray-400 mt-0.5">
 									URN preview: <code
-										>urn:{$frameworkStore.urn_namespace ?? 'custom'}:risk:framework:{$frameworkStore.ref_id ||
-											'…'}</code
+										>urn:{$frameworkStore.urn_namespace ??
+											'custom'}:risk:framework:{$frameworkStore.ref_id || '…'}</code
 									>
 									{#if lockUrnEdits}
 										Locked — a compliance assessment uses this framework.
