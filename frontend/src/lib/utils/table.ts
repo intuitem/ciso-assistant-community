@@ -2236,8 +2236,8 @@ export const listViewFields = {
 		}
 	},
 	'feared-events': {
-		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
-		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		head: ['selected', 'refId', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'ref_id', 'name', 'assets', 'description', 'qualifications', 'gravity'],
 		filters: {
 			assets: ASSET_FILTER,
 			qualifications: QUALIFICATION_FILTER,

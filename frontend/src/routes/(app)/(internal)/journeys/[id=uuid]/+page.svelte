@@ -282,7 +282,9 @@
 								</form>
 							{:else}
 								<div class="flex items-center gap-2 group">
-									<h2 class="text-lg font-semibold text-white">{data.journey.name}</h2>
+									<h2 class="text-lg font-semibold text-white" data-testid="journey-header-name">
+										{data.journey.name}
+									</h2>
 									<button
 										type="button"
 										class="text-violet-200 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
@@ -323,6 +325,7 @@
 					<button
 						type="button"
 						class="btn btn-sm preset-tonal-surface border border-surface-500"
+						data-testid="journey-toggle-descriptions"
 						onclick={() => (compactMode = !compactMode)}
 						title={compactMode ? m.showDescriptions() : m.hideDescriptions()}
 					>
@@ -341,6 +344,7 @@
 					<button
 						type="button"
 						class="btn btn-sm preset-tonal-surface border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300"
+						data-testid="journey-delete-btn"
 						onclick={deleteJourney}
 					>
 						<i class="fa-solid fa-trash-can mr-1"></i>
@@ -352,8 +356,12 @@
 			<!-- Progress bar (four-state) -->
 			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 				<div class="flex items-center justify-between mb-2">
-					<span class="font-medium text-sm text-gray-800">{m.journeyProgress()}</span>
-					<span class="text-sm font-mono text-gray-500">{data.stats.progress_percent ?? 0}%</span>
+					<span class="font-medium text-sm text-gray-800" data-testid="journey-progress-title"
+						>{m.journeyProgress()}</span
+					>
+					<span class="text-sm font-mono text-gray-500" data-testid="journey-progress-percent"
+						>{data.stats.progress_percent ?? 0}%</span
+					>
 				</div>
 				<div class="flex h-2.5 rounded-full bg-gray-100 overflow-hidden">
 					{#if stepCounts.done}
@@ -376,7 +384,7 @@
 					{/if}
 				</div>
 				<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-600">
-					<span class="flex items-center gap-1.5">
+					<span class="flex items-center gap-1.5" data-testid="journey-count-done">
 						<span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
 						{m.done()}
 						{stepCounts.done}
@@ -406,8 +414,7 @@
 					{@const style = STATUS_STYLES[step.status] || STATUS_STYLES.not_started}
 					{@const link = getStepLink(step)}
 					{@const isLast = i === data.steps.length - 1}
-					<div class="relative flex gap-4 {isLast ? '' : 'pb-3'}">
-						<!-- Timeline connector (spans full row height including padding) -->
+					<div class="relative flex gap-4 {isLast ? '' : 'pb-3'}" data-testid="journey-step-{i}">
 						{#if !isLast}
 							<div
 								class="absolute left-[0.8125rem] top-[1.75rem] bottom-0 w-0.5 {step.status ===
@@ -465,6 +472,7 @@
 										{/if}
 										<span
 											class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-tight {style.bg} {style.text}"
+											data-testid="journey-step-{i}-status"
 										>
 											{style.label()}
 										</span>
@@ -499,6 +507,7 @@
 										<button
 											type="button"
 											class="btn btn-sm preset-filled-warning-500"
+											data-testid="journey-step-{i}-start"
 											title={m.startStepTooltip()}
 											onclick={async () => {
 												await updateStepStatus(step.id, 'in_progress');
@@ -512,6 +521,7 @@
 										<button
 											type="button"
 											class="btn btn-sm preset-filled-success-500"
+											data-testid="journey-step-{i}-mark-done"
 											title={m.markAsDoneTooltip()}
 											onclick={() => updateStepStatus(step.id, 'done')}
 										>
@@ -521,6 +531,7 @@
 										<button
 											type="button"
 											class="btn btn-sm preset-tonal-surface border border-surface-500"
+											data-testid="journey-step-{i}-skip"
 											title={m.markAsSkippedTooltip()}
 											onclick={() => updateStepStatus(step.id, 'skipped')}
 										>
@@ -530,6 +541,7 @@
 										<button
 											type="button"
 											class="btn btn-sm preset-tonal-surface border border-surface-500"
+											data-testid="journey-step-{i}-reset"
 											onclick={() => updateStepStatus(step.id, 'not_started')}
 											title={m.resetStepTooltip()}
 										>
