@@ -705,7 +705,7 @@ When using the interactive Swagger UI, simply log in, the token will be automati
 
 The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
 
-Set `DJANGO_DEBUG=False` for security reason.
+Set `DJANGO_DEBUG=False` for security reasons.
 
 > [!NOTE]
 > The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the `HOST_HEADER` and `PROTOCOL_HEADER` variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
