@@ -14,6 +14,7 @@ public callables from this module, so the two would otherwise circular.
 import structlog
 import uuid
 
+from django.core.exceptions import FieldError
 from django.utils import timezone
 from huey.contrib.djhuey import db_task
 
@@ -838,7 +839,9 @@ def _parse_json_response(text: str) -> dict | None:
     if fence:
         try:
             return json.loads(fence.group(1))
-        except Exception:
+        except json.JSONDecodeError:
+            # Fenced block was malformed — fall through to the broader
+            # top-level {...} regex below.
             pass
     # First top-level {...} block
     match = re.search(r"\{.*\}", text, re.DOTALL)
@@ -941,7 +944,7 @@ def refresh_folder_index(folder_id: str) -> dict:
             continue
         try:
             qs = model_class.objects.filter(folder_id=folder_id_str)
-        except Exception:
+        except FieldError:
             # Model isn't folder-scoped this way — skip; refresh covers
             # FolderMixin'd models which is what we actually need here.
             continue
@@ -1775,7 +1778,9 @@ def _answer_iteration(
     try:
         tokens = count_tokens(prompt) + count_tokens(raw)
     except Exception:
-        pass
+        # Token accounting is best-effort: the answer/critic record is far
+        # more important than its token tally. Log at debug for triage.
+        logger.debug("count_tokens failed", exc_info=True)
 
     action = AgentAction.objects.create(
         agent_run=run,
@@ -1855,7 +1860,9 @@ def _critique(
     try:
         tokens = count_tokens(prompt) + count_tokens(raw)
     except Exception:
-        pass
+        # Token accounting is best-effort: the answer/critic record is far
+        # more important than its token tally. Log at debug for triage.
+        logger.debug("count_tokens failed", exc_info=True)
 
     AgentAction.objects.create(
         agent_run=run,
