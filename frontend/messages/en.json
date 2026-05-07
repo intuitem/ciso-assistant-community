@@ -1237,6 +1237,7 @@
 	"userLinkedToRepresentative": "A user is already linked to this representative.",
 	"nameDuplicate": "Name already exists",
 	"noAnswer": "No answer",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "The third party users who are responsible for questionnaire completion",
 	"sendQuestionnaire": "Send questionnaire",
 	"sureToSendQuestionnaire": "Are you sure you want to send the questionnaire: {questionnaire}?",

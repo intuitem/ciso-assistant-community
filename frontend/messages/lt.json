@@ -1230,6 +1230,7 @@
 	"userLinkedToRepresentative": "Prie šio atstovo jau susietas vartotojas.",
 	"nameDuplicate": "Pavadinimas jau egzistuoja",
 	"noAnswer": "Nėra atsakymo",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "Trečiosios šalies vartotojai, atsakingi už anketos užpildymą",
 	"sendQuestionnaire": "Siųsti anketą",
 	"sureToSendQuestionnaire": "Ar tikrai norite išsiųsti anketą: {questionnaire}?",

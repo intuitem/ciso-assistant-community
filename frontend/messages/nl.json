@@ -778,6 +778,7 @@
 	"createUserHelpText": "Maak of koppel een derde partijgebruiker aan de vertegenwoordiger op basis van het e-mailadres",
 	"nameDuplicate": "Naam bestaat al",
 	"noAnswer": "Geen antwoord",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "De externe gebruikers die verantwoordelijk zijn voor het invullen van de vragenlijst",
 	"sendQuestionnaire": "Vragenlijst verzenden",
 	"sureToSendQuestionnaire": "Weet u zeker dat u de vragenlijst {questionnaire} wilt verzenden?",

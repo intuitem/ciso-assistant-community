@@ -804,6 +804,7 @@
 	"createUserHelpText": "ईमेल के आधार पर प्रतिनिधि से तीसरे पक्ष के उपयोगकर्ता को बनाएं या लिंक करें",
 	"nameDuplicate": "नाम पहले से मौजूद है",
 	"noAnswer": "कोई जवाब नहीं",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "तीसरे पक्ष के उपयोगकर्ता जो प्रश्नावली को पूरा करने के लिए जिम्मेदार हैं",
 	"sendQuestionnaire": "प्रश्नावली भेजें",
 	"sureToSendQuestionnaire": "क्या आप वाकई प्रश्नावली भेजना चाहते हैं: {questionnaire} ?",

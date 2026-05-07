@@ -1122,6 +1122,7 @@
 	"createUserHelpText": "Créer ou lier un utilisateur tiers au représentant en fonction de l'e-mail",
 	"nameDuplicate": "Le nom existe déjà",
 	"noAnswer": "Pas de réponse",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "Les utilisateurs tiers qui sont responsables de la complétion du questionnaire",
 	"sendQuestionnaire": "Envoyer le questionnaire",
 	"sureToSendQuestionnaire": "Êtes-vous sûr de vouloir envoyer le questionnaire : {questionnaire} ?",

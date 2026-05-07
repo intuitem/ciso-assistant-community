@@ -855,6 +855,7 @@
 	"createUserHelpText": "E-postaya dayalı temsilci için bir üçüncü taraf kullanıcı oluşturun veya bağlayın",
 	"nameDuplicate": "Ad zaten var",
 	"noAnswer": "Cevap yok",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "Anketi tamamlamaktan sorumlu üçüncü taraf kullanıcılar",
 	"sendQuestionnaire": "Anketi gönder",
 	"sureToSendQuestionnaire": "Anketi göndermek istediğinizden emin misiniz: {questionnaire}?",

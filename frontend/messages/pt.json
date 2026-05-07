@@ -807,6 +807,7 @@
 	"createUserHelpText": "Crie ou vincule um usuário terceiro ao representante com base no e-mail",
 	"nameDuplicate": "Nome já existe",
 	"noAnswer": "Sem resposta",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "Os usuários terceiros responsáveis pelo preenchimento do questionário",
 	"sendQuestionnaire": "Enviar questionário",
 	"sureToSendQuestionnaire": "Tem certeza de que deseja enviar o questionário: {questionnaire} ?",

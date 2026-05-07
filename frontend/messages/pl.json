@@ -855,6 +855,7 @@
 	"createUserHelpText": "Utwórz lub połącz użytkownika zewnętrznego z przedstawicielem na podstawie adresu e-mail",
 	"nameDuplicate": "Nazwa już istnieje",
 	"noAnswer": "Brak odpowiedzi",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "Użytkownicy zewnętrzni odpowiedzialni za wypełnienie kwestionariusza",
 	"sendQuestionnaire": "Wyślij kwestionariusz",
 	"sureToSendQuestionnaire": "Czy na pewno chcesz wysłać kwestionariusz: {questionnaire} ?",

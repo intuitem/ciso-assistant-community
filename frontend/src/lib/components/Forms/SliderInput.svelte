@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import * as m from '$paraglide/messages';
 
 	interface Choice {
 		urn: string;
@@ -42,7 +43,7 @@
 	const sliderPosition = $derived.by(() => {
 		if (mode === 'number') {
 			if (value === null || typeof value !== 'number') return min;
-			return value;
+			return Math.min(max, Math.max(min, value));
 		}
 		// choice mode
 		if (value === null) return 0;
@@ -112,7 +113,7 @@
 			<button
 				type="button"
 				class="text-gray-400 hover:text-red-500 transition-colors"
-				aria-label="Clear answer"
+				aria-label={m.clearAnswer()}
 				onclick={clear}
 			>
 				<i class="fa-solid fa-xmark"></i>

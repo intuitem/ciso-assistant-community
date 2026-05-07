@@ -806,6 +806,7 @@
 	"createUserHelpText": "Skapa eller koppla en tredje parts användare till representanten baserat på e-posten",
 	"nameDuplicate": "Namnet finns redan",
 	"noAnswer": "Inget svar",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "De tredje parts användare som ansvarar för att fylla i frågeformuläret",
 	"sendQuestionnaire": "Skicka frågeformulär",
 	"sureToSendQuestionnaire": "Är du säker på att du vill skicka frågeformuläret: {questionnaire}?",

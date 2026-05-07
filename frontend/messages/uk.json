@@ -822,6 +822,7 @@
 	"createUserHelpText": "Створіть або прив’яжіть стороннього користувача до представника на основі e-mail",
 	"nameDuplicate": "Ім'я вже існує",
 	"noAnswer": "Немає відповіді",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "Сторонні користувачі, відповідальні за заповнення анкети",
 	"sendQuestionnaire": "Надіслати анкету",
 	"sureToSendQuestionnaire": "Ви впевнені, що хочете надіслати анкету: {questionnaire} ?",

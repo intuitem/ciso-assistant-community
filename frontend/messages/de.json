@@ -778,6 +778,7 @@
 	"createUserHelpText": "Erstellen oder verknüpfen Sie einen Drittbenutzer mit dem Vertreter basierend auf der E-Mail",
 	"nameDuplicate": "Name existiert bereits",
 	"noAnswer": "Keine Antwort",
+	"clearAnswer": "Clear answer",
 	"entityAssessmentRepresentativesHelpText": "Die Drittbenutzer, die für das Ausfüllen des Fragebogens verantwortlich sind",
 	"sendQuestionnaire": "Fragebogen versenden",
 	"sureToSendQuestionnaire": "Möchten Sie den Fragebogen „{questionnaire}“ wirklich versenden?",
