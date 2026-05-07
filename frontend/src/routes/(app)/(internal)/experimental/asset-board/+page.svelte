@@ -55,6 +55,7 @@
 					assets={data.assets}
 					folderId={data.selectedFolderId}
 					assetModel={data.assetModel}
+					deleteForm={data.assetDeleteForm}
 				/>
 			{/key}
 		{:else}

@@ -1,9 +1,10 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
-import { defaultWriteFormAction } from '$lib/utils/actions';
+import { defaultWriteFormAction, defaultDeleteFormAction } from '$lib/utils/actions';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
@@ -32,6 +33,9 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 		errors: false
 	});
 
+	// Delete form for the DeleteConfirmModal (validates `id` UUID).
+	const assetDeleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
+
 	const typeRes = await fetch(`${BASE_API_URL}/assets/type/`);
 	const typeData = typeRes.ok ? await typeRes.json() : {};
 	const typeOptions = Object.entries(typeData).map(([key, value]) => ({
@@ -43,6 +47,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 		folders,
 		assets,
 		selectedFolderId,
+		assetDeleteForm,
 		assetModel: {
 			...assetModelInfo,
 			urlModel: 'assets',
@@ -60,5 +65,8 @@ export const actions: Actions = {
 			action: 'create',
 			redirectToWrittenObject: false
 		});
+	},
+	delete: async (event) => {
+		return defaultDeleteFormAction({ event, urlModel: 'assets' });
 	}
 };

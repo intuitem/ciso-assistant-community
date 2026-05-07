@@ -17,6 +17,7 @@
 	import '@xyflow/svelte/dist/style.css';
 
 	import AssetNodeComponent from './AssetNode.svelte';
+	import AssetEdgeComponent from './AssetEdge.svelte';
 	import {
 		loadPositions,
 		savePositions,
@@ -31,6 +32,8 @@
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import { m } from '$paraglide/messages';
 
 	interface AssetItem {
 		id: string;
@@ -48,18 +51,21 @@
 		assets: AssetItem[];
 		folderId: string;
 		assetModel: any;
+		deleteForm: any;
 	}
 
-	let { assets, folderId, assetModel }: Props = $props();
+	let { assets, folderId, assetModel, deleteForm }: Props = $props();
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
 
 	const nodeTypes = { asset: AssetNodeComponent };
+	const edgeTypes = { asset: AssetEdgeComponent };
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 	let positions = $state<Record<string, XY>>({});
+	let instructionsOpen = $state(true);
 	// drop coordinates + optional parent for the next asset created via the canvas
 	let pendingPlacement = $state<XY | null>(null);
 	let pendingParentId = $state<string | null>(null);
@@ -116,8 +122,8 @@
 					id: `e-${pid}-${a.id}`,
 					source: pid,
 					target: a.id,
-					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
-					style: 'stroke: var(--color-surface-500); stroke-width: 2;'
+					type: 'asset',
+					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' }
 				});
 			}
 		}
@@ -421,6 +427,25 @@
 		}
 	}
 
+	function confirmDeleteAsset(assetId: string, assetName: string) {
+		const modalComponent: ModalComponent = {
+			ref: DeleteConfirmModal,
+			props: {
+				_form: deleteForm,
+				id: assetId,
+				URLModel: 'assets',
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.deleteModalTitle(),
+			body: m.deleteModalMessage({ name: assetName })
+		};
+		modalStore.trigger(modal);
+	}
+
 	setContext('assetBoard', {
 		showExternalLinks: (id: string) => {
 			const child = assets.find((a) => a.id === id);
@@ -435,7 +460,17 @@
 			});
 		},
 		renameAsset,
-		toggleAssetType
+		toggleAssetType,
+		confirmDeleteAsset,
+		deleteEdge: async (source: string, target: string) => {
+			// Same logic as ondelete, but for one specific edge selected via the UI button.
+			const remaining = currentParentsOf(target).filter((p) => p !== source);
+			const ok = await patchParentAssets(target, remaining);
+			if (ok) {
+				edges = edges.filter((e) => !(e.source === source && e.target === target));
+				toastStore.trigger({ message: 'Link removed', background: 'preset-tonal-success' });
+			}
+		}
 	});
 </script>
 
@@ -444,6 +479,7 @@
 		bind:nodes
 		bind:edges
 		{nodeTypes}
+		{edgeTypes}
 		{isValidConnection}
 		onconnect={handleConnect}
 		onconnectend={handleConnectEnd}
@@ -457,8 +493,8 @@
 		minZoom={0.3}
 		proOptions={{ hideAttribution: true }}
 		defaultEdgeOptions={{
-			markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
-			style: 'stroke: var(--color-surface-500); stroke-width: 2;'
+			type: 'asset',
+			markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' }
 		}}
 	>
 		<Background variant={BackgroundVariant.Dots} gap={20} />
@@ -475,24 +511,41 @@
 		</Panel>
 		<Panel position="top-left">
 			<div
-				class="text-xs bg-surface-100 text-surface-700 border border-surface-300 rounded-base px-3 py-2 max-w-md leading-relaxed shadow-sm"
+				class="text-xs bg-surface-100 text-surface-700 border border-surface-300 rounded-base shadow-sm max-w-md leading-relaxed"
 			>
-				<div class="font-semibold mb-1">
-					<i class="fa-solid fa-info-circle mr-1"></i>Asset whiteboard (experimental)
-				</div>
-				<div class="mb-1 text-surface-600">
-					Convention: arrow <span class="font-mono">A → B</span> means
-					<em>A depends on B</em> (A is a parent of B).
-				</div>
-				<ul class="list-disc list-inside space-y-0.5">
-					<li>Drag bottom handle of one asset onto another to link it as a parent</li>
-					<li>Drag bottom handle onto empty canvas to create a child asset</li>
-					<li>Double-click empty canvas to create a free-standing asset</li>
-					<li>Double-click a node's name to rename it</li>
-					<li>Click the <span class="font-semibold">PR/SP</span> pill to toggle the asset type</li>
-					<li>Select an edge and press Delete to unlink</li>
-					<li>Positions are saved per-domain in this browser only</li>
-				</ul>
+				<button
+					type="button"
+					class="w-full flex items-center justify-between px-3 py-2 font-semibold cursor-pointer hover:bg-surface-200 rounded-base"
+					aria-expanded={instructionsOpen}
+					aria-controls="asset-board-instructions"
+					onclick={() => (instructionsOpen = !instructionsOpen)}
+				>
+					<span>
+						<i class="fa-solid fa-info-circle mr-1"></i>Instructions
+					</span>
+					<i class="fa-solid {instructionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px]"
+					></i>
+				</button>
+				{#if instructionsOpen}
+					<div id="asset-board-instructions" class="px-3 pb-2">
+						<div class="mb-1 text-surface-600">
+							Convention: arrow <span class="font-mono">A → B</span> means
+							<em>A depends on B</em> (A is a parent of B).
+						</div>
+						<ul class="list-disc list-inside space-y-0.5">
+							<li>Drag bottom handle of one asset onto another to link it as a parent</li>
+							<li>Drag bottom handle onto empty canvas to create a child asset</li>
+							<li>Double-click empty canvas to create a free-standing asset</li>
+							<li>Double-click a node's name to rename it</li>
+							<li>
+								Click the <span class="font-semibold">PR/SP</span> pill to toggle the asset type
+							</li>
+							<li>Hover a node and click the trash icon to delete it (with cascade preview)</li>
+							<li>Click a link to select it, then click the × at its midpoint to unlink</li>
+							<li>Positions are saved per-domain in this browser only</li>
+						</ul>
+					</div>
+				{/if}
 			</div>
 		</Panel>
 	</SvelteFlow>
@@ -507,9 +560,17 @@
 	:global(.svelte-flow .svelte-flow__edge-path) {
 		stroke-width: 2;
 	}
+	:global(.svelte-flow .svelte-flow__edge) {
+		cursor: pointer;
+	}
 	:global(.svelte-flow .svelte-flow__edge:hover .svelte-flow__edge-path) {
 		stroke: var(--color-secondary-300);
 		stroke-width: 3;
-		cursor: pointer;
+	}
+	/* Selected edge: visually obvious so the user can find the delete button. */
+	:global(.svelte-flow .svelte-flow__edge.selected .svelte-flow__edge-path),
+	:global(.svelte-flow .svelte-flow__edge[aria-selected='true'] .svelte-flow__edge-path) {
+		stroke: var(--color-secondary-500);
+		stroke-width: 3;
 	}
 </style>

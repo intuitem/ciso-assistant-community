@@ -18,6 +18,7 @@
 		showExternalLinks: (id: string) => void;
 		renameAsset: (id: string, name: string) => Promise<boolean>;
 		toggleAssetType: (id: string) => Promise<boolean>;
+		confirmDeleteAsset: (id: string, name: string) => void;
 	}>('assetBoard');
 
 	// `data.type` is always the raw code 'PR' or 'SP' (set by AssetBoard from `is_primary`).
@@ -155,18 +156,33 @@
 	{/if}
 
 	{#if hovered}
-		<a
-			href="/assets/{id}"
-			target="_blank"
-			rel="noopener"
-			aria-label="Open asset detail in new tab"
-			title="Open in new tab"
-			class="nopan nodrag absolute -top-2 -left-2 w-4 h-4 rounded-full bg-surface-200 hover:bg-surface-300 text-surface-700 text-[8px] flex items-center justify-center cursor-pointer shadow"
-			onclick={(e) => e.stopPropagation()}
-			onmousedown={(e) => e.stopPropagation()}
-		>
-			<i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
-		</a>
+		<div class="nopan nodrag absolute -top-2 -left-2 flex gap-0.5">
+			<a
+				href="/assets/{id}"
+				target="_blank"
+				rel="noopener"
+				aria-label="Open asset detail in new tab"
+				title="Open in new tab"
+				class="w-4 h-4 rounded-full bg-surface-200 hover:bg-surface-300 text-surface-700 text-[8px] flex items-center justify-center cursor-pointer shadow"
+				onclick={(e) => e.stopPropagation()}
+				onmousedown={(e) => e.stopPropagation()}
+			>
+				<i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+			</a>
+			<button
+				type="button"
+				aria-label="Delete asset"
+				title="Delete asset"
+				class="w-4 h-4 rounded-full bg-error-500 hover:bg-error-600 text-white text-[8px] flex items-center justify-center cursor-pointer shadow"
+				onclick={(e) => {
+					e.stopPropagation();
+					board?.confirmDeleteAsset(id, data.label);
+				}}
+				onmousedown={(e) => e.stopPropagation()}
+			>
+				<i class="fa-solid fa-trash text-[8px]"></i>
+			</button>
+		</div>
 	{/if}
 
 	<Handle
