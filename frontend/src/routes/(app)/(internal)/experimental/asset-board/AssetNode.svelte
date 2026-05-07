@@ -158,16 +158,16 @@
 	{#if hovered}
 		<div class="nopan nodrag absolute -top-2 -left-2 flex gap-0.5">
 			<a
-				href="/assets/{id}"
+				href="/assets/{id}/edit"
 				target="_blank"
 				rel="noopener"
-				aria-label="Open asset detail in new tab"
-				title="Open in new tab"
+				aria-label="Edit asset in new tab"
+				title="Edit in new tab"
 				class="w-4 h-4 rounded-full bg-surface-200 hover:bg-surface-300 text-surface-700 text-[8px] flex items-center justify-center cursor-pointer shadow"
 				onclick={(e) => e.stopPropagation()}
 				onmousedown={(e) => e.stopPropagation()}
 			>
-				<i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+				<i class="fa-solid fa-pen text-[8px]"></i>
 			</a>
 			<button
 				type="button"
