@@ -273,16 +273,13 @@
 			// Chain the extract step so the user lands directly in the
 			// configure-run phase. Failures here are surfaced but don't roll
 			// back the mapping save.
-			const extractRes = await fetch(
-				`/experimental/questionnaire-autopilot/${run.id}/extract`,
-				{ method: 'POST' }
-			);
+			const extractRes = await fetch(`/experimental/questionnaire-autopilot/${run.id}/extract`, {
+				method: 'POST'
+			});
 			const extractResult = await extractRes.json();
 			if (!extractRes.ok) {
 				toast.trigger({
-					message:
-						extractResult.detail ||
-						'Mapping saved, but extracting the questions failed.'
+					message: extractResult.detail || 'Mapping saved, but extracting the questions failed.'
 				});
 				return;
 			}
@@ -368,15 +365,12 @@
 	const pickerSchema = z.object({
 		applied_control_id: z.string().nullable().optional()
 	});
-	const pickerForm = superForm(
-		defaults({ applied_control_id: null }, zod(pickerSchema)),
-		{
-			dataType: 'json',
-			taintedMessage: false,
-			SPA: true,
-			validators: zod(pickerSchema)
-		}
-	);
+	const pickerForm = superForm(defaults({ applied_control_id: null }, zod(pickerSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		SPA: true,
+		validators: zod(pickerSchema)
+	});
 	const _pickerStoreUnsub = pickerForm.form.subscribe((v: any) => {
 		pickerSelectedId = v?.applied_control_id ?? null;
 	});
@@ -389,14 +383,10 @@
 	// Looked up against the live questions list so the modal stays in sync
 	// even if polling refreshes the list while a modal is open.
 	const pickerQuestion = $derived(
-		pickerOpenForQuestion
-			? (questions.find((q) => q.id === pickerOpenForQuestion) ?? null)
-			: null
+		pickerOpenForQuestion ? (questions.find((q) => q.id === pickerOpenForQuestion) ?? null) : null
 	);
 	const suggestQuestion = $derived(
-		suggestOpenForQuestion
-			? (questions.find((q) => q.id === suggestOpenForQuestion) ?? null)
-			: null
+		suggestOpenForQuestion ? (questions.find((q) => q.id === suggestOpenForQuestion) ?? null) : null
 	);
 
 	function openPicker(question: Question) {
@@ -728,7 +718,7 @@
 				</div>
 			{/if}
 			<div class="text-xs text-gray-500 mt-1">
-				Folder: {run.folder?.str || run.folder?.name || '—'} · Uploaded
+				Domain: {run.folder?.str || run.folder?.name || '—'} · Uploaded
 				{new Date(run.created_at).toLocaleString()}
 			</div>
 		</div>
@@ -953,7 +943,7 @@
 				<p class="text-xs text-gray-500 mt-2 flex items-start gap-1.5">
 					<i class="fa-solid fa-arrows-rotate mt-0.5 text-blue-500"></i>
 					<span>
-						When you start, we first refresh the folder's vector index (drops stale entries, picks
+						When you start, we first refresh the domain's vector index (drops stale entries, picks
 						up new controls). Adds ~10–30 s before answering begins.
 					</span>
 				</p>
@@ -1122,7 +1112,7 @@
 						</div>
 						<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
 							<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
-							Re-runs the folder index refresh first, then the prefill.
+							Re-runs the domain index refresh first, then the prefill.
 						</div>
 					</div>
 				</div>
@@ -1184,7 +1174,7 @@
 						</div>
 						<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
 							<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
-							Re-runs the folder index refresh first, then the prefill.
+							Re-runs the domain index refresh first, then the prefill.
 						</div>
 					</div>
 				</div>
@@ -1221,8 +1211,8 @@
 			<div class="px-6 py-4 border-b">
 				<h4 class="font-semibold">Use an existing applied control</h4>
 				<p class="text-xs text-gray-500 mt-1">
-					Pick a control in this folder. The agent will re-run the question with it as
-					priority context.
+					Pick a control in this domain. The agent will re-run the question with it as priority
+					context.
 				</p>
 			</div>
 			{#if pickerQuestion}
@@ -1278,14 +1268,12 @@
 			if (e.target === e.currentTarget) closeSuggest();
 		}}
 	>
-		<div
-			class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
-		>
+		<div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
 			<div class="px-6 py-4 border-b">
 				<h4 class="font-semibold">Suggest a control to create</h4>
 				<p class="text-xs text-gray-500 mt-1">
-					Review the draft, edit anything, then create. We'll add the control to the
-					folder and immediately re-try the question with it.
+					Review the draft, edit anything, then create. We'll add the control to the domain and
+					immediately re-try the question with it.
 				</p>
 			</div>
 			{#if suggestQuestion}
@@ -1314,10 +1302,17 @@
 				</div>
 			{:else}
 				<div class="flex-1 overflow-y-auto px-6 py-4 space-y-3 text-sm">
+					{#if !suggestDraft.name && !suggestDraft.description && !suggestDraft.observation}
+						<div
+							class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2"
+						>
+							<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+							The LLM didn't return a draft (model may be unavailable). You can still fill the fields
+							in manually and create the control.
+						</div>
+					{/if}
 					<div>
-						<label for="d-name" class="block text-xs font-medium text-gray-700">
-							Name *
-						</label>
+						<label for="d-name" class="block text-xs font-medium text-gray-700"> Name * </label>
 						<input
 							id="d-name"
 							type="text"
@@ -1338,9 +1333,7 @@
 						></textarea>
 					</div>
 					<div>
-						<label for="d-status" class="block text-xs font-medium text-gray-700">
-							Status
-						</label>
+						<label for="d-status" class="block text-xs font-medium text-gray-700"> Status </label>
 						<select
 							id="d-status"
 							bind:value={suggestDraft.status}
@@ -1354,9 +1347,8 @@
 						</select>
 					</div>
 					<p class="text-[11px] text-gray-400">
-						The agent's drafted observation, category and CSF function will be saved
-						along with the control — you can refine them later from the Applied
-						Controls page.
+						The agent's drafted observation, category and CSF function will be saved along with the
+						control — you can refine them later from the Applied Controls page.
 					</p>
 				</div>
 			{/if}
@@ -1435,14 +1427,10 @@
 											<div class="flex justify-between text-[10px] text-gray-500">
 												<span>conf.</span>
 												<span>
-													{action.confidence != null
-														? action.confidence.toFixed(2)
-														: '—'}
+													{action.confidence != null ? action.confidence.toFixed(2) : '—'}
 												</span>
 											</div>
-											<div
-												class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"
-											>
+											<div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
 												<div class="{bar.color} h-1.5" style="width: {bar.width}"></div>
 											</div>
 										</div>
@@ -1450,9 +1438,7 @@
 								{/if}
 							</div>
 							{#if action}
-								<div
-									class="text-sm bg-gray-50 px-3 py-2 rounded whitespace-pre-wrap"
-								>
+								<div class="text-sm bg-gray-50 px-3 py-2 rounded whitespace-pre-wrap">
 									{action.payload.comment || '(no comment)'}
 								</div>
 							{/if}
@@ -1638,8 +1624,7 @@
 				.vocab_count} different answer vocabularies — each question writes its own value."
 		>
 			<i class="fa-solid fa-language mr-1"></i>
-			{run.value_mapping.vocab_count} answer vocabularies detected — each question writes its own
-			value.
+			{run.value_mapping.vocab_count} answer vocabularies detected — each question writes its own value.
 			<div class="text-[10px] text-gray-400 mt-0.5">
 				Needs info → cell left blank for manual review.
 			</div>

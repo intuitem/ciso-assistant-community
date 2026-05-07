@@ -3,6 +3,12 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { pageTitle } from '$lib/utils/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import { onDestroy } from 'svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+	import * as m from '$paraglide/messages';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -16,7 +22,22 @@
 
 	const toast = getToastStore();
 
+	// SuperForm wrapper around a single `folder` field so we can drive the
+	// standard FolderTreeSelect picker. Mirror its value into a hidden input
+	// so the multipart form action picks it up alongside the file.
+	const folderSchema = z.object({ folder: z.string().nullable().optional() });
+	const folderPickerForm = superForm(defaults({ folder: null }, zod(folderSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		SPA: true,
+		validators: zod(folderSchema)
+	});
 	let selectedFolderId = $state('');
+	const _folderUnsub = folderPickerForm.form.subscribe((v: any) => {
+		selectedFolderId = v?.folder ?? '';
+	});
+	onDestroy(_folderUnsub);
+
 	let title = $state('');
 	let submitting = $state(false);
 
@@ -121,7 +142,7 @@
 				<i class="fa-solid fa-file-import mr-2"></i>Questionnaire Autopilot
 			</h4>
 			<p class="text-sm text-gray-600 mt-1">
-				Upload a customer security questionnaire (.xlsx) and scope it to a folder. Once parsed,
+				Upload a customer security questionnaire (.xlsx) and scope it to a domain. Once parsed,
 				you'll review the detected sheet/columns before any prefill happens.
 			</p>
 			<p class="text-xs text-gray-500 mt-1">
@@ -143,24 +164,16 @@
 			class="space-y-4"
 		>
 			<div class="rounded-lg p-4 border-2 border-green-500">
-				<label for="folder" class="block text-sm font-medium text-gray-900">
-					Target folder *
-				</label>
-				<select
-					id="folder"
-					name="folder"
-					bind:value={selectedFolderId}
-					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-					required
-				>
-					<option value="">Select a folder</option>
-					{#each data.folders as folder}
-						<option value={folder.id}>{folder.str || folder.name}</option>
-					{/each}
-				</select>
+				<FolderTreeSelect
+					form={folderPickerForm}
+					field="folder"
+					label={m.folder() + ' *'}
+					contentTypes={['DO']}
+				/>
+				<input type="hidden" name="folder" value={selectedFolderId} />
 				<p class="text-xs text-gray-500 mt-1">
-					The agent will (later) look up applied controls, evidences, and existing assessments
-					inside this folder when answering questions.
+					The agent will look up applied controls, evidences, and existing assessments inside this
+					domain when answering questions.
 				</p>
 			</div>
 

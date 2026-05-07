@@ -3,16 +3,9 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
-	const [foldersRes, runsRes] = await Promise.all([
-		fetch(`${BASE_API_URL}/folders/?content_type=DO`),
-		fetch(`${BASE_API_URL}/chat/questionnaire-runs/?ordering=-created_at`)
-	]);
-
-	const foldersData = await foldersRes.json();
+	const runsRes = await fetch(`${BASE_API_URL}/chat/questionnaire-runs/?ordering=-created_at`);
 	const runsData = await runsRes.json();
-
 	return {
-		folders: foldersData.results ?? foldersData,
 		runs: runsData.results ?? runsData
 	};
 }) satisfies PageServerLoad;
@@ -28,7 +21,7 @@ export const actions: Actions = {
 			return fail(400, { error: 'Please select an Excel file.' });
 		}
 		if (!folder) {
-			return fail(400, { error: 'Please select a target folder.' });
+			return fail(400, { error: 'Please select a domain.' });
 		}
 
 		const forwarded = new FormData();
