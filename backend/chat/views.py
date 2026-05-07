@@ -832,6 +832,19 @@ class IndexedDocumentViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "source_type", "status"]
 
 
+def _excel_safe(value):
+    """Defang Excel formula injection: prefix a single quote to any string
+    starting with =, +, -, @ so Excel treats the cell as text rather than
+    evaluating it as a formula. The leading quote is invisible to humans
+    but the literal value passes through unchanged when copy-pasted.
+    """
+    if not isinstance(value, str):
+        return value
+    if value and value[0] in ("=", "+", "-", "@"):
+        return "'" + value
+    return value
+
+
 class QuestionnaireRunViewSet(BaseModelViewSet):
     """Experimental: questionnaire prefill runs."""
 
@@ -863,6 +876,23 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Hardened content check — magic bytes + zip structure + macro reject
+        # + zip-bomb guard. Catches renamed/forged/malicious uploads that the
+        # filename + size validators alone would pass.
+        from django.core.exceptions import ValidationError as DjValidationError
+
+        from .upload_validation import validate_questionnaire_upload
+
+        try:
+            validate_questionnaire_upload(file)
+        except DjValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if e.messages else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from django.contrib.auth.models import Permission
+
         from iam.models import Folder, RoleAssignment
 
         try:
@@ -872,12 +902,23 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
                 {"detail": "Folder not found."}, status=status.HTTP_404_NOT_FOUND
             )
 
-        readable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Folder
-        )
-        if folder.id not in readable_ids:
+        # Folder-scoped check: the user must hold add_questionnairerun in
+        # this specific folder. Holding the perm globally is not enough —
+        # the codebase's permission model is per-folder via role assignment.
+        try:
+            add_qr_perm = Permission.objects.get(codename="add_questionnairerun")
+        except Permission.DoesNotExist:
             return Response(
-                {"detail": "You do not have access to this folder."},
+                {"detail": "Server permission state is inconsistent."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_qr_perm, folder=folder
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to upload a questionnaire to this folder."
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -1173,10 +1214,10 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
                 ws.cell(
                     row=excel_row,
                     column=a_col + 1,
-                    value=cell_status_labels[status_key],
+                    value=_excel_safe(cell_status_labels[status_key]),
                 )
             if c_col is not None and comment:
-                ws.cell(row=excel_row, column=c_col + 1, value=comment)
+                ws.cell(row=excel_row, column=c_col + 1, value=_excel_safe(comment))
 
         out = io.BytesIO()
         wb.save(out)
@@ -1281,20 +1322,32 @@ class QuestionnaireQuestionViewSet(BaseModelViewSet):
         user-edited) draft, then immediately retry the question with the new
         control as priority context.
         """
+        from django.contrib.auth.models import Permission
+
         from core.models import AppliedControl
-        from iam.models import Folder, RoleAssignment
+        from iam.models import RoleAssignment
 
         question = self.get_object()
         folder = question.questionnaire_run.folder
 
-        # User must be able to read the folder. We rely on subsequent serializer
-        # validation for the AppliedControl write itself.
-        readable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Folder
-        )
-        if folder.id not in readable_ids:
+        # User must hold add_appliedcontrol in this folder. View access alone
+        # is not enough — Approver / Auditor roles can read a folder's
+        # controls but must not be able to write through this path.
+        try:
+            add_ac_perm = Permission.objects.get(codename="add_appliedcontrol")
+        except Permission.DoesNotExist:
             return Response(
-                {"detail": "You do not have access to this folder."},
+                {"detail": "Server permission state is inconsistent."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_ac_perm, folder=folder
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to add an applied "
+                    "control in this folder."
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -1377,6 +1430,49 @@ class QuestionnaireQuestionViewSet(BaseModelViewSet):
         )
 
 
+_STUCK_RUN_HEARTBEAT_GRACE_SECONDS = 5 * 60
+
+
+def _heal_if_stuck(run):
+    """Lazy stuck-run detector.
+
+    The agent worker heartbeats before each question (`_heartbeat()` in
+    chat.questionnaire). If an AgentRun is RUNNING but its last_heartbeat is
+    older than the grace period, the worker has almost certainly died —
+    flip the run to FAILED so the UI stops spinning forever.
+    Called from the polling/retrieve paths so the heal is opportunistic.
+    """
+    if not run or run.status != AgentRun.Status.RUNNING:
+        return
+    if not run.last_heartbeat_at:
+        return
+    age = (timezone.now() - run.last_heartbeat_at).total_seconds()
+    if age <= _STUCK_RUN_HEARTBEAT_GRACE_SECONDS:
+        return
+    run.status = AgentRun.Status.FAILED
+    run.finished_at = timezone.now()
+    msg = (
+        f"Worker heartbeat stale for {int(age)} s — marking the run as "
+        "failed. Restart Huey and re-run if you want a clean retry."
+    )
+    run.error_message = (
+        f"{run.error_message}\n{msg}".strip() if run.error_message else msg
+    )
+    run.save(
+        update_fields=[
+            "status",
+            "finished_at",
+            "error_message",
+            "updated_at",
+        ]
+    )
+    logger.warning(
+        "AgentRun %s healed from stuck-running (heartbeat %ds old)",
+        run.id,
+        int(age),
+    )
+
+
 class AgentRunViewSet(BaseModelViewSet):
     model = AgentRun
     filterset_fields = ["folder", "kind", "status", "target_object_id"]
@@ -1384,6 +1480,12 @@ class AgentRunViewSet(BaseModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        _heal_if_stuck(instance)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @action(detail=False, methods=["post"], url_path="start-questionnaire-prefill")
     def start_questionnaire_prefill(self, request):
@@ -1405,14 +1507,33 @@ class AgentRunViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        from iam.models import Folder, RoleAssignment
+        from django.contrib.auth.models import Permission
 
-        readable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Folder
-        )
-        if qr.folder_id not in readable_ids:
+        from iam.models import RoleAssignment
+
+        # Two-layer check: the user must be able to read the questionnaire run
+        # itself, AND must be able to add an AgentRun in this folder. View
+        # access alone shouldn't license LLM-driven writes.
+        if not RoleAssignment.is_object_readable(request.user, QuestionnaireRun, qr.id):
             return Response(
-                {"detail": "You do not have access to this questionnaire's folder."},
+                {"detail": "You do not have access to this questionnaire."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            add_agentrun_perm = Permission.objects.get(codename="add_agentrun")
+        except Permission.DoesNotExist:
+            return Response(
+                {"detail": "Server permission state is inconsistent."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_agentrun_perm, folder=qr.folder
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to start an agent "
+                    "run in this folder."
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
 
