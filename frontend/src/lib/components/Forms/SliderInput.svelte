@@ -1,0 +1,140 @@
+<script lang="ts">
+	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
+
+	interface Choice {
+		urn: string;
+		value: string;
+		description?: string | null;
+	}
+
+	interface Props {
+		mode: 'number' | 'choice';
+		value: number | string | null;
+		disabled?: boolean;
+		// number mode
+		min?: number;
+		max?: number;
+		step?: number;
+		// choice mode
+		choices?: Choice[];
+		onChange: (next: number | string | null) => void;
+	}
+
+	let {
+		mode,
+		value,
+		disabled = false,
+		min = 0,
+		max = 100,
+		step = 1,
+		choices = [],
+		onChange
+	}: Props = $props();
+
+	// Number mode: track whether the user has interacted with the slider yet.
+	// Until they do, value === null is treated as "untouched" — no thumb shown.
+	let engaged = $state(value !== null);
+
+	// Choice mode: positions are 0..N where 0 = null, 1..N = choices[i-1] in order.
+	const choiceCount = $derived(choices.length);
+
+	// Resolve the current slider position (number) from the bound value.
+	const sliderPosition = $derived.by(() => {
+		if (mode === 'number') {
+			if (value === null || typeof value !== 'number') return min;
+			return value;
+		}
+		// choice mode
+		if (value === null) return 0;
+		const idx = choices.findIndex((c) => c.urn === value);
+		// URN not found → orphan answer, sit at null sentinel
+		return idx === -1 ? 0 : idx + 1;
+	});
+
+	// Label below the thumb
+	const activeLabel = $derived.by(() => {
+		if (mode === 'number') {
+			if (value === null && !engaged) return '—';
+			return String(sliderPosition);
+		}
+		// choice mode
+		if (sliderPosition === 0) return '—';
+		const c = choices[sliderPosition - 1];
+		return c?.value ?? '—';
+	});
+
+	const activeDescription = $derived.by(() => {
+		if (mode !== 'choice') return null;
+		if (sliderPosition === 0) return null;
+		return choices[sliderPosition - 1]?.description ?? null;
+	});
+
+	function handleInput(e: Event) {
+		const raw = (e.currentTarget as HTMLInputElement).valueAsNumber;
+		if (mode === 'number') {
+			engaged = true;
+			onChange(raw);
+		} else {
+			if (raw === 0) {
+				onChange(null);
+			} else {
+				const c = choices[raw - 1];
+				onChange(c?.urn ?? null);
+			}
+		}
+	}
+
+	function clear() {
+		engaged = false;
+		onChange(null);
+	}
+
+	const showThumb = $derived(mode === 'choice' || engaged || value !== null);
+</script>
+
+<div class="flex flex-col gap-1 w-full">
+	<div class="flex items-center gap-2">
+		<input
+			type="range"
+			class="input flex-1 px-0 {showThumb ? '' : 'opacity-40'}"
+			min={mode === 'number' ? min : 0}
+			max={mode === 'number' ? max : choiceCount}
+			step={mode === 'number' ? step : 1}
+			value={sliderPosition}
+			{disabled}
+			aria-valuenow={sliderPosition}
+			aria-valuemin={mode === 'number' ? min : 0}
+			aria-valuemax={mode === 'number' ? max : choiceCount}
+			aria-valuetext={activeLabel}
+			oninput={handleInput}
+		/>
+		{#if mode === 'number' && value !== null && !disabled}
+			<button
+				type="button"
+				class="text-gray-400 hover:text-red-500 transition-colors"
+				aria-label="Clear answer"
+				onclick={clear}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
+		{/if}
+	</div>
+
+	<div class="flex items-center justify-center text-sm font-medium text-gray-700">
+		<span>{activeLabel}</span>
+		{#if activeDescription}
+			<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
+				<Tooltip.Trigger>
+					{#snippet child({ props })}
+						<span {...props} class="ml-2 underline">
+							<i class="fa-solid fa-circle-info"></i>
+						</span>
+					{/snippet}
+				</Tooltip.Trigger>
+				<Tooltip.Positioner>
+					<Tooltip.Content class="card preset-filled p-4">{activeDescription}</Tooltip.Content>
+				</Tooltip.Positioner>
+			</Tooltip>
+		{/if}
+	</div>
+</div>
