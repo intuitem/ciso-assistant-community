@@ -95,20 +95,31 @@
 
 <div class="flex flex-col gap-1 w-full">
 	<div class="flex items-center gap-2">
-		<input
-			type="range"
-			class="input flex-1 px-0 {showThumb ? '' : 'opacity-40'}"
-			min={mode === 'number' ? min : 0}
-			max={mode === 'number' ? max : choiceCount}
-			step={mode === 'number' ? step : 1}
-			value={sliderPosition}
-			{disabled}
-			aria-valuenow={sliderPosition}
-			aria-valuemin={mode === 'number' ? min : 0}
-			aria-valuemax={mode === 'number' ? max : choiceCount}
-			aria-valuetext={activeLabel}
-			oninput={handleInput}
-		/>
+		<div class="flex-1 flex flex-col gap-0.5">
+			<input
+				type="range"
+				class="input w-full px-0 {showThumb ? '' : 'opacity-40'}"
+				min={mode === 'number' ? min : 0}
+				max={mode === 'number' ? max : choiceCount}
+				step={mode === 'number' ? step : 1}
+				value={sliderPosition}
+				{disabled}
+				aria-valuenow={sliderPosition}
+				aria-valuemin={mode === 'number' ? min : 0}
+				aria-valuemax={mode === 'number' ? max : choiceCount}
+				aria-valuetext={activeLabel}
+				oninput={handleInput}
+			/>
+			{#if mode === 'choice' && choiceCount > 0}
+				<div class="flex justify-between pointer-events-none px-1.5" aria-hidden="true">
+					{#each Array(choiceCount + 1) as _, i (i)}
+						<span
+							class="w-px h-1.5 {i === sliderPosition ? 'bg-blue-500' : 'bg-gray-400'}"
+						></span>
+					{/each}
+				</div>
+			{/if}
+		</div>
 		{#if mode === 'number' && value !== null && !disabled}
 			<button
 				type="button"
