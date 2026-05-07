@@ -1,3 +1,5 @@
+import { browser } from '$app/environment';
+
 export interface XY {
 	x: number;
 	y: number;
@@ -13,6 +15,7 @@ const positionsKey = (folderId: string) => `assetBoard:positions:${folderId}`;
 const viewportKey = (folderId: string) => `assetBoard:viewport:${folderId}`;
 
 export function loadPositions(folderId: string): Record<string, XY> {
+	if (!browser) return {};
 	try {
 		const raw = localStorage.getItem(positionsKey(folderId));
 		if (!raw) return {};
@@ -24,6 +27,7 @@ export function loadPositions(folderId: string): Record<string, XY> {
 }
 
 export function savePositions(folderId: string, positions: Record<string, XY>): void {
+	if (!browser) return;
 	try {
 		localStorage.setItem(positionsKey(folderId), JSON.stringify(positions));
 	} catch {
@@ -32,6 +36,7 @@ export function savePositions(folderId: string, positions: Record<string, XY>): 
 }
 
 export function loadViewport(folderId: string): Viewport | null {
+	if (!browser) return null;
 	try {
 		const raw = localStorage.getItem(viewportKey(folderId));
 		if (!raw) return null;
@@ -51,6 +56,7 @@ export function loadViewport(folderId: string): Viewport | null {
 }
 
 export function saveViewport(folderId: string, viewport: Viewport): void {
+	if (!browser) return;
 	try {
 		localStorage.setItem(viewportKey(folderId), JSON.stringify(viewport));
 	} catch {

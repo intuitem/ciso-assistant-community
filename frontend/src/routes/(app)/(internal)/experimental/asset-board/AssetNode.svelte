@@ -44,8 +44,13 @@
 		event.preventDefault();
 		if (togglingType) return;
 		togglingType = true;
-		await board?.toggleAssetType(id);
-		togglingType = false;
+		try {
+			await board?.toggleAssetType(id);
+		} finally {
+			// Guarantee the spinner clears even if the underlying call throws — without
+			// this the pill would stay stuck on the spinner with no way to recover.
+			togglingType = false;
+		}
 	}
 
 	async function startEdit(event: MouseEvent) {
@@ -64,8 +69,13 @@
 			return;
 		}
 		saving = true;
-		const ok = await board?.renameAsset(id, trimmed);
-		saving = false;
+		let ok = false;
+		try {
+			ok = (await board?.renameAsset(id, trimmed)) ?? false;
+		} finally {
+			// Guarantee the input becomes editable again even if renameAsset throws.
+			saving = false;
+		}
 		if (ok) {
 			editing = false;
 		}

@@ -171,15 +171,17 @@
 	let flowInstance: ReturnType<typeof useSvelteFlow> | null = null;
 
 	function handleFlowInit() {
+		// `useSvelteFlow()` must be called inside `oninit` (not at script top-level):
+		// our component is the parent of <SvelteFlow>, not a descendant, so the
+		// xyflow context is only established once the flow has initialised. This is
+		// the documented pattern — see https://svelteflow.dev/api-reference/svelteflow#oninit
 		flowInstance = useSvelteFlow();
-		setTimeout(() => {
-			const saved = loadViewport(folderId);
-			if (saved) {
-				flowInstance?.setViewport(saved);
-			} else {
-				flowInstance?.fitView({ duration: 200, padding: 0.15 });
-			}
-		}, 100);
+		const saved = loadViewport(folderId);
+		if (saved) {
+			flowInstance?.setViewport(saved);
+		} else {
+			flowInstance?.fitView({ duration: 200, padding: 0.15 });
+		}
 	}
 
 	function persistViewport() {
@@ -272,7 +274,10 @@
 			const remaining = currentParentsOf(childId).filter((p) => !removedSources.has(p));
 			const ok = await patchParentAssets(childId, remaining);
 			if (!ok) {
-				// Re-add removed edges to local state
+				// Re-add removed edges to local state. `type: 'asset'` is required —
+				// defaultEdgeOptions only applies to edges created via onConnect, not to
+				// edges added programmatically here, and without it we'd lose the custom
+				// AssetEdge rendering (selected styling, click-to-show delete button).
 				for (const src of removedSources) {
 					edges = [
 						...edges,
@@ -280,8 +285,11 @@
 							id: `e-${src}-${childId}`,
 							source: src,
 							target: childId,
-							markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
-							style: 'stroke: var(--color-surface-500); stroke-width: 2;'
+							type: 'asset',
+							markerEnd: {
+								type: MarkerType.ArrowClosed,
+								color: 'var(--color-surface-600)'
+							}
 						}
 					];
 				}

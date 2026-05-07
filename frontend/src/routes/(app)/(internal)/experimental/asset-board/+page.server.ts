@@ -10,17 +10,21 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const selectedFolderId = url.searchParams.get('folder') ?? '';
 
+	// Defensive parsing: if the API returns a non-2xx (401/403/500/etc.), the body
+	// is an error object, not a list. Guard against that so {#each data.folders}
+	// doesn't iterate over object keys or throw.
+	const toList = (data: any): any[] =>
+		Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : [];
+
 	const foldersRes = await fetch(`${BASE_API_URL}/folders/?content_type=DO&content_type=GL`);
-	const foldersData = await foldersRes.json();
-	const folders = foldersData.results || foldersData;
+	const folders = foldersRes.ok ? toList(await foldersRes.json()) : [];
 
 	let assets: any[] = [];
 	if (selectedFolderId) {
 		const assetsRes = await fetch(
 			`${BASE_API_URL}/assets/?folder=${encodeURIComponent(selectedFolderId)}`
 		);
-		const assetsData = await assetsRes.json();
-		assets = assetsData.results || assetsData;
+		assets = assetsRes.ok ? toList(await assetsRes.json()) : [];
 	}
 
 	const assetModelInfo = getModelInfo('assets');
