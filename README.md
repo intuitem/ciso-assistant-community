@@ -373,10 +373,12 @@ For the following executions, use "docker compose up" directly.
 
 ## Setting up CISO Assistant for development
 
-> [!WARNING] Important note for Windows users
+> [!WARNING]
+> ### Important note for Windows users
 > The best working solution for users developing on **Windows** is to use [Ubuntu](https://apps.microsoft.com/detail/9pdxgncfsczv) installed on [WSL2](https://apps.microsoft.com/detail/9p9tqf7mrm4r) (Docker is not required).
 >
-> It is now also possible to run and develop CISO Assistant natively on Windows without WSL2 nor Docker, but it will requires some extra steps. Please note that the native running on Widows is still in **EXPERIMENTAL PHASE** and should **NOT** be used if you are unsure of what you are doing, or if you want to ensure stability throughout development.
+> It is now also possible to run and develop CISO Assistant natively on Windows without WSL2 nor Docker, but it will requires some extra steps.
+> Please note that the native running on Widows is still in **EXPERIMENTAL PHASE** and should **NOT** be used if you are unsure of what you are doing, or if you want to ensure stability throughout development.
 > Nevertheless, we would love to hear any suggestions in order to enhance the development experience for Windows users. Please fell free to open an Issue/PR about it!
 
 
@@ -413,7 +415,8 @@ PYTHONUTF8=1
 PYTHONIOENCODING=utf-8:replace
 ``` 
 
-> [!NOTE] Known issues
+> [!NOTE]
+> ### Known issues
 > - The `libmagic` library on Windows (MIME detection) struggles to recognize an Excel file (`.xlsx`) by reading its first `2048` bits as it returns `application/octet-stream` most of the time when importing an Excel library (backend displays the warning message `[warning  ] Invalid MIME type`). This doesn't prevent the Excel file from being imported thanks to the fallback method in `backend/library/views.py:StoredLibraryViewSet.upload_library`.
 
 </details>
