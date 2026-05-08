@@ -205,31 +205,6 @@ class TestAssetsAuthenticated:
             test.client, "Assets", "type", Asset.Type.choices
         )
 
-    def test_export_filtered_assets(self, test):
-        """Export should honor the same filters as the assets list."""
-
-        pr_asset = Asset.objects.create(
-            name="filtered-pr-asset",
-            description=ASSET_DESCRIPTION,
-            type=ASSET_TYPE[0],
-            folder=test.folder,
-        )
-        Asset.objects.create(
-            name="filtered-sp-asset",
-            description=ASSET_DESCRIPTION,
-            type=ASSET_TYPE2[0],
-            folder=test.folder,
-        )
-
-        response = test.client.get("/api/assets/export/?type=PR")
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response["Content-Type"] == "text/csv"
-        content = response.content.decode("utf-8")
-        assert "filtered-pr-asset" in content
-        assert "filtered-sp-asset" not in content
-
-
 # ---------------------------------------------------------------------------
 # IAM-scoped visibility on /api/assets/.
 #
@@ -296,4 +271,66 @@ class TestAssetListIAMScope:
         assert str(asset_in_b.id) not in ids, (
             f"scoped reader saw asset {asset_in_b.id} from another folder; "
             f"results: {ids}"
+        )
+
+    def test_scoped_reader_export_respects_scope(self):
+        """Export endpoint should honor IAM scope — a scoped reader
+        must not see assets from folders outside their perimeter,
+        even when using filters like type=PR on /api/assets/export/."""
+        root = Folder.get_root_folder()
+        folder_a = Folder.objects.create(
+            name=f"perf-test-A-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        folder_b = Folder.objects.create(
+            name=f"perf-test-B-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+
+        # Create assets in folder A (scoped reader has access)
+        asset_a_pr = Asset.objects.create(
+            folder=folder_a,
+            name=f"asset-A-PR-{uuid.uuid4().hex[:6]}",
+            type=Asset.Type.PRIMARY,
+        )
+        asset_a_sp = Asset.objects.create(
+            folder=folder_a,
+            name=f"asset-A-SP-{uuid.uuid4().hex[:6]}",
+            type=Asset.Type.SUPPORT,
+        )
+
+        # Create assets in folder B (scoped reader does NOT have access)
+        asset_b_pr = Asset.objects.create(
+            folder=folder_b,
+            name=f"asset-B-PR-{uuid.uuid4().hex[:6]}",
+            type=Asset.Type.PRIMARY,
+        )
+        asset_b_sp = Asset.objects.create(
+            folder=folder_b,
+            name=f"asset-B-SP-{uuid.uuid4().hex[:6]}",
+            type=Asset.Type.SUPPORT,
+        )
+
+        client = _client_for(_make_scoped_reader(folder_a))
+        r = client.get("/api/assets/export_csv/?type=PR")
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert r["Content-Type"] == "text/csv"
+        content = r.content.decode("utf-8")
+
+        # Should see only PR asset from folder A
+        assert asset_a_pr.name in content, (
+            f"scoped reader should see PR asset {asset_a_pr.name} from their folder"
+        )
+        # Should NOT see SP asset from folder A (filtered by type)
+        assert asset_a_sp.name not in content, (
+            f"scoped reader should not see SP asset {asset_a_sp.name} (filtered by type)"
+        )
+        # Should NOT see any asset from folder B (outside scope)
+        assert asset_b_pr.name not in content, (
+            f"scoped reader should not see PR asset {asset_b_pr.name} from another folder"
+        )
+        assert asset_b_sp.name not in content, (
+            f"scoped reader should not see SP asset {asset_b_sp.name} from another folder"
         )
