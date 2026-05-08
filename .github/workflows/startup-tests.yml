@@ -216,6 +216,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
       - name: Install Poetry via pipx
         shell: bash
         run: |
@@ -283,6 +287,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
       - name: Install frontend dependencies
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make pre-build

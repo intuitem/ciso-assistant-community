@@ -20,7 +20,11 @@ endif
 .DEFAULT_GOAL := build-enterprise
 
 ensure-pnpm:
-	@command -v pnpm || npm install -g pnpm
+	@command -v pnpm >/dev/null 2>&1 || { \
+		PNPM_VER=$$(node -p "require('$(COMMUNITY_DIR)/package.json').packageManager.split('@')[1]"); \
+		echo "pnpm not found, installing pnpm@$$PNPM_VER (pinned in $(COMMUNITY_DIR)/package.json)"; \
+		npm install -g "pnpm@$$PNPM_VER"; \
+	}
 
 pre-build: ensure-pnpm
 	@mkdir -p $(BUILD_DIR)
