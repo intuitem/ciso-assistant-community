@@ -1252,8 +1252,8 @@
 					history is never rewritten.
 				{:else}
 					Instance setting allows <strong>auto-approve</strong> — the new revision is recorded as
-					<em>approved</em> with you (the uploader) as its own reviewer. No review cycle is imposed;
-					the audit trail still shows who uploaded what, when.
+					<em>approved</em> with you (the uploader) as its own reviewer. No review cycle is imposed; the
+					audit trail still shows who uploaded what, when.
 				{/if}
 			</div>
 		</section>
@@ -1291,8 +1291,8 @@
 		<div class="text-sm font-semibold text-blue-900 mt-3 mb-1">Still open</div>
 		<ul class="list-disc ml-5 space-y-1 text-blue-900">
 			<li>
-				History as a <strong>vertical timeline</strong> vs a flat sortable table — timeline wins for
-				≤20 revisions; should we offer a table fallback for very long histories?
+				History as a <strong>vertical timeline</strong> vs a flat sortable table — timeline wins for ≤20
+				revisions; should we offer a table fallback for very long histories?
 			</li>
 			<li>
 				File identity = filename. Drop a renamed-file detector entirely, or add a "rename" badge

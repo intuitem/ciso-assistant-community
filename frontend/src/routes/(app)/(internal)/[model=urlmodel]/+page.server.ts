@@ -63,10 +63,10 @@ export const actions: Actions = {
 	create: async (event) => {
 		const redirectToWrittenObject = Boolean(
 			event.params.model === 'entity-assessments' ||
-				event.params.model === 'quantitative-risk-hypotheses' ||
-				event.params.model === 'quantitative-risk-studies' ||
-				event.params.model === 'quantitative-risk-scenarios' ||
-				event.params.model === 'risk-assessments'
+			event.params.model === 'quantitative-risk-hypotheses' ||
+			event.params.model === 'quantitative-risk-studies' ||
+			event.params.model === 'quantitative-risk-scenarios' ||
+			event.params.model === 'risk-assessments'
 		);
 		return defaultWriteFormAction({
 			event,
