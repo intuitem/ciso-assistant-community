@@ -430,6 +430,9 @@ class ExportMixin:
                     *self.export_config["prefetch_related"]
                 )
 
+        # Apply the same filter/search behavior as the list view.
+        queryset = self.filter_queryset(queryset)
+
         return queryset
 
     def _resolve_field_value(self, obj, field_config):
