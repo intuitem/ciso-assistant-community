@@ -108,7 +108,7 @@
 				<option value={option.value} style="background-color: {color_map[option.value]}">
 					{#if !translateOptions}
 						{option.label}
-					{:else if camelKey !== 'm' && m[camelKey]}
+					{:else if option.label === option.value && camelKey !== 'm' && m[camelKey]}
 						{safeTranslate(option.value)}
 					{:else}
 						{safeTranslate(option.label)}
