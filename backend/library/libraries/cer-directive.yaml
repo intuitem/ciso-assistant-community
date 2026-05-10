@@ -6,12 +6,15 @@ description:
   Entity-facing obligations from Chapter III of Directive (EU) 2022/2557
   of the European Parliament and of the Council of 14 December 2022 on the resilience
   of critical entities and repealing Council Directive 2008/114/EC. Covers Articles
-  12 to 17. Articles 12 to 15 (risk assessment, resilience measures, background
-  checks, incident notification) are assessable; Articles 16 (standards) and 17
-  (critical entities of particular European significance), along with the authority
-  follow-up duties in 15.3 and 15.4, are included as non-assessable context.
+  12 to 17. The core scope is risk assessment (Article 12), resilience measures
+  (Article 13) and incident notification (Article 15); Article 14 (background
+  checks) is included with only its substantive content requirements assessable.
+  Articles 16 (standards) and 17 (critical entities of particular European
+  significance), umbrella and permissive paragraphs within the core articles, and
+  competent-authority follow-up duties (15.3, 15.4) are included as non-assessable
+  context.
 copyright: European Union law
-version: 1
+version: 2
 publication_date: 2026-05-08
 provider: EU
 packager: intuitem
@@ -22,14 +25,16 @@ objects:
     urn: urn:intuitem:risk:framework:cer-directive
     ref_id: CER-directive
     name: CER directive (Critical Entities Resilience)
-    description:
-      Entity-facing obligations from Chapter III of Directive (EU) 2022/2557
-      on the resilience of critical entities. Articles 12 to 15 (risk assessment,
-      resilience measures, background checks, incident notification) are assessable.
-      Articles 16 (standards) and 17 (critical entities of particular European
-      significance), along with the authority follow-up duties in 15.3 and 15.4,
-      are included as non-assessable context. Member-State-level duties from Chapters
-      I, II, IV and V are out of scope and not modelled here.
+    description: >-
+      Entity-facing obligations from Chapter III of Directive (EU) 2022/2557 on the
+      resilience of critical entities. Core scope: risk assessment (Article 12),
+      resilience measures (Article 13) and incident notification (Article 15);
+      Article 14 (background checks) is included with only its substantive content
+      requirements (14.3) assessable. Articles 16 (standards) and 17 (critical
+      entities of particular European significance), umbrella and permissive
+      paragraphs (12.2.sp2, 13.1, 14.1, 14.2), and competent-authority follow-up
+      duties (15.3, 15.4) are included as non-assessable context. Member-State-level
+      duties from Chapters I, II, IV and V are out of scope and not modelled here.
     requirement_nodes:
       - urn: urn:intuitem:risk:req_node:cer-directive:art12
         assessable: false
@@ -97,7 +102,7 @@ objects:
               par d’autres entités de ces autres secteurs, y compris s’il y a lieu,
               dans les États membres voisins et les pays tiers.
       - urn: urn:intuitem:risk:req_node:cer-directive:12.2.sp2
-        assessable: true
+        assessable: false
         depth: 3
         parent_urn: urn:intuitem:risk:req_node:cer-directive:12.2
         ref_id: 12.2.sp2
@@ -134,7 +139,7 @@ objects:
             name: Article 13
             description: Mesures de résilience des entités critiques
       - urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        assessable: true
+        assessable: false
         depth: 2
         parent_urn: urn:intuitem:risk:req_node:cer-directive:art13
         ref_id: "13.1"
@@ -330,7 +335,7 @@ objects:
             name: Article 14
             description: Vérification des antécédents
       - urn: urn:intuitem:risk:req_node:cer-directive:14.1
-        assessable: true
+        assessable: false
         depth: 2
         parent_urn: urn:intuitem:risk:req_node:cer-directive:art14
         ref_id: "14.1"
@@ -368,7 +373,7 @@ objects:
               c) dont le recrutement est envisagé à des postes répondant aux critères
               énoncés au point a) ou b)."
       - urn: urn:intuitem:risk:req_node:cer-directive:14.2
-        assessable: true
+        assessable: false
         depth: 2
         parent_urn: urn:intuitem:risk:req_node:cer-directive:art14
         ref_id: "14.2"
@@ -716,26 +721,30 @@ objects:
     translations:
       fr:
         name: Directive REC (Résilience des entités critiques)
-        description:
-          Obligations applicables aux entités issues du chapitre III de
-          la directive (UE) 2022/2557 du Parlement européen et du Conseil du 14 décembre
-          2022 sur la résilience des entités critiques et abrogeant la directive 2008/114/CE
-          du Conseil. Couvre les articles 12 à 17. Les articles 12 à 15 (évaluation
-          des risques, mesures de résilience, vérification des antécédents, notification
-          d’incidents) sont évaluables ; les articles 16 (normes) et 17 (entités
-          critiques d’importance européenne particulière), ainsi que les devoirs
-          de suivi de l’autorité compétente prévus aux paragraphes 15.3 et 15.4,
-          sont inclus à titre informatif (non évaluables).
+        description: >-
+          Obligations applicables aux entités issues du chapitre III de la directive
+          (UE) 2022/2557 du Parlement européen et du Conseil du 14 décembre 2022
+          sur la résilience des entités critiques et abrogeant la directive
+          2008/114/CE du Conseil. Couvre les articles 12 à 17. Périmètre principal :
+          évaluation des risques (article 12), mesures de résilience (article 13) et
+          notification d’incidents (article 15) ; l’article 14 (vérification des
+          antécédents) est inclus avec uniquement ses exigences de contenu (14.3)
+          évaluables. Les articles 16 (normes) et 17 (entités critiques d’importance
+          européenne particulière), les paragraphes-cadres et permissifs (12.2.sp2,
+          13.1, 14.1, 14.2) ainsi que les devoirs de suivi de l’autorité compétente
+          (15.3, 15.4) sont inclus à titre informatif (non évaluables).
 translations:
   fr:
     name: Directive REC (Résilience des entités critiques)
-    description:
-      Obligations applicables aux entités issues du chapitre III de la
-      directive (UE) 2022/2557 du Parlement européen et du Conseil du 14 décembre
-      2022 sur la résilience des entités critiques et abrogeant la directive 2008/114/CE
-      du Conseil. Couvre les articles 12 à 17. Les articles 12 à 15 (évaluation des
-      risques, mesures de résilience, vérification des antécédents, notification
-      d’incidents) sont évaluables ; les articles 16 (normes) et 17 (entités critiques
-      d’importance européenne particulière), ainsi que les devoirs de suivi de
-      l’autorité compétente prévus aux paragraphes 15.3 et 15.4, sont inclus à titre
-      informatif (non évaluables).
+    description: >-
+      Obligations applicables aux entités issues du chapitre III de la directive
+      (UE) 2022/2557 du Parlement européen et du Conseil du 14 décembre 2022 sur la
+      résilience des entités critiques et abrogeant la directive 2008/114/CE du
+      Conseil. Couvre les articles 12 à 17. Périmètre principal : évaluation des
+      risques (article 12), mesures de résilience (article 13) et notification
+      d’incidents (article 15) ; l’article 14 (vérification des antécédents) est
+      inclus avec uniquement ses exigences de contenu (14.3) évaluables. Les
+      articles 16 (normes) et 17 (entités critiques d’importance européenne
+      particulière), les paragraphes-cadres et permissifs (12.2.sp2, 13.1, 14.1,
+      14.2) ainsi que les devoirs de suivi de l’autorité compétente (15.3, 15.4)
+      sont inclus à titre informatif (non évaluables).
