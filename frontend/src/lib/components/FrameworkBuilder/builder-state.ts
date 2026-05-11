@@ -828,11 +828,13 @@ export function createBuilderState(
 			return;
 		}
 
-		// Clear previous node-level validation errors
+		// Clear previous node- and question-level validation errors so stale
+		// entries (e.g. slider min/max/step errors from the previous attempt)
+		// don't survive a re-validation.
 		errors.update((m) => {
 			const next = new Map(m);
 			for (const key of next.keys()) {
-				if (key.startsWith('node-')) next.delete(key);
+				if (key.startsWith('node-') || key.startsWith('question-')) next.delete(key);
 			}
 			return next;
 		});
