@@ -5,7 +5,7 @@
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { onDestroy } from 'svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import * as m from '$paraglide/messages';
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
