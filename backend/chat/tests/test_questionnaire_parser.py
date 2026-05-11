@@ -8,8 +8,9 @@ Covers the pure / openpyxl-driven helpers that don't need Qdrant or LLM:
   indexed text body for the visible context label
 - ``_parse_data_validation_list`` — inline-quoted list and range-ref forms
 - ``_detect_cell_vocabulary`` — per-cell drop-down detection
-- ``extract_questions_from_sheet`` — the end-to-end row materializer (uses
-  a real workbook crafted in-memory)
+
+``extract_questions_from_sheet`` (the end-to-end row materializer) needs DB +
+file storage and is exercised by the integration smoke flow rather than here.
 """
 
 import io

@@ -134,6 +134,12 @@ class QuestionnaireRunListSerializer(BaseModelSerializer):
 
 
 class QuestionnaireRunWriteSerializer(BaseModelSerializer):
+    """Generic CRUD writer. ``column_mapping`` / ``value_mapping`` go through
+    dedicated validated endpoints (set_mapping / suggest_value_mapping) — keep
+    them out of the writable surface here so a generic PATCH can't store
+    arbitrary blobs that the extract step then trusts.
+    """
+
     class Meta:
         model = QuestionnaireRun
         exclude = [
@@ -143,6 +149,8 @@ class QuestionnaireRunWriteSerializer(BaseModelSerializer):
             "status",
             "error_message",
             "parsed_data",
+            "column_mapping",
+            "value_mapping",
         ]
 
 

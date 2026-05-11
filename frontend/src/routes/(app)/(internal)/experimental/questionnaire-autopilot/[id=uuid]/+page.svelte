@@ -179,37 +179,48 @@
 		}
 	}
 
+	// Polling fetches swallow transient errors on purpose — a single network
+	// blip would otherwise become an unhandled rejection inside setInterval
+	// and silently drop further polls. We log and return; the next tick retries.
 	async function refreshParseRun() {
-		const res = await fetch(`/experimental/questionnaire-autopilot/${run.id}`, {
-			headers: { accept: 'application/json' }
-		});
-		if (res.ok) {
-			polledRun = await res.json();
+		try {
+			const res = await fetch(`/experimental/questionnaire-autopilot/${run.id}`, {
+				headers: { accept: 'application/json' }
+			});
+			if (res.ok) {
+				polledRun = await res.json();
+			}
+		} catch (e) {
+			console.warn('refreshParseRun failed; will retry on next tick', e);
 		}
 	}
 
 	async function refreshAgentRun() {
 		if (!agentRun) return;
-		const res = await fetch(
-			`/experimental/questionnaire-autopilot/${run.id}/agent-state?run_id=${agentRun.id}`
-		);
-		if (!res.ok) return;
-		const payload = await res.json();
-		polledAgentRun = payload.agentRun;
-		polledActions = payload.actions ?? [];
-		if (
-			polledAgentRun &&
-			(polledAgentRun.status === 'succeeded' ||
-				polledAgentRun.status === 'failed' ||
-				polledAgentRun.status === 'cancelled')
-		) {
-			stopPoll();
-			// Sync the freshly-completed run into the page-server load so
-			// reloads don't re-fetch and so further polls see consistent state.
-			await invalidateAll();
-			polledRun = null;
-			polledAgentRun = null;
-			polledActions = null;
+		try {
+			const res = await fetch(
+				`/experimental/questionnaire-autopilot/${run.id}/agent-state?run_id=${agentRun.id}`
+			);
+			if (!res.ok) return;
+			const payload = await res.json();
+			polledAgentRun = payload.agentRun;
+			polledActions = payload.actions ?? [];
+			if (
+				polledAgentRun &&
+				(polledAgentRun.status === 'succeeded' ||
+					polledAgentRun.status === 'failed' ||
+					polledAgentRun.status === 'cancelled')
+			) {
+				stopPoll();
+				// Sync the freshly-completed run into the page-server load so
+				// reloads don't re-fetch and so further polls see consistent state.
+				await invalidateAll();
+				polledRun = null;
+				polledAgentRun = null;
+				polledActions = null;
+			}
+		} catch (e) {
+			console.warn('refreshAgentRun failed; will retry on next tick', e);
 		}
 	}
 

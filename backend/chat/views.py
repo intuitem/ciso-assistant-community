@@ -1000,10 +1000,15 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        from django.db import transaction
+
         from .tasks import extract_questions_from_sheet, suggest_value_mapping
 
-        QuestionnaireQuestion.objects.filter(questionnaire_run=run).delete()
-        created = extract_questions_from_sheet(run, sheet, mapping)
+        # Atomic: if extraction blows up (parser bug, malformed sheet, transient
+        # DB error), the prior questions stay intact so the run isn't stranded.
+        with transaction.atomic():
+            QuestionnaireQuestion.objects.filter(questionnaire_run=run).delete()
+            created = extract_questions_from_sheet(run, sheet, mapping)
 
         # Each question now carries its detected answer_candidates. Group +
         # LLM-map them in the background so per-question mappings are ready
@@ -1227,12 +1232,25 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
         wb.save(out)
         out.seek(0)
 
+        # run.filename came from the upload's File.name — client-supplied.
+        # A " or CRLF in there would break the Content-Disposition header
+        # (response-splitting territory). Strip to a safe ASCII fallback for
+        # the legacy `filename` token, then attach the RFC 5987 `filename*`
+        # form so non-ASCII titles still render cleanly on modern clients.
+        import re as _re
+        import urllib.parse as _urlparse
+
         original_name = run.filename or "questionnaire.xlsx"
-        if original_name.lower().endswith(".xlsx"):
-            stem = original_name[:-5]
-        else:
-            stem = original_name
-        download_name = f"{stem}__prefilled.xlsx"
+        stem = (
+            original_name[:-5]
+            if original_name.lower().endswith(".xlsx")
+            else original_name
+        )
+        ascii_stem = (
+            _re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._-") or "questionnaire"
+        )
+        ascii_name = f"{ascii_stem[:120]}__prefilled.xlsx"
+        utf8_name = _urlparse.quote(f"{stem}__prefilled.xlsx", safe="")
 
         response = HttpResponse(
             out.getvalue(),
@@ -1240,7 +1258,9 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             ),
         )
-        response["Content-Disposition"] = f'attachment; filename="{download_name}"'
+        response["Content-Disposition"] = (
+            f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{utf8_name}"
+        )
         return response
 
 
@@ -1575,28 +1595,35 @@ class AgentRunViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        active = AgentRun.objects.filter(
-            target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
-            target_object_id=qr.id,
-            status__in=[AgentRun.Status.QUEUED, AgentRun.Status.RUNNING],
-        )
-        if active.exists():
-            return Response(
-                {
-                    "detail": "An agent run is already in progress for this questionnaire."
-                },
-                status=status.HTTP_409_CONFLICT,
-            )
+        # Lock the parent QuestionnaireRun row so two concurrent Start clicks
+        # can't both pass the active-run check and each insert a new AgentRun.
+        # The check + create are now atomic relative to that lock.
+        from django.db import transaction
 
-        agent_run = AgentRun.objects.create(
-            owner=request.user,
-            folder=qr.folder,
-            kind=AgentRun.Kind.QUESTIONNAIRE_PREFILL,
-            strictness=data["strictness"],
-            target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
-            target_object_id=qr.id,
-            total_steps=question_count,
-        )
+        with transaction.atomic():
+            QuestionnaireRun.objects.select_for_update().get(id=qr.id)
+            active_exists = AgentRun.objects.filter(
+                target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+                target_object_id=qr.id,
+                status__in=[AgentRun.Status.QUEUED, AgentRun.Status.RUNNING],
+            ).exists()
+            if active_exists:
+                return Response(
+                    {
+                        "detail": "An agent run is already in progress for this questionnaire."
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            agent_run = AgentRun.objects.create(
+                owner=request.user,
+                folder=qr.folder,
+                kind=AgentRun.Kind.QUESTIONNAIRE_PREFILL,
+                strictness=data["strictness"],
+                target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+                target_object_id=qr.id,
+                total_steps=question_count,
+            )
 
         from .tasks import run_questionnaire_prefill
 

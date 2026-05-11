@@ -64,23 +64,34 @@ class Command(BaseCommand):
                 "Run 'init_qdrant' first."
             )
 
-        # Build the live-id set across every indexed model (optionally folder-scoped).
-        live_ids: set[str] = set()
+        # Build the live (object_type, object_id) set across every indexed
+        # model (optionally folder-scoped). Keying by tuple — not by id alone
+        # — guarantees we don't false-detect a stale point because some other
+        # model happened to share the same UUID (vanishingly rare, but cheap
+        # to do right).
+        live_keys: set[tuple[str, str]] = set()
+        from chat.text import _normalize_model_name
+
         for model_path in INDEXED_MODELS:
             try:
                 app_label, model_name = model_path.split(".")
                 model_class = apps.get_model(app_label, model_name)
             except (LookupError, ValueError):
                 continue
+            object_type = _normalize_model_name(model_name)
             try:
                 qs = model_class.objects.all()
                 if folder_filter:
                     qs = qs.filter(folder_id=folder_filter)
                 for obj_id in qs.values_list("id", flat=True).iterator():
-                    live_ids.add(str(obj_id))
+                    live_keys.add((object_type, str(obj_id)))
             except Exception as e:
-                self.stderr.write(
-                    self.style.WARNING(f"Skipping {model_path}: query failed ({e})")
+                # Don't continue with an incomplete live set — proceeding would
+                # treat live rows from this model as stale and delete their
+                # points. Bail loudly so the operator can investigate.
+                raise CommandError(
+                    f"Cannot build live-id set: query for {model_path} "
+                    f"failed ({e}). Aborting before any delete."
                 )
 
         # Walk every model point in Qdrant (optionally folder-scoped).
@@ -113,7 +124,8 @@ class Command(BaseCommand):
                 scanned += 1
                 payload = getattr(p, "payload", {}) or {}
                 obj_id = payload.get("object_id")
-                if obj_id and str(obj_id) not in live_ids:
+                object_type = payload.get("object_type") or ""
+                if obj_id and (object_type, str(obj_id)) not in live_keys:
                     stale_point_ids.append(p.id)
             if not next_offset:
                 break

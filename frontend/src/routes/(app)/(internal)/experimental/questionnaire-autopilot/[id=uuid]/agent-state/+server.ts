@@ -2,10 +2,19 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
+// run_id comes from the client and is interpolated straight into a backend
+// URL path. Reject anything that isn't a UUID before issuing the fetches —
+// stops a value like "../agent-actions" from path-traversing to a different
+// endpoint under the caller's session credentials.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const runId = url.searchParams.get('run_id');
 	if (!runId) {
 		return json({ detail: 'run_id required' }, { status: 400 });
+	}
+	if (!UUID_RE.test(runId)) {
+		return json({ detail: 'invalid run_id' }, { status: 400 });
 	}
 
 	const [runRes, actionsRes] = await Promise.all([

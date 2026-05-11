@@ -152,9 +152,21 @@ class TestRefiner:
     def test_library_only_treated_as_no_evidence(self, patched):
         # Reference material from a framework — does not justify yes.
         patched()
-        refs = [_ref(1, kind="model", obj_id="rn-1")]
+        refs = [_ref(1, kind="requirement_node", obj_id="rn-1")]
         new_status, note = _refine_verdict_against_citations("yes", [1], refs)
         assert new_status == "needs_info"
+
+    def test_neutral_internal_kind_does_not_downgrade(self, patched):
+        # Internal records that aren't status-bearing (evidence, vulnerability,
+        # incident, asset, …) should be neutral — they shouldn't push a "yes"
+        # to "needs_info" just because they don't fit the AC/RA/CA buckets.
+        patched()
+        for neutral_kind in ("evidence", "vulnerability", "incident", "asset"):
+            refs = [_ref(1, kind=neutral_kind, obj_id=f"x-{neutral_kind}")]
+            new_status, _ = _refine_verdict_against_citations("yes", [1], refs)
+            assert new_status == "yes", (
+                f"kind={neutral_kind!r} should not trigger a downgrade"
+            )
 
     def test_compliance_assessment_in_progress_supports_partial(self, patched):
         patched(ca_map={"ca-1": _FakeCA("in_progress")})

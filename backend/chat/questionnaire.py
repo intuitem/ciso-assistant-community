@@ -796,6 +796,7 @@ def _build_context_block(results: list[dict]) -> tuple[str, list[dict]]:
             snippet = snippet[:400] + "…"
         name = r.get("name") or ""
         object_type = r.get("object_type") or ""
+        source_type = r.get("source_type") or ""
         ref_id = r.get("ref_id") or ""
         status_marker = _extract_status_marker(text)
         label_bits = []
@@ -809,10 +810,18 @@ def _build_context_block(results: list[dict]) -> tuple[str, list[dict]]:
             label_bits.append(status_marker)
         label = " · ".join(label_bits) or "passage"
         lines.append(f"[{i}] ({label}) {snippet}")
+        # ``source_type`` is the broad category ("model" / "document"); for
+        # model rows the concrete kind (applied_control, evidence, …) lives
+        # in ``object_type``. The refiner + frontend citation linker key on
+        # the concrete kind, so prefer object_type when source_type is
+        # "model" and fall back to source_type otherwise (e.g. "document").
+        ref_kind = (
+            object_type if source_type == "model" else (source_type or object_type)
+        )
         refs.append(
             {
                 "index": i,
-                "kind": r.get("source_type") or object_type or "",
+                "kind": ref_kind or "",
                 "id": str(r.get("object_id") or r.get("id") or ""),
                 "name": name or object_type or "",
                 "ref_id": ref_id,
@@ -1288,18 +1297,20 @@ def _process_question(
                 iteration=1,
                 count_tokens=count_tokens,
             )
-            # Use whichever iteration scored higher
+            # Use whichever iteration scored higher. Expire the loser so the
+            # review UI (which picks the latest non-expired iteration) shows
+            # the better answer — not the most recent one.
+            loser_iteration = 0 if critic2["score"] >= confidence else 1
             if critic2["score"] >= confidence:
                 proposed = retry
                 confidence = critic2["score"]
-                # Mark earlier proposal as expired so review UI shows the latest
-                AgentAction.objects.filter(
-                    agent_run=run,
-                    kind=AgentAction.Kind.PROPOSE_ANSWER,
-                    target_content_type=qq_ct,
-                    target_object_id=question.id,
-                    iteration=0,
-                ).update(state=AgentAction.State.EXPIRED)
+            AgentAction.objects.filter(
+                agent_run=run,
+                kind=AgentAction.Kind.PROPOSE_ANSWER,
+                target_content_type=qq_ct,
+                target_object_id=question.id,
+                iteration=loser_iteration,
+            ).update(state=AgentAction.State.EXPIRED)
 
     # Update final proposal with critic-derived confidence
     AgentAction.objects.filter(id=proposed["action_id"]).update(confidence=confidence)
@@ -1322,7 +1333,7 @@ Reply with a single JSON object, no prose:
 describing how it's actually implemented and verified — be concrete with \
 technologies, frequencies, owners>",
   "status": "to_do",
-  "category": "technical" | "process" | "governance",
+  "category": "policy" | "process" | "technical" | "physical" | "procedure",
   "csf_function": "govern" | "identify" | "protect" | "detect" | "respond" | "recover"
 }}"""
 
@@ -1551,6 +1562,20 @@ def _applied_control_to_rag_dict(ac) -> dict:
     }
 
 
+# Citation kinds that describe what *should* be done (framework material,
+# library reference controls, library threats). These don't justify a "yes"
+# on their own — internal records of practice do.
+_LIBRARY_REF_KINDS = frozenset(
+    {
+        "requirement_node",
+        "reference_control",
+        "library_threat",
+        "framework",
+        "threat",
+    }
+)
+
+
 def _refine_verdict_against_citations(
     answer_status: str,
     cited_indices: list,
@@ -1655,13 +1680,18 @@ def _refine_verdict_against_citations(
                 else:
                     has_status_bearing_only = True
                 continue
-            # Not AC, not RA, not CA. Distinguish uploaded evidence from
-            # library reference: document chunks are real internal evidence;
-            # library requirement nodes / reference controls describe what
-            # *should* be done — they are not evidence that we actually do it.
+            # Not AC, not RA, not CA. Three buckets:
+            #   - "document": uploaded evidence — supports the verdict.
+            #   - library/reference (requirement_node, reference_control,
+            #     framework, library_*): describes what *should* be done,
+            #     not what we do. Pure library citations should not justify
+            #     "yes" on their own.
+            #   - everything else (evidence, incident, vulnerability, asset,
+            #     risk_scenario, …): real internal records — neutral here.
+            #     Don't downgrade on these.
             if ref_kind == "document":
                 has_document_evidence = True
-            else:
+            elif ref_kind in _LIBRARY_REF_KINDS:
                 has_library_only = True
 
     # Active/compliant evidence or uploaded documents support the verdict.
