@@ -123,6 +123,7 @@
 								choices={question.choices}
 								value={internalAnswers[urn] ?? null}
 								{disabled}
+								ariaLabel={question.text}
 								onChange={(v) => {
 									internalAnswers[urn] = v;
 									onChange(urn, v);
@@ -248,6 +249,7 @@
 								step={Number(question.config.step ?? 1)}
 								value={internalAnswers[urn] ?? null}
 								{disabled}
+								ariaLabel={question.text}
 								onChange={(v) => {
 									internalAnswers[urn] = v;
 									onChange(urn, v);

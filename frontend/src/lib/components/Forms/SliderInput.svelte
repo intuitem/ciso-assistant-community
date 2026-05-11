@@ -12,6 +12,7 @@
 		mode: 'number' | 'choice';
 		value: number | string | null;
 		disabled?: boolean;
+		ariaLabel?: string;
 		// number mode
 		min?: number;
 		max?: number;
@@ -25,16 +26,13 @@
 		mode,
 		value,
 		disabled = false,
+		ariaLabel = '',
 		min = 0,
 		max = 100,
 		step = 1,
 		choices = [],
 		onChange
 	}: Props = $props();
-
-	// Number mode: track whether the user has interacted with the slider yet.
-	// Until they do, value === null is treated as "untouched" — no thumb shown.
-	let engaged = $state(value !== null);
 
 	// Choice mode: positions are 0..N where 0 = null, 1..N = choices[i-1] in order.
 	const choiceCount = $derived(choices.length);
@@ -52,10 +50,12 @@
 		return idx === -1 ? 0 : idx + 1;
 	});
 
-	// Label below the thumb
+	// Label below the thumb. Number mode shows the em-dash sentinel whenever
+	// the bound value is null (untouched or cleared) — deriving directly from
+	// `value` keeps this in sync when the parent resets the answer externally.
 	const activeLabel = $derived.by(() => {
 		if (mode === 'number') {
-			if (value === null && !engaged) return '—';
+			if (value === null) return '—';
 			return String(sliderPosition);
 		}
 		// choice mode
@@ -73,7 +73,6 @@
 	function handleInput(e: Event) {
 		const raw = (e.currentTarget as HTMLInputElement).valueAsNumber;
 		if (mode === 'number') {
-			engaged = true;
 			onChange(raw);
 		} else {
 			if (raw === 0) {
@@ -86,11 +85,10 @@
 	}
 
 	function clear() {
-		engaged = false;
 		onChange(null);
 	}
 
-	const showThumb = $derived(mode === 'choice' || engaged || value !== null);
+	const showThumb = $derived(mode === 'choice' || value !== null);
 </script>
 
 <div class="flex flex-col gap-1 w-full">
@@ -104,6 +102,7 @@
 				step={mode === 'number' ? step : 1}
 				value={sliderPosition}
 				{disabled}
+				aria-label={ariaLabel}
 				aria-valuenow={sliderPosition}
 				aria-valuemin={mode === 'number' ? min : 0}
 				aria-valuemax={mode === 'number' ? max : choiceCount}
