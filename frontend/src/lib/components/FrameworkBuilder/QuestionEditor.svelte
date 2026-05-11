@@ -43,6 +43,18 @@
 	const sliderMax = $derived(Number((question.config as { max?: number } | null)?.max ?? 100));
 	const sliderStep = $derived(Number((question.config as { step?: number } | null)?.step ?? 1));
 
+	// Real-time mirror of the publish-time slider validation in `builder-state.ts`,
+	// so authors see the problem while editing instead of only when they click
+	// Publish. Saves still go through — blocking autosave on transient invalid
+	// intermediate states would lose user input.
+	const sliderConfigError = $derived.by(() => {
+		if (currentVariant !== 'number:slider') return null;
+		if (!(sliderMin < sliderMax)) return 'Slider min must be less than max.';
+		if (!(sliderStep > 0)) return 'Slider step must be greater than 0.';
+		if (sliderStep > sliderMax - sliderMin) return 'Slider step cannot exceed (max − min).';
+		return null;
+	});
+
 	const dependsOnLabel = $derived.by(() => {
 		if (!question.depends_on) return null;
 		const dep = question.depends_on as { question: string; answers: string[] };
@@ -191,6 +203,13 @@
 						/>
 					</label>
 				</div>
+			{/if}
+
+			{#if sliderConfigError}
+				<p class="text-xs text-amber-600">
+					<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+					{sliderConfigError}
+				</p>
 			{/if}
 
 			{#if currentVariant === 'unique_choice:slider' && question.choices.length < 2}
