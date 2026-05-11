@@ -11,7 +11,7 @@ native Windows development.
 
 ## Where to place them?
 
-Place the scripts from this folder at these paths from the CISO Assistant
+Copy the scripts from this folder at these paths from the CISO Assistant
 repository root:
 
 ```text
