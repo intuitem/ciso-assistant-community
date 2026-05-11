@@ -9,7 +9,7 @@
 	import TypeSelector from './TypeSelector.svelte';
 	import ChoiceListEditor from './ChoiceListEditor.svelte';
 	import DependsOnEditor from './DependsOnEditor.svelte';
-	import { TYPE_ICONS, TYPE_COLORS } from './builder-utils.svelte';
+	import { QUESTION_TYPES, inferVariant, defaultConfigFor } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 
 	interface Props {
@@ -34,10 +34,9 @@
 		question.type === 'unique_choice' || question.type === 'multiple_choice'
 	);
 
-	const supportsSlider = $derived(question.type === 'number' || question.type === 'unique_choice');
-
-	const sliderEnabled = $derived(
-		(question.config as { widget?: string } | null)?.widget === 'slider'
+	const currentVariant = $derived(inferVariant(question));
+	const variantInfo = $derived(
+		QUESTION_TYPES.find((t) => t.value === currentVariant) ?? QUESTION_TYPES[0]
 	);
 
 	const sliderMin = $derived(Number((question.config as { min?: number } | null)?.min ?? 0));
@@ -61,29 +60,22 @@
 		await builder.updateQuestion(question.id, { [field]: value });
 	}
 
-	async function changeType(newType: string) {
+	async function changeVariant(newVariant: string) {
+		const info = QUESTION_TYPES.find((t) => t.value === newVariant);
+		if (!info) return;
+		const newStoredType = info.storedType;
 		if (
 			isChoiceType &&
-			newType !== 'unique_choice' &&
-			newType !== 'multiple_choice' &&
+			newStoredType !== 'unique_choice' &&
+			newStoredType !== 'multiple_choice' &&
 			question.choices.length > 0
 		) {
 			if (!confirm('Changing type will delete existing choices. Continue?')) return;
 		}
-		// Slider config is tied to the data shape — wipe it on any type change.
-		await builder.updateQuestion(question.id, { type: newType, config: null });
-	}
-
-	function enableSlider() {
-		const config =
-			question.type === 'number'
-				? { widget: 'slider', min: 0, max: 100, step: 1 }
-				: { widget: 'slider' };
-		saveField('config', config);
-	}
-
-	function disableSlider() {
-		saveField('config', null);
+		await builder.updateQuestion(question.id, {
+			type: newStoredType,
+			config: defaultConfigFor(newVariant)
+		});
 	}
 
 	function updateSliderConfig(patch: Record<string, number>) {
@@ -107,11 +99,8 @@
 			class="flex-1 flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
 			onclick={() => (expanded = true)}
 		>
-			<span
-				class="w-6 h-6 rounded flex items-center justify-center {TYPE_COLORS[question.type] ??
-					'text-gray-400 bg-gray-100'}"
-			>
-				<i class="fa-solid {TYPE_ICONS[question.type] ?? 'fa-question'} text-xs"></i>
+			<span class="w-6 h-6 rounded flex items-center justify-center {variantInfo.color}">
+				<i class="fa-solid {variantInfo.icon} text-xs"></i>
 			</span>
 			<span class="flex-1 text-sm text-gray-700 truncate">
 				{#if $activeLanguageStore}
@@ -132,11 +121,8 @@
 					{dependsOnLabel}
 				</span>
 			{/if}
-			<span
-				class="text-xs font-medium px-2 py-0.5 rounded {TYPE_COLORS[question.type] ??
-					'text-gray-400 bg-gray-100'}"
-			>
-				{question.type.replace('_', ' ')}
+			<span class="text-xs font-medium px-2 py-0.5 rounded {variantInfo.color}">
+				{variantInfo.label}
 			</span>
 		</button>
 	{/if}
@@ -155,7 +141,7 @@
 			class="flex-1 border border-gray-200 rounded-lg p-4 space-y-3 bg-white"
 		>
 			<div class="flex items-center justify-between">
-				<TypeSelector currentType={question.type} onselect={changeType} />
+				<TypeSelector {currentVariant} onselect={changeVariant} />
 				<div class="flex items-center gap-2">
 					<ConfirmAction
 						message="Delete this question?"
@@ -174,74 +160,44 @@
 				</div>
 			</div>
 
-			{#if supportsSlider}
-				<div class="flex items-center gap-2 text-xs text-gray-600">
-					<span class="font-medium">Widget:</span>
-					<div class="inline-flex rounded border border-gray-200 overflow-hidden">
-						<button
-							type="button"
-							class="px-2 py-0.5 transition-colors {!sliderEnabled
-								? 'bg-blue-500 text-white'
-								: 'bg-white text-gray-600 hover:bg-gray-50'}"
-							onclick={() => {
-								if (sliderEnabled) disableSlider();
-							}}
-						>
-							Input
-						</button>
-						<button
-							type="button"
-							class="px-2 py-0.5 transition-colors {sliderEnabled
-								? 'bg-blue-500 text-white'
-								: 'bg-white text-gray-600 hover:bg-gray-50'}"
-							onclick={() => {
-								if (!sliderEnabled) enableSlider();
-							}}
-						>
-							Slider
-						</button>
-					</div>
+			{#if currentVariant === 'number:slider'}
+				<div class="grid grid-cols-3 gap-2">
+					<label class="block">
+						<span class="text-xs text-gray-500">Min</span>
+						<input
+							type="number"
+							value={sliderMin}
+							class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+							onblur={(e) => updateSliderConfig({ min: Number(e.currentTarget.value) })}
+						/>
+					</label>
+					<label class="block">
+						<span class="text-xs text-gray-500">Max</span>
+						<input
+							type="number"
+							value={sliderMax}
+							class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+							onblur={(e) => updateSliderConfig({ max: Number(e.currentTarget.value) })}
+						/>
+					</label>
+					<label class="block">
+						<span class="text-xs text-gray-500">Step</span>
+						<input
+							type="number"
+							value={sliderStep}
+							min="0"
+							class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+							onblur={(e) => updateSliderConfig({ step: Number(e.currentTarget.value) })}
+						/>
+					</label>
 				</div>
+			{/if}
 
-				{#if sliderEnabled && question.type === 'number'}
-					<div class="grid grid-cols-3 gap-2">
-						<label class="block">
-							<span class="text-xs text-gray-500">Min</span>
-							<input
-								type="number"
-								value={sliderMin}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => updateSliderConfig({ min: Number(e.currentTarget.value) })}
-							/>
-						</label>
-						<label class="block">
-							<span class="text-xs text-gray-500">Max</span>
-							<input
-								type="number"
-								value={sliderMax}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => updateSliderConfig({ max: Number(e.currentTarget.value) })}
-							/>
-						</label>
-						<label class="block">
-							<span class="text-xs text-gray-500">Step</span>
-							<input
-								type="number"
-								value={sliderStep}
-								min="0"
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => updateSliderConfig({ step: Number(e.currentTarget.value) })}
-							/>
-						</label>
-					</div>
-				{/if}
-
-				{#if sliderEnabled && question.type === 'unique_choice' && question.choices.length < 2}
-					<p class="text-xs text-amber-600">
-						<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-						Slider needs at least 2 choices.
-					</p>
-				{/if}
+			{#if currentVariant === 'unique_choice:slider' && question.choices.length < 2}
+				<p class="text-xs text-amber-600">
+					<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+					Slider needs at least 2 choices.
+				</p>
 			{/if}
 
 			<!-- Question text -->

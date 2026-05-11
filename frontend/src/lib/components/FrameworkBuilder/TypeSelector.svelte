@@ -2,19 +2,19 @@
 	import { QUESTION_TYPES } from './builder-utils.svelte';
 
 	interface Props {
-		currentType: string;
-		onselect: (type: string) => void;
+		currentVariant: string;
+		onselect: (variant: string) => void;
 	}
 
-	let { currentType, onselect }: Props = $props();
+	let { currentVariant, onselect }: Props = $props();
 	let open = $state(false);
 
 	const currentTypeInfo = $derived(
-		QUESTION_TYPES.find((t) => t.value === currentType) ?? QUESTION_TYPES[0]
+		QUESTION_TYPES.find((t) => t.value === currentVariant) ?? QUESTION_TYPES[0]
 	);
 
-	function select(type: string) {
-		onselect(type);
+	function select(variant: string) {
+		onselect(variant);
 		open = false;
 	}
 </script>
@@ -43,7 +43,7 @@
 			{#each QUESTION_TYPES as type (type.value)}
 				<button
 					type="button"
-					class="flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-gray-50 transition-colors {currentType ===
+					class="flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-gray-50 transition-colors {currentVariant ===
 					type.value
 						? 'ring-2 ring-blue-500 ring-offset-1'
 						: ''}"
