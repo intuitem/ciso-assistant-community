@@ -304,7 +304,7 @@ describe('validateDraft', () => {
 		});
 		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
 		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
-			'slider min must be less than max'
+			'Slider min must be less than max'
 		);
 	});
 
@@ -316,7 +316,7 @@ describe('validateDraft', () => {
 		});
 		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
 		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
-			'slider step must be greater than 0'
+			'Slider step must be greater than 0'
 		);
 	});
 
@@ -328,7 +328,7 @@ describe('validateDraft', () => {
 		});
 		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
 		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
-			'slider step cannot exceed (max - min)'
+			'Slider step cannot exceed (max − min)'
 		);
 	});
 
@@ -351,7 +351,7 @@ describe('validateDraft', () => {
 		});
 		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
 		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
-			'slider needs at least 2 choices'
+			'Slider needs at least 2 choices'
 		);
 	});
 
