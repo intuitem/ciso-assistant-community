@@ -231,13 +231,15 @@ class AgentRunWriteSerializer(BaseModelSerializer):
             "finished_at",
             "error_message",
         ]
-        # Targeting + scope fields are set by the spawn action only.
+        # Targeting + scope fields are set by the spawn action only;
+        # ``config`` is worker-owned scratch space.
         read_only_fields = [
             "kind",
             "target_content_type",
             "target_object_id",
             "chat_session",
             "folder",
+            "config",
         ]
 
 

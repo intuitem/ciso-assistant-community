@@ -406,6 +406,18 @@ class AgentRun(AbstractBaseModel, FolderMixin):
         blank=True, default="", verbose_name=_("Error message")
     )
 
+    config = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Config"),
+        help_text=_(
+            "Per-run scratch space for mode flags, source pointers, and "
+            "other kind-specific knobs (e.g. {mode: 'external', "
+            "ingest_namespace: 'agentrun:<uuid>'}). Read by the worker, "
+            "not exposed to clients for direct write."
+        ),
+    )
+
     class Meta:
         verbose_name = _("Agent run")
         verbose_name_plural = _("Agent runs")
