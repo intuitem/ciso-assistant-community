@@ -1,5 +1,6 @@
 """Tests for framework builder security hardening and URN generation."""
 
+import copy
 import io
 import uuid
 
@@ -2484,7 +2485,10 @@ def test_rewrite_child_urns_unit_idempotent_and_preserves_node_id():
     assert draft["choices"][0]["urn"] == "urn:newns:risk:question_choice:newslug:c1"
 
     # Idempotent: a second pass with the same target leaves output unchanged.
-    snapshot = {k: list(v) for k, v in draft.items()}
+    # Use deepcopy so the comparison catches any in-place mutation of the
+    # nested dicts/lists — a shallow copy would share dict identity with
+    # `draft` and pass even if the second pass mutated.
+    snapshot = copy.deepcopy(draft)
     rewrite_child_urns(draft, "newns", "newslug")
     assert draft == snapshot
 
