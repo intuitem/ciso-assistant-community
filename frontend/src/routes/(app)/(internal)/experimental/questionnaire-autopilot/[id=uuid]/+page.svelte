@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
@@ -145,6 +146,11 @@
 	$effect(() => {
 		$pageTitle = run.title || run.filename;
 	});
+
+	// Same flag the index page checks. ENABLE_CHAT=false on the backend
+	// removes chat_mode from featureflags entirely, so a single check covers
+	// both "infrastructure off" and "admin turned it off".
+	const chatEnabled = $derived(Boolean(page.data?.featureflags?.chat_mode));
 
 	const toast = getToastStore();
 
@@ -701,671 +707,694 @@
 	}
 </script>
 
-<div class="space-y-4">
-	<!-- Header -->
-	<div class="bg-white shadow-sm py-3 px-6 card flex items-center justify-between">
-		<div>
-			<a
-				href="/experimental/questionnaire-autopilot"
-				class="text-xs text-gray-500 hover:text-gray-700"
-			>
-				<i class="fa-solid fa-chevron-left mr-1"></i>All runs
-			</a>
-			<h4 class="h4 font-bold mt-1 font-mono">{run.title || run.filename}</h4>
-			{#if run.title && run.filename && run.title !== run.filename}
-				<div class="text-xs text-gray-500 mt-0.5">
-					<i class="fa-solid fa-file-excel mr-1"></i>{run.filename}
-				</div>
-			{/if}
-			<div class="text-xs text-gray-500 mt-1">
-				Domain: {run.folder?.str || run.folder?.name || '—'} · Uploaded
-				{new Date(run.created_at).toLocaleString()}
-			</div>
-		</div>
-		<div class="text-right space-y-1">
-			<span
-				class="text-xs px-2 py-0.5 rounded font-medium uppercase tracking-wide
-				{run.status === 'parsed'
-					? 'bg-green-100 text-green-800'
-					: run.status === 'failed'
-						? 'bg-red-100 text-red-800'
-						: 'bg-yellow-100 text-yellow-800'}"
-			>
-				file: {run.status}
-			</span>
-			{#if agentRun}
-				<div>
-					<span
-						class="text-xs px-2 py-0.5 rounded font-medium uppercase tracking-wide
-						{agentRun.status === 'succeeded'
-							? 'bg-green-100 text-green-800'
-							: agentRun.status === 'failed' || agentRun.status === 'cancelled'
-								? 'bg-red-100 text-red-800'
-								: 'bg-blue-100 text-blue-800'}"
-					>
-						agent: {agentRun.status}
-					</span>
-				</div>
-			{/if}
-		</div>
+{#if !chatEnabled}
+	<div class="bg-white shadow-sm py-6 px-6 card max-w-2xl border-l-4 border-amber-400">
+		<h4 class="h4 font-bold">
+			<i class="fa-solid fa-robot mr-2 text-amber-600"></i>AI chat is required
+		</h4>
+		<p class="text-sm text-gray-700 mt-2">
+			This run is still available, but Questionnaire Autopilot needs the same LLM and retrieval
+			pipeline as AI Chat — currently disabled on this deployment.
+		</p>
+		<p class="text-xs text-gray-500 mt-2">
+			Ask an administrator to enable <code class="font-mono">ENABLE_CHAT</code> on the backend and
+			turn on the <em>chat mode</em> feature flag in Settings.
+		</p>
 	</div>
-
-	{#if phase === 'parsing'}
-		<div class="bg-white shadow-sm py-6 px-6 card text-center">
-			<i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i>
-			<p class="mt-2 text-sm text-gray-600">Parsing the workbook…</p>
-		</div>
-	{:else if phase === 'parse_failed'}
-		<div class="bg-white shadow-sm py-4 px-6 card border-l-4 border-red-500">
-			<div class="font-semibold text-red-700">Parsing failed</div>
-			<div class="text-sm text-gray-700 mt-1 font-mono whitespace-pre-wrap">
-				{run.error_message || 'Unknown error.'}
-			</div>
-		</div>
-	{:else if phase === 'mapping' && run.parsed_data?.sheets}
-		<div class="grid grid-cols-3 gap-4">
-			<div class="col-span-1 bg-white shadow-sm py-4 px-6 card space-y-4">
-				<div>
-					<h5 class="font-semibold text-sm mb-2">1. Pick the sheet</h5>
-					<select
-						class="w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-						bind:value={selectedSheetName}
-						onchange={onSheetChange}
-					>
-						{#each run.parsed_data.sheets as sheet}
-							<option value={sheet.name}>
-								{sheet.name} ({sheet.row_count} row{sheet.row_count === 1 ? '' : 's'})
-							</option>
-						{/each}
-					</select>
+{:else}
+	<div class="space-y-4">
+		<!-- Header -->
+		<div class="bg-white shadow-sm py-3 px-6 card flex items-center justify-between">
+			<div>
+				<a
+					href="/experimental/questionnaire-autopilot"
+					class="text-xs text-gray-500 hover:text-gray-700"
+				>
+					<i class="fa-solid fa-chevron-left mr-1"></i>All runs
+				</a>
+				<h4 class="h4 font-bold mt-1 font-mono">{run.title || run.filename}</h4>
+				{#if run.title && run.filename && run.title !== run.filename}
+					<div class="text-xs text-gray-500 mt-0.5">
+						<i class="fa-solid fa-file-excel mr-1"></i>{run.filename}
+					</div>
+				{/if}
+				<div class="text-xs text-gray-500 mt-1">
+					Domain: {run.folder?.str || run.folder?.name || '—'} · Uploaded
+					{new Date(run.created_at).toLocaleString()}
 				</div>
-
-				{#if selectedSheet}
-					<div class="space-y-3">
-						<h5 class="font-semibold text-sm">2. Map the columns</h5>
-
-						<div>
-							<label for="qcol" class="block text-xs font-medium text-gray-700">
-								Question column *
-							</label>
-							<select
-								id="qcol"
-								class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-								bind:value={questionCol}
-							>
-								<option value="">— select —</option>
-								{#each colOptions as opt}
-									<option value={opt.value}>{opt.label}</option>
-								{/each}
-							</select>
-						</div>
-
-						<div>
-							<label for="acol" class="block text-xs font-medium text-gray-700">
-								Answer / Status column
-							</label>
-							<select
-								id="acol"
-								class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-								bind:value={answerCol}
-							>
-								<option value="">— optional —</option>
-								{#each colOptions as opt}
-									<option value={opt.value}>{opt.label}</option>
-								{/each}
-							</select>
-						</div>
-
-						<div>
-							<label for="ccol" class="block text-xs font-medium text-gray-700">
-								Comment column
-							</label>
-							<select
-								id="ccol"
-								class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-								bind:value={commentCol}
-							>
-								<option value="">— optional —</option>
-								{#each colOptions as opt}
-									<option value={opt.value}>{opt.label}</option>
-								{/each}
-							</select>
-						</div>
-
-						<div>
-							<label for="scol" class="block text-xs font-medium text-gray-700">
-								Section column
-							</label>
-							<select
-								id="scol"
-								class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-								bind:value={sectionCol}
-							>
-								<option value="">— optional —</option>
-								{#each colOptions as opt}
-									<option value={opt.value}>{opt.label}</option>
-								{/each}
-							</select>
-						</div>
-
-						<button
-							type="button"
-							class="btn preset-filled w-full"
-							disabled={!canSaveMapping}
-							onclick={saveMapping}
+			</div>
+			<div class="text-right space-y-1">
+				<span
+					class="text-xs px-2 py-0.5 rounded font-medium uppercase tracking-wide
+				{run.status === 'parsed'
+						? 'bg-green-100 text-green-800'
+						: run.status === 'failed'
+							? 'bg-red-100 text-red-800'
+							: 'bg-yellow-100 text-yellow-800'}"
+				>
+					file: {run.status}
+				</span>
+				{#if agentRun}
+					<div>
+						<span
+							class="text-xs px-2 py-0.5 rounded font-medium uppercase tracking-wide
+						{agentRun.status === 'succeeded'
+								? 'bg-green-100 text-green-800'
+								: agentRun.status === 'failed' || agentRun.status === 'cancelled'
+									? 'bg-red-100 text-red-800'
+									: 'bg-blue-100 text-blue-800'}"
 						>
-							{saving ? 'Saving & extracting…' : 'Save mapping & extract questions'}
-						</button>
+							agent: {agentRun.status}
+						</span>
 					</div>
 				{/if}
 			</div>
+		</div>
 
-			<div class="col-span-2 bg-white shadow-sm py-4 px-6 card overflow-x-auto">
-				<h5 class="font-semibold text-sm mb-2">
-					Preview — first {selectedSheet?.rows_preview.length ?? 0} of
-					{selectedSheet?.row_count ?? 0} rows
-				</h5>
-				{#if selectedSheet && selectedSheet.headers.length > 0}
-					<table class="text-xs w-full border-collapse">
-						<thead>
-							<tr class="bg-gray-50">
-								{#each selectedSheet.headers as header, i}
-									<th
-										class="border border-gray-200 px-2 py-1 text-left font-semibold
+		{#if phase === 'parsing'}
+			<div class="bg-white shadow-sm py-6 px-6 card text-center">
+				<i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i>
+				<p class="mt-2 text-sm text-gray-600">Parsing the workbook…</p>
+			</div>
+		{:else if phase === 'parse_failed'}
+			<div class="bg-white shadow-sm py-4 px-6 card border-l-4 border-red-500">
+				<div class="font-semibold text-red-700">Parsing failed</div>
+				<div class="text-sm text-gray-700 mt-1 font-mono whitespace-pre-wrap">
+					{run.error_message || 'Unknown error.'}
+				</div>
+			</div>
+		{:else if phase === 'mapping' && run.parsed_data?.sheets}
+			<div class="grid grid-cols-3 gap-4">
+				<div class="col-span-1 bg-white shadow-sm py-4 px-6 card space-y-4">
+					<div>
+						<h5 class="font-semibold text-sm mb-2">1. Pick the sheet</h5>
+						<select
+							class="w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+							bind:value={selectedSheetName}
+							onchange={onSheetChange}
+						>
+							{#each run.parsed_data.sheets as sheet}
+								<option value={sheet.name}>
+									{sheet.name} ({sheet.row_count} row{sheet.row_count === 1 ? '' : 's'})
+								</option>
+							{/each}
+						</select>
+					</div>
+
+					{#if selectedSheet}
+						<div class="space-y-3">
+							<h5 class="font-semibold text-sm">2. Map the columns</h5>
+
+							<div>
+								<label for="qcol" class="block text-xs font-medium text-gray-700">
+									Question column *
+								</label>
+								<select
+									id="qcol"
+									class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+									bind:value={questionCol}
+								>
+									<option value="">— select —</option>
+									{#each colOptions as opt}
+										<option value={opt.value}>{opt.label}</option>
+									{/each}
+								</select>
+							</div>
+
+							<div>
+								<label for="acol" class="block text-xs font-medium text-gray-700">
+									Answer / Status column
+								</label>
+								<select
+									id="acol"
+									class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+									bind:value={answerCol}
+								>
+									<option value="">— optional —</option>
+									{#each colOptions as opt}
+										<option value={opt.value}>{opt.label}</option>
+									{/each}
+								</select>
+							</div>
+
+							<div>
+								<label for="ccol" class="block text-xs font-medium text-gray-700">
+									Comment column
+								</label>
+								<select
+									id="ccol"
+									class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+									bind:value={commentCol}
+								>
+									<option value="">— optional —</option>
+									{#each colOptions as opt}
+										<option value={opt.value}>{opt.label}</option>
+									{/each}
+								</select>
+							</div>
+
+							<div>
+								<label for="scol" class="block text-xs font-medium text-gray-700">
+									Section column
+								</label>
+								<select
+									id="scol"
+									class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+									bind:value={sectionCol}
+								>
+									<option value="">— optional —</option>
+									{#each colOptions as opt}
+										<option value={opt.value}>{opt.label}</option>
+									{/each}
+								</select>
+							</div>
+
+							<button
+								type="button"
+								class="btn preset-filled w-full"
+								disabled={!canSaveMapping}
+								onclick={saveMapping}
+							>
+								{saving ? 'Saving & extracting…' : 'Save mapping & extract questions'}
+							</button>
+						</div>
+					{/if}
+				</div>
+
+				<div class="col-span-2 bg-white shadow-sm py-4 px-6 card overflow-x-auto">
+					<h5 class="font-semibold text-sm mb-2">
+						Preview — first {selectedSheet?.rows_preview.length ?? 0} of
+						{selectedSheet?.row_count ?? 0} rows
+					</h5>
+					{#if selectedSheet && selectedSheet.headers.length > 0}
+						<table class="text-xs w-full border-collapse">
+							<thead>
+								<tr class="bg-gray-50">
+									{#each selectedSheet.headers as header, i}
+										<th
+											class="border border-gray-200 px-2 py-1 text-left font-semibold
 										{i === questionCol ? 'bg-pink-100' : ''}
 										{i === answerCol ? 'bg-blue-100' : ''}
 										{i === commentCol ? 'bg-yellow-100' : ''}
 										{i === sectionCol ? 'bg-purple-100' : ''}"
-									>
-										<span class="text-gray-400 mr-1">{i + 1}.</span>
-										{header}
-									</th>
-								{/each}
-							</tr>
-						</thead>
-						<tbody>
-							{#each selectedSheet.rows_preview as row}
-								<tr>
-									{#each row as cell, i}
-										<td
-											class="border border-gray-200 px-2 py-1 align-top
+										>
+											<span class="text-gray-400 mr-1">{i + 1}.</span>
+											{header}
+										</th>
+									{/each}
+								</tr>
+							</thead>
+							<tbody>
+								{#each selectedSheet.rows_preview as row}
+									<tr>
+										{#each row as cell, i}
+											<td
+												class="border border-gray-200 px-2 py-1 align-top
 											{i === questionCol ? 'bg-pink-50' : ''}
 											{i === answerCol ? 'bg-blue-50' : ''}
 											{i === commentCol ? 'bg-yellow-50' : ''}
 											{i === sectionCol ? 'bg-purple-50' : ''}"
-										>
-											<div class="line-clamp-3">{cell}</div>
-										</td>
-									{/each}
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				{:else}
-					<p class="text-sm text-gray-500">This sheet appears empty.</p>
-				{/if}
-			</div>
-		</div>
-	{:else if phase === 'extract'}
-		<div class="bg-white shadow-sm py-6 px-6 card flex items-center justify-between">
-			<div>
-				<div class="font-semibold">Mapping saved.</div>
-				<div class="text-sm text-gray-600 mt-1">
-					Sheet: <span class="font-mono">{run.column_mapping.sheet}</span> · Question column:
-					<span class="font-mono">{(run.column_mapping.question_col ?? 0) + 1}</span>
-					{#if run.column_mapping.section_col != null}
-						· Section column: <span class="font-mono"
-							>{(run.column_mapping.section_col ?? 0) + 1}</span
-						>
+											>
+												<div class="line-clamp-3">{cell}</div>
+											</td>
+										{/each}
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					{:else}
+						<p class="text-sm text-gray-500">This sheet appears empty.</p>
 					{/if}
 				</div>
-				<p class="text-sm text-gray-500 mt-2">
-					Next step: extract the questions into individual records so the agent can answer each one.
-				</p>
 			</div>
-			<button
-				type="button"
-				class="btn preset-filled"
-				disabled={extractBusy}
-				onclick={extractQuestions}
-			>
-				{extractBusy ? 'Extracting…' : 'Extract questions'}
-			</button>
-		</div>
-	{:else if phase === 'configure_run'}
-		<div class="bg-white shadow-sm py-6 px-6 card space-y-4">
-			<div>
-				<div class="font-semibold">{questions.length} questions extracted.</div>
-				<p class="text-sm text-gray-600 mt-1">
-					Pick how the agent should work, then start the prefill. You'll see live progress — no need
-					to keep this page focused.
-				</p>
-				<p class="text-xs text-gray-500 mt-2 flex items-start gap-1.5">
-					<i class="fa-solid fa-arrows-rotate mt-0.5 text-blue-500"></i>
-					<span>
-						When you start, we first refresh the domain's vector index (drops stale entries, picks
-						up new controls). Adds ~10–30 s before answering begins.
-					</span>
-				</p>
-			</div>
-			<div class="space-y-2">
-				<label
-					class="flex items-start gap-3 p-3 rounded border-2 cursor-pointer
-					{strictness === 'fast' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
-				>
-					<input type="radio" name="strictness" value="fast" bind:group={strictness} class="mt-1" />
-					<div>
-						<div class="font-medium">Fast</div>
-						<div class="text-xs text-gray-600">
-							Single pass per question, no critic. Lower confidence on the proposals; best when you
-							want a quick draft to edit.
-						</div>
+		{:else if phase === 'extract'}
+			<div class="bg-white shadow-sm py-6 px-6 card flex items-center justify-between">
+				<div>
+					<div class="font-semibold">Mapping saved.</div>
+					<div class="text-sm text-gray-600 mt-1">
+						Sheet: <span class="font-mono">{run.column_mapping.sheet}</span> · Question column:
+						<span class="font-mono">{(run.column_mapping.question_col ?? 0) + 1}</span>
+						{#if run.column_mapping.section_col != null}
+							· Section column: <span class="font-mono"
+								>{(run.column_mapping.section_col ?? 0) + 1}</span
+							>
+						{/if}
 					</div>
-				</label>
-				<label
-					class="flex items-start gap-3 p-3 rounded border-2 cursor-pointer
-					{strictness === 'thorough' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
-				>
-					<input
-						type="radio"
-						name="strictness"
-						value="thorough"
-						bind:group={strictness}
-						class="mt-1"
-					/>
-					<div>
-						<div class="font-medium">Thorough</div>
-						<div class="text-xs text-gray-600">
-							Critic step + one retry on low-confidence answers. ~3–5× the cost and time of Fast;
-							better grounding on the answers we keep.
-						</div>
-					</div>
-				</label>
-			</div>
-			<div class="flex gap-2">
+					<p class="text-sm text-gray-500 mt-2">
+						Next step: extract the questions into individual records so the agent can answer each
+						one.
+					</p>
+				</div>
 				<button
 					type="button"
 					class="btn preset-filled"
-					disabled={startBusy}
-					onclick={() => startPrefill()}
+					disabled={extractBusy}
+					onclick={extractQuestions}
 				>
-					<i class="fa-solid fa-play mr-2"></i>
-					{startBusy ? 'Starting…' : 'Start prefill'}
+					{extractBusy ? 'Extracting…' : 'Extract questions'}
 				</button>
 			</div>
-		</div>
-	{:else if phase === 'running' && agentRun}
-		<div class="bg-white shadow-sm py-6 px-6 card space-y-4">
-			<div class="flex items-center justify-between">
+		{:else if phase === 'configure_run'}
+			<div class="bg-white shadow-sm py-6 px-6 card space-y-4">
 				<div>
-					<h5 class="font-semibold">
-						<i class="fa-solid fa-robot mr-2 text-blue-500"></i>Agent is working
-					</h5>
-					<div class="text-xs text-gray-500 mt-1">
-						Strictness: {agentRun.strictness} · Model: {agentRun.model_used || '—'} · Tokens: {agentRun.total_tokens.toLocaleString()}
-					</div>
-					<div class="text-xs text-gray-500 mt-0.5">
-						Started: {formatTimestamp(agentRun.started_at)} · Elapsed:
-						{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
-					</div>
+					<div class="font-semibold">{questions.length} questions extracted.</div>
+					<p class="text-sm text-gray-600 mt-1">
+						Pick how the agent should work, then start the prefill. You'll see live progress — no
+						need to keep this page focused.
+					</p>
+					<p class="text-xs text-gray-500 mt-2 flex items-start gap-1.5">
+						<i class="fa-solid fa-arrows-rotate mt-0.5 text-blue-500"></i>
+						<span>
+							When you start, we first refresh the domain's vector index (drops stale entries, picks
+							up new controls). Adds ~10–30 s before answering begins.
+						</span>
+					</p>
 				</div>
-				<button
-					type="button"
-					class="btn preset-tonal-error"
-					disabled={cancelBusy}
-					onclick={cancelRun}
-				>
-					{cancelBusy ? 'Cancelling…' : 'Cancel'}
-				</button>
-			</div>
-
-			<div>
-				<div class="flex justify-between text-xs text-gray-600 mb-1">
-					<span>{agentRun.completed_steps} / {agentRun.total_steps} questions</span>
-					<span>
-						{agentRun.total_steps > 0
-							? Math.floor((agentRun.completed_steps / agentRun.total_steps) * 100)
-							: 0}%
-					</span>
-				</div>
-				<div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-					<div
-						class="bg-blue-500 h-2 transition-all duration-500"
-						style="width: {agentRun.total_steps > 0
-							? (agentRun.completed_steps / agentRun.total_steps) * 100
-							: 0}%"
-					></div>
-				</div>
-			</div>
-
-			{#if agentRun.current_step_label}
-				<div class="text-sm font-mono bg-gray-50 px-3 py-2 rounded">
-					{agentRun.current_step_label}
-				</div>
-			{/if}
-
-			<div class="text-xs">
-				{#if heartbeatStaleness != null && heartbeatStaleness > 60}
-					<span class="text-red-600 font-semibold">
-						<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-						No heartbeat for {heartbeatStaleness}s — agent may be stuck. Consider cancelling.
-					</span>
-				{:else if heartbeatStaleness != null}
-					<span class="text-gray-500">
-						<i class="fa-solid fa-heart-pulse mr-1 text-green-500"></i>
-						Last heartbeat {heartbeatStaleness}s ago
-					</span>
-				{/if}
-			</div>
-		</div>
-
-		{#if answeredCount > 0}
-			{@render statsBreakdown()}
-			{@render bandedReview('Answers drafted so far — populating live')}
-		{/if}
-	{:else if phase === 'review' && agentRun}
-		<div class="bg-white shadow-sm py-4 px-6 card space-y-3">
-			<div class="flex items-start justify-between gap-4">
-				<div>
-					<h5 class="font-semibold">
-						<i class="fa-solid fa-circle-check mr-2 text-green-500"></i>Run complete —
-						{answeredCount} of {questions.length} answered
-					</h5>
-					<div class="text-xs text-gray-500 mt-1">
-						{agentRun.strictness} mode · {agentRun.model_used || '—'} ·
-						{agentRun.total_tokens.toLocaleString()} tokens
-					</div>
-					<div class="text-xs text-gray-500 mt-0.5">
-						Started: {formatTimestamp(agentRun.started_at)} · Finished:
-						{formatTimestamp(agentRun.finished_at)} · Duration:
-						{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
-					</div>
-				</div>
-				<div class="flex flex-col items-end gap-2 text-xs">
-					<a
-						href="/experimental/questionnaire-autopilot/{run.id}/export"
-						download
-						class="btn btn-sm preset-filled"
+				<div class="space-y-2">
+					<label
+						class="flex items-start gap-3 p-3 rounded border-2 cursor-pointer
+					{strictness === 'fast' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
 					>
-						<i class="fa-solid fa-file-arrow-down mr-1"></i>Download filled xlsx
-					</a>
-					{@render valueMappingHint()}
-					<div class="flex flex-col items-end gap-1">
-						<div class="text-gray-500">Run again with:</div>
-						<div class="flex gap-2">
-							<button
-								type="button"
-								class="btn btn-sm preset-tonal"
-								disabled={startBusy}
-								onclick={() => runAgain('fast')}
-							>
-								<i class="fa-solid fa-bolt mr-1"></i>Fast
-							</button>
-							<button
-								type="button"
-								class="btn btn-sm preset-tonal"
-								disabled={startBusy}
-								onclick={() => runAgain('thorough')}
-							>
-								<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
-							</button>
+						<input
+							type="radio"
+							name="strictness"
+							value="fast"
+							bind:group={strictness}
+							class="mt-1"
+						/>
+						<div>
+							<div class="font-medium">Fast</div>
+							<div class="text-xs text-gray-600">
+								Single pass per question, no critic. Lower confidence on the proposals; best when
+								you want a quick draft to edit.
+							</div>
 						</div>
-						<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
-							<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
-							Re-runs the domain index refresh first, then the prefill.
+					</label>
+					<label
+						class="flex items-start gap-3 p-3 rounded border-2 cursor-pointer
+					{strictness === 'thorough' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+					>
+						<input
+							type="radio"
+							name="strictness"
+							value="thorough"
+							bind:group={strictness}
+							class="mt-1"
+						/>
+						<div>
+							<div class="font-medium">Thorough</div>
+							<div class="text-xs text-gray-600">
+								Critic step + one retry on low-confidence answers. ~3–5× the cost and time of Fast;
+								better grounding on the answers we keep.
+							</div>
 						</div>
-					</div>
+					</label>
+				</div>
+				<div class="flex gap-2">
+					<button
+						type="button"
+						class="btn preset-filled"
+						disabled={startBusy}
+						onclick={() => startPrefill()}
+					>
+						<i class="fa-solid fa-play mr-2"></i>
+						{startBusy ? 'Starting…' : 'Start prefill'}
+					</button>
 				</div>
 			</div>
-		</div>
+		{:else if phase === 'running' && agentRun}
+			<div class="bg-white shadow-sm py-6 px-6 card space-y-4">
+				<div class="flex items-center justify-between">
+					<div>
+						<h5 class="font-semibold">
+							<i class="fa-solid fa-robot mr-2 text-blue-500"></i>Agent is working
+						</h5>
+						<div class="text-xs text-gray-500 mt-1">
+							Strictness: {agentRun.strictness} · Model: {agentRun.model_used || '—'} · Tokens: {agentRun.total_tokens.toLocaleString()}
+						</div>
+						<div class="text-xs text-gray-500 mt-0.5">
+							Started: {formatTimestamp(agentRun.started_at)} · Elapsed:
+							{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
+						</div>
+					</div>
+					<button
+						type="button"
+						class="btn preset-tonal-error"
+						disabled={cancelBusy}
+						onclick={cancelRun}
+					>
+						{cancelBusy ? 'Cancelling…' : 'Cancel'}
+					</button>
+				</div>
 
-		{@render statsBreakdown()}
-		{@render bandedReview('Sorted by confidence ascending — the gnarly ones come first.')}
-	{:else if phase === 'run_ended' && agentRun}
-		<div class="bg-white shadow-sm py-4 px-6 card border-l-4 border-red-500 space-y-3">
-			<div class="flex items-start justify-between gap-4">
 				<div>
-					<div class="font-semibold text-red-700">
-						Run {agentRun.status === 'cancelled' ? 'cancelled' : 'failed'}
+					<div class="flex justify-between text-xs text-gray-600 mb-1">
+						<span>{agentRun.completed_steps} / {agentRun.total_steps} questions</span>
+						<span>
+							{agentRun.total_steps > 0
+								? Math.floor((agentRun.completed_steps / agentRun.total_steps) * 100)
+								: 0}%
+						</span>
 					</div>
-					<div class="text-xs text-gray-500 mt-1">
-						{agentRun.strictness} mode · {agentRun.model_used || '—'} ·
-						{agentRun.total_tokens.toLocaleString()} tokens
-					</div>
-					<div class="text-xs text-gray-500 mt-0.5">
-						Started: {formatTimestamp(agentRun.started_at)} · Ended:
-						{formatTimestamp(agentRun.finished_at)} · Duration:
-						{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
-					</div>
-					<div class="text-xs text-gray-500 mt-1">
-						Completed {agentRun.completed_steps} of {agentRun.total_steps} questions before stopping.
+					<div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+						<div
+							class="bg-blue-500 h-2 transition-all duration-500"
+							style="width: {agentRun.total_steps > 0
+								? (agentRun.completed_steps / agentRun.total_steps) * 100
+								: 0}%"
+						></div>
 					</div>
 				</div>
-				<div class="flex flex-col items-end gap-2 text-xs">
-					{#if answeredCount > 0}
+
+				{#if agentRun.current_step_label}
+					<div class="text-sm font-mono bg-gray-50 px-3 py-2 rounded">
+						{agentRun.current_step_label}
+					</div>
+				{/if}
+
+				<div class="text-xs">
+					{#if heartbeatStaleness != null && heartbeatStaleness > 60}
+						<span class="text-red-600 font-semibold">
+							<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+							No heartbeat for {heartbeatStaleness}s — agent may be stuck. Consider cancelling.
+						</span>
+					{:else if heartbeatStaleness != null}
+						<span class="text-gray-500">
+							<i class="fa-solid fa-heart-pulse mr-1 text-green-500"></i>
+							Last heartbeat {heartbeatStaleness}s ago
+						</span>
+					{/if}
+				</div>
+			</div>
+
+			{#if answeredCount > 0}
+				{@render statsBreakdown()}
+				{@render bandedReview('Answers drafted so far — populating live')}
+			{/if}
+		{:else if phase === 'review' && agentRun}
+			<div class="bg-white shadow-sm py-4 px-6 card space-y-3">
+				<div class="flex items-start justify-between gap-4">
+					<div>
+						<h5 class="font-semibold">
+							<i class="fa-solid fa-circle-check mr-2 text-green-500"></i>Run complete —
+							{answeredCount} of {questions.length} answered
+						</h5>
+						<div class="text-xs text-gray-500 mt-1">
+							{agentRun.strictness} mode · {agentRun.model_used || '—'} ·
+							{agentRun.total_tokens.toLocaleString()} tokens
+						</div>
+						<div class="text-xs text-gray-500 mt-0.5">
+							Started: {formatTimestamp(agentRun.started_at)} · Finished:
+							{formatTimestamp(agentRun.finished_at)} · Duration:
+							{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
+						</div>
+					</div>
+					<div class="flex flex-col items-end gap-2 text-xs">
 						<a
 							href="/experimental/questionnaire-autopilot/{run.id}/export"
 							download
 							class="btn btn-sm preset-filled"
 						>
-							<i class="fa-solid fa-file-arrow-down mr-1"></i>Download partial xlsx
+							<i class="fa-solid fa-file-arrow-down mr-1"></i>Download filled xlsx
 						</a>
 						{@render valueMappingHint()}
-					{/if}
-					<div class="flex flex-col items-end gap-1">
-						<div class="text-gray-500">Run again with:</div>
-						<div class="flex gap-2">
-							<button
-								type="button"
-								class="btn btn-sm preset-tonal"
-								disabled={startBusy}
-								onclick={() => runAgain('fast')}
-							>
-								<i class="fa-solid fa-bolt mr-1"></i>Fast
-							</button>
-							<button
-								type="button"
-								class="btn btn-sm preset-tonal"
-								disabled={startBusy}
-								onclick={() => runAgain('thorough')}
-							>
-								<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
-							</button>
-						</div>
-						<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
-							<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
-							Re-runs the domain index refresh first, then the prefill.
+						<div class="flex flex-col items-end gap-1">
+							<div class="text-gray-500">Run again with:</div>
+							<div class="flex gap-2">
+								<button
+									type="button"
+									class="btn btn-sm preset-tonal"
+									disabled={startBusy}
+									onclick={() => runAgain('fast')}
+								>
+									<i class="fa-solid fa-bolt mr-1"></i>Fast
+								</button>
+								<button
+									type="button"
+									class="btn btn-sm preset-tonal"
+									disabled={startBusy}
+									onclick={() => runAgain('thorough')}
+								>
+									<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
+								</button>
+							</div>
+							<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
+								<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
+								Re-runs the domain index refresh first, then the prefill.
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-			{#if agentRun.error_message}
-				<div
-					class="text-sm text-gray-700 font-mono whitespace-pre-wrap bg-gray-50 px-3 py-2 rounded"
-				>
-					{agentRun.error_message}
-				</div>
-			{/if}
-		</div>
 
-		{#if answeredCount > 0}
 			{@render statsBreakdown()}
-			{@render bandedReview(
-				`${answeredCount} partial answer${answeredCount === 1 ? '' : 's'} drafted before the run stopped.`
-			)}
+			{@render bandedReview('Sorted by confidence ascending — the gnarly ones come first.')}
+		{:else if phase === 'run_ended' && agentRun}
+			<div class="bg-white shadow-sm py-4 px-6 card border-l-4 border-red-500 space-y-3">
+				<div class="flex items-start justify-between gap-4">
+					<div>
+						<div class="font-semibold text-red-700">
+							Run {agentRun.status === 'cancelled' ? 'cancelled' : 'failed'}
+						</div>
+						<div class="text-xs text-gray-500 mt-1">
+							{agentRun.strictness} mode · {agentRun.model_used || '—'} ·
+							{agentRun.total_tokens.toLocaleString()} tokens
+						</div>
+						<div class="text-xs text-gray-500 mt-0.5">
+							Started: {formatTimestamp(agentRun.started_at)} · Ended:
+							{formatTimestamp(agentRun.finished_at)} · Duration:
+							{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
+						</div>
+						<div class="text-xs text-gray-500 mt-1">
+							Completed {agentRun.completed_steps} of {agentRun.total_steps} questions before stopping.
+						</div>
+					</div>
+					<div class="flex flex-col items-end gap-2 text-xs">
+						{#if answeredCount > 0}
+							<a
+								href="/experimental/questionnaire-autopilot/{run.id}/export"
+								download
+								class="btn btn-sm preset-filled"
+							>
+								<i class="fa-solid fa-file-arrow-down mr-1"></i>Download partial xlsx
+							</a>
+							{@render valueMappingHint()}
+						{/if}
+						<div class="flex flex-col items-end gap-1">
+							<div class="text-gray-500">Run again with:</div>
+							<div class="flex gap-2">
+								<button
+									type="button"
+									class="btn btn-sm preset-tonal"
+									disabled={startBusy}
+									onclick={() => runAgain('fast')}
+								>
+									<i class="fa-solid fa-bolt mr-1"></i>Fast
+								</button>
+								<button
+									type="button"
+									class="btn btn-sm preset-tonal"
+									disabled={startBusy}
+									onclick={() => runAgain('thorough')}
+								>
+									<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
+								</button>
+							</div>
+							<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
+								<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
+								Re-runs the domain index refresh first, then the prefill.
+							</div>
+						</div>
+					</div>
+				</div>
+				{#if agentRun.error_message}
+					<div
+						class="text-sm text-gray-700 font-mono whitespace-pre-wrap bg-gray-50 px-3 py-2 rounded"
+					>
+						{agentRun.error_message}
+					</div>
+				{/if}
+			</div>
+
+			{#if answeredCount > 0}
+				{@render statsBreakdown()}
+				{@render bandedReview(
+					`${answeredCount} partial answer${answeredCount === 1 ? '' : 's'} drafted before the run stopped.`
+				)}
+			{/if}
 		{/if}
-	{/if}
-</div>
-
-<!-- ============== Pick existing control modal ============== -->
-{#if pickerOpenForQuestion}
-	<div
-		class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
-		role="dialog"
-		aria-modal="true"
-		onclick={(e) => {
-			if (e.target === e.currentTarget) closePicker();
-		}}
-	>
-		<div class="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col">
-			<div class="px-6 py-4 border-b">
-				<h4 class="font-semibold">Use an existing applied control</h4>
-				<p class="text-xs text-gray-500 mt-1">
-					Pick a control in this domain. The agent will re-run the question with it as priority
-					context.
-				</p>
-			</div>
-			{#if pickerQuestion}
-				<div class="px-6 py-3 bg-gray-50 border-b">
-					<div class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">
-						Question
-					</div>
-					<div class="text-sm mt-1">{pickerQuestion.text}</div>
-					{#if pickerQuestion.section || pickerQuestion.ref_id}
-						<div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
-							{#if pickerQuestion.section}
-								<span>{pickerQuestion.section}</span>
-							{/if}
-							{#if pickerQuestion.ref_id}
-								<span class="font-mono">· {pickerQuestion.ref_id}</span>
-							{/if}
-						</div>
-					{/if}
-				</div>
-			{/if}
-			<div class="px-6 py-4">
-				<AutocompleteSelect
-					form={pickerForm}
-					field="applied_control_id"
-					optionsEndpoint="applied-controls"
-					optionsDetailedUrlParameters={[['folder', run.folder.id]]}
-					optionsExtraFields={[['folder', 'str']]}
-					label="Applied control"
-				/>
-			</div>
-			<div class="px-6 py-3 border-t flex justify-end gap-2">
-				<button type="button" class="btn" onclick={closePicker}>Cancel</button>
-				<button
-					type="button"
-					class="btn preset-filled"
-					onclick={applyPickedControl}
-					disabled={!pickerSelectedId}
-				>
-					<i class="fa-solid fa-rotate mr-1"></i>Re-try with this control
-				</button>
-			</div>
-		</div>
 	</div>
-{/if}
 
-<!-- ============== Suggest a new control modal ============== -->
-{#if suggestOpenForQuestion}
-	<div
-		class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
-		role="dialog"
-		aria-modal="true"
-		onclick={(e) => {
-			if (e.target === e.currentTarget) closeSuggest();
-		}}
-	>
-		<div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-			<div class="px-6 py-4 border-b">
-				<h4 class="font-semibold">Suggest a control to create</h4>
-				<p class="text-xs text-gray-500 mt-1">
-					Review the draft, edit anything, then create. We'll add the control to the domain and
-					immediately re-try the question with it.
-				</p>
-			</div>
-			{#if suggestQuestion}
-				<div class="px-6 py-3 bg-gray-50 border-b">
-					<div class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">
-						Question
-					</div>
-					<div class="text-sm mt-1">{suggestQuestion.text}</div>
-					{#if suggestQuestion.section || suggestQuestion.ref_id}
-						<div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
-							{#if suggestQuestion.section}
-								<span>{suggestQuestion.section}</span>
-							{/if}
-							{#if suggestQuestion.ref_id}
-								<span class="font-mono">· {suggestQuestion.ref_id}</span>
-							{/if}
-						</div>
-					{/if}
-				</div>
-			{/if}
-
-			{#if suggestLoading || !suggestDraft}
-				<div class="px-6 py-12 text-center text-sm text-gray-500">
-					<i class="fa-solid fa-wand-magic-sparkles fa-pulse mr-2 text-blue-500"></i>
-					Drafting a control from the question…
-				</div>
-			{:else}
-				<div class="flex-1 overflow-y-auto px-6 py-4 space-y-3 text-sm">
-					{#if !suggestDraft.name && !suggestDraft.description && !suggestDraft.observation}
-						<div
-							class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2"
-						>
-							<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-							The LLM didn't return a draft (model may be unavailable). You can still fill the fields
-							in manually and create the control.
-						</div>
-					{/if}
-					<div>
-						<label for="d-name" class="block text-xs font-medium text-gray-700"> Name * </label>
-						<input
-							id="d-name"
-							type="text"
-							bind:value={suggestDraft.name}
-							maxlength="200"
-							class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
-						/>
-					</div>
-					<div>
-						<label for="d-desc" class="block text-xs font-medium text-gray-700">
-							Description
-						</label>
-						<textarea
-							id="d-desc"
-							bind:value={suggestDraft.description}
-							rows="3"
-							class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
-						></textarea>
-					</div>
-					<div>
-						<label for="d-status" class="block text-xs font-medium text-gray-700"> Status </label>
-						<select
-							id="d-status"
-							bind:value={suggestDraft.status}
-							class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
-						>
-							<option value="to_do">To do</option>
-							<option value="in_progress">In progress</option>
-							<option value="active">Active</option>
-							<option value="on_hold">On hold</option>
-							<option value="degraded">Degraded</option>
-						</select>
-					</div>
-					<p class="text-[11px] text-gray-400">
-						The agent's drafted observation, category and CSF function will be saved along with the
-						control — you can refine them later from the Applied Controls page.
+	<!-- ============== Pick existing control modal ============== -->
+	{#if pickerOpenForQuestion}
+		<div
+			class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+			role="dialog"
+			aria-modal="true"
+			onclick={(e) => {
+				if (e.target === e.currentTarget) closePicker();
+			}}
+		>
+			<div class="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col">
+				<div class="px-6 py-4 border-b">
+					<h4 class="font-semibold">Use an existing applied control</h4>
+					<p class="text-xs text-gray-500 mt-1">
+						Pick a control in this domain. The agent will re-run the question with it as priority
+						context.
 					</p>
 				</div>
-			{/if}
-
-			<div class="px-6 py-3 border-t flex justify-end gap-2">
-				<button type="button" class="btn" onclick={closeSuggest}>Cancel</button>
-				<button
-					type="button"
-					class="btn preset-filled"
-					onclick={commitSuggested}
-					disabled={!suggestDraft || !suggestDraft.name?.trim() || suggestLoading}
-				>
-					<i class="fa-solid fa-plus mr-1"></i>Create &amp; retry
-				</button>
+				{#if pickerQuestion}
+					<div class="px-6 py-3 bg-gray-50 border-b">
+						<div class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">
+							Question
+						</div>
+						<div class="text-sm mt-1">{pickerQuestion.text}</div>
+						{#if pickerQuestion.section || pickerQuestion.ref_id}
+							<div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+								{#if pickerQuestion.section}
+									<span>{pickerQuestion.section}</span>
+								{/if}
+								{#if pickerQuestion.ref_id}
+									<span class="font-mono">· {pickerQuestion.ref_id}</span>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				{/if}
+				<div class="px-6 py-4">
+					<AutocompleteSelect
+						form={pickerForm}
+						field="applied_control_id"
+						optionsEndpoint="applied-controls"
+						optionsDetailedUrlParameters={[['folder', run.folder.id]]}
+						optionsExtraFields={[['folder', 'str']]}
+						label="Applied control"
+					/>
+				</div>
+				<div class="px-6 py-3 border-t flex justify-end gap-2">
+					<button type="button" class="btn" onclick={closePicker}>Cancel</button>
+					<button
+						type="button"
+						class="btn preset-filled"
+						onclick={applyPickedControl}
+						disabled={!pickerSelectedId}
+					>
+						<i class="fa-solid fa-rotate mr-1"></i>Re-try with this control
+					</button>
+				</div>
 			</div>
 		</div>
-	</div>
+	{/if}
+
+	<!-- ============== Suggest a new control modal ============== -->
+	{#if suggestOpenForQuestion}
+		<div
+			class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+			role="dialog"
+			aria-modal="true"
+			onclick={(e) => {
+				if (e.target === e.currentTarget) closeSuggest();
+			}}
+		>
+			<div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+				<div class="px-6 py-4 border-b">
+					<h4 class="font-semibold">Suggest a control to create</h4>
+					<p class="text-xs text-gray-500 mt-1">
+						Review the draft, edit anything, then create. We'll add the control to the domain and
+						immediately re-try the question with it.
+					</p>
+				</div>
+				{#if suggestQuestion}
+					<div class="px-6 py-3 bg-gray-50 border-b">
+						<div class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">
+							Question
+						</div>
+						<div class="text-sm mt-1">{suggestQuestion.text}</div>
+						{#if suggestQuestion.section || suggestQuestion.ref_id}
+							<div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+								{#if suggestQuestion.section}
+									<span>{suggestQuestion.section}</span>
+								{/if}
+								{#if suggestQuestion.ref_id}
+									<span class="font-mono">· {suggestQuestion.ref_id}</span>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				{/if}
+
+				{#if suggestLoading || !suggestDraft}
+					<div class="px-6 py-12 text-center text-sm text-gray-500">
+						<i class="fa-solid fa-wand-magic-sparkles fa-pulse mr-2 text-blue-500"></i>
+						Drafting a control from the question…
+					</div>
+				{:else}
+					<div class="flex-1 overflow-y-auto px-6 py-4 space-y-3 text-sm">
+						{#if !suggestDraft.name && !suggestDraft.description && !suggestDraft.observation}
+							<div
+								class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2"
+							>
+								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+								The LLM didn't return a draft (model may be unavailable). You can still fill the fields
+								in manually and create the control.
+							</div>
+						{/if}
+						<div>
+							<label for="d-name" class="block text-xs font-medium text-gray-700"> Name * </label>
+							<input
+								id="d-name"
+								type="text"
+								bind:value={suggestDraft.name}
+								maxlength="200"
+								class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+							/>
+						</div>
+						<div>
+							<label for="d-desc" class="block text-xs font-medium text-gray-700">
+								Description
+							</label>
+							<textarea
+								id="d-desc"
+								bind:value={suggestDraft.description}
+								rows="3"
+								class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+							></textarea>
+						</div>
+						<div>
+							<label for="d-status" class="block text-xs font-medium text-gray-700"> Status </label>
+							<select
+								id="d-status"
+								bind:value={suggestDraft.status}
+								class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+							>
+								<option value="to_do">To do</option>
+								<option value="in_progress">In progress</option>
+								<option value="active">Active</option>
+								<option value="on_hold">On hold</option>
+								<option value="degraded">Degraded</option>
+							</select>
+						</div>
+						<p class="text-[11px] text-gray-400">
+							The agent's drafted observation, category and CSF function will be saved along with
+							the control — you can refine them later from the Applied Controls page.
+						</p>
+					</div>
+				{/if}
+
+				<div class="px-6 py-3 border-t flex justify-end gap-2">
+					<button type="button" class="btn" onclick={closeSuggest}>Cancel</button>
+					<button
+						type="button"
+						class="btn preset-filled"
+						onclick={commitSuggested}
+						disabled={!suggestDraft || !suggestDraft.name?.trim() || suggestLoading}
+					>
+						<i class="fa-solid fa-plus mr-1"></i>Create &amp; retry
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
 {/if}
 
 {#snippet bandedReview(needsReviewHeader: string)}
