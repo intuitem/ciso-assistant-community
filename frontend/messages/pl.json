@@ -1941,5 +1941,15 @@
 	"visibilityAuditorOnly": "Tylko audytor",
 	"visibilityHidden": "Ukryte",
 	"answers": "Odpowiedzi",
-	"respondentAlignment": "Zgodność respondenta"
+	"respondentAlignment": "Zgodność respondenta",
+	"frameworkRefId": "ID odniesienia",
+	"urnPreview": "Podgląd URN:",
+	"urnLockedComplianceAssessment": "Zablokowane — ocena zgodności używa tego frameworka.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Krok",
+	"sliderNeedsAtLeastTwoChoices": "Suwak wymaga co najmniej 2 opcji.",
+	"sliderMinMustBeLessThanMax": "Min suwaka musi być mniejsze niż maks.",
+	"sliderStepMustBeGreaterThanZero": "Krok suwaka musi być większy od 0.",
+	"sliderStepCannotExceedRange": "Krok suwaka nie może przekraczać (maks − min)."
 }

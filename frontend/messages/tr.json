@@ -1934,5 +1934,15 @@
 	"visibilityAuditorOnly": "Yalnızca denetçi",
 	"visibilityHidden": "Gizli",
 	"answers": "Yanıtlar",
-	"respondentAlignment": "Yanıtlayan uyumu"
+	"respondentAlignment": "Yanıtlayan uyumu",
+	"frameworkRefId": "Referans ID",
+	"urnPreview": "URN önizleme:",
+	"urnLockedComplianceAssessment": "Kilitli — bir uyumluluk değerlendirmesi bu çerçeveyi kullanıyor.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Adım",
+	"sliderNeedsAtLeastTwoChoices": "Kaydırıcı en az 2 seçenek gerektirir.",
+	"sliderMinMustBeLessThanMax": "Kaydırıcının min değeri maks değerinden küçük olmalıdır.",
+	"sliderStepMustBeGreaterThanZero": "Kaydırıcının adımı 0'dan büyük olmalıdır.",
+	"sliderStepCannotExceedRange": "Kaydırıcının adımı (maks − min) değerini aşamaz."
 }

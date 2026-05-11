@@ -3711,5 +3711,15 @@
 	"visibilityAuditorOnly": "Samo revizor",
 	"visibilityHidden": "Skriveno",
 	"answers": "Odgovori",
-	"respondentAlignment": "Usklađenost ispitanika"
+	"respondentAlignment": "Usklađenost ispitanika",
+	"frameworkRefId": "Referentni ID",
+	"urnPreview": "Pregled URN-a:",
+	"urnLockedComplianceAssessment": "Zaključano — procjena usklađenosti koristi ovaj okvir.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Korak",
+	"sliderNeedsAtLeastTwoChoices": "Klizač treba najmanje 2 izbora.",
+	"sliderMinMustBeLessThanMax": "Min klizača mora biti manji od maks.",
+	"sliderStepMustBeGreaterThanZero": "Korak klizača mora biti veći od 0.",
+	"sliderStepCannotExceedRange": "Korak klizača ne smije premašiti (maks − min)."
 }

@@ -1383,5 +1383,15 @@
 	"visibilityAuditorOnly": "Hanya auditor",
 	"visibilityHidden": "Tersembunyi",
 	"answers": "Jawaban",
-	"respondentAlignment": "Penyelarasan responden"
+	"respondentAlignment": "Penyelarasan responden",
+	"frameworkRefId": "ID referensi",
+	"urnPreview": "Pratinjau URN:",
+	"urnLockedComplianceAssessment": "Terkunci — penilaian kepatuhan menggunakan kerangka ini.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Langkah",
+	"sliderNeedsAtLeastTwoChoices": "Slider membutuhkan setidaknya 2 pilihan.",
+	"sliderMinMustBeLessThanMax": "Min slider harus kurang dari maks.",
+	"sliderStepMustBeGreaterThanZero": "Langkah slider harus lebih besar dari 0.",
+	"sliderStepCannotExceedRange": "Langkah slider tidak boleh melebihi (maks − min)."
 }

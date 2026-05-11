@@ -11,6 +11,7 @@
 	import DependsOnEditor from './DependsOnEditor.svelte';
 	import { QUESTION_TYPES, inferVariant, defaultConfigFor } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
+	import * as m from '$paraglide/messages';
 
 	interface Props {
 		question: Question;
@@ -49,9 +50,9 @@
 	// intermediate states would lose user input.
 	const sliderConfigError = $derived.by(() => {
 		if (currentVariant !== 'number:slider') return null;
-		if (!(sliderMin < sliderMax)) return 'Slider min must be less than max.';
-		if (!(sliderStep > 0)) return 'Slider step must be greater than 0.';
-		if (sliderStep > sliderMax - sliderMin) return 'Slider step cannot exceed (max − min).';
+		if (!(sliderMin < sliderMax)) return m.sliderMinMustBeLessThanMax();
+		if (!(sliderStep > 0)) return m.sliderStepMustBeGreaterThanZero();
+		if (sliderStep > sliderMax - sliderMin) return m.sliderStepCannotExceedRange();
 		return null;
 	});
 
@@ -175,7 +176,7 @@
 			{#if currentVariant === 'number:slider'}
 				<div class="grid grid-cols-3 gap-2">
 					<label class="block">
-						<span class="text-xs text-gray-500">Min</span>
+						<span class="text-xs text-gray-500">{m.sliderMin()}</span>
 						<input
 							type="number"
 							value={sliderMin}
@@ -184,7 +185,7 @@
 						/>
 					</label>
 					<label class="block">
-						<span class="text-xs text-gray-500">Max</span>
+						<span class="text-xs text-gray-500">{m.sliderMax()}</span>
 						<input
 							type="number"
 							value={sliderMax}
@@ -193,7 +194,7 @@
 						/>
 					</label>
 					<label class="block">
-						<span class="text-xs text-gray-500">Step</span>
+						<span class="text-xs text-gray-500">{m.sliderStep()}</span>
 						<input
 							type="number"
 							value={sliderStep}
@@ -215,7 +216,7 @@
 			{#if currentVariant === 'unique_choice:slider' && question.choices.length < 2}
 				<p class="text-xs text-amber-600">
 					<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-					Slider needs at least 2 choices.
+					{m.sliderNeedsAtLeastTwoChoices()}
 				</p>
 			{/if}
 

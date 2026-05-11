@@ -1186,5 +1186,15 @@
 	"visibilityAuditorOnly": "Pouze auditor",
 	"visibilityHidden": "Skryto",
 	"answers": "Odpovědi",
-	"respondentAlignment": "Shoda respondenta"
+	"respondentAlignment": "Shoda respondenta",
+	"frameworkRefId": "ID odkazu",
+	"urnPreview": "Náhled URN:",
+	"urnLockedComplianceAssessment": "Uzamčeno — hodnocení shody používá tento framework.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Krok",
+	"sliderNeedsAtLeastTwoChoices": "Posuvník vyžaduje alespoň 2 možnosti.",
+	"sliderMinMustBeLessThanMax": "Min posuvníku musí být menší než max.",
+	"sliderStepMustBeGreaterThanZero": "Krok posuvníku musí být větší než 0.",
+	"sliderStepCannotExceedRange": "Krok posuvníku nemůže přesáhnout (max − min)."
 }

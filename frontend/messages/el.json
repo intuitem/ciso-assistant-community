@@ -1896,5 +1896,15 @@
 	"visibilityAuditorOnly": "Μόνο ελεγκτής",
 	"visibilityHidden": "Κρυφό",
 	"answers": "Απαντήσεις",
-	"respondentAlignment": "Συμφωνία ερωτώμενου"
+	"respondentAlignment": "Συμφωνία ερωτώμενου",
+	"frameworkRefId": "Αναγνωριστικό αναφοράς",
+	"urnPreview": "Προεπισκόπηση URN:",
+	"urnLockedComplianceAssessment": "Κλειδωμένο — μια αξιολόγηση συμμόρφωσης χρησιμοποιεί αυτό το πλαίσιο.",
+	"sliderMin": "Ελάχ",
+	"sliderMax": "Μέγ",
+	"sliderStep": "Βήμα",
+	"sliderNeedsAtLeastTwoChoices": "Ο ολισθητής χρειάζεται τουλάχιστον 2 επιλογές.",
+	"sliderMinMustBeLessThanMax": "Το ελάχ του ολισθητή πρέπει να είναι μικρότερο από το μέγ.",
+	"sliderStepMustBeGreaterThanZero": "Το βήμα του ολισθητή πρέπει να είναι μεγαλύτερο από 0.",
+	"sliderStepCannotExceedRange": "Το βήμα του ολισθητή δεν μπορεί να ξεπερνά το (μέγ − ελάχ)."
 }

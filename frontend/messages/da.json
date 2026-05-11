@@ -1479,5 +1479,15 @@
 	"visibilityAuditorOnly": "Kun revisor",
 	"visibilityHidden": "Skjult",
 	"answers": "Svar",
-	"respondentAlignment": "Respondentens overensstemmelse"
+	"respondentAlignment": "Respondentens overensstemmelse",
+	"frameworkRefId": "Ref-ID",
+	"urnPreview": "URN-forhåndsvisning:",
+	"urnLockedComplianceAssessment": "Låst — en compliancevurdering bruger dette framework.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Trin",
+	"sliderNeedsAtLeastTwoChoices": "Skyderen kræver mindst 2 valg.",
+	"sliderMinMustBeLessThanMax": "Skyderens min skal være mindre end max.",
+	"sliderStepMustBeGreaterThanZero": "Skyderens trin skal være større end 0.",
+	"sliderStepCannotExceedRange": "Skyderens trin må ikke overstige (max − min)."
 }

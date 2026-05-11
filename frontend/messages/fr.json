@@ -4255,5 +4255,15 @@
 	"visibilityAuditorOnly": "Auditeur uniquement",
 	"visibilityHidden": "Masqué",
 	"answers": "Réponses",
-	"respondentAlignment": "Alignement du répondant"
+	"respondentAlignment": "Alignement du répondant",
+	"frameworkRefId": "ID de référence",
+	"urnPreview": "Aperçu URN :",
+	"urnLockedComplianceAssessment": "Verrouillé — un audit de conformité utilise ce référentiel.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Pas",
+	"sliderNeedsAtLeastTwoChoices": "Le curseur nécessite au moins 2 choix.",
+	"sliderMinMustBeLessThanMax": "Le min du curseur doit être inférieur au max.",
+	"sliderStepMustBeGreaterThanZero": "Le pas du curseur doit être supérieur à 0.",
+	"sliderStepCannotExceedRange": "Le pas du curseur ne peut pas dépasser (max − min)."
 }

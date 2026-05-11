@@ -2436,5 +2436,15 @@
 	"visibilityAuditorOnly": "Solo revisore",
 	"visibilityHidden": "Nascosto",
 	"answers": "Risposte",
-	"respondentAlignment": "Allineamento del rispondente"
+	"respondentAlignment": "Allineamento del rispondente",
+	"frameworkRefId": "ID di riferimento",
+	"urnPreview": "Anteprima URN:",
+	"urnLockedComplianceAssessment": "Bloccato — una valutazione di conformità usa questo framework.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Passo",
+	"sliderNeedsAtLeastTwoChoices": "Lo slider richiede almeno 2 scelte.",
+	"sliderMinMustBeLessThanMax": "Il min dello slider deve essere inferiore al max.",
+	"sliderStepMustBeGreaterThanZero": "Il passo dello slider deve essere maggiore di 0.",
+	"sliderStepCannotExceedRange": "Il passo dello slider non può superare (max − min)."
 }

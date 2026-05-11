@@ -1195,5 +1195,15 @@
 	"visibilityAuditorOnly": "Doar auditor",
 	"visibilityHidden": "Ascuns",
 	"answers": "Răspunsuri",
-	"respondentAlignment": "Aliniere respondent"
+	"respondentAlignment": "Aliniere respondent",
+	"frameworkRefId": "ID de referință",
+	"urnPreview": "Previzualizare URN:",
+	"urnLockedComplianceAssessment": "Blocat — o evaluare de conformitate folosește acest cadru.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Pas",
+	"sliderNeedsAtLeastTwoChoices": "Glisorul are nevoie de cel puțin 2 opțiuni.",
+	"sliderMinMustBeLessThanMax": "Min-ul glisorului trebuie să fie mai mic decât max-ul.",
+	"sliderStepMustBeGreaterThanZero": "Pasul glisorului trebuie să fie mai mare decât 0.",
+	"sliderStepCannotExceedRange": "Pasul glisorului nu poate depăși (max − min)."
 }

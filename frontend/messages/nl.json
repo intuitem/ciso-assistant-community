@@ -3084,5 +3084,15 @@
 	"visibilityAuditorOnly": "Alleen auditor",
 	"visibilityHidden": "Verborgen",
 	"answers": "Antwoorden",
-	"respondentAlignment": "Afstemming respondent"
+	"respondentAlignment": "Afstemming respondent",
+	"frameworkRefId": "Ref-ID",
+	"urnPreview": "URN-voorbeeld:",
+	"urnLockedComplianceAssessment": "Vergrendeld — een complianceaudit gebruikt dit framework.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Stap",
+	"sliderNeedsAtLeastTwoChoices": "Schuifregelaar heeft minimaal 2 keuzes nodig.",
+	"sliderMinMustBeLessThanMax": "Schuifregelaar-min moet kleiner zijn dan max.",
+	"sliderStepMustBeGreaterThanZero": "Schuifregelaar-stap moet groter zijn dan 0.",
+	"sliderStepCannotExceedRange": "Schuifregelaar-stap mag (max − min) niet overschrijden."
 }

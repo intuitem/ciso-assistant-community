@@ -4336,5 +4336,15 @@
 	"visibilityAuditorOnly": "Auditor only",
 	"visibilityHidden": "Hidden",
 	"answers": "Answers",
-	"respondentAlignment": "Respondent alignment"
+	"respondentAlignment": "Respondent alignment",
+	"frameworkRefId": "Ref ID",
+	"urnPreview": "URN preview:",
+	"urnLockedComplianceAssessment": "Locked — a compliance assessment uses this framework.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Step",
+	"sliderNeedsAtLeastTwoChoices": "Slider needs at least 2 choices.",
+	"sliderMinMustBeLessThanMax": "Slider min must be less than max.",
+	"sliderStepMustBeGreaterThanZero": "Slider step must be greater than 0.",
+	"sliderStepCannotExceedRange": "Slider step cannot exceed (max − min)."
 }

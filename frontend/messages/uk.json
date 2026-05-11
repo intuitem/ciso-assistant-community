@@ -1716,5 +1716,15 @@
 	"visibilityAuditorOnly": "Лише аудитор",
 	"visibilityHidden": "Приховано",
 	"answers": "Відповіді",
-	"respondentAlignment": "Узгодження респондента"
+	"respondentAlignment": "Узгодження респондента",
+	"frameworkRefId": "ID посилання",
+	"urnPreview": "Перегляд URN:",
+	"urnLockedComplianceAssessment": "Заблоковано — оцінка відповідності використовує цей фреймворк.",
+	"sliderMin": "Мін",
+	"sliderMax": "Макс",
+	"sliderStep": "Крок",
+	"sliderNeedsAtLeastTwoChoices": "Повзунок потребує щонайменше 2 варіантів.",
+	"sliderMinMustBeLessThanMax": "Мін повзунка має бути меншим за макс.",
+	"sliderStepMustBeGreaterThanZero": "Крок повзунка має бути більшим за 0.",
+	"sliderStepCannotExceedRange": "Крок повзунка не може перевищувати (макс − мін)."
 }

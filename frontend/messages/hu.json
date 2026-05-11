@@ -1198,5 +1198,15 @@
 	"visibilityAuditorOnly": "Csak auditor",
 	"visibilityHidden": "Rejtett",
 	"answers": "Válaszok",
-	"respondentAlignment": "Válaszadó egyeztetése"
+	"respondentAlignment": "Válaszadó egyeztetése",
+	"frameworkRefId": "Hivatkozási azonosító",
+	"urnPreview": "URN-előnézet:",
+	"urnLockedComplianceAssessment": "Zárolva — egy megfelelőségi értékelés használja ezt a keretrendszert.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Lépés",
+	"sliderNeedsAtLeastTwoChoices": "A csúszka legalább 2 választást igényel.",
+	"sliderMinMustBeLessThanMax": "A csúszka min értékének kisebbnek kell lennie a max értéknél.",
+	"sliderStepMustBeGreaterThanZero": "A csúszka lépésközének nagyobbnak kell lennie 0-nál.",
+	"sliderStepCannotExceedRange": "A csúszka lépésköze nem haladhatja meg (max − min)."
 }

@@ -1166,5 +1166,15 @@
 	"visibilityAuditorOnly": "صرف آڈیٹر",
 	"visibilityHidden": "چھپا ہوا",
 	"answers": "جوابات",
-	"respondentAlignment": "جواب دہندہ کی صف بندی"
+	"respondentAlignment": "جواب دہندہ کی صف بندی",
+	"frameworkRefId": "حوالہ ID",
+	"urnPreview": "URN جھلک:",
+	"urnLockedComplianceAssessment": "بند — ایک تعمیل کی تشخیص اس فریم ورک کو استعمال کرتی ہے۔",
+	"sliderMin": "کم سے کم",
+	"sliderMax": "زیادہ سے زیادہ",
+	"sliderStep": "قدم",
+	"sliderNeedsAtLeastTwoChoices": "سلائیڈر کو کم از کم 2 انتخاب چاہئیں۔",
+	"sliderMinMustBeLessThanMax": "سلائیڈر کا کم سے کم زیادہ سے زیادہ سے کم ہونا چاہیے۔",
+	"sliderStepMustBeGreaterThanZero": "سلائیڈر کا قدم 0 سے بڑا ہونا چاہیے۔",
+	"sliderStepCannotExceedRange": "سلائیڈر کا قدم (زیادہ سے زیادہ − کم سے کم) سے زیادہ نہیں ہو سکتا۔"
 }

@@ -1167,5 +1167,15 @@
 	"visibilityAuditorOnly": "केवल ऑडिटर",
 	"visibilityHidden": "छिपा हुआ",
 	"answers": "उत्तर",
-	"respondentAlignment": "प्रत्युत्तरकर्ता संरेखण"
+	"respondentAlignment": "प्रत्युत्तरकर्ता संरेखण",
+	"frameworkRefId": "संदर्भ ID",
+	"urnPreview": "URN पूर्वावलोकन:",
+	"urnLockedComplianceAssessment": "लॉक किया गया — एक अनुपालन मूल्यांकन इस ढांचे का उपयोग करता है।",
+	"sliderMin": "न्यूनतम",
+	"sliderMax": "अधिकतम",
+	"sliderStep": "चरण",
+	"sliderNeedsAtLeastTwoChoices": "स्लाइडर को कम से कम 2 विकल्प चाहिए।",
+	"sliderMinMustBeLessThanMax": "स्लाइडर का न्यूनतम अधिकतम से कम होना चाहिए।",
+	"sliderStepMustBeGreaterThanZero": "स्लाइडर का चरण 0 से अधिक होना चाहिए।",
+	"sliderStepCannotExceedRange": "स्लाइडर का चरण (अधिकतम − न्यूनतम) से अधिक नहीं हो सकता।"
 }

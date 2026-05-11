@@ -3227,5 +3227,15 @@
 	"visibilityAuditorOnly": "Solo auditor",
 	"visibilityHidden": "Oculto",
 	"answers": "Respuestas",
-	"respondentAlignment": "Alineación del encuestado"
+	"respondentAlignment": "Alineación del encuestado",
+	"frameworkRefId": "ID de referencia",
+	"urnPreview": "Vista previa URN:",
+	"urnLockedComplianceAssessment": "Bloqueado — una evaluación de cumplimiento usa este marco.",
+	"sliderMin": "Mín",
+	"sliderMax": "Máx",
+	"sliderStep": "Paso",
+	"sliderNeedsAtLeastTwoChoices": "El control deslizante necesita al menos 2 opciones.",
+	"sliderMinMustBeLessThanMax": "El mín del control deslizante debe ser menor que el máx.",
+	"sliderStepMustBeGreaterThanZero": "El paso del control deslizante debe ser mayor que 0.",
+	"sliderStepCannotExceedRange": "El paso del control deslizante no puede exceder (máx − mín)."
 }

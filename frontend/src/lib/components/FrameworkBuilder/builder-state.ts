@@ -1,5 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
+import * as m from '$paraglide/messages';
 import {
 	apiSaveDraft,
 	apiPublishDraft,
@@ -576,24 +577,24 @@ export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): Validati
 						if (typeof min !== 'number' || typeof max !== 'number' || min >= max) {
 							errors.push({
 								key: `question-${q.id}`,
-								message: `'${qLabel}': slider min must be less than max.`
+								message: `'${qLabel}': ${m.sliderMinMustBeLessThanMax()}`
 							});
 						} else if (typeof step !== 'number' || step <= 0) {
 							errors.push({
 								key: `question-${q.id}`,
-								message: `'${qLabel}': slider step must be greater than 0.`
+								message: `'${qLabel}': ${m.sliderStepMustBeGreaterThanZero()}`
 							});
 						} else if (step > max - min) {
 							errors.push({
 								key: `question-${q.id}`,
-								message: `'${qLabel}': slider step cannot exceed (max - min).`
+								message: `'${qLabel}': ${m.sliderStepCannotExceedRange()}`
 							});
 						}
 					} else if (q.type === 'unique_choice') {
 						if (q.choices.length < 2) {
 							errors.push({
 								key: `question-${q.id}`,
-								message: `'${qLabel}': slider needs at least 2 choices.`
+								message: `'${qLabel}': ${m.sliderNeedsAtLeastTwoChoices()}`
 							});
 						}
 					}

@@ -18,6 +18,7 @@
 		createHandleGatedDragHandlers
 	} from './builder-utils.svelte';
 	import { locales as supportedLocales } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -487,7 +488,7 @@
 									</label>
 									<label class="block">
 										<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
-											>Ref ID</span
+											>{m.frameworkRefId()}</span
 										>
 										<input
 											type="text"
@@ -507,12 +508,13 @@
 									</label>
 								</div>
 								<p class="text-[10px] text-gray-400 mt-0.5">
-									URN preview: <code
+									{m.urnPreview()}
+									<code
 										>urn:{$frameworkStore.urn_namespace ??
 											'custom'}:risk:framework:{$frameworkStore.ref_id || '…'}</code
 									>
 									{#if lockUrnEdits}
-										Locked — a compliance assessment uses this framework.
+										{m.urnLockedComplianceAssessment()}
 									{/if}
 								</p>
 							</div>
