@@ -8741,8 +8741,12 @@ class FrameworkViewSet(BaseModelViewSet):
             for record in nodes + questions + choices:
                 u = record.get("urn") or ""
                 parts = u.split(":")
+                # Only proper 6+ segment URNs (`urn:ns:risk:type:slug:node_id`)
+                # carry a slug we can seed from. Legacy 5-segment URNs
+                # (`urn:ns:risk:type:<uuid>`) have a per-node UUID at parts[4]
+                # — not a ref_id — so skip them and fall through to the slug.
                 if (
-                    len(parts) >= 5
+                    len(parts) >= 6
                     and parts[0] == "urn"
                     and parts[2] == "risk"
                     and parts[3] in REWRITABLE_URN_TYPES
@@ -9152,8 +9156,24 @@ class FrameworkViewSet(BaseModelViewSet):
         raw_ref_id = fw_meta.get("ref_id")
         new_ref_id = raw_ref_id.strip() if isinstance(raw_ref_id, str) else None
 
-        ns_changed = bool(new_namespace) and new_namespace != framework.urn_namespace
-        ref_changed = new_ref_id is not None and new_ref_id != (framework.ref_id or "")
+        # Normalize current DB values to match what start_editing seeds into
+        # the draft: NULL/empty urn_namespace → "custom"; NULL/whitespace
+        # ref_id → None. Without this, a no-op publish of a framework whose
+        # DB columns are NULL trips the rename branch and rewrites URNs.
+        current_namespace = (
+            framework.urn_namespace.strip()
+            if isinstance(framework.urn_namespace, str)
+            and framework.urn_namespace.strip()
+            else "custom"
+        )
+        current_ref = (
+            framework.ref_id.strip()
+            if isinstance(framework.ref_id, str) and framework.ref_id.strip()
+            else None
+        )
+
+        ns_changed = bool(new_namespace) and new_namespace != current_namespace
+        ref_changed = new_ref_id is not None and new_ref_id != (current_ref or "")
 
         new_urn_namespace = framework.urn_namespace
         new_framework_ref_id = framework.ref_id
