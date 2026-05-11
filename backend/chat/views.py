@@ -1483,23 +1483,30 @@ def _check_agent_dependencies() -> str:
     / "Ollama not configured" failure modes that would otherwise produce a
     run full of silent ``needs_info`` defaults from the worker's per-question
     exception handler.
+
+    Exception details are logged server-side; the returned message is a
+    static label so we don't echo stack-trace fragments (provider URLs,
+    credentials, internal paths) to API clients.
     """
     from .providers import get_llm, get_embedder
     from .rag import COLLECTION_NAME, get_qdrant_client
 
     try:
         get_llm()
-    except Exception as e:
-        return f"LLM provider not available: {e}"
+    except Exception:
+        logger.exception("agent_dependency_check_failed: llm_provider")
+        return "LLM provider not available. Check server logs for details."
     try:
         get_embedder()
-    except Exception as e:
-        return f"Embedder not available: {e}"
+    except Exception:
+        logger.exception("agent_dependency_check_failed: embedder")
+        return "Embedder not available. Check server logs for details."
     try:
         client = get_qdrant_client()
         collection_names = {c.name for c in client.get_collections().collections}
-    except Exception as e:
-        return f"Vector store (Qdrant) unreachable: {e}"
+    except Exception:
+        logger.exception("agent_dependency_check_failed: qdrant")
+        return "Vector store (Qdrant) unreachable. Check server logs for details."
     if COLLECTION_NAME not in collection_names:
         return (
             f"Vector store collection '{COLLECTION_NAME}' is missing. "
