@@ -804,7 +804,7 @@
 	"createUserHelpText": "Creați sau legați un utilizator terță parte la reprezentant pe baza emailului",
 	"nameDuplicate": "Numele există deja",
 	"noAnswer": "Nici un răspuns",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "Ștergeți răspunsul",
 	"entityAssessmentRepresentativesHelpText": "Utilizatorii terți care sunt responsabili pentru completarea chestionarului",
 	"sendQuestionnaire": "Trimite chestionar",
 	"sureToSendQuestionnaire": "Sigur doriți să trimiteți chestionarul: {questionnaire} ?",

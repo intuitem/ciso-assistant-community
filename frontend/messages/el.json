@@ -854,7 +854,7 @@
 	"createUserHelpText": "Δημιουργήστε ή συνδέστε έναν χρήστη τρίτου μέρους στον εκπρόσωπο με βάση το email",
 	"nameDuplicate": "Το όνομα υπάρχει ήδη",
 	"noAnswer": "Καμία απάντηση",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "Εκκαθάριση απάντησης",
 	"entityAssessmentRepresentativesHelpText": "Οι χρήστες τρίτων που είναι υπεύθυνοι για τη συμπλήρωση του ερωτηματολογίου",
 	"sendQuestionnaire": "Αποστολή ερωτηματολογίου",
 	"sureToSendQuestionnaire": "Είστε βέβαιοι ότι θέλετε να στείλετε το ερωτηματολόγιο: {questionnaire};",

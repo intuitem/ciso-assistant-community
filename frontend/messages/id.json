@@ -808,7 +808,7 @@
 	"createUserHelpText": "Buat atau tautkan pengguna pihak ketiga ke perwakilan berdasarkan email",
 	"nameDuplicate": "Nama sudah ada",
 	"noAnswer": "Tidak ada jawaban",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "Hapus jawaban",
 	"entityAssessmentRepresentativesHelpText": "Pengguna pihak ketiga yang bertanggung jawab untuk menyelesaikan kuesioner",
 	"sendQuestionnaire": "Kirim kuesioner",
 	"sureToSendQuestionnaire": "Apakah Anda yakin ingin mengirim kuesioner: {questionnaire}?",

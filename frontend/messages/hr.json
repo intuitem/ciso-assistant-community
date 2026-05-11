@@ -864,7 +864,7 @@
 	"createUserHelpText": "Kreiraj ili poveži korisnika treće strane s predstavnikom na temelju e-mail adrese",
 	"nameDuplicate": "Ime već postoji",
 	"noAnswer": "Nema odgovora",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "Obriši odgovor",
 	"entityAssessmentRepresentativesHelpText": "Korisnici treće strane koji su odgovorni za ispunjavanje upitnika",
 	"sendQuestionnaire": "Pošalji upitnik",
 	"sureToSendQuestionnaire": "Jeste li sigurni da želite poslati upitnik {questionnaire}?",

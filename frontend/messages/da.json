@@ -819,7 +819,7 @@
 	"createUserHelpText": "Opret eller link en tredjepartsbruger til repræsentanten baseret på e-mail",
 	"nameDuplicate": "Navnet findes allerede",
 	"noAnswer": "Intet svar",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "Ryd svar",
 	"entityAssessmentRepresentativesHelpText": "Tredjepartsbrugere ansvarlige for at udfylde spørgeskemaet",
 	"sendQuestionnaire": "Send spørgeskema",
 	"sureToSendQuestionnaire": "Er du sikker på, at du vil sende spørgeskemaet: {questionnaire}?",

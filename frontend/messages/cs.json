@@ -805,7 +805,7 @@
 	"createUserHelpText": "Vytvořte nebo připojte uživatele třetí strany k zástupci na základě e-mailu",
 	"nameDuplicate": "Jméno již existuje",
 	"noAnswer": "Bez odpovědi",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "Vymazat odpověď",
 	"entityAssessmentRepresentativesHelpText": "Uživatelé třetí strany, kteří jsou odpovědní za vyplnění dotazníku",
 	"sendQuestionnaire": "Odeslat dotazník",
 	"sureToSendQuestionnaire": "Opravdu chcete odeslat dotazník: {questionnaire}?",

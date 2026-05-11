@@ -804,7 +804,7 @@
 	"createUserHelpText": "إنشاء مستخدم تابع لجهة خارجية أو ربطه بالممثل بناءً على البريد الإلكتروني",
 	"nameDuplicate": "الاسم موجود بالفعل",
 	"noAnswer": "لا يوجد جواب",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "مسح الإجابة",
 	"entityAssessmentRepresentativesHelpText": "المستخدمون الخارجيون المسؤولون عن استكمال الاستبيان",
 	"sendQuestionnaire": "إرسال الاستبيان",
 	"sureToSendQuestionnaire": "هل أنت متأكد من أنك تريد إرسال الاستبيان: {questionnaire} ؟",

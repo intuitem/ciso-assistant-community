@@ -1022,7 +1022,7 @@
 	"userLinkedToRepresentative": "此代表已关联用户。",
 	"nameDuplicate": "名称已存在",
 	"noAnswer": "无答案",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "清除答案",
 	"entityAssessmentRepresentativesHelpText": "负责完成问卷的第三方用户",
 	"sendQuestionnaire": "发送问卷",
 	"sureToSendQuestionnaire": "确定要发送问卷：{questionnaire}？",

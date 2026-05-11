@@ -807,7 +807,7 @@
 	"createUserHelpText": "Hozzon létre vagy kapcsoljon össze egy harmadik fél felhasználót a képviselővel e-mail alapján",
 	"nameDuplicate": "A név már létezik",
 	"noAnswer": "Nincs válasz",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "Válasz törlése",
 	"entityAssessmentRepresentativesHelpText": "Azok a harmadik fél felhasználók, akik a kérdőív kitöltéséért felelősek",
 	"sendQuestionnaire": "Kérdőív elküldése",
 	"sureToSendQuestionnaire": "Biztosan el szeretné küldeni a(z) {questionnaire} kérdőívet?",

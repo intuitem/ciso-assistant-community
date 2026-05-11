@@ -1175,7 +1175,7 @@
 	"userLinkedToRepresentative": "이 대표자에는 이미 사용자가 연결되어 있습니다.",
 	"nameDuplicate": "이름이 이미 존재합니다",
 	"noAnswer": "답변 없음",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "답변 지우기",
 	"entityAssessmentRepresentativesHelpText": "설문지 작성을 담당하는 제3자 사용자",
 	"sendQuestionnaire": "설문지 전송",
 	"sureToSendQuestionnaire": "설문지: {questionnaire}을(를) 전송하시겠습니까?",

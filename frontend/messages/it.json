@@ -792,7 +792,7 @@
 	"createUserHelpText": "Crea o collega un utente di terza parte al rappresentante in base all'email",
 	"nameDuplicate": "Nome già esistente",
 	"noAnswer": "Nessuna risposta",
-	"clearAnswer": "Clear answer",
+	"clearAnswer": "Cancella risposta",
 	"entityAssessmentRepresentativesHelpText": "Utenti di terze parti responsabili della compilazione del questionario",
 	"sendQuestionnaire": "Invia questionario",
 	"sureToSendQuestionnaire": "Sei sicuro di voler inviare il questionario: {questionnaire}?",
