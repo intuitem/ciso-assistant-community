@@ -15,7 +15,8 @@ from django.core.management.base import BaseCommand, CommandError
 
 from chat.rag import COLLECTION_NAME, get_qdrant_client
 from chat.signals import INDEXED_MODELS
-from chat.tasks import _build_object_text, _normalize_model_name, _resolve_folder_id
+from chat.tasks import _resolve_folder_id
+from chat.text import _build_object_text, _normalize_model_name
 
 
 class Command(BaseCommand):

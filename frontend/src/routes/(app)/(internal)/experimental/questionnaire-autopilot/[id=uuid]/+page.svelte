@@ -7,6 +7,7 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+	import { VERDICT, VERDICT_ORDER, type Verdict } from '$lib/utils/questionnaire-verdict';
 	import type { PageData } from './$types';
 
 	interface Sheet {
@@ -599,39 +600,38 @@
 	const answeredCount = $derived(Object.keys(actionByQuestion).length);
 
 	const statusBreakdown = $derived.by(() => {
-		const counts: Record<string, number> = { yes: 0, partial: 0, no: 0, needs_info: 0 };
+		const counts: Record<Verdict, number> = {
+			[VERDICT.YES]: 0,
+			[VERDICT.PARTIAL]: 0,
+			[VERDICT.NO]: 0,
+			[VERDICT.NEEDS_INFO]: 0
+		};
 		for (const q of questions) {
 			const a = actionByQuestion[q.id];
 			if (!a) continue;
-			const s = a.payload.status || 'needs_info';
+			const s = (a.payload.status as Verdict) || VERDICT.NEEDS_INFO;
 			if (s in counts) counts[s] += 1;
-			else counts['needs_info'] += 1;
+			else counts[VERDICT.NEEDS_INFO] += 1;
 		}
-		const order: Array<'yes' | 'partial' | 'no' | 'needs_info'> = [
-			'yes',
-			'partial',
-			'no',
-			'needs_info'
-		];
-		const labels: Record<string, string> = {
-			yes: 'Yes',
-			partial: 'Partial',
-			no: 'No',
-			needs_info: 'Needs info'
+		const labels: Record<Verdict, string> = {
+			[VERDICT.YES]: 'Yes',
+			[VERDICT.PARTIAL]: 'Partial',
+			[VERDICT.NO]: 'No',
+			[VERDICT.NEEDS_INFO]: 'Needs info'
 		};
-		const colors: Record<string, string> = {
-			yes: 'bg-green-500',
-			partial: 'bg-yellow-500',
-			no: 'bg-red-500',
-			needs_info: 'bg-gray-400'
+		const colors: Record<Verdict, string> = {
+			[VERDICT.YES]: 'bg-green-500',
+			[VERDICT.PARTIAL]: 'bg-yellow-500',
+			[VERDICT.NO]: 'bg-red-500',
+			[VERDICT.NEEDS_INFO]: 'bg-gray-400'
 		};
-		const pillColors: Record<string, string> = {
-			yes: 'bg-green-100 text-green-800',
-			partial: 'bg-yellow-100 text-yellow-800',
-			no: 'bg-red-100 text-red-800',
-			needs_info: 'bg-gray-100 text-gray-700'
+		const pillColors: Record<Verdict, string> = {
+			[VERDICT.YES]: 'bg-green-100 text-green-800',
+			[VERDICT.PARTIAL]: 'bg-yellow-100 text-yellow-800',
+			[VERDICT.NO]: 'bg-red-100 text-red-800',
+			[VERDICT.NEEDS_INFO]: 'bg-gray-100 text-gray-700'
 		};
-		return order.map((s) => ({
+		return VERDICT_ORDER.map((s) => ({
 			status: s,
 			label: labels[s],
 			color: colors[s],
@@ -664,7 +664,7 @@
 		sortedQuestions.filter((q) => {
 			const a = actionByQuestion[q.id];
 			if (!a) return true;
-			if (a.payload?.status === 'needs_info') return true;
+			if (a.payload?.status === VERDICT.NEEDS_INFO) return true;
 			const c = a.confidence;
 			return c == null || c < AUTO_ACCEPT_THRESHOLD;
 		})
@@ -673,7 +673,7 @@
 		sortedQuestions.filter((q) => {
 			const a = actionByQuestion[q.id];
 			if (!a) return false;
-			if (a.payload?.status === 'needs_info') return false;
+			if (a.payload?.status === VERDICT.NEEDS_INFO) return false;
 			const c = a.confidence;
 			return c != null && c >= AUTO_ACCEPT_THRESHOLD;
 		})
@@ -682,10 +682,10 @@
 
 	function statusPill(status: string) {
 		const map: Record<string, string> = {
-			yes: 'bg-green-100 text-green-800',
-			no: 'bg-red-100 text-red-800',
-			partial: 'bg-yellow-100 text-yellow-800',
-			needs_info: 'bg-gray-100 text-gray-700'
+			[VERDICT.YES]: 'bg-green-100 text-green-800',
+			[VERDICT.NO]: 'bg-red-100 text-red-800',
+			[VERDICT.PARTIAL]: 'bg-yellow-100 text-yellow-800',
+			[VERDICT.NEEDS_INFO]: 'bg-gray-100 text-gray-700'
 		};
 		return map[status] || 'bg-gray-100 text-gray-700';
 	}
@@ -1419,9 +1419,9 @@
 									<div class="flex flex-col items-end gap-1 min-w-[140px]">
 										<span
 											class="text-xs px-2 py-0.5 rounded font-medium uppercase tracking-wide
-											{statusPill(action.payload.status || 'needs_info')}"
+											{statusPill(action.payload.status || VERDICT.NEEDS_INFO)}"
 										>
-											{action.payload.status ?? 'needs_info'}
+											{action.payload.status ?? VERDICT.NEEDS_INFO}
 										</span>
 										<div class="w-32">
 											<div class="flex justify-between text-[10px] text-gray-500">
@@ -1476,9 +1476,9 @@
 							<div class="flex flex-col items-end gap-1 min-w-[140px]">
 								<span
 									class="text-xs px-2 py-0.5 rounded font-medium uppercase tracking-wide
-									{statusPill(action.payload.status || 'needs_info')}"
+									{statusPill(action.payload.status || VERDICT.NEEDS_INFO)}"
 								>
-									{action.payload.status ?? 'needs_info'}
+									{action.payload.status ?? VERDICT.NEEDS_INFO}
 								</span>
 								<div class="w-32">
 									<div class="flex justify-between text-[10px] text-gray-500">
@@ -1530,7 +1530,7 @@
 								</div>
 							</details>
 						{/if}
-						{#if action.payload.status === 'needs_info' || (action.confidence != null && action.confidence < AUTO_ACCEPT_THRESHOLD)}
+						{#if action.payload.status === VERDICT.NEEDS_INFO || (action.confidence != null && action.confidence < AUTO_ACCEPT_THRESHOLD)}
 							<div class="flex items-center gap-3 text-xs pt-1">
 								{#if retryBusyForQuestion === question.id}
 									<span class="text-gray-500">

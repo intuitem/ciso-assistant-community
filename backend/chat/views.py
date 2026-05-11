@@ -25,6 +25,7 @@ from .constants import (
     MODEL_CONTEXT_TOKENS,
     RAG_CONTEXT_TOKENS,
     VERBATIM_WINDOW_TOKENS,
+    Verdict,
 )
 from .context import ContextBuilder
 from .memory import (
@@ -1129,9 +1130,9 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
         #    labels would violate the dropdown.
         # In both cases the comment cell still fills with the agent's text.
         DEFAULT_LABELS = {
-            "yes": "Yes",
-            "partial": "Partial",
-            "no": "No",
+            Verdict.YES: "Yes",
+            Verdict.PARTIAL: "Partial",
+            Verdict.NO: "No",
         }
 
         sheet_meta = next(
@@ -1186,25 +1187,18 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
                 continue
 
             payload = action.payload or {}
-            status_key = (payload.get("status") or "needs_info").lower()
+            status_key = (payload.get("status") or Verdict.NEEDS_INFO).lower()
             comment = (payload.get("comment") or "").strip()
             # openpyxl is 1-indexed; column indices in mapping are 0-indexed
             excel_row = excel_row_idx_zero_based + 1
 
-            # Per-question mapping is the source of truth. Three cases:
-            #   1. Mapping computed cleanly → write the customer term.
-            #   2. Cell has a dropdown but mapping isn't ready / failed →
-            #      leave the cell blank to avoid violating the dropdown.
-            #   3. No dropdown on this cell → internal labels are safe.
-            # In every case we never auto-write needs_info (legitimate
-            # "Not Applicable" answers should be human-picked).
             qm = question.answer_mapping or {}
             qm_source = qm.get("source")
             if qm_source and qm_source != "fallback":
                 cell_status_labels = {
-                    "yes": qm.get("yes"),
-                    "partial": qm.get("partial"),
-                    "no": qm.get("no"),
+                    Verdict.YES: qm.get(Verdict.YES),
+                    Verdict.PARTIAL: qm.get(Verdict.PARTIAL),
+                    Verdict.NO: qm.get(Verdict.NO),
                 }
                 skip_answer_cell = False
             elif question.answer_candidates:
@@ -1649,6 +1643,13 @@ class AgentActionViewSet(BaseModelViewSet):
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
+    # Approve / reject are intentionally not exercised by the questionnaire
+    # autopilot UI — that flow uses confidence-banded review without explicit
+    # per-action approval. They're reserved for the upcoming audit-prefill
+    # page where a human signs off each RequirementAssessment proposal before
+    # it lands on the audit. State transitions stay PROPOSED → APPROVED /
+    # REJECTED; the worker also writes the terminal EXPIRED state during
+    # retry iterations (see _process_question in chat/questionnaire.py).
     @action(detail=True, methods=["post"], url_path="approve")
     def approve(self, request, pk=None):
         action_obj = self.get_object()

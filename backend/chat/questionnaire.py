@@ -3,12 +3,10 @@
 Extracted from chat/tasks.py to keep questionnaire-specific code (parsing
 xlsx, vocabulary detection, the agentic prefill loop, citation-based verdict
 refinement, retry / suggest-control flows) separate from the general chat
-RAG/indexing tasks.
-
-Generic helpers (``_build_object_text``, ``_text_for_applied_control``,
-``_normalize_model_name``) live in chat/tasks.py and are imported lazily
-inside the functions that use them — chat/tasks.py also re-exports the
-public callables from this module, so the two would otherwise circular.
+RAG/indexing tasks. Shared text-building helpers live in ``chat/text.py``,
+imported at module level — chat/tasks.py also re-exports the questionnaire
+public callables, so a third module is what untangles what would otherwise
+be a circular import.
 """
 
 import structlog
@@ -17,6 +15,13 @@ import uuid
 from django.core.exceptions import FieldError
 from django.utils import timezone
 from huey.contrib.djhuey import db_task
+
+from .constants import Verdict
+from .text import (
+    _build_object_text,
+    _normalize_model_name,
+    _text_for_applied_control,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -148,6 +153,7 @@ def _llm_map_candidates(llm, candidates: list[str]) -> dict:
     this vocabulary). Falls back to internal labels with ``source='fallback'``
     if the LLM is unavailable or doesn't produce a valid mapping after retries.
     """
+    import json
     import time
 
     if llm is None or not candidates:
@@ -176,7 +182,9 @@ def _llm_map_candidates(llm, candidates: list[str]) -> dict:
         if attempt > 0:
             time.sleep(BACKOFF_SECONDS[attempt])
 
-        prompt = VALUE_MAPPING_PROMPT.format(candidates=json_dumps(candidates))
+        prompt = VALUE_MAPPING_PROMPT.format(
+            candidates=json.dumps(candidates, ensure_ascii=False)
+        )
         try:
             raw = llm.generate(prompt=prompt, context="", history=[])
         except Exception as e:
@@ -202,8 +210,6 @@ def _llm_map_candidates(llm, candidates: list[str]) -> dict:
                 "partial": partial,
                 "no": no,
                 "candidates": candidates,
-                # Vocabulary came from a non-empty answer cell (data validation
-                # or distinct existing values); export honors it.
                 "source": "data_validation",
             }
         logger.info(
@@ -225,13 +231,6 @@ def _llm_map_candidates(llm, candidates: list[str]) -> dict:
         "candidates": candidates,
         "source": "fallback",
     }
-
-
-def json_dumps(obj):
-    """Stable JSON for prompt embedding."""
-    import json
-
-    return json.dumps(obj, ensure_ascii=False)
 
 
 def extract_questions_from_sheet(run, sheet: dict, mapping: dict) -> int:
@@ -256,8 +255,6 @@ def extract_questions_from_sheet(run, sheet: dict, mapping: dict) -> int:
 
     with run.file.open("rb") as fp:
         content = fp.read()
-    # Not read_only: ws.data_validations is only accessible on a fully
-    # loaded workbook, and we need it for per-cell vocabulary detection.
     wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
     ws = wb[sheet_name]
     header_count = len(sheet["headers"])
@@ -286,9 +283,9 @@ def extract_questions_from_sheet(run, sheet: dict, mapping: dict) -> int:
 
         ref_id = ""
 
-        # Per-cell vocabulary: openpyxl uses 1-indexed Excel rows.
         candidates: list[str] = []
         if answer_col is not None:
+            # openpyxl is 1-indexed; idx is 0-indexed.
             candidates = _detect_cell_vocabulary(ws, idx + 1, answer_col)
 
         rows_to_create.append(
@@ -891,7 +888,6 @@ def refresh_folder_index(folder_id: str) -> dict:
     from .providers import get_embedder
     from .rag import COLLECTION_NAME, get_qdrant_client
     from .signals import INDEXED_MODELS
-    from .tasks import _build_object_text, _normalize_model_name
 
     folder_id_str = str(folder_id)
 
@@ -1154,7 +1150,7 @@ def run_questionnaire_prefill(agent_run_id: str):
                     kind=AgentAction.Kind.PROPOSE_ANSWER,
                     target_content_type=qq_ct,
                     target_object_id=question.id,
-                    payload={"status": "needs_info", "comment": ""},
+                    payload={"status": Verdict.NEEDS_INFO, "comment": ""},
                     rationale=f"Error: {e}",
                     source_refs=[],
                     confidence=0.0,
@@ -1541,8 +1537,6 @@ def _applied_control_to_rag_dict(ac) -> dict:
     through the same context-formatting code, so citation numbering stays
     consistent.
     """
-    from .tasks import _text_for_applied_control
-
     return {
         "id": str(ac.id),
         "score": 1.0,
@@ -1584,7 +1578,7 @@ def _refine_verdict_against_citations(
         RequirementAssessment,
     )
 
-    if answer_status not in ("yes", "partial"):
+    if answer_status not in (Verdict.YES, Verdict.PARTIAL):
         return answer_status, ""
     if not cited_indices:
         return answer_status, ""
@@ -1674,26 +1668,26 @@ def _refine_verdict_against_citations(
     if has_active or has_document_evidence:
         return answer_status, ""
 
-    if answer_status == "yes":
+    if answer_status == Verdict.YES:
         if has_partial:
             return (
-                "partial",
+                Verdict.PARTIAL,
                 "Auto-downgraded yes→partial: cited evidence is in progress / "
                 "partially compliant, not active.",
             )
         if has_status_bearing_only or has_library_only:
             return (
-                "needs_info",
+                Verdict.NEEDS_INFO,
                 "Auto-downgraded yes→needs_info: cited evidence is planned, "
                 "unverified, or only references the requirement itself "
                 "without evidence of practice.",
             )
-    elif answer_status == "partial":
+    elif answer_status == Verdict.PARTIAL:
         if has_partial:
             return answer_status, ""  # in_progress/partially_compliant supports partial
         if has_status_bearing_only or has_library_only:
             return (
-                "needs_info",
+                Verdict.NEEDS_INFO,
                 "Auto-downgraded partial→needs_info: cited evidence is "
                 "planned, unverified, or only references the requirement "
                 "itself without evidence of practice.",
@@ -1741,14 +1735,8 @@ def _answer_iteration(
     parsed = _parse_json_response(raw) or {}
     answer_status = (
         parsed.get("status")
-        if parsed.get("status")
-        in {
-            "yes",
-            "no",
-            "partial",
-            "needs_info",
-        }
-        else "needs_info"
+        if Verdict.is_valid(parsed.get("status") or "")
+        else Verdict.NEEDS_INFO
     )
     comment = (parsed.get("comment") or "").strip()
     cited_indices = parsed.get("citation_indices") or []
