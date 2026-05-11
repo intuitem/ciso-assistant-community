@@ -9,7 +9,7 @@ native Windows development.
 - `.win_native_dev_runserver.py`: Django `runserver` wrapper that increases the
   development server listen backlog.
 
-## Where To Place Them
+## Where to place them?
 
 Place the scripts from this folder at these paths from the CISO Assistant
 repository root:
@@ -25,7 +25,7 @@ Then start the backend from the repository root:
 .\backend.ps1
 ```
 
-## Why They Exist
+## Why they exist?
 
 On native Windows, Django's development server can drain bursts of incoming API
 connections more slowly than on Linux. During SvelteKit SSR, the frontend can
@@ -35,7 +35,7 @@ may intermittently return `ECONNREFUSED` before requests reach Django.
 The Python wrapper keeps normal `runserver` behavior but raises the backlog with
 `DJANGO_RUNSERVER_BACKLOG` (`512` by default).
 
-## Python Virtual Environment
+## About Python Virtual Environment (.venv)
 
 In `backend.ps1`, set `$PythonRelativeExecutablePath` to the Python executable
 that should run Django. A local `.venv` is recommended because it keeps
