@@ -1473,6 +1473,41 @@ class QuestionnaireQuestionViewSet(BaseModelViewSet):
 _STUCK_RUN_HEARTBEAT_GRACE_SECONDS = 5 * 60
 
 
+def _check_agent_dependencies() -> str:
+    """Cheap preflight before enqueueing an agent run.
+
+    Probes the three pieces of infrastructure the worker can't run without:
+    LLM provider, embedder, and Qdrant (collection present + reachable).
+    Returns an empty string on success, or a user-facing message describing
+    the first failing dependency. Catches the common "Qdrant isn't running"
+    / "Ollama not configured" failure modes that would otherwise produce a
+    run full of silent ``needs_info`` defaults from the worker's per-question
+    exception handler.
+    """
+    from .providers import get_llm, get_embedder
+    from .rag import COLLECTION_NAME, get_qdrant_client
+
+    try:
+        get_llm()
+    except Exception as e:
+        return f"LLM provider not available: {e}"
+    try:
+        get_embedder()
+    except Exception as e:
+        return f"Embedder not available: {e}"
+    try:
+        client = get_qdrant_client()
+        collection_names = {c.name for c in client.get_collections().collections}
+    except Exception as e:
+        return f"Vector store (Qdrant) unreachable: {e}"
+    if COLLECTION_NAME not in collection_names:
+        return (
+            f"Vector store collection '{COLLECTION_NAME}' is missing. "
+            "Run `manage.py init_qdrant` first."
+        )
+    return ""
+
+
 def _heal_if_stuck(run):
     """Lazy stuck-run detector.
 
@@ -1593,6 +1628,17 @@ class AgentRunViewSet(BaseModelViewSet):
             return Response(
                 {"detail": "No questions extracted yet — extract first."},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Fail fast if the worker's required infrastructure is unreachable.
+        # Without this, a Qdrant outage would still let the run start and
+        # then silently produce a needs_info for every question via the
+        # per-question exception handler in chat.questionnaire.
+        dep_error = _check_agent_dependencies()
+        if dep_error:
+            return Response(
+                {"detail": dep_error},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
         # Lock the parent QuestionnaireRun row so two concurrent Start clicks

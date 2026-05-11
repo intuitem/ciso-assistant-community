@@ -1127,6 +1127,14 @@ def run_questionnaire_prefill(agent_run_id: str):
         run.save(update_fields=["status", "error_message", "finished_at", "updated_at"])
         return
 
+    # Tolerate the occasional flaky question, but bail loudly when the
+    # whole infrastructure is broken (e.g. Qdrant dies mid-run). Without
+    # this guard, every question would stamp a fake `needs_info` proposal
+    # and the user would see a complete-looking run full of wrong answers.
+    _CONSECUTIVE_FAILURE_LIMIT = 3
+    consecutive_failures = 0
+    last_failure_message = ""
+
     try:
         for question in questions:
             label = f"{run.completed_steps + 1}/{run.total_steps}: {question.text[:80]}"
@@ -1145,11 +1153,15 @@ def run_questionnaire_prefill(agent_run_id: str):
                     rag_search=rag_search,
                     count_tokens=count_tokens,
                 )
+                consecutive_failures = 0
             except Exception as e:
+                consecutive_failures += 1
+                last_failure_message = str(e)
                 logger.error(
-                    "Failed processing question %s in run %s: %s",
+                    "Failed processing question %s in run %s (consecutive=%d): %s",
                     question.id,
                     run.id,
+                    consecutive_failures,
                     e,
                 )
                 # Record the failure as an AgentAction so it shows in the UI;
@@ -1167,6 +1179,29 @@ def run_questionnaire_prefill(agent_run_id: str):
                     iteration=0,
                     duration_ms=int((time.time() - t0) * 1000),
                 )
+                if consecutive_failures >= _CONSECUTIVE_FAILURE_LIMIT:
+                    run.status = AgentRun.Status.FAILED
+                    run.finished_at = timezone.now()
+                    run.error_message = (
+                        f"Aborting after {consecutive_failures} consecutive "
+                        f"question failures. Last error: {last_failure_message}"
+                    )
+                    run.current_step_label = ""
+                    run.save(
+                        update_fields=[
+                            "status",
+                            "finished_at",
+                            "error_message",
+                            "current_step_label",
+                            "updated_at",
+                        ]
+                    )
+                    logger.error(
+                        "AgentRun %s aborted: %s",
+                        run.id,
+                        run.error_message,
+                    )
+                    return
 
             # Soft per-question budget guard
             if time.time() - t0 > PER_QUESTION_TIMEOUT_SEC:
@@ -1565,8 +1600,14 @@ def _applied_control_to_rag_dict(ac) -> dict:
 # Citation kinds that describe what *should* be done (framework material,
 # library reference controls, library threats). These don't justify a "yes"
 # on their own — internal records of practice do.
+#
+# Two flavors covered: ``"library"`` is the indexer's ``source_type`` for
+# items pulled from YAML libraries (matched first by _build_context_block
+# when source_type != "model"), and the per-model ``object_type`` slugs
+# cover the case where a library row was indexed model-style.
 _LIBRARY_REF_KINDS = frozenset(
     {
+        "library",
         "requirement_node",
         "reference_control",
         "library_threat",
