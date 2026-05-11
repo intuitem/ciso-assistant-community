@@ -8,10 +8,23 @@
 
 	let { currentVariant, onselect }: Props = $props();
 	let open = $state(false);
+	let triggerEl: HTMLButtonElement | undefined = $state();
+	let menuPos = $state({ top: 0, left: 0 });
 
 	const currentTypeInfo = $derived(
 		QUESTION_TYPES.find((t) => t.value === currentVariant) ?? QUESTION_TYPES[0]
 	);
+
+	// The menu uses `position: fixed` so it escapes the `overflow-hidden` on
+	// the surrounding NodeBlock card. Anchor it to the trigger's bounding
+	// rect each time we open.
+	function toggle() {
+		if (!open && triggerEl) {
+			const r = triggerEl.getBoundingClientRect();
+			menuPos = { top: r.bottom + 4, left: r.left };
+		}
+		open = !open;
+	}
 
 	function select(variant: string) {
 		onselect(variant);
@@ -21,9 +34,10 @@
 
 <div class="relative">
 	<button
+		bind:this={triggerEl}
 		type="button"
 		class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium {currentTypeInfo.color} hover:opacity-80 transition-opacity"
-		onclick={() => (open = !open)}
+		onclick={toggle}
 	>
 		<i class="fa-solid {currentTypeInfo.icon}"></i>
 		{currentTypeInfo.label}
@@ -38,7 +52,8 @@
 			onkeydown={(e) => e.key === 'Escape' && (open = false)}
 		></div>
 		<div
-			class="absolute top-full left-0 mt-1 z-30 bg-white rounded-lg shadow-lg border border-gray-200 p-2 grid grid-cols-2 gap-1 w-56"
+			class="fixed z-30 bg-white rounded-lg shadow-lg border border-gray-200 p-2 grid grid-cols-2 gap-1 w-56"
+			style="top: {menuPos.top}px; left: {menuPos.left}px"
 		>
 			{#each QUESTION_TYPES as type (type.value)}
 				<button
