@@ -1,5 +1,5 @@
 """
-Native Windows development runserver entrypoint.
+Native Windows development runserver entrypoint
 
 Place this script at the following path from the CISO Assistant repository root:
 backend/.win_native_dev_runserver.py
@@ -7,7 +7,7 @@ backend/.win_native_dev_runserver.py
 Django's default development server listen backlog is small. In native Windows
 development, runserver can drain bursts of incoming API connections more slowly
 than on Linux. SvelteKit SSR may then open enough concurrent API connections to
-fill that queue, which intermittently causes ECONNREFUSED on 127.0.0.1:8000
+fill that queue, which intermittently causes `ECONNREFUSED` on `127.0.0.1:8000`
 before requests reach Django. This wrapper keeps the normal Django runserver
 behavior, but raises the listen backlog through DJANGO_RUNSERVER_BACKLOG.
 """
