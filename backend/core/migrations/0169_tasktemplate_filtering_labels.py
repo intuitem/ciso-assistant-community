@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0168_consolidate_visibility_booleans'),
+        ("core", "0168_consolidate_visibility_booleans"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tasktemplate',
-            name='filtering_labels',
-            field=models.ManyToManyField(blank=True, to='core.filteringlabel', verbose_name='Labels'),
+            model_name="tasktemplate",
+            name="filtering_labels",
+            field=models.ManyToManyField(
+                blank=True, to="core.filteringlabel", verbose_name="Labels"
+            ),
         ),
     ]
