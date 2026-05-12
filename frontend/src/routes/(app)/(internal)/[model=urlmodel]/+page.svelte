@@ -402,18 +402,18 @@
 							>
 								<div class="flex flex-col">
 									<a
-										href="{URLModel}/export/"
+										href="{URLModel}/export/{currentFilterSearch}"
 										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 										onclick={() => (exportPopupOpen = false)}>... {m.asCSV()}</a
 									>
 									<a
-										href="{URLModel}/export/xlsx/"
+										href="{URLModel}/export/xlsx/{currentFilterSearch}"
 										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 										onclick={() => (exportPopupOpen = false)}>... {m.asXLSX()}</a
 									>
 									{#if URLModel === 'entities'}
 										<a
-											href="/entities/export/ecosystem/"
+											href="/entities/export/ecosystem/{currentFilterSearch}"
 											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 											onclick={() => (exportPopupOpen = false)}>... {m.exportEcosystem()}</a
 										>

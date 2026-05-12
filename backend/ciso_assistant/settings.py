@@ -134,6 +134,30 @@ ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
 )
 logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
 
+# Questionnaire Autopilot — tunable thresholds. Defaults match the values
+# the feature was developed against; override via env when tuning a
+# specific deployment without redeploying. See chat/questionnaire.py.
+QUESTIONNAIRE_RETRY_THRESHOLD = float(
+    os.environ.get("QUESTIONNAIRE_RETRY_THRESHOLD", "0.7")
+)
+QUESTIONNAIRE_AUTO_ACCEPT_THRESHOLD = float(
+    os.environ.get("QUESTIONNAIRE_AUTO_ACCEPT_THRESHOLD", "0.85")
+)
+QUESTIONNAIRE_PER_QUESTION_TIMEOUT_SEC = int(
+    os.environ.get("QUESTIONNAIRE_PER_QUESTION_TIMEOUT_SEC", "90")
+)
+QUESTIONNAIRE_FAST_MODE_DEFAULT_CONFIDENCE = float(
+    os.environ.get("QUESTIONNAIRE_FAST_MODE_DEFAULT_CONFIDENCE", "0.5")
+)
+logger.info(
+    "QUESTIONNAIRE thresholds: retry=%.2f auto_accept=%.2f fast_default=%.2f "
+    "timeout=%ds",
+    QUESTIONNAIRE_RETRY_THRESHOLD,
+    QUESTIONNAIRE_AUTO_ACCEPT_THRESHOLD,
+    QUESTIONNAIRE_FAST_MODE_DEFAULT_CONFIDENCE,
+    QUESTIONNAIRE_PER_QUESTION_TIMEOUT_SEC,
+)
+
 ENABLE_SANDBOX = os.environ.get(
     "ENABLE_SANDBOX",
     "False",

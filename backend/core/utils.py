@@ -16,6 +16,9 @@ import calendar
 from dateutil import relativedelta as rd
 from uuid import UUID
 
+# Re-export so callers can import from a single utils module.
+from .friendly_names import generate_friendly_name  # noqa: F401
+
 logger = structlog.get_logger(__name__)
 
 
