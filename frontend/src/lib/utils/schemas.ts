@@ -1783,3 +1783,16 @@ export const webhookEndpointSchema = z.object({
 	target_folders: z.string().uuid().optional().array().optional(),
 	payload_format: z.enum(['thin', 'full']).default('full')
 });
+
+export const activateTOTPSchema: ZodSchema = z.object({
+	code: z
+		.string()
+		.regex(/^\d{6}$/)
+		.min(6)
+		.max(6)
+});
+
+export const registerWebAuthnSchema: ZodSchema = z.object({
+	name: z.string().min(1).max(100),
+	credential: z.any()
+});

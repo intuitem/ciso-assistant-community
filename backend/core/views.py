@@ -12338,8 +12338,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             compliance_assessment.get_requirement_assessments(
                 include_non_assessable=True,
                 lightweight=True,
-                skip_ig_filter=_framework.is_dynamic()
-                and not compliance_assessment.selected_implementation_groups,
+                skip_ig_filter=True,
             )
         )
         # Auditee filtering: scope to assigned requirements only
@@ -12375,6 +12374,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
+
         tree = get_sorted_requirement_nodes(
             requirement_nodes,
             requirement_assessments,

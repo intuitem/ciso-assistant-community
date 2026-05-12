@@ -1,7 +1,7 @@
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { activateTOTPSchema, registerWebAuthnSchema } from './mfa/utils/schemas';
+import { activateTOTPSchema, registerWebAuthnSchema } from '$lib/utils/schemas';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -59,16 +59,20 @@ export const load: PageServerLoad = async (event) => {
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
 	const registerWebAuthnForm = await superValidate(zod(registerWebAuthnSchema));
-
-	const personalAccessTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
-	const personalAccessTokensResponse = await event.fetch(personalAccessTokensEndpoint);
-	if (!personalAccessTokensResponse.ok) {
-		console.error('Could not get personal access tokens', personalAccessTokensResponse);
-		throw error(personalAccessTokensResponse.status, 'Could not get personal access tokens');
-	}
-	const personalAccessTokens = await personalAccessTokensResponse.json();
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
 	const personalAccessTokenDeleteForm = await superValidate(zod(z.object({ id: z.string() })));
+	const patAllowed = !event.locals.user.is_third_party;
+	let personalAccessTokens = [];
+
+	if (patAllowed) {
+		const personalAccessTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
+		const personalAccessTokensResponse = await event.fetch(personalAccessTokensEndpoint);
+		if (!personalAccessTokensResponse.ok) {
+			console.error('Could not get personal access tokens', personalAccessTokensResponse);
+			throw error(personalAccessTokensResponse.status, 'Could not get personal access tokens');
+		}
+		personalAccessTokens = await personalAccessTokensResponse.json();
+	}
 
 	return {
 		authenticators,
@@ -78,6 +82,7 @@ export const load: PageServerLoad = async (event) => {
 		webauthnCredentials,
 		webauthnCreationOptions,
 		registerWebAuthnForm,
+		patAllowed,
 		personalAccessTokens,
 		personalAccessTokenCreateForm,
 		personalAccessTokenDeleteForm,
@@ -174,6 +179,11 @@ export const actions: Actions = {
 		return { recoveryCodes: response.data };
 	},
 	createPAT: async (event) => {
+		const patAllowed = !event.locals.user.is_third_party;
+		if (!patAllowed) {
+			return fail(403, { error: 'Forbidden' });
+		}
+
 		const formData = await event.request.formData();
 		if (!formData) return fail(400, { error: 'No form data' });
 
@@ -279,6 +289,11 @@ export const actions: Actions = {
 		return { form };
 	},
 	deletePAT: async (event) => {
+		const patAllowed = !event.locals.user.is_third_party;
+		if (!patAllowed) {
+			return fail(403, { error: 'Forbidden' });
+		}
+
 		const formData = await event.request.formData();
 		if (!formData) return fail(400, { error: 'No form data' });
 

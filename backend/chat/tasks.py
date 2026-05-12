@@ -107,7 +107,7 @@ def index_model_object(app_label: str, model_name: str, object_id: str):
     if not text:
         return
 
-    folder_id = str(getattr(obj, "folder_id", ""))
+    folder_id = _resolve_folder_id(obj)
     if not folder_id:
         return
 
@@ -167,68 +167,36 @@ def remove_model_object(app_label: str, model_name: str, object_id: str):
         )
 
 
-def _build_object_text(obj, model_name: str) -> str:
-    """Build a searchable text representation of a model object."""
-    parts = [f"Type: {model_name.replace('_', ' ').title()}"]
+def _resolve_folder_id(obj) -> str:
+    """Walk the FK chain to find a folder_id for a model object.
 
-    name = getattr(obj, "name", None)
-    if name:
-        parts.append(f"Name: {name}")
-
-    ref_id = getattr(obj, "ref_id", None)
-    if ref_id:
-        parts.append(f"Reference: {ref_id}")
-
-    description = getattr(obj, "description", None)
-    if description:
-        parts.append(f"Description: {description}")
-
-    # Model-specific fields
-    if hasattr(obj, "current_level"):
-        parts.append(
-            f"Current risk level: {obj.get_current_level_display() if hasattr(obj, 'get_current_level_display') else obj.current_level}"
-        )
-
-    if hasattr(obj, "treatment"):
-        parts.append(
-            f"Treatment: {obj.get_treatment_display() if hasattr(obj, 'get_treatment_display') else obj.treatment}"
-        )
-
-    if hasattr(obj, "status"):
-        status_display = (
-            obj.get_status_display()
-            if hasattr(obj, "get_status_display")
-            else obj.status
-        )
-        parts.append(f"Status: {status_display}")
-
-    if hasattr(obj, "category"):
-        cat_display = (
-            obj.get_category_display()
-            if hasattr(obj, "get_category_display")
-            else obj.category
-        )
-        if cat_display:
-            parts.append(f"Category: {cat_display}")
-
-    if hasattr(obj, "business_value"):
-        bv = (
-            obj.get_business_value_display()
-            if hasattr(obj, "get_business_value_display")
-            else obj.business_value
-        )
-        if bv:
-            parts.append(f"Business value: {bv}")
-
-    return "\n".join(parts)
+    Most indexed models have FolderMixin (direct folder_id). RequirementAssessment
+    has it too via FolderMixin, but we keep this helper future-proof for parent-FK
+    resolutions (e.g. children of RequirementAssessment if we index those later).
+    """
+    direct = getattr(obj, "folder_id", None)
+    if direct:
+        return str(direct)
+    for parent_attr in (
+        "compliance_assessment",
+        "risk_assessment",
+        "questionnaire_run",
+    ):
+        parent = getattr(obj, parent_attr, None)
+        if parent and getattr(parent, "folder_id", None):
+            return str(parent.folder_id)
+    return ""
 
 
-def _normalize_model_name(model_name: str) -> str:
-    """Convert model class name to snake_case identifier."""
-    import re
-
-    s = re.sub(r"(?<=[a-z])(?=[A-Z])", "_", model_name)
-    return s.lower()
+# Text-building helpers used to live here. They moved to ``chat/text.py`` so
+# ``chat/questionnaire.py`` can import them at top level without circularity.
+from .text import (  # noqa: F401 — re-exported for callers that import via tasks
+    _build_object_text,
+    _normalize_model_name,
+    _text_for_applied_control,
+    _text_for_generic_model,
+    _text_for_requirement_assessment,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -479,3 +447,28 @@ def update_session_summary(session_id: str):
     except ChatSession.DoesNotExist:
         return
     update_summary_for_session(session, get_llm())
+
+
+# ---------------------------------------------------------------------------
+# Questionnaire Autopilot — re-exports
+# ---------------------------------------------------------------------------
+# The questionnaire-specific code lives in chat/questionnaire.py. We re-export
+# the public callables here so existing import sites (`from .tasks import
+# parse_questionnaire`, etc.) keep working without churn, AND so importing
+# chat.tasks at Django startup also imports chat.questionnaire — which is how
+# the @db_task decorators in that module register with Huey.
+from .questionnaire import (  # noqa: F401, E402
+    # Huey tasks
+    parse_questionnaire,
+    suggest_value_mapping,
+    run_questionnaire_prefill,
+    refresh_folder_index,
+    # Synchronous helpers called from view actions
+    extract_questions_from_sheet,
+    retry_question_with_hints,
+    draft_applied_control_for_question,
+    # Constants used by view validation
+    _VALID_AC_CATEGORIES,
+    _VALID_AC_CSF_FUNCTIONS,
+    _VALID_AC_STATUSES,
+)
