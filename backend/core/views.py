@@ -16116,6 +16116,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "evidences",
             "objectives",
             "incidents",
+            "filtering_labels",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -16151,6 +16152,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         "folder",
         "applied_controls",
         "evidences",
+        "filtering_labels",
     ]
     search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
@@ -16166,6 +16168,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "risk_assessments",
             "assets",
             "findings_assessment",
+            "filtering_labels",
         ],
         "fields": {
             "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
@@ -16277,6 +16280,13 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 ),
             },
             "link": {"source": "link", "label": "link", "escape": True},
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
         },
         "wrap_columns": ["name", "description"],
         "task_node_fields": {
@@ -16358,11 +16368,18 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     else ""
                 ),
             },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
         },
     }
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().prefetch_related("filtering_labels__folder")
         ordering = self.request.query_params.get("ordering", "")
 
         if any(

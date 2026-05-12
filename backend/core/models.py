@@ -8845,7 +8845,7 @@ class TaskTemplateManager(models.Manager):
         return super().create(**kwargs)
 
 
-class TaskTemplate(NameDescriptionMixin, FolderMixin):
+class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     objects = TaskTemplateManager()
 
     SCHEDULE_JSONSCHEMA = {
