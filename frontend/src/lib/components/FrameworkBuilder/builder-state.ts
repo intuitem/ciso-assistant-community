@@ -710,23 +710,14 @@ export function createBuilderState(
 		return value!;
 	}
 
-	/** Map all requirements in all sections recursively */
+	/** Map every requirement node in the tree, including top-level entries */
 	function updateAllRequirements(fn: (req: BuilderNode) => BuilderNode) {
-		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: mapRequirements(sec.children, fn)
-			}))
-		);
+		rootNodes.update((s) => mapRequirements(s, fn));
 	}
 
-	/** Find a requirement across all sections */
+	/** Find a requirement anywhere in the tree, including top-level entries */
 	function findReqGlobal(nodeId: string): BuilderNode | null {
-		for (const sec of get(rootNodes)) {
-			const found = findRequirement(sec.children, nodeId);
-			if (found) return found;
-		}
-		return null;
+		return findRequirement(get(rootNodes), nodeId);
 	}
 
 	// --- Draft save (explicit, triggered by Save button) ---
@@ -1155,12 +1146,9 @@ export function createBuilderState(
 			choices: []
 		};
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: [...r.questions, { question: newQuestion }]
-				}))
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: [...r.questions, { question: newQuestion }]
 			}))
 		);
 		markDirty();
@@ -1182,12 +1170,9 @@ export function createBuilderState(
 		const q = req?.questions[qIndex];
 		if (!q) return;
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: r.questions.filter((_, i) => i !== qIndex)
-				}))
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: r.questions.filter((_, i) => i !== qIndex)
 			}))
 		);
 		markDirty();
@@ -1222,22 +1207,19 @@ export function createBuilderState(
 			question: q.question.id
 		};
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: r.questions.map((qq, i) =>
-						i === qIndex
-							? {
-									...qq,
-									question: {
-										...qq.question,
-										choices: [...qq.question.choices, newChoice]
-									}
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: r.questions.map((qq, i) =>
+					i === qIndex
+						? {
+								...qq,
+								question: {
+									...qq.question,
+									choices: [...qq.question.choices, newChoice]
 								}
-							: qq
-					)
-				}))
+							}
+						: qq
+				)
 			}))
 		);
 		markDirty();
@@ -1262,22 +1244,19 @@ export function createBuilderState(
 		const choice = req?.questions[qIndex]?.question.choices[choiceIndex];
 		if (!choice) return;
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: r.questions.map((qq, i) =>
-						i === qIndex
-							? {
-									...qq,
-									question: {
-										...qq.question,
-										choices: qq.question.choices.filter((_, ci) => ci !== choiceIndex)
-									}
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: r.questions.map((qq, i) =>
+					i === qIndex
+						? {
+								...qq,
+								question: {
+									...qq.question,
+									choices: qq.question.choices.filter((_, ci) => ci !== choiceIndex)
 								}
-							: qq
-					)
-				}))
+							}
+						: qq
+				)
 			}))
 		);
 		markDirty();
@@ -1288,21 +1267,18 @@ export function createBuilderState(
 	function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => {
-					const qs = [...r.questions];
-					const [moved] = qs.splice(fromIndex, 1);
-					qs.splice(toIndex, 0, moved);
-					return {
-						...r,
-						questions: qs.map((q, i) => ({
-							...q,
-							question: { ...q.question, order: i * 100 }
-						}))
-					};
-				})
-			}))
+			updateRequirementById(s, reqNodeId, (r) => {
+				const qs = [...r.questions];
+				const [moved] = qs.splice(fromIndex, 1);
+				qs.splice(toIndex, 0, moved);
+				return {
+					...r,
+					questions: qs.map((q, i) => ({
+						...q,
+						question: { ...q.question, order: i * 100 }
+					}))
+				};
+			})
 		);
 		markDirty();
 	}
@@ -1310,24 +1286,21 @@ export function createBuilderState(
 	function reorderChoices(reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: r.questions.map((qq, i) => {
-						if (i !== qIndex) return qq;
-						const choices = [...qq.question.choices];
-						const [moved] = choices.splice(fromIndex, 1);
-						choices.splice(toIndex, 0, moved);
-						return {
-							...qq,
-							question: {
-								...qq.question,
-								choices: choices.map((c, ci) => ({ ...c, order: ci * 100 }))
-							}
-						};
-					})
-				}))
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: r.questions.map((qq, i) => {
+					if (i !== qIndex) return qq;
+					const choices = [...qq.question.choices];
+					const [moved] = choices.splice(fromIndex, 1);
+					choices.splice(toIndex, 0, moved);
+					return {
+						...qq,
+						question: {
+							...qq.question,
+							choices: choices.map((c, ci) => ({ ...c, order: ci * 100 }))
+						}
+					};
+				})
 			}))
 		);
 		markDirty();

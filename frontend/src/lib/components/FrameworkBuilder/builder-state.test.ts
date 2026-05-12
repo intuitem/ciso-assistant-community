@@ -535,3 +535,71 @@ describe('toggleAssessable', () => {
 		expect(get(s.rootNodes)[0].children[0].node.assessable).toBe(true);
 	});
 });
+
+describe('question and choice CRUD on top-level requirement nodes', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('adds a question to a top-level assessable node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		expect(get(s.rootNodes)[0].questions).toHaveLength(1);
+	});
+
+	it('updates a question that lives on a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		const qId = get(s.rootNodes)[0].questions[0].question.id;
+		s.updateQuestion(qId, { text: 'hello' });
+		expect(get(s.rootNodes)[0].questions[0].question.text).toBe('hello');
+	});
+
+	it('deletes a question from a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addQuestion(id);
+		s.deleteQuestion(id, 0);
+		expect(get(s.rootNodes)[0].questions).toHaveLength(1);
+	});
+
+	it('adds and updates a choice on a top-level node question', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addChoice(id, 0);
+		const choices = get(s.rootNodes)[0].questions[0].question.choices;
+		expect(choices).toHaveLength(1);
+		s.updateChoice(choices[0].id, { value: 'yes' });
+		expect(get(s.rootNodes)[0].questions[0].question.choices[0].value).toBe('yes');
+	});
+
+	it('deletes a choice from a top-level node question', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addChoice(id, 0);
+		s.addChoice(id, 0);
+		s.deleteChoice(id, 0, 0);
+		expect(get(s.rootNodes)[0].questions[0].question.choices).toHaveLength(1);
+	});
+
+	it('reorders questions on a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addQuestion(id);
+		const firstId = get(s.rootNodes)[0].questions[0].question.id;
+		s.reorderQuestions(id, 0, 1);
+		expect(get(s.rootNodes)[0].questions[1].question.id).toBe(firstId);
+	});
+});
