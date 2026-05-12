@@ -42,7 +42,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 
-from collections import defaultdict
+from collections import defaultdict, deque
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -1558,35 +1558,58 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def _get_optimized_object_data(self, queryset):
         """
-        Calculate folder full paths for objects in the queryset in 1 DB request.
+        Calculate folder full paths for objects in the queryset, reusing
+        the IAM snapshot cache instead of re-running `Folder.objects.all()`
+        on every list response. The snapshot already exposes a
+        folder_id → Folder map (with `name` loaded) and a parent_map; both
+        are kept in sync via Folder.save/delete invalidation.
+
+        Object-side accesses go through `*_id` columns rather than FK
+        attributes so this also works for callers that did not
+        `select_related("folder")` on their queryset.
         """
         initial_objects = list(queryset)
         if not initial_objects:
             return {}
 
+        from iam.cache_builders import get_folder_state
+
+        state = get_folder_state()
+        folders = state.folders
+        parent_map = state.parent_map
+
         path_results = {}
-        folders = {f.id: f for f in Folder.objects.all()}
         for obj in initial_objects:
-            path = []
-            if hasattr(obj, "folder"):
-                queue = deque([obj.folder.id])
-            elif hasattr(obj, "parent_folder") and obj.parent_folder:
-                queue = deque([obj.parent_folder.id])
+            if hasattr(obj, "folder_id"):
+                start_id = obj.folder_id
+            elif getattr(obj, "parent_folder_id", None):
+                start_id = obj.parent_folder_id
             else:
                 continue
+            if start_id is None:
+                continue
+
+            path = []
+            queue = deque([start_id])
             while queue:
                 folder_id = queue.popleft()
-                folder = folders[folder_id]
-                if folder.parent_folder:
+                folder = folders.get(folder_id)
+                if folder is None:
+                    # Cache may briefly miss a folder created in the same
+                    # request before invalidation propagates; bail rather
+                    # than KeyError so the response shape is preserved.
+                    continue
+                parent_id = parent_map.get(folder_id)
+                if parent_id is not None:
                     path.append(
                         {
                             "str": str(folder),
                             "id": folder.id,
-                            "parent_id": folder.parent_folder.id,
+                            "parent_id": parent_id,
                         }
                     )
-                    queue.append(folder.parent_folder.id)
-            path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
+                    queue.append(parent_id)
+            path_results[obj.id] = path[::-1]  # root → leaf order
 
         return {
             "paths": path_results,
@@ -1644,6 +1667,19 @@ class PerimeterViewSet(BaseModelViewSet):
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
     filterset_fields = ["name", "folder", "campaigns"]
+
+    def get_queryset(self):
+        # `Perimeter.__str__` returns `self.folder.name + "/" + self.name`,
+        # so any list response that serialises perimeters must
+        # select_related("folder") or pay an N+1. The default_assignee
+        # M2M is rendered by FieldsRelatedField and similarly needs to
+        # be prefetched.
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder")
+            .prefetch_related("default_assignee")
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -11182,41 +11218,74 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return super().get_serializer_class(**kwargs)
 
     def _get_optimized_object_data(self, queryset):
-        """Compute per-page requirement counts in one bounded GROUP BY,
-        replacing the Count(distinct=True) annotations dropped from the
-        list queryset. Bounded by `len(queryset)` (≤ page size), so the
-        cost is independent of the total RA table size.
+        """Compute per-page requirement counts in (at most) two bounded
+        queries, replacing both the Count(distinct=True) annotations
+        previously on the queryset and the unconditional
+        `requirement_assessments` prefetch on the list path.
 
-        Only the no-implementation-groups case is computed here; audits
-        with `selected_implementation_groups` still rely on the prefetched
-        `requirement_assessments` for in-Python IG filtering inside
-        `ComplianceAssessmentListSerializer.get_progress`.
+        - Audits without `selected_implementation_groups`: one GROUP BY
+          aggregates `total` / `assessed` via `Count(filter=Q())`.
+        - Audits with `selected_implementation_groups`: one fetch of
+          their requirement_assessments + requirement nodes, filtered
+          in Python by `selected_groups ∩ requirement.implementation_groups`.
+          Same logic the serializer used to walk on the prefetch.
+
+        Bounded by the page size, so cost is independent of the total
+        RA table size — and the common no-IG page now skips touching
+        the RA table altogether on the prefetch path.
         """
         optimized_data = super()._get_optimized_object_data(queryset)
-        audit_ids = [a.id for a in queryset]
-        if not audit_ids:
+        audits = list(queryset)
+        if not audits:
             return optimized_data
 
         not_assessed = RequirementAssessment.Result.NOT_ASSESSED
-        rows = (
-            RequirementAssessment.objects.filter(
-                compliance_assessment_id__in=audit_ids,
-                requirement__assessable=True,
-            )
-            .values("compliance_assessment_id")
-            .annotate(
-                total=Count("id"),
-                assessed=Count(
-                    "id",
-                    filter=~Q(result=not_assessed) | Q(score__isnull=False),
-                ),
-            )
-        )
+        ig_audits = [a for a in audits if a.selected_implementation_groups]
+        plain_ids = [a.id for a in audits if not a.selected_implementation_groups]
+
         total_map: dict = {}
         assessed_map: dict = {}
-        for r in rows:
-            total_map[r["compliance_assessment_id"]] = r["total"]
-            assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+
+        if plain_ids:
+            rows = (
+                RequirementAssessment.objects.filter(
+                    compliance_assessment_id__in=plain_ids,
+                    requirement__assessable=True,
+                )
+                .values("compliance_assessment_id")
+                .annotate(
+                    total=Count("id"),
+                    assessed=Count(
+                        "id",
+                        filter=~Q(result=not_assessed) | Q(score__isnull=False),
+                    ),
+                )
+            )
+            for r in rows:
+                total_map[r["compliance_assessment_id"]] = r["total"]
+                assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+
+        if ig_audits:
+            ig_groups_by_audit = {
+                a.id: set(a.selected_implementation_groups) for a in ig_audits
+            }
+            for aid in ig_groups_by_audit:
+                total_map.setdefault(aid, 0)
+                assessed_map.setdefault(aid, 0)
+            ras = RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=list(ig_groups_by_audit),
+                requirement__assessable=True,
+            ).select_related("requirement")
+            for ra in ras:
+                req_groups = ra.requirement.implementation_groups or []
+                if not (
+                    ig_groups_by_audit[ra.compliance_assessment_id] & set(req_groups)
+                ):
+                    continue
+                total_map[ra.compliance_assessment_id] += 1
+                if ra.result != not_assessed or ra.score is not None:
+                    assessed_map[ra.compliance_assessment_id] += 1
+
         optimized_data["total_requirements"] = total_map
         optimized_data["assessed_requirements"] = assessed_map
         return optimized_data
@@ -11233,6 +11302,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "framework",  # Displayed in table
                 "perimeter",  # Displayed in table
+                "perimeter__folder",  # Perimeter.__str__ uses folder.name -> avoid N+1
             )
             .annotate(
                 _has_questions=Exists(
@@ -11244,15 +11314,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
         if self.action == "list":
-            # List view: lightweight prefetch for progress with implementation groups
-            qs = qs.prefetch_related(
-                Prefetch(
-                    "requirement_assessments",
-                    queryset=RequirementAssessment.objects.filter(
-                        requirement__assessable=True
-                    ).select_related("requirement"),
-                ),
-            )
+            # List view: no requirement_assessments prefetch — both the
+            # IG and no-IG progress paths are computed in
+            # `_get_optimized_object_data` via bounded per-page queries.
+            pass
         elif self.action == "retrieve":
             # Detail view only: full prefetches for the read serializer
             qs = qs.select_related(
@@ -13947,6 +14012,40 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
+
+    def _get_optimized_object_data(self, queryset):
+        """Bulk-load parent requirement nodes for the page so the
+        `RequirementNode.parent_requirement` property short-circuits its
+        per-row `.filter(urn=self.parent_urn).first()` fallback.
+
+        Mirrors the `_parent_requirement_obj` cache pattern used in the
+        other places that build requirement trees. Bounded by the page —
+        a single `urn__in=<page parent_urns>` query.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        page = list(queryset)
+        if not page:
+            return optimized_data
+        parent_urns = {
+            req.parent_urn
+            for ra in page
+            for req in [getattr(ra, "requirement", None)]
+            if req is not None and req.parent_urn
+        }
+        if not parent_urns:
+            return optimized_data
+        parents_by_urn = {
+            p.urn: p for p in RequirementNode.objects.filter(urn__in=parent_urns)
+        }
+        for ra in page:
+            req = getattr(ra, "requirement", None)
+            if req is None:
+                continue
+            parent = parents_by_urn.get(req.parent_urn)
+            if parent is not None:
+                req._parent_requirement_obj = parent
+        return optimized_data
+
     filterset_fields = [
         "folder",
         "folder__name",
@@ -13992,6 +14091,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
                 "requirement__questions",  # Needed by FilteredNodeSerializer.questions
                 "requirement__questions__choices",  # Needed by get_questions_translated
+                # Avoid per-row N+1 from RequirementNode.associated_reference_controls
+                # and associated_threats — both are M2Ms iterated by the
+                # FilteredNodeSerializer used inside the read serializer.
+                "requirement__reference_controls",
+                "requirement__threats",
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)

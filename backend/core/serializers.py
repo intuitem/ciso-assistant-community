@@ -2584,31 +2584,16 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     progress = serializers.SerializerMethodField()
 
     def get_progress(self, obj):
-        if not obj.selected_implementation_groups:
-            # Fast path: read page-scoped counts from optimized_data
-            # (computed in ComplianceAssessmentViewSet._get_optimized_object_data
-            # via a single bounded GROUP BY query, replacing the previous
-            # Count(distinct=True) annotations).
-            optimized_data = self.context.get("optimized_data") or {}
-            total = optimized_data.get("total_requirements", {}).get(obj.id, 0)
-            assessed = optimized_data.get("assessed_requirements", {}).get(obj.id, 0)
-        else:
-            # Use prefetched requirement_assessments filtered by implementation groups
-            selected_groups = set(obj.selected_implementation_groups)
-            ras = [
-                ra
-                for ra in obj.requirement_assessments.all()
-                if selected_groups & set(ra.requirement.implementation_groups or [])
-            ]
-            total = len(ras)
-            assessed = len(
-                [
-                    ra
-                    for ra in ras
-                    if ra.result != RequirementAssessment.Result.NOT_ASSESSED
-                    or ra.score is not None
-                ]
-            )
+        # Both the no-IG and IG branches read from the page-scoped
+        # counts populated by
+        # `ComplianceAssessmentViewSet._get_optimized_object_data`.
+        # That replaces both the Count(distinct=True) annotations
+        # previously on the queryset and the unconditional
+        # `requirement_assessments` prefetch (which loaded ~5k RA + RN
+        # ORM objects per page).
+        optimized_data = self.context.get("optimized_data") or {}
+        total = optimized_data.get("total_requirements", {}).get(obj.id, 0)
+        assessed = optimized_data.get("assessed_requirements", {}).get(obj.id, 0)
         return int((assessed / total) * 100) if total else 0
 
     class Meta:

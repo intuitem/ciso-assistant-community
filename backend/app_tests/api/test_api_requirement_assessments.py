@@ -364,3 +364,191 @@ class TestRequirementAssessmentsAuthenticated:
             RequirementAssessment.Status.choices,
             user_group=test.user_group,
         )
+
+
+# ---------------------------------------------------------------------------
+# Bulk parent-requirement lookup on /api/requirement-assessments/ list.
+#
+# `RequirementNode.parent_requirement` falls back to
+# `RequirementNode.objects.filter(urn=self.parent_urn).first()` when its
+# `_parent_requirement_obj` cache isn't populated — one query per row, so
+# the RA list paid an N+1 across every requirement that had a parent.
+#
+# `RequirementAssessmentViewSet._get_optimized_object_data` now bulk-fetches
+# all parent nodes for the page (`urn__in=<parent_urns>`) and seeds the
+# `_parent_requirement_obj` cache. The tests below pin:
+#   - output: parent_requirement field is populated correctly,
+#   - perf: query count for parent lookups is bounded by 1 per page.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestRequirementAssessmentListParentBulkLoad:
+    @staticmethod
+    def _build_audit_with_parent_child_requirements(n_pairs=5):
+        """Create a framework with `n_pairs` parent/child requirement pairs,
+        plus an audit and one RA per child requirement. Returns the audit."""
+        import uuid
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name=f"parent-bulk-fw-{uuid.uuid4().hex[:6]}",
+            folder=folder,
+            urn=f"urn:test:parent-bulk:{uuid.uuid4().hex[:12]}",
+            is_published=True,
+        )
+        # Create parents (assessable=False is OK; the property only
+        # cares about parent_urn matching).
+        parent_urns = []
+        for i in range(n_pairs):
+            parent_urn = f"{fw.urn}:parent:{i}"
+            RequirementNode.objects.create(
+                framework=fw,
+                urn=parent_urn,
+                ref_id=f"P{i}",
+                name=f"Parent {i}",
+                assessable=False,
+                folder=folder,
+            )
+            parent_urns.append(parent_urn)
+        # Create child requirements pointing at those parents.
+        for i in range(n_pairs):
+            RequirementNode.objects.create(
+                framework=fw,
+                urn=f"{fw.urn}:child:{i}",
+                ref_id=f"C{i}",
+                parent_urn=parent_urns[i],
+                name=f"Child {i}",
+                assessable=True,
+                folder=folder,
+            )
+        audit = ComplianceAssessment.objects.create(
+            folder=folder,
+            framework=fw,
+            name=f"parent-bulk-audit-{uuid.uuid4().hex[:6]}",
+        )
+        audit.create_requirement_assessments()
+        return audit
+
+    def test_response_includes_parent_requirement(self, authenticated_client):
+        audit = self._build_audit_with_parent_child_requirements(n_pairs=3)
+        r = authenticated_client.get(
+            "/api/requirement-assessments/",
+            {
+                "compliance_assessment": str(audit.id),
+                "requirement__assessable": "true",
+                "limit": 10,
+            },
+        )
+        assert r.status_code == 200, r.content
+        body = r.json()
+        results = body["results"] if isinstance(body, dict) else body
+        # Only assessable children are in scope here; the non-assessable
+        # parent rows have no parent_requirement of their own and are
+        # filtered out above.
+        assert len(results) > 0
+        for item in results:
+            req = item.get("requirement") or {}
+            parent = req.get("parent_requirement")
+            assert parent is not None, (
+                f"parent_requirement not populated for {req.get('ref_id')!r}"
+            )
+            # Child ref_id is e.g. "C2"; matching parent urn ends with
+            # ":parent:2".
+            child_idx = req["ref_id"][1:]
+            assert parent["urn"].endswith(f":parent:{child_idx}"), (
+                f"wrong parent for child {req['ref_id']!r}: {parent}"
+            )
+
+    def test_query_count_is_bounded_by_page_not_by_rows(self, authenticated_client):
+        """For N RAs whose requirements all have parent_urn, the bulk
+        loader should issue ONE query for parents (not N)."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        audit = self._build_audit_with_parent_child_requirements(n_pairs=10)
+
+        with CaptureQueriesContext(connection) as ctx:
+            r = authenticated_client.get(
+                "/api/requirement-assessments/",
+                {
+                    "compliance_assessment": str(audit.id),
+                    "requirement__assessable": "true",
+                    "limit": 10,
+                },
+            )
+        assert r.status_code == 200, r.content
+
+        # Count queries that look like a per-row parent lookup:
+        #   SELECT ... FROM core_requirementnode WHERE urn = ? LIMIT 1
+        per_row_parent_lookups = sum(
+            1
+            for q in ctx.captured_queries
+            if 'from "core_requirementnode"' in q["sql"].lower()
+            and '"urn" =' in q["sql"].lower()
+            and "limit 1" in q["sql"].lower()
+        )
+        assert per_row_parent_lookups == 0, (
+            f"per-row parent lookups detected ({per_row_parent_lookups}); "
+            f"expected the bulk loader in _get_optimized_object_data to "
+            f"replace them with a single urn__in query"
+        )
+
+        # Also: a single bulk parent load — `WHERE urn IN (...)`.
+        bulk_parent_loads = sum(
+            1
+            for q in ctx.captured_queries
+            if 'from "core_requirementnode"' in q["sql"].lower()
+            and '"urn" in (' in q["sql"].lower()
+        )
+        assert bulk_parent_loads == 1, (
+            f"expected exactly one bulk parent load via urn__in, got {bulk_parent_loads}"
+        )
+
+    def test_response_correct_when_no_requirements_have_parents(
+        self, authenticated_client
+    ):
+        """Bulk loader must not emit a query when the page has no
+        parent_urns to look up."""
+        import uuid
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name=f"no-parent-fw-{uuid.uuid4().hex[:6]}",
+            folder=folder,
+            urn=f"urn:test:no-parent:{uuid.uuid4().hex[:12]}",
+            is_published=True,
+        )
+        for i in range(3):
+            RequirementNode.objects.create(
+                framework=fw,
+                urn=f"{fw.urn}:r:{i}",
+                ref_id=f"R{i}",
+                assessable=True,
+                folder=folder,
+                # parent_urn intentionally None
+            )
+        audit = ComplianceAssessment.objects.create(
+            folder=folder, framework=fw, name=f"no-parent-{uuid.uuid4().hex[:6]}"
+        )
+        audit.create_requirement_assessments()
+
+        with CaptureQueriesContext(connection) as ctx:
+            r = authenticated_client.get(
+                "/api/requirement-assessments/",
+                {"compliance_assessment": str(audit.id), "limit": 10},
+            )
+        assert r.status_code == 200, r.content
+
+        # No urn__in lookup should fire when there are no parent_urns.
+        bulk_parent_loads = sum(
+            1
+            for q in ctx.captured_queries
+            if 'from "core_requirementnode"' in q["sql"].lower()
+            and '"urn" in (' in q["sql"].lower()
+        )
+        assert bulk_parent_loads == 0, (
+            "bulk loader emitted a query despite no parent_urns on the page"
+        )
