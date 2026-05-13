@@ -81,7 +81,7 @@
 									href={option.href}
 									onclick={handleClick}
 									data-testid={option.testId}
-									aria-label={safeTranslate(option.titleKey)}
+									aria-label={`${safeTranslate(option.titleKey)} — ${option.format}`}
 									class="group flex flex-col p-3 rounded-container border border-surface-300 bg-white hover:border-primary-500 hover:bg-primary-50/40 hover:shadow-sm transition-colors"
 								>
 									<div class="flex items-center gap-2 mb-1">
