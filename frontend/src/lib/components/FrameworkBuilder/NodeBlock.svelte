@@ -339,6 +339,16 @@
 				<i class="fa-solid fa-grip-vertical text-xs"></i>
 			</span>
 
+			{#snippet untranslatedMarker(
+				field: string,
+				source: string | null | undefined,
+				langCode: string
+			)}
+				{#if source && !getTranslation(node.node.translations, langCode, field)}
+					<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
+				{/if}
+			{/snippet}
+
 			<div class="flex-1 min-w-0 space-y-1">
 				{#if $activeLanguageStore}
 					{@const lang = $activeLanguageStore}
@@ -352,24 +362,29 @@
 							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 						/>
 					</div>
-					<div class="grid grid-cols-2 gap-3">
-						<input
-							type="text"
-							value={node.node.name ?? ''}
-							readonly
-							class="text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
-						/>
-						<input
-							type="text"
-							value={getTranslation(node.node.translations, lang, 'name')}
-							placeholder={isSplash ? m.builderTranslateTitle() : m.builderTranslateName()}
-							class="text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
-							onblur={(e) =>
-								saveField(
-									'translations',
-									withTranslation(node.node.translations, lang, 'name', e.currentTarget.value)
-								)}
-						/>
+					<div>
+						<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+							{m.name()}{@render untranslatedMarker('name', node.node.name, lang)}
+						</label>
+						<div class="grid grid-cols-2 gap-3">
+							<input
+								type="text"
+								value={node.node.name ?? ''}
+								readonly
+								class="text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
+							/>
+							<input
+								type="text"
+								value={getTranslation(node.node.translations, lang, 'name')}
+								placeholder={isSplash ? m.builderTranslateTitle() : m.builderTranslateName()}
+								class="text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+								onblur={(e) =>
+									saveField(
+										'translations',
+										withTranslation(node.node.translations, lang, 'name', e.currentTarget.value)
+									)}
+							/>
+						</div>
 					</div>
 					{#if node.node.urn}
 						<button
@@ -392,7 +407,11 @@
 						<!-- Description side-by-side -->
 						<div>
 							<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
-								{m.description()}
+								{m.description()}{@render untranslatedMarker(
+									'description',
+									node.node.description,
+									lang
+								)}
 							</label>
 							<div class="grid grid-cols-2 gap-3">
 								<textarea
@@ -447,7 +466,11 @@
 								<label
 									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
 								>
-									{m.annotation()}
+									{m.annotation()}{@render untranslatedMarker(
+										'annotation',
+										node.node.annotation,
+										lang
+									)}
 								</label>
 								<div class="grid grid-cols-2 gap-3">
 									<textarea
@@ -483,7 +506,11 @@
 								<label
 									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
 								>
-									{m.typicalEvidence()}
+									{m.typicalEvidence()}{@render untranslatedMarker(
+										'typical_evidence',
+										node.node.typical_evidence,
+										lang
+									)}
 								</label>
 								<div class="grid grid-cols-2 gap-3">
 									<textarea
