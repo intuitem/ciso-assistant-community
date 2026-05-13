@@ -542,6 +542,13 @@
 				? defaultValue.map((v: { value: string }) => ({ ...v }))
 				: [];
 		}
+		_form.form.update((data) => {
+			for (const field of filteredFields) {
+				const dv = defaultFilters[field];
+				data[field] = Array.isArray(dv) ? dv.map((v: any) => v.value ?? v) : [];
+			}
+			return data;
+		});
 		if (!isStandaloneTable) return;
 		await tick();
 		const next = { ...$tableFilterStates };
@@ -713,7 +720,7 @@
 												onChange={(value) => {
 													const arrayValue = Array.isArray(value) ? value : [value];
 													const sanitizedArrayValue = arrayValue.filter(
-														(v) => v !== null && v !== undefined
+														(v) => v !== null && v !== undefined && v !== ''
 													);
 
 													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
