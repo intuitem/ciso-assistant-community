@@ -864,6 +864,7 @@
 	"createUserHelpText": "Kreiraj ili poveži korisnika treće strane s predstavnikom na temelju e-mail adrese",
 	"nameDuplicate": "Ime već postoji",
 	"noAnswer": "Nema odgovora",
+	"clearAnswer": "Obriši odgovor",
 	"entityAssessmentRepresentativesHelpText": "Korisnici treće strane koji su odgovorni za ispunjavanje upitnika",
 	"sendQuestionnaire": "Pošalji upitnik",
 	"sureToSendQuestionnaire": "Jeste li sigurni da želite poslati upitnik {questionnaire}?",
@@ -3979,5 +3980,15 @@
 	"visibilityAuditorOnly": "Samo revizor",
 	"visibilityHidden": "Skriveno",
 	"answers": "Odgovori",
-	"respondentAlignment": "Usklađenost ispitanika"
+	"respondentAlignment": "Usklađenost ispitanika",
+	"frameworkRefId": "Referentni ID",
+	"urnPreview": "Pregled URN-a:",
+	"urnLockedComplianceAssessment": "Zaključano — procjena usklađenosti koristi ovaj okvir.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Korak",
+	"sliderNeedsAtLeastTwoChoices": "Klizač treba najmanje 2 izbora.",
+	"sliderMinMustBeLessThanMax": "Min klizača mora biti manji od maks.",
+	"sliderStepMustBeGreaterThanZero": "Korak klizača mora biti veći od 0.",
+	"sliderStepCannotExceedRange": "Korak klizača ne smije premašiti (maks − min)."
 }

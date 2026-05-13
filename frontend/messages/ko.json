@@ -1175,6 +1175,7 @@
 	"userLinkedToRepresentative": "이 대표자에는 이미 사용자가 연결되어 있습니다.",
 	"nameDuplicate": "이름이 이미 존재합니다",
 	"noAnswer": "답변 없음",
+	"clearAnswer": "답변 지우기",
 	"entityAssessmentRepresentativesHelpText": "설문지 작성을 담당하는 제3자 사용자",
 	"sendQuestionnaire": "설문지 전송",
 	"sureToSendQuestionnaire": "설문지: {questionnaire}을(를) 전송하시겠습니까?",
@@ -4156,5 +4157,15 @@
 	"visibilityAuditorOnly": "감사자 전용",
 	"visibilityHidden": "숨김",
 	"answers": "답변",
-	"respondentAlignment": "응답자 정렬"
+	"respondentAlignment": "응답자 정렬",
+	"frameworkRefId": "참조 ID",
+	"urnPreview": "URN 미리보기:",
+	"urnLockedComplianceAssessment": "잠김 — 규정 준수 평가가 이 프레임워크를 사용합니다.",
+	"sliderMin": "최소",
+	"sliderMax": "최대",
+	"sliderStep": "단계",
+	"sliderNeedsAtLeastTwoChoices": "슬라이더에는 최소 2개의 선택지가 필요합니다.",
+	"sliderMinMustBeLessThanMax": "슬라이더 최소값은 최대값보다 작아야 합니다.",
+	"sliderStepMustBeGreaterThanZero": "슬라이더 단계는 0보다 커야 합니다.",
+	"sliderStepCannotExceedRange": "슬라이더 단계는 (최대 − 최소)를 초과할 수 없습니다."
 }

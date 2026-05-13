@@ -18,36 +18,32 @@ export function localeLabel(code: string): string {
 
 // ----- question-type metadata (F5) -----
 
+/**
+ * A picker card. `value` is a composite key — for slider variants it's
+ * `<storedType>:slider`. `storedType` is what gets written to `Question.type`.
+ * Splitting the two means the picker can surface "Number (slider)" as a
+ * first-class entry without needing a new value in the data model.
+ */
 export interface QuestionTypeInfo {
 	value: string;
+	storedType: string;
+	widget: 'native' | 'slider';
 	get label(): string;
 	icon: string;
 	color: string;
 }
 
-/** Human label for a question type, resolved against the active locale. */
-export function questionTypeLabel(type: string): string {
-	switch (type) {
-		case 'text':
-			return m.text();
-		case 'number':
-			return m.number();
-		case 'boolean':
-			return m.boolean();
-		case 'unique_choice':
-			return m.uniqueChoice();
-		case 'multiple_choice':
-			return m.multipleChoice();
-		case 'date':
-			return m.date();
-		default:
-			return type.replace('_', ' ');
-	}
-}
+const SLIDER_ICON = 'fa-sliders';
 
+// Order matters: the picker is a 2-column grid, so positions [0,1] form
+// row 1, [2,3] row 2, etc. We pair each slider variant on the same row
+// as its parent.
 export const QUESTION_TYPES: QuestionTypeInfo[] = [
+	// Row 1
 	{
 		value: 'text',
+		storedType: 'text',
+		widget: 'native',
 		get label() {
 			return m.text();
 		},
@@ -55,7 +51,20 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		color: 'text-blue-600 bg-blue-50'
 	},
 	{
+		value: 'boolean',
+		storedType: 'boolean',
+		widget: 'native',
+		get label() {
+			return m.boolean();
+		},
+		icon: 'fa-toggle-on',
+		color: 'text-green-600 bg-green-50'
+	},
+	// Row 2
+	{
 		value: 'number',
+		storedType: 'number',
+		widget: 'native',
 		get label() {
 			return m.number();
 		},
@@ -63,15 +72,20 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		color: 'text-emerald-600 bg-emerald-50'
 	},
 	{
-		value: 'boolean',
+		value: 'number:slider',
+		storedType: 'number',
+		widget: 'slider',
 		get label() {
-			return m.boolean();
+			return `${m.number()} (slider)`;
 		},
-		icon: 'fa-toggle-on',
-		color: 'text-green-600 bg-green-50'
+		icon: SLIDER_ICON,
+		color: 'text-emerald-600 bg-emerald-50'
 	},
+	// Row 3
 	{
 		value: 'unique_choice',
+		storedType: 'unique_choice',
+		widget: 'native',
 		get label() {
 			return m.uniqueChoice();
 		},
@@ -79,7 +93,20 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		color: 'text-violet-600 bg-violet-50'
 	},
 	{
+		value: 'unique_choice:slider',
+		storedType: 'unique_choice',
+		widget: 'slider',
+		get label() {
+			return `${m.uniqueChoice()} (slider)`;
+		},
+		icon: SLIDER_ICON,
+		color: 'text-violet-600 bg-violet-50'
+	},
+	// Row 4
+	{
 		value: 'multiple_choice',
+		storedType: 'multiple_choice',
+		widget: 'native',
 		get label() {
 			return m.multipleChoice();
 		},
@@ -88,6 +115,8 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 	},
 	{
 		value: 'date',
+		storedType: 'date',
+		widget: 'native',
 		get label() {
 			return m.date();
 		},
@@ -96,15 +125,39 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 	}
 ];
 
-/** Map from type value to Font Awesome icon class. */
+/** Map from composite value to Font Awesome icon class. */
 export const TYPE_ICONS: Record<string, string> = Object.fromEntries(
 	QUESTION_TYPES.map((t) => [t.value, t.icon])
 );
 
-/** Map from type value to Tailwind color classes. */
+/** Map from composite value to Tailwind color classes. */
 export const TYPE_COLORS: Record<string, string> = Object.fromEntries(
 	QUESTION_TYPES.map((t) => [t.value, t.color])
 );
+
+/**
+ * Derive the picker's composite key from a stored question. Slider questions
+ * (any `type` with `config.widget === 'slider'`) map to `<type>:slider`.
+ */
+export function inferVariant(question: {
+	type: string;
+	config?: Record<string, unknown> | null;
+}): string {
+	if (question.config && (question.config as { widget?: unknown }).widget === 'slider') {
+		return `${question.type}:slider`;
+	}
+	return question.type;
+}
+
+/**
+ * Default `config` to write when the author picks a given variant. Native
+ * variants store `null`; slider variants seed sensible defaults.
+ */
+export function defaultConfigFor(variant: string): Record<string, unknown> | null {
+	if (variant === 'number:slider') return { widget: 'slider', min: 0, max: 100, step: 1 };
+	if (variant === 'unique_choice:slider') return { widget: 'slider' };
+	return null;
+}
 
 // ----- drag-and-drop helpers (F2) -----
 

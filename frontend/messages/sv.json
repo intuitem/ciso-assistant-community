@@ -806,6 +806,7 @@
 	"createUserHelpText": "Skapa eller koppla en tredje parts användare till representanten baserat på e-posten",
 	"nameDuplicate": "Namnet finns redan",
 	"noAnswer": "Inget svar",
+	"clearAnswer": "Rensa svar",
 	"entityAssessmentRepresentativesHelpText": "De tredje parts användare som ansvarar för att fylla i frågeformuläret",
 	"sendQuestionnaire": "Skicka frågeformulär",
 	"sureToSendQuestionnaire": "Är du säker på att du vill skicka frågeformuläret: {questionnaire}?",
@@ -1480,5 +1481,15 @@
 	"visibilityAuditorOnly": "Endast revisor",
 	"visibilityHidden": "Dold",
 	"answers": "Svar",
-	"respondentAlignment": "Svarandes inriktning"
+	"respondentAlignment": "Svarandes inriktning",
+	"frameworkRefId": "Ref-ID",
+	"urnPreview": "URN-förhandsgranskning:",
+	"urnLockedComplianceAssessment": "Låst — en efterlevnadsbedömning använder detta ramverk.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Steg",
+	"sliderNeedsAtLeastTwoChoices": "Reglaget behöver minst 2 val.",
+	"sliderMinMustBeLessThanMax": "Reglagets min måste vara mindre än max.",
+	"sliderStepMustBeGreaterThanZero": "Reglagets steg måste vara större än 0.",
+	"sliderStepCannotExceedRange": "Reglagets steg får inte överstiga (max − min)."
 }

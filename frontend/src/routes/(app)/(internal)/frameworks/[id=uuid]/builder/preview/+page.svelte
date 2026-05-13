@@ -112,6 +112,7 @@
 				{
 					type: bq.question.type,
 					text: t(bq.question.translations, 'text', bq.question.text) || '',
+					config: bq.question.config,
 					choices: bq.question.choices.map((c) => ({
 						urn: c.urn,
 						value: t(c.translations, 'value', c.value) || '',

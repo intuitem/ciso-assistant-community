@@ -157,6 +157,54 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 	};
 }
 
+function makeQuestion(overrides: Partial<Question> = {}): Question {
+	return {
+		id: 'q-1',
+		urn: 'urn:custom:risk:question:fw:1-q1',
+		ref_id: '1-q1',
+		text: 'Q?',
+		annotation: null,
+		type: 'number',
+		config: null,
+		depends_on: null,
+		order: 0,
+		weight: 1,
+		folder: 'folder-1',
+		requirement_node: 'node-1',
+		choices: [],
+		...overrides
+	};
+}
+
+function makeChoice(id: string, order: number) {
+	return {
+		id,
+		urn: `urn:custom:risk:question_choice:fw:1-q1-c${order}`,
+		ref_id: `1-q1-c${order}`,
+		value: `Choice ${order}`,
+		annotation: null,
+		add_score: null,
+		compute_result: null,
+		order,
+		description: null,
+		color: null,
+		select_implementation_groups: null,
+		folder: 'folder-1',
+		question: 'q-1'
+	};
+}
+
+function makeSectionWithQuestion(question: Question): BuilderNode {
+	return makeSection({}, [
+		{
+			node: makeNode({}),
+			questions: [{ question }],
+			children: [],
+			depth: 1
+		}
+	]);
+}
+
 function makeSection(
 	nodeOverrides: Partial<RequirementNode> = {},
 	children: BuilderNode['children'] = []
@@ -246,6 +294,86 @@ describe('validateDraft', () => {
 		const sections = [makeSection()];
 		const errors = validateDraft(fw, sections);
 		expect(errors.find((e) => e.key === 'publish')!.message).toBe('Framework name is required.');
+	});
+
+	it('rejects number slider with min >= max', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 10, max: 5, step: 1 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'Slider min must be less than max'
+		);
+	});
+
+	it('rejects number slider with non-positive step', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 10, step: 0 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'Slider step must be greater than 0'
+		);
+	});
+
+	it('rejects number slider with step larger than range', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 10, step: 20 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'Slider step cannot exceed (max − min)'
+		);
+	});
+
+	it('accepts a valid number slider', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 100, step: 5 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
+	});
+
+	it('rejects unique_choice slider with fewer than 2 choices', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'unique_choice',
+			config: { widget: 'slider' },
+			choices: [makeChoice('c-1', 1)]
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'Slider needs at least 2 choices'
+		);
+	});
+
+	it('accepts a valid unique_choice slider', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'unique_choice',
+			config: { widget: 'slider' },
+			choices: [makeChoice('c-1', 1), makeChoice('c-2', 2)]
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
+	});
+
+	it('ignores config validation for non-slider widgets', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: null
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
 	});
 });
 
@@ -533,5 +661,73 @@ describe('toggleAssessable', () => {
 		const childId = get(s.rootNodes)[0].children[0].node.id;
 		s.toggleAssessable(childId);
 		expect(get(s.rootNodes)[0].children[0].node.assessable).toBe(true);
+	});
+});
+
+describe('question and choice CRUD on top-level requirement nodes', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('adds a question to a top-level assessable node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		expect(get(s.rootNodes)[0].questions).toHaveLength(1);
+	});
+
+	it('updates a question that lives on a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		const qId = get(s.rootNodes)[0].questions[0].question.id;
+		s.updateQuestion(qId, { text: 'hello' });
+		expect(get(s.rootNodes)[0].questions[0].question.text).toBe('hello');
+	});
+
+	it('deletes a question from a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addQuestion(id);
+		s.deleteQuestion(id, 0);
+		expect(get(s.rootNodes)[0].questions).toHaveLength(1);
+	});
+
+	it('adds and updates a choice on a top-level node question', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addChoice(id, 0);
+		const choices = get(s.rootNodes)[0].questions[0].question.choices;
+		expect(choices).toHaveLength(1);
+		s.updateChoice(choices[0].id, { value: 'yes' });
+		expect(get(s.rootNodes)[0].questions[0].question.choices[0].value).toBe('yes');
+	});
+
+	it('deletes a choice from a top-level node question', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addChoice(id, 0);
+		s.addChoice(id, 0);
+		s.deleteChoice(id, 0, 0);
+		expect(get(s.rootNodes)[0].questions[0].question.choices).toHaveLength(1);
+	});
+
+	it('reorders questions on a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addQuestion(id);
+		const firstId = get(s.rootNodes)[0].questions[0].question.id;
+		s.reorderQuestions(id, 0, 1);
+		expect(get(s.rootNodes)[0].questions[1].question.id).toBe(firstId);
 	});
 });

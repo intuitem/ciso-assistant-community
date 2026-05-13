@@ -855,6 +855,7 @@
 	"createUserHelpText": "E-postaya dayalı temsilci için bir üçüncü taraf kullanıcı oluşturun veya bağlayın",
 	"nameDuplicate": "Ad zaten var",
 	"noAnswer": "Cevap yok",
+	"clearAnswer": "Cevabı temizle",
 	"entityAssessmentRepresentativesHelpText": "Anketi tamamlamaktan sorumlu üçüncü taraf kullanıcılar",
 	"sendQuestionnaire": "Anketi gönder",
 	"sureToSendQuestionnaire": "Anketi göndermek istediğinizden emin misiniz: {questionnaire}?",
@@ -2218,5 +2219,15 @@
 	"visibilityAuditorOnly": "Yalnızca denetçi",
 	"visibilityHidden": "Gizli",
 	"answers": "Yanıtlar",
-	"respondentAlignment": "Yanıtlayan uyumu"
+	"respondentAlignment": "Yanıtlayan uyumu",
+	"frameworkRefId": "Referans ID",
+	"urnPreview": "URN önizleme:",
+	"urnLockedComplianceAssessment": "Kilitli — bir uyumluluk değerlendirmesi bu çerçeveyi kullanıyor.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Adım",
+	"sliderNeedsAtLeastTwoChoices": "Kaydırıcı en az 2 seçenek gerektirir.",
+	"sliderMinMustBeLessThanMax": "Kaydırıcının min değeri maks değerinden küçük olmalıdır.",
+	"sliderStepMustBeGreaterThanZero": "Kaydırıcının adımı 0'dan büyük olmalıdır.",
+	"sliderStepCannotExceedRange": "Kaydırıcının adımı (maks − min) değerini aşamaz."
 }

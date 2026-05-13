@@ -854,6 +854,7 @@
 	"createUserHelpText": "Δημιουργήστε ή συνδέστε έναν χρήστη τρίτου μέρους στον εκπρόσωπο με βάση το email",
 	"nameDuplicate": "Το όνομα υπάρχει ήδη",
 	"noAnswer": "Καμία απάντηση",
+	"clearAnswer": "Εκκαθάριση απάντησης",
 	"entityAssessmentRepresentativesHelpText": "Οι χρήστες τρίτων που είναι υπεύθυνοι για τη συμπλήρωση του ερωτηματολογίου",
 	"sendQuestionnaire": "Αποστολή ερωτηματολογίου",
 	"sureToSendQuestionnaire": "Είστε βέβαιοι ότι θέλετε να στείλετε το ερωτηματολόγιο: {questionnaire};",
@@ -2164,5 +2165,15 @@
 	"visibilityAuditorOnly": "Μόνο ελεγκτής",
 	"visibilityHidden": "Κρυφό",
 	"answers": "Απαντήσεις",
-	"respondentAlignment": "Συμφωνία ερωτώμενου"
+	"respondentAlignment": "Συμφωνία ερωτώμενου",
+	"frameworkRefId": "Αναγνωριστικό αναφοράς",
+	"urnPreview": "Προεπισκόπηση URN:",
+	"urnLockedComplianceAssessment": "Κλειδωμένο — μια αξιολόγηση συμμόρφωσης χρησιμοποιεί αυτό το πλαίσιο.",
+	"sliderMin": "Ελάχ",
+	"sliderMax": "Μέγ",
+	"sliderStep": "Βήμα",
+	"sliderNeedsAtLeastTwoChoices": "Ο ολισθητής χρειάζεται τουλάχιστον 2 επιλογές.",
+	"sliderMinMustBeLessThanMax": "Το ελάχ του ολισθητή πρέπει να είναι μικρότερο από το μέγ.",
+	"sliderStepMustBeGreaterThanZero": "Το βήμα του ολισθητή πρέπει να είναι μεγαλύτερο από 0.",
+	"sliderStepCannotExceedRange": "Το βήμα του ολισθητή δεν μπορεί να ξεπερνά το (μέγ − ελάχ)."
 }

@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 import json
 from rich import print as rprint
-from typing import Optional, Callable, Dict
+from typing import Optional, Dict
 import uuid
 
 from icecream import ic
@@ -20,8 +20,6 @@ cli_cfg = dict()
 auth_data = dict()
 
 GLOBAL_FOLDER_ID: Optional[str] = None
-
-CLICA_CONFG_PATH = ".clica_config.yaml"
 
 load_dotenv(".clica.env")
 
@@ -41,6 +39,12 @@ VERIFY_CERTIFICATE = os.getenv("VERIFY_CERTIFICATE", "true").lower() in (
     "yes",
     "on",
 )
+
+# Set CLICA_DEBUG=1 to enable ic() debug prints across the CLI.
+if os.getenv("CLICA_DEBUG"):
+    ic(API_URL, VERIFY_CERTIFICATE)
+else:
+    ic.disable()
 
 
 def ids_map(model, folder=None):

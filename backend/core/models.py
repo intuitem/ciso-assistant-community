@@ -2576,6 +2576,8 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             }
             if question.annotation:
                 q_data["annotation"] = question.annotation
+            if question.config is not None:
+                q_data["config"] = question.config
             choices = [_translate_choice(c) for c in question.choices.all()]
             if choices:
                 q_data["choices"] = choices

@@ -804,6 +804,7 @@
 	"createUserHelpText": "إنشاء مستخدم تابع لجهة خارجية أو ربطه بالممثل بناءً على البريد الإلكتروني",
 	"nameDuplicate": "الاسم موجود بالفعل",
 	"noAnswer": "لا يوجد جواب",
+	"clearAnswer": "مسح الإجابة",
 	"entityAssessmentRepresentativesHelpText": "المستخدمون الخارجيون المسؤولون عن استكمال الاستبيان",
 	"sendQuestionnaire": "إرسال الاستبيان",
 	"sureToSendQuestionnaire": "هل أنت متأكد من أنك تريد إرسال الاستبيان: {questionnaire} ؟",
@@ -1461,5 +1462,15 @@
 	"visibilityAuditorOnly": "المدقق فقط",
 	"visibilityHidden": "مخفي",
 	"answers": "الإجابات",
-	"respondentAlignment": "توافق المُجيب"
+	"respondentAlignment": "توافق المُجيب",
+	"frameworkRefId": "معرّف المرجع",
+	"urnPreview": "معاينة URN:",
+	"urnLockedComplianceAssessment": "مقفل — يستخدم تقييم الامتثال هذا الإطار.",
+	"sliderMin": "الحد الأدنى",
+	"sliderMax": "الحد الأقصى",
+	"sliderStep": "الخطوة",
+	"sliderNeedsAtLeastTwoChoices": "يحتاج المنزلق إلى خيارين على الأقل.",
+	"sliderMinMustBeLessThanMax": "يجب أن يكون الحد الأدنى للمنزلق أقل من الحد الأقصى.",
+	"sliderStepMustBeGreaterThanZero": "يجب أن تكون خطوة المنزلق أكبر من 0.",
+	"sliderStepCannotExceedRange": "لا يمكن أن تتجاوز خطوة المنزلق (الحد الأقصى − الحد الأدنى)."
 }

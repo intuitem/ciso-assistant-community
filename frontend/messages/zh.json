@@ -1022,6 +1022,7 @@
 	"userLinkedToRepresentative": "此代表已关联用户。",
 	"nameDuplicate": "名称已存在",
 	"noAnswer": "无答案",
+	"clearAnswer": "清除答案",
 	"entityAssessmentRepresentativesHelpText": "负责完成问卷的第三方用户",
 	"sendQuestionnaire": "发送问卷",
 	"sureToSendQuestionnaire": "确定要发送问卷：{questionnaire}？",
@@ -3509,5 +3510,15 @@
 	"visibilityAuditorOnly": "仅审计员",
 	"visibilityHidden": "隐藏",
 	"answers": "答案",
-	"respondentAlignment": "回应者一致性"
+	"respondentAlignment": "回应者一致性",
+	"frameworkRefId": "引用ID",
+	"urnPreview": "URN 预览：",
+	"urnLockedComplianceAssessment": "已锁定——一个合规评估正在使用此框架。",
+	"sliderMin": "最小",
+	"sliderMax": "最大",
+	"sliderStep": "步长",
+	"sliderNeedsAtLeastTwoChoices": "滑块需要至少 2 个选项。",
+	"sliderMinMustBeLessThanMax": "滑块最小值必须小于最大值。",
+	"sliderStepMustBeGreaterThanZero": "滑块步长必须大于 0。",
+	"sliderStepCannotExceedRange": "滑块步长不能超过（最大 − 最小）。"
 }

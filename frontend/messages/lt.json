@@ -1230,6 +1230,7 @@
 	"userLinkedToRepresentative": "Prie šio atstovo jau susietas vartotojas.",
 	"nameDuplicate": "Pavadinimas jau egzistuoja",
 	"noAnswer": "Nėra atsakymo",
+	"clearAnswer": "Išvalyti atsakymą",
 	"entityAssessmentRepresentativesHelpText": "Trečiosios šalies vartotojai, atsakingi už anketos užpildymą",
 	"sendQuestionnaire": "Siųsti anketą",
 	"sureToSendQuestionnaire": "Ar tikrai norite išsiųsti anketą: {questionnaire}?",
@@ -4442,5 +4443,15 @@
 	"visibilityAuditorOnly": "Tik auditorius",
 	"visibilityHidden": "Paslėpta",
 	"answers": "Atsakymai",
-	"respondentAlignment": "Respondento suderinimas"
+	"respondentAlignment": "Respondento suderinimas",
+	"frameworkRefId": "Nuorodos ID",
+	"urnPreview": "URN peržiūra:",
+	"urnLockedComplianceAssessment": "Užrakinta — atitikties vertinimas naudoja šią sistemą.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Žingsnis",
+	"sliderNeedsAtLeastTwoChoices": "Slankikliui reikia bent 2 pasirinkimų.",
+	"sliderMinMustBeLessThanMax": "Slankiklio min turi būti mažesnis už maks.",
+	"sliderStepMustBeGreaterThanZero": "Slankiklio žingsnis turi būti didesnis nei 0.",
+	"sliderStepCannotExceedRange": "Slankiklio žingsnis negali viršyti (maks − min)."
 }

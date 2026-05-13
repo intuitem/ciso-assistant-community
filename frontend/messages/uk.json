@@ -822,6 +822,7 @@
 	"createUserHelpText": "Створіть або прив’яжіть стороннього користувача до представника на основі e-mail",
 	"nameDuplicate": "Ім'я вже існує",
 	"noAnswer": "Немає відповіді",
+	"clearAnswer": "Очистити відповідь",
 	"entityAssessmentRepresentativesHelpText": "Сторонні користувачі, відповідальні за заповнення анкети",
 	"sendQuestionnaire": "Надіслати анкету",
 	"sureToSendQuestionnaire": "Ви впевнені, що хочете надіслати анкету: {questionnaire} ?",
@@ -1984,5 +1985,15 @@
 	"visibilityAuditorOnly": "Лише аудитор",
 	"visibilityHidden": "Приховано",
 	"answers": "Відповіді",
-	"respondentAlignment": "Узгодження респондента"
+	"respondentAlignment": "Узгодження респондента",
+	"frameworkRefId": "ID посилання",
+	"urnPreview": "Перегляд URN:",
+	"urnLockedComplianceAssessment": "Заблоковано — оцінка відповідності використовує цей фреймворк.",
+	"sliderMin": "Мін",
+	"sliderMax": "Макс",
+	"sliderStep": "Крок",
+	"sliderNeedsAtLeastTwoChoices": "Повзунок потребує щонайменше 2 варіантів.",
+	"sliderMinMustBeLessThanMax": "Мін повзунка має бути меншим за макс.",
+	"sliderStepMustBeGreaterThanZero": "Крок повзунка має бути більшим за 0.",
+	"sliderStepCannotExceedRange": "Крок повзунка не може перевищувати (макс − мін)."
 }
