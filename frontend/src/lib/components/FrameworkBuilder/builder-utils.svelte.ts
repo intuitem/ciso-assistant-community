@@ -24,21 +24,43 @@ export function localeLabel(code: string): string {
  * Splitting the two means the picker can surface "Number (slider)" as a
  * first-class entry without needing a new value in the data model.
  */
-export interface QuestionTypeInfo {
-	value: string;
-	storedType: string;
-	widget: 'native' | 'slider';
+// `storedType` is what gets written to `Question.type`. Native variants use that
+// same value as their picker key; slider variants use `<storedType>:slider`.
+// Only `number` and `unique_choice` have a slider variant — this is enforced by
+// the discriminated union below.
+export type NativeStoredType =
+	| 'text'
+	| 'boolean'
+	| 'number'
+	| 'unique_choice'
+	| 'multiple_choice'
+	| 'date';
+export type SliderStoredType = Extract<NativeStoredType, 'number' | 'unique_choice'>;
+
+interface BaseQuestionTypeInfo {
 	get label(): string;
 	icon: string;
 	color: string;
 }
+
+export type QuestionTypeInfo =
+	| (BaseQuestionTypeInfo & {
+			widget: 'native';
+			storedType: NativeStoredType;
+			value: NativeStoredType;
+	  })
+	| (BaseQuestionTypeInfo & {
+			widget: 'slider';
+			storedType: SliderStoredType;
+			value: `${SliderStoredType}:slider`;
+	  });
 
 const SLIDER_ICON = 'fa-sliders';
 
 // Order matters: the picker is a 2-column grid, so positions [0,1] form
 // row 1, [2,3] row 2, etc. We pair each slider variant on the same row
 // as its parent.
-export const QUESTION_TYPES: QuestionTypeInfo[] = [
+export const QUESTION_TYPES: readonly QuestionTypeInfo[] = [
 	// Row 1
 	{
 		value: 'text',

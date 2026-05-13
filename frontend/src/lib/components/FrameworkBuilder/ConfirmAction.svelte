@@ -17,7 +17,7 @@
 	let {
 		message = '',
 		onconfirm,
-		confirmLabel = m.confirm(),
+		confirmLabel,
 		triggerClass = 'text-gray-300 hover:text-red-500 text-xs transition-colors',
 		confirmClass = 'text-xs text-red-600 font-medium'
 	}: Props = $props();
@@ -37,7 +37,7 @@
 			active = false;
 		}}
 	>
-		{confirmLabel}
+		{confirmLabel ?? m.confirm()}
 	</button>
 	<button type="button" class="text-xs text-gray-500" onclick={() => (active = false)}>
 		{m.cancel()}
