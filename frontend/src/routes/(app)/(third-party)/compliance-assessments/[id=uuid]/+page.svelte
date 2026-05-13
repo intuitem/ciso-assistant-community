@@ -328,7 +328,9 @@
 		const ca = data.compliance_assessment;
 		const id = ca.id;
 		const isInternal = !page.data.user.is_third_party;
-		const isCyFun = ca.framework?.urn === 'urn:intuitem:risk:framework:ccb-cyfun2025';
+		const frameworkUrn = ca.framework?.urn ?? '';
+		const isCyFun = frameworkUrn === 'urn:intuitem:risk:framework:ccb-cyfun2025';
+		const isIso27001 = frameworkUrn.startsWith('urn:intuitem:risk:framework:iso27001');
 
 		const auditOptions = [
 			isInternal && {
@@ -367,14 +369,15 @@
 				href: `/compliance-assessments/${id}/export`,
 				testId: 'export-option-zip'
 			},
-			isInternal && {
-				titleKey: 'exportSoaBuilder',
-				descriptionKey: 'exportSoaBuilderDesc',
-				format: 'HTML' as const,
-				href: `/reports/soa?ca=${id}`,
-				kind: 'navigate' as const,
-				testId: 'export-option-soa'
-			}
+			isInternal &&
+				isIso27001 && {
+					titleKey: 'exportSoaBuilder',
+					descriptionKey: 'exportSoaBuilderDesc',
+					format: 'HTML' as const,
+					href: `/reports/soa?ca=${id}`,
+					kind: 'navigate' as const,
+					testId: 'export-option-soa'
+				}
 		].filter(Boolean);
 
 		const actionPlanOptions = isInternal
