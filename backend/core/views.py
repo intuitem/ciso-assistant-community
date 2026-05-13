@@ -5988,6 +5988,74 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         return Response(changes)
 
+    @action(detail=False, methods=["get"], name="MSS Excel Export")
+    def mss_xlsx(self, request):
+        """Export filtered applied controls in ANSSI MonServiceSécurisé format
+        (Intitulé / Description / Catégorie). Maps csf_function to the 4 MSS
+        categories: Gouvernance / Protection / Défense / Résilience.
+        """
+        queryset = self._get_export_queryset()
+
+        template_path = (
+            Path(__file__).resolve().parent
+            / "templates"
+            / "core"
+            / "Template_mesures_mss.xlsx"
+        )
+        wb = load_workbook(template_path)
+        ws = wb["Template mesures"]
+
+        MSS_CATEGORY_MAP = {
+            "govern": "Gouvernance",
+            "identify": "Gouvernance",
+            "protect": "Protection",
+            "detect": "Défense",
+            "respond": "Défense",
+            "recover": "Résilience",
+        }
+
+        # Clear the demo row R4 ("Mesure EXEMPLE") so it doesn't get imported.
+        # ws.cell(..., value=None) is a no-op in openpyxl; assign via .value.
+        for col in range(1, 4):
+            ws.cell(row=4, column=col).value = ""
+
+        # Data starts at R7 per the template (R6 is the data header).
+        row = 7
+        for control in queryset.iterator():
+            ws.cell(row=row, column=1, value=escape_excel_formula(control.name or ""))
+            ws.cell(
+                row=row,
+                column=2,
+                value=escape_excel_formula(control.description or ""),
+            )
+            ws.cell(
+                row=row,
+                column=3,
+                value=MSS_CATEGORY_MAP.get(control.csf_function or "", ""),
+            )
+            row += 1
+
+        # Extend the Catégorie dropdown if we wrote past the pre-validated range.
+        last_data_row = row - 1
+        if last_data_row > 106:
+            for dv in ws.data_validations.dataValidation:
+                if dv.type == "list" and dv.formula1 and "Gouvernance" in dv.formula1:
+                    dv.sqref = f"C4 C7:C{last_data_row}"
+                    break
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="applied-controls-mss.xlsx"'
+        )
+        return response
+
 
 class ActionPlanList(generics.ListAPIView):
     search_fields = ["name", "description", "ref_id"]
