@@ -49,6 +49,9 @@
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 
+	const CYFUN_2025_FRAMEWORK_URN = 'urn:intuitem:risk:framework:ccb-cyfun2025';
+	const ISO27001_FRAMEWORK_URN_PREFIX = 'urn:intuitem:risk:framework:iso27001';
+
 	interface Props {
 		data: PageData;
 		form: ActionData;
@@ -329,8 +332,12 @@
 		const id = ca.id;
 		const isInternal = !page.data.user.is_third_party;
 		const frameworkUrn = ca.framework?.urn ?? '';
-		const isCyFun = frameworkUrn === 'urn:intuitem:risk:framework:ccb-cyfun2025';
-		const isIso27001 = frameworkUrn.startsWith('urn:intuitem:risk:framework:iso27001');
+		// CyFun stays exact: backend cyfun_xlsx (views.py) hardcodes the 2025
+		// sheet layout, so other versions would 400. Bump both when a new CyFun
+		// ships. ISO27001 is prefix-matched — SoA only navigates to a page
+		// whose semantics carry across 27001 versions.
+		const isCyFun = frameworkUrn === CYFUN_2025_FRAMEWORK_URN;
+		const isIso27001 = frameworkUrn.startsWith(ISO27001_FRAMEWORK_URN_PREFIX);
 
 		const auditOptions = [
 			isInternal && {
