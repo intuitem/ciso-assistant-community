@@ -1454,5 +1454,12 @@
 	"builderUrnTooLong": "«{label}»: URN يبلغ {length} حرفًا (الحد الأقصى 255).",
 	"builderFailedToSaveDraftBeforePublish": "فشل حفظ المسودة قبل النشر.",
 	"builderUnsavedChangesNavigation": "لديك تعديلات غير محفوظة ستُفقد. هل تريد المغادرة على أي حال؟",
-	"builderUnpublishedChangesNavigation": "لديك تعديلات غير منشورة. تم حفظ مسودتك ويمكنك استئنافها لاحقًا. هل تريد المغادرة على أي حال؟"
+	"builderUnpublishedChangesNavigation": "لديك تعديلات غير منشورة. تم حفظ مسودتك ويمكنك استئنافها لاحقًا. هل تريد المغادرة على أي حال؟",
+	"fieldVisibility": "إظهار الحقول",
+	"fieldVisibilityHelpText": "تحكم في الحقول التي يمكن لكل دور رؤيتها وتحريرها.",
+	"visibilityAuditorRespondent": "المدقق + المُجيب",
+	"visibilityAuditorOnly": "المدقق فقط",
+	"visibilityHidden": "مخفي",
+	"answers": "الإجابات",
+	"respondentAlignment": "توافق المُجيب"
 }

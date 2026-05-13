@@ -1644,5 +1644,12 @@
 	"builderUrnTooLong": "'{label}': URN {length} karakter (maks. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Gagal menyimpan draf sebelum penerbitan.",
 	"builderUnsavedChangesNavigation": "Anda memiliki perubahan yang belum disimpan dan akan hilang. Tetap keluar?",
-	"builderUnpublishedChangesNavigation": "Anda memiliki perubahan yang belum diterbitkan. Draf Anda tersimpan dan Anda dapat melanjutkan nanti. Tetap keluar?"
+	"builderUnpublishedChangesNavigation": "Anda memiliki perubahan yang belum diterbitkan. Draf Anda tersimpan dan Anda dapat melanjutkan nanti. Tetap keluar?",
+	"fieldVisibility": "Visibilitas bidang",
+	"fieldVisibilityHelpText": "Kontrol bidang mana yang dapat dilihat dan diedit oleh setiap peran.",
+	"visibilityAuditorRespondent": "Auditor + Responden",
+	"visibilityAuditorOnly": "Hanya auditor",
+	"visibilityHidden": "Tersembunyi",
+	"answers": "Jawaban",
+	"respondentAlignment": "Penyelarasan responden"
 }

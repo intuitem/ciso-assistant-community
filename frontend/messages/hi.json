@@ -1428,5 +1428,12 @@
 	"builderUrnTooLong": "'{label}': URN {length} वर्णों का है (अधिकतम 255)।",
 	"builderFailedToSaveDraftBeforePublish": "प्रकाशित करने से पहले ड्राफ्ट सहेजने में विफल।",
 	"builderUnsavedChangesNavigation": "आपके पास असहेजे गए परिवर्तन हैं जो खो जाएंगे। फिर भी छोड़ें?",
-	"builderUnpublishedChangesNavigation": "आपके पास अप्रकाशित परिवर्तन हैं। आपका ड्राफ्ट सहेजा गया है और आप बाद में फिर से शुरू कर सकते हैं। फिर भी छोड़ें?"
+	"builderUnpublishedChangesNavigation": "आपके पास अप्रकाशित परिवर्तन हैं। आपका ड्राफ्ट सहेजा गया है और आप बाद में फिर से शुरू कर सकते हैं। फिर भी छोड़ें?",
+	"fieldVisibility": "फ़ील्ड दृश्यता",
+	"fieldVisibilityHelpText": "नियंत्रित करें कि कौन से फ़ील्ड प्रत्येक भूमिका देख और संपादित कर सकती है।",
+	"visibilityAuditorRespondent": "ऑडिटर + प्रत्युत्तरकर्ता",
+	"visibilityAuditorOnly": "केवल ऑडिटर",
+	"visibilityHidden": "छिपा हुआ",
+	"answers": "उत्तर",
+	"respondentAlignment": "प्रत्युत्तरकर्ता संरेखण"
 }

@@ -42,6 +42,9 @@
 	"associatedAssets": "Activos asociados",
 	"associatedRiskAssessments": "Evaluaciones de riesgos asociadas",
 	"associatedRiskScenarios": "Escenarios de riesgo asociados",
+	"CatalogDescription": "El catálogo es el lugar donde importa repositorios, amenazas, matrices y otros objetos predefinidos",
+	"securityAdvisoriesDescription": "Los avisos de seguridad son notificaciones sobre vulnerabilidades",
+	"cweDescription": "lista de debilidades de seguridad en software (CWE)",
 	"associatedRiskAcceptances": "Aceptaciones de riesgo asociadas",
 	"associatedComplianceAssessments": "Auditorías asociadas",
 	"associatedRequirementAssessments": "Requisitos asociados",
@@ -3494,5 +3497,12 @@
 	"builderUrnTooLong": "«{label}»: URN tiene {length} caracteres (máx. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Error al guardar el borrador antes de publicar.",
 	"builderUnsavedChangesNavigation": "Tiene cambios sin guardar que se perderán. ¿Salir de todos modos?",
-	"builderUnpublishedChangesNavigation": "Tiene cambios sin publicar. Su borrador está guardado y podrá retomarlo más tarde. ¿Salir de todos modos?"
+	"builderUnpublishedChangesNavigation": "Tiene cambios sin publicar. Su borrador está guardado y podrá retomarlo más tarde. ¿Salir de todos modos?",
+	"fieldVisibility": "Visibilidad de campos",
+	"fieldVisibilityHelpText": "Controle qué campos puede ver y editar cada rol.",
+	"visibilityAuditorRespondent": "Auditor + Encuestado",
+	"visibilityAuditorOnly": "Solo auditor",
+	"visibilityHidden": "Oculto",
+	"answers": "Respuestas",
+	"respondentAlignment": "Alineación del encuestado"
 }

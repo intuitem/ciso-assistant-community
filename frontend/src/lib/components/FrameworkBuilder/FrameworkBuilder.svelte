@@ -17,7 +17,6 @@
 		createCopyHandler,
 		createHandleGatedDragHandlers
 	} from './builder-utils.svelte';
-	import { DEFAULT_FIELD_VISIBILITY } from '$lib/utils/helpers';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import { m } from '$paraglide/messages';
 	import { installKeyboardHandlers } from './keyboard';
@@ -34,63 +33,7 @@
 	import EmptyState from './EmptyState.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
-
-	const CONFIGURABLE_FIELDS = [
-		'result',
-		'status',
-		'score',
-		'is_scored',
-		'documentation_score',
-		'observation',
-		'answers',
-		'evidences',
-		'applied_controls',
-		'security_exceptions'
-	] as const;
-
-	const fieldLabel = (field: string): string => {
-		switch (field) {
-			case 'result':
-				return m.builderFieldResult();
-			case 'status':
-				return m.builderFieldStatus();
-			case 'score':
-				return m.builderFieldScore();
-			case 'is_scored':
-				return m.builderFieldIsScored();
-			case 'documentation_score':
-				return m.builderFieldDocumentationScore();
-			case 'observation':
-				return m.builderFieldObservation();
-			case 'answers':
-				return m.builderFieldAnswers();
-			case 'evidences':
-				return m.builderFieldEvidences();
-			case 'applied_controls':
-				return m.builderFieldAppliedControls();
-			case 'security_exceptions':
-				return m.builderFieldSecurityExceptions();
-			default:
-				return field;
-		}
-	};
-
-	function getFieldVisibility(field: string): string {
-		return (
-			$frameworkStore.field_visibility?.[field] ?? DEFAULT_FIELD_VISIBILITY[field] ?? 'auditor'
-		);
-	}
-
-	function setFieldVisibility(field: string, value: string) {
-		const current = { ...$frameworkStore.field_visibility };
-		// If the value matches the code default, remove the override to keep it clean
-		if (value === (DEFAULT_FIELD_VISIBILITY[field] ?? 'auditor')) {
-			delete current[field];
-		} else {
-			current[field] = value;
-		}
-		builder.updateFramework({ field_visibility: current });
-	}
+	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 
 	interface Props {
 		framework: Framework;
@@ -789,28 +732,10 @@
 							/>
 
 							<!-- Field Visibility -->
-							<div class="space-y-1.5">
-								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-									>{m.builderFieldVisibility()}</span
-								>
-								<p class="text-xs text-gray-400">
-									{m.builderFieldVisibilityHint()}
-								</p>
-								{#each CONFIGURABLE_FIELDS as field}
-									<div class="flex items-center justify-between py-1">
-										<span class="text-sm text-gray-600">{fieldLabel(field)}</span>
-										<select
-											value={getFieldVisibility(field)}
-											class="text-xs border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
-											onchange={(e) => setFieldVisibility(field, e.currentTarget.value)}
-										>
-											<option value="everyone">{m.builderEveryone()}</option>
-											<option value="auditor">{m.builderAuditorOnly()}</option>
-											<option value="hidden">{m.builderHiddenVisibility()}</option>
-										</select>
-									</div>
-								{/each}
-							</div>
+							<VisibilityEditor
+								value={$frameworkStore.field_visibility}
+								onChange={(next) => builder.updateFramework({ field_visibility: next })}
+							/>
 
 							<!-- Languages -->
 							<div class="space-y-1.5">

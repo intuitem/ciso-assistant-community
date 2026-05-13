@@ -43,6 +43,9 @@
 	"associatedRiskAssessments": "Valutazioni del rischio associate",
 	"associatedRiskScenarios": "Scenari di rischio associati",
 	"associatedRiskAcceptances": "Accettazioni del rischio associate",
+	"CatalogDescription": "Il catalogo è il posto dove importare repository, minacce, matrici e altri oggetti predefiniti",
+	"securityAdvisoriesDescription": "Gli avvisi di sicurezza sono notifiche riguardo le vulnerabilità",
+	"cweDescription": "elenco di debolezze di sicurezza nei software (CWE)",
 	"associatedComplianceAssessments": "Audit associati",
 	"associatedRequirementAssessments": "Requisiti associati",
 	"associatedVulnerabilities": "Vulnerabilità associate",
@@ -2703,5 +2706,12 @@
 	"builderUrnTooLong": "«{label}»: URN è di {length} caratteri (max 255).",
 	"builderFailedToSaveDraftBeforePublish": "Salvataggio della bozza prima della pubblicazione non riuscito.",
 	"builderUnsavedChangesNavigation": "Hai modifiche non salvate che andranno perse. Uscire comunque?",
-	"builderUnpublishedChangesNavigation": "Hai modifiche non pubblicate. La tua bozza è salvata e potrai riprenderla più tardi. Uscire comunque?"
+	"builderUnpublishedChangesNavigation": "Hai modifiche non pubblicate. La tua bozza è salvata e potrai riprenderla più tardi. Uscire comunque?",
+	"fieldVisibility": "Visibilità dei campi",
+	"fieldVisibilityHelpText": "Controlla quali campi ogni ruolo può vedere e modificare.",
+	"visibilityAuditorRespondent": "Revisore + Rispondente",
+	"visibilityAuditorOnly": "Solo revisore",
+	"visibilityHidden": "Nascosto",
+	"answers": "Risposte",
+	"respondentAlignment": "Allineamento del rispondente"
 }

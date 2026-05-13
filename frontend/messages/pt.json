@@ -1477,5 +1477,12 @@
 	"builderUrnTooLong": "«{label}»: URN tem {length} caracteres (máx. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Falha ao salvar o rascunho antes de publicar.",
 	"builderUnsavedChangesNavigation": "Você tem alterações não salvas que serão perdidas. Sair mesmo assim?",
-	"builderUnpublishedChangesNavigation": "Você tem alterações não publicadas. Seu rascunho está salvo e você pode retomá-lo mais tarde. Sair mesmo assim?"
+	"builderUnpublishedChangesNavigation": "Você tem alterações não publicadas. Seu rascunho está salvo e você pode retomá-lo mais tarde. Sair mesmo assim?",
+	"fieldVisibility": "Visibilidade de campos",
+	"fieldVisibilityHelpText": "Controle quais campos cada papel pode ver e editar.",
+	"visibilityAuditorRespondent": "Auditor + Respondente",
+	"visibilityAuditorOnly": "Apenas auditor",
+	"visibilityHidden": "Oculto",
+	"answers": "Respostas",
+	"respondentAlignment": "Alinhamento do respondente"
 }

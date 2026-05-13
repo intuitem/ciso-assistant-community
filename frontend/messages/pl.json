@@ -2218,5 +2218,12 @@
 	"builderUrnTooLong": "„{label}”: URN ma {length} znaków (maks. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Nie udało się zapisać szkicu przed publikacją.",
 	"builderUnsavedChangesNavigation": "Masz niezapisane zmiany, które zostaną utracone. Mimo to wyjść?",
-	"builderUnpublishedChangesNavigation": "Masz nieopublikowane zmiany. Twój szkic jest zapisany i możesz go wznowić później. Mimo to wyjść?"
+	"builderUnpublishedChangesNavigation": "Masz nieopublikowane zmiany. Twój szkic jest zapisany i możesz go wznowić później. Mimo to wyjść?",
+	"fieldVisibility": "Widoczność pól",
+	"fieldVisibilityHelpText": "Kontroluj, które pola każda rola może zobaczyć i edytować.",
+	"visibilityAuditorRespondent": "Audytor + Respondent",
+	"visibilityAuditorOnly": "Tylko audytor",
+	"visibilityHidden": "Ukryte",
+	"answers": "Odpowiedzi",
+	"respondentAlignment": "Zgodność respondenta"
 }

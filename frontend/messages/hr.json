@@ -3972,5 +3972,12 @@
 	"builderUrnTooLong": "„{label}“: URN ima {length} znakova (najviše 255).",
 	"builderFailedToSaveDraftBeforePublish": "Spremanje nacrta prije objave nije uspjelo.",
 	"builderUnsavedChangesNavigation": "Imate nespremljene promjene koje će biti izgubljene. Svejedno otići?",
-	"builderUnpublishedChangesNavigation": "Imate neobjavljene promjene. Vaš nacrt je spremljen i možete nastaviti kasnije. Svejedno otići?"
+	"builderUnpublishedChangesNavigation": "Imate neobjavljene promjene. Vaš nacrt je spremljen i možete nastaviti kasnije. Svejedno otići?",
+	"fieldVisibility": "Vidljivost polja",
+	"fieldVisibilityHelpText": "Kontrolirajte koja polja svaka uloga može vidjeti i uređivati.",
+	"visibilityAuditorRespondent": "Revizor + Ispitanik",
+	"visibilityAuditorOnly": "Samo revizor",
+	"visibilityHidden": "Skriveno",
+	"answers": "Odgovori",
+	"respondentAlignment": "Usklađenost ispitanika"
 }

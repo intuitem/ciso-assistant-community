@@ -96,7 +96,7 @@ This policy applies to all data created, collected, processed, stored, or transm
 
 ## 8. Exceptions
 
-Exceptions to this policy must be approved in writing by the Information Security Officer and documented with:
+Exceptions to this policy shall be approved in writing by the Information Security Officer and documented with:
 - Business justification
 - Risk assessment
 - Compensating controls

@@ -144,6 +144,9 @@
 	}: Props = $props();
 
 	const URLModel = model.urlModel as urlModel;
+	const defaultFolderWritePermission =
+		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
+	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
 
 	function cancel(): void {
 		if (browser) {

@@ -2157,5 +2157,12 @@
 	"builderUrnTooLong": "«{label}»: το URN έχει {length} χαρακτήρες (μέγ. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Αποτυχία αποθήκευσης προσχεδίου πριν τη δημοσίευση.",
 	"builderUnsavedChangesNavigation": "Έχετε μη αποθηκευμένες αλλαγές που θα χαθούν. Έξοδος ούτως ή άλλως;",
-	"builderUnpublishedChangesNavigation": "Έχετε μη δημοσιευμένες αλλαγές. Το προσχέδιό σας έχει αποθηκευτεί και μπορείτε να συνεχίσετε αργότερα. Έξοδος ούτως ή άλλως;"
+	"builderUnpublishedChangesNavigation": "Έχετε μη δημοσιευμένες αλλαγές. Το προσχέδιό σας έχει αποθηκευτεί και μπορείτε να συνεχίσετε αργότερα. Έξοδος ούτως ή άλλως;",
+	"fieldVisibility": "Ορατότητα πεδίων",
+	"fieldVisibilityHelpText": "Ελέγξτε ποια πεδία μπορεί να βλέπει και να επεξεργάζεται κάθε ρόλος.",
+	"visibilityAuditorRespondent": "Ελεγκτής + Ερωτώμενος",
+	"visibilityAuditorOnly": "Μόνο ελεγκτής",
+	"visibilityHidden": "Κρυφό",
+	"answers": "Απαντήσεις",
+	"respondentAlignment": "Συμφωνία ερωτώμενου"
 }

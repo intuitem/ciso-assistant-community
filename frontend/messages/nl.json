@@ -3357,5 +3357,12 @@
 	"builderUrnTooLong": "'{label}': URN is {length} tekens (max 255).",
 	"builderFailedToSaveDraftBeforePublish": "Concept opslaan vóór publicatie mislukt.",
 	"builderUnsavedChangesNavigation": "Je hebt niet-opgeslagen wijzigingen die verloren gaan. Toch verlaten?",
-	"builderUnpublishedChangesNavigation": "Je hebt niet-gepubliceerde wijzigingen. Je concept is opgeslagen en je kunt later verder. Toch verlaten?"
+	"builderUnpublishedChangesNavigation": "Je hebt niet-gepubliceerde wijzigingen. Je concept is opgeslagen en je kunt later verder. Toch verlaten?",
+	"fieldVisibility": "Veldzichtbaarheid",
+	"fieldVisibilityHelpText": "Bepaal welke velden elke rol kan zien en bewerken.",
+	"visibilityAuditorRespondent": "Auditor + Respondent",
+	"visibilityAuditorOnly": "Alleen auditor",
+	"visibilityHidden": "Verborgen",
+	"answers": "Antwoorden",
+	"respondentAlignment": "Afstemming respondent"
 }

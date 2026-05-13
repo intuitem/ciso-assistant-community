@@ -3502,5 +3502,12 @@
 	"builderUrnTooLong": "「{label}」：URN 为 {length} 个字符（最多 255 个）。",
 	"builderFailedToSaveDraftBeforePublish": "发布前保存草稿失败。",
 	"builderUnsavedChangesNavigation": "您有未保存的更改将会丢失。仍要离开吗？",
-	"builderUnpublishedChangesNavigation": "您有未发布的更改。您的草稿已保存，稍后可继续。仍要离开吗？"
+	"builderUnpublishedChangesNavigation": "您有未发布的更改。您的草稿已保存，稍后可继续。仍要离开吗？",
+	"fieldVisibility": "字段可见性",
+	"fieldVisibilityHelpText": "控制每个角色可以查看和编辑哪些字段。",
+	"visibilityAuditorRespondent": "审计员 + 回应者",
+	"visibilityAuditorOnly": "仅审计员",
+	"visibilityHidden": "隐藏",
+	"answers": "答案",
+	"respondentAlignment": "回应者一致性"
 }

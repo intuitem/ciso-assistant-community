@@ -3352,5 +3352,12 @@
 	"builderUrnTooLong": "„{label}\": URN ist {length} Zeichen lang (max. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Speichern des Entwurfs vor der Veröffentlichung fehlgeschlagen.",
 	"builderUnsavedChangesNavigation": "Sie haben nicht gespeicherte Änderungen, die verloren gehen. Trotzdem verlassen?",
-	"builderUnpublishedChangesNavigation": "Sie haben unveröffentlichte Änderungen. Ihr Entwurf ist gespeichert und Sie können später fortfahren. Trotzdem verlassen?"
+	"builderUnpublishedChangesNavigation": "Sie haben unveröffentlichte Änderungen. Ihr Entwurf ist gespeichert und Sie können später fortfahren. Trotzdem verlassen?",
+	"fieldVisibility": "Feldsichtbarkeit",
+	"fieldVisibilityHelpText": "Steuern Sie, welche Felder jede Rolle sehen und bearbeiten kann.",
+	"visibilityAuditorRespondent": "Prüfer + Befragter",
+	"visibilityAuditorOnly": "Nur Prüfer",
+	"visibilityHidden": "Ausgeblendet",
+	"answers": "Antworten",
+	"respondentAlignment": "Abstimmung des Befragten"
 }

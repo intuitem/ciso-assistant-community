@@ -1475,5 +1475,12 @@
 	"builderUrnTooLong": "'{label}': URN are {length} caractere (max. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Salvarea schiței înainte de publicare a eșuat.",
 	"builderUnsavedChangesNavigation": "Aveți modificări nesalvate care vor fi pierdute. Părăsiți oricum?",
-	"builderUnpublishedChangesNavigation": "Aveți modificări nepublicate. Schița dvs. este salvată și o puteți relua mai târziu. Părăsiți oricum?"
+	"builderUnpublishedChangesNavigation": "Aveți modificări nepublicate. Schița dvs. este salvată și o puteți relua mai târziu. Părăsiți oricum?",
+	"fieldVisibility": "Vizibilitatea câmpurilor",
+	"fieldVisibilityHelpText": "Controlați ce câmpuri poate vedea și edita fiecare rol.",
+	"visibilityAuditorRespondent": "Auditor + Respondent",
+	"visibilityAuditorOnly": "Doar auditor",
+	"visibilityHidden": "Ascuns",
+	"answers": "Răspunsuri",
+	"respondentAlignment": "Aliniere respondent"
 }

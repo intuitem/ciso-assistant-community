@@ -1459,5 +1459,12 @@
 	"builderUrnTooLong": "„{label}”: az URN {length} karakter (max. 255).",
 	"builderFailedToSaveDraftBeforePublish": "A piszkozat mentése a közzététel előtt sikertelen.",
 	"builderUnsavedChangesNavigation": "Vannak nem mentett módosításai, amelyek el fognak veszni. Mégis kilép?",
-	"builderUnpublishedChangesNavigation": "Vannak közzé nem tett módosításai. A piszkozat mentve van, és később folytathatja. Mégis kilép?"
+	"builderUnpublishedChangesNavigation": "Vannak közzé nem tett módosításai. A piszkozat mentve van, és később folytathatja. Mégis kilép?",
+	"fieldVisibility": "Mezők láthatósága",
+	"fieldVisibilityHelpText": "Szabályozza, hogy az egyes szerepkörök mely mezőket láthatják és szerkeszthetik.",
+	"visibilityAuditorRespondent": "Auditor + Válaszadó",
+	"visibilityAuditorOnly": "Csak auditor",
+	"visibilityHidden": "Rejtett",
+	"answers": "Válaszok",
+	"respondentAlignment": "Válaszadó egyeztetése"
 }

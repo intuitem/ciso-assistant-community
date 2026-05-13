@@ -1977,5 +1977,12 @@
 	"builderUrnTooLong": "«{label}»: URN має {length} символів (макс. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Не вдалося зберегти чернетку перед публікацією.",
 	"builderUnsavedChangesNavigation": "У вас є незбережені зміни, які буде втрачено. Все одно вийти?",
-	"builderUnpublishedChangesNavigation": "У вас є неопубліковані зміни. Ваша чернетка збережена, ви зможете продовжити пізніше. Все одно вийти?"
+	"builderUnpublishedChangesNavigation": "У вас є неопубліковані зміни. Ваша чернетка збережена, ви зможете продовжити пізніше. Все одно вийти?",
+	"fieldVisibility": "Видимість полів",
+	"fieldVisibilityHelpText": "Контролюйте, які поля може бачити та редагувати кожна роль.",
+	"visibilityAuditorRespondent": "Аудитор + Респондент",
+	"visibilityAuditorOnly": "Лише аудитор",
+	"visibilityHidden": "Приховано",
+	"answers": "Відповіді",
+	"respondentAlignment": "Узгодження респондента"
 }

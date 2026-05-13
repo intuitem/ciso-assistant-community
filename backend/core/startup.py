@@ -109,6 +109,7 @@ READER_PERMISSIONS_LIST = [
     "view_syncmapping",
     "view_filteringlabel",
     # presets
+    "view_preset",
     "view_presetjourney",
     "view_presetjourneystep",
     # chat
@@ -118,6 +119,13 @@ READER_PERMISSIONS_LIST = [
     "delete_chatsession",
     "view_chatmessage",
     "view_indexeddocument",
+    # Questionnaire Autopilot — read-only at this role. AgentAction is the
+    # AI's audit trail and must stay immutable; QuestionnaireRun is shared
+    # across users in a domain. Write permissions live in ANALYST and up.
+    "view_questionnairerun",
+    "view_questionnairequestion",
+    "view_agentrun",
+    "view_agentaction",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -206,6 +214,7 @@ APPROVER_PERMISSIONS_LIST = [
     # integrations
     "view_syncmapping",
     # presets
+    "view_preset",
     "view_presetjourney",
     "view_presetjourneystep",
     # chat
@@ -215,6 +224,13 @@ APPROVER_PERMISSIONS_LIST = [
     "delete_chatsession",
     "view_chatmessage",
     "view_indexeddocument",
+    # Questionnaire Autopilot — read-only at this role. AgentAction is the
+    # AI's audit trail and must stay immutable; QuestionnaireRun is shared
+    # across users in a domain. Write permissions live in ANALYST and up.
+    "view_questionnairerun",
+    "view_questionnairequestion",
+    "view_agentrun",
+    "view_agentaction",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -519,9 +535,13 @@ ANALYST_PERMISSIONS_LIST = [
     "change_syncmapping",
     "delete_syncmapping",
     # presets
+    "view_preset",
     "view_presetjourney",
+    "add_preset",
     "add_presetjourney",
+    "change_preset",
     "change_presetjourney",
+    "delete_preset",
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
@@ -534,6 +554,22 @@ ANALYST_PERMISSIONS_LIST = [
     "add_indexeddocument",
     "view_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -883,9 +919,13 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_syncmapping",
     "delete_syncmapping",
     # presets
+    "view_preset",
     "view_presetjourney",
+    "add_preset",
     "add_presetjourney",
+    "change_preset",
     "change_presetjourney",
+    "delete_preset",
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
@@ -898,6 +938,22 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_indexeddocument",
     "view_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -1303,9 +1359,13 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_webhookendpoint",
     "view_webhookeventtype",
     # presets
+    "view_preset",
     "view_presetjourney",
+    "add_preset",
     "add_presetjourney",
+    "change_preset",
     "change_presetjourney",
+    "delete_preset",
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
@@ -1319,6 +1379,22 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_indexeddocument",
     "change_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -1339,6 +1415,12 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     "view_folder",
+    "view_requirementassignment",
+    "transition_requirementassignment",
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
 ]
 
 AUDITEE_PERMISSIONS_LIST = [

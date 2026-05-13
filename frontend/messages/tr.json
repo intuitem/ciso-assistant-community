@@ -2211,5 +2211,12 @@
 	"builderUrnTooLong": "'{label}': URN {length} karakter (maks. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Yayınlamadan önce taslak kaydedilemedi.",
 	"builderUnsavedChangesNavigation": "Kaybolacak kaydedilmemiş değişiklikleriniz var. Yine de çıkılsın mı?",
-	"builderUnpublishedChangesNavigation": "Yayınlanmamış değişiklikleriniz var. Taslağınız kaydedildi ve daha sonra devam edebilirsiniz. Yine de çıkılsın mı?"
+	"builderUnpublishedChangesNavigation": "Yayınlanmamış değişiklikleriniz var. Taslağınız kaydedildi ve daha sonra devam edebilirsiniz. Yine de çıkılsın mı?",
+	"fieldVisibility": "Alan görünürlüğü",
+	"fieldVisibilityHelpText": "Her rolün hangi alanları görebileceğini ve düzenleyebileceğini kontrol edin.",
+	"visibilityAuditorRespondent": "Denetçi + Yanıtlayan",
+	"visibilityAuditorOnly": "Yalnızca denetçi",
+	"visibilityHidden": "Gizli",
+	"answers": "Yanıtlar",
+	"respondentAlignment": "Yanıtlayan uyumu"
 }

@@ -1761,5 +1761,12 @@
 	"builderUrnTooLong": "'{label}': URN er {length} tegn (maks. 255).",
 	"builderFailedToSaveDraftBeforePublish": "Kunne ikke gemme kladden før udgivelse.",
 	"builderUnsavedChangesNavigation": "Du har ikke-gemte ændringer, der vil gå tabt. Forlad alligevel?",
-	"builderUnpublishedChangesNavigation": "Du har ikke-udgivne ændringer. Din kladde er gemt, og du kan fortsætte senere. Forlad alligevel?"
+	"builderUnpublishedChangesNavigation": "Du har ikke-udgivne ændringer. Din kladde er gemt, og du kan fortsætte senere. Forlad alligevel?",
+	"fieldVisibility": "Felternes synlighed",
+	"fieldVisibilityHelpText": "Bestem hvilke felter hver rolle kan se og redigere.",
+	"visibilityAuditorRespondent": "Revisor + Respondent",
+	"visibilityAuditorOnly": "Kun revisor",
+	"visibilityHidden": "Skjult",
+	"answers": "Svar",
+	"respondentAlignment": "Respondentens overensstemmelse"
 }

@@ -1473,5 +1473,12 @@
 	"builderUrnTooLong": "'{label}': URN är {length} tecken (max 255).",
 	"builderFailedToSaveDraftBeforePublish": "Det gick inte att spara utkastet före publicering.",
 	"builderUnsavedChangesNavigation": "Du har osparade ändringar som kommer att gå förlorade. Lämna ändå?",
-	"builderUnpublishedChangesNavigation": "Du har opublicerade ändringar. Ditt utkast är sparat och du kan återuppta senare. Lämna ändå?"
+	"builderUnpublishedChangesNavigation": "Du har opublicerade ändringar. Ditt utkast är sparat och du kan återuppta senare. Lämna ändå?",
+	"fieldVisibility": "Fältens synlighet",
+	"fieldVisibilityHelpText": "Bestäm vilka fält varje roll kan se och redigera.",
+	"visibilityAuditorRespondent": "Revisor + Svarande",
+	"visibilityAuditorOnly": "Endast revisor",
+	"visibilityHidden": "Dold",
+	"answers": "Svar",
+	"respondentAlignment": "Svarandes inriktning"
 }

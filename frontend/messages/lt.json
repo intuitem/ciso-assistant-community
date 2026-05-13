@@ -4435,5 +4435,12 @@
 	"builderUrnTooLong": "„{label}“: URN yra {length} simbolių (daugiausia 255).",
 	"builderFailedToSaveDraftBeforePublish": "Nepavyko išsaugoti juodraščio prieš paskelbiant.",
 	"builderUnsavedChangesNavigation": "Turite neišsaugotų pakeitimų, kurie bus prarasti. Vis tiek išeiti?",
-	"builderUnpublishedChangesNavigation": "Turite nepaskelbtų pakeitimų. Jūsų juodraštis išsaugotas ir galėsite tęsti vėliau. Vis tiek išeiti?"
+	"builderUnpublishedChangesNavigation": "Turite nepaskelbtų pakeitimų. Jūsų juodraštis išsaugotas ir galėsite tęsti vėliau. Vis tiek išeiti?",
+	"fieldVisibility": "Laukų matomumas",
+	"fieldVisibilityHelpText": "Valdykite, kuriuos laukus kiekvienas vaidmuo gali matyti ir redaguoti.",
+	"visibilityAuditorRespondent": "Auditorius + Respondentas",
+	"visibilityAuditorOnly": "Tik auditorius",
+	"visibilityHidden": "Paslėpta",
+	"answers": "Atsakymai",
+	"respondentAlignment": "Respondento suderinimas"
 }
