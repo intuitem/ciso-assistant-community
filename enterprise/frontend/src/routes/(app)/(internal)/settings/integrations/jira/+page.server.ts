@@ -21,14 +21,17 @@ const schema = z.object({
 	settings: z.object({
 		enable_outgoing_sync: z.boolean().default(false),
 		enable_incoming_sync: z.boolean().default(false),
-		project_key: z.string(),
-		issue_type: z.string().default('Task')
+		table_name: z.string().optional(),
+		project_key: z.string().optional(),
+		issue_type: z.string().optional(),
+		field_map: z.record(z.string(), z.any()).default({}).optional(),
+		value_map: z.record(z.string(), z.any()).default({}).optional()
 	})
 });
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	const response = await fetch(`${BASE_API_URL}/integrations/configs/?provider__name=jira`);
-	let config = {};
+	let config: Record<string, any> = {};
 	if (response.ok) {
 		config = await response.json().then((res) => res.results[0]);
 	}
@@ -44,6 +47,15 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 			provider_id: provider.id
 		};
 	}
+
+	// Synthesize a composite ``table_name`` from the legacy ``project_key`` /
+	// ``issue_type`` settings so existing configs preselect the right entry in
+	// the FieldMapper table picker without a data migration.
+	const settings = config?.settings;
+	if (settings && !settings.table_name && settings.project_key) {
+		settings.table_name = `${settings.project_key}:${settings.issue_type || 'Task'}`;
+	}
+
 	const form = await superValidate(config, zod(schema), { errors: false });
 	return {
 		form,

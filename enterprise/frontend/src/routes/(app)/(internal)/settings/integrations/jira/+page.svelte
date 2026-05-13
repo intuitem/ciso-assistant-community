@@ -6,6 +6,7 @@
 	import type { ActionData, PageData } from './$types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import FieldMapper from '$lib/components/Forms/FieldMapper.svelte';
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
@@ -36,8 +37,11 @@
 		settings: z.object({
 			enable_outgoing_sync: z.boolean().default(false),
 			enable_incoming_sync: z.boolean().default(false),
-			project_key: z.string(),
-			issue_type: z.string().default('Task')
+			table_name: z.string().optional(),
+			project_key: z.string().optional(),
+			issue_type: z.string().optional(),
+			field_map: z.record(z.string(), z.any()).default({}).optional(),
+			value_map: z.record(z.string(), z.any()).default({}).optional()
 		})
 	});
 
@@ -165,21 +169,6 @@
 							{/if}
 						</div>
 					</span>
-					<TextField
-						{form}
-						field="project_key"
-						valuePath="settings.project_key"
-						label={m.projectKey()}
-						helpText={m.jiraProjectKeyHelpText()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
-					/>
-					<TextField
-						{form}
-						field="issue_type"
-						valuePath="settings.issue_type"
-						label={m.issueType()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
-					/>
 				</div>
 				<div class="flex flex-col gap-4 card preset-outlined-surface-200-800 p-2">
 					<span class="flex flex-row justify-between items-center">
@@ -231,6 +220,15 @@
 						>
 					</span>
 					<p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
+				{/if}
+				{#if page.data?.config?.id}
+					<FieldMapper
+						{form}
+						integrationId={page.data?.config?.id}
+						description={m.jiraIntegrationMappingsHelpText()}
+						remoteFieldLabel={m.jiraField()}
+						tableHelpText={m.jiraTableHelpText()}
+					/>
 				{/if}
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"

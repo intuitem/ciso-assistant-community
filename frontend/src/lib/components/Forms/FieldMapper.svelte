@@ -8,6 +8,10 @@
 		integrationId,
 		initialConfig = null,
 		form,
+		title = m.integrationMappingsTitle(),
+		description = m.integrationMappingsHelpText(),
+		remoteFieldLabel = m.remoteField(),
+		tableHelpText = m.integrationTableHelpText(),
 		onSave = (config) => console.log('Saved:', config)
 	} = $props();
 
@@ -133,9 +137,9 @@
 <div class="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-surface-200">
 	<div class="mb-8 border-b border-surface-100 pb-4">
 		<h2 class="text-xl font-bold text-surface-800">
-			{m.serviceNowIntegrationMappingsDescription()}
+			{title}
 		</h2>
-		<p class="text-sm text-surface-500 mt-1">{m.serviceNowIntegrationMappingsHelpText()}</p>
+		<p class="text-sm text-surface-500 mt-1">{description}</p>
 	</div>
 
 	<section class="mb-8">
@@ -150,7 +154,7 @@
 				options={tables}
 				cachedValue={selectedTable}
 				onChange={handleTableChange}
-				helpText={m.serviceNowTableHelpText()}
+				helpText={tableHelpText}
 				baseClass="w-full md:w-1/2"
 			/>
 		{/key}
@@ -168,7 +172,7 @@
 				>
 					<div class="col-span-5">{m.localField()}</div>
 					<div class="col-span-1 text-center"></div>
-					<div class="col-span-6">{m.serviceNowColumn()}</div>
+					<div class="col-span-6">{remoteFieldLabel}</div>
 				</div>
 
 				<div class="space-y-4">
