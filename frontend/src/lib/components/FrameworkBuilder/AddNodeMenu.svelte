@@ -5,17 +5,11 @@
 	interface Props {
 		parent: string | null;
 		afterIndex?: number;
-		triggerLabel?: string;
+		triggerLabel: string;
 		triggerClass?: string;
 		onBeforeAdd?: () => void;
 	}
-	let {
-		parent,
-		afterIndex,
-		triggerLabel = m.builderAddNode(),
-		triggerClass = '',
-		onBeforeAdd
-	}: Props = $props();
+	let { parent, afterIndex, triggerLabel, triggerClass = '', onBeforeAdd }: Props = $props();
 
 	const builder = getBuilderContext();
 	let open = $state(false);
