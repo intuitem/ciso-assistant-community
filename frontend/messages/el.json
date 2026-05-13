@@ -2139,7 +2139,6 @@
 	"builderTargetLanguages": "Γλώσσες-στόχοι",
 	"builderAddLanguagePlaceholder": "Προσθήκη γλώσσας...",
 	"builderAdd": "Προσθήκη",
-	"builderRefIdLabel": "Ref ID",
 	"builderNodeNamePlaceholder": "Όνομα κόμβου",
 	"builderSplashScreenTitlePlaceholder": "Τίτλος οθόνης παρουσίασης",
 	"builderAssessableTooltip": "Καθορίζει αν αυτή η απαίτηση είναι αξιολογήσιμη από τους ερωτώμενους",

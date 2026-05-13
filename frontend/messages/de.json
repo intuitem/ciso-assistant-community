@@ -3334,7 +3334,6 @@
 	"builderTargetLanguages": "Zielsprachen",
 	"builderAddLanguagePlaceholder": "Sprache hinzufügen...",
 	"builderAdd": "Hinzufügen",
-	"builderRefIdLabel": "Ref-ID",
 	"builderNodeNamePlaceholder": "Knotenname",
 	"builderSplashScreenTitlePlaceholder": "Titel des Begrüßungsbildschirms",
 	"builderAssessableTooltip": "Gibt an, ob diese Anforderung von Teilnehmern bewertbar ist",

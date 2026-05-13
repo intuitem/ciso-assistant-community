@@ -1441,7 +1441,6 @@
 	"builderTargetLanguages": "Célnyelvek",
 	"builderAddLanguagePlaceholder": "Nyelv hozzáadása...",
 	"builderAdd": "Hozzáadás",
-	"builderRefIdLabel": "Ref ID",
 	"builderNodeNamePlaceholder": "Csomópont neve",
 	"builderSplashScreenTitlePlaceholder": "Bevezető képernyő címe",
 	"builderAssessableTooltip": "Jelzi, hogy ezt a követelményt értékelhetik-e a válaszadók",

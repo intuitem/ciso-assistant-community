@@ -109,7 +109,7 @@
 				<div class="px-3 pb-3 pt-1 border-t border-gray-200 space-y-2">
 					<div class="grid grid-cols-2 gap-2">
 						<label class="block">
-							<span class="text-xs text-gray-500">{m.refId()}</span>
+							<span class="text-xs text-gray-500">{m.frameworkRefId()}</span>
 							<input
 								type="text"
 								value={group.ref_id}

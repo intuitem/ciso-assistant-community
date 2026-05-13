@@ -3954,7 +3954,6 @@
 	"builderTargetLanguages": "Ciljni jezici",
 	"builderAddLanguagePlaceholder": "Dodaj jezik...",
 	"builderAdd": "Dodaj",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "Ime čvora",
 	"builderSplashScreenTitlePlaceholder": "Naslov uvodnog zaslona",
 	"builderAssessableTooltip": "Označava je li ovaj zahtjev procjenjiv od strane ispitanika",

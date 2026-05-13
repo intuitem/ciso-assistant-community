@@ -2688,7 +2688,6 @@
 	"builderTargetLanguages": "Lingue di destinazione",
 	"builderAddLanguagePlaceholder": "Aggiungi una lingua...",
 	"builderAdd": "Aggiungi",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "Nome del nodo",
 	"builderSplashScreenTitlePlaceholder": "Titolo della schermata di presentazione",
 	"builderAssessableTooltip": "Indica se questo requisito è valutabile dai rispondenti",

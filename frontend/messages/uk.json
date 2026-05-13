@@ -1959,7 +1959,6 @@
 	"builderTargetLanguages": "Цільові мови",
 	"builderAddLanguagePlaceholder": "Додати мову...",
 	"builderAdd": "Додати",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "Назва вузла",
 	"builderSplashScreenTitlePlaceholder": "Заголовок заставки",
 	"builderAssessableTooltip": "Чи може ця вимога оцінюватися респондентами",

@@ -1436,7 +1436,6 @@
 	"builderTargetLanguages": "اللغات المستهدفة",
 	"builderAddLanguagePlaceholder": "إضافة لغة...",
 	"builderAdd": "إضافة",
-	"builderRefIdLabel": "المعرّف",
 	"builderNodeNamePlaceholder": "اسم العقدة",
 	"builderSplashScreenTitlePlaceholder": "عنوان الشاشة الافتتاحية",
 	"builderAssessableTooltip": "ما إذا كان هذا المتطلب قابلاً للتقييم من قِبل المستجيبين",

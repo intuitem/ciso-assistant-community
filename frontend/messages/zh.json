@@ -3484,7 +3484,6 @@
 	"builderTargetLanguages": "目标语言",
 	"builderAddLanguagePlaceholder": "添加一种语言...",
 	"builderAdd": "添加",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "节点名称",
 	"builderSplashScreenTitlePlaceholder": "启动屏标题",
 	"builderAssessableTooltip": "此要求是否可由响应者评估",

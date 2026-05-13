@@ -347,7 +347,7 @@
 						<input
 							type="text"
 							value={node.node.ref_id ?? ''}
-							placeholder={m.builderRefIdLabel()}
+							placeholder={m.frameworkRefId()}
 							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
 							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 						/>
@@ -520,7 +520,7 @@
 						<input
 							type="text"
 							value={node.node.ref_id ?? ''}
-							placeholder={m.builderRefIdLabel()}
+							placeholder={m.frameworkRefId()}
 							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:{isSplash
 								? 'border-purple-500'
 								: 'border-blue-500'} px-0.5 py-0.5 outline-none focus-visible:ring-2 {isSplash

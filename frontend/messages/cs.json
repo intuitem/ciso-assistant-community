@@ -1448,7 +1448,6 @@
 	"builderTargetLanguages": "Cílové jazyky",
 	"builderAddLanguagePlaceholder": "Přidat jazyk...",
 	"builderAdd": "Přidat",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "Název uzlu",
 	"builderSplashScreenTitlePlaceholder": "Název úvodní obrazovky",
 	"builderAssessableTooltip": "Zda je tento požadavek hodnotitelný respondenty",

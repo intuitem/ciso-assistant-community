@@ -2193,7 +2193,6 @@
 	"builderTargetLanguages": "Hedef diller",
 	"builderAddLanguagePlaceholder": "Bir dil ekleyin...",
 	"builderAdd": "Ekle",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "Düğüm adı",
 	"builderSplashScreenTitlePlaceholder": "Açılış ekranı başlığı",
 	"builderAssessableTooltip": "Bu gereksinimin katılımcılar tarafından değerlendirilebilir olup olmadığı",

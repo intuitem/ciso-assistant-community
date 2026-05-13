@@ -4565,7 +4565,6 @@
 	"builderTargetLanguages": "Target languages",
 	"builderAddLanguagePlaceholder": "Add a language...",
 	"builderAdd": "Add",
-	"builderRefIdLabel": "Ref ID",
 	"builderNodeNamePlaceholder": "Node name",
 	"builderSplashScreenTitlePlaceholder": "Splash screen title",
 	"builderAssessableTooltip": "Whether this requirement is assessable by respondents",

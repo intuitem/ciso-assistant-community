@@ -3339,7 +3339,6 @@
 	"builderTargetLanguages": "Doeltalen",
 	"builderAddLanguagePlaceholder": "Een taal toevoegen...",
 	"builderAdd": "Toevoegen",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "Naam van node",
 	"builderSplashScreenTitlePlaceholder": "Titel van introscherm",
 	"builderAssessableTooltip": "Of deze vereiste beoordeelbaar is door respondenten",

@@ -1457,7 +1457,6 @@
 	"builderTargetLanguages": "Limbi țintă",
 	"builderAddLanguagePlaceholder": "Adăugați o limbă...",
 	"builderAdd": "Adaugă",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "Numele nodului",
 	"builderSplashScreenTitlePlaceholder": "Titlul ecranului de prezentare",
 	"builderAssessableTooltip": "Indică dacă această cerință este evaluabilă de către respondenți",

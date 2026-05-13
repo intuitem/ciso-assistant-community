@@ -4131,7 +4131,6 @@
 	"builderTargetLanguages": "대상 언어",
 	"builderAddLanguagePlaceholder": "언어 추가...",
 	"builderAdd": "추가",
-	"builderRefIdLabel": "참조 ID",
 	"builderNodeNamePlaceholder": "노드 이름",
 	"builderSplashScreenTitlePlaceholder": "시작 화면 제목",
 	"builderAssessableTooltip": "이 요구사항을 응답자가 평가할 수 있는지 여부",

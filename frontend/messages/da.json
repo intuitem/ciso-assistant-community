@@ -1743,7 +1743,6 @@
 	"builderTargetLanguages": "Målsprog",
 	"builderAddLanguagePlaceholder": "Tilføj et sprog...",
 	"builderAdd": "Tilføj",
-	"builderRefIdLabel": "Ref-ID",
 	"builderNodeNamePlaceholder": "Nodenavn",
 	"builderSplashScreenTitlePlaceholder": "Titel på velkomstskærm",
 	"builderAssessableTooltip": "Angiver, om dette krav kan vurderes af respondenter",

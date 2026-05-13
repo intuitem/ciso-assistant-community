@@ -1455,7 +1455,6 @@
 	"builderTargetLanguages": "Målspråk",
 	"builderAddLanguagePlaceholder": "Lägg till ett språk...",
 	"builderAdd": "Lägg till",
-	"builderRefIdLabel": "Ref-ID",
 	"builderNodeNamePlaceholder": "Nodnamn",
 	"builderSplashScreenTitlePlaceholder": "Titel på välkomstskärm",
 	"builderAssessableTooltip": "Anger om detta krav kan bedömas av respondenter",

@@ -4485,7 +4485,6 @@
 	"builderTargetLanguages": "Langues cibles",
 	"builderAddLanguagePlaceholder": "Ajouter une langue...",
 	"builderAdd": "Ajouter",
-	"builderRefIdLabel": "ID",
 	"builderNodeNamePlaceholder": "Nom du nœud",
 	"builderSplashScreenTitlePlaceholder": "Titre de l'écran de présentation",
 	"builderAssessableTooltip": "Indique si cette exigence est évaluable par les répondants",

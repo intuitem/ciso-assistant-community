@@ -1626,7 +1626,6 @@
 	"builderTargetLanguages": "Bahasa target",
 	"builderAddLanguagePlaceholder": "Tambah bahasa...",
 	"builderAdd": "Tambah",
-	"builderRefIdLabel": "ID Referensi",
 	"builderNodeNamePlaceholder": "Nama node",
 	"builderSplashScreenTitlePlaceholder": "Judul layar pembuka",
 	"builderAssessableTooltip": "Apakah persyaratan ini dapat dinilai oleh responden",
