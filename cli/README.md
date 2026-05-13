@@ -21,21 +21,21 @@ CLICA is a command-line interface tool for interacting with the CISO Assistant R
 ### Prerequisites
 
 - Python 3.12 or higher
-- Required Python packages (install via pip):
+- [uv](https://docs.astral.sh/uv/) (the project is managed with `uv`; install via `curl -LsSf https://astral.sh/uv/install.sh | sh` or your package manager)
+
+### Setup
+
+From the `cli/` directory:
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
+
+This creates a `.venv/` and installs the locked dependencies from `uv.lock`. Run CLI commands with `uv run` (see examples below), or activate the venv manually with `source .venv/bin/activate`.
 
 ### Dependencies
 
-The CLI requires the following Python packages:
-- rich
-- requests
-- click
-- pyyaml
-- icecream
-- python-dotenv
+Runtime dependencies are declared in [`pyproject.toml`](./pyproject.toml) and pinned in [`uv.lock`](./uv.lock). Use `uv add <pkg>` / `uv remove <pkg>` to manage them — do not edit `uv.lock` by hand.
 
 ## Authentication Setup
 
@@ -83,7 +83,7 @@ These commands retrieve information from your CISO Assistant instance:
 Retrieves all available folders/domains from your CISO Assistant instance.
 
 ```bash
-python clica.py get-folders
+uv run clica.py get-folders
 ```
 
 **Output:** JSON list of all folders with their IDs and names.
@@ -93,7 +93,7 @@ python clica.py get-folders
 Lists all available perimeters in your CISO Assistant instance.
 
 ```bash
-python clica.py get-perimeters
+uv run clica.py get-perimeters
 ```
 
 **Output:** JSON list of perimeters organized by folder.
@@ -103,7 +103,7 @@ python clica.py get-perimeters
 Retrieves all loaded risk matrices from the Global folder.
 
 ```bash
-python clica.py get-matrices
+uv run clica.py get-matrices
 ```
 
 **Output:** JSON list of available risk matrices with their IDs and names.
@@ -144,7 +144,7 @@ Supported Data Wizard commands:
 Example:
 
 ```bash
-python clica.py import-assets \
+uv run clica.py import-assets \
   --file data-wizard-assets.xlsx \
   --folder "Global"
 ```
@@ -156,7 +156,7 @@ python clica.py import-assets \
 Uploads a file as an attachment to an existing evidence record.
 
 ```bash
-python clica.py upload-attachment \
+uv run clica.py upload-attachment \
   --file /path/to/document.pdf \
   --name "Asset Management Policy"
 ```
@@ -173,7 +173,7 @@ python clica.py upload-attachment \
 Creates a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted backups.
 
 ```bash
-python clica.py backup-full --dest-dir ./db --batch-size 200 --resume
+uv run clica.py backup-full --dest-dir ./db --batch-size 200 --resume
 ```
 
 **Parameters:**
@@ -216,7 +216,7 @@ python clica.py backup-full --dest-dir ./db --batch-size 200 --resume
 Restores a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted restores.
 
 ```bash
-python clica.py restore-full --src-dir ./db --verify-hashes
+uv run clica.py restore-full --src-dir ./db --verify-hashes
 ```
 
 **Parameters:**
@@ -287,14 +287,9 @@ CLICA includes Model Context Protocol (MCP) integration for use with Claude Desk
 
 ### Setup for Claude Desktop
 
-1. Install prerequisites:
-   - Python 3.12
-   - uv package manager
-   - Node.js
-   - Claude Desktop
-
-2. Configure your `.mcp.env` file with the same parameters as `.clica.env`
-3. Update Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+1. Make sure the CLI is installed (see [Installation](#installation) — `uv sync` from the `cli/` directory), and that you also have Node.js and Claude Desktop.
+2. Configure your `.mcp.env` file with the same parameters as `.clica.env`.
+3. Update Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS). `uv` will resolve and run the locked environment for you:
 
 ```json
 {
@@ -321,12 +316,12 @@ CLICA includes Model Context Protocol (MCP) integration for use with Claude Desk
 
 ```bash
 # First, check available folders, perimeters, and matrices
-python clica.py get-folders
-python clica.py get-perimeters
-python clica.py get-matrices
+uv run clica.py get-folders
+uv run clica.py get-perimeters
+uv run clica.py get-matrices
 
 # Import a complete risk assessment via the Data Wizard backend
-python clica.py import-risk-assessment \
+uv run clica.py import-risk-assessment \
   --file data-wizard-risk-assessments.xlsx \
   --perimeter "IT Infrastructure" \
   --matrix "4x4 risk matrix from EBIOS-RM"
@@ -336,16 +331,16 @@ python clica.py import-risk-assessment \
 
 ```bash
 # Import assets using the Data Wizard backend
-python clica.py import-assets --file data-wizard-assets.xlsx --folder "Global"
+uv run clica.py import-assets --file data-wizard-assets.xlsx --folder "Global"
 
 # Import applied controls
-python clica.py import-applied-controls --file data-wizard-controls.xlsx --folder "Global"
+uv run clica.py import-applied-controls --file data-wizard-controls.xlsx --folder "Global"
 
 # Import evidence records
-python clica.py import-evidences --file data-wizard-evidences.xlsx --folder "Global"
+uv run clica.py import-evidences --file data-wizard-evidences.xlsx --folder "Global"
 
 # Upload supporting documents
-python clica.py upload-attachment \
+uv run clica.py upload-attachment \
   --file "security_policy.pdf" \
   --name "Information Security Policy"
 ```
@@ -355,16 +350,16 @@ python clica.py upload-attachment \
 ```bash
 # Create a full backup with timestamp
 BACKUP_DATE=$(date +%Y-%m-%d_%H-%M-%S)
-python clica.py backup-full --dest-dir "./backups/backup-$BACKUP_DATE"
+uv run clica.py backup-full --dest-dir "./backups/backup-$BACKUP_DATE"
 
 # List backups
 ls -lh ./backups/
 
 # Restore from a specific backup
-python clica.py restore-full --src-dir "./backups/backup-2024-01-15_10-30-00"
+uv run clica.py restore-full --src-dir "./backups/backup-2024-01-15_10-30-00"
 
 # Automated daily backup (can be added to cron)
-python clica.py backup-full --dest-dir "/var/backups/ciso-assistant/$(date +%Y-%m-%d)"
+uv run clica.py backup-full --dest-dir "/var/backups/ciso-assistant/$(date +%Y-%m-%d)"
 ```
 
 ## Troubleshooting
