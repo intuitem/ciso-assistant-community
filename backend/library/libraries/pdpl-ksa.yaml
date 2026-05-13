@@ -506,15 +506,14 @@ objects:
       assessable: false
       depth: 1
       ref_id: Article 16
-      name: Cases prohibiting Disclosure
-      description: Enumerates the situations in which the Controller must prevent Disclosure (and Data
-        Subject access — see Article 9(2)) of Personal Data, including cases affecting national security,
-        criminal investigations or fair trial, individual safety, professional confidentiality, sources
-        of confidential information, and similar grounds. The exact six paragraphs are listed in the Law;
-        refer to the official text for the authoritative wording.
-      annotation: Article 16 is referenced from Article 9(2). Authoritative wording of paragraphs (1)-(6)
-        should be confirmed against the official Arabic/English text published by SDAIA before relying
-        on assessment items derived from this article.
+      name: Cases prohibiting Disclosure or access
+      description: Enumerates in six paragraphs the cases in which the Controller must prevent Disclosure
+        of Personal Data and Data Subject access; Article 9(2) of this Law cross-refers to paragraphs
+        (1)–(6) of this Article. Refer to the official text published by SDAIA for the authoritative
+        wording of each paragraph.
+      annotation: The full wording of paragraphs (1)–(6) of Article 16 could not be retrieved from the
+        secondary sources used to build this library. Verify against the official SDAIA text before deriving
+        assessment items from this article.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-17
       assessable: true
       depth: 1
@@ -827,19 +826,13 @@ objects:
       depth: 1
       ref_id: Article 31
       name: '[Repealed]'
-      description: Article 31 has been repealed (by Royal Decree No. M/148 dated 5/9/1444H).
+      description: Article 31 has been repealed.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-32
       assessable: false
       depth: 1
       ref_id: Article 32
-      name: Records of Processing activities — refer to official text
-      description: This article concerns the Controller's record-keeping obligations for Personal Data
-        Processing activities, with details set out in the Implementing Regulations (Article 33 of the
-        IR). Refer to the official text published by SDAIA for the authoritative wording.
-      annotation: The exact wording of Article 32 could not be fully retrieved from secondary sources.
-        The substantive record-keeping obligation is operationalised by Article 33 of the Implementing
-        Regulations. Verify against the official text before relying on assessment items derived from
-        this article.
+      name: '[Repealed]'
+      description: Article 32 has been repealed.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-33
       assessable: false
       depth: 1
