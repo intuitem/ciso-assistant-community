@@ -1,6 +1,5 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
-import * as m from '$paraglide/messages';
 import {
 	apiSaveDraft,
 	apiPublishDraft,
