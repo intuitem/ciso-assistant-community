@@ -155,6 +155,8 @@ objects:
       name: Legal bases other than consent
       description: Processing of Personal Data is exempt from the consent requirement in Article 5(1)
         in the following cases.
+      annotation: Sub-items are alternative lawful bases, not cumulative duties. Assess each only where
+        the Controller actually relies on that basis; mark the others N/A.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:6.1
       assessable: true
       depth: 2
@@ -247,6 +249,9 @@ objects:
       description: The Controller shall only collect Personal Data directly from the Data Subject and
         may only process it for the purposes for which it has been collected, unless one of the following
         applies (with provisions and controls in the Regulations).
+      annotation: Sub-items are alternative exceptions to the direct-collection / purpose-limitation rule,
+        not cumulative duties. Assess each only where the Controller actually relies on that exception;
+        mark the others N/A.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:10.1
       assessable: true
       depth: 2
@@ -450,6 +455,8 @@ objects:
       name: Restrictions on Disclosure
       description: The Controller may not disclose Personal Data except in the following cases (with provisions
         and controls in the Regulations).
+      annotation: Sub-items are alternative lawful bases for Disclosure, not cumulative duties. Assess
+        each only where the Controller actually relies on that basis to disclose; mark the others N/A.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:15.1
       assessable: true
       depth: 2
@@ -682,6 +689,9 @@ objects:
       depth: 1
       ref_id: Article 27
       name: Processing for scientific, research and statistical purposes
+      annotation: Sub-items are alternative exceptions that allow Processing without consent for research/statistical
+        purposes, not cumulative duties. Assess each only where the Controller actually relies on that
+        exception; mark the others N/A.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:27.1
       assessable: true
       depth: 2
@@ -727,6 +737,10 @@ objects:
       depth: 1
       ref_id: Article 29
       name: Transfer of Personal Data outside the Kingdom
+      annotation: 'Cross-border transfer is built as: an enumerated set of permitted purposes (29.1),
+        a set of mandatory conditions to be satisfied for every transfer (29.2), and a carve-out from
+        29.2 in cases of extreme necessity (29.3). Assess 29.1 only where the Controller transfers Personal
+        Data outside the Kingdom; 29.2 is the substantive conditional duty.'
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:29.1
       assessable: true
       depth: 2
@@ -752,15 +766,13 @@ objects:
       implementation_groups:
       - conditional
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:29.3
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-29
       ref_id: '29.3'
       description: The conditions in paragraph (2) do not apply in cases of extreme necessity to preserve
         the life of the Data Subject or their vital interests, or to prevent, examine or treat an infectious
         disease.
-      implementation_groups:
-      - conditional
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:29.4
       assessable: false
       depth: 2
@@ -782,18 +794,14 @@ objects:
       description: The Competent Authority oversees the implementation of this Law and the Regulations,
         without prejudice to the powers of the Saudi Central Bank.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:30.2
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-30
       ref_id: '30.2'
       description: The Regulations identify the situations where Controllers shall appoint one or more
         Personal Data Protection Officers, and define their responsibilities.
-      annotation: 'Mandatory appointment cases include (per the Implementing Regulations): public entities
-        processing Personal Data at scale; Controllers whose core activities involve regular and systematic
-        large-scale monitoring; and Controllers whose core activities involve the operational processing
-        of Sensitive Data.'
-      implementation_groups:
-      - core
+      annotation: The substantive DPO appointment criteria are not in the PDPL Law itself; they live in
+        the Implementing Regulations. Assess the DPO duty against the IR library, not against this article.
     - urn: urn:intuitem:risk:req_node:pdpl-ksa:30.3
       assessable: true
       depth: 2
