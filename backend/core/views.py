@@ -6013,6 +6013,22 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "respond": "Défense",
             "recover": "Résilience",
         }
+        # Coarse fallback when csf_function is null. Can only reach
+        # Gouvernance / Protection — Défense and Résilience require csf_function.
+        MSS_CATEGORY_FROM_AC_CATEGORY = {
+            "policy": "Gouvernance",
+            "process": "Gouvernance",
+            "procedure": "Gouvernance",
+            "technical": "Protection",
+            "physical": "Protection",
+        }
+
+        def mss_category_for(control):
+            return (
+                MSS_CATEGORY_MAP.get(control.csf_function or "")
+                or MSS_CATEGORY_FROM_AC_CATEGORY.get(control.category or "")
+                or ""
+            )
 
         # Clear the demo row R4 ("Mesure EXEMPLE") so it doesn't get imported.
         # ws.cell(..., value=None) is a no-op in openpyxl; assign via .value.
@@ -6020,19 +6036,17 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             ws.cell(row=4, column=col).value = ""
 
         # Data starts at R7 per the template (R6 is the data header).
+        # Iterating the queryset directly — .iterator() would need chunk_size
+        # because _get_export_queryset() applies prefetch_related.
         row = 7
-        for control in queryset.iterator():
+        for control in queryset:
             ws.cell(row=row, column=1, value=escape_excel_formula(control.name or ""))
             ws.cell(
                 row=row,
                 column=2,
                 value=escape_excel_formula(control.description or ""),
             )
-            ws.cell(
-                row=row,
-                column=3,
-                value=MSS_CATEGORY_MAP.get(control.csf_function or "", ""),
-            )
+            ws.cell(row=row, column=3, value=mss_category_for(control))
             row += 1
 
         # Extend the Catégorie dropdown if we wrote past the pre-validated range.

@@ -438,7 +438,7 @@
 	"exportTableEcosystem": "Ecosystem map",
 	"exportTableEcosystemDesc": "Stakeholders and entities with their relations",
 	"exportTableMss": "MonServiceSécurisé template",
-	"exportTableMssDesc": "ANSSI MSS-ready workbook; csf_function maps to Catégorie",
+	"exportTableMssDesc": "Pre-filled template for ANSSI's MonServiceSécurisé portal",
 	"treatmentProgressOverview": "Treatment progress overview",
 	"pendingMeasures": "Your pending applied controls",
 	"orderdByRankingScore": "Over the next 30 days and ordered by ranking score",

@@ -424,7 +424,7 @@
 	"exportTableEcosystem": "Carte de l'écosystème",
 	"exportTableEcosystemDesc": "Parties prenantes et entités avec leurs relations",
 	"exportTableMss": "Modèle MonServiceSécurisé",
-	"exportTableMssDesc": "Classeur prêt pour MSS de l'ANSSI ; csf_function alimente la Catégorie",
+	"exportTableMssDesc": "Modèle pré-rempli pour le portail MonServiceSécurisé de l'ANSSI",
 	"treatmentProgressOverview": "Vue d'ensemble de l'avancement du traitement",
 	"pendingMeasures": "Vos mesures en attente",
 	"orderdByRankingScore": "Au cours des 30 prochains jours et classés par score de classement",
