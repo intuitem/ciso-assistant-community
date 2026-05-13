@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -107,6 +108,29 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
     serializers_module = "integrations.serializers"
 
     filterset_fields = ["provider", "provider__name", "provider__provider_type"]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValidationError as exc:
+            logger.warning(
+                "IntegrationConfiguration create rejected",
+                errors=exc.detail,
+                provider_id=str(request.data.get("provider_id", "")),
+            )
+            raise
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except ValidationError as exc:
+            logger.warning(
+                "IntegrationConfiguration update rejected",
+                errors=exc.detail,
+                config_id=kwargs.get("pk"),
+                provider_id=str(request.data.get("provider_id", "")),
+            )
+            raise
 
     @action(detail=True, methods=["post"], url_path="test-connection")
     def test_connection(self, request, pk=None):
