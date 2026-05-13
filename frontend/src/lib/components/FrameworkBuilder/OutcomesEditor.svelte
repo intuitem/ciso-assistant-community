@@ -44,6 +44,11 @@
 		rules = copy;
 		persist();
 	});
+
+	// Split the hint message around its {trueLiteral} placeholder so we can render
+	// a real <code> element in the middle without resorting to {@html}. The NUL
+	// sentinel is safe because translations are baked at build time.
+	const hintParts = $derived(m.builderOutcomeRulesHint({ trueLiteral: '\x00' }).split('\x00'));
 </script>
 
 <div class="space-y-1.5">
@@ -214,9 +219,8 @@
 	{/if}
 
 	<p class="text-xs text-gray-400">
-		{m.builderOutcomeRulesHint({
-			trueLiteral: '"true"'
-		})}
+		{hintParts[0] ?? ''}<code class="font-mono bg-gray-100 px-1 rounded">"true"</code
+		>{hintParts[1] ?? ''}
 	</p>
 
 	<button
