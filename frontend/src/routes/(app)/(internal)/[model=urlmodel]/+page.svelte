@@ -75,6 +75,15 @@
 				testId: filterSearch ? 'export-option-ecosystem-filtered' : 'export-option-ecosystem-all'
 			});
 		}
+		if (URLModel === 'applied-controls') {
+			opts.push({
+				titleKey: 'exportTableMss',
+				descriptionKey: 'exportTableMssDesc',
+				format: 'XLSX',
+				href: `/applied-controls/export/mss-xlsx/${filterSearch}`,
+				testId: filterSearch ? 'export-option-mss-filtered' : 'export-option-mss-all'
+			});
+		}
 		return opts;
 	}
 

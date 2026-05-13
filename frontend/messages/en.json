@@ -437,6 +437,8 @@
 	"exportTableXlsxDesc": "Formatted columns with widths and headers",
 	"exportTableEcosystem": "Ecosystem map",
 	"exportTableEcosystemDesc": "Stakeholders and entities with their relations",
+	"exportTableMss": "MonServiceSécurisé template",
+	"exportTableMssDesc": "ANSSI MSS-ready workbook; csf_function maps to Catégorie",
 	"treatmentProgressOverview": "Treatment progress overview",
 	"pendingMeasures": "Your pending applied controls",
 	"orderdByRankingScore": "Over the next 30 days and ordered by ranking score",
