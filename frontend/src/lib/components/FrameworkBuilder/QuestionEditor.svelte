@@ -61,6 +61,8 @@
 		const dep = question.depends_on as { question: string; answers: string[] };
 		const src = siblingQuestions.find((q) => q.urn === dep.question);
 		if (!src) return null;
+		// `ref` = the source question's ref_id (or 'Q' placeholder when blank);
+		// `count` = number of answer choices that trigger this dependency.
 		return m.builderShownWhenAnswers({
 			ref: src.ref_id || 'Q',
 			count: dep.answers.length
