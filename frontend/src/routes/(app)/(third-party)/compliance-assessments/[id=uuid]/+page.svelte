@@ -19,9 +19,7 @@
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ExportModal, {
-		type ExportGroup
-	} from '$lib/components/Modals/ExportModal.svelte';
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 
 	import {
 		complianceResultColorMap,

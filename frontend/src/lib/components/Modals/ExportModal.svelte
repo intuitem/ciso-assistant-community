@@ -70,11 +70,11 @@
 			{#each groups as group}
 				{#if group.options.length > 0}
 					<section>
-						<h3
-							class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2"
-						>
-							{safeTranslate(group.titleKey)}
-						</h3>
+						{#if group.titleKey}
+							<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+								{safeTranslate(group.titleKey)}
+							</h3>
+						{/if}
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 							{#each group.options as option}
 								<a
@@ -85,7 +85,11 @@
 									class="group flex flex-col p-3 rounded-container border border-surface-300 bg-white hover:border-primary-500 hover:bg-primary-50/40 hover:shadow-sm transition-colors"
 								>
 									<div class="flex items-center gap-2 mb-1">
-										<i class="fa-solid {FORMAT_ICON[option.format]} {FORMAT_COLOR[option.format]} text-lg"></i>
+										<i
+											class="fa-solid {FORMAT_ICON[option.format]} {FORMAT_COLOR[
+												option.format
+											]} text-lg"
+										></i>
 										<span class="badge preset-tonal-primary text-xs font-semibold">
 											{option.format}
 										</span>
