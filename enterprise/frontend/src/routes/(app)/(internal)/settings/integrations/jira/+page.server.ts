@@ -94,6 +94,10 @@ export const actions: Actions = {
 			setFlash({ type: 'error', message: 'Failed to save Jira integration config' }, event);
 			return fail(400, { form: form });
 		}
+		// Backfill the saved row's id so the form switches to PATCH mode on subsequent
+		// saves without waiting for the invalidateAll-triggered reload to settle.
+		const saved = await response.json();
+		form.data.id = saved.id;
 		setFlash({ type: 'success', message: 'Successfully saved Jira integration config' }, event);
 		return { form };
 	}
