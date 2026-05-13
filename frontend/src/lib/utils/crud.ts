@@ -2256,8 +2256,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'assets', urlModel: 'assets' },
-			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
 		detailViewFields: [
 			{ field: 'task_template' },
@@ -2277,8 +2276,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'scheduled_date' },
 			{ field: 'due_date' },
 			{ field: 'status' },
-			{ field: 'observation' },
-			{ field: 'filtering_labels' }
+			{ field: 'observation' }
 		]
 	},
 	campaigns: {
