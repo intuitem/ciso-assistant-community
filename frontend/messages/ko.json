@@ -3936,14 +3936,68 @@
 	"builderPublishing": "게시 중...",
 	"builderPublishModalTitle": "초안을 라이브에 게시",
 	"builderPublishModalDescription": "이 작업은 라이브 프레임워크를 업데이트합니다. 아래 변경 사항을 검토하세요.",
-	"builderRequirementAdded": "{count}개의 요구사항이 추가됨",
-	"builderQuestionsAddedSuffix": "{count}개의 질문",
-	"builderRequirementRemoved": "{count}개의 요구사항이 제거됨",
-	"builderQuestionsRemovedSuffix": "{count}개의 질문",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 요구사항이 추가됨",
+				"countPlural=other": "{count}개의 요구사항이 추가됨"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 질문",
+				"countPlural=other": "{count}개의 질문"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 요구사항이 제거됨",
+				"countPlural=other": "{count}개의 요구사항이 제거됨"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 질문",
+				"countPlural=other": "{count}개의 질문"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "구조적 변경이 감지되지 않았습니다 (메타데이터만 해당).",
-	"builderBreakingChangesDetected": "{count}개의 호환성 깨는 변경이 감지됨",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 호환성 깨는 변경이 감지됨",
+				"countPlural=other": "{count}개의 호환성 깨는 변경이 감지됨"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "이러한 변경은 기존 감사의 점수, 가시성 또는 컴플라이언스 결과에 영향을 미칠 수 있습니다.",
-	"builderAffectedAudits": "{count}개의 기존 감사가 영향을 받습니다",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 기존 감사가 영향을 받습니다",
+				"countPlural=other": "{count}개의 기존 감사가 영향을 받습니다"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "이러한 감사에 새 요구사항이 추가됩니다.",
 	"builderAffectedAuditsRemovedHint": "제거된 요구사항과 평가 데이터가 이러한 감사에서 삭제됩니다.",
 	"builderCouldNotLoadPreview": "영향 미리보기를 불러올 수 없습니다. 신중하게 진행하세요.",
@@ -3973,15 +4027,42 @@
 	"builderTranslateQuestion": "질문 번역...",
 	"builderFrameworkSettings": "프레임워크 설정",
 	"builderNoRulesOrGroupsConfigured": "구성된 규칙 또는 그룹이 없습니다",
-	"builderOutcomeRuleSummary": "{count}개의 결과 규칙",
-	"builderImplementationGroupsSummaryShort": "{count}개의 그룹",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 결과 규칙",
+				"countPlural=other": "{count}개의 결과 규칙"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 그룹",
+				"countPlural=other": "{count}개의 그룹"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN 네임스페이스",
 	"builderUrnNamespaceHint": "URN 접두사의 조직 (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "최초 게시 후 잠김.",
 	"builderScoringSettings": "채점 설정",
 	"builderAggregationHint": "평균은 총점을 질문 수로 나눕니다. 합계는 모든 점수를 직접 더합니다. 이진(0/1) 채점에는 합계를 사용하세요.",
 	"builderScoreScale": "점수 척도",
-	"builderScaleLevel": "{count}개의 단계",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 단계",
+				"countPlural=other": "{count}개의 단계"
+			}
+		}
+	],
 	"builderAddScaleLevel": "척도 단계 추가",
 	"builderScaleNamePlaceholder": "예: 부분",
 	"builderScaleDescriptionPlaceholder": "선택 사항",
@@ -4059,10 +4140,26 @@
 	"builderDefaultMode": "기본",
 	"builderSplashMode": "시작 화면",
 	"builderAssessableLeaf": "평가 가능한 리프",
-	"builderAssessableWithChild": "평가 가능 · 하위 {count}개",
-	"builderAssessableWithChildren": "평가 가능 · 하위 {count}개",
-	"builderGroupWithChild": "그룹 · 하위 {count}개",
-	"builderGroupWithChildren": "그룹 · 하위 {count}개",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "평가 가능 · 하위 {count}개",
+				"countPlural=other": "평가 가능 · 하위 {count}개"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "그룹 · 하위 {count}개",
+				"countPlural=other": "그룹 · 하위 {count}개"
+			}
+		}
+	],
 	"builderEmptyNode": "빈 노드",
 	"builderSplashScreenStatus": "시작 화면",
 	"builderNestedUnder": "{parent} 아래에 중첩됨",
@@ -4081,8 +4178,16 @@
 	"builderVisibilityExpressionPlaceholder": "예: requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "구현 그룹:",
 	"builderAddQuestion": "질문 추가",
-	"builderChildHidden": "하위 {count}개 숨김",
-	"builderChildrenHidden": "하위 {count}개 숨김",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "하위 {count}개 숨김",
+				"countPlural=other": "하위 {count}개 숨김"
+			}
+		}
+	],
 	"builderSplashSource": "소스",
 	"builderSplashNoSourceContent": "소스 콘텐츠 없음.",
 	"builderSplashEditPlaceholder": "시작 화면의 마크다운 콘텐츠를 작성하세요...",
@@ -4102,7 +4207,16 @@
 	"builderAnnotationOptional": "선택적 메모...",
 	"builderDeleteThisQuestion": "이 질문을 삭제하시겠습니까?",
 	"builderChangeTypeWarning": "유형을 변경하면 기존 선택지가 삭제됩니다. 계속하시겠습니까?",
-	"builderShownWhenAnswers": "{ref} = {count}개 답변일 때 표시됨",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{ref} = {count}개 답변일 때 표시됨",
+				"countPlural=other": "{ref} = {count}개 답변일 때 표시됨"
+			}
+		}
+	],
 	"builderChoices": "선택지",
 	"builderAddChoice": "선택지 추가",
 	"builderChoicePlaceholder": "선택지 텍스트...",

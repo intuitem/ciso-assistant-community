@@ -91,12 +91,8 @@
 		const parts: string[] = [];
 		const rules = ($frameworkStore.outcomes_definition ?? []).length;
 		const groups = ($frameworkStore.implementation_groups_definition ?? []).length;
-		if (rules > 0)
-			parts.push(m.builderOutcomeRuleSummary({ count: rules, s: rules > 1 ? 's' : '' }));
-		if (groups > 0)
-			parts.push(
-				m.builderImplementationGroupsSummaryShort({ count: groups, s: groups > 1 ? 's' : '' })
-			);
+		if (rules > 0) parts.push(m.builderOutcomeRuleSummary({ count: rules }));
+		if (groups > 0) parts.push(m.builderImplementationGroupsSummaryShort({ count: groups }));
 		return parts.length > 0 ? parts.join(', ') : m.builderNoRulesOrGroupsConfigured();
 	});
 
@@ -591,8 +587,7 @@
 														: 'fa-chevron-right'} text-[9px]"
 												></i>
 												{m.builderScoreScale()} ({m.builderScaleLevel({
-													count: scaleEntries.length,
-													s: scaleEntries.length === 1 ? '' : 's'
+													count: scaleEntries.length
 												})})
 											</button>
 											{#if showScalesEditor}

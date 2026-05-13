@@ -3759,14 +3759,68 @@
 	"builderPublishing": "Objavljivanje...",
 	"builderPublishModalTitle": "Objavi nacrt u produkciju",
 	"builderPublishModalDescription": "Ova akcija ažurirat će produkcijski okvir. Pregledajte promjene u nastavku.",
-	"builderRequirementAdded": "{count} zahtjeva dodano",
-	"builderQuestionsAddedSuffix": "{count} pitanja",
-	"builderRequirementRemoved": "{count} zahtjeva uklonjeno",
-	"builderQuestionsRemovedSuffix": "{count} pitanja",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} zahtjeva dodano",
+				"countPlural=other": "{count} zahtjeva dodano"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pitanja",
+				"countPlural=other": "{count} pitanja"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} zahtjeva uklonjeno",
+				"countPlural=other": "{count} zahtjeva uklonjeno"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pitanja",
+				"countPlural=other": "{count} pitanja"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Nije otkrivena strukturna promjena (samo metapodaci).",
-	"builderBreakingChangesDetected": "{count} nekompatibilnih promjena otkriveno",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nekompatibilnih promjena otkriveno",
+				"countPlural=other": "{count} nekompatibilnih promjena otkriveno"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Ove promjene mogu utjecati na bodovanje, vidljivost ili rezultate usklađenosti u postojećim revizijama.",
-	"builderAffectedAudits": "{count} postojećih revizija bit će pogođeno",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} postojećih revizija bit će pogođeno",
+				"countPlural=other": "{count} postojećih revizija bit će pogođeno"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Novi zahtjevi bit će dodani u te revizije.",
 	"builderAffectedAuditsRemovedHint": "Uklonjeni zahtjevi i njihovi podaci procjene bit će izbrisani iz tih revizija.",
 	"builderCouldNotLoadPreview": "Nije moguće učitati pregled utjecaja. Postupajte s oprezom.",
@@ -3796,15 +3850,42 @@
 	"builderTranslateQuestion": "Prevedi pitanje...",
 	"builderFrameworkSettings": "Postavke okvira",
 	"builderNoRulesOrGroupsConfigured": "Nema konfiguriranih pravila ni grupa",
-	"builderOutcomeRuleSummary": "{count} pravila ishoda",
-	"builderImplementationGroupsSummaryShort": "{count} grupa",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pravila ishoda",
+				"countPlural=other": "{count} pravila ishoda"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupa",
+				"countPlural=other": "{count} grupa"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN imenski prostor",
 	"builderUrnNamespaceHint": "Organizacija u URN prefiksu (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Zaključano nakon prve objave.",
 	"builderScoringSettings": "Postavke bodovanja",
 	"builderAggregationHint": "Prosjek dijeli ukupni rezultat brojem pitanja. Suma izravno zbraja sve rezultate. Koristite Sumu za binarno bodovanje (0/1).",
 	"builderScoreScale": "Skala bodovanja",
-	"builderScaleLevel": "{count} razina",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} razina",
+				"countPlural=other": "{count} razina"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Dodaj razinu skale",
 	"builderScaleNamePlaceholder": "npr. Djelomično",
 	"builderScaleDescriptionPlaceholder": "Neobavezno",
@@ -3882,10 +3963,26 @@
 	"builderDefaultMode": "Zadano",
 	"builderSplashMode": "Uvodno",
 	"builderAssessableLeaf": "Procjenjivi list",
-	"builderAssessableWithChild": "Procjenjivo · {count} podčvor",
-	"builderAssessableWithChildren": "Procjenjivo · {count} podčvorova",
-	"builderGroupWithChild": "Grupa · {count} podčvor",
-	"builderGroupWithChildren": "Grupa · {count} podčvorova",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Procjenjivo · {count} podčvor",
+				"countPlural=other": "Procjenjivo · {count} podčvorova"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grupa · {count} podčvor",
+				"countPlural=other": "Grupa · {count} podčvorova"
+			}
+		}
+	],
 	"builderEmptyNode": "Prazan čvor",
 	"builderSplashScreenStatus": "Uvodni zaslon",
 	"builderNestedUnder": "ugniježđeno pod {parent}",
@@ -3904,8 +4001,16 @@
 	"builderVisibilityExpressionPlaceholder": "npr. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Implementacijske grupe:",
 	"builderAddQuestion": "Dodaj pitanje",
-	"builderChildHidden": "{count} podčvor skriven",
-	"builderChildrenHidden": "{count} podčvorova skriveno",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} podčvor skriven",
+				"countPlural=other": "{count} podčvorova skriveno"
+			}
+		}
+	],
 	"builderSplashSource": "Izvor",
 	"builderSplashNoSourceContent": "Nema izvornog sadržaja.",
 	"builderSplashEditPlaceholder": "Unesite markdown sadržaj za uvodni zaslon...",
@@ -3925,7 +4030,16 @@
 	"builderAnnotationOptional": "Neobavezna napomena...",
 	"builderDeleteThisQuestion": "Izbrisati ovo pitanje?",
 	"builderChangeTypeWarning": "Promjena tipa izbrisat će postojeće odabire. Nastaviti?",
-	"builderShownWhenAnswers": "Prikazano kada {ref} = {count} odgovora",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Prikazano kada {ref} = {count} odgovora",
+				"countPlural=other": "Prikazano kada {ref} = {count} odgovora"
+			}
+		}
+	],
 	"builderChoices": "Odabiri",
 	"builderAddChoice": "Dodaj odabir",
 	"builderChoicePlaceholder": "Tekst odabira...",

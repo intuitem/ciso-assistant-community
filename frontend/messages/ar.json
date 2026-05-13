@@ -1241,14 +1241,68 @@
 	"builderPublishing": "جارٍ النشر...",
 	"builderPublishModalTitle": "نشر المسودة إلى النشر",
 	"builderPublishModalDescription": "ستحدّث هذه العملية الإطار النشط. راجع التعديلات أدناه.",
-	"builderRequirementAdded": "تم إضافة {count} متطلبات",
-	"builderQuestionsAddedSuffix": "{count} أسئلة",
-	"builderRequirementRemoved": "تم حذف {count} متطلبات",
-	"builderQuestionsRemovedSuffix": "{count} أسئلة",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "تم إضافة {count} متطلبات",
+				"countPlural=other": "تم إضافة {count} متطلبات"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} أسئلة",
+				"countPlural=other": "{count} أسئلة"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "تم حذف {count} متطلبات",
+				"countPlural=other": "تم حذف {count} متطلبات"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} أسئلة",
+				"countPlural=other": "{count} أسئلة"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "لم يتم اكتشاف تغييرات هيكلية (بيانات وصفية فقط).",
-	"builderBreakingChangesDetected": "تم اكتشاف {count} تغييرات جذرية",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "تم اكتشاف {count} تغييرات جذرية",
+				"countPlural=other": "تم اكتشاف {count} تغييرات جذرية"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "قد تؤثر هذه التعديلات على التسجيل أو الرؤية أو نتائج الامتثال في التدقيقات الموجودة.",
-	"builderAffectedAudits": "سيتأثر {count} تدقيقات موجودة",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "سيتأثر {count} تدقيقات موجودة",
+				"countPlural=other": "سيتأثر {count} تدقيقات موجودة"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "ستتم إضافة المتطلبات الجديدة إلى هذه التدقيقات.",
 	"builderAffectedAuditsRemovedHint": "ستُحذف المتطلبات المُزالة وبياناتها التقييمية من هذه التدقيقات.",
 	"builderCouldNotLoadPreview": "تعذر تحميل معاينة الأثر. تابع بحذر.",
@@ -1278,15 +1332,42 @@
 	"builderTranslateQuestion": "ترجمة السؤال...",
 	"builderFrameworkSettings": "إعدادات الإطار",
 	"builderNoRulesOrGroupsConfigured": "لم يتم تكوين أي قواعد أو مجموعات",
-	"builderOutcomeRuleSummary": "{count} قواعد نتائج",
-	"builderImplementationGroupsSummaryShort": "{count} مجموعات",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} قواعد نتائج",
+				"countPlural=other": "{count} قواعد نتائج"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} مجموعات",
+				"countPlural=other": "{count} مجموعات"
+			}
+		}
+	],
 	"builderUrnNamespace": "مساحة اسم URN",
 	"builderUrnNamespaceHint": "المنظمة في بادئة URN (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "مقفل بعد أول نشر.",
 	"builderScoringSettings": "إعدادات التسجيل",
 	"builderAggregationHint": "المتوسط يقسم النتيجة الإجمالية على عدد الأسئلة. المجموع يجمع كل النتائج مباشرة. استخدم المجموع للتسجيل الثنائي (0/1).",
 	"builderScoreScale": "مقياس الدرجات",
-	"builderScaleLevel": "{count} مستويات",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} مستويات",
+				"countPlural=other": "{count} مستويات"
+			}
+		}
+	],
 	"builderAddScaleLevel": "إضافة مستوى",
 	"builderScaleNamePlaceholder": "مثال: جزئي",
 	"builderScaleDescriptionPlaceholder": "اختياري",
@@ -1364,10 +1445,26 @@
 	"builderDefaultMode": "افتراضي",
 	"builderSplashMode": "افتتاحي",
 	"builderAssessableLeaf": "ورقة قابلة للتقييم",
-	"builderAssessableWithChild": "قابل للتقييم · {count} عنصر فرعي",
-	"builderAssessableWithChildren": "قابل للتقييم · {count} عناصر فرعية",
-	"builderGroupWithChild": "مجموعة · {count} عنصر فرعي",
-	"builderGroupWithChildren": "مجموعة · {count} عناصر فرعية",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "قابل للتقييم · {count} عنصر فرعي",
+				"countPlural=other": "قابل للتقييم · {count} عناصر فرعية"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "مجموعة · {count} عنصر فرعي",
+				"countPlural=other": "مجموعة · {count} عناصر فرعية"
+			}
+		}
+	],
 	"builderEmptyNode": "عقدة فارغة",
 	"builderSplashScreenStatus": "شاشة افتتاحية",
 	"builderNestedUnder": "متداخل تحت {parent}",
@@ -1386,8 +1483,16 @@
 	"builderVisibilityExpressionPlaceholder": "مثال: requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "مجموعات التنفيذ:",
 	"builderAddQuestion": "إضافة سؤال",
-	"builderChildHidden": "{count} عنصر فرعي مخفي",
-	"builderChildrenHidden": "{count} عناصر فرعية مخفية",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} عنصر فرعي مخفي",
+				"countPlural=other": "{count} عناصر فرعية مخفية"
+			}
+		}
+	],
 	"builderSplashSource": "المصدر",
 	"builderSplashNoSourceContent": "لا يوجد محتوى مصدر.",
 	"builderSplashEditPlaceholder": "اكتب محتوى Markdown لشاشتك الافتتاحية...",
@@ -1407,7 +1512,16 @@
 	"builderAnnotationOptional": "ملاحظة اختيارية...",
 	"builderDeleteThisQuestion": "حذف هذا السؤال؟",
 	"builderChangeTypeWarning": "سيؤدي تغيير النوع إلى حذف الخيارات الموجودة. هل تريد المتابعة؟",
-	"builderShownWhenAnswers": "يظهر عندما {ref} = {count} إجابات",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "يظهر عندما {ref} = {count} إجابات",
+				"countPlural=other": "يظهر عندما {ref} = {count} إجابات"
+			}
+		}
+	],
 	"builderChoices": "الخيارات",
 	"builderAddChoice": "إضافة خيار",
 	"builderChoicePlaceholder": "نص الخيار...",

@@ -1215,14 +1215,68 @@
 	"builderPublishing": "प्रकाशित किया जा रहा है...",
 	"builderPublishModalTitle": "ड्राफ्ट को लाइव पर प्रकाशित करें",
 	"builderPublishModalDescription": "यह लाइव फ्रेमवर्क को अपडेट करेगा। नीचे दिए गए परिवर्तनों की समीक्षा करें।",
-	"builderRequirementAdded": "{count} आवश्यकताएँ जोड़ी गईं",
-	"builderQuestionsAddedSuffix": "{count} प्रश्न",
-	"builderRequirementRemoved": "{count} आवश्यकताएँ हटाई गईं",
-	"builderQuestionsRemovedSuffix": "{count} प्रश्न",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} आवश्यकताएँ जोड़ी गईं",
+				"countPlural=other": "{count} आवश्यकताएँ जोड़ी गईं"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} प्रश्न",
+				"countPlural=other": "{count} प्रश्न"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} आवश्यकताएँ हटाई गईं",
+				"countPlural=other": "{count} आवश्यकताएँ हटाई गईं"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} प्रश्न",
+				"countPlural=other": "{count} प्रश्न"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "कोई संरचनात्मक परिवर्तन नहीं मिला (केवल मेटाडेटा)।",
-	"builderBreakingChangesDetected": "{count} ब्रेकिंग परिवर्तन पाए गए",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ब्रेकिंग परिवर्तन पाए गए",
+				"countPlural=other": "{count} ब्रेकिंग परिवर्तन पाए गए"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "ये परिवर्तन मौजूदा ऑडिट में स्कोरिंग, दृश्यता या अनुपालन परिणामों को प्रभावित कर सकते हैं।",
-	"builderAffectedAudits": "{count} मौजूदा ऑडिट प्रभावित होंगे",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} मौजूदा ऑडिट प्रभावित होंगे",
+				"countPlural=other": "{count} मौजूदा ऑडिट प्रभावित होंगे"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "इन ऑडिट में नई आवश्यकताएँ जोड़ी जाएंगी।",
 	"builderAffectedAuditsRemovedHint": "हटाई गई आवश्यकताएँ और उनका मूल्यांकन डेटा इन ऑडिट से हटा दिया जाएगा।",
 	"builderCouldNotLoadPreview": "प्रभाव पूर्वावलोकन लोड नहीं हो सका। सावधानी से आगे बढ़ें।",
@@ -1252,15 +1306,42 @@
 	"builderTranslateQuestion": "प्रश्न का अनुवाद करें...",
 	"builderFrameworkSettings": "फ्रेमवर्क सेटिंग्स",
 	"builderNoRulesOrGroupsConfigured": "कोई नियम या समूह कॉन्फ़िगर नहीं किए गए",
-	"builderOutcomeRuleSummary": "{count} परिणाम नियम",
-	"builderImplementationGroupsSummaryShort": "{count} समूह",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} परिणाम नियम",
+				"countPlural=other": "{count} परिणाम नियम"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} समूह",
+				"countPlural=other": "{count} समूह"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN नेमस्पेस",
 	"builderUrnNamespaceHint": "URN उपसर्ग में संगठन (urn:{namespace}:risk:...)।",
 	"builderUrnNamespaceLocked": "पहले प्रकाशन के बाद लॉक।",
 	"builderScoringSettings": "स्कोरिंग सेटिंग्स",
 	"builderAggregationHint": "औसत कुल स्कोर को प्रश्नों की संख्या से विभाजित करता है। योग सभी स्कोर सीधे जोड़ता है। बाइनरी (0/1) स्कोरिंग के लिए योग का उपयोग करें।",
 	"builderScoreScale": "स्कोर पैमाना",
-	"builderScaleLevel": "{count} स्तर",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} स्तर",
+				"countPlural=other": "{count} स्तर"
+			}
+		}
+	],
 	"builderAddScaleLevel": "पैमाने का स्तर जोड़ें",
 	"builderScaleNamePlaceholder": "जैसे आंशिक",
 	"builderScaleDescriptionPlaceholder": "वैकल्पिक",
@@ -1338,10 +1419,26 @@
 	"builderDefaultMode": "डिफ़ॉल्ट",
 	"builderSplashMode": "स्प्लैश",
 	"builderAssessableLeaf": "मूल्यांकन योग्य लीफ",
-	"builderAssessableWithChild": "मूल्यांकन योग्य · {count} चाइल्ड",
-	"builderAssessableWithChildren": "मूल्यांकन योग्य · {count} चाइल्ड",
-	"builderGroupWithChild": "समूह · {count} चाइल्ड",
-	"builderGroupWithChildren": "समूह · {count} चाइल्ड",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "मूल्यांकन योग्य · {count} चाइल्ड",
+				"countPlural=other": "मूल्यांकन योग्य · {count} चाइल्ड"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "समूह · {count} चाइल्ड",
+				"countPlural=other": "समूह · {count} चाइल्ड"
+			}
+		}
+	],
 	"builderEmptyNode": "खाली नोड",
 	"builderSplashScreenStatus": "स्प्लैश स्क्रीन",
 	"builderNestedUnder": "{parent} के अंतर्गत नेस्टेड",
@@ -1360,8 +1457,16 @@
 	"builderVisibilityExpressionPlaceholder": "जैसे requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "कार्यान्वयन समूह:",
 	"builderAddQuestion": "प्रश्न जोड़ें",
-	"builderChildHidden": "{count} चाइल्ड छिपा हुआ",
-	"builderChildrenHidden": "{count} चाइल्ड छिपे हुए",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} चाइल्ड छिपा हुआ",
+				"countPlural=other": "{count} चाइल्ड छिपे हुए"
+			}
+		}
+	],
 	"builderSplashSource": "स्रोत",
 	"builderSplashNoSourceContent": "कोई स्रोत सामग्री नहीं।",
 	"builderSplashEditPlaceholder": "अपनी स्प्लैश स्क्रीन के लिए मार्कडाउन सामग्री लिखें...",
@@ -1381,7 +1486,16 @@
 	"builderAnnotationOptional": "वैकल्पिक नोट...",
 	"builderDeleteThisQuestion": "इस प्रश्न को हटाएँ?",
 	"builderChangeTypeWarning": "प्रकार बदलने से मौजूदा विकल्प हट जाएंगे। जारी रखें?",
-	"builderShownWhenAnswers": "जब {ref} = {count} उत्तर हो तब दिखाया गया",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "जब {ref} = {count} उत्तर हो तब दिखाया गया",
+				"countPlural=other": "जब {ref} = {count} उत्तर हो तब दिखाया गया"
+			}
+		}
+	],
 	"builderChoices": "विकल्प",
 	"builderAddChoice": "विकल्प जोड़ें",
 	"builderChoicePlaceholder": "विकल्प पाठ...",

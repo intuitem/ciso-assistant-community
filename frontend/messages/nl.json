@@ -3144,14 +3144,68 @@
 	"builderPublishing": "Publiceren...",
 	"builderPublishModalTitle": "Concept publiceren naar live",
 	"builderPublishModalDescription": "Hiermee wordt het live kader bijgewerkt. Bekijk de wijzigingen hieronder.",
-	"builderRequirementAdded": "{count} vereisten toegevoegd",
-	"builderQuestionsAddedSuffix": "{count} vragen",
-	"builderRequirementRemoved": "{count} vereisten verwijderd",
-	"builderQuestionsRemovedSuffix": "{count} vragen",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vereisten toegevoegd",
+				"countPlural=other": "{count} vereisten toegevoegd"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vragen",
+				"countPlural=other": "{count} vragen"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vereisten verwijderd",
+				"countPlural=other": "{count} vereisten verwijderd"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vragen",
+				"countPlural=other": "{count} vragen"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Geen structurele wijzigingen gedetecteerd (alleen metadata).",
-	"builderBreakingChangesDetected": "{count} ingrijpende wijzigingen gedetecteerd",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ingrijpende wijzigingen gedetecteerd",
+				"countPlural=other": "{count} ingrijpende wijzigingen gedetecteerd"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Deze wijzigingen kunnen invloed hebben op de scoring, zichtbaarheid of nalevingsresultaten in bestaande audits.",
-	"builderAffectedAudits": "{count} bestaande audits worden beïnvloed",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} bestaande audits worden beïnvloed",
+				"countPlural=other": "{count} bestaande audits worden beïnvloed"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Nieuwe vereisten worden aan deze audits toegevoegd.",
 	"builderAffectedAuditsRemovedHint": "Verwijderde vereisten en hun beoordelingsgegevens worden uit deze audits verwijderd.",
 	"builderCouldNotLoadPreview": "Kon impactvoorbeeld niet laden. Ga voorzichtig te werk.",
@@ -3181,15 +3235,42 @@
 	"builderTranslateQuestion": "Vraag vertalen...",
 	"builderFrameworkSettings": "Kaderinstellingen",
 	"builderNoRulesOrGroupsConfigured": "Geen regels of groepen geconfigureerd",
-	"builderOutcomeRuleSummary": "{count} uitkomstregels",
-	"builderImplementationGroupsSummaryShort": "{count} groepen",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} uitkomstregels",
+				"countPlural=other": "{count} uitkomstregels"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} groepen",
+				"countPlural=other": "{count} groepen"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN-naamruimte",
 	"builderUrnNamespaceHint": "Organisatie in het URN-voorvoegsel (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Vergrendeld na de eerste publicatie.",
 	"builderScoringSettings": "Scoring-instellingen",
 	"builderAggregationHint": "Gemiddelde deelt de totale score door het aantal vragen. Som telt alle scores direct op. Gebruik Som voor binaire scoring (0/1).",
 	"builderScoreScale": "Scoreschaal",
-	"builderScaleLevel": "{count} niveaus",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} niveaus",
+				"countPlural=other": "{count} niveaus"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Niveau toevoegen",
 	"builderScaleNamePlaceholder": "bijv. Gedeeltelijk",
 	"builderScaleDescriptionPlaceholder": "Optioneel",
@@ -3267,10 +3348,26 @@
 	"builderDefaultMode": "Standaard",
 	"builderSplashMode": "Intro",
 	"builderAssessableLeaf": "Beoordeelbaar blad",
-	"builderAssessableWithChild": "Beoordeelbaar · {count} kind",
-	"builderAssessableWithChildren": "Beoordeelbaar · {count} kinderen",
-	"builderGroupWithChild": "Groep · {count} kind",
-	"builderGroupWithChildren": "Groep · {count} kinderen",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Beoordeelbaar · {count} kind",
+				"countPlural=other": "Beoordeelbaar · {count} kinderen"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Groep · {count} kind",
+				"countPlural=other": "Groep · {count} kinderen"
+			}
+		}
+	],
 	"builderEmptyNode": "Lege node",
 	"builderSplashScreenStatus": "Introscherm",
 	"builderNestedUnder": "genest onder {parent}",
@@ -3289,8 +3386,16 @@
 	"builderVisibilityExpressionPlaceholder": "bijv. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Implementatiegroepen:",
 	"builderAddQuestion": "Vraag toevoegen",
-	"builderChildHidden": "{count} kind verborgen",
-	"builderChildrenHidden": "{count} kinderen verborgen",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kind verborgen",
+				"countPlural=other": "{count} kinderen verborgen"
+			}
+		}
+	],
 	"builderSplashSource": "Bron",
 	"builderSplashNoSourceContent": "Geen broninhoud.",
 	"builderSplashEditPlaceholder": "Schrijf markdown-inhoud voor je introscherm...",
@@ -3310,7 +3415,16 @@
 	"builderAnnotationOptional": "Optionele notitie...",
 	"builderDeleteThisQuestion": "Deze vraag verwijderen?",
 	"builderChangeTypeWarning": "Het type wijzigen verwijdert bestaande keuzes. Doorgaan?",
-	"builderShownWhenAnswers": "Getoond wanneer {ref} = {count} antwoorden",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Getoond wanneer {ref} = {count} antwoorden",
+				"countPlural=other": "Getoond wanneer {ref} = {count} antwoorden"
+			}
+		}
+	],
 	"builderChoices": "Keuzes",
 	"builderAddChoice": "Keuze toevoegen",
 	"builderChoicePlaceholder": "Keuzetekst...",

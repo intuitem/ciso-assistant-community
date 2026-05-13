@@ -101,15 +101,11 @@
 		if (node.node.display_mode === 'splash') return m.builderSplashScreenStatus();
 		const childCount = node.children.length;
 		if (node.node.assessable && childCount > 0) {
-			return childCount === 1
-				? m.builderAssessableWithChild({ count: childCount })
-				: m.builderAssessableWithChildren({ count: childCount });
+			return m.builderAssessableWithChildren({ count: childCount });
 		}
 		if (node.node.assessable) return m.builderAssessableLeaf();
 		if (childCount > 0) {
-			return childCount === 1
-				? m.builderGroupWithChild({ count: childCount })
-				: m.builderGroupWithChildren({ count: childCount });
+			return m.builderGroupWithChildren({ count: childCount });
 		}
 		return m.builderEmptyNode();
 	});
@@ -980,9 +976,7 @@
 	{/if}
 	{#if node.children.length > 0 && collapsed}
 		<div class="ml-4 mt-1 text-[10px] text-gray-400 italic">
-			{node.children.length === 1
-				? m.builderChildHidden({ count: node.children.length })
-				: m.builderChildrenHidden({ count: node.children.length })}
+			{m.builderChildrenHidden({ count: node.children.length })}
 		</div>
 	{/if}
 </div>

@@ -1944,14 +1944,68 @@
 	"builderPublishing": "Δημοσίευση...",
 	"builderPublishModalTitle": "Δημοσίευση προσχεδίου σε ενεργό",
 	"builderPublishModalDescription": "Αυτή η ενέργεια θα ενημερώσει το ενεργό πλαίσιο. Ελέγξτε τις αλλαγές παρακάτω.",
-	"builderRequirementAdded": "{count} απαιτήσεις προστέθηκαν",
-	"builderQuestionsAddedSuffix": "{count} ερωτήσεις",
-	"builderRequirementRemoved": "{count} απαιτήσεις αφαιρέθηκαν",
-	"builderQuestionsRemovedSuffix": "{count} ερωτήσεις",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} απαιτήσεις προστέθηκαν",
+				"countPlural=other": "{count} απαιτήσεις προστέθηκαν"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ερωτήσεις",
+				"countPlural=other": "{count} ερωτήσεις"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} απαιτήσεις αφαιρέθηκαν",
+				"countPlural=other": "{count} απαιτήσεις αφαιρέθηκαν"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ερωτήσεις",
+				"countPlural=other": "{count} ερωτήσεις"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Δεν εντοπίστηκαν δομικές αλλαγές (μόνο μεταδεδομένα).",
-	"builderBreakingChangesDetected": "Εντοπίστηκαν {count} ασύμβατες αλλαγές",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Εντοπίστηκαν {count} ασύμβατες αλλαγές",
+				"countPlural=other": "Εντοπίστηκαν {count} ασύμβατες αλλαγές"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Αυτές οι αλλαγές μπορεί να επηρεάσουν τη βαθμολόγηση, την ορατότητα ή τα αποτελέσματα συμμόρφωσης σε υπάρχοντες ελέγχους.",
-	"builderAffectedAudits": "{count} υπάρχοντες έλεγχοι θα επηρεαστούν",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} υπάρχοντες έλεγχοι θα επηρεαστούν",
+				"countPlural=other": "{count} υπάρχοντες έλεγχοι θα επηρεαστούν"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Νέες απαιτήσεις θα προστεθούν σε αυτούς τους ελέγχους.",
 	"builderAffectedAuditsRemovedHint": "Οι αφαιρεθείσες απαιτήσεις και τα δεδομένα αξιολόγησής τους θα διαγραφούν από αυτούς τους ελέγχους.",
 	"builderCouldNotLoadPreview": "Δεν ήταν δυνατή η φόρτωση της προεπισκόπησης επιπτώσεων. Προχωρήστε με προσοχή.",
@@ -1981,15 +2035,42 @@
 	"builderTranslateQuestion": "Μετάφραση ερώτησης...",
 	"builderFrameworkSettings": "Ρυθμίσεις πλαισίου",
 	"builderNoRulesOrGroupsConfigured": "Δεν έχουν διαμορφωθεί κανόνες ή ομάδες",
-	"builderOutcomeRuleSummary": "{count} κανόνες αποτελέσματος",
-	"builderImplementationGroupsSummaryShort": "{count} ομάδες",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} κανόνες αποτελέσματος",
+				"countPlural=other": "{count} κανόνες αποτελέσματος"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ομάδες",
+				"countPlural=other": "{count} ομάδες"
+			}
+		}
+	],
 	"builderUrnNamespace": "Χώρος ονομάτων URN",
 	"builderUrnNamespaceHint": "Οργανισμός στο πρόθεμα URN (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Κλειδωμένο μετά την πρώτη δημοσίευση.",
 	"builderScoringSettings": "Ρυθμίσεις βαθμολόγησης",
 	"builderAggregationHint": "Ο μέσος όρος διαιρεί τη συνολική βαθμολογία με τον αριθμό των ερωτήσεων. Το άθροισμα προσθέτει απευθείας όλες τις βαθμολογίες. Χρησιμοποιήστε άθροισμα για δυαδική βαθμολόγηση (0/1).",
 	"builderScoreScale": "Κλίμακα βαθμολογίας",
-	"builderScaleLevel": "{count} επίπεδα",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} επίπεδα",
+				"countPlural=other": "{count} επίπεδα"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Προσθήκη επιπέδου",
 	"builderScaleNamePlaceholder": "π.χ. Μερικό",
 	"builderScaleDescriptionPlaceholder": "Προαιρετικό",
@@ -2067,10 +2148,26 @@
 	"builderDefaultMode": "Προεπιλογή",
 	"builderSplashMode": "Παρουσίαση",
 	"builderAssessableLeaf": "Αξιολογήσιμο φύλλο",
-	"builderAssessableWithChild": "Αξιολογήσιμη · {count} θυγατρικό",
-	"builderAssessableWithChildren": "Αξιολογήσιμη · {count} θυγατρικά",
-	"builderGroupWithChild": "Ομάδα · {count} θυγατρικό",
-	"builderGroupWithChildren": "Ομάδα · {count} θυγατρικά",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Αξιολογήσιμη · {count} θυγατρικό",
+				"countPlural=other": "Αξιολογήσιμη · {count} θυγατρικά"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ομάδα · {count} θυγατρικό",
+				"countPlural=other": "Ομάδα · {count} θυγατρικά"
+			}
+		}
+	],
 	"builderEmptyNode": "Κενός κόμβος",
 	"builderSplashScreenStatus": "Οθόνη παρουσίασης",
 	"builderNestedUnder": "ένθετο κάτω από {parent}",
@@ -2089,8 +2186,16 @@
 	"builderVisibilityExpressionPlaceholder": "π.χ. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Ομάδες υλοποίησης:",
 	"builderAddQuestion": "Προσθήκη ερώτησης",
-	"builderChildHidden": "{count} θυγατρικό κρυφό",
-	"builderChildrenHidden": "{count} θυγατρικά κρυφά",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} θυγατρικό κρυφό",
+				"countPlural=other": "{count} θυγατρικά κρυφά"
+			}
+		}
+	],
 	"builderSplashSource": "Πηγή",
 	"builderSplashNoSourceContent": "Δεν υπάρχει περιεχόμενο πηγής.",
 	"builderSplashEditPlaceholder": "Γράψτε περιεχόμενο markdown για την οθόνη παρουσίασής σας...",
@@ -2110,7 +2215,16 @@
 	"builderAnnotationOptional": "Προαιρετική σημείωση...",
 	"builderDeleteThisQuestion": "Διαγραφή αυτής της ερώτησης;",
 	"builderChangeTypeWarning": "Η αλλαγή τύπου θα διαγράψει τις υπάρχουσες επιλογές. Συνέχεια;",
-	"builderShownWhenAnswers": "Εμφανίζεται όταν {ref} = {count} απαντήσεις",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Εμφανίζεται όταν {ref} = {count} απαντήσεις",
+				"countPlural=other": "Εμφανίζεται όταν {ref} = {count} απαντήσεις"
+			}
+		}
+	],
 	"builderChoices": "Επιλογές",
 	"builderAddChoice": "Προσθήκη επιλογής",
 	"builderChoicePlaceholder": "Κείμενο επιλογής...",

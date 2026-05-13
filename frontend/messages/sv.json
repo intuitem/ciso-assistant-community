@@ -1260,14 +1260,68 @@
 	"builderPublishing": "Publicerar...",
 	"builderPublishModalTitle": "Publicera utkast till live",
 	"builderPublishModalDescription": "Detta uppdaterar live-ramverket. Granska ändringarna nedan.",
-	"builderRequirementAdded": "{count} krav tillagda",
-	"builderQuestionsAddedSuffix": "{count} frågor",
-	"builderRequirementRemoved": "{count} krav borttagna",
-	"builderQuestionsRemovedSuffix": "{count} frågor",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} krav tillagda",
+				"countPlural=other": "{count} krav tillagda"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} frågor",
+				"countPlural=other": "{count} frågor"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} krav borttagna",
+				"countPlural=other": "{count} krav borttagna"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} frågor",
+				"countPlural=other": "{count} frågor"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Inga strukturella ändringar upptäckta (endast metadata).",
-	"builderBreakingChangesDetected": "{count} brytande ändring(ar) upptäckta",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} brytande ändring(ar) upptäckta",
+				"countPlural=other": "{count} brytande ändring(ar) upptäckta"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Dessa ändringar kan påverka poängsättning, synlighet eller efterlevnadsresultat i befintliga revisioner.",
-	"builderAffectedAudits": "{count} befintlig(a) revision(er) kommer att påverkas",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} befintlig(a) revision(er) kommer att påverkas",
+				"countPlural=other": "{count} befintlig(a) revision(er) kommer att påverkas"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Nya krav kommer att läggas till dessa revisioner.",
 	"builderAffectedAuditsRemovedHint": "Borttagna krav och deras bedömningsdata kommer att raderas från dessa revisioner.",
 	"builderCouldNotLoadPreview": "Kunde inte ladda påverkansförhandsgranskningen. Fortsätt med försiktighet.",
@@ -1297,15 +1351,42 @@
 	"builderTranslateQuestion": "Översätt fråga...",
 	"builderFrameworkSettings": "Ramverksinställningar",
 	"builderNoRulesOrGroupsConfigured": "Inga regler eller grupper konfigurerade",
-	"builderOutcomeRuleSummary": "{count} resultatregel/regler",
-	"builderImplementationGroupsSummaryShort": "{count} grupp(er)",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} resultatregel/regler",
+				"countPlural=other": "{count} resultatregel/regler"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupp(er)",
+				"countPlural=other": "{count} grupp(er)"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN-namnrymd",
 	"builderUrnNamespaceHint": "Organisation i URN-prefixet (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Låst efter första publiceringen.",
 	"builderScoringSettings": "Poänginställningar",
 	"builderAggregationHint": "Medelvärde dividerar totalpoängen med antalet frågor. Summa adderar alla poäng direkt. Använd Summa för binär poängsättning (0/1).",
 	"builderScoreScale": "Poängskala",
-	"builderScaleLevel": "{count} nivå(er)",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nivå(er)",
+				"countPlural=other": "{count} nivå(er)"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Lägg till nivå",
 	"builderScaleNamePlaceholder": "t.ex. Delvis",
 	"builderScaleDescriptionPlaceholder": "Valfritt",
@@ -1383,10 +1464,26 @@
 	"builderDefaultMode": "Standard",
 	"builderSplashMode": "Presentation",
 	"builderAssessableLeaf": "Bedömningsbart blad",
-	"builderAssessableWithChild": "Bedömningsbar · {count} underordnad",
-	"builderAssessableWithChildren": "Bedömningsbar · {count} underordnade",
-	"builderGroupWithChild": "Grupp · {count} underordnad",
-	"builderGroupWithChildren": "Grupp · {count} underordnade",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Bedömningsbar · {count} underordnad",
+				"countPlural=other": "Bedömningsbar · {count} underordnade"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grupp · {count} underordnad",
+				"countPlural=other": "Grupp · {count} underordnade"
+			}
+		}
+	],
 	"builderEmptyNode": "Tom nod",
 	"builderSplashScreenStatus": "Välkomstskärm",
 	"builderNestedUnder": "nästlad under {parent}",
@@ -1405,8 +1502,16 @@
 	"builderVisibilityExpressionPlaceholder": "t.ex. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Implementeringsgrupper:",
 	"builderAddQuestion": "Lägg till fråga",
-	"builderChildHidden": "{count} underordnad dold",
-	"builderChildrenHidden": "{count} underordnade dolda",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} underordnad dold",
+				"countPlural=other": "{count} underordnade dolda"
+			}
+		}
+	],
 	"builderSplashSource": "Källa",
 	"builderSplashNoSourceContent": "Inget källinnehåll.",
 	"builderSplashEditPlaceholder": "Skriv markdown-innehåll för din välkomstskärm...",
@@ -1426,7 +1531,16 @@
 	"builderAnnotationOptional": "Valfri anteckning...",
 	"builderDeleteThisQuestion": "Radera denna fråga?",
 	"builderChangeTypeWarning": "Att ändra typ raderar befintliga val. Fortsätta?",
-	"builderShownWhenAnswers": "Visas när {ref} = {count} svar",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Visas när {ref} = {count} svar",
+				"countPlural=other": "Visas när {ref} = {count} svar"
+			}
+		}
+	],
 	"builderChoices": "Val",
 	"builderAddChoice": "Lägg till val",
 	"builderChoicePlaceholder": "Valtext...",

@@ -1998,14 +1998,68 @@
 	"builderPublishing": "Yayınlanıyor...",
 	"builderPublishModalTitle": "Taslağı yayına al",
 	"builderPublishModalDescription": "Bu işlem yayındaki çerçeveyi güncelleyecek. Aşağıdaki değişiklikleri inceleyin.",
-	"builderRequirementAdded": "{count} gereksinim eklendi",
-	"builderQuestionsAddedSuffix": "{count} soru",
-	"builderRequirementRemoved": "{count} gereksinim kaldırıldı",
-	"builderQuestionsRemovedSuffix": "{count} soru",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gereksinim eklendi",
+				"countPlural=other": "{count} gereksinim eklendi"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} soru",
+				"countPlural=other": "{count} soru"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gereksinim kaldırıldı",
+				"countPlural=other": "{count} gereksinim kaldırıldı"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} soru",
+				"countPlural=other": "{count} soru"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Yapısal değişiklik algılanmadı (yalnızca üst veri).",
-	"builderBreakingChangesDetected": "{count} kırıcı değişiklik algılandı",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kırıcı değişiklik algılandı",
+				"countPlural=other": "{count} kırıcı değişiklik algılandı"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Bu değişiklikler mevcut denetimlerdeki puanlamayı, görünürlüğü veya uyumluluk sonuçlarını etkileyebilir.",
-	"builderAffectedAudits": "{count} mevcut denetim etkilenecek",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} mevcut denetim etkilenecek",
+				"countPlural=other": "{count} mevcut denetim etkilenecek"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Bu denetimlere yeni gereksinimler eklenecek.",
 	"builderAffectedAuditsRemovedHint": "Kaldırılan gereksinimler ve değerlendirme verileri bu denetimlerden silinecek.",
 	"builderCouldNotLoadPreview": "Etki önizlemesi yüklenemedi. Dikkatli ilerleyin.",
@@ -2035,15 +2089,42 @@
 	"builderTranslateQuestion": "Soruyu çevir...",
 	"builderFrameworkSettings": "Çerçeve Ayarları",
 	"builderNoRulesOrGroupsConfigured": "Yapılandırılmış kural veya grup yok",
-	"builderOutcomeRuleSummary": "{count} sonuç kuralı",
-	"builderImplementationGroupsSummaryShort": "{count} grup",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} sonuç kuralı",
+				"countPlural=other": "{count} sonuç kuralı"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grup",
+				"countPlural=other": "{count} grup"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN ad alanı",
 	"builderUrnNamespaceHint": "URN önekindeki organizasyon (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "İlk yayından sonra kilitlenir.",
 	"builderScoringSettings": "Puanlama ayarları",
 	"builderAggregationHint": "Ortalama, toplam puanı soru sayısına böler. Toplam, tüm puanları doğrudan ekler. İkili (0/1) puanlama için Toplam'ı kullanın.",
 	"builderScoreScale": "Puan ölçeği",
-	"builderScaleLevel": "{count} seviye",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} seviye",
+				"countPlural=other": "{count} seviye"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Ölçek seviyesi ekle",
 	"builderScaleNamePlaceholder": "ör. Kısmi",
 	"builderScaleDescriptionPlaceholder": "İsteğe bağlı",
@@ -2121,10 +2202,26 @@
 	"builderDefaultMode": "Varsayılan",
 	"builderSplashMode": "Açılış",
 	"builderAssessableLeaf": "Değerlendirilebilir yaprak",
-	"builderAssessableWithChild": "Değerlendirilebilir · {count} alt düğüm",
-	"builderAssessableWithChildren": "Değerlendirilebilir · {count} alt düğüm",
-	"builderGroupWithChild": "Grup · {count} alt düğüm",
-	"builderGroupWithChildren": "Grup · {count} alt düğüm",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Değerlendirilebilir · {count} alt düğüm",
+				"countPlural=other": "Değerlendirilebilir · {count} alt düğüm"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grup · {count} alt düğüm",
+				"countPlural=other": "Grup · {count} alt düğüm"
+			}
+		}
+	],
 	"builderEmptyNode": "Boş düğüm",
 	"builderSplashScreenStatus": "Açılış ekranı",
 	"builderNestedUnder": "{parent} altında iç içe",
@@ -2143,8 +2240,16 @@
 	"builderVisibilityExpressionPlaceholder": "ör. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Uygulama grupları:",
 	"builderAddQuestion": "Soru ekle",
-	"builderChildHidden": "{count} alt düğüm gizli",
-	"builderChildrenHidden": "{count} alt düğüm gizli",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} alt düğüm gizli",
+				"countPlural=other": "{count} alt düğüm gizli"
+			}
+		}
+	],
 	"builderSplashSource": "Kaynak",
 	"builderSplashNoSourceContent": "Kaynak içerik yok.",
 	"builderSplashEditPlaceholder": "Açılış ekranınız için markdown içeriği yazın...",
@@ -2164,7 +2269,16 @@
 	"builderAnnotationOptional": "İsteğe bağlı not...",
 	"builderDeleteThisQuestion": "Bu soru silinsin mi?",
 	"builderChangeTypeWarning": "Türü değiştirmek mevcut seçenekleri silecek. Devam edilsin mi?",
-	"builderShownWhenAnswers": "{ref} = {count} yanıt olduğunda gösterilir",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{ref} = {count} yanıt olduğunda gösterilir",
+				"countPlural=other": "{ref} = {count} yanıt olduğunda gösterilir"
+			}
+		}
+	],
 	"builderChoices": "Seçenekler",
 	"builderAddChoice": "Seçenek ekle",
 	"builderChoicePlaceholder": "Seçenek metni...",

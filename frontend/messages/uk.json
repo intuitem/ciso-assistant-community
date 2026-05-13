@@ -1764,14 +1764,68 @@
 	"builderPublishing": "Публікація...",
 	"builderPublishModalTitle": "Опублікувати чернетку",
 	"builderPublishModalDescription": "Це оновить робочий фреймворк. Перегляньте зміни нижче.",
-	"builderRequirementAdded": "{count} вимог додано",
-	"builderQuestionsAddedSuffix": "{count} питань",
-	"builderRequirementRemoved": "{count} вимог видалено",
-	"builderQuestionsRemovedSuffix": "{count} питань",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} вимог додано",
+				"countPlural=other": "{count} вимог додано"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} питань",
+				"countPlural=other": "{count} питань"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} вимог видалено",
+				"countPlural=other": "{count} вимог видалено"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} питань",
+				"countPlural=other": "{count} питань"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Структурних змін не виявлено (лише метадані).",
-	"builderBreakingChangesDetected": "Виявлено {count} критичних змін",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Виявлено {count} критичних змін",
+				"countPlural=other": "Виявлено {count} критичних змін"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Ці зміни можуть вплинути на оцінювання, видимість або результати відповідності в наявних аудитах.",
-	"builderAffectedAudits": "{count} наявних аудитів буде зачеплено",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} наявних аудитів буде зачеплено",
+				"countPlural=other": "{count} наявних аудитів буде зачеплено"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Нові вимоги будуть додані до цих аудитів.",
 	"builderAffectedAuditsRemovedHint": "Видалені вимоги та їхні дані оцінювання будуть стерті з цих аудитів.",
 	"builderCouldNotLoadPreview": "Не вдалося завантажити попередній перегляд впливу. Дійте обережно.",
@@ -1801,15 +1855,42 @@
 	"builderTranslateQuestion": "Перекласти питання...",
 	"builderFrameworkSettings": "Налаштування фреймворку",
 	"builderNoRulesOrGroupsConfigured": "Не налаштовано правил або груп",
-	"builderOutcomeRuleSummary": "{count} правил результату",
-	"builderImplementationGroupsSummaryShort": "{count} груп",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} правил результату",
+				"countPlural=other": "{count} правил результату"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} груп",
+				"countPlural=other": "{count} груп"
+			}
+		}
+	],
 	"builderUrnNamespace": "Простір імен URN",
 	"builderUrnNamespaceHint": "Організація в префіксі URN (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Заблоковано після першої публікації.",
 	"builderScoringSettings": "Налаштування оцінювання",
 	"builderAggregationHint": "Середнє ділить загальний бал на кількість питань. Сума додає всі бали безпосередньо. Використовуйте Суму для бінарного (0/1) оцінювання.",
 	"builderScoreScale": "Шкала оцінок",
-	"builderScaleLevel": "{count} рівнів",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} рівнів",
+				"countPlural=other": "{count} рівнів"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Додати рівень шкали",
 	"builderScaleNamePlaceholder": "напр. Частково",
 	"builderScaleDescriptionPlaceholder": "Необов'язково",
@@ -1887,10 +1968,26 @@
 	"builderDefaultMode": "За замовчуванням",
 	"builderSplashMode": "Заставка",
 	"builderAssessableLeaf": "Оцінюваний листок",
-	"builderAssessableWithChild": "Оцінюване · {count} дочірній",
-	"builderAssessableWithChildren": "Оцінюване · {count} дочірніх",
-	"builderGroupWithChild": "Група · {count} дочірній",
-	"builderGroupWithChildren": "Група · {count} дочірніх",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Оцінюване · {count} дочірній",
+				"countPlural=other": "Оцінюване · {count} дочірніх"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Група · {count} дочірній",
+				"countPlural=other": "Група · {count} дочірніх"
+			}
+		}
+	],
 	"builderEmptyNode": "Порожній вузол",
 	"builderSplashScreenStatus": "Заставка",
 	"builderNestedUnder": "вкладено під {parent}",
@@ -1909,8 +2006,16 @@
 	"builderVisibilityExpressionPlaceholder": "напр. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Групи впровадження:",
 	"builderAddQuestion": "Додати питання",
-	"builderChildHidden": "{count} дочірній прихований",
-	"builderChildrenHidden": "{count} дочірніх приховано",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} дочірній прихований",
+				"countPlural=other": "{count} дочірніх приховано"
+			}
+		}
+	],
 	"builderSplashSource": "Джерело",
 	"builderSplashNoSourceContent": "Немає вихідного вмісту.",
 	"builderSplashEditPlaceholder": "Введіть markdown-вміст для вашої заставки...",
@@ -1930,7 +2035,16 @@
 	"builderAnnotationOptional": "Необов'язкова нотатка...",
 	"builderDeleteThisQuestion": "Видалити це питання?",
 	"builderChangeTypeWarning": "Зміна типу видалить наявні варіанти. Продовжити?",
-	"builderShownWhenAnswers": "Показується, коли {ref} = {count} відповідей",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Показується, коли {ref} = {count} відповідей",
+				"countPlural=other": "Показується, коли {ref} = {count} відповідей"
+			}
+		}
+	],
 	"builderChoices": "Варіанти",
 	"builderAddChoice": "Додати варіант",
 	"builderChoicePlaceholder": "Текст варіанту...",

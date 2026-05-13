@@ -1253,14 +1253,68 @@
 	"builderPublishing": "Publikuji...",
 	"builderPublishModalTitle": "Publikovat návrh do provozu",
 	"builderPublishModalDescription": "Tato akce aktualizuje provozní rámec. Zkontrolujte změny níže.",
-	"builderRequirementAdded": "{count} požadavků přidáno",
-	"builderQuestionsAddedSuffix": "{count} otázek",
-	"builderRequirementRemoved": "{count} požadavků odebráno",
-	"builderQuestionsRemovedSuffix": "{count} otázek",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} požadavků přidáno",
+				"countPlural=other": "{count} požadavků přidáno"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} otázek",
+				"countPlural=other": "{count} otázek"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} požadavků odebráno",
+				"countPlural=other": "{count} požadavků odebráno"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} otázek",
+				"countPlural=other": "{count} otázek"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Nebyly zjištěny žádné strukturální změny (pouze metadata).",
-	"builderBreakingChangesDetected": "{count} nekompatibilních změn zjištěno",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nekompatibilních změn zjištěno",
+				"countPlural=other": "{count} nekompatibilních změn zjištěno"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Tyto změny mohou ovlivnit skórování, viditelnost nebo výsledky souladu v existujících auditech.",
-	"builderAffectedAudits": "{count} existujících auditů bude ovlivněno",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} existujících auditů bude ovlivněno",
+				"countPlural=other": "{count} existujících auditů bude ovlivněno"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Do těchto auditů budou přidány nové požadavky.",
 	"builderAffectedAuditsRemovedHint": "Odebrané požadavky a jejich data hodnocení budou z těchto auditů smazány.",
 	"builderCouldNotLoadPreview": "Nepodařilo se načíst náhled dopadu. Pokračujte opatrně.",
@@ -1290,15 +1344,42 @@
 	"builderTranslateQuestion": "Přeložit otázku...",
 	"builderFrameworkSettings": "Nastavení rámce",
 	"builderNoRulesOrGroupsConfigured": "Nejsou nakonfigurována žádná pravidla ani skupiny",
-	"builderOutcomeRuleSummary": "{count} pravidel výsledků",
-	"builderImplementationGroupsSummaryShort": "{count} skupin",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pravidel výsledků",
+				"countPlural=other": "{count} pravidel výsledků"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} skupin",
+				"countPlural=other": "{count} skupin"
+			}
+		}
+	],
 	"builderUrnNamespace": "Jmenný prostor URN",
 	"builderUrnNamespaceHint": "Organizace v prefixu URN (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Uzamčeno po prvním publikování.",
 	"builderScoringSettings": "Nastavení skórování",
 	"builderAggregationHint": "Průměr dělí celkové skóre počtem otázek. Součet přímo sčítá všechna skóre. Použijte Součet pro binární (0/1) skórování.",
 	"builderScoreScale": "Stupnice skóre",
-	"builderScaleLevel": "{count} úrovní",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} úrovní",
+				"countPlural=other": "{count} úrovní"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Přidat úroveň",
 	"builderScaleNamePlaceholder": "např. Částečný",
 	"builderScaleDescriptionPlaceholder": "Volitelné",
@@ -1376,10 +1457,26 @@
 	"builderDefaultMode": "Výchozí",
 	"builderSplashMode": "Úvod",
 	"builderAssessableLeaf": "Hodnotitelný list",
-	"builderAssessableWithChild": "Hodnotitelný · {count} potomek",
-	"builderAssessableWithChildren": "Hodnotitelný · {count} potomků",
-	"builderGroupWithChild": "Skupina · {count} potomek",
-	"builderGroupWithChildren": "Skupina · {count} potomků",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Hodnotitelný · {count} potomek",
+				"countPlural=other": "Hodnotitelný · {count} potomků"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Skupina · {count} potomek",
+				"countPlural=other": "Skupina · {count} potomků"
+			}
+		}
+	],
 	"builderEmptyNode": "Prázdný uzel",
 	"builderSplashScreenStatus": "Úvodní obrazovka",
 	"builderNestedUnder": "vnořeno pod {parent}",
@@ -1398,8 +1495,16 @@
 	"builderVisibilityExpressionPlaceholder": "např. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Implementační skupiny:",
 	"builderAddQuestion": "Přidat otázku",
-	"builderChildHidden": "{count} potomek skryt",
-	"builderChildrenHidden": "{count} potomků skryto",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} potomek skryt",
+				"countPlural=other": "{count} potomků skryto"
+			}
+		}
+	],
 	"builderSplashSource": "Zdroj",
 	"builderSplashNoSourceContent": "Žádný zdrojový obsah.",
 	"builderSplashEditPlaceholder": "Napište obsah markdown vaší úvodní obrazovky...",
@@ -1419,7 +1524,16 @@
 	"builderAnnotationOptional": "Volitelná poznámka...",
 	"builderDeleteThisQuestion": "Smazat tuto otázku?",
 	"builderChangeTypeWarning": "Změna typu smaže existující možnosti. Pokračovat?",
-	"builderShownWhenAnswers": "Zobrazeno, když {ref} = {count} odpovědí",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Zobrazeno, když {ref} = {count} odpovědí",
+				"countPlural=other": "Zobrazeno, když {ref} = {count} odpovědí"
+			}
+		}
+	],
 	"builderChoices": "Možnosti",
 	"builderAddChoice": "Přidat možnost",
 	"builderChoicePlaceholder": "Text možnosti...",
@@ -1524,7 +1638,6 @@
 	"noRevisionsYet": "Zatím žádné revize",
 	"editHistory": "Historie úprav",
 	"compareEdits": "Porovnat úpravy",
-	"saving": "Ukládání...",
 	"saved": "Uloženo",
 	"diffFrom": "Od",
 	"diffTo": "Do",
@@ -1645,7 +1758,6 @@
 	"assetClassArchivesRoom": "Archivní místnosti",
 	"assetClassPrimaryBuilding": "Hlavní budova",
 	"assetClassPhysicalSecuritySystem": "Systémy fyzické bezpečnosti",
-	"requirement": "Požadavek",
 	"requirements": "Požadavky",
 	"requirementAssignment": "Přiřazení požadavku",
 	"requirementAssignments": "Přiřazení požadavků",

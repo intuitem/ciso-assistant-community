@@ -1237,14 +1237,68 @@
 	"builderPublishing": "شائع ہو رہا ہے...",
 	"builderPublishModalTitle": "مسودے کو براہ راست شائع کریں",
 	"builderPublishModalDescription": "یہ براہ راست فریم ورک کو اپ ڈیٹ کرے گا۔ نیچے تبدیلیوں کا جائزہ لیں۔",
-	"builderRequirementAdded": "{count} ضروریات شامل کی گئیں",
-	"builderQuestionsAddedSuffix": "{count} سوالات",
-	"builderRequirementRemoved": "{count} ضروریات ہٹا دی گئیں",
-	"builderQuestionsRemovedSuffix": "{count} سوالات",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ضروریات شامل کی گئیں",
+				"countPlural=other": "{count} ضروریات شامل کی گئیں"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} سوالات",
+				"countPlural=other": "{count} سوالات"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ضروریات ہٹا دی گئیں",
+				"countPlural=other": "{count} ضروریات ہٹا دی گئیں"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} سوالات",
+				"countPlural=other": "{count} سوالات"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "کوئی ساختی تبدیلیاں نہیں ملیں (صرف میٹا ڈیٹا)۔",
-	"builderBreakingChangesDetected": "{count} نقصان دہ تبدیلیاں ملی ہیں",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} نقصان دہ تبدیلیاں ملی ہیں",
+				"countPlural=other": "{count} نقصان دہ تبدیلیاں ملی ہیں"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "یہ تبدیلیاں موجودہ آڈٹس میں اسکورنگ، نمائش یا تعمیل کے نتائج کو متاثر کر سکتی ہیں۔",
-	"builderAffectedAudits": "{count} موجودہ آڈٹس متاثر ہوں گے",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} موجودہ آڈٹس متاثر ہوں گے",
+				"countPlural=other": "{count} موجودہ آڈٹس متاثر ہوں گے"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "ان آڈٹس میں نئی ضروریات شامل کی جائیں گی۔",
 	"builderAffectedAuditsRemovedHint": "ہٹائی گئی ضروریات اور ان کا تشخیصی ڈیٹا ان آڈٹس سے حذف کر دیا جائے گا۔",
 	"builderCouldNotLoadPreview": "اثر کا پیش نظارہ لوڈ نہیں ہو سکا۔ احتیاط سے آگے بڑھیں۔",
@@ -1274,15 +1328,42 @@
 	"builderTranslateQuestion": "سوال کا ترجمہ کریں...",
 	"builderFrameworkSettings": "فریم ورک کی ترتیبات",
 	"builderNoRulesOrGroupsConfigured": "کوئی قواعد یا گروپس ترتیب نہیں دیے گئے",
-	"builderOutcomeRuleSummary": "{count} نتیجہ قواعد",
-	"builderImplementationGroupsSummaryShort": "{count} گروپس",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} نتیجہ قواعد",
+				"countPlural=other": "{count} نتیجہ قواعد"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} گروپس",
+				"countPlural=other": "{count} گروپس"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN نیم اسپیس",
 	"builderUrnNamespaceHint": "URN سابقہ میں تنظیم (urn:{namespace}:risk:...)۔",
 	"builderUrnNamespaceLocked": "پہلی اشاعت کے بعد مقفل۔",
 	"builderScoringSettings": "اسکورنگ کی ترتیبات",
 	"builderAggregationHint": "اوسط کل اسکور کو سوالات کی تعداد سے تقسیم کرتا ہے۔ مجموعہ تمام اسکور براہ راست جوڑتا ہے۔ بائنری (0/1) اسکورنگ کے لیے مجموعہ استعمال کریں۔",
 	"builderScoreScale": "اسکور کا پیمانہ",
-	"builderScaleLevel": "{count} سطحیں",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} سطحیں",
+				"countPlural=other": "{count} سطحیں"
+			}
+		}
+	],
 	"builderAddScaleLevel": "سطح شامل کریں",
 	"builderScaleNamePlaceholder": "مثال: جزوی",
 	"builderScaleDescriptionPlaceholder": "اختیاری",
@@ -1360,10 +1441,26 @@
 	"builderDefaultMode": "ڈیفالٹ",
 	"builderSplashMode": "سپلیش",
 	"builderAssessableLeaf": "قابل تشخیص پتہ",
-	"builderAssessableWithChild": "قابل تشخیص · {count} بچہ",
-	"builderAssessableWithChildren": "قابل تشخیص · {count} بچے",
-	"builderGroupWithChild": "گروپ · {count} بچہ",
-	"builderGroupWithChildren": "گروپ · {count} بچے",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "قابل تشخیص · {count} بچہ",
+				"countPlural=other": "قابل تشخیص · {count} بچے"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "گروپ · {count} بچہ",
+				"countPlural=other": "گروپ · {count} بچے"
+			}
+		}
+	],
 	"builderEmptyNode": "خالی نوڈ",
 	"builderSplashScreenStatus": "سپلیش اسکرین",
 	"builderNestedUnder": "{parent} کے تحت نیسٹڈ",
@@ -1382,8 +1479,16 @@
 	"builderVisibilityExpressionPlaceholder": "مثال: requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "نفاذ کے گروپ:",
 	"builderAddQuestion": "سوال شامل کریں",
-	"builderChildHidden": "{count} بچہ چھپا ہوا",
-	"builderChildrenHidden": "{count} بچے چھپے ہوئے",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} بچہ چھپا ہوا",
+				"countPlural=other": "{count} بچے چھپے ہوئے"
+			}
+		}
+	],
 	"builderSplashSource": "ماخذ",
 	"builderSplashNoSourceContent": "کوئی ماخذ مواد نہیں۔",
 	"builderSplashEditPlaceholder": "اپنی سپلیش اسکرین کے لیے مارک ڈاؤن مواد لکھیں...",
@@ -1403,7 +1508,16 @@
 	"builderAnnotationOptional": "اختیاری نوٹ...",
 	"builderDeleteThisQuestion": "اس سوال کو حذف کریں؟",
 	"builderChangeTypeWarning": "قسم بدلنے سے موجودہ انتخابات حذف ہو جائیں گے۔ جاری رکھیں؟",
-	"builderShownWhenAnswers": "دکھایا جاتا ہے جب {ref} = {count} جوابات",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "دکھایا جاتا ہے جب {ref} = {count} جوابات",
+				"countPlural=other": "دکھایا جاتا ہے جب {ref} = {count} جوابات"
+			}
+		}
+	],
 	"builderChoices": "انتخابات",
 	"builderAddChoice": "انتخاب شامل کریں",
 	"builderChoicePlaceholder": "انتخاب کا متن...",

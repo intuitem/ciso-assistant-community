@@ -63,8 +63,7 @@
 		if (!src) return null;
 		return m.builderShownWhenAnswers({
 			ref: src.ref_id || 'Q',
-			count: dep.answers.length,
-			s: dep.answers.length > 1 ? 's' : ''
+			count: dep.answers.length
 		});
 	});
 

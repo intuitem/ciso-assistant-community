@@ -1431,14 +1431,68 @@
 	"builderPublishing": "Menerbitkan...",
 	"builderPublishModalTitle": "Terbitkan draf ke aktif",
 	"builderPublishModalDescription": "Tindakan ini akan memperbarui kerangka kerja aktif. Tinjau perubahannya di bawah.",
-	"builderRequirementAdded": "{count} persyaratan ditambahkan",
-	"builderQuestionsAddedSuffix": "{count} pertanyaan",
-	"builderRequirementRemoved": "{count} persyaratan dihapus",
-	"builderQuestionsRemovedSuffix": "{count} pertanyaan",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} persyaratan ditambahkan",
+				"countPlural=other": "{count} persyaratan ditambahkan"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pertanyaan",
+				"countPlural=other": "{count} pertanyaan"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} persyaratan dihapus",
+				"countPlural=other": "{count} persyaratan dihapus"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pertanyaan",
+				"countPlural=other": "{count} pertanyaan"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Tidak ada perubahan struktural yang terdeteksi (hanya metadata).",
-	"builderBreakingChangesDetected": "{count} perubahan tidak kompatibel terdeteksi",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} perubahan tidak kompatibel terdeteksi",
+				"countPlural=other": "{count} perubahan tidak kompatibel terdeteksi"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Perubahan ini dapat memengaruhi penilaian, visibilitas, atau hasil kepatuhan dalam audit yang sudah ada.",
-	"builderAffectedAudits": "{count} audit yang ada akan terdampak",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} audit yang ada akan terdampak",
+				"countPlural=other": "{count} audit yang ada akan terdampak"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Persyaratan baru akan ditambahkan ke audit-audit ini.",
 	"builderAffectedAuditsRemovedHint": "Persyaratan yang dihapus dan data penilaiannya akan dihapus dari audit-audit ini.",
 	"builderCouldNotLoadPreview": "Tidak dapat memuat pratinjau dampak. Lanjutkan dengan hati-hati.",
@@ -1468,15 +1522,42 @@
 	"builderTranslateQuestion": "Terjemahkan pertanyaan...",
 	"builderFrameworkSettings": "Pengaturan Kerangka Kerja",
 	"builderNoRulesOrGroupsConfigured": "Tidak ada aturan atau grup yang dikonfigurasi",
-	"builderOutcomeRuleSummary": "{count} aturan hasil",
-	"builderImplementationGroupsSummaryShort": "{count} grup",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} aturan hasil",
+				"countPlural=other": "{count} aturan hasil"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grup",
+				"countPlural=other": "{count} grup"
+			}
+		}
+	],
 	"builderUrnNamespace": "Namespace URN",
 	"builderUrnNamespaceHint": "Organisasi dalam awalan URN (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Terkunci setelah penerbitan pertama.",
 	"builderScoringSettings": "Pengaturan penilaian",
 	"builderAggregationHint": "Rata-rata membagi total skor dengan jumlah pertanyaan. Jumlah menambahkan semua skor secara langsung. Gunakan Jumlah untuk penilaian biner (0/1).",
 	"builderScoreScale": "Skala skor",
-	"builderScaleLevel": "{count} tingkat",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} tingkat",
+				"countPlural=other": "{count} tingkat"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Tambah tingkat skala",
 	"builderScaleNamePlaceholder": "mis. Sebagian",
 	"builderScaleDescriptionPlaceholder": "Opsional",
@@ -1554,10 +1635,26 @@
 	"builderDefaultMode": "Default",
 	"builderSplashMode": "Layar pembuka",
 	"builderAssessableLeaf": "Daun yang dapat dinilai",
-	"builderAssessableWithChild": "Dapat dinilai · {count} anak",
-	"builderAssessableWithChildren": "Dapat dinilai · {count} anak",
-	"builderGroupWithChild": "Grup · {count} anak",
-	"builderGroupWithChildren": "Grup · {count} anak",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Dapat dinilai · {count} anak",
+				"countPlural=other": "Dapat dinilai · {count} anak"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grup · {count} anak",
+				"countPlural=other": "Grup · {count} anak"
+			}
+		}
+	],
 	"builderEmptyNode": "Node kosong",
 	"builderSplashScreenStatus": "Layar pembuka",
 	"builderNestedUnder": "bersarang di bawah {parent}",
@@ -1576,8 +1673,16 @@
 	"builderVisibilityExpressionPlaceholder": "mis. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Grup implementasi:",
 	"builderAddQuestion": "Tambah pertanyaan",
-	"builderChildHidden": "{count} anak disembunyikan",
-	"builderChildrenHidden": "{count} anak disembunyikan",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} anak disembunyikan",
+				"countPlural=other": "{count} anak disembunyikan"
+			}
+		}
+	],
 	"builderSplashSource": "Sumber",
 	"builderSplashNoSourceContent": "Tidak ada konten sumber.",
 	"builderSplashEditPlaceholder": "Tulis konten markdown untuk layar pembuka Anda...",
@@ -1597,7 +1702,16 @@
 	"builderAnnotationOptional": "Catatan opsional...",
 	"builderDeleteThisQuestion": "Hapus pertanyaan ini?",
 	"builderChangeTypeWarning": "Mengubah tipe akan menghapus pilihan yang ada. Lanjutkan?",
-	"builderShownWhenAnswers": "Ditampilkan ketika {ref} = {count} jawaban",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ditampilkan ketika {ref} = {count} jawaban",
+				"countPlural=other": "Ditampilkan ketika {ref} = {count} jawaban"
+			}
+		}
+	],
 	"builderChoices": "Pilihan",
 	"builderAddChoice": "Tambah pilihan",
 	"builderChoicePlaceholder": "Teks pilihan...",

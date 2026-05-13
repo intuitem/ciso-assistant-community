@@ -409,13 +409,11 @@
 							<div class="text-sm font-medium text-green-800">
 								<i class="fa-solid fa-plus mr-1"></i>
 								{m.builderRequirementAdded({
-									count: publishPreview.added.requirements,
-									s: publishPreview.added.requirements > 1 ? 's' : ''
+									count: publishPreview.added.requirements
 								})}
 								{#if publishPreview.added.questions > 0}
 									, {m.builderQuestionsAddedSuffix({
-										count: publishPreview.added.questions,
-										s: publishPreview.added.questions > 1 ? 's' : ''
+										count: publishPreview.added.questions
 									})}
 								{/if}
 							</div>
@@ -434,13 +432,11 @@
 							<div class="text-sm font-medium text-red-800">
 								<i class="fa-solid fa-trash mr-1"></i>
 								{m.builderRequirementRemoved({
-									count: publishPreview.removed.requirements,
-									s: publishPreview.removed.requirements > 1 ? 's' : ''
+									count: publishPreview.removed.requirements
 								})}
 								{#if publishPreview.removed.questions > 0}
 									, {m.builderQuestionsRemovedSuffix({
-										count: publishPreview.removed.questions,
-										s: publishPreview.removed.questions > 1 ? 's' : ''
+										count: publishPreview.removed.questions
 									})}
 								{/if}
 							</div>
@@ -468,8 +464,7 @@
 							<div class="text-sm font-medium text-orange-800">
 								<i class="fa-solid fa-bolt mr-1"></i>
 								{m.builderBreakingChangesDetected({
-									count: publishPreview.breaking_changes.length,
-									s: publishPreview.breaking_changes.length > 1 ? 's' : ''
+									count: publishPreview.breaking_changes.length
 								})}
 							</div>
 							<ul class="mt-1.5 text-xs text-orange-700 space-y-0.5">
@@ -491,8 +486,7 @@
 							<div class="text-sm font-medium text-amber-800">
 								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
 								{m.builderAffectedAudits({
-									count: publishPreview.affected_audits.length,
-									s: publishPreview.affected_audits.length > 1 ? 's' : ''
+									count: publishPreview.affected_audits.length
 								})}
 							</div>
 							<ul class="mt-1.5 text-xs text-amber-700 space-y-0.5">

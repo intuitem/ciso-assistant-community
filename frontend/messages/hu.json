@@ -1246,14 +1246,68 @@
 	"builderPublishing": "Közzététel...",
 	"builderPublishModalTitle": "Piszkozat közzététele élesben",
 	"builderPublishModalDescription": "Ez frissíti az éles keretrendszert. Tekintse át az alábbi módosításokat.",
-	"builderRequirementAdded": "{count} követelmény hozzáadva",
-	"builderQuestionsAddedSuffix": "{count} kérdés",
-	"builderRequirementRemoved": "{count} követelmény eltávolítva",
-	"builderQuestionsRemovedSuffix": "{count} kérdés",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} követelmény hozzáadva",
+				"countPlural=other": "{count} követelmény hozzáadva"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kérdés",
+				"countPlural=other": "{count} kérdés"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} követelmény eltávolítva",
+				"countPlural=other": "{count} követelmény eltávolítva"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kérdés",
+				"countPlural=other": "{count} kérdés"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Nem észlelhető strukturális változás (csak metaadatok).",
-	"builderBreakingChangesDetected": "{count} kompatibilitást megtörő változás észlelve",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kompatibilitást megtörő változás észlelve",
+				"countPlural=other": "{count} kompatibilitást megtörő változás észlelve"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Ezek a módosítások hatással lehetnek a pontozásra, a láthatóságra vagy a megfelelőségi eredményekre a meglévő auditokban.",
-	"builderAffectedAudits": "{count} meglévő auditot érint",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} meglévő auditot érint",
+				"countPlural=other": "{count} meglévő auditot érint"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Új követelmények kerülnek hozzáadásra ezekhez az auditokhoz.",
 	"builderAffectedAuditsRemovedHint": "Az eltávolított követelmények és értékelési adataik törlésre kerülnek ezekből az auditokból.",
 	"builderCouldNotLoadPreview": "A hatásvizsgálati előnézet nem tölthető be. Óvatosan járjon el.",
@@ -1283,15 +1337,42 @@
 	"builderTranslateQuestion": "Kérdés fordítása...",
 	"builderFrameworkSettings": "Keretrendszer beállításai",
 	"builderNoRulesOrGroupsConfigured": "Nincsenek konfigurált szabályok vagy csoportok",
-	"builderOutcomeRuleSummary": "{count} eredményszabály",
-	"builderImplementationGroupsSummaryShort": "{count} csoport",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} eredményszabály",
+				"countPlural=other": "{count} eredményszabály"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} csoport",
+				"countPlural=other": "{count} csoport"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN névtér",
 	"builderUrnNamespaceHint": "Szervezet az URN előtagban (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Az első közzététel után zárolva.",
 	"builderScoringSettings": "Pontozási beállítások",
 	"builderAggregationHint": "Az átlag a teljes pontszámot elosztja a kérdések számával. Az összeg közvetlenül összeadja az összes pontszámot. Bináris (0/1) pontozáshoz használja az összeget.",
 	"builderScoreScale": "Pontozási skála",
-	"builderScaleLevel": "{count} szint",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} szint",
+				"countPlural=other": "{count} szint"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Szint hozzáadása",
 	"builderScaleNamePlaceholder": "pl. Részleges",
 	"builderScaleDescriptionPlaceholder": "Opcionális",
@@ -1369,10 +1450,26 @@
 	"builderDefaultMode": "Alapértelmezett",
 	"builderSplashMode": "Bemutató",
 	"builderAssessableLeaf": "Értékelhető levél",
-	"builderAssessableWithChild": "Értékelhető · {count} gyermek",
-	"builderAssessableWithChildren": "Értékelhető · {count} gyermek",
-	"builderGroupWithChild": "Csoport · {count} gyermek",
-	"builderGroupWithChildren": "Csoport · {count} gyermek",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Értékelhető · {count} gyermek",
+				"countPlural=other": "Értékelhető · {count} gyermek"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Csoport · {count} gyermek",
+				"countPlural=other": "Csoport · {count} gyermek"
+			}
+		}
+	],
 	"builderEmptyNode": "Üres csomópont",
 	"builderSplashScreenStatus": "Bevezető képernyő",
 	"builderNestedUnder": "beágyazva ide: {parent}",
@@ -1391,8 +1488,16 @@
 	"builderVisibilityExpressionPlaceholder": "pl. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Megvalósítási csoportok:",
 	"builderAddQuestion": "Kérdés hozzáadása",
-	"builderChildHidden": "{count} gyermek rejtve",
-	"builderChildrenHidden": "{count} gyermek rejtve",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gyermek rejtve",
+				"countPlural=other": "{count} gyermek rejtve"
+			}
+		}
+	],
 	"builderSplashSource": "Forrás",
 	"builderSplashNoSourceContent": "Nincs forrástartalom.",
 	"builderSplashEditPlaceholder": "Írjon markdown tartalmat a bevezető képernyőhöz...",
@@ -1412,7 +1517,16 @@
 	"builderAnnotationOptional": "Opcionális megjegyzés...",
 	"builderDeleteThisQuestion": "Törli ezt a kérdést?",
 	"builderChangeTypeWarning": "A típus megváltoztatása törli a meglévő opciókat. Folytatja?",
-	"builderShownWhenAnswers": "Akkor jelenik meg, ha {ref} = {count} válasz",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Akkor jelenik meg, ha {ref} = {count} válasz",
+				"countPlural=other": "Akkor jelenik meg, ha {ref} = {count} válasz"
+			}
+		}
+	],
 	"builderChoices": "Opciók",
 	"builderAddChoice": "Opció hozzáadása",
 	"builderChoicePlaceholder": "Opció szövege...",

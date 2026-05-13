@@ -3289,14 +3289,68 @@
 	"builderPublishing": "发布中...",
 	"builderPublishModalTitle": "将草稿发布到正式版本",
 	"builderPublishModalDescription": "此操作将更新正式框架。请查看下方的更改。",
-	"builderRequirementAdded": "已添加 {count} 项要求",
-	"builderQuestionsAddedSuffix": "{count} 个问题",
-	"builderRequirementRemoved": "已移除 {count} 项要求",
-	"builderQuestionsRemovedSuffix": "{count} 个问题",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "已添加 {count} 项要求",
+				"countPlural=other": "已添加 {count} 项要求"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个问题",
+				"countPlural=other": "{count} 个问题"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "已移除 {count} 项要求",
+				"countPlural=other": "已移除 {count} 项要求"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个问题",
+				"countPlural=other": "{count} 个问题"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "未检测到结构性更改（仅元数据）。",
-	"builderBreakingChangesDetected": "检测到 {count} 项不兼容更改",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "检测到 {count} 项不兼容更改",
+				"countPlural=other": "检测到 {count} 项不兼容更改"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "这些更改可能会影响现有审计中的评分、可见性或合规结果。",
-	"builderAffectedAudits": "{count} 个现有审计将受到影响",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个现有审计将受到影响",
+				"countPlural=other": "{count} 个现有审计将受到影响"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "新增要求将被添加到这些审计中。",
 	"builderAffectedAuditsRemovedHint": "已移除的要求及其评估数据将从这些审计中删除。",
 	"builderCouldNotLoadPreview": "无法加载影响预览。请谨慎操作。",
@@ -3326,15 +3380,42 @@
 	"builderTranslateQuestion": "翻译问题...",
 	"builderFrameworkSettings": "框架设置",
 	"builderNoRulesOrGroupsConfigured": "未配置任何规则或组",
-	"builderOutcomeRuleSummary": "{count} 条结果规则",
-	"builderImplementationGroupsSummaryShort": "{count} 个组",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 条结果规则",
+				"countPlural=other": "{count} 条结果规则"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个组",
+				"countPlural=other": "{count} 个组"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN 命名空间",
 	"builderUrnNamespaceHint": "URN 前缀中的组织标识 (urn:{namespace}:risk:...)。",
 	"builderUrnNamespaceLocked": "首次发布后已锁定。",
 	"builderScoringSettings": "评分设置",
 	"builderAggregationHint": "平均：将总分除以问题数量。求和：直接累加所有得分。对二元 (0/1) 评分请使用求和。",
 	"builderScoreScale": "评分量表",
-	"builderScaleLevel": "{count} 个级别",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个级别",
+				"countPlural=other": "{count} 个级别"
+			}
+		}
+	],
 	"builderAddScaleLevel": "添加级别",
 	"builderScaleNamePlaceholder": "例如：部分",
 	"builderScaleDescriptionPlaceholder": "可选",
@@ -3412,10 +3493,26 @@
 	"builderDefaultMode": "默认",
 	"builderSplashMode": "启动屏",
 	"builderAssessableLeaf": "可评估叶节点",
-	"builderAssessableWithChild": "可评估 · {count} 个子节点",
-	"builderAssessableWithChildren": "可评估 · {count} 个子节点",
-	"builderGroupWithChild": "分组 · {count} 个子节点",
-	"builderGroupWithChildren": "分组 · {count} 个子节点",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "可评估 · {count} 个子节点",
+				"countPlural=other": "可评估 · {count} 个子节点"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "分组 · {count} 个子节点",
+				"countPlural=other": "分组 · {count} 个子节点"
+			}
+		}
+	],
 	"builderEmptyNode": "空节点",
 	"builderSplashScreenStatus": "启动屏",
 	"builderNestedUnder": "嵌套于 {parent} 之下",
@@ -3434,8 +3531,16 @@
 	"builderVisibilityExpressionPlaceholder": "例如：requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "实施组：",
 	"builderAddQuestion": "添加问题",
-	"builderChildHidden": "{count} 个子节点已隐藏",
-	"builderChildrenHidden": "{count} 个子节点已隐藏",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个子节点已隐藏",
+				"countPlural=other": "{count} 个子节点已隐藏"
+			}
+		}
+	],
 	"builderSplashSource": "源代码",
 	"builderSplashNoSourceContent": "无源内容。",
 	"builderSplashEditPlaceholder": "为启动屏编写 markdown 内容...",
@@ -3455,7 +3560,16 @@
 	"builderAnnotationOptional": "可选备注...",
 	"builderDeleteThisQuestion": "删除此问题？",
 	"builderChangeTypeWarning": "更改类型将删除现有选项。继续吗？",
-	"builderShownWhenAnswers": "当 {ref} = {count} 个答案时显示",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "当 {ref} = {count} 个答案时显示",
+				"countPlural=other": "当 {ref} = {count} 个答案时显示"
+			}
+		}
+	],
 	"builderChoices": "选项",
 	"builderAddChoice": "添加选项",
 	"builderChoicePlaceholder": "选项文本...",

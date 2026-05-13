@@ -4222,14 +4222,68 @@
 	"builderPublishing": "Skelbiama...",
 	"builderPublishModalTitle": "Paskelbti juodraštį",
 	"builderPublishModalDescription": "Šis veiksmas atnaujins veikiančią sistemą. Peržiūrėkite pakeitimus žemiau.",
-	"builderRequirementAdded": "{count} reikalavimai pridėti",
-	"builderQuestionsAddedSuffix": "{count} klausimai",
-	"builderRequirementRemoved": "{count} reikalavimai pašalinti",
-	"builderQuestionsRemovedSuffix": "{count} klausimai",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} reikalavimai pridėti",
+				"countPlural=other": "{count} reikalavimai pridėti"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} klausimai",
+				"countPlural=other": "{count} klausimai"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} reikalavimai pašalinti",
+				"countPlural=other": "{count} reikalavimai pašalinti"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} klausimai",
+				"countPlural=other": "{count} klausimai"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Struktūrinių pakeitimų neaptikta (tik metaduomenys).",
-	"builderBreakingChangesDetected": "Aptikti {count} nesuderinami pakeitimai",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Aptikti {count} nesuderinami pakeitimai",
+				"countPlural=other": "Aptikti {count} nesuderinami pakeitimai"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Šie pakeitimai gali paveikti vertinimą, matomumą ar atitikties rezultatus esamuose audituose.",
-	"builderAffectedAudits": "{count} esami auditai bus paveikti",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} esami auditai bus paveikti",
+				"countPlural=other": "{count} esami auditai bus paveikti"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Į šiuos auditus bus pridėti nauji reikalavimai.",
 	"builderAffectedAuditsRemovedHint": "Pašalinti reikalavimai ir jų vertinimo duomenys bus ištrinti iš šių auditų.",
 	"builderCouldNotLoadPreview": "Nepavyko įkelti poveikio peržiūros. Veikite atsargiai.",
@@ -4259,15 +4313,42 @@
 	"builderTranslateQuestion": "Versti klausimą...",
 	"builderFrameworkSettings": "Sistemos nustatymai",
 	"builderNoRulesOrGroupsConfigured": "Taisyklių ar grupių nesukonfigūruota",
-	"builderOutcomeRuleSummary": "{count} rezultato taisyklės",
-	"builderImplementationGroupsSummaryShort": "{count} grupės",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} rezultato taisyklės",
+				"countPlural=other": "{count} rezultato taisyklės"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupės",
+				"countPlural=other": "{count} grupės"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN vardų erdvė",
 	"builderUrnNamespaceHint": "Organizacija URN priešdėlyje (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Užrakinta po pirmojo paskelbimo.",
 	"builderScoringSettings": "Vertinimo nustatymai",
 	"builderAggregationHint": "Vidurkis dalija bendrą balą iš klausimų skaičiaus. Suma tiesiogiai sudeda visus balus. Naudokite Sumą dvejetainiam (0/1) vertinimui.",
 	"builderScoreScale": "Balų skalė",
-	"builderScaleLevel": "{count} lygiai",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} lygiai",
+				"countPlural=other": "{count} lygiai"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Pridėti skalės lygį",
 	"builderScaleNamePlaceholder": "pvz. Dalinis",
 	"builderScaleDescriptionPlaceholder": "Neprivaloma",
@@ -4345,10 +4426,26 @@
 	"builderDefaultMode": "Numatytasis",
 	"builderSplashMode": "Pristatymas",
 	"builderAssessableLeaf": "Vertinamas lapas",
-	"builderAssessableWithChild": "Vertinama · {count} vaikinis",
-	"builderAssessableWithChildren": "Vertinama · {count} vaikiniai",
-	"builderGroupWithChild": "Grupė · {count} vaikinis",
-	"builderGroupWithChildren": "Grupė · {count} vaikiniai",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Vertinama · {count} vaikinis",
+				"countPlural=other": "Vertinama · {count} vaikiniai"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grupė · {count} vaikinis",
+				"countPlural=other": "Grupė · {count} vaikiniai"
+			}
+		}
+	],
 	"builderEmptyNode": "Tuščias mazgas",
 	"builderSplashScreenStatus": "Pradinis ekranas",
 	"builderNestedUnder": "įdėta po {parent}",
@@ -4367,8 +4464,16 @@
 	"builderVisibilityExpressionPlaceholder": "pvz. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Įgyvendinimo grupės:",
 	"builderAddQuestion": "Pridėti klausimą",
-	"builderChildHidden": "{count} vaikinis paslėptas",
-	"builderChildrenHidden": "{count} vaikiniai paslėpti",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vaikinis paslėptas",
+				"countPlural=other": "{count} vaikiniai paslėpti"
+			}
+		}
+	],
 	"builderSplashSource": "Šaltinis",
 	"builderSplashNoSourceContent": "Šaltinio turinio nėra.",
 	"builderSplashEditPlaceholder": "Įveskite markdown turinį pradiniam ekranui...",
@@ -4388,7 +4493,16 @@
 	"builderAnnotationOptional": "Neprivaloma pastaba...",
 	"builderDeleteThisQuestion": "Ištrinti šį klausimą?",
 	"builderChangeTypeWarning": "Pakeitus tipą bus ištrinti esami pasirinkimai. Tęsti?",
-	"builderShownWhenAnswers": "Rodoma, kai {ref} = {count} atsakymai",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Rodoma, kai {ref} = {count} atsakymai",
+				"countPlural=other": "Rodoma, kai {ref} = {count} atsakymai"
+			}
+		}
+	],
 	"builderChoices": "Pasirinkimai",
 	"builderAddChoice": "Pridėti pasirinkimą",
 	"builderChoicePlaceholder": "Pasirinkimo tekstas...",

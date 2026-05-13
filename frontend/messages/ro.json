@@ -1262,14 +1262,68 @@
 	"builderPublishing": "Se publică...",
 	"builderPublishModalTitle": "Publică schița în producție",
 	"builderPublishModalDescription": "Această acțiune va actualiza cadrul de producție. Verificați modificările de mai jos.",
-	"builderRequirementAdded": "{count} cerințe adăugate",
-	"builderQuestionsAddedSuffix": "{count} întrebări",
-	"builderRequirementRemoved": "{count} cerințe eliminate",
-	"builderQuestionsRemovedSuffix": "{count} întrebări",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} cerințe adăugate",
+				"countPlural=other": "{count} cerințe adăugate"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} întrebări",
+				"countPlural=other": "{count} întrebări"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} cerințe eliminate",
+				"countPlural=other": "{count} cerințe eliminate"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} întrebări",
+				"countPlural=other": "{count} întrebări"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Nu au fost detectate modificări structurale (numai metadate).",
-	"builderBreakingChangesDetected": "{count} modificări incompatibile detectate",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} modificări incompatibile detectate",
+				"countPlural=other": "{count} modificări incompatibile detectate"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Aceste modificări pot afecta calculul scorului, vizibilitatea sau rezultatele de conformitate în auditurile existente.",
-	"builderAffectedAudits": "{count} audituri existente vor fi afectate",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} audituri existente vor fi afectate",
+				"countPlural=other": "{count} audituri existente vor fi afectate"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Cerințe noi vor fi adăugate la aceste audituri.",
 	"builderAffectedAuditsRemovedHint": "Cerințele eliminate și datele lor de evaluare vor fi șterse din aceste audituri.",
 	"builderCouldNotLoadPreview": "Nu s-a putut încărca previzualizarea impactului. Continuați cu precauție.",
@@ -1299,15 +1353,42 @@
 	"builderTranslateQuestion": "Traduceți întrebarea...",
 	"builderFrameworkSettings": "Setări cadru",
 	"builderNoRulesOrGroupsConfigured": "Nicio regulă sau grup configurat",
-	"builderOutcomeRuleSummary": "{count} reguli de rezultat",
-	"builderImplementationGroupsSummaryShort": "{count} grupuri",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} reguli de rezultat",
+				"countPlural=other": "{count} reguli de rezultat"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupuri",
+				"countPlural=other": "{count} grupuri"
+			}
+		}
+	],
 	"builderUrnNamespace": "Spațiu de nume URN",
 	"builderUrnNamespaceHint": "Organizație în prefixul URN (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Blocat după prima publicare.",
 	"builderScoringSettings": "Setări de scorare",
 	"builderAggregationHint": "Media împarte scorul total la numărul de întrebări. Suma adună direct toate scorurile. Folosiți Suma pentru scorarea binară (0/1).",
 	"builderScoreScale": "Scala de scor",
-	"builderScaleLevel": "{count} niveluri",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} niveluri",
+				"countPlural=other": "{count} niveluri"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Adaugă nivel",
 	"builderScaleNamePlaceholder": "ex. Parțial",
 	"builderScaleDescriptionPlaceholder": "Opțional",
@@ -1385,10 +1466,26 @@
 	"builderDefaultMode": "Implicit",
 	"builderSplashMode": "Prezentare",
 	"builderAssessableLeaf": "Frunză evaluabilă",
-	"builderAssessableWithChild": "Evaluabil · {count} copil",
-	"builderAssessableWithChildren": "Evaluabil · {count} copii",
-	"builderGroupWithChild": "Grup · {count} copil",
-	"builderGroupWithChildren": "Grup · {count} copii",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Evaluabil · {count} copil",
+				"countPlural=other": "Evaluabil · {count} copii"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grup · {count} copil",
+				"countPlural=other": "Grup · {count} copii"
+			}
+		}
+	],
 	"builderEmptyNode": "Nod gol",
 	"builderSplashScreenStatus": "Ecran de prezentare",
 	"builderNestedUnder": "imbricat sub {parent}",
@@ -1407,8 +1504,16 @@
 	"builderVisibilityExpressionPlaceholder": "ex. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Grupuri de implementare:",
 	"builderAddQuestion": "Adaugă întrebare",
-	"builderChildHidden": "{count} copil ascuns",
-	"builderChildrenHidden": "{count} copii ascunși",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} copil ascuns",
+				"countPlural=other": "{count} copii ascunși"
+			}
+		}
+	],
 	"builderSplashSource": "Sursă",
 	"builderSplashNoSourceContent": "Niciun conținut sursă.",
 	"builderSplashEditPlaceholder": "Scrieți conținutul markdown al ecranului de prezentare...",
@@ -1428,7 +1533,16 @@
 	"builderAnnotationOptional": "Notă opțională...",
 	"builderDeleteThisQuestion": "Ștergeți această întrebare?",
 	"builderChangeTypeWarning": "Schimbarea tipului va șterge opțiunile existente. Continuați?",
-	"builderShownWhenAnswers": "Afișat când {ref} = {count} răspunsuri",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Afișat când {ref} = {count} răspunsuri",
+				"countPlural=other": "Afișat când {ref} = {count} răspunsuri"
+			}
+		}
+	],
 	"builderChoices": "Opțiuni",
 	"builderAddChoice": "Adaugă opțiune",
 	"builderChoicePlaceholder": "Text opțiune...",

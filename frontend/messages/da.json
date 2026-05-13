@@ -1548,14 +1548,68 @@
 	"builderPublishing": "Udgiver...",
 	"builderPublishModalTitle": "Udgiv kladde til live",
 	"builderPublishModalDescription": "Dette opdaterer det live rammeværk. Gennemgå ændringerne nedenfor.",
-	"builderRequirementAdded": "{count} krav tilføjet",
-	"builderQuestionsAddedSuffix": "{count} spørgsmål",
-	"builderRequirementRemoved": "{count} krav fjernet",
-	"builderQuestionsRemovedSuffix": "{count} spørgsmål",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} krav tilføjet",
+				"countPlural=other": "{count} krav tilføjet"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} spørgsmål",
+				"countPlural=other": "{count} spørgsmål"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} krav fjernet",
+				"countPlural=other": "{count} krav fjernet"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} spørgsmål",
+				"countPlural=other": "{count} spørgsmål"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Ingen strukturelle ændringer fundet (kun metadata).",
-	"builderBreakingChangesDetected": "{count} brydende ændring(er) fundet",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} brydende ændring(er) fundet",
+				"countPlural=other": "{count} brydende ændring(er) fundet"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Disse ændringer kan påvirke scoring, synlighed eller compliance-resultater i eksisterende revisioner.",
-	"builderAffectedAudits": "{count} eksisterende revision(er) vil blive påvirket",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} eksisterende revision(er) vil blive påvirket",
+				"countPlural=other": "{count} eksisterende revision(er) vil blive påvirket"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Nye krav vil blive tilføjet til disse revisioner.",
 	"builderAffectedAuditsRemovedHint": "Fjernede krav og deres vurderingsdata vil blive slettet fra disse revisioner.",
 	"builderCouldNotLoadPreview": "Kunne ikke indlæse påvirkningsforhåndsvisning. Fortsæt med forsigtighed.",
@@ -1585,15 +1639,42 @@
 	"builderTranslateQuestion": "Oversæt spørgsmål...",
 	"builderFrameworkSettings": "Rammeværksindstillinger",
 	"builderNoRulesOrGroupsConfigured": "Ingen regler eller grupper konfigureret",
-	"builderOutcomeRuleSummary": "{count} resultatregel/regler",
-	"builderImplementationGroupsSummaryShort": "{count} gruppe(r)",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} resultatregel/regler",
+				"countPlural=other": "{count} resultatregel/regler"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gruppe(r)",
+				"countPlural=other": "{count} gruppe(r)"
+			}
+		}
+	],
 	"builderUrnNamespace": "URN-navnerum",
 	"builderUrnNamespaceHint": "Organisation i URN-præfikset (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Låst efter første udgivelse.",
 	"builderScoringSettings": "Scoringsindstillinger",
 	"builderAggregationHint": "Gennemsnit dividerer den samlede score med antallet af spørgsmål. Sum lægger alle scores direkte sammen. Brug Sum til binær scoring (0/1).",
 	"builderScoreScale": "Scoreskala",
-	"builderScaleLevel": "{count} niveau(er)",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} niveau(er)",
+				"countPlural=other": "{count} niveau(er)"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Tilføj niveau",
 	"builderScaleNamePlaceholder": "f.eks. Delvis",
 	"builderScaleDescriptionPlaceholder": "Valgfri",
@@ -1671,10 +1752,26 @@
 	"builderDefaultMode": "Standard",
 	"builderSplashMode": "Præsentation",
 	"builderAssessableLeaf": "Vurderbart blad",
-	"builderAssessableWithChild": "Vurderbar · {count} underordnet",
-	"builderAssessableWithChildren": "Vurderbar · {count} underordnede",
-	"builderGroupWithChild": "Gruppe · {count} underordnet",
-	"builderGroupWithChildren": "Gruppe · {count} underordnede",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Vurderbar · {count} underordnet",
+				"countPlural=other": "Vurderbar · {count} underordnede"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Gruppe · {count} underordnet",
+				"countPlural=other": "Gruppe · {count} underordnede"
+			}
+		}
+	],
 	"builderEmptyNode": "Tom node",
 	"builderSplashScreenStatus": "Velkomstskærm",
 	"builderNestedUnder": "indlejret under {parent}",
@@ -1693,8 +1790,16 @@
 	"builderVisibilityExpressionPlaceholder": "f.eks. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Implementeringsgrupper:",
 	"builderAddQuestion": "Tilføj spørgsmål",
-	"builderChildHidden": "{count} underordnet skjult",
-	"builderChildrenHidden": "{count} underordnede skjult",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} underordnet skjult",
+				"countPlural=other": "{count} underordnede skjult"
+			}
+		}
+	],
 	"builderSplashSource": "Kilde",
 	"builderSplashNoSourceContent": "Intet kildeindhold.",
 	"builderSplashEditPlaceholder": "Skriv markdown-indhold til din velkomstskærm...",
@@ -1714,7 +1819,16 @@
 	"builderAnnotationOptional": "Valgfri note...",
 	"builderDeleteThisQuestion": "Slet dette spørgsmål?",
 	"builderChangeTypeWarning": "Ændring af type sletter eksisterende valg. Fortsæt?",
-	"builderShownWhenAnswers": "Vises når {ref} = {count} svar",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Vises når {ref} = {count} svar",
+				"countPlural=other": "Vises når {ref} = {count} svar"
+			}
+		}
+	],
 	"builderChoices": "Valg",
 	"builderAddChoice": "Tilføj valg",
 	"builderChoicePlaceholder": "Valgtekst...",

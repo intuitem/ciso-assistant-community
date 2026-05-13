@@ -1264,14 +1264,68 @@
 	"builderPublishing": "Publicando...",
 	"builderPublishModalTitle": "Publicar rascunho em produção",
 	"builderPublishModalDescription": "Esta ação atualizará o framework em produção. Revise as alterações abaixo.",
-	"builderRequirementAdded": "{count} requisitos adicionados",
-	"builderQuestionsAddedSuffix": "{count} perguntas",
-	"builderRequirementRemoved": "{count} requisitos removidos",
-	"builderQuestionsRemovedSuffix": "{count} perguntas",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} requisitos adicionados",
+				"countPlural=other": "{count} requisitos adicionados"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} perguntas",
+				"countPlural=other": "{count} perguntas"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} requisitos removidos",
+				"countPlural=other": "{count} requisitos removidos"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} perguntas",
+				"countPlural=other": "{count} perguntas"
+			}
+		}
+	],
 	"builderNoStructuralChanges": "Nenhuma alteração estrutural detectada (apenas metadados).",
-	"builderBreakingChangesDetected": "{count} alterações incompatíveis detectadas",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} alterações incompatíveis detectadas",
+				"countPlural=other": "{count} alterações incompatíveis detectadas"
+			}
+		}
+	],
 	"builderBreakingChangesHint": "Estas alterações podem afetar a pontuação, a visibilidade ou os resultados de conformidade nas auditorias existentes.",
-	"builderAffectedAudits": "{count} auditorias existentes serão afetadas",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} auditorias existentes serão afetadas",
+				"countPlural=other": "{count} auditorias existentes serão afetadas"
+			}
+		}
+	],
 	"builderAffectedAuditsAddedHint": "Novos requisitos serão adicionados a estas auditorias.",
 	"builderAffectedAuditsRemovedHint": "Os requisitos removidos e seus dados de avaliação serão excluídos destas auditorias.",
 	"builderCouldNotLoadPreview": "Não foi possível carregar a pré-visualização de impacto. Prossiga com cautela.",
@@ -1301,15 +1355,42 @@
 	"builderTranslateQuestion": "Traduzir a pergunta...",
 	"builderFrameworkSettings": "Configurações do framework",
 	"builderNoRulesOrGroupsConfigured": "Nenhuma regra ou grupo configurado",
-	"builderOutcomeRuleSummary": "{count} regras de resultado",
-	"builderImplementationGroupsSummaryShort": "{count} grupos",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} regras de resultado",
+				"countPlural=other": "{count} regras de resultado"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupos",
+				"countPlural=other": "{count} grupos"
+			}
+		}
+	],
 	"builderUrnNamespace": "Namespace URN",
 	"builderUrnNamespaceHint": "Organização no prefixo URN (urn:{namespace}:risk:...).",
 	"builderUrnNamespaceLocked": "Bloqueado após a primeira publicação.",
 	"builderScoringSettings": "Configurações de pontuação",
 	"builderAggregationHint": "Média divide a pontuação total pelo número de perguntas. Soma adiciona diretamente todas as pontuações. Use Soma para pontuação binária (0/1).",
 	"builderScoreScale": "Escala de pontuação",
-	"builderScaleLevel": "{count} níveis",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} níveis",
+				"countPlural=other": "{count} níveis"
+			}
+		}
+	],
 	"builderAddScaleLevel": "Adicionar nível",
 	"builderScaleNamePlaceholder": "ex. Parcial",
 	"builderScaleDescriptionPlaceholder": "Opcional",
@@ -1387,10 +1468,26 @@
 	"builderDefaultMode": "Padrão",
 	"builderSplashMode": "Apresentação",
 	"builderAssessableLeaf": "Folha avaliável",
-	"builderAssessableWithChild": "Avaliável · {count} filho",
-	"builderAssessableWithChildren": "Avaliável · {count} filhos",
-	"builderGroupWithChild": "Grupo · {count} filho",
-	"builderGroupWithChildren": "Grupo · {count} filhos",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Avaliável · {count} filho",
+				"countPlural=other": "Avaliável · {count} filhos"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grupo · {count} filho",
+				"countPlural=other": "Grupo · {count} filhos"
+			}
+		}
+	],
 	"builderEmptyNode": "Nó vazio",
 	"builderSplashScreenStatus": "Tela de apresentação",
 	"builderNestedUnder": "aninhado sob {parent}",
@@ -1409,8 +1506,16 @@
 	"builderVisibilityExpressionPlaceholder": "ex. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Grupos de implementação:",
 	"builderAddQuestion": "Adicionar pergunta",
-	"builderChildHidden": "{count} filho oculto",
-	"builderChildrenHidden": "{count} filhos ocultos",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} filho oculto",
+				"countPlural=other": "{count} filhos ocultos"
+			}
+		}
+	],
 	"builderSplashSource": "Fonte",
 	"builderSplashNoSourceContent": "Sem conteúdo de origem.",
 	"builderSplashEditPlaceholder": "Escreva o conteúdo markdown da sua tela de apresentação...",
@@ -1430,7 +1535,16 @@
 	"builderAnnotationOptional": "Nota opcional...",
 	"builderDeleteThisQuestion": "Excluir esta pergunta?",
 	"builderChangeTypeWarning": "Alterar o tipo excluirá as opções existentes. Continuar?",
-	"builderShownWhenAnswers": "Exibido quando {ref} = {count} respostas",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Exibido quando {ref} = {count} respostas",
+				"countPlural=other": "Exibido quando {ref} = {count} respostas"
+			}
+		}
+	],
 	"builderChoices": "Opções",
 	"builderAddChoice": "Adicionar opção",
 	"builderChoicePlaceholder": "Texto da opção...",
