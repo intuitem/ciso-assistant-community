@@ -3406,8 +3406,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} nivel{es}",
-				"countPlural=other": "{count} nivel{es}"
+				"countPlural=one": "{count} nivel",
+				"countPlural=other": "{count} niveles"
 			}
 		}
 	],
