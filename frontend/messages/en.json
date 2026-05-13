@@ -4753,5 +4753,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Slider needs at least 2 choices.",
 	"sliderMinMustBeLessThanMax": "Slider min must be less than max.",
 	"sliderStepMustBeGreaterThanZero": "Slider step must be greater than 0.",
-	"sliderStepCannotExceedRange": "Slider step cannot exceed (max − min)."
+	"sliderStepCannotExceedRange": "Slider step cannot exceed (max − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Single choice",
+	"builderQuestionTypeMultipleChoice": "Multiple choice",
+	"builderQuestionTypeDate": "Date",
+	"builderChangedOn": "changed on"
 }

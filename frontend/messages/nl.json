@@ -3488,5 +3488,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Schuifregelaar heeft minimaal 2 keuzes nodig.",
 	"sliderMinMustBeLessThanMax": "Schuifregelaar-min moet kleiner zijn dan max.",
 	"sliderStepMustBeGreaterThanZero": "Schuifregelaar-stap moet groter zijn dan 0.",
-	"sliderStepCannotExceedRange": "Schuifregelaar-stap mag (max − min) niet overschrijden."
+	"sliderStepCannotExceedRange": "Schuifregelaar-stap mag (max − min) niet overschrijden.",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekst",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Getal",
+	"builderQuestionTypeUniqueChoice": "Unieke keuze",
+	"builderQuestionTypeMultipleChoice": "Meerkeuze",
+	"builderQuestionTypeDate": "Datum",
+	"builderChangedOn": "changed on"
 }

@@ -2837,5 +2837,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Lo slider richiede almeno 2 scelte.",
 	"sliderMinMustBeLessThanMax": "Il min dello slider deve essere inferiore al max.",
 	"sliderStepMustBeGreaterThanZero": "Il passo dello slider deve essere maggiore di 0.",
-	"sliderStepCannotExceedRange": "Il passo dello slider non può superare (max − min)."
+	"sliderStepCannotExceedRange": "Il passo dello slider non può superare (max − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Testo",
+	"builderQuestionTypeBoolean": "Booleano",
+	"builderQuestionTypeNumber": "Numero",
+	"builderQuestionTypeUniqueChoice": "Scelta unica",
+	"builderQuestionTypeMultipleChoice": "Scelta multipla",
+	"builderQuestionTypeDate": "Data",
+	"builderChangedOn": "changed on"
 }

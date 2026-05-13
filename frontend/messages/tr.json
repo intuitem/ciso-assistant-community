@@ -2342,5 +2342,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Kaydırıcı en az 2 seçenek gerektirir.",
 	"sliderMinMustBeLessThanMax": "Kaydırıcının min değeri maks değerinden küçük olmalıdır.",
 	"sliderStepMustBeGreaterThanZero": "Kaydırıcının adımı 0'dan büyük olmalıdır.",
-	"sliderStepCannotExceedRange": "Kaydırıcının adımı (maks − min) değerini aşamaz."
+	"sliderStepCannotExceedRange": "Kaydırıcının adımı (maks − min) değerini aşamaz.",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Metin",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Sayı",
+	"builderQuestionTypeUniqueChoice": "Tek seçim",
+	"builderQuestionTypeMultipleChoice": "Çoktan seçmeli",
+	"builderQuestionTypeDate": "Tarih",
+	"builderChangedOn": "changed on"
 }

@@ -1892,5 +1892,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Skyderen kræver mindst 2 valg.",
 	"sliderMinMustBeLessThanMax": "Skyderens min skal være mindre end max.",
 	"sliderStepMustBeGreaterThanZero": "Skyderens trin skal være større end 0.",
-	"sliderStepCannotExceedRange": "Skyderens trin må ikke overstige (max − min)."
+	"sliderStepCannotExceedRange": "Skyderens trin må ikke overstige (max − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekst",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Tal",
+	"builderQuestionTypeUniqueChoice": "Enkelt valg",
+	"builderQuestionTypeMultipleChoice": "Flere valg",
+	"builderQuestionTypeDate": "Dato",
+	"builderChangedOn": "changed on"
 }

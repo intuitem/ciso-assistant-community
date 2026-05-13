@@ -2108,5 +2108,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Повзунок потребує щонайменше 2 варіантів.",
 	"sliderMinMustBeLessThanMax": "Мін повзунка має бути меншим за макс.",
 	"sliderStepMustBeGreaterThanZero": "Крок повзунка має бути більшим за 0.",
-	"sliderStepCannotExceedRange": "Крок повзунка не може перевищувати (макс − мін)."
+	"sliderStepCannotExceedRange": "Крок повзунка не може перевищувати (макс − мін).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "Логічне значення",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Single choice",
+	"builderQuestionTypeMultipleChoice": "Multiple choice",
+	"builderQuestionTypeDate": "Дата",
+	"builderChangedOn": "changed on"
 }

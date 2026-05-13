@@ -470,7 +470,9 @@
 							<ul class="mt-1.5 text-xs text-orange-700 space-y-0.5">
 								{#each publishPreview.breaking_changes as change}
 									<li class="truncate" title="{change.type}: {change.name} ({change.field})">
-										<span class="font-mono">{change.field}</span> changed on {change.type}
+										<span class="font-mono">{change.field}</span>
+										{m.builderChangedOn()}
+										{change.type}
 										<span class="font-medium">{change.name}</span>
 									</li>
 								{/each}

@@ -45,7 +45,7 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		storedType: 'text',
 		widget: 'native',
 		get label() {
-			return m.text();
+			return m.builderQuestionTypeText();
 		},
 		icon: 'fa-font',
 		color: 'text-blue-600 bg-blue-50'
@@ -55,7 +55,7 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		storedType: 'boolean',
 		widget: 'native',
 		get label() {
-			return m.boolean();
+			return m.builderQuestionTypeBoolean();
 		},
 		icon: 'fa-toggle-on',
 		color: 'text-green-600 bg-green-50'
@@ -66,7 +66,7 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		storedType: 'number',
 		widget: 'native',
 		get label() {
-			return m.number();
+			return m.builderQuestionTypeNumber();
 		},
 		icon: 'fa-hashtag',
 		color: 'text-emerald-600 bg-emerald-50'
@@ -76,7 +76,7 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		storedType: 'number',
 		widget: 'slider',
 		get label() {
-			return `${m.number()} (slider)`;
+			return `${m.builderQuestionTypeNumber()} (${m.builderSlider()})`;
 		},
 		icon: SLIDER_ICON,
 		color: 'text-emerald-600 bg-emerald-50'
@@ -87,7 +87,7 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		storedType: 'unique_choice',
 		widget: 'native',
 		get label() {
-			return m.uniqueChoice();
+			return m.builderQuestionTypeUniqueChoice();
 		},
 		icon: 'fa-circle-dot',
 		color: 'text-violet-600 bg-violet-50'
@@ -97,7 +97,7 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		storedType: 'unique_choice',
 		widget: 'slider',
 		get label() {
-			return `${m.uniqueChoice()} (slider)`;
+			return `${m.builderQuestionTypeUniqueChoice()} (${m.builderSlider()})`;
 		},
 		icon: SLIDER_ICON,
 		color: 'text-violet-600 bg-violet-50'
@@ -108,7 +108,7 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		storedType: 'multiple_choice',
 		widget: 'native',
 		get label() {
-			return m.multipleChoice();
+			return m.builderQuestionTypeMultipleChoice();
 		},
 		icon: 'fa-square-check',
 		color: 'text-purple-600 bg-purple-50'
@@ -118,7 +118,7 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		storedType: 'date',
 		widget: 'native',
 		get label() {
-			return m.date();
+			return m.builderQuestionTypeDate();
 		},
 		icon: 'fa-calendar',
 		color: 'text-amber-600 bg-amber-50'

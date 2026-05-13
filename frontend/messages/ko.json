@@ -4280,5 +4280,13 @@
 	"sliderNeedsAtLeastTwoChoices": "슬라이더에는 최소 2개의 선택지가 필요합니다.",
 	"sliderMinMustBeLessThanMax": "슬라이더 최소값은 최대값보다 작아야 합니다.",
 	"sliderStepMustBeGreaterThanZero": "슬라이더 단계는 0보다 커야 합니다.",
-	"sliderStepCannotExceedRange": "슬라이더 단계는 (최대 − 최소)를 초과할 수 없습니다."
+	"sliderStepCannotExceedRange": "슬라이더 단계는 (최대 − 최소)를 초과할 수 없습니다.",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "텍스트",
+	"builderQuestionTypeBoolean": "불리언",
+	"builderQuestionTypeNumber": "번호",
+	"builderQuestionTypeUniqueChoice": "단일 선택",
+	"builderQuestionTypeMultipleChoice": "복수 선택",
+	"builderQuestionTypeDate": "날짜",
+	"builderChangedOn": "changed on"
 }

@@ -2288,5 +2288,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Ο ολισθητής χρειάζεται τουλάχιστον 2 επιλογές.",
 	"sliderMinMustBeLessThanMax": "Το ελάχ του ολισθητή πρέπει να είναι μικρότερο από το μέγ.",
 	"sliderStepMustBeGreaterThanZero": "Το βήμα του ολισθητή πρέπει να είναι μεγαλύτερο από 0.",
-	"sliderStepCannotExceedRange": "Το βήμα του ολισθητή δεν μπορεί να ξεπερνά το (μέγ − ελάχ)."
+	"sliderStepCannotExceedRange": "Το βήμα του ολισθητή δεν μπορεί να ξεπερνά το (μέγ − ελάχ).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Κείμενο",
+	"builderQuestionTypeBoolean": "Δυαδική τιμή",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Μοναδική επιλογή",
+	"builderQuestionTypeMultipleChoice": "Πολλαπλή επιλογή",
+	"builderQuestionTypeDate": "Ημερομηνία",
+	"builderChangedOn": "changed on"
 }

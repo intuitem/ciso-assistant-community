@@ -4566,5 +4566,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Slankikliui reikia bent 2 pasirinkimų.",
 	"sliderMinMustBeLessThanMax": "Slankiklio min turi būti mažesnis už maks.",
 	"sliderStepMustBeGreaterThanZero": "Slankiklio žingsnis turi būti didesnis nei 0.",
-	"sliderStepCannotExceedRange": "Slankiklio žingsnis negali viršyti (maks − min)."
+	"sliderStepCannotExceedRange": "Slankiklio žingsnis negali viršyti (maks − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekstas",
+	"builderQuestionTypeBoolean": "Loginis",
+	"builderQuestionTypeNumber": "Skaičius",
+	"builderQuestionTypeUniqueChoice": "Vienas pasirinkimas",
+	"builderQuestionTypeMultipleChoice": "Keli pasirinkimai",
+	"builderQuestionTypeDate": "Data",
+	"builderChangedOn": "changed on"
 }

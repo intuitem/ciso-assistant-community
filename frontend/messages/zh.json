@@ -3633,5 +3633,13 @@
 	"sliderNeedsAtLeastTwoChoices": "滑块需要至少 2 个选项。",
 	"sliderMinMustBeLessThanMax": "滑块最小值必须小于最大值。",
 	"sliderStepMustBeGreaterThanZero": "滑块步长必须大于 0。",
-	"sliderStepCannotExceedRange": "滑块步长不能超过（最大 − 最小）。"
+	"sliderStepCannotExceedRange": "滑块步长不能超过（最大 − 最小）。",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "文本",
+	"builderQuestionTypeBoolean": "布尔值",
+	"builderQuestionTypeNumber": "数字",
+	"builderQuestionTypeUniqueChoice": "单选",
+	"builderQuestionTypeMultipleChoice": "多选",
+	"builderQuestionTypeDate": "日期",
+	"builderChangedOn": "changed on"
 }

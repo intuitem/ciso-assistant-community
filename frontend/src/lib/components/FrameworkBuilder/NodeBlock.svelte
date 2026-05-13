@@ -887,7 +887,7 @@
 					class="w-full text-xs px-2 py-1 border border-gray-200 rounded font-mono bg-gray-50 focus:bg-white focus:{isSplash
 						? 'border-purple-300'
 						: 'border-blue-300'} focus:outline-none"
-					placeholder={'e.g. requirements["urn:..."].score > 50'}
+					placeholder={m.builderVisibilityExpressionPlaceholder()}
 					value={node.node.visibility_expression ?? ''}
 					onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
 				/>

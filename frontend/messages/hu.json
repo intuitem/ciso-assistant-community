@@ -1590,5 +1590,13 @@
 	"sliderNeedsAtLeastTwoChoices": "A csúszka legalább 2 választást igényel.",
 	"sliderMinMustBeLessThanMax": "A csúszka min értékének kisebbnek kell lennie a max értéknél.",
 	"sliderStepMustBeGreaterThanZero": "A csúszka lépésközének nagyobbnak kell lennie 0-nál.",
-	"sliderStepCannotExceedRange": "A csúszka lépésköze nem haladhatja meg (max − min)."
+	"sliderStepCannotExceedRange": "A csúszka lépésköze nem haladhatja meg (max − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "Logikai",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Single choice",
+	"builderQuestionTypeMultipleChoice": "Multiple choice",
+	"builderQuestionTypeDate": "Date",
+	"builderChangedOn": "changed on"
 }

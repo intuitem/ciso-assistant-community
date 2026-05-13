@@ -3483,5 +3483,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Schieberegler benötigt mindestens 2 Auswahlmöglichkeiten.",
 	"sliderMinMustBeLessThanMax": "Schieberegler-Min muss kleiner als Max sein.",
 	"sliderStepMustBeGreaterThanZero": "Schieberegler-Schritt muss größer als 0 sein.",
-	"sliderStepCannotExceedRange": "Schieberegler-Schritt darf (Max − Min) nicht überschreiten."
+	"sliderStepCannotExceedRange": "Schieberegler-Schritt darf (Max − Min) nicht überschreiten.",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Zahl",
+	"builderQuestionTypeUniqueChoice": "Einzelauswahl",
+	"builderQuestionTypeMultipleChoice": "Mehrfachauswahl",
+	"builderQuestionTypeDate": "Datum",
+	"builderChangedOn": "changed on"
 }

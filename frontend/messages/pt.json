@@ -1608,5 +1608,13 @@
 	"sliderNeedsAtLeastTwoChoices": "O controle deslizante precisa de pelo menos 2 escolhas.",
 	"sliderMinMustBeLessThanMax": "O mín do controle deslizante deve ser menor que o máx.",
 	"sliderStepMustBeGreaterThanZero": "O passo do controle deslizante deve ser maior que 0.",
-	"sliderStepCannotExceedRange": "O passo do controle deslizante não pode exceder (máx − mín)."
+	"sliderStepCannotExceedRange": "O passo do controle deslizante não pode exceder (máx − mín).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Texto",
+	"builderQuestionTypeBoolean": "Booleano",
+	"builderQuestionTypeNumber": "Número",
+	"builderQuestionTypeUniqueChoice": "Escolha única",
+	"builderQuestionTypeMultipleChoice": "Múltipla escolha",
+	"builderQuestionTypeDate": "Data",
+	"builderChangedOn": "changed on"
 }

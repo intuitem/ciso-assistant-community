@@ -1559,5 +1559,13 @@
 	"sliderNeedsAtLeastTwoChoices": "स्लाइडर को कम से कम 2 विकल्प चाहिए।",
 	"sliderMinMustBeLessThanMax": "स्लाइडर का न्यूनतम अधिकतम से कम होना चाहिए।",
 	"sliderStepMustBeGreaterThanZero": "स्लाइडर का चरण 0 से अधिक होना चाहिए।",
-	"sliderStepCannotExceedRange": "स्लाइडर का चरण (अधिकतम − न्यूनतम) से अधिक नहीं हो सकता।"
+	"sliderStepCannotExceedRange": "स्लाइडर का चरण (अधिकतम − न्यूनतम) से अधिक नहीं हो सकता।",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "बूलियन",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Single choice",
+	"builderQuestionTypeMultipleChoice": "Multiple choice",
+	"builderQuestionTypeDate": "Date",
+	"builderChangedOn": "changed on"
 }

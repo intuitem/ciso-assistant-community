@@ -1775,5 +1775,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Slider membutuhkan setidaknya 2 pilihan.",
 	"sliderMinMustBeLessThanMax": "Min slider harus kurang dari maks.",
 	"sliderStepMustBeGreaterThanZero": "Langkah slider harus lebih besar dari 0.",
-	"sliderStepCannotExceedRange": "Langkah slider tidak boleh melebihi (maks − min)."
+	"sliderStepCannotExceedRange": "Langkah slider tidak boleh melebihi (maks − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Teks",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Pilihan unik",
+	"builderQuestionTypeMultipleChoice": "Pilihan ganda",
+	"builderQuestionTypeDate": "Tanggal",
+	"builderChangedOn": "changed on"
 }

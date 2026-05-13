@@ -4103,5 +4103,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Klizač treba najmanje 2 izbora.",
 	"sliderMinMustBeLessThanMax": "Min klizača mora biti manji od maks.",
 	"sliderStepMustBeGreaterThanZero": "Korak klizača mora biti veći od 0.",
-	"sliderStepCannotExceedRange": "Korak klizača ne smije premašiti (maks − min)."
+	"sliderStepCannotExceedRange": "Korak klizača ne smije premašiti (maks − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekst",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Broj",
+	"builderQuestionTypeUniqueChoice": "Jednostruki odabir",
+	"builderQuestionTypeMultipleChoice": "Višestruki odabir",
+	"builderQuestionTypeDate": "Datum",
+	"builderChangedOn": "changed on"
 }

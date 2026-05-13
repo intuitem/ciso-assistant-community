@@ -1880,5 +1880,13 @@
 	"dataBreaches": "Úniky dat (Incidenty)",
 	"dataBreach": "Únik dat",
 	"addDataBreach": "Zaznamenat únik dat",
-	"dataBreachesByType": "Únik"
+	"dataBreachesByType": "Únik",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Číslo",
+	"builderQuestionTypeUniqueChoice": "Jedinečná volba",
+	"builderQuestionTypeMultipleChoice": "Více možností",
+	"builderQuestionTypeDate": "Datum",
+	"builderChangedOn": "changed on"
 }

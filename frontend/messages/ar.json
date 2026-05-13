@@ -1585,5 +1585,13 @@
 	"sliderNeedsAtLeastTwoChoices": "يحتاج المنزلق إلى خيارين على الأقل.",
 	"sliderMinMustBeLessThanMax": "يجب أن يكون الحد الأدنى للمنزلق أقل من الحد الأقصى.",
 	"sliderStepMustBeGreaterThanZero": "يجب أن تكون خطوة المنزلق أكبر من 0.",
-	"sliderStepCannotExceedRange": "لا يمكن أن تتجاوز خطوة المنزلق (الحد الأقصى − الحد الأدنى)."
+	"sliderStepCannotExceedRange": "لا يمكن أن تتجاوز خطوة المنزلق (الحد الأقصى − الحد الأدنى).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "نص",
+	"builderQuestionTypeBoolean": "قيمة منطقية",
+	"builderQuestionTypeNumber": "رقم",
+	"builderQuestionTypeUniqueChoice": "اختيار فريد",
+	"builderQuestionTypeMultipleChoice": "اختيار متعدد",
+	"builderQuestionTypeDate": "التاريخ",
+	"builderChangedOn": "changed on"
 }

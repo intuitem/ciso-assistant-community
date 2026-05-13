@@ -1606,5 +1606,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Glisorul are nevoie de cel puțin 2 opțiuni.",
 	"sliderMinMustBeLessThanMax": "Min-ul glisorului trebuie să fie mai mic decât max-ul.",
 	"sliderStepMustBeGreaterThanZero": "Pasul glisorului trebuie să fie mai mare decât 0.",
-	"sliderStepCannotExceedRange": "Pasul glisorului nu poate depăși (max − min)."
+	"sliderStepCannotExceedRange": "Pasul glisorului nu poate depăși (max − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Număr",
+	"builderQuestionTypeUniqueChoice": "Alegere unică",
+	"builderQuestionTypeMultipleChoice": "Alegere multiplă",
+	"builderQuestionTypeDate": "Data",
+	"builderChangedOn": "changed on"
 }

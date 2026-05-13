@@ -2349,5 +2349,13 @@
 	"sliderNeedsAtLeastTwoChoices": "Suwak wymaga co najmniej 2 opcji.",
 	"sliderMinMustBeLessThanMax": "Min suwaka musi być mniejsze niż maks.",
 	"sliderStepMustBeGreaterThanZero": "Krok suwaka musi być większy od 0.",
-	"sliderStepCannotExceedRange": "Krok suwaka nie może przekraczać (maks − min)."
+	"sliderStepCannotExceedRange": "Krok suwaka nie może przekraczać (maks − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekst",
+	"builderQuestionTypeBoolean": "Wartość logiczna",
+	"builderQuestionTypeNumber": "Liczba",
+	"builderQuestionTypeUniqueChoice": "Unikalny wybór",
+	"builderQuestionTypeMultipleChoice": "Wielokrotny wybór",
+	"builderQuestionTypeDate": "Data",
+	"builderChangedOn": "changed on"
 }

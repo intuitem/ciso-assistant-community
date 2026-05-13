@@ -548,7 +548,7 @@ export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): Validati
 	function validate(tree: BuilderNode[]) {
 		for (const bn of tree) {
 			const n = bn.node;
-			const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
+			const label = n.ref_id ?? `#${n.order_id ?? '?'}`;
 			if (n.name && n.name.length > 200) {
 				errors.push({
 					key: `node-${n.id}`,

@@ -1581,5 +1581,13 @@
 	"sliderNeedsAtLeastTwoChoices": "سلائیڈر کو کم از کم 2 انتخاب چاہئیں۔",
 	"sliderMinMustBeLessThanMax": "سلائیڈر کا کم سے کم زیادہ سے زیادہ سے کم ہونا چاہیے۔",
 	"sliderStepMustBeGreaterThanZero": "سلائیڈر کا قدم 0 سے بڑا ہونا چاہیے۔",
-	"sliderStepCannotExceedRange": "سلائیڈر کا قدم (زیادہ سے زیادہ − کم سے کم) سے زیادہ نہیں ہو سکتا۔"
+	"sliderStepCannotExceedRange": "سلائیڈر کا قدم (زیادہ سے زیادہ − کم سے کم) سے زیادہ نہیں ہو سکتا۔",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "متن",
+	"builderQuestionTypeBoolean": "بولین",
+	"builderQuestionTypeNumber": "نمبر",
+	"builderQuestionTypeUniqueChoice": "واحد انتخاب",
+	"builderQuestionTypeMultipleChoice": "متعدد انتخاب",
+	"builderQuestionTypeDate": "تاریخ",
+	"builderChangedOn": "changed on"
 }
