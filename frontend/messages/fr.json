@@ -4410,7 +4410,7 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} niveau",
-				"countPlural=other": "{count} niveaus"
+				"countPlural=other": "{count} niveaux"
 			}
 		}
 	],
