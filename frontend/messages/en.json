@@ -4786,7 +4786,7 @@
 	"addThreshold": "Add",
 	"noThresholdsConfigured": "No thresholds — value uses the default color.",
 	"useColor": "use",
-	"ifValue": "if value"
+	"ifValue": "if value",
 	"frameworkRefId": "Ref ID",
 	"urnPreview": "URN preview:",
 	"urnLockedComplianceAssessment": "Locked — a compliance assessment uses this framework.",
