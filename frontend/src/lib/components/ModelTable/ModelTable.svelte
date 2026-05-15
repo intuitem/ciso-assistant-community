@@ -351,14 +351,21 @@
 			if (finalFilterValue) {
 				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
 			}
-
-			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
-			const fullPath = page.url.pathname + page.url.search;
-			if (hrefPattern.test(fullPath)) {
-				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
-			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
+		// Keep the current breadcrumb href in sync with the new search params so
+		// navigating back to this page via the breadcrumb restores the filters.
+		breadcrumbs.update((crumbs) => {
+			if (crumbs.length < 2) return crumbs;
+			const last = crumbs[crumbs.length - 1];
+			const lastPath = last.href?.split('?')[0];
+			if (lastPath !== page.url.pathname) return crumbs;
+			const newHref = page.url.pathname + page.url.search;
+			if (last.href === newHref) return crumbs;
+			const next = crumbs.slice();
+			next[next.length - 1] = { ...last, href: newHref };
+			return next;
+		});
 		// untracked so resetFilters can delete the entry without retriggering us
 		if (isStandaloneTable) {
 			untrack(() => {

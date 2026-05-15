@@ -6,16 +6,33 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { pageTitle } from '$lib/utils/stores';
 
-	async function trimBreadcrumbsToCurrentPath(
+	function hrefPathname(href: string | undefined): string | undefined {
+		if (!href) return undefined;
+		const queryIdx = href.indexOf('?');
+		return queryIdx === -1 ? href : href.slice(0, queryIdx);
+	}
+
+	function syncBreadcrumbsToCurrentUrl(
 		breadcrumbs: Breadcrumb[],
-		currentPath: string
-	): Promise<Breadcrumb[]> {
-		const idx = breadcrumbs.findIndex((c) => c.href?.startsWith(currentPath));
-		// First breadcrumb is home, its href is always '/'
-		if (idx > 0 && idx < breadcrumbs.length - 1) {
-			breadcrumbs = breadcrumbs.slice(0, idx + 1);
+		currentPath: string,
+		currentUrl: string,
+		fallbackLabel: string
+	): Breadcrumb[] {
+		// First breadcrumb is home (href '/'); skip it when matching.
+		const idx = breadcrumbs.findIndex(
+			(c, i) => i > 0 && hrefPathname(c.href) === currentPath
+		);
+		if (idx > 0) {
+			// Trim to the matched crumb and refresh its href with the current
+			// query string so filters/search params survive a round-trip.
+			const trimmed = breadcrumbs.slice(0, idx + 1);
+			const matched = trimmed[idx];
+			trimmed[idx] = { ...matched, href: currentUrl };
+			return trimmed;
 		}
-		return breadcrumbs;
+		// Current page isn't in the stack: append it so the trail always
+		// reflects where the user actually is.
+		return [...breadcrumbs, { label: fallbackLabel, href: currentUrl }];
 	}
 
 	function getPageTitle(): string {
@@ -38,13 +55,25 @@
 		return URL_MODEL_MAP[lastPathSegment]?.localNamePlural;
 	}
 
-	afterNavigate(async () => {
-		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, page.url.pathname);
-	});
+	function sync(fallbackLabel: string) {
+		const currentPath = page.url.pathname;
+		const currentUrl = currentPath + page.url.search;
+		const current = $breadcrumbs;
+		const next = syncBreadcrumbsToCurrentUrl(current, currentPath, currentUrl, fallbackLabel);
+		// Only write if something actually changed, to avoid effect loops.
+		if (
+			next.length !== current.length ||
+			next.some((c, i) => c.href !== current[i].href || c.label !== current[i].label)
+		) {
+			$breadcrumbs = next;
+		}
+	}
+
+	afterNavigate(() => sync($pageTitle || getPageTitle()));
 
 	$effect(() => {
 		$pageTitle = getPageTitle();
-		if ($breadcrumbs.length < 2) breadcrumbs.push([{ label: $pageTitle, href: page.url.pathname }]);
+		sync($pageTitle);
 	});
 </script>
 
