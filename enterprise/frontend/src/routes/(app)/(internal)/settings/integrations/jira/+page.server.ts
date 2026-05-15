@@ -90,8 +90,25 @@ export const actions: Actions = {
 				});
 
 		if (!response.ok) {
-			console.error('Failed to save Jira integration config:', await response.text());
-			setFlash({ type: 'error', message: 'Failed to save Jira integration config' }, event);
+			// Surface DRF's validation detail so the user can see *what* was
+			// rejected (e.g. "duplicate config for provider+folder") rather than
+			// just "save failed".
+			const rawBody = await response.text();
+			let detail = '';
+			try {
+				const parsed = JSON.parse(rawBody);
+				detail =
+					typeof parsed === 'string'
+						? parsed
+						: parsed.detail || parsed.error || JSON.stringify(parsed);
+			} catch {
+				detail = rawBody.slice(0, 200);
+			}
+			console.error('Failed to save Jira integration config:', detail);
+			setFlash(
+				{ type: 'error', message: `Failed to save Jira integration config: ${detail}` },
+				event
+			);
 			return fail(400, { form: form });
 		}
 		// Backfill the saved row's id so the form switches to PATCH mode on subsequent

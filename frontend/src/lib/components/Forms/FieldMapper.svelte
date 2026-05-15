@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+
+	const toastStore = getToastStore();
 
 	let {
 		integrationId,
@@ -65,23 +68,49 @@
 		LOCAL_FIELDS.filter((f) => f.type === 'choice' && fieldMap[f.key])
 	);
 
-	async function fetchRpc(action: string, params = {}) {
+	// Returns `null` (not `[]`) on failure so callers can branch on it.
+	// Surfaces a toast for non-2xx and network/parse errors so the user has a
+	// signal when the integration backend is unreachable or the action isn't
+	// supported. Callers that want a "safe empty" should do `?? []` themselves.
+	async function fetchRpc(action: string, params = {}): Promise<any> {
+		let res: Response;
 		try {
-			const res = await fetch(`/settings/integrations/configs/${integrationId}/rpc`, {
+			res = await fetch(`/settings/integrations/configs/${integrationId}/rpc`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ action, params })
 			});
-			const data = await res.json();
-			return data.result || [];
 		} catch (e) {
-			console.error(`RPC ${action} failed:`, e);
-			return [];
+			console.error(`RPC ${action} network error:`, e);
+			toastStore.trigger({
+				message: `Could not reach the integration backend (${action}).`,
+				preset: 'error'
+			});
+			return null;
 		}
+
+		let data: any = null;
+		try {
+			data = await res.json();
+		} catch {
+			// Non-JSON body (e.g. Django debug HTML on 500). Fall through.
+		}
+
+		if (!res.ok) {
+			const detail = (data && (data.error || data.message)) || `HTTP ${res.status}`;
+			console.error(`RPC ${action} failed:`, detail, data);
+			toastStore.trigger({
+				message: `Integration action "${action}" failed: ${detail}`,
+				preset: 'error'
+			});
+			return null;
+		}
+
+		return data?.result ?? null;
 	}
 
 	async function loadTables() {
-		const rawTables = await fetchRpc('get_tables');
+		const rawTables = (await fetchRpc('get_tables')) ?? [];
 		// Transform to Autocomplete options format
 		tables = rawTables.map((t: Record<string, any>) => ({
 			value: t.name,
@@ -92,7 +121,7 @@
 	async function loadColumns(tableName: string) {
 		if (!tableName) return;
 		isLoadingColumns = true;
-		const rawCols = await fetchRpc('get_columns', { table_name: tableName });
+		const rawCols = (await fetchRpc('get_columns', { table_name: tableName })) ?? [];
 
 		columns = rawCols.map((c: Record<string, any>) => ({
 			value: c.name,
@@ -112,6 +141,7 @@
 			table_name: tableName,
 			field_name: fieldName
 		});
+		if (rawChoices === null) return; // RPC failed — don't cache an empty list as success
 		choicesCache[cacheKey] = rawChoices.map((c) => ({ value: c.value, label: c.label }));
 	}
 
@@ -131,12 +161,23 @@
 		});
 	});
 
+	// Seed an empty per-field map up-front so the template can read
+	// `valueMap[field.key][choice.value]` without mutating state during render.
+	$effect(() => {
+		for (const f of activeChoiceFields) {
+			if (!valueMap[f.key]) valueMap[f.key] = {};
+		}
+	});
+
 	async function handleTableChange(val: string) {
 		selectedTable = val;
 		fieldMap = {};
 		valueMap = {};
 		columns = [];
-		onMapsChange({ field_map: {}, value_map: {} });
+		// Skip an early empty `onMapsChange` here — it would double-write the
+		// formStore and mark the form dirty for the cleared state before the
+		// suggested mapping has even arrived. The single onMapsChange at the
+		// end of this function applies the final state in one taint.
 		await loadColumns(val);
 		if (!val) return;
 		const suggested = await fetchRpc('suggest_mapping', { table_name: val });
@@ -271,8 +312,11 @@
 													options={choices}
 													optionsValueField="value"
 													optionsLabelField="label"
-													cachedValue={(valueMap[field.key] ??= {})[choice.value]}
-													onChange={(val) => ((valueMap[field.key] ??= {})[choice.value] = val)}
+													cachedValue={valueMap[field.key]?.[choice.value]}
+													onChange={(val) => {
+														valueMap[field.key] ??= {};
+														valueMap[field.key][choice.value] = val;
+													}}
 													nullable={true}
 													baseClass="w-full"
 												/>

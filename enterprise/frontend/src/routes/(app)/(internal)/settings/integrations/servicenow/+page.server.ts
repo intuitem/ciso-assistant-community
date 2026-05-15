@@ -79,8 +79,25 @@ export const actions: Actions = {
 				});
 
 		if (!response.ok) {
-			console.error('Failed to save ServiceNow integration config:', await response.text());
-			setFlash({ type: 'error', message: 'Failed to save ServiceNow integration config' }, event);
+			const rawBody = await response.text();
+			let detail = '';
+			try {
+				const parsed = JSON.parse(rawBody);
+				detail =
+					typeof parsed === 'string'
+						? parsed
+						: parsed.detail || parsed.error || JSON.stringify(parsed);
+			} catch {
+				detail = rawBody.slice(0, 200);
+			}
+			console.error('Failed to save ServiceNow integration config:', detail);
+			setFlash(
+				{
+					type: 'error',
+					message: `Failed to save ServiceNow integration config: ${detail}`
+				},
+				event
+			);
 			return fail(400, { form: form });
 		}
 		setFlash(

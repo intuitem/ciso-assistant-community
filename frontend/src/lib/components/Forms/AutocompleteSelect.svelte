@@ -277,16 +277,20 @@
 					}
 				}
 				optionsLoaded = true;
-			}
-			// After options are loaded, set initial selection using stored initial value
-			if (initialValue) {
-				selected = options.filter((item) =>
-					Array.isArray(initialValue)
-						? initialValue.includes(item.value)
-						: item.value === initialValue
-				);
-			} else if (options.length === 1 && $constraints?.required) {
-				selected = [options[0]];
+				// After endpoint-fetched options are loaded, set initial selection
+				// from the stored initial value. The prop-options path is already
+				// seeded synchronously at script-init via `initialSelection()`, so
+				// this filter would duplicate (and on re-mount with fresh options
+				// can race) — gate it on the fetch path.
+				if (initialValue) {
+					selected = options.filter((item) =>
+						Array.isArray(initialValue)
+							? initialValue.includes(item.value)
+							: item.value === initialValue
+					);
+				} else if (options.length === 1 && $constraints?.required) {
+					selected = [options[0]];
+				}
 			}
 		} catch (error) {
 			console.error(`Error fetching ${optionsEndpoint}:`, error);
