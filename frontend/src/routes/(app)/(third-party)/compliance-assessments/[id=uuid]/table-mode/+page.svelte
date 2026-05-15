@@ -454,8 +454,18 @@
 								class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
 							></div>
 
-							<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
-								{getTitle(requirementAssessment)}
+							<span
+								class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl inline-flex items-center gap-3"
+							>
+								<span>{getTitle(requirementAssessment)}</span>
+								{#if typeof requirementAssessment.requirement?.weight === 'number' && requirementAssessment.requirement.weight !== 1 && requirementAssessment.assessable}
+									<span
+										class="badge text-xs font-medium"
+										style="color: #3730a3; background-color: #e0e7ff;"
+									>
+										{m.requirementWeight()}: {requirementAssessment.requirement.weight}
+									</span>
+								{/if}
 							</span>
 						</span>
 						<div class="h-2"></div>

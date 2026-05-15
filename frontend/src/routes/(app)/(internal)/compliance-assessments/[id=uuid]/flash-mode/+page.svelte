@@ -383,7 +383,17 @@
 								<MarkdownRenderer content={currentSplashNode.description} />
 							</div>
 						{:else if currentRequirementAssessment}
-							<div class="content-section-label">{title}</div>
+							<div class="content-section-label flex items-center gap-3 flex-wrap">
+								<span>{title}</span>
+								{#if typeof requirement?.weight === 'number' && requirement.weight !== 1 && currentRequirementAssessment.assessable}
+									<span
+										class="badge text-sm font-medium"
+										style="background-color: #e0e7ff; color: #3730a3;"
+									>
+										{m.requirementWeight()}: {requirement.weight}
+									</span>
+								{/if}
+							</div>
 
 							{#if currentRequirementAssessment.description}
 								<div class="content-description">

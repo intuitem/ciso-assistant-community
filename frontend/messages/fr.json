@@ -4733,5 +4733,6 @@
 	"builderQuestionTypeUniqueChoice": "Choix unique",
 	"builderQuestionTypeMultipleChoice": "Choix multiple",
 	"builderQuestionTypeDate": "Date",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "changed on",
+	"requirementWeight": "Poids"
 }

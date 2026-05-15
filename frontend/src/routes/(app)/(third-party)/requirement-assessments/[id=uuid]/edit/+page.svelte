@@ -401,8 +401,13 @@
 {/if}
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
-		<div class="flex">
+		<div class="flex items-center gap-2">
 			<span class="code left h-min">{data.requirement.urn}</span>
+			{#if typeof data.requirement.weight === 'number' && data.requirement.weight !== 1}
+				<span class="badge h-fit" style="background-color: #e0e7ff; color: #3730a3;">
+					{m.requirementWeight()}: {data.requirement.weight}
+				</span>
+			{/if}
 		</div>
 		<a
 			class="text-pink-500 hover:text-pink-400"

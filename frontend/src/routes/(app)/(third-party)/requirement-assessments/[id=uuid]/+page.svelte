@@ -138,6 +138,11 @@
 				</span>
 			</span>
 		{/if}
+		{#if typeof data.requirement.weight === 'number' && data.requirement.weight !== 1}
+			<span class="badge h-fit" style="background-color: #e0e7ff; color: #3730a3;">
+				{m.requirementWeight()}: {data.requirement.weight}
+			</span>
+		{/if}
 		{#if data.requirement.implementation_groups && data.requirement.implementation_groups.length > 0}
 			<div class="ml-3">
 				<b class="mr-2">{m.implementationGroups()} :</b>
