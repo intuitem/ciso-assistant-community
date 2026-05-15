@@ -1455,13 +1455,7 @@ export function createBuilderState(
 		}));
 
 		// --- Swap all node/question/choice fields ---
-		rootNodes.update((secs) =>
-			secs.map((sec) => ({
-				...sec,
-				node: swapNodeFields(sec.node, oldLocale, newLocale),
-				children: swapReqFields(sec.children, oldLocale, newLocale)
-			}))
-		);
+		rootNodes.update((secs) => swapReqFields(secs, oldLocale, newLocale));
 
 		// If we were translating into the new base, deselect
 		const currentLang = get(activeLanguage);
@@ -1639,21 +1633,12 @@ export function createBuilderState(
 			}
 		}
 
-		for (const sec of secs) {
-			checkNode(sec.node);
-			walkReqs(sec.children);
-		}
+		walkReqs(secs);
 		return { translated, total };
 	}
 
 	function copyFromBase(lang: string) {
-		rootNodes.update((secs) =>
-			secs.map((sec) => ({
-				...sec,
-				node: copyNodeTranslations(sec.node, lang),
-				children: copyReqTranslations(sec.children, lang)
-			}))
-		);
+		rootNodes.update((secs) => copyReqTranslations(secs, lang));
 		markDirty();
 	}
 
