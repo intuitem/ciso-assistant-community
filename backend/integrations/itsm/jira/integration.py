@@ -150,7 +150,7 @@ class JiraOrchestrator(BaseITSMOrchestrator):
         return payload.get("webhookEvent")
 
     def get_interactive_actions(self):
-        return ["get_tables", "get_columns", "get_choices"]
+        return ["get_tables", "get_columns", "get_choices", "suggest_mapping"]
 
     def execute_action(self, action: str, params: dict):
         client = self._get_client()
@@ -172,6 +172,14 @@ class JiraOrchestrator(BaseITSMOrchestrator):
                     "Parameters 'table_name' and 'field_name' are required"
                 )
             return client.get_field_choices(table, field)
+
+        if action == "suggest_mapping":
+            table = params.get("table_name")
+            if not table:
+                raise ValueError(
+                    "Parameter 'table_name' is required for suggest_mapping"
+                )
+            return self.mapper.suggest_mapping_for_table(table, client)
 
         raise NotImplementedError(f"Unknown action: {action}")
 

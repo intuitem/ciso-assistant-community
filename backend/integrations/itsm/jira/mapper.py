@@ -83,6 +83,43 @@ class JiraFieldMapper(BaseFieldMapper):
                 str(remote_val): local_val for local_val, remote_val in mapping.items()
             }
 
+    def suggest_mapping_for_table(self, table_name: str, client) -> dict[str, Any]:
+        """Filter the legacy defaults against what the chosen project + issue
+        type actually exposes, so the UI can pre-populate rows the user would
+        almost certainly pick themselves.
+        """
+        columns = client.get_table_columns(table_name)
+        column_names = {c.get("name") for c in columns if c.get("name")}
+
+        field_map = {
+            local: remote
+            for local, remote in self._DEFAULT_FIELD_MAP.items()
+            if remote in column_names
+        }
+
+        value_map: dict[str, dict[str, str]] = {}
+        for local_field, label_map in self._DEFAULT_VALUE_MAP_TO_REMOTE.items():
+            remote_field = field_map.get(local_field)
+            if not remote_field:
+                continue
+            choices = client.get_field_choices(table_name, remote_field) or []
+            # Build a case-insensitive lookup so we can return Jira's canonical
+            # casing (matters for status names like "In Progress" vs "in progress").
+            label_lookup = {
+                str(c.get("label", "")).lower(): c.get("label")
+                for c in choices
+                if c.get("label")
+            }
+            matched = {
+                local_val: label_lookup[remote_label.lower()]
+                for local_val, remote_label in label_map.items()
+                if remote_label.lower() in label_lookup
+            }
+            if matched:
+                value_map[local_field] = matched
+
+        return {"field_map": field_map, "value_map": value_map}
+
     def _get_mappings(self) -> dict[str, str]:
         return self.field_map
 

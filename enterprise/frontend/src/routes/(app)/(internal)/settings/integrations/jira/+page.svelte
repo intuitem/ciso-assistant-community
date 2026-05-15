@@ -228,6 +228,10 @@
 						description={m.jiraIntegrationMappingsHelpText()}
 						remoteFieldLabel={m.jiraField()}
 						tableHelpText={m.jiraTableHelpText()}
+						onMapsChange={({ field_map, value_map }) => {
+							$formStore.settings.field_map = field_map;
+							$formStore.settings.value_map = value_map;
+						}}
 					/>
 				{/if}
 				<button

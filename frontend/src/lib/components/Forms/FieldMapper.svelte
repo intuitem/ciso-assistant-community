@@ -12,7 +12,13 @@
 		description = m.integrationMappingsHelpText(),
 		remoteFieldLabel = m.remoteField(),
 		tableHelpText = m.integrationTableHelpText(),
-		onSave = (config) => console.log('Saved:', config)
+		onSave = (config) => console.log('Saved:', config),
+		// Fires after handleTableChange so the parent page can sync field_map /
+		// value_map into the superform store. Without this, the per-row
+		// AutocompleteSelect rebinds happen on the next tick but the form's
+		// settings.field_map / settings.value_map keep stale values.
+		onMapsChange = (_maps: { field_map: Record<string, any>; value_map: Record<string, any> }) =>
+			undefined
 	} = $props();
 
 	const LOCAL_FIELDS = [
@@ -125,12 +131,20 @@
 		});
 	});
 
-	function handleTableChange(val: string) {
+	async function handleTableChange(val: string) {
 		selectedTable = val;
-		fieldMap = {}; // Clear mappings on table switch to avoid invalid references
+		fieldMap = {};
 		valueMap = {};
 		columns = [];
-		loadColumns(val);
+		onMapsChange({ field_map: {}, value_map: {} });
+		await loadColumns(val);
+		if (!val) return;
+		const suggested = await fetchRpc('suggest_mapping', { table_name: val });
+		const nextFieldMap = (suggested?.field_map as Record<string, any>) ?? {};
+		const nextValueMap = (suggested?.value_map as Record<string, any>) ?? {};
+		fieldMap = nextFieldMap;
+		valueMap = nextValueMap;
+		onMapsChange({ field_map: nextFieldMap, value_map: nextValueMap });
 	}
 </script>
 

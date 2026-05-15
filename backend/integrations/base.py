@@ -161,6 +161,18 @@ class BaseFieldMapper(ABC):
         """
         pass
 
+    def suggest_mapping_for_table(
+        self, table_name: str, client: "BaseIntegrationClient"
+    ) -> dict[str, Any]:
+        """Suggest a default mapping for the given remote table.
+
+        Returns ``{"field_map": {...}, "value_map": {...}}`` already intersected
+        with what actually exists in the remote table (so a row is only filled
+        in when its target field/choice exists upstream). Default
+        implementation returns no suggestions; providers override.
+        """
+        return {"field_map": {}, "value_map": {}}
+
 
 class BaseSyncOrchestrator(ABC):
     """Orchestrates sync operations between local and remote systems"""
