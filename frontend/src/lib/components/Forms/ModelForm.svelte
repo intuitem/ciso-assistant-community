@@ -75,6 +75,10 @@
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
+	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
+	import ResponsibilityMatrixActivityForm from './ModelForm/ResponsibilityMatrixActivityForm.svelte';
+	import ResponsibilityAssignmentForm from './ModelForm/ResponsibilityAssignmentForm.svelte';
+	import ResponsibilityRoleForm from './ModelForm/ResponsibilityRoleForm.svelte';
 	import MetricDefinitionForm from './ModelForm/MetricDefinitionForm.svelte';
 	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
 	import CustomMetricSampleForm from './ModelForm/CustomMetricSampleForm.svelte';
@@ -804,6 +808,38 @@
 			/>
 		{:else if URLModel === 'accreditations'}
 			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'responsibility-matrices'}
+			<ResponsibilityMatrixForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-matrix-activities'}
+			<ResponsibilityMatrixActivityForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-assignments'}
+			<ResponsibilityAssignmentForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-roles'}
+			<ResponsibilityRoleForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'metric-definitions'}
 			<MetricDefinitionForm
 				{form}

@@ -37,6 +37,57 @@ def extract_node_id(urn: str | None) -> str | None:
     return node_id if node_id else None
 
 
+REWRITABLE_URN_TYPES = {"req_node", "question", "question_choice"}
+
+
+def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
+    """Rewrite segment 1 (namespace) and segment 4 (slug) of every child URN in
+    the draft, in place. Idempotent across slugs.
+
+    URN format: `urn:ns:risk:type:slug:node_id` (6+ segments). Segments 5+
+    (node_id) are preserved so CEL expressions keying off node_id keep
+    resolving. URNs with fewer than 6 segments are left untouched — the
+    rename branch in `_reconcile_draft` rejects drafts that contain such
+    legacy URNs before this helper runs, so encountering one here would be
+    a bug.
+
+    Touches: nodes[*].urn, nodes[*].parent_urn, questions[*].urn,
+    questions[*].depends_on.{question, answers}, choices[*].urn.
+    """
+
+    def sub(u):
+        if not isinstance(u, str):
+            return u
+        parts = u.split(":")
+        if (
+            len(parts) >= 6
+            and parts[0] == "urn"
+            and parts[2] == "risk"
+            and parts[3] in REWRITABLE_URN_TYPES
+        ):
+            parts[1] = new_ns
+            parts[4] = new_slug
+            return ":".join(parts)
+        return u
+
+    for n in draft.get("nodes", []) or []:
+        n["urn"] = sub(n.get("urn"))
+        if n.get("parent_urn"):
+            n["parent_urn"] = sub(n.get("parent_urn"))
+    for q in draft.get("questions", []) or []:
+        q["urn"] = sub(q.get("urn"))
+        dep = q.get("depends_on")
+        if isinstance(dep, dict):
+            if isinstance(dep.get("question"), str):
+                dep["question"] = sub(dep["question"])
+            if isinstance(dep.get("answers"), list):
+                dep["answers"] = [
+                    sub(a) if isinstance(a, str) else a for a in dep["answers"]
+                ]
+    for c in draft.get("choices", []) or []:
+        c["urn"] = sub(c.get("urn"))
+
+
 def is_compute_result_truthy(compute_result: str | None) -> bool:
     """Return True if a QuestionChoice.compute_result value is truthy."""
     return compute_result is not None and compute_result not in ("false", "0", "")
