@@ -749,30 +749,9 @@ docker-compose.yml now relies on a non-root user 1001:1001, which is available i
 
 ## Supported languages 🌐
 
-1. FR: French
-2. EN: English
-3. AR: Arabic
-4. PT: Portuguese
-5. ES: Spanish
-6. DE: German
-7. NL: Dutch
-8. IT: Italian
-9. PL: Polish
-10. RO: Romanian
-11. HI: Hindi
-12. UR: Urdu
-13. CS: Czech
-14. SV: Swedish
-15. ID: Indonesian
-16. DA: Danish
-17. HU: Hungarian
-18. UK: Ukrainian
-19. EL: Greek
-20. TR: Turkish
-21. HR: Croatian
-22. ZH: Chinese (Simplified)
-23. LT: Lithuanian
-24. KO: Korean
+[![Translation progress](https://intuitem.github.io/metrics/i18n/progress.svg)](https://intuitem.github.io/metrics/i18n/)
+
+Reference is `en.json`; coverage = share of reference keys present in each locale file. Auto-refreshed daily — full breakdown at the [dashboard](https://intuitem.github.io/metrics/i18n/).
 
 ## Contributors 🤝
 
