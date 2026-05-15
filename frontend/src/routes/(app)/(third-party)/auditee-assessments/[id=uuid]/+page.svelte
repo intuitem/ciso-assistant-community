@@ -876,10 +876,7 @@
 						{/if}
 					</div>
 					{#if typeof requirement.weight === 'number' && requirement.weight !== 1 && requirementAssessment?.assessable}
-						<span
-							class="badge h-fit"
-							style="background-color: #e0e7ff; color: #3730a3;"
-						>
+						<span class="badge h-fit" style="background-color: #e0e7ff; color: #3730a3;">
 							{m.requirementWeight()}: {requirement.weight}
 						</span>
 					{/if}
