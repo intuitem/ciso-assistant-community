@@ -140,11 +140,19 @@
 		await loadColumns(val);
 		if (!val) return;
 		const suggested = await fetchRpc('suggest_mapping', { table_name: val });
+		console.debug('[FieldMapper] suggest_mapping response', suggested);
 		const nextFieldMap = (suggested?.field_map as Record<string, any>) ?? {};
 		const nextValueMap = (suggested?.value_map as Record<string, any>) ?? {};
 		fieldMap = nextFieldMap;
 		valueMap = nextValueMap;
 		onMapsChange({ field_map: nextFieldMap, value_map: nextValueMap });
+		// Pre-warm the choices cache for every field that has a suggested value
+		// mapping so the value-mapping AutocompleteSelects render with options
+		// at first paint instead of waiting for the $effect to re-fire.
+		for (const localField of Object.keys(nextValueMap)) {
+			const remoteField = nextFieldMap[localField];
+			if (remoteField) loadChoices(val, remoteField);
+		}
 	}
 </script>
 
