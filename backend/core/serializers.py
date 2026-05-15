@@ -2506,6 +2506,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "ref_id",
             "reference_controls",
             "has_update",
+            "library",
         ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(

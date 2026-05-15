@@ -10,6 +10,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import FrameworlEquivalence from '$lib/components/FrameworkEquivalence/FrameworlEquivalence.svelte';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import LibraryUpdateButton from '$lib/components/ModelTable/field/LibraryUpdateButton.svelte';
 
 	interface Props {
 		data: PageData;
@@ -59,12 +60,20 @@
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
 		<div class="">
-			<div class="mb-1">
-				{#if data.framework.has_update}
-					<i title={m.updateAvailable()} class="fa-solid fa-circle-up text-success-600-400"></i>
+			{#if data.framework.has_update}
+				<div
+					class="flex mb-1 w-full space-x-2 whitespace-nowrap flex-row items-center text-xl text-surface-700"
+				>
 					<span>{m.updateAvailable()}</span>
-				{/if}
-			</div>
+					<LibraryUpdateButton
+						loadedLibraryID={data.framework.library.id}
+						libraryURN={data.framework.library.urn}
+						onUpdate={() => {
+							data.framework.has_update = false;
+						}}
+					/>
+				</div>
+			{/if}
 			<div class="flex flex-col space-y-2">
 				{#each Object.entries(data.framework).filter(([key, _]) => !blacklistedKeys.has(key)) as [key, value]}
 					<div class="flex flex-col">

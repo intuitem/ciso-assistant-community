@@ -47,6 +47,7 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import LibraryUpdateButton from '$lib/components/ModelTable/field/LibraryUpdateButton.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 
 	const CYFUN_2025_FRAMEWORK_URN = 'urn:intuitem:risk:framework:ccb-cyfun2025';
@@ -643,13 +644,14 @@
 							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
 							{#if isUpdatableFramework}
-								<i title={m.updateAvailable()} class="fa-solid fa-circle-up text-success-600-400"
-								></i>
+								<div
+									class="flex mb-1 w-full space-x-2 whitespace-nowrap flex-row items-center text-xl text-surface-700"
+								>
+									<span class="text-base">{m.updateAvailable()}</span>
+									<LibraryUpdateButton loadedLibraryID={value.library.id} />
+								</div>
 							{/if}
 							{safeTranslate(key)}
-							{#if isUpdatableFramework}
-								({m.updateAvailable()})
-							{/if}
 						</div>
 						<ul class="text-sm">
 							<li

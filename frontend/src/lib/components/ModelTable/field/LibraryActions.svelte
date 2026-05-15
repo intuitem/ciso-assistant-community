@@ -10,6 +10,7 @@
 		type ModalComponent,
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
+	import LibraryUpdateButton from '$lib/components/ModelTable/field/LibraryUpdateButton.svelte';
 
 	interface Props {
 		meta: any;
@@ -21,25 +22,6 @@
 	let library = $derived(meta);
 	let loading = $state({ form: false, library: '' });
 	let updating = $state({ form: false, library: '' });
-
-	const modalStore = getModalStore();
-	function choicesModal(choices: object[]): void {
-		const modalComponent: ModalComponent = {
-			ref: ChoicesModal,
-			props: {
-				parent: null,
-				formAction: `/loaded-libraries/${library.loaded_library}?/update`,
-				choices: choices,
-				title: m.scoreChangeDetected(),
-				message: m.scoreChangeDetectedDescription()
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent
-		};
-		modalStore.trigger(modal);
-	}
 </script>
 
 {#snippet loadingSpinner()}
@@ -97,42 +79,17 @@
 		</span>
 	{/if}
 {/if}
-<!-- This condition must check that the libary is a LoadedLibrary object and that there is an available update for it -->
-<!-- Should we put a is_upgradable BooleanField directly into the LoadedLibrary model or query the database everytime we load the loaded libraries menu to check if there is an update available or not among the stored liaries ? -->
+
 {#if actionsURLModel === 'stored-libraries' && library.is_update}
 	{#if loading.form && loading.library === library.urn}
 		{@render loadingSpinner()}
 	{:else}
 		<span class="hover:text-primary-500">
-			<form
-				method="post"
-				action="/loaded-libraries/{library.loaded_library}?/update"
-				use:enhance={() => {
-					loading.form = true;
-					loading.library = library.urn;
-					return async ({ result, update }) => {
-						loading.form = false;
-						loading.library = '';
-						if (result.type !== 'error') {
-							await update();
-						}
-						if (result.type === 'failure' && result.data?.error === 'score_change_detected') {
-							choicesModal(result.data.choices);
-						}
-						Object.values($tableHandlers).forEach((handler) => {
-							handler.invalidate();
-						});
-					};
-				}}
-			>
-				<button
-					title={m.updateThisLibrary()}
-					aria-label={m.updateThisLibrary()}
-					onclick={(e) => e.stopPropagation()}
-				>
-					<i class="fa-solid fa-circle-up text-success-700-300 hover:text-success-600-400"></i>
-				</button>
-			</form>
+			<LibraryUpdateButton
+				loadedLibraryID={library.loaded_library}
+				libraryURN={library.urn}
+				bind:loading
+			/>
 		</span>
 	{/if}
 {/if}
