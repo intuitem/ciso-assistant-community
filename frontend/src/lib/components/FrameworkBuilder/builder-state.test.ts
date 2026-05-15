@@ -664,6 +664,121 @@ describe('toggleAssessable', () => {
 	});
 });
 
+describe('translation operations on top-level requirement nodes', () => {
+	function seedTopLevelWithQuestion() {
+		const fw = makeFramework({
+			locale: 'en',
+			available_languages: ['en', 'fr'],
+			translations: {}
+		});
+		const node = makeNode({
+			id: 'top-1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			parent_urn: null,
+			name: 'Top requirement',
+			translations: { fr: { name: 'Exigence racine' } }
+		});
+		const question: Question = {
+			id: 'q-1',
+			urn: 'urn:x:question:fw:1-q1',
+			ref_id: '1-q1',
+			text: 'Is it true?',
+			annotation: null,
+			type: 'unique_choice',
+			config: null,
+			depends_on: null,
+			order: 0,
+			weight: 1,
+			folder: 'folder-1',
+			requirement_node: 'top-1',
+			translations: { fr: { text: 'Est-ce vrai ?' } },
+			choices: [
+				{
+					id: 'c-1',
+					urn: 'urn:x:question_choice:fw:1-q1-c1',
+					ref_id: '1-q1-c1',
+					value: 'Yes',
+					annotation: null,
+					add_score: null,
+					compute_result: null,
+					order: 0,
+					description: null,
+					color: null,
+					select_implementation_groups: null,
+					folder: 'folder-1',
+					question: 'q-1',
+					translations: { fr: { value: 'Oui' } }
+				}
+			]
+		};
+		return createBuilderState(fw, [node], [question]);
+	}
+
+	it('setBaseLocale swaps question and choice text on a top-level node', () => {
+		const s = seedTopLevelWithQuestion();
+		s.setBaseLocale('fr');
+		const root = get(s.rootNodes)[0];
+		expect(root.questions[0].question.text).toBe('Est-ce vrai ?');
+		expect(root.questions[0].question.translations?.en?.text).toBe('Is it true?');
+		expect(root.questions[0].question.choices[0].value).toBe('Oui');
+		expect(root.questions[0].question.choices[0].translations?.en?.value).toBe('Yes');
+	});
+
+	it('getTranslationProgress counts questions and choices on a top-level node', () => {
+		const s = seedTopLevelWithQuestion();
+		// 3 translatable strings: node.name, question.text, choice.value — all already have fr.
+		expect(s.getTranslationProgress('fr')).toEqual({ translated: 3, total: 3 });
+	});
+
+	it('copyFromBase seeds translations for a top-level node question and choice', () => {
+		const fw = makeFramework({ locale: 'en', available_languages: ['en', 'de'] });
+		const node = makeNode({
+			id: 'top-1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			parent_urn: null,
+			name: 'Top requirement'
+		});
+		const question: Question = {
+			id: 'q-1',
+			urn: 'urn:x:question:fw:1-q1',
+			ref_id: '1-q1',
+			text: 'Is it true?',
+			annotation: null,
+			type: 'unique_choice',
+			config: null,
+			depends_on: null,
+			order: 0,
+			weight: 1,
+			folder: 'folder-1',
+			requirement_node: 'top-1',
+			choices: [
+				{
+					id: 'c-1',
+					urn: 'urn:x:question_choice:fw:1-q1-c1',
+					ref_id: '1-q1-c1',
+					value: 'Yes',
+					annotation: null,
+					add_score: null,
+					compute_result: null,
+					order: 0,
+					description: null,
+					color: null,
+					select_implementation_groups: null,
+					folder: 'folder-1',
+					question: 'q-1'
+				}
+			]
+		};
+		const s = createBuilderState(fw, [node], [question]);
+		s.copyFromBase('de');
+		const root = get(s.rootNodes)[0];
+		expect(root.questions[0].question.translations?.de?.text).toBe('Is it true?');
+		expect(root.questions[0].question.choices[0].translations?.de?.value).toBe('Yes');
+	});
+});
+
 describe('question and choice CRUD on top-level requirement nodes', () => {
 	function newStore() {
 		return createBuilderState(makeFramework(), [], []);
