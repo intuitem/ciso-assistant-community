@@ -7,7 +7,10 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
 
-	const libraries: Locator[] = await page.locator('tbody tr td:nth-child(2)').all();
+	const nameCells = page.locator('tbody tr td:nth-child(2)');
+	await expect(nameCells.first()).not.toHaveText('', { timeout: 30000 });
+
+	const libraries: Locator[] = await nameCells.all();
 	const libraryNames: string[] = await Promise.all(
 		libraries.map(async (library) => await library.innerText())
 	);
