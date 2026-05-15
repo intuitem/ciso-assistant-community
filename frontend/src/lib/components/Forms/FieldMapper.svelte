@@ -160,6 +160,8 @@
 				if (remoteField) await loadChoices(val, remoteField);
 			})
 		);
+		console.debug('[FieldMapper] pre-warmed choicesCache', $state.snapshot(choicesCache));
+		console.debug('[FieldMapper] nextValueMap', nextValueMap);
 
 		const mappedCols = rawCols.map((c: Record<string, any>) => ({
 			value: c.name,
