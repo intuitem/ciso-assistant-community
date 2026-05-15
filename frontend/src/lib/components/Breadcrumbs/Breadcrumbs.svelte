@@ -18,20 +18,16 @@
 		currentUrl: string,
 		fallbackLabel: string
 	): Breadcrumb[] {
-		// First breadcrumb is home (href '/'); skip it when matching.
-		const idx = breadcrumbs.findIndex(
-			(c, i) => i > 0 && hrefPathname(c.href) === currentPath
-		);
+		// Skip home (index 0, href '/').
+		const idx = breadcrumbs.findIndex((c, i) => i > 0 && hrefPathname(c.href) === currentPath);
 		if (idx > 0) {
-			// Trim to the matched crumb and refresh its href with the current
-			// query string so filters/search params survive a round-trip.
+			// Refresh the matched crumb's href with the current query so filters
+			// survive a round-trip.
 			const trimmed = breadcrumbs.slice(0, idx + 1);
 			const matched = trimmed[idx];
 			trimmed[idx] = { ...matched, href: currentUrl };
 			return trimmed;
 		}
-		// Current page isn't in the stack: append it so the trail always
-		// reflects where the user actually is.
 		return [...breadcrumbs, { label: fallbackLabel, href: currentUrl }];
 	}
 
@@ -60,7 +56,7 @@
 		const currentUrl = currentPath + page.url.search;
 		const current = $breadcrumbs;
 		const next = syncBreadcrumbsToCurrentUrl(current, currentPath, currentUrl, fallbackLabel);
-		// Only write if something actually changed, to avoid effect loops.
+		// Skip writes that don't change anything to avoid effect loops.
 		if (
 			next.length !== current.length ||
 			next.some((c, i) => c.href !== current[i].href || c.label !== current[i].label)

@@ -353,8 +353,7 @@
 			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Keep the current breadcrumb href in sync with the new search params so
-		// navigating back to this page via the breadcrumb restores the filters.
+		// Sync the current crumb's href with the new filter query.
 		breadcrumbs.update((crumbs) => {
 			if (crumbs.length < 2) return crumbs;
 			const last = crumbs[crumbs.length - 1];
