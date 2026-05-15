@@ -137,7 +137,7 @@ Here is an illustration of the **decoupling** principle and its advantages:
 
 Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
-## Setting up the local AI engine 
+## Setting up the local AI engine
 
 Read more here: [AI engine](backend/chat/README.md)
 
@@ -251,9 +251,17 @@ Read more here: [AI engine](backend/chat/README.md)
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
 108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
-109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷 
+109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷
 110. Cadre Conformité Cyber France (3CF) v3.1 (2026) ✈️🇫🇷
 111. Règles OIV - Secteur « Transport aérien » (2016) ✈️🇫🇷
+112. IEC 62443 series — parts 2-1, 2-4, 3-2, 3-3, 4-1, 4-2 🏭🌐
+113. CER Directive (Critical Entities Resilience) 🇪🇺
+114. EUDI ARF — EU Digital Identity Wallet High-Level Requirements (Annex 2.02) 🇪🇺
+115. UK Defence Standard 05-138 Issue 4 🇬🇧
+116. Zero Trust for Operational Technology (ZT OT) 🇺🇸🏭
+117. T.C. CBDDO Bilgi ve İletişim Güvenliği Rehberi (BİGR) 🇹🇷
+118. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
+119. Personal Data Protection Law (PDPL) 🇸🇦
 
 ### Community contributions
 
@@ -284,6 +292,12 @@ Read more here: [AI engine](backend/chat/README.md)
 25. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
 26. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
 27. Prestataire d'audit de sécurité des systèmes d'information (PASSI) 🇫🇷
+28. ANS Programme CaRE - Domaine 2 (Continuité et reprise d'activité, sauvegarde) 🇫🇷🏥
+29. ANS HospiConnect HOP'EN2 (Sécurisation de l'accès au SIH) 🇫🇷🏥
+30. Loi n° 09-08 relative à la protection des personnes physiques 🇲🇦
+31. Checklist des exigences de la Loi n° 09-08 🇲🇦
+32. Référentiel des exigences de qualification des prestataires de services cloud ☁️🇲🇦
+33. AI Defense Matrix 🤖🌐
 
 <br/>
 
@@ -405,7 +419,7 @@ You will also have to add those 2 system environment variables after installing 
 ```conf
 MAGIC=Full path to the `magic.mgc` file (usually `C:\msys64\ucrt64\share\misc\magic.mgc`)
 WEASYPRINT_DLL_DIRECTORIES=Same path as your MSYS2 UCRT64 binaries
-``` 
+```
 
 
 Given that the default encoding on Windows isn't `UTF-8` but `cp1252`, certain python script printing `UTF-8` characters such as emojis may cause the backend crash or malfunction in some cases (e.g. library importation).
@@ -413,7 +427,7 @@ To avoid this issue with this project, enforce the `UTF-8` encoding by adding th
 ```conf
 PYTHONUTF8=1
 PYTHONIOENCODING=utf-8:replace
-``` 
+```
 
 > [!NOTE]
 > ### Known issues
@@ -731,7 +745,7 @@ docker-compose.yml now relies on a non-root user 1001:1001, which is available i
 - docker compose down
 - update the docker-compose.yml file
 - sudo chown -R 1001:1001 db
-- docker compose up -d 
+- docker compose up -d
 
 ## Supported languages 🌐
 
