@@ -8135,6 +8135,70 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 return {"result": RequirementAssessment.Result.NON_COMPLIANT}
         return {}
 
+    def preview_suggested_applied_controls(
+        self,
+        *,
+        selected_reference_control_ids: list | None = None,
+    ) -> list[dict]:
+        """Return a list of {'applied_control': AppliedControl, 'status': str}
+        where status is one of 'create' (no matching AppliedControl exists yet),
+        'reuse' (an AppliedControl with same folder/ref/category exists and will
+        be linked), or 'linked' (already linked to this RequirementAssessment).
+        AppliedControl instances may be unsaved when status == 'create'."""
+        results: list[dict] = []
+        if not self.compliance_assessment.requirement_matches_selected_groups(
+            self.requirement
+        ):
+            return results
+        reference_controls = list(self.requirement.reference_controls.all())
+        if selected_reference_control_ids is not None:
+            ids_set = {str(v) for v in selected_reference_control_ids}
+            reference_controls = [
+                rc for rc in reference_controls if str(rc.id) in ids_set
+            ]
+        if not reference_controls:
+            return results
+        # Single query covering every (folder, reference_control, category) combo
+        # we may need, plus the RAs each candidate is linked to. Avoids 2R queries.
+        ref_ids = [rc.id for rc in reference_controls]
+        ac_qs = AppliedControl.objects.filter(
+            folder=self.folder,
+            reference_control_id__in=ref_ids,
+        ).prefetch_related("requirement_assessments")
+        ac_by_key: dict = {}
+        linked_by_key: dict = {}
+        for ac in ac_qs:
+            key = (ac.reference_control_id, ac.category)
+            ac_by_key.setdefault(key, ac)
+            if any(ra.id == self.id for ra in ac.requirement_assessments.all()):
+                # Track the actually-linked instance, not just any AC with the key.
+                linked_by_key[key] = ac
+        for reference_control in reference_controls:
+            key = (reference_control.id, reference_control.category)
+            if key in linked_by_key:
+                results.append(
+                    {"applied_control": linked_by_key[key], "status": "linked"}
+                )
+                continue
+            if key in ac_by_key:
+                results.append({"applied_control": ac_by_key[key], "status": "reuse"})
+                continue
+            results.append(
+                {
+                    "applied_control": AppliedControl(
+                        folder=self.folder,
+                        reference_control=reference_control,
+                        category=reference_control.category,
+                        name=reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        ref_id=reference_control.ref_id,
+                        description=reference_control.description,
+                    ),
+                    "status": "create",
+                }
+            )
+        return results
+
     def create_applied_controls_from_suggestions(
         self,
         *,

@@ -11437,6 +11437,120 @@ class CampaignViewSet(BaseModelViewSet):
                 compliance_assessment.create_requirement_assessments()
 
 
+def _serialize_suggestion_preview(entries: list[dict]) -> list[dict]:
+    """Lightweight serialization for the suggest-controls dry-run preview.
+    Only emits fields consumed by the modal (id, name, ref_id, reference_control,
+    suggestion_status) — avoids the heavy AppliedControlReadSerializer which would
+    trigger many extra queries per row."""
+    payload = []
+    for entry in entries:
+        ac = entry["applied_control"]
+        ref = ac.reference_control
+        payload.append(
+            {
+                "id": str(ac.id) if ac.pk else None,
+                "name": ac.name,
+                "ref_id": ac.ref_id,
+                "reference_control": (
+                    {"id": str(ref.id), "str": str(ref), "name": ref.name}
+                    if ref is not None
+                    else None
+                ),
+                "suggestion_status": entry["status"],
+            }
+        )
+    return payload
+
+
+def _preview_suggestions_for_compliance_assessment(
+    compliance_assessment,
+    selected_reference_control_ids: list | None = None,
+) -> list[dict]:
+    """Batched dry-run preview across all RAs of a compliance assessment.
+    Avoids N+1 by:
+      - prefetching requirement.reference_controls on the RA queryset,
+      - issuing a single AppliedControl query covering all (folder, ref_ctrl) keys.
+    Returns at most one entry per reference_control, with status priority
+    create > reuse > linked."""
+    ras = list(
+        compliance_assessment.requirement_assessments.select_related(
+            "requirement", "folder"
+        ).prefetch_related("requirement__reference_controls")
+    )
+
+    selected_ids_set = (
+        {str(v) for v in selected_reference_control_ids}
+        if selected_reference_control_ids is not None
+        else None
+    )
+
+    ref_ctrls_by_ra: dict = {}
+    all_ref_ids: set = set()
+    folder_ids: set = set()
+    for ra in ras:
+        if not compliance_assessment.requirement_matches_selected_groups(
+            ra.requirement
+        ):
+            continue
+        ref_ctrls = list(ra.requirement.reference_controls.all())
+        if selected_ids_set is not None:
+            ref_ctrls = [rc for rc in ref_ctrls if str(rc.id) in selected_ids_set]
+        if not ref_ctrls:
+            continue
+        ref_ctrls_by_ra[ra.id] = (ra, ref_ctrls)
+        all_ref_ids.update(rc.id for rc in ref_ctrls)
+        folder_ids.add(ra.folder_id)
+
+    ac_by_key: dict = {}
+    linked_ac_by_ra_key: dict = {}
+    if all_ref_ids and folder_ids:
+        ac_qs = (
+            AppliedControl.objects.filter(
+                folder_id__in=folder_ids,
+                reference_control_id__in=all_ref_ids,
+            )
+            .select_related("reference_control")
+            .prefetch_related("requirement_assessments")
+        )
+        for ac in ac_qs:
+            key = (ac.folder_id, ac.reference_control_id, ac.category)
+            ac_by_key.setdefault(key, ac)
+            for linked_ra in ac.requirement_assessments.all():
+                # Track the actually-linked AC per (RA, key), not just first seen.
+                linked_ac_by_ra_key[(linked_ra.id, *key)] = ac
+
+    status_priority = {"create": 0, "reuse": 1, "linked": 2}
+    best: dict = {}
+    for ra_id, (ra, ref_ctrls) in ref_ctrls_by_ra.items():
+        for rc in ref_ctrls:
+            key = (ra.folder_id, rc.id, rc.category)
+            linked_ac = linked_ac_by_ra_key.get((ra_id, *key))
+            if linked_ac is not None:
+                status_ = "linked"
+                ac = linked_ac
+            elif key in ac_by_key:
+                status_ = "reuse"
+                ac = ac_by_key[key]
+            else:
+                status_ = "create"
+                ac = AppliedControl(
+                    folder=ra.folder,
+                    reference_control=rc,
+                    category=rc.category,
+                    name=rc.get_name_translated or rc.ref_id,
+                    ref_id=rc.ref_id,
+                    description=rc.description,
+                )
+            dedupe_key = str(rc.id)
+            current = best.get(dedupe_key)
+            if (
+                current is None
+                or status_priority[status_] < status_priority[current["status"]]
+            ):
+                best[dedupe_key] = {"applied_control": ac, "status": status_}
+    return list(best.values())
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
@@ -13515,6 +13629,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 selected_reference_control_ids = raw
+        if dry_run:
+            preview = _preview_suggestions_for_compliance_assessment(
+                compliance_assessment,
+                selected_reference_control_ids=selected_reference_control_ids,
+            )
+            return Response(
+                _serialize_suggestion_preview(preview),
+                status=status.HTTP_200_OK,
+            )
         requirement_assessments = compliance_assessment.requirement_assessments.all()
         controls = []
         for requirement_assessment in requirement_assessments:
@@ -14403,6 +14526,14 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 selected_reference_control_ids = raw
+        if dry_run:
+            preview = requirement_assessment.preview_suggested_applied_controls(
+                selected_reference_control_ids=selected_reference_control_ids,
+            )
+            return Response(
+                _serialize_suggestion_preview(preview),
+                status=status.HTTP_200_OK,
+            )
         controls = requirement_assessment.create_applied_controls_from_suggestions(
             dry_run=dry_run,
             selected_reference_control_ids=selected_reference_control_ids,
