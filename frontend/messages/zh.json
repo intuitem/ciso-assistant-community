@@ -1022,6 +1022,7 @@
 	"userLinkedToRepresentative": "此代表已关联用户。",
 	"nameDuplicate": "名称已存在",
 	"noAnswer": "无答案",
+	"clearAnswer": "清除答案",
 	"entityAssessmentRepresentativesHelpText": "负责完成问卷的第三方用户",
 	"sendQuestionnaire": "发送问卷",
 	"sureToSendQuestionnaire": "确定要发送问卷：{questionnaire}？",
@@ -3225,11 +3226,402 @@
 	"syncCweCatalog": "拉取CWE",
 	"syncCweCatalogFailed": "CWE失败",
 	"exportEcosystem": "生态系统导出 (XLSX)",
+	"close": "关闭",
+	"expandAll": "全部展开",
+	"collapseAll": "全部折叠",
+	"sum": "求和",
+	"average": "平均",
+	"publish": "发布",
+	"saving": "保存中...",
+	"exportYaml": "导出 YAML",
+	"implementationGroups": "实施组",
+	"boolean": "布尔值",
+	"builderEmptyStateTitle": "您希望如何构建此框架？",
+	"builderEmptyStateSubtitle": "选择一个起始结构 — 您可以随时更改结构。",
+	"builderEmptyFlat": "扁平列表",
+	"builderEmptyFlatHint": "所有要求都在同一层级。例如 Google SAIF（12 项要求）。",
+	"builderEmptyGrouped": "分组",
+	"builderEmptyGroupedHint": "包含要求的章节。例如 OWASP MASVS（8 个章节 → 24 项要求）。",
+	"builderEmptyHierarchy": "层级",
+	"builderEmptyHierarchyHint": "多级嵌套。例如 NIST CSF 2.0（6 → 23 → 106）。",
+	"builderEmptyBlank": "空白画布",
+	"builderEmptyBlankHint": "从零开始 — 添加一个空节点。",
+	"builderAddTopLevelNode": "+ 添加顶级节点",
+	"builderAddChild": "+ 添加子节点",
+	"builderAddSiblingBelow": "+ 在下方添加同级节点",
+	"builderBlankNode": "空白节点",
+	"builderBlankNodeHint": "空白 — 自行设置标志",
+	"builderGroup": "分组",
+	"builderGroupHint": "不可评估，用于嵌套",
+	"builderRequirementHint": "可评估，仍可包含子节点",
+	"builderSplashScreen": "启动屏",
+	"builderSplashScreenHint": "展示性，不可评估",
+	"builderStatusLive": "已上线",
+	"builderStatusLiveTitle": "草稿与审计响应者所看到的内容一致。",
+	"builderStatusUnpublishedChanges": "存在未发布的更改",
+	"builderStatusUnpublishedChangesTitle": "草稿包含尚未对审计响应者可见的修改。请发布以应用。",
+	"builderStatusDraftNothingLive": "草稿 — 尚未上线任何内容",
+	"builderStatusDraftNothingLiveTitle": "草稿已有内容，但尚未发布。在您发布之前，新审计将看不到任何内容。",
+	"builderStatusEmpty": "空",
+	"builderStatusEmptyTitle": "尚无要求。基于此框架的新审计将无内容可作答。",
+	"builderPreview": "预览",
+	"builderPreviewSaveFirst": "请先保存草稿才能预览",
+	"builderPreviewAsRespondent": "以响应者身份预览（在新标签页中打开）",
+	"builderExportYamlTitle": "将框架导出为 YAML 库文件",
+	"builderExportYamlUnpublishedWarning": "未发布的更改不会被包含。请先发布以导出最新修改。",
+	"builderCopyBase": "复制基础语言",
+	"builderCopyBaseTitle": "将基础语言文本复制到 {lang}（不会覆盖已有翻译）",
+	"builderCopyBaseQuestion": "复制基础文本？",
+	"builderNoTranslation": "无翻译",
+	"builderShowKeyboardShortcuts": "显示键盘快捷键",
+	"builderKeyboardShortcutsHint": "键盘快捷键 (?)",
+	"builderExpandAllCards": "展开所有卡片",
+	"builderCollapseAllCards": "折叠所有卡片",
+	"builderSaveFailed": "保存失败",
+	"builderPublishedFlash": "已发布！",
+	"builderSaveDraftTitle": "保存草稿 (Ctrl+S)",
+	"builderDiscardDraftTitle": "放弃草稿",
+	"builderDiscard": "放弃",
+	"builderDiscardAllChangesQuestion": "放弃所有更改？",
+	"builderYesDiscard": "是，放弃",
+	"builderPublishDraftToLiveTitle": "将草稿发布到正式框架",
+	"builderPublishing": "发布中...",
+	"builderPublishModalTitle": "将草稿发布到正式版本",
+	"builderPublishModalDescription": "此操作将更新正式框架。请查看下方的更改。",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "已添加 {count} 项要求",
+				"countPlural=other": "已添加 {count} 项要求"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个问题",
+				"countPlural=other": "{count} 个问题"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "已移除 {count} 项要求",
+				"countPlural=other": "已移除 {count} 项要求"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个问题",
+				"countPlural=other": "{count} 个问题"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "未检测到结构性更改（仅元数据）。",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "检测到 {count} 项不兼容更改",
+				"countPlural=other": "检测到 {count} 项不兼容更改"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "这些更改可能会影响现有审计中的评分、可见性或合规结果。",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个现有审计将受到影响",
+				"countPlural=other": "{count} 个现有审计将受到影响"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "新增要求将被添加到这些审计中。",
+	"builderAffectedAuditsRemovedHint": "已移除的要求及其评估数据将从这些审计中删除。",
+	"builderCouldNotLoadPreview": "无法加载影响预览。请谨慎操作。",
+	"builderConfirmPublish": "确认发布",
+	"builderSearchNodes": "搜索节点...",
+	"builderExpandSidebar": "展开侧边栏",
+	"builderCollapseSidebar": "折叠侧边栏",
+	"builderJumpTo": "跳转到：{label}",
+	"builderUntitled": "未命名",
+	"builderHasUntranslatedItems": "包含未翻译的项目",
+	"builderNoNodesYet": "尚无节点",
+	"builderNoMatchingNodes": "无匹配节点",
+	"builderNodesOf": "{filtered} / {total} 个节点",
+	"builderExpand": "展开",
+	"builderCollapse": "折叠",
+	"builderFrameworkNamePlaceholder": "框架名称",
+	"builderFrameworkDescriptionPlaceholder": "框架描述（可选）",
+	"builderFrameworkAnnotationPlaceholder": "框架注释（可选的指导文本）",
+	"builderTranslateName": "翻译名称...",
+	"builderTranslateDescription": "翻译描述...",
+	"builderTranslateAnnotation": "翻译注释...",
+	"builderTranslateTypicalEvidence": "翻译典型证据...",
+	"builderTranslateTitle": "翻译标题...",
+	"builderTranslateLabel": "翻译标签...",
+	"builderTranslateMarkdown": "翻译 markdown 内容...",
+	"builderTranslatePlaceholder": "翻译...",
+	"builderTranslateQuestion": "翻译问题...",
+	"builderFrameworkSettings": "框架设置",
+	"builderNoRulesOrGroupsConfigured": "未配置任何规则或组",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 条结果规则",
+				"countPlural=other": "{count} 条结果规则"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个组",
+				"countPlural=other": "{count} 个组"
+			}
+		}
+	],
+	"builderUrnNamespace": "URN 命名空间",
+	"builderScoringSettings": "评分设置",
+	"builderAggregationHint": "平均：将总分除以问题数量。求和：直接累加所有得分。对二元 (0/1) 评分请使用求和。",
+	"builderScoreScale": "评分量表",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个级别",
+				"countPlural=other": "{count} 个级别"
+			}
+		}
+	],
+	"builderAddScaleLevel": "添加级别",
+	"builderScaleNamePlaceholder": "例如：部分",
+	"builderScaleDescriptionPlaceholder": "可选",
+	"builderScaleNameTranslate": "{lang} 名称",
+	"builderScaleDescriptionTranslate": "{lang} 描述",
+	"builderOutcomeRules": "结果规则",
+	"builderAddRule": "添加规则",
+	"builderUntitledRule": "未命名规则",
+	"builderLabel": "标签",
+	"builderLabelHint": "例如：高度合规",
+	"builderCelExpression": "CEL 表达式",
+	"builderCelExpressionPlaceholder": "例如：assessment.score_sum >= 150 或 \"true\" 作为通配",
+	"builderColor": "颜色",
+	"builderClearAction": "清除",
+	"builderNoOutcomeRules": "尚无结果规则。请在上方添加。",
+	"builderOutcomeRulesHint": "所有匹配的规则都会包含在计算出的结果中。使用 {trueLiteral} 作为通配。",
+	"builderCelContextReference": "CEL 上下文参考",
+	"builderCelLabelTranslate": "{lang} 标签",
+	"builderCelGroupAssessment": "评估",
+	"builderCelGroupRequirements": "要求（按 node_id）",
+	"builderCelGroupAnswers": "答案（按问题 node_id）",
+	"builderCelGroupOther": "其他",
+	"builderCelScoreSum": "已获得的总分",
+	"builderCelScoreMax": "可能的总分",
+	"builderCelAnsweredCount": "已回答的要求",
+	"builderCelTotalCount": "可评估要求总数",
+	"builderCelReqScore": "要求得分",
+	"builderCelReqMaxScore": "要求最高分",
+	"builderCelReqResult": "要求结果",
+	"builderCelReqStatus": "要求状态",
+	"builderCelNodeIdHint": "node_id = URN 中 slug 之后的部分（例如 urn:custom:risk:req_node:my-fw:1.2 中的 \"1.2\"）",
+	"builderCelAnswerScore": "答案得分（add_score × 权重）",
+	"builderCelAnswerValue": "自由文本答案值",
+	"builderCelAnswerSelectedChoices": "已选选项的 node_id 列表",
+	"builderCelAnswerWeight": "问题权重",
+	"builderCelAnswerType": "问题类型 (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "已计算结果 ref_id 的映射",
+	"builderCelHiddenRequirements": "由可见性表达式隐藏的 node_id 列表",
+	"builderImplementationGroupsTitle": "实施组",
+	"builderAddGroup": "添加组",
+	"builderUntitledGroup": "未命名组",
+	"builderGroupNamePlaceholder": "例如：第 1 级",
+	"builderGroupDescriptionPlaceholder": "此实施组的描述",
+	"builderSelectedByDefault": "默认选中",
+	"builderDefaultBadge": "默认",
+	"builderTranslationLabel": "{lang} 翻译",
+	"builderNoImplementationGroups": "尚未定义实施组。请在上方添加。",
+	"builderLanguagesSection": "语言",
+	"builderLanguagesHint": "设置基础语言并添加翻译目标语言。",
+	"builderBaseLanguage": "基础语言",
+	"builderTargetLanguages": "目标语言",
+	"builderAddLanguagePlaceholder": "添加一种语言...",
+	"builderAdd": "添加",
+	"builderNodeNamePlaceholder": "节点名称",
+	"builderSplashScreenTitlePlaceholder": "启动屏标题",
+	"builderAssessableTooltip": "此要求是否可由响应者评估",
+	"builderAssessable": "可评估",
+	"builderDisplayMode": "显示模式",
+	"builderDefaultMode": "默认",
+	"builderSplashMode": "启动屏",
+	"builderAssessableLeaf": "可评估叶节点",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "可评估 · {count} 个子节点",
+				"countPlural=other": "可评估 · {count} 个子节点"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "分组 · {count} 个子节点",
+				"countPlural=other": "分组 · {count} 个子节点"
+			}
+		}
+	],
+	"builderEmptyNode": "空节点",
+	"builderSplashScreenStatus": "启动屏",
+	"builderNestedUnder": "嵌套于 {parent} 之下",
+	"builderExpandChildren": "展开子节点",
+	"builderCollapseChildren": "折叠子节点",
+	"builderAdvanced": "高级",
+	"builderAdvancedAnnotation": "注释",
+	"builderAdvancedAnnotationEvidence": "注释、证据",
+	"builderAdvancedAnnotationEvidenceVisibility": "注释、证据、可见性",
+	"builderAdvancedAnnotationVisibility": "注释、可见性",
+	"builderAnnotationPlaceholder": "供审阅者参考的可选指导说明",
+	"builderTypicalEvidencePlaceholder": "响应者应附上的证据示例",
+	"builderDescriptionOptional": "可选",
+	"builderVisibilityExpression": "可见性表达式 (CEL)",
+	"builderVisibilityExpressionTooltip": "必须求值为 true 才能使此要求可见的 CEL 表达式。例如：requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "例如：requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "实施组：",
+	"builderAddQuestion": "添加问题",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个子节点已隐藏",
+				"countPlural=other": "{count} 个子节点已隐藏"
+			}
+		}
+	],
+	"builderSplashSource": "源代码",
+	"builderSplashNoSourceContent": "无源内容。",
+	"builderSplashEditPlaceholder": "为启动屏编写 markdown 内容...",
+	"builderSplashNoContent": "尚无内容。切换到编辑以添加 markdown。",
+	"builderSplashBold": "粗体",
+	"builderSplashItalic": "斜体",
+	"builderSplashHeading": "标题",
+	"builderSplashBulletList": "项目符号列表",
+	"builderSplashNumberedList": "编号列表",
+	"builderSplashLink": "链接",
+	"builderSplashTable": "表格",
+	"builderSplashInsertImage": "插入图片",
+	"builderUntitledQuestion": "未命名问题",
+	"builderNotTranslated": "未翻译",
+	"builderQuestionTextPlaceholder": "输入您的问题...",
+	"builderWeight": "权重",
+	"builderAnnotationOptional": "可选备注...",
+	"builderDeleteThisQuestion": "删除此问题？",
+	"builderChangeTypeWarning": "更改类型将删除现有选项。继续吗？",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "当 {ref} = {count} 个答案时显示",
+				"countPlural=other": "当 {ref} = {count} 个答案时显示"
+			}
+		}
+	],
+	"builderChoices": "选项",
+	"builderAddChoice": "添加选项",
+	"builderChoicePlaceholder": "选项文本...",
+	"builderResultLabel": "结果",
+	"builderNone": "无",
+	"builderNoChoicesYet": "尚无选项。请在上方添加。",
+	"builderRemoveCondition": "移除条件",
+	"builderAddCondition": "添加条件",
+	"builderShowWhenThisQuestion": "显示条件：当此问题...",
+	"builderSelectAQuestion": "选择一个问题...",
+	"builderHasAnswer": "...的答案为：",
+	"builderMatch": "匹配：",
+	"builderMatchAny": "任意一项已选",
+	"builderMatchAll": "全部已选",
+	"builderConditionsOnlyChoiceTypes": "仅支持对选择类问题设置条件。",
+	"builderKeyboardShortcuts": "键盘快捷键",
+	"builderKbOutlineEditing": "大纲编辑",
+	"builderKbOutlineEditingHint": "应用于当前高亮的节点。",
+	"builderKbBuilder": "构建器",
+	"builderKbIndentNode": "缩进节点",
+	"builderKbOutdentNode": "取消缩进节点",
+	"builderKbAddChild": "添加子节点",
+	"builderKbAddSiblingBelow": "在下方添加同级节点",
+	"builderKbToggleAssessable": "切换可评估状态",
+	"builderKbSaveDraft": "保存草稿",
+	"builderKbShowCheatsheet": "显示此速查表",
+	"builderKbCloseDialog": "关闭对话框或下拉菜单",
+	"builderImportedFramework": "已导入的框架",
+	"builderImportedFrameworkDescription": "此框架是从库中导入的，无法直接编辑。如需修改，请创建可编辑副本。",
+	"builderCreateCopyAndEdit": "创建副本并编辑",
+	"builderCreatingCopy": "创建副本中...",
+	"builderLoadingEditor": "加载编辑器中...",
+	"builderFailedToStartEditor": "启动编辑器失败",
+	"builderBackToFramework": "返回框架",
+	"builderBackToBuilder": "返回构建器",
+	"builderFailedToLoadDraft": "加载草稿失败",
+	"builderImplementationGroupsHeader": "实施组",
+	"builderNoItemsToPreview": "无可预览的项目。",
+	"builderNoItemsToPreviewHint": "请在构建器中添加可评估的要求或启动屏。",
+	"builderBaseLanguageOption": "基础语言",
+	"builderFrameworkNameRequired": "框架名称为必填项。",
+	"builderFrameworkNameTooLong": "框架名称为 {length} 个字符（最多 200 个）。",
+	"builderNodeNameTooLong": "名称超过 200 个字符（{length}/200）。请将长文本移至描述字段。",
+	"builderRefIdTooLong": "「{label}」：ref_id 为 {length} 个字符（最多 100 个）。",
+	"builderUrnTooLong": "「{label}」：URN 为 {length} 个字符（最多 255 个）。",
+	"builderFailedToSaveDraftBeforePublish": "发布前保存草稿失败。",
+	"builderUnsavedChangesNavigation": "您有未保存的更改将会丢失。仍要离开吗？",
+	"builderUnpublishedChangesNavigation": "您有未发布的更改。您的草稿已保存，稍后可继续。仍要离开吗？",
 	"fieldVisibility": "字段可见性",
 	"fieldVisibilityHelpText": "控制每个角色可以查看和编辑哪些字段。",
 	"visibilityAuditorRespondent": "审计员 + 回应者",
 	"visibilityAuditorOnly": "仅审计员",
 	"visibilityHidden": "隐藏",
 	"answers": "答案",
-	"respondentAlignment": "回应者一致性"
+	"respondentAlignment": "回应者一致性",
+	"frameworkRefId": "引用ID",
+	"urnPreview": "URN 预览：",
+	"urnLockedComplianceAssessment": "已锁定——一个合规评估正在使用此框架。",
+	"sliderMin": "最小",
+	"sliderMax": "最大",
+	"sliderStep": "步长",
+	"sliderNeedsAtLeastTwoChoices": "滑块需要至少 2 个选项。",
+	"sliderMinMustBeLessThanMax": "滑块最小值必须小于最大值。",
+	"sliderStepMustBeGreaterThanZero": "滑块步长必须大于 0。",
+	"sliderStepCannotExceedRange": "滑块步长不能超过（最大 − 最小）。",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "文本",
+	"builderQuestionTypeBoolean": "布尔值",
+	"builderQuestionTypeNumber": "数字",
+	"builderQuestionTypeUniqueChoice": "单选",
+	"builderQuestionTypeMultipleChoice": "多选",
+	"builderQuestionTypeDate": "日期",
+	"builderChangedOn": "changed on"
 }

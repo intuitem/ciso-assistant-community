@@ -607,7 +607,16 @@ poetry run python manage.py createsuperuser
 poetry run python manage.py runserver
 ```
 
-11. for Huey (tasks runner)
+<details>
+<summary>[EXPERIMENTAL] How to run development server natively on Windows?</summary>
+
+When running Django's development server natively on Windows, SvelteKit SSR can open enough concurrent API connections to hit the server's small default listen backlog. This may cause intermittent `ECONNREFUSED` / `TypeError: fetch failed` errors in the frontend.
+
+Use the helper scripts documented in [`tools/.windows/README.md`](tools/.windows/README.md) for the native Windows development setup.
+
+</details>
+
+11. For Huey (tasks runner)
 
 - prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.

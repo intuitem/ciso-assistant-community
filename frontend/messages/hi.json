@@ -804,6 +804,7 @@
 	"createUserHelpText": "ईमेल के आधार पर प्रतिनिधि से तीसरे पक्ष के उपयोगकर्ता को बनाएं या लिंक करें",
 	"nameDuplicate": "नाम पहले से मौजूद है",
 	"noAnswer": "कोई जवाब नहीं",
+	"clearAnswer": "उत्तर साफ़ करें",
 	"entityAssessmentRepresentativesHelpText": "तीसरे पक्ष के उपयोगकर्ता जो प्रश्नावली को पूरा करने के लिए जिम्मेदार हैं",
 	"sendQuestionnaire": "प्रश्नावली भेजें",
 	"sureToSendQuestionnaire": "क्या आप वाकई प्रश्नावली भेजना चाहते हैं: {questionnaire} ?",
@@ -1160,11 +1161,393 @@
 	"syncCweCatalog": "CWE प्राप्त करें",
 	"syncCweCatalogFailed": "CWE त्रुटि",
 	"expirationDateIsInThePastWarning": "दर्ज की गई समाप्ति तिथि अतीत में है",
+	"boolean": "बूलियन",
+	"builderEmptyStateTitle": "आप इस फ्रेमवर्क की संरचना कैसे करना चाहते हैं?",
+	"builderEmptyStateSubtitle": "एक प्रारंभिक संरचना चुनें — आप इसे किसी भी समय बदल सकते हैं।",
+	"builderEmptyFlat": "सपाट सूची",
+	"builderEmptyFlatHint": "सभी आवश्यकताएँ एक ही स्तर पर। जैसे Google SAIF (12 आवश्यकताएँ)।",
+	"builderEmptyGrouped": "समूहीकृत",
+	"builderEmptyGroupedHint": "आवश्यकताओं वाले अनुभाग। जैसे OWASP MASVS (8 अनुभाग → 24 आवश्यकताएँ)।",
+	"builderEmptyHierarchy": "पदानुक्रम",
+	"builderEmptyHierarchyHint": "बहु-स्तरीय नेस्टिंग। जैसे NIST CSF 2.0 (6 → 23 → 106)।",
+	"builderEmptyBlank": "खाली कैनवास",
+	"builderEmptyBlankHint": "शून्य से शुरू करें — एक खाली नोड जोड़ें।",
+	"builderAddTopLevelNode": "+ शीर्ष-स्तरीय नोड जोड़ें",
+	"builderAddChild": "+ चाइल्ड जोड़ें",
+	"builderAddSiblingBelow": "+ नीचे सिबलिंग जोड़ें",
+	"builderBlankNode": "खाली नोड",
+	"builderBlankNodeHint": "खाली — फ्लैग स्वयं सेट करें",
+	"builderGroup": "समूह",
+	"builderGroupHint": "मूल्यांकन योग्य नहीं, नेस्टिंग के लिए",
+	"builderRequirementHint": "मूल्यांकन योग्य, फिर भी चाइल्ड हो सकते हैं",
+	"builderSplashScreen": "स्प्लैश स्क्रीन",
+	"builderSplashScreenHint": "प्रस्तुतिकरण, मूल्यांकन योग्य नहीं",
+	"builderStatusLive": "लाइव",
+	"builderStatusLiveTitle": "ड्राफ्ट वही दिखाता है जो ऑडिट उत्तरदाता देखते हैं।",
+	"builderStatusUnpublishedChanges": "अप्रकाशित परिवर्तन",
+	"builderStatusUnpublishedChangesTitle": "ड्राफ्ट में ऐसे संपादन हैं जो अभी ऑडिट उत्तरदाताओं को दिखाई नहीं देते। लागू करने के लिए प्रकाशित करें।",
+	"builderStatusDraftNothingLive": "ड्राफ्ट — अभी कुछ भी लाइव नहीं",
+	"builderStatusDraftNothingLiveTitle": "ड्राफ्ट में सामग्री है लेकिन अभी तक कुछ भी प्रकाशित नहीं हुआ है। नए ऑडिट तब तक कुछ नहीं देखेंगे जब तक आप प्रकाशित नहीं करते।",
+	"builderStatusEmpty": "खाली",
+	"builderStatusEmptyTitle": "अभी कोई आवश्यकताएँ नहीं हैं। इस फ्रेमवर्क पर बने नए ऑडिट के पास उत्तर देने के लिए कुछ नहीं होगा।",
+	"builderPreview": "पूर्वावलोकन",
+	"builderPreviewSaveFirst": "पूर्वावलोकन के लिए पहले अपना ड्राफ्ट सहेजें",
+	"builderPreviewAsRespondent": "उत्तरदाता के रूप में पूर्वावलोकन (नए टैब में खुलता है)",
+	"builderExportYamlTitle": "फ्रेमवर्क को YAML लाइब्रेरी फ़ाइल के रूप में निर्यात करें",
+	"builderExportYamlUnpublishedWarning": "अप्रकाशित परिवर्तन शामिल नहीं किए जाएंगे। नवीनतम संपादन निर्यात करने के लिए पहले प्रकाशित करें।",
+	"builderCopyBase": "आधार कॉपी करें",
+	"builderCopyBaseTitle": "आधार भाषा का पाठ {lang} में कॉपी करें (मौजूदा अनुवादों को अधिलेखित नहीं करेगा)",
+	"builderCopyBaseQuestion": "आधार पाठ कॉपी करें?",
+	"builderNoTranslation": "कोई अनुवाद नहीं",
+	"builderShowKeyboardShortcuts": "कीबोर्ड शॉर्टकट दिखाएँ",
+	"builderKeyboardShortcutsHint": "कीबोर्ड शॉर्टकट (?)",
+	"builderExpandAllCards": "सभी कार्ड विस्तृत करें",
+	"builderCollapseAllCards": "सभी कार्ड संक्षिप्त करें",
+	"builderSaveFailed": "सहेजना विफल",
+	"builderPublishedFlash": "प्रकाशित!",
+	"builderSaveDraftTitle": "ड्राफ्ट सहेजें (Ctrl+S)",
+	"builderDiscardDraftTitle": "ड्राफ्ट त्यागें",
+	"builderDiscard": "त्यागें",
+	"builderDiscardAllChangesQuestion": "सभी परिवर्तन त्यागें?",
+	"builderYesDiscard": "हाँ, त्यागें",
+	"builderPublishDraftToLiveTitle": "ड्राफ्ट को लाइव फ्रेमवर्क पर प्रकाशित करें",
+	"builderPublishing": "प्रकाशित किया जा रहा है...",
+	"builderPublishModalTitle": "ड्राफ्ट को लाइव पर प्रकाशित करें",
+	"builderPublishModalDescription": "यह लाइव फ्रेमवर्क को अपडेट करेगा। नीचे दिए गए परिवर्तनों की समीक्षा करें।",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} आवश्यकताएँ जोड़ी गईं",
+				"countPlural=other": "{count} आवश्यकताएँ जोड़ी गईं"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} प्रश्न",
+				"countPlural=other": "{count} प्रश्न"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} आवश्यकताएँ हटाई गईं",
+				"countPlural=other": "{count} आवश्यकताएँ हटाई गईं"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} प्रश्न",
+				"countPlural=other": "{count} प्रश्न"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "कोई संरचनात्मक परिवर्तन नहीं मिला (केवल मेटाडेटा)।",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ब्रेकिंग परिवर्तन पाए गए",
+				"countPlural=other": "{count} ब्रेकिंग परिवर्तन पाए गए"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "ये परिवर्तन मौजूदा ऑडिट में स्कोरिंग, दृश्यता या अनुपालन परिणामों को प्रभावित कर सकते हैं।",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} मौजूदा ऑडिट प्रभावित होंगे",
+				"countPlural=other": "{count} मौजूदा ऑडिट प्रभावित होंगे"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "इन ऑडिट में नई आवश्यकताएँ जोड़ी जाएंगी।",
+	"builderAffectedAuditsRemovedHint": "हटाई गई आवश्यकताएँ और उनका मूल्यांकन डेटा इन ऑडिट से हटा दिया जाएगा।",
+	"builderCouldNotLoadPreview": "प्रभाव पूर्वावलोकन लोड नहीं हो सका। सावधानी से आगे बढ़ें।",
+	"builderConfirmPublish": "प्रकाशन की पुष्टि करें",
+	"builderSearchNodes": "नोड खोजें...",
+	"builderExpandSidebar": "साइडबार विस्तृत करें",
+	"builderCollapseSidebar": "साइडबार संक्षिप्त करें",
+	"builderJumpTo": "इस पर जाएँ: {label}",
+	"builderUntitled": "बिना शीर्षक",
+	"builderHasUntranslatedItems": "अनुवादित नहीं किए गए आइटम हैं",
+	"builderNoNodesYet": "अभी कोई नोड नहीं",
+	"builderNoMatchingNodes": "कोई मेल खाते नोड नहीं",
+	"builderNodesOf": "{total} में से {filtered} नोड",
+	"builderExpand": "विस्तृत करें",
+	"builderCollapse": "संक्षिप्त करें",
+	"builderFrameworkNamePlaceholder": "फ्रेमवर्क नाम",
+	"builderFrameworkDescriptionPlaceholder": "फ्रेमवर्क विवरण (वैकल्पिक)",
+	"builderFrameworkAnnotationPlaceholder": "फ्रेमवर्क व्याख्या (वैकल्पिक मार्गदर्शन पाठ)",
+	"builderTranslateName": "नाम का अनुवाद करें...",
+	"builderTranslateDescription": "विवरण का अनुवाद करें...",
+	"builderTranslateAnnotation": "व्याख्या का अनुवाद करें...",
+	"builderTranslateTypicalEvidence": "सामान्य साक्ष्य का अनुवाद करें...",
+	"builderTranslateTitle": "शीर्षक का अनुवाद करें...",
+	"builderTranslateLabel": "लेबल का अनुवाद करें...",
+	"builderTranslateMarkdown": "मार्कडाउन सामग्री का अनुवाद करें...",
+	"builderTranslatePlaceholder": "अनुवाद करें...",
+	"builderTranslateQuestion": "प्रश्न का अनुवाद करें...",
+	"builderFrameworkSettings": "फ्रेमवर्क सेटिंग्स",
+	"builderNoRulesOrGroupsConfigured": "कोई नियम या समूह कॉन्फ़िगर नहीं किए गए",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} परिणाम नियम",
+				"countPlural=other": "{count} परिणाम नियम"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} समूह",
+				"countPlural=other": "{count} समूह"
+			}
+		}
+	],
+	"builderUrnNamespace": "URN नेमस्पेस",
+	"builderScoringSettings": "स्कोरिंग सेटिंग्स",
+	"builderAggregationHint": "औसत कुल स्कोर को प्रश्नों की संख्या से विभाजित करता है। योग सभी स्कोर सीधे जोड़ता है। बाइनरी (0/1) स्कोरिंग के लिए योग का उपयोग करें।",
+	"builderScoreScale": "स्कोर पैमाना",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} स्तर",
+				"countPlural=other": "{count} स्तर"
+			}
+		}
+	],
+	"builderAddScaleLevel": "पैमाने का स्तर जोड़ें",
+	"builderScaleNamePlaceholder": "जैसे आंशिक",
+	"builderScaleDescriptionPlaceholder": "वैकल्पिक",
+	"builderScaleNameTranslate": "{lang} नाम",
+	"builderScaleDescriptionTranslate": "{lang} विवरण",
+	"builderOutcomeRules": "परिणाम नियम",
+	"builderAddRule": "नियम जोड़ें",
+	"builderUntitledRule": "बिना शीर्षक नियम",
+	"builderLabel": "लेबल",
+	"builderLabelHint": "जैसे उच्च अनुपालन",
+	"builderCelExpression": "CEL अभिव्यक्ति",
+	"builderCelExpressionPlaceholder": "जैसे assessment.score_sum >= 150 या सर्व-समावेशी के लिए \"true\"",
+	"builderColor": "रंग",
+	"builderClearAction": "साफ करें",
+	"builderNoOutcomeRules": "अभी कोई परिणाम नियम नहीं हैं। ऊपर एक जोड़ें।",
+	"builderOutcomeRulesHint": "सभी मेल खाने वाले नियम परिकलित परिणामों में शामिल किए जाते हैं। सर्व-समावेशी के रूप में {trueLiteral} का उपयोग करें।",
+	"builderCelContextReference": "CEL संदर्भ रेफरेंस",
+	"builderCelLabelTranslate": "{lang} लेबल",
+	"builderCelGroupAssessment": "मूल्यांकन",
+	"builderCelGroupRequirements": "आवश्यकताएँ (node_id के अनुसार)",
+	"builderCelGroupAnswers": "उत्तर (प्रश्न node_id के अनुसार)",
+	"builderCelGroupOther": "अन्य",
+	"builderCelScoreSum": "प्राप्त कुल अंक",
+	"builderCelScoreMax": "कुल संभावित अंक",
+	"builderCelAnsweredCount": "उत्तर दी गई आवश्यकताएँ",
+	"builderCelTotalCount": "कुल मूल्यांकन योग्य आवश्यकताएँ",
+	"builderCelReqScore": "आवश्यकता का स्कोर",
+	"builderCelReqMaxScore": "आवश्यकता का अधिकतम स्कोर",
+	"builderCelReqResult": "आवश्यकता का परिणाम",
+	"builderCelReqStatus": "आवश्यकता की स्थिति",
+	"builderCelNodeIdHint": "node_id = स्लग के बाद URN का भाग (जैसे urn:custom:risk:req_node:my-fw:1.2 से \"1.2\")",
+	"builderCelAnswerScore": "उत्तर का स्कोर (add_score × भार)",
+	"builderCelAnswerValue": "मुक्त-पाठ उत्तर मान",
+	"builderCelAnswerSelectedChoices": "चयनित विकल्पों के node_id की सूची",
+	"builderCelAnswerWeight": "प्रश्न का भार",
+	"builderCelAnswerType": "प्रश्न प्रकार (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "पहले परिकलित परिणाम ref_id का मानचित्र",
+	"builderCelHiddenRequirements": "दृश्यता अभिव्यक्तियों द्वारा छिपाए गए node_id की सूची",
+	"builderImplementationGroupsTitle": "कार्यान्वयन समूह",
+	"builderAddGroup": "समूह जोड़ें",
+	"builderUntitledGroup": "बिना शीर्षक समूह",
+	"builderGroupNamePlaceholder": "जैसे टियर 1",
+	"builderGroupDescriptionPlaceholder": "इस कार्यान्वयन समूह का विवरण",
+	"builderSelectedByDefault": "डिफ़ॉल्ट रूप से चयनित",
+	"builderDefaultBadge": "डिफ़ॉल्ट",
+	"builderTranslationLabel": "{lang} अनुवाद",
+	"builderNoImplementationGroups": "कोई कार्यान्वयन समूह परिभाषित नहीं हैं। ऊपर एक जोड़ें।",
+	"builderLanguagesSection": "भाषाएँ",
+	"builderLanguagesHint": "आधार भाषा सेट करें और अनुवाद के लिए लक्ष्य भाषाएँ जोड़ें।",
+	"builderBaseLanguage": "आधार भाषा",
+	"builderTargetLanguages": "लक्ष्य भाषाएँ",
+	"builderAddLanguagePlaceholder": "एक भाषा जोड़ें...",
+	"builderAdd": "जोड़ें",
+	"builderNodeNamePlaceholder": "नोड का नाम",
+	"builderSplashScreenTitlePlaceholder": "स्प्लैश स्क्रीन शीर्षक",
+	"builderAssessableTooltip": "क्या यह आवश्यकता उत्तरदाताओं द्वारा मूल्यांकन योग्य है",
+	"builderAssessable": "मूल्यांकन योग्य",
+	"builderDisplayMode": "प्रदर्शन मोड",
+	"builderDefaultMode": "डिफ़ॉल्ट",
+	"builderSplashMode": "स्प्लैश",
+	"builderAssessableLeaf": "मूल्यांकन योग्य लीफ",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "मूल्यांकन योग्य · {count} चाइल्ड",
+				"countPlural=other": "मूल्यांकन योग्य · {count} चाइल्ड"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "समूह · {count} चाइल्ड",
+				"countPlural=other": "समूह · {count} चाइल्ड"
+			}
+		}
+	],
+	"builderEmptyNode": "खाली नोड",
+	"builderSplashScreenStatus": "स्प्लैश स्क्रीन",
+	"builderNestedUnder": "{parent} के अंतर्गत नेस्टेड",
+	"builderExpandChildren": "चाइल्ड विस्तृत करें",
+	"builderCollapseChildren": "चाइल्ड संक्षिप्त करें",
+	"builderAdvanced": "उन्नत",
+	"builderAdvancedAnnotation": "व्याख्या",
+	"builderAdvancedAnnotationEvidence": "व्याख्या, साक्ष्य",
+	"builderAdvancedAnnotationEvidenceVisibility": "व्याख्या, साक्ष्य, दृश्यता",
+	"builderAdvancedAnnotationVisibility": "व्याख्या, दृश्यता",
+	"builderAnnotationPlaceholder": "समीक्षकों के लिए वैकल्पिक मार्गदर्शन नोट्स",
+	"builderTypicalEvidencePlaceholder": "साक्ष्य के उदाहरण जो उत्तरदाताओं को संलग्न करने चाहिए",
+	"builderDescriptionOptional": "वैकल्पिक",
+	"builderVisibilityExpression": "दृश्यता अभिव्यक्ति (CEL)",
+	"builderVisibilityExpressionTooltip": "CEL अभिव्यक्ति जिसका मान true होना चाहिए ताकि यह आवश्यकता दिखाई दे। उदाहरण: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "जैसे requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "कार्यान्वयन समूह:",
+	"builderAddQuestion": "प्रश्न जोड़ें",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} चाइल्ड छिपा हुआ",
+				"countPlural=other": "{count} चाइल्ड छिपे हुए"
+			}
+		}
+	],
+	"builderSplashSource": "स्रोत",
+	"builderSplashNoSourceContent": "कोई स्रोत सामग्री नहीं।",
+	"builderSplashEditPlaceholder": "अपनी स्प्लैश स्क्रीन के लिए मार्कडाउन सामग्री लिखें...",
+	"builderSplashNoContent": "अभी कोई सामग्री नहीं। मार्कडाउन जोड़ने के लिए संपादन पर स्विच करें।",
+	"builderSplashBold": "बोल्ड",
+	"builderSplashItalic": "इटैलिक",
+	"builderSplashHeading": "शीर्षक",
+	"builderSplashBulletList": "बुलेट सूची",
+	"builderSplashNumberedList": "क्रमांकित सूची",
+	"builderSplashLink": "लिंक",
+	"builderSplashTable": "तालिका",
+	"builderSplashInsertImage": "छवि सम्मिलित करें",
+	"builderUntitledQuestion": "बिना शीर्षक प्रश्न",
+	"builderNotTranslated": "अनुवादित नहीं",
+	"builderQuestionTextPlaceholder": "अपना प्रश्न दर्ज करें...",
+	"builderWeight": "भार",
+	"builderAnnotationOptional": "वैकल्पिक नोट...",
+	"builderDeleteThisQuestion": "इस प्रश्न को हटाएँ?",
+	"builderChangeTypeWarning": "प्रकार बदलने से मौजूदा विकल्प हट जाएंगे। जारी रखें?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "जब {ref} = {count} उत्तर हो तब दिखाया गया",
+				"countPlural=other": "जब {ref} = {count} उत्तर हो तब दिखाया गया"
+			}
+		}
+	],
+	"builderChoices": "विकल्प",
+	"builderAddChoice": "विकल्प जोड़ें",
+	"builderChoicePlaceholder": "विकल्प पाठ...",
+	"builderResultLabel": "परिणाम",
+	"builderNone": "कोई नहीं",
+	"builderNoChoicesYet": "अभी कोई विकल्प नहीं हैं। ऊपर एक जोड़ें।",
+	"builderRemoveCondition": "शर्त हटाएँ",
+	"builderAddCondition": "शर्त जोड़ें",
+	"builderShowWhenThisQuestion": "जब यह प्रश्न... तब दिखाएँ",
+	"builderSelectAQuestion": "एक प्रश्न चुनें...",
+	"builderHasAnswer": "...का उत्तर है:",
+	"builderMatch": "मेल:",
+	"builderMatchAny": "कोई भी चयनित",
+	"builderMatchAll": "सभी चयनित",
+	"builderConditionsOnlyChoiceTypes": "शर्तें केवल विकल्प-प्रकार के प्रश्नों के लिए समर्थित हैं।",
+	"builderKeyboardShortcuts": "कीबोर्ड शॉर्टकट",
+	"builderKbOutlineEditing": "रूपरेखा संपादन",
+	"builderKbOutlineEditingHint": "हाइलाइट किए गए नोड पर लागू।",
+	"builderKbBuilder": "बिल्डर",
+	"builderKbIndentNode": "नोड को इंडेंट करें",
+	"builderKbOutdentNode": "नोड को आउटडेंट करें",
+	"builderKbAddChild": "चाइल्ड जोड़ें",
+	"builderKbAddSiblingBelow": "नीचे सिबलिंग जोड़ें",
+	"builderKbToggleAssessable": "मूल्यांकन योग्य टॉगल करें",
+	"builderKbSaveDraft": "ड्राफ्ट सहेजें",
+	"builderKbShowCheatsheet": "यह चीटशीट दिखाएँ",
+	"builderKbCloseDialog": "डायलॉग या ड्रॉपडाउन बंद करें",
+	"builderImportedFramework": "आयातित फ्रेमवर्क",
+	"builderImportedFrameworkDescription": "यह फ्रेमवर्क एक लाइब्रेरी से आयात किया गया था और इसे सीधे संपादित नहीं किया जा सकता। परिवर्तन करने के लिए, एक संपादन योग्य प्रति बनाएँ।",
+	"builderCreateCopyAndEdit": "प्रति बनाएँ और संपादित करें",
+	"builderCreatingCopy": "प्रति बनाई जा रही है...",
+	"builderLoadingEditor": "संपादक लोड हो रहा है...",
+	"builderFailedToStartEditor": "संपादक शुरू करने में विफल",
+	"builderBackToFramework": "फ्रेमवर्क पर वापस",
+	"builderBackToBuilder": "बिल्डर पर वापस",
+	"builderFailedToLoadDraft": "ड्राफ्ट लोड करने में विफल",
+	"builderImplementationGroupsHeader": "कार्यान्वयन समूह",
+	"builderNoItemsToPreview": "पूर्वावलोकन के लिए कोई आइटम नहीं।",
+	"builderNoItemsToPreviewHint": "बिल्डर में मूल्यांकन योग्य आवश्यकताएँ या स्प्लैश स्क्रीन जोड़ें।",
+	"builderBaseLanguageOption": "आधार भाषा",
+	"builderFrameworkNameRequired": "फ्रेमवर्क नाम आवश्यक है।",
+	"builderFrameworkNameTooLong": "फ्रेमवर्क नाम {length} वर्णों का है (अधिकतम 200)।",
+	"builderNodeNameTooLong": "नाम 200 वर्णों से अधिक है ({length}/200)। लंबे पाठ को विवरण फ़ील्ड में ले जाएँ।",
+	"builderRefIdTooLong": "'{label}': ref_id {length} वर्णों का है (अधिकतम 100)।",
+	"builderUrnTooLong": "'{label}': URN {length} वर्णों का है (अधिकतम 255)।",
+	"builderFailedToSaveDraftBeforePublish": "प्रकाशित करने से पहले ड्राफ्ट सहेजने में विफल।",
+	"builderUnsavedChangesNavigation": "आपके पास असहेजे गए परिवर्तन हैं जो खो जाएंगे। फिर भी छोड़ें?",
+	"builderUnpublishedChangesNavigation": "आपके पास अप्रकाशित परिवर्तन हैं। आपका ड्राफ्ट सहेजा गया है और आप बाद में फिर से शुरू कर सकते हैं। फिर भी छोड़ें?",
 	"fieldVisibility": "फ़ील्ड दृश्यता",
 	"fieldVisibilityHelpText": "नियंत्रित करें कि कौन से फ़ील्ड प्रत्येक भूमिका देख और संपादित कर सकती है।",
 	"visibilityAuditorRespondent": "ऑडिटर + प्रत्युत्तरकर्ता",
 	"visibilityAuditorOnly": "केवल ऑडिटर",
 	"visibilityHidden": "छिपा हुआ",
 	"answers": "उत्तर",
-	"respondentAlignment": "प्रत्युत्तरकर्ता संरेखण"
+	"respondentAlignment": "प्रत्युत्तरकर्ता संरेखण",
+	"frameworkRefId": "संदर्भ ID",
+	"urnPreview": "URN पूर्वावलोकन:",
+	"urnLockedComplianceAssessment": "लॉक किया गया — एक अनुपालन मूल्यांकन इस ढांचे का उपयोग करता है।",
+	"sliderMin": "न्यूनतम",
+	"sliderMax": "अधिकतम",
+	"sliderStep": "चरण",
+	"sliderNeedsAtLeastTwoChoices": "स्लाइडर को कम से कम 2 विकल्प चाहिए।",
+	"sliderMinMustBeLessThanMax": "स्लाइडर का न्यूनतम अधिकतम से कम होना चाहिए।",
+	"sliderStepMustBeGreaterThanZero": "स्लाइडर का चरण 0 से अधिक होना चाहिए।",
+	"sliderStepCannotExceedRange": "स्लाइडर का चरण (अधिकतम − न्यूनतम) से अधिक नहीं हो सकता।",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "बूलियन",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Single choice",
+	"builderQuestionTypeMultipleChoice": "Multiple choice",
+	"builderQuestionTypeDate": "Date",
+	"builderChangedOn": "changed on"
 }

@@ -7,10 +7,26 @@ import {
 	apiStartEditing,
 	type DraftJSON
 } from './builder-api';
+import { m } from '$paraglide/messages';
 
 // --- Types ---
 
 export type Translations = Record<string, Record<string, string>>;
+
+// --- Question widget config ---
+
+export interface SliderConfig {
+	widget: 'slider';
+	min?: number; // number questions only
+	max?: number; // number questions only
+	step?: number; // number questions only
+}
+
+export function isSliderConfig(
+	config: Record<string, unknown> | null | undefined
+): config is SliderConfig {
+	return !!config && (config as { widget?: unknown }).widget === 'slider';
+}
 
 export interface QuestionChoice {
 	id: string;
@@ -101,7 +117,9 @@ export interface Framework {
 	available_languages?: string[];
 	urn: string | null;
 	urn_namespace: string;
+	ref_id: string | null;
 	editing_version: number;
+	has_compliance_assessments: boolean;
 }
 
 /**
@@ -397,7 +415,8 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 			implementation_groups_definition: fw.implementation_groups_definition,
 			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
 			field_visibility: fw.field_visibility,
-			urn_namespace: fw.urn_namespace
+			urn_namespace: fw.urn_namespace,
+			ref_id: fw.ref_id
 		},
 		nodes,
 		questions,
@@ -431,7 +450,8 @@ export function hydrateDraft(
 		implementation_groups_definition: meta.implementation_groups_definition,
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
 		field_visibility: meta.field_visibility ?? {},
-		urn_namespace: meta.urn_namespace ?? 'custom'
+		urn_namespace: meta.urn_namespace ?? 'custom',
+		ref_id: meta.ref_id ?? null
 	};
 
 	// Build a lookup from question_id to choices
@@ -517,36 +537,70 @@ export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): Validati
 	const errors: ValidationError[] = [];
 
 	if (!fw.name || fw.name.trim().length === 0) {
-		errors.push({ key: 'publish', message: 'Framework name is required.' });
+		errors.push({ key: 'publish', message: m.builderFrameworkNameRequired() });
 	} else if (fw.name.length > 200) {
 		errors.push({
 			key: 'publish',
-			message: `Framework name is ${fw.name.length} characters (max 200).`
+			message: m.builderFrameworkNameTooLong({ length: fw.name.length })
 		});
 	}
 
 	function validate(tree: BuilderNode[]) {
 		for (const bn of tree) {
 			const n = bn.node;
-			const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
+			const label = n.ref_id ?? `#${n.order_id ?? '?'}`;
 			if (n.name && n.name.length > 200) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `Name exceeds 200 characters (${n.name.length}/200). Move long text to the description field.`
+					message: m.builderNodeNameTooLong({ length: n.name.length })
 				});
 			}
 			if (n.ref_id && n.ref_id.length > 100) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `'${label}': ref_id is ${n.ref_id.length} characters (max 100).`
+					message: m.builderRefIdTooLong({ label, length: n.ref_id.length })
 				});
 			}
 			if (n.urn && n.urn.length > 255) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `'${label}': URN is ${n.urn.length} characters (max 255).`
+					message: m.builderUrnTooLong({ label, length: n.urn.length })
 				});
 			}
+
+			for (const bq of bn.questions) {
+				const q = bq.question;
+				if (isSliderConfig(q.config)) {
+					const qLabel = q.ref_id ?? q.urn ?? q.id;
+					if (q.type === 'number') {
+						const { min, max, step } = q.config;
+						if (typeof min !== 'number' || typeof max !== 'number' || min >= max) {
+							errors.push({
+								key: `question-${q.id}`,
+								message: `'${qLabel}': ${m.sliderMinMustBeLessThanMax()}`
+							});
+						} else if (typeof step !== 'number' || step <= 0) {
+							errors.push({
+								key: `question-${q.id}`,
+								message: `'${qLabel}': ${m.sliderStepMustBeGreaterThanZero()}`
+							});
+						} else if (step > max - min) {
+							errors.push({
+								key: `question-${q.id}`,
+								message: `'${qLabel}': ${m.sliderStepCannotExceedRange()}`
+							});
+						}
+					} else if (q.type === 'unique_choice') {
+						if (q.choices.length < 2) {
+							errors.push({
+								key: `question-${q.id}`,
+								message: `'${qLabel}': ${m.sliderNeedsAtLeastTwoChoices()}`
+							});
+						}
+					}
+				}
+			}
+
 			validate(bn.children);
 		}
 	}
@@ -670,8 +724,14 @@ export function createBuilderState(
 		initialFrameworkData = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
 	}
 
-	// Cache the slug after hydration so renamed drafts use the updated name
-	const fwSlug = slugifyFrameworkName(initialFrameworkData.name, frameworkId);
+	// Reactive slug: prefer the user-typed ref_id (mid-session rename), fall
+	// back to slugify(name) for legacy frameworks where ref_id is null.
+	function getFwSlug(): string {
+		const fw = get(framework);
+		const refId = fw.ref_id;
+		if (refId && refId.length > 0) return refId;
+		return slugifyFrameworkName(fw.name, frameworkId);
+	}
 
 	const framework = writable<Framework>(initialFrameworkData);
 	const initialRootNodes = buildTree(initialNodes, initialQuestions);
@@ -693,12 +753,12 @@ export function createBuilderState(
 	}
 
 	function setError(key: string, message: string) {
-		errors.update((m) => new Map(m).set(key, message));
+		errors.update((map) => new Map(map).set(key, message));
 	}
 
 	function clearError(key: string) {
-		errors.update((m) => {
-			const next = new Map(m);
+		errors.update((map) => {
+			const next = new Map(map);
 			next.delete(key);
 			return next;
 		});
@@ -710,23 +770,14 @@ export function createBuilderState(
 		return value!;
 	}
 
-	/** Map all requirements in all sections recursively */
+	/** Map every requirement node in the tree, including top-level entries */
 	function updateAllRequirements(fn: (req: BuilderNode) => BuilderNode) {
-		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: mapRequirements(sec.children, fn)
-			}))
-		);
+		rootNodes.update((s) => mapRequirements(s, fn));
 	}
 
-	/** Find a requirement across all sections */
+	/** Find a requirement anywhere in the tree, including top-level entries */
 	function findReqGlobal(nodeId: string): BuilderNode | null {
-		for (const sec of get(rootNodes)) {
-			const found = findRequirement(sec.children, nodeId);
-			if (found) return found;
-		}
-		return null;
+		return findRequirement(get(rootNodes), nodeId);
 	}
 
 	// --- Draft save (explicit, triggered by Save button) ---
@@ -765,15 +816,17 @@ export function createBuilderState(
 	async function publish() {
 		const saved = await flushDraft();
 		if (!saved) {
-			setError('publish', 'Failed to save draft before publishing.');
+			setError('publish', m.builderFailedToSaveDraftBeforePublish());
 			return;
 		}
 
-		// Clear previous node-level validation errors
-		errors.update((m) => {
-			const next = new Map(m);
+		// Clear previous node- and question-level validation errors so stale
+		// entries (e.g. slider min/max/step errors from the previous attempt)
+		// don't survive a re-validation.
+		errors.update((prev) => {
+			const next = new Map(prev);
 			for (const key of next.keys()) {
-				if (key.startsWith('node-')) next.delete(key);
+				if (key.startsWith('node-') || key.startsWith('question-')) next.delete(key);
 			}
 			return next;
 		});
@@ -866,7 +919,7 @@ export function createBuilderState(
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: generateUrn('req_node', fwSlug, refId, getUrnNs()),
+			urn: generateUrn('req_node', getFwSlug(), refId, getUrnNs()),
 			ref_id: refId,
 			name: null,
 			description: null,
@@ -1137,7 +1190,7 @@ export function createBuilderState(
 		const parentRefId = req.node.ref_id ?? null;
 		const siblingRefIds = req.questions.map((bq) => bq.question.ref_id);
 		const refId = computeRefId(siblingRefIds, parentRefId, 'question');
-		const urn = generateUrn('question', fwSlug, refId, getUrnNs());
+		const urn = generateUrn('question', getFwSlug(), refId, getUrnNs());
 
 		const newQuestion: Question = {
 			id: newId,
@@ -1155,12 +1208,9 @@ export function createBuilderState(
 			choices: []
 		};
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: [...r.questions, { question: newQuestion }]
-				}))
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: [...r.questions, { question: newQuestion }]
 			}))
 		);
 		markDirty();
@@ -1182,12 +1232,9 @@ export function createBuilderState(
 		const q = req?.questions[qIndex];
 		if (!q) return;
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: r.questions.filter((_, i) => i !== qIndex)
-				}))
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: r.questions.filter((_, i) => i !== qIndex)
 			}))
 		);
 		markDirty();
@@ -1208,7 +1255,7 @@ export function createBuilderState(
 
 		const newChoice: QuestionChoice = {
 			id: newId,
-			urn: generateUrn('question_choice', fwSlug, refId, getUrnNs()),
+			urn: generateUrn('question_choice', getFwSlug(), refId, getUrnNs()),
 			ref_id: refId,
 			value: '',
 			annotation: null,
@@ -1222,22 +1269,19 @@ export function createBuilderState(
 			question: q.question.id
 		};
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: r.questions.map((qq, i) =>
-						i === qIndex
-							? {
-									...qq,
-									question: {
-										...qq.question,
-										choices: [...qq.question.choices, newChoice]
-									}
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: r.questions.map((qq, i) =>
+					i === qIndex
+						? {
+								...qq,
+								question: {
+									...qq.question,
+									choices: [...qq.question.choices, newChoice]
 								}
-							: qq
-					)
-				}))
+							}
+						: qq
+				)
 			}))
 		);
 		markDirty();
@@ -1262,22 +1306,19 @@ export function createBuilderState(
 		const choice = req?.questions[qIndex]?.question.choices[choiceIndex];
 		if (!choice) return;
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: r.questions.map((qq, i) =>
-						i === qIndex
-							? {
-									...qq,
-									question: {
-										...qq.question,
-										choices: qq.question.choices.filter((_, ci) => ci !== choiceIndex)
-									}
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: r.questions.map((qq, i) =>
+					i === qIndex
+						? {
+								...qq,
+								question: {
+									...qq.question,
+									choices: qq.question.choices.filter((_, ci) => ci !== choiceIndex)
 								}
-							: qq
-					)
-				}))
+							}
+						: qq
+				)
 			}))
 		);
 		markDirty();
@@ -1288,21 +1329,18 @@ export function createBuilderState(
 	function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => {
-					const qs = [...r.questions];
-					const [moved] = qs.splice(fromIndex, 1);
-					qs.splice(toIndex, 0, moved);
-					return {
-						...r,
-						questions: qs.map((q, i) => ({
-							...q,
-							question: { ...q.question, order: i * 100 }
-						}))
-					};
-				})
-			}))
+			updateRequirementById(s, reqNodeId, (r) => {
+				const qs = [...r.questions];
+				const [moved] = qs.splice(fromIndex, 1);
+				qs.splice(toIndex, 0, moved);
+				return {
+					...r,
+					questions: qs.map((q, i) => ({
+						...q,
+						question: { ...q.question, order: i * 100 }
+					}))
+				};
+			})
 		);
 		markDirty();
 	}
@@ -1310,24 +1348,21 @@ export function createBuilderState(
 	function reorderChoices(reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 		rootNodes.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				children: updateRequirementById(sec.children, reqNodeId, (r) => ({
-					...r,
-					questions: r.questions.map((qq, i) => {
-						if (i !== qIndex) return qq;
-						const choices = [...qq.question.choices];
-						const [moved] = choices.splice(fromIndex, 1);
-						choices.splice(toIndex, 0, moved);
-						return {
-							...qq,
-							question: {
-								...qq.question,
-								choices: choices.map((c, ci) => ({ ...c, order: ci * 100 }))
-							}
-						};
-					})
-				}))
+			updateRequirementById(s, reqNodeId, (r) => ({
+				...r,
+				questions: r.questions.map((qq, i) => {
+					if (i !== qIndex) return qq;
+					const choices = [...qq.question.choices];
+					const [moved] = choices.splice(fromIndex, 1);
+					choices.splice(toIndex, 0, moved);
+					return {
+						...qq,
+						question: {
+							...qq.question,
+							choices: choices.map((c, ci) => ({ ...c, order: ci * 100 }))
+						}
+					};
+				})
 			}))
 		);
 		markDirty();

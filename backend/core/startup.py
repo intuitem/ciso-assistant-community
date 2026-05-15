@@ -99,6 +99,11 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_responsibilityrole",
+    "view_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "view_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "view_metricinstance",
@@ -119,6 +124,13 @@ READER_PERMISSIONS_LIST = [
     "delete_chatsession",
     "view_chatmessage",
     "view_indexeddocument",
+    # Questionnaire Autopilot — read-only at this role. AgentAction is the
+    # AI's audit trail and must stay immutable; QuestionnaireRun is shared
+    # across users in a domain. Write permissions live in ANALYST and up.
+    "view_questionnairerun",
+    "view_questionnairequestion",
+    "view_agentrun",
+    "view_agentaction",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -204,6 +216,11 @@ APPROVER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_responsibilityrole",
+    "view_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "view_responsibilityassignment",
     # integrations
     "view_syncmapping",
     # presets
@@ -217,6 +234,13 @@ APPROVER_PERMISSIONS_LIST = [
     "delete_chatsession",
     "view_chatmessage",
     "view_indexeddocument",
+    # Questionnaire Autopilot — read-only at this role. AgentAction is the
+    # AI's audit trail and must stay immutable; QuestionnaireRun is shared
+    # across users in a domain. Write permissions live in ANALYST and up.
+    "view_questionnairerun",
+    "view_questionnairequestion",
+    "view_agentrun",
+    "view_agentaction",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -496,6 +520,26 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "view_metricinstance",
@@ -540,6 +584,22 @@ ANALYST_PERMISSIONS_LIST = [
     "add_indexeddocument",
     "view_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -859,6 +919,26 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "add_metricdefinition",
@@ -908,6 +988,22 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_indexeddocument",
     "view_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -1270,6 +1366,26 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "add_metricdefinition",
@@ -1333,6 +1449,22 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_indexeddocument",
     "change_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -1606,6 +1738,13 @@ def startup(sender: AppConfig, **kwargs):
         Terminology.create_default_metric_units()
     except Exception as e:
         logger.error("Error creating default Metric Units", exc_info=True)
+
+    try:
+        from pmbok.models import ResponsibilityRole
+
+        ResponsibilityRole.create_default_roles()
+    except Exception as e:
+        logger.error("Error creating default Responsibility Roles", exc_info=True)
 
     # Init integration providers
 

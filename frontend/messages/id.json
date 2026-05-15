@@ -808,6 +808,7 @@
 	"createUserHelpText": "Buat atau tautkan pengguna pihak ketiga ke perwakilan berdasarkan email",
 	"nameDuplicate": "Nama sudah ada",
 	"noAnswer": "Tidak ada jawaban",
+	"clearAnswer": "Hapus jawaban",
 	"entityAssessmentRepresentativesHelpText": "Pengguna pihak ketiga yang bertanggung jawab untuk menyelesaikan kuesioner",
 	"sendQuestionnaire": "Kirim kuesioner",
 	"sureToSendQuestionnaire": "Apakah Anda yakin ingin mengirim kuesioner: {questionnaire}?",
@@ -1376,11 +1377,393 @@
 	"syncCweCatalog": "Ambil CWE",
 	"syncCweCatalogFailed": "Gagal CWE",
 	"expirationDateIsInThePastWarning": "Tanggal kedaluwarsa yang dimasukkan berada di masa lalu",
+	"boolean": "Boolean",
+	"builderEmptyStateTitle": "Bagaimana Anda ingin menyusun kerangka kerja ini?",
+	"builderEmptyStateSubtitle": "Pilih bentuk awal — Anda dapat mengubah strukturnya kapan saja.",
+	"builderEmptyFlat": "Daftar datar",
+	"builderEmptyFlatHint": "Semua persyaratan pada satu tingkat. Seperti Google SAIF (12 persyaratan).",
+	"builderEmptyGrouped": "Dikelompokkan",
+	"builderEmptyGroupedHint": "Bagian berisi persyaratan. Seperti OWASP MASVS (8 bagian → 24 persyaratan).",
+	"builderEmptyHierarchy": "Hierarki",
+	"builderEmptyHierarchyHint": "Penyusunan bertingkat. Seperti NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Kanvas kosong",
+	"builderEmptyBlankHint": "Mulai dari nol — tambahkan satu node kosong.",
+	"builderAddTopLevelNode": "+ Tambah node tingkat atas",
+	"builderAddChild": "+ Tambah anak",
+	"builderAddSiblingBelow": "+ Tambah saudara di bawah",
+	"builderBlankNode": "Node kosong",
+	"builderBlankNodeHint": "Kosong — atur flag sendiri",
+	"builderGroup": "Grup",
+	"builderGroupHint": "Tidak dapat dinilai, untuk penyusunan",
+	"builderRequirementHint": "Dapat dinilai, masih dapat memiliki anak",
+	"builderSplashScreen": "Layar pembuka",
+	"builderSplashScreenHint": "Bersifat presentasional, tidak dapat dinilai",
+	"builderStatusLive": "Aktif",
+	"builderStatusLiveTitle": "Draf sesuai dengan apa yang dilihat responden audit.",
+	"builderStatusUnpublishedChanges": "Perubahan belum diterbitkan",
+	"builderStatusUnpublishedChangesTitle": "Draf memiliki perubahan yang belum terlihat oleh responden audit. Terbitkan untuk menerapkannya.",
+	"builderStatusDraftNothingLive": "Draf — belum ada yang aktif",
+	"builderStatusDraftNothingLiveTitle": "Draf memiliki konten tetapi belum ada yang diterbitkan. Audit baru tidak akan melihat apa pun sampai Anda menerbitkan.",
+	"builderStatusEmpty": "Kosong",
+	"builderStatusEmptyTitle": "Belum ada persyaratan. Audit baru yang dibangun di atas kerangka kerja ini tidak akan memiliki apa pun untuk dijawab.",
+	"builderPreview": "Pratinjau",
+	"builderPreviewSaveFirst": "Simpan dulu draf Anda untuk pratinjau",
+	"builderPreviewAsRespondent": "Pratinjau sebagai responden (dibuka di tab baru)",
+	"builderExportYamlTitle": "Ekspor kerangka kerja sebagai berkas pustaka YAML",
+	"builderExportYamlUnpublishedWarning": "Perubahan yang belum diterbitkan tidak akan disertakan. Terbitkan dulu untuk mengekspor perubahan terbaru.",
+	"builderCopyBase": "Salin dasar",
+	"builderCopyBaseTitle": "Salin teks bahasa dasar ke {lang} (tidak akan menimpa terjemahan yang sudah ada)",
+	"builderCopyBaseQuestion": "Salin teks dasar?",
+	"builderNoTranslation": "Tanpa terjemahan",
+	"builderShowKeyboardShortcuts": "Tampilkan pintasan keyboard",
+	"builderKeyboardShortcutsHint": "Pintasan keyboard (?)",
+	"builderExpandAllCards": "Bentangkan semua kartu",
+	"builderCollapseAllCards": "Ciutkan semua kartu",
+	"builderSaveFailed": "Gagal menyimpan",
+	"builderPublishedFlash": "Diterbitkan!",
+	"builderSaveDraftTitle": "Simpan draf (Ctrl+S)",
+	"builderDiscardDraftTitle": "Buang draf",
+	"builderDiscard": "Buang",
+	"builderDiscardAllChangesQuestion": "Buang semua perubahan?",
+	"builderYesDiscard": "Ya, buang",
+	"builderPublishDraftToLiveTitle": "Terbitkan draf ke kerangka kerja aktif",
+	"builderPublishing": "Menerbitkan...",
+	"builderPublishModalTitle": "Terbitkan draf ke aktif",
+	"builderPublishModalDescription": "Tindakan ini akan memperbarui kerangka kerja aktif. Tinjau perubahannya di bawah.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} persyaratan ditambahkan",
+				"countPlural=other": "{count} persyaratan ditambahkan"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pertanyaan",
+				"countPlural=other": "{count} pertanyaan"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} persyaratan dihapus",
+				"countPlural=other": "{count} persyaratan dihapus"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pertanyaan",
+				"countPlural=other": "{count} pertanyaan"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Tidak ada perubahan struktural yang terdeteksi (hanya metadata).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} perubahan tidak kompatibel terdeteksi",
+				"countPlural=other": "{count} perubahan tidak kompatibel terdeteksi"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Perubahan ini dapat memengaruhi penilaian, visibilitas, atau hasil kepatuhan dalam audit yang sudah ada.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} audit yang ada akan terdampak",
+				"countPlural=other": "{count} audit yang ada akan terdampak"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Persyaratan baru akan ditambahkan ke audit-audit ini.",
+	"builderAffectedAuditsRemovedHint": "Persyaratan yang dihapus dan data penilaiannya akan dihapus dari audit-audit ini.",
+	"builderCouldNotLoadPreview": "Tidak dapat memuat pratinjau dampak. Lanjutkan dengan hati-hati.",
+	"builderConfirmPublish": "Konfirmasi penerbitan",
+	"builderSearchNodes": "Cari node...",
+	"builderExpandSidebar": "Bentangkan bilah sisi",
+	"builderCollapseSidebar": "Ciutkan bilah sisi",
+	"builderJumpTo": "Lompat ke: {label}",
+	"builderUntitled": "Tanpa judul",
+	"builderHasUntranslatedItems": "Memiliki item yang belum diterjemahkan",
+	"builderNoNodesYet": "Belum ada node",
+	"builderNoMatchingNodes": "Tidak ada node yang cocok",
+	"builderNodesOf": "{filtered} dari {total} node",
+	"builderExpand": "Bentangkan",
+	"builderCollapse": "Ciutkan",
+	"builderFrameworkNamePlaceholder": "Nama kerangka kerja",
+	"builderFrameworkDescriptionPlaceholder": "Deskripsi kerangka kerja (opsional)",
+	"builderFrameworkAnnotationPlaceholder": "Anotasi kerangka kerja (teks panduan opsional)",
+	"builderTranslateName": "Terjemahkan nama...",
+	"builderTranslateDescription": "Terjemahkan deskripsi...",
+	"builderTranslateAnnotation": "Terjemahkan anotasi...",
+	"builderTranslateTypicalEvidence": "Terjemahkan bukti khas...",
+	"builderTranslateTitle": "Terjemahkan judul...",
+	"builderTranslateLabel": "Terjemahkan label...",
+	"builderTranslateMarkdown": "Terjemahkan konten markdown...",
+	"builderTranslatePlaceholder": "Terjemahkan...",
+	"builderTranslateQuestion": "Terjemahkan pertanyaan...",
+	"builderFrameworkSettings": "Pengaturan Kerangka Kerja",
+	"builderNoRulesOrGroupsConfigured": "Tidak ada aturan atau grup yang dikonfigurasi",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} aturan hasil",
+				"countPlural=other": "{count} aturan hasil"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grup",
+				"countPlural=other": "{count} grup"
+			}
+		}
+	],
+	"builderUrnNamespace": "Namespace URN",
+	"builderScoringSettings": "Pengaturan penilaian",
+	"builderAggregationHint": "Rata-rata membagi total skor dengan jumlah pertanyaan. Jumlah menambahkan semua skor secara langsung. Gunakan Jumlah untuk penilaian biner (0/1).",
+	"builderScoreScale": "Skala skor",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} tingkat",
+				"countPlural=other": "{count} tingkat"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Tambah tingkat skala",
+	"builderScaleNamePlaceholder": "mis. Sebagian",
+	"builderScaleDescriptionPlaceholder": "Opsional",
+	"builderScaleNameTranslate": "Nama ({lang})",
+	"builderScaleDescriptionTranslate": "Deskripsi ({lang})",
+	"builderOutcomeRules": "Aturan hasil",
+	"builderAddRule": "Tambah aturan",
+	"builderUntitledRule": "Aturan tanpa judul",
+	"builderLabel": "Label",
+	"builderLabelHint": "mis. Kepatuhan tinggi",
+	"builderCelExpression": "Ekspresi CEL",
+	"builderCelExpressionPlaceholder": "mis. assessment.score_sum >= 150 atau \"true\" sebagai catch-all",
+	"builderColor": "Warna",
+	"builderClearAction": "Bersihkan",
+	"builderNoOutcomeRules": "Belum ada aturan hasil. Tambahkan satu di atas.",
+	"builderOutcomeRulesHint": "Semua aturan yang cocok disertakan dalam hasil yang dihitung. Gunakan {trueLiteral} sebagai catch-all.",
+	"builderCelContextReference": "Referensi konteks CEL",
+	"builderCelLabelTranslate": "Label ({lang})",
+	"builderCelGroupAssessment": "Penilaian",
+	"builderCelGroupRequirements": "Persyaratan (berdasarkan node_id)",
+	"builderCelGroupAnswers": "Jawaban (berdasarkan node_id pertanyaan)",
+	"builderCelGroupOther": "Lainnya",
+	"builderCelScoreSum": "total poin yang diperoleh",
+	"builderCelScoreMax": "total poin yang mungkin",
+	"builderCelAnsweredCount": "persyaratan yang dijawab",
+	"builderCelTotalCount": "total persyaratan yang dapat dinilai",
+	"builderCelReqScore": "skor persyaratan",
+	"builderCelReqMaxScore": "skor maksimum persyaratan",
+	"builderCelReqResult": "hasil persyaratan",
+	"builderCelReqStatus": "status persyaratan",
+	"builderCelNodeIdHint": "node_id = bagian dari URN setelah slug (mis. \"1.2\" dari urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "skor jawaban (add_score × bobot)",
+	"builderCelAnswerValue": "nilai jawaban teks bebas",
+	"builderCelAnswerSelectedChoices": "daftar node_ids pilihan yang dipilih",
+	"builderCelAnswerWeight": "bobot pertanyaan",
+	"builderCelAnswerType": "tipe pertanyaan (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "peta ref_ids hasil yang sudah dihitung sebelumnya",
+	"builderCelHiddenRequirements": "daftar node_ids yang disembunyikan oleh ekspresi visibilitas",
+	"builderImplementationGroupsTitle": "Grup implementasi",
+	"builderAddGroup": "Tambah grup",
+	"builderUntitledGroup": "Grup tanpa judul",
+	"builderGroupNamePlaceholder": "mis. Tingkat 1",
+	"builderGroupDescriptionPlaceholder": "Deskripsi grup implementasi ini",
+	"builderSelectedByDefault": "Dipilih secara default",
+	"builderDefaultBadge": "default",
+	"builderTranslationLabel": "Terjemahan ({lang})",
+	"builderNoImplementationGroups": "Tidak ada grup implementasi yang ditentukan. Tambahkan satu di atas.",
+	"builderLanguagesSection": "Bahasa",
+	"builderLanguagesHint": "Atur bahasa dasar dan tambahkan bahasa target untuk penerjemahan.",
+	"builderBaseLanguage": "Bahasa dasar",
+	"builderTargetLanguages": "Bahasa target",
+	"builderAddLanguagePlaceholder": "Tambah bahasa...",
+	"builderAdd": "Tambah",
+	"builderNodeNamePlaceholder": "Nama node",
+	"builderSplashScreenTitlePlaceholder": "Judul layar pembuka",
+	"builderAssessableTooltip": "Apakah persyaratan ini dapat dinilai oleh responden",
+	"builderAssessable": "Dapat dinilai",
+	"builderDisplayMode": "Mode tampilan",
+	"builderDefaultMode": "Default",
+	"builderSplashMode": "Layar pembuka",
+	"builderAssessableLeaf": "Daun yang dapat dinilai",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Dapat dinilai · {count} anak",
+				"countPlural=other": "Dapat dinilai · {count} anak"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grup · {count} anak",
+				"countPlural=other": "Grup · {count} anak"
+			}
+		}
+	],
+	"builderEmptyNode": "Node kosong",
+	"builderSplashScreenStatus": "Layar pembuka",
+	"builderNestedUnder": "bersarang di bawah {parent}",
+	"builderExpandChildren": "Bentangkan anak",
+	"builderCollapseChildren": "Ciutkan anak",
+	"builderAdvanced": "Lanjutan",
+	"builderAdvancedAnnotation": "anotasi",
+	"builderAdvancedAnnotationEvidence": "anotasi, bukti",
+	"builderAdvancedAnnotationEvidenceVisibility": "anotasi, bukti, visibilitas",
+	"builderAdvancedAnnotationVisibility": "anotasi, visibilitas",
+	"builderAnnotationPlaceholder": "Catatan panduan opsional untuk peninjau",
+	"builderTypicalEvidencePlaceholder": "Contoh bukti yang harus dilampirkan responden",
+	"builderDescriptionOptional": "Opsional",
+	"builderVisibilityExpression": "Ekspresi visibilitas (CEL)",
+	"builderVisibilityExpressionTooltip": "Ekspresi CEL yang harus dievaluasi sebagai true agar persyaratan ini terlihat. Contoh: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "mis. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Grup implementasi:",
+	"builderAddQuestion": "Tambah pertanyaan",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} anak disembunyikan",
+				"countPlural=other": "{count} anak disembunyikan"
+			}
+		}
+	],
+	"builderSplashSource": "Sumber",
+	"builderSplashNoSourceContent": "Tidak ada konten sumber.",
+	"builderSplashEditPlaceholder": "Tulis konten markdown untuk layar pembuka Anda...",
+	"builderSplashNoContent": "Belum ada konten. Beralih ke Edit untuk menambahkan markdown.",
+	"builderSplashBold": "Tebal",
+	"builderSplashItalic": "Miring",
+	"builderSplashHeading": "Judul",
+	"builderSplashBulletList": "Daftar berbutir",
+	"builderSplashNumberedList": "Daftar bernomor",
+	"builderSplashLink": "Tautan",
+	"builderSplashTable": "Tabel",
+	"builderSplashInsertImage": "Sisipkan gambar",
+	"builderUntitledQuestion": "Pertanyaan tanpa judul",
+	"builderNotTranslated": "Belum diterjemahkan",
+	"builderQuestionTextPlaceholder": "Masukkan pertanyaan Anda...",
+	"builderWeight": "Bobot",
+	"builderAnnotationOptional": "Catatan opsional...",
+	"builderDeleteThisQuestion": "Hapus pertanyaan ini?",
+	"builderChangeTypeWarning": "Mengubah tipe akan menghapus pilihan yang ada. Lanjutkan?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ditampilkan ketika {ref} = {count} jawaban",
+				"countPlural=other": "Ditampilkan ketika {ref} = {count} jawaban"
+			}
+		}
+	],
+	"builderChoices": "Pilihan",
+	"builderAddChoice": "Tambah pilihan",
+	"builderChoicePlaceholder": "Teks pilihan...",
+	"builderResultLabel": "Hasil",
+	"builderNone": "Tidak ada",
+	"builderNoChoicesYet": "Belum ada pilihan. Tambahkan satu di atas.",
+	"builderRemoveCondition": "Hapus kondisi",
+	"builderAddCondition": "Tambah kondisi",
+	"builderShowWhenThisQuestion": "Tampilkan ketika pertanyaan ini...",
+	"builderSelectAQuestion": "Pilih pertanyaan...",
+	"builderHasAnswer": "...memiliki jawaban:",
+	"builderMatch": "Cocokkan:",
+	"builderMatchAny": "Salah satu yang dipilih",
+	"builderMatchAll": "Semua yang dipilih",
+	"builderConditionsOnlyChoiceTypes": "Kondisi hanya didukung untuk pertanyaan tipe pilihan.",
+	"builderKeyboardShortcuts": "Pintasan keyboard",
+	"builderKbOutlineEditing": "Pengeditan kerangka",
+	"builderKbOutlineEditingHint": "Berlaku untuk node yang disorot.",
+	"builderKbBuilder": "Pembangun",
+	"builderKbIndentNode": "Indentasi node",
+	"builderKbOutdentNode": "Kurangi indentasi node",
+	"builderKbAddChild": "Tambah anak",
+	"builderKbAddSiblingBelow": "Tambah saudara di bawah",
+	"builderKbToggleAssessable": "Alihkan dapat dinilai",
+	"builderKbSaveDraft": "Simpan draf",
+	"builderKbShowCheatsheet": "Tampilkan lembar contekan ini",
+	"builderKbCloseDialog": "Tutup dialog atau menu turun",
+	"builderImportedFramework": "Kerangka Kerja yang Diimpor",
+	"builderImportedFrameworkDescription": "Kerangka kerja ini diimpor dari pustaka dan tidak dapat diedit secara langsung. Untuk membuat perubahan, buat salinan yang dapat diedit.",
+	"builderCreateCopyAndEdit": "Buat salinan & edit",
+	"builderCreatingCopy": "Membuat salinan...",
+	"builderLoadingEditor": "Memuat editor...",
+	"builderFailedToStartEditor": "Gagal memulai editor",
+	"builderBackToFramework": "Kembali ke kerangka kerja",
+	"builderBackToBuilder": "Kembali ke pembangun",
+	"builderFailedToLoadDraft": "Gagal memuat draf",
+	"builderImplementationGroupsHeader": "Grup Implementasi",
+	"builderNoItemsToPreview": "Tidak ada item untuk dipratinjau.",
+	"builderNoItemsToPreviewHint": "Tambahkan persyaratan yang dapat dinilai atau layar pembuka di pembangun.",
+	"builderBaseLanguageOption": "Bahasa dasar",
+	"builderFrameworkNameRequired": "Nama kerangka kerja wajib diisi.",
+	"builderFrameworkNameTooLong": "Nama kerangka kerja {length} karakter (maks. 200).",
+	"builderNodeNameTooLong": "Nama melebihi 200 karakter ({length}/200). Pindahkan teks panjang ke bidang deskripsi.",
+	"builderRefIdTooLong": "'{label}': ref_id {length} karakter (maks. 100).",
+	"builderUrnTooLong": "'{label}': URN {length} karakter (maks. 255).",
+	"builderFailedToSaveDraftBeforePublish": "Gagal menyimpan draf sebelum penerbitan.",
+	"builderUnsavedChangesNavigation": "Anda memiliki perubahan yang belum disimpan dan akan hilang. Tetap keluar?",
+	"builderUnpublishedChangesNavigation": "Anda memiliki perubahan yang belum diterbitkan. Draf Anda tersimpan dan Anda dapat melanjutkan nanti. Tetap keluar?",
 	"fieldVisibility": "Visibilitas bidang",
 	"fieldVisibilityHelpText": "Kontrol bidang mana yang dapat dilihat dan diedit oleh setiap peran.",
 	"visibilityAuditorRespondent": "Auditor + Responden",
 	"visibilityAuditorOnly": "Hanya auditor",
 	"visibilityHidden": "Tersembunyi",
 	"answers": "Jawaban",
-	"respondentAlignment": "Penyelarasan responden"
+	"respondentAlignment": "Penyelarasan responden",
+	"frameworkRefId": "ID referensi",
+	"urnPreview": "Pratinjau URN:",
+	"urnLockedComplianceAssessment": "Terkunci — penilaian kepatuhan menggunakan kerangka ini.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Langkah",
+	"sliderNeedsAtLeastTwoChoices": "Slider membutuhkan setidaknya 2 pilihan.",
+	"sliderMinMustBeLessThanMax": "Min slider harus kurang dari maks.",
+	"sliderStepMustBeGreaterThanZero": "Langkah slider harus lebih besar dari 0.",
+	"sliderStepCannotExceedRange": "Langkah slider tidak boleh melebihi (maks − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Teks",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Pilihan unik",
+	"builderQuestionTypeMultipleChoice": "Pilihan ganda",
+	"builderQuestionTypeDate": "Tanggal",
+	"builderChangedOn": "changed on"
 }

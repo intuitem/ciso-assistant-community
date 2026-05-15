@@ -822,6 +822,7 @@
 	"createUserHelpText": "Створіть або прив’яжіть стороннього користувача до представника на основі e-mail",
 	"nameDuplicate": "Ім'я вже існує",
 	"noAnswer": "Немає відповіді",
+	"clearAnswer": "Очистити відповідь",
 	"entityAssessmentRepresentativesHelpText": "Сторонні користувачі, відповідальні за заповнення анкети",
 	"sendQuestionnaire": "Надіслати анкету",
 	"sureToSendQuestionnaire": "Ви впевнені, що хочете надіслати анкету: {questionnaire} ?",
@@ -1709,11 +1710,393 @@
 	"syncCweCatalog": "Отримати CWE",
 	"syncCweCatalogFailed": "Помилка CWE",
 	"exportEcosystem": "експорт екосистеми (XLSX)",
+	"boolean": "Логічне значення",
+	"builderEmptyStateTitle": "Як ви хочете структурувати цей фреймворк?",
+	"builderEmptyStateSubtitle": "Виберіть початкову форму — ви зможете змінити структуру в будь-який час.",
+	"builderEmptyFlat": "Плоский список",
+	"builderEmptyFlatHint": "Усі вимоги на одному рівні. Як Google SAIF (12 вимог).",
+	"builderEmptyGrouped": "Згруповано",
+	"builderEmptyGroupedHint": "Розділи, що містять вимоги. Як OWASP MASVS (8 розділів → 24 вимоги).",
+	"builderEmptyHierarchy": "Ієрархія",
+	"builderEmptyHierarchyHint": "Багаторівнева вкладеність. Як NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Порожнє полотно",
+	"builderEmptyBlankHint": "Почніть з нуля — додайте один порожній вузол.",
+	"builderAddTopLevelNode": "+ Додати кореневий вузол",
+	"builderAddChild": "+ Додати дочірній",
+	"builderAddSiblingBelow": "+ Додати сусідній нижче",
+	"builderBlankNode": "Порожній вузол",
+	"builderBlankNodeHint": "Порожній — налаштуйте прапорці самостійно",
+	"builderGroup": "Група",
+	"builderGroupHint": "Не оцінюється, для вкладеності",
+	"builderRequirementHint": "Оцінюється, може мати дочірні елементи",
+	"builderSplashScreen": "Заставка",
+	"builderSplashScreenHint": "Презентаційний, не оцінюється",
+	"builderStatusLive": "В ефірі",
+	"builderStatusLiveTitle": "Чернетка відповідає тому, що бачать респонденти аудиту.",
+	"builderStatusUnpublishedChanges": "Неопубліковані зміни",
+	"builderStatusUnpublishedChangesTitle": "У чернетці є зміни, які ще не видно респондентам аудиту. Опублікуйте, щоб застосувати.",
+	"builderStatusDraftNothingLive": "Чернетка — нічого не опубліковано",
+	"builderStatusDraftNothingLiveTitle": "У чернетці є вміст, але нічого ще не опубліковано. Нові аудити нічого не побачать, доки ви не опублікуєте.",
+	"builderStatusEmpty": "Порожньо",
+	"builderStatusEmptyTitle": "Поки що немає вимог. Нові аудити, побудовані на цьому фреймворку, не матимуть на що відповідати.",
+	"builderPreview": "Попередній перегляд",
+	"builderPreviewSaveFirst": "Спочатку збережіть чернетку для попереднього перегляду",
+	"builderPreviewAsRespondent": "Попередній перегляд як респондент (відкривається у новій вкладці)",
+	"builderExportYamlTitle": "Експортувати фреймворк як YAML-файл бібліотеки",
+	"builderExportYamlUnpublishedWarning": "Неопубліковані зміни не будуть включені. Спочатку опублікуйте, щоб експортувати останні правки.",
+	"builderCopyBase": "Копіювати базу",
+	"builderCopyBaseTitle": "Копіювати текст базової мови до {lang} (не перезаписує наявні переклади)",
+	"builderCopyBaseQuestion": "Копіювати базовий текст?",
+	"builderNoTranslation": "Немає перекладу",
+	"builderShowKeyboardShortcuts": "Показати клавіатурні скорочення",
+	"builderKeyboardShortcutsHint": "Клавіатурні скорочення (?)",
+	"builderExpandAllCards": "Розгорнути всі картки",
+	"builderCollapseAllCards": "Згорнути всі картки",
+	"builderSaveFailed": "Не вдалося зберегти",
+	"builderPublishedFlash": "Опубліковано!",
+	"builderSaveDraftTitle": "Зберегти чернетку (Ctrl+S)",
+	"builderDiscardDraftTitle": "Відхилити чернетку",
+	"builderDiscard": "Відхилити",
+	"builderDiscardAllChangesQuestion": "Відхилити всі зміни?",
+	"builderYesDiscard": "Так, відхилити",
+	"builderPublishDraftToLiveTitle": "Опублікувати чернетку в робочий фреймворк",
+	"builderPublishing": "Публікація...",
+	"builderPublishModalTitle": "Опублікувати чернетку",
+	"builderPublishModalDescription": "Це оновить робочий фреймворк. Перегляньте зміни нижче.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} вимог додано",
+				"countPlural=other": "{count} вимог додано"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} питань",
+				"countPlural=other": "{count} питань"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} вимог видалено",
+				"countPlural=other": "{count} вимог видалено"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} питань",
+				"countPlural=other": "{count} питань"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Структурних змін не виявлено (лише метадані).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Виявлено {count} критичних змін",
+				"countPlural=other": "Виявлено {count} критичних змін"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Ці зміни можуть вплинути на оцінювання, видимість або результати відповідності в наявних аудитах.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} наявних аудитів буде зачеплено",
+				"countPlural=other": "{count} наявних аудитів буде зачеплено"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Нові вимоги будуть додані до цих аудитів.",
+	"builderAffectedAuditsRemovedHint": "Видалені вимоги та їхні дані оцінювання будуть стерті з цих аудитів.",
+	"builderCouldNotLoadPreview": "Не вдалося завантажити попередній перегляд впливу. Дійте обережно.",
+	"builderConfirmPublish": "Підтвердити публікацію",
+	"builderSearchNodes": "Пошук вузлів...",
+	"builderExpandSidebar": "Розгорнути бічну панель",
+	"builderCollapseSidebar": "Згорнути бічну панель",
+	"builderJumpTo": "Перейти до: {label}",
+	"builderUntitled": "Без назви",
+	"builderHasUntranslatedItems": "Містить неперекладені елементи",
+	"builderNoNodesYet": "Поки що немає вузлів",
+	"builderNoMatchingNodes": "Немає відповідних вузлів",
+	"builderNodesOf": "{filtered} з {total} вузлів",
+	"builderExpand": "Розгорнути",
+	"builderCollapse": "Згорнути",
+	"builderFrameworkNamePlaceholder": "Назва фреймворку",
+	"builderFrameworkDescriptionPlaceholder": "Опис фреймворку (необов'язково)",
+	"builderFrameworkAnnotationPlaceholder": "Анотація фреймворку (необов'язковий пояснювальний текст)",
+	"builderTranslateName": "Перекласти назву...",
+	"builderTranslateDescription": "Перекласти опис...",
+	"builderTranslateAnnotation": "Перекласти анотацію...",
+	"builderTranslateTypicalEvidence": "Перекласти типовий доказ...",
+	"builderTranslateTitle": "Перекласти заголовок...",
+	"builderTranslateLabel": "Перекласти мітку...",
+	"builderTranslateMarkdown": "Перекласти вміст markdown...",
+	"builderTranslatePlaceholder": "Перекласти...",
+	"builderTranslateQuestion": "Перекласти питання...",
+	"builderFrameworkSettings": "Налаштування фреймворку",
+	"builderNoRulesOrGroupsConfigured": "Не налаштовано правил або груп",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} правил результату",
+				"countPlural=other": "{count} правил результату"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} груп",
+				"countPlural=other": "{count} груп"
+			}
+		}
+	],
+	"builderUrnNamespace": "Простір імен URN",
+	"builderScoringSettings": "Налаштування оцінювання",
+	"builderAggregationHint": "Середнє ділить загальний бал на кількість питань. Сума додає всі бали безпосередньо. Використовуйте Суму для бінарного (0/1) оцінювання.",
+	"builderScoreScale": "Шкала оцінок",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} рівнів",
+				"countPlural=other": "{count} рівнів"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Додати рівень шкали",
+	"builderScaleNamePlaceholder": "напр. Частково",
+	"builderScaleDescriptionPlaceholder": "Необов'язково",
+	"builderScaleNameTranslate": "Назва ({lang})",
+	"builderScaleDescriptionTranslate": "Опис ({lang})",
+	"builderOutcomeRules": "Правила результату",
+	"builderAddRule": "Додати правило",
+	"builderUntitledRule": "Правило без назви",
+	"builderLabel": "Мітка",
+	"builderLabelHint": "напр. Висока відповідність",
+	"builderCelExpression": "Вираз CEL",
+	"builderCelExpressionPlaceholder": "напр. assessment.score_sum >= 150 або \"true\" як універсальне правило",
+	"builderColor": "Колір",
+	"builderClearAction": "Очистити",
+	"builderNoOutcomeRules": "Поки що немає правил результату. Додайте одне вище.",
+	"builderOutcomeRulesHint": "Усі правила, що збігаються, включаються в обчислені результати. Використовуйте {trueLiteral} як універсальне правило.",
+	"builderCelContextReference": "Довідник контексту CEL",
+	"builderCelLabelTranslate": "Мітка ({lang})",
+	"builderCelGroupAssessment": "Оцінювання",
+	"builderCelGroupRequirements": "Вимоги (за node_id)",
+	"builderCelGroupAnswers": "Відповіді (за node_id питання)",
+	"builderCelGroupOther": "Інше",
+	"builderCelScoreSum": "загальна кількість набраних балів",
+	"builderCelScoreMax": "загальна кількість можливих балів",
+	"builderCelAnsweredCount": "відповіді на вимоги",
+	"builderCelTotalCount": "загальна кількість оцінюваних вимог",
+	"builderCelReqScore": "оцінка вимоги",
+	"builderCelReqMaxScore": "максимальна оцінка вимоги",
+	"builderCelReqResult": "результат вимоги",
+	"builderCelReqStatus": "статус вимоги",
+	"builderCelNodeIdHint": "node_id = частина URN після слагу (напр. \"1.2\" з urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "оцінка відповіді (add_score × вага)",
+	"builderCelAnswerValue": "значення відповіді у вільній формі",
+	"builderCelAnswerSelectedChoices": "список node_ids обраних варіантів",
+	"builderCelAnswerWeight": "вага питання",
+	"builderCelAnswerType": "тип питання (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "карта раніше обчислених ref_ids результатів",
+	"builderCelHiddenRequirements": "список node_ids, прихованих виразами видимості",
+	"builderImplementationGroupsTitle": "Групи впровадження",
+	"builderAddGroup": "Додати групу",
+	"builderUntitledGroup": "Група без назви",
+	"builderGroupNamePlaceholder": "напр. Рівень 1",
+	"builderGroupDescriptionPlaceholder": "Опис цієї групи впровадження",
+	"builderSelectedByDefault": "Вибрано за замовчуванням",
+	"builderDefaultBadge": "за замовчуванням",
+	"builderTranslationLabel": "Переклад ({lang})",
+	"builderNoImplementationGroups": "Не визначено груп впровадження. Додайте одну вище.",
+	"builderLanguagesSection": "Мови",
+	"builderLanguagesHint": "Встановіть базову мову та додайте цільові мови для перекладу.",
+	"builderBaseLanguage": "Базова мова",
+	"builderTargetLanguages": "Цільові мови",
+	"builderAddLanguagePlaceholder": "Додати мову...",
+	"builderAdd": "Додати",
+	"builderNodeNamePlaceholder": "Назва вузла",
+	"builderSplashScreenTitlePlaceholder": "Заголовок заставки",
+	"builderAssessableTooltip": "Чи може ця вимога оцінюватися респондентами",
+	"builderAssessable": "Оцінюване",
+	"builderDisplayMode": "Режим відображення",
+	"builderDefaultMode": "За замовчуванням",
+	"builderSplashMode": "Заставка",
+	"builderAssessableLeaf": "Оцінюваний листок",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Оцінюване · {count} дочірній",
+				"countPlural=other": "Оцінюване · {count} дочірніх"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Група · {count} дочірній",
+				"countPlural=other": "Група · {count} дочірніх"
+			}
+		}
+	],
+	"builderEmptyNode": "Порожній вузол",
+	"builderSplashScreenStatus": "Заставка",
+	"builderNestedUnder": "вкладено під {parent}",
+	"builderExpandChildren": "Розгорнути дочірні",
+	"builderCollapseChildren": "Згорнути дочірні",
+	"builderAdvanced": "Розширено",
+	"builderAdvancedAnnotation": "анотація",
+	"builderAdvancedAnnotationEvidence": "анотація, доказ",
+	"builderAdvancedAnnotationEvidenceVisibility": "анотація, доказ, видимість",
+	"builderAdvancedAnnotationVisibility": "анотація, видимість",
+	"builderAnnotationPlaceholder": "Необов'язкові пояснювальні нотатки для рецензентів",
+	"builderTypicalEvidencePlaceholder": "Приклади доказів, які повинні додавати респонденти",
+	"builderDescriptionOptional": "Необов'язково",
+	"builderVisibilityExpression": "Вираз видимості (CEL)",
+	"builderVisibilityExpressionTooltip": "Вираз CEL, який має оцінюватися як true, щоб ця вимога була видимою. Приклад: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "напр. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Групи впровадження:",
+	"builderAddQuestion": "Додати питання",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} дочірній прихований",
+				"countPlural=other": "{count} дочірніх приховано"
+			}
+		}
+	],
+	"builderSplashSource": "Джерело",
+	"builderSplashNoSourceContent": "Немає вихідного вмісту.",
+	"builderSplashEditPlaceholder": "Введіть markdown-вміст для вашої заставки...",
+	"builderSplashNoContent": "Поки що немає вмісту. Перейдіть у режим Редагувати, щоб додати markdown.",
+	"builderSplashBold": "Жирний",
+	"builderSplashItalic": "Курсив",
+	"builderSplashHeading": "Заголовок",
+	"builderSplashBulletList": "Маркований список",
+	"builderSplashNumberedList": "Нумерований список",
+	"builderSplashLink": "Посилання",
+	"builderSplashTable": "Таблиця",
+	"builderSplashInsertImage": "Вставити зображення",
+	"builderUntitledQuestion": "Питання без назви",
+	"builderNotTranslated": "Не перекладено",
+	"builderQuestionTextPlaceholder": "Введіть ваше питання...",
+	"builderWeight": "Вага",
+	"builderAnnotationOptional": "Необов'язкова нотатка...",
+	"builderDeleteThisQuestion": "Видалити це питання?",
+	"builderChangeTypeWarning": "Зміна типу видалить наявні варіанти. Продовжити?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Показується, коли {ref} = {count} відповідей",
+				"countPlural=other": "Показується, коли {ref} = {count} відповідей"
+			}
+		}
+	],
+	"builderChoices": "Варіанти",
+	"builderAddChoice": "Додати варіант",
+	"builderChoicePlaceholder": "Текст варіанту...",
+	"builderResultLabel": "Результат",
+	"builderNone": "Немає",
+	"builderNoChoicesYet": "Поки що немає варіантів. Додайте один вище.",
+	"builderRemoveCondition": "Видалити умову",
+	"builderAddCondition": "Додати умову",
+	"builderShowWhenThisQuestion": "Показувати, коли це питання...",
+	"builderSelectAQuestion": "Виберіть питання...",
+	"builderHasAnswer": "...має відповідь:",
+	"builderMatch": "Збіг:",
+	"builderMatchAny": "Будь-яка з обраних",
+	"builderMatchAll": "Усі обрані",
+	"builderConditionsOnlyChoiceTypes": "Умови підтримуються лише для питань з варіантами вибору.",
+	"builderKeyboardShortcuts": "Клавіатурні скорочення",
+	"builderKbOutlineEditing": "Редагування структури",
+	"builderKbOutlineEditingHint": "Застосовується до виділеного вузла.",
+	"builderKbBuilder": "Конструктор",
+	"builderKbIndentNode": "Збільшити відступ вузла",
+	"builderKbOutdentNode": "Зменшити відступ вузла",
+	"builderKbAddChild": "Додати дочірній",
+	"builderKbAddSiblingBelow": "Додати сусідній нижче",
+	"builderKbToggleAssessable": "Перемкнути оцінюваність",
+	"builderKbSaveDraft": "Зберегти чернетку",
+	"builderKbShowCheatsheet": "Показати цю шпаргалку",
+	"builderKbCloseDialog": "Закрити діалог або випадаюче меню",
+	"builderImportedFramework": "Імпортований фреймворк",
+	"builderImportedFrameworkDescription": "Цей фреймворк було імпортовано з бібліотеки і його не можна редагувати безпосередньо. Щоб внести зміни, створіть редаговану копію.",
+	"builderCreateCopyAndEdit": "Створити копію та редагувати",
+	"builderCreatingCopy": "Створення копії...",
+	"builderLoadingEditor": "Завантаження редактора...",
+	"builderFailedToStartEditor": "Не вдалося запустити редактор",
+	"builderBackToFramework": "Назад до фреймворку",
+	"builderBackToBuilder": "Назад до конструктора",
+	"builderFailedToLoadDraft": "Не вдалося завантажити чернетку",
+	"builderImplementationGroupsHeader": "Групи впровадження",
+	"builderNoItemsToPreview": "Немає елементів для попереднього перегляду.",
+	"builderNoItemsToPreviewHint": "Додайте оцінювані вимоги або заставки в конструкторі.",
+	"builderBaseLanguageOption": "Базова мова",
+	"builderFrameworkNameRequired": "Назва фреймворку є обов'язковою.",
+	"builderFrameworkNameTooLong": "Назва фреймворку має {length} символів (макс. 200).",
+	"builderNodeNameTooLong": "Назва перевищує 200 символів ({length}/200). Перенесіть довгий текст у поле опису.",
+	"builderRefIdTooLong": "«{label}»: ref_id має {length} символів (макс. 100).",
+	"builderUrnTooLong": "«{label}»: URN має {length} символів (макс. 255).",
+	"builderFailedToSaveDraftBeforePublish": "Не вдалося зберегти чернетку перед публікацією.",
+	"builderUnsavedChangesNavigation": "У вас є незбережені зміни, які буде втрачено. Все одно вийти?",
+	"builderUnpublishedChangesNavigation": "У вас є неопубліковані зміни. Ваша чернетка збережена, ви зможете продовжити пізніше. Все одно вийти?",
 	"fieldVisibility": "Видимість полів",
 	"fieldVisibilityHelpText": "Контролюйте, які поля може бачити та редагувати кожна роль.",
 	"visibilityAuditorRespondent": "Аудитор + Респондент",
 	"visibilityAuditorOnly": "Лише аудитор",
 	"visibilityHidden": "Приховано",
 	"answers": "Відповіді",
-	"respondentAlignment": "Узгодження респондента"
+	"respondentAlignment": "Узгодження респондента",
+	"frameworkRefId": "ID посилання",
+	"urnPreview": "Перегляд URN:",
+	"urnLockedComplianceAssessment": "Заблоковано — оцінка відповідності використовує цей фреймворк.",
+	"sliderMin": "Мін",
+	"sliderMax": "Макс",
+	"sliderStep": "Крок",
+	"sliderNeedsAtLeastTwoChoices": "Повзунок потребує щонайменше 2 варіантів.",
+	"sliderMinMustBeLessThanMax": "Мін повзунка має бути меншим за макс.",
+	"sliderStepMustBeGreaterThanZero": "Крок повзунка має бути більшим за 0.",
+	"sliderStepCannotExceedRange": "Крок повзунка не може перевищувати (макс − мін).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "Логічне значення",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Single choice",
+	"builderQuestionTypeMultipleChoice": "Multiple choice",
+	"builderQuestionTypeDate": "Дата",
+	"builderChangedOn": "changed on"
 }

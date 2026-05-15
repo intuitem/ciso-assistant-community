@@ -133,9 +133,11 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
+    REWRITABLE_URN_TYPES,
     build_answers_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
+    rewrite_child_urns,
     _generate_occurrences,
     _create_task_dict,
 )
@@ -5988,6 +5990,88 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         return Response(changes)
 
+    @action(detail=False, methods=["get"], name="MSS Excel Export")
+    def mss_xlsx(self, request):
+        """Export filtered applied controls in ANSSI MonServiceSécurisé format
+        (Intitulé / Description / Catégorie). Maps csf_function to the 4 MSS
+        categories: Gouvernance / Protection / Défense / Résilience.
+        """
+        queryset = self._get_export_queryset()
+
+        template_path = (
+            Path(__file__).resolve().parent
+            / "templates"
+            / "core"
+            / "Template_mesures_mss.xlsx"
+        )
+        wb = load_workbook(template_path)
+        ws = wb["Template mesures"]
+
+        MSS_CATEGORY_MAP = {
+            "govern": "Gouvernance",
+            "identify": "Gouvernance",
+            "protect": "Protection",
+            "detect": "Défense",
+            "respond": "Défense",
+            "recover": "Résilience",
+        }
+        # Coarse fallback when csf_function is null. Can only reach
+        # Gouvernance / Protection — Défense and Résilience require csf_function.
+        MSS_CATEGORY_FROM_AC_CATEGORY = {
+            "policy": "Gouvernance",
+            "process": "Gouvernance",
+            "procedure": "Gouvernance",
+            "technical": "Protection",
+            "physical": "Protection",
+        }
+
+        def mss_category_for(control):
+            return (
+                MSS_CATEGORY_MAP.get(control.csf_function or "")
+                or MSS_CATEGORY_FROM_AC_CATEGORY.get(control.category or "")
+                or ""
+            )
+
+        # Clear the demo row R4 ("Mesure EXEMPLE") so it doesn't get imported.
+        # ws.cell(..., value=None) is a no-op in openpyxl; assign via .value.
+        for col in range(1, 4):
+            ws.cell(row=4, column=col).value = ""
+
+        # Data starts at R7 per the template (R6 is the data header).
+        # Iterating the queryset directly — .iterator() would need chunk_size
+        # because _get_export_queryset() applies prefetch_related.
+        row = 7
+        for control in queryset:
+            ws.cell(row=row, column=1, value=escape_excel_formula(control.name or ""))
+            ws.cell(
+                row=row,
+                column=2,
+                value=escape_excel_formula(control.description or ""),
+            )
+            ws.cell(row=row, column=3, value=mss_category_for(control))
+            row += 1
+
+        # Extend the Catégorie dropdown if we wrote past the pre-validated range.
+        last_data_row = row - 1
+        if last_data_row > 106:
+            for dv in ws.data_validations.dataValidation:
+                if dv.type == "list" and dv.formula1 and "Gouvernance" in dv.formula1:
+                    dv.sqref = f"C4 C7:C{last_data_row}"
+                    break
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="applied-controls-mss.xlsx"'
+        )
+        return response
+
 
 class ActionPlanList(generics.ListAPIView):
     search_fields = ["name", "description", "ref_id"]
@@ -8364,7 +8448,9 @@ class FrameworkViewSet(BaseModelViewSet):
         """Export a framework as a library-compatible YAML file."""
         framework = self.get_object()
 
-        slug = self._slugify_framework_name(framework.name, framework.id)
+        slug = framework.ref_id or self._slugify_framework_name(
+            framework.name, framework.id
+        )
 
         # Query all nodes ordered by DFS order
         nodes = list(
@@ -8735,6 +8821,26 @@ class FrameworkViewSet(BaseModelViewSet):
         if framework.translations and isinstance(framework.translations, dict):
             available_languages.update(framework.translations.keys())
 
+        seed_ref_id = framework.ref_id
+        if not seed_ref_id:
+            for record in nodes + questions + choices:
+                u = record.get("urn") or ""
+                parts = u.split(":")
+                # Only proper 6+ segment URNs (`urn:ns:risk:type:slug:node_id`)
+                # carry a slug we can seed from. Legacy 5-segment URNs
+                # (`urn:ns:risk:type:<uuid>`) have a per-node UUID at parts[4]
+                # — not a ref_id — so skip them and fall through to the slug.
+                if (
+                    len(parts) >= 6
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                ):
+                    seed_ref_id = parts[4]
+                    break
+            if not seed_ref_id:
+                seed_ref_id = self._slugify_framework_name(framework.name, framework.id)
+
         draft = {
             "framework_meta": {
                 "name": framework.name,
@@ -8749,6 +8855,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "outcomes_definition": framework.outcomes_definition,
                 "field_visibility": framework.field_visibility or {},
                 "urn_namespace": framework.urn_namespace or "custom",
+                "ref_id": seed_ref_id,
             },
             "nodes": nodes,
             "questions": questions,
@@ -9126,6 +9233,144 @@ class FrameworkViewSet(BaseModelViewSet):
                         f"Question '{label}' depends on a choice that does not exist in this framework."
                     )
 
+        # --- 0c. Apply URN rename (urn_namespace / ref_id) before any sync. ---
+        new_namespace_raw = fw_meta.get("urn_namespace")
+        new_namespace = (
+            new_namespace_raw.strip() if isinstance(new_namespace_raw, str) else ""
+        ) or None
+        raw_ref_id = fw_meta.get("ref_id")
+        new_ref_id = raw_ref_id.strip() if isinstance(raw_ref_id, str) else None
+
+        # Normalize current DB values to match what start_editing seeds into
+        # the draft: NULL/empty urn_namespace → "custom"; NULL/whitespace
+        # ref_id → None. Without this, a no-op publish of a framework whose
+        # DB columns are NULL trips the rename branch and rewrites URNs.
+        current_namespace = (
+            framework.urn_namespace.strip()
+            if isinstance(framework.urn_namespace, str)
+            and framework.urn_namespace.strip()
+            else "custom"
+        )
+        current_ref = (
+            framework.ref_id.strip()
+            if isinstance(framework.ref_id, str) and framework.ref_id.strip()
+            else None
+        )
+
+        ns_changed = bool(new_namespace) and new_namespace != current_namespace
+        ref_changed = new_ref_id is not None and new_ref_id != (current_ref or "")
+
+        new_urn_namespace = framework.urn_namespace
+        new_framework_ref_id = framework.ref_id
+
+        if ns_changed or ref_changed:
+            if framework.complianceassessment_set.exists():
+                raise DraftValidationError(
+                    "Cannot change URN namespace or ref_id while a compliance assessment uses this framework."
+                )
+            if ref_changed and (
+                not new_ref_id or not re.fullmatch(r"[A-Za-z0-9_-]+", new_ref_id)
+            ):
+                raise DraftValidationError(
+                    "ref_id must be non-empty and may only contain letters, digits, '-' or '_'."
+                )
+
+            # Reject legacy URN shapes that the rewrite helper can't safely
+            # update (e.g. 5-segment `urn:ns:risk:type:<per-node-uuid>` from
+            # older duplicate flows — no slug position to write into). Any
+            # candidate URN must be `urn:_:risk:<rewritable-type>:_:_...` with
+            # at least 6 segments. Failing fast here prevents the framework
+            # metadata from drifting away from its child URNs.
+            def _is_legacy_child_urn(u):
+                if not isinstance(u, str):
+                    return False
+                parts = u.split(":")
+                return (
+                    len(parts) >= 4
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                    and len(parts) < 6
+                )
+
+            legacy_urns: list[str] = []
+            for n in draft_nodes:
+                if _is_legacy_child_urn(n.get("urn")):
+                    legacy_urns.append(n["urn"])
+                if _is_legacy_child_urn(n.get("parent_urn")):
+                    legacy_urns.append(n["parent_urn"])
+            for q in draft_questions:
+                if _is_legacy_child_urn(q.get("urn")):
+                    legacy_urns.append(q["urn"])
+                dep = q.get("depends_on")
+                if isinstance(dep, dict):
+                    if _is_legacy_child_urn(dep.get("question")):
+                        legacy_urns.append(dep["question"])
+                    if isinstance(dep.get("answers"), list):
+                        legacy_urns.extend(
+                            a for a in dep["answers"] if _is_legacy_child_urn(a)
+                        )
+            for c in draft_choices:
+                if _is_legacy_child_urn(c.get("urn")):
+                    legacy_urns.append(c["urn"])
+            if legacy_urns:
+                sample = legacy_urns[0]
+                raise DraftValidationError(
+                    "This framework contains legacy URNs that cannot be renamed "
+                    f"(e.g. '{sample}'). Re-duplicate it from a library-backed "
+                    "source before changing its URN namespace or ref_id."
+                )
+
+            new_ns = new_namespace or framework.urn_namespace or "custom"
+
+            current_slug = None
+            for n in draft_nodes + draft_questions + draft_choices:
+                u = n.get("urn") or ""
+                parts = u.split(":")
+                if (
+                    len(parts) >= 6
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                ):
+                    current_slug = parts[4]
+                    break
+            if not current_slug:
+                current_slug = framework.ref_id or self._slugify_framework_name(
+                    framework.name, framework.id
+                )
+            new_slug = new_ref_id if ref_changed else current_slug
+
+            rewrite_child_urns(draft, new_ns, new_slug)
+            # draft_nodes/questions/choices are aliases of draft["..."] lists, so they
+            # already see the rewritten URNs.
+
+            sample_node_prefix = f"urn:{new_ns}:risk:req_node:{new_slug}:"
+            sample_question_prefix = f"urn:{new_ns}:risk:question:{new_slug}:"
+            sample_choice_prefix = f"urn:{new_ns}:risk:question_choice:{new_slug}:"
+            collision = (
+                RequirementNode.objects.exclude(framework=framework)
+                .filter(urn__startswith=sample_node_prefix)
+                .exists()
+                or Question.objects.exclude(requirement_node__framework=framework)
+                .filter(urn__startswith=sample_question_prefix)
+                .exists()
+                or QuestionChoice.objects.exclude(
+                    question__requirement_node__framework=framework
+                )
+                .filter(urn__startswith=sample_choice_prefix)
+                .exists()
+            )
+            if collision:
+                raise DraftValidationError(
+                    f"Another framework already uses urn_namespace='{new_ns}' with ref_id='{new_slug}'. "
+                    "Pick a different ref_id."
+                )
+
+            new_urn_namespace = new_ns
+            if ref_changed:
+                new_framework_ref_id = new_ref_id
+
         with transaction.atomic():
             # --- 1. Collect existing DB IDs ---
             db_node_ids = set(
@@ -9326,52 +9571,69 @@ class FrameworkViewSet(BaseModelViewSet):
             draft_choice_map = {c["id"]: c for c in draft_choices}
 
             # --- 5. UPDATE+CREATE nodes ---
+            # Skip rows whose draft payload already equals the DB row — this
+            # avoids feeding unchanged rows into a 1000-deep CASE-WHEN UPDATE
+            # that SQLite handles poorly. Common case: open the builder and
+            # publish without editing → zero-cost UPDATE.
+            NODE_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "name",
+                "description",
+                "annotation",
+                "parent_urn",
+                "order_id",
+                "assessable",
+                "implementation_groups",
+                "visibility_expression",
+                "typical_evidence",
+                "weight",
+                "importance",
+                "display_mode",
+                "folder_id",
+                "translations",
+            ]
             if existing_node_ids:
+                db_nodes_map = {
+                    row["id"]: row
+                    for row in RequirementNode.objects.filter(
+                        id__in=existing_node_ids
+                    ).values("id", *NODE_UPDATE_FIELDS)
+                }
                 nodes_to_update = []
                 for node_id in existing_node_ids:
                     data = draft_node_map[str(node_id)]
-                    node = RequirementNode(
-                        id=node_id,
-                        framework=framework,
-                        urn=data.get("urn") or None,
-                        ref_id=data.get("ref_id") or None,
-                        name=data.get("name") or None,
-                        description=data.get("description") or None,
-                        annotation=data.get("annotation") or None,
-                        parent_urn=data.get("parent_urn") or None,
-                        order_id=data.get("order_id"),
-                        assessable=data.get("assessable", False),
-                        implementation_groups=data.get("implementation_groups"),
-                        visibility_expression=data.get("visibility_expression") or None,
-                        typical_evidence=data.get("typical_evidence") or None,
-                        weight=data.get("weight", 1),
-                        importance=data.get("importance", "undefined"),
-                        display_mode=data.get("display_mode", "default"),
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                    payload = {
+                        "urn": data.get("urn") or None,
+                        "ref_id": data.get("ref_id") or None,
+                        "name": data.get("name") or None,
+                        "description": data.get("description") or None,
+                        "annotation": data.get("annotation") or None,
+                        "parent_urn": data.get("parent_urn") or None,
+                        "order_id": data.get("order_id"),
+                        "assessable": data.get("assessable", False),
+                        "implementation_groups": data.get("implementation_groups"),
+                        "visibility_expression": data.get("visibility_expression")
+                        or None,
+                        "typical_evidence": data.get("typical_evidence") or None,
+                        "weight": data.get("weight", 1),
+                        "importance": data.get("importance", "undefined"),
+                        "display_mode": data.get("display_mode", "default"),
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_nodes_map.get(node_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in NODE_UPDATE_FIELDS
+                    ):
+                        continue
+                    nodes_to_update.append(
+                        RequirementNode(id=node_id, framework=framework, **payload)
                     )
-                    nodes_to_update.append(node)
-                RequirementNode.objects.bulk_update(
-                    nodes_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "name",
-                        "description",
-                        "annotation",
-                        "parent_urn",
-                        "order_id",
-                        "assessable",
-                        "implementation_groups",
-                        "visibility_expression",
-                        "typical_evidence",
-                        "weight",
-                        "importance",
-                        "display_mode",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
+                if nodes_to_update:
+                    RequirementNode.objects.bulk_update(
+                        nodes_to_update, NODE_UPDATE_FIELDS
+                    )
 
             new_node_ids = draft_node_ids - db_node_ids
             if new_node_ids:
@@ -9411,7 +9673,27 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
             # --- 6. UPDATE+CREATE questions (with FK validation) ---
+            QUESTION_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "text",
+                "annotation",
+                "type",
+                "config",
+                "depends_on",
+                "order",
+                "weight",
+                "requirement_node_id",
+                "folder_id",
+                "translations",
+            ]
             if existing_question_ids:
+                db_questions_map = {
+                    row["id"]: row
+                    for row in Question.objects.filter(
+                        id__in=existing_question_ids
+                    ).values("id", *QUESTION_UPDATE_FIELDS)
+                }
                 questions_to_update = []
                 for question_id in existing_question_ids:
                     data = draft_question_map[str(question_id)]
@@ -9420,39 +9702,30 @@ class FrameworkViewSet(BaseModelViewSet):
                         raise DraftValidationError(
                             "Question references requirement_node not in this framework."
                         )
-                    question = Question(
-                        id=question_id,
-                        urn=data.get("urn"),
-                        ref_id=data.get("ref_id") or None,
-                        text=data.get("text") or None,
-                        annotation=data.get("annotation") or None,
-                        type=data.get("type", "text"),
-                        config=data.get("config"),
-                        depends_on=data.get("depends_on"),
-                        order=data.get("order", 0),
-                        weight=data.get("weight", 1),
-                        requirement_node_id=req_node_id,
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                    payload = {
+                        "urn": data.get("urn"),
+                        "ref_id": data.get("ref_id") or None,
+                        "text": data.get("text") or None,
+                        "annotation": data.get("annotation") or None,
+                        "type": data.get("type", "text"),
+                        "config": data.get("config"),
+                        "depends_on": data.get("depends_on"),
+                        "order": data.get("order", 0),
+                        "weight": data.get("weight", 1),
+                        "requirement_node_id": req_node_id,
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_questions_map.get(question_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in QUESTION_UPDATE_FIELDS
+                    ):
+                        continue
+                    questions_to_update.append(Question(id=question_id, **payload))
+                if questions_to_update:
+                    Question.objects.bulk_update(
+                        questions_to_update, QUESTION_UPDATE_FIELDS
                     )
-                    questions_to_update.append(question)
-                Question.objects.bulk_update(
-                    questions_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "text",
-                        "annotation",
-                        "type",
-                        "config",
-                        "depends_on",
-                        "order",
-                        "weight",
-                        "requirement_node_id",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
 
             new_question_ids = draft_question_ids - db_question_ids
             if new_question_ids:
@@ -9491,7 +9764,28 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
             # --- 7. UPDATE+CREATE choices (with FK validation) ---
+            CHOICE_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "value",
+                "annotation",
+                "add_score",
+                "compute_result",
+                "order",
+                "description",
+                "color",
+                "select_implementation_groups",
+                "question_id",
+                "folder_id",
+                "translations",
+            ]
             if existing_choice_ids:
+                db_choices_map = {
+                    row["id"]: row
+                    for row in QuestionChoice.objects.filter(
+                        id__in=existing_choice_ids
+                    ).values("id", *CHOICE_UPDATE_FIELDS)
+                }
                 choices_to_update = []
                 for choice_id in existing_choice_ids:
                     data = draft_choice_map[str(choice_id)]
@@ -9500,43 +9794,33 @@ class FrameworkViewSet(BaseModelViewSet):
                         raise DraftValidationError(
                             "Choice references question not in this framework."
                         )
-                    choice = QuestionChoice(
-                        id=choice_id,
-                        urn=data.get("urn") or None,
-                        ref_id=data.get("ref_id") or None,
-                        value=data.get("value") or None,
-                        annotation=data.get("annotation") or None,
-                        add_score=data.get("add_score"),
-                        compute_result=data.get("compute_result") or None,
-                        order=data.get("order", 0),
-                        description=data.get("description") or None,
-                        color=data.get("color") or None,
-                        select_implementation_groups=data.get(
+                    payload = {
+                        "urn": data.get("urn") or None,
+                        "ref_id": data.get("ref_id") or None,
+                        "value": data.get("value") or None,
+                        "annotation": data.get("annotation") or None,
+                        "add_score": data.get("add_score"),
+                        "compute_result": data.get("compute_result") or None,
+                        "order": data.get("order", 0),
+                        "description": data.get("description") or None,
+                        "color": data.get("color") or None,
+                        "select_implementation_groups": data.get(
                             "select_implementation_groups"
                         ),
-                        question_id=q_id,
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                        "question_id": q_id,
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_choices_map.get(choice_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in CHOICE_UPDATE_FIELDS
+                    ):
+                        continue
+                    choices_to_update.append(QuestionChoice(id=choice_id, **payload))
+                if choices_to_update:
+                    QuestionChoice.objects.bulk_update(
+                        choices_to_update, CHOICE_UPDATE_FIELDS
                     )
-                    choices_to_update.append(choice)
-                QuestionChoice.objects.bulk_update(
-                    choices_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "value",
-                        "annotation",
-                        "add_score",
-                        "compute_result",
-                        "order",
-                        "description",
-                        "color",
-                        "select_implementation_groups",
-                        "question_id",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
 
             new_choice_ids = draft_choice_ids - db_choice_ids
             if new_choice_ids:
@@ -9594,9 +9878,11 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework.translations = meta.get(
                     "translations", framework.translations
                 )
-                # urn_namespace is only settable before first publish
-                if framework.editing_version <= 1 and meta.get("urn_namespace"):
-                    framework.urn_namespace = meta["urn_namespace"]
+                # urn_namespace + ref_id are gated on absence of compliance
+                # assessments; the gate, validation, and child-URN rewrite all
+                # happened up in section 0c.
+                framework.urn_namespace = new_urn_namespace
+                framework.ref_id = new_framework_ref_id
 
             # --- 9. Sync RequirementAssessments for existing audits ---
             # New requirement nodes need RA + Answer rows in every existing CA.
@@ -9725,6 +10011,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "locale",
                     "translations",
                     "urn_namespace",
+                    "ref_id",
                     "editing_draft",
                     "editing_version",
                     "editing_history",
@@ -12338,8 +12625,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             compliance_assessment.get_requirement_assessments(
                 include_non_assessable=True,
                 lightweight=True,
-                skip_ig_filter=_framework.is_dynamic()
-                and not compliance_assessment.selected_implementation_groups,
+                skip_ig_filter=True,
             )
         )
         # Auditee filtering: scope to assigned requirements only
@@ -12375,6 +12661,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
+
         tree = get_sorted_requirement_nodes(
             requirement_nodes,
             requirement_assessments,
@@ -16116,6 +16403,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "evidences",
             "objectives",
             "incidents",
+            "filtering_labels",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -16151,6 +16439,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         "folder",
         "applied_controls",
         "evidences",
+        "filtering_labels",
     ]
     search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
@@ -16166,6 +16455,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "risk_assessments",
             "assets",
             "findings_assessment",
+            "filtering_labels",
         ],
         "fields": {
             "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
@@ -16277,6 +16567,13 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 ),
             },
             "link": {"source": "link", "label": "link", "escape": True},
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
         },
         "wrap_columns": ["name", "description"],
         "task_node_fields": {
@@ -16358,11 +16655,18 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     else ""
                 ),
             },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
         },
     }
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().prefetch_related("filtering_labels__folder")
         ordering = self.request.query_params.get("ordering", "")
 
         if any(

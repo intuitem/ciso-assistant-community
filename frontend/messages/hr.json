@@ -864,6 +864,7 @@
 	"createUserHelpText": "Kreiraj ili poveži korisnika treće strane s predstavnikom na temelju e-mail adrese",
 	"nameDuplicate": "Ime već postoji",
 	"noAnswer": "Nema odgovora",
+	"clearAnswer": "Obriši odgovor",
 	"entityAssessmentRepresentativesHelpText": "Korisnici treće strane koji su odgovorni za ispunjavanje upitnika",
 	"sendQuestionnaire": "Pošalji upitnik",
 	"sureToSendQuestionnaire": "Jeste li sigurni da želite poslati upitnik {questionnaire}?",
@@ -3704,11 +3705,393 @@
 	"tasksReview": "Pregled zadataka",
 	"yearlyTasksReview": "Pregled agregiranih zadataka",
 	"exportEcosystem": "izvoz ekosustava (XLSX)",
+	"boolean": "Boolean",
+	"builderEmptyStateTitle": "Kako želite strukturirati ovaj okvir?",
+	"builderEmptyStateSubtitle": "Odaberite početnu strukturu — možete je promijeniti u bilo kojem trenutku.",
+	"builderEmptyFlat": "Plosnata lista",
+	"builderEmptyFlatHint": "Svi zahtjevi na jednoj razini. Kao Google SAIF (12 zahtjeva).",
+	"builderEmptyGrouped": "Grupirano",
+	"builderEmptyGroupedHint": "Sekcije koje sadrže zahtjeve. Kao OWASP MASVS (8 sekcija → 24 zahtjeva).",
+	"builderEmptyHierarchy": "Hijerarhija",
+	"builderEmptyHierarchyHint": "Višerazinsko ugnježđivanje. Kao NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Prazno platno",
+	"builderEmptyBlankHint": "Krenite od nule — dodajte jedan prazan čvor.",
+	"builderAddTopLevelNode": "+ Dodaj korijenski čvor",
+	"builderAddChild": "+ Dodaj podčvor",
+	"builderAddSiblingBelow": "+ Dodaj srodni čvor ispod",
+	"builderBlankNode": "Prazan čvor",
+	"builderBlankNodeHint": "Prazno — sami postavite atribute",
+	"builderGroup": "Grupa",
+	"builderGroupHint": "Nije procjenjivo, za ugnježđivanje",
+	"builderRequirementHint": "Procjenjivo, može imati podčvorove",
+	"builderSplashScreen": "Uvodni zaslon",
+	"builderSplashScreenHint": "Prezentacijski, nije procjenjiv",
+	"builderStatusLive": "U produkciji",
+	"builderStatusLiveTitle": "Nacrt odgovara onome što vide ispitanici revizije.",
+	"builderStatusUnpublishedChanges": "Neobjavljene promjene",
+	"builderStatusUnpublishedChangesTitle": "Nacrt sadrži izmjene koje još nisu vidljive ispitanicima revizije. Objavite kako biste ih primijenili.",
+	"builderStatusDraftNothingLive": "Nacrt — ništa nije u produkciji",
+	"builderStatusDraftNothingLiveTitle": "Nacrt ima sadržaj, ali ništa nije objavljeno. Nove revizije neće vidjeti ništa dok ne objavite.",
+	"builderStatusEmpty": "Prazno",
+	"builderStatusEmptyTitle": "Još nema zahtjeva. Nove revizije temeljene na ovom okviru neće imati ništa za procjenu.",
+	"builderPreview": "Pregled",
+	"builderPreviewSaveFirst": "Najprije spremite nacrt za pregled",
+	"builderPreviewAsRespondent": "Pregled kao ispitanik (otvara se u novoj kartici)",
+	"builderExportYamlTitle": "Izvezi okvir kao YAML datoteku biblioteke",
+	"builderExportYamlUnpublishedWarning": "Neobjavljene promjene neće biti uključene. Najprije objavite kako biste izvezli najnovije izmjene.",
+	"builderCopyBase": "Kopiraj bazu",
+	"builderCopyBaseTitle": "Kopiraj tekst bazičnog jezika u {lang} (ne prepisuje postojeće prijevode)",
+	"builderCopyBaseQuestion": "Kopirati bazični tekst?",
+	"builderNoTranslation": "Nema prijevoda",
+	"builderShowKeyboardShortcuts": "Prikaži tipkovničke prečace",
+	"builderKeyboardShortcutsHint": "Tipkovnički prečaci (?)",
+	"builderExpandAllCards": "Proširi sve kartice",
+	"builderCollapseAllCards": "Zaklopi sve kartice",
+	"builderSaveFailed": "Spremanje nije uspjelo",
+	"builderPublishedFlash": "Objavljeno!",
+	"builderSaveDraftTitle": "Spremi nacrt (Ctrl+S)",
+	"builderDiscardDraftTitle": "Odbaci nacrt",
+	"builderDiscard": "Odbaci",
+	"builderDiscardAllChangesQuestion": "Odbaciti sve promjene?",
+	"builderYesDiscard": "Da, odbaci",
+	"builderPublishDraftToLiveTitle": "Objavi nacrt u produkcijski okvir",
+	"builderPublishing": "Objavljivanje...",
+	"builderPublishModalTitle": "Objavi nacrt u produkciju",
+	"builderPublishModalDescription": "Ova akcija ažurirat će produkcijski okvir. Pregledajte promjene u nastavku.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} zahtjeva dodano",
+				"countPlural=other": "{count} zahtjeva dodano"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pitanja",
+				"countPlural=other": "{count} pitanja"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} zahtjeva uklonjeno",
+				"countPlural=other": "{count} zahtjeva uklonjeno"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pitanja",
+				"countPlural=other": "{count} pitanja"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Nije otkrivena strukturna promjena (samo metapodaci).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nekompatibilnih promjena otkriveno",
+				"countPlural=other": "{count} nekompatibilnih promjena otkriveno"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Ove promjene mogu utjecati na bodovanje, vidljivost ili rezultate usklađenosti u postojećim revizijama.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} postojećih revizija bit će pogođeno",
+				"countPlural=other": "{count} postojećih revizija bit će pogođeno"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Novi zahtjevi bit će dodani u te revizije.",
+	"builderAffectedAuditsRemovedHint": "Uklonjeni zahtjevi i njihovi podaci procjene bit će izbrisani iz tih revizija.",
+	"builderCouldNotLoadPreview": "Nije moguće učitati pregled utjecaja. Postupajte s oprezom.",
+	"builderConfirmPublish": "Potvrdi objavu",
+	"builderSearchNodes": "Pretraži čvorove...",
+	"builderExpandSidebar": "Proširi bočnu traku",
+	"builderCollapseSidebar": "Zaklopi bočnu traku",
+	"builderJumpTo": "Skoči na: {label}",
+	"builderUntitled": "Bez naslova",
+	"builderHasUntranslatedItems": "Sadrži neprevedene stavke",
+	"builderNoNodesYet": "Još nema čvorova",
+	"builderNoMatchingNodes": "Nema podudarajućih čvorova",
+	"builderNodesOf": "{filtered} od {total} čvorova",
+	"builderExpand": "Proširi",
+	"builderCollapse": "Zaklopi",
+	"builderFrameworkNamePlaceholder": "Ime okvira",
+	"builderFrameworkDescriptionPlaceholder": "Opis okvira (neobavezno)",
+	"builderFrameworkAnnotationPlaceholder": "Napomena okvira (neobavezni tekst smjernica)",
+	"builderTranslateName": "Prevedi ime...",
+	"builderTranslateDescription": "Prevedi opis...",
+	"builderTranslateAnnotation": "Prevedi napomenu...",
+	"builderTranslateTypicalEvidence": "Prevedi tipični dokaz...",
+	"builderTranslateTitle": "Prevedi naslov...",
+	"builderTranslateLabel": "Prevedi oznaku...",
+	"builderTranslateMarkdown": "Prevedi markdown sadržaj...",
+	"builderTranslatePlaceholder": "Prevedi...",
+	"builderTranslateQuestion": "Prevedi pitanje...",
+	"builderFrameworkSettings": "Postavke okvira",
+	"builderNoRulesOrGroupsConfigured": "Nema konfiguriranih pravila ni grupa",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pravila ishoda",
+				"countPlural=other": "{count} pravila ishoda"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupa",
+				"countPlural=other": "{count} grupa"
+			}
+		}
+	],
+	"builderUrnNamespace": "URN imenski prostor",
+	"builderScoringSettings": "Postavke bodovanja",
+	"builderAggregationHint": "Prosjek dijeli ukupni rezultat brojem pitanja. Suma izravno zbraja sve rezultate. Koristite Sumu za binarno bodovanje (0/1).",
+	"builderScoreScale": "Skala bodovanja",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} razina",
+				"countPlural=other": "{count} razina"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Dodaj razinu skale",
+	"builderScaleNamePlaceholder": "npr. Djelomično",
+	"builderScaleDescriptionPlaceholder": "Neobavezno",
+	"builderScaleNameTranslate": "Ime ({lang})",
+	"builderScaleDescriptionTranslate": "Opis ({lang})",
+	"builderOutcomeRules": "Pravila ishoda",
+	"builderAddRule": "Dodaj pravilo",
+	"builderUntitledRule": "Pravilo bez naslova",
+	"builderLabel": "Oznaka",
+	"builderLabelHint": "npr. Visoka usklađenost",
+	"builderCelExpression": "CEL izraz",
+	"builderCelExpressionPlaceholder": "npr. assessment.score_sum >= 150 ili \"true\" za sve slučajeve",
+	"builderColor": "Boja",
+	"builderClearAction": "Očisti",
+	"builderNoOutcomeRules": "Još nema pravila ishoda. Dodajte jedno iznad.",
+	"builderOutcomeRulesHint": "Sva podudarna pravila uključena su u izračunate ishode. Koristite {trueLiteral} kao opcija za sve slučajeve.",
+	"builderCelContextReference": "Referenca CEL konteksta",
+	"builderCelLabelTranslate": "Oznaka ({lang})",
+	"builderCelGroupAssessment": "Procjena",
+	"builderCelGroupRequirements": "Zahtjevi (po node_id)",
+	"builderCelGroupAnswers": "Odgovori (po node_id pitanja)",
+	"builderCelGroupOther": "Ostalo",
+	"builderCelScoreSum": "ukupno osvojenih bodova",
+	"builderCelScoreMax": "ukupno mogućih bodova",
+	"builderCelAnsweredCount": "odgovoreni zahtjevi",
+	"builderCelTotalCount": "ukupno procjenjivih zahtjeva",
+	"builderCelReqScore": "rezultat zahtjeva",
+	"builderCelReqMaxScore": "maksimalni rezultat zahtjeva",
+	"builderCelReqResult": "rezultat zahtjeva",
+	"builderCelReqStatus": "status zahtjeva",
+	"builderCelNodeIdHint": "node_id = dio URN-a nakon sluga (npr. \"1.2\" iz urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "rezultat odgovora (add_score × težina)",
+	"builderCelAnswerValue": "vrijednost slobodnog tekstualnog odgovora",
+	"builderCelAnswerSelectedChoices": "popis node_id-ova odabranih opcija",
+	"builderCelAnswerWeight": "težina pitanja",
+	"builderCelAnswerType": "tip pitanja (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "mapa prethodno izračunatih ref_id-ova ishoda",
+	"builderCelHiddenRequirements": "popis node_id-ova skrivenih izrazima vidljivosti",
+	"builderImplementationGroupsTitle": "Implementacijske grupe",
+	"builderAddGroup": "Dodaj grupu",
+	"builderUntitledGroup": "Grupa bez naslova",
+	"builderGroupNamePlaceholder": "npr. Razina 1",
+	"builderGroupDescriptionPlaceholder": "Opis ove implementacijske grupe",
+	"builderSelectedByDefault": "Odabrano prema zadanom",
+	"builderDefaultBadge": "zadano",
+	"builderTranslationLabel": "Prijevod ({lang})",
+	"builderNoImplementationGroups": "Nije definirana nijedna implementacijska grupa. Dodajte jednu iznad.",
+	"builderLanguagesSection": "Jezici",
+	"builderLanguagesHint": "Postavite bazični jezik i dodajte ciljne jezike za prevođenje.",
+	"builderBaseLanguage": "Bazični jezik",
+	"builderTargetLanguages": "Ciljni jezici",
+	"builderAddLanguagePlaceholder": "Dodaj jezik...",
+	"builderAdd": "Dodaj",
+	"builderNodeNamePlaceholder": "Ime čvora",
+	"builderSplashScreenTitlePlaceholder": "Naslov uvodnog zaslona",
+	"builderAssessableTooltip": "Označava je li ovaj zahtjev procjenjiv od strane ispitanika",
+	"builderAssessable": "Procjenjivo",
+	"builderDisplayMode": "Način prikaza",
+	"builderDefaultMode": "Zadano",
+	"builderSplashMode": "Uvodno",
+	"builderAssessableLeaf": "Procjenjivi list",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Procjenjivo · {count} podčvor",
+				"countPlural=other": "Procjenjivo · {count} podčvorova"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grupa · {count} podčvor",
+				"countPlural=other": "Grupa · {count} podčvorova"
+			}
+		}
+	],
+	"builderEmptyNode": "Prazan čvor",
+	"builderSplashScreenStatus": "Uvodni zaslon",
+	"builderNestedUnder": "ugniježđeno pod {parent}",
+	"builderExpandChildren": "Proširi podčvorove",
+	"builderCollapseChildren": "Zaklopi podčvorove",
+	"builderAdvanced": "Napredno",
+	"builderAdvancedAnnotation": "napomena",
+	"builderAdvancedAnnotationEvidence": "napomena, dokaz",
+	"builderAdvancedAnnotationEvidenceVisibility": "napomena, dokaz, vidljivost",
+	"builderAdvancedAnnotationVisibility": "napomena, vidljivost",
+	"builderAnnotationPlaceholder": "Neobavezne smjernice za recenzente",
+	"builderTypicalEvidencePlaceholder": "Primjeri dokaza koje ispitanici trebaju priložiti",
+	"builderDescriptionOptional": "Neobavezno",
+	"builderVisibilityExpression": "Izraz vidljivosti (CEL)",
+	"builderVisibilityExpressionTooltip": "CEL izraz koji mora biti istinit kako bi ovaj zahtjev bio vidljiv. Primjer: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "npr. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Implementacijske grupe:",
+	"builderAddQuestion": "Dodaj pitanje",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} podčvor skriven",
+				"countPlural=other": "{count} podčvorova skriveno"
+			}
+		}
+	],
+	"builderSplashSource": "Izvor",
+	"builderSplashNoSourceContent": "Nema izvornog sadržaja.",
+	"builderSplashEditPlaceholder": "Unesite markdown sadržaj za uvodni zaslon...",
+	"builderSplashNoContent": "Još nema sadržaja. Prijeđite na Uređivanje za dodavanje markdowna.",
+	"builderSplashBold": "Podebljano",
+	"builderSplashItalic": "Kurziv",
+	"builderSplashHeading": "Naslov",
+	"builderSplashBulletList": "Lista s grafičkim oznakama",
+	"builderSplashNumberedList": "Numerirana lista",
+	"builderSplashLink": "Poveznica",
+	"builderSplashTable": "Tablica",
+	"builderSplashInsertImage": "Umetni sliku",
+	"builderUntitledQuestion": "Pitanje bez naslova",
+	"builderNotTranslated": "Nije prevedeno",
+	"builderQuestionTextPlaceholder": "Unesite svoje pitanje...",
+	"builderWeight": "Težina",
+	"builderAnnotationOptional": "Neobavezna napomena...",
+	"builderDeleteThisQuestion": "Izbrisati ovo pitanje?",
+	"builderChangeTypeWarning": "Promjena tipa izbrisat će postojeće odabire. Nastaviti?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Prikazano kada {ref} = {count} odgovora",
+				"countPlural=other": "Prikazano kada {ref} = {count} odgovora"
+			}
+		}
+	],
+	"builderChoices": "Odabiri",
+	"builderAddChoice": "Dodaj odabir",
+	"builderChoicePlaceholder": "Tekst odabira...",
+	"builderResultLabel": "Rezultat",
+	"builderNone": "Nema",
+	"builderNoChoicesYet": "Još nema odabira. Dodajte jedan iznad.",
+	"builderRemoveCondition": "Ukloni uvjet",
+	"builderAddCondition": "Dodaj uvjet",
+	"builderShowWhenThisQuestion": "Prikaži kada ovo pitanje...",
+	"builderSelectAQuestion": "Odaberite pitanje...",
+	"builderHasAnswer": "...ima odgovor:",
+	"builderMatch": "Podudaranje:",
+	"builderMatchAny": "Bilo koji odabrani",
+	"builderMatchAll": "Svi odabrani",
+	"builderConditionsOnlyChoiceTypes": "Uvjeti su podržani samo za pitanja tipa odabira.",
+	"builderKeyboardShortcuts": "Tipkovnički prečaci",
+	"builderKbOutlineEditing": "Uređivanje strukture",
+	"builderKbOutlineEditingHint": "Primjenjuje se na istaknuti čvor.",
+	"builderKbBuilder": "Graditelj",
+	"builderKbIndentNode": "Uvuci čvor",
+	"builderKbOutdentNode": "Izvuci čvor",
+	"builderKbAddChild": "Dodaj podčvor",
+	"builderKbAddSiblingBelow": "Dodaj srodni čvor ispod",
+	"builderKbToggleAssessable": "Prebaci procjenjivost",
+	"builderKbSaveDraft": "Spremi nacrt",
+	"builderKbShowCheatsheet": "Prikaži ovaj podsjetnik",
+	"builderKbCloseDialog": "Zatvori dijalog ili padajući izbornik",
+	"builderImportedFramework": "Uvezeni okvir",
+	"builderImportedFrameworkDescription": "Ovaj okvir uvezen je iz biblioteke i ne može se izravno uređivati. Za izmjene stvorite uredivu kopiju.",
+	"builderCreateCopyAndEdit": "Stvori kopiju i uredi",
+	"builderCreatingCopy": "Stvaranje kopije...",
+	"builderLoadingEditor": "Učitavanje uređivača...",
+	"builderFailedToStartEditor": "Pokretanje uređivača nije uspjelo",
+	"builderBackToFramework": "Natrag na okvir",
+	"builderBackToBuilder": "Natrag u graditelj",
+	"builderFailedToLoadDraft": "Učitavanje nacrta nije uspjelo",
+	"builderImplementationGroupsHeader": "Implementacijske grupe",
+	"builderNoItemsToPreview": "Nema stavki za pregled.",
+	"builderNoItemsToPreviewHint": "Dodajte procjenjive zahtjeve ili uvodne zaslone u graditelju.",
+	"builderBaseLanguageOption": "Bazični jezik",
+	"builderFrameworkNameRequired": "Ime okvira je obavezno.",
+	"builderFrameworkNameTooLong": "Ime okvira ima {length} znakova (najviše 200).",
+	"builderNodeNameTooLong": "Ime prelazi 200 znakova ({length}/200). Premjestite dugi tekst u polje opisa.",
+	"builderRefIdTooLong": "„{label}“: ref_id ima {length} znakova (najviše 100).",
+	"builderUrnTooLong": "„{label}“: URN ima {length} znakova (najviše 255).",
+	"builderFailedToSaveDraftBeforePublish": "Spremanje nacrta prije objave nije uspjelo.",
+	"builderUnsavedChangesNavigation": "Imate nespremljene promjene koje će biti izgubljene. Svejedno otići?",
+	"builderUnpublishedChangesNavigation": "Imate neobjavljene promjene. Vaš nacrt je spremljen i možete nastaviti kasnije. Svejedno otići?",
 	"fieldVisibility": "Vidljivost polja",
 	"fieldVisibilityHelpText": "Kontrolirajte koja polja svaka uloga može vidjeti i uređivati.",
 	"visibilityAuditorRespondent": "Revizor + Ispitanik",
 	"visibilityAuditorOnly": "Samo revizor",
 	"visibilityHidden": "Skriveno",
 	"answers": "Odgovori",
-	"respondentAlignment": "Usklađenost ispitanika"
+	"respondentAlignment": "Usklađenost ispitanika",
+	"frameworkRefId": "Referentni ID",
+	"urnPreview": "Pregled URN-a:",
+	"urnLockedComplianceAssessment": "Zaključano — procjena usklađenosti koristi ovaj okvir.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Korak",
+	"sliderNeedsAtLeastTwoChoices": "Klizač treba najmanje 2 izbora.",
+	"sliderMinMustBeLessThanMax": "Min klizača mora biti manji od maks.",
+	"sliderStepMustBeGreaterThanZero": "Korak klizača mora biti veći od 0.",
+	"sliderStepCannotExceedRange": "Korak klizača ne smije premašiti (maks − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekst",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Broj",
+	"builderQuestionTypeUniqueChoice": "Jednostruki odabir",
+	"builderQuestionTypeMultipleChoice": "Višestruki odabir",
+	"builderQuestionTypeDate": "Datum",
+	"builderChangedOn": "changed on"
 }

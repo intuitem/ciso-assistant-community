@@ -781,6 +781,7 @@
 	"createUserHelpText": "Crear o vincular un usuario de terceros al representante en función del correo electrónico",
 	"nameDuplicate": "El nombre ya existe",
 	"noAnswer": "No hay respuesta",
+	"clearAnswer": "Limpiar respuesta",
 	"entityAssessmentRepresentativesHelpText": "Los usuarios de terceros que son responsables de completar el cuestionario",
 	"sendQuestionnaire": "Enviar cuestionario",
 	"sureToSendQuestionnaire": "¿Está seguro de que desea enviar el cuestionario: {questionnaire} ?",
@@ -3220,11 +3221,402 @@
 	"syncCweCatalogFailed": "Error al obtener el catálogo CWE",
 	"syncToReferenceControl": "Sincronizar con el control de referencia",
 	"exportEcosystem": "exportación de ecosistema (XLSX)",
+	"average": "Promedio",
+	"boolean": "Booleano",
+	"close": "Cerrar",
+	"collapseAll": "Contraer todo",
+	"expandAll": "Expandir todo",
+	"exportYaml": "Exportar",
+	"implementationGroups": "Grupos de implementación",
+	"publish": "Publicar",
+	"saving": "Guardando...",
+	"sum": "Suma",
+	"builderEmptyStateTitle": "¿Cómo desea estructurar este marco?",
+	"builderEmptyStateSubtitle": "Elija una estructura inicial — podrá modificarla en cualquier momento.",
+	"builderEmptyFlat": "Lista plana",
+	"builderEmptyFlatHint": "Todos los requisitos en un único nivel. Como Google SAIF (12 requisitos).",
+	"builderEmptyGrouped": "Agrupada",
+	"builderEmptyGroupedHint": "Secciones que contienen requisitos. Como OWASP MASVS (8 secciones → 24 requisitos).",
+	"builderEmptyHierarchy": "Jerarquía",
+	"builderEmptyHierarchyHint": "Anidamiento multinivel. Como NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Lienzo en blanco",
+	"builderEmptyBlankHint": "Empiece desde cero — añada un nodo vacío.",
+	"builderAddTopLevelNode": "+ Añadir nodo raíz",
+	"builderAddChild": "+ Añadir hijo",
+	"builderAddSiblingBelow": "+ Añadir hermano debajo",
+	"builderBlankNode": "Nodo en blanco",
+	"builderBlankNodeHint": "Vacío — usted define los atributos",
+	"builderGroup": "Grupo",
+	"builderGroupHint": "No evaluable, para anidamiento",
+	"builderRequirementHint": "Evaluable, puede tener hijos",
+	"builderSplashScreen": "Pantalla de presentación",
+	"builderSplashScreenHint": "Presentacional, no evaluable",
+	"builderStatusLive": "En producción",
+	"builderStatusLiveTitle": "El borrador coincide con lo que ven los encuestados de la auditoría.",
+	"builderStatusUnpublishedChanges": "Cambios sin publicar",
+	"builderStatusUnpublishedChangesTitle": "El borrador tiene modificaciones que aún no son visibles para los encuestados de la auditoría. Publique para aplicarlas.",
+	"builderStatusDraftNothingLive": "Borrador — nada en producción",
+	"builderStatusDraftNothingLiveTitle": "El borrador tiene contenido pero nada se ha publicado aún. Las nuevas auditorías no verán nada hasta que publique.",
+	"builderStatusEmpty": "Vacío",
+	"builderStatusEmptyTitle": "Aún no hay requisitos. Las nuevas auditorías basadas en este marco no tendrán nada que evaluar.",
+	"builderPreview": "Vista previa",
+	"builderPreviewSaveFirst": "Guarde primero su borrador para poder previsualizar",
+	"builderPreviewAsRespondent": "Vista previa como encuestado (se abre en una pestaña nueva)",
+	"builderExportYamlTitle": "Exportar el marco como archivo de biblioteca YAML",
+	"builderExportYamlUnpublishedWarning": "Los cambios sin publicar no se incluirán. Publique primero para exportar las últimas modificaciones.",
+	"builderCopyBase": "Copiar base",
+	"builderCopyBaseTitle": "Copiar el texto del idioma base a {lang} (no sobrescribe las traducciones existentes)",
+	"builderCopyBaseQuestion": "¿Copiar el texto base?",
+	"builderNoTranslation": "Sin traducción",
+	"builderShowKeyboardShortcuts": "Mostrar atajos de teclado",
+	"builderKeyboardShortcutsHint": "Atajos de teclado (?)",
+	"builderExpandAllCards": "Expandir todas las tarjetas",
+	"builderCollapseAllCards": "Contraer todas las tarjetas",
+	"builderSaveFailed": "Error al guardar",
+	"builderPublishedFlash": "¡Publicado!",
+	"builderSaveDraftTitle": "Guardar borrador (Ctrl+S)",
+	"builderDiscardDraftTitle": "Descartar borrador",
+	"builderDiscard": "Descartar",
+	"builderDiscardAllChangesQuestion": "¿Descartar todos los cambios?",
+	"builderYesDiscard": "Sí, descartar",
+	"builderPublishDraftToLiveTitle": "Publicar el borrador al marco en producción",
+	"builderPublishing": "Publicando...",
+	"builderPublishModalTitle": "Publicar borrador en producción",
+	"builderPublishModalDescription": "Esta acción actualizará el marco en producción. Revise los cambios a continuación.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} requisito añadido",
+				"countPlural=other": "{count} requisitos añadidos"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pregunta",
+				"countPlural=other": "{count} preguntas"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} requisito eliminado",
+				"countPlural=other": "{count} requisitos eliminados"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pregunta",
+				"countPlural=other": "{count} preguntas"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "No se detectaron cambios estructurales (solo metadatos).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} cambio incompatible detectado",
+				"countPlural=other": "{count} cambios incompatibles detectados"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Estos cambios pueden afectar el cálculo de puntaje, la visibilidad o los resultados de cumplimiento en las auditorías existentes.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} auditoría existente se verá afectada",
+				"countPlural=other": "{count} auditorías existentes se verá afectada"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Se añadirán nuevos requisitos a estas auditorías.",
+	"builderAffectedAuditsRemovedHint": "Los requisitos eliminados y sus datos de evaluación se borrarán de estas auditorías.",
+	"builderCouldNotLoadPreview": "No se pudo cargar la vista previa de impacto. Proceda con precaución.",
+	"builderConfirmPublish": "Confirmar publicación",
+	"builderSearchNodes": "Buscar nodos...",
+	"builderExpandSidebar": "Expandir barra lateral",
+	"builderCollapseSidebar": "Contraer barra lateral",
+	"builderJumpTo": "Ir a: {label}",
+	"builderUntitled": "Sin título",
+	"builderHasUntranslatedItems": "Contiene elementos sin traducir",
+	"builderNoNodesYet": "Aún no hay nodos",
+	"builderNoMatchingNodes": "Ningún nodo coincide",
+	"builderNodesOf": "{filtered} de {total} nodos",
+	"builderExpand": "Expandir",
+	"builderCollapse": "Contraer",
+	"builderFrameworkNamePlaceholder": "Nombre del marco",
+	"builderFrameworkDescriptionPlaceholder": "Descripción del marco (opcional)",
+	"builderFrameworkAnnotationPlaceholder": "Anotación del marco (texto de orientación opcional)",
+	"builderTranslateName": "Traducir el nombre...",
+	"builderTranslateDescription": "Traducir la descripción...",
+	"builderTranslateAnnotation": "Traducir la anotación...",
+	"builderTranslateTypicalEvidence": "Traducir la evidencia típica...",
+	"builderTranslateTitle": "Traducir el título...",
+	"builderTranslateLabel": "Traducir la etiqueta...",
+	"builderTranslateMarkdown": "Traducir el contenido markdown...",
+	"builderTranslatePlaceholder": "Traducir...",
+	"builderTranslateQuestion": "Traducir la pregunta...",
+	"builderFrameworkSettings": "Ajustes del marco",
+	"builderNoRulesOrGroupsConfigured": "No hay reglas ni grupos configurados",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} regla de resultado",
+				"countPlural=other": "{count} reglas de resultado"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupo",
+				"countPlural=other": "{count} grupos"
+			}
+		}
+	],
+	"builderUrnNamespace": "Espacio de nombres URN",
+	"builderScoringSettings": "Ajustes de puntuación",
+	"builderAggregationHint": "Promedio divide el puntaje total entre el número de preguntas. Suma adiciona directamente todos los puntajes. Use Suma para puntuación binaria (0/1).",
+	"builderScoreScale": "Escala de puntaje",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nivel",
+				"countPlural=other": "{count} niveles"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Añadir nivel",
+	"builderScaleNamePlaceholder": "ej. Parcial",
+	"builderScaleDescriptionPlaceholder": "Opcional",
+	"builderScaleNameTranslate": "Nombre {lang}",
+	"builderScaleDescriptionTranslate": "Descripción {lang}",
+	"builderOutcomeRules": "Reglas de resultado",
+	"builderAddRule": "Añadir regla",
+	"builderUntitledRule": "Regla sin título",
+	"builderLabel": "Etiqueta",
+	"builderLabelHint": "ej. Alta conformidad",
+	"builderCelExpression": "Expresión CEL",
+	"builderCelExpressionPlaceholder": "ej. assessment.score_sum >= 150 o \"true\" como comodín",
+	"builderColor": "Color",
+	"builderClearAction": "Limpiar",
+	"builderNoOutcomeRules": "Aún no hay reglas de resultado. Añada una arriba.",
+	"builderOutcomeRulesHint": "Todas las reglas que coinciden se incluyen en los resultados calculados. Use {trueLiteral} como comodín.",
+	"builderCelContextReference": "Referencia del contexto CEL",
+	"builderCelLabelTranslate": "Etiqueta {lang}",
+	"builderCelGroupAssessment": "Evaluación",
+	"builderCelGroupRequirements": "Requisitos (por node_id)",
+	"builderCelGroupAnswers": "Respuestas (por node_id de pregunta)",
+	"builderCelGroupOther": "Otro",
+	"builderCelScoreSum": "puntos totales obtenidos",
+	"builderCelScoreMax": "puntos totales posibles",
+	"builderCelAnsweredCount": "requisitos respondidos",
+	"builderCelTotalCount": "total de requisitos evaluables",
+	"builderCelReqScore": "puntaje del requisito",
+	"builderCelReqMaxScore": "puntaje máximo del requisito",
+	"builderCelReqResult": "resultado del requisito",
+	"builderCelReqStatus": "estado del requisito",
+	"builderCelNodeIdHint": "node_id = la parte de la URN después del slug (ej. \"1.2\" en urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "puntaje de la respuesta (add_score × peso)",
+	"builderCelAnswerValue": "valor de respuesta de texto libre",
+	"builderCelAnswerSelectedChoices": "lista de node_ids de opciones seleccionadas",
+	"builderCelAnswerWeight": "peso de la pregunta",
+	"builderCelAnswerType": "tipo de pregunta (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "tabla de ref_ids de resultados ya calculados",
+	"builderCelHiddenRequirements": "lista de node_ids ocultos por expresiones de visibilidad",
+	"builderImplementationGroupsTitle": "Grupos de implementación",
+	"builderAddGroup": "Añadir grupo",
+	"builderUntitledGroup": "Grupo sin título",
+	"builderGroupNamePlaceholder": "ej. Nivel 1",
+	"builderGroupDescriptionPlaceholder": "Descripción de este grupo de implementación",
+	"builderSelectedByDefault": "Seleccionado por defecto",
+	"builderDefaultBadge": "predeterminado",
+	"builderTranslationLabel": "Traducción {lang}",
+	"builderNoImplementationGroups": "No hay grupos de implementación definidos. Añada uno arriba.",
+	"builderLanguagesSection": "Idiomas",
+	"builderLanguagesHint": "Defina el idioma base y añada idiomas de destino para la traducción.",
+	"builderBaseLanguage": "Idioma base",
+	"builderTargetLanguages": "Idiomas de destino",
+	"builderAddLanguagePlaceholder": "Añadir un idioma...",
+	"builderAdd": "Añadir",
+	"builderNodeNamePlaceholder": "Nombre del nodo",
+	"builderSplashScreenTitlePlaceholder": "Título de la pantalla de presentación",
+	"builderAssessableTooltip": "Indica si este requisito es evaluable por los encuestados",
+	"builderAssessable": "Evaluable",
+	"builderDisplayMode": "Modo de visualización",
+	"builderDefaultMode": "Predeterminado",
+	"builderSplashMode": "Presentación",
+	"builderAssessableLeaf": "Hoja evaluable",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Evaluable · {count} hijo",
+				"countPlural=other": "Evaluable · {count} hijos"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grupo · {count} hijo",
+				"countPlural=other": "Grupo · {count} hijos"
+			}
+		}
+	],
+	"builderEmptyNode": "Nodo vacío",
+	"builderSplashScreenStatus": "Pantalla de presentación",
+	"builderNestedUnder": "anidado bajo {parent}",
+	"builderExpandChildren": "Expandir hijos",
+	"builderCollapseChildren": "Contraer hijos",
+	"builderAdvanced": "Avanzado",
+	"builderAdvancedAnnotation": "anotación",
+	"builderAdvancedAnnotationEvidence": "anotación, evidencia",
+	"builderAdvancedAnnotationEvidenceVisibility": "anotación, evidencia, visibilidad",
+	"builderAdvancedAnnotationVisibility": "anotación, visibilidad",
+	"builderAnnotationPlaceholder": "Notas de orientación opcionales para los revisores",
+	"builderTypicalEvidencePlaceholder": "Ejemplos de evidencia que los encuestados deben adjuntar",
+	"builderDescriptionOptional": "Opcional",
+	"builderVisibilityExpression": "Expresión de visibilidad (CEL)",
+	"builderVisibilityExpressionTooltip": "Expresión CEL que debe evaluarse como verdadera para que este requisito sea visible. Ejemplo: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "ej. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Grupos de implementación:",
+	"builderAddQuestion": "Añadir pregunta",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} hijo oculto",
+				"countPlural=other": "{count} hijos ocultos"
+			}
+		}
+	],
+	"builderSplashSource": "Fuente",
+	"builderSplashNoSourceContent": "Sin contenido fuente.",
+	"builderSplashEditPlaceholder": "Escriba el contenido markdown de su pantalla de presentación...",
+	"builderSplashNoContent": "Aún no hay contenido. Cambie a Editar para añadir markdown.",
+	"builderSplashBold": "Negrita",
+	"builderSplashItalic": "Cursiva",
+	"builderSplashHeading": "Título",
+	"builderSplashBulletList": "Lista con viñetas",
+	"builderSplashNumberedList": "Lista numerada",
+	"builderSplashLink": "Enlace",
+	"builderSplashTable": "Tabla",
+	"builderSplashInsertImage": "Insertar imagen",
+	"builderUntitledQuestion": "Pregunta sin título",
+	"builderNotTranslated": "Sin traducir",
+	"builderQuestionTextPlaceholder": "Escriba su pregunta...",
+	"builderWeight": "Peso",
+	"builderAnnotationOptional": "Nota opcional...",
+	"builderDeleteThisQuestion": "¿Eliminar esta pregunta?",
+	"builderChangeTypeWarning": "Cambiar el tipo eliminará las opciones existentes. ¿Continuar?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Mostrado cuando {ref} = {count} respuesta",
+				"countPlural=other": "Mostrado cuando {ref} = {count} respuestas"
+			}
+		}
+	],
+	"builderChoices": "Opciones",
+	"builderAddChoice": "Añadir opción",
+	"builderChoicePlaceholder": "Texto de la opción...",
+	"builderResultLabel": "Resultado",
+	"builderNone": "Ninguno",
+	"builderNoChoicesYet": "Aún no hay opciones. Añada una arriba.",
+	"builderRemoveCondition": "Eliminar condición",
+	"builderAddCondition": "Añadir condición",
+	"builderShowWhenThisQuestion": "Mostrar cuando esta pregunta...",
+	"builderSelectAQuestion": "Seleccione una pregunta...",
+	"builderHasAnswer": "...tiene la respuesta:",
+	"builderMatch": "Coincidencia:",
+	"builderMatchAny": "Cualquiera de las seleccionadas",
+	"builderMatchAll": "Todas las seleccionadas",
+	"builderConditionsOnlyChoiceTypes": "Las condiciones solo se admiten para preguntas de tipo opción.",
+	"builderKeyboardShortcuts": "Atajos de teclado",
+	"builderKbOutlineEditing": "Edición de la estructura",
+	"builderKbOutlineEditingHint": "Se aplica al nodo seleccionado.",
+	"builderKbBuilder": "Constructor",
+	"builderKbIndentNode": "Aumentar sangría del nodo",
+	"builderKbOutdentNode": "Reducir sangría del nodo",
+	"builderKbAddChild": "Añadir hijo",
+	"builderKbAddSiblingBelow": "Añadir hermano debajo",
+	"builderKbToggleAssessable": "Alternar evaluable",
+	"builderKbSaveDraft": "Guardar borrador",
+	"builderKbShowCheatsheet": "Mostrar este recordatorio",
+	"builderKbCloseDialog": "Cerrar diálogo",
+	"builderImportedFramework": "Marco importado",
+	"builderImportedFrameworkDescription": "Este marco se importó desde una biblioteca y no se puede editar directamente. Para realizar cambios, cree una copia editable.",
+	"builderCreateCopyAndEdit": "Crear copia y editar",
+	"builderCreatingCopy": "Creando copia...",
+	"builderLoadingEditor": "Cargando editor...",
+	"builderFailedToStartEditor": "Error al iniciar el editor",
+	"builderBackToFramework": "Volver al marco",
+	"builderBackToBuilder": "Volver al constructor",
+	"builderFailedToLoadDraft": "Error al cargar el borrador",
+	"builderImplementationGroupsHeader": "Grupos de implementación",
+	"builderNoItemsToPreview": "No hay elementos para previsualizar.",
+	"builderNoItemsToPreviewHint": "Añada requisitos evaluables o pantallas de presentación en el constructor.",
+	"builderBaseLanguageOption": "Idioma base",
+	"builderFrameworkNameRequired": "El nombre del marco es obligatorio.",
+	"builderFrameworkNameTooLong": "El nombre del marco tiene {length} caracteres (máx. 200).",
+	"builderNodeNameTooLong": "El nombre supera 200 caracteres ({length}/200). Mueva el texto largo al campo de descripción.",
+	"builderRefIdTooLong": "«{label}»: ref_id tiene {length} caracteres (máx. 100).",
+	"builderUrnTooLong": "«{label}»: URN tiene {length} caracteres (máx. 255).",
+	"builderFailedToSaveDraftBeforePublish": "Error al guardar el borrador antes de publicar.",
+	"builderUnsavedChangesNavigation": "Tiene cambios sin guardar que se perderán. ¿Salir de todos modos?",
+	"builderUnpublishedChangesNavigation": "Tiene cambios sin publicar. Su borrador está guardado y podrá retomarlo más tarde. ¿Salir de todos modos?",
 	"fieldVisibility": "Visibilidad de campos",
 	"fieldVisibilityHelpText": "Controle qué campos puede ver y editar cada rol.",
 	"visibilityAuditorRespondent": "Auditor + Encuestado",
 	"visibilityAuditorOnly": "Solo auditor",
 	"visibilityHidden": "Oculto",
 	"answers": "Respuestas",
-	"respondentAlignment": "Alineación del encuestado"
+	"respondentAlignment": "Alineación del encuestado",
+	"frameworkRefId": "ID de referencia",
+	"urnPreview": "Vista previa URN:",
+	"urnLockedComplianceAssessment": "Bloqueado — una evaluación de cumplimiento usa este marco.",
+	"sliderMin": "Mín",
+	"sliderMax": "Máx",
+	"sliderStep": "Paso",
+	"sliderNeedsAtLeastTwoChoices": "El control deslizante necesita al menos 2 opciones.",
+	"sliderMinMustBeLessThanMax": "El mín del control deslizante debe ser menor que el máx.",
+	"sliderStepMustBeGreaterThanZero": "El paso del control deslizante debe ser mayor que 0.",
+	"sliderStepCannotExceedRange": "El paso del control deslizante no puede exceder (máx − mín).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Texto",
+	"builderQuestionTypeBoolean": "Booleano",
+	"builderQuestionTypeNumber": "Número",
+	"builderQuestionTypeUniqueChoice": "Opción única",
+	"builderQuestionTypeMultipleChoice": "Opción múltiple",
+	"builderQuestionTypeDate": "Fecha",
+	"builderChangedOn": "changed on"
 }

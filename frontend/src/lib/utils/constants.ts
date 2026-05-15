@@ -58,6 +58,68 @@ export const extendedResultColorMap: { [key: string]: string } = {
 	good_practice: '#22c55e'
 };
 
+// Semantic color map used by dashboard breakdown widgets (pie/donut/bar/table).
+// Keys are lowercased and matched verbatim against breakdown keys returned by the backend.
+// When a breakdown key is not found here, the chart falls back to DEFAULT_BREAKDOWN_PALETTE.
+export const breakdownSemanticColorMap: { [key: string]: string } = {
+	// Compliance results
+	not_assessed: '#d1d5db',
+	partially_compliant: '#fde047',
+	non_compliant: '#f87171',
+	compliant: '#86efac',
+	not_applicable: '#1f2937',
+	// Compliance / task / generic statuses
+	to_do: '#9ca3af',
+	in_progress: '#f59e0b',
+	in_review: '#3b82f6',
+	done: '#86efac',
+	// Severity (findings, incidents, vulnerabilities, exceptions)
+	critical: '#dc2626',
+	high: '#ea580c',
+	medium: '#ca8a04',
+	low: '#2563eb',
+	info: '#64748b',
+	undefined: '#475569',
+	// Risk treatment
+	open: '#9ca3af',
+	mitigate: '#3b82f6',
+	accept: '#fde047',
+	avoid: '#a855f7',
+	transfer: '#06b6d4',
+	// Extended results (audits)
+	major_nonconformity: '#dc2626',
+	minor_nonconformity: '#f97316',
+	observation: '#eab308',
+	opportunity_for_improvement: '#3b82f6',
+	good_practice: '#22c55e'
+};
+
+// Fallback palette for breakdown keys not in breakdownSemanticColorMap.
+// Picked for color-blind friendliness and reasonable contrast against light backgrounds.
+export const DEFAULT_BREAKDOWN_PALETTE: string[] = [
+	'#3b82f6',
+	'#a855f7',
+	'#22c55e',
+	'#f97316',
+	'#eab308',
+	'#06b6d4',
+	'#ec4899',
+	'#84cc16',
+	'#0ea5e9',
+	'#f43f5e',
+	'#8b5cf6',
+	'#14b8a6'
+];
+
+export function resolveBreakdownColor(key: string, index = 0): string {
+	if (!key) return DEFAULT_BREAKDOWN_PALETTE[index % DEFAULT_BREAKDOWN_PALETTE.length];
+	const normalized = String(key).toLowerCase().trim();
+	if (normalized in breakdownSemanticColorMap) {
+		return breakdownSemanticColorMap[normalized];
+	}
+	return DEFAULT_BREAKDOWN_PALETTE[index % DEFAULT_BREAKDOWN_PALETTE.length];
+}
+
 export const MONTH_LIST = [
 	'January',
 	'February',

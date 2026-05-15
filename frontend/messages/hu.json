@@ -807,6 +807,7 @@
 	"createUserHelpText": "Hozzon létre vagy kapcsoljon össze egy harmadik fél felhasználót a képviselővel e-mail alapján",
 	"nameDuplicate": "A név már létezik",
 	"noAnswer": "Nincs válasz",
+	"clearAnswer": "Válasz törlése",
 	"entityAssessmentRepresentativesHelpText": "Azok a harmadik fél felhasználók, akik a kérdőív kitöltéséért felelősek",
 	"sendQuestionnaire": "Kérdőív elküldése",
 	"sureToSendQuestionnaire": "Biztosan el szeretné küldeni a(z) {questionnaire} kérdőívet?",
@@ -1191,11 +1192,393 @@
 	"syncToAppliedControl": "Szinkronizálás az alkalmazott kontrollal",
 	"syncToReferenceControl": "Szinkronizálás a referencia kontrollal",
 	"exportEcosystem": "ökoszisztéma export (XLSX)",
+	"boolean": "Logikai",
+	"builderEmptyStateTitle": "Hogyan szeretné felépíteni ezt a keretrendszert?",
+	"builderEmptyStateSubtitle": "Válasszon kiindulási struktúrát — bármikor módosíthatja.",
+	"builderEmptyFlat": "Lapos lista",
+	"builderEmptyFlatHint": "Minden követelmény egy szinten. Mint a Google SAIF (12 követelmény).",
+	"builderEmptyGrouped": "Csoportosított",
+	"builderEmptyGroupedHint": "Követelményeket tartalmazó szakaszok. Mint az OWASP MASVS (8 szakasz → 24 követelmény).",
+	"builderEmptyHierarchy": "Hierarchia",
+	"builderEmptyHierarchyHint": "Többszintű egymásba ágyazás. Mint a NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Üres vászon",
+	"builderEmptyBlankHint": "Kezdje a nulláról — adjon hozzá egy üres csomópontot.",
+	"builderAddTopLevelNode": "+ Gyökércsomópont hozzáadása",
+	"builderAddChild": "+ Gyermek hozzáadása",
+	"builderAddSiblingBelow": "+ Testvér hozzáadása lejjebb",
+	"builderBlankNode": "Üres csomópont",
+	"builderBlankNodeHint": "Üres — Ön állítja be a tulajdonságokat",
+	"builderGroup": "Csoport",
+	"builderGroupHint": "Nem értékelhető, beágyazáshoz",
+	"builderRequirementHint": "Értékelhető, lehetnek gyermekei",
+	"builderSplashScreen": "Bevezető képernyő",
+	"builderSplashScreenHint": "Bemutató jellegű, nem értékelhető",
+	"builderStatusLive": "Élő",
+	"builderStatusLiveTitle": "A piszkozat megegyezik azzal, amit az audit válaszadói látnak.",
+	"builderStatusUnpublishedChanges": "Közzé nem tett változtatások",
+	"builderStatusUnpublishedChangesTitle": "A piszkozat olyan módosításokat tartalmaz, amelyek még nem láthatók az audit válaszadói számára. A módosítások alkalmazásához tegye közzé.",
+	"builderStatusDraftNothingLive": "Piszkozat — semmi nincs élesben",
+	"builderStatusDraftNothingLiveTitle": "A piszkozatban van tartalom, de még semmi sem lett közzétéve. Az új auditok semmit sem fognak látni a közzétételig.",
+	"builderStatusEmpty": "Üres",
+	"builderStatusEmptyTitle": "Még nincsenek követelmények. Az erre a keretrendszerre épülő új auditoknak nem lesz mit kiértékelniük.",
+	"builderPreview": "Előnézet",
+	"builderPreviewSaveFirst": "Az előnézethez először mentse el a piszkozatot",
+	"builderPreviewAsRespondent": "Előnézet válaszadóként (új lapon nyílik meg)",
+	"builderExportYamlTitle": "Keretrendszer exportálása YAML könyvtárfájlként",
+	"builderExportYamlUnpublishedWarning": "A közzé nem tett változtatások nem szerepelnek benne. A legújabb módosítások exportálásához először tegye közzé.",
+	"builderCopyBase": "Alap másolása",
+	"builderCopyBaseTitle": "Alapnyelvi szöveg másolása ide: {lang} (nem írja felül a meglévő fordításokat)",
+	"builderCopyBaseQuestion": "Másolja az alapszöveget?",
+	"builderNoTranslation": "Nincs fordítás",
+	"builderShowKeyboardShortcuts": "Billentyűparancsok megjelenítése",
+	"builderKeyboardShortcutsHint": "Billentyűparancsok (?)",
+	"builderExpandAllCards": "Összes kártya kibontása",
+	"builderCollapseAllCards": "Összes kártya összecsukása",
+	"builderSaveFailed": "A mentés sikertelen",
+	"builderPublishedFlash": "Közzétéve!",
+	"builderSaveDraftTitle": "Piszkozat mentése (Ctrl+S)",
+	"builderDiscardDraftTitle": "Piszkozat elvetése",
+	"builderDiscard": "Elvetés",
+	"builderDiscardAllChangesQuestion": "Elveti az összes módosítást?",
+	"builderYesDiscard": "Igen, elvetés",
+	"builderPublishDraftToLiveTitle": "Piszkozat közzététele az éles keretrendszerbe",
+	"builderPublishing": "Közzététel...",
+	"builderPublishModalTitle": "Piszkozat közzététele élesben",
+	"builderPublishModalDescription": "Ez frissíti az éles keretrendszert. Tekintse át az alábbi módosításokat.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} követelmény hozzáadva",
+				"countPlural=other": "{count} követelmény hozzáadva"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kérdés",
+				"countPlural=other": "{count} kérdés"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} követelmény eltávolítva",
+				"countPlural=other": "{count} követelmény eltávolítva"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kérdés",
+				"countPlural=other": "{count} kérdés"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Nem észlelhető strukturális változás (csak metaadatok).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kompatibilitást megtörő változás észlelve",
+				"countPlural=other": "{count} kompatibilitást megtörő változás észlelve"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Ezek a módosítások hatással lehetnek a pontozásra, a láthatóságra vagy a megfelelőségi eredményekre a meglévő auditokban.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} meglévő auditot érint",
+				"countPlural=other": "{count} meglévő auditot érint"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Új követelmények kerülnek hozzáadásra ezekhez az auditokhoz.",
+	"builderAffectedAuditsRemovedHint": "Az eltávolított követelmények és értékelési adataik törlésre kerülnek ezekből az auditokból.",
+	"builderCouldNotLoadPreview": "A hatásvizsgálati előnézet nem tölthető be. Óvatosan járjon el.",
+	"builderConfirmPublish": "Közzététel megerősítése",
+	"builderSearchNodes": "Csomópontok keresése...",
+	"builderExpandSidebar": "Oldalsáv kibontása",
+	"builderCollapseSidebar": "Oldalsáv összecsukása",
+	"builderJumpTo": "Ugrás ide: {label}",
+	"builderUntitled": "Névtelen",
+	"builderHasUntranslatedItems": "Lefordítatlan elemeket tartalmaz",
+	"builderNoNodesYet": "Még nincsenek csomópontok",
+	"builderNoMatchingNodes": "Nincs egyező csomópont",
+	"builderNodesOf": "{filtered} / {total} csomópont",
+	"builderExpand": "Kibontás",
+	"builderCollapse": "Összecsukás",
+	"builderFrameworkNamePlaceholder": "Keretrendszer neve",
+	"builderFrameworkDescriptionPlaceholder": "Keretrendszer leírása (opcionális)",
+	"builderFrameworkAnnotationPlaceholder": "Keretrendszer megjegyzése (opcionális útmutató szöveg)",
+	"builderTranslateName": "Név fordítása...",
+	"builderTranslateDescription": "Leírás fordítása...",
+	"builderTranslateAnnotation": "Megjegyzés fordítása...",
+	"builderTranslateTypicalEvidence": "Tipikus bizonyíték fordítása...",
+	"builderTranslateTitle": "Cím fordítása...",
+	"builderTranslateLabel": "Címke fordítása...",
+	"builderTranslateMarkdown": "Markdown tartalom fordítása...",
+	"builderTranslatePlaceholder": "Fordítás...",
+	"builderTranslateQuestion": "Kérdés fordítása...",
+	"builderFrameworkSettings": "Keretrendszer beállításai",
+	"builderNoRulesOrGroupsConfigured": "Nincsenek konfigurált szabályok vagy csoportok",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} eredményszabály",
+				"countPlural=other": "{count} eredményszabály"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} csoport",
+				"countPlural=other": "{count} csoport"
+			}
+		}
+	],
+	"builderUrnNamespace": "URN névtér",
+	"builderScoringSettings": "Pontozási beállítások",
+	"builderAggregationHint": "Az átlag a teljes pontszámot elosztja a kérdések számával. Az összeg közvetlenül összeadja az összes pontszámot. Bináris (0/1) pontozáshoz használja az összeget.",
+	"builderScoreScale": "Pontozási skála",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} szint",
+				"countPlural=other": "{count} szint"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Szint hozzáadása",
+	"builderScaleNamePlaceholder": "pl. Részleges",
+	"builderScaleDescriptionPlaceholder": "Opcionális",
+	"builderScaleNameTranslate": "{lang} név",
+	"builderScaleDescriptionTranslate": "{lang} leírás",
+	"builderOutcomeRules": "Eredményszabályok",
+	"builderAddRule": "Szabály hozzáadása",
+	"builderUntitledRule": "Névtelen szabály",
+	"builderLabel": "Címke",
+	"builderLabelHint": "pl. Magas megfelelőség",
+	"builderCelExpression": "CEL kifejezés",
+	"builderCelExpressionPlaceholder": "pl. assessment.score_sum >= 150 vagy \"true\" gyűjtőszabályként",
+	"builderColor": "Szín",
+	"builderClearAction": "Törlés",
+	"builderNoOutcomeRules": "Még nincsenek eredményszabályok. Adjon hozzá egyet fent.",
+	"builderOutcomeRulesHint": "Az összes egyező szabály bekerül a számított eredményekbe. Használja a {trueLiteral} értéket gyűjtőszabályként.",
+	"builderCelContextReference": "CEL kontextus hivatkozás",
+	"builderCelLabelTranslate": "{lang} címke",
+	"builderCelGroupAssessment": "Értékelés",
+	"builderCelGroupRequirements": "Követelmények (node_id szerint)",
+	"builderCelGroupAnswers": "Válaszok (kérdés node_id szerint)",
+	"builderCelGroupOther": "Egyéb",
+	"builderCelScoreSum": "összes elért pont",
+	"builderCelScoreMax": "összes elérhető pont",
+	"builderCelAnsweredCount": "megválaszolt követelmények",
+	"builderCelTotalCount": "összes értékelhető követelmény",
+	"builderCelReqScore": "követelmény pontszáma",
+	"builderCelReqMaxScore": "követelmény maximális pontszáma",
+	"builderCelReqResult": "követelmény eredménye",
+	"builderCelReqStatus": "követelmény állapota",
+	"builderCelNodeIdHint": "node_id = az URN slug utáni része (pl. \"1.2\" innen: urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "válasz pontszáma (add_score × súly)",
+	"builderCelAnswerValue": "szabad szöveges válasz értéke",
+	"builderCelAnswerSelectedChoices": "kiválasztott opciók node_id-jainak listája",
+	"builderCelAnswerWeight": "kérdés súlya",
+	"builderCelAnswerType": "kérdés típusa (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "korábban kiszámított eredmény ref_id-k táblázata",
+	"builderCelHiddenRequirements": "láthatósági kifejezések által elrejtett node_id-k listája",
+	"builderImplementationGroupsTitle": "Megvalósítási csoportok",
+	"builderAddGroup": "Csoport hozzáadása",
+	"builderUntitledGroup": "Névtelen csoport",
+	"builderGroupNamePlaceholder": "pl. 1. szint",
+	"builderGroupDescriptionPlaceholder": "Ennek a megvalósítási csoportnak a leírása",
+	"builderSelectedByDefault": "Alapértelmezetten kiválasztott",
+	"builderDefaultBadge": "alapértelmezett",
+	"builderTranslationLabel": "{lang} fordítás",
+	"builderNoImplementationGroups": "Nincsenek megvalósítási csoportok megadva. Adjon hozzá egyet fent.",
+	"builderLanguagesSection": "Nyelvek",
+	"builderLanguagesHint": "Adja meg az alapnyelvet, és adjon hozzá célnyelveket a fordításhoz.",
+	"builderBaseLanguage": "Alapnyelv",
+	"builderTargetLanguages": "Célnyelvek",
+	"builderAddLanguagePlaceholder": "Nyelv hozzáadása...",
+	"builderAdd": "Hozzáadás",
+	"builderNodeNamePlaceholder": "Csomópont neve",
+	"builderSplashScreenTitlePlaceholder": "Bevezető képernyő címe",
+	"builderAssessableTooltip": "Jelzi, hogy ezt a követelményt értékelhetik-e a válaszadók",
+	"builderAssessable": "Értékelhető",
+	"builderDisplayMode": "Megjelenítési mód",
+	"builderDefaultMode": "Alapértelmezett",
+	"builderSplashMode": "Bemutató",
+	"builderAssessableLeaf": "Értékelhető levél",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Értékelhető · {count} gyermek",
+				"countPlural=other": "Értékelhető · {count} gyermek"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Csoport · {count} gyermek",
+				"countPlural=other": "Csoport · {count} gyermek"
+			}
+		}
+	],
+	"builderEmptyNode": "Üres csomópont",
+	"builderSplashScreenStatus": "Bevezető képernyő",
+	"builderNestedUnder": "beágyazva ide: {parent}",
+	"builderExpandChildren": "Gyermekek kibontása",
+	"builderCollapseChildren": "Gyermekek összecsukása",
+	"builderAdvanced": "Speciális",
+	"builderAdvancedAnnotation": "megjegyzés",
+	"builderAdvancedAnnotationEvidence": "megjegyzés, bizonyíték",
+	"builderAdvancedAnnotationEvidenceVisibility": "megjegyzés, bizonyíték, láthatóság",
+	"builderAdvancedAnnotationVisibility": "megjegyzés, láthatóság",
+	"builderAnnotationPlaceholder": "Opcionális útmutató jegyzetek a felülvizsgálók számára",
+	"builderTypicalEvidencePlaceholder": "Példák a válaszadók által csatolandó bizonyítékokra",
+	"builderDescriptionOptional": "Opcionális",
+	"builderVisibilityExpression": "Láthatósági kifejezés (CEL)",
+	"builderVisibilityExpressionTooltip": "CEL kifejezés, amelynek igazra kell kiértékelődnie ahhoz, hogy ez a követelmény látható legyen. Példa: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "pl. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Megvalósítási csoportok:",
+	"builderAddQuestion": "Kérdés hozzáadása",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gyermek rejtve",
+				"countPlural=other": "{count} gyermek rejtve"
+			}
+		}
+	],
+	"builderSplashSource": "Forrás",
+	"builderSplashNoSourceContent": "Nincs forrástartalom.",
+	"builderSplashEditPlaceholder": "Írjon markdown tartalmat a bevezető képernyőhöz...",
+	"builderSplashNoContent": "Még nincs tartalom. Váltson Szerkesztés módba a markdown hozzáadásához.",
+	"builderSplashBold": "Félkövér",
+	"builderSplashItalic": "Dőlt",
+	"builderSplashHeading": "Címsor",
+	"builderSplashBulletList": "Felsorolás",
+	"builderSplashNumberedList": "Számozott lista",
+	"builderSplashLink": "Hivatkozás",
+	"builderSplashTable": "Táblázat",
+	"builderSplashInsertImage": "Kép beszúrása",
+	"builderUntitledQuestion": "Névtelen kérdés",
+	"builderNotTranslated": "Nem fordított",
+	"builderQuestionTextPlaceholder": "Adja meg a kérdést...",
+	"builderWeight": "Súly",
+	"builderAnnotationOptional": "Opcionális megjegyzés...",
+	"builderDeleteThisQuestion": "Törli ezt a kérdést?",
+	"builderChangeTypeWarning": "A típus megváltoztatása törli a meglévő opciókat. Folytatja?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Akkor jelenik meg, ha {ref} = {count} válasz",
+				"countPlural=other": "Akkor jelenik meg, ha {ref} = {count} válasz"
+			}
+		}
+	],
+	"builderChoices": "Opciók",
+	"builderAddChoice": "Opció hozzáadása",
+	"builderChoicePlaceholder": "Opció szövege...",
+	"builderResultLabel": "Eredmény",
+	"builderNone": "Nincs",
+	"builderNoChoicesYet": "Még nincsenek opciók. Adjon hozzá egyet fent.",
+	"builderRemoveCondition": "Feltétel eltávolítása",
+	"builderAddCondition": "Feltétel hozzáadása",
+	"builderShowWhenThisQuestion": "Megjelenítés, ha ez a kérdés...",
+	"builderSelectAQuestion": "Válasszon ki egy kérdést...",
+	"builderHasAnswer": "...válasza:",
+	"builderMatch": "Egyezés:",
+	"builderMatchAny": "Bármelyik kiválasztott",
+	"builderMatchAll": "Az összes kiválasztott",
+	"builderConditionsOnlyChoiceTypes": "A feltételek csak választási típusú kérdéseknél támogatottak.",
+	"builderKeyboardShortcuts": "Billentyűparancsok",
+	"builderKbOutlineEditing": "Vázlatszerkesztés",
+	"builderKbOutlineEditingHint": "A kijelölt csomópontra vonatkozik.",
+	"builderKbBuilder": "Szerkesztő",
+	"builderKbIndentNode": "Csomópont behúzása",
+	"builderKbOutdentNode": "Csomópont kihúzása",
+	"builderKbAddChild": "Gyermek hozzáadása",
+	"builderKbAddSiblingBelow": "Testvér hozzáadása lejjebb",
+	"builderKbToggleAssessable": "Értékelhetőség váltása",
+	"builderKbSaveDraft": "Piszkozat mentése",
+	"builderKbShowCheatsheet": "Ennek az emlékeztetőnek a megjelenítése",
+	"builderKbCloseDialog": "Párbeszédpanel vagy lenyíló bezárása",
+	"builderImportedFramework": "Importált keretrendszer",
+	"builderImportedFrameworkDescription": "Ez a keretrendszer egy könyvtárból lett importálva, és nem szerkeszthető közvetlenül. Módosításokhoz hozzon létre egy szerkeszthető másolatot.",
+	"builderCreateCopyAndEdit": "Másolat létrehozása és szerkesztés",
+	"builderCreatingCopy": "Másolat létrehozása...",
+	"builderLoadingEditor": "Szerkesztő betöltése...",
+	"builderFailedToStartEditor": "A szerkesztő indítása sikertelen",
+	"builderBackToFramework": "Vissza a keretrendszerhez",
+	"builderBackToBuilder": "Vissza a szerkesztőhöz",
+	"builderFailedToLoadDraft": "A piszkozat betöltése sikertelen",
+	"builderImplementationGroupsHeader": "Megvalósítási csoportok",
+	"builderNoItemsToPreview": "Nincs előnézhető elem.",
+	"builderNoItemsToPreviewHint": "Adjon hozzá értékelhető követelményeket vagy bevezető képernyőket a szerkesztőben.",
+	"builderBaseLanguageOption": "Alapnyelv",
+	"builderFrameworkNameRequired": "A keretrendszer neve kötelező.",
+	"builderFrameworkNameTooLong": "A keretrendszer neve {length} karakter (max. 200).",
+	"builderNodeNameTooLong": "A név meghaladja a 200 karaktert ({length}/200). Helyezze át a hosszú szöveget a leírás mezőbe.",
+	"builderRefIdTooLong": "„{label}”: a ref_id {length} karakter (max. 100).",
+	"builderUrnTooLong": "„{label}”: az URN {length} karakter (max. 255).",
+	"builderFailedToSaveDraftBeforePublish": "A piszkozat mentése a közzététel előtt sikertelen.",
+	"builderUnsavedChangesNavigation": "Vannak nem mentett módosításai, amelyek el fognak veszni. Mégis kilép?",
+	"builderUnpublishedChangesNavigation": "Vannak közzé nem tett módosításai. A piszkozat mentve van, és később folytathatja. Mégis kilép?",
 	"fieldVisibility": "Mezők láthatósága",
 	"fieldVisibilityHelpText": "Szabályozza, hogy az egyes szerepkörök mely mezőket láthatják és szerkeszthetik.",
 	"visibilityAuditorRespondent": "Auditor + Válaszadó",
 	"visibilityAuditorOnly": "Csak auditor",
 	"visibilityHidden": "Rejtett",
 	"answers": "Válaszok",
-	"respondentAlignment": "Válaszadó egyeztetése"
+	"respondentAlignment": "Válaszadó egyeztetése",
+	"frameworkRefId": "Hivatkozási azonosító",
+	"urnPreview": "URN-előnézet:",
+	"urnLockedComplianceAssessment": "Zárolva — egy megfelelőségi értékelés használja ezt a keretrendszert.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Lépés",
+	"sliderNeedsAtLeastTwoChoices": "A csúszka legalább 2 választást igényel.",
+	"sliderMinMustBeLessThanMax": "A csúszka min értékének kisebbnek kell lennie a max értéknél.",
+	"sliderStepMustBeGreaterThanZero": "A csúszka lépésközének nagyobbnak kell lennie 0-nál.",
+	"sliderStepCannotExceedRange": "A csúszka lépésköze nem haladhatja meg (max − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Text",
+	"builderQuestionTypeBoolean": "Logikai",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Single choice",
+	"builderQuestionTypeMultipleChoice": "Multiple choice",
+	"builderQuestionTypeDate": "Date",
+	"builderChangedOn": "changed on"
 }

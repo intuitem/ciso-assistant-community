@@ -778,6 +778,7 @@
 	"createUserHelpText": "Maak of koppel een derde partijgebruiker aan de vertegenwoordiger op basis van het e-mailadres",
 	"nameDuplicate": "Naam bestaat al",
 	"noAnswer": "Geen antwoord",
+	"clearAnswer": "Antwoord wissen",
 	"entityAssessmentRepresentativesHelpText": "De externe gebruikers die verantwoordelijk zijn voor het invullen van de vragenlijst",
 	"sendQuestionnaire": "Vragenlijst verzenden",
 	"sureToSendQuestionnaire": "Weet u zeker dat u de vragenlijst {questionnaire} wilt verzenden?",
@@ -3077,11 +3078,405 @@
 	"syncCweCatalogFailed": "Ophalen van CWE-catalogus mislukt",
 	"syncToReferenceControl": "Synchroniseren met referentiecontrole",
 	"exportEcosystem": "ecosysteem export (XLSX)",
+	"aggregation": "Aggregatie",
+	"average": "Gemiddelde",
+	"close": "Sluiten",
+	"collapseAll": "Alles inklappen",
+	"copied": "Gekopieerd!",
+	"expandAll": "Alles uitklappen",
+	"exportYaml": "Exporteren als YAML",
+	"implementationGroups": "Implementatiegroepen",
+	"number": "Getal",
+	"publish": "Publiceren",
+	"saving": "Opslaan...",
+	"sum": "Som",
+	"boolean": "Boolean",
+	"builderEmptyStateTitle": "Hoe wil je dit kader structureren?",
+	"builderEmptyStateSubtitle": "Kies een uitgangsvorm — je kunt de structuur op elk moment wijzigen.",
+	"builderEmptyFlat": "Platte lijst",
+	"builderEmptyFlatHint": "Alle vereisten op één niveau. Zoals Google SAIF (12 vereisten).",
+	"builderEmptyGrouped": "Gegroepeerd",
+	"builderEmptyGroupedHint": "Secties met vereisten. Zoals OWASP MASVS (8 secties → 24 vereisten).",
+	"builderEmptyHierarchy": "Hiërarchie",
+	"builderEmptyHierarchyHint": "Geneste niveaus. Zoals NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Leeg canvas",
+	"builderEmptyBlankHint": "Begin vanaf nul — voeg één lege node toe.",
+	"builderAddTopLevelNode": "+ Hoofdniveau-node toevoegen",
+	"builderAddChild": "+ Kind toevoegen",
+	"builderAddSiblingBelow": "+ Broer/zus eronder toevoegen",
+	"builderBlankNode": "Lege node",
+	"builderBlankNodeHint": "Leeg — schakel zelf de vlaggen om",
+	"builderGroup": "Groep",
+	"builderGroupHint": "Niet beoordeelbaar, voor nesting",
+	"builderRequirementHint": "Beoordeelbaar, kan toch kinderen hebben",
+	"builderSplashScreen": "Introscherm",
+	"builderSplashScreenHint": "Presentatie, niet beoordeelbaar",
+	"builderStatusLive": "Live",
+	"builderStatusLiveTitle": "Het concept komt overeen met wat respondenten zien.",
+	"builderStatusUnpublishedChanges": "Niet-gepubliceerde wijzigingen",
+	"builderStatusUnpublishedChangesTitle": "Het concept bevat wijzigingen die nog niet zichtbaar zijn voor respondenten. Publiceer om toe te passen.",
+	"builderStatusDraftNothingLive": "Concept — nog niets live",
+	"builderStatusDraftNothingLiveTitle": "Het concept bevat inhoud, maar er is nog niets gepubliceerd. Nieuwe audits zien niets totdat je publiceert.",
+	"builderStatusEmpty": "Leeg",
+	"builderStatusEmptyTitle": "Nog geen vereisten. Nieuwe audits op basis van dit kader hebben niets om te beantwoorden.",
+	"builderPreview": "Voorbeeld",
+	"builderPreviewSaveFirst": "Sla eerst je concept op om een voorbeeld te bekijken",
+	"builderPreviewAsRespondent": "Voorbeeld als respondent (opent in nieuw tabblad)",
+	"builderExportYamlTitle": "Kader exporteren als YAML-bibliotheekbestand",
+	"builderExportYamlUnpublishedWarning": "Niet-gepubliceerde wijzigingen worden niet meegenomen. Publiceer eerst om de laatste aanpassingen te exporteren.",
+	"builderCopyBase": "Basis kopiëren",
+	"builderCopyBaseTitle": "Tekst van de basistaal kopiëren naar {lang} (overschrijft bestaande vertalingen niet)",
+	"builderCopyBaseQuestion": "Basistekst kopiëren?",
+	"builderNoTranslation": "Geen vertaling",
+	"builderShowKeyboardShortcuts": "Toetsenbordsneltoetsen tonen",
+	"builderKeyboardShortcutsHint": "Toetsenbordsneltoetsen (?)",
+	"builderExpandAllCards": "Alle kaarten uitklappen",
+	"builderCollapseAllCards": "Alle kaarten inklappen",
+	"builderSaveFailed": "Opslaan mislukt",
+	"builderPublishedFlash": "Gepubliceerd!",
+	"builderSaveDraftTitle": "Concept opslaan (Ctrl+S)",
+	"builderDiscardDraftTitle": "Concept verwerpen",
+	"builderDiscard": "Verwerpen",
+	"builderDiscardAllChangesQuestion": "Alle wijzigingen verwerpen?",
+	"builderYesDiscard": "Ja, verwerpen",
+	"builderPublishDraftToLiveTitle": "Concept publiceren naar live kader",
+	"builderPublishing": "Publiceren...",
+	"builderPublishModalTitle": "Concept publiceren naar live",
+	"builderPublishModalDescription": "Hiermee wordt het live kader bijgewerkt. Bekijk de wijzigingen hieronder.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vereisten toegevoegd",
+				"countPlural=other": "{count} vereisten toegevoegd"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vragen",
+				"countPlural=other": "{count} vragen"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vereisten verwijderd",
+				"countPlural=other": "{count} vereisten verwijderd"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vragen",
+				"countPlural=other": "{count} vragen"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Geen structurele wijzigingen gedetecteerd (alleen metadata).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ingrijpende wijzigingen gedetecteerd",
+				"countPlural=other": "{count} ingrijpende wijzigingen gedetecteerd"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Deze wijzigingen kunnen invloed hebben op de scoring, zichtbaarheid of nalevingsresultaten in bestaande audits.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} bestaande audits worden beïnvloed",
+				"countPlural=other": "{count} bestaande audits worden beïnvloed"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Nieuwe vereisten worden aan deze audits toegevoegd.",
+	"builderAffectedAuditsRemovedHint": "Verwijderde vereisten en hun beoordelingsgegevens worden uit deze audits verwijderd.",
+	"builderCouldNotLoadPreview": "Kon impactvoorbeeld niet laden. Ga voorzichtig te werk.",
+	"builderConfirmPublish": "Publicatie bevestigen",
+	"builderSearchNodes": "Nodes zoeken...",
+	"builderExpandSidebar": "Zijbalk uitklappen",
+	"builderCollapseSidebar": "Zijbalk inklappen",
+	"builderJumpTo": "Spring naar: {label}",
+	"builderUntitled": "Naamloos",
+	"builderHasUntranslatedItems": "Bevat onvertaalde items",
+	"builderNoNodesYet": "Nog geen nodes",
+	"builderNoMatchingNodes": "Geen overeenkomende nodes",
+	"builderNodesOf": "{filtered} van {total} nodes",
+	"builderExpand": "Uitklappen",
+	"builderCollapse": "Inklappen",
+	"builderFrameworkNamePlaceholder": "Naam van het kader",
+	"builderFrameworkDescriptionPlaceholder": "Beschrijving van het kader (optioneel)",
+	"builderFrameworkAnnotationPlaceholder": "Aantekening van het kader (optionele begeleidingstekst)",
+	"builderTranslateName": "Naam vertalen...",
+	"builderTranslateDescription": "Beschrijving vertalen...",
+	"builderTranslateAnnotation": "Aantekening vertalen...",
+	"builderTranslateTypicalEvidence": "Typisch bewijs vertalen...",
+	"builderTranslateTitle": "Titel vertalen...",
+	"builderTranslateLabel": "Label vertalen...",
+	"builderTranslateMarkdown": "Markdown-inhoud vertalen...",
+	"builderTranslatePlaceholder": "Vertalen...",
+	"builderTranslateQuestion": "Vraag vertalen...",
+	"builderFrameworkSettings": "Kaderinstellingen",
+	"builderNoRulesOrGroupsConfigured": "Geen regels of groepen geconfigureerd",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} uitkomstregels",
+				"countPlural=other": "{count} uitkomstregels"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} groepen",
+				"countPlural=other": "{count} groepen"
+			}
+		}
+	],
+	"builderUrnNamespace": "URN-naamruimte",
+	"builderScoringSettings": "Scoring-instellingen",
+	"builderAggregationHint": "Gemiddelde deelt de totale score door het aantal vragen. Som telt alle scores direct op. Gebruik Som voor binaire scoring (0/1).",
+	"builderScoreScale": "Scoreschaal",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} niveaus",
+				"countPlural=other": "{count} niveaus"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Niveau toevoegen",
+	"builderScaleNamePlaceholder": "bijv. Gedeeltelijk",
+	"builderScaleDescriptionPlaceholder": "Optioneel",
+	"builderScaleNameTranslate": "Naam {lang}",
+	"builderScaleDescriptionTranslate": "Beschrijving {lang}",
+	"builderOutcomeRules": "Uitkomstregels",
+	"builderAddRule": "Regel toevoegen",
+	"builderUntitledRule": "Naamloze regel",
+	"builderLabel": "Label",
+	"builderLabelHint": "bijv. Hoge naleving",
+	"builderCelExpression": "CEL-expressie",
+	"builderCelExpressionPlaceholder": "bijv. assessment.score_sum >= 150 of \"true\" als vangnet",
+	"builderColor": "Kleur",
+	"builderClearAction": "Wissen",
+	"builderNoOutcomeRules": "Nog geen uitkomstregels. Voeg er hierboven een toe.",
+	"builderOutcomeRulesHint": "Alle overeenkomende regels worden meegenomen in de berekende uitkomsten. Gebruik {trueLiteral} als vangnet.",
+	"builderCelContextReference": "CEL-contextreferentie",
+	"builderCelLabelTranslate": "Label {lang}",
+	"builderCelGroupAssessment": "Beoordeling",
+	"builderCelGroupRequirements": "Vereisten (op node_id)",
+	"builderCelGroupAnswers": "Antwoorden (op node_id van vraag)",
+	"builderCelGroupOther": "Overig",
+	"builderCelScoreSum": "totaal aantal behaalde punten",
+	"builderCelScoreMax": "totaal aantal mogelijke punten",
+	"builderCelAnsweredCount": "beantwoorde vereisten",
+	"builderCelTotalCount": "totaal aantal beoordeelbare vereisten",
+	"builderCelReqScore": "score van vereiste",
+	"builderCelReqMaxScore": "maximale score van vereiste",
+	"builderCelReqResult": "resultaat van vereiste",
+	"builderCelReqStatus": "status van vereiste",
+	"builderCelNodeIdHint": "node_id = het deel van de URN na de slug (bijv. \"1.2\" uit urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "antwoordscore (add_score × gewicht)",
+	"builderCelAnswerValue": "vrije-tekstantwoordwaarde",
+	"builderCelAnswerSelectedChoices": "lijst met node_ids van geselecteerde keuzes",
+	"builderCelAnswerWeight": "vraaggewicht",
+	"builderCelAnswerType": "vraagtype (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "tabel met ref_ids van eerder berekende uitkomsten",
+	"builderCelHiddenRequirements": "lijst met node_ids verborgen door zichtbaarheidsexpressies",
+	"builderImplementationGroupsTitle": "Implementatiegroepen",
+	"builderAddGroup": "Groep toevoegen",
+	"builderUntitledGroup": "Naamloze groep",
+	"builderGroupNamePlaceholder": "bijv. Niveau 1",
+	"builderGroupDescriptionPlaceholder": "Beschrijving van deze implementatiegroep",
+	"builderSelectedByDefault": "Standaard geselecteerd",
+	"builderDefaultBadge": "standaard",
+	"builderTranslationLabel": "Vertaling {lang}",
+	"builderNoImplementationGroups": "Geen implementatiegroepen gedefinieerd. Voeg er hierboven een toe.",
+	"builderLanguagesSection": "Talen",
+	"builderLanguagesHint": "Stel de basistaal in en voeg doeltalen toe voor vertaling.",
+	"builderBaseLanguage": "Basistaal",
+	"builderTargetLanguages": "Doeltalen",
+	"builderAddLanguagePlaceholder": "Een taal toevoegen...",
+	"builderAdd": "Toevoegen",
+	"builderNodeNamePlaceholder": "Naam van node",
+	"builderSplashScreenTitlePlaceholder": "Titel van introscherm",
+	"builderAssessableTooltip": "Of deze vereiste beoordeelbaar is door respondenten",
+	"builderAssessable": "Beoordeelbaar",
+	"builderDisplayMode": "Weergavemodus",
+	"builderDefaultMode": "Standaard",
+	"builderSplashMode": "Intro",
+	"builderAssessableLeaf": "Beoordeelbaar blad",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Beoordeelbaar · {count} kind",
+				"countPlural=other": "Beoordeelbaar · {count} kinderen"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Groep · {count} kind",
+				"countPlural=other": "Groep · {count} kinderen"
+			}
+		}
+	],
+	"builderEmptyNode": "Lege node",
+	"builderSplashScreenStatus": "Introscherm",
+	"builderNestedUnder": "genest onder {parent}",
+	"builderExpandChildren": "Kinderen uitklappen",
+	"builderCollapseChildren": "Kinderen inklappen",
+	"builderAdvanced": "Geavanceerd",
+	"builderAdvancedAnnotation": "aantekening",
+	"builderAdvancedAnnotationEvidence": "aantekening, bewijs",
+	"builderAdvancedAnnotationEvidenceVisibility": "aantekening, bewijs, zichtbaarheid",
+	"builderAdvancedAnnotationVisibility": "aantekening, zichtbaarheid",
+	"builderAnnotationPlaceholder": "Optionele richtlijnen voor reviewers",
+	"builderTypicalEvidencePlaceholder": "Voorbeelden van bewijs dat respondenten moeten bijvoegen",
+	"builderDescriptionOptional": "Optioneel",
+	"builderVisibilityExpression": "Zichtbaarheidsexpressie (CEL)",
+	"builderVisibilityExpressionTooltip": "CEL-expressie die waar moet zijn om deze vereiste zichtbaar te maken. Voorbeeld: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "bijv. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Implementatiegroepen:",
+	"builderAddQuestion": "Vraag toevoegen",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kind verborgen",
+				"countPlural=other": "{count} kinderen verborgen"
+			}
+		}
+	],
+	"builderSplashSource": "Bron",
+	"builderSplashNoSourceContent": "Geen broninhoud.",
+	"builderSplashEditPlaceholder": "Schrijf markdown-inhoud voor je introscherm...",
+	"builderSplashNoContent": "Nog geen inhoud. Schakel naar Bewerken om markdown toe te voegen.",
+	"builderSplashBold": "Vet",
+	"builderSplashItalic": "Cursief",
+	"builderSplashHeading": "Kop",
+	"builderSplashBulletList": "Opsommingslijst",
+	"builderSplashNumberedList": "Genummerde lijst",
+	"builderSplashLink": "Link",
+	"builderSplashTable": "Tabel",
+	"builderSplashInsertImage": "Afbeelding invoegen",
+	"builderUntitledQuestion": "Naamloze vraag",
+	"builderNotTranslated": "Niet vertaald",
+	"builderQuestionTextPlaceholder": "Voer je vraag in...",
+	"builderWeight": "Gewicht",
+	"builderAnnotationOptional": "Optionele notitie...",
+	"builderDeleteThisQuestion": "Deze vraag verwijderen?",
+	"builderChangeTypeWarning": "Het type wijzigen verwijdert bestaande keuzes. Doorgaan?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Getoond wanneer {ref} = {count} antwoorden",
+				"countPlural=other": "Getoond wanneer {ref} = {count} antwoorden"
+			}
+		}
+	],
+	"builderChoices": "Keuzes",
+	"builderAddChoice": "Keuze toevoegen",
+	"builderChoicePlaceholder": "Keuzetekst...",
+	"builderResultLabel": "Resultaat",
+	"builderNone": "Geen",
+	"builderNoChoicesYet": "Nog geen keuzes. Voeg er hierboven een toe.",
+	"builderRemoveCondition": "Voorwaarde verwijderen",
+	"builderAddCondition": "Voorwaarde toevoegen",
+	"builderShowWhenThisQuestion": "Tonen wanneer deze vraag...",
+	"builderSelectAQuestion": "Selecteer een vraag...",
+	"builderHasAnswer": "...als antwoord heeft:",
+	"builderMatch": "Overeenkomst:",
+	"builderMatchAny": "Eén van geselecteerd",
+	"builderMatchAll": "Alle geselecteerde",
+	"builderConditionsOnlyChoiceTypes": "Voorwaarden worden alleen ondersteund voor keuzevragen.",
+	"builderKeyboardShortcuts": "Toetsenbordsneltoetsen",
+	"builderKbOutlineEditing": "Structuur bewerken",
+	"builderKbOutlineEditingHint": "Toepassen op de gemarkeerde node.",
+	"builderKbBuilder": "Bouwer",
+	"builderKbIndentNode": "Node inspringen",
+	"builderKbOutdentNode": "Node uitspringen",
+	"builderKbAddChild": "Kind toevoegen",
+	"builderKbAddSiblingBelow": "Broer/zus eronder toevoegen",
+	"builderKbToggleAssessable": "Beoordeelbaar omschakelen",
+	"builderKbSaveDraft": "Concept opslaan",
+	"builderKbShowCheatsheet": "Toon dit overzicht",
+	"builderKbCloseDialog": "Dialoog of dropdown sluiten",
+	"builderImportedFramework": "Geïmporteerd kader",
+	"builderImportedFrameworkDescription": "Dit kader is geïmporteerd uit een bibliotheek en kan niet rechtstreeks worden bewerkt. Maak een bewerkbare kopie om wijzigingen aan te brengen.",
+	"builderCreateCopyAndEdit": "Kopie maken en bewerken",
+	"builderCreatingCopy": "Kopie maken...",
+	"builderLoadingEditor": "Editor laden...",
+	"builderFailedToStartEditor": "Editor kon niet worden gestart",
+	"builderBackToFramework": "Terug naar kader",
+	"builderBackToBuilder": "Terug naar bouwer",
+	"builderFailedToLoadDraft": "Concept laden mislukt",
+	"builderImplementationGroupsHeader": "Implementatiegroepen",
+	"builderNoItemsToPreview": "Geen items om te bekijken.",
+	"builderNoItemsToPreviewHint": "Voeg beoordeelbare vereisten of introschermen toe in de bouwer.",
+	"builderBaseLanguageOption": "Basistaal",
+	"builderFrameworkNameRequired": "Naam van het kader is verplicht.",
+	"builderFrameworkNameTooLong": "Naam van het kader is {length} tekens (max 200).",
+	"builderNodeNameTooLong": "Naam overschrijdt 200 tekens ({length}/200). Verplaats lange tekst naar het beschrijvingsveld.",
+	"builderRefIdTooLong": "'{label}': ref_id is {length} tekens (max 100).",
+	"builderUrnTooLong": "'{label}': URN is {length} tekens (max 255).",
+	"builderFailedToSaveDraftBeforePublish": "Concept opslaan vóór publicatie mislukt.",
+	"builderUnsavedChangesNavigation": "Je hebt niet-opgeslagen wijzigingen die verloren gaan. Toch verlaten?",
+	"builderUnpublishedChangesNavigation": "Je hebt niet-gepubliceerde wijzigingen. Je concept is opgeslagen en je kunt later verder. Toch verlaten?",
 	"fieldVisibility": "Veldzichtbaarheid",
 	"fieldVisibilityHelpText": "Bepaal welke velden elke rol kan zien en bewerken.",
 	"visibilityAuditorRespondent": "Auditor + Respondent",
 	"visibilityAuditorOnly": "Alleen auditor",
 	"visibilityHidden": "Verborgen",
 	"answers": "Antwoorden",
-	"respondentAlignment": "Afstemming respondent"
+	"respondentAlignment": "Afstemming respondent",
+	"frameworkRefId": "Ref-ID",
+	"urnPreview": "URN-voorbeeld:",
+	"urnLockedComplianceAssessment": "Vergrendeld — een complianceaudit gebruikt dit framework.",
+	"sliderMin": "Min",
+	"sliderMax": "Max",
+	"sliderStep": "Stap",
+	"sliderNeedsAtLeastTwoChoices": "Schuifregelaar heeft minimaal 2 keuzes nodig.",
+	"sliderMinMustBeLessThanMax": "Schuifregelaar-min moet kleiner zijn dan max.",
+	"sliderStepMustBeGreaterThanZero": "Schuifregelaar-stap moet groter zijn dan 0.",
+	"sliderStepCannotExceedRange": "Schuifregelaar-stap mag (max − min) niet overschrijden.",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekst",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Getal",
+	"builderQuestionTypeUniqueChoice": "Unieke keuze",
+	"builderQuestionTypeMultipleChoice": "Meerkeuze",
+	"builderQuestionTypeDate": "Datum",
+	"builderChangedOn": "changed on"
 }

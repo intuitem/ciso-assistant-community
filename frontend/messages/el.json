@@ -854,6 +854,7 @@
 	"createUserHelpText": "Δημιουργήστε ή συνδέστε έναν χρήστη τρίτου μέρους στον εκπρόσωπο με βάση το email",
 	"nameDuplicate": "Το όνομα υπάρχει ήδη",
 	"noAnswer": "Καμία απάντηση",
+	"clearAnswer": "Εκκαθάριση απάντησης",
 	"entityAssessmentRepresentativesHelpText": "Οι χρήστες τρίτων που είναι υπεύθυνοι για τη συμπλήρωση του ερωτηματολογίου",
 	"sendQuestionnaire": "Αποστολή ερωτηματολογίου",
 	"sureToSendQuestionnaire": "Είστε βέβαιοι ότι θέλετε να στείλετε το ερωτηματολόγιο: {questionnaire};",
@@ -1889,11 +1890,393 @@
 	"syncCweCatalogFailed": "Σφάλμα CWE",
 	"syncToReferenceControl": "Συγχρονισμός με τον πρότυπο έλεγχο",
 	"exportEcosystem": "εξαγωγή οικοσυστήματος (XLSX)",
+	"boolean": "Δυαδική τιμή",
+	"builderEmptyStateTitle": "Πώς θέλετε να δομήσετε αυτό το πλαίσιο;",
+	"builderEmptyStateSubtitle": "Επιλέξτε μια αρχική δομή — μπορείτε να την αλλάξετε ανά πάσα στιγμή.",
+	"builderEmptyFlat": "Επίπεδη λίστα",
+	"builderEmptyFlatHint": "Όλες οι απαιτήσεις σε ένα επίπεδο. Όπως το Google SAIF (12 απαιτήσεις).",
+	"builderEmptyGrouped": "Ομαδοποιημένη",
+	"builderEmptyGroupedHint": "Ενότητες που περιέχουν απαιτήσεις. Όπως το OWASP MASVS (8 ενότητες → 24 απαιτήσεις).",
+	"builderEmptyHierarchy": "Ιεραρχία",
+	"builderEmptyHierarchyHint": "Πολυεπίπεδη ένθεση. Όπως το NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Κενός καμβάς",
+	"builderEmptyBlankHint": "Ξεκινήστε από το μηδέν — προσθέστε έναν κενό κόμβο.",
+	"builderAddTopLevelNode": "+ Προσθήκη ριζικού κόμβου",
+	"builderAddChild": "+ Προσθήκη θυγατρικού",
+	"builderAddSiblingBelow": "+ Προσθήκη αδελφικού από κάτω",
+	"builderBlankNode": "Κενός κόμβος",
+	"builderBlankNodeHint": "Κενός — ορίστε εσείς τις ιδιότητες",
+	"builderGroup": "Ομάδα",
+	"builderGroupHint": "Μη αξιολογήσιμη, για ένθεση",
+	"builderRequirementHint": "Αξιολογήσιμη, μπορεί να έχει θυγατρικά",
+	"builderSplashScreen": "Οθόνη παρουσίασης",
+	"builderSplashScreenHint": "Παρουσιαστική, μη αξιολογήσιμη",
+	"builderStatusLive": "Ενεργό",
+	"builderStatusLiveTitle": "Το προσχέδιο αντιστοιχεί σε αυτό που βλέπουν οι ερωτώμενοι του ελέγχου.",
+	"builderStatusUnpublishedChanges": "Μη δημοσιευμένες αλλαγές",
+	"builderStatusUnpublishedChangesTitle": "Το προσχέδιο περιέχει αλλαγές που δεν είναι ακόμη ορατές στους ερωτώμενους του ελέγχου. Δημοσιεύστε για να εφαρμοστούν.",
+	"builderStatusDraftNothingLive": "Προσχέδιο — τίποτα δεν είναι ενεργό",
+	"builderStatusDraftNothingLiveTitle": "Το προσχέδιο έχει περιεχόμενο αλλά τίποτα δεν έχει δημοσιευτεί. Οι νέοι έλεγχοι δεν θα βλέπουν τίποτα μέχρι να δημοσιεύσετε.",
+	"builderStatusEmpty": "Κενό",
+	"builderStatusEmptyTitle": "Δεν υπάρχουν ακόμη απαιτήσεις. Οι νέοι έλεγχοι που βασίζονται σε αυτό το πλαίσιο δεν θα έχουν τίποτα να αξιολογήσουν.",
+	"builderPreview": "Προεπισκόπηση",
+	"builderPreviewSaveFirst": "Αποθηκεύστε πρώτα το προσχέδιό σας για προεπισκόπηση",
+	"builderPreviewAsRespondent": "Προεπισκόπηση ως ερωτώμενος (ανοίγει σε νέα καρτέλα)",
+	"builderExportYamlTitle": "Εξαγωγή πλαισίου ως αρχείο βιβλιοθήκης YAML",
+	"builderExportYamlUnpublishedWarning": "Οι μη δημοσιευμένες αλλαγές δεν θα συμπεριληφθούν. Δημοσιεύστε πρώτα για να εξαγάγετε τις τελευταίες αλλαγές.",
+	"builderCopyBase": "Αντιγραφή βάσης",
+	"builderCopyBaseTitle": "Αντιγραφή κειμένου από τη βασική γλώσσα στα {lang} (δεν αντικαθιστά υπάρχουσες μεταφράσεις)",
+	"builderCopyBaseQuestion": "Αντιγραφή του βασικού κειμένου;",
+	"builderNoTranslation": "Καμία μετάφραση",
+	"builderShowKeyboardShortcuts": "Εμφάνιση συντομεύσεων πληκτρολογίου",
+	"builderKeyboardShortcutsHint": "Συντομεύσεις πληκτρολογίου (?)",
+	"builderExpandAllCards": "Ανάπτυξη όλων των καρτών",
+	"builderCollapseAllCards": "Σύμπτυξη όλων των καρτών",
+	"builderSaveFailed": "Η αποθήκευση απέτυχε",
+	"builderPublishedFlash": "Δημοσιεύτηκε!",
+	"builderSaveDraftTitle": "Αποθήκευση προσχεδίου (Ctrl+S)",
+	"builderDiscardDraftTitle": "Απόρριψη προσχεδίου",
+	"builderDiscard": "Απόρριψη",
+	"builderDiscardAllChangesQuestion": "Απόρριψη όλων των αλλαγών;",
+	"builderYesDiscard": "Ναι, απόρριψη",
+	"builderPublishDraftToLiveTitle": "Δημοσίευση προσχεδίου στο ενεργό πλαίσιο",
+	"builderPublishing": "Δημοσίευση...",
+	"builderPublishModalTitle": "Δημοσίευση προσχεδίου σε ενεργό",
+	"builderPublishModalDescription": "Αυτή η ενέργεια θα ενημερώσει το ενεργό πλαίσιο. Ελέγξτε τις αλλαγές παρακάτω.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} απαιτήσεις προστέθηκαν",
+				"countPlural=other": "{count} απαιτήσεις προστέθηκαν"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ερωτήσεις",
+				"countPlural=other": "{count} ερωτήσεις"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} απαιτήσεις αφαιρέθηκαν",
+				"countPlural=other": "{count} απαιτήσεις αφαιρέθηκαν"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ερωτήσεις",
+				"countPlural=other": "{count} ερωτήσεις"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Δεν εντοπίστηκαν δομικές αλλαγές (μόνο μεταδεδομένα).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Εντοπίστηκαν {count} ασύμβατες αλλαγές",
+				"countPlural=other": "Εντοπίστηκαν {count} ασύμβατες αλλαγές"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Αυτές οι αλλαγές μπορεί να επηρεάσουν τη βαθμολόγηση, την ορατότητα ή τα αποτελέσματα συμμόρφωσης σε υπάρχοντες ελέγχους.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} υπάρχοντες έλεγχοι θα επηρεαστούν",
+				"countPlural=other": "{count} υπάρχοντες έλεγχοι θα επηρεαστούν"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Νέες απαιτήσεις θα προστεθούν σε αυτούς τους ελέγχους.",
+	"builderAffectedAuditsRemovedHint": "Οι αφαιρεθείσες απαιτήσεις και τα δεδομένα αξιολόγησής τους θα διαγραφούν από αυτούς τους ελέγχους.",
+	"builderCouldNotLoadPreview": "Δεν ήταν δυνατή η φόρτωση της προεπισκόπησης επιπτώσεων. Προχωρήστε με προσοχή.",
+	"builderConfirmPublish": "Επιβεβαίωση δημοσίευσης",
+	"builderSearchNodes": "Αναζήτηση κόμβων...",
+	"builderExpandSidebar": "Ανάπτυξη πλαϊνής γραμμής",
+	"builderCollapseSidebar": "Σύμπτυξη πλαϊνής γραμμής",
+	"builderJumpTo": "Μετάβαση σε: {label}",
+	"builderUntitled": "Χωρίς τίτλο",
+	"builderHasUntranslatedItems": "Περιέχει μη μεταφρασμένα στοιχεία",
+	"builderNoNodesYet": "Δεν υπάρχουν ακόμη κόμβοι",
+	"builderNoMatchingNodes": "Δεν υπάρχουν κόμβοι που να ταιριάζουν",
+	"builderNodesOf": "{filtered} από {total} κόμβους",
+	"builderExpand": "Ανάπτυξη",
+	"builderCollapse": "Σύμπτυξη",
+	"builderFrameworkNamePlaceholder": "Όνομα πλαισίου",
+	"builderFrameworkDescriptionPlaceholder": "Περιγραφή πλαισίου (προαιρετικό)",
+	"builderFrameworkAnnotationPlaceholder": "Σχολιασμός πλαισίου (προαιρετικό κείμενο καθοδήγησης)",
+	"builderTranslateName": "Μετάφραση ονόματος...",
+	"builderTranslateDescription": "Μετάφραση περιγραφής...",
+	"builderTranslateAnnotation": "Μετάφραση σχολιασμού...",
+	"builderTranslateTypicalEvidence": "Μετάφραση τυπικού τεκμηρίου...",
+	"builderTranslateTitle": "Μετάφραση τίτλου...",
+	"builderTranslateLabel": "Μετάφραση ετικέτας...",
+	"builderTranslateMarkdown": "Μετάφραση περιεχομένου markdown...",
+	"builderTranslatePlaceholder": "Μετάφραση...",
+	"builderTranslateQuestion": "Μετάφραση ερώτησης...",
+	"builderFrameworkSettings": "Ρυθμίσεις πλαισίου",
+	"builderNoRulesOrGroupsConfigured": "Δεν έχουν διαμορφωθεί κανόνες ή ομάδες",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} κανόνες αποτελέσματος",
+				"countPlural=other": "{count} κανόνες αποτελέσματος"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ομάδες",
+				"countPlural=other": "{count} ομάδες"
+			}
+		}
+	],
+	"builderUrnNamespace": "Χώρος ονομάτων URN",
+	"builderScoringSettings": "Ρυθμίσεις βαθμολόγησης",
+	"builderAggregationHint": "Ο μέσος όρος διαιρεί τη συνολική βαθμολογία με τον αριθμό των ερωτήσεων. Το άθροισμα προσθέτει απευθείας όλες τις βαθμολογίες. Χρησιμοποιήστε άθροισμα για δυαδική βαθμολόγηση (0/1).",
+	"builderScoreScale": "Κλίμακα βαθμολογίας",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} επίπεδα",
+				"countPlural=other": "{count} επίπεδα"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Προσθήκη επιπέδου",
+	"builderScaleNamePlaceholder": "π.χ. Μερικό",
+	"builderScaleDescriptionPlaceholder": "Προαιρετικό",
+	"builderScaleNameTranslate": "Όνομα {lang}",
+	"builderScaleDescriptionTranslate": "Περιγραφή {lang}",
+	"builderOutcomeRules": "Κανόνες αποτελέσματος",
+	"builderAddRule": "Προσθήκη κανόνα",
+	"builderUntitledRule": "Κανόνας χωρίς τίτλο",
+	"builderLabel": "Ετικέτα",
+	"builderLabelHint": "π.χ. Υψηλή συμμόρφωση",
+	"builderCelExpression": "Έκφραση CEL",
+	"builderCelExpressionPlaceholder": "π.χ. assessment.score_sum >= 150 ή \"true\" ως γενικός κανόνας",
+	"builderColor": "Χρώμα",
+	"builderClearAction": "Εκκαθάριση",
+	"builderNoOutcomeRules": "Δεν υπάρχουν ακόμη κανόνες αποτελέσματος. Προσθέστε έναν παραπάνω.",
+	"builderOutcomeRulesHint": "Όλοι οι κανόνες που ταιριάζουν περιλαμβάνονται στα υπολογισμένα αποτελέσματα. Χρησιμοποιήστε {trueLiteral} ως γενικό κανόνα.",
+	"builderCelContextReference": "Αναφορά πλαισίου CEL",
+	"builderCelLabelTranslate": "Ετικέτα {lang}",
+	"builderCelGroupAssessment": "Αξιολόγηση",
+	"builderCelGroupRequirements": "Απαιτήσεις (κατά node_id)",
+	"builderCelGroupAnswers": "Απαντήσεις (κατά node_id ερώτησης)",
+	"builderCelGroupOther": "Άλλο",
+	"builderCelScoreSum": "συνολικοί πόντοι που σημειώθηκαν",
+	"builderCelScoreMax": "συνολικοί δυνατοί πόντοι",
+	"builderCelAnsweredCount": "απαντημένες απαιτήσεις",
+	"builderCelTotalCount": "σύνολο αξιολογήσιμων απαιτήσεων",
+	"builderCelReqScore": "βαθμολογία απαίτησης",
+	"builderCelReqMaxScore": "μέγιστη βαθμολογία απαίτησης",
+	"builderCelReqResult": "αποτέλεσμα απαίτησης",
+	"builderCelReqStatus": "κατάσταση απαίτησης",
+	"builderCelNodeIdHint": "node_id = το τμήμα του URN μετά το slug (π.χ. \"1.2\" από urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "βαθμολογία απάντησης (add_score × βάρος)",
+	"builderCelAnswerValue": "τιμή απάντησης ελεύθερου κειμένου",
+	"builderCelAnswerSelectedChoices": "λίστα των node_ids των επιλεγμένων επιλογών",
+	"builderCelAnswerWeight": "βάρος ερώτησης",
+	"builderCelAnswerType": "τύπος ερώτησης (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "πίνακας των ref_ids των ήδη υπολογισμένων αποτελεσμάτων",
+	"builderCelHiddenRequirements": "λίστα των node_ids που έχουν αποκρυφθεί από εκφράσεις ορατότητας",
+	"builderImplementationGroupsTitle": "Ομάδες υλοποίησης",
+	"builderAddGroup": "Προσθήκη ομάδας",
+	"builderUntitledGroup": "Ομάδα χωρίς τίτλο",
+	"builderGroupNamePlaceholder": "π.χ. Επίπεδο 1",
+	"builderGroupDescriptionPlaceholder": "Περιγραφή αυτής της ομάδας υλοποίησης",
+	"builderSelectedByDefault": "Επιλεγμένο από προεπιλογή",
+	"builderDefaultBadge": "προεπιλογή",
+	"builderTranslationLabel": "Μετάφραση {lang}",
+	"builderNoImplementationGroups": "Δεν έχουν οριστεί ομάδες υλοποίησης. Προσθέστε μία παραπάνω.",
+	"builderLanguagesSection": "Γλώσσες",
+	"builderLanguagesHint": "Ορίστε τη βασική γλώσσα και προσθέστε γλώσσες-στόχους για μετάφραση.",
+	"builderBaseLanguage": "Βασική γλώσσα",
+	"builderTargetLanguages": "Γλώσσες-στόχοι",
+	"builderAddLanguagePlaceholder": "Προσθήκη γλώσσας...",
+	"builderAdd": "Προσθήκη",
+	"builderNodeNamePlaceholder": "Όνομα κόμβου",
+	"builderSplashScreenTitlePlaceholder": "Τίτλος οθόνης παρουσίασης",
+	"builderAssessableTooltip": "Καθορίζει αν αυτή η απαίτηση είναι αξιολογήσιμη από τους ερωτώμενους",
+	"builderAssessable": "Αξιολογήσιμη",
+	"builderDisplayMode": "Λειτουργία εμφάνισης",
+	"builderDefaultMode": "Προεπιλογή",
+	"builderSplashMode": "Παρουσίαση",
+	"builderAssessableLeaf": "Αξιολογήσιμο φύλλο",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Αξιολογήσιμη · {count} θυγατρικό",
+				"countPlural=other": "Αξιολογήσιμη · {count} θυγατρικά"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ομάδα · {count} θυγατρικό",
+				"countPlural=other": "Ομάδα · {count} θυγατρικά"
+			}
+		}
+	],
+	"builderEmptyNode": "Κενός κόμβος",
+	"builderSplashScreenStatus": "Οθόνη παρουσίασης",
+	"builderNestedUnder": "ένθετο κάτω από {parent}",
+	"builderExpandChildren": "Ανάπτυξη θυγατρικών",
+	"builderCollapseChildren": "Σύμπτυξη θυγατρικών",
+	"builderAdvanced": "Σύνθετα",
+	"builderAdvancedAnnotation": "σχολιασμός",
+	"builderAdvancedAnnotationEvidence": "σχολιασμός, τεκμήριο",
+	"builderAdvancedAnnotationEvidenceVisibility": "σχολιασμός, τεκμήριο, ορατότητα",
+	"builderAdvancedAnnotationVisibility": "σχολιασμός, ορατότητα",
+	"builderAnnotationPlaceholder": "Προαιρετικές σημειώσεις καθοδήγησης για τους ελεγκτές",
+	"builderTypicalEvidencePlaceholder": "Παραδείγματα τεκμηρίων που πρέπει να επισυνάψουν οι ερωτώμενοι",
+	"builderDescriptionOptional": "Προαιρετικό",
+	"builderVisibilityExpression": "Έκφραση ορατότητας (CEL)",
+	"builderVisibilityExpressionTooltip": "Έκφραση CEL που πρέπει να αποτιμηθεί ως true για να είναι ορατή αυτή η απαίτηση. Παράδειγμα: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "π.χ. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Ομάδες υλοποίησης:",
+	"builderAddQuestion": "Προσθήκη ερώτησης",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} θυγατρικό κρυφό",
+				"countPlural=other": "{count} θυγατρικά κρυφά"
+			}
+		}
+	],
+	"builderSplashSource": "Πηγή",
+	"builderSplashNoSourceContent": "Δεν υπάρχει περιεχόμενο πηγής.",
+	"builderSplashEditPlaceholder": "Γράψτε περιεχόμενο markdown για την οθόνη παρουσίασής σας...",
+	"builderSplashNoContent": "Δεν υπάρχει ακόμη περιεχόμενο. Μεταβείτε σε λειτουργία Επεξεργασίας για να προσθέσετε markdown.",
+	"builderSplashBold": "Έντονα",
+	"builderSplashItalic": "Πλάγια",
+	"builderSplashHeading": "Επικεφαλίδα",
+	"builderSplashBulletList": "Λίστα με κουκκίδες",
+	"builderSplashNumberedList": "Αριθμημένη λίστα",
+	"builderSplashLink": "Σύνδεσμος",
+	"builderSplashTable": "Πίνακας",
+	"builderSplashInsertImage": "Εισαγωγή εικόνας",
+	"builderUntitledQuestion": "Ερώτηση χωρίς τίτλο",
+	"builderNotTranslated": "Μη μεταφρασμένο",
+	"builderQuestionTextPlaceholder": "Εισαγάγετε την ερώτησή σας...",
+	"builderWeight": "Βάρος",
+	"builderAnnotationOptional": "Προαιρετική σημείωση...",
+	"builderDeleteThisQuestion": "Διαγραφή αυτής της ερώτησης;",
+	"builderChangeTypeWarning": "Η αλλαγή τύπου θα διαγράψει τις υπάρχουσες επιλογές. Συνέχεια;",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Εμφανίζεται όταν {ref} = {count} απαντήσεις",
+				"countPlural=other": "Εμφανίζεται όταν {ref} = {count} απαντήσεις"
+			}
+		}
+	],
+	"builderChoices": "Επιλογές",
+	"builderAddChoice": "Προσθήκη επιλογής",
+	"builderChoicePlaceholder": "Κείμενο επιλογής...",
+	"builderResultLabel": "Αποτέλεσμα",
+	"builderNone": "Καμία",
+	"builderNoChoicesYet": "Δεν υπάρχουν ακόμη επιλογές. Προσθέστε μία παραπάνω.",
+	"builderRemoveCondition": "Αφαίρεση συνθήκης",
+	"builderAddCondition": "Προσθήκη συνθήκης",
+	"builderShowWhenThisQuestion": "Εμφάνιση όταν αυτή η ερώτηση...",
+	"builderSelectAQuestion": "Επιλέξτε μια ερώτηση...",
+	"builderHasAnswer": "...έχει την απάντηση:",
+	"builderMatch": "Αντιστοιχία:",
+	"builderMatchAny": "Οποιαδήποτε από τις επιλεγμένες",
+	"builderMatchAll": "Όλες οι επιλεγμένες",
+	"builderConditionsOnlyChoiceTypes": "Οι συνθήκες υποστηρίζονται μόνο για ερωτήσεις τύπου επιλογής.",
+	"builderKeyboardShortcuts": "Συντομεύσεις πληκτρολογίου",
+	"builderKbOutlineEditing": "Επεξεργασία διάρθρωσης",
+	"builderKbOutlineEditingHint": "Εφαρμόζεται στον επιλεγμένο κόμβο.",
+	"builderKbBuilder": "Κατασκευαστής",
+	"builderKbIndentNode": "Εσοχή κόμβου",
+	"builderKbOutdentNode": "Αφαίρεση εσοχής κόμβου",
+	"builderKbAddChild": "Προσθήκη θυγατρικού",
+	"builderKbAddSiblingBelow": "Προσθήκη αδελφικού από κάτω",
+	"builderKbToggleAssessable": "Εναλλαγή αξιολογήσιμου",
+	"builderKbSaveDraft": "Αποθήκευση προσχεδίου",
+	"builderKbShowCheatsheet": "Εμφάνιση αυτού του οδηγού",
+	"builderKbCloseDialog": "Κλείσιμο διαλόγου ή αναπτυσσόμενης λίστας",
+	"builderImportedFramework": "Εισαγόμενο πλαίσιο",
+	"builderImportedFrameworkDescription": "Αυτό το πλαίσιο εισήχθη από βιβλιοθήκη και δεν μπορεί να επεξεργαστεί απευθείας. Για να κάνετε αλλαγές, δημιουργήστε ένα επεξεργάσιμο αντίγραφο.",
+	"builderCreateCopyAndEdit": "Δημιουργία αντιγράφου και επεξεργασία",
+	"builderCreatingCopy": "Δημιουργία αντιγράφου...",
+	"builderLoadingEditor": "Φόρτωση επεξεργαστή...",
+	"builderFailedToStartEditor": "Αποτυχία εκκίνησης επεξεργαστή",
+	"builderBackToFramework": "Επιστροφή στο πλαίσιο",
+	"builderBackToBuilder": "Επιστροφή στον κατασκευαστή",
+	"builderFailedToLoadDraft": "Αποτυχία φόρτωσης προσχεδίου",
+	"builderImplementationGroupsHeader": "Ομάδες υλοποίησης",
+	"builderNoItemsToPreview": "Δεν υπάρχουν στοιχεία για προεπισκόπηση.",
+	"builderNoItemsToPreviewHint": "Προσθέστε αξιολογήσιμες απαιτήσεις ή οθόνες παρουσίασης στον κατασκευαστή.",
+	"builderBaseLanguageOption": "Βασική γλώσσα",
+	"builderFrameworkNameRequired": "Το όνομα του πλαισίου είναι υποχρεωτικό.",
+	"builderFrameworkNameTooLong": "Το όνομα του πλαισίου έχει {length} χαρακτήρες (μέγ. 200).",
+	"builderNodeNameTooLong": "Το όνομα υπερβαίνει τους 200 χαρακτήρες ({length}/200). Μετακινήστε το μεγάλο κείμενο στο πεδίο περιγραφής.",
+	"builderRefIdTooLong": "«{label}»: το ref_id έχει {length} χαρακτήρες (μέγ. 100).",
+	"builderUrnTooLong": "«{label}»: το URN έχει {length} χαρακτήρες (μέγ. 255).",
+	"builderFailedToSaveDraftBeforePublish": "Αποτυχία αποθήκευσης προσχεδίου πριν τη δημοσίευση.",
+	"builderUnsavedChangesNavigation": "Έχετε μη αποθηκευμένες αλλαγές που θα χαθούν. Έξοδος ούτως ή άλλως;",
+	"builderUnpublishedChangesNavigation": "Έχετε μη δημοσιευμένες αλλαγές. Το προσχέδιό σας έχει αποθηκευτεί και μπορείτε να συνεχίσετε αργότερα. Έξοδος ούτως ή άλλως;",
 	"fieldVisibility": "Ορατότητα πεδίων",
 	"fieldVisibilityHelpText": "Ελέγξτε ποια πεδία μπορεί να βλέπει και να επεξεργάζεται κάθε ρόλος.",
 	"visibilityAuditorRespondent": "Ελεγκτής + Ερωτώμενος",
 	"visibilityAuditorOnly": "Μόνο ελεγκτής",
 	"visibilityHidden": "Κρυφό",
 	"answers": "Απαντήσεις",
-	"respondentAlignment": "Συμφωνία ερωτώμενου"
+	"respondentAlignment": "Συμφωνία ερωτώμενου",
+	"frameworkRefId": "Αναγνωριστικό αναφοράς",
+	"urnPreview": "Προεπισκόπηση URN:",
+	"urnLockedComplianceAssessment": "Κλειδωμένο — μια αξιολόγηση συμμόρφωσης χρησιμοποιεί αυτό το πλαίσιο.",
+	"sliderMin": "Ελάχ",
+	"sliderMax": "Μέγ",
+	"sliderStep": "Βήμα",
+	"sliderNeedsAtLeastTwoChoices": "Ο ολισθητής χρειάζεται τουλάχιστον 2 επιλογές.",
+	"sliderMinMustBeLessThanMax": "Το ελάχ του ολισθητή πρέπει να είναι μικρότερο από το μέγ.",
+	"sliderStepMustBeGreaterThanZero": "Το βήμα του ολισθητή πρέπει να είναι μεγαλύτερο από 0.",
+	"sliderStepCannotExceedRange": "Το βήμα του ολισθητή δεν μπορεί να ξεπερνά το (μέγ − ελάχ).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Κείμενο",
+	"builderQuestionTypeBoolean": "Δυαδική τιμή",
+	"builderQuestionTypeNumber": "Number",
+	"builderQuestionTypeUniqueChoice": "Μοναδική επιλογή",
+	"builderQuestionTypeMultipleChoice": "Πολλαπλή επιλογή",
+	"builderQuestionTypeDate": "Ημερομηνία",
+	"builderChangedOn": "changed on"
 }

@@ -855,6 +855,7 @@
 	"createUserHelpText": "E-postaya dayalı temsilci için bir üçüncü taraf kullanıcı oluşturun veya bağlayın",
 	"nameDuplicate": "Ad zaten var",
 	"noAnswer": "Cevap yok",
+	"clearAnswer": "Cevabı temizle",
 	"entityAssessmentRepresentativesHelpText": "Anketi tamamlamaktan sorumlu üçüncü taraf kullanıcılar",
 	"sendQuestionnaire": "Anketi gönder",
 	"sureToSendQuestionnaire": "Anketi göndermek istediğinizden emin misiniz: {questionnaire}?",
@@ -1927,11 +1928,409 @@
 	"syncCweCatalog": "CWE çek",
 	"syncCweCatalogFailed": "CWE hatası",
 	"exportEcosystem": "ekosistem dışa aktarımı (XLSX)",
+	"aggregation": "Toplama",
+	"average": "Ortalama",
+	"boolean": "Boolean",
+	"clearSearch": "Aramayı temizle",
+	"close": "Kapat",
+	"collapseAll": "Tümünü daralt",
+	"confirm": "Onayla",
+	"copied": "Kopyalandı!",
+	"expandAll": "Tümünü genişlet",
+	"exportYaml": "YAML olarak dışa aktar",
+	"implementationGroups": "Uygulama grupları",
+	"number": "Sayı",
+	"publish": "Yayınla",
+	"requirement": "Gereksinim",
+	"saving": "Kaydediliyor...",
+	"sum": "Toplam",
+	"tableOfContents": "İçindekiler",
+	"builderEmptyStateTitle": "Bu çerçeveyi nasıl yapılandırmak istersiniz?",
+	"builderEmptyStateSubtitle": "Bir başlangıç yapısı seçin — istediğiniz zaman değiştirebilirsiniz.",
+	"builderEmptyFlat": "Düz liste",
+	"builderEmptyFlatHint": "Tüm gereksinimler tek seviyede. Google SAIF gibi (12 gereksinim).",
+	"builderEmptyGrouped": "Gruplanmış",
+	"builderEmptyGroupedHint": "Gereksinimleri içeren bölümler. OWASP MASVS gibi (8 bölüm → 24 gereksinim).",
+	"builderEmptyHierarchy": "Hiyerarşi",
+	"builderEmptyHierarchyHint": "Çok seviyeli iç içe yapı. NIST CSF 2.0 gibi (6 → 23 → 106).",
+	"builderEmptyBlank": "Boş tuval",
+	"builderEmptyBlankHint": "Sıfırdan başlayın — boş bir düğüm ekleyin.",
+	"builderAddTopLevelNode": "+ Üst düzey düğüm ekle",
+	"builderAddChild": "+ Alt düğüm ekle",
+	"builderAddSiblingBelow": "+ Alta kardeş ekle",
+	"builderBlankNode": "Boş düğüm",
+	"builderBlankNodeHint": "Boş — bayrakları kendiniz ayarlayın",
+	"builderGroup": "Grup",
+	"builderGroupHint": "Değerlendirilemez, iç içe yerleştirme için",
+	"builderRequirementHint": "Değerlendirilebilir, alt düğümleri olabilir",
+	"builderSplashScreen": "Açılış ekranı",
+	"builderSplashScreenHint": "Sunum amaçlı, değerlendirilemez",
+	"builderStatusLive": "Yayında",
+	"builderStatusLiveTitle": "Taslak, denetim katılımcılarının gördüğüyle eşleşiyor.",
+	"builderStatusUnpublishedChanges": "Yayınlanmamış değişiklikler",
+	"builderStatusUnpublishedChangesTitle": "Taslakta henüz denetim katılımcılarına görünmeyen değişiklikler var. Uygulamak için yayınlayın.",
+	"builderStatusDraftNothingLive": "Taslak — henüz hiçbir şey yayında değil",
+	"builderStatusDraftNothingLiveTitle": "Taslakta içerik var ancak henüz hiçbir şey yayınlanmadı. Yeni denetimler siz yayınlayana kadar hiçbir şey görmeyecek.",
+	"builderStatusEmpty": "Boş",
+	"builderStatusEmptyTitle": "Henüz gereksinim yok. Bu çerçeveye dayanan yeni denetimlerin yanıtlayacağı bir şey olmayacak.",
+	"builderPreview": "Önizleme",
+	"builderPreviewSaveFirst": "Önizlemek için önce taslağınızı kaydedin",
+	"builderPreviewAsRespondent": "Katılımcı olarak önizle (yeni sekmede açılır)",
+	"builderExportYamlTitle": "Çerçeveyi YAML kütüphane dosyası olarak dışa aktar",
+	"builderExportYamlUnpublishedWarning": "Yayınlanmamış değişiklikler dahil edilmeyecek. En son düzenlemeleri dışa aktarmak için önce yayınlayın.",
+	"builderCopyBase": "Tabanı kopyala",
+	"builderCopyBaseTitle": "Taban dil metnini {lang} diline kopyala (mevcut çevirilerin üzerine yazmaz)",
+	"builderCopyBaseQuestion": "Taban metni kopyalansın mı?",
+	"builderNoTranslation": "Çeviri yok",
+	"builderShowKeyboardShortcuts": "Klavye kısayollarını göster",
+	"builderKeyboardShortcutsHint": "Klavye kısayolları (?)",
+	"builderExpandAllCards": "Tüm kartları genişlet",
+	"builderCollapseAllCards": "Tüm kartları daralt",
+	"builderSaveFailed": "Kaydetme başarısız",
+	"builderPublishedFlash": "Yayınlandı!",
+	"builderSaveDraftTitle": "Taslağı kaydet (Ctrl+S)",
+	"builderDiscardDraftTitle": "Taslağı iptal et",
+	"builderDiscard": "İptal et",
+	"builderDiscardAllChangesQuestion": "Tüm değişiklikler iptal edilsin mi?",
+	"builderYesDiscard": "Evet, iptal et",
+	"builderPublishDraftToLiveTitle": "Taslağı yayındaki çerçeveye yayınla",
+	"builderPublishing": "Yayınlanıyor...",
+	"builderPublishModalTitle": "Taslağı yayına al",
+	"builderPublishModalDescription": "Bu işlem yayındaki çerçeveyi güncelleyecek. Aşağıdaki değişiklikleri inceleyin.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gereksinim eklendi",
+				"countPlural=other": "{count} gereksinim eklendi"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} soru",
+				"countPlural=other": "{count} soru"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gereksinim kaldırıldı",
+				"countPlural=other": "{count} gereksinim kaldırıldı"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} soru",
+				"countPlural=other": "{count} soru"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Yapısal değişiklik algılanmadı (yalnızca üst veri).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} kırıcı değişiklik algılandı",
+				"countPlural=other": "{count} kırıcı değişiklik algılandı"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Bu değişiklikler mevcut denetimlerdeki puanlamayı, görünürlüğü veya uyumluluk sonuçlarını etkileyebilir.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} mevcut denetim etkilenecek",
+				"countPlural=other": "{count} mevcut denetim etkilenecek"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Bu denetimlere yeni gereksinimler eklenecek.",
+	"builderAffectedAuditsRemovedHint": "Kaldırılan gereksinimler ve değerlendirme verileri bu denetimlerden silinecek.",
+	"builderCouldNotLoadPreview": "Etki önizlemesi yüklenemedi. Dikkatli ilerleyin.",
+	"builderConfirmPublish": "Yayınlamayı onayla",
+	"builderSearchNodes": "Düğümleri ara...",
+	"builderExpandSidebar": "Kenar çubuğunu genişlet",
+	"builderCollapseSidebar": "Kenar çubuğunu daralt",
+	"builderJumpTo": "Şuraya atla: {label}",
+	"builderUntitled": "Başlıksız",
+	"builderHasUntranslatedItems": "Çevrilmemiş öğeler içeriyor",
+	"builderNoNodesYet": "Henüz düğüm yok",
+	"builderNoMatchingNodes": "Eşleşen düğüm yok",
+	"builderNodesOf": "{filtered}/{total} düğüm",
+	"builderExpand": "Genişlet",
+	"builderCollapse": "Daralt",
+	"builderFrameworkNamePlaceholder": "Çerçeve adı",
+	"builderFrameworkDescriptionPlaceholder": "Çerçeve açıklaması (isteğe bağlı)",
+	"builderFrameworkAnnotationPlaceholder": "Çerçeve açıklaması (isteğe bağlı yönlendirme metni)",
+	"builderTranslateName": "Adı çevir...",
+	"builderTranslateDescription": "Açıklamayı çevir...",
+	"builderTranslateAnnotation": "Açıklamayı çevir...",
+	"builderTranslateTypicalEvidence": "Tipik kanıtı çevir...",
+	"builderTranslateTitle": "Başlığı çevir...",
+	"builderTranslateLabel": "Etiketi çevir...",
+	"builderTranslateMarkdown": "Markdown içeriğini çevir...",
+	"builderTranslatePlaceholder": "Çevir...",
+	"builderTranslateQuestion": "Soruyu çevir...",
+	"builderFrameworkSettings": "Çerçeve Ayarları",
+	"builderNoRulesOrGroupsConfigured": "Yapılandırılmış kural veya grup yok",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} sonuç kuralı",
+				"countPlural=other": "{count} sonuç kuralı"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grup",
+				"countPlural=other": "{count} grup"
+			}
+		}
+	],
+	"builderUrnNamespace": "URN ad alanı",
+	"builderScoringSettings": "Puanlama ayarları",
+	"builderAggregationHint": "Ortalama, toplam puanı soru sayısına böler. Toplam, tüm puanları doğrudan ekler. İkili (0/1) puanlama için Toplam'ı kullanın.",
+	"builderScoreScale": "Puan ölçeği",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} seviye",
+				"countPlural=other": "{count} seviye"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Ölçek seviyesi ekle",
+	"builderScaleNamePlaceholder": "ör. Kısmi",
+	"builderScaleDescriptionPlaceholder": "İsteğe bağlı",
+	"builderScaleNameTranslate": "{lang} Ad",
+	"builderScaleDescriptionTranslate": "{lang} Açıklama",
+	"builderOutcomeRules": "Sonuç kuralları",
+	"builderAddRule": "Kural ekle",
+	"builderUntitledRule": "Başlıksız kural",
+	"builderLabel": "Etiket",
+	"builderLabelHint": "ör. Yüksek uyumluluk",
+	"builderCelExpression": "CEL İfadesi",
+	"builderCelExpressionPlaceholder": "ör. assessment.score_sum >= 150 veya genel kapsayıcı için \"true\"",
+	"builderColor": "Renk",
+	"builderClearAction": "Temizle",
+	"builderNoOutcomeRules": "Henüz sonuç kuralı yok. Yukarıdan bir tane ekleyin.",
+	"builderOutcomeRulesHint": "Eşleşen tüm kurallar hesaplanan sonuçlara dahil edilir. Genel kapsayıcı olarak {trueLiteral} kullanın.",
+	"builderCelContextReference": "CEL bağlam referansı",
+	"builderCelLabelTranslate": "{lang} Etiket",
+	"builderCelGroupAssessment": "Değerlendirme",
+	"builderCelGroupRequirements": "Gereksinimler (node_id'ye göre)",
+	"builderCelGroupAnswers": "Yanıtlar (soru node_id'sine göre)",
+	"builderCelGroupOther": "Diğer",
+	"builderCelScoreSum": "alınan toplam puan",
+	"builderCelScoreMax": "olası toplam puan",
+	"builderCelAnsweredCount": "yanıtlanan gereksinimler",
+	"builderCelTotalCount": "değerlendirilebilir toplam gereksinim",
+	"builderCelReqScore": "gereksinim puanı",
+	"builderCelReqMaxScore": "gereksinim maksimum puanı",
+	"builderCelReqResult": "gereksinim sonucu",
+	"builderCelReqStatus": "gereksinim durumu",
+	"builderCelNodeIdHint": "node_id = URN'nin slug'tan sonraki kısmı (ör. urn:custom:risk:req_node:my-fw:1.2 içinden \"1.2\")",
+	"builderCelAnswerScore": "yanıt puanı (add_score × ağırlık)",
+	"builderCelAnswerValue": "serbest metin yanıt değeri",
+	"builderCelAnswerSelectedChoices": "seçilen seçeneklerin node_id listesi",
+	"builderCelAnswerWeight": "soru ağırlığı",
+	"builderCelAnswerType": "soru türü (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "önceden hesaplanmış sonuç ref_id'lerinin haritası",
+	"builderCelHiddenRequirements": "görünürlük ifadeleriyle gizlenmiş node_id'lerin listesi",
+	"builderImplementationGroupsTitle": "Uygulama grupları",
+	"builderAddGroup": "Grup ekle",
+	"builderUntitledGroup": "Başlıksız grup",
+	"builderGroupNamePlaceholder": "ör. Seviye 1",
+	"builderGroupDescriptionPlaceholder": "Bu uygulama grubunun açıklaması",
+	"builderSelectedByDefault": "Varsayılan olarak seçili",
+	"builderDefaultBadge": "varsayılan",
+	"builderTranslationLabel": "{lang} çeviri",
+	"builderNoImplementationGroups": "Tanımlı uygulama grubu yok. Yukarıdan bir tane ekleyin.",
+	"builderLanguagesSection": "Diller",
+	"builderLanguagesHint": "Taban dili belirleyin ve çeviri için hedef diller ekleyin.",
+	"builderBaseLanguage": "Taban dil",
+	"builderTargetLanguages": "Hedef diller",
+	"builderAddLanguagePlaceholder": "Bir dil ekleyin...",
+	"builderAdd": "Ekle",
+	"builderNodeNamePlaceholder": "Düğüm adı",
+	"builderSplashScreenTitlePlaceholder": "Açılış ekranı başlığı",
+	"builderAssessableTooltip": "Bu gereksinimin katılımcılar tarafından değerlendirilebilir olup olmadığı",
+	"builderAssessable": "Değerlendirilebilir",
+	"builderDisplayMode": "Görüntüleme modu",
+	"builderDefaultMode": "Varsayılan",
+	"builderSplashMode": "Açılış",
+	"builderAssessableLeaf": "Değerlendirilebilir yaprak",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Değerlendirilebilir · {count} alt düğüm",
+				"countPlural=other": "Değerlendirilebilir · {count} alt düğüm"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grup · {count} alt düğüm",
+				"countPlural=other": "Grup · {count} alt düğüm"
+			}
+		}
+	],
+	"builderEmptyNode": "Boş düğüm",
+	"builderSplashScreenStatus": "Açılış ekranı",
+	"builderNestedUnder": "{parent} altında iç içe",
+	"builderExpandChildren": "Alt düğümleri genişlet",
+	"builderCollapseChildren": "Alt düğümleri daralt",
+	"builderAdvanced": "Gelişmiş",
+	"builderAdvancedAnnotation": "açıklama",
+	"builderAdvancedAnnotationEvidence": "açıklama, kanıt",
+	"builderAdvancedAnnotationEvidenceVisibility": "açıklama, kanıt, görünürlük",
+	"builderAdvancedAnnotationVisibility": "açıklama, görünürlük",
+	"builderAnnotationPlaceholder": "İnceleyenler için isteğe bağlı yönlendirme notları",
+	"builderTypicalEvidencePlaceholder": "Katılımcıların eklemesi gereken kanıt örnekleri",
+	"builderDescriptionOptional": "İsteğe bağlı",
+	"builderVisibilityExpression": "Görünürlük ifadesi (CEL)",
+	"builderVisibilityExpressionTooltip": "Bu gereksinimin görünür olması için doğru olarak değerlendirilmesi gereken CEL ifadesi. Örnek: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "ör. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Uygulama grupları:",
+	"builderAddQuestion": "Soru ekle",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} alt düğüm gizli",
+				"countPlural=other": "{count} alt düğüm gizli"
+			}
+		}
+	],
+	"builderSplashSource": "Kaynak",
+	"builderSplashNoSourceContent": "Kaynak içerik yok.",
+	"builderSplashEditPlaceholder": "Açılış ekranınız için markdown içeriği yazın...",
+	"builderSplashNoContent": "Henüz içerik yok. Markdown eklemek için Düzenleme moduna geçin.",
+	"builderSplashBold": "Kalın",
+	"builderSplashItalic": "İtalik",
+	"builderSplashHeading": "Başlık",
+	"builderSplashBulletList": "Madde listesi",
+	"builderSplashNumberedList": "Numaralı liste",
+	"builderSplashLink": "Bağlantı",
+	"builderSplashTable": "Tablo",
+	"builderSplashInsertImage": "Görsel ekle",
+	"builderUntitledQuestion": "Başlıksız soru",
+	"builderNotTranslated": "Çevrilmedi",
+	"builderQuestionTextPlaceholder": "Sorunuzu girin...",
+	"builderWeight": "Ağırlık",
+	"builderAnnotationOptional": "İsteğe bağlı not...",
+	"builderDeleteThisQuestion": "Bu soru silinsin mi?",
+	"builderChangeTypeWarning": "Türü değiştirmek mevcut seçenekleri silecek. Devam edilsin mi?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{ref} = {count} yanıt olduğunda gösterilir",
+				"countPlural=other": "{ref} = {count} yanıt olduğunda gösterilir"
+			}
+		}
+	],
+	"builderChoices": "Seçenekler",
+	"builderAddChoice": "Seçenek ekle",
+	"builderChoicePlaceholder": "Seçenek metni...",
+	"builderResultLabel": "Sonuç",
+	"builderNone": "Yok",
+	"builderNoChoicesYet": "Henüz seçenek yok. Yukarıdan bir tane ekleyin.",
+	"builderRemoveCondition": "Koşulu kaldır",
+	"builderAddCondition": "Koşul ekle",
+	"builderShowWhenThisQuestion": "Bu soru şu olduğunda göster...",
+	"builderSelectAQuestion": "Bir soru seçin...",
+	"builderHasAnswer": "...yanıtı var:",
+	"builderMatch": "Eşleşme:",
+	"builderMatchAny": "Seçilenlerden herhangi biri",
+	"builderMatchAll": "Tüm seçilenler",
+	"builderConditionsOnlyChoiceTypes": "Koşullar yalnızca seçim türündeki sorular için desteklenir.",
+	"builderKeyboardShortcuts": "Klavye kısayolları",
+	"builderKbOutlineEditing": "Yapı düzenleme",
+	"builderKbOutlineEditingHint": "Vurgulanan düğüme uygulanır.",
+	"builderKbBuilder": "Oluşturucu",
+	"builderKbIndentNode": "Düğümü içeri al",
+	"builderKbOutdentNode": "Düğümü dışarı al",
+	"builderKbAddChild": "Alt düğüm ekle",
+	"builderKbAddSiblingBelow": "Alta kardeş ekle",
+	"builderKbToggleAssessable": "Değerlendirilebilirliği değiştir",
+	"builderKbSaveDraft": "Taslağı kaydet",
+	"builderKbShowCheatsheet": "Bu ipucu listesini göster",
+	"builderKbCloseDialog": "İletişim kutusunu veya açılır menüyü kapat",
+	"builderImportedFramework": "İçe aktarılan çerçeve",
+	"builderImportedFrameworkDescription": "Bu çerçeve bir kütüphaneden içe aktarıldı ve doğrudan düzenlenemez. Değişiklik yapmak için düzenlenebilir bir kopya oluşturun.",
+	"builderCreateCopyAndEdit": "Kopya oluştur ve düzenle",
+	"builderCreatingCopy": "Kopya oluşturuluyor...",
+	"builderLoadingEditor": "Düzenleyici yükleniyor...",
+	"builderFailedToStartEditor": "Düzenleyici başlatılamadı",
+	"builderBackToFramework": "Çerçeveye geri dön",
+	"builderBackToBuilder": "Oluşturucuya geri dön",
+	"builderFailedToLoadDraft": "Taslak yüklenemedi",
+	"builderImplementationGroupsHeader": "Uygulama Grupları",
+	"builderNoItemsToPreview": "Önizlenecek öğe yok.",
+	"builderNoItemsToPreviewHint": "Oluşturucuda değerlendirilebilir gereksinimler veya açılış ekranları ekleyin.",
+	"builderBaseLanguageOption": "Taban dil",
+	"builderFrameworkNameRequired": "Çerçeve adı gereklidir.",
+	"builderFrameworkNameTooLong": "Çerçeve adı {length} karakter (maks. 200).",
+	"builderNodeNameTooLong": "Ad 200 karakteri aşıyor ({length}/200). Uzun metni açıklama alanına taşıyın.",
+	"builderRefIdTooLong": "'{label}': ref_id {length} karakter (maks. 100).",
+	"builderUrnTooLong": "'{label}': URN {length} karakter (maks. 255).",
+	"builderFailedToSaveDraftBeforePublish": "Yayınlamadan önce taslak kaydedilemedi.",
+	"builderUnsavedChangesNavigation": "Kaybolacak kaydedilmemiş değişiklikleriniz var. Yine de çıkılsın mı?",
+	"builderUnpublishedChangesNavigation": "Yayınlanmamış değişiklikleriniz var. Taslağınız kaydedildi ve daha sonra devam edebilirsiniz. Yine de çıkılsın mı?",
 	"fieldVisibility": "Alan görünürlüğü",
 	"fieldVisibilityHelpText": "Her rolün hangi alanları görebileceğini ve düzenleyebileceğini kontrol edin.",
 	"visibilityAuditorRespondent": "Denetçi + Yanıtlayan",
 	"visibilityAuditorOnly": "Yalnızca denetçi",
 	"visibilityHidden": "Gizli",
 	"answers": "Yanıtlar",
-	"respondentAlignment": "Yanıtlayan uyumu"
+	"respondentAlignment": "Yanıtlayan uyumu",
+	"frameworkRefId": "Referans ID",
+	"urnPreview": "URN önizleme:",
+	"urnLockedComplianceAssessment": "Kilitli — bir uyumluluk değerlendirmesi bu çerçeveyi kullanıyor.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Adım",
+	"sliderNeedsAtLeastTwoChoices": "Kaydırıcı en az 2 seçenek gerektirir.",
+	"sliderMinMustBeLessThanMax": "Kaydırıcının min değeri maks değerinden küçük olmalıdır.",
+	"sliderStepMustBeGreaterThanZero": "Kaydırıcının adımı 0'dan büyük olmalıdır.",
+	"sliderStepCannotExceedRange": "Kaydırıcının adımı (maks − min) değerini aşamaz.",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Metin",
+	"builderQuestionTypeBoolean": "Boolean",
+	"builderQuestionTypeNumber": "Sayı",
+	"builderQuestionTypeUniqueChoice": "Tek seçim",
+	"builderQuestionTypeMultipleChoice": "Çoktan seçmeli",
+	"builderQuestionTypeDate": "Tarih",
+	"builderChangedOn": "changed on"
 }

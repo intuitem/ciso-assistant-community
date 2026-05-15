@@ -19,6 +19,7 @@
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 
 	import {
 		complianceResultColorMap,
@@ -47,6 +48,9 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
+
+	const CYFUN_2025_FRAMEWORK_URN = 'urn:intuitem:risk:framework:ccb-cyfun2025';
+	const ISO27001_FRAMEWORK_URN_PREFIX = 'urn:intuitem:risk:framework:iso27001';
 
 	interface Props {
 		data: PageData;
@@ -323,6 +327,113 @@
 		modalStore.trigger(modal);
 	}
 
+	function buildExportGroups(): ExportGroup[] {
+		const ca = data.compliance_assessment;
+		const id = ca.id;
+		const isInternal = !page.data.user.is_third_party;
+		const frameworkUrn = ca.framework?.urn ?? '';
+		// CyFun stays exact: backend cyfun_xlsx (views.py) hardcodes the 2025
+		// sheet layout, so other versions would 400. Bump both when a new CyFun
+		// ships. ISO27001 is prefix-matched — SoA only navigates to a page
+		// whose semantics carry across 27001 versions.
+		const isCyFun = frameworkUrn === CYFUN_2025_FRAMEWORK_URN;
+		const isIso27001 = frameworkUrn.startsWith(ISO27001_FRAMEWORK_URN_PREFIX);
+
+		const auditOptions = [
+			isInternal && {
+				titleKey: 'exportRequirementsData',
+				descriptionKey: 'exportRequirementsDataDesc',
+				format: 'CSV' as const,
+				href: `/compliance-assessments/${id}/export/csv`,
+				testId: 'export-option-csv'
+			},
+			isInternal && {
+				titleKey: 'exportRequirementsWorkbook',
+				descriptionKey: 'exportRequirementsWorkbookDesc',
+				format: 'XLSX' as const,
+				href: `/compliance-assessments/${id}/export/xlsx`,
+				testId: 'export-option-xlsx'
+			},
+			isInternal && {
+				titleKey: 'exportExecutiveSummary',
+				descriptionKey: 'exportExecutiveSummaryDesc',
+				format: 'DOCX' as const,
+				href: `/compliance-assessments/${id}/export/word`,
+				testId: 'export-option-word'
+			},
+			isInternal &&
+				isCyFun && {
+					titleKey: 'exportCyFunAssessment',
+					descriptionKey: 'exportCyFunAssessmentDesc',
+					format: 'XLSX' as const,
+					href: `/compliance-assessments/${id}/export/cyfun-xlsx`,
+					testId: 'export-option-cyfun-xlsx'
+				},
+			{
+				titleKey: 'exportBundleWithEvidences',
+				descriptionKey: 'exportBundleWithEvidencesDesc',
+				format: 'ZIP' as const,
+				href: `/compliance-assessments/${id}/export`,
+				testId: 'export-option-zip'
+			},
+			isInternal &&
+				isIso27001 && {
+					titleKey: 'exportSoaBuilder',
+					descriptionKey: 'exportSoaBuilderDesc',
+					format: 'HTML' as const,
+					href: `/reports/soa?ca=${id}`,
+					kind: 'navigate' as const,
+					testId: 'export-option-soa'
+				}
+		].filter(Boolean);
+
+		const actionPlanOptions = isInternal
+			? [
+					{
+						titleKey: 'exportControlsList',
+						descriptionKey: 'exportControlsListDesc',
+						format: 'CSV' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/csv`,
+						testId: 'export-option-ap-csv'
+					},
+					{
+						titleKey: 'exportControlsWorkbook',
+						descriptionKey: 'exportControlsWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/xlsx`,
+						testId: 'export-option-ap-xlsx'
+					},
+					{
+						titleKey: 'exportStatusGroupedReport',
+						descriptionKey: 'exportStatusGroupedReportDesc',
+						format: 'PDF' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/pdf`,
+						testId: 'export-option-ap-pdf'
+					}
+				]
+			: [];
+
+		return [
+			{ titleKey: 'complianceAssessment', options: auditOptions as ExportGroup['options'] },
+			{ titleKey: 'actionPlan', options: actionPlanOptions }
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups: buildExportGroups()
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalRequestValidation(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -462,7 +573,6 @@
 	let tree = $derived(data.tree);
 	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
 
-	let exportPopupOpen = $state(false);
 	let filterPopupOpen = $state(false);
 
 	run(() => {
@@ -727,82 +837,14 @@
 			{/if}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover
-						open={exportPopupOpen}
-						onOpenChange={(e) => (exportPopupOpen = e.open)}
-						positioning={{ placement: 'bottom' }}
+					<button
+						type="button"
+						class="btn preset-filled-primary-500 w-full"
+						onclick={modalExport}
+						data-testid="export-button"
 					>
-						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-							<span data-testid="export-button">
-								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-							</span>
-						</Popover.Trigger>
-						<Popover.Positioner>
-							<Popover.Content
-								class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-							>
-								<div>
-									<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-									{#if !page.data.user.is_third_party}
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asCSV()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asXLSX()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asWord()}</a
-										>
-										{#if data.compliance_assessment.framework?.urn === 'urn:intuitem:risk:framework:ccb-cyfun2025'}
-											<a
-												href="/compliance-assessments/{data.compliance_assessment
-													.id}/export/cyfun-xlsx"
-												class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-												>... {m.asCyFunExcel()}</a
-											>
-										{/if}
-									{/if}
-									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asZIP()}</a
-									>
-									{#if !page.data.user.is_third_party}
-										<a
-											href="/reports/soa?ca={data.compliance_assessment.id}"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.statementOfApplicability()}</a
-										>
-										<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/csv"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asCSV()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/xlsx"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asXLSX()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/pdf"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asPDF()}</a
-										>
-									{/if}
-								</div>
-							</Popover.Content>
-						</Popover.Positioner>
-					</Popover>
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					</button>
 					{#if canEditObject}
 						<Anchor
 							breadcrumbAction="push"

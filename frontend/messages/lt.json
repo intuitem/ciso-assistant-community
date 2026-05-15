@@ -1230,6 +1230,7 @@
 	"userLinkedToRepresentative": "Prie šio atstovo jau susietas vartotojas.",
 	"nameDuplicate": "Pavadinimas jau egzistuoja",
 	"noAnswer": "Nėra atsakymo",
+	"clearAnswer": "Išvalyti atsakymą",
 	"entityAssessmentRepresentativesHelpText": "Trečiosios šalies vartotojai, atsakingi už anketos užpildymą",
 	"sendQuestionnaire": "Siųsti anketą",
 	"sureToSendQuestionnaire": "Ar tikrai norite išsiųsti anketą: {questionnaire}?",
@@ -4167,11 +4168,393 @@
 	"riskCoverage": "Rizikos aprėptis",
 	"soaSelectRiskDescription": "Pasirinkus rizikos vertinimus, taikymo pareiškimas bus praturtintas susietais rizikos scenarijais ir apdorojimo sprendimais",
 	"exportEcosystem": "ekosistemos eksportas (XLSX)",
+	"boolean": "Loginis",
+	"builderEmptyStateTitle": "Kaip norite struktūrizuoti šią sistemą?",
+	"builderEmptyStateSubtitle": "Pasirinkite pradinę struktūrą — galėsite ją pakeisti bet kuriuo metu.",
+	"builderEmptyFlat": "Plokščias sąrašas",
+	"builderEmptyFlatHint": "Visi reikalavimai viename lygyje. Kaip Google SAIF (12 reikalavimų).",
+	"builderEmptyGrouped": "Sugrupuota",
+	"builderEmptyGroupedHint": "Skyriai, kuriuose yra reikalavimai. Kaip OWASP MASVS (8 skyriai → 24 reikalavimai).",
+	"builderEmptyHierarchy": "Hierarchija",
+	"builderEmptyHierarchyHint": "Daugiapakopis įdėjimas. Kaip NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Tuščia drobė",
+	"builderEmptyBlankHint": "Pradėkite nuo nulio — pridėkite vieną tuščią mazgą.",
+	"builderAddTopLevelNode": "+ Pridėti šakninį mazgą",
+	"builderAddChild": "+ Pridėti vaikinį mazgą",
+	"builderAddSiblingBelow": "+ Pridėti gretimą mazgą žemiau",
+	"builderBlankNode": "Tuščias mazgas",
+	"builderBlankNodeHint": "Tuščias — patys nustatote atributus",
+	"builderGroup": "Grupė",
+	"builderGroupHint": "Nevertinama, skirta įdėjimui",
+	"builderRequirementHint": "Vertinama, gali turėti vaikinių mazgų",
+	"builderSplashScreen": "Pradinis ekranas",
+	"builderSplashScreenHint": "Pristatomasis, nevertinamas",
+	"builderStatusLive": "Veikiantis",
+	"builderStatusLiveTitle": "Juodraštis atitinka tai, ką mato audito respondentai.",
+	"builderStatusUnpublishedChanges": "Nepaskelbti pakeitimai",
+	"builderStatusUnpublishedChangesTitle": "Juodraštyje yra pakeitimų, kurie dar nematomi audito respondentams. Paskelbkite, kad pritaikytumėte.",
+	"builderStatusDraftNothingLive": "Juodraštis — niekas neveikia",
+	"builderStatusDraftNothingLiveTitle": "Juodraštyje yra turinio, bet niekas dar nepaskelbta. Nauji auditai nematys nieko, kol nepaskelbsite.",
+	"builderStatusEmpty": "Tuščia",
+	"builderStatusEmptyTitle": "Reikalavimų dar nėra. Nauji auditai, sukurti šios sistemos pagrindu, neturės ką vertinti.",
+	"builderPreview": "Peržiūra",
+	"builderPreviewSaveFirst": "Pirmiausia išsaugokite juodraštį, kad galėtumėte peržiūrėti",
+	"builderPreviewAsRespondent": "Peržiūra kaip respondentas (atidaroma naujame skirtuke)",
+	"builderExportYamlTitle": "Eksportuoti sistemą kaip YAML bibliotekos failą",
+	"builderExportYamlUnpublishedWarning": "Nepaskelbti pakeitimai nebus įtraukti. Pirmiausia paskelbkite, kad eksportuotumėte naujausius pakeitimus.",
+	"builderCopyBase": "Kopijuoti bazę",
+	"builderCopyBaseTitle": "Kopijuoti bazinės kalbos tekstą į {lang} (esamų vertimų neperrašys)",
+	"builderCopyBaseQuestion": "Kopijuoti bazinį tekstą?",
+	"builderNoTranslation": "Vertimo nėra",
+	"builderShowKeyboardShortcuts": "Rodyti klavišų kombinacijas",
+	"builderKeyboardShortcutsHint": "Klavišų kombinacijos (?)",
+	"builderExpandAllCards": "Išskleisti visas korteles",
+	"builderCollapseAllCards": "Sutraukti visas korteles",
+	"builderSaveFailed": "Išsaugoti nepavyko",
+	"builderPublishedFlash": "Paskelbta!",
+	"builderSaveDraftTitle": "Išsaugoti juodraštį (Ctrl+S)",
+	"builderDiscardDraftTitle": "Atmesti juodraštį",
+	"builderDiscard": "Atmesti",
+	"builderDiscardAllChangesQuestion": "Atmesti visus pakeitimus?",
+	"builderYesDiscard": "Taip, atmesti",
+	"builderPublishDraftToLiveTitle": "Paskelbti juodraštį į veikiančią sistemą",
+	"builderPublishing": "Skelbiama...",
+	"builderPublishModalTitle": "Paskelbti juodraštį",
+	"builderPublishModalDescription": "Šis veiksmas atnaujins veikiančią sistemą. Peržiūrėkite pakeitimus žemiau.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} reikalavimai pridėti",
+				"countPlural=other": "{count} reikalavimai pridėti"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} klausimai",
+				"countPlural=other": "{count} klausimai"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} reikalavimai pašalinti",
+				"countPlural=other": "{count} reikalavimai pašalinti"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} klausimai",
+				"countPlural=other": "{count} klausimai"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Struktūrinių pakeitimų neaptikta (tik metaduomenys).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Aptikti {count} nesuderinami pakeitimai",
+				"countPlural=other": "Aptikti {count} nesuderinami pakeitimai"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Šie pakeitimai gali paveikti vertinimą, matomumą ar atitikties rezultatus esamuose audituose.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} esami auditai bus paveikti",
+				"countPlural=other": "{count} esami auditai bus paveikti"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Į šiuos auditus bus pridėti nauji reikalavimai.",
+	"builderAffectedAuditsRemovedHint": "Pašalinti reikalavimai ir jų vertinimo duomenys bus ištrinti iš šių auditų.",
+	"builderCouldNotLoadPreview": "Nepavyko įkelti poveikio peržiūros. Veikite atsargiai.",
+	"builderConfirmPublish": "Patvirtinti paskelbimą",
+	"builderSearchNodes": "Ieškoti mazgų...",
+	"builderExpandSidebar": "Išskleisti šoninę juostą",
+	"builderCollapseSidebar": "Sutraukti šoninę juostą",
+	"builderJumpTo": "Pereiti į: {label}",
+	"builderUntitled": "Be pavadinimo",
+	"builderHasUntranslatedItems": "Yra neišverstų elementų",
+	"builderNoNodesYet": "Mazgų dar nėra",
+	"builderNoMatchingNodes": "Atitinkančių mazgų nėra",
+	"builderNodesOf": "{filtered} iš {total} mazgų",
+	"builderExpand": "Išskleisti",
+	"builderCollapse": "Sutraukti",
+	"builderFrameworkNamePlaceholder": "Sistemos pavadinimas",
+	"builderFrameworkDescriptionPlaceholder": "Sistemos aprašymas (neprivaloma)",
+	"builderFrameworkAnnotationPlaceholder": "Sistemos anotacija (neprivalomas gairių tekstas)",
+	"builderTranslateName": "Versti pavadinimą...",
+	"builderTranslateDescription": "Versti aprašymą...",
+	"builderTranslateAnnotation": "Versti anotaciją...",
+	"builderTranslateTypicalEvidence": "Versti tipinį įrodymą...",
+	"builderTranslateTitle": "Versti antraštę...",
+	"builderTranslateLabel": "Versti etiketę...",
+	"builderTranslateMarkdown": "Versti markdown turinį...",
+	"builderTranslatePlaceholder": "Versti...",
+	"builderTranslateQuestion": "Versti klausimą...",
+	"builderFrameworkSettings": "Sistemos nustatymai",
+	"builderNoRulesOrGroupsConfigured": "Taisyklių ar grupių nesukonfigūruota",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} rezultato taisyklės",
+				"countPlural=other": "{count} rezultato taisyklės"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupės",
+				"countPlural=other": "{count} grupės"
+			}
+		}
+	],
+	"builderUrnNamespace": "URN vardų erdvė",
+	"builderScoringSettings": "Vertinimo nustatymai",
+	"builderAggregationHint": "Vidurkis dalija bendrą balą iš klausimų skaičiaus. Suma tiesiogiai sudeda visus balus. Naudokite Sumą dvejetainiam (0/1) vertinimui.",
+	"builderScoreScale": "Balų skalė",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} lygiai",
+				"countPlural=other": "{count} lygiai"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Pridėti skalės lygį",
+	"builderScaleNamePlaceholder": "pvz. Dalinis",
+	"builderScaleDescriptionPlaceholder": "Neprivaloma",
+	"builderScaleNameTranslate": "Pavadinimas ({lang})",
+	"builderScaleDescriptionTranslate": "Aprašymas ({lang})",
+	"builderOutcomeRules": "Rezultato taisyklės",
+	"builderAddRule": "Pridėti taisyklę",
+	"builderUntitledRule": "Taisyklė be pavadinimo",
+	"builderLabel": "Etiketė",
+	"builderLabelHint": "pvz. Aukšta atitiktis",
+	"builderCelExpression": "CEL išraiška",
+	"builderCelExpressionPlaceholder": "pvz. assessment.score_sum >= 150 arba \"true\" visiems atvejams",
+	"builderColor": "Spalva",
+	"builderClearAction": "Išvalyti",
+	"builderNoOutcomeRules": "Rezultato taisyklių dar nėra. Pridėkite vieną aukščiau.",
+	"builderOutcomeRulesHint": "Visos atitinkančios taisyklės įtraukiamos į apskaičiuotus rezultatus. Naudokite {trueLiteral} kaip universalų atvejį.",
+	"builderCelContextReference": "CEL konteksto nuoroda",
+	"builderCelLabelTranslate": "Etiketė ({lang})",
+	"builderCelGroupAssessment": "Vertinimas",
+	"builderCelGroupRequirements": "Reikalavimai (pagal node_id)",
+	"builderCelGroupAnswers": "Atsakymai (pagal klausimo node_id)",
+	"builderCelGroupOther": "Kita",
+	"builderCelScoreSum": "iš viso surinkta taškų",
+	"builderCelScoreMax": "iš viso galimų taškų",
+	"builderCelAnsweredCount": "atsakyti reikalavimai",
+	"builderCelTotalCount": "iš viso vertinamų reikalavimų",
+	"builderCelReqScore": "reikalavimo balas",
+	"builderCelReqMaxScore": "didžiausias reikalavimo balas",
+	"builderCelReqResult": "reikalavimo rezultatas",
+	"builderCelReqStatus": "reikalavimo būsena",
+	"builderCelNodeIdHint": "node_id = URN dalis po slug (pvz. \"1.2\" iš urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "atsakymo balas (add_score × svoris)",
+	"builderCelAnswerValue": "laisvo teksto atsakymo reikšmė",
+	"builderCelAnswerSelectedChoices": "pasirinktų variantų node_id sąrašas",
+	"builderCelAnswerWeight": "klausimo svoris",
+	"builderCelAnswerType": "klausimo tipas (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "anksčiau apskaičiuotų rezultatų ref_id žemėlapis",
+	"builderCelHiddenRequirements": "matomumo išraiškomis paslėptų node_id sąrašas",
+	"builderImplementationGroupsTitle": "Įgyvendinimo grupės",
+	"builderAddGroup": "Pridėti grupę",
+	"builderUntitledGroup": "Grupė be pavadinimo",
+	"builderGroupNamePlaceholder": "pvz. 1 lygis",
+	"builderGroupDescriptionPlaceholder": "Šios įgyvendinimo grupės aprašymas",
+	"builderSelectedByDefault": "Pasirinkta pagal numatymą",
+	"builderDefaultBadge": "numatytas",
+	"builderTranslationLabel": "Vertimas ({lang})",
+	"builderNoImplementationGroups": "Įgyvendinimo grupių neapibrėžta. Pridėkite vieną aukščiau.",
+	"builderLanguagesSection": "Kalbos",
+	"builderLanguagesHint": "Nustatykite bazinę kalbą ir pridėkite tikslines kalbas vertimui.",
+	"builderBaseLanguage": "Bazinė kalba",
+	"builderTargetLanguages": "Tikslinės kalbos",
+	"builderAddLanguagePlaceholder": "Pridėti kalbą...",
+	"builderAdd": "Pridėti",
+	"builderNodeNamePlaceholder": "Mazgo pavadinimas",
+	"builderSplashScreenTitlePlaceholder": "Pradinio ekrano antraštė",
+	"builderAssessableTooltip": "Nurodo, ar šį reikalavimą gali vertinti respondentai",
+	"builderAssessable": "Vertinama",
+	"builderDisplayMode": "Rodymo režimas",
+	"builderDefaultMode": "Numatytasis",
+	"builderSplashMode": "Pristatymas",
+	"builderAssessableLeaf": "Vertinamas lapas",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Vertinama · {count} vaikinis",
+				"countPlural=other": "Vertinama · {count} vaikiniai"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grupė · {count} vaikinis",
+				"countPlural=other": "Grupė · {count} vaikiniai"
+			}
+		}
+	],
+	"builderEmptyNode": "Tuščias mazgas",
+	"builderSplashScreenStatus": "Pradinis ekranas",
+	"builderNestedUnder": "įdėta po {parent}",
+	"builderExpandChildren": "Išskleisti vaikinius",
+	"builderCollapseChildren": "Sutraukti vaikinius",
+	"builderAdvanced": "Išplėstinis",
+	"builderAdvancedAnnotation": "anotacija",
+	"builderAdvancedAnnotationEvidence": "anotacija, įrodymas",
+	"builderAdvancedAnnotationEvidenceVisibility": "anotacija, įrodymas, matomumas",
+	"builderAdvancedAnnotationVisibility": "anotacija, matomumas",
+	"builderAnnotationPlaceholder": "Neprivalomos gairės recenzentams",
+	"builderTypicalEvidencePlaceholder": "Įrodymų pavyzdžiai, kuriuos respondentai turi pridėti",
+	"builderDescriptionOptional": "Neprivaloma",
+	"builderVisibilityExpression": "Matomumo išraiška (CEL)",
+	"builderVisibilityExpressionTooltip": "CEL išraiška, kuri turi būti įvertinta kaip teisinga, kad šis reikalavimas būtų matomas. Pavyzdys: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "pvz. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Įgyvendinimo grupės:",
+	"builderAddQuestion": "Pridėti klausimą",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} vaikinis paslėptas",
+				"countPlural=other": "{count} vaikiniai paslėpti"
+			}
+		}
+	],
+	"builderSplashSource": "Šaltinis",
+	"builderSplashNoSourceContent": "Šaltinio turinio nėra.",
+	"builderSplashEditPlaceholder": "Įveskite markdown turinį pradiniam ekranui...",
+	"builderSplashNoContent": "Turinio dar nėra. Perjunkite į Redagavimą, kad pridėtumėte markdown.",
+	"builderSplashBold": "Paryškintas",
+	"builderSplashItalic": "Kursyvas",
+	"builderSplashHeading": "Antraštė",
+	"builderSplashBulletList": "Sąrašas su ženkleliais",
+	"builderSplashNumberedList": "Numeruotas sąrašas",
+	"builderSplashLink": "Nuoroda",
+	"builderSplashTable": "Lentelė",
+	"builderSplashInsertImage": "Įterpti paveikslėlį",
+	"builderUntitledQuestion": "Klausimas be pavadinimo",
+	"builderNotTranslated": "Neišversta",
+	"builderQuestionTextPlaceholder": "Įveskite savo klausimą...",
+	"builderWeight": "Svoris",
+	"builderAnnotationOptional": "Neprivaloma pastaba...",
+	"builderDeleteThisQuestion": "Ištrinti šį klausimą?",
+	"builderChangeTypeWarning": "Pakeitus tipą bus ištrinti esami pasirinkimai. Tęsti?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Rodoma, kai {ref} = {count} atsakymai",
+				"countPlural=other": "Rodoma, kai {ref} = {count} atsakymai"
+			}
+		}
+	],
+	"builderChoices": "Pasirinkimai",
+	"builderAddChoice": "Pridėti pasirinkimą",
+	"builderChoicePlaceholder": "Pasirinkimo tekstas...",
+	"builderResultLabel": "Rezultatas",
+	"builderNone": "Nėra",
+	"builderNoChoicesYet": "Pasirinkimų dar nėra. Pridėkite vieną aukščiau.",
+	"builderRemoveCondition": "Pašalinti sąlygą",
+	"builderAddCondition": "Pridėti sąlygą",
+	"builderShowWhenThisQuestion": "Rodyti, kai šis klausimas...",
+	"builderSelectAQuestion": "Pasirinkite klausimą...",
+	"builderHasAnswer": "...turi atsakymą:",
+	"builderMatch": "Atitikimas:",
+	"builderMatchAny": "Bet kuris pasirinktas",
+	"builderMatchAll": "Visi pasirinkti",
+	"builderConditionsOnlyChoiceTypes": "Sąlygos palaikomos tik pasirinkimo tipo klausimams.",
+	"builderKeyboardShortcuts": "Klavišų kombinacijos",
+	"builderKbOutlineEditing": "Struktūros redagavimas",
+	"builderKbOutlineEditingHint": "Taikoma paryškintam mazgui.",
+	"builderKbBuilder": "Kūrėjas",
+	"builderKbIndentNode": "Padidinti mazgo įtrauką",
+	"builderKbOutdentNode": "Sumažinti mazgo įtrauką",
+	"builderKbAddChild": "Pridėti vaikinį",
+	"builderKbAddSiblingBelow": "Pridėti gretimą žemiau",
+	"builderKbToggleAssessable": "Perjungti vertinamumą",
+	"builderKbSaveDraft": "Išsaugoti juodraštį",
+	"builderKbShowCheatsheet": "Rodyti šią atmintinę",
+	"builderKbCloseDialog": "Uždaryti dialogą ar išskleidžiamąjį meniu",
+	"builderImportedFramework": "Importuota sistema",
+	"builderImportedFrameworkDescription": "Ši sistema buvo importuota iš bibliotekos ir negali būti tiesiogiai redaguojama. Norėdami atlikti pakeitimus, sukurkite redaguojamą kopiją.",
+	"builderCreateCopyAndEdit": "Sukurti kopiją ir redaguoti",
+	"builderCreatingCopy": "Kuriama kopija...",
+	"builderLoadingEditor": "Įkeliamas redaktorius...",
+	"builderFailedToStartEditor": "Nepavyko paleisti redaktoriaus",
+	"builderBackToFramework": "Atgal į sistemą",
+	"builderBackToBuilder": "Atgal į kūrėją",
+	"builderFailedToLoadDraft": "Nepavyko įkelti juodraščio",
+	"builderImplementationGroupsHeader": "Įgyvendinimo grupės",
+	"builderNoItemsToPreview": "Nėra elementų peržiūrai.",
+	"builderNoItemsToPreviewHint": "Pridėkite vertinamus reikalavimus arba pradinius ekranus kūrėjuje.",
+	"builderBaseLanguageOption": "Bazinė kalba",
+	"builderFrameworkNameRequired": "Sistemos pavadinimas yra privalomas.",
+	"builderFrameworkNameTooLong": "Sistemos pavadinimas yra {length} simbolių (daugiausia 200).",
+	"builderNodeNameTooLong": "Pavadinimas viršija 200 simbolių ({length}/200). Perkelkite ilgą tekstą į aprašymo lauką.",
+	"builderRefIdTooLong": "„{label}“: ref_id yra {length} simbolių (daugiausia 100).",
+	"builderUrnTooLong": "„{label}“: URN yra {length} simbolių (daugiausia 255).",
+	"builderFailedToSaveDraftBeforePublish": "Nepavyko išsaugoti juodraščio prieš paskelbiant.",
+	"builderUnsavedChangesNavigation": "Turite neišsaugotų pakeitimų, kurie bus prarasti. Vis tiek išeiti?",
+	"builderUnpublishedChangesNavigation": "Turite nepaskelbtų pakeitimų. Jūsų juodraštis išsaugotas ir galėsite tęsti vėliau. Vis tiek išeiti?",
 	"fieldVisibility": "Laukų matomumas",
 	"fieldVisibilityHelpText": "Valdykite, kuriuos laukus kiekvienas vaidmuo gali matyti ir redaguoti.",
 	"visibilityAuditorRespondent": "Auditorius + Respondentas",
 	"visibilityAuditorOnly": "Tik auditorius",
 	"visibilityHidden": "Paslėpta",
 	"answers": "Atsakymai",
-	"respondentAlignment": "Respondento suderinimas"
+	"respondentAlignment": "Respondento suderinimas",
+	"frameworkRefId": "Nuorodos ID",
+	"urnPreview": "URN peržiūra:",
+	"urnLockedComplianceAssessment": "Užrakinta — atitikties vertinimas naudoja šią sistemą.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Žingsnis",
+	"sliderNeedsAtLeastTwoChoices": "Slankikliui reikia bent 2 pasirinkimų.",
+	"sliderMinMustBeLessThanMax": "Slankiklio min turi būti mažesnis už maks.",
+	"sliderStepMustBeGreaterThanZero": "Slankiklio žingsnis turi būti didesnis nei 0.",
+	"sliderStepCannotExceedRange": "Slankiklio žingsnis negali viršyti (maks − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekstas",
+	"builderQuestionTypeBoolean": "Loginis",
+	"builderQuestionTypeNumber": "Skaičius",
+	"builderQuestionTypeUniqueChoice": "Vienas pasirinkimas",
+	"builderQuestionTypeMultipleChoice": "Keli pasirinkimai",
+	"builderQuestionTypeDate": "Data",
+	"builderChangedOn": "changed on"
 }

@@ -1175,6 +1175,7 @@
 	"userLinkedToRepresentative": "이 대표자에는 이미 사용자가 연결되어 있습니다.",
 	"nameDuplicate": "이름이 이미 존재합니다",
 	"noAnswer": "답변 없음",
+	"clearAnswer": "답변 지우기",
 	"entityAssessmentRepresentativesHelpText": "설문지 작성을 담당하는 제3자 사용자",
 	"sendQuestionnaire": "설문지 전송",
 	"sureToSendQuestionnaire": "설문지: {questionnaire}을(를) 전송하시겠습니까?",
@@ -3881,11 +3882,393 @@
 	"searchPrompt": "모든 객체에서 검색할 질의를 입력하세요",
 	"all": "전체",
 	"exportEcosystem": "생태계 내보내기 (XLSX)",
+	"boolean": "불리언",
+	"builderEmptyStateTitle": "이 프레임워크를 어떻게 구성하시겠습니까?",
+	"builderEmptyStateSubtitle": "시작 구조를 선택하세요 — 언제든지 변경할 수 있습니다.",
+	"builderEmptyFlat": "단일 목록",
+	"builderEmptyFlatHint": "모든 요구사항이 한 단계에 있습니다. Google SAIF처럼 (요구사항 12개).",
+	"builderEmptyGrouped": "그룹화",
+	"builderEmptyGroupedHint": "요구사항을 포함하는 섹션. OWASP MASVS처럼 (8개 섹션 → 24개 요구사항).",
+	"builderEmptyHierarchy": "계층 구조",
+	"builderEmptyHierarchyHint": "다단계 중첩. NIST CSF 2.0처럼 (6 → 23 → 106).",
+	"builderEmptyBlank": "빈 캔버스",
+	"builderEmptyBlankHint": "처음부터 시작 — 빈 노드 하나를 추가합니다.",
+	"builderAddTopLevelNode": "+ 최상위 노드 추가",
+	"builderAddChild": "+ 하위 추가",
+	"builderAddSiblingBelow": "+ 아래에 형제 추가",
+	"builderBlankNode": "빈 노드",
+	"builderBlankNodeHint": "비어 있음 — 플래그를 직접 설정하세요",
+	"builderGroup": "그룹",
+	"builderGroupHint": "평가 불가능, 중첩용",
+	"builderRequirementHint": "평가 가능, 하위 노드를 가질 수 있음",
+	"builderSplashScreen": "시작 화면",
+	"builderSplashScreenHint": "안내용, 평가 불가능",
+	"builderStatusLive": "라이브",
+	"builderStatusLiveTitle": "초안이 감사 응답자가 보는 것과 일치합니다.",
+	"builderStatusUnpublishedChanges": "게시되지 않은 변경 사항",
+	"builderStatusUnpublishedChangesTitle": "초안에 감사 응답자가 아직 볼 수 없는 편집이 있습니다. 적용하려면 게시하세요.",
+	"builderStatusDraftNothingLive": "초안 — 라이브된 항목 없음",
+	"builderStatusDraftNothingLiveTitle": "초안에 콘텐츠가 있지만 아직 게시된 것은 없습니다. 게시하기 전까지 신규 감사에는 아무것도 표시되지 않습니다.",
+	"builderStatusEmpty": "비어 있음",
+	"builderStatusEmptyTitle": "아직 요구사항이 없습니다. 이 프레임워크 기반의 신규 감사는 응답할 항목이 없습니다.",
+	"builderPreview": "미리보기",
+	"builderPreviewSaveFirst": "미리보기를 보려면 먼저 초안을 저장하세요",
+	"builderPreviewAsRespondent": "응답자로 미리보기 (새 탭에서 열림)",
+	"builderExportYamlTitle": "프레임워크를 YAML 라이브러리 파일로 내보내기",
+	"builderExportYamlUnpublishedWarning": "게시되지 않은 변경 사항은 포함되지 않습니다. 최신 편집 내용을 내보내려면 먼저 게시하세요.",
+	"builderCopyBase": "기본 언어 복사",
+	"builderCopyBaseTitle": "기본 언어 텍스트를 {lang}(으)로 복사 (기존 번역은 덮어쓰지 않음)",
+	"builderCopyBaseQuestion": "기본 언어 텍스트를 복사하시겠습니까?",
+	"builderNoTranslation": "번역 없음",
+	"builderShowKeyboardShortcuts": "키보드 단축키 보기",
+	"builderKeyboardShortcutsHint": "키보드 단축키 (?)",
+	"builderExpandAllCards": "모든 카드 펼치기",
+	"builderCollapseAllCards": "모든 카드 접기",
+	"builderSaveFailed": "저장 실패",
+	"builderPublishedFlash": "게시됨!",
+	"builderSaveDraftTitle": "초안 저장 (Ctrl+S)",
+	"builderDiscardDraftTitle": "초안 폐기",
+	"builderDiscard": "폐기",
+	"builderDiscardAllChangesQuestion": "모든 변경 사항을 폐기하시겠습니까?",
+	"builderYesDiscard": "예, 폐기합니다",
+	"builderPublishDraftToLiveTitle": "초안을 라이브 프레임워크에 게시",
+	"builderPublishing": "게시 중...",
+	"builderPublishModalTitle": "초안을 라이브에 게시",
+	"builderPublishModalDescription": "이 작업은 라이브 프레임워크를 업데이트합니다. 아래 변경 사항을 검토하세요.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 요구사항이 추가됨",
+				"countPlural=other": "{count}개의 요구사항이 추가됨"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 질문",
+				"countPlural=other": "{count}개의 질문"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 요구사항이 제거됨",
+				"countPlural=other": "{count}개의 요구사항이 제거됨"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 질문",
+				"countPlural=other": "{count}개의 질문"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "구조적 변경이 감지되지 않았습니다 (메타데이터만 해당).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 호환성 깨는 변경이 감지됨",
+				"countPlural=other": "{count}개의 호환성 깨는 변경이 감지됨"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "이러한 변경은 기존 감사의 점수, 가시성 또는 컴플라이언스 결과에 영향을 미칠 수 있습니다.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 기존 감사가 영향을 받습니다",
+				"countPlural=other": "{count}개의 기존 감사가 영향을 받습니다"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "이러한 감사에 새 요구사항이 추가됩니다.",
+	"builderAffectedAuditsRemovedHint": "제거된 요구사항과 평가 데이터가 이러한 감사에서 삭제됩니다.",
+	"builderCouldNotLoadPreview": "영향 미리보기를 불러올 수 없습니다. 신중하게 진행하세요.",
+	"builderConfirmPublish": "게시 확인",
+	"builderSearchNodes": "노드 검색...",
+	"builderExpandSidebar": "사이드바 펼치기",
+	"builderCollapseSidebar": "사이드바 접기",
+	"builderJumpTo": "이동: {label}",
+	"builderUntitled": "제목 없음",
+	"builderHasUntranslatedItems": "번역되지 않은 항목이 있음",
+	"builderNoNodesYet": "아직 노드가 없습니다",
+	"builderNoMatchingNodes": "일치하는 노드가 없습니다",
+	"builderNodesOf": "{total}개 중 {filtered}개의 노드",
+	"builderExpand": "펼치기",
+	"builderCollapse": "접기",
+	"builderFrameworkNamePlaceholder": "프레임워크 이름",
+	"builderFrameworkDescriptionPlaceholder": "프레임워크 설명 (선택 사항)",
+	"builderFrameworkAnnotationPlaceholder": "프레임워크 주석 (선택적 안내 텍스트)",
+	"builderTranslateName": "이름 번역...",
+	"builderTranslateDescription": "설명 번역...",
+	"builderTranslateAnnotation": "주석 번역...",
+	"builderTranslateTypicalEvidence": "일반적인 증거 번역...",
+	"builderTranslateTitle": "제목 번역...",
+	"builderTranslateLabel": "레이블 번역...",
+	"builderTranslateMarkdown": "마크다운 콘텐츠 번역...",
+	"builderTranslatePlaceholder": "번역...",
+	"builderTranslateQuestion": "질문 번역...",
+	"builderFrameworkSettings": "프레임워크 설정",
+	"builderNoRulesOrGroupsConfigured": "구성된 규칙 또는 그룹이 없습니다",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 결과 규칙",
+				"countPlural=other": "{count}개의 결과 규칙"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 그룹",
+				"countPlural=other": "{count}개의 그룹"
+			}
+		}
+	],
+	"builderUrnNamespace": "URN 네임스페이스",
+	"builderScoringSettings": "채점 설정",
+	"builderAggregationHint": "평균은 총점을 질문 수로 나눕니다. 합계는 모든 점수를 직접 더합니다. 이진(0/1) 채점에는 합계를 사용하세요.",
+	"builderScoreScale": "점수 척도",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count}개의 단계",
+				"countPlural=other": "{count}개의 단계"
+			}
+		}
+	],
+	"builderAddScaleLevel": "척도 단계 추가",
+	"builderScaleNamePlaceholder": "예: 부분",
+	"builderScaleDescriptionPlaceholder": "선택 사항",
+	"builderScaleNameTranslate": "{lang} 이름",
+	"builderScaleDescriptionTranslate": "{lang} 설명",
+	"builderOutcomeRules": "결과 규칙",
+	"builderAddRule": "규칙 추가",
+	"builderUntitledRule": "제목 없는 규칙",
+	"builderLabel": "레이블",
+	"builderLabelHint": "예: 높은 컴플라이언스",
+	"builderCelExpression": "CEL 표현식",
+	"builderCelExpressionPlaceholder": "예: assessment.score_sum >= 150 또는 모든 경우에 일치하는 \"true\"",
+	"builderColor": "색상",
+	"builderClearAction": "지우기",
+	"builderNoOutcomeRules": "아직 결과 규칙이 없습니다. 위에서 하나 추가하세요.",
+	"builderOutcomeRulesHint": "일치하는 모든 규칙이 계산된 결과에 포함됩니다. 모든 경우에 일치하려면 {trueLiteral}을(를) 사용하세요.",
+	"builderCelContextReference": "CEL 컨텍스트 참조",
+	"builderCelLabelTranslate": "{lang} 레이블",
+	"builderCelGroupAssessment": "평가",
+	"builderCelGroupRequirements": "요구사항 (node_id 기준)",
+	"builderCelGroupAnswers": "답변 (질문 node_id 기준)",
+	"builderCelGroupOther": "기타",
+	"builderCelScoreSum": "획득한 총 점수",
+	"builderCelScoreMax": "총 가능한 점수",
+	"builderCelAnsweredCount": "답변된 요구사항",
+	"builderCelTotalCount": "총 평가 가능한 요구사항",
+	"builderCelReqScore": "요구사항 점수",
+	"builderCelReqMaxScore": "요구사항 최대 점수",
+	"builderCelReqResult": "요구사항 결과",
+	"builderCelReqStatus": "요구사항 상태",
+	"builderCelNodeIdHint": "node_id = 슬러그 뒤의 URN 일부 (예: urn:custom:risk:req_node:my-fw:1.2 의 \"1.2\")",
+	"builderCelAnswerScore": "답변 점수 (add_score × 가중치)",
+	"builderCelAnswerValue": "자유 텍스트 답변 값",
+	"builderCelAnswerSelectedChoices": "선택된 선택지 node_id 목록",
+	"builderCelAnswerWeight": "질문 가중치",
+	"builderCelAnswerType": "질문 유형 (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "이미 계산된 결과 ref_id 맵",
+	"builderCelHiddenRequirements": "가시성 표현식에 의해 숨겨진 node_id 목록",
+	"builderImplementationGroupsTitle": "구현 그룹",
+	"builderAddGroup": "그룹 추가",
+	"builderUntitledGroup": "제목 없는 그룹",
+	"builderGroupNamePlaceholder": "예: 1단계",
+	"builderGroupDescriptionPlaceholder": "이 구현 그룹에 대한 설명",
+	"builderSelectedByDefault": "기본 선택",
+	"builderDefaultBadge": "기본",
+	"builderTranslationLabel": "{lang} 번역",
+	"builderNoImplementationGroups": "정의된 구현 그룹이 없습니다. 위에서 하나 추가하세요.",
+	"builderLanguagesSection": "언어",
+	"builderLanguagesHint": "기본 언어를 설정하고 번역 대상 언어를 추가하세요.",
+	"builderBaseLanguage": "기본 언어",
+	"builderTargetLanguages": "대상 언어",
+	"builderAddLanguagePlaceholder": "언어 추가...",
+	"builderAdd": "추가",
+	"builderNodeNamePlaceholder": "노드 이름",
+	"builderSplashScreenTitlePlaceholder": "시작 화면 제목",
+	"builderAssessableTooltip": "이 요구사항을 응답자가 평가할 수 있는지 여부",
+	"builderAssessable": "평가 가능",
+	"builderDisplayMode": "표시 모드",
+	"builderDefaultMode": "기본",
+	"builderSplashMode": "시작 화면",
+	"builderAssessableLeaf": "평가 가능한 리프",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "평가 가능 · 하위 {count}개",
+				"countPlural=other": "평가 가능 · 하위 {count}개"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "그룹 · 하위 {count}개",
+				"countPlural=other": "그룹 · 하위 {count}개"
+			}
+		}
+	],
+	"builderEmptyNode": "빈 노드",
+	"builderSplashScreenStatus": "시작 화면",
+	"builderNestedUnder": "{parent} 아래에 중첩됨",
+	"builderExpandChildren": "하위 펼치기",
+	"builderCollapseChildren": "하위 접기",
+	"builderAdvanced": "고급",
+	"builderAdvancedAnnotation": "주석",
+	"builderAdvancedAnnotationEvidence": "주석, 증거",
+	"builderAdvancedAnnotationEvidenceVisibility": "주석, 증거, 가시성",
+	"builderAdvancedAnnotationVisibility": "주석, 가시성",
+	"builderAnnotationPlaceholder": "검토자를 위한 선택적 안내 메모",
+	"builderTypicalEvidencePlaceholder": "응답자가 첨부해야 하는 증거 예시",
+	"builderDescriptionOptional": "선택 사항",
+	"builderVisibilityExpression": "가시성 표현식 (CEL)",
+	"builderVisibilityExpressionTooltip": "이 요구사항이 표시되려면 true로 평가되어야 하는 CEL 표현식. 예: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "예: requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "구현 그룹:",
+	"builderAddQuestion": "질문 추가",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "하위 {count}개 숨김",
+				"countPlural=other": "하위 {count}개 숨김"
+			}
+		}
+	],
+	"builderSplashSource": "소스",
+	"builderSplashNoSourceContent": "소스 콘텐츠 없음.",
+	"builderSplashEditPlaceholder": "시작 화면의 마크다운 콘텐츠를 작성하세요...",
+	"builderSplashNoContent": "아직 콘텐츠가 없습니다. 마크다운을 추가하려면 편집 모드로 전환하세요.",
+	"builderSplashBold": "굵게",
+	"builderSplashItalic": "기울임",
+	"builderSplashHeading": "제목",
+	"builderSplashBulletList": "글머리 기호 목록",
+	"builderSplashNumberedList": "번호 매기기 목록",
+	"builderSplashLink": "링크",
+	"builderSplashTable": "표",
+	"builderSplashInsertImage": "이미지 삽입",
+	"builderUntitledQuestion": "제목 없는 질문",
+	"builderNotTranslated": "번역되지 않음",
+	"builderQuestionTextPlaceholder": "질문을 입력하세요...",
+	"builderWeight": "가중치",
+	"builderAnnotationOptional": "선택적 메모...",
+	"builderDeleteThisQuestion": "이 질문을 삭제하시겠습니까?",
+	"builderChangeTypeWarning": "유형을 변경하면 기존 선택지가 삭제됩니다. 계속하시겠습니까?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{ref} = {count}개 답변일 때 표시됨",
+				"countPlural=other": "{ref} = {count}개 답변일 때 표시됨"
+			}
+		}
+	],
+	"builderChoices": "선택지",
+	"builderAddChoice": "선택지 추가",
+	"builderChoicePlaceholder": "선택지 텍스트...",
+	"builderResultLabel": "결과",
+	"builderNone": "없음",
+	"builderNoChoicesYet": "아직 선택지가 없습니다. 위에서 하나 추가하세요.",
+	"builderRemoveCondition": "조건 제거",
+	"builderAddCondition": "조건 추가",
+	"builderShowWhenThisQuestion": "이 질문이 다음과 같을 때 표시...",
+	"builderSelectAQuestion": "질문을 선택하세요...",
+	"builderHasAnswer": "...의 답변:",
+	"builderMatch": "일치:",
+	"builderMatchAny": "선택된 것 중 아무거나",
+	"builderMatchAll": "선택된 것 모두",
+	"builderConditionsOnlyChoiceTypes": "조건은 선택형 질문에서만 지원됩니다.",
+	"builderKeyboardShortcuts": "키보드 단축키",
+	"builderKbOutlineEditing": "아웃라인 편집",
+	"builderKbOutlineEditingHint": "강조 표시된 노드에 적용됩니다.",
+	"builderKbBuilder": "빌더",
+	"builderKbIndentNode": "노드 들여쓰기",
+	"builderKbOutdentNode": "노드 내어쓰기",
+	"builderKbAddChild": "하위 추가",
+	"builderKbAddSiblingBelow": "아래에 형제 추가",
+	"builderKbToggleAssessable": "평가 가능 토글",
+	"builderKbSaveDraft": "초안 저장",
+	"builderKbShowCheatsheet": "이 치트시트 보기",
+	"builderKbCloseDialog": "대화상자 또는 드롭다운 닫기",
+	"builderImportedFramework": "가져온 프레임워크",
+	"builderImportedFrameworkDescription": "이 프레임워크는 라이브러리에서 가져온 것이므로 직접 편집할 수 없습니다. 변경하려면 편집 가능한 복사본을 만드세요.",
+	"builderCreateCopyAndEdit": "복사본 만들고 편집",
+	"builderCreatingCopy": "복사본 생성 중...",
+	"builderLoadingEditor": "에디터 로드 중...",
+	"builderFailedToStartEditor": "에디터 시작 실패",
+	"builderBackToFramework": "프레임워크로 돌아가기",
+	"builderBackToBuilder": "빌더로 돌아가기",
+	"builderFailedToLoadDraft": "초안 로드 실패",
+	"builderImplementationGroupsHeader": "구현 그룹",
+	"builderNoItemsToPreview": "미리 볼 항목이 없습니다.",
+	"builderNoItemsToPreviewHint": "빌더에서 평가 가능한 요구사항이나 시작 화면을 추가하세요.",
+	"builderBaseLanguageOption": "기본 언어",
+	"builderFrameworkNameRequired": "프레임워크 이름은 필수입니다.",
+	"builderFrameworkNameTooLong": "프레임워크 이름은 {length}자입니다 (최대 200자).",
+	"builderNodeNameTooLong": "이름이 200자를 초과합니다 ({length}/200). 긴 텍스트는 설명 필드로 옮기세요.",
+	"builderRefIdTooLong": "'{label}': ref_id가 {length}자입니다 (최대 100자).",
+	"builderUrnTooLong": "'{label}': URN이 {length}자입니다 (최대 255자).",
+	"builderFailedToSaveDraftBeforePublish": "게시 전 초안 저장에 실패했습니다.",
+	"builderUnsavedChangesNavigation": "저장되지 않은 변경 사항이 있어 손실됩니다. 그래도 나가시겠습니까?",
+	"builderUnpublishedChangesNavigation": "게시되지 않은 변경 사항이 있습니다. 초안은 저장되어 있어 나중에 다시 진행할 수 있습니다. 그래도 나가시겠습니까?",
 	"fieldVisibility": "필드 가시성",
 	"fieldVisibilityHelpText": "각 역할이 볼 수 있고 편집할 수 있는 필드를 제어합니다.",
 	"visibilityAuditorRespondent": "감사자 + 응답자",
 	"visibilityAuditorOnly": "감사자 전용",
 	"visibilityHidden": "숨김",
 	"answers": "답변",
-	"respondentAlignment": "응답자 정렬"
+	"respondentAlignment": "응답자 정렬",
+	"frameworkRefId": "참조 ID",
+	"urnPreview": "URN 미리보기:",
+	"urnLockedComplianceAssessment": "잠김 — 규정 준수 평가가 이 프레임워크를 사용합니다.",
+	"sliderMin": "최소",
+	"sliderMax": "최대",
+	"sliderStep": "단계",
+	"sliderNeedsAtLeastTwoChoices": "슬라이더에는 최소 2개의 선택지가 필요합니다.",
+	"sliderMinMustBeLessThanMax": "슬라이더 최소값은 최대값보다 작아야 합니다.",
+	"sliderStepMustBeGreaterThanZero": "슬라이더 단계는 0보다 커야 합니다.",
+	"sliderStepCannotExceedRange": "슬라이더 단계는 (최대 − 최소)를 초과할 수 없습니다.",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "텍스트",
+	"builderQuestionTypeBoolean": "불리언",
+	"builderQuestionTypeNumber": "번호",
+	"builderQuestionTypeUniqueChoice": "단일 선택",
+	"builderQuestionTypeMultipleChoice": "복수 선택",
+	"builderQuestionTypeDate": "날짜",
+	"builderChangedOn": "changed on"
 }

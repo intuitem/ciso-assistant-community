@@ -855,6 +855,7 @@
 	"createUserHelpText": "Utwórz lub połącz użytkownika zewnętrznego z przedstawicielem na podstawie adresu e-mail",
 	"nameDuplicate": "Nazwa już istnieje",
 	"noAnswer": "Brak odpowiedzi",
+	"clearAnswer": "Wyczyść odpowiedź",
 	"entityAssessmentRepresentativesHelpText": "Użytkownicy zewnętrzni odpowiedzialni za wypełnienie kwestionariusza",
 	"sendQuestionnaire": "Wyślij kwestionariusz",
 	"sureToSendQuestionnaire": "Czy na pewno chcesz wysłać kwestionariusz: {questionnaire} ?",
@@ -1934,11 +1935,409 @@
 	"syncToAppliedControl": "Synchronizuj z zastosowaną kontrolą",
 	"syncToReferenceControl": "Synchronizuj z kontrolą referencyjną",
 	"exportEcosystem": "eksport ekosystemu (XLSX)",
+	"aggregation": "Agregacja",
+	"average": "Średnia",
+	"clearSearch": "Wyczyść wyszukiwanie",
+	"close": "Zamknij",
+	"collapseAll": "Zwiń wszystko",
+	"confirm": "Potwierdź",
+	"copied": "Skopiowano!",
+	"expandAll": "Rozwiń wszystko",
+	"exportYaml": "Eksportuj jako YAML",
+	"implementationGroups": "Grupy wdrożeniowe",
+	"number": "Liczba",
+	"publish": "Opublikuj",
+	"requirement": "Wymaganie",
+	"saving": "Zapisywanie...",
+	"sum": "Suma",
+	"tableOfContents": "Spis treści",
+	"boolean": "Wartość logiczna",
+	"builderEmptyStateTitle": "Jak chcesz ustrukturyzować tę strukturę?",
+	"builderEmptyStateSubtitle": "Wybierz początkowy kształt — strukturę można zmienić w dowolnym momencie.",
+	"builderEmptyFlat": "Lista płaska",
+	"builderEmptyFlatHint": "Wszystkie wymagania na jednym poziomie. Jak Google SAIF (12 wymagań).",
+	"builderEmptyGrouped": "Pogrupowana",
+	"builderEmptyGroupedHint": "Sekcje zawierające wymagania. Jak OWASP MASVS (8 sekcji → 24 wymagania).",
+	"builderEmptyHierarchy": "Hierarchia",
+	"builderEmptyHierarchyHint": "Wielopoziomowe zagnieżdżenie. Jak NIST CSF 2.0 (6 → 23 → 106).",
+	"builderEmptyBlank": "Pusty obszar",
+	"builderEmptyBlankHint": "Zacznij od zera — dodaj jeden pusty węzeł.",
+	"builderAddTopLevelNode": "+ Dodaj węzeł najwyższego poziomu",
+	"builderAddChild": "+ Dodaj element podrzędny",
+	"builderAddSiblingBelow": "+ Dodaj element równorzędny poniżej",
+	"builderBlankNode": "Pusty węzeł",
+	"builderBlankNodeHint": "Pusty — sam ustaw flagi",
+	"builderGroup": "Grupa",
+	"builderGroupHint": "Nieoceniana, do zagnieżdżania",
+	"builderRequirementHint": "Oceniana, może mieć elementy podrzędne",
+	"builderSplashScreen": "Ekran powitalny",
+	"builderSplashScreenHint": "Prezentacyjny, nieoceniany",
+	"builderStatusLive": "Na żywo",
+	"builderStatusLiveTitle": "Szkic odpowiada temu, co widzą respondenci audytu.",
+	"builderStatusUnpublishedChanges": "Nieopublikowane zmiany",
+	"builderStatusUnpublishedChangesTitle": "Szkic zawiera zmiany, które nie są jeszcze widoczne dla respondentów audytu. Opublikuj, aby je zastosować.",
+	"builderStatusDraftNothingLive": "Szkic — nic nie jest na żywo",
+	"builderStatusDraftNothingLiveTitle": "Szkic ma treść, ale nic nie zostało jeszcze opublikowane. Nowe audyty nie zobaczą nic, dopóki nie opublikujesz.",
+	"builderStatusEmpty": "Pusty",
+	"builderStatusEmptyTitle": "Brak wymagań. Nowe audyty oparte na tej strukturze nie będą miały na co odpowiadać.",
+	"builderPreview": "Podgląd",
+	"builderPreviewSaveFirst": "Najpierw zapisz szkic, aby wyświetlić podgląd",
+	"builderPreviewAsRespondent": "Podgląd jako respondent (otwiera się w nowej karcie)",
+	"builderExportYamlTitle": "Eksportuj strukturę jako plik biblioteki YAML",
+	"builderExportYamlUnpublishedWarning": "Nieopublikowane zmiany nie zostaną uwzględnione. Najpierw opublikuj, aby wyeksportować najnowsze edycje.",
+	"builderCopyBase": "Kopiuj bazę",
+	"builderCopyBaseTitle": "Kopiuj tekst języka bazowego do {lang} (nie nadpisuje istniejących tłumaczeń)",
+	"builderCopyBaseQuestion": "Kopiować tekst bazowy?",
+	"builderNoTranslation": "Brak tłumaczenia",
+	"builderShowKeyboardShortcuts": "Pokaż skróty klawiszowe",
+	"builderKeyboardShortcutsHint": "Skróty klawiszowe (?)",
+	"builderExpandAllCards": "Rozwiń wszystkie karty",
+	"builderCollapseAllCards": "Zwiń wszystkie karty",
+	"builderSaveFailed": "Zapisywanie nie powiodło się",
+	"builderPublishedFlash": "Opublikowano!",
+	"builderSaveDraftTitle": "Zapisz szkic (Ctrl+S)",
+	"builderDiscardDraftTitle": "Odrzuć szkic",
+	"builderDiscard": "Odrzuć",
+	"builderDiscardAllChangesQuestion": "Odrzucić wszystkie zmiany?",
+	"builderYesDiscard": "Tak, odrzuć",
+	"builderPublishDraftToLiveTitle": "Opublikuj szkic do struktury na żywo",
+	"builderPublishing": "Publikowanie...",
+	"builderPublishModalTitle": "Opublikuj szkic na żywo",
+	"builderPublishModalDescription": "Spowoduje to aktualizację struktury na żywo. Sprawdź zmiany poniżej.",
+	"builderRequirementAdded": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} wymagania dodane",
+				"countPlural=other": "{count} wymagania dodane"
+			}
+		}
+	],
+	"builderQuestionsAddedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pytania",
+				"countPlural=other": "{count} pytania"
+			}
+		}
+	],
+	"builderRequirementRemoved": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} wymagania usunięte",
+				"countPlural=other": "{count} wymagania usunięte"
+			}
+		}
+	],
+	"builderQuestionsRemovedSuffix": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} pytania",
+				"countPlural=other": "{count} pytania"
+			}
+		}
+	],
+	"builderNoStructuralChanges": "Nie wykryto zmian strukturalnych (tylko metadane).",
+	"builderBreakingChangesDetected": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Wykryto {count} zmiany powodujące niezgodność",
+				"countPlural=other": "Wykryto {count} zmiany powodujące niezgodność"
+			}
+		}
+	],
+	"builderBreakingChangesHint": "Te zmiany mogą wpłynąć na punktację, widoczność lub wyniki zgodności w istniejących audytach.",
+	"builderAffectedAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} istniejących audytów zostanie naruszonych",
+				"countPlural=other": "{count} istniejących audytów zostanie naruszonych"
+			}
+		}
+	],
+	"builderAffectedAuditsAddedHint": "Nowe wymagania zostaną dodane do tych audytów.",
+	"builderAffectedAuditsRemovedHint": "Usunięte wymagania i ich dane oceny zostaną usunięte z tych audytów.",
+	"builderCouldNotLoadPreview": "Nie można załadować podglądu wpływu. Postępuj ostrożnie.",
+	"builderConfirmPublish": "Potwierdź publikację",
+	"builderSearchNodes": "Szukaj węzłów...",
+	"builderExpandSidebar": "Rozwiń pasek boczny",
+	"builderCollapseSidebar": "Zwiń pasek boczny",
+	"builderJumpTo": "Przejdź do: {label}",
+	"builderUntitled": "Bez tytułu",
+	"builderHasUntranslatedItems": "Zawiera nieprzetłumaczone elementy",
+	"builderNoNodesYet": "Brak węzłów",
+	"builderNoMatchingNodes": "Brak pasujących węzłów",
+	"builderNodesOf": "{filtered} z {total} węzłów",
+	"builderExpand": "Rozwiń",
+	"builderCollapse": "Zwiń",
+	"builderFrameworkNamePlaceholder": "Nazwa struktury",
+	"builderFrameworkDescriptionPlaceholder": "Opis struktury (opcjonalnie)",
+	"builderFrameworkAnnotationPlaceholder": "Adnotacja struktury (opcjonalny tekst pomocniczy)",
+	"builderTranslateName": "Przetłumacz nazwę...",
+	"builderTranslateDescription": "Przetłumacz opis...",
+	"builderTranslateAnnotation": "Przetłumacz adnotację...",
+	"builderTranslateTypicalEvidence": "Przetłumacz typowy dowód...",
+	"builderTranslateTitle": "Przetłumacz tytuł...",
+	"builderTranslateLabel": "Przetłumacz etykietę...",
+	"builderTranslateMarkdown": "Przetłumacz treść markdown...",
+	"builderTranslatePlaceholder": "Przetłumacz...",
+	"builderTranslateQuestion": "Przetłumacz pytanie...",
+	"builderFrameworkSettings": "Ustawienia struktury",
+	"builderNoRulesOrGroupsConfigured": "Nie skonfigurowano reguł ani grup",
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} reguły wyniku",
+				"countPlural=other": "{count} reguły wyniku"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} grupy",
+				"countPlural=other": "{count} grupy"
+			}
+		}
+	],
+	"builderUrnNamespace": "Przestrzeń nazw URN",
+	"builderScoringSettings": "Ustawienia punktacji",
+	"builderAggregationHint": "Średnia dzieli całkowity wynik przez liczbę pytań. Suma dodaje wszystkie wyniki bezpośrednio. Użyj Sumy dla punktacji binarnej (0/1).",
+	"builderScoreScale": "Skala punktacji",
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} poziomy",
+				"countPlural=other": "{count} poziomy"
+			}
+		}
+	],
+	"builderAddScaleLevel": "Dodaj poziom",
+	"builderScaleNamePlaceholder": "np. Częściowy",
+	"builderScaleDescriptionPlaceholder": "Opcjonalnie",
+	"builderScaleNameTranslate": "Nazwa {lang}",
+	"builderScaleDescriptionTranslate": "Opis {lang}",
+	"builderOutcomeRules": "Reguły wyniku",
+	"builderAddRule": "Dodaj regułę",
+	"builderUntitledRule": "Reguła bez tytułu",
+	"builderLabel": "Etykieta",
+	"builderLabelHint": "np. Wysoka zgodność",
+	"builderCelExpression": "Wyrażenie CEL",
+	"builderCelExpressionPlaceholder": "np. assessment.score_sum >= 150 lub \"true\" jako reguła zbiorcza",
+	"builderColor": "Kolor",
+	"builderClearAction": "Wyczyść",
+	"builderNoOutcomeRules": "Brak reguł wyniku. Dodaj jedną powyżej.",
+	"builderOutcomeRulesHint": "Wszystkie pasujące reguły są uwzględniane w obliczonych wynikach. Użyj {trueLiteral} jako reguły zbiorczej.",
+	"builderCelContextReference": "Odniesienie kontekstu CEL",
+	"builderCelLabelTranslate": "Etykieta {lang}",
+	"builderCelGroupAssessment": "Ocena",
+	"builderCelGroupRequirements": "Wymagania (według node_id)",
+	"builderCelGroupAnswers": "Odpowiedzi (według node_id pytania)",
+	"builderCelGroupOther": "Inne",
+	"builderCelScoreSum": "łączna liczba zdobytych punktów",
+	"builderCelScoreMax": "łączna liczba możliwych punktów",
+	"builderCelAnsweredCount": "wymagania, na które udzielono odpowiedzi",
+	"builderCelTotalCount": "łączna liczba ocenianych wymagań",
+	"builderCelReqScore": "wynik wymagania",
+	"builderCelReqMaxScore": "maksymalny wynik wymagania",
+	"builderCelReqResult": "rezultat wymagania",
+	"builderCelReqStatus": "status wymagania",
+	"builderCelNodeIdHint": "node_id = część URN po slugu (np. \"1.2\" z urn:custom:risk:req_node:my-fw:1.2)",
+	"builderCelAnswerScore": "wynik odpowiedzi (add_score × waga)",
+	"builderCelAnswerValue": "wartość odpowiedzi tekstowej",
+	"builderCelAnswerSelectedChoices": "lista node_id wybranych opcji",
+	"builderCelAnswerWeight": "waga pytania",
+	"builderCelAnswerType": "typ pytania (unique_choice, multiple_choice, text)",
+	"builderCelComputedOutcomes": "mapa wcześniej obliczonych ref_id wyników",
+	"builderCelHiddenRequirements": "lista node_id ukrytych przez wyrażenia widoczności",
+	"builderImplementationGroupsTitle": "Grupy wdrożeniowe",
+	"builderAddGroup": "Dodaj grupę",
+	"builderUntitledGroup": "Grupa bez tytułu",
+	"builderGroupNamePlaceholder": "np. Poziom 1",
+	"builderGroupDescriptionPlaceholder": "Opis tej grupy wdrożeniowej",
+	"builderSelectedByDefault": "Wybrane domyślnie",
+	"builderDefaultBadge": "domyślne",
+	"builderTranslationLabel": "Tłumaczenie {lang}",
+	"builderNoImplementationGroups": "Nie zdefiniowano grup wdrożeniowych. Dodaj jedną powyżej.",
+	"builderLanguagesSection": "Języki",
+	"builderLanguagesHint": "Ustaw język bazowy i dodaj języki docelowe do tłumaczenia.",
+	"builderBaseLanguage": "Język bazowy",
+	"builderTargetLanguages": "Języki docelowe",
+	"builderAddLanguagePlaceholder": "Dodaj język...",
+	"builderAdd": "Dodaj",
+	"builderNodeNamePlaceholder": "Nazwa węzła",
+	"builderSplashScreenTitlePlaceholder": "Tytuł ekranu powitalnego",
+	"builderAssessableTooltip": "Czy to wymaganie jest oceniane przez respondentów",
+	"builderAssessable": "Oceniane",
+	"builderDisplayMode": "Tryb wyświetlania",
+	"builderDefaultMode": "Domyślny",
+	"builderSplashMode": "Powitalny",
+	"builderAssessableLeaf": "Oceniany liść",
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Oceniane · {count} element podrzędny",
+				"countPlural=other": "Oceniane · {count} elementy podrzędne"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Grupa · {count} element podrzędny",
+				"countPlural=other": "Grupa · {count} elementy podrzędne"
+			}
+		}
+	],
+	"builderEmptyNode": "Pusty węzeł",
+	"builderSplashScreenStatus": "Ekran powitalny",
+	"builderNestedUnder": "zagnieżdżony pod {parent}",
+	"builderExpandChildren": "Rozwiń elementy podrzędne",
+	"builderCollapseChildren": "Zwiń elementy podrzędne",
+	"builderAdvanced": "Zaawansowane",
+	"builderAdvancedAnnotation": "adnotacja",
+	"builderAdvancedAnnotationEvidence": "adnotacja, dowód",
+	"builderAdvancedAnnotationEvidenceVisibility": "adnotacja, dowód, widoczność",
+	"builderAdvancedAnnotationVisibility": "adnotacja, widoczność",
+	"builderAnnotationPlaceholder": "Opcjonalne wskazówki dla recenzentów",
+	"builderTypicalEvidencePlaceholder": "Przykłady dowodów, które respondenci powinni dołączyć",
+	"builderDescriptionOptional": "Opcjonalnie",
+	"builderVisibilityExpression": "Wyrażenie widoczności (CEL)",
+	"builderVisibilityExpressionTooltip": "Wyrażenie CEL, które musi zostać oszacowane jako prawdziwe, aby to wymaganie było widoczne. Przykład: requirements[\"urn:...\"].score > 50",
+	"builderVisibilityExpressionPlaceholder": "np. requirements[\"urn:...\"].score > 50",
+	"builderImplementationGroupsLabel": "Grupy wdrożeniowe:",
+	"builderAddQuestion": "Dodaj pytanie",
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} element podrzędny ukryty",
+				"countPlural=other": "{count} elementy podrzędne ukryte"
+			}
+		}
+	],
+	"builderSplashSource": "Źródło",
+	"builderSplashNoSourceContent": "Brak treści źródłowej.",
+	"builderSplashEditPlaceholder": "Napisz treść markdown dla swojego ekranu powitalnego...",
+	"builderSplashNoContent": "Brak treści. Przełącz na Edycję, aby dodać markdown.",
+	"builderSplashBold": "Pogrubienie",
+	"builderSplashItalic": "Kursywa",
+	"builderSplashHeading": "Nagłówek",
+	"builderSplashBulletList": "Lista punktowana",
+	"builderSplashNumberedList": "Lista numerowana",
+	"builderSplashLink": "Link",
+	"builderSplashTable": "Tabela",
+	"builderSplashInsertImage": "Wstaw obraz",
+	"builderUntitledQuestion": "Pytanie bez tytułu",
+	"builderNotTranslated": "Nieprzetłumaczone",
+	"builderQuestionTextPlaceholder": "Wprowadź swoje pytanie...",
+	"builderWeight": "Waga",
+	"builderAnnotationOptional": "Opcjonalna notatka...",
+	"builderDeleteThisQuestion": "Usunąć to pytanie?",
+	"builderChangeTypeWarning": "Zmiana typu spowoduje usunięcie istniejących opcji. Kontynuować?",
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Wyświetlane, gdy {ref} = {count} odpowiedzi",
+				"countPlural=other": "Wyświetlane, gdy {ref} = {count} odpowiedzi"
+			}
+		}
+	],
+	"builderChoices": "Opcje",
+	"builderAddChoice": "Dodaj opcję",
+	"builderChoicePlaceholder": "Tekst opcji...",
+	"builderResultLabel": "Rezultat",
+	"builderNone": "Brak",
+	"builderNoChoicesYet": "Brak opcji. Dodaj jedną powyżej.",
+	"builderRemoveCondition": "Usuń warunek",
+	"builderAddCondition": "Dodaj warunek",
+	"builderShowWhenThisQuestion": "Pokaż, gdy to pytanie...",
+	"builderSelectAQuestion": "Wybierz pytanie...",
+	"builderHasAnswer": "...ma odpowiedź:",
+	"builderMatch": "Dopasowanie:",
+	"builderMatchAny": "Dowolne wybrane",
+	"builderMatchAll": "Wszystkie wybrane",
+	"builderConditionsOnlyChoiceTypes": "Warunki są obsługiwane tylko dla pytań typu opcji.",
+	"builderKeyboardShortcuts": "Skróty klawiszowe",
+	"builderKbOutlineEditing": "Edycja konspektu",
+	"builderKbOutlineEditingHint": "Stosuje się do podświetlonego węzła.",
+	"builderKbBuilder": "Kreator",
+	"builderKbIndentNode": "Wcięcie węzła",
+	"builderKbOutdentNode": "Wycofanie wcięcia węzła",
+	"builderKbAddChild": "Dodaj element podrzędny",
+	"builderKbAddSiblingBelow": "Dodaj element równorzędny poniżej",
+	"builderKbToggleAssessable": "Przełącz oceniane",
+	"builderKbSaveDraft": "Zapisz szkic",
+	"builderKbShowCheatsheet": "Pokaż tę ściągawkę",
+	"builderKbCloseDialog": "Zamknij okno dialogowe lub menu rozwijane",
+	"builderImportedFramework": "Importowana struktura",
+	"builderImportedFrameworkDescription": "Ta struktura została zaimportowana z biblioteki i nie można jej edytować bezpośrednio. Aby wprowadzić zmiany, utwórz edytowalną kopię.",
+	"builderCreateCopyAndEdit": "Utwórz kopię i edytuj",
+	"builderCreatingCopy": "Tworzenie kopii...",
+	"builderLoadingEditor": "Ładowanie edytora...",
+	"builderFailedToStartEditor": "Nie udało się uruchomić edytora",
+	"builderBackToFramework": "Powrót do struktury",
+	"builderBackToBuilder": "Powrót do kreatora",
+	"builderFailedToLoadDraft": "Nie udało się załadować szkicu",
+	"builderImplementationGroupsHeader": "Grupy wdrożeniowe",
+	"builderNoItemsToPreview": "Brak elementów do podglądu.",
+	"builderNoItemsToPreviewHint": "Dodaj oceniane wymagania lub ekrany powitalne w kreatorze.",
+	"builderBaseLanguageOption": "Język bazowy",
+	"builderFrameworkNameRequired": "Nazwa struktury jest wymagana.",
+	"builderFrameworkNameTooLong": "Nazwa struktury ma {length} znaków (maks. 200).",
+	"builderNodeNameTooLong": "Nazwa przekracza 200 znaków ({length}/200). Przenieś długi tekst do pola opisu.",
+	"builderRefIdTooLong": "„{label}”: ref_id ma {length} znaków (maks. 100).",
+	"builderUrnTooLong": "„{label}”: URN ma {length} znaków (maks. 255).",
+	"builderFailedToSaveDraftBeforePublish": "Nie udało się zapisać szkicu przed publikacją.",
+	"builderUnsavedChangesNavigation": "Masz niezapisane zmiany, które zostaną utracone. Mimo to wyjść?",
+	"builderUnpublishedChangesNavigation": "Masz nieopublikowane zmiany. Twój szkic jest zapisany i możesz go wznowić później. Mimo to wyjść?",
 	"fieldVisibility": "Widoczność pól",
 	"fieldVisibilityHelpText": "Kontroluj, które pola każda rola może zobaczyć i edytować.",
 	"visibilityAuditorRespondent": "Audytor + Respondent",
 	"visibilityAuditorOnly": "Tylko audytor",
 	"visibilityHidden": "Ukryte",
 	"answers": "Odpowiedzi",
-	"respondentAlignment": "Zgodność respondenta"
+	"respondentAlignment": "Zgodność respondenta",
+	"frameworkRefId": "ID odniesienia",
+	"urnPreview": "Podgląd URN:",
+	"urnLockedComplianceAssessment": "Zablokowane — ocena zgodności używa tego frameworka.",
+	"sliderMin": "Min",
+	"sliderMax": "Maks",
+	"sliderStep": "Krok",
+	"sliderNeedsAtLeastTwoChoices": "Suwak wymaga co najmniej 2 opcji.",
+	"sliderMinMustBeLessThanMax": "Min suwaka musi być mniejsze niż maks.",
+	"sliderStepMustBeGreaterThanZero": "Krok suwaka musi być większy od 0.",
+	"sliderStepCannotExceedRange": "Krok suwaka nie może przekraczać (maks − min).",
+	"builderSlider": "slider",
+	"builderQuestionTypeText": "Tekst",
+	"builderQuestionTypeBoolean": "Wartość logiczna",
+	"builderQuestionTypeNumber": "Liczba",
+	"builderQuestionTypeUniqueChoice": "Unikalny wybór",
+	"builderQuestionTypeMultipleChoice": "Wielokrotny wybór",
+	"builderQuestionTypeDate": "Data",
+	"builderChangedOn": "changed on"
 }
