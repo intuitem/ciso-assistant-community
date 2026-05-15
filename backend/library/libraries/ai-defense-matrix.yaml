@@ -7,7 +7,7 @@ copyright: Copyright 2026 by Lenny Zeltser and Sounil Yu, licensed under CC BY-S
 version: 1
 publication_date: 2026-05-11
 provider: AI Defense Matrix
-packager: intuitem
+packager: steven-hostetler
 objects:
   framework:
     urn: urn:intuitem:risk:framework:ai-defense-matrix
