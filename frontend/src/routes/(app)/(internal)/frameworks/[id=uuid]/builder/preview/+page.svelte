@@ -14,6 +14,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		data: PageData;
@@ -176,7 +177,7 @@
 			class="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0 flex items-center gap-1.5"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
-			<span>Back to builder</span>
+			<span>{m.builderBackToBuilder()}</span>
 		</a>
 
 		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
@@ -184,7 +185,7 @@
 		<span
 			class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-700"
 		>
-			<i class="fa-solid fa-eye mr-1"></i>Preview
+			<i class="fa-solid fa-eye mr-1"></i>{m.builderPreview()}
 		</span>
 
 		<span class="text-sm text-gray-600 truncate">{data.framework.name}</span>
@@ -197,7 +198,7 @@
 					class="text-xs border border-gray-200 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-white cursor-pointer"
 					onchange={(e) => (previewLanguage = e.currentTarget.value || null)}
 				>
-					<option value="">Base language</option>
+					<option value="">{m.builderBaseLanguageOption()}</option>
 					{#each availableLanguages as lang}
 						<option value={lang}>{lang.toUpperCase()}</option>
 					{/each}
@@ -214,7 +215,7 @@
 {:else if error}
 	<div class="max-w-2xl mx-auto mt-12 p-6">
 		<div class="card p-6 preset-tonal-error">
-			<p class="font-semibold">Failed to load draft</p>
+			<p class="font-semibold">{m.builderFailedToLoadDraft()}</p>
 			<p class="text-sm mt-1">{error}</p>
 		</div>
 	</div>
@@ -226,7 +227,7 @@
 				class="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200"
 			>
 				<span class="text-xs font-medium text-gray-500 uppercase tracking-wide mr-1"
-					>Implementation Groups</span
+					>{m.builderImplementationGroupsHeader()}</span
 				>
 				{#each igDefs as ig}
 					{@const active = selectedGroups.has(ig.ref_id)}
@@ -248,7 +249,7 @@
 						class="text-xs text-gray-400 hover:text-gray-600 ml-1"
 						onclick={() => (selectedGroups = new Set())}
 					>
-						Clear
+						{m.builderClearAction()}
 					</button>
 				{/if}
 			</div>
@@ -258,8 +259,8 @@
 		{#if navItems.length === 0}
 			<div class="text-center text-gray-400 py-12">
 				<i class="fa-solid fa-folder-open text-3xl mb-3"></i>
-				<p>No items to preview.</p>
-				<p class="text-sm mt-1">Add assessable requirements or splash screens in the builder.</p>
+				<p>{m.builderNoItemsToPreview()}</p>
+				<p class="text-sm mt-1">{m.builderNoItemsToPreviewHint()}</p>
 			</div>
 		{:else if currentItem}
 			{#if currentItem.type === 'splash'}
@@ -277,7 +278,7 @@
 				<div class="card bg-white shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 space-y-4">
 					<h3 class="text-xl font-semibold text-orange-600">
 						{node.ref_id ? `${node.ref_id} - ` : ''}{t(node.translations, 'name', node.name) ||
-							'Untitled'}
+							m.builderUntitled()}
 					</h3>
 					{#if node.description}
 						<div class="card w-full font-light text-lg p-4 preset-tonal-primary">
@@ -315,7 +316,7 @@
 					disabled={currentIndex === 0}
 					onclick={handlePrev}
 				>
-					<i class="fa-solid fa-chevron-left mr-1.5"></i>Previous
+					<i class="fa-solid fa-chevron-left mr-1.5"></i>{m.previous()}
 				</button>
 
 				<span class="text-sm text-gray-500">
@@ -331,7 +332,7 @@
 					disabled={currentIndex === navItems.length - 1}
 					onclick={handleNext}
 				>
-					Next<i class="fa-solid fa-chevron-right ml-1.5"></i>
+					{m.next()}<i class="fa-solid fa-chevron-right ml-1.5"></i>
 				</button>
 			</div>
 		{/if}

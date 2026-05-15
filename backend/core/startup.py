@@ -99,6 +99,11 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_responsibilityrole",
+    "view_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "view_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "view_metricinstance",
@@ -211,6 +216,11 @@ APPROVER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_responsibilityrole",
+    "view_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "view_responsibilityassignment",
     # integrations
     "view_syncmapping",
     # presets
@@ -510,6 +520,26 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "view_metricinstance",
@@ -889,6 +919,26 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "add_metricdefinition",
@@ -1316,6 +1366,26 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "add_metricdefinition",
@@ -1668,6 +1738,13 @@ def startup(sender: AppConfig, **kwargs):
         Terminology.create_default_metric_units()
     except Exception as e:
         logger.error("Error creating default Metric Units", exc_info=True)
+
+    try:
+        from pmbok.models import ResponsibilityRole
+
+        ResponsibilityRole.create_default_roles()
+    except Exception as e:
+        logger.error("Error creating default Responsibility Roles", exc_info=True)
 
     # Init integration providers
 

@@ -11,7 +11,7 @@
 	import DependsOnEditor from './DependsOnEditor.svelte';
 	import { QUESTION_TYPES, inferVariant, defaultConfigFor } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		question: Question;
@@ -61,7 +61,12 @@
 		const dep = question.depends_on as { question: string; answers: string[] };
 		const src = siblingQuestions.find((q) => q.urn === dep.question);
 		if (!src) return null;
-		return `Shown when ${src.ref_id || 'Q'} = ${dep.answers.length} answer(s)`;
+		// `ref` = the source question's ref_id (or 'Q' placeholder when blank);
+		// `count` = number of answer choices that trigger this dependency.
+		return m.builderShownWhenAnswers({
+			ref: src.ref_id || 'Q',
+			count: dep.answers.length
+		});
 	});
 
 	// Available questions for depends_on: only those before this question in order
@@ -83,7 +88,7 @@
 			newStoredType !== 'multiple_choice' &&
 			question.choices.length > 0
 		) {
-			if (!confirm('Changing type will delete existing choices. Continue?')) return;
+			if (!confirm(m.builderChangeTypeWarning())) return;
 		}
 		await builder.updateQuestion(question.id, {
 			type: newStoredType,
@@ -118,14 +123,14 @@
 			<span class="flex-1 text-sm text-gray-700 truncate">
 				{#if $activeLanguageStore}
 					{@const translated = getTranslation(question.translations, $activeLanguageStore, 'text')}
-					<span class="text-gray-400">{question.text || 'Untitled'}</span>
+					<span class="text-gray-400">{question.text || m.builderUntitled()}</span>
 					{#if translated}
 						<span class="text-blue-600 ml-1">| {translated}</span>
 					{:else}
-						<span class="text-amber-500 ml-1" title="Not translated">*</span>
+						<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
 					{/if}
 				{:else}
-					{question.text || 'Untitled question'}
+					{question.text || m.builderUntitledQuestion()}
 				{/if}
 			</span>
 			{#if dependsOnLabel}
@@ -157,9 +162,9 @@
 				<TypeSelector {currentVariant} onselect={changeVariant} />
 				<div class="flex items-center gap-2">
 					<ConfirmAction
-						message="Delete this question?"
+						message={m.builderDeleteThisQuestion()}
 						onconfirm={() => builder.deleteQuestion(reqNodeId, qIndex)}
-						confirmLabel="Yes"
+						confirmLabel={m.yes()}
 						triggerClass="text-gray-300 hover:text-red-500 transition-colors"
 						confirmClass="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50 hover:bg-red-100"
 					/>
@@ -232,7 +237,7 @@
 					></textarea>
 					<textarea
 						value={getTranslation(question.translations, lang, 'text')}
-						placeholder="Translate question..."
+						placeholder={m.builderTranslateQuestion()}
 						rows="2"
 						class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 						onblur={(e) => {
@@ -246,7 +251,7 @@
 			{:else}
 				<textarea
 					value={question.text ?? ''}
-					placeholder="Enter your question..."
+					placeholder={m.builderQuestionTextPlaceholder()}
 					rows="2"
 					class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 					onblur={(e) => {
@@ -258,7 +263,7 @@
 			<!-- Metadata row -->
 			<div class="grid grid-cols-3 gap-2">
 				<label class="block">
-					<span class="text-xs text-gray-500">Ref ID</span>
+					<span class="text-xs text-gray-500">{m.refId()}</span>
 					<input
 						type="text"
 						value={question.ref_id ?? ''}
@@ -269,7 +274,7 @@
 					/>
 				</label>
 				<label class="block">
-					<span class="text-xs text-gray-500">Weight</span>
+					<span class="text-xs text-gray-500">{m.builderWeight()}</span>
 					<input
 						type="number"
 						value={question.weight}
@@ -282,11 +287,11 @@
 					/>
 				</label>
 				<label class="block">
-					<span class="text-xs text-gray-500">Annotation</span>
+					<span class="text-xs text-gray-500">{m.annotation()}</span>
 					<input
 						type="text"
 						value={question.annotation ?? ''}
-						placeholder="Optional note..."
+						placeholder={m.builderAnnotationOptional()}
 						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
 						onblur={(e) => {
 							saveField('annotation', e.currentTarget.value || null);

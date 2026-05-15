@@ -1,6 +1,5 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
-import * as m from '$paraglide/messages';
 import {
 	apiSaveDraft,
 	apiPublishDraft,
@@ -8,6 +7,7 @@ import {
 	apiStartEditing,
 	type DraftJSON
 } from './builder-api';
+import { m } from '$paraglide/messages';
 
 // --- Types ---
 
@@ -537,34 +537,34 @@ export function validateDraft(fw: Framework, rootNodes: BuilderNode[]): Validati
 	const errors: ValidationError[] = [];
 
 	if (!fw.name || fw.name.trim().length === 0) {
-		errors.push({ key: 'publish', message: 'Framework name is required.' });
+		errors.push({ key: 'publish', message: m.builderFrameworkNameRequired() });
 	} else if (fw.name.length > 200) {
 		errors.push({
 			key: 'publish',
-			message: `Framework name is ${fw.name.length} characters (max 200).`
+			message: m.builderFrameworkNameTooLong({ length: fw.name.length })
 		});
 	}
 
 	function validate(tree: BuilderNode[]) {
 		for (const bn of tree) {
 			const n = bn.node;
-			const label = n.ref_id ?? `position ${n.order_id ?? '?'}`;
+			const label = n.ref_id ?? `#${n.order_id ?? '?'}`;
 			if (n.name && n.name.length > 200) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `Name exceeds 200 characters (${n.name.length}/200). Move long text to the description field.`
+					message: m.builderNodeNameTooLong({ length: n.name.length })
 				});
 			}
 			if (n.ref_id && n.ref_id.length > 100) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `'${label}': ref_id is ${n.ref_id.length} characters (max 100).`
+					message: m.builderRefIdTooLong({ label, length: n.ref_id.length })
 				});
 			}
 			if (n.urn && n.urn.length > 255) {
 				errors.push({
 					key: `node-${n.id}`,
-					message: `'${label}': URN is ${n.urn.length} characters (max 255).`
+					message: m.builderUrnTooLong({ label, length: n.urn.length })
 				});
 			}
 
@@ -753,12 +753,12 @@ export function createBuilderState(
 	}
 
 	function setError(key: string, message: string) {
-		errors.update((m) => new Map(m).set(key, message));
+		errors.update((map) => new Map(map).set(key, message));
 	}
 
 	function clearError(key: string) {
-		errors.update((m) => {
-			const next = new Map(m);
+		errors.update((map) => {
+			const next = new Map(map);
 			next.delete(key);
 			return next;
 		});
@@ -816,15 +816,15 @@ export function createBuilderState(
 	async function publish() {
 		const saved = await flushDraft();
 		if (!saved) {
-			setError('publish', 'Failed to save draft before publishing.');
+			setError('publish', m.builderFailedToSaveDraftBeforePublish());
 			return;
 		}
 
 		// Clear previous node- and question-level validation errors so stale
 		// entries (e.g. slider min/max/step errors from the previous attempt)
 		// don't survive a re-validation.
-		errors.update((m) => {
-			const next = new Map(m);
+		errors.update((prev) => {
+			const next = new Map(prev);
 			for (const key of next.keys()) {
 				if (key.startsWith('node-') || key.startsWith('question-')) next.delete(key);
 			}

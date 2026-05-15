@@ -143,31 +143,65 @@
 	}
 
 	let createAppliedControlsLoading = $state(false);
+	let actionableSuggestionsCount = $state<number | null>(null);
 
-	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
-		let previewItems: { id: string; label: string }[] = [];
+	type PreviewItem = { id: string; label: string; status: 'create' | 'reuse' | 'linked' };
+
+	function mapPreviewItems(previewData: any[]): PreviewItem[] {
+		return previewData
+			.filter((control) => control?.reference_control?.id)
+			.map((control) => ({
+				id: control.reference_control.id as string,
+				label:
+					control?.name ||
+					control?.reference_control?.str ||
+					control?.reference_control?.name ||
+					control?.ref_id ||
+					'',
+				status: (control?.suggestion_status as 'create' | 'reuse' | 'linked') ?? 'create'
+			}));
+	}
+
+	async function fetchSuggestionsPreview(id: string): Promise<PreviewItem[] | null> {
 		try {
 			const previewResponse = await fetch(
 				`/requirement-assessments/${id}/suggestions/applied-controls?dry_run=true`
 			);
 			if (previewResponse.ok) {
-				const previewData: any[] = await previewResponse.json();
-				previewItems = previewData
-					.filter((control) => control?.reference_control?.id)
-					.map((control) => ({
-						id: control.reference_control.id as string,
-						label:
-							control?.name ||
-							control?.reference_control?.str ||
-							control?.reference_control?.name ||
-							control?.ref_id ||
-							''
-					}));
-			} else {
-				throw new Error(await previewResponse.text());
+				return mapPreviewItems(await previewResponse.json());
 			}
 		} catch (error) {
 			console.error('Unable to fetch suggested controls preview', error);
+		}
+		return null;
+	}
+
+	$effect(() => {
+		// Re-track whenever the RA's applied_controls change (e.g., after "save and stay"
+		// triggers invalidateAll, or after the modal creates/links new controls).
+		const _ = data.requirementAssessment.applied_controls;
+		if (
+			Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') &&
+			reference_controls.length > 0
+		) {
+			fetchSuggestionsPreview(data.requirementAssessment.id).then((items) => {
+				if (items) {
+					actionableSuggestionsCount = items.filter((i) => i.status !== 'linked').length;
+				} else if (actionableSuggestionsCount === null) {
+					actionableSuggestionsCount = reference_controls.length;
+				}
+			});
+		}
+	});
+
+	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
+		if (createAppliedControlsLoading) return;
+		createAppliedControlsLoading = true;
+		let previewItems: PreviewItem[] = [];
+		const fetched = await fetchSuggestionsPreview(id);
+		if (fetched) {
+			previewItems = fetched;
+		} else {
 			previewItems = reference_controls
 				.filter((control) => control?.id)
 				.map((control) => ({
@@ -177,11 +211,15 @@
 						control?.reference_control?.str ||
 						control?.reference_control?.name ||
 						control?.ref_id ||
-						''
+						'',
+					status: 'create' as const
 				}));
 		}
 
-		if (previewItems.length === 0) return;
+		if (previewItems.length === 0) {
+			createAppliedControlsLoading = false;
+			return;
+		}
 
 		const modalComponent: ModalComponent = {
 			ref: SuggestControlsModal,
@@ -195,7 +233,7 @@
 			component: modalComponent,
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: previewItems.length
+				count: previewItems.filter((i) => i.status !== 'linked').length
 			}),
 			response: (r: string[] | false | undefined) => {
 				createAppliedControlsLoading = false;
@@ -211,7 +249,6 @@
 				}
 			}
 		};
-		createAppliedControlsLoading = true;
 		modalStore.trigger(modal);
 	}
 
@@ -611,9 +648,17 @@
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 										<span class="flex flex-row justify-end items-center space-x-2">
 											{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
+												{@const nothingToSuggest = actionableSuggestionsCount === 0}
 												<button
-													class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+													class="btn self-end shadow-sm
+														{nothingToSuggest
+														? 'bg-emerald-50 border border-emerald-200 text-emerald-700 cursor-not-allowed pointer-events-none'
+														: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}"
 													type="button"
+													disabled={nothingToSuggest || createAppliedControlsLoading}
+													aria-label={nothingToSuggest
+														? m.allSuggestionsApplied()
+														: m.suggestControls()}
 													onclick={() => {
 														modalConfirmCreateSuggestedControls(
 															page.data.requirementAssessment.id,
@@ -622,19 +667,21 @@
 														);
 													}}
 												>
-													<span class="mr-2">
-														{#if createAppliedControlsLoading}
-															<Progress value={null}>
-																<Progress.Circle class="[--size:--spacing(6)] -ml-2">
-																	<Progress.CircleTrack />
-																	<Progress.CircleRange class="stroke-white" />
-																</Progress.Circle>
-															</Progress>
-														{:else}
-															<i class="fa-solid fa-fire-extinguisher"></i>
-														{/if}
-													</span>
-													{m.suggestControls()}
+													{#if createAppliedControlsLoading}
+														<Progress value={null}>
+															<Progress.Circle class="[--size:--spacing(5)] mr-2">
+																<Progress.CircleTrack />
+																<Progress.CircleRange class="stroke-violet-500" />
+															</Progress.Circle>
+														</Progress>
+														{m.suggestControls()}
+													{:else if nothingToSuggest}
+														<i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>
+														{m.allSuggestionsApplied()}
+													{:else}
+														<i class="fa-solid fa-wand-magic-sparkles text-violet-500 mr-2"></i>
+														{m.suggestControls()}
+													{/if}
 												</button>
 											{/if}
 											<button

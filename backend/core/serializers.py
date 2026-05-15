@@ -4552,6 +4552,7 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     risk_assessments = FieldsRelatedField(many=True)
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     next_occurrence = serializers.ReadOnlyField(source="get_next_occurrence")
     last_occurrence_status = serializers.ReadOnlyField(
