@@ -3,7 +3,7 @@ from django.core.files.uploadedfile import UploadedFile
 
 
 class LoadFileSerializer(serializers.Serializer):
-    ALLOWED_FILE_EXTENSIONS = ["xlsx", "xls", "csv"]
+    ALLOWED_FILE_EXTENSIONS = ["xlsx", "xls", "csv", "xml"]
     file = serializers.FileField(
         allow_empty_file=False,
         max_length=None,
