@@ -229,8 +229,16 @@
 						remoteFieldLabel={m.jiraField()}
 						tableHelpText={m.jiraTableHelpText()}
 						onMapsChange={({ field_map, value_map }) => {
-							$formStore.settings.field_map = field_map;
-							$formStore.settings.value_map = value_map;
+							// Top-level reassignment so the writable store fires .set() and
+							// every formFieldProxy(settings.field_map.*) subscriber re-reads.
+							$formStore = {
+								...$formStore,
+								settings: {
+									...$formStore.settings,
+									field_map,
+									value_map
+								}
+							};
 						}}
 					/>
 				{/if}
