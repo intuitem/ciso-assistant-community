@@ -149,13 +149,32 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
-	let selected: typeof options = $state([]);
+	const initialValue = resetForm ? undefined : $value;
+
+	// Seed `selected` from the form value at instantiation. Otherwise, when the
+	// component mounts with non-empty `options` (e.g. options passed directly
+	// as a prop, or after a {#key options} remount once an async fetch
+	// resolves) AND the form already carries a value at this path, the
+	// "selected → form value" $effect below would observe `selectedValues=[]`
+	// vs `$value='X'`, interpret it as "user cleared the field" and write
+	// `null`/`''` back, wiping the pre-existing form value. Computing the
+	// initial selection here keeps that effect quiet on mount.
+	function initialSelection(): typeof options {
+		if (initialValue === undefined || initialValue === null || initialValue === '') {
+			return [];
+		}
+		if (Array.isArray(initialValue)) {
+			return options.filter((item) => initialValue.includes(item.value));
+		}
+		return options.filter((item) => item.value === initialValue);
+	}
+
+	let selected: typeof options = $state(initialSelection());
 	let selectedValues: (string | undefined)[] = $derived(
 		selected.map((item) => item.value || item.label || item)
 	);
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
-	const initialValue = resetForm ? undefined : $value;
 	const default_value = nullable ? null : '';
 
 	const multiSelectOptions = {

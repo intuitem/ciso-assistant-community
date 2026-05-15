@@ -225,6 +225,7 @@
 					<FieldMapper
 						{form}
 						integrationId={page.data?.config?.id}
+						initialConfig={page.data?.config?.settings}
 						description={m.jiraIntegrationMappingsHelpText()}
 						remoteFieldLabel={m.jiraField()}
 						tableHelpText={m.jiraTableHelpText()}

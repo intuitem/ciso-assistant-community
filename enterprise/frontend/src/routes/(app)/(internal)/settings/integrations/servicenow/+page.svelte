@@ -222,6 +222,7 @@
 					<FieldMapper
 						{form}
 						integrationId={page.data?.config?.id}
+						initialConfig={page.data?.config?.settings}
 						title={m.serviceNowIntegrationMappingsDescription()}
 						description={m.serviceNowIntegrationMappingsHelpText()}
 						remoteFieldLabel={m.serviceNowColumn()}
