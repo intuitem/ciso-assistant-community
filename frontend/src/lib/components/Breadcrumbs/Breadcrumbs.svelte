@@ -94,7 +94,6 @@
 						data-testid="crumb-item"
 						href={c.href}
 						title={safeTranslate(c.label)}
-						onclick={() => breadcrumbs.slice(i)}
 					>
 						{#if c.icon}
 							<i class={c.icon}></i>
