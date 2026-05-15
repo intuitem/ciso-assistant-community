@@ -1526,6 +1526,47 @@ AUDITEE_PERMISSIONS_LIST = [
 ]
 
 
+def sync_builtin_role_permissions(sender=None, **kwargs):
+    """Re-sync built-in role permission sets from the *_PERMISSIONS_LIST
+    constants.
+
+    Django emits ``post_migrate`` once per app, in ``INSTALLED_APPS`` order,
+    and ``django.contrib.auth``'s ``create_permissions`` handler runs per app
+    to materialise that app's ``add_/change_/delete_/view_<model>`` rows.
+    ``startup()`` is connected with ``sender=CoreConfig``, so it fires when
+    ``post_migrate`` reaches ``core`` — which is positioned in
+    ``INSTALLED_APPS`` *before* apps like ``integrations`` and ``webhooks``.
+    That means the integration permissions don't yet exist when
+    ``startup()`` filters them, and ``role.permissions.set(...)`` ends up
+    persisting a role missing those codenames.
+
+    Registering this helper with no ``sender`` filter makes it fire on
+    every app's ``post_migrate``; the *last* invocation (after the final
+    app's permissions have been created) leaves the roles in their correct
+    final state. Idempotent (``get_or_create`` + ``set``).
+    """
+    from django.contrib.auth.models import Permission
+    from iam.models import Folder, Role
+
+    # Folders may not exist yet on the very first signals (before iam has
+    # migrated). The role records themselves are folder-less, so we can
+    # safely create them, but we defer until iam-level state is sane.
+    if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
+        return
+
+    role_permission_lists = (
+        ("BI-RL-AUD", READER_PERMISSIONS_LIST),
+        ("BI-RL-APP", APPROVER_PERMISSIONS_LIST),
+        ("BI-RL-ANA", ANALYST_PERMISSIONS_LIST),
+        ("BI-RL-DMA", DOMAIN_MANAGER_PERMISSIONS_LIST),
+        ("BI-RL-ADM", ADMINISTRATOR_PERMISSIONS_LIST),
+    )
+
+    for name, perm_list in role_permission_lists:
+        role, _ = Role.objects.get_or_create(name=name, builtin=True)
+        role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+
+
 def startup(sender: AppConfig, **kwargs):
     """
     Implement CISO Assistant 1.0 default Roles and User Groups during migrate
@@ -1900,3 +1941,4 @@ class CoreConfig(AppConfig):
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)
+            post_migrate.connect(sync_builtin_role_permissions)
