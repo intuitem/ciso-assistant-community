@@ -22,6 +22,7 @@
 	const modalStore: ModalStore = getModalStore();
 
 	let formElement: HTMLFormElement | null = $state(null);
+	let fileInputRef: HTMLInputElement | null = $state(null);
 	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
 	let selectedModel = $state('Asset'); // Default selection
 	let searchQuery = $state('');
@@ -167,6 +168,12 @@
 
 	let authorizedExtensions = $derived(extensionsFor(selectedModel));
 
+	$effect(() => {
+		selectedModel;
+		files = null;
+		if (fileInputRef) fileInputRef.value = '';
+	});
+
 	// Filter models based on search query
 	let filteredModels = $derived(
 		searchQuery.length > 0
@@ -223,6 +230,7 @@
 					id="file"
 					type="file"
 					name="file"
+					bind:this={fileInputRef}
 					accept={authorizedExtensions.join(',')}
 					required
 					bind:files

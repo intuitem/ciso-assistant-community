@@ -368,7 +368,7 @@ _EGERIE_STATUS_MAP = {
 }
 
 
-def map_egerie_status(egerie_status: str) -> str:
+def map_egerie_status(egerie_status: Optional[str]) -> str:
     return _EGERIE_STATUS_MAP.get((egerie_status or "").lower(), "")
 
 

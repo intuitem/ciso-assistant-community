@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from data_wizard.egerie_xml_helpers import (
+    map_egerie_status,
     process_xml_file,
     quartile_to_index,
 )
@@ -106,6 +107,25 @@ MINIMAL_EGERIE_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
   </assessment>
 </analysis>
 """
+
+
+class MapEgerieStatusTest(unittest.TestCase):
+    def test_known_statuses(self):
+        self.assertEqual(map_egerie_status("inactive"), "to_do")
+        self.assertEqual(map_egerie_status("planned"), "to_do")
+        self.assertEqual(map_egerie_status("in_progress"), "in_progress")
+        self.assertEqual(map_egerie_status("applied"), "active")
+        self.assertEqual(map_egerie_status("active"), "active")
+        self.assertEqual(map_egerie_status("deprecated"), "deprecated")
+
+    def test_case_insensitive(self):
+        self.assertEqual(map_egerie_status("PLANNED"), "to_do")
+        self.assertEqual(map_egerie_status("Applied"), "active")
+
+    def test_unknown_and_empty(self):
+        self.assertEqual(map_egerie_status("nonsense"), "")
+        self.assertEqual(map_egerie_status(""), "")
+        self.assertEqual(map_egerie_status(None), "")
 
 
 class QuartileMappingTest(unittest.TestCase):
