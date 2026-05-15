@@ -164,7 +164,8 @@ export const LOCALE_DISPLAY_MAP = {
 	hr: '🇭🇷 Hrvatski',
 	zh: '🇨🇳 简体中文',
 	lt: '🇱🇹 Lietuvių',
-	ko: '🇰🇷 한국어'
+	ko: '🇰🇷 한국어',
+	et: '🇪🇪 Eesti'
 };
 
 export const ISO_8601_REGEX =
