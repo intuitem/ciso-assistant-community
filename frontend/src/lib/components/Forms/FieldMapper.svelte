@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -155,8 +155,18 @@
 			})
 		);
 
+		// Reveal fieldMap first so the value-mapping section mounts with the
+		// AutocompleteSelects reading $value=undefined from the still-empty form.
+		// That keeps AutocompleteSelect's "selected-vs-$value" mount-time
+		// reconciliation $effect (AutocompleteSelect.svelte:499) quiet — it
+		// would otherwise see selected=[] vs $value='Active', conclude the user
+		// cleared the field, and write null back. Once the section is mounted,
+		// the next tick we push the suggested value_map into the form; that
+		// triggers AutocompleteSelect's other $effect (line 436) to set
+		// `selected` from $value, which is the path we actually want.
 		fieldMap = nextFieldMap;
 		valueMap = nextValueMap;
+		await tick();
 		onMapsChange({ field_map: nextFieldMap, value_map: nextValueMap });
 	}
 </script>
