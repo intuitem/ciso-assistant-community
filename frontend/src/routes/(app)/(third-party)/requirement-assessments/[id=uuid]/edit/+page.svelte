@@ -403,7 +403,7 @@
 	<div class="flex justify-between">
 		<div class="flex items-center gap-2">
 			<span class="code left h-min">{data.requirement.urn}</span>
-			{#if typeof data.requirement.weight === 'number' && data.requirement.weight !== 1}
+			{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
 				<span class="badge h-fit" style="background-color: #e0e7ff; color: #3730a3;">
 					{m.requirementWeight()}: {data.requirement.weight}
 				</span>

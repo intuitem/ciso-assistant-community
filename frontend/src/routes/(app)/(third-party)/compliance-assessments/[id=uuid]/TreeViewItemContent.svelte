@@ -155,10 +155,9 @@
 		return node.max_score;
 	}
 
+	const rawWeight = (rest as Record<string, unknown>).weight;
 	const nodeWeight: number | null =
-		typeof (rest as Record<string, any>).weight === 'number'
-			? (rest as Record<string, any>).weight
-			: null;
+		typeof rawWeight === 'number' && Number.isFinite(rawWeight) ? rawWeight : null;
 
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
