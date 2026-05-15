@@ -137,42 +137,24 @@
 		valueMap = {};
 		columns = [];
 		onMapsChange({ field_map: {}, value_map: {} });
+		await loadColumns(val);
 		if (!val) return;
-
-		// Fetch columns and the suggested mapping in parallel — both depend
-		// only on the selected table.
-		const [rawCols, suggested] = await Promise.all([
-			fetchRpc('get_columns', { table_name: val }),
-			fetchRpc('suggest_mapping', { table_name: val })
-		]);
-
+		const suggested = await fetchRpc('suggest_mapping', { table_name: val });
 		const nextFieldMap = (suggested?.field_map as Record<string, any>) ?? {};
 		const nextValueMap = (suggested?.value_map as Record<string, any>) ?? {};
 
-		// Pre-load every choice list that the suggested value_map references,
-		// BEFORE we surface fieldMap/valueMap to the UI. That way the
-		// value-mapping AutocompleteSelects mount exactly once with both their
-		// options and their $value already in place — no {#key choices}
-		// remount dance, no race between options arriving and the form value.
+		// Pre-load every choice list the value_map references BEFORE we surface
+		// the suggested maps. Otherwise the value-mapping AutocompleteSelects
+		// mount with empty options, optionsLoaded=false, and their post-mount
+		// $effect (which would react to the form value flipping to the
+		// suggestion) is gated off — so the selected option never gets set.
 		await Promise.all(
 			Object.keys(nextValueMap).map(async (localField) => {
 				const remoteField = nextFieldMap[localField];
 				if (remoteField) await loadChoices(val, remoteField);
 			})
 		);
-		console.debug('[FieldMapper] pre-warmed choicesCache', $state.snapshot(choicesCache));
-		console.debug('[FieldMapper] nextValueMap', nextValueMap);
 
-		const mappedCols = rawCols.map((c: Record<string, any>) => ({
-			value: c.name,
-			label: c.label,
-			infoString: { string: c.readonly ? '(Read Only)' : c.name, position: 'suffix' },
-			original: c
-		}));
-
-		// Surface everything together so Svelte re-renders the field-mapping
-		// and value-mapping rows once with their final state.
-		columns = mappedCols;
 		fieldMap = nextFieldMap;
 		valueMap = nextValueMap;
 		onMapsChange({ field_map: nextFieldMap, value_map: nextValueMap });
