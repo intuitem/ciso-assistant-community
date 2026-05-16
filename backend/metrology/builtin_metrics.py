@@ -197,6 +197,101 @@ BUILTIN_METRICS = {
             "type": METRIC_TYPE_BREAKDOWN,
             "description": _("Risk scenarios count per qualification tag"),
         },
+        # Assets
+        "total_assets": {
+            "label": _("Total Assets"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Total assets (root folder = whole organization)"),
+        },
+        "assets_type_breakdown": {
+            "label": _("Assets Type Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Assets count per type (Primary / Support)"),
+        },
+        # Evidence
+        "total_evidence": {
+            "label": _("Total Evidence"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Total evidence (root folder = whole organization)"),
+        },
+        "evidence_status_breakdown": {
+            "label": _("Evidence Status Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Evidence count per status"),
+        },
+        "evidence_expiring_30d": {
+            "label": _("Evidence Expiring in 30 Days"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Evidence whose expiry date falls within the next 30 days (and is not yet expired)"
+            ),
+        },
+        # Vulnerabilities
+        "total_vulnerabilities": {
+            "label": _("Total Vulnerabilities"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Total vulnerabilities (root folder = whole organization)"
+            ),
+        },
+        "vulnerabilities_severity_breakdown": {
+            "label": _("Vulnerabilities Severity Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Vulnerabilities count per severity"),
+        },
+        "vulnerabilities_status_breakdown": {
+            "label": _("Vulnerabilities Status Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Vulnerabilities count per status"),
+        },
+        # Tasks
+        "tasks_overdue": {
+            "label": _("Tasks Overdue"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Task occurrences whose due date is in the past and that are not completed or cancelled"
+            ),
+        },
+        "tasks_due_7d": {
+            "label": _("Tasks Due in 7 Days"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Task occurrences due in the next 7 days that are not completed or cancelled"
+            ),
+        },
+        # Applied controls extras
+        "controls_eta_breakdown": {
+            "label": _("Controls ETA Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _(
+                "Applied controls grouped by ETA state (on track / late / no ETA)"
+            ),
+        },
+        "controls_priority_breakdown": {
+            "label": _("Controls Priority Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Applied controls count per priority level"),
+        },
+        # Audits rollup
+        "total_audits": {
+            "label": _("Total Audits"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _(
+                "Total compliance assessments (root folder = whole organization)"
+            ),
+        },
+        "audits_status_breakdown": {
+            "label": _("Audits Status Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Compliance assessments count per status"),
+        },
+        "audits_avg_progress": {
+            "label": _("Audits Average Progress"),
+            "type": METRIC_TYPE_PERCENTAGE,
+            "description": _(
+                "Mean completion percentage across in-scope compliance assessments"
+            ),
+        },
     },
 }
 
