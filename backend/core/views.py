@@ -7869,7 +7869,23 @@ def get_analytics_export_xlsx(request):
     Export all analytics dashboard data as a multi-sheet XLSX file.
     Sheets: Summary, Risk Levels, Compliance, Controls, Incidents.
     """
-    user = request.user
+    try:
+        return _build_analytics_export_xlsx(request.user)
+    except Exception:
+        error_id = uuid.uuid4()
+        logger.error(
+            "Analytics XLSX export failed",
+            error_id=str(error_id),
+            exc_info=True,
+        )
+        return HttpResponse(
+            f"An unexpected error occurred while generating the export (ref: {error_id}).",
+            status=500,
+        )
+
+
+def _build_analytics_export_xlsx(user):
+    """Build the multi-sheet analytics workbook and return it as an HTTP response."""
     today = date.today()
 
     wb = Workbook()

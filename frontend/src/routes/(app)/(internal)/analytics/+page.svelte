@@ -185,17 +185,6 @@
 	}
 </script>
 
-<div class="flex justify-end px-4 pt-2">
-	<a
-		href="/analytics/export/xlsx"
-		class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
-		download
-	>
-		<i class="fa-solid fa-file-excel text-green-600"></i>
-		{m.exportButton() + ' ' + m.asXLSX()}
-	</a>
-</div>
-
 <Tabs value={group} onValueChange={(e) => handleTabChange(e.value)}>
 	<Tabs.List>
 		<Tabs.Trigger value="summary">{m.summary()}</Tabs.Trigger>
