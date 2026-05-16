@@ -50,6 +50,12 @@
 		tags={['presets', 'journey', 'editor']}
 	/>
 	<Article
+		title="Questionnaire Autopilot"
+		desc="Upload a customer security questionnaire (.xlsx), scope it to a folder, then map its columns. LLM prefill comes next."
+		link="/experimental/questionnaire-autopilot"
+		tags={['agentic', 'questionnaire', 'vendor-due-diligence']}
+	/>
+	<Article
 		title="Asset Whiteboard"
 		desc="Place and link assets on a freeform canvas, per domain. Drawn edges update parent_assets in real time; positions saved in your browser."
 		link="/experimental/asset-board"

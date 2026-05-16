@@ -17,16 +17,16 @@ This policy applies to all systems, applications, and data owned or managed by [
 
 ### 3.1 Data at Rest
 
-- All sensitive and confidential data stored on servers, databases, and storage media must be encrypted.
-- Full-disk encryption must be enabled on all endpoints (laptops, workstations, mobile devices).
+- All sensitive and confidential data stored on servers, databases, and storage media shall be encrypted.
+- Full-disk encryption shall be enabled on all endpoints (laptops, workstations, mobile devices).
 - Approved algorithms: AES-256 for symmetric encryption.
 
 ### 3.2 Data in Transit
 
-- All network communications carrying sensitive data must use encrypted channels.
+- All network communications carrying sensitive data shall use encrypted channels.
 - TLS 1.2 or higher is required for all web and API communications.
 - Legacy protocols (SSL, TLS 1.0, TLS 1.1) are prohibited.
-- VPN connections must use approved encryption standards for remote access.
+- VPN connections shall use approved encryption standards for remote access.
 
 ### 3.3 Data in Use
 
@@ -37,30 +37,30 @@ This policy applies to all systems, applications, and data owned or managed by [
 
 ### 4.1 Key Generation
 
-- Cryptographic keys must be generated using approved random number generators.
-- Key lengths must meet or exceed current industry recommendations.
+- Cryptographic keys shall be generated using approved random number generators.
+- Key lengths shall meet or exceed current industry recommendations.
 
 ### 4.2 Key Storage and Protection
 
-- Private keys must never be stored in plaintext.
+- Private keys shall never be stored in plaintext.
 - Hardware security modules (HSMs) or equivalent key management services should be used for critical keys.
-- Access to cryptographic keys must be restricted to authorized personnel only.
+- Access to cryptographic keys shall be restricted to authorized personnel only.
 
 ### 4.3 Key Rotation and Expiry
 
-- Encryption keys must be rotated according to a defined schedule based on risk assessment.
-- Compromised or suspected-compromised keys must be revoked and replaced immediately.
-- Expired keys must be securely archived or destroyed according to retention requirements.
+- Encryption keys shall be rotated according to a defined schedule based on risk assessment.
+- Compromised or suspected-compromised keys shall be revoked and replaced immediately.
+- Expired keys shall be securely archived or destroyed according to retention requirements.
 
 ### 4.4 Key Destruction
 
-- Keys that are no longer needed must be securely destroyed using approved methods.
-- Key destruction must be documented and auditable.
+- Keys that are no longer needed shall be securely destroyed using approved methods.
+- Key destruction shall be documented and auditable.
 
 ## 5. Certificate Management
 
-- Digital certificates must be issued by trusted certificate authorities.
-- Certificate expiration must be monitored, and renewals must be completed before expiry.
+- Digital certificates shall be issued by trusted certificate authorities.
+- Certificate expiration shall be monitored, and renewals shall be completed before expiry.
 - Self-signed certificates are prohibited in production environments.
 
 ## 6. Prohibited Practices
