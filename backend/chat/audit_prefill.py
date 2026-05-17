@@ -90,15 +90,15 @@ Hub is available" → tool name only)
 of THE DOCUMENT)
 
 Rules:
-- The snippet MUST read like control evidence on its own. If you have to \
-explain context for the snippet to make sense as a control, it's probably \
-not one — skip it.
-- If the document is irrelevant (CV, invoice, marketing brochure, support \
-handbook) reply with {{"controls": []}}.
+- Pick a snippet that, on its own, shows the control exists — a direct \
+quote of the safeguard, not a heading or a definition around it.
 - Keep names short and matchable — "MFA enforcement" beats "Implement \
 multi-factor authentication on all internal applications".
-- A document with no concrete safeguards (only definitions, scope, intent) \
-should yield {{"controls": []}} — false positives are worse than misses."""
+- Extract every distinct control the document describes. A single policy \
+document often contains many — don't merge them into one.
+- Only reply with {{"controls": []}} if the document genuinely contains \
+no implementable safeguards (e.g. it is purely an org chart, a CV, an \
+invoice, or a glossary)."""
 
 
 JUDGE_SAME_CONTROL_PROMPT = """You are deciding whether two security control \
