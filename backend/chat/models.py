@@ -321,6 +321,7 @@ class AgentRun(AbstractBaseModel, FolderMixin):
 
     class Kind(models.TextChoices):
         QUESTIONNAIRE_PREFILL = "questionnaire_prefill", _("Questionnaire prefill")
+        AUDIT_PREFILL = "audit_prefill", _("Audit prefill")
 
     class Status(models.TextChoices):
         QUEUED = "queued", _("Queued")
@@ -435,6 +436,12 @@ class AgentAction(AbstractBaseModel):
         PROPOSE_ANSWER = "propose_answer", _("Propose answer")
         CRITIQUE = "critique", _("Critique")
         RETRY = "retry", _("Retry")
+        # Audit prefill — Wave 1 (control discovery)
+        EXTRACT_CONTROL = "extract_control", _("Extract control")
+        LINK_CONTROL_EXISTING = "link_control_existing", _("Link existing control")
+        # Audit prefill — Wave 2 (per-requirement assessment)
+        PROPOSE_RESULT = "propose_result", _("Propose requirement result")
+        LINK_EVIDENCE_CONTROL = "link_evidence_control", _("Link evidence to control")
 
     class State(models.TextChoices):
         PROPOSED = "proposed", _("Proposed")

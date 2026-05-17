@@ -290,3 +290,20 @@ class StartQuestionnairePrefillSerializer(serializers.Serializer):
         choices=AgentRun.Strictness.choices,
         default=AgentRun.Strictness.FAST,
     )
+
+
+class StartAuditPrefillSerializer(serializers.Serializer):
+    """Input for Wave 1 of the audit-prefill agent run.
+
+    Folder + audit are decoupled in the API on purpose: the audit lives in
+    one folder, but the documents to scan may live in a different folder
+    inside the same perimeter (e.g. a shared "Policies" subfolder under the
+    parent domain). The view validates the combination.
+    """
+
+    folder = serializers.UUIDField()
+    compliance_assessment = serializers.UUIDField()
+    strictness = serializers.ChoiceField(
+        choices=AgentRun.Strictness.choices,
+        default=AgentRun.Strictness.FAST,
+    )

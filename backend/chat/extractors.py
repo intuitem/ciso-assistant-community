@@ -47,6 +47,10 @@ def get_extractor(content_type: str):
         "application/pdf": extract_pdf,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": extract_excel,
         # .xls (vnd.ms-excel) excluded — openpyxl only supports .xlsx
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": extract_docx,
+        # Markdown is plain text once the LLM sees it — no need for a real
+        # parser. Same chunker as .txt; headings stay inline as `#` lines.
+        "text/markdown": extract_text,
         "text/csv": extract_csv,
         "text/plain": extract_text,
     }
@@ -186,29 +190,68 @@ def extract_csv(file) -> list[Chunk]:
     return chunks
 
 
-def extract_text(file) -> list[Chunk]:
-    """Extract plain text, splitting into chunks by paragraph."""
-    file.seek(0)
-    content = file.read()
-    if isinstance(content, bytes):
-        content = content.decode("utf-8", errors="replace")
+def extract_docx(file) -> list[Chunk]:
+    """Extract from .docx: paragraphs first, then tables rendered as
+    pipe-separated rows.
 
-    paragraphs = [p.strip() for p in content.split("\n\n") if p.strip()]
-    chunks = []
+    Order is imperfect — true paragraph/table interleaving would require
+    walking the XML body. For prototype use (policy docs, control catalogs)
+    the substance is preserved either way; the LLM doesn't need section
+    fidelity to spot a control.
+    """
+    try:
+        from docx import Document
+    except ImportError:
+        logger.warning("python-docx not installed, cannot extract .docx")
+        return []
+
+    file.seek(0)
+    doc = Document(file)
+
+    text_pieces: list[str] = []
+    for para in doc.paragraphs:
+        t = para.text.strip()
+        if t:
+            text_pieces.append(t)
+
+    for table_idx, table in enumerate(doc.tables, start=1):
+        rendered_rows = []
+        for row in table.rows:
+            cells = [c.text.strip().replace("\n", " ") for c in row.cells]
+            if any(cells):
+                rendered_rows.append("| " + " | ".join(cells) + " |")
+        if rendered_rows:
+            text_pieces.append(f"[Table {table_idx}]\n" + "\n".join(rendered_rows))
+
+    if not text_pieces:
+        return []
+
+    return _paragraphs_to_chunks(text_pieces, base_metadata={})
+
+
+def _paragraphs_to_chunks(paragraphs: list[str], base_metadata: dict) -> list[Chunk]:
+    """Greedy merge of paragraphs into ~MAX_CHUNK_CHARS-sized chunks.
+
+    Factored out so .docx and .txt share one chunker — the only difference
+    between them was where the paragraphs come from.
+    """
+    chunks: list[Chunk] = []
     current_chunk = ""
 
     for para in paragraphs:
-        if len(para) > MAX_CHUNK_CHARS:
-            para_parts = _split_long_text(para, MAX_CHUNK_CHARS)
-        else:
-            para_parts = [para]
-
-        for part in para_parts:
+        parts = (
+            _split_long_text(para, MAX_CHUNK_CHARS)
+            if len(para) > MAX_CHUNK_CHARS
+            else [para]
+        )
+        for part in parts:
             if len(current_chunk) + len(part) > MAX_CHUNK_CHARS:
                 if current_chunk:
                     chunks.append(
                         Chunk(
-                            text=current_chunk.strip(), index=len(chunks), metadata={}
+                            text=current_chunk.strip(),
+                            index=len(chunks),
+                            metadata=dict(base_metadata),
                         )
                     )
                 current_chunk = part
@@ -216,6 +259,23 @@ def extract_text(file) -> list[Chunk]:
                 current_chunk += "\n\n" + part if current_chunk else part
 
     if current_chunk:
-        chunks.append(Chunk(text=current_chunk.strip(), index=len(chunks), metadata={}))
+        chunks.append(
+            Chunk(
+                text=current_chunk.strip(),
+                index=len(chunks),
+                metadata=dict(base_metadata),
+            )
+        )
 
     return chunks
+
+
+def extract_text(file) -> list[Chunk]:
+    """Extract plain text (or markdown), splitting into chunks by paragraph."""
+    file.seek(0)
+    content = file.read()
+    if isinstance(content, bytes):
+        content = content.decode("utf-8", errors="replace")
+
+    paragraphs = [p.strip() for p in content.split("\n\n") if p.strip()]
+    return _paragraphs_to_chunks(paragraphs, base_metadata={})
