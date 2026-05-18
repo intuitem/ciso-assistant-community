@@ -140,7 +140,7 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     perimeters = models.ManyToManyField(
         Perimeter, blank=True, related_name="processings"
     )
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     def update_sensitive_data_flag(self):
         """Update the has_sensitive_personal_data flag based on associated personal data"""
