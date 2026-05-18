@@ -3016,6 +3016,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
             {
                 "id": str(matrix.id),
                 "name": matrix.name,
+                "description": matrix.description,
+                "provider": matrix.provider,
+                "locale": matrix.locale,
                 "status": "draft_created_from",
                 "editing_draft": matrix.editing_draft,
             },
@@ -3180,6 +3183,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
             {
                 "id": str(matrix.id),
                 "name": matrix.name,
+                "description": matrix.description,
+                "provider": matrix.provider,
+                "locale": matrix.locale,
                 "editing_draft": matrix.editing_draft,
                 "status": "imported",
             },
