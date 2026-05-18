@@ -1,6 +1,9 @@
 import { writable } from 'svelte/store';
+import { browser } from '$app/environment';
 import { goto as _goto } from '$app/navigation';
 import { m } from '$paraglide/messages';
+
+const STORAGE_KEY = 'ciso:breadcrumbs';
 
 export interface Breadcrumb {
 	label: string;
@@ -18,8 +21,28 @@ const homeCrumb: Breadcrumb = {
 	icon: 'fa-regular fa-compass'
 };
 
+function loadFromSession(initialValue: Breadcrumb[]): Breadcrumb[] {
+	if (!browser) return initialValue;
+	try {
+		const raw = sessionStorage.getItem(STORAGE_KEY);
+		if (!raw) return initialValue;
+		const parsed = JSON.parse(raw) as Breadcrumb[];
+		return [homeCrumb, ...parsed.slice(1)];
+	} catch {
+		return initialValue;
+	}
+}
+
 const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
-	const breadcrumbs = writable<Breadcrumb[]>(initialValue);
+	const breadcrumbs = writable<Breadcrumb[]>(loadFromSession(initialValue));
+
+	if (browser) {
+		breadcrumbs.subscribe((value) => {
+			try {
+				sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+			} catch {}
+		});
+	}
 
 	function mergeCrumbs(crumbs: Breadcrumb[]) {
 		const mergedCrumbs: Breadcrumb[] = [];
