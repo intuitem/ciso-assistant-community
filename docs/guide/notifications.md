@@ -11,7 +11,11 @@ icon: bell
 
 Email notifications must be enabled by your administrator under **Extra > Settings > Enable email notifications**. This setting is **off by default** on a fresh install — no notification emails are sent until an administrator enables it.
 
-Your CISO Assistant (Onprem) instance also needs an outgoing mail server configured (`EMAIL_HOST`, `EMAIL_PORT`, and `DEFAULT_FROM_EMAIL` at minimum). If you are not receiving emails, contact your administrator to verify these are set.
+{% hint style="warning" %}
+## Onprem instances only
+
+Your CISO Assistant instance also needs an outgoing mail server configured (`EMAIL_HOST`, `EMAIL_PORT`, and `DEFAULT_FROM_EMAIL` at minimum). If you are not receiving emails, contact your administrator to verify these are set.
+{% endhint %}
 
 Notifications are sent to the email address associated with your account.
 
