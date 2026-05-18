@@ -12,6 +12,17 @@
 		return queryIdx === -1 ? href : href.slice(0, queryIdx);
 	}
 
+	// Detect sibling navigation: same depth and same first segment (model).
+	// Used to replace (not append) the last crumb when navigating to a
+	// sibling resource — e.g. save-and-next between requirement assessments.
+	function isSiblingPath(a: string | undefined, b: string): boolean {
+		if (!a) return false;
+		const aSegs = a.split('/').filter(Boolean);
+		const bSegs = b.split('/').filter(Boolean);
+		if (aSegs.length === 0 || aSegs.length !== bSegs.length) return false;
+		return aSegs[0] === bSegs[0];
+	}
+
 	function syncBreadcrumbsToCurrentUrl(
 		breadcrumbs: Breadcrumb[],
 		currentPath: string,
@@ -27,6 +38,14 @@
 			const matched = trimmed[idx];
 			trimmed[idx] = { ...matched, href: currentUrl };
 			return trimmed;
+		}
+		// Sibling nav (e.g. save-and-next): replace last crumb instead of
+		// appending so the trail doesn't grow indefinitely.
+		const last = breadcrumbs[breadcrumbs.length - 1];
+		if (breadcrumbs.length > 1 && isSiblingPath(hrefPathname(last?.href), currentPath)) {
+			const replaced = breadcrumbs.slice();
+			replaced[replaced.length - 1] = { label: fallbackLabel, href: currentUrl };
+			return replaced;
 		}
 		return [...breadcrumbs, { label: fallbackLabel, href: currentUrl }];
 	}
@@ -65,11 +84,10 @@
 		}
 	}
 
-	afterNavigate(() => sync($pageTitle || getPageTitle()));
+	afterNavigate(() => sync(getPageTitle()));
 
 	$effect(() => {
 		$pageTitle = getPageTitle();
-		sync($pageTitle);
 	});
 </script>
 
