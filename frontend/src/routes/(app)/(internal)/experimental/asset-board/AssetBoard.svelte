@@ -18,12 +18,18 @@
 
 	import AssetNodeComponent from './AssetNode.svelte';
 	import AssetEdgeComponent from './AssetEdge.svelte';
+	import TrustZoneComponent from './TrustZone.svelte';
 	import {
 		loadPositions,
 		savePositions,
 		loadViewport,
 		saveViewport as saveViewportLS,
-		type XY
+		loadZones,
+		saveZones,
+		loadMembership,
+		saveMembership,
+		type XY,
+		type TrustZone
 	} from './positions';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import {
@@ -59,17 +65,24 @@
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
 
-	const nodeTypes = { asset: AssetNodeComponent };
+	const nodeTypes = { asset: AssetNodeComponent, zone: TrustZoneComponent };
 	const edgeTypes = { asset: AssetEdgeComponent };
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 	let positions = $state<Record<string, XY>>({});
+	let zones = $state<TrustZone[]>([]);
+	// asset id -> zone id (parent membership, in the xyflow parentId sense)
+	let membership = $state<Record<string, string>>({});
 	let instructionsOpen = $state(true);
 	// drop coordinates + optional parent for the next asset created via the canvas
 	let pendingPlacement = $state<XY | null>(null);
 	let pendingParentId = $state<string | null>(null);
 	let knownAssetIds = $state<Set<string>>(new Set());
+
+	const ZONE_DEFAULT_COLOR = '#3b82f6';
+	const ZONE_DEFAULT_W = 320;
+	const ZONE_DEFAULT_H = 220;
 
 	const GRID_COLS = 4;
 	const GRID_X = 240;
@@ -94,12 +107,37 @@
 			externalParentCount[a.id] = count;
 		}
 
-		const flowNodes: Node[] = assets.map((a, i) => {
+		// Zone nodes come first so child assets render on top.
+		const zoneById = new Map(zones.map((z) => [z.id, z]));
+		const zoneNodes: Node[] = zones.map((z) => ({
+			id: z.id,
+			type: 'zone',
+			position: { x: z.x, y: z.y },
+			data: { label: z.name, color: z.color },
+			style: `width: ${z.width}px; height: ${z.height}px;`,
+			width: z.width,
+			height: z.height,
+			draggable: true,
+			selectable: true,
+			connectable: false,
+			deletable: false,
+			// Zones must be below assets so the asset header buttons stay clickable
+			zIndex: -1
+		}));
+
+		const assetNodes: Node[] = assets.map((a, i) => {
 			const saved = positions[a.id];
-			return {
+			const absolute = saved ?? defaultPositionFor(i);
+			const parentId = membership[a.id];
+			const parent = parentId ? zoneById.get(parentId) : undefined;
+			// xyflow stores child positions relative to the parent. We persist absolute
+			// positions and convert here so the membership and the absolute layout in
+			// localStorage stay independent of each other.
+			const position = parent ? { x: absolute.x - parent.x, y: absolute.y - parent.y } : absolute;
+			const node: Node = {
 				id: a.id,
 				type: 'asset',
-				position: saved ?? defaultPositionFor(i),
+				position,
 				data: {
 					label: a.name,
 					refId: a.ref_id ?? '',
@@ -111,6 +149,13 @@
 				deletable: false,
 				connectable: true
 			};
+			if (parent) {
+				// No `extent: 'parent'` on purpose — we WANT the user to be able to drag an
+				// asset out of a zone to remove its membership. reassignMembership runs on
+				// drag stop and updates parentId accordingly.
+				node.parentId = parentId;
+			}
+			return node;
 		});
 
 		const flowEdges: Edge[] = [];
@@ -128,13 +173,25 @@
 			}
 		}
 
-		nodes = flowNodes;
+		nodes = [...zoneNodes, ...assetNodes];
 		edges = flowEdges;
 		knownAssetIds = inFolderIds;
 	}
 
 	// Initial load from localStorage and graph build
 	positions = loadPositions(folderId);
+	zones = loadZones(folderId);
+	membership = loadMembership(folderId);
+	// Drop membership for any zone that no longer exists
+	let cleanedMembership: Record<string, string> = {};
+	const liveZoneIds = new Set(zones.map((z) => z.id));
+	for (const [assetId, zoneId] of Object.entries(membership)) {
+		if (liveZoneIds.has(zoneId)) cleanedMembership[assetId] = zoneId;
+	}
+	if (Object.keys(cleanedMembership).length !== Object.keys(membership).length) {
+		membership = cleanedMembership;
+		saveMembership(folderId, membership);
+	}
 	buildGraph();
 
 	// When the assets prop changes (after invalidateAll), rebuild
@@ -190,14 +247,62 @@
 		saveViewportLS(folderId, vp);
 	}
 
-	function handleNodeDragStop(_e: any, node?: Node) {
-		// SvelteFlow exposes onnodedragstop with (event, draggedNode); fall back to scanning if absent
-		const updated = { ...positions };
+	function handleNodeDragStop(_e: any, draggedNode?: Node) {
+		// Live zone positions from the post-drag nodes array — when the user drags a zone,
+		// the zone's own n.position is new but its child assets' (relative) positions are
+		// unchanged. We compute child absolute positions against this LIVE map, not the
+		// stale `zones` state, otherwise children appear to teleport on the next render.
+		const liveZonePos: Record<string, XY> = {};
 		for (const n of nodes) {
-			updated[n.id] = { x: n.position.x, y: n.position.y };
+			if (n.type === 'zone') liveZonePos[n.id] = { x: n.position.x, y: n.position.y };
 		}
-		positions = updated;
-		savePositions(folderId, updated);
+
+		let zonesChanged = false;
+		const updatedZones: TrustZone[] = zones.map((z) => {
+			const p = liveZonePos[z.id];
+			if (p && (p.x !== z.x || p.y !== z.y)) {
+				zonesChanged = true;
+				return { ...z, x: p.x, y: p.y };
+			}
+			return z;
+		});
+
+		const updatedPositions: Record<string, XY> = { ...positions };
+		for (const n of nodes) {
+			if (n.type === 'zone') continue;
+			const parentPos = n.parentId ? liveZonePos[n.parentId] : undefined;
+			updatedPositions[n.id] = parentPos
+				? { x: n.position.x + parentPos.x, y: n.position.y + parentPos.y }
+				: { x: n.position.x, y: n.position.y };
+		}
+		positions = updatedPositions;
+		savePositions(folderId, updatedPositions);
+		if (zonesChanged) {
+			zones = updatedZones;
+			saveZones(folderId, zones);
+		}
+
+		// If an asset was the one dragged, reassign its membership based on what it overlaps now.
+		if (draggedNode && draggedNode.type === 'asset') {
+			reassignMembership(draggedNode.id, updatedPositions[draggedNode.id]);
+		}
+	}
+
+	function reassignMembership(assetId: string, abs: XY) {
+		// Find zone containing the asset's top-left corner (good enough for v1).
+		// Iterate in reverse so the most-recently-created zone wins on overlap.
+		const containing = [...zones].reverse().find((z) => {
+			return abs.x >= z.x && abs.x <= z.x + z.width && abs.y >= z.y && abs.y <= z.y + z.height;
+		});
+		const newZoneId = containing?.id ?? null;
+		const currentZoneId = membership[assetId] ?? null;
+		if (newZoneId === currentZoneId) return;
+		const updated = { ...membership };
+		if (newZoneId) updated[assetId] = newZoneId;
+		else delete updated[assetId];
+		membership = updated;
+		saveMembership(folderId, updated);
+		buildGraph();
 	}
 
 	function isValidConnection(connection: Connection): boolean {
@@ -342,6 +447,71 @@
 		openCreateModal({ dropCoords: center });
 	}
 
+	function handleCreateZone() {
+		const vp = flowInstance?.getViewport() ?? { x: 0, y: 0, zoom: 1 };
+		const center = flowInstance?.screenToFlowPosition({
+			x: window.innerWidth / 2,
+			y: window.innerHeight / 2
+		}) ?? { x: 200 - vp.x, y: 200 - vp.y };
+		const zone: TrustZone = {
+			id: `zone-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+			name: `Trust zone ${zones.length + 1}`,
+			color: ZONE_DEFAULT_COLOR,
+			x: center.x - ZONE_DEFAULT_W / 2,
+			y: center.y - ZONE_DEFAULT_H / 2,
+			width: ZONE_DEFAULT_W,
+			height: ZONE_DEFAULT_H
+		};
+		zones = [...zones, zone];
+		saveZones(folderId, zones);
+		buildGraph();
+	}
+
+	function renameZone(zoneId: string, name: string) {
+		zones = zones.map((z) => (z.id === zoneId ? { ...z, name } : z));
+		saveZones(folderId, zones);
+		buildGraph();
+	}
+
+	function recolorZone(zoneId: string, color: string) {
+		zones = zones.map((z) => (z.id === zoneId ? { ...z, color } : z));
+		saveZones(folderId, zones);
+		buildGraph();
+	}
+
+	function resizeZone(zoneId: string, width: number, height: number) {
+		zones = zones.map((z) => (z.id === zoneId ? { ...z, width, height } : z));
+		saveZones(folderId, zones);
+		// Reassign membership for every asset — resizing can move zone borders past assets.
+		const newMembership: Record<string, string> = {};
+		for (const a of assets) {
+			const abs = positions[a.id];
+			if (!abs) {
+				if (membership[a.id]) newMembership[a.id] = membership[a.id];
+				continue;
+			}
+			const containing = [...zones].reverse().find((z) => {
+				return abs.x >= z.x && abs.x <= z.x + z.width && abs.y >= z.y && abs.y <= z.y + z.height;
+			});
+			if (containing) newMembership[a.id] = containing.id;
+		}
+		membership = newMembership;
+		saveMembership(folderId, newMembership);
+		buildGraph();
+	}
+
+	function deleteZone(zoneId: string) {
+		zones = zones.filter((z) => z.id !== zoneId);
+		saveZones(folderId, zones);
+		const updated = { ...membership };
+		for (const [assetId, zid] of Object.entries(updated)) {
+			if (zid === zoneId) delete updated[assetId];
+		}
+		membership = updated;
+		saveMembership(folderId, updated);
+		buildGraph();
+	}
+
 	function handleConnectEnd(event: MouseEvent | TouchEvent, connectionState: any) {
 		// xyflow Svelte: when a connection ends with no target node, isValid is null
 		if (!connectionState || connectionState.isValid !== null) return;
@@ -455,6 +625,10 @@
 	}
 
 	setContext('assetBoard', {
+		renameZone,
+		recolorZone,
+		resizeZone,
+		deleteZone,
 		showExternalLinks: (id: string) => {
 			const child = assets.find((a) => a.id === id);
 			const external =
@@ -509,13 +683,23 @@
 		<Controls showLock={false} />
 		<MiniMap />
 		<Panel position="top-right">
-			<button
-				type="button"
-				class="btn preset-filled-primary-500 text-sm shadow"
-				onclick={handleCreateAtCenter}
-			>
-				<i class="fa-solid fa-plus mr-1"></i>Create asset
-			</button>
+			<div class="flex gap-2">
+				<button
+					type="button"
+					class="btn preset-tonal-secondary text-sm shadow"
+					onclick={handleCreateZone}
+					title="Draw a trust-zone rectangle on the canvas"
+				>
+					<i class="fa-solid fa-shield-halved mr-1"></i>Add trust zone
+				</button>
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 text-sm shadow"
+					onclick={handleCreateAtCenter}
+				>
+					<i class="fa-solid fa-plus mr-1"></i>Create asset
+				</button>
+			</div>
 		</Panel>
 		<Panel position="top-left">
 			<div
@@ -550,7 +734,11 @@
 							</li>
 							<li>Hover a node and click the trash icon to delete it (with cascade preview)</li>
 							<li>Click a link to select it, then click the × at its midpoint to unlink</li>
-							<li>Positions are saved per-domain in this browser only</li>
+							<li>
+								Use <span class="font-semibold">Add trust zone</span> to draw a boundary; drag assets
+								inside to nest them, drag back out to remove
+							</li>
+							<li>Positions, zones and membership are saved per-domain in this browser only</li>
 						</ul>
 					</div>
 				{/if}
