@@ -1531,15 +1531,16 @@ def startup(sender=None, **kwargs):
     object is created.  Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined.
 
     Connected to ``post_migrate`` without a sender filter.  Django emits
-    that signal once per app in ``INSTALLED_APPS`` order.  We wait for the
-    last app so that every permission row (including those from apps after
-    ``core`` such as ``integrations`` and ``webhooks``) already exists when
-    we call ``role.permissions.set()``.
+    that signal once per app in ``INSTALLED_APPS`` order, but only for apps
+    that have a ``models`` module.  We wait for the last such app so that
+    every permission row (including those from apps after ``core`` such as
+    ``integrations`` and ``webhooks``) already exists when we call
+    ``role.permissions.set()``.
     """
     from django.apps import apps
 
-    all_configs = list(apps.get_app_configs())
-    if sender != all_configs[-1]:
+    migratable = [c for c in apps.get_app_configs() if c.models_module is not None]
+    if sender != migratable[-1]:
         return
 
     from django.contrib.auth.models import Permission
@@ -1649,7 +1650,6 @@ def startup(sender=None, **kwargs):
         ra2.perimeter_folders.add(global_approvers.folder)
 
     # if global auditees user group does not exist, then create it
-    auditee = Role.objects.get(name=RoleCodename.AUDITEE.value)
     if not UserGroup.objects.filter(
         name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
     ).exists():
@@ -1660,7 +1660,7 @@ def startup(sender=None, **kwargs):
         )
         ra = RoleAssignment.objects.create(
             user_group=global_auditees,
-            role=auditee,
+            role=Role.objects.get(name=RoleCodename.AUDITEE.value),
             is_recursive=True,
             builtin=True,
             folder=Folder.get_root_folder(),
