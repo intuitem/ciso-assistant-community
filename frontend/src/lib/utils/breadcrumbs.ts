@@ -64,13 +64,24 @@ export function syncBreadcrumbsToCurrentUrl(
 	return [...breadcrumbs, { label: fallbackLabel, href: currentUrl }];
 }
 
-function loadFromSession(initialValue: Breadcrumb[]): Breadcrumb[] {
+function isValidCrumb(value: unknown): value is Breadcrumb {
+	if (!value || typeof value !== 'object') return false;
+	const c = value as Record<string, unknown>;
+	if (typeof c.label !== 'string') return false;
+	if (c.href !== undefined && typeof c.href !== 'string') return false;
+	if (c.icon !== undefined && typeof c.icon !== 'string') return false;
+	return true;
+}
+
+export function loadFromSession(initialValue: Breadcrumb[]): Breadcrumb[] {
 	if (!browser) return initialValue;
 	try {
 		const raw = sessionStorage.getItem(STORAGE_KEY);
 		if (!raw) return initialValue;
-		const parsed = JSON.parse(raw) as Breadcrumb[];
-		return [homeCrumb, ...parsed.slice(1)];
+		const parsed = JSON.parse(raw);
+		if (!Array.isArray(parsed)) return initialValue;
+		const tail = parsed.slice(1).filter(isValidCrumb).slice(0, BREADCRUMBS_MAX_DEPTH);
+		return [homeCrumb, ...tail];
 	} catch {
 		return initialValue;
 	}
@@ -129,12 +140,22 @@ const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 		});
 	}
 
+	function clear() {
+		if (browser) {
+			try {
+				sessionStorage.removeItem(STORAGE_KEY);
+			} catch {}
+		}
+		breadcrumbs.set([homeCrumb]);
+	}
+
 	return {
 		...breadcrumbs,
 		push,
 		updateCrumb,
 		replace,
-		slice
+		slice,
+		clear
 	};
 };
 
