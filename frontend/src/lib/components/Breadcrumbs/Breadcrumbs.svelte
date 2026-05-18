@@ -12,9 +12,7 @@
 		return queryIdx === -1 ? href : href.slice(0, queryIdx);
 	}
 
-	// Detect sibling navigation: same depth and same first segment (model).
-	// Used to replace (not append) the last crumb when navigating to a
-	// sibling resource — e.g. save-and-next between requirement assessments.
+	// Same depth + same first segment.
 	function isSiblingPath(a: string | undefined, b: string): boolean {
 		if (!a) return false;
 		const aSegs = a.split('/').filter(Boolean);
@@ -29,18 +27,14 @@
 		currentUrl: string,
 		fallbackLabel: string
 	): Breadcrumb[] {
-		// Skip home (index 0, href '/').
 		const idx = breadcrumbs.findIndex((c, i) => i > 0 && hrefPathname(c.href) === currentPath);
 		if (idx > 0) {
-			// Refresh the matched crumb's href with the current query so filters
-			// survive a round-trip.
 			const trimmed = breadcrumbs.slice(0, idx + 1);
 			const matched = trimmed[idx];
 			trimmed[idx] = { ...matched, href: currentUrl };
 			return trimmed;
 		}
-		// Sibling nav (e.g. save-and-next): replace last crumb instead of
-		// appending so the trail doesn't grow indefinitely.
+		// Replace last crumb on sibling nav.
 		const last = breadcrumbs[breadcrumbs.length - 1];
 		if (breadcrumbs.length > 1 && isSiblingPath(hrefPathname(last?.href), currentPath)) {
 			const replaced = breadcrumbs.slice();
@@ -75,7 +69,7 @@
 		const currentUrl = currentPath + page.url.search;
 		const current = $breadcrumbs;
 		const next = syncBreadcrumbsToCurrentUrl(current, currentPath, currentUrl, fallbackLabel);
-		// Skip writes that don't change anything to avoid effect loops.
+		// No-op if unchanged.
 		if (
 			next.length !== current.length ||
 			next.some((c, i) => c.href !== current[i].href || c.label !== current[i].label)
