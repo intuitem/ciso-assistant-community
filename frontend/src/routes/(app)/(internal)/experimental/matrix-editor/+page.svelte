@@ -298,7 +298,7 @@
 
 				const result = await res.json();
 				// Load the newly created draft
-				loadDraft({
+				await loadDraft({
 					id: result.id,
 					name: result.name,
 					description: result.description,
