@@ -118,6 +118,16 @@
 												</li>
 											{/each}
 										</ul>
+									{:else if key === 'field_visibility'}
+										{#if Object.entries(value).length === 0}
+											--
+										{:else}
+											<ul>
+												{#each Object.entries(value) as [obj, who_can_see]}
+													<li>{obj} : {who_can_see}</li>
+												{/each}
+											</ul>
+										{/if}
 									{:else if value.str && value.id}
 										{@const itemHref = `/${
 											URL_MODEL_MAP['frameworks']['foreignKeyFields']?.find(

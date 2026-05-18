@@ -401,6 +401,8 @@
 										class="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 sticky left-0 bg-gray-50/95 backdrop-blur-sm z-30"
 										class:min-w-[220px]={!compactMode}
 										class:min-w-[100px]={compactMode}
+										class:w-full={compactMode}
+										class:max-w-0={compactMode}
 									>
 										{m.tasks()}
 									</th>
@@ -426,6 +428,8 @@
 											class="px-4 sticky left-0 z-10 bg-white"
 											class:py-2.5={!compactMode}
 											class:py-1.5={compactMode}
+											class:w-full={compactMode}
+											class:max-w-0={compactMode}
 										>
 											{#if compactMode}
 												{#if task.ref_id}
@@ -439,7 +443,7 @@
 												{:else}
 													<Anchor
 														href="/task-templates/{task.id}"
-														class="text-xs text-gray-700 hover:text-violet-600 truncate block max-w-[120px] transition-colors"
+														class="text-xs text-gray-700 hover:text-violet-600 truncate block w-full transition-colors"
 														title={task.name}
 													>
 														{task.name}
