@@ -3,6 +3,10 @@
 	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ExportModal, {
+		type ExportGroup,
+		type ExportOption
+	} from '$lib/components/Modals/ExportModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance } from '$lib/utils/stores';
@@ -27,7 +31,6 @@
 	let { data, form }: Props = $props();
 	const toastStore = getToastStore();
 	let URLModel = $derived(data.URLModel);
-	let exportPopupOpen = $state(false);
 	let pullCatalogOpen = $state(false);
 	let currentFilterSearch = $state(page.url.search);
 
@@ -45,6 +48,70 @@
 	}
 
 	const modalStore: ModalStore = getModalStore();
+
+	function buildTableExportOptions(filterSearch: string): ExportOption[] {
+		const opts: ExportOption[] = [
+			{
+				titleKey: 'exportTableCsv',
+				descriptionKey: 'exportTableCsvDesc',
+				format: 'CSV',
+				href: `${URLModel}/export/${filterSearch}`,
+				testId: filterSearch ? 'export-option-csv-filtered' : 'export-option-csv-all'
+			},
+			{
+				titleKey: 'exportTableXlsx',
+				descriptionKey: 'exportTableXlsxDesc',
+				format: 'XLSX',
+				href: `${URLModel}/export/xlsx/${filterSearch}`,
+				testId: filterSearch ? 'export-option-xlsx-filtered' : 'export-option-xlsx-all'
+			}
+		];
+		if (URLModel === 'entities') {
+			opts.push({
+				titleKey: 'exportTableEcosystem',
+				descriptionKey: 'exportTableEcosystemDesc',
+				format: 'XLSX',
+				href: `/entities/export/ecosystem/${filterSearch}`,
+				testId: filterSearch ? 'export-option-ecosystem-filtered' : 'export-option-ecosystem-all'
+			});
+		}
+		if (URLModel === 'applied-controls') {
+			opts.push({
+				titleKey: 'exportTableMss',
+				descriptionKey: 'exportTableMssDesc',
+				format: 'XLSX',
+				href: `/applied-controls/export/mss-xlsx/${filterSearch}`,
+				testId: filterSearch ? 'export-option-mss-filtered' : 'export-option-mss-all'
+			});
+		}
+		return opts;
+	}
+
+	function modalExport(): void {
+		const hasFilters = currentFilterSearch.length > 0;
+		const groups: ExportGroup[] = hasFilters
+			? [
+					{
+						titleKey: 'exportGroupCurrentView',
+						options: buildTableExportOptions(currentFilterSearch)
+					},
+					{ titleKey: 'exportGroupEntireTable', options: buildTableExportOptions('') }
+				]
+			: [{ titleKey: '', options: buildTableExportOptions('') }];
+
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
 
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
@@ -157,7 +224,7 @@
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										title={m.exportButton()}
 										data-testid="export-button"
-										onclick={() => (exportPopupOpen = !exportPopupOpen)}
+										onclick={modalExport}
 									>
 										<i class="fa-solid fa-download"></i>
 									</button>
@@ -390,37 +457,6 @@
 								{/if}
 							{/if}
 						</div>
-						{#if exportPopupOpen}
-							<!-- svelte-ignore a11y_no_static_element_interactions -->
-							<div
-								class="fixed inset-0 z-40"
-								onclick={() => (exportPopupOpen = false)}
-								onkeydown={() => {}}
-							></div>
-							<div
-								class="absolute right-0 z-50 mt-1 card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
-							>
-								<div class="flex flex-col">
-									<a
-										href="{URLModel}/export/{currentFilterSearch}"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										onclick={() => (exportPopupOpen = false)}>... {m.asCSV()}</a
-									>
-									<a
-										href="{URLModel}/export/xlsx/{currentFilterSearch}"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										onclick={() => (exportPopupOpen = false)}>... {m.asXLSX()}</a
-									>
-									{#if URLModel === 'entities'}
-										<a
-											href="/entities/export/ecosystem/{currentFilterSearch}"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											onclick={() => (exportPopupOpen = false)}>... {m.exportEcosystem()}</a
-										>
-									{/if}
-								</div>
-							</div>
-						{/if}
 					</div>
 				{/snippet}
 				{#snippet badge(key, row)}

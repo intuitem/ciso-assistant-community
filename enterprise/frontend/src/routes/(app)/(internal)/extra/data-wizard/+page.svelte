@@ -22,6 +22,7 @@
 	const modalStore: ModalStore = getModalStore();
 
 	let formElement: HTMLFormElement | null = $state(null);
+	let fileInputRef: HTMLInputElement | null = $state(null);
 	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
 	let selectedModel = $state('Asset'); // Default selection
 	let searchQuery = $state('');
@@ -83,8 +84,21 @@
 			id: 'TaskTemplate',
 			label: m.taskTemplates(),
 			description: m.taskTemplatesDescription()
+    },
+    {
+			id: 'EbiosRMStudyEgerieXML',
+			label: m.ebiosRMStudyEgerieXML(),
+			description: m.ebiosRMStudyEgerieXMLDescription()
 		}
 	];
+
+	// Per-model accepted file extensions. Most importers consume Excel;
+	// Egerie ships an XML export, hence the explicit branch.
+	const XML_MODELS = new Set(['EbiosRMStudyEgerieXML']);
+	function extensionsFor(modelId: string): string[] {
+		if (XML_MODELS.has(modelId)) return ['.xml'];
+		return ['.xls', '.xlsx'];
+	}
 
 	function modalConfirm(): void {
 		const modalComponent: ModalComponent = {
@@ -123,7 +137,8 @@
 		selectedModel !== 'RiskAssessment' &&
 			selectedModel !== 'BusinessImpactAnalysis' &&
 			selectedModel !== 'EbiosRMStudyARM' &&
-			selectedModel !== 'EbiosRMStudyExcel'
+			selectedModel !== 'EbiosRMStudyExcel' &&
+			selectedModel !== 'EbiosRMStudyEgerieXML'
 	);
 
 	// Models that don't need perimeter selection
@@ -144,6 +159,7 @@
 		'EbiosRMStudyARM',
 		'EbiosRMStudyExcel',
 		'TaskTemplate',
+		'EbiosRMStudyEgerieXML',
 		'Vulnerability'
 	];
 
@@ -156,7 +172,13 @@
 	// Helper to check if the form has been processed (form action has run)
 	let formSubmitted = $derived(form !== null && form !== undefined);
 
-	const authorizedExtensions = ['.xls', '.xlsx'];
+	let authorizedExtensions = $derived(extensionsFor(selectedModel));
+
+	$effect(() => {
+		selectedModel;
+		files = null;
+		if (fileInputRef) fileInputRef.value = '';
+	});
 
 	// Filter models based on search query
 	let filteredModels = $derived(
@@ -192,7 +214,7 @@
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
 				<h4 class="h4 font-bold">
-					<i class="fa-solid fa-file-excel mr-2"></i>{m.dataWizardLoadExcelData()}
+					<i class="fa-solid fa-file-import mr-2"></i>{m.dataWizardLoadData()}
 				</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400"
@@ -214,6 +236,7 @@
 					id="file"
 					type="file"
 					name="file"
+					bind:this={fileInputRef}
 					accept={authorizedExtensions.join(',')}
 					required
 					bind:files
@@ -229,7 +252,7 @@
 						<div
 							class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100"
 						>
-							<i class="fas fa-file-excel text-green-600 text-xl"></i>
+							<i class="fas fa-file-import text-indigo-600 text-xl"></i>
 						</div>
 						<div class="text-sm">
 							{#if files && files.length > 0}
@@ -244,7 +267,9 @@
 								<p class="font-medium text-gray-900">
 									<span class="text-blue-600">{m.clickToUpload()}</span>
 								</p>
-								<p class="text-gray-500">{m.fileAcceptExcelOnly()}</p>
+								<p class="text-gray-500">
+									{m.fileAcceptOnly({ extensions: authorizedExtensions.join(', ') })}
+								</p>
 							{/if}
 						</div>
 					</div>

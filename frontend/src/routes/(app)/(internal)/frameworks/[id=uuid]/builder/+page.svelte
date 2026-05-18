@@ -4,6 +4,7 @@
 	import { apiStartEditing } from '$lib/components/FrameworkBuilder/builder-api';
 	import type { DraftJSON } from '$lib/components/FrameworkBuilder/builder-api';
 	import type { PageData } from './$types';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		data: PageData;
@@ -69,7 +70,7 @@
 				href="/frameworks/{data.framework.id}"
 				class="text-sm text-gray-500 hover:text-gray-700 transition-colors"
 			>
-				<i class="fa-solid fa-arrow-left mr-1"></i>Back to framework
+				<i class="fa-solid fa-arrow-left mr-1"></i>{m.builderBackToFramework()}
 			</a>
 		</div>
 		<!-- Import guard -->
@@ -79,10 +80,9 @@
 			>
 				<i class="fa-solid fa-lock text-2xl text-amber-600"></i>
 			</div>
-			<h2 class="text-xl font-semibold text-gray-800 mb-2">Imported Framework</h2>
+			<h2 class="text-xl font-semibold text-gray-800 mb-2">{m.builderImportedFramework()}</h2>
 			<p class="text-sm text-gray-500 mb-6">
-				This framework was imported from a library and cannot be edited directly. To make changes,
-				create an editable copy.
+				{m.builderImportedFrameworkDescription()}
 			</p>
 			<button
 				type="button"
@@ -91,26 +91,26 @@
 				onclick={cloneFramework}
 			>
 				{#if cloning}
-					<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Creating copy...
+					<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>{m.builderCreatingCopy()}
 				{:else}
-					<i class="fa-solid fa-copy mr-2"></i>Create copy & edit
+					<i class="fa-solid fa-copy mr-2"></i>{m.builderCreateCopyAndEdit()}
 				{/if}
 			</button>
 		</div>
 	{:else if draftLoading}
 		<div class="flex items-center justify-center py-32">
 			<i class="fa-solid fa-circle-notch fa-spin text-2xl text-gray-400 mr-3"></i>
-			<span class="text-gray-500">Loading editor...</span>
+			<span class="text-gray-500">{m.builderLoadingEditor()}</span>
 		</div>
 	{:else if draftError}
 		<div class="max-w-lg mx-auto mt-16 text-center">
 			<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
 				<i class="fa-solid fa-triangle-exclamation text-2xl text-red-600"></i>
 			</div>
-			<h2 class="text-xl font-semibold text-gray-800 mb-2">Failed to start editor</h2>
+			<h2 class="text-xl font-semibold text-gray-800 mb-2">{m.builderFailedToStartEditor()}</h2>
 			<p class="text-sm text-red-600 mb-6">{draftError}</p>
 			<a href="/frameworks/{data.framework.id}" class="btn preset-filled-primary-500 px-6">
-				Back to framework
+				{m.builderBackToFramework()}
 			</a>
 		</div>
 	{:else if draftReady}

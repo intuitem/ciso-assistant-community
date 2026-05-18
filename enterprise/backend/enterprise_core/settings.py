@@ -597,6 +597,7 @@ LANGUAGES = [
     ("zh", "Chinese (Simplified)"),
     ("lt", "Lithuanian"),
     ("ko", "Korean"),
+    ("et", "Estonian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

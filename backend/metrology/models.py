@@ -631,7 +631,9 @@ class BuiltinMetricSample(AbstractBaseModel):
         """
         from core.models import (
             AppliedControl,
+            Asset,
             ComplianceAssessment,
+            Evidence,
             Framework,
             Incident,
             RiskAcceptance,
@@ -639,11 +641,15 @@ class BuiltinMetricSample(AbstractBaseModel):
             SecurityException,
             TaskTemplate,
             Severity,
+            Vulnerability,
         )
         from iam.models import Folder
-        from django.db.models import Count
+        from django.db.models import Count, Q
+        from datetime import timedelta
+        from django.utils import timezone as _tz
 
         is_global = folder.content_type == Folder.ContentType.ROOT
+        today = _tz.localdate()
 
         def scope(qs):
             return qs if is_global else qs.filter(folder=folder)
@@ -797,10 +803,120 @@ class BuiltinMetricSample(AbstractBaseModel):
             id__in=audits_qs.values_list("framework_id", flat=True).distinct()
         ).count()
 
+        # Assets
+        assets = scope(Asset.objects.all())
+        total_assets = assets.count()
+        # Labels for Asset.Type / Evidence.Status / Vulnerability.Status / Assessment.Status
+        # come from gettext_lazy proxies. They satisfy dict.get/__eq__ but JSON serialization
+        # rejects them as dict keys, so force str() at construction time.
+        assets_type_labels = {
+            choice[0]: str(choice[1]) for choice in Asset.Type.choices
+        }
+        assets_type_breakdown = {
+            assets_type_labels.get(k, str(k)): v
+            for k, v in assets.values("type")
+            .annotate(count=Count("id"))
+            .values_list("type", "count")
+        }
+
+        # Evidence
+        evidence = scope(Evidence.objects.all())
+        total_evidence = evidence.count()
+        evidence_status_labels = {
+            choice[0]: str(choice[1]) for choice in Evidence.Status.choices
+        }
+        evidence_status_breakdown = {
+            evidence_status_labels.get(k, str(k)): v
+            for k, v in evidence.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        }
+        evidence_expiring_30d = evidence.filter(
+            expiry_date__isnull=False,
+            expiry_date__gte=today,
+            expiry_date__lte=today + timedelta(days=30),
+        ).count()
+
+        # Vulnerabilities
+        vulnerabilities = scope(Vulnerability.objects.all())
+        total_vulnerabilities = vulnerabilities.count()
+        vuln_severity_raw = dict(
+            vulnerabilities.values("severity")
+            .annotate(count=Count("id"))
+            .values_list("severity", "count")
+        )
+        # Vulnerability.severity uses the shared core Severity choices.
+        vuln_severity_breakdown = {
+            severity_labels.get(k, str(k)): v for k, v in vuln_severity_raw.items()
+        }
+        vuln_status_labels = {
+            choice[0]: str(choice[1]) for choice in Vulnerability.Status.choices
+        }
+        vulnerabilities_status_breakdown = {
+            vuln_status_labels.get(k, str(k)): v
+            for k, v in vulnerabilities.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        }
+
+        # Task occurrences: overdue + due in next 7 days (excluding completed / cancelled).
+        # TaskNode.folder is propagated from its TaskTemplate.folder, so direct filter is correct.
+        from core.models import TaskNode
+
+        open_tasks = scope(TaskNode.objects.all()).exclude(
+            status__in=["completed", "cancelled"]
+        )
+        tasks_overdue = open_tasks.filter(due_date__lt=today).count()
+        tasks_due_7d = open_tasks.filter(
+            due_date__gte=today, due_date__lte=today + timedelta(days=7)
+        ).count()
+
+        # Applied controls — ETA state (on track / late / no ETA) and priority breakdown.
+        eta_on_track = controls.filter(Q(eta__isnull=False) & Q(eta__gte=today)).count()
+        eta_late = controls.filter(
+            Q(eta__isnull=False)
+            & Q(eta__lt=today)
+            & ~Q(status__in=["active", "deprecated"])
+        ).count()
+        eta_no_eta = controls.filter(eta__isnull=True).count()
+        controls_eta_breakdown = {
+            str(_("On track")): eta_on_track,
+            str(_("Late")): eta_late,
+            str(_("No ETA")): eta_no_eta,
+        }
+        controls_priority_breakdown = {
+            str(k if k is not None else _("Unset")): v
+            for k, v in controls.values("priority")
+            .annotate(count=Count("id"))
+            .values_list("priority", "count")
+        }
+
+        # Audits rollup: count, status breakdown, mean progress.
+        total_audits = audits_qs.count()
+        audit_status_labels = {
+            choice[0]: str(choice[1]) for choice in ComplianceAssessment.Status.choices
+        }
+        audits_status_breakdown = {
+            audit_status_labels.get(k, str(k) if k else str(_("Unset"))): v
+            for k, v in audits_qs.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        }
+        # progress is a Python @property, so iterate; cost is bounded by daily snapshot.
+        if total_audits:
+            progresses = [a.progress for a in audits_qs.only("id")]
+            audits_avg_progress = (
+                round(sum(progresses) / len(progresses)) if progresses else 0
+            )
+        else:
+            audits_avg_progress = 0
+
         return {
             "total_controls": total_controls,
             "controls_status_breakdown": controls_status_breakdown,
             "controls_category_breakdown": controls_category_breakdown,
+            "controls_eta_breakdown": controls_eta_breakdown,
+            "controls_priority_breakdown": controls_priority_breakdown,
             "total_incidents": total_incidents,
             "incidents_severity_breakdown": incidents_severity_breakdown,
             "incidents_status_breakdown": incidents_status_breakdown,
@@ -813,6 +929,19 @@ class BuiltinMetricSample(AbstractBaseModel):
             "total_risk_acceptances": total_risk_acceptances,
             "total_frameworks_in_use": total_frameworks_in_use,
             "risk_scenarios_qualifications_breakdown": risk_scenarios_qualifications_breakdown,
+            "total_assets": total_assets,
+            "assets_type_breakdown": assets_type_breakdown,
+            "total_evidence": total_evidence,
+            "evidence_status_breakdown": evidence_status_breakdown,
+            "evidence_expiring_30d": evidence_expiring_30d,
+            "total_vulnerabilities": total_vulnerabilities,
+            "vulnerabilities_severity_breakdown": vuln_severity_breakdown,
+            "vulnerabilities_status_breakdown": vulnerabilities_status_breakdown,
+            "tasks_overdue": tasks_overdue,
+            "tasks_due_7d": tasks_due_7d,
+            "total_audits": total_audits,
+            "audits_status_breakdown": audits_status_breakdown,
+            "audits_avg_progress": audits_avg_progress,
         }
 
 
