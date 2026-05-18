@@ -35,7 +35,14 @@ class Command(BaseCommand):
                     if library.is_preset:
                         from library.utils import upsert_preset_from_stored_library
 
-                        upsert_preset_from_stored_library(library)
+                        try:
+                            upsert_preset_from_stored_library(library)
+                        except Exception:
+                            logger.exception(
+                                "Failed to upsert preset from stored library",
+                                filename=fname,
+                                urn=library.urn,
+                            )
                     logger.info(
                         "Successfully stored library",
                         filename=fname,
