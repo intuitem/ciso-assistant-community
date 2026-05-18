@@ -1011,7 +1011,10 @@
 											class="badge text-sm font-semibold"
 											style="background-color: {complianceResultColorMap[
 												requirementAssessment.result
-											] || '#ddd'}"
+											] || '#ddd'}; {complianceResultColorMap[requirementAssessment.result] ===
+											'#000000'
+												? 'color: white;'
+												: ''}"
 										>
 											{safeTranslate(requirementAssessment.result)}
 										</span>

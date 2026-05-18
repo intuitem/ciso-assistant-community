@@ -1,11 +1,16 @@
 <script lang="ts">
-	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
+	import { complianceResultColorMap, complianceResultTailwindColorMap } from '$lib/utils/constants';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { getFieldVisibility } from '$lib/utils/helpers';
+	import {
+		getFieldVisibility,
+		hasComputedResult,
+		computeRequirementScoreAndResult
+	} from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -184,6 +189,14 @@
 		if (!currentRequirementAssessment) return;
 		if (!currentRequirementAssessment.answers) currentRequirementAssessment.answers = {};
 		currentRequirementAssessment.answers[urn] = newAnswer;
+		const computed = computeRequirementScoreAndResult(
+			currentRequirementAssessment,
+			currentRequirementAssessment.answers
+		);
+		if (computed.result !== null) {
+			currentRequirementAssessment.result = computed.result;
+			result = computed.result;
+		}
 		const form = document.getElementById('flashModeForm');
 		fetch(form!.action, {
 			method: 'POST',
@@ -200,6 +213,7 @@
 			: null
 	);
 	let hasQuestions = $derived(currentQuestions != null && Object.keys(currentQuestions).length > 0);
+	let currentHasComputedResult = $derived(hasComputedResult(currentQuestions));
 
 	function updateResult(newResult: string | null) {
 		currentRequirementAssessment.result = newResult;
@@ -419,20 +433,32 @@
 				{#if currentRequirementAssessment}
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						{#if showResult}
-							<RadioGroup
-								possibleOptions={possible_options}
-								initialValue={currentRequirementAssessment.result}
-								classes="w-full"
-								colorMap={complianceResultTailwindColorMap}
-								disabled={isReadOnly}
-								field="result"
-								onChange={(newValue) => {
-									const newResult = result === newValue ? 'not_assessed' : newValue;
-									updateResult(newResult);
-								}}
-								key="id"
-								labelKey="label"
-							/>
+							{#if currentHasComputedResult}
+								<span
+									class="badge text-sm font-semibold"
+									style="background-color: {complianceResultColorMap[result ?? 'not_assessed'] ||
+										'#ddd'}; {complianceResultColorMap[result ?? 'not_assessed'] === '#000000'
+										? 'color: white;'
+										: ''}"
+								>
+									{safeTranslate(result ?? 'not_assessed')}
+								</span>
+							{:else}
+								<RadioGroup
+									possibleOptions={possible_options}
+									initialValue={currentRequirementAssessment.result}
+									classes="w-full"
+									colorMap={complianceResultTailwindColorMap}
+									disabled={isReadOnly}
+									field="result"
+									onChange={(newValue) => {
+										const newResult = result === newValue ? 'not_assessed' : newValue;
+										updateResult(newResult);
+									}}
+									key="id"
+									labelKey="label"
+								/>
+							{/if}
 						{/if}
 					</form>
 

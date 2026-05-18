@@ -644,7 +644,9 @@
 													</p>
 													{#if hasComputedResult(requirementAssessment.requirement.questions)}
 														<span
-															class="badge text-sm font-semibold"
+															class="badge text-sm font-semibold {getClassesText(
+																requirementAssessment.result
+															)}"
 															style="background-color: {complianceResultColorMap[
 																requirementAssessment.result
 															] || '#ddd'}"
@@ -681,11 +683,14 @@
 													field="answers"
 													disabled={isReadOnly}
 													{shallow}
-													onChange={(urn, newAnswer) => {
+													onChange={async (urn, newAnswer) => {
 														requirementAssessment.answers[urn] = newAnswer;
-														updateBulk(requirementAssessment, {
+														await updateBulk(requirementAssessment, {
 															answers: { [urn]: newAnswer }
 														});
+														if (invalidateAllBool) {
+															await invalidateAll();
+														}
 													}}
 												/>
 											</div>

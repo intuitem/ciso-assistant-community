@@ -831,7 +831,10 @@
 									class="badge text-sm font-semibold"
 									style="background-color: {complianceResultColorMap[
 										computedResult || 'not_assessed'
-									] || '#ddd'}"
+									] || '#ddd'}; {complianceResultColorMap[computedResult || 'not_assessed'] ===
+									'#000000'
+										? 'color: white;'
+										: ''}"
 								>
 									{safeTranslate(computedResult || 'not_assessed')}
 								</span>
