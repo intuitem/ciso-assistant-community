@@ -962,12 +962,12 @@ class LibraryUpdater:
                 order_id = 0
                 all_fields_to_update = set()
 
-                # Check if score boundaries changed
+                # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
                     prev_min != new_framework.min_score
                     or prev_max != new_framework.max_score
-                    or prev_def != new_framework.scores_definition
                 )
+                scores_definition_changed = prev_def != new_framework.scores_definition
 
                 # If scores changed and no strategy provided, raise exception for frontend to handle
                 if (
@@ -979,11 +979,7 @@ class LibraryUpdater:
                     affected_cas = [
                         ca
                         for ca in compliance_assessments
-                        if (
-                            ca.min_score == prev_min
-                            and ca.max_score == prev_max
-                            and ca.scores_definition == prev_def
-                        )
+                        if (ca.min_score == prev_min and ca.max_score == prev_max)
                     ]
 
                     if affected_cas:
@@ -1004,19 +1000,25 @@ class LibraryUpdater:
 
                 # Update compliance assessments score boundaries
                 compliance_assessments_to_update = []
+                ca_with_scale_change = []
                 ca_bounds = {}
                 for ca in compliance_assessments:
                     # preserve user overrides: update only if CA still equals previous framework defaults
-                    still_on_prev_defaults = (
-                        ca.min_score == prev_min
-                        and ca.max_score == prev_max
-                        and ca.scores_definition == prev_def
+                    scale_on_prev_defaults = (
+                        ca.min_score == prev_min and ca.max_score == prev_max
                     )
+                    definition_on_prev_defaults = ca.scores_definition == prev_def
 
-                    if still_on_prev_defaults and score_boundaries_changed:
+                    needs_update = False
+                    if scale_on_prev_defaults and score_boundaries_changed:
                         ca.min_score = new_framework.min_score
                         ca.max_score = new_framework.max_score
+                        needs_update = True
+                        ca_with_scale_change.append(ca)
+                    if definition_on_prev_defaults and scores_definition_changed:
                         ca.scores_definition = new_framework.scores_definition
+                        needs_update = True
+                    if needs_update:
                         compliance_assessments_to_update.append(ca)
 
                 if compliance_assessments_to_update:
@@ -1046,7 +1048,7 @@ class LibraryUpdater:
                                 )
                             ),
                         )
-                        for ca in compliance_assessments_to_update
+                        for ca in ca_with_scale_change
                     }
 
                 # main loop by requirement_node
@@ -1125,8 +1127,7 @@ class LibraryUpdater:
                         if (
                             ra.is_scored
                             and ra.score is not None
-                            and ra.compliance_assessment
-                            in compliance_assessments_to_update
+                            and ra.compliance_assessment in ca_with_scale_change
                         ):
                             default_min = (
                                 0
@@ -2324,7 +2325,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Override visibility per field. Keys: field names. Values: 'everyone', 'auditor', or 'hidden'."
+            "Per-field visibility template seeded into new CAs: "
+            "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
         ),
     )
     urn_namespace = models.CharField(
@@ -2418,15 +2420,6 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
-
-    def save(self, *args, **kwargs):
-        from core.mappings.engine import engine
-
-        obj = super().save(*args, **kwargs)
-
-        if self.urn not in engine.frameworks:
-            transaction.on_commit(lambda: engine.load_frameworks())
-        return obj
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -2583,6 +2576,8 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             }
             if question.annotation:
                 q_data["annotation"] = question.annotation
+            if question.config is not None:
+                q_data["config"] = question.config
             choices = [_translate_choice(c) for c in question.choices.all()]
             if choices:
                 q_data["choices"] = choices
@@ -6621,9 +6616,6 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
-    scoring_enabled = models.BooleanField(default=False)
-    show_documentation_score = models.BooleanField(default=False)
-
     computed_outcome = models.JSONField(null=True, blank=True)
 
     assets = models.ManyToManyField(
@@ -6650,15 +6642,17 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
-    extended_result_enabled = models.BooleanField(default=False)
-    progress_status_enabled = models.BooleanField(default=True)
-
     field_visibility = models.JSONField(
         default=dict,
         blank=True,
         verbose_name=_("Field visibility"),
         help_text=_(
-            "Override visibility per field for this assessment. Overrides framework defaults."
+            "Per-field visibility map: "
+            "{field_name: {role: 'edit' | 'read' | 'hidden'}}. "
+            "Missing keys cascade through core.utils.DEFAULT_VISIBILITY "
+            "(e.g. score/documentation_score default to hidden, "
+            "status/extended_result to auditor-only) and finally to 'edit' "
+            "for every role for unknown fields."
         ),
     )
 
@@ -6687,6 +6681,63 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+
+    # --- Visibility-derived booleans ---
+    # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
+    # per-role pairs ({role: 'edit'|'read'|'hidden'}); the legacy booleans read
+    # the auditor axis (the field exists at all if auditor isn't 'hidden').
+
+    def _auditor_visible(self, field):
+        from core.utils import resolve_field_visibility
+
+        pair = resolve_field_visibility(self, field)
+        return pair.get("auditor", "edit") != "hidden"
+
+    def _set_field_hidden(self, field, hidden):
+        # When un-hiding via the legacy boolean setters (scoring_enabled,
+        # show_documentation_score, extended_result_enabled, progress_status_enabled),
+        # restore AUDITOR_ONLY rather than EVERYONE_EDIT — the historical "True"
+        # value of those booleans only meant "auditor sees it", and the migration
+        # backfills existing CAs to AUDITOR_ONLY for the same reason. Writing
+        # EVERYONE_EDIT here would silently widen access to respondents.
+        from core.utils import AUDITOR_ONLY, HIDDEN
+
+        fv = dict(self.field_visibility or {})
+        fv[field] = dict(HIDDEN) if hidden else dict(AUDITOR_ONLY)
+        self.field_visibility = fv
+
+    @property
+    def scoring_enabled(self):
+        return self._auditor_visible("score")
+
+    @scoring_enabled.setter
+    def scoring_enabled(self, value):
+        self._set_field_hidden("score", not value)
+        self._set_field_hidden("is_scored", not value)
+
+    @property
+    def show_documentation_score(self):
+        return self._auditor_visible("documentation_score")
+
+    @show_documentation_score.setter
+    def show_documentation_score(self, value):
+        self._set_field_hidden("documentation_score", not value)
+
+    @property
+    def extended_result_enabled(self):
+        return self._auditor_visible("extended_result")
+
+    @extended_result_enabled.setter
+    def extended_result_enabled(self, value):
+        self._set_field_hidden("extended_result", not value)
+
+    @property
+    def progress_status_enabled(self):
+        return self._auditor_visible("status")
+
+    @progress_status_enabled.setter
+    def progress_status_enabled(self, value):
+        self._set_field_hidden("status", not value)
 
     def upsert_daily_metrics(self):
         per_status = {item[1]: item[0] for item in self.get_requirements_status_count()}
@@ -7841,20 +7892,59 @@ class ComplianceAssessment(Assessment):
         )
         return requirement_assessments, assessment_source_dict
 
+    def _get_progress_counts(self) -> tuple[int, int]:
+        """
+        Return (total, assessed) counts for assessable requirements
+        """
+
+        requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        )
+
+        if not self.selected_implementation_groups:
+            counts = requirements.aggregate(
+                total=Count("id"),
+                assessed=Count(
+                    "id",
+                    filter=~Q(result=RequirementAssessment.Result.NOT_ASSESSED)
+                    | Q(score__isnull=False),
+                ),
+            )
+            return counts["total"], counts["assessed"]
+
+        selected_groups = set(self.selected_implementation_groups)
+        total = 0
+        assessed = 0
+        lightweight_requirements = (
+            requirements.select_related("requirement")
+            .only(
+                "result",
+                "score",
+                "requirement_id",
+                "requirement__implementation_groups",
+            )
+            .iterator()
+        )
+
+        for requirement_assessment in lightweight_requirements:
+            requirement_groups = set(
+                requirement_assessment.requirement.implementation_groups or []
+            )
+            if selected_groups.isdisjoint(requirement_groups):
+                continue
+
+            total += 1
+            if (
+                requirement_assessment.result
+                != RequirementAssessment.Result.NOT_ASSESSED
+            ) or requirement_assessment.score is not None:
+                assessed += 1
+
+        return total, assessed
+
     @property
     def progress(self) -> int:
-        requirement_assessments = list(
-            self.get_requirement_assessments(include_non_assessable=False)
-        )
-        total_cnt = len(requirement_assessments)
-        assessed_cnt = len(
-            [
-                r
-                for r in requirement_assessments
-                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
-                or r.score != None
-            ]
-        )
+        total_cnt, assessed_cnt = self._get_progress_counts()
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
 
     @property
@@ -7911,6 +8001,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         )
         GOOD_PRACTICE = "good_practice", "Good practice"
 
+    class RespondentAlignment(models.TextChoices):
+        YES = "yes", _("Yes")
+        NO = "no", _("No")
+        IN_PROGRESS = "in_progress", _("In progress")
+        NOT_APPLICABLE = "not_applicable", _("Not applicable")
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -7949,6 +8045,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         related_name="requirement_assessments",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    respondent_alignment = models.CharField(
+        max_length=32,
+        choices=RespondentAlignment.choices,
+        blank=True,
+        null=True,
+        verbose_name=_("Respondent alignment"),
+    )
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
         on_delete=models.CASCADE,
@@ -8030,6 +8133,70 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             ):
                 return {"result": RequirementAssessment.Result.NON_COMPLIANT}
         return {}
+
+    def preview_suggested_applied_controls(
+        self,
+        *,
+        selected_reference_control_ids: list | None = None,
+    ) -> list[dict]:
+        """Return a list of {'applied_control': AppliedControl, 'status': str}
+        where status is one of 'create' (no matching AppliedControl exists yet),
+        'reuse' (an AppliedControl with same folder/ref/category exists and will
+        be linked), or 'linked' (already linked to this RequirementAssessment).
+        AppliedControl instances may be unsaved when status == 'create'."""
+        results: list[dict] = []
+        if not self.compliance_assessment.requirement_matches_selected_groups(
+            self.requirement
+        ):
+            return results
+        reference_controls = list(self.requirement.reference_controls.all())
+        if selected_reference_control_ids is not None:
+            ids_set = {str(v) for v in selected_reference_control_ids}
+            reference_controls = [
+                rc for rc in reference_controls if str(rc.id) in ids_set
+            ]
+        if not reference_controls:
+            return results
+        # Single query covering every (folder, reference_control, category) combo
+        # we may need, plus the RAs each candidate is linked to. Avoids 2R queries.
+        ref_ids = [rc.id for rc in reference_controls]
+        ac_qs = AppliedControl.objects.filter(
+            folder=self.folder,
+            reference_control_id__in=ref_ids,
+        ).prefetch_related("requirement_assessments")
+        ac_by_key: dict = {}
+        linked_by_key: dict = {}
+        for ac in ac_qs:
+            key = (ac.reference_control_id, ac.category)
+            ac_by_key.setdefault(key, ac)
+            if any(ra.id == self.id for ra in ac.requirement_assessments.all()):
+                # Track the actually-linked instance, not just any AC with the key.
+                linked_by_key[key] = ac
+        for reference_control in reference_controls:
+            key = (reference_control.id, reference_control.category)
+            if key in linked_by_key:
+                results.append(
+                    {"applied_control": linked_by_key[key], "status": "linked"}
+                )
+                continue
+            if key in ac_by_key:
+                results.append({"applied_control": ac_by_key[key], "status": "reuse"})
+                continue
+            results.append(
+                {
+                    "applied_control": AppliedControl(
+                        folder=self.folder,
+                        reference_control=reference_control,
+                        category=reference_control.category,
+                        name=reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        ref_id=reference_control.ref_id,
+                        description=reference_control.description,
+                    ),
+                    "status": "create",
+                }
+            )
+        return results
 
     def create_applied_controls_from_suggestions(
         self,
@@ -8744,7 +8911,7 @@ class TaskTemplateManager(models.Manager):
         return super().create(**kwargs)
 
 
-class TaskTemplate(NameDescriptionMixin, FolderMixin):
+class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     objects = TaskTemplateManager()
 
     SCHEDULE_JSONSCHEMA = {
@@ -9364,11 +9531,38 @@ class Actor(AbstractBaseModel):
         return str(self.specific)
 
 
+class Preset(NameDescriptionMixin, FolderMixin, EditableMixin):
+    """Template definition. Library-backed (urn set) or user-authored (urn null)."""
+
+    urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    ref_id = models.CharField(max_length=255, null=True, blank=True)
+    version = models.IntegerField(default=1)
+    provider = models.CharField(max_length=255, null=True, blank=True)
+    translations = models.JSONField(default=dict, blank=True)
+    profile = models.JSONField(default=dict, blank=True)
+    feature_flags = models.JSONField(default=dict, blank=True)
+    scaffolded_objects = models.JSONField(default=list, blank=True)
+    steps = models.JSONField(default=list, blank=True)
+    dependencies = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class PresetJourney(NameDescriptionMixin, FolderMixin):
     """Instance created when a user applies a preset definition."""
 
-    urn = models.CharField(max_length=255)
-    version = models.IntegerField(default=1)
+    preset = models.ForeignKey(
+        Preset,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="journeys",
+    )
+    applied_version = models.IntegerField(default=1)
     object_refs = models.JSONField(default=dict)
     applied_at = models.DateTimeField(auto_now_add=True)
     applied_by = models.ForeignKey(
@@ -9401,6 +9595,8 @@ class PresetJourneyStep(AbstractBaseModel):
     translations = models.JSONField(null=True, blank=True)
     target_model = models.CharField(max_length=100, blank=True, null=True)
     target_ref = models.CharField(max_length=100, blank=True, null=True)
+    target_url = models.CharField(max_length=255, blank=True, null=True)
+    target_params = models.JSONField(null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.NOT_STARTED
     )
@@ -9554,6 +9750,10 @@ auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
     m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    Preset,
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     PresetJourney,

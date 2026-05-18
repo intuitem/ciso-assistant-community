@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { get } from 'svelte/store';
 	import { getBuilderContext } from './builder-state';
+	import { m } from '$paraglide/messages';
 
 	const builder = getBuilderContext();
 
@@ -38,10 +39,10 @@
 
 <div class="max-w-3xl mx-auto py-16 px-6">
 	<h2 class="text-xl font-semibold text-gray-800 mb-2">
-		How do you want to structure this framework?
+		{m.builderEmptyStateTitle()}
 	</h2>
 	<p class="text-sm text-gray-500 mb-8">
-		Pick a starting shape — you can change the structure at any time.
+		{m.builderEmptyStateSubtitle()}
 	</p>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -51,9 +52,9 @@
 			onclick={seedFlat}
 		>
 			<div class="text-3xl mb-2 text-gray-400">≡</div>
-			<div class="text-sm font-medium text-gray-800">Flat list</div>
+			<div class="text-sm font-medium text-gray-800">{m.builderEmptyFlat()}</div>
 			<p class="text-xs text-gray-500 mt-1">
-				All requirements at one level. Like Google SAIF (12 requirements).
+				{m.builderEmptyFlatHint()}
 			</p>
 		</button>
 
@@ -63,9 +64,9 @@
 			onclick={seedGrouped}
 		>
 			<div class="text-3xl mb-2 text-gray-400">□</div>
-			<div class="text-sm font-medium text-gray-800">Grouped</div>
+			<div class="text-sm font-medium text-gray-800">{m.builderEmptyGrouped()}</div>
 			<p class="text-xs text-gray-500 mt-1">
-				Sections containing requirements. Like OWASP MASVS (8 sections → 24 reqs).
+				{m.builderEmptyGroupedHint()}
 			</p>
 		</button>
 
@@ -75,9 +76,9 @@
 			onclick={seedHierarchy}
 		>
 			<div class="text-3xl mb-2 text-gray-400">▼</div>
-			<div class="text-sm font-medium text-gray-800">Hierarchy</div>
+			<div class="text-sm font-medium text-gray-800">{m.builderEmptyHierarchy()}</div>
 			<p class="text-xs text-gray-500 mt-1">
-				Multi-level nesting. Like NIST CSF 2.0 (6 → 23 → 106).
+				{m.builderEmptyHierarchyHint()}
 			</p>
 		</button>
 
@@ -87,8 +88,8 @@
 			onclick={seedBlank}
 		>
 			<div class="text-3xl mb-2 text-gray-400">○</div>
-			<div class="text-sm font-medium text-gray-800">Blank canvas</div>
-			<p class="text-xs text-gray-500 mt-1">Start from zero — add one empty node.</p>
+			<div class="text-sm font-medium text-gray-800">{m.builderEmptyBlank()}</div>
+			<p class="text-xs text-gray-500 mt-1">{m.builderEmptyBlankHint()}</p>
 		</button>
 	</div>
 </div>
