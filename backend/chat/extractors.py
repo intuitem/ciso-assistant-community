@@ -5,6 +5,7 @@ Each extractor handles a specific file type and produces semantically meaningful
 
 import csv
 import io
+import re
 import structlog
 from dataclasses import dataclass
 
@@ -13,6 +14,14 @@ logger = structlog.get_logger(__name__)
 CHUNK_SIZE = 500  # Target tokens per chunk (approx 4 chars per token)
 CHUNK_OVERLAP = 50  # Token overlap between chunks
 MAX_CHUNK_CHARS = CHUNK_SIZE * 4
+
+_HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
+
+# Lazy state for Docling. The converter loads ~300 MB of models on first
+# instantiation, so we keep it process-global. `_docling_unavailable` flips
+# permanently after import or first-init failure so we don't retry every call.
+_docling_converter = None
+_docling_unavailable = False
 
 
 def _split_long_text(text: str, max_len: int) -> list[str]:
@@ -57,8 +66,124 @@ def get_extractor(content_type: str):
     return extractors.get(content_type)
 
 
+def _get_docling_converter():
+    """Lazy-init the Docling converter. Returns None if unavailable.
+
+    First call pays the model-load cost (~300 MB downloaded once, cached in
+    ~/.cache/docling on subsequent runs). Failures flip a permanent flag so
+    we skip retrying on every extraction.
+    """
+    global _docling_converter, _docling_unavailable
+    if _docling_unavailable:
+        return None
+    if _docling_converter is not None:
+        return _docling_converter
+    try:
+        from docling.document_converter import DocumentConverter
+
+        _docling_converter = DocumentConverter()
+        logger.info("docling_initialized")
+        return _docling_converter
+    except Exception as e:
+        logger.warning("docling_unavailable", error=str(e))
+        _docling_unavailable = True
+        return None
+
+
+def _extract_with_docling(file, hint: str) -> list[Chunk] | None:
+    """Try Docling for layout-aware extraction. Returns None on failure so the
+    caller can fall back to its prior implementation.
+    """
+    converter = _get_docling_converter()
+    if converter is None:
+        return None
+    try:
+        from docling.datamodel.base_models import DocumentStream
+
+        file.seek(0)
+        data = file.read()
+        source = DocumentStream(name=hint, stream=io.BytesIO(data))
+        result = converter.convert(source)
+        markdown = result.document.export_to_markdown()
+        if not markdown.strip():
+            return None
+        return _markdown_to_chunks(markdown, base_metadata={"extractor": "docling"})
+    except Exception as e:
+        logger.warning("docling_extract_failed", error=str(e), hint=hint)
+        return None
+
+
+def _markdown_to_chunks(markdown: str, base_metadata: dict) -> list[Chunk]:
+    """Chunk markdown while prefixing each chunk with its heading breadcrumb.
+
+    The LLM sees something like:
+        [5. Access Control > 5.2 Authentication]
+        MFA shall be enforced for all administrative accounts. ...
+
+    so a control extracted from this chunk can be tagged with its originating
+    section. Tables are emitted by Docling as markdown pipe tables and stay
+    inline — they don't need special handling.
+    """
+    chunks: list[Chunk] = []
+    heading_stack: list[str] = []
+    current_lines: list[str] = []
+    current_len = 0
+
+    def flush():
+        nonlocal current_lines, current_len
+        if not current_lines:
+            return
+        body = "\n".join(current_lines).strip()
+        current_lines = []
+        current_len = 0
+        if not body:
+            return
+        breadcrumb = " > ".join(filter(None, heading_stack))
+        prefix = f"[{breadcrumb}]\n" if breadcrumb else ""
+        text = (prefix + body).strip()
+        meta = dict(base_metadata)
+        if breadcrumb:
+            meta["section"] = breadcrumb
+        parts = (
+            _split_long_text(text, MAX_CHUNK_CHARS)
+            if len(text) > MAX_CHUNK_CHARS
+            else [text]
+        )
+        for part in parts:
+            chunks.append(Chunk(text=part, index=len(chunks), metadata=dict(meta)))
+
+    for line in markdown.split("\n"):
+        m = _HEADING_RE.match(line)
+        if m:
+            flush()
+            level = len(m.group(1))
+            title = m.group(2).strip()
+            # Trim the stack to one slot above the new heading's level, then push
+            heading_stack[:] = heading_stack[: level - 1]
+            while len(heading_stack) < level - 1:
+                heading_stack.append("")
+            heading_stack.append(title)
+            continue
+        current_lines.append(line)
+        current_len += len(line) + 1
+        if current_len >= MAX_CHUNK_CHARS:
+            flush()
+
+    flush()
+    return chunks
+
+
 def extract_pdf(file) -> list[Chunk]:
-    """Extract text from PDF, splitting by pages/paragraphs."""
+    """Extract text from PDF.
+
+    Prefers Docling for layout-aware parsing (preserves tables and section
+    headings). Falls back to PyMuPDF if Docling is unavailable, fails, or
+    returns nothing useful — preserves the prior behavior on edge-case files.
+    """
+    chunks = _extract_with_docling(file, hint="document.pdf")
+    if chunks:
+        return chunks
+
     try:
         import fitz  # PyMuPDF
     except ImportError:
@@ -191,14 +316,17 @@ def extract_csv(file) -> list[Chunk]:
 
 
 def extract_docx(file) -> list[Chunk]:
-    """Extract from .docx: paragraphs first, then tables rendered as
-    pipe-separated rows.
+    """Extract from .docx.
 
-    Order is imperfect — true paragraph/table interleaving would require
-    walking the XML body. For prototype use (policy docs, control catalogs)
-    the substance is preserved either way; the LLM doesn't need section
-    fidelity to spot a control.
+    Prefers Docling — it walks the document tree, preserves the order of
+    paragraphs and tables, and emits markdown with heading hierarchy intact.
+    Falls back to the python-docx implementation (paragraphs first, tables
+    tacked on at the end) if Docling fails.
     """
+    chunks = _extract_with_docling(file, hint="document.docx")
+    if chunks:
+        return chunks
+
     try:
         from docx import Document
     except ImportError:

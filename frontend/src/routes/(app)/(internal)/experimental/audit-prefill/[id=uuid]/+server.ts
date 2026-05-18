@@ -52,7 +52,9 @@ export const POST: RequestHandler = async ({ request, params, fetch }) => {
 			kinds: body.kinds ?? undefined
 		});
 	} else if (op === 'start-wave2') {
-		response = await post(`/chat/agent-runs/${params.id}/start-audit-prefill-wave2/`, {});
+		response = await post(`/chat/agent-runs/${params.id}/start-audit-prefill-wave2/`, {
+			skip_not_applicable: body.skip_not_applicable ?? true
+		});
 	} else if (op === 'cancel') {
 		response = await post(`/chat/agent-runs/${params.id}/cancel/`, {});
 	} else {

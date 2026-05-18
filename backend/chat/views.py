@@ -1899,6 +1899,11 @@ class AgentRunViewSet(BaseModelViewSet):
                     status=status.HTTP_409_CONFLICT,
                 )
 
+            # Pass-through user options. Defaults to skipping not_applicable RAs
+            # because those already carry an explicit auditor decision — re-
+            # scoring them just creates no-op proposals the user has to dismiss.
+            skip_na = bool(request.data.get("skip_not_applicable", True))
+
             wave2 = AgentRun.objects.create(
                 owner=request.user,
                 folder=parent.folder,
@@ -1906,7 +1911,11 @@ class AgentRunViewSet(BaseModelViewSet):
                 strictness=parent.strictness,
                 target_content_type=parent.target_content_type,
                 target_object_id=parent.target_object_id,
-                config={"wave": 2, "parent_run_id": str(parent.id)},
+                config={
+                    "wave": 2,
+                    "parent_run_id": str(parent.id),
+                    "skip_not_applicable": skip_na,
+                },
             )
 
         from .audit_prefill import run_audit_prefill_wave2

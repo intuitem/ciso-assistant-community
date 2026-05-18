@@ -180,7 +180,15 @@ def run_audit_prefill_wave1(agent_run_id: str):
 
     run.total_steps = len(evidences) + 1  # +1 for the dedup/match pass
     run.completed_steps = 0
-    run.save(update_fields=["total_steps", "completed_steps", "updated_at"])
+    # Stamp the perimeter size into config so the UI can show, while Wave 1
+    # is still running, that these N existing controls are available and
+    # will be carried into Wave 2 as additional context. Same query Wave 2
+    # uses for its per-RA shortlist (minus the Wave-1-derived subset).
+    run.config = {
+        **(run.config or {}),
+        "existing_folder_controls_count": len(existing_controls),
+    }
+    run.save(update_fields=["total_steps", "completed_steps", "config", "updated_at"])
 
     if not evidences:
         run.status = AgentRun.Status.SUCCEEDED
@@ -769,11 +777,26 @@ def run_audit_prefill_wave2(agent_run_id: str):
         _fail(run, "Target compliance assessment not found.")
         return
 
-    ras = list(
-        RequirementAssessment.objects.filter(
-            compliance_assessment=ca, selected=True
-        ).select_related("requirement")
+    # Only assessable requirements — section headers and intro nodes aren't
+    # something an auditor scores. (selected=True keeps the user's filter
+    # respected; requirement__assessable=True drops headings/intros.)
+    ra_qs = RequirementAssessment.objects.filter(
+        compliance_assessment=ca,
+        selected=True,
+        requirement__assessable=True,
     )
+    skip_na = bool((run.config or {}).get("skip_not_applicable", False))
+    if skip_na:
+        ra_qs = ra_qs.exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
+    ras = list(ra_qs.select_related("requirement"))
+    na_skipped_total = 0
+    if skip_na:
+        na_skipped_total = RequirementAssessment.objects.filter(
+            compliance_assessment=ca,
+            selected=True,
+            requirement__assessable=True,
+            result=RequirementAssessment.Result.NOT_APPLICABLE,
+        ).count()
     run.total_steps = len(ras)
     run.completed_steps = 0
     run.save(update_fields=["total_steps", "completed_steps", "updated_at"])
@@ -790,6 +813,9 @@ def run_audit_prefill_wave2(agent_run_id: str):
     is_thorough = run.strictness == AgentRun.Strictness.THOROUGH
     ra_ct = ContentType.objects.get_for_model(RequirementAssessment)
 
+    proposed_count = 0
+    noop_skipped = 0
+
     try:
         for i, ra in enumerate(ras, start=1):
             label = f"Assessing {i}/{len(ras)}: {str(ra.requirement)[:80]}"
@@ -797,7 +823,7 @@ def run_audit_prefill_wave2(agent_run_id: str):
                 return
 
             try:
-                _propose_result_for_ra(
+                emitted = _propose_result_for_ra(
                     run=run,
                     ra=ra,
                     catalog_controls=catalog_controls,
@@ -812,6 +838,10 @@ def run_audit_prefill_wave2(agent_run_id: str):
                     ),
                     build_context=_build_context_block,
                 )
+                if emitted:
+                    proposed_count += 1
+                else:
+                    noop_skipped += 1
             except Exception as e:
                 logger.exception("Failed Wave 2 RA %s", ra.id)
                 AgentAction.objects.create(
@@ -821,6 +851,7 @@ def run_audit_prefill_wave2(agent_run_id: str):
                     target_object_id=ra.id,
                     payload={
                         "result": "not_assessed",
+                        "current_result": ra.result or "not_assessed",
                         "control_ids": [],
                         "observation": "",
                         "confidence": 0.0,
@@ -830,6 +861,7 @@ def run_audit_prefill_wave2(agent_run_id: str):
                     confidence=0.0,
                     state=AgentAction.State.PROPOSED,
                 )
+                proposed_count += 1
 
             run.completed_steps = i
             run.last_heartbeat_at = timezone.now()
@@ -843,7 +875,10 @@ def run_audit_prefill_wave2(agent_run_id: str):
         run.config = {
             **(run.config or {}),
             "wave": 2,
-            "ras_proposed": len(ras),
+            "ras_total": len(ras),
+            "ras_proposed": proposed_count,
+            "ras_noop_skipped": noop_skipped,
+            "ras_na_skipped": na_skipped_total,
             "catalog_size": len(catalog_controls),
         }
         run.save(
@@ -997,6 +1032,21 @@ def _propose_result_for_ra(
         confidence = 0.5
     confidence = max(0.0, min(1.0, confidence))
 
+    # No-op detection: if the LLM proposes the same result the RA already
+    # has, with no controls cited and no observation, there is nothing for
+    # the user to act on — skip emitting the action entirely. Common case:
+    # empty/sparse catalog → LLM defaults to non_compliant for an RA that
+    # was already non_compliant (or not_assessed treated as non_compliant).
+    current_result = ra.result or "not_assessed"
+    is_noop = result == current_result and not control_ids and not observation.strip()
+    if is_noop:
+        logger.info(
+            "Wave 2 no-op skip for RA %s: result=%s unchanged, no controls, no observation",
+            ra.id,
+            result,
+        )
+        return False
+
     # Build per-control evidence linking from RAG source_refs: any cited
     # evidence becomes a candidate to link onto each proposed control. The
     # frontend can let the user trim before approving.
@@ -1009,6 +1059,7 @@ def _propose_result_for_ra(
         target_object_id=ra.id,
         payload={
             "result": result,
+            "current_result": current_result,
             "control_ids": control_ids,
             "observation": observation,
             "evidence_links": evidence_links,
@@ -1020,6 +1071,7 @@ def _propose_result_for_ra(
         state=AgentAction.State.PROPOSED,
         duration_ms=duration_ms,
     )
+    return True
 
 
 def _requirement_text(ra) -> str:

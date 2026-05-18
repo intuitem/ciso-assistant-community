@@ -17,6 +17,10 @@
 
 	let minConfidence = $state(0.7);
 	let busy = $state(false);
+	// Skip RAs already marked not_applicable when launching Wave 2. Defaults
+	// on — N/A is an explicit auditor decision, re-scoring those just yields
+	// no-op proposals the user has to dismiss.
+	let skipNotApplicable = $state(true);
 	// Two independent disclosures per action: the editor (pencil) and the
 	// sources viewer ("N source passage(s)" link). One can be open without
 	// the other, and they don't interfere — clicking pencil while sources
@@ -70,6 +74,9 @@
 		visibleActions.filter((a: any) => a.kind === 'extract_control' && a.state === 'proposed').length
 	);
 	const totalCandidatesExtracted = $derived(data.run?.config?.candidates ?? null);
+	const existingFolderControlsCount = $derived(
+		data.run?.config?.existing_folder_controls_count ?? null
+	);
 
 	// Wave 2 lookups: RA id → RA, AC id → AC.
 	const raById = $derived(
@@ -258,7 +265,10 @@
 		if (busy) return;
 		busy = true;
 		try {
-			const res = await callOp({ op: 'start-wave2' });
+			const res = await callOp({
+				op: 'start-wave2',
+				skip_not_applicable: skipNotApplicable
+			});
 			toast.trigger({ message: 'Wave 2 started.' });
 			await goto(`/experimental/audit-prefill/${res.id}`);
 		} finally {
@@ -428,49 +438,95 @@
 		</div>
 
 		<div class="p-6 space-y-3">
-			{#if data.run.status !== 'succeeded'}
-				<p class="text-sm text-gray-500 italic">
-					{data.run.status === 'running'
-						? wave === 2
-							? 'Asking the LLM for a verdict on each requirement…'
-							: 'Reading documents and clustering candidates…'
-						: data.run.status === 'queued'
-							? 'Run is queued — waiting for a worker.'
-							: 'Run is not active.'}
-				</p>
+			{#if wave === 1 && existingFolderControlsCount !== null && (data.run.status === 'queued' || data.run.status === 'running' || visibleActions.length === 0)}
+				<!-- Upfront context banner: shown while Wave 1 has no proposals to
+					display yet, so the user knows the perimeter is being tracked
+					and will flow into Wave 2. -->
+				<div class="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-900">
+					<i class="fa-solid fa-database mr-1 text-blue-500"></i>
+					<strong>{existingFolderControlsCount}</strong> existing control{existingFolderControlsCount ===
+					1
+						? ''
+						: 's'} found in this folder. Carried as context into Wave 2.
+				</div>
+			{/if}
+			{#if data.run.status === 'queued'}
+				<p class="text-sm text-gray-500 italic">Run is queued — waiting for a worker.</p>
 			{:else if visibleActions.length === 0}
 				<p class="text-sm text-gray-500 italic">
-					{wave === 2
-						? 'No requirement proposals — the audit may have no selected requirements.'
-						: 'No control candidates extracted. The folder may not contain readable security docs.'}
+					{#if data.run.status === 'running'}
+						{wave === 2
+							? 'Asking the LLM for a verdict on each requirement…'
+							: 'Reading documents and clustering candidates…'}
+					{:else if data.run.status === 'succeeded'}
+						{wave === 2
+							? 'No requirement proposals — the audit may have no selected requirements, or every result was unchanged from current state.'
+							: 'No control candidates extracted. The folder may not contain readable security docs.'}
+					{:else}
+						Run is not active.
+					{/if}
 				</p>
 			{:else}
+				{#if data.run.status === 'running'}
+					<!-- Live banner: tells the user proposals are streaming in. The
+						bulk action bar below is rendered but disabled until the run
+						finishes — the set isn't final yet. -->
+					<div
+						class="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-900 flex items-center gap-2"
+					>
+						<i class="fa-solid fa-spinner fa-spin text-amber-600"></i>
+						<span>
+							{wave === 2 ? 'Drafting verdicts' : 'Drafting controls'} live —
+							<strong>{visibleActions.length}</strong> so far. New entries appear as the agent processes
+							them. Bulk actions unlock when the run finishes.
+						</span>
+					</div>
+				{/if}
 				{#if wave === 1}
 					<!-- Transparency banner: explains what Wave 1 actually did so the
-						user sees that Create proposals are leftovers AFTER dedup. -->
-					<div class="bg-blue-50 border border-blue-200 rounded p-3 text-sm text-blue-900">
-						<i class="fa-solid fa-circle-info mr-1 text-blue-600"></i>
-						{#if totalCandidatesExtracted !== null}
-							Wave 1 extracted <strong>{totalCandidatesExtracted}</strong> candidate control{totalCandidatesExtracted ===
-							1
-								? ''
-								: 's'}
-							from your documents and deduped them against existing perimeter controls.
-						{:else}
-							Wave 1 deduped the extracted candidates against existing perimeter controls.
-						{/if}
-						Result:
-						<span class="px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800 mx-1">
-							{wave1LinkCount} Link
-						</span>
-						(matches an existing control — no new entry needed) and
-						<span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 mx-1">
-							{wave1CreateCount} Create
-						</span>
-						(new control we'd like to add).
-						{#if wave1CreateCount > 0}
-							The Creates are <em>extra</em> on top of what you already have — review them carefully,
-							or use "Ignore new suggestions" below to dismiss them all.
+						user sees that Create proposals are leftovers AFTER dedup, and
+						that the existing folder controls are known and will flow into
+						Wave 2 as context for per-requirement scoring. -->
+					<div
+						class="bg-blue-50 border border-blue-200 rounded p-3 text-sm text-blue-900 space-y-1"
+					>
+						<div>
+							<i class="fa-solid fa-circle-info mr-1 text-blue-600"></i>
+							{#if totalCandidatesExtracted !== null}
+								Wave 1 extracted <strong>{totalCandidatesExtracted}</strong> candidate control{totalCandidatesExtracted ===
+								1
+									? ''
+									: 's'}
+								from your documents and deduped them against existing perimeter controls.
+							{:else}
+								Wave 1 deduped the extracted candidates against existing perimeter controls.
+							{/if}
+							Result:
+							<span class="px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800 mx-1">
+								{wave1LinkCount} Link
+							</span>
+							(matches an existing control — no new entry needed) and
+							<span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 mx-1">
+								{wave1CreateCount} Create
+							</span>
+							(new control we'd like to add).
+							{#if wave1CreateCount > 0}
+								The Creates are <em>extra</em> on top of what you already have — review them carefully,
+								or use "Ignore new suggestions" below to dismiss them all.
+							{/if}
+						</div>
+						{#if existingFolderControlsCount !== null}
+							<div class="text-xs text-blue-800">
+								<i class="fa-solid fa-database mr-1 text-blue-500"></i>
+								<strong>{existingFolderControlsCount}</strong> existing control{existingFolderControlsCount ===
+								1
+									? ''
+									: 's'} found in this folder. Wave 2 will consider {existingFolderControlsCount ===
+								1
+									? 'it'
+									: 'them'} (minus any approved as Link above) as additional context when scoring each
+								requirement.
+							</div>
 						{/if}
 					</div>
 				{/if}
@@ -507,7 +563,10 @@
 								type="button"
 								class="btn preset-filled text-sm"
 								onclick={bulkApprove}
-								disabled={busy || proposedCount === 0}
+								disabled={busy || proposedCount === 0 || data.run.status === 'running'}
+								title={data.run.status === 'running'
+									? 'Wait for the run to finish — the proposal set is still streaming in.'
+									: 'Approve every proposal at or above this confidence.'}
 							>
 								<i class="fa-solid fa-check mr-1"></i>
 								Approve all ≥ {Math.round(minConfidence * 100)}%
@@ -523,8 +582,10 @@
 											kinds: ['extract_control'],
 											label: `Ignore all ${wave1CreateProposedCount} new (Create) suggestion(s)`
 										})}
-									disabled={busy}
-									title="Reject every 'Create' proposal that's still proposed. Link-to-existing proposals are untouched."
+									disabled={busy || data.run.status === 'running'}
+									title={data.run.status === 'running'
+										? 'Wait for the run to finish before bulk-rejecting.'
+										: "Reject every 'Create' proposal that's still proposed. Link-to-existing proposals are untouched."}
 								>
 									<i class="fa-solid fa-xmark mr-1"></i>
 									Ignore {wave1CreateProposedCount} new suggestion{wave1CreateProposedCount === 1
@@ -539,8 +600,10 @@
 									bulkReject({
 										label: `Reject all ${proposedCount} remaining proposal(s)`
 									})}
-								disabled={busy || proposedCount === 0}
-								title="Reject every proposal that's still in the proposed state."
+								disabled={busy || proposedCount === 0 || data.run.status === 'running'}
+								title={data.run.status === 'running'
+									? 'Wait for the run to finish before bulk-rejecting.'
+									: "Reject every proposal that's still in the proposed state."}
 							>
 								<i class="fa-solid fa-xmark mr-1"></i>
 								Reject all {proposedCount} remaining
@@ -551,16 +614,30 @@
 
 				{#if wave === 1 && wave1Settled}
 					<div
-						class="bg-pink-50 border border-pink-200 rounded p-3 flex items-center justify-between"
+						class="bg-pink-50 border border-pink-200 rounded p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
 					>
 						<div class="text-sm text-pink-900">
 							Wave 1 fully resolved.
 							<span class="text-pink-700">{approvedCount} controls in the catalog;</span>
 							ready to start the per-requirement pass.
 						</div>
-						<button type="button" class="btn preset-filled" onclick={startWave2} disabled={busy}>
-							<i class="fa-solid fa-forward mr-2"></i>Start Wave 2
-						</button>
+						<div class="flex flex-col md:items-end gap-2">
+							<label class="flex items-center gap-2 text-xs text-pink-900 cursor-pointer">
+								<input
+									type="checkbox"
+									bind:checked={skipNotApplicable}
+									class="rounded border-pink-300"
+									disabled={busy}
+								/>
+								<span>
+									Skip requirements already marked
+									<code class="px-1 py-0.5 rounded bg-pink-100 text-pink-700">not_applicable</code>
+								</span>
+							</label>
+							<button type="button" class="btn preset-filled" onclick={startWave2} disabled={busy}>
+								<i class="fa-solid fa-forward mr-2"></i>Start Wave 2
+							</button>
+						</div>
 					</div>
 				{/if}
 
@@ -587,8 +664,23 @@
 												<i class="fa-solid fa-link mr-1"></i>Link existing
 											</span>
 										{:else if action.kind === 'propose_result'}
+											{#if action.payload?.current_result && action.payload?.current_result !== action.payload?.result}
+												<span
+													class="text-xs px-1.5 py-0.5 rounded {resultBadge(
+														action.payload?.current_result
+													)} opacity-60"
+													title="Current state of this requirement"
+												>
+													{action.payload?.current_result}
+												</span>
+												<i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
+											{/if}
 											<span
 												class="text-xs px-1.5 py-0.5 rounded {resultBadge(action.payload?.result)}"
+												title={action.payload?.current_result &&
+												action.payload?.current_result !== action.payload?.result
+													? 'Proposed new state'
+													: 'Proposed state'}
 											>
 												{action.payload?.result ?? 'not_assessed'}
 											</span>
