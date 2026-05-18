@@ -21,6 +21,49 @@ const homeCrumb: Breadcrumb = {
 	icon: 'fa-regular fa-compass'
 };
 
+export function hrefPathname(href: string | undefined): string | undefined {
+	if (!href) return undefined;
+	const queryIdx = href.indexOf('?');
+	return queryIdx === -1 ? href : href.slice(0, queryIdx);
+}
+
+// Same depth + same first segment.
+export function isSiblingPath(a: string | undefined, b: string): boolean {
+	if (!a) return false;
+	const aSegs = a.split('/').filter(Boolean);
+	const bSegs = b.split('/').filter(Boolean);
+	if (aSegs.length === 0 || aSegs.length !== bSegs.length) return false;
+	return aSegs[0] === bSegs[0];
+}
+
+export function syncBreadcrumbsToCurrentUrl(
+	breadcrumbs: Breadcrumb[],
+	currentPath: string,
+	currentUrl: string,
+	fallbackLabel: string,
+	isFreshLoad: boolean
+): Breadcrumb[] {
+	const idx = breadcrumbs.findIndex((c, i) => i > 0 && hrefPathname(c.href) === currentPath);
+	if (idx > 0) {
+		const trimmed = breadcrumbs.slice(0, idx + 1);
+		const matched = trimmed[idx];
+		trimmed[idx] = { ...matched, href: currentUrl };
+		return trimmed;
+	}
+	// Fresh load with no match: reset trail.
+	if (isFreshLoad) {
+		return [breadcrumbs[0], { label: fallbackLabel, href: currentUrl }];
+	}
+	// Replace last crumb on sibling nav.
+	const last = breadcrumbs[breadcrumbs.length - 1];
+	if (breadcrumbs.length > 1 && isSiblingPath(hrefPathname(last?.href), currentPath)) {
+		const replaced = breadcrumbs.slice();
+		replaced[replaced.length - 1] = { label: fallbackLabel, href: currentUrl };
+		return replaced;
+	}
+	return [...breadcrumbs, { label: fallbackLabel, href: currentUrl }];
+}
+
 function loadFromSession(initialValue: Breadcrumb[]): Breadcrumb[] {
 	if (!browser) return initialValue;
 	try {

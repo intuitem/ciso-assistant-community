@@ -1,53 +1,10 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { breadcrumbs, type Breadcrumb } from '$lib/utils/breadcrumbs';
+	import { breadcrumbs, syncBreadcrumbsToCurrentUrl } from '$lib/utils/breadcrumbs';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { pageTitle } from '$lib/utils/stores';
-
-	function hrefPathname(href: string | undefined): string | undefined {
-		if (!href) return undefined;
-		const queryIdx = href.indexOf('?');
-		return queryIdx === -1 ? href : href.slice(0, queryIdx);
-	}
-
-	// Same depth + same first segment.
-	function isSiblingPath(a: string | undefined, b: string): boolean {
-		if (!a) return false;
-		const aSegs = a.split('/').filter(Boolean);
-		const bSegs = b.split('/').filter(Boolean);
-		if (aSegs.length === 0 || aSegs.length !== bSegs.length) return false;
-		return aSegs[0] === bSegs[0];
-	}
-
-	function syncBreadcrumbsToCurrentUrl(
-		breadcrumbs: Breadcrumb[],
-		currentPath: string,
-		currentUrl: string,
-		fallbackLabel: string,
-		isFreshLoad: boolean
-	): Breadcrumb[] {
-		const idx = breadcrumbs.findIndex((c, i) => i > 0 && hrefPathname(c.href) === currentPath);
-		if (idx > 0) {
-			const trimmed = breadcrumbs.slice(0, idx + 1);
-			const matched = trimmed[idx];
-			trimmed[idx] = { ...matched, href: currentUrl };
-			return trimmed;
-		}
-		// Fresh load with no match: reset trail.
-		if (isFreshLoad) {
-			return [breadcrumbs[0], { label: fallbackLabel, href: currentUrl }];
-		}
-		// Replace last crumb on sibling nav.
-		const last = breadcrumbs[breadcrumbs.length - 1];
-		if (breadcrumbs.length > 1 && isSiblingPath(hrefPathname(last?.href), currentPath)) {
-			const replaced = breadcrumbs.slice();
-			replaced[replaced.length - 1] = { label: fallbackLabel, href: currentUrl };
-			return replaced;
-		}
-		return [...breadcrumbs, { label: fallbackLabel, href: currentUrl }];
-	}
 
 	function getPageTitle(): string {
 		// Check each source in priority order
