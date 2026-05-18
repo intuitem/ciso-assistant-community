@@ -25,7 +25,8 @@
 		breadcrumbs: Breadcrumb[],
 		currentPath: string,
 		currentUrl: string,
-		fallbackLabel: string
+		fallbackLabel: string,
+		isFreshLoad: boolean
 	): Breadcrumb[] {
 		const idx = breadcrumbs.findIndex((c, i) => i > 0 && hrefPathname(c.href) === currentPath);
 		if (idx > 0) {
@@ -33,6 +34,10 @@
 			const matched = trimmed[idx];
 			trimmed[idx] = { ...matched, href: currentUrl };
 			return trimmed;
+		}
+		// Fresh load with no match: reset trail.
+		if (isFreshLoad) {
+			return [breadcrumbs[0], { label: fallbackLabel, href: currentUrl }];
 		}
 		// Replace last crumb on sibling nav.
 		const last = breadcrumbs[breadcrumbs.length - 1];
@@ -64,11 +69,17 @@
 		return URL_MODEL_MAP[lastPathSegment]?.localNamePlural;
 	}
 
-	function sync(fallbackLabel: string) {
+	function sync(fallbackLabel: string, isFreshLoad: boolean) {
 		const currentPath = page.url.pathname;
 		const currentUrl = currentPath + page.url.search;
 		const current = $breadcrumbs;
-		const next = syncBreadcrumbsToCurrentUrl(current, currentPath, currentUrl, fallbackLabel);
+		const next = syncBreadcrumbsToCurrentUrl(
+			current,
+			currentPath,
+			currentUrl,
+			fallbackLabel,
+			isFreshLoad
+		);
 		// No-op if unchanged.
 		if (
 			next.length !== current.length ||
@@ -78,7 +89,7 @@
 		}
 	}
 
-	afterNavigate(() => sync(getPageTitle()));
+	afterNavigate((nav) => sync(getPageTitle(), nav.type === 'enter'));
 
 	$effect(() => {
 		$pageTitle = getPageTitle();
@@ -106,6 +117,7 @@
 						data-testid="crumb-item"
 						href={c.href}
 						title={safeTranslate(c.label)}
+						onclick={() => breadcrumbs.slice(i)}
 					>
 						{#if c.icon}
 							<i class={c.icon}></i>
