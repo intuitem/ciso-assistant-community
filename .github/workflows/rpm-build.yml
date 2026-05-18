@@ -54,11 +54,15 @@ jobs:
             ncurses-devel \
             gdbm-devel
 
-      - name: Install Node.js and pnpm
+      - name: Install Node.js
         run: |
           curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
           dnf install -y nodejs
-          npm install -g pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Install Poetry
         run: |

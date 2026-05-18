@@ -175,7 +175,12 @@
 				<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
 					{m.cancel()}
 				</button>
-				<button type="submit" class="btn {parent.buttonPositive}" disabled={submitting}>
+				<button
+					type="submit"
+					class="btn {parent.buttonPositive}"
+					data-testid="apply-preset-confirm-btn"
+					disabled={submitting}
+				>
 					{#if submitting}
 						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
 					{/if}

@@ -50,8 +50,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Install community frontend dependencies
         working-directory: ${{ env.frontend-directory }}
@@ -94,8 +96,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
@@ -238,8 +242,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Install community frontend dependencies (if not cached/part of build artifact)
         working-directory: ${{ env.frontend-directory }}
@@ -247,7 +253,10 @@ jobs:
 
       - name: Get installed Playwright version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk -F ' ' '{print $2}')" >> $GITHUB_ENV
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
 
       - name: Cache playwright binaries
         uses: actions/cache@v4
@@ -414,8 +423,10 @@ jobs:
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make pre-build
 
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Install enterprise frontend dependencies
         working-directory: ${{ env.enterprise-frontend-build-directory }}
@@ -423,7 +434,10 @@ jobs:
 
       - name: Get installed Playwright version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk -F ' ' '{print $2}')" >> $GITHUB_ENV
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
 
       - name: Cache playwright binaries
         uses: actions/cache@v4

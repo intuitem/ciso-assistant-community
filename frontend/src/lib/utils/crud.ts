@@ -2217,7 +2217,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
-			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -2662,6 +2663,111 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'checklist' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	'responsibility-roles': {
+		name: 'responsibilityrole',
+		localName: 'responsibilityRole',
+		localNamePlural: 'responsibilityRoles',
+		verboseName: 'Responsibility role',
+		verboseNamePlural: 'Responsibility roles',
+		endpointUrl: 'pmbok/responsibility-roles',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'code' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'taxonomy' },
+			{ field: 'color' },
+			{ field: 'order' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' }
+		],
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		selectFields: [{ field: 'taxonomy', endpointUrl: 'pmbok/responsibility-roles' }],
+		filters: [{ field: 'folder' }, { field: 'taxonomy' }, { field: 'is_visible' }]
+	},
+	'responsibility-matrices': {
+		name: 'responsibilitymatrix',
+		localName: 'responsibilityMatrix',
+		localNamePlural: 'responsibilityMatrices',
+		verboseName: 'Responsibility matrix',
+		verboseNamePlural: 'Responsibility matrices',
+		endpointUrl: 'pmbok/responsibility-matrices',
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'preset' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'roles', urlModel: 'responsibility-roles' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [{ field: 'preset', endpointUrl: 'pmbok/responsibility-matrices' }],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'preset' },
+			{ field: 'roles' },
+			{ field: 'filtering_labels' }
+		]
+	},
+	'responsibility-matrix-activities': {
+		name: 'responsibilitymatrixactivity',
+		localName: 'responsibilityActivity',
+		localNamePlural: 'responsibilityActivities',
+		verboseName: 'Responsibility activity',
+		verboseNamePlural: 'Responsibility activities',
+		endpointUrl: 'pmbok/responsibility-matrix-activities',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'matrix', urlModel: 'responsibility-matrices' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'order' }
+		],
+		foreignKeyFields: [{ field: 'matrix', urlModel: 'responsibility-matrices' }],
+		filters: [{ field: 'matrix' }]
+	},
+	'responsibility-matrix-actors': {
+		name: 'responsibilitymatrixactor',
+		localName: 'responsibilityMatrixActor',
+		localNamePlural: 'responsibilityMatrixActors',
+		verboseName: 'Matrix actor',
+		verboseNamePlural: 'Matrix actors',
+		endpointUrl: 'pmbok/responsibility-matrix-actors',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'matrix', urlModel: 'responsibility-matrices' },
+			{ field: 'actor', urlModel: 'actors' },
+			{ field: 'order' }
+		],
+		foreignKeyFields: [
+			{ field: 'matrix', urlModel: 'responsibility-matrices' },
+			{ field: 'actor', urlModel: 'actors' }
+		],
+		filters: [{ field: 'matrix' }, { field: 'actor' }]
+	},
+	'responsibility-assignments': {
+		name: 'responsibilityassignment',
+		localName: 'responsibilityAssignment',
+		localNamePlural: 'responsibilityAssignments',
+		verboseName: 'Responsibility assignment',
+		verboseNamePlural: 'Responsibility assignments',
+		endpointUrl: 'pmbok/responsibility-assignments',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'activity', urlModel: 'responsibility-matrix-activities' },
+			{ field: 'actor', urlModel: 'actors' },
+			{ field: 'role', urlModel: 'responsibility-roles' }
+		],
+		foreignKeyFields: [
+			{ field: 'activity', urlModel: 'responsibility-matrix-activities' },
+			{ field: 'actor', urlModel: 'actors' },
+			{ field: 'role', urlModel: 'responsibility-roles' }
+		],
+		filters: [{ field: 'activity' }, { field: 'actor' }, { field: 'role' }]
 	},
 	'metric-definitions': {
 		name: 'metricdefinition',

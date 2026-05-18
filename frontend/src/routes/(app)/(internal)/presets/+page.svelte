@@ -305,7 +305,9 @@
 				<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-100">
 					<i class="fa-solid fa-box-open text-violet-600 text-sm"></i>
 				</div>
-				<h2 class="text-lg font-semibold text-gray-800">{m.availablePresets()}</h2>
+				<h2 class="text-lg font-semibold text-gray-800" data-testid="available-templates-heading">
+					{m.availablePresets()}
+				</h2>
 				<i
 					class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200 {presetsCollapsed
 						? '-rotate-90'
@@ -332,6 +334,7 @@
 								? 'bg-gray-800 text-white shadow-sm'
 								: 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700'}"
 							onclick={() => (activeFilter = region)}
+							data-testid="filter-{region}"
 						>
 							{REGION_FLAGS[region] ?? ''}
 							{region.toUpperCase()}
@@ -358,6 +361,7 @@
 							{isExpanded
 								? 'border-violet-300 shadow-md ring-1 ring-violet-100'
 								: 'border-gray-200 hover:shadow-md hover:border-gray-300'}"
+							data-testid="preset-card-{preset.id}"
 						>
 							<!-- Card header — always visible -->
 							<button
@@ -365,7 +369,10 @@
 								onclick={() => toggleExpand(preset.id)}
 							>
 								<div class="flex-1 min-w-0">
-									<h3 class="font-semibold text-[15px] text-gray-800 leading-tight">
+									<h3
+										class="font-semibold text-[15px] text-gray-800 leading-tight"
+										data-testid="preset-name-{preset.id}"
+									>
 										{preset.name}
 									</h3>
 									{#if preset.description}
@@ -423,6 +430,7 @@
 										class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
 										transition-all duration-150 cursor-pointer
 										bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-sm"
+										data-testid="preset-apply-{preset.id}"
 										onclick={() => applyPreset(preset.id, preset.name)}
 									>
 										<i class="fa-solid fa-play text-[10px]"></i>
