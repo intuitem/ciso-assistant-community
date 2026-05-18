@@ -301,6 +301,9 @@
 				loadDraft({
 					id: result.id,
 					name: result.name,
+					description: result.description,
+					provider: result.provider,
+					locale: result.locale,
 					editing_draft: result.editing_draft
 				});
 				refreshDrafts();
