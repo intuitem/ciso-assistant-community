@@ -139,7 +139,7 @@
 			</span>
 		{/if}
 		{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
-			<span class="badge h-fit" style="background-color: #e0e7ff; color: #3730a3;">
+			<span class="badge h-fit bg-indigo-100 text-indigo-800">
 				{m.requirementWeight()}: {data.requirement.weight}
 			</span>
 		{/if}

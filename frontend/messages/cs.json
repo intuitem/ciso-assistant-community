@@ -1871,5 +1871,6 @@
 	"builderQuestionTypeUniqueChoice": "Jedinečná volba",
 	"builderQuestionTypeMultipleChoice": "Více možností",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "changed on",
+	"requirementWeight": "Váha"
 }

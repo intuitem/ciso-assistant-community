@@ -292,11 +292,7 @@
 						{/each}
 					{/if}
 					{#if assessable && nodeWeight !== null && nodeWeight !== 1}
-						<span
-							class="badge mr-1"
-							style="background-color: #e0e7ff; color: #3730a3;"
-							title={m.requirementWeight()}
-						>
+						<span class="badge mr-1 bg-indigo-100 text-indigo-800" title={m.requirementWeight()}>
 							{m.requirementWeight()}: {nodeWeight}
 						</span>
 					{/if}
