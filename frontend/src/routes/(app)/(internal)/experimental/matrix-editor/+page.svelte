@@ -3,7 +3,6 @@
 	import LevelEditor from '$lib/components/RiskMatrixEditor/LevelEditor.svelte';
 	import GridEditor from '$lib/components/RiskMatrixEditor/GridEditor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { LOCALE_MAP, language } from '$lib/utils/locales';
 	import { onMount } from 'svelte';
