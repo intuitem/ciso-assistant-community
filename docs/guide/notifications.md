@@ -9,7 +9,7 @@ icon: bell
 
 #### Prerequisites
 
-Email notifications must be enabled by your administrator under **Extra > Settings > Enable email notifications**. This setting is **off by default** on a fresh install — no notification emails are sent until an administrator enables it.
+Email notifications must be enabled by your administrator under **Extra > Settings > Enable email notifications**. This setting is **off by default** on a fresh install, no notification emails are sent until an administrator enables it.
 
 {% hint style="warning" %}
 ## Onprem instances only
