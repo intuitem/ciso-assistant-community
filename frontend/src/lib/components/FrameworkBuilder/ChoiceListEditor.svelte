@@ -8,6 +8,7 @@
 	} from './builder-state';
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		choices: QuestionChoice[];
@@ -65,13 +66,15 @@
 
 <div class="space-y-1.5" bind:this={listEl}>
 	<div class="flex items-center justify-between">
-		<span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Choices</span>
+		<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+			>{m.builderChoices()}</span
+		>
 		<button
 			type="button"
 			class="text-xs text-blue-600 hover:text-blue-700 font-medium"
 			onclick={() => builder.addChoice(reqNodeId, qIndex)}
 		>
-			<i class="fa-solid fa-plus mr-1"></i>Add choice
+			<i class="fa-solid fa-plus mr-1"></i>{m.builderAddChoice()}
 		</button>
 	</div>
 
@@ -114,7 +117,7 @@
 					<input
 						type="text"
 						value={getTranslation(choice.translations, lang, 'value')}
-						placeholder="Translate..."
+						placeholder={m.builderTranslatePlaceholder()}
 						class="flex-1 bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-1 py-0.5 text-sm outline-none transition-colors"
 						onblur={(e) =>
 							saveField(
@@ -127,7 +130,7 @@
 					<input
 						type="text"
 						value={choice.value ?? ''}
-						placeholder="Choice text..."
+						placeholder={m.builderChoicePlaceholder()}
 						class="choice-value-input flex-1 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1 py-0.5 text-sm text-gray-900 outline-none transition-colors"
 						onblur={(e) => saveField(choice.id, 'value', e.currentTarget.value)}
 						onkeydown={(e) => handleChoiceKeydown(e, choice, index)}
@@ -156,7 +159,7 @@
 				<div class="px-3 pb-3 pt-1 border-t border-gray-200 space-y-2">
 					<div class="grid grid-cols-2 gap-2">
 						<label class="block">
-							<span class="text-xs text-gray-500">Ref ID</span>
+							<span class="text-xs text-gray-500">{m.refId()}</span>
 							<input
 								type="text"
 								value={choice.ref_id ?? ''}
@@ -165,7 +168,7 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs text-gray-500">Score</span>
+							<span class="text-xs text-gray-500">{m.score()}</span>
 							<input
 								type="number"
 								value={choice.add_score ?? ''}
@@ -184,22 +187,22 @@
 
 					<div class="grid grid-cols-2 gap-2">
 						<label class="block">
-							<span class="text-xs text-gray-500">Result</span>
+							<span class="text-xs text-gray-500">{m.builderResultLabel()}</span>
 							<select
 								value={choice.compute_result ?? ''}
 								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onchange={(e) =>
 									saveField(choice.id, 'compute_result', e.currentTarget.value || null)}
 							>
-								<option value="">None</option>
-								<option value="compliant">Compliant</option>
-								<option value="non_compliant">Non-compliant</option>
-								<option value="partially_compliant">Partially compliant</option>
-								<option value="not_applicable">Not applicable</option>
+								<option value="">{m.builderNone()}</option>
+								<option value="compliant">{m.compliant()}</option>
+								<option value="non_compliant">{m.nonCompliant()}</option>
+								<option value="partially_compliant">{m.partiallyCompliant()}</option>
+								<option value="not_applicable">{m.notApplicable()}</option>
 							</select>
 						</label>
 						<label class="block">
-							<span class="text-xs text-gray-500">Color</span>
+							<span class="text-xs text-gray-500">{m.builderColor()}</span>
 							<div class="flex items-center gap-2">
 								<input
 									type="color"
@@ -213,7 +216,7 @@
 										class="text-xs text-gray-400 hover:text-gray-600"
 										onclick={() => saveField(choice.id, 'color', null)}
 									>
-										Clear
+										{m.builderClearAction()}
 									</button>
 								{/if}
 							</div>
@@ -222,7 +225,7 @@
 
 					{#if implementationGroups && implementationGroups.length > 0}
 						<div>
-							<span class="text-xs text-gray-500">Implementation Groups</span>
+							<span class="text-xs text-gray-500">{m.implementationGroups()}</span>
 							<div class="flex flex-wrap gap-1 mt-1">
 								{#each implementationGroups as ig}
 									{@const refId = (ig as Record<string, string>).ref_id}
@@ -248,7 +251,7 @@
 					{/if}
 
 					<label class="block">
-						<span class="text-xs text-gray-500">Description</span>
+						<span class="text-xs text-gray-500">{m.description()}</span>
 						<textarea
 							value={choice.description ?? ''}
 							rows="2"
@@ -266,6 +269,6 @@
 	{/each}
 
 	{#if choices.length === 0}
-		<p class="text-xs text-gray-400 text-center py-2">No choices yet. Add one above.</p>
+		<p class="text-xs text-gray-400 text-center py-2">{m.builderNoChoicesYet()}</p>
 	{/if}
 </div>

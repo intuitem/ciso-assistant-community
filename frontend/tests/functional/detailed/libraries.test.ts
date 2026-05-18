@@ -7,7 +7,14 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
 
-	const libraries: Locator[] = await page.locator('tbody tr td:nth-child(2)').all();
+	const headers = await page.locator('thead tr').first().locator('th').allInnerTexts();
+	const nameHeaderIndex = headers.findIndex((h) => /^\s*name\s*$/i.test(h));
+	expect(nameHeaderIndex, 'Could not find "Name" column header').toBeGreaterThanOrEqual(0);
+
+	const nameCells = page.locator(`tbody tr td:nth-child(${nameHeaderIndex + 1})`);
+	await expect(nameCells.first()).toHaveText(/\S+/, { timeout: 30000 });
+
+	const libraries: Locator[] = await nameCells.all();
 	const libraryNames: string[] = await Promise.all(
 		libraries.map(async (library) => await library.innerText())
 	);

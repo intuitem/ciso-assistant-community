@@ -21,6 +21,7 @@ export interface DraftJSON {
 		outcomes_definition: Record<string, unknown>[] | null;
 		field_visibility?: Record<string, string>;
 		urn_namespace?: string;
+		ref_id?: string | null;
 	};
 	nodes: Record<string, unknown>[];
 	questions: Record<string, unknown>[];

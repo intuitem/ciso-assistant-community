@@ -3,6 +3,7 @@
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import ThresholdsEditor from './ThresholdsEditor.svelte';
 	import { formFieldProxy, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -34,6 +35,13 @@
 	const { value: metricKeyValue } = formFieldProxy(form, 'metric_key');
 	const { value: chartTypeValue } = formFieldProxy(form, 'chart_type');
 	const { value: timeRangeValue } = formFieldProxy(form, 'time_range');
+
+	// Detect breakdown metrics so we can hide controls (like thresholds) that only apply to scalars.
+	const isBreakdownMetric = $derived(
+		!!selectedModel &&
+			!!selectedMetricKey &&
+			supportedModels?.[selectedModel]?.[selectedMetricKey]?.type === 'breakdown'
+	);
 
 	// State for builtin metric options
 	let selectedModel = $state<string>(object?.target_content_type_display || '');
@@ -325,3 +333,5 @@
 	cacheLock={cacheLocks['show_target']}
 	bind:cachedValue={formDataCache['show_target']}
 />
+
+<ThresholdsEditor {form} {object} chartType={selectedChartType} {isBreakdownMetric} />

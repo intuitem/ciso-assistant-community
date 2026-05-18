@@ -345,6 +345,125 @@ class TestPresetExecutorExistingDomain:
         ca = ComplianceAssessment.objects.get(folder=folder)
         assert ca.requirement_assessments.count() == 1
 
+    def test_step_target_url_and_params_are_persisted(self):
+        """Steps with target_url / target_params should round-trip to the DB."""
+        root = Folder.get_root_folder()
+        user = User.objects.create_user(
+            email="preset_url@example.com", password="secret"
+        )
+        _create_test_libraries(root)
+
+        preset_library = _create_preset_library(
+            root,
+            scaffolded_objects=[],
+            steps=[
+                {
+                    "key": "reports",
+                    "title": "Review reports",
+                    "target_url": "/reporting",
+                    "target_params": {"tab": "overview"},
+                },
+                {
+                    "key": "settings",
+                    "title": "Configure integrations",
+                    "target_url": "/settings",
+                },
+            ],
+        )
+
+        journey = PresetExecutor(preset_library, user).apply(folder_name="URL Steps")
+
+        reports_step = journey.steps.get(key="reports")
+        assert reports_step.target_url == "/reporting"
+        assert reports_step.target_params == {"tab": "overview"}
+        assert reports_step.target_model is None
+
+        settings_step = journey.steps.get(key="settings")
+        assert settings_step.target_url == "/settings"
+        assert settings_step.target_params is None
+
+    def test_step_target_params_substitute_object_refs(self):
+        """Values like "{{ref:name}}" in target_params should be replaced with the
+        corresponding UUID from object_refs at step creation; unresolved refs should
+        be dropped; other values should pass through."""
+        root = Folder.get_root_folder()
+        user = User.objects.create_user(
+            email="preset_refs@example.com", password="secret"
+        )
+        _create_test_libraries(root)
+
+        preset_library = _create_preset_library(
+            root,
+            scaffolded_objects=[
+                {
+                    "type": "compliance_assessment",
+                    "name": "ISO Audit",
+                    "framework": "urn:test:framework-lib",
+                    "ref": "iso_audit",
+                },
+                {
+                    "type": "risk_assessment",
+                    "name": "Main RA",
+                    "risk_matrix": "urn:test:risk-matrix-lib",
+                    "ref": "main_ra",
+                },
+            ],
+            steps=[
+                {
+                    "key": "soa_report",
+                    "title": "Generate SoA",
+                    "target_url": "/reports/soa/results",
+                    "target_params": {
+                        "compliance_assessment": "{{ref:iso_audit}}",
+                        "risk_assessments": "{{ref:main_ra}}",
+                        "implementation_groups": "SoA",
+                        "ghost": "{{ref:unknown_ref}}",
+                    },
+                }
+            ],
+        )
+
+        journey = PresetExecutor(preset_library, user).apply(folder_name="Refs Domain")
+        step = journey.steps.get(key="soa_report")
+        ca_id = journey.object_refs["iso_audit"]
+        ra_id = journey.object_refs["main_ra"]
+
+        assert step.target_url == "/reports/soa/results"
+        assert step.target_params == {
+            "compliance_assessment": ca_id,
+            "risk_assessments": ra_id,
+            "implementation_groups": "SoA",
+        }
+        assert "ghost" not in step.target_params
+
+    def test_compliance_assessment_implementation_groups_are_applied(self):
+        """A compliance_assessment preset item with implementation_groups should
+        set selected_implementation_groups on the created assessment."""
+        root = Folder.get_root_folder()
+        user = User.objects.create_user(
+            email="preset_ig@example.com", password="secret"
+        )
+        _create_test_libraries(root)
+
+        preset_library = _create_preset_library(
+            root,
+            scaffolded_objects=[
+                {
+                    "type": "compliance_assessment",
+                    "name": "ISO Subset",
+                    "framework": "urn:test:framework-lib",
+                    "implementation_groups": ["IG1", "IG2"],
+                    "ref": "iso_subset",
+                }
+            ],
+            steps=[],
+        )
+
+        journey = PresetExecutor(preset_library, user).apply(folder_name="IG Domain")
+
+        ca = ComplianceAssessment.objects.get(folder=journey.folder, name="ISO Subset")
+        assert ca.selected_implementation_groups == ["IG1", "IG2"]
+
     def test_rejects_duplicate_preset_on_same_folder(self):
         """Applying the same preset twice to the same folder should raise ValidationError."""
         root = Folder.get_root_folder()
