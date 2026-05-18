@@ -32,15 +32,15 @@ class Command(BaseCommand):
             try:
                 library, error = StoredLibrary.store_library_file(fname, True)
                 if library:
+                    if library.is_preset:
+                        from library.utils import upsert_preset_from_stored_library
+
+                        upsert_preset_from_stored_library(library)
                     logger.info(
                         "Successfully stored library",
                         filename=fname,
                         library=library,
                     )
-                    if library.is_preset:
-                        from library.utils import upsert_preset_from_stored_library
-
-                        upsert_preset_from_stored_library(library)
                 elif error:
                     if error == "libraryAlreadyLoadedError":
                         continue
