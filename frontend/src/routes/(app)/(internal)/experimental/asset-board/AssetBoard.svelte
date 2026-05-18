@@ -9,6 +9,7 @@
 		BackgroundVariant,
 		MiniMap,
 		Panel,
+		ViewportPortal,
 		MarkerType,
 		type Node,
 		type Edge,
@@ -83,6 +84,17 @@
 	const ZONE_DEFAULT_COLOR = '#3b82f6';
 	const ZONE_DEFAULT_W = 320;
 	const ZONE_DEFAULT_H = 220;
+	// Minimum size (in flow units) for a Shift-drag rectangle to count as a zone.
+	const ZONE_MIN_DRAW = 30;
+
+	// Live preview of the rectangle the user is sketching with Shift + drag.
+	let drawState = $state<{ startX: number; startY: number; curX: number; curY: number } | null>(
+		null
+	);
+	let shiftDown = $state(false);
+	// Whether the cursor is hovering the canvas — drives the crosshair affordance when shift is held.
+	let cursorOnPane = $state(false);
+	let boardEl: HTMLDivElement | null = null;
 
 	const GRID_COLS = 4;
 	const GRID_X = 240;
@@ -447,6 +459,91 @@
 		openCreateModal({ dropCoords: center });
 	}
 
+	function isOnPane(target: EventTarget | null): boolean {
+		// Walk up from the click target. If we hit a node/edge first, the click was on
+		// something interactive; if we hit `.svelte-flow__pane`, it was empty canvas.
+		let el = target as HTMLElement | null;
+		while (el) {
+			if (el.classList?.contains('svelte-flow__node')) return false;
+			if (el.classList?.contains('svelte-flow__edge')) return false;
+			if (el.classList?.contains('svelte-flow__pane')) return true;
+			el = el.parentElement;
+		}
+		return false;
+	}
+
+	function handlePointerDown(event: PointerEvent) {
+		if (!event.shiftKey) return;
+		if (event.button !== 0) return;
+		if (!isOnPane(event.target)) return;
+		const flow = flowInstance?.screenToFlowPosition({ x: event.clientX, y: event.clientY });
+		if (!flow) return;
+		// Stop xyflow from starting a pan/selection on this same gesture.
+		event.preventDefault();
+		event.stopPropagation();
+		boardEl?.setPointerCapture(event.pointerId);
+		drawState = { startX: flow.x, startY: flow.y, curX: flow.x, curY: flow.y };
+	}
+
+	function handlePointerMove(event: PointerEvent) {
+		if (!drawState) return;
+		const flow = flowInstance?.screenToFlowPosition({ x: event.clientX, y: event.clientY });
+		if (!flow) return;
+		drawState = { ...drawState, curX: flow.x, curY: flow.y };
+	}
+
+	function handlePointerUp(event: PointerEvent) {
+		if (!drawState) return;
+		const ds = drawState;
+		drawState = null;
+		try {
+			boardEl?.releasePointerCapture(event.pointerId);
+		} catch {
+			// no-op if capture was lost
+		}
+		const x = Math.min(ds.startX, ds.curX);
+		const y = Math.min(ds.startY, ds.curY);
+		const width = Math.abs(ds.curX - ds.startX);
+		const height = Math.abs(ds.curY - ds.startY);
+		if (width < ZONE_MIN_DRAW || height < ZONE_MIN_DRAW) return;
+		const zone: TrustZone = {
+			id: `zone-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+			name: `Trust zone ${zones.length + 1}`,
+			color: ZONE_DEFAULT_COLOR,
+			x,
+			y,
+			width,
+			height
+		};
+		zones = [...zones, zone];
+		saveZones(folderId, zones);
+		// Any assets already sitting inside the new rectangle become members.
+		const newMembership: Record<string, string> = { ...membership };
+		for (const a of assets) {
+			const pos = positions[a.id];
+			if (!pos) continue;
+			if (pos.x >= x && pos.x <= x + width && pos.y >= y && pos.y <= y + height) {
+				newMembership[a.id] = zone.id;
+			}
+		}
+		if (Object.keys(newMembership).length !== Object.keys(membership).length) {
+			membership = newMembership;
+			saveMembership(folderId, newMembership);
+		}
+		buildGraph();
+	}
+
+	function handleKey(event: KeyboardEvent) {
+		if (event.key === 'Shift') shiftDown = true;
+		if (event.key === 'Escape' && drawState) {
+			drawState = null;
+		}
+	}
+
+	function handleKeyUp(event: KeyboardEvent) {
+		if (event.key === 'Shift') shiftDown = false;
+	}
+
 	function handleCreateZone() {
 		const vp = flowInstance?.getViewport() ?? { x: 0, y: 0, zoom: 1 };
 		const center = flowInstance?.screenToFlowPosition({
@@ -656,7 +753,21 @@
 	});
 </script>
 
-<div class="h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200 relative">
+<svelte:window onkeydown={handleKey} onkeyup={handleKeyUp} />
+
+<div
+	bind:this={boardEl}
+	class="h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200 relative"
+	class:zone-draw-armed={shiftDown && cursorOnPane}
+	class:zone-drawing={drawState !== null}
+	onpointerdowncapture={handlePointerDown}
+	onpointermove={handlePointerMove}
+	onpointerup={handlePointerUp}
+	onpointercancel={handlePointerUp}
+	onmouseenter={() => (cursorOnPane = true)}
+	onmouseleave={() => (cursorOnPane = false)}
+	role="presentation"
+>
 	<SvelteFlow
 		bind:nodes
 		bind:edges
@@ -682,6 +793,20 @@
 		<Background variant={BackgroundVariant.Dots} gap={20} />
 		<Controls showLock={false} />
 		<MiniMap />
+		{#if drawState}
+			{@const dx = Math.min(drawState.startX, drawState.curX)}
+			{@const dy = Math.min(drawState.startY, drawState.curY)}
+			{@const dw = Math.abs(drawState.curX - drawState.startX)}
+			{@const dh = Math.abs(drawState.curY - drawState.startY)}
+			<ViewportPortal target="front">
+				<div
+					class="zone-preview"
+					style:transform="translate({dx}px, {dy}px)"
+					style:width="{dw}px"
+					style:height="{dh}px"
+				></div>
+			</ViewportPortal>
+		{/if}
 		<Panel position="top-right">
 			<div class="flex gap-2">
 				<button
@@ -735,8 +860,8 @@
 							<li>Hover a node and click the trash icon to delete it (with cascade preview)</li>
 							<li>Click a link to select it, then click the × at its midpoint to unlink</li>
 							<li>
-								Use <span class="font-semibold">Add trust zone</span> to draw a boundary; drag assets
-								inside to nest them, drag back out to remove
+								<span class="font-semibold">Shift + drag</span> on empty canvas to draw a trust
+								zone; drag assets inside to nest them, drag back out to remove
 							</li>
 							<li>Positions, zones and membership are saved per-domain in this browser only</li>
 						</ul>
@@ -768,5 +893,23 @@
 	:global(.svelte-flow .svelte-flow__edge[aria-selected='true'] .svelte-flow__edge-path) {
 		stroke: var(--color-secondary-500);
 		stroke-width: 3;
+	}
+	/* Shift held on empty canvas: hint that a drag will draw a rectangle. */
+	.zone-draw-armed :global(.svelte-flow__pane) {
+		cursor: crosshair;
+	}
+	/* While drawing: keep the crosshair even after the user has moved off the pane onto
+	   the preview rectangle, and stop xyflow from treating the gesture as a pan. */
+	.zone-drawing :global(.svelte-flow__pane) {
+		cursor: crosshair;
+	}
+	.zone-preview {
+		position: absolute;
+		top: 0;
+		left: 0;
+		pointer-events: none;
+		border: 2px dashed #3b82f6;
+		background-color: rgba(59, 130, 246, 0.08);
+		border-radius: 0.5rem;
 	}
 </style>
