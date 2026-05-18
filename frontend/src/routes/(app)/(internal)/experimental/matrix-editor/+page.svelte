@@ -8,8 +8,6 @@
 	import { LOCALE_MAP, language } from '$lib/utils/locales';
 	import { onMount } from 'svelte';
 
-	$pageTitle = m.matrixEditor();
-
 	// Warn before leaving with unsaved changes + auto-load latest draft
 	onMount(() => {
 		const handler = (e: BeforeUnloadEvent) => {
