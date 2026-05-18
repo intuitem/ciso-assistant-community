@@ -7,17 +7,19 @@ icon: bell
 
 # Notifications
 
-### Prerequisites
+#### Prerequisites
 
-Email notifications must be enabled by your administrator under **Extra > Settings > Enable email notifications**. Your CISO Assistant instance also needs an outgoing mail server configured. If you are not receiving emails, contact your administrator.
+Email notifications must be enabled by your administrator under **Extra > Settings > Enable email notifications**. This setting is **off by default** on a fresh install — no notification emails are sent until an administrator enables it.
+
+Your CISO Assistant (Onprem) instance also needs an outgoing mail server configured (`EMAIL_HOST`, `EMAIL_PORT`, and `DEFAULT_FROM_EMAIL` at minimum). If you are not receiving emails, contact your administrator to verify these are set.
 
 Notifications are sent to the email address associated with your account.
 
 ***
 
-### Notification types
+#### Notification types
 
-#### Assignments
+**Assignments**
 
 You receive an email whenever something is assigned to you.
 
@@ -26,11 +28,13 @@ You receive an email whenever something is assigned to you.
 | **Applied Control**       | **Owner**       | You are added as an owner    |
 | **Compliance Assessment** | **Authors**     | You are added as an author   |
 | **Risk Scenario**         | **Owner**       | You are added as an owner    |
-| **Task**                  | **Assigned to** | You are added as an assignee |
+| **Task (template)**       | **Assigned to** | You are added as an assignee |
+
+> **Note:** Task assignment notifications fire when a **task template** is assigned. Due-date reminders (below) fire on the **task occurrences** generated from that template.
 
 ***
 
-#### Deadlines & Expiry reminders
+**Deadlines & Expiry reminders**
 
 CISO Assistant sends reminders automatically **30 days**, **7 days**, and **1 day** before a deadline or expiry date. These emails are sent every morning.
 
@@ -57,9 +61,9 @@ CISO Assistant sends reminders automatically **30 days**, **7 days**, and **1 da
 
 **Validation Flow**
 
-| Notification                              | Required field          | Who receives it |
-| ----------------------------------------- | ----------------------- | --------------- |
-| Deadline approaching (flow still pending) | **Validation deadline** | **Approver**    |
+| Notification                                          | Required field          | Who receives it |
+| ----------------------------------------------------- | ----------------------- | --------------- |
+| Deadline approaching (flow in _submitted_ state only) | **Validation deadline** | **Approver**    |
 
 **Task**
 
@@ -71,7 +75,7 @@ CISO Assistant sends reminders automatically **30 days**, **7 days**, and **1 da
 
 ***
 
-#### Overdue alerts
+**Overdue alerts**
 
 If a deadline has already passed and the item is still open, you will receive an overdue alert.
 
@@ -83,7 +87,7 @@ If a deadline has already passed and the item is still open, you will receive an
 
 ***
 
-#### Compliance assignment workflow
+**Compliance assignment workflow**
 
 When working on a **Requirement Assignment** inside a compliance assessment, notifications follow the review workflow automatically — no extra fields to fill.
 
@@ -95,7 +99,7 @@ When working on a **Requirement Assignment** inside a compliance assessment, not
 
 ***
 
-#### Validation flows
+**Validation flows**
 
 | Event                                 | Who is notified                                    |
 | ------------------------------------- | -------------------------------------------------- |
@@ -104,7 +108,7 @@ When working on a **Requirement Assignment** inside a compliance assessment, not
 
 ***
 
-#### Account notifications
+**Account notifications**
 
 | Event                    | Who is notified                             |
 | ------------------------ | ------------------------------------------- |
@@ -114,13 +118,13 @@ When working on a **Requirement Assignment** inside a compliance assessment, not
 
 ***
 
-#### Third-party questionnaires (TPRM)
+**Third-party questionnaires (TPRM)**
 
 If your organisation uses the Third-Party Risk Management module, external contacts receive an email when a questionnaire is sent to them. This email contains a link to fill in the questionnaire.
 
 ***
 
-### Quick reference — what to fill in
+#### Quick reference — what to fill in
 
 | If you want this notification…               | Fill in these fields                                     |
 | -------------------------------------------- | -------------------------------------------------------- |
@@ -128,19 +132,20 @@ If your organisation uses the Third-Party Risk Management module, external conta
 | Remind owners before a control expires       | **Applied Control › Owner** + **Expiry date**            |
 | Remind authors before an assessment deadline | **Compliance Assessment › Authors** + **Due date**       |
 | Remind owners before evidence expires        | **Evidence › Owner** + **Expiry date**                   |
+| Alert owners when evidence has expired       | **Evidence › Owner** + **Expiry date**                   |
 | Remind an approver of a validation deadline  | **Validation Flow › Approver** + **Validation deadline** |
 | Notify assignees of upcoming task due dates  | **Task › Assigned to** + **Due date**                    |
 
 ***
 
-### Frequently asked questions
+#### Frequently asked questions
 
-**I am not receiving any emails. What should I check?** First confirm that email notifications are enabled with your administrator. Then verify that your account email address is correct in your profile. Finally, check your spam folder.
+**I am not receiving any emails. What should I check?** First confirm that email notifications are enabled with your administrator (the global toggle is off by default). Then ask the administrator to verify that `EMAIL_HOST`, `EMAIL_PORT`, and `DEFAULT_FROM_EMAIL` are set. Verify that your account email address is correct in your profile. Finally, check your spam folder.
 
 **I filled in the fields but still got no email. Why?** Check that the field contains an exact date — reminders are sent only on specific days (30, 7, and 1 day before). If the deadline is sooner than 30 days from when you set it, the 30-day reminder will not fire.
 
 **I am receiving too many reminders. Can I opt out?** Per-user opt-out is not yet available.
 
-**At what time are reminders sent?** Reminders are sent in the early morning (between 6 AM and 7 AM server time).
+**At what time are reminders sent?** Reminders are sent in the early morning (between 6:00 AM and 7:15 AM server time). Account, password-reset, and validation-flow event emails are sent immediately when the event occurs, not in this window.
 
 **Will I get a reminder every day until the deadline?** No. Reminders are sent only on specific days: 30 days before, 7 days before, and 1 day before the deadline. Overdue alerts are sent daily until the item is resolved.
