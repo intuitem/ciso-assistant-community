@@ -1655,6 +1655,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
         ENTITY_RELATIONSHIP = "entity.relationship", "entityRelationship"
         METRIC_UNIT = "metric_definition.unit", "metricUnit"
+        PROJECT_STATUS = "project.status", "projectStatus"
+        PROJECT_HEALTH = "project.health", "projectHealth"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {

@@ -1,4 +1,6 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from core.models import (
     FilteringLabelMixin,
@@ -158,6 +160,106 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         help_text="Evidence documents for the accreditation decision (e.g. minutes/PV)",
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+
+class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
+    PRIORITY = [
+        (1, _("P1")),
+        (2, _("P2")),
+        (3, _("P3")),
+        (4, _("P4")),
+    ]
+
+    ref_id = models.CharField(max_length=100, blank=True)
+    ref_link = models.URLField(blank=True)
+
+    owner = models.ForeignKey(
+        "core.Actor",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="owned_projects",
+    )
+    sponsor = models.ForeignKey(
+        "core.Actor",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sponsored_projects",
+    )
+
+    status = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="project_status",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+    )
+    priority = models.PositiveSmallIntegerField(
+        choices=PRIORITY,
+        null=True,
+        blank=True,
+        verbose_name=_("Priority"),
+    )
+    health = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="project_health",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.PROJECT_HEALTH,
+            "is_visible": True,
+        },
+    )
+
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    eta = models.DateField(blank=True, null=True)
+    progress = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+
+    purpose = models.TextField(blank=True)
+    objectives = models.TextField(blank=True)
+    success_criteria = models.TextField(blank=True)
+    business_case = models.TextField(blank=True)
+    deliverables = models.TextField(blank=True)
+    assumptions = models.TextField(blank=True)
+    constraints = models.TextField(blank=True)
+    dependencies_note = models.TextField(blank=True)
+    exit_criteria = models.TextField(blank=True)
+
+    budget = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True)
+    currency = models.CharField(max_length=3, blank=True)
+
+    linked_collection = models.ForeignKey(
+        GenericCollection,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="projects",
+    )
+    parent_project = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sub_projects",
+    )
+    tolerances = models.JSONField(default=dict, blank=True)
+    extra = models.JSONField(default=dict, blank=True)
+
+    observation = models.TextField(blank=True, null=True)
+
+    def __str__(self) -> str:
+        return f"{self.ref_id} - {self.name}" if self.ref_id else self.name
 
 
 class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
@@ -352,6 +454,11 @@ class ResponsibilityMatrix(NameDescriptionFolderMixin, FilteringLabelMixin):
         related_name="matrices",
         blank=True,
     )
+    projects = models.ManyToManyField(
+        Project,
+        related_name="responsibility_matrices",
+        blank=True,
+    )
 
     def save(self, *args, **kwargs):
         # Detect a folder move and propagate to descendants so IAM scoping stays
@@ -518,6 +625,10 @@ auditlog.register(
 )
 auditlog.register(
     Accreditation,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Project,
     exclude_fields=common_exclude,
 )
 auditlog.register(
