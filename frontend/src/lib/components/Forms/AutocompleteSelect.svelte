@@ -163,7 +163,7 @@
 	// with selected=[] and overwrites $value to [] before onMount restores it — a
 	// race that wipes selections on remount (e.g. when a parent `{#key options}`
 	// block tears the component down on options change).
-	if (initialValue && options.length > 0) {
+	if (initialValue != null && options.length > 0) {
 		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
 		selected = options.filter((item) => ids.includes(item.value));
 	}
