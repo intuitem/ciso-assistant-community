@@ -70,9 +70,7 @@
 		if (currentObservation !== proposedObservation) return false;
 
 		const currentIds = new Set<string>(
-			(ra.applied_controls ?? []).map((c: any) =>
-				typeof c === 'string' ? c : (c?.id ?? '')
-			)
+			(ra.applied_controls ?? []).map((c: any) => (typeof c === 'string' ? c : (c?.id ?? '')))
 		);
 		const proposedIds: string[] = action.payload?.control_ids ?? [];
 		// Subset check: every proposed id is already linked → no new links.
@@ -89,9 +87,7 @@
 	// they're not actionable and just add noise.
 	const visibleActions = $derived(
 		data.actions
-			.filter((a: any) =>
-				wave === 2 ? wave2Kinds.includes(a.kind) : wave1Kinds.includes(a.kind)
-			)
+			.filter((a: any) => (wave === 2 ? wave2Kinds.includes(a.kind) : wave1Kinds.includes(a.kind)))
 			.filter((a: any) => !isProposedNoOp(a))
 			.slice()
 			.sort((a: any, b: any) => {
@@ -115,9 +111,7 @@
 	// Index of the first decided (approved/rejected) action in the sorted list.
 	// Used to slot a "Decided" divider between the actionable and historical
 	// rows. -1 when everything is still proposed.
-	const firstDecidedIndex = $derived(
-		visibleActions.findIndex((a: any) => a.state !== 'proposed')
-	);
+	const firstDecidedIndex = $derived(visibleActions.findIndex((a: any) => a.state !== 'proposed'));
 	const wave1Settled = $derived(wave === 1 && proposedCount === 0 && visibleActions.length > 0);
 
 	// Wave 1 breakdowns — used by the transparency banner so users can see
@@ -711,11 +705,15 @@
 				<ul class="space-y-2">
 					{#each visibleActions as action, i}
 						{#if i === firstDecidedIndex && firstDecidedIndex > 0}
-							<li class="text-xs text-gray-500 uppercase tracking-wide pt-2 pb-0.5 flex items-center gap-2">
+							<li
+								class="text-xs text-gray-500 uppercase tracking-wide pt-2 pb-0.5 flex items-center gap-2"
+							>
 								<span>Decided</span>
 								<span class="flex-1 h-px bg-gray-200"></span>
 								<span class="normal-case tracking-normal text-gray-400">
-									{approvedCount + rejectedCount} item{approvedCount + rejectedCount === 1 ? '' : 's'}
+									{approvedCount + rejectedCount} item{approvedCount + rejectedCount === 1
+										? ''
+										: 's'}
 								</span>
 							</li>
 						{/if}
@@ -757,295 +755,296 @@
 								<div class="flex justify-between items-start gap-3">
 									<div class="flex-1 min-w-0">
 										<!-- Kind / state / confidence row -->
-									<div class="flex items-center gap-2 mb-1">
-										{#if action.kind === 'extract_control'}
-											<span class="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
-												<i class="fa-solid fa-plus mr-1"></i>Create
-											</span>
-										{:else if action.kind === 'link_control_existing'}
-											<span class="text-xs px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800">
-												<i class="fa-solid fa-link mr-1"></i>Link existing
-											</span>
-										{:else if action.kind === 'propose_result'}
-											{#if resultChanges}
-												<span
-													class="text-xs px-1.5 py-0.5 rounded {resultBadge(currentResult)} opacity-60"
-													title="Current state of this requirement"
-												>
-													{currentResult}
+										<div class="flex items-center gap-2 mb-1">
+											{#if action.kind === 'extract_control'}
+												<span class="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
+													<i class="fa-solid fa-plus mr-1"></i>Create
 												</span>
-												<i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
+											{:else if action.kind === 'link_control_existing'}
+												<span class="text-xs px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800">
+													<i class="fa-solid fa-link mr-1"></i>Link existing
+												</span>
+											{:else if action.kind === 'propose_result'}
+												{#if resultChanges}
+													<span
+														class="text-xs px-1.5 py-0.5 rounded {resultBadge(
+															currentResult
+														)} opacity-60"
+														title="Current state of this requirement"
+													>
+														{currentResult}
+													</span>
+													<i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
+												{/if}
+												<span
+													class="text-xs px-1.5 py-0.5 rounded {resultBadge(proposedResult)}"
+													title={resultChanges ? 'Proposed new state' : 'Proposed state'}
+												>
+													{proposedResult ?? 'not_assessed'}
+												</span>
 											{/if}
-											<span
-												class="text-xs px-1.5 py-0.5 rounded {resultBadge(proposedResult)}"
-												title={resultChanges ? 'Proposed new state' : 'Proposed state'}
-											>
-												{proposedResult ?? 'not_assessed'}
+											<span class="text-xs px-1.5 py-0.5 rounded {actionStateBadge(action.state)}">
+												{action.state}
 											</span>
-										{/if}
-										<span class="text-xs px-1.5 py-0.5 rounded {actionStateBadge(action.state)}">
-											{action.state}
-										</span>
-										<span class="text-xs {confidenceColor(action.confidence)}">
-											{action.confidence !== null && action.confidence !== undefined
-												? `${Math.round(action.confidence * 100)}%`
-												: '—'}
-										</span>
-									</div>
-
-									<!-- Header line, kind-dependent -->
-									{#if action.kind === 'propose_result'}
-										<div class="text-sm font-semibold truncate">
-											{ra
-												? `${ra.requirement?.ref_id ?? ''} ${ra.requirement?.str ?? ra.requirement?.name ?? ''}`.trim()
-												: (action.target_object_id ?? '(missing requirement)')}
+											<span class="text-xs {confidenceColor(action.confidence)}">
+												{action.confidence !== null && action.confidence !== undefined
+													? `${Math.round(action.confidence * 100)}%`
+													: '—'}
+											</span>
 										</div>
 
-										<!-- "If approved" change summary: spells out exactly what
+										<!-- Header line, kind-dependent -->
+										{#if action.kind === 'propose_result'}
+											<div class="text-sm font-semibold truncate">
+												{ra
+													? `${ra.requirement?.ref_id ?? ''} ${ra.requirement?.str ?? ra.requirement?.name ?? ''}`.trim()
+													: (action.target_object_id ?? '(missing requirement)')}
+											</div>
+
+											<!-- "If approved" change summary: spells out exactly what
 											editing the RA would do. Removes ambiguity when the result
 											doesn't move (observation-only or no-op cases). -->
-										<div class="text-xs mt-1 flex flex-wrap gap-1.5 items-center">
-											<span class="text-gray-500">If approved:</span>
-											{#if resultChanges}
-												<span
-													class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
-													title="The RA's result field will change"
-												>
-													set result {currentResult} → {proposedResult}
-												</span>
-											{/if}
-											{#if observationChanges}
-												<span
-													class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
-													title="The RA's observation field will be overwritten"
-												>
-													{currentObservation.length > 0
-														? 'update observation'
-														: 'add observation'}
-												</span>
-											{/if}
-											{#if addsControls}
-												<span
-													class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
-													title="These controls will be linked to the RA"
-												>
-													link {proposedControlIds.length} control{proposedControlIds.length ===
-													1
-														? ''
-														: 's'}
-												</span>
-											{/if}
-											{#if isNoOpProposal}
-												<span
-													class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 italic"
-													title="The RA already matches the proposal — nothing would change"
-												>
-													no change — already at this state
-												</span>
-											{/if}
-										</div>
-
-										{#if action.payload?.control_ids?.length}
-											<div class="text-xs text-gray-600 mt-1">
-												<span class="font-medium">Controls cited:</span>
-												{action.payload.control_ids
-													.map((cid: string) => controlName(cid))
-													.join(', ')}
+											<div class="text-xs mt-1 flex flex-wrap gap-1.5 items-center">
+												<span class="text-gray-500">If approved:</span>
+												{#if resultChanges}
+													<span
+														class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
+														title="The RA's result field will change"
+													>
+														set result {currentResult} → {proposedResult}
+													</span>
+												{/if}
+												{#if observationChanges}
+													<span
+														class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
+														title="The RA's observation field will be overwritten"
+													>
+														{currentObservation.length > 0
+															? 'update observation'
+															: 'add observation'}
+													</span>
+												{/if}
+												{#if addsControls}
+													<span
+														class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
+														title="These controls will be linked to the RA"
+													>
+														link {proposedControlIds.length} control{proposedControlIds.length === 1
+															? ''
+															: 's'}
+													</span>
+												{/if}
+												{#if isNoOpProposal}
+													<span
+														class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 italic"
+														title="The RA already matches the proposal — nothing would change"
+													>
+														no change — already at this state
+													</span>
+												{/if}
 											</div>
+
+											{#if action.payload?.control_ids?.length}
+												<div class="text-xs text-gray-600 mt-1">
+													<span class="font-medium">Controls cited:</span>
+													{action.payload.control_ids
+														.map((cid: string) => controlName(cid))
+														.join(', ')}
+												</div>
+											{:else}
+												<div class="text-xs text-gray-400 italic mt-1">No controls cited.</div>
+											{/if}
+											{#if action.payload?.observation}
+												<div class="text-xs text-gray-700 mt-1 line-clamp-2">
+													{action.payload.observation}
+												</div>
+											{/if}
 										{:else}
-											<div class="text-xs text-gray-400 italic mt-1">No controls cited.</div>
-										{/if}
-										{#if action.payload?.observation}
-											<div class="text-xs text-gray-700 mt-1 line-clamp-2">
-												{action.payload.observation}
+											<div class="text-sm font-semibold truncate">
+												{action.payload?.name ||
+													action.payload?.candidate_name ||
+													action.payload?.existing_control_name ||
+													'(no name)'}
 											</div>
+											{#if action.payload?.description || action.payload?.candidate_description}
+												<div class="text-xs text-gray-600 mt-0.5">
+													{action.payload?.description || action.payload?.candidate_description}
+												</div>
+											{/if}
+											{#if action.kind === 'link_control_existing' && action.payload?.existing_control_name}
+												<div class="text-xs text-gray-500 mt-1">
+													<i class="fa-solid fa-arrow-right mx-1"></i>
+													linking to:
+													<span class="font-mono">{action.payload.existing_control_name}</span>
+												</div>
+											{/if}
 										{/if}
-									{:else}
-										<div class="text-sm font-semibold truncate">
-											{action.payload?.name ||
-												action.payload?.candidate_name ||
-												action.payload?.existing_control_name ||
-												'(no name)'}
-										</div>
-										{#if action.payload?.description || action.payload?.candidate_description}
-											<div class="text-xs text-gray-600 mt-0.5">
-												{action.payload?.description || action.payload?.candidate_description}
-											</div>
-										{/if}
-										{#if action.kind === 'link_control_existing' && action.payload?.existing_control_name}
-											<div class="text-xs text-gray-500 mt-1">
-												<i class="fa-solid fa-arrow-right mx-1"></i>
-												linking to:
-												<span class="font-mono">{action.payload.existing_control_name}</span>
-											</div>
-										{/if}
-									{/if}
 
-									{#if action.rationale}
-										<div class="text-xs text-gray-500 italic mt-1 line-clamp-2">
-											{action.rationale}
-										</div>
-									{/if}
-									{#if action.source_refs?.length > 0}
-										<button
-											type="button"
-											class="text-xs text-pink-600 hover:underline mt-1"
-											onclick={() => toggleSources(action.id)}
-										>
-											{isViewingSources ? 'Hide' : 'Show'}
-											{action.source_refs.length} source passage{action.source_refs.length === 1
-												? ''
-												: 's'}
-										</button>
-									{/if}
-								</div>
+										{#if action.rationale}
+											<div class="text-xs text-gray-500 italic mt-1 line-clamp-2">
+												{action.rationale}
+											</div>
+										{/if}
+										{#if action.source_refs?.length > 0}
+											<button
+												type="button"
+												class="text-xs text-pink-600 hover:underline mt-1"
+												onclick={() => toggleSources(action.id)}
+											>
+												{isViewingSources ? 'Hide' : 'Show'}
+												{action.source_refs.length} source passage{action.source_refs.length === 1
+													? ''
+													: 's'}
+											</button>
+										{/if}
+									</div>
 
-								{#if action.state === 'proposed'}
-									<div class="flex gap-1 shrink-0">
-										{#if action.kind === 'extract_control' || action.kind === 'propose_result'}
+									{#if action.state === 'proposed'}
+										<div class="flex gap-1 shrink-0">
+											{#if action.kind === 'extract_control' || action.kind === 'propose_result'}
+												<button
+													type="button"
+													class="btn preset-outlined text-xs"
+													onclick={() => toggleEdit(action.id, action)}
+													disabled={busy}
+													title={isEditing ? 'Hide editor' : 'Edit before approving'}
+												>
+													<i class="fa-solid fa-pencil"></i>
+												</button>
+											{/if}
+											<button
+												type="button"
+												class="btn preset-filled text-xs"
+												onclick={() => approveAction(action)}
+												disabled={busy}
+											>
+												<i class="fa-solid fa-check"></i>
+											</button>
 											<button
 												type="button"
 												class="btn preset-outlined text-xs"
-												onclick={() => toggleEdit(action.id, action)}
+												onclick={() => rejectAction(action)}
 												disabled={busy}
-												title={isEditing ? 'Hide editor' : 'Edit before approving'}
 											>
-												<i class="fa-solid fa-pencil"></i>
+												<i class="fa-solid fa-xmark"></i>
 											</button>
-										{/if}
-										<button
-											type="button"
-											class="btn preset-filled text-xs"
-											onclick={() => approveAction(action)}
-											disabled={busy}
-										>
-											<i class="fa-solid fa-check"></i>
-										</button>
-										<button
-											type="button"
-											class="btn preset-outlined text-xs"
-											onclick={() => rejectAction(action)}
-											disabled={busy}
-										>
-											<i class="fa-solid fa-xmark"></i>
-										</button>
-									</div>
-								{/if}
-							</div>
-
-							{#if isEditing}
-								<div
-									class="mt-3 pt-3 border-t border-gray-200 bg-amber-50/40 -mx-3 -mb-3 px-3 pb-3 rounded-b"
-								>
-									<div class="text-xs font-semibold uppercase tracking-wide text-amber-800 mb-2">
-										<i class="fa-solid fa-pencil mr-1"></i>Edit before approving
-									</div>
-									{#if action.kind === 'extract_control'}
-										<div class="grid grid-cols-2 gap-3">
-											<label class="block text-xs">
-												<span class="font-medium text-gray-700 block mb-1">Name</span>
-												<input
-													type="text"
-													bind:value={editedPayload.name}
-													maxlength="200"
-													class="w-full text-sm rounded border-gray-300"
-												/>
-											</label>
-											<label class="block text-xs">
-												<span class="font-medium text-gray-700 block mb-1">Category</span>
-												<select
-													bind:value={editedPayload.category}
-													class="w-full text-sm rounded border-gray-300"
-												>
-													<option value="">—</option>
-													<option value="policy">policy</option>
-													<option value="process">process</option>
-													<option value="technical">technical</option>
-													<option value="physical">physical</option>
-													<option value="procedure">procedure</option>
-												</select>
-											</label>
-											<label class="block text-xs col-span-2">
-												<span class="font-medium text-gray-700 block mb-1">Description</span>
-												<textarea
-													bind:value={editedPayload.description}
-													rows="2"
-													class="w-full text-sm rounded border-gray-300"
-												></textarea>
-											</label>
-											<label class="block text-xs">
-												<span class="font-medium text-gray-700 block mb-1">CSF function</span>
-												<select
-													bind:value={editedPayload.csf_function}
-													class="w-full text-sm rounded border-gray-300"
-												>
-													<option value="">—</option>
-													<option value="govern">govern</option>
-													<option value="identify">identify</option>
-													<option value="protect">protect</option>
-													<option value="detect">detect</option>
-													<option value="respond">respond</option>
-													<option value="recover">recover</option>
-												</select>
-											</label>
-										</div>
-									{:else if action.kind === 'propose_result'}
-										<div class="space-y-3">
-											<label class="block text-xs">
-												<span class="font-medium text-gray-700 block mb-1">Result</span>
-												<select
-													bind:value={editedPayload.result}
-													class="w-full text-sm rounded border-gray-300"
-												>
-													<option value="compliant">compliant</option>
-													<option value="partially_compliant">partially_compliant</option>
-													<option value="non_compliant">non_compliant</option>
-													<option value="not_applicable">not_applicable</option>
-												</select>
-											</label>
-											<label class="block text-xs">
-												<span class="font-medium text-gray-700 block mb-1">Observation</span>
-												<textarea
-													bind:value={editedPayload.observation}
-													rows="3"
-													class="w-full text-sm rounded border-gray-300"
-												></textarea>
-											</label>
-											{#if action.payload?.evidence_links?.length}
-												<div class="text-xs text-gray-500">
-													On approval, each cited control will be linked to
-													{action.payload.evidence_links[0]?.evidence_ids?.length ?? 0}
-													evidence(s).
-												</div>
-											{/if}
 										</div>
 									{/if}
 								</div>
-							{/if}
 
-							{#if isViewingSources && action.source_refs?.length > 0}
-								<div
-									class="mt-3 pt-3 border-t border-gray-200 bg-gray-50/60 -mx-3 -mb-3 px-3 pb-3 rounded-b"
-								>
-									<div class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">
-										<i class="fa-solid fa-quote-left mr-1"></i>Sources
-									</div>
-									<ul class="space-y-1.5">
-										{#each action.source_refs as ref}
-											<li class="text-xs bg-white border border-gray-200 rounded p-2">
-												<div class="font-mono text-gray-700">
-													[{ref.index}] {ref.name}
-												</div>
-												{#if ref.snippet}
-													<div class="text-gray-600 mt-1 italic">
-														"{ref.snippet}"
+								{#if isEditing}
+									<div
+										class="mt-3 pt-3 border-t border-gray-200 bg-amber-50/40 -mx-3 -mb-3 px-3 pb-3 rounded-b"
+									>
+										<div class="text-xs font-semibold uppercase tracking-wide text-amber-800 mb-2">
+											<i class="fa-solid fa-pencil mr-1"></i>Edit before approving
+										</div>
+										{#if action.kind === 'extract_control'}
+											<div class="grid grid-cols-2 gap-3">
+												<label class="block text-xs">
+													<span class="font-medium text-gray-700 block mb-1">Name</span>
+													<input
+														type="text"
+														bind:value={editedPayload.name}
+														maxlength="200"
+														class="w-full text-sm rounded border-gray-300"
+													/>
+												</label>
+												<label class="block text-xs">
+													<span class="font-medium text-gray-700 block mb-1">Category</span>
+													<select
+														bind:value={editedPayload.category}
+														class="w-full text-sm rounded border-gray-300"
+													>
+														<option value="">—</option>
+														<option value="policy">policy</option>
+														<option value="process">process</option>
+														<option value="technical">technical</option>
+														<option value="physical">physical</option>
+														<option value="procedure">procedure</option>
+													</select>
+												</label>
+												<label class="block text-xs col-span-2">
+													<span class="font-medium text-gray-700 block mb-1">Description</span>
+													<textarea
+														bind:value={editedPayload.description}
+														rows="2"
+														class="w-full text-sm rounded border-gray-300"
+													></textarea>
+												</label>
+												<label class="block text-xs">
+													<span class="font-medium text-gray-700 block mb-1">CSF function</span>
+													<select
+														bind:value={editedPayload.csf_function}
+														class="w-full text-sm rounded border-gray-300"
+													>
+														<option value="">—</option>
+														<option value="govern">govern</option>
+														<option value="identify">identify</option>
+														<option value="protect">protect</option>
+														<option value="detect">detect</option>
+														<option value="respond">respond</option>
+														<option value="recover">recover</option>
+													</select>
+												</label>
+											</div>
+										{:else if action.kind === 'propose_result'}
+											<div class="space-y-3">
+												<label class="block text-xs">
+													<span class="font-medium text-gray-700 block mb-1">Result</span>
+													<select
+														bind:value={editedPayload.result}
+														class="w-full text-sm rounded border-gray-300"
+													>
+														<option value="compliant">compliant</option>
+														<option value="partially_compliant">partially_compliant</option>
+														<option value="non_compliant">non_compliant</option>
+														<option value="not_applicable">not_applicable</option>
+													</select>
+												</label>
+												<label class="block text-xs">
+													<span class="font-medium text-gray-700 block mb-1">Observation</span>
+													<textarea
+														bind:value={editedPayload.observation}
+														rows="3"
+														class="w-full text-sm rounded border-gray-300"
+													></textarea>
+												</label>
+												{#if action.payload?.evidence_links?.length}
+													<div class="text-xs text-gray-500">
+														On approval, each cited control will be linked to
+														{action.payload.evidence_links[0]?.evidence_ids?.length ?? 0}
+														evidence(s).
 													</div>
 												{/if}
-											</li>
-										{/each}
-									</ul>
-								</div>
-							{/if}
+											</div>
+										{/if}
+									</div>
+								{/if}
+
+								{#if isViewingSources && action.source_refs?.length > 0}
+									<div
+										class="mt-3 pt-3 border-t border-gray-200 bg-gray-50/60 -mx-3 -mb-3 px-3 pb-3 rounded-b"
+									>
+										<div class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">
+											<i class="fa-solid fa-quote-left mr-1"></i>Sources
+										</div>
+										<ul class="space-y-1.5">
+											{#each action.source_refs as ref}
+												<li class="text-xs bg-white border border-gray-200 rounded p-2">
+													<div class="font-mono text-gray-700">
+														[{ref.index}] {ref.name}
+													</div>
+													{#if ref.snippet}
+														<div class="text-gray-600 mt-1 italic">
+															"{ref.snippet}"
+														</div>
+													{/if}
+												</li>
+											{/each}
+										</ul>
+									</div>
+								{/if}
 							{:else}
 								<!-- Compact one-liner for approved/rejected proposals.
 									Keeps the audit trail visible without dominating the list. -->
