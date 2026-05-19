@@ -16,6 +16,9 @@ import calendar
 from dateutil import relativedelta as rd
 from uuid import UUID
 
+# Re-export so callers can import from a single utils module.
+from .friendly_names import generate_friendly_name  # noqa: F401
+
 logger = structlog.get_logger(__name__)
 
 
@@ -32,6 +35,57 @@ def extract_node_id(urn: str | None) -> str | None:
         return None
     node_id = ":".join(parts[5:]).strip()
     return node_id if node_id else None
+
+
+REWRITABLE_URN_TYPES = {"req_node", "question", "question_choice"}
+
+
+def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
+    """Rewrite segment 1 (namespace) and segment 4 (slug) of every child URN in
+    the draft, in place. Idempotent across slugs.
+
+    URN format: `urn:ns:risk:type:slug:node_id` (6+ segments). Segments 5+
+    (node_id) are preserved so CEL expressions keying off node_id keep
+    resolving. URNs with fewer than 6 segments are left untouched — the
+    rename branch in `_reconcile_draft` rejects drafts that contain such
+    legacy URNs before this helper runs, so encountering one here would be
+    a bug.
+
+    Touches: nodes[*].urn, nodes[*].parent_urn, questions[*].urn,
+    questions[*].depends_on.{question, answers}, choices[*].urn.
+    """
+
+    def sub(u):
+        if not isinstance(u, str):
+            return u
+        parts = u.split(":")
+        if (
+            len(parts) >= 6
+            and parts[0] == "urn"
+            and parts[2] == "risk"
+            and parts[3] in REWRITABLE_URN_TYPES
+        ):
+            parts[1] = new_ns
+            parts[4] = new_slug
+            return ":".join(parts)
+        return u
+
+    for n in draft.get("nodes", []) or []:
+        n["urn"] = sub(n.get("urn"))
+        if n.get("parent_urn"):
+            n["parent_urn"] = sub(n.get("parent_urn"))
+    for q in draft.get("questions", []) or []:
+        q["urn"] = sub(q.get("urn"))
+        dep = q.get("depends_on")
+        if isinstance(dep, dict):
+            if isinstance(dep.get("question"), str):
+                dep["question"] = sub(dep["question"])
+            if isinstance(dep.get("answers"), list):
+                dep["answers"] = [
+                    sub(a) if isinstance(a, str) else a for a in dep["answers"]
+                ]
+    for c in draft.get("choices", []) or []:
+        c["urn"] = sub(c.get("urn"))
 
 
 def is_compute_result_truthy(compute_result: str | None) -> bool:
@@ -1133,67 +1187,94 @@ def get_auditee_filtered_folder_ids(user) -> set:
 
 
 # --- Field Visibility ---
+#
+# The compliance assessment's `field_visibility` is the single source of truth
+# at runtime. It is populated at CA creation from DEFAULT_VISIBILITY merged with
+# the framework's `field_visibility`, and can be edited per-CA from then on.
+#
+# Storage shape: {field_name: {role: 'edit'|'read'|'hidden'}}
+# Roles known today: 'auditor', 'respondent'. Future roles slot in alongside.
+# A missing field key, or a missing role within a field's pair, resolves to 'edit'
+# (matching the "no restriction" default).
 
-DEFAULT_FIELD_VISIBILITY = {
-    "result": "auditor",
-    "status": "auditor",
-    "score": "auditor",
-    "is_scored": "auditor",
-    "documentation_score": "auditor",
-    "observation": "everyone",
-    "answers": "everyone",
-    "evidences": "everyone",
-    "applied_controls": "auditor",
-    "security_exceptions": "auditor",
-    "respondent_alignment": "everyone",
+EVERYONE_EDIT = {"auditor": "edit", "respondent": "edit"}
+AUDITOR_ONLY = {"auditor": "edit", "respondent": "hidden"}
+AUDITOR_READ_ONLY = {"auditor": "read", "respondent": "hidden"}
+HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
+
+DEFAULT_VISIBILITY = {
+    "score": HIDDEN,
+    "is_scored": HIDDEN,
+    "documentation_score": HIDDEN,
+    "status": AUDITOR_ONLY,
+    "extended_result": AUDITOR_ONLY,
+    # respondent_alignment is only ever populated by the respondent answering
+    # the auto-question. AUDITOR_ONLY would prevent that, so the auditor's
+    # badge would never render — functionally equivalent to HIDDEN. Default
+    # off; auditors who want it explicitly flip to "Auditor + Respondent".
+    "respondent_alignment": HIDDEN,
 }
 
 
-def resolve_field_visibility(framework, compliance_assessment, field_name):
-    """Resolve the visibility level for a field using the three-tier cascade.
+def resolve_visibility_from_overrides(overrides, field_name):
+    """Resolve a field's visibility pair from a raw `field_visibility` dict.
 
-    Priority: CA override > Framework override > Code default > "auditor" (safe fallback).
+    Shape: {role: 'edit'|'read'|'hidden'}.
 
-    Returns: "everyone", "auditor", or "hidden"
+    Lookup order:
+      1. Explicit override in `overrides`.
+      2. DEFAULT_VISIBILITY (backstop in case a new field was added in code
+         without a migration to backfill existing CAs).
+      3. EVERYONE_EDIT (truly unknown field).
+
+    Use this when you have a raw dict (e.g. from a queryset `.values()` call).
+    For a model instance, prefer `resolve_field_visibility(ca, field)`.
     """
-    # Tier 1: CA-level override (highest priority)
-    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    if field_name in ca_overrides:
-        return ca_overrides[field_name]
-
-    # Tier 2: Framework-level override
-    fw_overrides = getattr(framework, "field_visibility", None) or {}
-    if field_name in fw_overrides:
-        return fw_overrides[field_name]
-
-    # Tier 3: Code-level default
-    return DEFAULT_FIELD_VISIBILITY.get(field_name, "auditor")
+    pair = (overrides or {}).get(field_name)
+    if isinstance(pair, dict):
+        return pair
+    fallback = DEFAULT_VISIBILITY.get(field_name)
+    if isinstance(fallback, dict):
+        return dict(fallback)
+    return dict(EVERYONE_EDIT)
 
 
-def get_visible_fields(framework, compliance_assessment, viewer_role="auditor"):
-    """Get the set of field names visible to the given role.
+def resolve_field_visibility(compliance_assessment, field_name):
+    """Return the per-role visibility pair for a field on a CA instance."""
+    overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    return resolve_visibility_from_overrides(overrides, field_name)
 
-    viewer_role: "respondent" or "auditor"
 
-    Returns a set of field names that should be included in the response.
+def _role_access(compliance_assessment, field_name, role):
+    pair = resolve_field_visibility(compliance_assessment, field_name)
+    return pair.get(role, "edit")
+
+
+def is_field_visible_to(compliance_assessment, field_name, role):
+    """Whether a field is readable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) != "hidden"
+
+
+def is_field_editable_by(compliance_assessment, field_name, role):
+    """Whether a field is writable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) == "edit"
+
+
+def build_initial_field_visibility(framework):
+    """Build the initial `field_visibility` map for a new CA.
+
+    Layered per-role: code defaults are seeded for every known field, then the
+    framework's overrides are merged on top — but per-role, so a framework that
+    only specifies a single role (e.g. {"score": {"auditor": "edit"}}) does not
+    erase the default value for the other roles.
     """
-    all_fields = set(DEFAULT_FIELD_VISIBILITY.keys())
-
-    # Also include any fields mentioned in overrides
     fw_overrides = getattr(framework, "field_visibility", None) or {}
-    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    all_fields.update(fw_overrides.keys())
-    all_fields.update(ca_overrides.keys())
-
-    visible = set()
-    for field in all_fields:
-        visibility = resolve_field_visibility(framework, compliance_assessment, field)
-        if visibility == "hidden":
-            continue  # hidden from everyone
-        if visibility == "everyone":
-            visible.add(field)
-        elif visibility == "auditor" and viewer_role == "auditor":
-            visible.add(field)
-        # "auditor" + viewer_role="respondent" -> not visible
-
-    return visible
+    merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    for key, pair in fw_overrides.items():
+        if not isinstance(pair, dict):
+            continue
+        # Ensure the field has a starting pair (DEFAULT_VISIBILITY may not
+        # cover every key the framework configures).
+        merged.setdefault(key, dict(EVERYONE_EDIT))
+        merged[key].update(pair)
+    return merged

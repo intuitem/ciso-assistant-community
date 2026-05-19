@@ -203,6 +203,7 @@
 							{#if canEditRequirementAssessment}
 								<Anchor
 									breadcrumbAction="push"
+									label={title || m.requirementAssessment()}
 									href="/requirement-assessments/{ra_id}/edit?next={page.url.pathname}"
 								>
 									{#if hasTitle || description}
@@ -220,6 +221,7 @@
 							{:else}
 								<Anchor
 									breadcrumbAction="push"
+									label={title || m.requirementAssessment()}
 									href="/requirement-assessments/{ra_id}?next={page.url.pathname}"
 								>
 									{#if hasTitle}

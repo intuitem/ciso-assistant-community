@@ -38,9 +38,33 @@
 		tags={['frameworks', 'builder', 'editor']}
 	/>
 	<Article
+		title="Bulk evidence upload"
+		desc="Upload multiple files or a whole directory as evidences, with conflict-resolution strategies (skip, add revision, replace, rename) and SHA-256 duplicate detection."
+		link="/experimental/evidence-bulk-upload"
+		tags={['evidences', 'bulk', 'upload']}
+	/>
+	<Article
 		title="Preset Editor"
 		desc="Author presets — scaffolds and steps. Create from scratch or fork a library preset."
 		link="/experimental/preset-editor"
 		tags={['presets', 'journey', 'editor']}
 	/>
+	<Article
+		title="Questionnaire Autopilot"
+		desc="Upload a customer security questionnaire (.xlsx), scope it to a folder, then map its columns. LLM prefill comes next."
+		link="/experimental/questionnaire-autopilot"
+		tags={['agentic', 'questionnaire', 'vendor-due-diligence']}
+	/>
+	<Article
+		title="Asset Whiteboard"
+		desc="Place and link assets on a freeform canvas, per domain. Drawn edges update parent_assets in real time; positions saved in your browser."
+		link="/experimental/asset-board"
+		tags={['assets', 'graph', 'canvas', 'prototype']}
+	/>
+	<!-- <Article -->
+	<!-- 	title="Multi-file evidence (UX prototype)" -->
+	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->
+	<!-- 	link="/experimental/evidence-multifile" -->
+	<!-- 	tags={['evidences', 'history', 'ux', 'prototype']} -->
+	<!-- /> -->
 </div>

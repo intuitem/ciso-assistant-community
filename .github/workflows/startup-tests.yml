@@ -80,11 +80,13 @@ jobs:
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
       - name: Install frontend dependencies
         working-directory: ${{ env.frontend-directory }}
-        run: |
-          npm install -g pnpm
-          pnpm i --frozen-lockfile
+        run: pnpm i --frozen-lockfile
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install
@@ -131,11 +133,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
       - name: Install frontend dependencies
         working-directory: ${{ env.frontend-directory }}
-        run: |
-          npm install -g pnpm
-          pnpm i --frozen-lockfile
+        run: pnpm i --frozen-lockfile
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install

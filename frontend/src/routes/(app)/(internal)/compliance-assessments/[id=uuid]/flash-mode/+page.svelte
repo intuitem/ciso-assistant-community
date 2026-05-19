@@ -20,9 +20,7 @@
 
 	// Field visibility for auditor role
 	const complianceAssessment = $derived(data.compliance_assessment);
-	const fieldVis = $derived(
-		getFieldVisibility(complianceAssessment.framework, complianceAssessment, 'auditor')
-	);
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, 'auditor'));
 	const showResult = $derived(fieldVis.showResult);
 	const showObservation = $derived(fieldVis.showObservation);
 
