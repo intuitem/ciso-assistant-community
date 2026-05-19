@@ -10,6 +10,7 @@
 	import Checkbox from '../Checkbox.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
+	import { tick } from 'svelte';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 
@@ -91,13 +92,17 @@
 		if (id) {
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
-				.then((r) => {
+				.then(async (r) => {
 					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
-					implementationGroupsChoices = implementation_groups.map((group) => ({
+					const newChoices = implementation_groups.map((group) => ({
 						label: group.name,
 						value: group.ref_id
 					}));
+					const choicesChanged =
+						newChoices.length !== implementationGroupsChoices.length ||
+						newChoices.some((c, i) => c.value !== implementationGroupsChoices[i]?.value);
+
 					suggestions = r['reference_controls'].length > 0;
 
 					// Effective per-role visibility map this framework would seed into a
@@ -109,14 +114,23 @@
 						.filter((group) => group.default_selected)
 						.map((group) => group.ref_id);
 
-					// Only apply defaults when creating a new assessment, not when editing
 					if (!object.id) {
-						form.form.update((currentData) => {
-							return {
-								...currentData,
-								selected_implementation_groups: defaultImplementationGroups
-							};
-						});
+						if (choicesChanged) {
+							implementationGroupsChoices = newChoices;
+						}
+						form.form.update((currentData) => ({
+							...currentData,
+							selected_implementation_groups: defaultImplementationGroups
+						}));
+					} else if (choicesChanged) {
+						const savedGroups = [...($formData.selected_implementation_groups ?? [])];
+						implementationGroupsChoices = newChoices;
+						await tick();
+						await tick();
+						form.form.update((d) => ({
+							...d,
+							selected_implementation_groups: savedGroups
+						}));
 					}
 				});
 		}
