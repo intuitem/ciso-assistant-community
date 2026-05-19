@@ -41,7 +41,7 @@ FRAMEWORK_SHEET = "caf_meta"
 CONTENT_SHEET = "caf_content"
 
 NCSC_COLLECTION_URL = "https://www.ncsc.gov.uk/collection/cyber-assessment-framework"
-FRAMEWORK_NAME = "NCSC - Cyber Assessment Framework (CAF) 4.0"
+FRAMEWORK_NAME = "NCSC - Cyber Assessment Framework (CAF) v4.0"
 FRAMEWORK_DESCRIPTION = (
     "National Cyber Security Centre - Cyber Assessment Framework\n"
     f"{NCSC_COLLECTION_URL}"
