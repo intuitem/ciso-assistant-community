@@ -97,7 +97,7 @@ test.describe('General settings', () => {
 			await settingsPage.hasUrl();
 			await settingsPage.hasTitle();
 			await page.getByRole('button', { name: 'Risk matrix settings' }).click();
-			await page.getByLabel('Risk matrix settings').getByText('Ebios RM').click();
+			await page.getByLabel('Risk matrix settings').getByText('EBIOS RM').click();
 			await page.getByRole('button', { name: 'Save' }).click();
 			const toast = page.getByTestId('toast');
 			await expect(toast).toBeVisible();
