@@ -761,7 +761,7 @@
 	"logoHelpText": "Logo-ul va fi afișat în antetul aplicației. Formatele acceptate sunt PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Favicon-ul va fi afișat în fila browser. Formatele acceptate sunt ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entitate",
-	"entity_name": "Entitate",
+	"entity_name": "Numele entității",
 	"entities": "Entități",
 	"addEntity": "Adăugați entitate",
 	"referenceLink": "Link de referință",

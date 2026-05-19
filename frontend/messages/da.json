@@ -774,7 +774,7 @@
 	"logoHelpText": "Logoet vil blive vist i appens header. Accepterede formater: PNG, JPEG, WEBP, SVG",
 	"faviconHelpText": "Faviconet vil blive vist i browsertabben. Accepterede formater: ICO, PNG, JPEG, WEBP, SVG",
 	"entity": "Enhed",
-	"entity_name": "Enhed",
+	"entity_name": "Enhedsnavn",
 	"entities": "Enheder",
 	"addEntity": "Tilføj enhed",
 	"referenceLink": "Referencelink",

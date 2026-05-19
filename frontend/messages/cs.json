@@ -762,7 +762,7 @@
 	"logoHelpText": "Logo bude zobrazeno v záhlaví aplikace. Přijatelné formáty jsou PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Favicon bude zobrazen v záložce prohlížeče. Přijatelné formáty jsou ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entita",
-	"entity_name": "Entita",
+	"entity_name": "Název subjektu",
 	"entities": "Entity",
 	"addEntity": "Přidat entitu",
 	"referenceLink": "Referenční odkaz",

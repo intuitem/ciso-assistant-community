@@ -1163,7 +1163,7 @@
 	"accreditationStatus": "Akreditacijos būsena",
 	"accreditationCategory": "Akreditacijos kategorija",
 	"entity": "Subjektas",
-	"entity_name": "Subjektas",
+	"entity_name": "Subjekto pavadinimas",
 	"entities": "Subjektai",
 	"entitiesGraph": "Subjektų ekosistema",
 	"addEntity": "Pridėti subjektą",

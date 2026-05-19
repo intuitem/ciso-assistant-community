@@ -810,7 +810,7 @@
 	"logoHelpText": "Logo będzie wyświetlane w nagłówku aplikacji. Akceptowalne formaty to PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Favicon będzie wyświetlany w karcie przeglądarki. Akceptowane formaty to ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Podmiot",
-	"entity_name": "Podmiot",
+	"entity_name": "Nazwa podmiotu",
 	"entities": "Podmioty",
 	"addEntity": "Dodaj jednostkę",
 	"referenceLink": "Link referencyjny",

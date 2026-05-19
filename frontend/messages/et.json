@@ -1266,6 +1266,7 @@
 	"accreditationStatus": "Akrediteeringu olek",
 	"accreditationCategory": "Akrediteeringu kategooria",
 	"entity": "Üksus",
+	"entity_name": "Üksuse nimi",
 	"entities": "Üksused",
 	"entitiesGraph": "Üksuste ökosüsteem",
 	"addEntity": "Lisa üksus",

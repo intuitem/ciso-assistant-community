@@ -744,7 +744,7 @@
 	"logoHelpText": "Il logo sarà mostrato nell'intestazione dell'app. Formati accettati: PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "La favicon sarà visibile nella scheda del browser. Formati accettati: ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entità",
-	"entity_name": "Entità",
+	"entity_name": "Nome dell'entità",
 	"entities": "Entità",
 	"addEntity": "Aggiungi entità",
 	"referenceLink": "Link di riferimento",
