@@ -9,6 +9,8 @@ from data_wizard.egerie_xml_helpers import (
     quartile_to_index,
 )
 
+import pandas as pd
+from data_wizard.views import normalize_df_columns
 
 # Minimal Egerie analysis XML covering the elements we actually consume.
 # Kept inline so the parser test runs without external fixtures.
@@ -246,3 +248,23 @@ class EgerieRealSamplesTest(unittest.TestCase):
         # Workshop 3 is empty in this sample
         self.assertEqual(len(data["stakeholders"]), 0)
         self.assertEqual(len(data["strategic_scenarios"]), 0)
+
+
+class NormalizeDfColumnsTest(unittest.TestCase):
+    def test_strips_and_lowercases(self):
+        # check that the fields are well trimed and put in lowercase
+        df = pd.DataFrame(columns=[" Name ", "DESCRIPTION", "  Ref_ID"])
+        normalize_df_columns(df)
+        self.assertEqual(list(df.columns), ["name", "description", "ref_id"])
+
+    def test_already_normalized(self):
+        # checks that nothing changes
+        df = pd.DataFrame(columns=["name", "ref"])
+        normalize_df_columns(df)
+        self.assertEqual(list(df.columns), ["name", "ref"])
+
+    def test_numeric_column_name(self):
+        # check for int values
+        df = pd.DataFrame(columns=[0, 1, 2])
+        normalize_df_columns(df)
+        self.assertEqual(list(df.columns), ["0", "1", "2"])
