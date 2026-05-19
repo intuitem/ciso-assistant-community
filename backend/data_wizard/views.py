@@ -2576,6 +2576,7 @@ class LoadFileView(APIView):
                         file_type = RecordFileType.CSV
                         df = pd.read_csv(record_file).fillna("")
 
+                    df.columns = [str(header).strip().lower() for header in df.columns]
                     base_context = BaseContext(
                         request,
                         folders_map=folders_map,
