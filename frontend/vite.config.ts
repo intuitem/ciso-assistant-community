@@ -4,6 +4,14 @@ import { defineConfig } from 'vitest/config';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+	build: {
+		target: 'es2022'
+	},
+	optimizeDeps: {
+		esbuildOptions: {
+			target: 'es2022'
+		}
+	},
 	plugins: [
 		paraglideVitePlugin({
 			project: './project.inlang',
