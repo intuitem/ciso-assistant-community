@@ -268,3 +268,9 @@ class NormalizeDfColumnsTest(unittest.TestCase):
         df = pd.DataFrame(columns=[0, 1, 2])
         normalize_df_columns(df)
         self.assertEqual(list(df.columns), ["0", "1", "2"])
+
+    def test_duplicate_after_normalization_raises(self):
+        df = pd.DataFrame(columns=["Name", " name"])
+        with self.assertRaises(ValueError) as ctx:
+            normalize_df_columns(df)
+        self.assertIn("name", str(ctx.exception))
