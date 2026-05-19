@@ -5,6 +5,10 @@
         "backend": {
             "type": "object",
             "properties": {
+                "affinity": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "annotations": {
                     "type": "object",
                     "additionalProperties": true
@@ -45,6 +49,9 @@
                                 "port": {
                                     "type": "integer"
                                 },
+                                "useSsl": {
+                                    "type": "boolean"
+                                },
                                 "useTls": {
                                     "type": "boolean"
                                 },
@@ -64,10 +71,19 @@
                 "env": {
                     "type": "array"
                 },
+                "extraVolumeMounts": {
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "type": "array"
+                },
                 "huey": {
                     "type": "object",
                     "properties": {
                         "env": {
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
                             "type": "array"
                         },
                         "name": {
@@ -103,6 +119,10 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "persistence": {
                     "type": "object",
@@ -182,6 +202,9 @@
                         }
                     },
                     "additionalProperties": false
+                },
+                "tolerations": {
+                    "type": "array"
                 }
             },
             "additionalProperties": false
@@ -213,6 +236,10 @@
         "frontend": {
             "type": "object",
             "properties": {
+                "affinity": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "annotations": {
                     "type": "object",
                     "additionalProperties": true
@@ -231,6 +258,12 @@
                     "additionalProperties": true
                 },
                 "env": {
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "type": "array"
+                },
+                "extraVolumes": {
                     "type": "array"
                 },
                 "image": {
@@ -256,6 +289,10 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "podAnnotations": {
                     "type": "object",
@@ -287,6 +324,9 @@
                         }
                     },
                     "additionalProperties": false
+                },
+                "tolerations": {
+                    "type": "array"
                 }
             },
             "additionalProperties": false
@@ -297,6 +337,10 @@
         "global": {
             "type": "object",
             "properties": {
+                "affinity": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "clusterDomain": {
                     "type": "string"
                 },

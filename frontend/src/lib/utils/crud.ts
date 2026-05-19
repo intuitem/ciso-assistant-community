@@ -349,6 +349,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
+			{ field: 'incidents', urlModel: 'incidents' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'existing_applied_controls', urlModel: 'applied-controls' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
@@ -444,6 +445,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'assets',
 				disableDelete: true,
 				disableCreate: true
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'incidents',
+				disableCreate: true,
+				disableDelete: true
 			}
 		],
 		selectFields: [
@@ -2116,11 +2123,38 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owners', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'qualifications', urlModel: 'terminologies' },
 			{ field: 'entities', urlModel: 'entities' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'incident', urlModel: 'timeline-entries' },
-			{ field: 'incident', urlModel: 'dora-incident-reports' }
+			{ field: 'incident', urlModel: 'dora-incident-reports' },
+			{
+				field: 'incidents',
+				urlModel: 'applied-controls',
+				disableCreate: true,
+				disableDelete: true,
+				addExisting: {
+					parentField: 'applied_controls',
+					lazy: true
+				}
+			},
+			{
+				field: 'incidents',
+				urlModel: 'task-templates',
+				disableCreate: true,
+				disableDelete: true,
+				addExisting: {
+					parentField: 'task_templates'
+				}
+			},
+			{
+				field: 'incidents',
+				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		selectFields: [
 			{ field: 'severity', valueType: 'number' },
@@ -2145,6 +2179,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'resolved_at' },
 			{ field: 'resolution' },
 			{ field: 'is_bcp_activated' },
+			{ field: 'applied_controls' },
+			{ field: 'task_templates' },
+			{ field: 'risk_scenarios' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
 			{ field: 'link' },
@@ -2180,7 +2217,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
-			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -2192,6 +2230,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				defaultFilters: {
 					status: [{ value: 'pending' }, { value: 'in_progress' }]
 				}
+			},
+			{
+				field: 'task_templates',
+				urlModel: 'incidents',
+				disableCreate: true,
+				disableDelete: true
 			}
 		]
 	},
@@ -2620,6 +2664,111 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels' }
 		]
 	},
+	'responsibility-roles': {
+		name: 'responsibilityrole',
+		localName: 'responsibilityRole',
+		localNamePlural: 'responsibilityRoles',
+		verboseName: 'Responsibility role',
+		verboseNamePlural: 'Responsibility roles',
+		endpointUrl: 'pmbok/responsibility-roles',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'code' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'taxonomy' },
+			{ field: 'color' },
+			{ field: 'order' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' }
+		],
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		selectFields: [{ field: 'taxonomy', endpointUrl: 'pmbok/responsibility-roles' }],
+		filters: [{ field: 'folder' }, { field: 'taxonomy' }, { field: 'is_visible' }]
+	},
+	'responsibility-matrices': {
+		name: 'responsibilitymatrix',
+		localName: 'responsibilityMatrix',
+		localNamePlural: 'responsibilityMatrices',
+		verboseName: 'Responsibility matrix',
+		verboseNamePlural: 'Responsibility matrices',
+		endpointUrl: 'pmbok/responsibility-matrices',
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'preset' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'roles', urlModel: 'responsibility-roles' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [{ field: 'preset', endpointUrl: 'pmbok/responsibility-matrices' }],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'preset' },
+			{ field: 'roles' },
+			{ field: 'filtering_labels' }
+		]
+	},
+	'responsibility-matrix-activities': {
+		name: 'responsibilitymatrixactivity',
+		localName: 'responsibilityActivity',
+		localNamePlural: 'responsibilityActivities',
+		verboseName: 'Responsibility activity',
+		verboseNamePlural: 'Responsibility activities',
+		endpointUrl: 'pmbok/responsibility-matrix-activities',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'matrix', urlModel: 'responsibility-matrices' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'order' }
+		],
+		foreignKeyFields: [{ field: 'matrix', urlModel: 'responsibility-matrices' }],
+		filters: [{ field: 'matrix' }]
+	},
+	'responsibility-matrix-actors': {
+		name: 'responsibilitymatrixactor',
+		localName: 'responsibilityMatrixActor',
+		localNamePlural: 'responsibilityMatrixActors',
+		verboseName: 'Matrix actor',
+		verboseNamePlural: 'Matrix actors',
+		endpointUrl: 'pmbok/responsibility-matrix-actors',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'matrix', urlModel: 'responsibility-matrices' },
+			{ field: 'actor', urlModel: 'actors' },
+			{ field: 'order' }
+		],
+		foreignKeyFields: [
+			{ field: 'matrix', urlModel: 'responsibility-matrices' },
+			{ field: 'actor', urlModel: 'actors' }
+		],
+		filters: [{ field: 'matrix' }, { field: 'actor' }]
+	},
+	'responsibility-assignments': {
+		name: 'responsibilityassignment',
+		localName: 'responsibilityAssignment',
+		localNamePlural: 'responsibilityAssignments',
+		verboseName: 'Responsibility assignment',
+		verboseNamePlural: 'Responsibility assignments',
+		endpointUrl: 'pmbok/responsibility-assignments',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'activity', urlModel: 'responsibility-matrix-activities' },
+			{ field: 'actor', urlModel: 'actors' },
+			{ field: 'role', urlModel: 'responsibility-roles' }
+		],
+		foreignKeyFields: [
+			{ field: 'activity', urlModel: 'responsibility-matrix-activities' },
+			{ field: 'actor', urlModel: 'actors' },
+			{ field: 'role', urlModel: 'responsibility-roles' }
+		],
+		filters: [{ field: 'activity' }, { field: 'actor' }, { field: 'role' }]
+	},
 	'metric-definitions': {
 		name: 'metricdefinition',
 		localName: 'metricDefinition',
@@ -2772,6 +2921,28 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'time_range', valueType: 'string', detail: false },
 			{ field: 'aggregation', valueType: 'string', detail: false }
 		]
+	},
+	journeys: {
+		name: 'presetjourney',
+		localName: 'journey',
+		localNamePlural: 'journeys',
+		verboseName: 'Journey',
+		verboseNamePlural: 'Journeys',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'preset', urlModel: 'presets' }
+		],
+		filters: [{ field: 'folder' }, { field: 'preset' }]
+	},
+	presets: {
+		name: 'preset',
+		localName: 'preset',
+		localNamePlural: 'presets',
+		verboseName: 'Preset',
+		verboseNamePlural: 'Presets',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
 	}
 };
 
@@ -2874,7 +3045,8 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					mitigate: { text: 'mitigate', cssClasses: 'badge bg-lime-200' },
 					accept: { text: 'accept', cssClasses: 'badge bg-green-200' },
 					avoid: { text: 'avoid', cssClasses: 'badge bg-red-200' },
-					transfer: { text: 'transfer', cssClasses: 'badge bg-yellow-300' }
+					transfer: { text: 'transfer', cssClasses: 'badge bg-yellow-300' },
+					cancelled: { text: 'cancelled', cssClasses: 'badge bg-gray-300' }
 				}
 			}
 		}
