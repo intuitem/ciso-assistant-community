@@ -52,14 +52,72 @@
 	const wave1Kinds = ['extract_control', 'link_control_existing'];
 	const wave2Kinds = ['propose_result'];
 
+	// Detect proposals whose approval would change nothing on the RA. Mirrors
+	// the backend no-op rule (audit_prefill.py _propose_result_for_ra) but
+	// runs over the live RA snapshot from raById, so older AgentActions
+	// emitted before the backend rule are also caught here.
+	function isProposedNoOp(action: any): boolean {
+		if (action.state !== 'proposed') return false;
+		if (action.kind !== 'propose_result') return false;
+		const ra: any = raById.get(action.target_object_id);
+		if (!ra) return false;
+		const currentResult: string = ra.result ?? action.payload?.current_result ?? 'not_assessed';
+		const proposedResult: string = action.payload?.result ?? 'not_assessed';
+		if (currentResult !== proposedResult) return false;
+
+		const currentObservation: string = (ra.observation ?? '').trim();
+		const proposedObservation: string = (action.payload?.observation ?? '').trim();
+		if (currentObservation !== proposedObservation) return false;
+
+		const currentIds = new Set<string>(
+			(ra.applied_controls ?? []).map((c: any) =>
+				typeof c === 'string' ? c : (c?.id ?? '')
+			)
+		);
+		const proposedIds: string[] = action.payload?.control_ids ?? [];
+		// Subset check: every proposed id is already linked → no new links.
+		for (const id of proposedIds) {
+			if (!currentIds.has(id)) return false;
+		}
+		return true;
+	}
+
+	// Proposed actions stay at top in their original order; approved/rejected
+	// sink to the bottom (kept in original order among themselves) so the user
+	// always has the actionable items in front and the decided ones serve as
+	// a compact audit trail. Proposed no-ops are filtered out entirely —
+	// they're not actionable and just add noise.
 	const visibleActions = $derived(
-		data.actions.filter((a: any) =>
-			wave === 2 ? wave2Kinds.includes(a.kind) : wave1Kinds.includes(a.kind)
-		)
+		data.actions
+			.filter((a: any) =>
+				wave === 2 ? wave2Kinds.includes(a.kind) : wave1Kinds.includes(a.kind)
+			)
+			.filter((a: any) => !isProposedNoOp(a))
+			.slice()
+			.sort((a: any, b: any) => {
+				const aPending = a.state === 'proposed' ? 0 : 1;
+				const bPending = b.state === 'proposed' ? 0 : 1;
+				return aPending - bPending;
+			})
+	);
+	// Count of proposed actions that were hidden as no-ops — surfaced as a
+	// small note so the user sees the bot DID evaluate those RAs.
+	const hiddenNoOpCount = $derived(
+		data.actions.filter(
+			(a: any) =>
+				(wave === 2 ? wave2Kinds.includes(a.kind) : wave1Kinds.includes(a.kind)) &&
+				isProposedNoOp(a)
+		).length
 	);
 	const proposedCount = $derived(visibleActions.filter((a: any) => a.state === 'proposed').length);
 	const approvedCount = $derived(visibleActions.filter((a: any) => a.state === 'approved').length);
 	const rejectedCount = $derived(visibleActions.filter((a: any) => a.state === 'rejected').length);
+	// Index of the first decided (approved/rejected) action in the sorted list.
+	// Used to slot a "Decided" divider between the actionable and historical
+	// rows. -1 when everything is still proposed.
+	const firstDecidedIndex = $derived(
+		visibleActions.findIndex((a: any) => a.state !== 'proposed')
+	);
 	const wave1Settled = $derived(wave === 1 && proposedCount === 0 && visibleActions.length > 0);
 
 	// Wave 1 breakdowns — used by the transparency banner so users can see
@@ -546,6 +604,14 @@
 						<span class="px-2 py-0.5 rounded bg-gray-200 text-gray-600">
 							{rejectedCount} rejected
 						</span>
+						{#if hiddenNoOpCount > 0}
+							<span
+								class="px-2 py-0.5 rounded bg-gray-100 text-gray-500 italic"
+								title="The agent evaluated these RAs but proposed no actual change (same result, same controls, same observation). Hidden from the list."
+							>
+								{hiddenNoOpCount} no-change (hidden)
+							</span>
+						{/if}
 					</div>
 					<div class="flex flex-col items-stretch md:items-end gap-2">
 						<div class="flex items-center gap-2">
@@ -643,17 +709,54 @@
 
 				<!-- Proposals list -->
 				<ul class="space-y-2">
-					{#each visibleActions as action}
+					{#each visibleActions as action, i}
+						{#if i === firstDecidedIndex && firstDecidedIndex > 0}
+							<li class="text-xs text-gray-500 uppercase tracking-wide pt-2 pb-0.5 flex items-center gap-2">
+								<span>Decided</span>
+								<span class="flex-1 h-px bg-gray-200"></span>
+								<span class="normal-case tracking-normal text-gray-400">
+									{approvedCount + rejectedCount} item{approvedCount + rejectedCount === 1 ? '' : 's'}
+								</span>
+							</li>
+						{/if}
 						{@const isEditing = editingAction === action.id}
 						{@const isViewingSources = viewingSourcesFor === action.id}
 						{@const ra =
 							action.kind === 'propose_result' && action.target_object_id
 								? raById.get(action.target_object_id)
 								: null}
-						<li class="border rounded p-3 hover:shadow-sm transition-shadow">
-							<div class="flex justify-between items-start gap-3">
-								<div class="flex-1 min-w-0">
-									<!-- Kind / state / confidence row -->
+						<!-- Source-of-truth for "current" is the live RA, falling back
+							to the payload snapshot when the action predates that field. -->
+						{@const currentResult = ra?.result ?? action.payload?.current_result ?? null}
+						{@const proposedResult = action.payload?.result ?? null}
+						{@const currentObservation = (ra?.observation ?? '').trim()}
+						{@const proposedObservation = (action.payload?.observation ?? '').trim()}
+						{@const proposedControlIds = action.payload?.control_ids ?? []}
+						{@const resultChanges =
+							action.kind === 'propose_result' &&
+							currentResult !== null &&
+							proposedResult !== null &&
+							currentResult !== proposedResult}
+						{@const observationChanges =
+							action.kind === 'propose_result' &&
+							proposedObservation.length > 0 &&
+							proposedObservation !== currentObservation}
+						{@const addsControls =
+							action.kind === 'propose_result' && proposedControlIds.length > 0}
+						{@const isNoOpProposal =
+							action.kind === 'propose_result' &&
+							!resultChanges &&
+							!observationChanges &&
+							!addsControls}
+						<li
+							class={action.state === 'proposed'
+								? `border rounded p-3 hover:shadow-sm transition-shadow ${isNoOpProposal ? 'opacity-60 bg-gray-50' : ''}`
+								: 'border rounded px-3 py-1.5 bg-gray-50/70 text-xs'}
+						>
+							{#if action.state === 'proposed'}
+								<div class="flex justify-between items-start gap-3">
+									<div class="flex-1 min-w-0">
+										<!-- Kind / state / confidence row -->
 									<div class="flex items-center gap-2 mb-1">
 										{#if action.kind === 'extract_control'}
 											<span class="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
@@ -664,25 +767,20 @@
 												<i class="fa-solid fa-link mr-1"></i>Link existing
 											</span>
 										{:else if action.kind === 'propose_result'}
-											{#if action.payload?.current_result && action.payload?.current_result !== action.payload?.result}
+											{#if resultChanges}
 												<span
-													class="text-xs px-1.5 py-0.5 rounded {resultBadge(
-														action.payload?.current_result
-													)} opacity-60"
+													class="text-xs px-1.5 py-0.5 rounded {resultBadge(currentResult)} opacity-60"
 													title="Current state of this requirement"
 												>
-													{action.payload?.current_result}
+													{currentResult}
 												</span>
 												<i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
 											{/if}
 											<span
-												class="text-xs px-1.5 py-0.5 rounded {resultBadge(action.payload?.result)}"
-												title={action.payload?.current_result &&
-												action.payload?.current_result !== action.payload?.result
-													? 'Proposed new state'
-													: 'Proposed state'}
+												class="text-xs px-1.5 py-0.5 rounded {resultBadge(proposedResult)}"
+												title={resultChanges ? 'Proposed new state' : 'Proposed state'}
 											>
-												{action.payload?.result ?? 'not_assessed'}
+												{proposedResult ?? 'not_assessed'}
 											</span>
 										{/if}
 										<span class="text-xs px-1.5 py-0.5 rounded {actionStateBadge(action.state)}">
@@ -702,6 +800,51 @@
 												? `${ra.requirement?.ref_id ?? ''} ${ra.requirement?.str ?? ra.requirement?.name ?? ''}`.trim()
 												: (action.target_object_id ?? '(missing requirement)')}
 										</div>
+
+										<!-- "If approved" change summary: spells out exactly what
+											editing the RA would do. Removes ambiguity when the result
+											doesn't move (observation-only or no-op cases). -->
+										<div class="text-xs mt-1 flex flex-wrap gap-1.5 items-center">
+											<span class="text-gray-500">If approved:</span>
+											{#if resultChanges}
+												<span
+													class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
+													title="The RA's result field will change"
+												>
+													set result {currentResult} → {proposedResult}
+												</span>
+											{/if}
+											{#if observationChanges}
+												<span
+													class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
+													title="The RA's observation field will be overwritten"
+												>
+													{currentObservation.length > 0
+														? 'update observation'
+														: 'add observation'}
+												</span>
+											{/if}
+											{#if addsControls}
+												<span
+													class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"
+													title="These controls will be linked to the RA"
+												>
+													link {proposedControlIds.length} control{proposedControlIds.length ===
+													1
+														? ''
+														: 's'}
+												</span>
+											{/if}
+											{#if isNoOpProposal}
+												<span
+													class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 italic"
+													title="The RA already matches the proposal — nothing would change"
+												>
+													no change — already at this state
+												</span>
+											{/if}
+										</div>
+
 										{#if action.payload?.control_ids?.length}
 											<div class="text-xs text-gray-600 mt-1">
 												<span class="font-medium">Controls cited:</span>
@@ -901,6 +1044,41 @@
 											</li>
 										{/each}
 									</ul>
+								</div>
+							{/if}
+							{:else}
+								<!-- Compact one-liner for approved/rejected proposals.
+									Keeps the audit trail visible without dominating the list. -->
+								<div class="flex items-center gap-2 min-w-0">
+									<span class="px-1.5 py-0.5 rounded {actionStateBadge(action.state)}">
+										{action.state === 'approved' ? '✓ approved' : '✗ rejected'}
+									</span>
+									{#if action.kind === 'extract_control'}
+										<span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">Create</span>
+									{:else if action.kind === 'link_control_existing'}
+										<span class="px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800">Link</span>
+									{:else if action.kind === 'propose_result'}
+										<span class="px-1.5 py-0.5 rounded {resultBadge(proposedResult)}">
+											{proposedResult ?? 'not_assessed'}
+										</span>
+									{/if}
+									<span class="truncate flex-1 text-gray-700">
+										{#if action.kind === 'propose_result'}
+											{ra
+												? `${ra.requirement?.ref_id ?? ''} ${ra.requirement?.str ?? ra.requirement?.name ?? ''}`.trim()
+												: '(missing requirement)'}
+										{:else}
+											{action.payload?.name ||
+												action.payload?.candidate_name ||
+												action.payload?.existing_control_name ||
+												'(no name)'}
+										{/if}
+									</span>
+									<span class="text-gray-400 shrink-0">
+										{action.confidence !== null && action.confidence !== undefined
+											? `${Math.round(action.confidence * 100)}%`
+											: '—'}
+									</span>
 								</div>
 							{/if}
 						</li>

@@ -173,6 +173,31 @@ def run_audit_prefill_wave1(agent_run_id: str):
         _fail(run, f"LLM or embedder unavailable: {e}")
         return
 
+    # Refresh the folder's vector index. Wave 1 itself doesn't query Qdrant
+    # (it walks file bytes directly), but we keep the index fresh for
+    # symmetry with the questionnaire flow and so the user reviewing Wave 1
+    # has an up-to-date index ready for Wave 2 — without paying the refresh
+    # cost a second time at Wave 2 start.
+    run.current_step_label = "Refreshing folder index…"
+    run.last_heartbeat_at = timezone.now()
+    run.save(update_fields=["current_step_label", "last_heartbeat_at", "updated_at"])
+    try:
+        from .questionnaire import refresh_folder_index
+
+        refresh_stats = refresh_folder_index(str(run.folder_id))
+        logger.info(
+            "Folder index refreshed for run %s (Wave 1): pruned=%d indexed=%d",
+            run.id,
+            refresh_stats.get("pruned", 0),
+            refresh_stats.get("indexed", 0),
+        )
+    except Exception as e:
+        logger.warning(
+            "Folder index refresh failed for run %s (Wave 1): %s — continuing with possibly stale index",
+            run.id,
+            e,
+        )
+
     evidences = list(
         Evidence.objects.filter(folder=run.folder).prefetch_related("revisions")
     )
@@ -514,6 +539,38 @@ def _emit_cluster_actions(
         confidence = _cluster_confidence(cluster, matched=matched_ac is not None)
 
         if matched_ac is not None:
+            # Re-run idempotency: if every evidence in this cluster has
+            # already been the source of an approved LINK_CONTROL_EXISTING
+            # against this same control (from any prior run in this folder),
+            # the user has already signed off on this link. Skip emitting
+            # so the second run is visually clean.
+            cluster_evidence_ids = {
+                str(m.get("evidence_id"))
+                for m in cluster["members"]
+                if m.get("evidence_id")
+            }
+            if cluster_evidence_ids:
+                prior_links = AgentAction.objects.filter(
+                    kind=AgentAction.Kind.LINK_CONTROL_EXISTING,
+                    state=AgentAction.State.APPROVED,
+                    target_content_type=ac_ct,
+                    target_object_id=matched_ac.id,
+                    agent_run__folder=run.folder,
+                ).exclude(agent_run=run)
+                prior_evidence_ids: set[str] = set()
+                for prior in prior_links:
+                    for ref in prior.source_refs or []:
+                        if ref.get("kind") == "evidence" and ref.get("id"):
+                            prior_evidence_ids.add(str(ref["id"]))
+                if cluster_evidence_ids.issubset(prior_evidence_ids):
+                    logger.info(
+                        "Wave 1 link_existing skip (idempotent): cluster %d → AC %s already approved from %d evidence(s) on a prior run",
+                        cluster_idx,
+                        matched_ac.id,
+                        len(cluster_evidence_ids),
+                    )
+                    continue
+
             AgentAction.objects.create(
                 agent_run=run,
                 kind=AgentAction.Kind.LINK_CONTROL_EXISTING,
@@ -658,9 +715,13 @@ but leave gaps.
 (implies non_compliant or not_applicable).
 - {observation_rule}"""
 
-OBSERVATION_FIELD_THOROUGH = '"observation": "<2-3 sentences justifying the verdict, citing specific controls by name>",'
+OBSERVATION_FIELD_THOROUGH = '"observation": "<2-3 sentences justifying the verdict, citing specific controls by name; empty string if non_compliant with no controls>",'
 OBSERVATION_RULE_THOROUGH = (
-    "observation should be concrete and reference the controls by name."
+    "observation should be concrete and reference the cited controls by name. "
+    "If you propose non_compliant AND control_ids is empty (no catalog control "
+    "addresses the requirement), set observation to an empty string — do NOT "
+    'narrate the absence ("None of the controls address X" adds no information '
+    "the result doesn't already convey)."
 )
 OBSERVATION_FIELD_FAST = ""
 OBSERVATION_RULE_FAST = (
@@ -672,7 +733,7 @@ OBSERVATION_RULE_FAST = (
 # keeps irrelevant controls out of the prompt even if they fill the top-K.
 WAVE2_EXISTING_TOP_K_FAST = 5
 WAVE2_EXISTING_TOP_K_THOROUGH = 8
-WAVE2_EXISTING_COSINE_FLOOR = 0.5
+WAVE2_EXISTING_COSINE_FLOOR = 0.65
 
 
 _VALID_RA_RESULTS = {
@@ -743,6 +804,30 @@ def run_audit_prefill_wave2(agent_run_id: str):
             e,
         )
         embedder = None
+
+    # Refresh the folder's vector index before the per-RA loop. Wave 2
+    # queries Qdrant via _search_folder_evidence; without this refresh, the
+    # LLM could cite ghost evidence (deleted Evidence still in the index) or
+    # miss recently-added documents.
+    run.current_step_label = "Refreshing folder index…"
+    run.last_heartbeat_at = timezone.now()
+    run.save(update_fields=["current_step_label", "last_heartbeat_at", "updated_at"])
+    try:
+        from .questionnaire import refresh_folder_index
+
+        refresh_stats = refresh_folder_index(str(run.folder_id))
+        logger.info(
+            "Folder index refreshed for run %s (Wave 2): pruned=%d indexed=%d",
+            run.id,
+            refresh_stats.get("pruned", 0),
+            refresh_stats.get("indexed", 0),
+        )
+    except Exception as e:
+        logger.warning(
+            "Folder index refresh failed for run %s (Wave 2): %s — continuing with possibly stale index",
+            run.id,
+            e,
+        )
 
     # Resolve the parent Wave-1 run and build the control catalog.
     parent_id = (run.config or {}).get("parent_run_id")
@@ -1032,16 +1117,28 @@ def _propose_result_for_ra(
         confidence = 0.5
     confidence = max(0.0, min(1.0, confidence))
 
-    # No-op detection: if the LLM proposes the same result the RA already
-    # has, with no controls cited and no observation, there is nothing for
-    # the user to act on — skip emitting the action entirely. Common case:
-    # empty/sparse catalog → LLM defaults to non_compliant for an RA that
-    # was already non_compliant (or not_assessed treated as non_compliant).
+    # No-op detection: if approving would not change any field on the RA,
+    # skip emitting the action entirely. Catches two regimes:
+    #   - Empty/sparse catalog: LLM defaults to e.g. non_compliant on an
+    #     RA that's already non_compliant, with no controls and no
+    #     observation. Original case.
+    #   - Re-run idempotency: previous run already wrote result + linked
+    #     controls + observation, the LLM repeats them, nothing to do.
     current_result = ra.result or "not_assessed"
-    is_noop = result == current_result and not control_ids and not observation.strip()
-    if is_noop:
+    current_observation = (ra.observation or "").strip()
+    current_control_ids = {
+        str(cid) for cid in ra.applied_controls.values_list("id", flat=True)
+    }
+    proposed_set = {str(cid) for cid in control_ids}
+    proposed_obs_stripped = observation.strip()
+
+    result_unchanged = result == current_result
+    controls_unchanged = proposed_set.issubset(current_control_ids)
+    observation_unchanged = proposed_obs_stripped == current_observation
+
+    if result_unchanged and controls_unchanged and observation_unchanged:
         logger.info(
-            "Wave 2 no-op skip for RA %s: result=%s unchanged, no controls, no observation",
+            "Wave 2 no-op skip for RA %s: result=%s, controls already linked, observation unchanged",
             ra.id,
             result,
         )
