@@ -1182,7 +1182,7 @@
 	"accreditationStatus": "Accreditation status",
 	"accreditationCategory": "Accreditation category",
 	"entity": "Entity",
-	"entity_name": "Entity",
+	"entity_name": "Entity name",
 	"entities": "Entities",
 	"entitiesGraph": "Entities ecosystem",
 	"addEntity": "Add entity",
