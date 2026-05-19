@@ -10,7 +10,6 @@
 	import Checkbox from '../Checkbox.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
-	import { tick } from 'svelte';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 
@@ -92,22 +91,15 @@
 		if (id) {
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
-				.then(async (r) => {
+				.then((r) => {
 					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
-					const newChoices = implementation_groups.map((group) => ({
+					implementationGroupsChoices = implementation_groups.map((group) => ({
 						label: group.name,
 						value: group.ref_id
 					}));
-					const choicesChanged =
-						newChoices.length !== implementationGroupsChoices.length ||
-						newChoices.some((c, i) => c.value !== implementationGroupsChoices[i]?.value);
-
 					suggestions = r['reference_controls'].length > 0;
 
-					// Effective per-role visibility map this framework would seed into a
-					// new CA. The visibility editor uses this as fallback for keys the
-					// user hasn't explicitly overridden in the form.
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
 
 					defaultImplementationGroups = implementation_groups
@@ -115,21 +107,9 @@
 						.map((group) => group.ref_id);
 
 					if (!object.id) {
-						if (choicesChanged) {
-							implementationGroupsChoices = newChoices;
-						}
 						form.form.update((currentData) => ({
 							...currentData,
 							selected_implementation_groups: defaultImplementationGroups
-						}));
-					} else if (choicesChanged) {
-						const savedGroups = [...($formData.selected_implementation_groups ?? [])];
-						implementationGroupsChoices = newChoices;
-						await tick();
-						await tick();
-						form.form.update((d) => ({
-							...d,
-							selected_implementation_groups: savedGroups
 						}));
 					}
 				});
@@ -224,18 +204,16 @@
 	/>
 {/if}
 {#if implementationGroupsChoices.length > 0 && !is_dynamic}
-	{#key implementationGroupsChoices}
-		<AutocompleteSelect
-			multiple
-			translateOptions={false}
-			{form}
-			options={implementationGroupsChoices}
-			field="selected_implementation_groups"
-			cacheLock={cacheLocks['selected_implementation_groups']}
-			bind:cachedValue={formDataCache['selected_implementation_groups']}
-			label={m.selectedImplementationGroups()}
-		/>
-	{/key}
+	<AutocompleteSelect
+		multiple
+		translateOptions={false}
+		{form}
+		options={implementationGroupsChoices}
+		field="selected_implementation_groups"
+		cacheLock={cacheLocks['selected_implementation_groups']}
+		bind:cachedValue={formDataCache['selected_implementation_groups']}
+		label={m.selectedImplementationGroups()}
+	/>
 {/if}
 <TextField
 	{form}
