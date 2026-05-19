@@ -15,8 +15,7 @@
 			<span
 				class="inline-block px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 leading-none {bold
 					? 'font-semibold'
-					: ''}"
-				>{ref_id}</span
+					: ''}">{ref_id}</span
 			>
 		{/if}
 		{#if name}
