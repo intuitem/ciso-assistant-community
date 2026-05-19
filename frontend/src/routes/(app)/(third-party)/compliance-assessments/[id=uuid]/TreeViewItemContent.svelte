@@ -74,6 +74,7 @@
 	type TreeViewItemNode = typeof node;
 
 	const hasTitle = !!(ref_id || name);
+	const title = ref_id && name ? `${ref_id} - ${name}` : ref_id || name || '';
 
 	let showInfo = $state(false);
 
