@@ -6935,9 +6935,8 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         if justification is None:
             return res
         risk_acceptance = self.get_object()
-        risk_acceptance.set_state("accepted")
         risk_acceptance.justification = justification
-        risk_acceptance.save(update_fields=["justification"])
+        risk_acceptance.set_state("accepted")
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
@@ -6956,9 +6955,8 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         if justification is None:
             return res
         risk_acceptance = self.get_object()
-        risk_acceptance.set_state("rejected")
         risk_acceptance.justification = justification
-        risk_acceptance.save(update_fields=["justification"])
+        risk_acceptance.set_state("rejected")
         return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
@@ -6976,9 +6974,8 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         if justification is None:
             return res
         risk_acceptance = self.get_object()
-        risk_acceptance.set_state("revoked")
         risk_acceptance.justification = justification
-        risk_acceptance.save(update_fields=["justification"])
+        risk_acceptance.set_state("revoked")
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
