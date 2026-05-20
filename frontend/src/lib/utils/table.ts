@@ -2366,7 +2366,6 @@ export const listViewFields = {
 		],
 		filters: {
 			is_selected: IS_SELECTED_FILTER,
-			entity_name: ENTITY_FILTER,
 			category: STAKEHOLDER_CATEGORY_FILTER
 		}
 	},
