@@ -735,6 +735,7 @@
 													requirementAssessment.requirement.min_score !== null ||
 													requirementAssessment.requirement.max_score !== null}
 												{@const raHasCustomTarget =
+													requirementAssessment.target_score !== null ||
 													requirementAssessment.requirement.target_score !== null}
 												{#if hasComputedScore(requirementAssessment.requirement.questions)}
 													<div class="flex flex-row items-center space-x-4">
@@ -748,10 +749,7 @@
 																<Progress.Circle class="[--size:--spacing(10)]">
 																	<Progress.CircleTrack />
 																	<Progress.CircleRange
-																		class={displayScoreColor(
-																			requirementAssessment.score,
-																			raMax
-																		)}
+																		class={displayScoreColor(requirementAssessment.score, raMax)}
 																	/>
 																</Progress.Circle>
 																<div class="absolute inset-0 flex items-center justify-center">

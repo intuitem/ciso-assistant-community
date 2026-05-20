@@ -3126,6 +3126,19 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     def validate_documentation_score(self, value):
         return self._clamp_to_resolved(value)
 
+    def validate_target_score(self, value):
+        if value is None or not self.instance:
+            return value
+        resolved = self.instance.get_resolved_scoring()
+        lo, hi = resolved["min_score"], resolved["max_score"]
+        if lo is None or hi is None:
+            return value
+        if not (lo <= value <= hi):
+            raise serializers.ValidationError(
+                f"target_score must be within [{lo}, {hi}]."
+            )
+        return value
+
     def get_compliance_assessment(self):
         if hasattr(self, "instance") and self.instance:
             return self.instance.compliance_assessment

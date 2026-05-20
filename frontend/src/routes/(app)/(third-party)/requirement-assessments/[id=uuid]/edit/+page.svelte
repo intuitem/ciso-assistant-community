@@ -388,7 +388,7 @@
 	const resolvedScoresDef =
 		ra.effective_scores_definition ?? page.data.compliance_assessment_score.scores_definition;
 	const hasCustomScale = req.min_score !== null || req.max_score !== null;
-	const hasCustomTarget = req.target_score !== null;
+	const hasCustomTarget = ra.target_score !== null || req.target_score !== null;
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}

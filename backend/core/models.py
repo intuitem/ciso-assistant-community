@@ -2635,11 +2635,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             and resolved_min >= resolved_max
         ):
             raise ValidationError(
-                {
-                    "max_score": _(
-                        "max_score must be strictly greater than min_score."
-                    )
-                }
+                {"max_score": _("max_score must be strictly greater than min_score.")}
             )
 
         if self.scores_definition is not None:
@@ -7143,8 +7139,15 @@ class ComplianceAssessment(Assessment):
 
             is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
             if is_na and anchor_na_to_target:
-                target = resolved["target_score"]
-                raw = target if target is not None else ra_max
+                # Per-RA target wins; fall back to the audit-wide CA target as
+                # a heuristic stand-in; otherwise the RA's resolved max.
+                per_ra_target = resolved["target_score"]
+                if per_ra_target is not None:
+                    raw = per_ra_target
+                elif self.target_score is not None:
+                    raw = self.target_score
+                else:
+                    raw = ra_max
             else:
                 # Legacy semantics: None -> 0 (pulls unscored to min).
                 raw = getattr(ras, score_field) or 0
@@ -8151,6 +8154,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     documentation_score = models.IntegerField(
         blank=True, null=True, verbose_name=_("Documentation Score")
     )
+    # Per-instance target override. Falls back to the RequirementNode default.
+    target_score = models.FloatField(
+        blank=True, null=True, verbose_name=_("Target score")
+    )
     evidences = models.ManyToManyField(
         Evidence,
         blank=True,
@@ -8208,12 +8215,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         )
 
     def get_resolved_scoring(self) -> dict:
-        """Resolve the effective score scale and target via the cascade
-        RequirementNode -> ComplianceAssessment.
+        """Resolve the effective score scale and per-requirement target.
 
-        Each of the four fields is resolved independently: the Node value when
-        set, the CA value otherwise. scores_definition is returned unwrapped
-        (bare list) or None.
+        Scale fields cascade Node -> CA. The per-requirement target cascades
+        RA -> Node only: the RA holds an operator override, the Node holds the
+        library-shipped default. `ComplianceAssessment.target_score` is a
+        distinct concept (the audit-wide global target) and is *not* used here
+        as a per-RA fallback. scores_definition is returned unwrapped (bare
+        list) or None.
         """
         req = self.requirement
         ca = self.compliance_assessment
@@ -8225,9 +8234,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             if req.scores_definition is not None
             else ca.scores_definition
         )
-        target_score = (
-            req.target_score if req.target_score is not None else ca.target_score
-        )
+        if self.target_score is not None:
+            target_score = self.target_score
+        else:
+            target_score = req.target_score
 
         if isinstance(scores_definition, dict) and "scale" in scores_definition:
             scores_definition = scores_definition["scale"]

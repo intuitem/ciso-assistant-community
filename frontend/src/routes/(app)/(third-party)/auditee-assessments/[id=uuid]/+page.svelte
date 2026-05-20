@@ -1090,11 +1090,9 @@
 										</div>
 									{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
 										{@const raMin =
-											requirementAssessment.effective_min_score ??
-											complianceAssessment.min_score}
+											requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
 										{@const raMax =
-											requirementAssessment.effective_max_score ??
-											complianceAssessment.max_score}
+											requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
 										{@const raScoresDef =
 											requirementAssessment.effective_scores_definition ??
 											complianceAssessment.scores_definition}
@@ -1102,6 +1100,7 @@
 											requirementAssessment.requirement.min_score !== null ||
 											requirementAssessment.requirement.max_score !== null}
 										{@const raHasCustomTarget =
+											requirementAssessment.target_score !== null ||
 											requirementAssessment.requirement.target_score !== null}
 										{#if raHasCustomScale || raHasCustomTarget}
 											<div class="flex space-x-1 mb-1">

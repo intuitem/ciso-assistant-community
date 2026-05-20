@@ -50,9 +50,7 @@ def ca_05(framework_05):
 
 def _scale_def_for(min_v: int, max_v: int) -> dict:
     """Build a wrapped scores_definition that exactly covers [min_v, max_v]."""
-    return {
-        "scale": [{"score": s, "name": f"L{s}"} for s in range(min_v, max_v + 1)]
-    }
+    return {"scale": [{"score": s, "name": f"L{s}"} for s in range(min_v, max_v + 1)]}
 
 
 @pytest.mark.django_db
@@ -151,9 +149,7 @@ class TestRequirementNodeClean:
 
     def test_scores_definition_missing_entry_rejected(self, framework_05):
         bad = {"scale": [{"score": 0, "name": "L0"}]}  # missing 1
-        node = self._node(
-            framework_05, min_score=0, max_score=1, scores_definition=bad
-        )
+        node = self._node(framework_05, min_score=0, max_score=1, scores_definition=bad)
         with pytest.raises(ValidationError) as exc:
             node.clean()
         assert "scores_definition" in exc.value.message_dict
@@ -220,7 +216,9 @@ class TestGetResolvedScoring:
         resolved = ra.get_resolved_scoring()
         assert resolved["min_score"] == 0
         assert resolved["max_score"] == 5
-        assert resolved["target_score"] == 3
+        # CA.target_score is the audit-wide global target, not a per-RA default.
+        # With no Node or RA override, the resolved per-RA target is None.
+        assert resolved["target_score"] is None
 
     def test_partial_bounds_override_combines_with_ca(self, ca_05, framework_05):
         """Each field cascades independently: Node.min only, max from CA."""
@@ -253,8 +251,8 @@ class TestGetResolvedScoring:
         assert resolved["min_score"] == 0
         assert resolved["max_score"] == 1
         assert resolved["scores_definition"] == _scale_def_for(0, 1)["scale"]
-        # target still inherited from CA
-        assert resolved["target_score"] == 3
+        # No per-RA target override; CA target is unrelated to per-RA target.
+        assert resolved["target_score"] is None
 
     def test_target_override_independent_of_scale(self, ca_05, framework_05):
         node = RequirementNode.objects.create(
@@ -270,6 +268,22 @@ class TestGetResolvedScoring:
         assert resolved["min_score"] == 0  # CA scale
         assert resolved["max_score"] == 5
         assert resolved["target_score"] == 4  # node override
+
+    def test_ra_target_wins_over_node_target(self, ca_05, framework_05):
+        """Auditor RA-level target takes precedence over the library default."""
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-ra-target",
+            framework=framework_05,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            target_score=3,
+        )
+        ra = self._make_ra(ca_05, node)
+        ra.target_score = 5
+        ra.save()
+
+        resolved = ra.get_resolved_scoring()
+        assert resolved["target_score"] == 5
 
     def test_both_overrides_combine(self, ca_05, framework_05):
         node = RequirementNode.objects.create(
@@ -341,9 +355,7 @@ class TestSerializer:
         assert data["effective_target_score"] == 1
         assert isinstance(data["effective_scores_definition"], list)
 
-    def test_effective_fields_are_none_when_scoring_disabled(
-        self, ca_05, framework_05
-    ):
+    def test_effective_fields_are_none_when_scoring_disabled(self, ca_05, framework_05):
         from core.serializers import RequirementAssessmentReadSerializer
 
         node = RequirementNode.objects.create(
@@ -365,9 +377,7 @@ class TestSerializer:
         assert data["effective_target_score"] is None
         assert data["effective_scores_definition"] is None
 
-    def test_nested_requirement_exposes_raw_override_fields(
-        self, ca_05, framework_05
-    ):
+    def test_nested_requirement_exposes_raw_override_fields(self, ca_05, framework_05):
         from core.serializers import RequirementAssessmentReadSerializer
 
         node = RequirementNode.objects.create(

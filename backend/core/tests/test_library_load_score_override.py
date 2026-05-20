@@ -20,9 +20,7 @@ def test_yaml_library_load_creates_overrides():
     load_err = stored.load()
     assert load_err is None
 
-    framework = Framework.objects.get(
-        urn="urn:intuitem:test:framework:mixed-scoring"
-    )
+    framework = Framework.objects.get(urn="urn:intuitem:test:framework:mixed-scoring")
     assert framework.min_score == 0
     assert framework.max_score == 5
 
