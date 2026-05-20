@@ -100,23 +100,17 @@
 					}));
 					suggestions = r['reference_controls'].length > 0;
 
-					// Effective per-role visibility map this framework would seed into a
-					// new CA. The visibility editor uses this as fallback for keys the
-					// user hasn't explicitly overridden in the form.
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
 
 					defaultImplementationGroups = implementation_groups
 						.filter((group) => group.default_selected)
 						.map((group) => group.ref_id);
 
-					// Only apply defaults when creating a new assessment, not when editing
 					if (!object.id) {
-						form.form.update((currentData) => {
-							return {
-								...currentData,
-								selected_implementation_groups: defaultImplementationGroups
-							};
-						});
+						form.form.update((currentData) => ({
+							...currentData,
+							selected_implementation_groups: defaultImplementationGroups
+						}));
 					}
 				});
 		}
@@ -210,18 +204,16 @@
 	/>
 {/if}
 {#if implementationGroupsChoices.length > 0 && !is_dynamic}
-	{#key implementationGroupsChoices}
-		<AutocompleteSelect
-			multiple
-			translateOptions={false}
-			{form}
-			options={implementationGroupsChoices}
-			field="selected_implementation_groups"
-			cacheLock={cacheLocks['selected_implementation_groups']}
-			bind:cachedValue={formDataCache['selected_implementation_groups']}
-			label={m.selectedImplementationGroups()}
-		/>
-	{/key}
+	<AutocompleteSelect
+		multiple
+		translateOptions={false}
+		{form}
+		options={implementationGroupsChoices}
+		field="selected_implementation_groups"
+		cacheLock={cacheLocks['selected_implementation_groups']}
+		bind:cachedValue={formDataCache['selected_implementation_groups']}
+		label={m.selectedImplementationGroups()}
+	/>
 {/if}
 <TextField
 	{form}
