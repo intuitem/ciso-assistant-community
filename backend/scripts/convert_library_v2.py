@@ -1125,6 +1125,67 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                     raise ValueError(
                         f"(framework) Invalid weight at row #{row[0].row}: {data['weight']}. Must be a strictly positive integer."
                     )
+
+            # Optional per-requirement score scale and target override. Each
+            # field cascades independently against the ComplianceAssessment.
+            for int_field in ("min_score", "max_score"):
+                if (
+                    int_field in data
+                    and data[int_field] is not None
+                    and str(data[int_field]).strip() != ""
+                ):
+                    try:
+                        node[int_field] = int(data[int_field])
+                    except (TypeError, ValueError):
+                        raise ValueError(
+                            f"(framework) Invalid {int_field} at row #{row[0].row}: "
+                            f"{data[int_field]}. Must be an integer."
+                        )
+            if (
+                "target_score" in data
+                and data["target_score"] is not None
+                and str(data["target_score"]).strip() != ""
+            ):
+                try:
+                    node["target_score"] = float(data["target_score"])
+                except (TypeError, ValueError):
+                    raise ValueError(
+                        f"(framework) Invalid target_score at row #{row[0].row}: "
+                        f"{data['target_score']}. Must be a number."
+                    )
+            # scores_definition references an object_block (same mechanism as
+            # the framework-level scores_definition). The cell carries the
+            # block name; parsed entries are inlined under the node.
+            node_scores_name = data.get("scores_definition")
+            if node_scores_name and str(node_scores_name).strip():
+                node_scores_name = str(node_scores_name).strip()
+                if node_scores_name not in object_blocks:
+                    raise ValueError(
+                        f"(framework) Unknown scores_definition object block "
+                        f"'{node_scores_name}' at row #{row[0].row}."
+                    )
+                node_score_header, node_score_rows = parse_content_rows(
+                    object_blocks[node_scores_name]["content_sheet"]
+                )
+                node_score_defs = []
+                for n_row, n_data in node_score_rows:
+                    entry = {
+                        "score": int(n_data.get("score")),
+                        "name": str(n_data.get("name", "")).strip(),
+                        "description": (
+                            str(n_data.get("description", "")).strip()
+                            if n_data.get("description") is not None
+                            else None
+                        ),
+                    }
+                    if n_data.get("description_doc"):
+                        entry["description_doc"] = str(
+                            n_data["description_doc"]
+                        ).strip()
+                    attach_translations_from_row(entry, node_score_header, n_row)
+                    node_score_defs.append(entry)
+                node["scores_definition"] = node_score_defs
+
             if "implementation_groups" in data and data["implementation_groups"]:
                 node["implementation_groups"] = [
                     s.strip() for s in str(data["implementation_groups"]).split(",")
