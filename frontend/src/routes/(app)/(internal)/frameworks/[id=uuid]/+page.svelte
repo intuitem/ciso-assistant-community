@@ -152,6 +152,9 @@
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
+			<a class="btn preset-filled-primary-500" href="/frameworks/{data.framework.id}/report/"
+				>{m.viewReport()}</a
+			>
 			<a
 				class="btn preset-filled-primary-500"
 				href="/frameworks/{data.framework.id}/excel-template/">Download Excel template</a

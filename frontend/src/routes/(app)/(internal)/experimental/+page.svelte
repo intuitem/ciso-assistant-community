@@ -61,12 +61,6 @@
 		link="/experimental/asset-board"
 		tags={['assets', 'graph', 'canvas', 'prototype']}
 	/>
-	<Article
-		title="Framework report"
-		desc="Cross-assessment report for a single framework: result distribution and average score, drillable per requirement, per section, and per domain ancestry depth. IG filter focuses the view. Static fake data, no backend."
-		link="/experimental/framework-report"
-		tags={['frameworks', 'reporting', 'compliance', 'prototype']}
-	/>
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->
 	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->
