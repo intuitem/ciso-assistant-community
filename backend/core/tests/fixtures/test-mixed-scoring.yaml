@@ -1,0 +1,71 @@
+---
+urn: urn:intuitem:test:library:mixed-scoring
+locale: en
+ref_id: TEST-MIXED-SCORING
+name: "Test - Mixed Scoring Library"
+description: "Test fixture exercising per-requirement score scale and target overrides."
+copyright: Test fixture, not for production use.
+version: 1
+publication_date: 2026-05-20
+provider: Test
+packager: Test
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:mixed-scoring
+    ref_id: TEST-MIXED
+    name: "Mixed Scoring Framework"
+    description: "Framework on 0-5 with two assessable requirements overriding scoring."
+    min_score: 0
+    max_score: 5
+    scores_definition:
+      - score: 0
+        name: "N/A"
+      - score: 1
+        name: "Initial"
+      - score: 2
+        name: "Repeatable"
+      - score: 3
+        name: "Defined"
+      - score: 4
+        name: "Managed"
+      - score: 5
+        name: "Optimized"
+    requirement_nodes:
+      - urn: urn:intuitem:test:req_node:mixed:root
+        assessable: false
+        depth: 1
+        ref_id: "ROOT"
+        name: "Root"
+
+      - urn: urn:intuitem:test:req_node:mixed:default
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:test:req_node:mixed:root
+        ref_id: "R.1"
+        name: "Default-scale requirement"
+        description: "Uses the framework's 0-5 scale."
+
+      - urn: urn:intuitem:test:req_node:mixed:binary
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:test:req_node:mixed:root
+        ref_id: "R.2"
+        name: "Binary requirement (0-1)"
+        description: "Yes/no requirement on a 0-1 scale with a target of 1."
+        min_score: 0
+        max_score: 1
+        scores_definition:
+          - score: 0
+            name: "No"
+          - score: 1
+            name: "Yes"
+        target_score: 1
+
+      - urn: urn:intuitem:test:req_node:mixed:target-only
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:test:req_node:mixed:root
+        ref_id: "R.3"
+        name: "Target-only override requirement"
+        description: "Inherits the framework 0-5 scale but overrides only the target."
+        target_score: 4

@@ -305,3 +305,106 @@ class TestGetResolvedScoring:
         resolved = ra.get_resolved_scoring()
         assert isinstance(resolved["scores_definition"], list)
         assert len(resolved["scores_definition"]) == 3
+
+
+@pytest.mark.django_db
+class TestSerializer:
+    """Serializer-level behavior: effective_* exposure, visibility, clamping."""
+
+    def _ra(self, ca, node):
+        return RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=node,
+            folder=ca.folder,
+        )
+
+    def test_effective_fields_use_resolved_scoring(self, ca_05, framework_05):
+        from core.serializers import RequirementAssessmentReadSerializer
+
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-eff",
+            framework=framework_05,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            min_score=0,
+            max_score=1,
+            scores_definition=_scale_def_for(0, 1),
+            target_score=1,
+        )
+        ra = self._ra(ca_05, node)
+        data = RequirementAssessmentReadSerializer(
+            ra, context={"viewer_role": "auditor"}
+        ).data
+
+        assert data["effective_min_score"] == 0
+        assert data["effective_max_score"] == 1
+        assert data["effective_target_score"] == 1
+        assert isinstance(data["effective_scores_definition"], list)
+
+    def test_effective_fields_are_none_when_scoring_disabled(
+        self, ca_05, framework_05
+    ):
+        from core.serializers import RequirementAssessmentReadSerializer
+
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-eff-off",
+            framework=framework_05,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+        )
+        ra = self._ra(ca_05, node)
+        ca_05.scoring_enabled = False
+        ca_05.save()
+        ra.refresh_from_db()
+
+        data = RequirementAssessmentReadSerializer(
+            ra, context={"viewer_role": "auditor"}
+        ).data
+        assert data["effective_min_score"] is None
+        assert data["effective_max_score"] is None
+        assert data["effective_target_score"] is None
+        assert data["effective_scores_definition"] is None
+
+    def test_nested_requirement_exposes_raw_override_fields(
+        self, ca_05, framework_05
+    ):
+        from core.serializers import RequirementAssessmentReadSerializer
+
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-raw",
+            framework=framework_05,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            min_score=0,
+            max_score=1,
+            target_score=1,
+        )
+        ra = self._ra(ca_05, node)
+        data = RequirementAssessmentReadSerializer(
+            ra, context={"viewer_role": "auditor"}
+        ).data
+
+        req = data["requirement"]
+        assert req["min_score"] == 0
+        assert req["max_score"] == 1
+        assert req["target_score"] == 1
+
+    def test_validate_score_clamps_to_node_override(self, ca_05, framework_05):
+        from core.serializers import RequirementAssessmentWriteSerializer
+
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-clamp",
+            framework=framework_05,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            min_score=0,
+            max_score=1,
+            scores_definition=_scale_def_for(0, 1),
+        )
+        ra = self._ra(ca_05, node)
+        serializer = RequirementAssessmentWriteSerializer(instance=ra, data={})
+        serializer.is_valid()
+        # Score 5 (on CA scale) must be clamped down to 1 (node max)
+        assert serializer.validate_score(5) == 1
+        # documentation_score uses the same scale
+        assert serializer.validate_documentation_score(5) == 1

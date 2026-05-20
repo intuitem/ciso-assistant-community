@@ -100,6 +100,13 @@ class RequirementNodeImporter:
         parent_urn = self.requirement_data.get("parent_urn")
         if parent_urn:
             parent_urn = parent_urn.lower()
+
+        # YAML scores_definition is a bare list; wrap it in {"scale": [...]}
+        # to match Framework storage shape.
+        scores_definition = self.requirement_data.get("scores_definition")
+        if isinstance(scores_definition, list):
+            scores_definition = {"scale": scores_definition}
+
         requirement_node = RequirementNode.objects.create(
             folder=Folder.get_root_folder(),
             framework=framework_object,
@@ -118,11 +125,16 @@ class RequirementNodeImporter:
                 "display_mode", RequirementNode.DisplayMode.DEFAULT
             ),
             weight=self.requirement_data.get("weight", 1),
+            min_score=self.requirement_data.get("min_score"),
+            max_score=self.requirement_data.get("max_score"),
+            scores_definition=scores_definition,
+            target_score=self.requirement_data.get("target_score"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
             is_published=True,
         )
+        requirement_node.clean()
 
         # Create Question + QuestionChoice objects from questions data
         questions_data = self.requirement_data.get("questions")

@@ -24,6 +24,7 @@ from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from integrations.models import IntegrationConfiguration, SyncMapping
 
@@ -2167,7 +2168,14 @@ class RequirementNodeWriteSerializer(BaseModelSerializer):
         # because requirement nodes on draft frameworks should be editable.
         self._check_object_perm(instance, "change")
         try:
-            return super(BaseModelSerializer, self).update(instance, validated_data)
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            # Trigger RequirementNode.clean() for override constraints.
+            instance.full_clean()
+            instance.save()
+            return instance
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(getattr(e, "message_dict", e.messages))
         except Exception as e:
             logger.error(
                 "Failed to update RequirementNode", error=str(e), exc_info=True
@@ -2888,6 +2896,12 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "questions",
                 "implementation_groups",
                 "display_mode",
+                # Raw override fields, used by the frontend to detect a
+                # node-level override (e.g. for the "Custom scale" badge).
+                "min_score",
+                "max_score",
+                "scores_definition",
+                "target_score",
             ]
 
     name = serializers.CharField(source="__str__")
@@ -2914,6 +2928,34 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     is_locked = serializers.BooleanField()
     applied_controls = FieldsRelatedField(many=True)
     answers = serializers.SerializerMethodField()
+
+    # Effective scale and target after the Node -> CA cascade. Null when the
+    # CA has scoring disabled (no scale to expose).
+    effective_min_score = serializers.SerializerMethodField()
+    effective_max_score = serializers.SerializerMethodField()
+    effective_scores_definition = serializers.SerializerMethodField()
+    effective_target_score = serializers.SerializerMethodField()
+
+    def _resolved(self, obj):
+        if not obj.compliance_assessment.scoring_enabled:
+            return None
+        return obj.get_resolved_scoring()
+
+    def get_effective_min_score(self, obj):
+        r = self._resolved(obj)
+        return r["min_score"] if r else None
+
+    def get_effective_max_score(self, obj):
+        r = self._resolved(obj)
+        return r["max_score"] if r else None
+
+    def get_effective_scores_definition(self, obj):
+        r = self._resolved(obj)
+        return r["scores_definition"] if r else None
+
+    def get_effective_target_score(self, obj):
+        r = self._resolved(obj)
+        return r["target_score"] if r else None
 
     def get_answers(self, obj):
         """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
@@ -3068,17 +3110,21 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
-    def validate_score(self, value):
-        compliance_assessment = self.get_compliance_assessment()
+    def _clamp_to_resolved(self, value):
+        """Clamp a raw score to the resolved scale (Node override or CA)."""
+        if value is None or not self.instance:
+            return value
+        resolved = self.instance.get_resolved_scoring()
+        lo, hi = resolved["min_score"], resolved["max_score"]
+        if lo is None or hi is None:
+            return value
+        return max(lo, min(value, hi))
 
-        if value is not None:
-            value = max(
-                (
-                    compliance_assessment.min_score,
-                    min(value, compliance_assessment.max_score),
-                )
-            )
-        return value
+    def validate_score(self, value):
+        return self._clamp_to_resolved(value)
+
+    def validate_documentation_score(self, value):
+        return self._clamp_to_resolved(value)
 
     def get_compliance_assessment(self):
         if hasattr(self, "instance") and self.instance:
