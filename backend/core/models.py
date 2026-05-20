@@ -1074,11 +1074,17 @@ class LibraryUpdater:
                         ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
+                    # Match storage shape used by the library loader.
+                    if isinstance(requirement_node_dict.get("scores_definition"), list):
+                        requirement_node_dict["scores_definition"] = {
+                            "scale": requirement_node_dict["scores_definition"]
+                        }
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
+                        requirement_node_object.clean()
                         all_fields_to_update.update(requirement_node_dict.keys())
                         requirement_node_objects_to_update.append(
                             requirement_node_object
@@ -1091,6 +1097,7 @@ class LibraryUpdater:
                             **self.i18n_object_dict,
                             **requirement_node_dict,
                         )
+                        requirement_node_object.clean()
                         for ca in compliance_assessments:
                             requirement_assessment_objects_to_create.append(
                                 RequirementAssessment(
@@ -7197,6 +7204,10 @@ class ComplianceAssessment(Assessment):
                     return None
                 visiting.add(urn)
 
+                # An assessable node with its own scored RA is authoritative
+                # at this point in the tree: descendants are not traversed
+                # even when they exist. If a framework needs both the parent
+                # score and a children rollup, that's a separate feature.
                 if urn in leaf_ratios:
                     computed_ratios[urn] = leaf_ratios[urn]["ratio"]
                     return computed_ratios[urn]
@@ -8241,6 +8252,24 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         if isinstance(scores_definition, dict) and "scale" in scores_definition:
             scores_definition = scores_definition["scale"]
+
+        # Inherited scores_definition from the CA can be misaligned when the
+        # Node overrides the scale (e.g. CA labels for 0..5 vs node range 0..1).
+        # Drop the labels rather than display them out of range.
+        if (
+            scores_definition is not None
+            and req.scores_definition is None
+            and min_score is not None
+            and max_score is not None
+            and isinstance(scores_definition, list)
+        ):
+            scored_values = {
+                entry.get("score")
+                for entry in scores_definition
+                if isinstance(entry, dict) and entry.get("score") is not None
+            }
+            if not set(range(min_score, max_score + 1)).issubset(scored_values):
+                scores_definition = None
 
         return {
             "min_score": min_score,

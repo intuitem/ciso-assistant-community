@@ -829,22 +829,21 @@
 													{/if}
 												{/if}
 											{:else if complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
+												{@const raMax =
+													requirementAssessment.effective_max_score ??
+													complianceAssessment.max_score}
 												<div class="flex flex-row items-center space-x-2 w-full">
 													<span>{m.implementationScoreResult()}</span>
 													<div class="relative">
 														<Progress
-															value={(requirementAssessment.score * 100) /
-																complianceAssessment.max_score}
+															value={formatScoreValue(requirementAssessment.score, raMax)}
 															min={0}
 															max={100}
 														>
 															<Progress.Circle class="[--size:--spacing(10)]">
 																<Progress.CircleTrack />
 																<Progress.CircleRange
-																	class={displayScoreColor(
-																		requirementAssessment.score,
-																		complianceAssessment.max_score
-																	)}
+																	class={displayScoreColor(requirementAssessment.score, raMax)}
 																/>
 															</Progress.Circle>
 															<div class="absolute inset-0 flex items-center justify-center">
@@ -857,8 +856,10 @@
 													<span>{m.documentationScoreResult()}</span>
 													<div class="relative">
 														<Progress
-															value={(requirementAssessment.documentation_score * 100) /
-																complianceAssessment.max_score}
+															value={formatScoreValue(
+																requirementAssessment.documentation_score,
+																raMax
+															)}
 															min={0}
 															max={100}
 														>
@@ -867,7 +868,7 @@
 																<Progress.CircleRange
 																	class={displayScoreColor(
 																		requirementAssessment.documentation_score,
-																		complianceAssessment.max_score
+																		raMax
 																	)}
 																/>
 															</Progress.Circle>
@@ -880,22 +881,21 @@
 													</div>
 												</div>
 											{:else if complianceAssessment.scoring_enabled && requirementAssessment.is_scored}
+												{@const raMax =
+													requirementAssessment.effective_max_score ??
+													complianceAssessment.max_score}
 												<div class="flex flex-row items-center space-x-2 w-full">
 													<span>{m.scoreResult()}</span>
 													<div class="relative">
 														<Progress
-															value={(requirementAssessment.score * 100) /
-																complianceAssessment.max_score}
+															value={formatScoreValue(requirementAssessment.score, raMax)}
 															min={0}
 															max={100}
 														>
 															<Progress.Circle class="[--size:--spacing(10)]">
 																<Progress.CircleTrack />
 																<Progress.CircleRange
-																	class={displayScoreColor(
-																		requirementAssessment.score,
-																		complianceAssessment.max_score
-																	)}
+																	class={displayScoreColor(requirementAssessment.score, raMax)}
 																/>
 															</Progress.Circle>
 															<div class="absolute inset-0 flex items-center justify-center">

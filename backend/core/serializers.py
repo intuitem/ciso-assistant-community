@@ -2168,11 +2168,20 @@ class RequirementNodeWriteSerializer(BaseModelSerializer):
         # because requirement nodes on draft frameworks should be editable.
         self._check_object_perm(instance, "change")
         try:
+            m2m_field_names = {f.name for f in instance._meta.many_to_many}
+            m2m_values = {
+                attr: validated_data.pop(attr)
+                for attr in list(validated_data.keys())
+                if attr in m2m_field_names
+            }
             for attr, value in validated_data.items():
                 setattr(instance, attr, value)
-            # Trigger RequirementNode.clean() for override constraints.
-            instance.full_clean()
+            # Trigger RequirementNode.clean() for override constraints. M2M
+            # fields aren't yet attached at this point; exclude them.
+            instance.full_clean(exclude=list(m2m_field_names))
             instance.save()
+            for attr, value in m2m_values.items():
+                getattr(instance, attr).set(value)
             return instance
         except DjangoValidationError as e:
             raise serializers.ValidationError(getattr(e, "message_dict", e.messages))
