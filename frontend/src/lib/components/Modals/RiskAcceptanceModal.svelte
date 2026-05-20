@@ -66,9 +66,7 @@
 			class="modal-form {cForm}"
 			validators={schema}
 			onUpdated={(form) => {
-				if (form.valid && !form.message?.error) {
-					parent.onConfirm();
-				}
+				parent.onConfirm();
 			}}
 		>
 			{#snippet children({ form })}
