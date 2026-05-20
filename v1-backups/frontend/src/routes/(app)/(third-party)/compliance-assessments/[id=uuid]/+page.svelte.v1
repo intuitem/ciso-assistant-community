@@ -37,8 +37,8 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime.js';
 
+	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import SyncToActionsChangesTree from '$lib/components/Modals/SyncToActionsChangesTree.svelte';
 	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
 	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
@@ -477,13 +477,19 @@
 				id: id,
 				URLModel: 'compliance-assessments',
 				formAction: action,
-				bodyComponent: SyncToActionsChangesTree,
+				bodyComponent: List,
 				bodyProps: {
-					changes: requirementAssessmentsSync.changes,
+					items: Object.values(requirementAssessmentsSync.changes).map(
+						({ str, changes }) =>
+							`${str}: ${changes
+								.map((change) => `${safeTranslate(change.current)} ➡️ ${safeTranslate(change.new)}`)
+								.join(' | ')}`
+					),
 					message: m.theFollowingChangesWillBeApplied()
 				}
 			}
 		};
+		console.log(requirementAssessmentsSync.changes)
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,

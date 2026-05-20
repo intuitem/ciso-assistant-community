@@ -71,29 +71,9 @@ def test_sync_to_applied_controls_returns_requirement_path():
     changes = compliance_assessment.sync_to_applied_controls(dry_run=True)
 
     assert changes[str(requirement_assessment.id)]["str"] == (
-        "leaf-1 (Leaf description helps humans identify this control.)"
+        "A - Governance > leaf-1 "
+        "(Leaf description helps humans identify this control.)"
     )
-    assert changes[str(requirement_assessment.id)]["requirement"]["label"] == (
-        "leaf-1 (Leaf description helps humans identify this control.)"
-    )
-    assert changes[str(requirement_assessment.id)]["requirement"]["path"] == [
-        {
-            "id": str(RequirementNode.objects.get(urn=root_urn).id),
-            "urn": root_urn,
-            "ref_id": "A",
-            "node_id": "root",
-            "name": "Governance",
-            "label": "A - Governance",
-        },
-        {
-            "id": str(leaf.id),
-            "urn": leaf_urn,
-            "ref_id": "",
-            "node_id": "leaf-1",
-            "name": "",
-            "label": "leaf-1 (Leaf description helps humans identify this control.)",
-        },
-    ]
 
 
 @pytest.mark.django_db

@@ -2547,11 +2547,11 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             return f"{node_id} ({excerpt})"
         return node_id
 
-    def path_display_segments(
+    def path_display_str(
         self, nodes_by_urn: dict[str, "RequirementNode"] | None = None
-    ) -> list[dict[str, str]]:
+    ) -> str:
         nodes_by_urn = nodes_by_urn or {}
-        path: list[dict[str, str]] = []
+        path: list[str] = []
         current = self
         seen_urns: set[str] = set()
 
@@ -2561,16 +2561,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             if current.urn:
                 seen_urns.add(current.urn)
 
-            path.append(
-                {
-                    "id": str(current.id),
-                    "urn": current.urn or "",
-                    "ref_id": current.ref_id or "",
-                    "node_id": current.node_id or "",
-                    "name": current.get_name_translated or "",
-                    "label": current.path_display_label,
-                }
-            )
+            path.append(current.path_display_label)
             parent_urn = current.parent_urn
             if not parent_urn:
                 break
@@ -2581,7 +2572,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                     framework=self.framework, urn=parent_urn
                 ).first()
 
-        return list(reversed(path))
+        return " > ".join(reversed(path))
 
     @property
     def get_typical_evidence_translated(self) -> str:
@@ -7030,22 +7021,8 @@ class ComplianceAssessment(Assessment):
             applied_controls = list(ra.applied_controls.all())
             new_result = infer_result(applied_controls)
             if ra.result != new_result:
-                requirement_path = ra.requirement.path_display_segments(
-                    requirement_nodes_by_urn
-                )
-                requirement_label = (
-                    requirement_path[-1]["label"]
-                    if requirement_path
-                    else ra.requirement.path_display_label
-                )
                 ra_changes = {
-                    "str": requirement_label,
-                    "requirement": {
-                        "id": str(ra.requirement.id),
-                        "urn": ra.requirement.urn,
-                        "label": requirement_label,
-                        "path": requirement_path,
-                    },
+                    "str": ra.requirement.path_display_str(requirement_nodes_by_urn),
                     "changes": [{"current": ra.result, "new": new_result}],
                 }
                 if not dry_run:
