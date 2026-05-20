@@ -18,6 +18,7 @@ INDEXED_MODELS = [
     "core.Threat",
     "core.ComplianceAssessment",
     "core.RiskAssessment",
+    "core.RequirementAssessment",
 ]
 
 

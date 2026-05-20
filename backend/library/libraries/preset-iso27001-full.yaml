@@ -3,7 +3,7 @@ locale: en
 ref_id: preset-iso27001-full
 name: "ISO 27001:2022 \u2014 Full Implementation"
 description: "Comprehensive ISO 27001 ISMS implementation following the Plan\u2013Do\u2013Check\u2013Act cycle. Creates a compliance assessment with suggested controls, organisational context, a risk assessment, metric definitions for KPIs, and periodic task templates for ongoing management."
-version: 2
+version: 3
 provider: intuitem
 packager: intuitem
 translations:
@@ -38,6 +38,7 @@ objects:
         - organisation_objectives
         - tasks
         - follow_up
+        - reports
 
     scaffolded_objects:
       # --- Organisation issues (clause 4 - Context of the organisation) ---
@@ -391,13 +392,17 @@ objects:
 
         - key: soa_review
           title: "Review Statement of Applicability"
-          description: "Generate and review the Statement of Applicability (SoA) report. From the audit export menu, select \u2018Statement of Applicability\u2019 to open the SoA report with the compliance assessment and optionally link a risk assessment for additional controls coverage."
-          target_model: compliance-assessments
-          target_ref: iso_audit
+          description: "Generate and review the Statement of Applicability (SoA) report, pre-scoped to the ISO 27001 compliance assessment and the main risk assessment with the 'SoA' implementation group."
+          target_url: /reports/soa/results
+          target_params:
+            compliance_assessment: "{{ref:iso_audit}}"
+            risk_assessments: "{{ref:main_ra}}"
+            implementation_groups:
+              - SoA
           translations:
             fr:
               title: "Revue de la D\u00e9claration d\u2019Applicabilit\u00e9"
-              description: "G\u00e9n\u00e9rez et examinez le rapport de D\u00e9claration d\u2019Applicabilit\u00e9 (DdA). Depuis le menu d\u2019export de l\u2019audit, s\u00e9lectionnez \u00ab\u00a0D\u00e9claration d\u2019applicabilit\u00e9\u00a0\u00bb pour ouvrir le rapport avec l\u2019audit de conformit\u00e9 et \u00e9ventuellement lier une analyse de risques."
+              description: "G\u00e9n\u00e9rez et examinez le rapport de D\u00e9claration d\u2019Applicabilit\u00e9 (DdA), pr\u00e9-configur\u00e9 avec l\u2019\u00e9valuation de conformit\u00e9 ISO 27001, l\u2019analyse de risques principale et le groupe d\u2019impl\u00e9mentation \u00ab\u00a0SoA\u00a0\u00bb."
 
         - key: risk_treatment
           title: "Plan risk treatment"
