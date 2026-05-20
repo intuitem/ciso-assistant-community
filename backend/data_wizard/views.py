@@ -332,9 +332,11 @@ def _resolve_vulnerabilities(
                 ).first()
             )
             if vuln is None:
-                vuln = Vulnerability.objects.create(
-                    name=token, folder=folder, ref_id=token
-                )
+                create_kwargs = {"name": token, "folder": folder}
+                ref_id_max = Vulnerability._meta.get_field("ref_id").max_length
+                if len(token) <= ref_id_max:
+                    create_kwargs["ref_id"] = token
+                vuln = Vulnerability.objects.create(**create_kwargs)
             vuln_ids.append(vuln.id)
         except Exception:
             logging.exception(f"Failed to resolve vulnerability {token}")
@@ -408,6 +410,10 @@ class Error:
 
     def to_dict(self) -> dict:
         return {"record": self.record, "error": self.error}
+
+
+class FolderScopeError(ValueError):
+    """Raised when an existing-record lookup cannot be scoped to a folder."""
 
 
 @dataclass
@@ -512,9 +518,14 @@ class RecordConsumer[Context = None](ABC):
         if not fields_to_check:
             return None
 
-        folder = record_data.get("folder")
         folder_filter = {}
-        if folder and hasattr(model_class, "folder"):
+        if hasattr(model_class, "folder"):
+            folder = record_data.get("folder") or self.folder_id
+            if folder is None:
+                raise FolderScopeError(
+                    "Cannot resolve existing record without folder context: "
+                    "provide an X-Folder-Id header or a 'domain' column"
+                )
             folder_filter["folder"] = folder
 
         if "ref_id" in fields_to_check:
@@ -601,7 +612,14 @@ class RecordConsumer[Context = None](ABC):
                     pk=internal_id, id__in=viewable_ids
                 ).first()
             if existing is None:
-                existing = self.find_existing(record_data)
+                try:
+                    existing = self.find_existing(record_data)
+                except FolderScopeError as e:
+                    results.add_error(Error(record=record, error=str(e)))
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
 
             if existing:
                 match self.on_conflict:
@@ -628,9 +646,6 @@ class RecordConsumer[Context = None](ABC):
                                 results.add_updated()
                             except Exception as e:
                                 results.add_error(Error(record=record, error=str(e)))
-                                if self.on_conflict == ConflictMode.STOP:
-                                    results.stopped = True
-                                    break
                         else:
                             results.add_error(
                                 Error(
@@ -638,9 +653,6 @@ class RecordConsumer[Context = None](ABC):
                                     error=str(serializer.errors),
                                 )
                             )
-                            if self.on_conflict == ConflictMode.STOP:
-                                results.stopped = True
-                                break
                         continue
 
             serializer = self.SERIALIZER_CLASS(
