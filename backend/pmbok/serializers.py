@@ -121,6 +121,7 @@ class ProjectReadSerializer(BaseModelSerializer):
     owner = FieldsRelatedField()
     sponsor = FieldsRelatedField()
     parent_project = FieldsRelatedField()
+    sub_projects = FieldsRelatedField(many=True)
     linked_collection = FieldsRelatedField()
     responsibility_matrices = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
@@ -129,10 +130,10 @@ class ProjectReadSerializer(BaseModelSerializer):
     priority = serializers.SerializerMethodField()
 
     def get_status(self, obj):
-        return obj.status.get_name_translated if obj.status_id else None
+        return obj.status.name if obj.status_id else None
 
     def get_health(self, obj):
-        return obj.health.get_name_translated if obj.health_id else None
+        return obj.health.name if obj.health_id else None
 
     def get_priority(self, obj):
         return dict(Project.PRIORITY).get(obj.priority) if obj.priority else None
@@ -154,6 +155,36 @@ class ProjectWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Project
         fields = "__all__"
+
+    def validate_parent_project(self, value):
+        if value is None:
+            return value
+        instance = getattr(self, "instance", None)
+        if instance is None:
+            return value
+        if value.pk == instance.pk:
+            raise serializers.ValidationError("A project cannot be its own parent.")
+        descendants = set()
+        queue = list(
+            Project.objects.filter(parent_project=instance.pk).values_list(
+                "pk", flat=True
+            )
+        )
+        while queue:
+            current = queue.pop()
+            if current in descendants:
+                continue
+            descendants.add(current)
+            queue.extend(
+                Project.objects.filter(parent_project=current).values_list(
+                    "pk", flat=True
+                )
+            )
+        if value.pk in descendants:
+            raise serializers.ValidationError(
+                "Setting this project as parent would create a cycle."
+            )
+        return value
 
 
 class ResponsibilityRoleReadSerializer(BaseModelSerializer):

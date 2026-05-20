@@ -287,6 +287,8 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
 
     observation = models.TextField(blank=True, null=True)
 
+    fields_to_check = ["ref_id", "name"]
+
     def save(self, *args, **kwargs):
         from datetime import date
 

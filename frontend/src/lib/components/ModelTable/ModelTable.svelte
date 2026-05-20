@@ -983,8 +983,8 @@
 														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
 																>{value != null
-																		? safeTranslate('percentageDisplay', { number: value })
-																		: '--'}</span
+																	? safeTranslate('percentageDisplay', { number: value })
+																	: '--'}</span
 															>
 														{:else if key === 'translations'}
 															{#if Object.keys(value).length > 0}
