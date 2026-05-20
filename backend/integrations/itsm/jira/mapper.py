@@ -45,6 +45,17 @@ class JiraFieldMapper(BaseFieldMapper):
         },
     }
 
+    # Pull-only aliases for priority values that don't have a 1:1 local
+    # equivalent. The CISO model has 4 priorities, Jira has 5, so the legacy
+    # mapping collapsed Lowest -> 4 (same as Low) and Highest -> 1 (same as
+    # the explicit map below). Without these aliases, issues with priority
+    # "Lowest" or "Highest" land as None on pull when the user's value_map
+    # only carries the canonical four labels.
+    _PRIORITY_PULL_ALIASES: dict[str, str] = {
+        "Highest": "1",
+        "Lowest": "4",
+    }
+
     # Defines which fields are pushed/pulled and on which operations. Fields
     # outside this map are ignored even if the user configured a mapping for
     # them, so business rules around immutability survive UI configuration.
@@ -64,17 +75,25 @@ class JiraFieldMapper(BaseFieldMapper):
         field_map = self.settings.get("field_map") or {}
         value_map = self.settings.get("value_map") or {}
 
-        if not field_map and not value_map:
-            self.field_map = dict(self._DEFAULT_FIELD_MAP)
-            self.value_map_to_remote = {
-                field: dict(mapping)
-                for field, mapping in self._DEFAULT_VALUE_MAP_TO_REMOTE.items()
-            }
-        else:
+        # Fall back to defaults independently per map. The earlier "use
+        # defaults only when both are empty" rule meant that a config with
+        # any value_map row (even one) silently dropped the field_map
+        # defaults, so e.g. Jira creation lost ``name -> summary`` and failed
+        # with "summary required".
+        if field_map:
             self.field_map = dict(field_map)
+        else:
+            self.field_map = dict(self._DEFAULT_FIELD_MAP)
+
+        if value_map:
             self.value_map_to_remote = {
                 field: {str(k): v for k, v in mapping.items()}
                 for field, mapping in value_map.items()
+            }
+        else:
+            self.value_map_to_remote = {
+                field: dict(mapping)
+                for field, mapping in self._DEFAULT_VALUE_MAP_TO_REMOTE.items()
             }
 
         self.value_map_to_local: dict[str, dict[str, Any]] = {}
@@ -82,6 +101,11 @@ class JiraFieldMapper(BaseFieldMapper):
             self.value_map_to_local[field] = {
                 str(remote_val): local_val for local_val, remote_val in mapping.items()
             }
+
+        # Backfill priority aliases the user's saved value_map can't express.
+        priority_local = self.value_map_to_local.setdefault("priority", {})
+        for remote_label, local_val in self._PRIORITY_PULL_ALIASES.items():
+            priority_local.setdefault(remote_label, local_val)
 
     def suggest_mapping_for_table(self, table_name: str, client) -> dict[str, Any]:
         """Filter the legacy defaults against what the chosen project + issue

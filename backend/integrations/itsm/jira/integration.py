@@ -36,6 +36,7 @@ JIRA_CONFIG_SCHEMA = {
         },
     },
     "settings": {
+        "required": ["table_name"],
         "properties": {
             # Composite "<PROJECT_KEY>:<Issue Type Name>" string the
             # FieldMapper UI writes back. Falls back to the legacy split

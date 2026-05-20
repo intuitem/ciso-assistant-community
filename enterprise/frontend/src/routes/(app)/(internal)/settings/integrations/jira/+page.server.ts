@@ -21,7 +21,7 @@ const schema = z.object({
 	settings: z.object({
 		enable_outgoing_sync: z.boolean().default(false),
 		enable_incoming_sync: z.boolean().default(false),
-		table_name: z.string().optional(),
+		table_name: z.string().min(1, 'A target table must be selected'),
 		project_key: z.string().optional(),
 		issue_type: z.string().optional(),
 		field_map: z.record(z.string(), z.any()).default({}).optional(),

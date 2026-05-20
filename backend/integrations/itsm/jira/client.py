@@ -273,13 +273,18 @@ class JiraClient(BaseIntegrationClient):
                 expand="projects.issuetypes.fields",
             )
         except Exception:
+            # Let the orchestrator's RPC view surface this as a real error
+            # (502 with detail) instead of silently returning only the
+            # synthetic status row — which the UI used to render as a
+            # "1-row mapper" with no signal that the underlying API call
+            # had failed (expired token, missing scope, etc.).
             logger.warning(
                 "Failed to fetch createmeta for project",
                 project_key=project_key,
                 issue_type=issue_type,
                 exc_info=True,
             )
-            meta = {}
+            raise
 
         for project in meta.get("projects", []) or []:
             for it in project.get("issuetypes", []) or []:
@@ -318,37 +323,24 @@ class JiraClient(BaseIntegrationClient):
         )
 
     def _get_status_choices(self, project_key: str, issue_type: str) -> list[dict]:
+        # Use the SDK's public ``statuses()`` so we don't hardcode
+        # ``/rest/api/3/...`` (which 404s on Jira Server/DC where the path is
+        # ``/rest/api/2/...``) and don't reach into ``self.jira._session``.
         try:
-            response = self.jira._session.get(
-                f"{self.jira._options['server']}/rest/api/3/project/{project_key}/statuses"
-            )
-            response.raise_for_status()
-            data = response.json()
+            all_statuses = self.jira.statuses()
         except Exception:
             logger.warning(
                 "Failed to fetch Jira statuses",
                 project_key=project_key,
                 exc_info=True,
             )
-            return []
+            raise
 
         statuses: dict[str, str] = {}
-        for entry in data or []:
-            if issue_type and entry.get("name") != issue_type:
-                continue
-            for status in entry.get("statuses", []) or []:
-                name = status.get("name")
-                if name:
-                    statuses[name] = name
-
-        # If no match for the specified issue type, surface every status the
-        # project knows about so the user isn't stuck with an empty dropdown.
-        if not statuses:
-            for entry in data or []:
-                for status in entry.get("statuses", []) or []:
-                    name = status.get("name")
-                    if name:
-                        statuses[name] = name
+        for status in all_statuses or []:
+            name = getattr(status, "name", None)
+            if name:
+                statuses[name] = name
 
         return [
             {"value": value, "label": label}
@@ -356,20 +348,18 @@ class JiraClient(BaseIntegrationClient):
         ]
 
     def _get_priority_choices(self) -> list[dict]:
+        # Same reasoning as ``_get_status_choices``: use the public SDK.
         try:
-            response = self.jira._session.get(
-                f"{self.jira._options['server']}/rest/api/3/priority"
-            )
-            response.raise_for_status()
-            data = response.json()
+            priorities = self.jira.priorities()
         except Exception:
             logger.warning("Failed to fetch Jira priorities", exc_info=True)
-            return []
-        return [
-            {"value": p["name"], "label": p["name"]}
-            for p in data or []
-            if p.get("name")
-        ]
+            raise
+        result: list[dict] = []
+        for p in priorities or []:
+            name = getattr(p, "name", None)
+            if name:
+                result.append({"value": name, "label": name})
+        return result
 
     def _get_allowed_values_from_createmeta(
         self, project_key: str, issue_type: str, field_name: str

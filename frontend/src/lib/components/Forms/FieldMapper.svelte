@@ -170,35 +170,49 @@
 	});
 
 	async function handleTableChange(val: string) {
+		// Snapshot the user's current maps before touching anything. We need
+		// them as a fallback when the provider has no defaults to suggest
+		// (e.g. ServiceNow) — without the snapshot, a table change would
+		// silently wipe rows the user just finished configuring.
+		const prevFieldMap = { ...fieldMap };
+		const prevValueMap = { ...valueMap };
+
 		selectedTable = val;
-		fieldMap = {};
-		valueMap = {};
 		columns = [];
-		// Skip an early empty `onMapsChange` here — it would double-write the
-		// formStore and mark the form dirty for the cleared state before the
-		// suggested mapping has even arrived. The single onMapsChange at the
-		// end of this function applies the final state in one taint.
 		await loadColumns(val);
-		if (!val) return;
+		if (!val) {
+			fieldMap = {};
+			valueMap = {};
+			onMapsChange({ field_map: {}, value_map: {} });
+			return;
+		}
+
 		const suggested = await fetchRpc('suggest_mapping', { table_name: val });
 		const nextFieldMap = (suggested?.field_map as Record<string, any>) ?? {};
 		const nextValueMap = (suggested?.value_map as Record<string, any>) ?? {};
+		const hasSuggestion =
+			Object.keys(nextFieldMap).length > 0 || Object.keys(nextValueMap).length > 0;
+
+		// Providers with real defaults (Jira) win: clear and replace. Providers
+		// with the BaseFieldMapper no-op (ServiceNow) keep the user's prior
+		// mappings so a table change doesn't destroy hand-configured rows.
+		const finalFieldMap = hasSuggestion ? nextFieldMap : prevFieldMap;
+		const finalValueMap = hasSuggestion ? nextValueMap : prevValueMap;
 
 		// Pre-load every choice list the value_map references BEFORE we surface
-		// the suggested maps. Otherwise the value-mapping AutocompleteSelects
-		// mount with empty options, optionsLoaded=false, and their post-mount
-		// $effect (which would react to the form value flipping to the
-		// suggestion) is gated off — so the selected option never gets set.
+		// the maps. Otherwise the value-mapping AutocompleteSelects mount with
+		// empty options, optionsLoaded=false, and their post-mount $effect is
+		// gated off so the selected option never gets set.
 		await Promise.all(
-			Object.keys(nextValueMap).map(async (localField) => {
-				const remoteField = nextFieldMap[localField];
+			Object.keys(finalValueMap).map(async (localField) => {
+				const remoteField = finalFieldMap[localField];
 				if (remoteField) await loadChoices(val, remoteField);
 			})
 		);
 
-		fieldMap = nextFieldMap;
-		valueMap = nextValueMap;
-		onMapsChange({ field_map: nextFieldMap, value_map: nextValueMap });
+		fieldMap = finalFieldMap;
+		valueMap = finalValueMap;
+		onMapsChange({ field_map: finalFieldMap, value_map: finalValueMap });
 	}
 </script>
 
