@@ -306,22 +306,40 @@
 	<!-- Tab bar -->
 	<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)} class="w-full">
 		<Tabs.List class="border-b border-gray-200 px-4">
-			<Tabs.Trigger value="overview" class="px-4 py-3 text-sm font-medium">
+			<Tabs.Trigger
+				value="overview"
+				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+			>
 				<i class="fa-solid fa-chart-pie mr-2"></i>{m.overview()}
 			</Tabs.Trigger>
-			<Tabs.Trigger value="charter" class="px-4 py-3 text-sm font-medium">
+			<Tabs.Trigger
+				value="charter"
+				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+			>
 				<i class="fa-solid fa-file-contract mr-2"></i>{m.charter()}
 			</Tabs.Trigger>
-			<Tabs.Trigger value="schedule" class="px-4 py-3 text-sm font-medium">
+			<Tabs.Trigger
+				value="schedule"
+				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+			>
 				<i class="fa-solid fa-calendar mr-2"></i>{m.schedule()}
 			</Tabs.Trigger>
-			<Tabs.Trigger value="scope" class="px-4 py-3 text-sm font-medium">
+			<Tabs.Trigger
+				value="scope"
+				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+			>
 				<i class="fa-solid fa-bullseye mr-2"></i>{m.scope()}
 			</Tabs.Trigger>
-			<Tabs.Trigger value="linked" class="px-4 py-3 text-sm font-medium">
+			<Tabs.Trigger
+				value="linked"
+				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+			>
 				<i class="fa-solid fa-link mr-2"></i>{m.linked()}
 			</Tabs.Trigger>
-			<Tabs.Trigger value="people" class="px-4 py-3 text-sm font-medium">
+			<Tabs.Trigger
+				value="people"
+				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+			>
 				<i class="fa-solid fa-people-arrows mr-2"></i>{m.people()}
 			</Tabs.Trigger>
 		</Tabs.List>
