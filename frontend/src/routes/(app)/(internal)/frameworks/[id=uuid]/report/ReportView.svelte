@@ -87,26 +87,33 @@
 	}
 
 	let { report }: Props = $props();
-	const framework = report.framework;
-	const rows: ReportRow[] = report.rows ?? [];
-
-	$pageTitle = `${framework.name} — ${m.frameworkReport()}`;
-	const sectionList: Section[] = framework.sections ?? [];
-	const igDefs: IGDef[] = framework.implementation_groups_definition ?? [];
-	const caStatusCounts: Record<string, number> = report.ca_status_counts ?? {};
-	const liveStatuses: string[] = report.live_statuses ?? ['in_progress', 'in_review', 'done'];
-	const complianceAssessments: ComplianceAssessmentSummary[] = report.compliance_assessments ?? [];
+	// Reactive snapshots of the payload — the parent {#await} block does remount
+	// this component on each promise resolution today, but tracking via $derived
+	// is defense-in-depth and means the file stays correct if a future caller
+	// passes a reactive `report` prop without remounting.
+	let framework = $derived(report.framework);
+	let rows = $derived<ReportRow[]>(report.rows ?? []);
+	let sectionList = $derived<Section[]>(framework.sections ?? []);
+	let igDefs = $derived<IGDef[]>(framework.implementation_groups_definition ?? []);
+	let caStatusCounts = $derived<Record<string, number>>(report.ca_status_counts ?? {});
+	let liveStatuses = $derived<string[]>(
+		report.live_statuses ?? ['in_progress', 'in_review', 'done']
+	);
+	let complianceAssessments = $derived<ComplianceAssessmentSummary[]>(
+		report.compliance_assessments ?? []
+	);
 
 	const STATUS_ORDER = ['in_progress', 'in_review', 'done', 'planned', 'deprecated', 'unknown'];
-	const orderedStatusCounts = STATUS_ORDER.map((s) => [s, caStatusCounts[s] ?? 0] as const).filter(
-		([, n]) => n > 0
+	let orderedStatusCounts = $derived(
+		STATUS_ORDER.map((s) => [s, caStatusCounts[s] ?? 0] as const).filter(([, n]) => n > 0)
 	);
-	const totalDetectedCAs = Object.values(caStatusCounts).reduce((a, b) => a + b, 0);
-	const countedCAs = liveStatuses.reduce((a, s) => a + (caStatusCounts[s] ?? 0), 0);
-	const excludedCAs = totalDetectedCAs - countedCAs;
+	let totalDetectedCAs = $derived(Object.values(caStatusCounts).reduce((a, b) => a + b, 0));
+	let countedCAs = $derived(liveStatuses.reduce((a, s) => a + (caStatusCounts[s] ?? 0), 0));
+	let excludedCAs = $derived(totalDetectedCAs - countedCAs);
 
-	const sectionByUrn = new Map<string, Section>();
-	for (const s of sectionList) sectionByUrn.set(s.urn, s);
+	$effect(() => {
+		$pageTitle = `${framework.name} — ${m.frameworkReport()}`;
+	});
 
 	// IG id resolver: most YAMLs use ref_id as the canonical key on the requirement
 	// side (implementation_groups: ["1", "2"]) while the framework header may

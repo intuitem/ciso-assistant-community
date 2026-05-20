@@ -14,8 +14,11 @@
 
 	let { data }: Props = $props();
 
-	const fw = data.framework;
-	const tree = data.tree;
+	// Track data reactively — SvelteKit reuses this component instance when
+	// navigating between two /frameworks/{id} URLs, so plain `const` snapshots
+	// would point at the previous framework after the data prop updates.
+	let fw = $derived(data.framework);
+	let tree = $derived(data.tree);
 	let expandedNodes: string[] = $state([]);
 
 	function transformToTreeView(nodes) {
@@ -29,7 +32,14 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
+	let treeViewNodes = $derived(transformToTreeView(Object.entries(tree)) as TreeViewNode[]);
+
+	// Node ids in the previous tree don't match the new tree on framework
+	// change, so wipe the expansion state to avoid a confusing half-open panel.
+	$effect(() => {
+		void fw.id;
+		expandedNodes = [];
+	});
 
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
@@ -40,15 +50,16 @@
 		return count;
 	}
 
-	const scoreScale = fw.scores_definition?.scale ?? fw.scores_definition ?? [];
-	const hasScoreScale = Array.isArray(scoreScale) && scoreScale.length > 0;
-	const igs = fw.implementation_groups_definition ?? [];
-	const hasIgs = Array.isArray(igs) && igs.length > 0;
-	const hasScoreRange =
+	let scoreScale = $derived(fw.scores_definition?.scale ?? fw.scores_definition ?? []);
+	let hasScoreScale = $derived(Array.isArray(scoreScale) && scoreScale.length > 0);
+	let igs = $derived(fw.implementation_groups_definition ?? []);
+	let hasIgs = $derived(Array.isArray(igs) && igs.length > 0);
+	let hasScoreRange = $derived(
 		fw.min_score !== null &&
-		fw.min_score !== undefined &&
-		fw.max_score !== null &&
-		fw.max_score !== undefined;
+			fw.min_score !== undefined &&
+			fw.max_score !== null &&
+			fw.max_score !== undefined
+	);
 </script>
 
 <div class="flex flex-col space-y-4">
