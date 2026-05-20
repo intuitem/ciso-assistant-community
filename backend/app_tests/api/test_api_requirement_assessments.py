@@ -160,6 +160,12 @@ class TestRequirementAssessmentsAuthenticated:
                         0
                     ].implementation_groups,
                     "display_mode": RequirementNode.objects.all()[0].display_mode,
+                    "min_score": RequirementNode.objects.all()[0].min_score,
+                    "max_score": RequirementNode.objects.all()[0].max_score,
+                    "scores_definition": RequirementNode.objects.all()[
+                        0
+                    ].scores_definition,
+                    "target_score": RequirementNode.objects.all()[0].target_score,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -322,6 +328,12 @@ class TestRequirementAssessmentsAuthenticated:
                         0
                     ].implementation_groups,
                     "display_mode": RequirementNode.objects.all()[0].display_mode,
+                    "min_score": RequirementNode.objects.all()[0].min_score,
+                    "max_score": RequirementNode.objects.all()[0].max_score,
+                    "scores_definition": RequirementNode.objects.all()[
+                        0
+                    ].scores_definition,
+                    "target_score": RequirementNode.objects.all()[0].target_score,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"

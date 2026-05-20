@@ -733,7 +733,8 @@
 													data.scores.scores_definition}
 												{@const raHasCustomScale =
 													requirementAssessment.requirement.min_score !== null ||
-													requirementAssessment.requirement.max_score !== null}
+													requirementAssessment.requirement.max_score !== null ||
+													requirementAssessment.requirement.scores_definition !== null}
 												{@const raHasCustomTarget =
 													requirementAssessment.target_score !== null ||
 													requirementAssessment.requirement.target_score !== null}

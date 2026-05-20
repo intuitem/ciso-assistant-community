@@ -7146,13 +7146,16 @@ class ComplianceAssessment(Assessment):
 
             is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
             if is_na and anchor_na_to_target:
-                # Per-RA target wins; fall back to the audit-wide CA target as
-                # a heuristic stand-in; otherwise the RA's resolved max.
+                # Per-RA target wins. Otherwise project the CA-wide target
+                # onto the RA scale as a ratio so mixed scales stay coherent
+                # (a CA target of 80/100 contributes 80% of the RA range).
                 per_ra_target = resolved["target_score"]
                 if per_ra_target is not None:
                     raw = per_ra_target
                 elif self.target_score is not None:
-                    raw = self.target_score
+                    ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
+                    ca_ratio = (ca_target_clamped - ca_min) / ca_range
+                    raw = ra_min + ca_ratio * ra_range
                 else:
                     raw = ra_max
             else:

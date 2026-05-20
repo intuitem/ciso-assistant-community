@@ -418,3 +418,44 @@ class TestSerializer:
         assert serializer.validate_score(5) == 1
         # documentation_score uses the same scale
         assert serializer.validate_documentation_score(5) == 1
+
+    def test_validate_target_score_rejects_out_of_bounds(self, ca_05, framework_05):
+        from core.serializers import RequirementAssessmentWriteSerializer
+        from rest_framework.exceptions import ValidationError as DRFValidationError
+
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-target-validate",
+            framework=framework_05,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            min_score=0,
+            max_score=1,
+        )
+        ra = self._ra(ca_05, node)
+        serializer = RequirementAssessmentWriteSerializer(instance=ra, data={})
+        serializer.is_valid()
+        # target_score is rejected (not clamped) when out of resolved bounds.
+        with pytest.raises(DRFValidationError):
+            serializer.validate_target_score(5)
+        assert serializer.validate_target_score(1) == 1
+        assert serializer.validate_target_score(None) is None
+
+    def test_ra_target_exposed_in_read_payload(self, ca_05, framework_05):
+        """RA-level target_score is exposed at the top level for the badge."""
+        from core.serializers import RequirementAssessmentReadSerializer
+
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-ra-target-exposed",
+            framework=framework_05,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+        )
+        ra = self._ra(ca_05, node)
+        ra.target_score = 4
+        ra.save()
+
+        data = RequirementAssessmentReadSerializer(
+            ra, context={"viewer_role": "auditor"}
+        ).data
+        assert data["target_score"] == 4
+        assert data["effective_target_score"] == 4
