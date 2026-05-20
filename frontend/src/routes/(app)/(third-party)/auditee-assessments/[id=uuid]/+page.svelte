@@ -1089,11 +1089,39 @@
 											</div>
 										</div>
 									{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
+										{@const raMin =
+											requirementAssessment.effective_min_score ??
+											complianceAssessment.min_score}
+										{@const raMax =
+											requirementAssessment.effective_max_score ??
+											complianceAssessment.max_score}
+										{@const raScoresDef =
+											requirementAssessment.effective_scores_definition ??
+											complianceAssessment.scores_definition}
+										{@const raHasCustomScale =
+											requirementAssessment.requirement.min_score !== null ||
+											requirementAssessment.requirement.max_score !== null}
+										{@const raHasCustomTarget =
+											requirementAssessment.requirement.target_score !== null}
+										{#if raHasCustomScale || raHasCustomTarget}
+											<div class="flex space-x-1 mb-1">
+												{#if raHasCustomScale}
+													<span class="badge preset-tonal-primary text-xs">
+														{m.customScale?.() ?? 'Custom scale'}
+													</span>
+												{/if}
+												{#if raHasCustomTarget}
+													<span class="badge preset-tonal-secondary text-xs">
+														{m.customTarget?.() ?? 'Custom target'}
+													</span>
+												{/if}
+											</div>
+										{/if}
 										<Score
 											form={scoreForms[requirementAssessment.id]}
-											min_score={complianceAssessment.min_score}
-											max_score={complianceAssessment.max_score}
-											scores_definition={complianceAssessment.scores_definition}
+											min_score={raMin}
+											max_score={raMax}
+											scores_definition={raScoresDef}
 											field="score"
 											label={complianceAssessment.show_documentation_score
 												? m.implementationScore()
@@ -1127,9 +1155,9 @@
 										{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 											<Score
 												form={docScoreForms[requirementAssessment.id]}
-												min_score={complianceAssessment.min_score}
-												max_score={complianceAssessment.max_score}
-												scores_definition={complianceAssessment.scores_definition}
+												min_score={raMin}
+												max_score={raMax}
+												scores_definition={raScoresDef}
 												field="documentation_score"
 												label={m.documentationScore()}
 												isDoc={true}

@@ -722,15 +722,26 @@
 												: ''}"
 										>
 											{#if showScore && !shallow && complianceAssessment.scoring_enabled}
+												{@const raMin =
+													requirementAssessment.effective_min_score ??
+													complianceAssessment.min_score}
+												{@const raMax =
+													requirementAssessment.effective_max_score ??
+													complianceAssessment.max_score}
+												{@const raScoresDef =
+													requirementAssessment.effective_scores_definition ??
+													data.scores.scores_definition}
+												{@const raHasCustomScale =
+													requirementAssessment.requirement.min_score !== null ||
+													requirementAssessment.requirement.max_score !== null}
+												{@const raHasCustomTarget =
+													requirementAssessment.requirement.target_score !== null}
 												{#if hasComputedScore(requirementAssessment.requirement.questions)}
 													<div class="flex flex-row items-center space-x-4">
 														<span class="font-medium">{m.score()}</span>
 														<div class="shrink-0 relative">
 															<Progress
-																value={formatScoreValue(
-																	requirementAssessment.score,
-																	complianceAssessment.max_score
-																)}
+																value={formatScoreValue(requirementAssessment.score, raMax)}
 																min={0}
 																max={100}
 															>
@@ -739,7 +750,7 @@
 																	<Progress.CircleRange
 																		class={displayScoreColor(
 																			requirementAssessment.score,
-																			complianceAssessment.max_score
+																			raMax
 																		)}
 																	/>
 																</Progress.Circle>
@@ -752,11 +763,25 @@
 														</div>
 													</div>
 												{:else if requirementAssessment.result !== 'not_applicable'}
+													{#if raHasCustomScale || raHasCustomTarget}
+														<div class="flex space-x-1 mb-1">
+															{#if raHasCustomScale}
+																<span class="badge preset-tonal-primary text-xs">
+																	{m.customScale?.() ?? 'Custom scale'}
+																</span>
+															{/if}
+															{#if raHasCustomTarget}
+																<span class="badge preset-tonal-secondary text-xs">
+																	{m.customTarget?.() ?? 'Custom target'}
+																</span>
+															{/if}
+														</div>
+													{/if}
 													<Score
 														form={scoreForms[requirementAssessment.id]}
-														min_score={complianceAssessment.min_score}
-														max_score={complianceAssessment.max_score}
-														scores_definition={data.scores.scores_definition}
+														min_score={raMin}
+														max_score={raMax}
+														scores_definition={raScoresDef}
 														field="score"
 														label={complianceAssessment.show_documentation_score
 															? m.implementationScore()
@@ -790,9 +815,9 @@
 													{#if complianceAssessment.show_documentation_score}
 														<Score
 															form={docScoreForms[requirementAssessment.id]}
-															min_score={complianceAssessment.min_score}
-															max_score={complianceAssessment.max_score}
-															scores_definition={data.scores.scores_definition}
+															min_score={raMin}
+															max_score={raMax}
+															scores_definition={raScoresDef}
 															field="documentation_score"
 															label={m.documentationScore()}
 															isDoc={true}

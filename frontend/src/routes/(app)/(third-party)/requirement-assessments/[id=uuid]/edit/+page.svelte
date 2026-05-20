@@ -378,6 +378,17 @@
 
 	let computedResult = $derived(computedScoreAndResult.result);
 	let computedScore = $derived(computedScoreAndResult.score);
+
+	// effective_* are resolved server-side via the Node -> CA cascade. They are
+	// null when scoring is disabled on the CA.
+	const ra = data.requirementAssessment;
+	const req = ra.requirement;
+	const resolvedMin = ra.effective_min_score ?? page.data.compliance_assessment_score.min_score;
+	const resolvedMax = ra.effective_max_score ?? page.data.compliance_assessment_score.max_score;
+	const resolvedScoresDef =
+		ra.effective_scores_definition ?? page.data.compliance_assessment_score.scores_definition;
+	const hasCustomScale = req.min_score !== null || req.max_score !== null;
+	const hasCustomTarget = req.target_score !== null;
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}
@@ -854,20 +865,14 @@
 									<span class="font-medium">{m.score()}</span>
 									<div class="shrink-0 relative">
 										<Progress
-											value={formatScoreValue(
-												computedScore || 0,
-												page.data.compliance_assessment_score.max_score
-											)}
+											value={formatScoreValue(computedScore || 0, resolvedMax)}
 											min={0}
 											max={100}
 										>
 											<Progress.Circle class="[--size:--spacing(10)]">
 												<Progress.CircleTrack />
 												<Progress.CircleRange
-													class={displayScoreColor(
-														computedScore,
-														page.data.compliance_assessment_score.max_score
-													)}
+													class={displayScoreColor(computedScore, resolvedMax)}
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
@@ -880,11 +885,25 @@
 						{:else if data.result !== 'not_applicable'}
 							{#if showScore}
 								<div class="flex flex-col">
+									{#if hasCustomScale || hasCustomTarget}
+										<div class="flex space-x-2 mb-1">
+											{#if hasCustomScale}
+												<span class="badge preset-tonal-primary text-xs">
+													{m.customScale?.() ?? 'Custom scale'}
+												</span>
+											{/if}
+											{#if hasCustomTarget}
+												<span class="badge preset-tonal-secondary text-xs">
+													{m.customTarget?.() ?? 'Custom target'}
+												</span>
+											{/if}
+										</div>
+									{/if}
 									<Score
 										{form}
-										min_score={page.data.compliance_assessment_score.min_score}
-										max_score={page.data.compliance_assessment_score.max_score}
-										scores_definition={page.data.compliance_assessment_score.scores_definition}
+										min_score={resolvedMin}
+										max_score={resolvedMax}
+										scores_definition={resolvedScoresDef}
 										field="score"
 										label={page.data.compliance_assessment_score.show_documentation_score
 											? m.implementationScore()
@@ -910,9 +929,9 @@
 							{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
 								<Score
 									{form}
-									min_score={page.data.compliance_assessment_score.min_score}
-									max_score={page.data.compliance_assessment_score.max_score}
-									scores_definition={page.data.compliance_assessment_score.scores_definition}
+									min_score={resolvedMin}
+									max_score={resolvedMax}
+									scores_definition={resolvedScoresDef}
 									field="documentation_score"
 									label={m.documentationScore()}
 									isDoc={true}
