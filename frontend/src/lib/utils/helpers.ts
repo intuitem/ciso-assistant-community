@@ -339,14 +339,9 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	return { score: totalScore, result };
 }
 
-/**
- * Map a QuestionChoice.compute_result string to a RequirementAssessment.Result value.
- * Supports both legacy boolean literals and the framework builder's semantic values.
- * Returns null when the choice should not contribute to the overall result.
- */
+/** Map a QuestionChoice.compute_result value to a Result string. */
 function resolveComputeResult(value: unknown): string | null {
 	if (value === null || value === undefined) return null;
-	// Legacy boolean storage (from older library YAMLs serialised as bool)
 	if (typeof value === 'boolean') return value ? 'compliant' : 'non_compliant';
 	if (typeof value !== 'string') return null;
 	const v = value.trim().toLowerCase();
@@ -355,19 +350,15 @@ function resolveComputeResult(value: unknown): string | null {
 	if (v === 'false' || v === '0' || v === 'non_compliant') return 'non_compliant';
 	if (v === 'partially_compliant') return 'partially_compliant';
 	if (v === 'not_applicable') return 'not_applicable';
-	// Unknown values don't contribute. Surfacing the warning helps catch typos
-	// or future-added values that haven't been wired up yet, instead of silently
-	// inflating compliance.
 	console.warn(`Unknown compute_result value ignored: "${value}"`);
 	return null;
 }
 
+/** Aggregate resolved compute_result values: not_applicable vetoes, else worst-wins. */
 function aggregateComputeResults(resolved: string[]): string | null {
 	const contributing = resolved.filter((r) => r !== null && r !== undefined);
 	if (contributing.length === 0) return null;
 
-	// not_applicable is a veto: a single selected choice flagged as not_applicable
-	// forces the whole requirement to not_applicable (supports scoping questions).
 	if (contributing.some((r) => r === 'not_applicable')) return 'not_applicable';
 
 	const hasCompliant = contributing.some((r) => r === 'compliant');

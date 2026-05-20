@@ -365,14 +365,7 @@ class TestScoringExtended:
 
 @pytest.mark.django_db
 class TestSemanticComputeResult:
-    """Tests for the semantic compute_result values produced by the framework builder UI.
-
-    The UI lets users tag each choice with one of: 'compliant', 'non_compliant',
-    'partially_compliant', 'not_applicable'. These must be aggregated by their
-    semantic meaning (worst-wins), not collapsed to a boolean. Legacy YAML
-    libraries that use the boolean literals 'true'/'false' must continue to
-    behave as before.
-    """
+    """Aggregation of semantic compute_result values and legacy true/false literals."""
 
     def _build_two_question_ra(
         self, folder, q1_choices, q2_choices, q1_type=None, q2_type=None
@@ -456,11 +449,7 @@ class TestSemanticComputeResult:
         return ra, q1, q1_choice_objs, q2, q2_choice_objs
 
     def test_non_compliant_choice_yields_non_compliant_result(self, db):
-        """Bug regression: a single 'non_compliant' choice must not become COMPLIANT.
-
-        Previously every non-empty/non-'false' string was treated as truthy, so
-        picking 'non_compliant' in the UI silently produced a COMPLIANT result.
-        """
+        """A 'non_compliant' choice on every question -> requirement is non_compliant."""
         folder = Folder.get_root_folder()
         ra, q1, q1_choices, q2, q2_choices = self._build_two_question_ra(
             folder,
@@ -578,12 +567,7 @@ class TestSemanticComputeResult:
         assert ra.result == "partially_compliant"
 
     def test_not_applicable_choice_vetoes_other_results(self, db):
-        """A single 'not_applicable' choice forces the whole requirement to not_applicable.
-
-        This supports scoping questions ("Do you process personal data? -> No")
-        that mark the requirement as out of scope regardless of how other
-        questions are answered.
-        """
+        """A single 'not_applicable' choice overrides other contributions."""
         folder = Folder.get_root_folder()
         ra, q1, q1_choices, q2, q2_choices = self._build_two_question_ra(
             folder,
@@ -659,11 +643,7 @@ class TestSemanticComputeResult:
         assert ra.result == "not_applicable"
 
     def test_multiple_choice_one_to_one_mapping(self, db):
-        """For multi-choice questions, each selected choice contributes one result.
-
-        Selecting one 'compliant' and one 'non_compliant' on the same question
-        must yield 'partially_compliant' overall.
-        """
+        """Each ticked choice on a multi-choice question contributes one result."""
         folder = Folder.get_root_folder()
         ra, q1, q1_choices, q2, q2_choices = self._build_two_question_ra(
             folder,
@@ -801,7 +781,7 @@ class TestResolveComputeResult:
         assert resolve_compute_result("   ") is None
 
     def test_resolve_unknown_value_returns_none(self):
-        """Unknown values must not silently coerce to compliant — they don't contribute."""
+        """Unrecognized strings return None instead of contributing."""
         from core.utils import resolve_compute_result
 
         assert resolve_compute_result("complient") is None  # typo

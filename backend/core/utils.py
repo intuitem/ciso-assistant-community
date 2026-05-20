@@ -89,15 +89,7 @@ def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
 
 
 def resolve_compute_result(compute_result: str | None) -> str | None:
-    """Map a QuestionChoice.compute_result string to a RequirementAssessment.Result value.
-
-    Supports both legacy boolean literals ("true"/"false"/"1"/"0") and the
-    semantic values produced by the framework builder UI ("compliant",
-    "non_compliant", "partially_compliant", "not_applicable").
-
-    Returns None when the choice should not contribute to the overall result
-    (i.e. compute_result is None or an empty string).
-    """
+    """Map a QuestionChoice.compute_result string to a Result value."""
     if compute_result is None:
         return None
     value = compute_result.strip().lower()
@@ -111,9 +103,6 @@ def resolve_compute_result(compute_result: str | None) -> str | None:
         return "partially_compliant"
     if value == "not_applicable":
         return "not_applicable"
-    # Unknown values do not contribute to the aggregated result. Surfacing a
-    # warning rather than silently treating them as compliant prevents typos
-    # in framework YAMLs from inflating compliance scores.
     logger.warning(
         "Unknown compute_result value ignored", compute_result=compute_result
     )
@@ -121,21 +110,7 @@ def resolve_compute_result(compute_result: str | None) -> str | None:
 
 
 def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
-    """Aggregate a list of resolved compute_result values into a single Result.
-
-    Semantics of the special values:
-    - None: neutral, does not contribute (e.g. compute_result was empty/null).
-    - "not_applicable": veto — as soon as one selected choice carries this
-      value, the whole requirement is marked not_applicable. This supports
-      scoping questions like "Do you process personal data? -> No" that flag
-      the requirement as out of scope.
-    - "compliant" / "non_compliant" / "partially_compliant": normal
-      contributions aggregated worst-wins.
-
-    Returns one of "compliant", "partially_compliant", "non_compliant",
-    "not_applicable", or None if no value should be derived (caller decides
-    whether that becomes NOT_ASSESSED).
-    """
+    """Aggregate resolved compute_result values: not_applicable vetoes, else worst-wins."""
     contributing = [r for r in resolved_results if r is not None]
     if not contributing:
         return None
