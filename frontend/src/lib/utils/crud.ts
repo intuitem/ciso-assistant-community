@@ -219,6 +219,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'risk-assessments' },
+			{ field: 'perimeter', urlModel: 'findings-assessments' },
+			{ field: 'perimeter', urlModel: 'business-impact-analysis' },
 			{ field: 'perimeter', urlModel: 'entity-assessments' },
 			{ field: 'perimeters', urlModel: 'campaigns' },
 			{ field: 'perimeters', urlModel: 'processings' }
