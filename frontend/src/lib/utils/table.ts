@@ -135,18 +135,6 @@ export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const PROJECT_PRIORITY_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		optionsEndpoint: 'pmbok/projects/priority',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
-		label: 'priority',
-		browserCache: 'force-cache',
-		multiple: true
-	}
-};
-
 export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2754,34 +2742,11 @@ export const listViewFields = {
 		}
 	},
 	projects: {
-		head: [
-			'ref_id',
-			'name',
-			'status',
-			'priority',
-			'health',
-			'owner',
-			'sponsor',
-			'progress',
-			'end_date',
-			'folder'
-		],
-		body: [
-			'ref_id',
-			'name',
-			'status',
-			'priority',
-			'health',
-			'owner',
-			'sponsor',
-			'progress',
-			'end_date',
-			'folder'
-		],
+		head: ['ref_id', 'name', 'health', 'owner', 'progress', 'folder'],
+		body: ['ref_id', 'name', 'health', 'owner', 'progress', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: PROJECT_STATUS_FILTER,
-			priority: PROJECT_PRIORITY_FILTER,
 			health: PROJECT_HEALTH_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
