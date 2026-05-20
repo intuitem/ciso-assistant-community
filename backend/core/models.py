@@ -1898,6 +1898,78 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
+    DEFAULT_PROJECT_STATUSES = [
+        {
+            "name": "draft",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "initiated",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "planning",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "in_progress",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "on_hold",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "closing",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "closed",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "cancelled",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+    ]
+
+    DEFAULT_PROJECT_HEALTH = [
+        {
+            "name": "green",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_HEALTH,
+            "is_visible": True,
+        },
+        {
+            "name": "amber",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_HEALTH,
+            "is_visible": True,
+        },
+        {
+            "name": "red",
+            "builtin": True,
+            "field_path": FieldPath.PROJECT_HEALTH,
+            "is_visible": True,
+        },
+    ]
+
     DEFAULT_ENTITY_RELATIONSHIPS = [
         {
             "name": "regulatory_authority",
@@ -2064,6 +2136,24 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     @classmethod
     def create_default_accreditations_category(cls):
         for item in cls.DEFAULT_ACCREDITATION_CATEGORY:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_project_statuses(cls):
+        for item in cls.DEFAULT_PROJECT_STATUSES:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_project_health(cls):
+        for item in cls.DEFAULT_PROJECT_HEALTH:
             Terminology.objects.update_or_create(
                 name=item["name"],
                 field_path=item["field_path"],

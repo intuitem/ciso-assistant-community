@@ -113,6 +113,40 @@ export const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.status',
+		optionsLabelField: 'name',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.health',
+		optionsLabelField: 'name',
+		label: 'health',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_PRIORITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'pmbok/projects/priority',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'priority',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2716,6 +2750,39 @@ export const listViewFields = {
 			status: ACCREDITATION_STATUS_FILTER,
 			category: ACCREDITATION_CATEGORY_FILTER,
 			authority: ACCREDITATION_AUTHORITY_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	projects: {
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'priority',
+			'health',
+			'owner',
+			'sponsor',
+			'progress',
+			'end_date',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'status',
+			'priority',
+			'health',
+			'owner',
+			'sponsor',
+			'progress',
+			'end_date',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: PROJECT_STATUS_FILTER,
+			priority: PROJECT_PRIORITY_FILTER,
+			health: PROJECT_HEALTH_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},

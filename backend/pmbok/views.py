@@ -9,6 +9,7 @@ from core.views import BaseModelViewSet
 from pmbok.models import (
     GenericCollection,
     Accreditation,
+    Project,
     ResponsibilityRole,
     ResponsibilityMatrix,
     ResponsibilityMatrixActivity,
@@ -78,6 +79,29 @@ class AccreditationViewSet(BaseModelViewSet):
     @action(detail=False, name="Get Accreditation category choices")
     def category(self, request):
         return Response(dict(Accreditation.CATEGORY_CHOICES))
+
+
+class ProjectViewSet(BaseModelViewSet):
+    model = Project
+    serializers_module = "pmbok.serializers"
+    filterset_fields = [
+        "folder",
+        "status",
+        "priority",
+        "health",
+        "owner",
+        "sponsor",
+        "parent_project",
+        "linked_collection",
+        "filtering_labels",
+    ]
+    search_fields = ["name", "description", "ref_id", "purpose", "objectives"]
+    ordering = ["created_at"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get Project priority choices")
+    def priority(self, request):
+        return Response(dict(Project.PRIORITY))
 
 
 class ResponsibilityRoleViewSet(BaseModelViewSet):

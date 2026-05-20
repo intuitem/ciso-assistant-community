@@ -1,10 +1,12 @@
 from rest_framework import serializers
 
+from core.models import Terminology
 from core.serializers import BaseModelSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 from pmbok.models import (
     GenericCollection,
     Accreditation,
+    Project,
     ResponsibilityRole,
     ResponsibilityMatrix,
     ResponsibilityMatrixActivity,
@@ -111,6 +113,47 @@ class AccreditationWriteSerializer(BaseModelSerializer):
             )
 
         return super().validate(data)
+
+
+class ProjectReadSerializer(BaseModelSerializer):
+    path = PathField(read_only=True)
+    folder = FieldsRelatedField()
+    owner = FieldsRelatedField()
+    sponsor = FieldsRelatedField()
+    parent_project = FieldsRelatedField()
+    linked_collection = FieldsRelatedField()
+    responsibility_matrices = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    status = serializers.SerializerMethodField()
+    health = serializers.SerializerMethodField()
+    priority = serializers.SerializerMethodField()
+
+    def get_status(self, obj):
+        return obj.status.get_name_translated if obj.status_id else None
+
+    def get_health(self, obj):
+        return obj.health.get_name_translated if obj.health_id else None
+
+    def get_priority(self, obj):
+        return dict(Project.PRIORITY).get(obj.priority) if obj.priority else None
+
+    class Meta:
+        model = Project
+        fields = "__all__"
+
+
+class ProjectWriteSerializer(BaseModelSerializer):
+    status = serializers.PrimaryKeyRelatedField(
+        queryset=Terminology.objects.filter(
+            field_path=Terminology.FieldPath.PROJECT_STATUS, is_visible=True
+        ),
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = Project
+        fields = "__all__"
 
 
 class ResponsibilityRoleReadSerializer(BaseModelSerializer):

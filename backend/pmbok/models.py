@@ -170,6 +170,34 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
         (4, _("P4")),
     ]
 
+    TOLERANCES_SCHEMA = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "time": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "plus_days": {"type": "integer", "minimum": 0},
+                    "minus_days": {"type": "integer", "minimum": 0},
+                },
+            },
+            "cost": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "plus_pct": {"type": "number", "minimum": 0},
+                    "minus_pct": {"type": "number", "minimum": 0},
+                },
+            },
+            "scope": {"type": "string"},
+            "quality": {"type": "string"},
+            "benefits": {"type": "string"},
+            "risk": {"type": "string"},
+        },
+    }
+
     ref_id = models.CharField(max_length=100, blank=True)
     ref_link = models.URLField(blank=True)
 
@@ -191,7 +219,6 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
     status = models.ForeignKey(
         Terminology,
         on_delete=models.PROTECT,
-        null=True,
         blank=True,
         related_name="project_status",
         limit_choices_to={
@@ -220,6 +247,7 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     eta = models.DateField(blank=True, null=True)
+    closed_at = models.DateField(blank=True, null=True)
     progress = models.PositiveSmallIntegerField(
         blank=True,
         null=True,
@@ -235,6 +263,8 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
     constraints = models.TextField(blank=True)
     dependencies_note = models.TextField(blank=True)
     exit_criteria = models.TextField(blank=True)
+    organizational_alignment = models.TextField(blank=True)
+    approval_requirements = models.TextField(blank=True)
 
     budget = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True)
     currency = models.CharField(max_length=3, blank=True)
@@ -254,12 +284,34 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
         related_name="sub_projects",
     )
     tolerances = models.JSONField(default=dict, blank=True)
-    extra = models.JSONField(default=dict, blank=True)
 
     observation = models.TextField(blank=True, null=True)
 
-    def __str__(self) -> str:
-        return f"{self.ref_id} - {self.name}" if self.ref_id else self.name
+    def save(self, *args, **kwargs):
+        from datetime import date
+
+        if self.status_id is None:
+            self.status = Terminology.objects.filter(
+                field_path=Terminology.FieldPath.PROJECT_STATUS,
+                name="draft",
+                builtin=True,
+            ).first()
+
+        previous_status_name = None
+        if self.pk:
+            previous_status_name = (
+                type(self)
+                .objects.filter(pk=self.pk)
+                .values_list("status__name", flat=True)
+                .first()
+            )
+        new_status_name = self.status.name if self.status_id else None
+        if new_status_name == "closed" and previous_status_name != "closed":
+            self.closed_at = self.closed_at or date.today()
+        elif new_status_name != "closed" and previous_status_name == "closed":
+            self.closed_at = None
+
+        super().save(*args, **kwargs)
 
 
 class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
