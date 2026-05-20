@@ -4879,5 +4879,6 @@
 	"lifecycle": "Lifecycle",
 	"scoreRange": "Score range",
 	"scoreScale": "Score scale",
-	"downloadExcelTemplate": "Download Excel template"
+	"downloadExcelTemplate": "Download Excel template",
+	"frameworkActionsHelp": "The Excel template is meant for third parties or external entities to fill offline, then re-import the results through the {dataWizard}."
 }

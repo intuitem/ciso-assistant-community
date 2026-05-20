@@ -91,13 +91,16 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-col gap-2 shrink-0">
+		<div class="flex flex-col gap-2 shrink-0 w-64">
 			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/report/"
 				>{m.viewReport()}</a
 			>
 			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/excel-template/">
 				{m.downloadExcelTemplate()}
 			</a>
+			<p class="text-xs text-gray-500 leading-snug mt-1">
+				{m.frameworkActionsHelp({ dataWizard: m.dataWizard() })}
+			</p>
 		</div>
 	</div>
 
