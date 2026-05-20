@@ -2487,6 +2487,22 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         ),
     )
 
+    # Optional scale override from the ComplianceAssessment scale
+    # which itself defaults to the Framework
+    min_score = models.IntegerField(
+        null=True, blank=True, verbose_name=_("Minimum score")
+    )
+    max_score = models.IntegerField(
+        null=True, blank=True, verbose_name=_("Maximum score")
+    )
+    scores_definition = models.JSONField(
+        null=True, blank=True, verbose_name=_("Score definition")
+    )
+    # Independent from the scale override.
+    target_score = models.FloatField(
+        null=True, blank=True, verbose_name=_("Target score")
+    )
+
     @property
     def associated_reference_controls(self):
         _reference_controls = self.reference_controls.all()
@@ -2586,6 +2602,87 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             result[question.urn] = q_data
 
         return result if result else None
+
+    def _unwrap_scores_definition(self):
+        sd = self.scores_definition
+        if isinstance(sd, dict) and "scale" in sd:
+            return sd["scale"]
+        return sd
+
+    def clean(self):
+        """Validate the optional per-requirement scale and target override.
+
+        Each field is independently null-or-set. scores_definition and
+        target_score are checked against the Node-level resolved bounds: the
+        Node's own value when set, the Framework value otherwise.
+        """
+        from django.core.exceptions import ValidationError
+
+        super().clean()
+
+        # Bounds visible at Node level (no CA context).
+        if self.framework is not None:
+            fallback_min = self.framework.min_score
+            fallback_max = self.framework.max_score
+        else:
+            fallback_min = fallback_max = None
+        resolved_min = self.min_score if self.min_score is not None else fallback_min
+        resolved_max = self.max_score if self.max_score is not None else fallback_max
+
+        if (
+            resolved_min is not None
+            and resolved_max is not None
+            and resolved_min >= resolved_max
+        ):
+            raise ValidationError(
+                {
+                    "max_score": _(
+                        "max_score must be strictly greater than min_score."
+                    )
+                }
+            )
+
+        if self.scores_definition is not None:
+            scale = self._unwrap_scores_definition()
+            if not isinstance(scale, list) or not scale:
+                raise ValidationError(
+                    {
+                        "scores_definition": _(
+                            "scores_definition must be a non-empty list of entries."
+                        )
+                    }
+                )
+            if resolved_min is not None and resolved_max is not None:
+                seen = {
+                    entry.get("score")
+                    for entry in scale
+                    if isinstance(entry, dict) and entry.get("score") is not None
+                }
+                expected = set(range(resolved_min, resolved_max + 1))
+                if seen != expected:
+                    raise ValidationError(
+                        {
+                            "scores_definition": _(
+                                "scores_definition entries must cover every integer score "
+                                "in [min_score, max_score]."
+                            )
+                        }
+                    )
+
+        if self.target_score is not None and resolved_min is not None:
+            if not (resolved_min <= self.target_score <= resolved_max):
+                raise ValidationError(
+                    {
+                        "target_score": _(
+                            "target_score (%(value)s) must be within [%(min)s, %(max)s]."
+                        )
+                        % {
+                            "value": self.target_score,
+                            "min": resolved_min,
+                            "max": resolved_max,
+                        }
+                    }
+                )
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -7011,37 +7108,62 @@ class ComplianceAssessment(Assessment):
         return changes
 
     def _compute_score_for_field(
-        self, requirement_assessments, ig, score_field, na_target=None
+        self, requirement_assessments, ig, score_field, anchor_na_to_target=False
     ):
         """
-        Compute a single score value from the given field using the current
-        score_calculation_method (AVG, SUM, or AVG_OF_AVG).
+        Compute a single score value using the current score_calculation_method
+        (AVG, SUM, or AVG_OF_AVG).
 
-        When na_target is set, N/A requirement assessments use that value
-        instead of their actual score.
+        Each RA is normalized against its resolved scale (Node override or CA)
+        before aggregation; the final value is denormalized to the CA scale.
+        For uniform-scale CAs (no Node override anywhere) this reduces to the
+        legacy raw-score formula exactly.
+
+        When anchor_na_to_target is True, N/A RAs contribute their resolved
+        target (or resolved max if no target is set).
 
         Returns the computed score, or -1 if no scored requirements exist.
         """
-        if self.score_calculation_method == self.CalculationMethod.AVG_OF_AVG:
-            # Build leaf scores from requirement assessments
-            leaf_scores = {}
-            for ras in requirement_assessments:
-                if not ig or (ig & set(ras.requirement.implementation_groups or [])):
-                    is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
-                    score = (
-                        na_target
-                        if is_na and na_target is not None
-                        else (getattr(ras, score_field) or 0)
-                    )
-                    leaf_scores[ras.requirement.urn] = {
-                        "score": score,
-                        "weight": ras.requirement.weight or 1,
-                    }
+        ca_min = self.min_score
+        ca_max = self.max_score
+        if ca_min is None or ca_max is None or ca_max <= ca_min:
+            return -1
+        ca_range = ca_max - ca_min
 
-            if not leaf_scores:
+        def _ra_ratio_weight(ras):
+            if ig and not (ig & set(ras.requirement.implementation_groups or [])):
+                return None
+
+            resolved = ras.get_resolved_scoring()
+            ra_min = resolved["min_score"]
+            ra_max = resolved["max_score"]
+            if ra_min is None or ra_max is None or ra_max <= ra_min:
+                return None
+            ra_range = ra_max - ra_min
+
+            is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
+            if is_na and anchor_na_to_target:
+                target = resolved["target_score"]
+                raw = target if target is not None else ra_max
+            else:
+                # Legacy semantics: None -> 0 (pulls unscored to min).
+                raw = getattr(ras, score_field) or 0
+
+            ratio = (raw - ra_min) / ra_range
+            return ratio, (ras.requirement.weight or 1)
+
+        if self.score_calculation_method == self.CalculationMethod.AVG_OF_AVG:
+            leaf_ratios = {}
+            for ras in requirement_assessments:
+                r = _ra_ratio_weight(ras)
+                if r is None:
+                    continue
+                ratio, weight = r
+                leaf_ratios[ras.requirement.urn] = {"ratio": ratio, "weight": weight}
+
+            if not leaf_ratios:
                 return -1
 
-            # Fetch the framework tree structure
             all_nodes = RequirementNode.objects.filter(
                 framework=self.framework
             ).values_list("urn", "parent_urn", "weight")
@@ -7050,7 +7172,7 @@ class ComplianceAssessment(Assessment):
             node_weights = {}
             roots = []
             all_urns = set()
-            parent_links = {}  # urn -> parent_urn
+            parent_links = {}
             for urn, parent_urn, weight in all_nodes:
                 node_weights[urn] = weight or 1
                 all_urns.add(urn)
@@ -7059,25 +7181,22 @@ class ComplianceAssessment(Assessment):
                 if parent_urn and parent_urn in all_urns:
                     children_map[parent_urn].append(urn)
                 else:
-                    # No parent, or parent_urn references a missing node —
-                    # treat as a root so the subtree is still reachable.
+                    # Orphan or root: keep reachable as a tree root.
                     roots.append(urn)
 
-            # Recursively compute weighted averages bottom-up
-            computed = {}
+            computed_ratios = {}
             visiting = set()
 
             def compute(urn):
-                if urn in computed:
-                    return computed[urn]
+                if urn in computed_ratios:
+                    return computed_ratios[urn]
                 if urn in visiting:
-                    # Cycle in the requirement tree — skip to avoid infinite recursion
                     return None
                 visiting.add(urn)
 
-                if urn in leaf_scores:
-                    computed[urn] = leaf_scores[urn]["score"]
-                    return computed[urn]
+                if urn in leaf_ratios:
+                    computed_ratios[urn] = leaf_ratios[urn]["ratio"]
+                    return computed_ratios[urn]
 
                 children = children_map.get(urn, [])
                 if not children:
@@ -7085,67 +7204,64 @@ class ComplianceAssessment(Assessment):
 
                 child_results = []
                 for child_urn in children:
-                    child_score = compute(child_urn)
-                    if child_score is not None:
+                    child_ratio = compute(child_urn)
+                    if child_ratio is not None:
                         child_results.append(
-                            (child_score, node_weights.get(child_urn, 1))
+                            (child_ratio, node_weights.get(child_urn, 1))
                         )
 
                 if not child_results:
                     return None
 
-                total_weighted = sum(s * w for s, w in child_results)
+                total_weighted = sum(r * w for r, w in child_results)
                 total_weight = sum(w for _, w in child_results)
-                computed[urn] = total_weighted / total_weight
-                return computed[urn]
+                computed_ratios[urn] = total_weighted / total_weight
+                return computed_ratios[urn]
 
-            # Compute all nodes bottom-up
             for root in roots:
                 compute(root)
 
-            # Collect scores for the global average.
-            # If a root is structural (no scored leaves as direct children),
-            # descend one level and flat-average its children (categories).
-            # Otherwise the root itself is the grouping level.
-            category_scores = []
+            # Pick the grouping level: a root with scored leaves is itself the
+            # category; a purely structural root descends one level so its
+            # categories carry equal weight in the final flat average.
+            category_ratios = []
             for root in roots:
                 children = children_map.get(root, [])
-                has_leaf_children = any(c in leaf_scores for c in children)
+                has_leaf_children = any(c in leaf_ratios for c in children)
                 if has_leaf_children or not children:
-                    if root in computed:
-                        category_scores.append(computed[root])
+                    if root in computed_ratios:
+                        category_ratios.append(computed_ratios[root])
                 else:
                     for child_urn in children:
-                        if child_urn in computed:
-                            category_scores.append(computed[child_urn])
+                        if child_urn in computed_ratios:
+                            category_ratios.append(computed_ratios[child_urn])
 
-            if not category_scores:
+            if not category_ratios:
                 return -1
 
-            return int(sum(category_scores) / len(category_scores) * 10) / 10
+            global_ratio = sum(category_ratios) / len(category_ratios)
+            return int((ca_min + global_ratio * ca_range) * 10) / 10
 
-        weighted_score = 0
+        total_ratio_weighted = 0
+        total_denormalized_weighted = 0
         total_weight = 0
         for ras in requirement_assessments:
-            if not ig or (ig & set(ras.requirement.implementation_groups or [])):
-                weight = ras.requirement.weight if ras.requirement.weight else 1
-                is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
-                score = (
-                    na_target
-                    if is_na and na_target is not None
-                    else (getattr(ras, score_field) or 0)
-                )
-                weighted_score += score * weight
-                total_weight += weight
+            r = _ra_ratio_weight(ras)
+            if r is None:
+                continue
+            ratio, weight = r
+            total_ratio_weighted += ratio * weight
+            total_denormalized_weighted += (ca_min + ratio * ca_range) * weight
+            total_weight += weight
 
         if total_weight == 0:
             return -1
 
         if self.score_calculation_method == self.CalculationMethod.SUM:
-            return int(weighted_score * 10) / 10
-        # We use int(x * 10) / 10 instead of round() so that the python
-        # backend outputs the same result as the javascript frontend.
-        return int(weighted_score / total_weight * 10) / 10
+            return int(total_denormalized_weighted * 10) / 10
+        # int(x * 10) / 10 matches the javascript frontend rounding.
+        avg_ratio = total_ratio_weighted / total_weight
+        return int((ca_min + avg_ratio * ca_range) * 10) / 10
 
     def get_global_score(self):
         """
@@ -7163,7 +7279,7 @@ class ComplianceAssessment(Assessment):
         """
         qs = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            .select_related("requirement")
+            .select_related("requirement", "compliance_assessment")
             .exclude(requirement__assessable=False)
         )
         if self.anchor_na_to_target:
@@ -7186,20 +7302,17 @@ class ComplianceAssessment(Assessment):
             else None
         )
 
-        na_target = None
-        if self.anchor_na_to_target:
-            na_target = (
-                self.target_score if self.target_score is not None else self.max_score
-            )
-
         impl_score = self._compute_score_for_field(
-            requirement_assessments_scored, ig, "score", na_target
+            requirement_assessments_scored, ig, "score", self.anchor_na_to_target
         )
 
         doc_score = None
         if self.show_documentation_score:
             doc_score = self._compute_score_for_field(
-                requirement_assessments_scored, ig, "documentation_score", na_target
+                requirement_assessments_scored,
+                ig,
+                "documentation_score",
+                self.anchor_na_to_target,
             )
 
         # Maturity is the average of the enabled layers (ignore -1 / None)
@@ -8094,6 +8207,38 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             "description",
         )
 
+    def get_resolved_scoring(self) -> dict:
+        """Resolve the effective score scale and target via the cascade
+        RequirementNode -> ComplianceAssessment.
+
+        Each of the four fields is resolved independently: the Node value when
+        set, the CA value otherwise. scores_definition is returned unwrapped
+        (bare list) or None.
+        """
+        req = self.requirement
+        ca = self.compliance_assessment
+
+        min_score = req.min_score if req.min_score is not None else ca.min_score
+        max_score = req.max_score if req.max_score is not None else ca.max_score
+        scores_definition = (
+            req.scores_definition
+            if req.scores_definition is not None
+            else ca.scores_definition
+        )
+        target_score = (
+            req.target_score if req.target_score is not None else ca.target_score
+        )
+
+        if isinstance(scores_definition, dict) and "scale" in scores_definition:
+            scores_definition = scores_definition["scale"]
+
+        return {
+            "min_score": min_score,
+            "max_score": max_score,
+            "scores_definition": scores_definition,
+            "target_score": target_score,
+        }
+
     @property
     def is_locked(self) -> bool:
         return self.compliance_assessment.is_locked
@@ -8340,8 +8485,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
-        min_score = self.compliance_assessment.min_score or 0
-        max_score = self.compliance_assessment.max_score or 100
+        resolved = self.get_resolved_scoring()
+        min_score = resolved["min_score"] if resolved["min_score"] is not None else 0
+        max_score = resolved["max_score"] if resolved["max_score"] is not None else 100
         results = []
         visible_questions = 0
         answered_visible_questions = 0
