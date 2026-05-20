@@ -4875,5 +4875,11 @@
 	"directPlusIndirectEvidences": "{direct} directes + {indirect} via les mesures appliquées",
 	"directEvidencesOnly": "{direct} directes",
 	"topLevel": "Niveau supérieur",
-	"viewReport": "Voir le rapport"
+	"viewReport": "Voir le rapport",
+	"identity": "Identité",
+	"scoring": "Notation",
+	"lifecycle": "Cycle de vie",
+	"scoreRange": "Plage de notes",
+	"scoreScale": "Échelle de notes",
+	"downloadExcelTemplate": "Télécharger le modèle Excel"
 }
