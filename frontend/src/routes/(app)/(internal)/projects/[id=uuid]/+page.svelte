@@ -811,7 +811,8 @@
 							{section.label}
 						</h3>
 						{#if charterEditing}
-							<MarkdownField label=""
+							<MarkdownField
+								label=""
 								bind:value={charterDraft[section.key]}
 								rows={4}
 								placeholder={section.label}
@@ -1187,7 +1188,8 @@
 							{section.label}
 						</h3>
 						{#if scopeEditing}
-							<MarkdownField label=""
+							<MarkdownField
+								label=""
 								bind:value={scopeDraft[section.key]}
 								rows={4}
 								placeholder={section.label}
