@@ -6864,9 +6864,11 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     def _get_justification(self, request):
         raw_justification = request.data.get("justification", "")
         if not isinstance(raw_justification, str):
-            justification = ""
-        else:
-            justification = raw_justification.strip()
+            return None, Response(
+                {"error": "The justification field must be a string"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        justification = raw_justification.strip()
         max_len = RiskAcceptance._meta.get_field("justification").max_length
         if max_len and len(justification) > max_len:
             return None, Response(
