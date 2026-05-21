@@ -9,6 +9,8 @@
  * Companion tests:
  *   - visibility-editor.test.ts verifies the editor UI itself (pill state,
  *     cascade, persistence) without checking downstream effects.
+ *   - visibility-effects-respondent.test.ts covers the auditor-only pill
+ *     from the respondent's view (this file only exercises the auditor).
  *   - test_field_visibility.py (backend) covers the resolver helpers.
  */
 
@@ -21,32 +23,8 @@ import type { Page } from '@playwright/test';
 const vars = TestContent.generateTestVars();
 const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
-/** Three visibility states exposed by the editor. */
+/** Visibility pills exposed by the editor. */
 type Pill = 'everyone' | 'auditor' | 'hidden';
-
-/**
- * Set a single field's visibility via the editor UI and save.
- * Assumes the audit edit form is already open with the "More" section expanded.
- */
-async function setVisibility(page: Page, field: string, pill: Pill) {
-	await page.getByTestId(`visibility-${field}-${pill}`).click();
-	await expect(page.getByTestId(`visibility-${field}-${pill}`)).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
-}
-
-/** Open the audit edit form and expand the "More" dropdown to reveal pills. */
-async function openVisibilityEditor(page: Page) {
-	await page.getByTestId('edit-button').click();
-	await page.getByText('More').click();
-}
-
-/** Save the audit edit form and wait for the navigation back to detail view. */
-async function saveAudit(page: Page) {
-	await page.getByTestId('save-button').click();
-	await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
-}
 
 test('field visibility effects: each flag toggles the corresponding UI', async ({
 	logedPage,
@@ -54,9 +32,12 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 	complianceAssessmentsPage,
 	page
 }) => {
-	// Auto-accept any unsaved-changes dialogs. The requirement-assessment edit
-	// form has taintedMessage enabled, and Playwright otherwise auto-dismisses
-	// the resulting window.confirm() — which would silently block navigation.
+	// The matrix walks ~22 visibility cycles; the default 100s timeout is tight.
+	test.slow();
+
+	// taintedMessage is enabled on the requirement-assessment edit form. Any
+	// goto() that leaves a tainted form triggers a window.confirm() which
+	// Playwright otherwise auto-dismisses, silently blocking navigation.
 	page.on('dialog', (dialog) => dialog.accept());
 
 	// --- Bootstrap: folder + perimeter + CA --------------------------------
@@ -80,8 +61,9 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 	const auditDetailUrl = page.url();
 
 	// Resolve the URL of an assessable requirement assessment edit page ONCE
-	// via tree traversal, then reuse direct navigation in subsequent steps —
-	// repeated tree traversals were flaky after multiple visibility edits.
+	// via tree traversal, then reuse direct navigation in every subsequent
+	// step. Repeated tree traversals were flaky after multiple visibility
+	// edits (apparent localStorage/state interaction in the tree widget).
 	// NIST CSF v1.1 has ID.AM-1 (Identify → Asset Management) — use it.
 	const IDAM1 = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
 		'ID - Identify',
@@ -89,169 +71,132 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 	]);
 	await IDAM1.content.click();
 	await page.waitForURL('/requirement-assessments/**');
-	// Tree click navigates to /edit when the user has edit perms (admin in tests).
-	// Strip any query string but keep the path as-is — already an edit URL.
+	// The tree click navigates straight to /edit for users with edit perms
+	// (admin in tests). Drop the ?next=... so we can reuse the bare URL.
 	const raEditUrl = page.url().split('?')[0];
 
-	async function openFirstRequirementAssessment() {
-		await page.goto(raEditUrl);
-		await page.waitForURL(/\/requirement-assessments\/[^/]+\/edit/);
+	/**
+	 * Set one or more field visibilities and persist. Always starts from the
+	 * audit detail page and ends there too, so callers don't need to track
+	 * page state between iterations.
+	 */
+	async function setVisibility(...pairs: Array<[string, Pill]>) {
+		await page.goto(auditDetailUrl);
+		await page.getByTestId('edit-button').click();
+		await page.getByText('More').click();
+		for (const [field, pill] of pairs) {
+			await page.getByTestId(`visibility-${field}-${pill}`).click();
+			await expect(page.getByTestId(`visibility-${field}-${pill}`)).toHaveAttribute(
+				'aria-checked',
+				'true'
+			);
+		}
+		await page.getByTestId('save-button').click();
+		await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 	}
 
-	// --- answers ------------------------------------------------------------
-	// answers defaults to "everyone" (no DEFAULT_VISIBILITY entry).
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'answers', 'hidden');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
+	// === Regression: answers hidden + save buttons work (the original bug) ==
+	await setVisibility(['answers', 'hidden']);
+	await page.goto(raEditUrl);
 	await expect(page.getByTestId('answers-field')).toBeHidden();
-	// Regression for the original bug: save buttons must still work.
 	await page.getByTestId('save-no-continue-button').click();
 	await expect(page.getByText(/successfully saved/i)).toBeVisible();
 
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'answers', 'everyone');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	// NIST CSF has no per-requirement questions, so the answers-field testid
-	// only appears when the requirement has questions. For frameworks without
-	// questions the visible-state assertion is a no-op; the hidden-state
-	// assertion above is the meaningful one.
+	// === Matrix: each field hidden then visible ============================
+	// Fields that render in the audit overview (donut charts, etc.) AND in
+	// the RA edit form. We check both surfaces.
+	type FieldCheck = {
+		field: string;
+		// Asserts the field is rendered (or not) in its UI locations.
+		assertOverview?: (visible: boolean) => Promise<void>;
+		assertRaEdit?: (visible: boolean) => Promise<void>;
+		// Some fields require setting a parent first (e.g. doc_score needs score).
+		dependsOn?: Array<[string, Pill]>;
+	};
 
-	// --- result -------------------------------------------------------------
-	// result defaults to "everyone".
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'result', 'hidden');
-	await saveAudit(page);
-	// Overview: result donut chart absent.
-	await expect(page.locator('#compliance_result_div')).toHaveCount(0);
-	// Edit form: result field absent.
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('result-field')).toBeHidden();
+	// answers is covered by the regression test above; NIST CSF v1.1 has no
+	// per-requirement questions so the matrix iteration would be a no-op.
+	const checks: FieldCheck[] = [
+		{
+			field: 'result',
+			assertOverview: async (visible) => {
+				await expect(page.locator('#compliance_result_div')).toHaveCount(visible ? 1 : 0);
+			},
+			assertRaEdit: async (visible) => {
+				if (visible) await expect(page.getByTestId('result-field')).toBeVisible();
+				else await expect(page.getByTestId('result-field')).toBeHidden();
+			}
+		},
+		{
+			field: 'status',
+			assertOverview: async (visible) => {
+				await expect(page.locator('#compliance_status_div')).toHaveCount(visible ? 1 : 0);
+			},
+			assertRaEdit: async (visible) => {
+				if (visible) await expect(page.getByTestId('status-field')).toBeVisible();
+				else await expect(page.getByTestId('status-field')).toBeHidden();
+			}
+		},
+		{
+			field: 'score',
+			assertRaEdit: async (visible) => {
+				if (visible) await expect(page.getByTestId('score-field')).toBeVisible();
+				else await expect(page.getByTestId('score-field')).toBeHidden();
+			}
+		},
+		{
+			field: 'documentation_score',
+			// doc_score visibility cannot exceed score's — keep score visible.
+			dependsOn: [['score', 'everyone']],
+			assertRaEdit: async (visible) => {
+				if (visible) await expect(page.getByTestId('documentation-score-field')).toBeVisible();
+				else await expect(page.getByTestId('documentation-score-field')).toBeHidden();
+			}
+		},
+		{
+			field: 'extended_result',
+			assertRaEdit: async (visible) => {
+				if (visible) await expect(page.getByTestId('extended-result-field')).toBeVisible();
+				else await expect(page.getByTestId('extended-result-field')).toBeHidden();
+			}
+		},
+		{
+			field: 'observation',
+			assertRaEdit: async (visible) => {
+				if (visible) await expect(page.getByTestId('observation-field')).toBeVisible();
+				else await expect(page.getByTestId('observation-field')).toBeHidden();
+			}
+		},
+		{
+			field: 'applied_controls',
+			assertRaEdit: async (visible) => {
+				if (visible) await expect(page.getByTestId('applied-controls-tab')).toBeVisible();
+				else await expect(page.getByTestId('applied-controls-tab')).toBeHidden();
+			}
+		},
+		{
+			field: 'evidences',
+			assertRaEdit: async (visible) => {
+				if (visible) await expect(page.getByTestId('evidences-tab')).toBeVisible();
+				else await expect(page.getByTestId('evidences-tab')).toBeHidden();
+			}
+		}
+	];
 
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'result', 'everyone');
-	await saveAudit(page);
-	await expect(page.locator('#compliance_result_div')).toHaveCount(1);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('result-field')).toBeVisible();
-
-	// --- status -------------------------------------------------------------
-	// status defaults to "auditor". Hide it.
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'status', 'hidden');
-	await saveAudit(page);
-	// Overview: status donut chart absent.
-	await expect(page.locator('#compliance_status_div')).toHaveCount(0);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('status-field')).toBeHidden();
-
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'status', 'everyone');
-	await saveAudit(page);
-	await expect(page.locator('#compliance_status_div')).toHaveCount(1);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('status-field')).toBeVisible();
-
-	// --- score --------------------------------------------------------------
-	// score defaults to "hidden". Show it first to verify the visible state.
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'score', 'everyone');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('score-field')).toBeVisible();
-
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'score', 'hidden');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('score-field')).toBeHidden();
-
-	// --- documentation_score ------------------------------------------------
-	// doc_score visibility cannot exceed score's. Set both to "everyone" first.
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'score', 'everyone');
-	await setVisibility(page, 'documentation_score', 'everyone');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('documentation-score-field')).toBeVisible();
-
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'documentation_score', 'hidden');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('documentation-score-field')).toBeHidden();
-
-	// --- extended_result ----------------------------------------------------
-	// extended_result defaults to "auditor". Show it for the auditor anyway
-	// (default state) and verify the field is present on the edit form.
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'extended_result', 'everyone');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('extended-result-field')).toBeVisible();
-
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'extended_result', 'hidden');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('extended-result-field')).toBeHidden();
-
-	// --- observation --------------------------------------------------------
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'observation', 'hidden');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('observation-field')).toBeHidden();
-
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'observation', 'everyone');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('observation-field')).toBeVisible();
-
-	// --- applied_controls ---------------------------------------------------
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'applied_controls', 'hidden');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('applied-controls-tab')).toBeHidden();
-
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'applied_controls', 'everyone');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('applied-controls-tab')).toBeVisible();
-
-	// --- evidences ----------------------------------------------------------
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'evidences', 'hidden');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('evidences-tab')).toBeHidden();
-
-	await page.goto(auditDetailUrl);
-	await openVisibilityEditor(page);
-	await setVisibility(page, 'evidences', 'everyone');
-	await saveAudit(page);
-	await openFirstRequirementAssessment();
-	await expect(page.getByTestId('evidences-tab')).toBeVisible();
+	for (const check of checks) {
+		for (const pill of ['hidden', 'everyone'] as Pill[]) {
+			const visible = pill === 'everyone';
+			const settings: Array<[string, Pill]> = [...(check.dependsOn ?? []), [check.field, pill]];
+			await setVisibility(...settings);
+			// After setVisibility we're on auditDetailUrl. Audit-overview assertions
+			// must run before navigating away.
+			if (check.assertOverview) await check.assertOverview(visible);
+			if (check.assertRaEdit) {
+				await page.goto(raEditUrl);
+				await check.assertRaEdit(visible);
+			}
+		}
+	}
 });
 
 test.afterAll('cleanup', async ({ browser }) => {
