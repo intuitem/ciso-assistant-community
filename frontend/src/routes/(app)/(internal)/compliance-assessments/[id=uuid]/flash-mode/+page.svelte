@@ -20,6 +20,7 @@
 	// Field visibility for auditor role
 	const complianceAssessment = $derived(data.compliance_assessment);
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, 'auditor'));
+	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
 	const showObservation = $derived(fieldVis.showObservation);
 
@@ -398,7 +399,7 @@
 								</div>
 							{/if}
 
-							{#if hasQuestions}
+							{#if showAnswers && hasQuestions}
 								<div class="mt-4">
 									<Question
 										questions={currentQuestions}
