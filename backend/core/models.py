@@ -74,6 +74,15 @@ from collections import defaultdict, deque
 logger = get_logger(__name__)
 
 
+def _truncate_one_decimal(value: float) -> float:
+    """Truncate *value* to one decimal, matching the JS frontend display.
+
+    A tiny epsilon absorbs float-precision noise introduced by ratio-based
+    aggregation (e.g. 77.49999999999 should still truncate to 77.5).
+    """
+    return int(value * 10 + 1e-9) / 10
+
+
 def _defer_once(conn_attr: str, key, callback):
     """Schedule *callback* via on_commit, deduplicating by *key* per transaction.
 
@@ -7257,7 +7266,7 @@ class ComplianceAssessment(Assessment):
                 return -1
 
             global_ratio = sum(category_ratios) / len(category_ratios)
-            return int((ca_min + global_ratio * ca_range) * 10) / 10
+            return _truncate_one_decimal(ca_min + global_ratio * ca_range)
 
         total_ratio_weighted = 0
         total_denormalized_weighted = 0
@@ -7275,10 +7284,11 @@ class ComplianceAssessment(Assessment):
             return -1
 
         if self.score_calculation_method == self.CalculationMethod.SUM:
-            return int(total_denormalized_weighted * 10) / 10
-        # int(x * 10) / 10 matches the javascript frontend rounding.
+            return _truncate_one_decimal(total_denormalized_weighted)
+        # Truncate to one decimal to match the javascript frontend, with a
+        # tiny epsilon to absorb float-precision noise from the ratio path.
         avg_ratio = total_ratio_weighted / total_weight
-        return int((ca_min + avg_ratio * ca_range) * 10) / 10
+        return _truncate_one_decimal(ca_min + avg_ratio * ca_range)
 
     def get_global_score(self):
         """
@@ -7335,7 +7345,7 @@ class ComplianceAssessment(Assessment):
         # Maturity is the average of the enabled layers (ignore -1 / None)
         enabled = [s for s in [impl_score, doc_score] if s is not None and s != -1]
         if enabled:
-            maturity_score = int(sum(enabled) / len(enabled) * 10) / 10
+            maturity_score = _truncate_one_decimal(sum(enabled) / len(enabled))
         else:
             maturity_score = impl_score  # -1 if nothing scored
 

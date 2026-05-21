@@ -37,7 +37,7 @@ def ca_05(framework_05):
     root = Folder.get_root_folder()
     folder = Folder.objects.create(parent_folder=root, name="ca folder")
     perimeter = Perimeter.objects.create(name="ca perimeter", folder=folder)
-    return ComplianceAssessment.objects.create(
+    ca = ComplianceAssessment.objects.create(
         name="0-5 CA",
         framework=framework_05,
         folder=folder,
@@ -46,6 +46,10 @@ def ca_05(framework_05):
         max_score=5,
         target_score=3,
     )
+    # DEFAULT_VISIBILITY hides score; explicitly enable for serializer tests.
+    ca.scoring_enabled = True
+    ca.save()
+    return ca
 
 
 def _scale_def_for(min_v: int, max_v: int) -> dict:
