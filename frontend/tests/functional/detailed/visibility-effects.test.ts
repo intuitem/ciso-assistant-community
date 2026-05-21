@@ -54,6 +54,11 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 	complianceAssessmentsPage,
 	page
 }) => {
+	// Auto-accept any unsaved-changes dialogs. The requirement-assessment edit
+	// form has taintedMessage enabled, and Playwright otherwise auto-dismisses
+	// the resulting window.confirm() — which would silently block navigation.
+	page.on('dialog', (dialog) => dialog.accept());
+
 	// --- Bootstrap: folder + perimeter + CA --------------------------------
 	for (const requirement of ['folders', 'perimeters', 'complianceAssessments']) {
 		const requiredPage = pages[requirement + 'Page'];

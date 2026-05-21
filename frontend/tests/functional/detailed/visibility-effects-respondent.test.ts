@@ -42,6 +42,9 @@ test('auditor sets up entity-assessment and hides result from respondent', async
 }) => {
 	test.slow();
 
+	// Auto-accept any unsaved-changes dialogs (see visibility-effects.test.ts).
+	page.on('dialog', (dialog) => dialog.accept());
+
 	// --- Bootstrap -----------------------------------------------------------
 	await foldersPage.goto();
 	await foldersPage.createItem({ name: vars.folderName, description: vars.description });
