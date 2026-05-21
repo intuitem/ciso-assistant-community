@@ -89,7 +89,9 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 	]);
 	await IDAM1.content.click();
 	await page.waitForURL('/requirement-assessments/**');
-	const raEditUrl = page.url() + '/edit';
+	// Tree click navigates to /edit when the user has edit perms (admin in tests).
+	// Strip any query string but keep the path as-is — already an edit URL.
+	const raEditUrl = page.url().split('?')[0];
 
 	async function openFirstRequirementAssessment() {
 		await page.goto(raEditUrl);
