@@ -4,6 +4,7 @@
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import ThresholdsEditor from './ThresholdsEditor.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -120,3 +121,5 @@
 	cacheLock={cacheLocks['show_target']}
 	bind:cachedValue={formDataCache['show_target']}
 />
+
+<ThresholdsEditor {form} {object} chartType={formDataCache['chart_type'] ?? object?.chart_type} />

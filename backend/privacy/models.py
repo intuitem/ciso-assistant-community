@@ -1,5 +1,5 @@
 from django.db import models
-from iam.models import User, FolderMixin
+from iam.models import User, FolderMixin, PublishInRootFolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
@@ -60,7 +60,9 @@ TRANSFER_MECHANISM_CHOICES = (
 )
 
 
-class ProcessingNature(ReferentialObjectMixin, I18nObjectMixin):
+class ProcessingNature(
+    ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin
+):
     DEFAULT_PROCESSING_NATURE = [
         "privacy_collection",
         "privacy_recording",
@@ -88,6 +90,7 @@ class ProcessingNature(ReferentialObjectMixin, I18nObjectMixin):
         for value in cls.DEFAULT_PROCESSING_NATURE:
             ProcessingNature.objects.update_or_create(
                 name=value,
+                defaults={"is_published": True},
             )
 
     class Meta:

@@ -1,11 +1,11 @@
-ref_id,name,description,status,severity,assets,applied_controls,security_exceptions,filtering_labels
-CVE-2024-0001,Log4Shell RCE,Remote code execution via JNDI injection in Log4j 2.x,exploitable,critical,,,,
-CVE-2024-0002,OpenSSL Buffer Overflow,Heap buffer overflow allowing potential remote code execution,potential,high,kubernetes cluster,,,test-label
-CVE-2024-0003,Weak TLS Configuration,Server accepts deprecated TLS 1.0 and 1.1 protocols,mitigated,medium,,,,
-CVE-2024-0004,Default Admin Credentials,Application ships with unchanged default admin password,exploitable,high,,,,
-CVE-2024-0005,Unpatched Kernel,Linux kernel version missing critical security patches,potential,high,,,,
-CVE-2024-0006,Informational Header Leak,Server response headers expose version information,not exploitable,info,,,,
-CVE-2024-0007,Deprecated Hash Algorithm,MD5 used for password hashing in legacy module,unaffected,medium,,,,
-CVE-2024-0008,SQL Injection,User-supplied input not sanitised before DB query,fixed,critical,,,,
-,Unlabelled Exposure,No ref_id to test optional field,potential,low,,,,
-,Severity undefined test,Should import with severity -1 (undefined),potential,undefined,,,,
+ref_id,name,description,status,severity,assets,applied_controls,security_exceptions,filtering_labels,detected_at,due_date
+CVE-2024-0001,Log4Shell RCE,Remote code execution via JNDI injection in Log4j 2.x,exploitable,critical,,,,,2024-01-15,2024-02-15
+CVE-2024-0002,OpenSSL Buffer Overflow,Heap buffer overflow allowing potential remote code execution,potential,high,kubernetes cluster,,,test-label,,
+CVE-2024-0003,Weak TLS Configuration,Server accepts deprecated TLS 1.0 and 1.1 protocols,mitigated,medium,,,,,,
+CVE-2024-0004,Default Admin Credentials,Application ships with unchanged default admin password,exploitable,high,,,,,,
+CVE-2024-0005,Unpatched Kernel,Linux kernel version missing critical security patches,potential,high,,,,,,
+CVE-2024-0006,Informational Header Leak,Server response headers expose version information,not exploitable,info,,,,,,
+CVE-2024-0007,Deprecated Hash Algorithm,MD5 used for password hashing in legacy module,unaffected,medium,,,,,,
+CVE-2024-0008,SQL Injection,User-supplied input not sanitised before DB query,fixed,critical,,,,,,
+,Unlabelled Exposure,No ref_id to test optional field,potential,low,,,,,,
+,Severity undefined test,Should import with severity -1 (undefined),potential,undefined,,,,,,

@@ -1,12 +1,16 @@
 import { describe, it, expect } from 'vitest';
+import { get } from 'svelte/store';
 import {
 	slugifyFrameworkName,
 	computeRefId,
 	generateUrn,
 	validateDraft,
+	buildTree,
+	serializeDraft,
 	type Framework,
-	type BuilderSection,
-	type RequirementNode
+	type BuilderNode,
+	type RequirementNode,
+	type Question
 } from './builder-state';
 
 const FW_ID = 'a1b2c3d4-0000-0000-0000-000000000000';
@@ -153,10 +157,58 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 	};
 }
 
+function makeQuestion(overrides: Partial<Question> = {}): Question {
+	return {
+		id: 'q-1',
+		urn: 'urn:custom:risk:question:fw:1-q1',
+		ref_id: '1-q1',
+		text: 'Q?',
+		annotation: null,
+		type: 'number',
+		config: null,
+		depends_on: null,
+		order: 0,
+		weight: 1,
+		folder: 'folder-1',
+		requirement_node: 'node-1',
+		choices: [],
+		...overrides
+	};
+}
+
+function makeChoice(id: string, order: number) {
+	return {
+		id,
+		urn: `urn:custom:risk:question_choice:fw:1-q1-c${order}`,
+		ref_id: `1-q1-c${order}`,
+		value: `Choice ${order}`,
+		annotation: null,
+		add_score: null,
+		compute_result: null,
+		order,
+		description: null,
+		color: null,
+		select_implementation_groups: null,
+		folder: 'folder-1',
+		question: 'q-1'
+	};
+}
+
+function makeSectionWithQuestion(question: Question): BuilderNode {
+	return makeSection({}, [
+		{
+			node: makeNode({}),
+			questions: [{ question }],
+			children: [],
+			depth: 1
+		}
+	]);
+}
+
 function makeSection(
 	nodeOverrides: Partial<RequirementNode> = {},
-	requirements: BuilderSection['requirements'] = []
-): BuilderSection {
+	children: BuilderNode['children'] = []
+): BuilderNode {
 	return {
 		node: makeNode({
 			id: 'section-1',
@@ -167,8 +219,9 @@ function makeSection(
 			name: 'Section 1',
 			...nodeOverrides
 		}),
-		requirements,
-		collapsed: false
+		questions: [],
+		children,
+		depth: 0
 	};
 }
 
@@ -241,5 +294,555 @@ describe('validateDraft', () => {
 		const sections = [makeSection()];
 		const errors = validateDraft(fw, sections);
 		expect(errors.find((e) => e.key === 'publish')!.message).toBe('Framework name is required.');
+	});
+
+	it('rejects number slider with min >= max', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 10, max: 5, step: 1 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'Slider min must be less than max'
+		);
+	});
+
+	it('rejects number slider with non-positive step', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 10, step: 0 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'Slider step must be greater than 0'
+		);
+	});
+
+	it('rejects number slider with step larger than range', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 10, step: 20 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'Slider step cannot exceed (max − min)'
+		);
+	});
+
+	it('accepts a valid number slider', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: { widget: 'slider', min: 0, max: 100, step: 5 }
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
+	});
+
+	it('rejects unique_choice slider with fewer than 2 choices', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'unique_choice',
+			config: { widget: 'slider' },
+			choices: [makeChoice('c-1', 1)]
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.find((e) => e.key === 'question-q-1')!.message).toContain(
+			'Slider needs at least 2 choices'
+		);
+	});
+
+	it('accepts a valid unique_choice slider', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'unique_choice',
+			config: { widget: 'slider' },
+			choices: [makeChoice('c-1', 1), makeChoice('c-2', 2)]
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
+	});
+
+	it('ignores config validation for non-slider widgets', () => {
+		const fw = makeFramework();
+		const q = makeQuestion({
+			type: 'number',
+			config: null
+		});
+		const errors = validateDraft(fw, [makeSectionWithQuestion(q)]);
+		expect(errors.filter((e) => e.key === 'question-q-1')).toHaveLength(0);
+	});
+});
+
+describe('buildTree', () => {
+	it('preserves a single top-level assessable node as one root node (no wrapper)', () => {
+		const n: RequirementNode = {
+			id: 'n1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Top-level assessable',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const tree = buildTree([n], []);
+		expect(tree).toHaveLength(1);
+		expect(tree[0].node.id).toBe('n1');
+		expect(tree[0].node.assessable).toBe(true);
+		expect(tree[0].children).toHaveLength(0);
+	});
+
+	it('preserves an assessable parent with assessable children', () => {
+		const parent: RequirementNode = {
+			id: 'p1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Assessable parent',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const child: RequirementNode = {
+			...parent,
+			id: 'c1',
+			urn: 'urn:x:req_node:fw:1.1',
+			ref_id: '1.1',
+			parent_urn: 'urn:x:req_node:fw:1',
+			order_id: 0
+		};
+		const tree = buildTree([parent, child], []);
+		expect(tree).toHaveLength(1);
+		expect(tree[0].node.id).toBe('p1');
+		expect(tree[0].node.assessable).toBe(true);
+		expect(tree[0].children).toHaveLength(1);
+		expect(tree[0].children[0].node.id).toBe('c1');
+	});
+});
+
+import { createBuilderState } from './builder-state';
+
+describe('addNode', () => {
+	function newStore() {
+		const fw = makeFramework();
+		return createBuilderState(fw, [], []);
+	}
+
+	it('creates a non-assessable group when preset is "group"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const roots = get(s.rootNodes);
+		expect(roots).toHaveLength(1);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+
+	it('creates an assessable leaf when preset is "requirement"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(true);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+
+	it('creates a splash node when preset is "splash"', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'splash' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('splash');
+	});
+
+	it('nests a child under a given parent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const parentId = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: parentId, preset: 'requirement' });
+		const roots = get(s.rootNodes);
+		expect(roots[0].children).toHaveLength(1);
+		expect(roots[0].children[0].node.assessable).toBe(true);
+	});
+
+	it('defaults to a blank node (non-assessable leaf) when preset is omitted', () => {
+		const s = newStore();
+		s.addNode({ parent: null });
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.assessable).toBe(false);
+		expect(roots[0].node.display_mode).toBe('default');
+	});
+});
+
+describe('serializeDraft round-trip', () => {
+	it('does not emit the same node twice for a flat framework', () => {
+		const fw = makeFramework();
+		const n: RequirementNode = {
+			id: 'n1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			name: 'Top-level assessable',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: 0,
+			assessable: true,
+			implementation_groups: null,
+			visibility_expression: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: 'fw-1',
+			folder: 'folder-1'
+		};
+		const tree = buildTree([n], []);
+		const draft = serializeDraft(fw, tree);
+		const ids = draft.nodes.map((x) => x.id);
+		expect(new Set(ids).size).toBe(ids.length);
+		expect(ids).toEqual(['n1']);
+	});
+});
+
+describe('indentNode', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('indents a root node under its previous sibling', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' }); // idx 0
+		s.addNode({ parent: null, preset: 'requirement' }); // idx 1
+		const roots = get(s.rootNodes);
+		const id = roots[1].node.id;
+		const prevUrn = roots[0].node.urn;
+
+		const ok = s.indentNode(id);
+		expect(ok).toBe(true);
+		const after = get(s.rootNodes);
+		expect(after).toHaveLength(1);
+		expect(after[0].node.id).toBe(roots[0].node.id);
+		expect(after[0].children).toHaveLength(1);
+		expect(after[0].children[0].node.id).toBe(id);
+		expect(after[0].children[0].node.parent_urn).toBe(prevUrn);
+		expect(after[0].children[0].depth).toBe(1);
+	});
+
+	it('is a no-op for the first sibling (no previous sibling to nest under)', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		const ok = s.indentNode(id);
+		expect(ok).toBe(false);
+		expect(get(s.rootNodes)).toHaveLength(1);
+	});
+
+	it('indents a nested node under its previous sibling', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const group = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: group, preset: 'requirement' });
+		s.addNode({ parent: group, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[1].node.id;
+		const prevUrn = get(s.rootNodes)[0].children[0].node.urn;
+
+		const ok = s.indentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		expect(roots[0].children).toHaveLength(1);
+		expect(roots[0].children[0].children).toHaveLength(1);
+		expect(roots[0].children[0].children[0].node.id).toBe(targetId);
+		expect(roots[0].children[0].children[0].node.parent_urn).toBe(prevUrn);
+		expect(roots[0].children[0].children[0].depth).toBe(2);
+	});
+});
+
+describe('outdentNode', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('promotes a nested node to be a sibling of its parent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const group = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: group, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[0].node.id;
+
+		const ok = s.outdentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		expect(roots).toHaveLength(2);
+		// Outdented node lands immediately after its former parent
+		expect(roots[1].node.id).toBe(targetId);
+		expect(roots[1].node.parent_urn).toBeNull();
+		expect(roots[1].depth).toBe(0);
+		// Former parent has no more children
+		expect(roots[0].children).toHaveLength(0);
+	});
+
+	it('is a no-op for a root node (nothing to outdent to)', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		const ok = s.outdentNode(id);
+		expect(ok).toBe(false);
+		expect(get(s.rootNodes)).toHaveLength(1);
+	});
+
+	it('promotes a deeply nested node to its grandparent', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const top = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: top, preset: 'group' });
+		const mid = get(s.rootNodes)[0].children[0].node.id;
+		s.addNode({ parent: mid, preset: 'requirement' });
+		const targetId = get(s.rootNodes)[0].children[0].children[0].node.id;
+
+		const ok = s.outdentNode(targetId);
+		expect(ok).toBe(true);
+		const roots = get(s.rootNodes);
+		// Target moves from depth 2 (inside mid) to depth 1 (as sibling of mid under top)
+		expect(roots).toHaveLength(1);
+		expect(roots[0].children).toHaveLength(2);
+		expect(roots[0].children[1].node.id).toBe(targetId);
+		expect(roots[0].children[1].node.parent_urn).toBe(get(s.rootNodes)[0].node.urn);
+		expect(roots[0].children[1].depth).toBe(1);
+	});
+});
+
+describe('toggleAssessable', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('flips a group node to assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const id = get(s.rootNodes)[0].node.id;
+		expect(get(s.rootNodes)[0].node.assessable).toBe(false);
+		s.toggleAssessable(id);
+		expect(get(s.rootNodes)[0].node.assessable).toBe(true);
+	});
+
+	it('flips an assessable node back to non-assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.toggleAssessable(id);
+		expect(get(s.rootNodes)[0].node.assessable).toBe(false);
+	});
+
+	it('works on nested nodes', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'group' });
+		const parentId = get(s.rootNodes)[0].node.id;
+		s.addNode({ parent: parentId, preset: 'group' });
+		const childId = get(s.rootNodes)[0].children[0].node.id;
+		s.toggleAssessable(childId);
+		expect(get(s.rootNodes)[0].children[0].node.assessable).toBe(true);
+	});
+});
+
+describe('translation operations on top-level requirement nodes', () => {
+	function seedTopLevelWithQuestion() {
+		const fw = makeFramework({
+			locale: 'en',
+			available_languages: ['en', 'fr'],
+			translations: {}
+		});
+		const node = makeNode({
+			id: 'top-1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			parent_urn: null,
+			name: 'Top requirement',
+			translations: { fr: { name: 'Exigence racine' } }
+		});
+		const question: Question = {
+			id: 'q-1',
+			urn: 'urn:x:question:fw:1-q1',
+			ref_id: '1-q1',
+			text: 'Is it true?',
+			annotation: null,
+			type: 'unique_choice',
+			config: null,
+			depends_on: null,
+			order: 0,
+			weight: 1,
+			folder: 'folder-1',
+			requirement_node: 'top-1',
+			translations: { fr: { text: 'Est-ce vrai ?' } },
+			choices: [
+				{
+					id: 'c-1',
+					urn: 'urn:x:question_choice:fw:1-q1-c1',
+					ref_id: '1-q1-c1',
+					value: 'Yes',
+					annotation: null,
+					add_score: null,
+					compute_result: null,
+					order: 0,
+					description: null,
+					color: null,
+					select_implementation_groups: null,
+					folder: 'folder-1',
+					question: 'q-1',
+					translations: { fr: { value: 'Oui' } }
+				}
+			]
+		};
+		return createBuilderState(fw, [node], [question]);
+	}
+
+	it('setBaseLocale swaps question and choice text on a top-level node', () => {
+		const s = seedTopLevelWithQuestion();
+		s.setBaseLocale('fr');
+		const root = get(s.rootNodes)[0];
+		expect(root.questions[0].question.text).toBe('Est-ce vrai ?');
+		expect(root.questions[0].question.translations?.en?.text).toBe('Is it true?');
+		expect(root.questions[0].question.choices[0].value).toBe('Oui');
+		expect(root.questions[0].question.choices[0].translations?.en?.value).toBe('Yes');
+	});
+
+	it('getTranslationProgress counts questions and choices on a top-level node', () => {
+		const s = seedTopLevelWithQuestion();
+		// 3 translatable strings: node.name, question.text, choice.value — all already have fr.
+		expect(s.getTranslationProgress('fr')).toEqual({ translated: 3, total: 3 });
+	});
+
+	it('copyFromBase seeds translations for a top-level node question and choice', () => {
+		const fw = makeFramework({ locale: 'en', available_languages: ['en', 'de'] });
+		const node = makeNode({
+			id: 'top-1',
+			urn: 'urn:x:req_node:fw:1',
+			ref_id: '1',
+			parent_urn: null,
+			name: 'Top requirement'
+		});
+		const question: Question = {
+			id: 'q-1',
+			urn: 'urn:x:question:fw:1-q1',
+			ref_id: '1-q1',
+			text: 'Is it true?',
+			annotation: null,
+			type: 'unique_choice',
+			config: null,
+			depends_on: null,
+			order: 0,
+			weight: 1,
+			folder: 'folder-1',
+			requirement_node: 'top-1',
+			choices: [
+				{
+					id: 'c-1',
+					urn: 'urn:x:question_choice:fw:1-q1-c1',
+					ref_id: '1-q1-c1',
+					value: 'Yes',
+					annotation: null,
+					add_score: null,
+					compute_result: null,
+					order: 0,
+					description: null,
+					color: null,
+					select_implementation_groups: null,
+					folder: 'folder-1',
+					question: 'q-1'
+				}
+			]
+		};
+		const s = createBuilderState(fw, [node], [question]);
+		s.copyFromBase('de');
+		const root = get(s.rootNodes)[0];
+		expect(root.questions[0].question.translations?.de?.text).toBe('Is it true?');
+		expect(root.questions[0].question.choices[0].translations?.de?.value).toBe('Yes');
+	});
+});
+
+describe('question and choice CRUD on top-level requirement nodes', () => {
+	function newStore() {
+		return createBuilderState(makeFramework(), [], []);
+	}
+
+	it('adds a question to a top-level assessable node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		expect(get(s.rootNodes)[0].questions).toHaveLength(1);
+	});
+
+	it('updates a question that lives on a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		const qId = get(s.rootNodes)[0].questions[0].question.id;
+		s.updateQuestion(qId, { text: 'hello' });
+		expect(get(s.rootNodes)[0].questions[0].question.text).toBe('hello');
+	});
+
+	it('deletes a question from a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addQuestion(id);
+		s.deleteQuestion(id, 0);
+		expect(get(s.rootNodes)[0].questions).toHaveLength(1);
+	});
+
+	it('adds and updates a choice on a top-level node question', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addChoice(id, 0);
+		const choices = get(s.rootNodes)[0].questions[0].question.choices;
+		expect(choices).toHaveLength(1);
+		s.updateChoice(choices[0].id, { value: 'yes' });
+		expect(get(s.rootNodes)[0].questions[0].question.choices[0].value).toBe('yes');
+	});
+
+	it('deletes a choice from a top-level node question', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addChoice(id, 0);
+		s.addChoice(id, 0);
+		s.deleteChoice(id, 0, 0);
+		expect(get(s.rootNodes)[0].questions[0].question.choices).toHaveLength(1);
+	});
+
+	it('reorders questions on a top-level node', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const id = get(s.rootNodes)[0].node.id;
+		s.addQuestion(id);
+		s.addQuestion(id);
+		const firstId = get(s.rootNodes)[0].questions[0].question.id;
+		s.reorderQuestions(id, 0, 1);
+		expect(get(s.rootNodes)[0].questions[1].question.id).toBe(firstId);
 	});
 });

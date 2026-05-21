@@ -215,6 +215,7 @@ export const RiskScenarioSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
+	incidents: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string().uuid().optional().nullable(),
@@ -272,6 +273,7 @@ export const AppliedControlSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional(),
 	task_templates: z.string().uuid().optional().array().optional(),
+	incidents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),
@@ -429,6 +431,7 @@ export const RequirementAssessmentSchema = z.object({
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
+	respondent_alignment: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	noRedirect: z.boolean().default(false),
 	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
@@ -505,10 +508,16 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
-	scoring_enabled: z.boolean().optional().default(false),
-	show_documentation_score: z.boolean().optional().default(false),
-	extended_result_enabled: z.boolean().optional().default(false),
-	progress_status_enabled: z.boolean().optional().default(true),
+	field_visibility: z
+		.record(
+			z.string(),
+			z.object({
+				auditor: z.enum(['edit', 'read', 'hidden']),
+				respondent: z.enum(['edit', 'read', 'hidden'])
+			})
+		)
+		.optional()
+		.default({}),
 	score_calculation_method: z.string().optional().default('average'),
 	target_score: z.number().optional().nullable(),
 	anchor_na_to_target: z.boolean().optional().default(false),
@@ -661,7 +670,9 @@ export const FeatureFlagsSchema = z.object({
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
 	journeys: z.boolean().optional(),
-	policy_documents: z.boolean().optional()
+	policy_documents: z.boolean().optional(),
+	security_advisories: z.boolean().optional(),
+	cwes: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1311,6 +1322,8 @@ export const IncidentSchema = z.object({
 	qualifications: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	entities: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
+	task_templates: z.string().uuid().optional().array().optional(),
 	occurred_at: z
 		.string()
 		.datetime({ local: true })
@@ -1413,7 +1426,9 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	objectives: z.string().uuid().optional().array().optional(),
+	incidents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
 		.object({
@@ -1565,6 +1580,45 @@ export const AccreditationSchema = z.object({
 	decision_evidence: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
+export const ResponsibilityRoleSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	code: z.string().min(1).max(8),
+	color: z.string().optional(),
+	order: z.coerce.number().int().min(0).default(0),
+	taxonomy: z.string().default('custom'),
+	is_visible: z.boolean().default(true),
+	builtin: z.boolean().default(false)
+});
+
+export const ResponsibilityMatrixSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	preset: z.enum(['raci', 'rasci', 'rapid', 'custom']).default('raci'),
+	roles: z.array(z.string().uuid().optional()).optional(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
+export const ResponsibilityMatrixActivitySchema = z.object({
+	name: z.string().min(1).max(500),
+	description: z.string().optional(),
+	order: z.coerce.number().int().min(0).default(0),
+	matrix: z.string().uuid()
+});
+
+export const ResponsibilityMatrixActorSchema = z.object({
+	matrix: z.string().uuid(),
+	actor: z.string().uuid(),
+	order: z.coerce.number().int().min(0).default(0)
+});
+
+export const ResponsibilityAssignmentSchema = z.object({
+	activity: z.string().uuid(),
+	actor: z.string().uuid(),
+	role: z.string().uuid()
 });
 
 // Metrology
@@ -1739,6 +1793,11 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
 	accreditations: AccreditationSchema,
+	'responsibility-roles': ResponsibilityRoleSchema,
+	'responsibility-matrices': ResponsibilityMatrixSchema,
+	'responsibility-matrix-activities': ResponsibilityMatrixActivitySchema,
+	'responsibility-matrix-actors': ResponsibilityMatrixActorSchema,
+	'responsibility-assignments': ResponsibilityAssignmentSchema,
 	'metric-definitions': MetricDefinitionSchema,
 	'metric-instances': MetricInstanceSchema,
 	'custom-metric-samples': CustomMetricSampleSchema,
@@ -1767,4 +1826,17 @@ export const webhookEndpointSchema = z.object({
 	secret: z.string().min(1).optional(),
 	target_folders: z.string().uuid().optional().array().optional(),
 	payload_format: z.enum(['thin', 'full']).default('full')
+});
+
+export const activateTOTPSchema: ZodSchema = z.object({
+	code: z
+		.string()
+		.regex(/^\d{6}$/)
+		.min(6)
+		.max(6)
+});
+
+export const registerWebAuthnSchema: ZodSchema = z.object({
+	name: z.string().min(1).max(100),
+	credential: z.any()
 });

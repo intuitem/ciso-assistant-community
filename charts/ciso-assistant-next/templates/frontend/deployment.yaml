@@ -52,9 +52,16 @@ spec:
           - name: BODY_SIZE_LIMIT
             value: {{ .Values.frontend.config.bodySizeLimit | quote }}
         ports:
-        - name: http
-          containerPort: 3000
-          protocol: TCP
+          - name: http
+            containerPort: 3000
+            protocol: TCP
+        {{- if and .Values.frontend.extraVolumeMounts (not .Values.frontend.extraVolumes) }}
+          {{- fail "frontend.extraVolumeMounts can't be set without frontend.extraVolumes" }}
+        {{- end }}
+        {{- with .Values.frontend.extraVolumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         {{- if .Values.frontend.resources }}
         resources:
           {{- toYaml .Values.frontend.resources | nindent 10 }}
@@ -63,11 +70,19 @@ spec:
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-      {{- with .Values.global.nodeSelector }}
+      {{- with .Values.frontend.nodeSelector | default .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.global.tolerations }}
+      {{- with .Values.frontend.tolerations | default .Values.global.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.affinity | default .Values.global.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.extraVolumes }}
+      volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}

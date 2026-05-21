@@ -42,6 +42,7 @@
 		{ label: 'Other', value: 'other' }
 	]}
 	field="source"
+	disableDoubleDash
 	label={m.source()}
 	cacheLock={cacheLocks['source']}
 	bind:cachedValue={formDataCache['source']}
@@ -75,13 +76,6 @@
 	label={m.annotation()}
 	cacheLock={cacheLocks['annotation']}
 	bind:cachedValue={formDataCache['annotation']}
-/>
-<TextField
-	{form}
-	field="provider"
-	label={m.provider()}
-	cacheLock={cacheLocks['provider']}
-	bind:cachedValue={formDataCache['provider']}
 />
 <AutocompleteSelect
 	multiple

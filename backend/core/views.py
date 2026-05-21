@@ -4,6 +4,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 import copy
 import csv
+import hashlib
 import json
 import mimetypes
 import re
@@ -102,6 +103,7 @@ from rest_framework.decorators import (
 from rest_framework.parsers import (
     FileUploadParser,
     FormParser,
+    JSONParser,
     MultiPartParser,
 )
 from rest_framework.renderers import JSONRenderer
@@ -109,7 +111,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import (
+    NotFound,
+    PermissionDenied,
+    ValidationError as DRFValidationError,
+)
 
 
 from weasyprint import HTML
@@ -127,9 +133,11 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
+    REWRITABLE_URN_TYPES,
     build_answers_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
+    rewrite_child_urns,
     _generate_occurrences,
     _create_task_dict,
 )
@@ -423,6 +431,9 @@ class ExportMixin:
                 queryset = queryset.prefetch_related(
                     *self.export_config["prefetch_related"]
                 )
+
+        # Apply the same filter/search behavior as the list view.
+        queryset = self.filter_queryset(queryset)
 
         return queryset
 
@@ -878,11 +889,78 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 field_models[name] = related_model
         return field_models
 
+    def _user_can_view_all(self, model) -> bool:
+        """Whether the current user has unrestricted view access to `model`.
+
+        When True, the IAM post-filter has nothing to mask for that model
+        and can be skipped — both the per-related-model RBAC scan in
+        `_get_accessible_ids_map` and the per-row mask walk in
+        `_filter_related_fields`. Reads only the IAM snapshot caches; no
+        DB queries.
+        """
+        user = self.request.user
+        if not getattr(user, "is_authenticated", False):
+            return False
+
+        name = model.__name__.lower()
+
+        # Actor splits into User/Team/Entity in get_accessible_object_ids;
+        # mirror that decomposition.
+        if name == "actor":
+            from core.models import Team
+            from tprm.models import Entity
+
+            return all(self._user_can_view_all(m) for m in (User, Team, Entity))
+
+        from iam.cache_builders import (
+            get_folder_state,
+            get_roles_state,
+            iter_descendant_ids,
+        )
+        from iam.models import _iter_assignment_lites_for_user
+
+        roles_state = get_roles_state()
+        view_code = f"view_{name}"
+        if view_code not in roles_state.permission_ids_by_codename:
+            # Mirror get_accessible_object_ids: when the view permission
+            # is not registered for the model, that helper returns
+            # ([], [], []) — i.e. "the user can see nothing", which means
+            # the post-filter MUST mask everything. Returning False here
+            # falls through to the slow path so the masking happens.
+            return False
+
+        state = get_folder_state()
+        all_folder_ids = frozenset(state.folders.keys())
+        covered: set = set()
+        for a in _iter_assignment_lites_for_user(user):
+            role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
+            if "view_folder" not in role_perms or view_code not in role_perms:
+                continue
+            if a.is_recursive:
+                for pf_id in a.perimeter_folder_ids:
+                    covered.update(
+                        iter_descendant_ids(state, pf_id, include_start=True)
+                    )
+            else:
+                covered.update(a.perimeter_folder_ids)
+            if all_folder_ids.issubset(covered):
+                return True
+        return False
+
     def _get_accessible_ids_map(self, related_models):
-        """Return visible object IDs per related model for the current user."""
+        """Return visible object IDs per related model for the current user.
+
+        Returns `None` for models the user can fully view (post-filter
+        skips them) or for models that aren't IAM-scoped at all.
+        """
         root_folder = Folder.get_root_folder()
         allowed = {}
         for model in related_models:
+            # Fast path: skip the IAM scan when the user can see every
+            # instance of this model.
+            if self._user_can_view_all(model):
+                allowed[model] = None
+                continue
             try:
                 ids = RoleAssignment.get_accessible_object_ids(
                     root_folder, self.request.user, model
@@ -912,6 +990,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def _filter_related_fields(self, data, field_models, allowed_ids):
         """Mask related fields the current user is not allowed to see."""
+        # Fast path: nothing to mask if every related model is unrestricted
+        # for this user — avoids the per-row Python walk on list responses.
+        if not any(v is not None for v in allowed_ids.values()):
+            return data
         if isinstance(data, list):
             return [
                 self._filter_related_fields(item, field_models, allowed_ids)
@@ -1680,7 +1762,7 @@ class ThreatViewSet(BaseModelViewSet):
         "filtering_labels",
         "urn",
     ]
-    search_fields = ["name", "provider", "description"]
+    search_fields = ["ref_id", "name", "provider", "description"]
 
     def get_queryset(self):
         return (
@@ -1797,6 +1879,10 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         qs = super().get_queryset().select_related("asset_class", "folder")
         if self.action == "autocomplete":
             return qs
+        # The list view only renders objectives + a handful of lightweight M2Ms,
+        # so skip the heavier prefetches used by the detail serializer.
+        if self.action == "list":
+            return qs.prefetch_related("owner", "filtering_labels", "parent_assets")
         return qs.prefetch_related(
             "parent_assets",
             "child_assets",
@@ -1806,6 +1892,32 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             "personal_data",
             "overridden_children_capabilities",
         )
+
+    def get_serializer_class(self, **kwargs):
+        action = kwargs.get("action", self.action)
+        if action == "list":
+            from core.serializers import AssetListSerializer
+
+            return AssetListSerializer
+        return super().get_serializer_class(**kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Populate `optimized_data` for the single retrieved asset so the
+        serializer's objectives/capabilities fields reuse the graph prefetch
+        path instead of falling back to per-asset model methods."""
+        instance = self.get_object()
+        optimized_data = self._get_optimized_object_data(
+            self.model.objects.filter(pk=instance.pk)
+        )
+        context = self.get_serializer_context()
+        context["optimized_data"] = optimized_data
+        serializer = self.get_serializer(instance, context=context)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        return Response(data)
 
     def _get_optimized_object_data(self, queryset):
         """
@@ -1820,6 +1932,10 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         graph_data = Asset._prefetch_graph_data(initial_assets)
         child_to_parents = graph_data["child_to_parents"]
         parent_to_children = graph_data["parent_to_children"]
+
+        # The list view only renders objectives (not capabilities), so skip the
+        # capability aggregation there to halve the per-asset work.
+        compute_capabilities = self.action != "list"
 
         scale = Asset._get_security_objective_scale()
         sec_obj_results = {}
@@ -1836,36 +1952,50 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             ]
 
             # Calculate and store objectives.
+            sec_cap = {}
+            rec_cap = {}
             if asset.is_primary:
                 sec_obj = asset.security_objectives.get("objectives", {})
                 dro_obj = asset.disaster_recovery_objectives.get("objectives", {})
 
-                # For primary assets, aggregate capabilities from supporting descendants
-                supporting_descendants = {d for d in descendants if not d.is_primary}
-                sec_cap = Asset._aggregate_security_capabilities(
-                    supporting_descendants, asset
-                )
-                rec_cap = Asset._aggregate_recovery_capabilities(
-                    supporting_descendants, asset
-                )
+                if compute_capabilities:
+                    # For primary assets, aggregate capabilities from supporting descendants.
+                    # Reuse the already-built parent_to_children to avoid a fresh prefetch per asset.
+                    supporting_descendants = {
+                        d for d in descendants if not d.is_primary
+                    }
+                    sec_cap = Asset._aggregate_security_capabilities(
+                        supporting_descendants,
+                        asset,
+                        parent_to_children=parent_to_children,
+                    )
+                    rec_cap = Asset._aggregate_recovery_capabilities(
+                        supporting_descendants,
+                        asset,
+                        parent_to_children=parent_to_children,
+                    )
             else:
                 ancestors = Asset._get_all_ancestors(asset, child_to_parents)
                 primary_ancestors = {anc for anc in ancestors if anc.is_primary}
                 sec_obj = Asset._aggregate_security_objectives(primary_ancestors)
                 dro_obj = Asset._aggregate_dro_objectives(primary_ancestors)
 
-                # For supporting assets, use stored capabilities
-                sec_cap = asset.security_capabilities.get("objectives", {})
-                rec_cap = asset.recovery_capabilities.get("objectives", {})
+                if compute_capabilities:
+                    # For supporting assets, use stored capabilities
+                    sec_cap = asset.security_capabilities.get("objectives", {})
+                    rec_cap = asset.recovery_capabilities.get("objectives", {})
 
             sec_obj_results[asset.id] = self._format_security_objectives(sec_obj, scale)
             dro_obj_results[asset.id] = self._format_disaster_recovery_objectives(
                 dro_obj
             )
-            sec_cap_results[asset.id] = self._format_security_objectives(sec_cap, scale)
-            rec_cap_results[asset.id] = self._format_disaster_recovery_objectives(
-                rec_cap
-            )
+            if compute_capabilities:
+                sec_cap_results[asset.id] = self._format_security_objectives(
+                    sec_cap, scale
+                )
+                rec_cap_results[asset.id] = self._format_disaster_recovery_objectives(
+                    rec_cap
+                )
 
         optimized_data.update(
             {
@@ -2240,6 +2370,10 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "source": "observation",
                 "label": "observation",
                 "escape": True,
+            },
+            "is_business_function": {
+                "source": "is_business_function",
+                "label": "Is a business function ?",
             },
         },
         "wrap_columns": ["name", "description", "observation"],
@@ -2882,6 +3016,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
             {
                 "id": str(matrix.id),
                 "name": matrix.name,
+                "description": matrix.description,
+                "provider": matrix.provider,
+                "locale": matrix.locale,
                 "status": "draft_created_from",
                 "editing_draft": matrix.editing_draft,
             },
@@ -3046,6 +3183,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
             {
                 "id": str(matrix.id),
                 "name": matrix.name,
+                "description": matrix.description,
+                "provider": matrix.provider,
+                "locale": matrix.locale,
                 "editing_draft": matrix.editing_draft,
                 "status": "imported",
             },
@@ -4668,6 +4808,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
     ("quantitative_risk_hypotheses_removed", "CRQ Hypotheses (removed)"),
     ("assetassessment", "Asset Assessments"),
     ("task_templates", "Task Templates"),
+    ("incidents", "Incidents"),
     ("comments", "Comments"),
 ]
 
@@ -4838,6 +4979,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "security_exceptions": ["exact"],
             "owner": ["exact"],
             "findings": ["exact"],
+            "incidents": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
             "processings": ["exact"],
@@ -4988,6 +5130,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "has_quantitative_risk_hypotheses_removed": QuantitativeRiskHypothesis.removed_applied_controls.through,
             "has_assetassessment": AssetAssessment.associated_controls.through,
             "has_task_templates": TaskTemplate.applied_controls.through,
+            "has_incidents": Incident.applied_controls.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(appliedcontrol_id=OuterRef("pk")))
@@ -4998,19 +5141,34 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             Comment.objects.filter(applied_control_id=OuterRef("pk"))
         )
 
-        return (
-            qs.select_related("reference_control")
-            .prefetch_related(
+        qs = qs.select_related("reference_control").annotate(**annotations)
+
+        # The list serializer doesn't render findings/evidences/objectives/
+        # security_exceptions, so skip those prefetches on the list path.
+        if self.action == "list":
+            return qs.prefetch_related(
                 "owner",
-                "filtering_labels__folder",  # FieldsRelatedField includes folder
-                "findings",  # Used for findings_count
-                "evidences",  # Serialized as FieldsRelatedField
-                "objectives",  # ManyToManyField to OrganisationObjective
-                "assets",  # ManyToManyField used in table
-                "security_exceptions",  # Serialized as FieldsRelatedField
+                "filtering_labels__folder",
+                "assets",
             )
-            .annotate(**annotations)
+
+        return qs.prefetch_related(
+            "owner",
+            "filtering_labels__folder",
+            "findings",  # Used for findings_count
+            "evidences",  # Serialized as FieldsRelatedField
+            "objectives",  # ManyToManyField to OrganisationObjective
+            "assets",  # ManyToManyField used in table
+            "security_exceptions",  # Serialized as FieldsRelatedField
         )
+
+    def get_serializer_class(self, **kwargs):
+        action = kwargs.get("action", self.action)
+        if action == "list":
+            from core.serializers import AppliedControlListSerializer
+
+            return AppliedControlListSerializer
+        return super().get_serializer_class(**kwargs)
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
@@ -5029,6 +5187,37 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         if page is not None:
             return self.get_paginated_response(data)
         return Response(data)
+
+    @action(detail=False, methods=["post"], url_path="merge")
+    def merge(self, request):
+        """Merge N source applied controls into 1 target. See
+        applied_controls_helper.merge_applied_controls for payload + semantics."""
+        from core.applied_controls_helper import merge_applied_controls
+        from core.serializers import AppliedControlMergeRequestSerializer
+
+        serializer = AppliedControlMergeRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        target = serializer.validated_data["target"]
+
+        # Force category='policy' on /policies/merge/ so the created row stays
+        # classified as a policy even if the caller supplied a different value.
+        if self.model is Policy and target["type"] == "new":
+            fields = dict(target.get("fields") or {})
+            fields["category"] = "policy"
+            target = {**target, "fields": fields}
+
+        result = merge_applied_controls(
+            source_ids=serializer.validated_data["source_ids"],
+            target=target,
+            user=request.user,
+            request=request,
+            lookup_queryset=self.get_queryset(),
+            dry_run=serializer.validated_data.get("dry_run", False),
+            managed_document_resolution=serializer.validated_data.get(
+                "managed_document_resolution"
+            ),
+        )
+        return Response(result)
 
     def perform_create(self, serializer):
         create_remote_object = serializer.validated_data.pop(
@@ -5807,6 +5996,88 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         return Response(changes)
 
+    @action(detail=False, methods=["get"], name="MSS Excel Export")
+    def mss_xlsx(self, request):
+        """Export filtered applied controls in ANSSI MonServiceSécurisé format
+        (Intitulé / Description / Catégorie). Maps csf_function to the 4 MSS
+        categories: Gouvernance / Protection / Défense / Résilience.
+        """
+        queryset = self._get_export_queryset()
+
+        template_path = (
+            Path(__file__).resolve().parent
+            / "templates"
+            / "core"
+            / "Template_mesures_mss.xlsx"
+        )
+        wb = load_workbook(template_path)
+        ws = wb["Template mesures"]
+
+        MSS_CATEGORY_MAP = {
+            "govern": "Gouvernance",
+            "identify": "Gouvernance",
+            "protect": "Protection",
+            "detect": "Défense",
+            "respond": "Défense",
+            "recover": "Résilience",
+        }
+        # Coarse fallback when csf_function is null. Can only reach
+        # Gouvernance / Protection — Défense and Résilience require csf_function.
+        MSS_CATEGORY_FROM_AC_CATEGORY = {
+            "policy": "Gouvernance",
+            "process": "Gouvernance",
+            "procedure": "Gouvernance",
+            "technical": "Protection",
+            "physical": "Protection",
+        }
+
+        def mss_category_for(control):
+            return (
+                MSS_CATEGORY_MAP.get(control.csf_function or "")
+                or MSS_CATEGORY_FROM_AC_CATEGORY.get(control.category or "")
+                or ""
+            )
+
+        # Clear the demo row R4 ("Mesure EXEMPLE") so it doesn't get imported.
+        # ws.cell(..., value=None) is a no-op in openpyxl; assign via .value.
+        for col in range(1, 4):
+            ws.cell(row=4, column=col).value = ""
+
+        # Data starts at R7 per the template (R6 is the data header).
+        # Iterating the queryset directly — .iterator() would need chunk_size
+        # because _get_export_queryset() applies prefetch_related.
+        row = 7
+        for control in queryset:
+            ws.cell(row=row, column=1, value=escape_excel_formula(control.name or ""))
+            ws.cell(
+                row=row,
+                column=2,
+                value=escape_excel_formula(control.description or ""),
+            )
+            ws.cell(row=row, column=3, value=mss_category_for(control))
+            row += 1
+
+        # Extend the Catégorie dropdown if we wrote past the pre-validated range.
+        last_data_row = row - 1
+        if last_data_row > 106:
+            for dv in ws.data_validations.dataValidation:
+                if dv.type == "list" and dv.formula1 and "Gouvernance" in dv.formula1:
+                    dv.sqref = f"C4 C7:C{last_data_row}"
+                    break
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="applied-controls-mss.xlsx"'
+        )
+        return response
+
 
 class ActionPlanList(generics.ListAPIView):
     search_fields = ["name", "description", "ref_id"]
@@ -6242,6 +6513,7 @@ class RiskScenarioFilter(GenericFilterSet):
             "vulnerabilities": ["exact"],
             "qualifications": ["exact"],
             "filtering_labels": ["exact"],
+            "incidents": ["exact"],
         }
 
 
@@ -6967,8 +7239,12 @@ class ActorViewSet(BaseModelViewSet):
         if not allow_entities:
             queryset = queryset.filter(entity__isnull=True)
 
-        third_parties = Actor.objects.filter(user__is_third_party=True)
-        queryset = queryset.exclude(id__in=third_parties)
+        include_third_parties = self.request.query_params.get(
+            "include_third_parties", "false"
+        )
+        if include_third_parties.lower() != "true":
+            third_parties = Actor.objects.filter(user__is_third_party=True)
+            queryset = queryset.exclude(id__in=third_parties)
 
         return queryset.order_by("type_rank", "display_name")
 
@@ -7194,7 +7470,10 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
-        Returns the tree of domains and perimeters
+        Return the tree of domains and perimeters.
+
+        Optional query param `write_perm` (e.g. write_perm=add_asset).When provided, each node in the response carries a ``writable`` boolean
+        that is ``true`` only for folders where the requesting user holds that permission.
         """
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"
@@ -7218,6 +7497,22 @@ class FolderViewSet(BaseModelViewSet):
                 needed_folders.add(current.parent_folder_id)
                 current = Folder.objects.get(pk=current.parent_folder_id)
 
+        # Optional per-node writable annotation
+        write_perm_codename = request.query_params.get("write_perm")
+        writable_ids = None
+        if write_perm_codename:
+            perm = Permission.objects.filter(codename=write_perm_codename).first()
+            if perm is not None:
+                writable_ids = {
+                    f.id
+                    for f in Folder.objects.filter(id__in=needed_folders)
+                    if RoleAssignment.is_access_allowed(
+                        user=request.user, perm=perm, folder=f
+                    )
+                }
+            else:
+                writable_ids = set()
+
         folders_list = []
         for folder in (
             Folder.objects.exclude(content_type="GL")
@@ -7234,6 +7529,7 @@ class FolderViewSet(BaseModelViewSet):
                 "name": folder.name,
                 "uuid": folder.id,
                 "viewable": folder.id in viewable_objects,
+                "writable": writable_ids is None or folder.id in writable_ids,
                 "content_type": folder.content_type,
             }
             # Add enclave-specific styling
@@ -7251,6 +7547,7 @@ class FolderViewSet(BaseModelViewSet):
                 include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
+                writable_ids=writable_ids,
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
@@ -7262,6 +7559,7 @@ class FolderViewSet(BaseModelViewSet):
                 "name": root_folder.name,
                 "uuid": str(root_folder.id),
                 "content_type": root_folder.content_type,
+                "writable": writable_ids is None or root_folder.id in writable_ids,
                 "children": folders_list,
             }
         )
@@ -7597,15 +7895,14 @@ class UserPreferencesView(APIView):
         return Response({}, status=status.HTTP_200_OK)
 
 
-@cache_page(60 * SHORT_CACHE_TTL)
-@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_counters_view(request):
     """
     API endpoint that returns the counters
     """
-    return Response({"results": get_counters(request.user)})
+    folder_id = request.query_params.get("folder", None)
+    return Response({"results": get_counters(request.user, folder_id)})
 
 
 @api_view(["GET"])
@@ -7636,7 +7933,10 @@ def get_combined_assessments_status_view(request):
     API endpoint that returns combined assessment counts per status
     for RiskAssessment, ComplianceAssessment, and FindingsAssessment
     """
-    return Response({"results": combined_assessments_per_status(request.user)})
+    folder_id = request.query_params.get("folder", None)
+    return Response(
+        {"results": combined_assessments_per_status(request.user, folder_id)}
+    )
 
 
 @api_view(["GET"])
@@ -7649,7 +7949,10 @@ def get_governance_calendar_data_view(request):
     year = request.query_params.get("year", None)
     if year:
         year = int(year)
-    return Response({"results": get_governance_calendar_data(request.user, year)})
+    folder_id = request.query_params.get("folder", None)
+    return Response(
+        {"results": get_governance_calendar_data(request.user, year, folder_id)}
+    )
 
 
 # TODO: Add all the proper docstrings for the following list of functions
@@ -7829,6 +8132,8 @@ class FrameworkViewSet(BaseModelViewSet):
         """Deep-clone a framework with all requirement nodes, questions, and choices."""
         import uuid
 
+        from core.utils import extract_node_id
+
         source = self.get_object()  # checks read permission
         folder_id = request.data.get("folder", source.folder_id)
         folder = Folder.objects.get(id=folder_id)
@@ -7844,149 +8149,251 @@ class FrameworkViewSet(BaseModelViewSet):
                 }
             )
 
-        # Clone framework
-        new_name = request.data.get("name", f"{source.name} (copy)")
-        new_framework = Framework.objects.create(
-            name=new_name,
-            description=source.description,
-            annotation=source.annotation,
-            folder_id=folder_id,
-            min_score=source.min_score,
-            max_score=source.max_score,
-            scores_definition=source.scores_definition,
-            implementation_groups_definition=source.implementation_groups_definition,
-            outcomes_definition=source.outcomes_definition,
-            locale=source.locale,
-            default_locale=source.default_locale,
-            provider=source.provider,
-            urn_namespace=source.urn_namespace,
-        )
+        with transaction.atomic():
+            # Clone framework
+            new_name = request.data.get("name", f"{source.name} (copy)")
+            new_framework = Framework.objects.create(
+                name=new_name,
+                description=source.description,
+                annotation=source.annotation,
+                folder_id=folder_id,
+                min_score=source.min_score,
+                max_score=source.max_score,
+                scores_definition=source.scores_definition,
+                implementation_groups_definition=source.implementation_groups_definition,
+                outcomes_definition=source.outcomes_definition,
+                locale=source.locale,
+                default_locale=source.default_locale,
+                provider=source.provider,
+                urn_namespace=source.urn_namespace,
+            )
 
-        # Use readable slug-based URNs instead of UUIDs
-        fw_slug = self._slugify_framework_name(new_name, new_framework.id)
-        ns = new_framework.urn_namespace or "custom"
+            # Use readable slug-based URNs instead of UUIDs
+            fw_slug = self._slugify_framework_name(new_name, new_framework.id)
+            ns = new_framework.urn_namespace or "custom"
 
-        # Map old URNs to new URNs for parent_urn remapping
-        urn_map = {}
-        nodes = RequirementNode.objects.filter(framework=source).order_by(
-            F("order_id").asc(nulls_last=True)
-        )
-
-        # Compute positional ref_ids for nodes that don't have one
-        child_counter = {}  # parent_urn -> next child number
-        computed_ref_ids = {}  # node urn -> computed ref_id
-        for node in nodes:
-            if node.ref_id:
-                computed_ref_ids[node.urn] = node.ref_id
-            else:
-                parent = node.parent_urn
-                if parent not in child_counter:
-                    child_counter[parent] = 1
-                idx = child_counter[parent]
-                child_counter[parent] = idx + 1
-                parent_ref = computed_ref_ids.get(parent)
-                computed_ref_ids[node.urn] = (
-                    f"{parent_ref}.{idx}" if parent_ref else str(idx)
+            # Map old URNs to new URNs for parent_urn remapping
+            urn_map = {}
+            nodes = list(
+                RequirementNode.objects.filter(framework=source).order_by(
+                    F("order_id").asc(nulls_last=True)
                 )
-
-        for node in nodes:
-            old_urn = node.urn
-            if old_urn:
-                ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
-                new_urn = f"urn:{ns}:risk:req_node:{fw_slug}:{ref_id}"
-                urn_map[old_urn] = new_urn
-            else:
-                urn_map[old_urn] = None
-
-        # Clone requirement nodes
-        node_id_map = {}  # old node id -> new node id
-        for node in nodes:
-            old_id = node.id
-            new_node = RequirementNode.objects.create(
-                urn=urn_map.get(node.urn),
-                ref_id=node.ref_id,
-                name=node.name,
-                description=node.description,
-                annotation=node.annotation,
-                framework=new_framework,
-                parent_urn=urn_map.get(node.parent_urn, node.parent_urn),
-                order_id=node.order_id,
-                assessable=node.assessable,
-                implementation_groups=node.implementation_groups,
-                typical_evidence=node.typical_evidence,
-                weight=node.weight,
-                importance=node.importance,
-                visibility_expression=node.visibility_expression,
-                folder_id=folder_id,
-                locale=node.locale,
-                default_locale=node.default_locale,
-                translations=node.translations,
             )
-            node_id_map[old_id] = new_node.id
 
-        # Clone questions and choices
-        questions = (
-            Question.objects.filter(requirement_node__framework=source)
-            .prefetch_related("choices")
-            .order_by("order")
-        )
-        q_counter = {}  # req_node_id -> next question number
-        for q in questions:
-            new_req_node_id = node_id_map.get(q.requirement_node_id)
-            if not new_req_node_id:
-                continue
-            # Compute positional ref_id for questions without one
-            if q.ref_id:
-                q_ref_id = q.ref_id
-            else:
-                req_node = q.requirement_node
-                parent_ref = computed_ref_ids.get(req_node.urn, "")
-                if q.requirement_node_id not in q_counter:
-                    q_counter[q.requirement_node_id] = 1
-                q_idx = q_counter[q.requirement_node_id]
-                q_counter[q.requirement_node_id] = q_idx + 1
-                q_ref_id = f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
-            new_question = Question.objects.create(
-                urn=f"urn:{ns}:risk:question:{fw_slug}:{q_ref_id}",
-                ref_id=q.ref_id or q_ref_id,
-                text=q.text,
-                annotation=q.annotation,
-                type=q.type,
-                config=q.config,
-                depends_on=q.depends_on,
-                order=q.order,
-                weight=q.weight,
-                requirement_node_id=new_req_node_id,
-                folder_id=folder_id,
-                translations=q.translations,
-            )
-            c_counter = 0
-            for choice in q.choices.all():
-                c_counter += 1
-                if choice.ref_id:
-                    c_ref_id = choice.ref_id
+            # Compute positional ref_ids for nodes that don't have one
+            child_counter = {}  # parent_urn -> next child number
+            computed_ref_ids = {}  # node urn -> computed ref_id
+            for node in nodes:
+                if node.ref_id:
+                    computed_ref_ids[node.urn] = node.ref_id
                 else:
-                    c_ref_id = f"{q_ref_id}-c{c_counter}"
-                QuestionChoice.objects.create(
-                    urn=f"urn:{ns}:risk:question_choice:{fw_slug}:{c_ref_id}"
-                    if choice.urn
-                    else None,
-                    ref_id=choice.ref_id or c_ref_id,
-                    value=choice.value,
-                    annotation=choice.annotation,
-                    add_score=choice.add_score,
-                    compute_result=choice.compute_result,
-                    order=choice.order,
-                    description=choice.description,
-                    color=choice.color,
-                    select_implementation_groups=choice.select_implementation_groups,
-                    question=new_question,
-                    folder_id=folder_id,
-                    translations=choice.translations,
-                )
+                    parent = node.parent_urn
+                    if parent not in child_counter:
+                        child_counter[parent] = 1
+                    idx = child_counter[parent]
+                    child_counter[parent] = idx + 1
+                    parent_ref = computed_ref_ids.get(parent)
+                    computed_ref_ids[node.urn] = (
+                        f"{parent_ref}.{idx}" if parent_ref else str(idx)
+                    )
 
-        serializer = FrameworkReadSerializer(new_framework)
-        return Response(serializer.data, status=201)
+            # Pre-compute each question's ref_id and URN suffix (and the same for
+            # each choice) so the creation loop below can just read from these
+            # dicts. The suffixes also participate in the slug collision check.
+            # Source node_ids are preserved when the URN fits the
+            # urn:{org}:risk:{type}:{slug}:{node_id} shape, so CEL expressions in
+            # outcomes_definition and visibility_expression that reference
+            # answers.<q_node_id> keep working on the copy.
+            questions_list = list(
+                Question.objects.filter(requirement_node__framework=source)
+                .prefetch_related("choices")
+                .order_by("order")
+            )
+            q_idx_counter = {}  # req_node_id -> next question number
+            question_ref_ids = {}  # q.id -> final ref_id
+            question_suffixes = {}  # q.id -> URN suffix string
+            choice_ref_ids = {}  # choice.id -> final ref_id
+            choice_suffixes = {}  # choice.id -> URN suffix string (only choices with urn)
+            for q in questions_list:
+                q_idx = q_idx_counter.get(q.requirement_node_id, 1)
+                q_idx_counter[q.requirement_node_id] = q_idx + 1
+                parent_ref = computed_ref_ids.get(q.requirement_node.urn, "")
+                positional_q_suffix = (
+                    f"{parent_ref}-q{q_idx}" if parent_ref else f"q{q_idx}"
+                )
+                q_ref_id = q.ref_id or positional_q_suffix
+                question_ref_ids[q.id] = q_ref_id
+                source_node_id = extract_node_id(q.urn) if q.urn else None
+                question_suffixes[q.id] = source_node_id or positional_q_suffix
+                for c_counter, choice in enumerate(q.choices.all(), start=1):
+                    c_ref_id = choice.ref_id or f"{q_ref_id}-c{c_counter}"
+                    choice_ref_ids[choice.id] = c_ref_id
+                    if choice.urn:
+                        choice_suffixes[choice.id] = (
+                            extract_node_id(choice.urn) or c_ref_id
+                        )
+
+            # Build candidate URNs and check for collisions (can happen when
+            # the slug truncation makes the copy slug identical to the source slug,
+            # or when an unrelated framework happens to share the same slug+node_id)
+            def _build_urn_map(slug):
+                result = {}
+                for node in nodes:
+                    old_urn = node.urn
+                    if old_urn:
+                        ref_id = computed_ref_ids.get(old_urn, str(uuid.uuid4())[:8])
+                        result[old_urn] = f"urn:{ns}:risk:req_node:{slug}:{ref_id}"
+                    else:
+                        result[old_urn] = None
+                return result
+
+            def _build_question_candidate_urns(slug):
+                return {
+                    f"urn:{ns}:risk:question:{slug}:{s}"
+                    for s in question_suffixes.values()
+                }
+
+            def _build_choice_candidate_urns(slug):
+                return {
+                    f"urn:{ns}:risk:question_choice:{slug}:{s}"
+                    for s in choice_suffixes.values()
+                }
+
+            def _slug_collides(slug):
+                node_map = _build_urn_map(slug)
+                node_urns = {v for v in node_map.values() if v}
+                q_urns = _build_question_candidate_urns(slug)
+                c_urns = _build_choice_candidate_urns(slug)
+                if (
+                    node_urns
+                    and RequirementNode.objects.filter(urn__in=node_urns).exists()
+                ):
+                    return True, node_map
+                if q_urns and Question.objects.filter(urn__in=q_urns).exists():
+                    return True, node_map
+                if c_urns and QuestionChoice.objects.filter(urn__in=c_urns).exists():
+                    return True, node_map
+                return False, node_map
+
+            collides, urn_map = _slug_collides(fw_slug)
+            if collides:
+                for attempt in range(2, 100):
+                    candidate_slug = f"{fw_slug}-{attempt}"
+                    attempt_collides, candidate_map = _slug_collides(candidate_slug)
+                    if not attempt_collides:
+                        fw_slug = candidate_slug
+                        urn_map = candidate_map
+                        break
+                else:
+                    raise ValidationError(
+                        {
+                            "name": "Could not find a unique URN slug for the duplicate; rename the framework and retry."
+                        }
+                    )
+
+            # Clone requirement nodes
+            node_id_map = {}  # old node id -> new node id
+            for node in nodes:
+                old_id = node.id
+                new_node = RequirementNode.objects.create(
+                    urn=urn_map.get(node.urn),
+                    ref_id=node.ref_id,
+                    name=node.name,
+                    description=node.description,
+                    annotation=node.annotation,
+                    framework=new_framework,
+                    parent_urn=urn_map.get(node.parent_urn, node.parent_urn),
+                    order_id=node.order_id,
+                    assessable=node.assessable,
+                    implementation_groups=node.implementation_groups,
+                    typical_evidence=node.typical_evidence,
+                    weight=node.weight,
+                    importance=node.importance,
+                    visibility_expression=node.visibility_expression,
+                    folder_id=folder_id,
+                    locale=node.locale,
+                    default_locale=node.default_locale,
+                    translations=node.translations,
+                )
+                node_id_map[old_id] = new_node.id
+
+            # Clone questions and choices using the pre-computed ref_ids and URN
+            # suffixes. Node_ids are preserved from the source (CEL in
+            # outcomes_definition and visibility_expression references
+            # answers.<q_node_id> and selected_choices by choice node_id — those
+            # must match source node_ids for the copied CEL to evaluate correctly).
+            question_urn_map = {}  # old question urn -> new question urn
+            choice_urn_map = {}  # old choice urn -> new choice urn
+            questions_with_depends_on = []  # (new_question, original_depends_on)
+            for q in questions_list:
+                new_req_node_id = node_id_map.get(q.requirement_node_id)
+                if not new_req_node_id:
+                    continue
+
+                new_question_urn = (
+                    f"urn:{ns}:risk:question:{fw_slug}:{question_suffixes[q.id]}"
+                )
+                new_question = Question.objects.create(
+                    urn=new_question_urn,
+                    ref_id=question_ref_ids[q.id],
+                    text=q.text,
+                    annotation=q.annotation,
+                    type=q.type,
+                    config=q.config,
+                    depends_on=q.depends_on,
+                    order=q.order,
+                    weight=q.weight,
+                    requirement_node_id=new_req_node_id,
+                    folder_id=folder_id,
+                    translations=q.translations,
+                )
+                if q.urn:
+                    question_urn_map[q.urn] = new_question_urn
+                if q.depends_on:
+                    questions_with_depends_on.append((new_question, q.depends_on))
+                for choice in q.choices.all():
+                    if choice.urn:
+                        new_choice_urn = f"urn:{ns}:risk:question_choice:{fw_slug}:{choice_suffixes[choice.id]}"
+                    else:
+                        new_choice_urn = None
+                    QuestionChoice.objects.create(
+                        urn=new_choice_urn,
+                        ref_id=choice_ref_ids[choice.id],
+                        value=choice.value,
+                        annotation=choice.annotation,
+                        add_score=choice.add_score,
+                        compute_result=choice.compute_result,
+                        order=choice.order,
+                        description=choice.description,
+                        color=choice.color,
+                        select_implementation_groups=choice.select_implementation_groups,
+                        question=new_question,
+                        folder_id=folder_id,
+                        translations=choice.translations,
+                    )
+                    if choice.urn and new_choice_urn:
+                        choice_urn_map[choice.urn] = new_choice_urn
+
+            # Remap depends_on URNs (question + answer choices) to the copy's new
+            # URNs. Unknown URNs (e.g. cross-framework refs) are left untouched.
+            for new_question, original_depends_on in questions_with_depends_on:
+                if not isinstance(original_depends_on, dict):
+                    continue
+                remapped = dict(original_depends_on)
+                target_urn = remapped.get("question")
+                if target_urn in question_urn_map:
+                    remapped["question"] = question_urn_map[target_urn]
+                raw_answers = remapped.get("answers")
+                if isinstance(raw_answers, list):
+                    remapped["answers"] = [
+                        choice_urn_map.get(a, a) for a in raw_answers
+                    ]
+                if remapped != original_depends_on:
+                    new_question.depends_on = remapped
+                    new_question.save(update_fields=["depends_on"])
+
+            serializer = FrameworkReadSerializer(new_framework)
+            return Response(serializer.data, status=201)
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
@@ -8047,7 +8454,9 @@ class FrameworkViewSet(BaseModelViewSet):
         """Export a framework as a library-compatible YAML file."""
         framework = self.get_object()
 
-        slug = self._slugify_framework_name(framework.name, framework.id)
+        slug = framework.ref_id or self._slugify_framework_name(
+            framework.name, framework.id
+        )
 
         # Query all nodes ordered by DFS order
         nodes = list(
@@ -8418,6 +8827,26 @@ class FrameworkViewSet(BaseModelViewSet):
         if framework.translations and isinstance(framework.translations, dict):
             available_languages.update(framework.translations.keys())
 
+        seed_ref_id = framework.ref_id
+        if not seed_ref_id:
+            for record in nodes + questions + choices:
+                u = record.get("urn") or ""
+                parts = u.split(":")
+                # Only proper 6+ segment URNs (`urn:ns:risk:type:slug:node_id`)
+                # carry a slug we can seed from. Legacy 5-segment URNs
+                # (`urn:ns:risk:type:<uuid>`) have a per-node UUID at parts[4]
+                # — not a ref_id — so skip them and fall through to the slug.
+                if (
+                    len(parts) >= 6
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                ):
+                    seed_ref_id = parts[4]
+                    break
+            if not seed_ref_id:
+                seed_ref_id = self._slugify_framework_name(framework.name, framework.id)
+
         draft = {
             "framework_meta": {
                 "name": framework.name,
@@ -8432,6 +8861,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "outcomes_definition": framework.outcomes_definition,
                 "field_visibility": framework.field_visibility or {},
                 "urn_namespace": framework.urn_namespace or "custom",
+                "ref_id": seed_ref_id,
             },
             "nodes": nodes,
             "questions": questions,
@@ -8809,6 +9239,144 @@ class FrameworkViewSet(BaseModelViewSet):
                         f"Question '{label}' depends on a choice that does not exist in this framework."
                     )
 
+        # --- 0c. Apply URN rename (urn_namespace / ref_id) before any sync. ---
+        new_namespace_raw = fw_meta.get("urn_namespace")
+        new_namespace = (
+            new_namespace_raw.strip() if isinstance(new_namespace_raw, str) else ""
+        ) or None
+        raw_ref_id = fw_meta.get("ref_id")
+        new_ref_id = raw_ref_id.strip() if isinstance(raw_ref_id, str) else None
+
+        # Normalize current DB values to match what start_editing seeds into
+        # the draft: NULL/empty urn_namespace → "custom"; NULL/whitespace
+        # ref_id → None. Without this, a no-op publish of a framework whose
+        # DB columns are NULL trips the rename branch and rewrites URNs.
+        current_namespace = (
+            framework.urn_namespace.strip()
+            if isinstance(framework.urn_namespace, str)
+            and framework.urn_namespace.strip()
+            else "custom"
+        )
+        current_ref = (
+            framework.ref_id.strip()
+            if isinstance(framework.ref_id, str) and framework.ref_id.strip()
+            else None
+        )
+
+        ns_changed = bool(new_namespace) and new_namespace != current_namespace
+        ref_changed = new_ref_id is not None and new_ref_id != (current_ref or "")
+
+        new_urn_namespace = framework.urn_namespace
+        new_framework_ref_id = framework.ref_id
+
+        if ns_changed or ref_changed:
+            if framework.complianceassessment_set.exists():
+                raise DraftValidationError(
+                    "Cannot change URN namespace or ref_id while a compliance assessment uses this framework."
+                )
+            if ref_changed and (
+                not new_ref_id or not re.fullmatch(r"[A-Za-z0-9_-]+", new_ref_id)
+            ):
+                raise DraftValidationError(
+                    "ref_id must be non-empty and may only contain letters, digits, '-' or '_'."
+                )
+
+            # Reject legacy URN shapes that the rewrite helper can't safely
+            # update (e.g. 5-segment `urn:ns:risk:type:<per-node-uuid>` from
+            # older duplicate flows — no slug position to write into). Any
+            # candidate URN must be `urn:_:risk:<rewritable-type>:_:_...` with
+            # at least 6 segments. Failing fast here prevents the framework
+            # metadata from drifting away from its child URNs.
+            def _is_legacy_child_urn(u):
+                if not isinstance(u, str):
+                    return False
+                parts = u.split(":")
+                return (
+                    len(parts) >= 4
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                    and len(parts) < 6
+                )
+
+            legacy_urns: list[str] = []
+            for n in draft_nodes:
+                if _is_legacy_child_urn(n.get("urn")):
+                    legacy_urns.append(n["urn"])
+                if _is_legacy_child_urn(n.get("parent_urn")):
+                    legacy_urns.append(n["parent_urn"])
+            for q in draft_questions:
+                if _is_legacy_child_urn(q.get("urn")):
+                    legacy_urns.append(q["urn"])
+                dep = q.get("depends_on")
+                if isinstance(dep, dict):
+                    if _is_legacy_child_urn(dep.get("question")):
+                        legacy_urns.append(dep["question"])
+                    if isinstance(dep.get("answers"), list):
+                        legacy_urns.extend(
+                            a for a in dep["answers"] if _is_legacy_child_urn(a)
+                        )
+            for c in draft_choices:
+                if _is_legacy_child_urn(c.get("urn")):
+                    legacy_urns.append(c["urn"])
+            if legacy_urns:
+                sample = legacy_urns[0]
+                raise DraftValidationError(
+                    "This framework contains legacy URNs that cannot be renamed "
+                    f"(e.g. '{sample}'). Re-duplicate it from a library-backed "
+                    "source before changing its URN namespace or ref_id."
+                )
+
+            new_ns = new_namespace or framework.urn_namespace or "custom"
+
+            current_slug = None
+            for n in draft_nodes + draft_questions + draft_choices:
+                u = n.get("urn") or ""
+                parts = u.split(":")
+                if (
+                    len(parts) >= 6
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                ):
+                    current_slug = parts[4]
+                    break
+            if not current_slug:
+                current_slug = framework.ref_id or self._slugify_framework_name(
+                    framework.name, framework.id
+                )
+            new_slug = new_ref_id if ref_changed else current_slug
+
+            rewrite_child_urns(draft, new_ns, new_slug)
+            # draft_nodes/questions/choices are aliases of draft["..."] lists, so they
+            # already see the rewritten URNs.
+
+            sample_node_prefix = f"urn:{new_ns}:risk:req_node:{new_slug}:"
+            sample_question_prefix = f"urn:{new_ns}:risk:question:{new_slug}:"
+            sample_choice_prefix = f"urn:{new_ns}:risk:question_choice:{new_slug}:"
+            collision = (
+                RequirementNode.objects.exclude(framework=framework)
+                .filter(urn__startswith=sample_node_prefix)
+                .exists()
+                or Question.objects.exclude(requirement_node__framework=framework)
+                .filter(urn__startswith=sample_question_prefix)
+                .exists()
+                or QuestionChoice.objects.exclude(
+                    question__requirement_node__framework=framework
+                )
+                .filter(urn__startswith=sample_choice_prefix)
+                .exists()
+            )
+            if collision:
+                raise DraftValidationError(
+                    f"Another framework already uses urn_namespace='{new_ns}' with ref_id='{new_slug}'. "
+                    "Pick a different ref_id."
+                )
+
+            new_urn_namespace = new_ns
+            if ref_changed:
+                new_framework_ref_id = new_ref_id
+
         with transaction.atomic():
             # --- 1. Collect existing DB IDs ---
             db_node_ids = set(
@@ -9009,52 +9577,69 @@ class FrameworkViewSet(BaseModelViewSet):
             draft_choice_map = {c["id"]: c for c in draft_choices}
 
             # --- 5. UPDATE+CREATE nodes ---
+            # Skip rows whose draft payload already equals the DB row — this
+            # avoids feeding unchanged rows into a 1000-deep CASE-WHEN UPDATE
+            # that SQLite handles poorly. Common case: open the builder and
+            # publish without editing → zero-cost UPDATE.
+            NODE_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "name",
+                "description",
+                "annotation",
+                "parent_urn",
+                "order_id",
+                "assessable",
+                "implementation_groups",
+                "visibility_expression",
+                "typical_evidence",
+                "weight",
+                "importance",
+                "display_mode",
+                "folder_id",
+                "translations",
+            ]
             if existing_node_ids:
+                db_nodes_map = {
+                    row["id"]: row
+                    for row in RequirementNode.objects.filter(
+                        id__in=existing_node_ids
+                    ).values("id", *NODE_UPDATE_FIELDS)
+                }
                 nodes_to_update = []
                 for node_id in existing_node_ids:
                     data = draft_node_map[str(node_id)]
-                    node = RequirementNode(
-                        id=node_id,
-                        framework=framework,
-                        urn=data.get("urn") or None,
-                        ref_id=data.get("ref_id") or None,
-                        name=data.get("name") or None,
-                        description=data.get("description") or None,
-                        annotation=data.get("annotation") or None,
-                        parent_urn=data.get("parent_urn") or None,
-                        order_id=data.get("order_id"),
-                        assessable=data.get("assessable", False),
-                        implementation_groups=data.get("implementation_groups"),
-                        visibility_expression=data.get("visibility_expression") or None,
-                        typical_evidence=data.get("typical_evidence") or None,
-                        weight=data.get("weight", 1),
-                        importance=data.get("importance", "undefined"),
-                        display_mode=data.get("display_mode", "default"),
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                    payload = {
+                        "urn": data.get("urn") or None,
+                        "ref_id": data.get("ref_id") or None,
+                        "name": data.get("name") or None,
+                        "description": data.get("description") or None,
+                        "annotation": data.get("annotation") or None,
+                        "parent_urn": data.get("parent_urn") or None,
+                        "order_id": data.get("order_id"),
+                        "assessable": data.get("assessable", False),
+                        "implementation_groups": data.get("implementation_groups"),
+                        "visibility_expression": data.get("visibility_expression")
+                        or None,
+                        "typical_evidence": data.get("typical_evidence") or None,
+                        "weight": data.get("weight", 1),
+                        "importance": data.get("importance", "undefined"),
+                        "display_mode": data.get("display_mode", "default"),
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_nodes_map.get(node_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in NODE_UPDATE_FIELDS
+                    ):
+                        continue
+                    nodes_to_update.append(
+                        RequirementNode(id=node_id, framework=framework, **payload)
                     )
-                    nodes_to_update.append(node)
-                RequirementNode.objects.bulk_update(
-                    nodes_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "name",
-                        "description",
-                        "annotation",
-                        "parent_urn",
-                        "order_id",
-                        "assessable",
-                        "implementation_groups",
-                        "visibility_expression",
-                        "typical_evidence",
-                        "weight",
-                        "importance",
-                        "display_mode",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
+                if nodes_to_update:
+                    RequirementNode.objects.bulk_update(
+                        nodes_to_update, NODE_UPDATE_FIELDS
+                    )
 
             new_node_ids = draft_node_ids - db_node_ids
             if new_node_ids:
@@ -9094,7 +9679,27 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
             # --- 6. UPDATE+CREATE questions (with FK validation) ---
+            QUESTION_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "text",
+                "annotation",
+                "type",
+                "config",
+                "depends_on",
+                "order",
+                "weight",
+                "requirement_node_id",
+                "folder_id",
+                "translations",
+            ]
             if existing_question_ids:
+                db_questions_map = {
+                    row["id"]: row
+                    for row in Question.objects.filter(
+                        id__in=existing_question_ids
+                    ).values("id", *QUESTION_UPDATE_FIELDS)
+                }
                 questions_to_update = []
                 for question_id in existing_question_ids:
                     data = draft_question_map[str(question_id)]
@@ -9103,39 +9708,30 @@ class FrameworkViewSet(BaseModelViewSet):
                         raise DraftValidationError(
                             "Question references requirement_node not in this framework."
                         )
-                    question = Question(
-                        id=question_id,
-                        urn=data.get("urn"),
-                        ref_id=data.get("ref_id") or None,
-                        text=data.get("text") or None,
-                        annotation=data.get("annotation") or None,
-                        type=data.get("type", "text"),
-                        config=data.get("config"),
-                        depends_on=data.get("depends_on"),
-                        order=data.get("order", 0),
-                        weight=data.get("weight", 1),
-                        requirement_node_id=req_node_id,
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                    payload = {
+                        "urn": data.get("urn"),
+                        "ref_id": data.get("ref_id") or None,
+                        "text": data.get("text") or None,
+                        "annotation": data.get("annotation") or None,
+                        "type": data.get("type", "text"),
+                        "config": data.get("config"),
+                        "depends_on": data.get("depends_on"),
+                        "order": data.get("order", 0),
+                        "weight": data.get("weight", 1),
+                        "requirement_node_id": req_node_id,
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_questions_map.get(question_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in QUESTION_UPDATE_FIELDS
+                    ):
+                        continue
+                    questions_to_update.append(Question(id=question_id, **payload))
+                if questions_to_update:
+                    Question.objects.bulk_update(
+                        questions_to_update, QUESTION_UPDATE_FIELDS
                     )
-                    questions_to_update.append(question)
-                Question.objects.bulk_update(
-                    questions_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "text",
-                        "annotation",
-                        "type",
-                        "config",
-                        "depends_on",
-                        "order",
-                        "weight",
-                        "requirement_node_id",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
 
             new_question_ids = draft_question_ids - db_question_ids
             if new_question_ids:
@@ -9174,7 +9770,28 @@ class FrameworkViewSet(BaseModelViewSet):
             )
 
             # --- 7. UPDATE+CREATE choices (with FK validation) ---
+            CHOICE_UPDATE_FIELDS = [
+                "urn",
+                "ref_id",
+                "value",
+                "annotation",
+                "add_score",
+                "compute_result",
+                "order",
+                "description",
+                "color",
+                "select_implementation_groups",
+                "question_id",
+                "folder_id",
+                "translations",
+            ]
             if existing_choice_ids:
+                db_choices_map = {
+                    row["id"]: row
+                    for row in QuestionChoice.objects.filter(
+                        id__in=existing_choice_ids
+                    ).values("id", *CHOICE_UPDATE_FIELDS)
+                }
                 choices_to_update = []
                 for choice_id in existing_choice_ids:
                     data = draft_choice_map[str(choice_id)]
@@ -9183,43 +9800,33 @@ class FrameworkViewSet(BaseModelViewSet):
                         raise DraftValidationError(
                             "Choice references question not in this framework."
                         )
-                    choice = QuestionChoice(
-                        id=choice_id,
-                        urn=data.get("urn") or None,
-                        ref_id=data.get("ref_id") or None,
-                        value=data.get("value") or None,
-                        annotation=data.get("annotation") or None,
-                        add_score=data.get("add_score"),
-                        compute_result=data.get("compute_result") or None,
-                        order=data.get("order", 0),
-                        description=data.get("description") or None,
-                        color=data.get("color") or None,
-                        select_implementation_groups=data.get(
+                    payload = {
+                        "urn": data.get("urn") or None,
+                        "ref_id": data.get("ref_id") or None,
+                        "value": data.get("value") or None,
+                        "annotation": data.get("annotation") or None,
+                        "add_score": data.get("add_score"),
+                        "compute_result": data.get("compute_result") or None,
+                        "order": data.get("order", 0),
+                        "description": data.get("description") or None,
+                        "color": data.get("color") or None,
+                        "select_implementation_groups": data.get(
                             "select_implementation_groups"
                         ),
-                        question_id=q_id,
-                        folder_id=framework.folder_id,
-                        translations=data.get("translations"),
+                        "question_id": q_id,
+                        "folder_id": framework.folder_id,
+                        "translations": data.get("translations"),
+                    }
+                    existing = db_choices_map.get(choice_id)
+                    if existing and all(
+                        payload[f] == existing[f] for f in CHOICE_UPDATE_FIELDS
+                    ):
+                        continue
+                    choices_to_update.append(QuestionChoice(id=choice_id, **payload))
+                if choices_to_update:
+                    QuestionChoice.objects.bulk_update(
+                        choices_to_update, CHOICE_UPDATE_FIELDS
                     )
-                    choices_to_update.append(choice)
-                QuestionChoice.objects.bulk_update(
-                    choices_to_update,
-                    [
-                        "urn",
-                        "ref_id",
-                        "value",
-                        "annotation",
-                        "add_score",
-                        "compute_result",
-                        "order",
-                        "description",
-                        "color",
-                        "select_implementation_groups",
-                        "question_id",
-                        "folder_id",
-                        "translations",
-                    ],
-                )
 
             new_choice_ids = draft_choice_ids - db_choice_ids
             if new_choice_ids:
@@ -9277,9 +9884,11 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework.translations = meta.get(
                     "translations", framework.translations
                 )
-                # urn_namespace is only settable before first publish
-                if framework.editing_version <= 1 and meta.get("urn_namespace"):
-                    framework.urn_namespace = meta["urn_namespace"]
+                # urn_namespace + ref_id are gated on absence of compliance
+                # assessments; the gate, validation, and child-URN rewrite all
+                # happened up in section 0c.
+                framework.urn_namespace = new_urn_namespace
+                framework.ref_id = new_framework_ref_id
 
             # --- 9. Sync RequirementAssessments for existing audits ---
             # New requirement nodes need RA + Answer rows in every existing CA.
@@ -9408,6 +10017,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "locale",
                     "translations",
                     "urn_namespace",
+                    "ref_id",
                     "editing_draft",
                     "editing_version",
                     "editing_history",
@@ -9671,21 +10281,26 @@ class RequirementViewSet(BaseModelViewSet):
                         "compliance_assessment__id",
                         "compliance_assessment__name",
                         "compliance_assessment__version",
-                        "compliance_assessment__show_documentation_score",
+                        "compliance_assessment__field_visibility",
                         "compliance_assessment__max_score",
                     )
                     .distinct()
                 )
 
+                from core.utils import resolve_visibility_from_overrides
+
                 for ca in compliance_assessments:
+                    fv = ca["compliance_assessment__field_visibility"]
+                    doc_pair = resolve_visibility_from_overrides(
+                        fv, "documentation_score"
+                    )
+                    show_doc = doc_pair.get("auditor", "edit") != "hidden"
                     perimeter_entry["compliance_assessments"].append(
                         {
                             "id": ca["compliance_assessment__id"],
                             "name": ca["compliance_assessment__name"],
                             "version": ca["compliance_assessment__version"],
-                            "show_documentation_score": ca[
-                                "compliance_assessment__show_documentation_score"
-                            ],
+                            "show_documentation_score": show_doc,
                             "max_score": ca["compliance_assessment__max_score"],
                         }
                     )
@@ -9773,6 +10388,330 @@ class EvidenceViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Evidence.Status.choices))
+
+    # --- Bulk / directory upload (experimental) -----------------------------
+
+    class BatchConflictStrategy(models.TextChoices):
+        SKIP = "skip", "Skip"
+        ADD_REVISION = "add_revision", "Add revision"
+        REPLACE = "replace", "Replace"
+        RENAME = "rename", "Rename"
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="batch-upload",
+        parser_classes=[MultiPartParser, FormParser],
+    )
+    def batch_upload(self, request):
+        """
+        Bulk-upload evidences from a multipart payload.
+
+        Form fields:
+            folder (UUID, required): target folder.
+            conflict_strategy (str, default 'skip'): one of skip / add_revision / replace / rename.
+            manifest (JSON string, required): list of {"field": "file_0", "name": "...", "rel_path": "..."}.
+            file_0 ... file_N: the actual file blobs, keyed by the manifest's "field" entries.
+
+        Returns:
+            { "summary": {...counts...}, "results": [...per-file outcomes...] }
+        """
+        valid_strategies = {c.value for c in self.BatchConflictStrategy}
+        strategy = request.data.get(
+            "conflict_strategy", self.BatchConflictStrategy.SKIP
+        )
+        if strategy not in valid_strategies:
+            return Response(
+                {
+                    "error": f"Invalid conflict_strategy '{strategy}'. Must be one of {sorted(valid_strategies)}."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        folder_id = request.data.get("folder")
+        if not folder_id:
+            return Response(
+                {"error": "folder is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+        except (ValueError, TypeError, Folder.DoesNotExist):
+            return Response(
+                {"error": "Folder not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            manifest = json.loads(request.data.get("manifest") or "[]")
+            if not isinstance(manifest, list):
+                raise ValueError("manifest must be a list")
+        except (ValueError, json.JSONDecodeError):
+            logger.exception("Invalid manifest JSON received in batch upload")
+            return Response(
+                {"error": "Invalid manifest JSON"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Gate the whole request before any folder lookup so dedup/name
+        # queries can't leak folder contents to unauthorized callers.
+        try:
+            add_perm = Permission.objects.get(codename="add_evidence")
+            change_perm = Permission.objects.get(codename="change_evidence")
+        except Permission.DoesNotExist:
+            return Response(
+                {"error": "Evidence permissions are not configured"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_perm, folder=folder
+        ):
+            return Response(
+                {"error": "You do not have permission to add evidence in this folder"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if strategy in (
+            self.BatchConflictStrategy.ADD_REVISION,
+            self.BatchConflictStrategy.REPLACE,
+        ) and not RoleAssignment.is_access_allowed(
+            user=request.user, perm=change_perm, folder=folder
+        ):
+            return Response(
+                {
+                    "error": "You do not have permission to change evidence in this folder"
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        summary = {
+            "total": len(manifest),
+            "created": 0,
+            "revision_added": 0,
+            "replaced": 0,
+            "renamed": 0,
+            "skipped": 0,
+            "duplicate": 0,
+            "errors": 0,
+        }
+        results = []
+
+        for entry in manifest:
+            field = entry.get("field")
+            name = (entry.get("name") or field or "").strip()
+            rel_path = entry.get("rel_path") or None
+            result = {"field": field, "name": name, "rel_path": rel_path}
+
+            upload = request.FILES.get(field) if field else None
+            if upload is None:
+                result["outcome"] = "error"
+                result["error"] = "File missing in multipart payload"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+            if not name:
+                result["outcome"] = "error"
+                result["error"] = "Evidence name is empty"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+
+            # Hash dedup — same blob already in this folder?
+            try:
+                hash_obj = hashlib.sha256()
+                for chunk in upload.chunks(chunk_size=1024 * 1024):
+                    hash_obj.update(chunk)
+                file_hash = hash_obj.hexdigest()
+                upload.seek(0)
+            except Exception:
+                logger.exception(
+                    "Failed to hash uploaded file in batch upload",
+                    field=field,
+                    name=name,
+                )
+                result["outcome"] = "error"
+                result["error"] = "Failed to hash file"
+                summary["errors"] += 1
+                results.append(result)
+                continue
+
+            existing_dup = (
+                EvidenceRevision.objects.filter(
+                    evidence__folder=folder,
+                    attachment_hash=file_hash,
+                )
+                .select_related("evidence")
+                .first()
+            )
+            if existing_dup:
+                result["outcome"] = "duplicate"
+                result["evidence_id"] = str(existing_dup.evidence_id)
+                result["evidence_name"] = existing_dup.evidence.name
+                result["revision_id"] = str(existing_dup.id)
+                summary["duplicate"] += 1
+                results.append(result)
+                continue
+
+            # Name-based conflict
+            existing = Evidence.objects.filter(folder=folder, name=name).first()
+
+            if existing is None:
+                self._batch_create_evidence(
+                    result, summary, name, folder, upload, rel_path, request
+                )
+                results.append(result)
+                continue
+
+            if strategy == self.BatchConflictStrategy.SKIP:
+                result["outcome"] = "skipped"
+                result["evidence_id"] = str(existing.id)
+                summary["skipped"] += 1
+            elif strategy == self.BatchConflictStrategy.ADD_REVISION:
+                self._batch_add_revision(
+                    result, summary, existing, upload, rel_path, request
+                )
+            elif strategy == self.BatchConflictStrategy.REPLACE:
+                self._batch_replace_revision(
+                    result, summary, existing, upload, rel_path
+                )
+            elif strategy == self.BatchConflictStrategy.RENAME:
+                new_name = self._batch_find_unique_name(name, folder)
+                self._batch_create_evidence(
+                    result,
+                    summary,
+                    new_name,
+                    folder,
+                    upload,
+                    rel_path,
+                    request,
+                    renamed_from=name,
+                )
+            results.append(result)
+
+        return Response(
+            {"summary": summary, "results": results}, status=status.HTTP_200_OK
+        )
+
+    # --- batch_upload helpers ---
+
+    def _batch_create_evidence(
+        self,
+        result,
+        summary,
+        name,
+        folder,
+        upload,
+        rel_path,
+        request,
+        renamed_from=None,
+    ):
+        """Create a new Evidence + v1 revision via the existing serializer (so IAM/validation reuse)."""
+        serializer = EvidenceWriteSerializer(
+            data={"name": name, "folder": str(folder.id), "attachment": upload},
+            context={"request": request},
+        )
+        if not serializer.is_valid():
+            result["outcome"] = "error"
+            result["error"] = serializer.errors
+            summary["errors"] += 1
+            return
+        try:
+            evidence = serializer.save()
+        except PermissionDenied as e:
+            result["outcome"] = "error"
+            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            summary["errors"] += 1
+            return
+        revision = evidence.revisions.first()
+        if revision and rel_path:
+            revision.observation = f"path: {rel_path}"
+            revision.save(update_fields=["observation"])
+        if renamed_from:
+            result["outcome"] = "renamed"
+            result["renamed_from"] = renamed_from
+            result["renamed_to"] = name
+            summary["renamed"] += 1
+        else:
+            result["outcome"] = "created"
+            summary["created"] += 1
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id) if revision else None
+        result["version"] = revision.version if revision else 1
+
+    def _batch_add_revision(self, result, summary, evidence, upload, rel_path, request):
+        """Create a new EvidenceRevision against an existing Evidence (auto-bumps version)."""
+        rev_serializer = EvidenceRevisionWriteSerializer(
+            data={
+                "evidence": str(evidence.id),
+                "attachment": upload,
+                "observation": f"path: {rel_path}" if rel_path else "",
+            },
+            context={"request": request},
+        )
+        if not rev_serializer.is_valid():
+            result["outcome"] = "error"
+            result["error"] = rev_serializer.errors
+            summary["errors"] += 1
+            return
+        try:
+            revision = rev_serializer.save()
+        except PermissionDenied as e:
+            result["outcome"] = "error"
+            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            summary["errors"] += 1
+            return
+        result["outcome"] = "revision_added"
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id)
+        result["version"] = revision.version
+        summary["revision_added"] += 1
+
+    def _batch_replace_revision(self, result, summary, evidence, upload, rel_path):
+        """Overwrite the last revision's attachment in place — preserves Evidence id and M2M links."""
+        revision = evidence.last_revision
+        if revision is None:
+            revision = EvidenceRevision(evidence=evidence)
+        old_attachment = revision.attachment
+        revision.attachment = upload
+        if rel_path:
+            revision.observation = f"path: {rel_path}"
+        try:
+            revision.full_clean(exclude=["folder", "attachment_hash"])
+        except ValidationError as e:
+            messages = []
+            if hasattr(e, "message_dict"):
+                for fld_messages in e.message_dict.values():
+                    messages.extend(fld_messages)
+            elif hasattr(e, "messages"):
+                messages = e.messages
+            else:
+                messages = [str(e)]
+            result["outcome"] = "error"
+            result["error"] = " ".join(messages)
+            summary["errors"] += 1
+            return
+        revision.save()
+        if old_attachment:
+            old_attachment.delete(save=False)
+        result["outcome"] = "replaced"
+        result["evidence_id"] = str(evidence.id)
+        result["revision_id"] = str(revision.id)
+        result["version"] = revision.version
+        summary["replaced"] += 1
+
+    @staticmethod
+    def _batch_find_unique_name(name, folder):
+        """Append ' (1)', ' (2)' ... before the extension until the name is free in folder."""
+        if "." in name:
+            base, _, ext = name.rpartition(".")
+            ext = "." + ext
+        else:
+            base, ext = name, ""
+        i = 1
+        candidate = name
+        while Evidence.objects.filter(folder=folder, name=candidate).exists():
+            candidate = f"{base} ({i}){ext}"
+            i += 1
+        return candidate
 
 
 class EvidenceRevisionViewSet(BaseModelViewSet):
@@ -9908,9 +10847,323 @@ class QuickStartView(APIView):
             return Response(objects, status=status.HTTP_201_CREATED)
 
 
-class PresetJourneyViewSet(BaseModelViewSet):
+class PresetViewSet(BaseModelViewSet):
+    model = Preset
+    filterset_fields = ["folder", "provider"]
+    search_fields = ["name", "description", "ref_id", "urn"]
+
+    def _reject_if_library_backed(self):
+        """Library-backed Presets (urn != None) are read-only by contract.
+        Standard CRUD endpoints (update/partial_update/destroy) inherit from
+        BaseModelViewSet and bypass our @action-level guard, so we re-enforce
+        the rule at the dispatch layer too."""
+        instance = self.get_object()
+        if instance.urn is not None:
+            return Response(
+                {"detail": "Library-backed presets are read-only. Duplicate first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return None
+
+    def update(self, request, *args, **kwargs):
+        denied = self._reject_if_library_backed()
+        if denied is not None:
+            return denied
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        denied = self._reject_if_library_backed()
+        if denied is not None:
+            return denied
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        denied = self._reject_if_library_backed()
+        if denied is not None:
+            return denied
+        return super().destroy(request, *args, **kwargs)
+
+    def _editable_or_403(self, request):
+        preset = self.get_object()
+        if preset.urn is not None:
+            return preset, Response(
+                {"detail": "Library-backed presets are read-only. Duplicate first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_preset"),
+            folder=preset.folder,
+        ):
+            return preset, Response(status=status.HTTP_403_FORBIDDEN)
+        return preset, None
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        from core.preset_editor import serialize_preset_to_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            preset.editing_draft = serialize_preset_to_draft(preset)
+            preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": preset.editing_draft})
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path="save-draft",
+        parser_classes=[JSONParser],
+    )
+    def save_draft(self, request, pk=None):
+        from core.preset_editor import validate_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        normalized = validate_draft(request.data, strict=False)
+        preset.editing_draft = normalized
+        preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": preset.editing_draft})
+
+    @action(detail=True, methods=["post"], url_path="discard-draft")
+    def discard_draft(self, request, pk=None):
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        preset.editing_draft = None
+        preset.save(update_fields=["editing_draft"])
+        return Response({"editing_draft": None})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft-preview")
+    def publish_draft_preview(self, request, pk=None):
+        from core.preset_editor import validate_draft
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            return Response(
+                {"detail": "No active draft."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        normalized = validate_draft(preset.editing_draft)
+
+        live_keys = {s.get("key") for s in (preset.steps or []) if s.get("key")}
+        draft_keys = {s["key"] for s in normalized["steps"]}
+        deleted_keys = live_keys - draft_keys
+
+        warnings = []
+        for key in sorted(deleted_keys):
+            journey_steps = PresetJourneyStep.objects.filter(
+                journey__preset=preset, key=key
+            )
+            with_user_state = journey_steps.exclude(
+                status=PresetJourneyStep.Status.NOT_STARTED, notes=""
+            ).count()
+            warnings.append(
+                {
+                    "key": key,
+                    "journey_step_count": journey_steps.count(),
+                    "with_user_state": with_user_state,
+                }
+            )
+        return Response({"deleted_steps": warnings})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft")
+    def publish_draft(self, request, pk=None):
+        from core.preset_editor import validate_draft
+        from django.utils import timezone
+
+        preset, denied = self._editable_or_403(request)
+        if denied is not None:
+            return denied
+        if not preset.editing_draft:
+            return Response(
+                {"detail": "No active draft."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        normalized = validate_draft(preset.editing_draft)
+
+        snapshot = {
+            "version": preset.editing_version,
+            "name": preset.name,
+            "description": preset.description or "",
+            "scaffolded_objects": list(preset.scaffolded_objects or []),
+            "steps": list(preset.steps or []),
+            "published_at": timezone.now().isoformat(),
+        }
+        history = list(preset.editing_history or [])
+        history.append(snapshot)
+        # Cap to last 20 snapshots so the JSONField doesn't grow unboundedly
+        # under heavy editing.
+        EDITING_HISTORY_CAP = 20
+        if len(history) > EDITING_HISTORY_CAP:
+            history = history[-EDITING_HISTORY_CAP:]
+
+        preset.name = normalized["journey_meta"]["name"]
+        preset.description = normalized["journey_meta"]["description"]
+        preset.scaffolded_objects = normalized["scaffolded_objects"]
+        preset.steps = normalized["steps"]
+        # Clear translations on publish: the editor doesn't surface a per-locale
+        # editor today, so any inherited library translations would otherwise
+        # keep materializing stale localized strings via the executor's locale
+        # lookups. Re-add later when the translations editor lands.
+        preset.translations = {}
+        preset.editing_version = preset.editing_version + 1
+        preset.version = preset.editing_version
+        preset.editing_history = history
+        preset.editing_draft = None
+        preset.save()
+
+        from core.serializers import PresetReadSerializer
+
+        return Response(PresetReadSerializer(preset).data)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="create-blank",
+        parser_classes=[JSONParser],
+    )
+    def create_blank(self, request):
+        root = Folder.get_root_folder()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_preset"),
+            folder=root,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        name = (request.data.get("name") or "").strip() or "Untitled preset"
+        description = request.data.get("description") or ""
+        preset = Preset.objects.create(
+            name=name,
+            description=description,
+            folder=root,
+            urn=None,
+            ref_id=None,
+            version=1,
+            provider=None,
+            translations={},
+            profile={},
+            feature_flags={},
+            dependencies=[],
+            scaffolded_objects=[],
+            steps=[],
+            editing_version=1,
+            editing_history=[],
+            editing_draft=None,
+        )
+        from core.serializers import PresetReadSerializer
+
+        return Response(
+            PresetReadSerializer(preset).data, status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=True, methods=["post"])
+    def duplicate(self, request, pk=None):
+        source = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_preset"),
+            folder=source.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        new_preset = Preset.objects.create(
+            name=f"{source.name} (copy)",
+            description=source.description,
+            folder=source.folder,
+            translations=dict(source.translations or {}),
+            profile=dict(source.profile or {}),
+            feature_flags=dict(source.feature_flags or {}),
+            dependencies=list(source.dependencies or []),
+            scaffolded_objects=list(source.scaffolded_objects or []),
+            steps=list(source.steps or []),
+            urn=None,
+            ref_id=None,
+            version=1,
+            provider=None,
+            editing_version=1,
+            editing_history=[],
+            editing_draft=None,
+        )
+        from core.serializers import PresetReadSerializer
+
+        return Response(
+            PresetReadSerializer(new_preset).data, status=status.HTTP_201_CREATED
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="apply",
+        parser_classes=[JSONParser],
+    )
+    def apply(self, request, pk=None):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Use get_object() so the queryset filters by view_preset RBAC —
+        # prevents UUID-guessing applies of presets the user can't view.
+        preset = self.get_object()
+
+        from library.preset_executor import PresetExecutor
+
+        folder_name = request.data.get("folder_name")
+        folder_id = request.data.get("folder_id")
+        create_objects = request.data.get("create_objects", True)
+        apply_feature_flags = request.data.get("apply_feature_flags", True)
+
+        if apply_feature_flags:
+            can_change_settings = RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_globalsettings"),
+                folder=Folder.get_root_folder(),
+            )
+            if not can_change_settings:
+                apply_feature_flags = False
+
+        try:
+            executor = PresetExecutor(preset, request.user, request)
+            journey = executor.apply(
+                folder_name=folder_name,
+                folder_id=folder_id,
+                create_objects=create_objects,
+                apply_feature_flags=apply_feature_flags,
+            )
+            return Response(
+                {"journey_id": str(journey.id)},
+                status=status.HTTP_201_CREATED,
+            )
+        except (ValidationError, DRFValidationError) as e:
+            logger.error("Failed to apply preset", error=e)
+            if hasattr(e, "detail"):
+                detail = e.detail
+            elif hasattr(e, "message_dict"):
+                detail = e.message_dict
+            else:
+                detail = "Validation failed."
+            return Response(
+                {"error": detail},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        except Exception:
+            # Unexpected server-side failure — keep the response body generic
+            # so we don't leak internals, but record the traceback and return a
+            # 5xx so callers don't treat this as bad input.
+            logger.exception("Failed to apply preset")
+            return Response(
+                {"error": "Failed to apply preset."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class JourneyViewSet(BaseModelViewSet):
     model = PresetJourney
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "preset"]
     search_fields = ["name", "description"]
 
     @action(detail=True, methods=["get"])
@@ -9949,10 +11202,35 @@ class PresetJourneyViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"])
     def upgrade(self, request, pk=None):
         journey = self.get_object()
-        stored_lib = (
-            StoredLibrary.objects.filter(urn=journey.urn).order_by("-version").first()
-        )
-        if not stored_lib or stored_lib.version <= journey.version:
+        if not journey.preset:
+            return Response({"detail": "Already up to date."})
+        if journey.preset.urn:
+            stored_lib = (
+                StoredLibrary.objects.filter(urn=journey.preset.urn)
+                .order_by("-version")
+                .first()
+            )
+            if stored_lib and stored_lib.version > journey.preset.version:
+                # The upsert mutates the global library-backed Preset row, so
+                # gate it behind the same library-write permission `apply()`
+                # uses. Without this, any caller with `change_journey` could
+                # trigger global library state changes via upgrade.
+                if not RoleAssignment.is_access_allowed(
+                    user=request.user,
+                    perm=Permission.objects.get(codename="add_loadedlibrary"),
+                    folder=Folder.get_root_folder(),
+                ):
+                    return Response(
+                        {
+                            "detail": "Library upgrade requires permission to load libraries."
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                from library.utils import upsert_preset_from_stored_library
+
+                upsert_preset_from_stored_library(stored_lib)
+                journey.preset.refresh_from_db()
+        if journey.preset.version <= journey.applied_version:
             return Response({"detail": "Already up to date."})
         from library.preset_executor import PresetExecutor
 
@@ -9962,7 +11240,7 @@ class PresetJourneyViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         )
 
-        executor = PresetExecutor(stored_lib, request.user, request)
+        executor = PresetExecutor(journey.preset, request.user, request)
         executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
         from core.serializers import PresetJourneyReadSerializer
 
@@ -10011,7 +11289,7 @@ class PresetJourneyViewSet(BaseModelViewSet):
         return stats
 
 
-class PresetJourneyStepViewSet(BaseModelViewSet):
+class JourneyStepViewSet(BaseModelViewSet):
     model = PresetJourneyStep
     filterset_fields = ["journey", "status"]
     search_fields = ["title", "description"]
@@ -10149,6 +11427,8 @@ class CampaignViewSet(BaseModelViewSet):
                         for group in campaign.selected_implementation_groups
                         if group["framework"] == str(framework.id)
                     ]
+                from core.utils import build_initial_field_visibility
+
                 compliance_assessment = ComplianceAssessment.objects.create(
                     name=f"{campaign.name} - {perimeter.name} - {framework.name}",
                     campaign=campaign,
@@ -10158,8 +11438,123 @@ class CampaignViewSet(BaseModelViewSet):
                     selected_implementation_groups=framework_implementation_groups
                     if framework_implementation_groups
                     else None,
+                    field_visibility=build_initial_field_visibility(framework),
                 )
                 compliance_assessment.create_requirement_assessments()
+
+
+def _serialize_suggestion_preview(entries: list[dict]) -> list[dict]:
+    """Lightweight serialization for the suggest-controls dry-run preview.
+    Only emits fields consumed by the modal (id, name, ref_id, reference_control,
+    suggestion_status) — avoids the heavy AppliedControlReadSerializer which would
+    trigger many extra queries per row."""
+    payload = []
+    for entry in entries:
+        ac = entry["applied_control"]
+        ref = ac.reference_control
+        payload.append(
+            {
+                "id": str(ac.id) if ac.pk else None,
+                "name": ac.name,
+                "ref_id": ac.ref_id,
+                "reference_control": (
+                    {"id": str(ref.id), "str": str(ref), "name": ref.name}
+                    if ref is not None
+                    else None
+                ),
+                "suggestion_status": entry["status"],
+            }
+        )
+    return payload
+
+
+def _preview_suggestions_for_compliance_assessment(
+    compliance_assessment,
+    selected_reference_control_ids: list | None = None,
+) -> list[dict]:
+    """Batched dry-run preview across all RAs of a compliance assessment.
+    Avoids N+1 by:
+      - prefetching requirement.reference_controls on the RA queryset,
+      - issuing a single AppliedControl query covering all (folder, ref_ctrl) keys.
+    Returns at most one entry per reference_control, with status priority
+    create > reuse > linked."""
+    ras = list(
+        compliance_assessment.requirement_assessments.select_related(
+            "requirement", "folder"
+        ).prefetch_related("requirement__reference_controls")
+    )
+
+    selected_ids_set = (
+        {str(v) for v in selected_reference_control_ids}
+        if selected_reference_control_ids is not None
+        else None
+    )
+
+    ref_ctrls_by_ra: dict = {}
+    all_ref_ids: set = set()
+    folder_ids: set = set()
+    for ra in ras:
+        if not compliance_assessment.requirement_matches_selected_groups(
+            ra.requirement
+        ):
+            continue
+        ref_ctrls = list(ra.requirement.reference_controls.all())
+        if selected_ids_set is not None:
+            ref_ctrls = [rc for rc in ref_ctrls if str(rc.id) in selected_ids_set]
+        if not ref_ctrls:
+            continue
+        ref_ctrls_by_ra[ra.id] = (ra, ref_ctrls)
+        all_ref_ids.update(rc.id for rc in ref_ctrls)
+        folder_ids.add(ra.folder_id)
+
+    ac_by_key: dict = {}
+    linked_ac_by_ra_key: dict = {}
+    if all_ref_ids and folder_ids:
+        ac_qs = (
+            AppliedControl.objects.filter(
+                folder_id__in=folder_ids,
+                reference_control_id__in=all_ref_ids,
+            )
+            .select_related("reference_control")
+            .prefetch_related("requirement_assessments")
+        )
+        for ac in ac_qs:
+            key = (ac.folder_id, ac.reference_control_id, ac.category)
+            ac_by_key.setdefault(key, ac)
+            for linked_ra in ac.requirement_assessments.all():
+                # Track the actually-linked AC per (RA, key), not just first seen.
+                linked_ac_by_ra_key[(linked_ra.id, *key)] = ac
+
+    status_priority = {"create": 0, "reuse": 1, "linked": 2}
+    best: dict = {}
+    for ra_id, (ra, ref_ctrls) in ref_ctrls_by_ra.items():
+        for rc in ref_ctrls:
+            key = (ra.folder_id, rc.id, rc.category)
+            linked_ac = linked_ac_by_ra_key.get((ra_id, *key))
+            if linked_ac is not None:
+                status_ = "linked"
+                ac = linked_ac
+            elif key in ac_by_key:
+                status_ = "reuse"
+                ac = ac_by_key[key]
+            else:
+                status_ = "create"
+                ac = AppliedControl(
+                    folder=ra.folder,
+                    reference_control=rc,
+                    category=rc.category,
+                    name=rc.get_name_translated or rc.ref_id,
+                    ref_id=rc.ref_id,
+                    description=rc.description,
+                )
+            dedupe_key = str(rc.id)
+            current = best.get(dedupe_key)
+            if (
+                current is None
+                or status_priority[status_] < status_priority[current["status"]]
+            ):
+                best[dedupe_key] = {"applied_control": ac, "status": status_}
+    return list(best.values())
 
 
 class ComplianceAssessmentViewSet(BaseModelViewSet):
@@ -10182,7 +11577,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "genericcollection",
-        "extended_result_enabled",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
@@ -10193,6 +11587,46 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             return ComplianceAssessmentListSerializer
         return super().get_serializer_class(**kwargs)
+
+    def _get_optimized_object_data(self, queryset):
+        """Compute per-page requirement counts in one bounded GROUP BY,
+        replacing the Count(distinct=True) annotations dropped from the
+        list queryset. Bounded by `len(queryset)` (≤ page size), so the
+        cost is independent of the total RA table size.
+
+        Only the no-implementation-groups case is computed here; audits
+        with `selected_implementation_groups` still rely on the prefetched
+        `requirement_assessments` for in-Python IG filtering inside
+        `ComplianceAssessmentListSerializer.get_progress`.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        audit_ids = [a.id for a in queryset]
+        if not audit_ids:
+            return optimized_data
+
+        not_assessed = RequirementAssessment.Result.NOT_ASSESSED
+        rows = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=audit_ids,
+                requirement__assessable=True,
+            )
+            .values("compliance_assessment_id")
+            .annotate(
+                total=Count("id"),
+                assessed=Count(
+                    "id",
+                    filter=~Q(result=not_assessed) | Q(score__isnull=False),
+                ),
+            )
+        )
+        total_map: dict = {}
+        assessed_map: dict = {}
+        for r in rows:
+            total_map[r["compliance_assessment_id"]] = r["total"]
+            assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+        optimized_data["total_requirements"] = total_map
+        optimized_data["assessed_requirements"] = assessed_map
+        return optimized_data
 
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
@@ -10251,26 +11685,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # Custom detail actions (tree, global_score, donut_data, etc.)
         # use lightweight querysets — they don't need full prefetches.
 
-        qs = qs.annotate(
-            total_requirements=Count(
-                "requirement_assessments",
-                filter=Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
-            assessed_requirements=Count(
-                "requirement_assessments",
-                filter=Q(
-                    Q(
-                        ~Q(
-                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                        )
-                    )
-                    | Q(requirement_assessments__score__isnull=False),
-                    requirement_assessments__requirement__assessable=True,
+        # The `total_requirements` / `assessed_requirements` Count(distinct=True)
+        # annotations are catastrophic on the list path: each one forces
+        # SQLite to materialise a temp B-tree over the full LEFT JOIN of
+        # the requirement_assessments table per row, and the two together
+        # account for the ~2.7s single-query cost on /compliance-assessments/.
+        # On the list path we compute the same numbers in `_get_optimized_object_data`
+        # via a single GROUP BY bounded by the page (≤ page_size audits).
+        # Retrieve still uses the annotations because the cost is trivial
+        # at one row.
+        if self.action != "list":
+            qs = qs.annotate(
+                total_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(requirement_assessments__requirement__assessable=True),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-        )
+                assessed_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(
+                        Q(
+                            ~Q(
+                                requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                            )
+                        )
+                        | Q(requirement_assessments__score__isnull=False),
+                        requirement_assessments__requirement__assessable=True,
+                    ),
+                    distinct=True,
+                ),
+            )
 
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
         if auditee_folders:
@@ -10623,6 +12067,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ws.cell(row=row, column=7, value=ra.documentation_score)
                 if ra.score is not None:
                     ws.cell(row=row, column=8, value=ra.score)
+            if ra.observation:
+                ws.cell(
+                    row=row, column=13, value=escape_excel_formula(ra.observation)
+                )  # Column M: comments
 
         buffer = io.BytesIO()
         wb.save(buffer)
@@ -10906,18 +12354,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for author in instance.authors.all():
                 try:
                     specific = author.specific
-                    if hasattr(specific, "mailing"):
+                    if not hasattr(specific, "mailing"):
+                        logger.warning(
+                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                        )
+                        continue
+                    assignments = list(
+                        instance.requirement_assignments.filter(actor=author)
+                    )
+                    if not assignments:
+                        logger.warning(
+                            f"Actor {author} has no assignment on this audit, skipping email"
+                        )
+                        continue
+                    for assignment in assignments:
                         specific.mailing(
                             email_template_name="tprm/third_party_email.html",
                             subject=_(
                                 "CISO Assistant: A questionnaire has been assigned to you"
                             ),
-                            object="compliance-assessments",
-                            object_id=instance.id,
-                        )
-                    else:
-                        logger.warning(
-                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                            object="auditee-assessments",
+                            object_id=assignment.id,
                         )
                 except Exception as primary_exception:
                     logger.error(
@@ -10926,6 +12383,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     raise ValidationError(
                         {"error": ["An error occurred while sending the email"]}
                     )
+            draft_assignments = instance.requirement_assignments.filter(
+                status=RequirementAssignment.Status.DRAFT
+            )
+            for assignment in draft_assignments:
+                assignment.status = RequirementAssignment.Status.IN_PROGRESS
+                assignment.save(update_fields=["status"])
+                RequirementAssignmentEvent.objects.create(
+                    assignment=assignment,
+                    event_type=RequirementAssignment.Status.IN_PROGRESS,
+                    event_actor=request.user,
+                    folder=assignment.folder,
+                )
             return Response({"results": "mail sent"})
         raise ValidationError({"warning": ["noMailerConfigured"]})
 
@@ -11276,8 +12745,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             compliance_assessment.get_requirement_assessments(
                 include_non_assessable=True,
                 lightweight=True,
-                skip_ig_filter=_framework.is_dynamic()
-                and not compliance_assessment.selected_implementation_groups,
+                skip_ig_filter=True,
             )
         )
         # Auditee filtering: scope to assigned requirements only
@@ -11313,6 +12781,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
+
         tree = get_sorted_requirement_nodes(
             requirement_nodes,
             requirement_assessments,
@@ -11499,8 +12968,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             "observation": ac.observation or "",
                             "reference_control": {
                                 "ref_id": rc.ref_id or "",
-                                "name": rc.name or "",
-                                "description": rc.description or "",
+                                "name": get_referential_translation(rc, "name") or "",
+                                "description": get_referential_translation(
+                                    rc, "description"
+                                )
+                                or "",
                             }
                             if rc
                             else None,
@@ -11510,7 +12982,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             for ac_data in controls_map.values():
                 ac_data["risk_scenarios"] = list(ac_data["risk_scenarios"].values())
-            additional_controls = list(controls_map.values())
+
+            def _sort_key(ac):
+                ref_id = (
+                    (ac.get("reference_control") or {}).get("ref_id")
+                    or ac.get("ref_id")
+                    or ""
+                )
+                if not ref_id:
+                    return (1, [])
+                return (
+                    0,
+                    [
+                        (0, int(p)) if p.isdigit() else (1, p.lower())
+                        for p in re.split(r"(\d+)", ref_id)
+                        if p
+                    ],
+                )
+
+            additional_controls = sorted(controls_map.values(), key=_sort_key)
 
         return Response(
             {
@@ -12145,6 +13635,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 selected_reference_control_ids = raw
+        if dry_run:
+            preview = _preview_suggestions_for_compliance_assessment(
+                compliance_assessment,
+                selected_reference_control_ids=selected_reference_control_ids,
+            )
+            return Response(
+                _serialize_suggestion_preview(preview),
+                status=status.HTTP_200_OK,
+            )
         requirement_assessments = compliance_assessment.requirement_assessments.all()
         controls = []
         for requirement_assessment in requirement_assessments:
@@ -13033,6 +14532,14 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 selected_reference_control_ids = raw
+        if dry_run:
+            preview = requirement_assessment.preview_suggested_applied_controls(
+                selected_reference_control_ids=selected_reference_control_ids,
+            )
+            return Response(
+                _serialize_suggestion_preview(preview),
+                status=status.HTTP_200_OK,
+            )
         controls = requirement_assessment.create_applied_controls_from_suggestions(
             dry_run=dry_run,
             selected_reference_control_ids=selected_reference_control_ids,
@@ -14411,6 +15918,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "owners",
         "entities",
         "assets",
+        "applied_controls",
+        "task_templates",
+        "risk_scenarios",
         "filtering_labels",
     ]
 
@@ -15029,6 +16539,8 @@ class TaskTemplateFilter(GenericFilterSet):
             "next_occurrence_status",
             "evidences",
             "objectives",
+            "incidents",
+            "filtering_labels",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -15064,6 +16576,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         "folder",
         "applied_controls",
         "evidences",
+        "filtering_labels",
     ]
     search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
@@ -15079,6 +16592,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "risk_assessments",
             "assets",
             "findings_assessment",
+            "filtering_labels",
         ],
         "fields": {
             "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
@@ -15190,6 +16704,13 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 ),
             },
             "link": {"source": "link", "label": "link", "escape": True},
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
         },
         "wrap_columns": ["name", "description"],
         "task_node_fields": {
@@ -15271,11 +16792,18 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     else ""
                 ),
             },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
         },
     }
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().prefetch_related("filtering_labels__folder")
         ordering = self.request.query_params.get("ordering", "")
 
         if any(

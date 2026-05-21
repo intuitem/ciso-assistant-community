@@ -526,6 +526,14 @@ class BuiltinMetricSample(AbstractBaseModel):
         scenarios = RiskScenario.objects.filter(risk_assessment=assessment)
         total = scenarios.count()
 
+        # Qualifications breakdown (M2M -> Terminology.name)
+        qualifications_breakdown = dict(
+            scenarios.values("qualifications__name")
+            .annotate(count=Count("id", distinct=True))
+            .filter(qualifications__name__isnull=False)
+            .values_list("qualifications__name", "count")
+        )
+
         # Treatment breakdown
         treatment_breakdown = {}
         for treatment in RiskScenario.TREATMENT_OPTIONS:
@@ -575,6 +583,7 @@ class BuiltinMetricSample(AbstractBaseModel):
             "treatment_breakdown": treatment_breakdown,
             "current_level_breakdown": current_level_breakdown,
             "residual_level_breakdown": residual_level_breakdown,
+            "qualifications_breakdown": qualifications_breakdown,
         }
 
     @classmethod
@@ -613,12 +622,40 @@ class BuiltinMetricSample(AbstractBaseModel):
 
     @classmethod
     def _compute_folder_metrics(cls, folder):
-        """Compute metrics for a Folder (domain-level aggregations)."""
-        from core.models import AppliedControl, Incident
-        from django.db.models import Count
+        """Compute metrics for a Folder.
 
-        # Applied controls in this folder
-        controls = AppliedControl.objects.filter(folder=folder)
+        Root folder is treated as the whole-organization scope: queries
+        are unfiltered. Other folders use direct membership only (no
+        descendant traversal), matching the existing behavior of the
+        breakdown metrics.
+        """
+        from core.models import (
+            AppliedControl,
+            Asset,
+            ComplianceAssessment,
+            Evidence,
+            Framework,
+            Incident,
+            RiskAcceptance,
+            RiskScenario,
+            SecurityException,
+            TaskTemplate,
+            Severity,
+            Vulnerability,
+        )
+        from iam.models import Folder
+        from django.db.models import Count, Q
+        from datetime import timedelta
+        from django.utils import timezone as _tz
+
+        is_global = folder.content_type == Folder.ContentType.ROOT
+        today = _tz.localdate()
+
+        def scope(qs):
+            return qs if is_global else qs.filter(folder=folder)
+
+        # Applied controls
+        controls = scope(AppliedControl.objects.all())
         total_controls = controls.count()
 
         controls_status_breakdown = dict(
@@ -633,20 +670,21 @@ class BuiltinMetricSample(AbstractBaseModel):
             .values_list("category", "count")
         )
 
-        # Incidents in this folder
-        incidents = Incident.objects.filter(folder=folder)
+        # Incidents
+        incidents = scope(Incident.objects.all())
         total_incidents = incidents.count()
 
-        incidents_severity_breakdown = dict(
+        incidents_severity_raw = dict(
             incidents.values("severity")
             .annotate(count=Count("id"))
             .values_list("severity", "count")
         )
-        # Convert severity integers to labels using Incident.Severity
-        severity_labels = {choice[0]: choice[1] for choice in Incident.Severity.choices}
+        incident_severity_labels = {
+            choice[0]: choice[1] for choice in Incident.Severity.choices
+        }
         incidents_severity_breakdown = {
-            severity_labels.get(k, str(k)): v
-            for k, v in incidents_severity_breakdown.items()
+            incident_severity_labels.get(k, str(k)): v
+            for k, v in incidents_severity_raw.items()
         }
 
         incidents_status_breakdown = dict(
@@ -655,13 +693,255 @@ class BuiltinMetricSample(AbstractBaseModel):
             .values_list("status", "count")
         )
 
+        incidents_detection_raw = dict(
+            incidents.exclude(detection__in=[None, ""])
+            .values("detection")
+            .annotate(count=Count("id"))
+            .values_list("detection", "count")
+        )
+        detection_labels = {
+            choice[0]: choice[1] for choice in Incident.Detection.choices
+        }
+        incidents_detection_breakdown = {
+            detection_labels.get(k, str(k)): v
+            for k, v in incidents_detection_raw.items()
+        }
+
+        incidents_qualifications_breakdown = dict(
+            incidents.values("qualifications__name")
+            .annotate(count=Count("id", distinct=True))
+            .filter(qualifications__name__isnull=False)
+            .values_list("qualifications__name", "count")
+        )
+
+        # Task templates: status comes from TaskNode (current node for non-recurrent,
+        # latest past occurrence for recurrent). Mirrors helpers.task_template_per_status.
+        from core.models import TaskNode
+        from django.db.models import Subquery, OuterRef
+        from django.utils import timezone as _tz
+
+        task_templates = scope(TaskTemplate.objects.all())
+        task_templates_status_breakdown = {
+            label: 0 for _key, label in TaskNode.TASK_STATUS_CHOICES
+        }
+        status_label_by_key = dict(TaskNode.TASK_STATUS_CHOICES)
+        today = _tz.localdate()
+
+        last_occurrence_subq = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=today)
+            .order_by("-due_date")
+            .values("status")[:1]
+        )
+        single_node_subq = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"))
+            .order_by("-due_date")
+            .values("status")[:1]
+        )
+
+        for status in (
+            task_templates.filter(is_recurrent=True)
+            .annotate(node_status=Subquery(last_occurrence_subq))
+            .values_list("node_status", flat=True)
+        ):
+            label = status_label_by_key.get(status or "pending", "pending")
+            task_templates_status_breakdown[label] = (
+                task_templates_status_breakdown.get(label, 0) + 1
+            )
+        for status in (
+            task_templates.filter(is_recurrent=False)
+            .annotate(node_status=Subquery(single_node_subq))
+            .values_list("node_status", flat=True)
+        ):
+            label = status_label_by_key.get(status or "pending", "pending")
+            task_templates_status_breakdown[label] = (
+                task_templates_status_breakdown.get(label, 0) + 1
+            )
+
+        # Security exceptions
+        security_exceptions = scope(SecurityException.objects.all())
+        total_security_exceptions = security_exceptions.count()
+
+        security_exceptions_status_breakdown = dict(
+            security_exceptions.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        )
+
+        sec_exc_severity_raw = dict(
+            security_exceptions.values("severity")
+            .annotate(count=Count("id"))
+            .values_list("severity", "count")
+        )
+        severity_labels = {choice[0]: choice[1] for choice in Severity.choices}
+        security_exceptions_severity_breakdown = {
+            severity_labels.get(k, str(k)): v for k, v in sec_exc_severity_raw.items()
+        }
+
+        # Risk acceptances
+        total_risk_acceptances = scope(RiskAcceptance.objects.all()).count()
+
+        # Risk scenarios qualifications (scoped via the parent risk assessment's folder)
+        risk_scenarios_qs = (
+            RiskScenario.objects.all()
+            if is_global
+            else RiskScenario.objects.filter(risk_assessment__folder=folder)
+        )
+        risk_scenarios_qualifications_breakdown = dict(
+            risk_scenarios_qs.values("qualifications__name")
+            .annotate(count=Count("id", distinct=True))
+            .filter(qualifications__name__isnull=False)
+            .values_list("qualifications__name", "count")
+        )
+
+        # Frameworks "in use" = distinct frameworks referenced by accessible audits
+        audits_qs = (
+            ComplianceAssessment.objects.all()
+            if is_global
+            else ComplianceAssessment.objects.filter(folder=folder)
+        )
+        total_frameworks_in_use = Framework.objects.filter(
+            id__in=audits_qs.values_list("framework_id", flat=True).distinct()
+        ).count()
+
+        # Assets
+        assets = scope(Asset.objects.all())
+        total_assets = assets.count()
+        # Labels for Asset.Type / Evidence.Status / Vulnerability.Status / Assessment.Status
+        # come from gettext_lazy proxies. They satisfy dict.get/__eq__ but JSON serialization
+        # rejects them as dict keys, so force str() at construction time.
+        assets_type_labels = {
+            choice[0]: str(choice[1]) for choice in Asset.Type.choices
+        }
+        assets_type_breakdown = {
+            assets_type_labels.get(k, str(k)): v
+            for k, v in assets.values("type")
+            .annotate(count=Count("id"))
+            .values_list("type", "count")
+        }
+
+        # Evidence
+        evidence = scope(Evidence.objects.all())
+        total_evidence = evidence.count()
+        evidence_status_labels = {
+            choice[0]: str(choice[1]) for choice in Evidence.Status.choices
+        }
+        evidence_status_breakdown = {
+            evidence_status_labels.get(k, str(k)): v
+            for k, v in evidence.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        }
+        evidence_expiring_30d = evidence.filter(
+            expiry_date__isnull=False,
+            expiry_date__gte=today,
+            expiry_date__lte=today + timedelta(days=30),
+        ).count()
+
+        # Vulnerabilities
+        vulnerabilities = scope(Vulnerability.objects.all())
+        total_vulnerabilities = vulnerabilities.count()
+        vuln_severity_raw = dict(
+            vulnerabilities.values("severity")
+            .annotate(count=Count("id"))
+            .values_list("severity", "count")
+        )
+        # Vulnerability.severity uses the shared core Severity choices.
+        vuln_severity_breakdown = {
+            severity_labels.get(k, str(k)): v for k, v in vuln_severity_raw.items()
+        }
+        vuln_status_labels = {
+            choice[0]: str(choice[1]) for choice in Vulnerability.Status.choices
+        }
+        vulnerabilities_status_breakdown = {
+            vuln_status_labels.get(k, str(k)): v
+            for k, v in vulnerabilities.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        }
+
+        # Task occurrences: overdue + due in next 7 days (excluding completed / cancelled).
+        # TaskNode.folder is propagated from its TaskTemplate.folder, so direct filter is correct.
+        from core.models import TaskNode
+
+        open_tasks = scope(TaskNode.objects.all()).exclude(
+            status__in=["completed", "cancelled"]
+        )
+        tasks_overdue = open_tasks.filter(due_date__lt=today).count()
+        tasks_due_7d = open_tasks.filter(
+            due_date__gte=today, due_date__lte=today + timedelta(days=7)
+        ).count()
+
+        # Applied controls — ETA state (on track / late / no ETA) and priority breakdown.
+        eta_on_track = controls.filter(Q(eta__isnull=False) & Q(eta__gte=today)).count()
+        eta_late = controls.filter(
+            Q(eta__isnull=False)
+            & Q(eta__lt=today)
+            & ~Q(status__in=["active", "deprecated"])
+        ).count()
+        eta_no_eta = controls.filter(eta__isnull=True).count()
+        controls_eta_breakdown = {
+            str(_("On track")): eta_on_track,
+            str(_("Late")): eta_late,
+            str(_("No ETA")): eta_no_eta,
+        }
+        controls_priority_breakdown = {
+            str(k if k is not None else _("Unset")): v
+            for k, v in controls.values("priority")
+            .annotate(count=Count("id"))
+            .values_list("priority", "count")
+        }
+
+        # Audits rollup: count, status breakdown, mean progress.
+        total_audits = audits_qs.count()
+        audit_status_labels = {
+            choice[0]: str(choice[1]) for choice in ComplianceAssessment.Status.choices
+        }
+        audits_status_breakdown = {
+            audit_status_labels.get(k, str(k) if k else str(_("Unset"))): v
+            for k, v in audits_qs.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        }
+        # progress is a Python @property, so iterate; cost is bounded by daily snapshot.
+        if total_audits:
+            progresses = [a.progress for a in audits_qs.only("id")]
+            audits_avg_progress = (
+                round(sum(progresses) / len(progresses)) if progresses else 0
+            )
+        else:
+            audits_avg_progress = 0
+
         return {
             "total_controls": total_controls,
             "controls_status_breakdown": controls_status_breakdown,
             "controls_category_breakdown": controls_category_breakdown,
+            "controls_eta_breakdown": controls_eta_breakdown,
+            "controls_priority_breakdown": controls_priority_breakdown,
             "total_incidents": total_incidents,
             "incidents_severity_breakdown": incidents_severity_breakdown,
             "incidents_status_breakdown": incidents_status_breakdown,
+            "incidents_detection_breakdown": incidents_detection_breakdown,
+            "incidents_qualifications_breakdown": incidents_qualifications_breakdown,
+            "task_templates_status_breakdown": task_templates_status_breakdown,
+            "security_exceptions_status_breakdown": security_exceptions_status_breakdown,
+            "security_exceptions_severity_breakdown": security_exceptions_severity_breakdown,
+            "total_security_exceptions": total_security_exceptions,
+            "total_risk_acceptances": total_risk_acceptances,
+            "total_frameworks_in_use": total_frameworks_in_use,
+            "risk_scenarios_qualifications_breakdown": risk_scenarios_qualifications_breakdown,
+            "total_assets": total_assets,
+            "assets_type_breakdown": assets_type_breakdown,
+            "total_evidence": total_evidence,
+            "evidence_status_breakdown": evidence_status_breakdown,
+            "evidence_expiring_30d": evidence_expiring_30d,
+            "total_vulnerabilities": total_vulnerabilities,
+            "vulnerabilities_severity_breakdown": vuln_severity_breakdown,
+            "vulnerabilities_status_breakdown": vulnerabilities_status_breakdown,
+            "tasks_overdue": tasks_overdue,
+            "tasks_due_7d": tasks_due_7d,
+            "total_audits": total_audits,
+            "audits_status_breakdown": audits_status_breakdown,
+            "audits_avg_progress": audits_avg_progress,
         }
 
 
