@@ -38,6 +38,12 @@ export const load: PageServerLoad = async (event) => {
 	const allProjects = projectRes.ok ? ((await projectRes.json()).results ?? []) : [];
 	const projectOptions = allProjects.filter((p: any) => p.id !== event.params.id);
 
+	const snapshotsRes = await event.fetch(
+		`${BASE_API_URL}/metrology/builtin-metric-samples/for_object/?model=project&object_id=${event.params.id}`
+	);
+	const rawSnapshots = snapshotsRes.ok ? await snapshotsRes.json() : [];
+	const snapshots = Array.isArray(rawSnapshots) ? [...rawSnapshots].reverse() : [];
+
 	return {
 		...detail,
 		statusOptions,
@@ -45,7 +51,8 @@ export const load: PageServerLoad = async (event) => {
 		priorityOptions,
 		actorOptions,
 		collectionOptions,
-		projectOptions
+		projectOptions,
+		snapshots
 	};
 };
 

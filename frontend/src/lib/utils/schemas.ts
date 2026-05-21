@@ -1609,6 +1609,7 @@ export const ProjectSchema = z.object({
 	organizational_alignment: z.string().optional(),
 	approval_requirements: z.string().optional(),
 	budget: z.coerce.number().optional().nullable(),
+	actual_cost: z.coerce.number().optional().nullable(),
 	currency: z.string().max(3).optional(),
 	linked_collection: z.string().uuid().optional().nullable(),
 	parent_project: z.string().uuid().optional().nullable(),

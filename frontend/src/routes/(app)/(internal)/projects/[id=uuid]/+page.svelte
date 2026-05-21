@@ -6,6 +6,7 @@
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -120,6 +121,7 @@
 		end_date: string | null;
 		eta: string | null;
 		budget: number | null;
+		actual_cost: number | null;
 		currency: string;
 		tolerances: {
 			time?: { plus_days?: number; minus_days?: number };
@@ -134,6 +136,7 @@
 		end_date: null,
 		eta: null,
 		budget: null,
+		actual_cost: null,
 		currency: '',
 		tolerances: {}
 	});
@@ -144,11 +147,24 @@
 			end_date: project.end_date ?? null,
 			eta: project.eta ?? null,
 			budget: project.budget ?? null,
+			actual_cost: project.actual_cost ?? null,
 			currency: project.currency ?? '',
 			tolerances: structuredClone(project.tolerances ?? {})
 		};
 		scheduleEditing = true;
 	}
+
+	let budgetSpentPct = $derived(
+		project.budget && Number(project.budget) > 0
+			? (Number(project.actual_cost ?? 0) / Number(project.budget)) * 100
+			: 0
+	);
+	let budgetRemaining = $derived(
+		project.budget != null ? Number(project.budget) - Number(project.actual_cost ?? 0) : null
+	);
+	let budgetBarColor = $derived(
+		budgetSpentPct > 100 ? 'bg-red-500' : budgetSpentPct > 80 ? 'bg-amber-500' : 'bg-green-500'
+	);
 
 	async function saveSchedule() {
 		if ((await patchProject(scheduleDraft, 'schedule')) === true) scheduleEditing = false;
@@ -235,6 +251,222 @@
 		if ((await patchProject(basicsDraft, 'basics')) === true) basicsEditing = false;
 	}
 
+	// --- Analytics tab ---
+	let snapshots = $derived(data.snapshots ?? []);
+	let latestSnapshot = $derived(
+		snapshots.length > 0 ? snapshots[snapshots.length - 1].metrics : null
+	);
+	let snapshot7dAgo = $derived(
+		snapshots.length >= 8 ? snapshots[snapshots.length - 8].metrics : null
+	);
+	let progressDelta7d = $derived(
+		latestSnapshot?.progress != null && snapshot7dAgo?.progress != null
+			? latestSnapshot.progress - snapshot7dAgo.progress
+			: null
+	);
+
+	let progressChartEl: HTMLDivElement | null = $state(null);
+	let budgetChartEl: HTMLDivElement | null = $state(null);
+	let lifecycleChartEl: HTMLDivElement | null = $state(null);
+	let progressChart: any = $state(null);
+	let budgetChart: any = $state(null);
+	let lifecycleChart: any = $state(null);
+
+	const statusYOrder = [
+		'cancelled',
+		'on_hold',
+		'draft',
+		'initiated',
+		'planning',
+		'in_progress',
+		'closing',
+		'closed'
+	];
+	const healthYOrder = ['red', 'amber', 'green'];
+
+	async function renderCharts() {
+		if (snapshots.length === 0) return;
+		const echarts = await import('echarts');
+		const dates = snapshots.map((s: any) => s.date);
+
+		if (progressChartEl) {
+			progressChart?.dispose?.();
+			progressChart = echarts.init(progressChartEl, null, { renderer: 'svg' });
+			progressChart.setOption({
+				grid: { left: 40, right: 20, top: 20, bottom: 30 },
+				xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 10 } },
+				yAxis: { type: 'value', min: 0, max: 100, axisLabel: { formatter: '{value}%' } },
+				tooltip: { trigger: 'axis' },
+				series: [
+					{
+						type: 'line',
+						smooth: true,
+						symbol: 'circle',
+						symbolSize: 4,
+						lineStyle: { width: 2 },
+						areaStyle: { opacity: 0.1 },
+						data: snapshots.map((s: any) => s.metrics.progress ?? null),
+						connectNulls: true
+					}
+				]
+			});
+		}
+
+		if (lifecycleChartEl) {
+			lifecycleChart?.dispose?.();
+			lifecycleChart = echarts.init(lifecycleChartEl, null, { renderer: 'svg' });
+			const seriesLabels = [m.projectStatus(), m.projectHealth(), m.projectPriority()];
+			lifecycleChart.setOption({
+				tooltip: {
+					trigger: 'axis',
+					formatter: (params: any[]) => {
+						if (!params || params.length === 0) return '';
+						const date = params[0].axisValueLabel ?? params[0].axisValue ?? '';
+						const lines = params.map((p) => {
+							const label = seriesLabels[p.seriesIndex] ?? '';
+							const raw = p.value;
+							let value: string;
+							if (raw == null || raw === '') value = '--';
+							else if (p.seriesIndex === 2) value = `P${raw}`;
+							else value = safeTranslate(String(raw));
+							return `<div style="display:flex;justify-content:space-between;gap:12px;"><span>${p.marker} ${label}</span><strong>${value}</strong></div>`;
+						});
+						return `<div style="font-weight:600;margin-bottom:4px;">${date}</div>${lines.join('')}`;
+					}
+				},
+				axisPointer: { link: [{ xAxisIndex: 'all' }] },
+				grid: [
+					{ left: 90, right: 20, top: 30, height: 80 },
+					{ left: 90, right: 20, top: 150, height: 60 },
+					{ left: 90, right: 20, top: 240, height: 60 }
+				],
+				xAxis: [
+					{ type: 'category', data: dates, gridIndex: 0, axisLabel: { show: false } },
+					{ type: 'category', data: dates, gridIndex: 1, axisLabel: { show: false } },
+					{ type: 'category', data: dates, gridIndex: 2, axisLabel: { fontSize: 10 } }
+				],
+				yAxis: [
+					{
+						type: 'category',
+						data: statusYOrder,
+						gridIndex: 0,
+						name: m.projectStatus(),
+						nameLocation: 'middle',
+						nameGap: 78,
+						nameTextStyle: { fontSize: 10, fontWeight: 'bold' },
+						axisLabel: { fontSize: 9, formatter: (v: string) => safeTranslate(v) }
+					},
+					{
+						type: 'category',
+						data: healthYOrder,
+						gridIndex: 1,
+						name: m.projectHealth(),
+						nameLocation: 'middle',
+						nameGap: 78,
+						nameTextStyle: { fontSize: 10, fontWeight: 'bold' },
+						axisLabel: { fontSize: 9, formatter: (v: string) => safeTranslate(v) }
+					},
+					{
+						type: 'value',
+						min: 1,
+						max: 4,
+						interval: 1,
+						inverse: true,
+						gridIndex: 2,
+						name: m.projectPriority(),
+						nameLocation: 'middle',
+						nameGap: 78,
+						nameTextStyle: { fontSize: 10, fontWeight: 'bold' },
+						axisLabel: { fontSize: 9, formatter: (v: number) => `P${v}` }
+					}
+				],
+				series: [
+					{
+						type: 'line',
+						step: 'end',
+						symbol: 'none',
+						lineStyle: { width: 2, color: '#3b82f6' },
+						areaStyle: { color: '#3b82f6', opacity: 0.15 },
+						data: snapshots.map((s: any) => s.metrics.status),
+						xAxisIndex: 0,
+						yAxisIndex: 0,
+						connectNulls: true
+					},
+					{
+						type: 'line',
+						step: 'end',
+						symbol: 'none',
+						lineStyle: { width: 2, color: '#7c3aed' },
+						areaStyle: { color: '#7c3aed', opacity: 0.15 },
+						data: snapshots.map((s: any) => s.metrics.health),
+						xAxisIndex: 1,
+						yAxisIndex: 1,
+						connectNulls: true
+					},
+					{
+						type: 'line',
+						step: 'end',
+						symbol: 'none',
+						lineStyle: { width: 2, color: '#f97316' },
+						areaStyle: { color: '#f97316', opacity: 0.15 },
+						data: snapshots.map((s: any) => s.metrics.priority),
+						xAxisIndex: 2,
+						yAxisIndex: 2,
+						connectNulls: true
+					}
+				]
+			});
+		}
+
+		if (budgetChartEl) {
+			budgetChart?.dispose?.();
+			budgetChart = echarts.init(budgetChartEl, null, { renderer: 'svg' });
+			const budgetSeries = snapshots.map((s: any) => s.metrics.budget ?? null);
+			const actualSeries = snapshots.map((s: any) => s.metrics.actual_cost ?? null);
+			budgetChart.setOption({
+				grid: { left: 60, right: 20, top: 30, bottom: 30 },
+				xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 10 } },
+				yAxis: { type: 'value' },
+				tooltip: { trigger: 'axis' },
+				legend: { top: 0, textStyle: { fontSize: 11 } },
+				series: [
+					{
+						name: m.expectedBudget(),
+						type: 'line',
+						data: budgetSeries,
+						lineStyle: { type: 'dashed', width: 2 },
+						symbol: 'none',
+						connectNulls: true
+					},
+					{
+						name: m.actualCost(),
+						type: 'line',
+						data: actualSeries,
+						lineStyle: { width: 2 },
+						areaStyle: { opacity: 0.15 },
+						symbol: 'circle',
+						symbolSize: 4,
+						connectNulls: true
+					}
+				]
+			});
+		}
+	}
+
+	$effect(() => {
+		if (activeTab === 'analytics') {
+			void snapshots;
+			setTimeout(renderCharts, 0);
+		} else {
+			progressChart?.dispose?.();
+			budgetChart?.dispose?.();
+			lifecycleChart?.dispose?.();
+			progressChart = null;
+			budgetChart = null;
+			lifecycleChart = null;
+		}
+	});
+
 	let progressValue = $derived(project.progress ?? 0);
 </script>
 
@@ -298,11 +530,12 @@
 								placeholder="https://…"
 							/>
 						</label>
-						<label class="block">
+						<div class="block">
 							<span class="text-xs font-semibold text-gray-500 uppercase">{m.description()}</span>
-							<textarea bind:value={basicsDraft.description} class="textarea w-full mt-1" rows="4"
-							></textarea>
-						</label>
+							<div class="mt-1">
+								<MarkdownField label="" bind:value={basicsDraft.description} rows={4} />
+							</div>
+						</div>
 					</div>
 				{/if}
 			</div>
@@ -431,6 +664,12 @@
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
 				<i class="fa-solid fa-people-arrows mr-2"></i>{m.people()}
+			</Tabs.Trigger>
+			<Tabs.Trigger
+				value="analytics"
+				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+			>
+				<i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}
 			</Tabs.Trigger>
 		</Tabs.List>
 
@@ -572,12 +811,11 @@
 							{section.label}
 						</h3>
 						{#if charterEditing}
-							<textarea
+							<MarkdownField label=""
 								bind:value={charterDraft[section.key]}
-								class="textarea w-full"
-								rows="4"
+								rows={4}
 								placeholder={section.label}
-							></textarea>
+							/>
 						{:else if project[section.key]}
 							<div class="prose prose-sm max-w-none text-gray-900">
 								<MarkdownRenderer content={project[section.key]} />
@@ -666,36 +904,87 @@
 					<div class="text-xs font-semibold text-gray-500 uppercase mb-1">{m.closedAt()}</div>
 					<span class="text-sm text-gray-900">{project.closed_at ?? '--'}</span>
 				</div>
-				<div>
-					<label for="sc-budget" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.budget()}
-					</label>
+				<div class="md:col-span-2">
+					<div class="flex items-baseline justify-between mb-2">
+						<h3 class="text-sm font-semibold text-gray-700">{m.financials()}</h3>
+					</div>
 					{#if scheduleEditing}
-						<input
-							id="sc-budget"
-							type="number"
-							step="0.01"
-							bind:value={scheduleDraft.budget}
-							class="input w-full"
-						/>
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+							<label class="block">
+								<span class="text-xs font-semibold text-gray-500 uppercase">
+									{m.expectedBudget()}
+								</span>
+								<input
+									type="number"
+									step="0.01"
+									bind:value={scheduleDraft.budget}
+									class="input w-full mt-1"
+								/>
+							</label>
+							<label class="block">
+								<span class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</span>
+								<input
+									type="number"
+									step="0.01"
+									bind:value={scheduleDraft.actual_cost}
+									class="input w-full mt-1"
+								/>
+							</label>
+							<label class="block">
+								<span class="text-xs font-semibold text-gray-500 uppercase">{m.currency()}</span>
+								<input
+									type="text"
+									maxlength="3"
+									bind:value={scheduleDraft.currency}
+									class="input w-full mt-1"
+								/>
+							</label>
+						</div>
+					{:else if project.budget == null && project.actual_cost == null}
+						<span class="text-sm text-gray-400 italic">--</span>
 					{:else}
-						<span class="text-sm text-gray-900">{project.budget ?? '--'}</span>
-					{/if}
-				</div>
-				<div>
-					<label for="sc-currency" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.currency()}
-					</label>
-					{#if scheduleEditing}
-						<input
-							id="sc-currency"
-							type="text"
-							maxlength="3"
-							bind:value={scheduleDraft.currency}
-							class="input w-full"
-						/>
-					{:else}
-						<span class="text-sm text-gray-900">{project.currency || '--'}</span>
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+							<div>
+								<div class="text-xs font-semibold text-gray-500 uppercase">
+									{m.expectedBudget()}
+								</div>
+								<div class="text-sm text-gray-900">
+									{project.budget ?? '--'}
+									{project.currency ?? ''}
+								</div>
+							</div>
+							<div>
+								<div class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</div>
+								<div class="text-sm text-gray-900">
+									{project.actual_cost ?? '--'}
+									{project.currency ?? ''}
+								</div>
+							</div>
+							<div>
+								<div class="text-xs font-semibold text-gray-500 uppercase">{m.remaining()}</div>
+								<div
+									class="text-sm font-medium"
+									class:text-gray-900={budgetRemaining == null || budgetRemaining >= 0}
+									class:text-red-600={budgetRemaining != null && budgetRemaining < 0}
+								>
+									{budgetRemaining ?? '--'}
+									{project.currency ?? ''}
+								</div>
+							</div>
+						</div>
+						{#if project.budget != null && Number(project.budget) > 0}
+							<div class="flex items-center gap-2">
+								<div class="grow h-2 rounded-full bg-gray-200 overflow-hidden">
+									<div
+										class="h-full {budgetBarColor} transition-all"
+										style="width: {Math.min(budgetSpentPct, 100)}%"
+									></div>
+								</div>
+								<span class="text-xs text-gray-700 shrink-0 tabular-nums">
+									{budgetSpentPct.toFixed(0)}%
+								</span>
+							</div>
+						{/if}
 					{/if}
 				</div>
 			</div>
@@ -898,12 +1187,11 @@
 							{section.label}
 						</h3>
 						{#if scopeEditing}
-							<textarea
+							<MarkdownField label=""
 								bind:value={scopeDraft[section.key]}
-								class="textarea w-full"
-								rows="4"
+								rows={4}
 								placeholder={section.label}
-							></textarea>
+							/>
 						{:else if project[section.key]}
 							<div class="prose prose-sm max-w-none text-gray-900">
 								<MarkdownRenderer content={project[section.key]} />
@@ -1104,6 +1392,103 @@
 					{/if}
 				</div>
 			</div>
+		</Tabs.Content>
+
+		<!-- ANALYTICS -->
+		<Tabs.Content value="analytics" class="p-6">
+			<h2 class="text-lg font-semibold mb-4">{m.analytics()}</h2>
+
+			{#if snapshots.length === 0}
+				<div class="text-center py-12 text-gray-400">
+					<i class="fa-solid fa-chart-line text-3xl mb-3"></i>
+					<p class="text-sm">{m.noSnapshotsYet()}</p>
+				</div>
+			{:else}
+				<!-- KPI strip -->
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+					<div class="rounded-lg bg-gray-50 p-4">
+						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+							{m.progress()}
+						</div>
+						<div class="flex items-baseline gap-2">
+							<span class="text-2xl font-bold text-gray-900">{latestSnapshot?.progress ?? 0}%</span>
+							{#if progressDelta7d != null}
+								<span
+									class="text-xs font-medium"
+									class:text-green-600={progressDelta7d > 0}
+									class:text-gray-500={progressDelta7d === 0}
+									class:text-red-600={progressDelta7d < 0}
+								>
+									{progressDelta7d >= 0 ? '+' : ''}{progressDelta7d}
+									{m.last7Days()}
+								</span>
+							{/if}
+						</div>
+					</div>
+					<div class="rounded-lg bg-gray-50 p-4">
+						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+							{m.projectStatus()}
+						</div>
+						<span
+							class="badge text-sm font-medium px-2.5 py-0.5 rounded-full {statusColorMap[
+								latestSnapshot?.status
+							] ?? 'bg-gray-100 text-gray-600'}"
+						>
+							{safeTranslate(latestSnapshot?.status ?? '--')}
+						</span>
+					</div>
+					<div class="rounded-lg bg-gray-50 p-4">
+						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+							{m.projectHealth()}
+						</div>
+						<span
+							class="badge text-sm font-medium px-2.5 py-0.5 rounded-full {healthColorMap[
+								latestSnapshot?.health
+							] ?? 'bg-gray-100 text-gray-600'}"
+						>
+							{safeTranslate(latestSnapshot?.health ?? '--')}
+						</span>
+					</div>
+					<div class="rounded-lg bg-gray-50 p-4">
+						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+							{m.actualCost()}
+						</div>
+						<div class="text-lg font-bold text-gray-900">
+							{latestSnapshot?.actual_cost ?? '--'}
+							{#if latestSnapshot?.budget}
+								<span class="text-xs text-gray-500 font-normal">
+									/ {latestSnapshot.budget}
+									{latestSnapshot.currency ?? ''}
+								</span>
+							{/if}
+						</div>
+					</div>
+				</div>
+
+				<!-- Lifecycle multi-curve area chart -->
+				<div class="mb-6">
+					<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+						{m.lifecycle()} — {m.timeline()}
+					</div>
+					<div bind:this={lifecycleChartEl} style="width: 100%; height: 320px;"></div>
+				</div>
+
+				<!-- Charts -->
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<div>
+						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+							{m.progress()}
+						</div>
+						<div bind:this={progressChartEl} style="width: 100%; height: 240px;"></div>
+					</div>
+					<div>
+						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+							{m.financials()}
+						</div>
+						<div bind:this={budgetChartEl} style="width: 100%; height: 240px;"></div>
+					</div>
+				</div>
+			{/if}
 		</Tabs.Content>
 	</Tabs>
 </div>

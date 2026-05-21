@@ -267,6 +267,9 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
     approval_requirements = models.TextField(blank=True)
 
     budget = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True)
+    actual_cost = models.DecimalField(
+        max_digits=14, decimal_places=2, blank=True, null=True
+    )
     currency = models.CharField(max_length=3, blank=True)
 
     linked_collection = models.ForeignKey(
@@ -314,6 +317,12 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
             self.closed_at = None
 
         super().save(*args, **kwargs)
+
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
+        if self.folder_id:
+            BuiltinMetricSample.update_or_create_snapshot(self.folder)
 
 
 class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):

@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.views import BaseModelViewSet, LONG_CACHE_TTL
+from iam.models import RoleAssignment
 from metrology.models import (
     MetricDefinition,
     MetricInstance,
@@ -15,6 +16,24 @@ from metrology.models import (
     DashboardWidget,
 )
 from metrology.builtin_metrics import BUILTIN_METRICS, get_available_metrics_for_model
+
+
+def _user_can_read_target(user, content_type, object_id):
+    import uuid
+
+    target_model = content_type.model_class()
+    if target_model is None:
+        return False
+    try:
+        object_uuid = (
+            object_id if isinstance(object_id, uuid.UUID) else uuid.UUID(str(object_id))
+        )
+    except (ValueError, TypeError):
+        return False
+    try:
+        return RoleAssignment.is_object_readable(user, target_model, object_uuid)
+    except NotImplementedError:
+        return False
 
 
 class MetricDefinitionViewSet(BaseModelViewSet):
@@ -227,6 +246,12 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        if not _user_can_read_target(request.user, content_type, object_id):
+            return Response(
+                {"error": "Not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         samples = BuiltinMetricSample.objects.filter(
             content_type=content_type, object_id=object_id
         ).order_by("-date")
@@ -270,6 +295,12 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
         if not content_type:
             return Response(
                 {"error": "Content type not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not _user_can_read_target(request.user, content_type, object_id):
+            return Response(
+                {"error": "Not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 

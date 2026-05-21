@@ -292,6 +292,94 @@ BUILTIN_METRICS = {
                 "Mean completion percentage across in-scope compliance assessments"
             ),
         },
+        # Projects rollup
+        "projects_total": {
+            "label": _("Total Projects"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Total projects (root folder = whole organization)"),
+        },
+        "projects_status_breakdown": {
+            "label": _("Projects Status Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Projects count per status"),
+        },
+        "projects_health_breakdown": {
+            "label": _("Projects Health Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Projects count per health (RAG)"),
+        },
+        "projects_priority_breakdown": {
+            "label": _("Projects Priority Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Projects count per priority level"),
+        },
+        "projects_avg_progress": {
+            "label": _("Projects Average Progress"),
+            "type": METRIC_TYPE_PERCENTAGE,
+            "description": _("Mean completion percentage across in-scope projects"),
+        },
+        "projects_total_budget": {
+            "label": _("Projects Total Budget"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Sum of expected budgets across in-scope projects"),
+        },
+        "projects_total_actual_cost": {
+            "label": _("Projects Total Actual Cost"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Sum of actual costs across in-scope projects"),
+        },
+    },
+    "Project": {
+        "status": {
+            "label": _("Status"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("Lifecycle status"),
+        },
+        "health": {
+            "label": _("Health"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("RAG indicator"),
+        },
+        "priority": {
+            "label": _("Priority"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Priority level (1-4)"),
+        },
+        "progress": {
+            "label": _("Progress"),
+            "type": METRIC_TYPE_PERCENTAGE,
+            "description": _("Completion percentage"),
+        },
+        "start_date": {
+            "label": _("Start Date"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("Planned start date"),
+        },
+        "end_date": {
+            "label": _("End Date"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("Planned end date"),
+        },
+        "eta": {
+            "label": _("ETA"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("Forecast end date"),
+        },
+        "budget": {
+            "label": _("Budget"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Expected budget"),
+        },
+        "actual_cost": {
+            "label": _("Actual Cost"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Consumed cost"),
+        },
+        "currency": {
+            "label": _("Currency"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("ISO 4217 currency code"),
+        },
     },
 }
 

@@ -487,8 +487,29 @@ class BuiltinMetricSample(AbstractBaseModel):
             return cls._compute_findings_assessment_metrics(obj)
         elif model_name == "Folder":
             return cls._compute_folder_metrics(obj)
+        elif model_name == "Project":
+            return cls._compute_project_metrics(obj)
         else:
             return {}
+
+    @classmethod
+    def _compute_project_metrics(cls, project):
+        return {
+            "status": project.status.name if project.status_id else None,
+            "health": project.health.name if project.health_id else None,
+            "priority": project.priority,
+            "progress": project.progress,
+            "start_date": project.start_date.isoformat()
+            if project.start_date
+            else None,
+            "end_date": project.end_date.isoformat() if project.end_date else None,
+            "eta": project.eta.isoformat() if project.eta else None,
+            "budget": float(project.budget) if project.budget is not None else None,
+            "actual_cost": float(project.actual_cost)
+            if project.actual_cost is not None
+            else None,
+            "currency": project.currency or "",
+        }
 
     @classmethod
     def _compute_compliance_assessment_metrics(cls, assessment):
@@ -911,6 +932,56 @@ class BuiltinMetricSample(AbstractBaseModel):
         else:
             audits_avg_progress = 0
 
+        # Projects rollup
+        from pmbok.models import Project as _Project
+        from django.db.models import Sum, Avg
+
+        projects = scope(_Project.objects.all())
+        projects_total = projects.count()
+        projects_status_breakdown = dict(
+            projects.exclude(status__isnull=True)
+            .values("status__name")
+            .annotate(count=Count("id"))
+            .values_list("status__name", "count")
+        )
+        projects_health_breakdown = dict(
+            projects.exclude(health__isnull=True)
+            .values("health__name")
+            .annotate(count=Count("id"))
+            .values_list("health__name", "count")
+        )
+        projects_priority_breakdown = dict(
+            projects.exclude(priority__isnull=True)
+            .values("priority")
+            .annotate(count=Count("id"))
+            .values_list("priority", "count")
+        )
+        projects_priority_labels = {1: "P1", 2: "P2", 3: "P3", 4: "P4"}
+        projects_priority_breakdown = {
+            projects_priority_labels.get(k, str(k)): v
+            for k, v in projects_priority_breakdown.items()
+        }
+        projects_aggs = projects.aggregate(
+            avg_progress=Avg("progress"),
+            total_budget=Sum("budget"),
+            total_actual_cost=Sum("actual_cost"),
+        )
+        projects_avg_progress = (
+            round(projects_aggs["avg_progress"])
+            if projects_aggs["avg_progress"] is not None
+            else 0
+        )
+        projects_total_budget = (
+            float(projects_aggs["total_budget"])
+            if projects_aggs["total_budget"] is not None
+            else 0
+        )
+        projects_total_actual_cost = (
+            float(projects_aggs["total_actual_cost"])
+            if projects_aggs["total_actual_cost"] is not None
+            else 0
+        )
+
         return {
             "total_controls": total_controls,
             "controls_status_breakdown": controls_status_breakdown,
@@ -942,6 +1013,13 @@ class BuiltinMetricSample(AbstractBaseModel):
             "total_audits": total_audits,
             "audits_status_breakdown": audits_status_breakdown,
             "audits_avg_progress": audits_avg_progress,
+            "projects_total": projects_total,
+            "projects_status_breakdown": projects_status_breakdown,
+            "projects_health_breakdown": projects_health_breakdown,
+            "projects_priority_breakdown": projects_priority_breakdown,
+            "projects_avg_progress": projects_avg_progress,
+            "projects_total_budget": projects_total_budget,
+            "projects_total_actual_cost": projects_total_actual_cost,
         }
 
 
