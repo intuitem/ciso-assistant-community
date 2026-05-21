@@ -79,21 +79,20 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 	);
 	const auditDetailUrl = page.url();
 
-	/**
-	 * Navigate to an assessable requirement assessment edit page.
-	 * NIST CSF v1.1 has ID.AM-1 (Identify → Asset Management) — use it.
-	 */
+	// Resolve the URL of an assessable requirement assessment edit page ONCE
+	// via tree traversal, then reuse direct navigation in subsequent steps —
+	// repeated tree traversals were flaky after multiple visibility edits.
+	// NIST CSF v1.1 has ID.AM-1 (Identify → Asset Management) — use it.
+	const IDAM1 = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
+		'ID - Identify',
+		'ID.AM - Asset Management'
+	]);
+	await IDAM1.content.click();
+	await page.waitForURL('/requirement-assessments/**');
+	const raEditUrl = page.url() + '/edit';
+
 	async function openFirstRequirementAssessment() {
-		await page.goto(auditDetailUrl);
-		const IDAM1 = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
-			'ID - Identify',
-			'ID.AM - Asset Management'
-		]);
-		await IDAM1.content.click();
-		await page.waitForURL('/requirement-assessments/**');
-		// Switch to edit form.
-		const editUrl = page.url() + '/edit';
-		await page.goto(editUrl);
+		await page.goto(raEditUrl);
 		await page.waitForURL(/\/requirement-assessments\/[^/]+\/edit/);
 	}
 
