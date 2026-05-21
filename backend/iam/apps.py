@@ -73,10 +73,12 @@ def _patch_allauth_auth_error_logging():
 
     logger = structlog.get_logger("iam.sso.allauth")
     original = helpers.render_authentication_error
+    
+    _MISSING = object()
 
     @functools.wraps(original)
     def render_authentication_error(
-        request, provider, error="unknown", exception=None, extra_context=None
+        request, provider, error=_MISSING, exception=None, extra_context=None
     ):
         provider_id = (
             getattr(provider, "id", None)
@@ -86,7 +88,7 @@ def _patch_allauth_auth_error_logging():
         logger.error(
             "allauth auth error",
             provider=provider_id,
-            error=str(error) if error else None,
+            error=str(error) if error is not _MISSING and error else None,
             exception_type=type(exception).__name__ if exception else None,
             has_socialaccount_state=bool(request.session.get("socialaccount_state")),
             path=request.path,
@@ -100,15 +102,12 @@ def _patch_allauth_auth_error_logging():
             extra_context_keys=sorted((extra_context or {}).keys()),
             session_keys=sorted(request.session.keys()),
             cookie_names=sorted(request.COOKIES.keys()),
-            exc_info=exception is not None,
+            exc_info=exception,
         )
-        return original(
-            request,
-            provider,
-            error=error,
-            exception=exception,
-            extra_context=extra_context,
-        )
+        kwargs = {"exception": exception, "extra_context": extra_context}
+        if error is not _MISSING:
+            kwargs["error"] = error
+        return original(request, provider, **kwargs)
 
     render_authentication_error._ciso_patched = True
 
