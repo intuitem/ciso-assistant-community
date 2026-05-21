@@ -118,10 +118,41 @@ def _build_answer_context(questions_qs, answers_qs):
     )
 
 
+def _normalize_legacy_choice_values(apps, db_alias):
+    """Convert legacy boolean compute_result literals in QuestionChoice rows.
+
+    Existing rows may store "true"/"false" from older library imports.
+    Normalize them to the semantic values so the framework builder UI
+    (which only offers compliant/non_compliant/…) renders them correctly.
+    """
+    QuestionChoice = apps.get_model("core", "QuestionChoice")
+    LEGACY_MAP = {
+        "true": "compliant",
+        "false": "non_compliant",
+    }
+    for old, new in LEGACY_MAP.items():
+        updated = (
+            QuestionChoice.objects.using(db_alias)
+            .filter(compute_result=old)
+            .update(compute_result=new)
+        )
+        if updated:
+            logger.info(
+                "Normalized %d QuestionChoice.compute_result '%s' -> '%s'",
+                updated,
+                old,
+                new,
+            )
+
+
 def backfill_results(apps, schema_editor):
     RequirementAssessment = apps.get_model("core", "RequirementAssessment")
     db_alias = schema_editor.connection.alias
 
+    # --- Step 1: normalize legacy "true"/"false" in QuestionChoice rows ---
+    _normalize_legacy_choice_values(apps, db_alias)
+
+    # --- Step 2: recompute results for question-driven RAs only -----------
     RESULT_NOT_ASSESSED = "not_assessed"
     RESULT_COMPLIANT = "compliant"
     RESULT_NON_COMPLIANT = "non_compliant"
@@ -137,7 +168,14 @@ def backfill_results(apps, schema_editor):
     }
 
     def recompute(ra):
+        """Recompute score/result. Return True if the RA was modified."""
         questions_qs = ra.requirement.questions.prefetch_related("choices").all()
+
+        # No questions → this RA is manual or respondent-alignment-driven.
+        # Leave it untouched to avoid corrupting manually-set results.
+        if not questions_qs:
+            return False
+
         answers_qs = (
             ra.answers.select_related("question")
             .prefetch_related("selected_choices")
@@ -210,6 +248,8 @@ def backfill_results(apps, schema_editor):
             aggregated = _aggregate_compute_results(results)
             ra.result = result_map.get(aggregated, RESULT_NOT_ASSESSED)
 
+        return True
+
     fields = ["score", "result", "is_scored"]
     queryset = RequirementAssessment.objects.using(db_alias).select_related(
         "compliance_assessment", "requirement"
@@ -217,7 +257,8 @@ def backfill_results(apps, schema_editor):
 
     batch = []
     for ra in queryset.iterator(chunk_size=BATCH_SIZE):
-        recompute(ra)
+        if not recompute(ra):
+            continue
         batch.append(ra)
         if len(batch) >= BATCH_SIZE:
             RequirementAssessment.objects.using(db_alias).bulk_update(batch, fields)

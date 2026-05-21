@@ -28,6 +28,20 @@ export function isSliderConfig(
 	return !!config && (config as { widget?: unknown }).widget === 'slider';
 }
 
+/** Normalize legacy compute_result values ("true"/"false") to semantic strings. */
+const LEGACY_COMPUTE_RESULT_MAP: Record<string, string> = {
+	true: 'compliant',
+	false: 'non_compliant'
+};
+
+function normalizeComputeResult(value: unknown): string | null {
+	if (value === null || value === undefined) return null;
+	if (typeof value === 'boolean') return value ? 'compliant' : 'non_compliant';
+	if (typeof value !== 'string') return null;
+	const v = value.trim().toLowerCase();
+	return LEGACY_COMPUTE_RESULT_MAP[v] ?? (v || null);
+}
+
 export interface QuestionChoice {
 	id: string;
 	urn: string | null;
@@ -384,7 +398,7 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 						value: c.value,
 						annotation: c.annotation,
 						add_score: c.add_score,
-						compute_result: c.compute_result,
+						compute_result: normalizeComputeResult(c.compute_result),
 						order: c.order,
 						description: c.description,
 						color: c.color,
@@ -466,7 +480,7 @@ export function hydrateDraft(
 			value: (c.value ?? null) as string | null,
 			annotation: (c.annotation ?? null) as string | null,
 			add_score: (c.add_score ?? null) as number | null,
-			compute_result: (c.compute_result ?? null) as string | null,
+			compute_result: normalizeComputeResult(c.compute_result),
 			order: (c.order ?? 0) as number,
 			description: (c.description ?? null) as string | null,
 			color: (c.color ?? null) as string | null,
