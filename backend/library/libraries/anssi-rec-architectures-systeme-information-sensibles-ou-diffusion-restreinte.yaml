@@ -47,7 +47,7 @@ description: "L'instruction interminist\xE9rielle n\xB0 901/SGDSN/ANSSI (II 901)
   \ SI soit conforme aux recommandations de ce guide pour attester de sa conformit\xE9\
   \ \xE0 l'ensemble des exigences r\xE9glementaires II 901. Un travail compl\xE9mentaire\
   \ est n\xE9cessaire pour s'assurer de la conformit\xE9 exhaustive du SI consid\xE9\
-  r\xE9, si un niveau d'homologation sensible ou DR est vis\xE9."
+  r\xE9, si un niveau d'homologation sensible ou DR est vis\xE9.\n\nSource : https://messervices.cyber.gouv.fr/guides/recommandations-pour-les-architectures-des-si-sensibles-ou-dr"
 copyright: ANSSI
 version: 3
 publication_date: 2026-05-21
@@ -103,7 +103,7 @@ objects:
       \ ce guide pour attester de sa conformit\xE9 \xE0 l'ensemble des exigences r\xE9\
       glementaires II 901. Un travail compl\xE9mentaire est n\xE9cessaire pour s'assurer\
       \ de la conformit\xE9 exhaustive du SI consid\xE9r\xE9, si un niveau d'homologation\
-      \ sensible ou DR est vis\xE9."
+      \ sensible ou DR est vis\xE9.\n\nSource : https://messervices.cyber.gouv.fr/guides/recommandations-pour-les-architectures-des-si-sensibles-ou-dr"
     min_score: 1
     max_score: 5
     requirement_nodes:
