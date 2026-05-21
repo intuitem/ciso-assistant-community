@@ -212,6 +212,29 @@
 		if ((await patchProject(peopleDraft, 'people')) === true) peopleEditing = false;
 	}
 
+	// --- Header basics (name, ref_id, ref_link, description) ---
+	let basicsEditing = $state(false);
+	let basicsDraft: {
+		name: string;
+		ref_id: string;
+		ref_link: string;
+		description: string;
+	} = $state({ name: '', ref_id: '', ref_link: '', description: '' });
+
+	function startBasicsEdit() {
+		basicsDraft = {
+			name: project.name ?? '',
+			ref_id: project.ref_id ?? '',
+			ref_link: project.ref_link ?? '',
+			description: project.description ?? ''
+		};
+		basicsEditing = true;
+	}
+
+	async function saveBasics() {
+		if ((await patchProject(basicsDraft, 'basics')) === true) basicsEditing = false;
+	}
+
 	let progressValue = $derived(project.progress ?? 0);
 </script>
 
@@ -219,26 +242,93 @@
 	<!-- Header bar -->
 	<div class="p-6 border-b border-gray-200">
 		<div class="flex items-start justify-between gap-4 flex-wrap">
-			<div class="min-w-0">
-				<div class="flex items-baseline gap-3">
-					<h1 class="text-2xl font-semibold text-gray-900 truncate">{project.name}</h1>
-					{#if project.ref_id}
-						<span class="text-sm text-gray-500">{project.ref_id}</span>
+			<div class="min-w-0 grow">
+				{#if !basicsEditing}
+					<div class="group flex items-baseline gap-3">
+						<h1 class="text-2xl font-semibold text-gray-900 truncate">{project.name}</h1>
+						{#if project.ref_id}
+							<span class="text-sm text-gray-500">{project.ref_id}</span>
+						{/if}
+						<button
+							onclick={startBasicsEdit}
+							class="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-primary-600"
+							aria-label={m.edit()}
+							title={m.edit()}
+						>
+							<i class="fa-solid fa-pen text-sm"></i>
+						</button>
+					</div>
+					{#if project.ref_link}
+						<a
+							href={project.ref_link}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-primary-600 hover:text-primary-800 hover:underline text-sm inline-flex items-center gap-1 mt-1"
+						>
+							<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+							{project.ref_link}
+						</a>
 					{/if}
-				</div>
-				{#if project.ref_link}
-					<a
-						href={project.ref_link}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-primary-600 hover:text-primary-800 hover:underline text-sm inline-flex items-center gap-1 mt-1"
-					>
-						<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
-						{project.ref_link}
-					</a>
+					{#if project.description}
+						<div class="prose prose-sm max-w-none text-gray-700 mt-3">
+							<MarkdownRenderer content={project.description} />
+						</div>
+					{/if}
+				{:else}
+					<div class="space-y-3 max-w-3xl">
+						<label class="block">
+							<span class="text-xs font-semibold text-gray-500 uppercase">{m.name()}</span>
+							<input type="text" bind:value={basicsDraft.name} class="input w-full mt-1" required />
+						</label>
+						<label class="block">
+							<span class="text-xs font-semibold text-gray-500 uppercase">{m.refId()}</span>
+							<input
+								type="text"
+								maxlength="100"
+								bind:value={basicsDraft.ref_id}
+								class="input w-full mt-1"
+							/>
+						</label>
+						<label class="block">
+							<span class="text-xs font-semibold text-gray-500 uppercase">{m.refLink()}</span>
+							<input
+								type="url"
+								bind:value={basicsDraft.ref_link}
+								class="input w-full mt-1"
+								placeholder="https://…"
+							/>
+						</label>
+						<label class="block">
+							<span class="text-xs font-semibold text-gray-500 uppercase">{m.description()}</span>
+							<textarea bind:value={basicsDraft.description} class="textarea w-full mt-1" rows="4"
+							></textarea>
+						</label>
+					</div>
 				{/if}
 			</div>
+
+			{#if basicsEditing}
+				<div class="shrink-0 flex gap-2">
+					<button
+						class="btn preset-tonal-surface btn-sm"
+						onclick={() => (basicsEditing = false)}
+						disabled={savingSection === 'basics'}>{m.cancel()}</button
+					>
+					<button
+						class="btn preset-filled-primary-500 btn-sm"
+						onclick={saveBasics}
+						disabled={savingSection === 'basics'}
+					>
+						{#if savingSection === 'basics'}<i class="fa-solid fa-spinner fa-spin mr-2"
+							></i>{/if}{m.save()}
+					</button>
+				</div>
+			{/if}
 		</div>
+
+		{#if errorMessage && basicsEditing}
+			<div class="card preset-tonal-error p-3 mt-3 text-sm">{errorMessage}</div>
+		{/if}
 
 		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-4">
 			<div>
