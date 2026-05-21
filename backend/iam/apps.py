@@ -73,7 +73,7 @@ def _patch_allauth_auth_error_logging():
 
     logger = structlog.get_logger("iam.sso.allauth")
     original = helpers.render_authentication_error
-    
+
     _MISSING = object()
 
     @functools.wraps(original)
