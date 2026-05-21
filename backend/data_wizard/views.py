@@ -2590,8 +2590,12 @@ class LoadFileView(APIView):
                     try:
                         df = normalize_df_columns(df)
                     except ValueError as e:
+                        logger.warning(
+                            "Invalid import file structure during column normalization",
+                            exc_info=True,
+                        )
                         return Response(
-                            {"error": str(e)},
+                            {"error": "Invalid file format or columns."},
                             status=status.HTTP_400_BAD_REQUEST,
                         )
                     base_context = BaseContext(
