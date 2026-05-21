@@ -5347,6 +5347,16 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         return Response({"results": object_ids_change})
 
+    @action(detail=False, methods=["get"], name="Get applied controls analytics")
+    def analytics(self, request):
+        """Aggregated analytics over the filtered applied-controls queryset.
+
+        Respects the same filterset as the list endpoint, so the analytics page
+        can carry the table's current filters through verbatim.
+        """
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(ActionPlanBudgetOverview.compute_budget_overview(qs))
+
     @action(
         detail=False, name="Something"
     )  # Write a good name for the "name" keyword argument
@@ -6136,6 +6146,7 @@ class ActionPlanBudgetOverview:
     def compute_budget_overview(queryset):
         from core.utils import get_global_currency, format_currency
         from global_settings.models import GlobalSettings
+        from django.utils import timezone
 
         # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
         _f = ActionPlanBudgetOverview._safe_float
@@ -6147,12 +6158,27 @@ class ActionPlanBudgetOverview:
 
         currency = get_global_currency()
         fmt = lambda v: format_currency(v, currency)
+        today = timezone.now().date()
+
+        # Defensive prefetch: top-owner/top-folder iteration touches M2M + FK
+        if hasattr(queryset, "prefetch_related"):
+            queryset = queryset.prefetch_related("owner").select_related("folder")
 
         controls = list(queryset)
         count = len(controls)
         by_status: dict = {}
         by_priority: dict = {}
         by_category: dict = {}
+        by_csf_function: dict = {}
+        eta_buckets = {
+            "overdue": {"key": "overdue", "count": 0, "total": 0.0},
+            "due_30d": {"key": "due_30d", "count": 0, "total": 0.0},
+            "due_90d": {"key": "due_90d", "count": 0, "total": 0.0},
+            "later": {"key": "later", "count": 0, "total": 0.0},
+            "no_eta": {"key": "no_eta", "count": 0, "total": 0.0},
+        }
+        owner_counts: dict = {}
+        folder_counts: dict = {}
         total_annual_cost = 0.0
         count_with_cost = 0
 
@@ -6162,11 +6188,12 @@ class ActionPlanBudgetOverview:
                 count_with_cost += 1
             total_annual_cost += cost
 
-            # by status — use raw value as key, display value for frontend
+            # by status — keep `status` for backwards-compat; add raw `key` for i18n
             s = ctrl.status or "_unset"
             status_label = ctrl.get_status_display() if ctrl.status else "not_set"
             bucket = by_status.setdefault(
-                s, {"status": status_label, "count": 0, "total": 0.0}
+                s,
+                {"key": s, "status": status_label, "count": 0, "total": 0.0},
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6178,7 +6205,12 @@ class ActionPlanBudgetOverview:
             )
             bucket = by_priority.setdefault(
                 p,
-                {"priority": priority_label, "count": 0, "total": 0.0},
+                {
+                    "key": str(p),
+                    "priority": priority_label,
+                    "count": 0,
+                    "total": 0.0,
+                },
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6188,7 +6220,58 @@ class ActionPlanBudgetOverview:
             category_label = ctrl.get_category_display() if ctrl.category else "not_set"
             bucket = by_category.setdefault(
                 c,
-                {"category": category_label, "count": 0, "total": 0.0},
+                {"key": c, "category": category_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # by csf_function
+            f = ctrl.csf_function or "_unset"
+            csf_label = (
+                ctrl.get_csf_function_display() if ctrl.csf_function else "not_set"
+            )
+            bucket = by_csf_function.setdefault(
+                f,
+                {
+                    "key": f,
+                    "csf_function": csf_label,
+                    "count": 0,
+                    "total": 0.0,
+                },
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # eta buckets
+            if ctrl.eta is None:
+                eta_buckets["no_eta"]["count"] += 1
+                eta_buckets["no_eta"]["total"] += cost
+            else:
+                delta_days = (ctrl.eta - today).days
+                if delta_days < 0:
+                    key = "overdue"
+                elif delta_days <= 30:
+                    key = "due_30d"
+                elif delta_days <= 90:
+                    key = "due_90d"
+                else:
+                    key = "later"
+                eta_buckets[key]["count"] += 1
+                eta_buckets[key]["total"] += cost
+
+            # top owners (M2M)
+            for owner in ctrl.owner.all():
+                label = str(owner)
+                bucket = owner_counts.setdefault(
+                    label, {"label": label, "count": 0, "total": 0.0}
+                )
+                bucket["count"] += 1
+                bucket["total"] += cost
+
+            # top folders
+            folder_label = ctrl.folder.name if ctrl.folder_id else "_unset"
+            bucket = folder_counts.setdefault(
+                folder_label, {"label": folder_label, "count": 0, "total": 0.0}
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6200,6 +6283,22 @@ class ActionPlanBudgetOverview:
             bucket["total_display"] = fmt(bucket["total"])
         for bucket in by_category.values():
             bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_csf_function.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in eta_buckets.values():
+            bucket["total_display"] = fmt(bucket["total"])
+
+        top_owners = sorted(
+            owner_counts.values(), key=lambda x: x["count"], reverse=True
+        )[:10]
+        for bucket in top_owners:
+            bucket["total_display"] = fmt(bucket["total"])
+
+        top_folders = sorted(
+            folder_counts.values(), key=lambda x: x["count"], reverse=True
+        )[:10]
+        for bucket in top_folders:
+            bucket["total_display"] = fmt(bucket["total"])
 
         return {
             "count": count,
@@ -6210,6 +6309,10 @@ class ActionPlanBudgetOverview:
             "by_status": [v for v in by_status.values() if v["count"] > 0],
             "by_priority": [v for v in by_priority.values() if v["count"] > 0],
             "by_category": [v for v in by_category.values() if v["count"] > 0],
+            "by_csf_function": [v for v in by_csf_function.values() if v["count"] > 0],
+            "eta_buckets": list(eta_buckets.values()),
+            "top_owners": top_owners,
+            "top_folders": top_folders,
         }
 
 

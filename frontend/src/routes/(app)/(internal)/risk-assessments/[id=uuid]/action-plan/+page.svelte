@@ -77,6 +77,12 @@
 			<div class="flex gap-2 ml-auto">
 				<Anchor
 					breadcrumbAction="push"
+					href={`/risk-assessments/${page.params.id}/action-plan/analytics`}
+					class="btn variant-ghost-surface h-fit"
+					><i class="fa-solid fa-chart-pie mr-2"></i>{m.appliedControlsAnalytics()}</Anchor
+				>
+				<Anchor
+					breadcrumbAction="push"
 					href={`/applied-controls/flash-mode?risk_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
 					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
 					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor

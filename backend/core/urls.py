@@ -217,6 +217,10 @@ urlpatterns = [
         ComplianceAssessmentActionPlanBudgetOverview.as_view(),
     ),
     path(
+        "compliance-assessments/<uuid:pk>/action-plan/analytics/",
+        ComplianceAssessmentActionPlanBudgetOverview.as_view(),
+    ),
+    path(
         "compliance-assessments/<uuid:pk>/evidences-list/",
         ComplianceAssessmentEvidenceList.as_view(),
     ),
@@ -226,6 +230,10 @@ urlpatterns = [
     ),
     path(
         "risk-assessments/<uuid:pk>/action-plan/budget-overview/",
+        RiskAssessmentActionPlanBudgetOverview.as_view(),
+    ),
+    path(
+        "risk-assessments/<uuid:pk>/action-plan/analytics/",
         RiskAssessmentActionPlanBudgetOverview.as_view(),
     ),
     path(
