@@ -161,6 +161,25 @@ class ProjectWriteSerializer(BaseModelSerializer):
         model = Project
         fields = "__all__"
 
+    def validate(self, data):
+        instance = getattr(self, "instance", None)
+
+        def current(field):
+            return data.get(field, getattr(instance, field, None) if instance else None)
+
+        start = current("start_date")
+        end = current("end_date")
+        eta = current("eta")
+        if start and end and end < start:
+            raise serializers.ValidationError(
+                {"end_date": "End date cannot be earlier than start date."}
+            )
+        if start and eta and eta < start:
+            raise serializers.ValidationError(
+                {"eta": "ETA cannot be earlier than start date."}
+            )
+        return super().validate(data)
+
     def validate_parent_project(self, value):
         if value is None:
             return value

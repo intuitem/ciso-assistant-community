@@ -5,9 +5,7 @@ import type { RequestHandler } from './$types';
 const ENDPOINT = 'pmbok/projects';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
-	const endpoint = `${BASE_API_URL}/${ENDPOINT}/${params.id}/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
-	}`;
+	const endpoint = `${BASE_API_URL}/${ENDPOINT}/${params.id}/${url.search || ''}`;
 	const res = await fetch(endpoint);
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());

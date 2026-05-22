@@ -277,9 +277,19 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
     organizational_alignment = models.TextField(blank=True)
     approval_requirements = models.TextField(blank=True)
 
-    budget = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True)
+    budget = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0)],
+    )
     actual_cost = models.DecimalField(
-        max_digits=14, decimal_places=2, blank=True, null=True
+        max_digits=14,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0)],
     )
     currency = models.CharField(max_length=3, blank=True)
 
@@ -316,6 +326,8 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
             ).first()
 
         is_new = self._state.adding
+        if not self.currency and self.parent_project_id:
+            self.currency = self.parent_project.currency or ""
         if is_new:
             if not self.currency:
                 general = GlobalSettings.objects.filter(name="general").first()

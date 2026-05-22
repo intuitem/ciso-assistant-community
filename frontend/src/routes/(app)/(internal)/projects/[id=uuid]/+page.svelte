@@ -365,6 +365,13 @@
 			lifecycleChart?.dispose?.();
 			lifecycleChart = echarts.init(lifecycleChartEl, null, { renderer: 'svg' });
 			const seriesLabels = [m.projectStatus(), m.projectHealth(), m.projectPriority()];
+			const esc = (s: unknown) =>
+				String(s ?? '')
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;')
+					.replace(/'/g, '&#39;');
 			lifecycleChart.setOption({
 				tooltip: {
 					trigger: 'axis',
@@ -378,9 +385,9 @@
 							if (raw == null || raw === '') value = '--';
 							else if (p.seriesIndex === 2) value = `P${raw}`;
 							else value = safeTranslate(String(raw));
-							return `<div style="display:flex;justify-content:space-between;gap:12px;"><span>${p.marker} ${label}</span><strong>${value}</strong></div>`;
+							return `<div style="display:flex;justify-content:space-between;gap:12px;"><span>${p.marker} ${esc(label)}</span><strong>${esc(value)}</strong></div>`;
 						});
-						return `<div style="font-weight:600;margin-bottom:4px;">${date}</div>${lines.join('')}`;
+						return `<div style="font-weight:600;margin-bottom:4px;">${esc(date)}</div>${lines.join('')}`;
 					}
 				},
 				axisPointer: { link: [{ xAxisIndex: 'all' }] },
