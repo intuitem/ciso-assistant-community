@@ -559,11 +559,6 @@ export function choiceUrnFromAlignmentValue(value: string | null): string | unde
 	return AUTO_CHOICES.find((c) => c.id === value)?.urn;
 }
 
-/**
- * Whether the auto-alignment question should be shown for a given requirement.
- * Visible to respondents when respondent_alignment visibility includes them and
- * the requirement has no framework questions of its own.
- */
 /** Background + readable text color for a compliance-result badge. */
 export function resultBadgeStyle(result: string | null | undefined): string {
 	const key = result ?? 'not_assessed';
@@ -571,6 +566,11 @@ export function resultBadgeStyle(result: string | null | undefined): string {
 	return `background-color: ${bg};${isDark(bg) ? ' color: white;' : ''}`;
 }
 
+/**
+ * Whether the auto-alignment question should be shown for a given requirement.
+ * Visible to respondents when respondent_alignment visibility includes them and
+ * the requirement has no framework questions of its own.
+ */
 export function shouldShowAutoQuestion(
 	requirement: Record<string, any>,
 	viewerRole: string,

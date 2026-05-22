@@ -1455,7 +1455,7 @@ class TestVisibilityEdgeCases:
         assert ra.result == "compliant"
 
     def test_depends_on_with_unknown_condition(self, db):
-        """condition='foo' -> fallback returns True (visible)."""
+        """condition='foo' -> fallback returns False (hidden)."""
         folder = Folder.get_root_folder()
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
@@ -1527,7 +1527,8 @@ class TestVisibilityEdgeCases:
             folder=folder,
         )
 
-        # Answer Q1 -> Q2 is visible (unknown condition falls through to True)
+        # Answer Q1 -> Q2 stays hidden (unknown condition falls through to False).
+        # Q2's answer is preserved in case the user fixes the condition later.
         a1 = Answer.objects.create(
             requirement_assessment=ra,
             question=q1,
@@ -1544,5 +1545,5 @@ class TestVisibilityEdgeCases:
         ra.compute_score_and_result()
         ra.refresh_from_db()
 
-        # Both visible and answered -> compliant
+        # Only Q1 visible and answered with a 'compliant' choice -> compliant
         assert ra.result == "compliant"

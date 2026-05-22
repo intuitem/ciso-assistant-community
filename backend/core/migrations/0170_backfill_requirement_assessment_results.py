@@ -107,7 +107,7 @@ def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visite
         # Single-value answer can only satisfy "all" if there's exactly one expected answer
         return len(dep_answers) == 1 and target_answer == dep_answers[0]
 
-    return True
+    return False
 
 
 def _build_answer_context(questions_qs, answers_qs):
