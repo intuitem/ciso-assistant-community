@@ -323,6 +323,12 @@
 		return result;
 	});
 
+	// True when the framework has no real (non-assessable) section nodes, so
+	// every requirement lands in the synthetic "__top__" bucket. We then skip
+	// the wrapper section row and the Expand/Collapse-all controls — they'd
+	// just add a redundant click and noise.
+	let isFlat = $derived(hierarchical.length === 1 && hierarchical[0]?.urn === '__top__');
+
 	// Per-domain rollup at chosen ancestry depth
 	let perDomain = $derived.by(() => {
 		const map = new Map<string, ReportRow[]>();
@@ -582,7 +588,7 @@
 			</div>
 		</div>
 
-		{#if view === 'requirement'}
+		{#if view === 'requirement' && !isFlat}
 			<div>
 				<div class="text-xs text-gray-500 block">{m.sections()}</div>
 				<div class="inline-flex gap-2">
@@ -682,67 +688,69 @@
 				<tbody>
 					{#each hierarchical as section}
 						{@const sectionCompliance = compliancePct(section.dist)}
-						<tr
-							class="border-t bg-gray-100 font-medium hover:bg-gray-200 cursor-pointer"
-							onclick={() => toggleSection(section.urn)}
-						>
-							<td class="px-3 py-2 font-mono text-xs">
-								<span class="inline-block w-3 text-gray-500"
-									>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
-								>
-								{section.ref}
-							</td>
-							<td class="px-3 py-2">
-								{section.name}
-								<span class="text-xs text-gray-500 ml-2 font-normal"
-									>({section.requirement_count}
-									{m.reqsAbbr()} · {section.row_count}
-									{m.rowsLabel()})</span
-								>
-							</td>
-							<td class="px-3 py-2 text-center text-xs text-gray-500">—</td>
-							<td class="px-3 py-2">
-								{#if section.row_count > 0}
-									<div class="flex h-5 w-full rounded overflow-hidden border">
-										{#each RESULT_ORDER as r}
-											{@const w =
-												distTotal(section.dist) === 0
-													? 0
-													: (section.dist[r] / distTotal(section.dist)) * 100}
-											{#if w > 0}
-												<div
-													style="width:{w}%; background:{RESULT_COLORS[r]};"
-													title="{resultLabel(r)}: {section.dist[r]}"
-												></div>
-											{/if}
-										{/each}
-									</div>
-								{:else}
-									<span class="text-xs text-gray-400">{m.noRowsInScope()}</span>
-								{/if}
-							</td>
-							<td class="px-3 py-2 text-right font-mono"
-								>{sectionCompliance === null ? '—' : `${sectionCompliance.toFixed(0)}%`}</td
+						{#if !isFlat}
+							<tr
+								class="border-t bg-gray-100 font-medium hover:bg-gray-200 cursor-pointer"
+								onclick={() => toggleSection(section.urn)}
 							>
-							<td class="px-3 py-2 text-right font-mono"
-								>{section.avg_score === null ? '—' : section.avg_score.toFixed(0)}</td
-							>
-						</tr>
+								<td class="px-3 py-2 font-mono text-xs">
+									<span class="inline-block w-3 text-gray-500"
+										>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
+									>
+									{section.ref}
+								</td>
+								<td class="px-3 py-2">
+									{section.name}
+									<span class="text-xs text-gray-500 ml-2 font-normal"
+										>({section.requirement_count}
+										{m.reqsAbbr()} · {section.row_count}
+										{m.rowsLabel()})</span
+									>
+								</td>
+								<td class="px-3 py-2 text-center text-xs text-gray-500">—</td>
+								<td class="px-3 py-2">
+									{#if section.row_count > 0}
+										<div class="flex h-5 w-full rounded overflow-hidden border">
+											{#each RESULT_ORDER as r}
+												{@const w =
+													distTotal(section.dist) === 0
+														? 0
+														: (section.dist[r] / distTotal(section.dist)) * 100}
+												{#if w > 0}
+													<div
+														style="width:{w}%; background:{RESULT_COLORS[r]};"
+														title="{resultLabel(r)}: {section.dist[r]}"
+													></div>
+												{/if}
+											{/each}
+										</div>
+									{:else}
+										<span class="text-xs text-gray-400">{m.noRowsInScope()}</span>
+									{/if}
+								</td>
+								<td class="px-3 py-2 text-right font-mono"
+									>{sectionCompliance === null ? '—' : `${sectionCompliance.toFixed(0)}%`}</td
+								>
+								<td class="px-3 py-2 text-right font-mono"
+									>{section.avg_score === null ? '—' : section.avg_score.toFixed(0)}</td
+								>
+							</tr>
+						{/if}
 
-						{#if expandedSections.has(section.urn)}
+						{#if isFlat || expandedSections.has(section.urn)}
 							{#each section.requirements as req}
 								{@const reqCompliance = compliancePct(req.dist)}
 								<tr
 									class="border-t hover:bg-gray-50 cursor-pointer"
 									onclick={() => (expandedRow = expandedRow === req.urn ? null : req.urn)}
 								>
-									<td class="px-3 py-2 font-mono text-xs pl-8">
+									<td class="px-3 py-2 font-mono text-xs {isFlat ? '' : 'pl-8'}">
 										<span class="inline-block w-3 text-gray-400"
 											>{expandedRow === req.urn ? '▾' : '▸'}</span
 										>
 										{req.ref_id}
 									</td>
-									<td class="px-3 py-2 pl-6">{req.name}</td>
+									<td class="px-3 py-2 {isFlat ? '' : 'pl-6'}">{req.name}</td>
 									<td class="px-3 py-2 text-center">{req.ca_count}</td>
 									<td class="px-3 py-2">
 										<div class="flex h-4 w-full rounded overflow-hidden border">
