@@ -138,6 +138,7 @@ from core.utils import (
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
     resolve_compute_result,
+    is_field_visible_to,
     rewrite_child_urns,
     _generate_occurrences,
     _create_task_dict,
@@ -2905,6 +2906,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
         matrix.editing_draft = None
         matrix.editing_version += 1
         matrix.is_enabled = True
+        matrix.is_published = True
 
         # Apply draft metadata to the model
         update_fields = [
@@ -2913,6 +2915,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
             "editing_version",
             "editing_history",
             "is_enabled",
+            "is_published",
             "updated_at",
         ]
         for field in ("name", "description", "provider", "locale"):
@@ -8120,6 +8123,208 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
 
+    @action(detail=True, methods=["get"])
+    def report(self, request, pk):
+        """Cross-assessment report for one framework.
+
+        Returns a flat list of RequirementAssessment rows across every
+        ComplianceAssessment using this framework that the user can read,
+        plus framework scoring metadata. Redacted fields (per CA's
+        field_visibility for the viewer's role) come back as null so the
+        row still contributes to domain/section counts.
+
+        Only "live" CAs participate by default: status in (in_progress,
+        in_review, done). This excludes planned (not yet started) and
+        deprecated (superseded by a newer audit on the same folder),
+        which would otherwise double-count requirements when multiple
+        audit cycles coexist on the same folder.
+
+        Query params:
+          - implementation_group (str): narrow to a single IG.
+            Default honors each CA's selected_implementation_groups.
+        """
+        framework = self.get_object()  # checks read permission
+
+        ig_filter = request.query_params.get("implementation_group") or None
+
+        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Statuses considered "live" for cross-CA rollups. Planned and
+        # deprecated CAs are intentionally excluded; surface them via the
+        # standard CA list page if needed.
+        LIVE_STATUSES = ("in_progress", "in_review", "done")
+
+        visible_cas_qs = ComplianceAssessment.objects.filter(
+            framework=framework,
+            id__in=viewable_ca_ids,
+        ).select_related("folder")
+
+        all_visible_cas = list(visible_cas_qs)
+
+        # Full status breakdown across all visible CAs (before live-status filter)
+        ca_status_counts: Dict[str, int] = {}
+        for ca in all_visible_cas:
+            key = ca.status or "unknown"
+            ca_status_counts[key] = ca_status_counts.get(key, 0) + 1
+
+        cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
+
+        # Per-CA viewer role: respondent if the user is an auditee on the CA's
+        # folder, auditor otherwise. Computed once per CA.
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ca_viewer_roles = {
+            ca.id: (
+                "respondent"
+                if (auditee_folders and ca.folder_id in auditee_folders)
+                else "auditor"
+            )
+            for ca in cas
+        }
+
+        ras = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment__in=cas,
+                requirement__assessable=True,
+            )
+            .select_related(
+                "requirement",
+                "compliance_assessment",
+                "compliance_assessment__folder",
+            )
+            .annotate(
+                applied_controls_count=Count("applied_controls", distinct=True),
+            )
+            .prefetch_related(
+                "evidences",
+                "applied_controls__evidences",
+            )
+        )
+
+        # Cache folder paths so we don't walk ancestry twice for the same folder.
+        folder_path_cache: Dict[Any, List[str]] = {}
+
+        def folder_path_for(folder) -> List[str]:
+            if folder is None:
+                return []
+            if folder.id in folder_path_cache:
+                return folder_path_cache[folder.id]
+            path = [f.name for f in folder.get_folder_full_path()]
+            folder_path_cache[folder.id] = path
+            return path
+
+        rows: List[Dict[str, Any]] = []
+        for ra in ras:
+            ca = ra.compliance_assessment
+            req = ra.requirement
+            ig_list = req.implementation_groups or []
+            selected = ca.selected_implementation_groups or []
+
+            # honor each CA's selected IGs (empty selection means "all")
+            if selected and not (set(ig_list) & set(selected)):
+                continue
+            # apply explicit IG filter on top
+            if ig_filter and ig_filter not in ig_list:
+                continue
+
+            viewer_role = ca_viewer_roles[ca.id]
+
+            def field(name, value):
+                return value if is_field_visible_to(ca, name, viewer_role) else None
+
+            folder_path = folder_path_for(ca.folder)
+
+            # Distinct evidences reachable from this RA: directly attached
+            # plus those attached through any of the linked applied controls.
+            direct_evidence_ids = {e.id for e in ra.evidences.all()}
+            indirect_evidence_ids: set = set()
+            for ac in ra.applied_controls.all():
+                for e in ac.evidences.all():
+                    indirect_evidence_ids.add(e.id)
+            total_evidence_ids = direct_evidence_ids | indirect_evidence_ids
+
+            rows.append(
+                {
+                    "requirement_assessment_id": str(ra.id),
+                    "requirement_urn": req.urn,
+                    "requirement_parent_urn": req.parent_urn,
+                    "requirement_ref_id": req.ref_id,
+                    "requirement_name": req.name,
+                    "assessable": req.assessable,
+                    "implementation_groups": ig_list,
+                    "result": field("result", ra.result),
+                    "extended_result": field("extended_result", ra.extended_result),
+                    "status": field("status", ra.status),
+                    "score": field("score", ra.score),
+                    "documentation_score": field(
+                        "documentation_score", ra.documentation_score
+                    ),
+                    "is_scored": field("is_scored", ra.is_scored),
+                    "compliance_assessment_id": str(ca.id),
+                    "compliance_assessment_name": ca.name,
+                    "folder_id": str(ca.folder_id) if ca.folder_id else None,
+                    "folder_path": folder_path,
+                    "folder_path_str": " / ".join(folder_path),
+                    "applied_controls_count": ra.applied_controls_count,
+                    "evidences_count": len(total_evidence_ids),
+                    "direct_evidences_count": len(direct_evidence_ids),
+                    "indirect_evidences_count": len(
+                        indirect_evidence_ids - direct_evidence_ids
+                    ),
+                }
+            )
+
+        # Per-CA summary used by the frontend "detected assessments" drawer.
+        # Includes every visible CA, counted or not, so users can see what
+        # the live-status filter excluded.
+        compliance_assessments = [
+            {
+                "id": str(ca.id),
+                "name": ca.name,
+                "status": ca.status,
+                "folder_id": str(ca.folder_id) if ca.folder_id else None,
+                "folder_path": folder_path_for(ca.folder),
+                "folder_path_str": " / ".join(folder_path_for(ca.folder)),
+                "is_counted": ca.status in LIVE_STATUSES,
+            }
+            for ca in sorted(all_visible_cas, key=lambda c: (c.name or "").lower())
+        ]
+
+        # Non-assessable nodes that act as sections (the immediate parents of
+        # assessable requirements). The frontend uses this to render the
+        # section-then-requirement hierarchy without a second roundtrip.
+        sections = [
+            {
+                "urn": node.urn,
+                "ref_id": node.ref_id,
+                "name": node.name,
+                "parent_urn": node.parent_urn,
+            }
+            for node in RequirementNode.objects.filter(
+                framework=framework, assessable=False
+            ).order_by(F("order_id").asc(nulls_last=True))
+        ]
+
+        return Response(
+            {
+                "framework": {
+                    "id": str(framework.id),
+                    "name": framework.get_name_translated or framework.name,
+                    "min_score": framework.min_score,
+                    "max_score": framework.max_score,
+                    "scores_definition": framework.scores_definition,
+                    "implementation_groups_definition": framework.implementation_groups_definition,
+                    "sections": sections,
+                },
+                "rows": rows,
+                "compliance_assessments": compliance_assessments,
+                "ca_status_counts": ca_status_counts,
+                "live_statuses": list(LIVE_STATUSES),
+                "generated_at": timezone.now().isoformat(),
+            }
+        )
+
     @staticmethod
     def _slugify_framework_name(name, framework_id):
         """Slugify a framework name for URN namespacing, with UUID fallback."""
@@ -10006,6 +10211,7 @@ class FrameworkViewSet(BaseModelViewSet):
             framework.editing_history = history
             framework.editing_version = framework.editing_version + 1
             framework.editing_draft = None
+            framework.is_published = True
             framework.save(
                 update_fields=[
                     "name",
@@ -10023,6 +10229,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "editing_draft",
                     "editing_version",
                     "editing_history",
+                    "is_published",
                     "updated_at",
                 ]
             )
@@ -11015,6 +11222,7 @@ class PresetViewSet(BaseModelViewSet):
         preset.version = preset.editing_version
         preset.editing_history = history
         preset.editing_draft = None
+        preset.is_published = True
         preset.save()
 
         from core.serializers import PresetReadSerializer
