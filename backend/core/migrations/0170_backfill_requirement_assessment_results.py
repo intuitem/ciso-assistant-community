@@ -47,38 +47,66 @@ def _aggregate_compute_results(resolved_results):
 
 
 def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visited=None):
-    depends_on = getattr(question, "depends_on", None)
+    """Check if a question is visible based on depends_on logic.
+
+    Works with Question model objects (new relational models).
+    - question: a Question model instance
+    - answers_by_urn: dict of {question.urn: answer_value}
+    - questions_by_urn: dict of {question.urn: Question} (optional, for lookups)
+    - visited: set of urns already visited (cycle protection)
+    """
+    depends_on = (
+        question.depends_on
+        if hasattr(question, "depends_on")
+        else question.get("depends_on")
+        if isinstance(question, dict)
+        else None
+    )
     if not depends_on:
         return True
+
     dep_ref = depends_on.get("question") if isinstance(depends_on, dict) else None
     if not dep_ref:
         return True
+
+    # Cycle protection
     if visited is None:
         visited = set()
-    q_urn = getattr(question, "urn", None)
+    q_urn = getattr(question, "urn", None) or (
+        question.get("urn") if isinstance(question, dict) else None
+    )
     if q_urn:
         if q_urn in visited:
             return True
         visited = visited | {q_urn}
+
+    # Check parent question visibility first (recursive chain)
     if questions_by_urn:
         parent_question = questions_by_urn.get(dep_ref)
         if parent_question and not _is_question_visible(
             parent_question, answers_by_urn, questions_by_urn, visited
         ):
             return False
+
     target_answer = answers_by_urn.get(dep_ref)
+    # Use explicit None/empty-list check to avoid hiding on falsy values like 0 or False
     if target_answer is None or (isinstance(target_answer, list) and not target_answer):
         return False
+
     condition = depends_on.get("condition", "any")
     dep_answers = depends_on.get("answers", [])
+
     if condition == "any":
         if isinstance(target_answer, list):
             return any(a in dep_answers for a in target_answer)
         return target_answer in dep_answers
+
     if condition == "all":
         if isinstance(target_answer, list):
             return all(a in target_answer for a in dep_answers)
+        # Single-value answer can only satisfy "all" if there's exactly one expected answer
         return len(dep_answers) == 1 and target_answer == dep_answers[0]
+
     return True
 
 
@@ -153,13 +181,14 @@ def backfill_results(apps, schema_editor):
     # --- Step 1: normalize legacy "true"/"false" in QuestionChoice rows ---
     _normalize_legacy_choice_values(apps, db_alias)
 
-    # --- Step 2: recompute results for question-driven RAs only -----------
+    # --- Step 2: recompute result for question-driven RAs only -------------
+    # Score computation (add_score) was never affected by the boolean-collapse
+    # bug — only result aggregation was.  Leave score/is_scored untouched.
     RESULT_NOT_ASSESSED = "not_assessed"
     RESULT_COMPLIANT = "compliant"
     RESULT_NON_COMPLIANT = "non_compliant"
     RESULT_PARTIALLY_COMPLIANT = "partially_compliant"
     RESULT_NOT_APPLICABLE = "not_applicable"
-    CALCULATION_METHOD_SUM = "sum"
 
     result_map = {
         "compliant": RESULT_COMPLIANT,
@@ -168,8 +197,8 @@ def backfill_results(apps, schema_editor):
         "not_applicable": RESULT_NOT_APPLICABLE,
     }
 
-    def recompute(ra):
-        """Recompute score/result. Return True if the RA was modified."""
+    def recompute_result(ra):
+        """Recompute result only. Return True if the RA was modified."""
         questions_qs = ra.requirement.questions.prefetch_related("choices").all()
 
         # No questions → this RA is manual or respondent-alignment-driven.
@@ -189,29 +218,9 @@ def backfill_results(apps, schema_editor):
             has_answer_by_qid,
         ) = _build_answer_context(questions_qs, answers_qs)
 
-        ca = ra.compliance_assessment
-        min_score = ca.min_score if ca.min_score is not None else 0
-        max_score = ca.max_score if ca.max_score is not None else 100
-
-        aggregation = None
-        scores_def = ca.scores_definition
-        if isinstance(scores_def, dict):
-            candidate = scores_def.get("aggregation")
-            if candidate in ("sum", "mean"):
-                aggregation = candidate
-        if not aggregation:
-            aggregation = (
-                "sum"
-                if ca.score_calculation_method == CALCULATION_METHOD_SUM
-                else "mean"
-            )
-
-        total_score = 0
-        total_weight = 0
         results = []
         visible_questions = 0
         answered_visible_questions = 0
-        is_score_computed = False
 
         for question in questions_qs:
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
@@ -224,28 +233,16 @@ def backfill_results(apps, schema_editor):
             for choice in question.choices.all():
                 if choice.id not in selected_pks:
                     continue
-                if choice.add_score is not None:
-                    is_score_computed = True
-                    total_score += choice.add_score * question.weight
-                    total_weight += question.weight
                 if choice.compute_result is not None:
                     resolved = _resolve_compute_result(choice.compute_result)
                     if resolved is not None:
                         results.append(resolved)
 
-        if is_score_computed:
-            if aggregation == "mean" and total_weight > 0:
-                computed_score = total_score / total_weight
-            else:
-                computed_score = total_score
-            ra.score = max(min(int(computed_score), max_score), min_score)
-        else:
-            ra.score = None
-        ra.is_scored = is_score_computed
-
         if visible_questions == 0:
             ra.result = RESULT_NOT_APPLICABLE
-        elif answered_visible_questions < visible_questions or not results:
+        elif answered_visible_questions < visible_questions:
+            ra.result = RESULT_NOT_ASSESSED
+        elif not results:
             ra.result = RESULT_NOT_ASSESSED
         else:
             aggregated = _aggregate_compute_results(results)
@@ -253,14 +250,14 @@ def backfill_results(apps, schema_editor):
 
         return True
 
-    fields = ["score", "result", "is_scored"]
+    fields = ["result"]
     queryset = RequirementAssessment.objects.using(db_alias).select_related(
-        "compliance_assessment", "requirement"
+        "requirement"
     )
 
     batch = []
     for ra in queryset.iterator(chunk_size=BATCH_SIZE):
-        if not recompute(ra):
+        if not recompute_result(ra):
             continue
         batch.append(ra)
         if len(batch) >= BATCH_SIZE:
