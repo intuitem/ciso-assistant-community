@@ -27,7 +27,7 @@ export const load = (async ({ fetch, params }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['applied-controls', 'evidences'] as urlModel[]) {
+	for (const key of ['applied-controls', 'evidences', 'security-exceptions'] as urlModel[]) {
 		const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
 		const response = await fetch(keyEndpoint);
 		if (response.ok) {

@@ -86,6 +86,7 @@
 	const {
 		showAppliedControls,
 		showEvidences,
+		showSecurityExceptions,
 		showStatus,
 		showResult,
 		showScore,
@@ -95,10 +96,12 @@
 	} = getFieldVisibility(complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+	const canShowSecurityExceptions = showSecurityExceptions && !page.data.user.is_third_party;
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
 		if (showEvidences) return 'evidence';
+		if (canShowSecurityExceptions) return 'security_exceptions';
 		return 'applied_controls';
 	}
 	let group = $state(pickDefaultTab());
@@ -361,7 +364,7 @@
 			{/if}
 		</div>
 	{/if}
-	{#if canShowAppliedControls || showEvidences}
+	{#if canShowAppliedControls || showEvidences || canShowSecurityExceptions}
 		<div>
 			<Tabs
 				value={group}
@@ -375,6 +378,9 @@
 					{/if}
 					{#if showEvidences}
 						<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
+					{/if}
+					{#if canShowSecurityExceptions}
+						<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
 					{/if}
 					<Tabs.Indicator />
 				</Tabs.List>
@@ -410,6 +416,20 @@
 								expectedCount={countMasked(data.requirementAssessment.evidences)}
 								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
 									.id}"
+							/>
+						</div>
+					</Tabs.Content>
+				{/if}
+				{#if canShowSecurityExceptions}
+					<Tabs.Content value="security_exceptions">
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['security-exceptions']}
+								hideFilters={true}
+								URLModel="security-exceptions"
+								expectedCount={countMasked(data.requirementAssessment.security_exceptions)}
+								baseEndpoint="/security-exceptions?requirement_assessments={page.data
+									.requirementAssessment.id}"
 							/>
 						</div>
 					</Tabs.Content>

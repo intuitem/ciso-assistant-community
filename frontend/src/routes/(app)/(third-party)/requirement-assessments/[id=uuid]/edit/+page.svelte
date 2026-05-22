@@ -303,18 +303,18 @@
 		showObservation,
 		showAppliedControls,
 		showEvidences,
+		showSecurityExceptions,
 		showRespondentAlignment,
 		showComments
 	} = getFieldVisibility(complianceAssessment, viewerRole);
 
-	const isAuditor = viewerRole === 'auditor';
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+	const canShowSecurityExceptions = showSecurityExceptions && !page.data.user.is_third_party;
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
 		if (showEvidences) return 'evidences';
-		// Security exceptions are auditor-only — not part of the per-CA visibility model.
-		if (isAuditor) return 'security_exceptions';
+		if (canShowSecurityExceptions) return 'security_exceptions';
 		return 'applied_controls';
 	}
 	let group = $state(pickDefaultTab());
@@ -611,7 +611,7 @@
 			{...rest}
 		>
 			{#snippet children({ form, data })}
-				{#if canShowAppliedControls || showEvidences || isAuditor}
+				{#if canShowAppliedControls || showEvidences || canShowSecurityExceptions}
 					<div class="card shadow-lg bg-white">
 						<Tabs
 							value={group}
@@ -626,7 +626,7 @@
 								{#if showEvidences}
 									<Tabs.Trigger value="evidences">{m.evidences()}</Tabs.Trigger>
 								{/if}
-								{#if isAuditor}
+								{#if canShowSecurityExceptions}
 									<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
 								{/if}
 								<Tabs.Indicator />
@@ -744,7 +744,7 @@
 									</div>
 								</Tabs.Content>
 							{/if}
-							{#if isAuditor}
+							{#if canShowSecurityExceptions}
 								<Tabs.Content value="security_exceptions">
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 										<span class="flex flex-row justify-end items-center">

@@ -30,6 +30,7 @@
 		answers: m.answers,
 		evidences: m.evidences,
 		applied_controls: m.appliedControls,
+		security_exceptions: m.securityExceptions,
 		respondent_alignment: m.respondentAlignment,
 		comments: m.comments
 	};
