@@ -2754,8 +2754,8 @@ export const listViewFields = {
 		}
 	},
 	projects: {
-		head: ['kind', 'ref_id', 'name', 'health', 'owner', 'progress', 'folder'],
-		body: ['kind', 'ref_id', 'name', 'health', 'owner', 'progress', 'folder'],
+		head: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		body: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			kind: PROJECT_KIND_FILTER,

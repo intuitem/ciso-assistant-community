@@ -305,6 +305,8 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
 
     def save(self, *args, **kwargs):
         from datetime import date
+        from decimal import Decimal
+        from global_settings.models import GlobalSettings
 
         if self.status_id is None:
             self.status = Terminology.objects.filter(
@@ -313,8 +315,20 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
                 builtin=True,
             ).first()
 
+        is_new = self._state.adding
+        if is_new:
+            if not self.currency:
+                general = GlobalSettings.objects.filter(name="general").first()
+                if general:
+                    self.currency = general.value.get("currency", "") or ""
+            if self.progress is None:
+                self.progress = 0
+            if self.budget is None:
+                self.budget = Decimal("0")
+            if self.actual_cost is None:
+                self.actual_cost = Decimal("0")
         previous_status_name = None
-        if self.pk:
+        if not is_new:
             previous_status_name = (
                 type(self)
                 .objects.filter(pk=self.pk)
@@ -328,6 +342,11 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
             self.closed_at = None
 
         super().save(*args, **kwargs)
+
+        if is_new and not self.linked_collection_id and self.folder_id:
+            coll = GenericCollection.objects.create(name=self.name, folder=self.folder)
+            type(self).objects.filter(pk=self.pk).update(linked_collection=coll)
+            self.linked_collection_id = coll.pk
 
         from metrology.models import BuiltinMetricSample
 

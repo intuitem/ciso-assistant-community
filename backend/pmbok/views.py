@@ -107,7 +107,9 @@ class ProjectViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Project kind choices")
     def kind(self, request):
-        return Response(dict(Project.Kind.choices))
+        return Response(
+            [{"value": v, "label": str(l)} for v, l in Project.Kind.choices]
+        )
 
 
 class ResponsibilityRoleViewSet(BaseModelViewSet):

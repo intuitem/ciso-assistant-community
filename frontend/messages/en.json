@@ -2848,6 +2848,8 @@
 	"kind": "Kind",
 	"portfolio": "Portfolio",
 	"program": "Program",
+	"tracking": "Tracking",
+	"multiSelectHint": "Hold Ctrl/Cmd to select multiple.",
 	"relationship": "Relationship",
 	"relationships": "Relationships",
 	"checklist": "Checklist",

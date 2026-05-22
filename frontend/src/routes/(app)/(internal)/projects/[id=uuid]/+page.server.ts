@@ -12,19 +12,29 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
-	const [statusRes, healthRes, priorityRes, actorRes, collectionRes, projectRes] =
-		await Promise.all([
-			event.fetch(
-				`${BASE_API_URL}/terminologies/?field_path=project.status&is_visible=true&limit=100`
-			),
-			event.fetch(
-				`${BASE_API_URL}/terminologies/?field_path=project.health&is_visible=true&limit=100`
-			),
-			event.fetch(`${BASE_API_URL}/pmbok/projects/priority/`),
-			event.fetch(`${BASE_API_URL}/actors/?user__is_third_party=False&limit=200`),
-			event.fetch(`${BASE_API_URL}/pmbok/generic-collections/?limit=200`),
-			event.fetch(`${BASE_API_URL}/pmbok/projects/?limit=200`)
-		]);
+	const [
+		statusRes,
+		healthRes,
+		priorityRes,
+		actorRes,
+		collectionRes,
+		projectRes,
+		matrixRes,
+		kindRes
+	] = await Promise.all([
+		event.fetch(
+			`${BASE_API_URL}/terminologies/?field_path=project.status&is_visible=true&limit=100`
+		),
+		event.fetch(
+			`${BASE_API_URL}/terminologies/?field_path=project.health&is_visible=true&limit=100`
+		),
+		event.fetch(`${BASE_API_URL}/pmbok/projects/priority/`),
+		event.fetch(`${BASE_API_URL}/actors/?user__is_third_party=False&limit=200`),
+		event.fetch(`${BASE_API_URL}/pmbok/generic-collections/?limit=200`),
+		event.fetch(`${BASE_API_URL}/pmbok/projects/?limit=200`),
+		event.fetch(`${BASE_API_URL}/pmbok/responsibility-matrices/?limit=200`),
+		event.fetch(`${BASE_API_URL}/pmbok/projects/kind/`)
+	]);
 
 	const statusOptions = statusRes.ok ? ((await statusRes.json()).results ?? []) : [];
 	const healthOptions = healthRes.ok ? ((await healthRes.json()).results ?? []) : [];
@@ -37,6 +47,8 @@ export const load: PageServerLoad = async (event) => {
 	const collectionOptions = collectionRes.ok ? ((await collectionRes.json()).results ?? []) : [];
 	const allProjects = projectRes.ok ? ((await projectRes.json()).results ?? []) : [];
 	const projectOptions = allProjects.filter((p: any) => p.id !== event.params.id);
+	const matrixOptions = matrixRes.ok ? ((await matrixRes.json()).results ?? []) : [];
+	const kindOptions = kindRes.ok ? await kindRes.json() : [];
 
 	const snapshotsRes = await event.fetch(
 		`${BASE_API_URL}/metrology/builtin-metric-samples/for_object/?model=project&object_id=${event.params.id}`
@@ -52,6 +64,8 @@ export const load: PageServerLoad = async (event) => {
 		actorOptions,
 		collectionOptions,
 		projectOptions,
+		matrixOptions,
+		kindOptions,
 		snapshots
 	};
 };

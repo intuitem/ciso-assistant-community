@@ -151,6 +151,11 @@ class ProjectWriteSerializer(BaseModelSerializer):
         required=False,
         allow_null=True,
     )
+    responsibility_matrices = serializers.PrimaryKeyRelatedField(
+        queryset=ResponsibilityMatrix.objects.all(),
+        many=True,
+        required=False,
+    )
 
     class Meta:
         model = Project

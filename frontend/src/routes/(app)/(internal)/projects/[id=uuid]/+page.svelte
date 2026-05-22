@@ -22,6 +22,8 @@
 	let actorOptions = $derived(data.actorOptions);
 	let collectionOptions = $derived(data.collectionOptions);
 	let projectOptions = $derived(data.projectOptions);
+	let matrixOptions = $derived(data.matrixOptions);
+	let kindOptions = $derived(data.kindOptions);
 
 	let activeTab = $state('overview');
 	let savingSection: string | null = $state(null);
@@ -204,15 +206,39 @@
 
 	// --- Linked tab (other CISO Assistant objects) ---
 	let linkedEditing = $state(false);
-	let linkedDraft: { linked_collection: string | null; parent_project: string | null } = $state({
+	let matrixSearchQuery = $state('');
+	let filteredMatrixOptions = $derived(
+		matrixSearchQuery.trim()
+			? matrixOptions.filter((opt: any) =>
+					((opt.str ?? opt.name) as string)
+						.toLowerCase()
+						.includes(matrixSearchQuery.trim().toLowerCase())
+				)
+			: matrixOptions
+	);
+
+	function toggleMatrix(id: string) {
+		if (linkedDraft.responsibility_matrices.includes(id)) {
+			linkedDraft.responsibility_matrices = linkedDraft.responsibility_matrices.filter(
+				(v) => v !== id
+			);
+		} else {
+			linkedDraft.responsibility_matrices = [...linkedDraft.responsibility_matrices, id];
+		}
+	}
+
+	let linkedDraft: {
+		linked_collection: string | null;
+		responsibility_matrices: string[];
+	} = $state({
 		linked_collection: null,
-		parent_project: null
+		responsibility_matrices: []
 	});
 
 	function startLinkedEdit() {
 		linkedDraft = {
 			linked_collection: project.linked_collection?.id ?? null,
-			parent_project: project.parent_project?.id ?? null
+			responsibility_matrices: (project.responsibility_matrices ?? []).map((m: any) => m.id)
 		};
 		linkedEditing = true;
 	}
@@ -247,14 +273,25 @@
 		ref_id: string;
 		ref_link: string;
 		description: string;
-	} = $state({ name: '', ref_id: '', ref_link: '', description: '' });
+		kind: string;
+		parent_project: string | null;
+	} = $state({
+		name: '',
+		ref_id: '',
+		ref_link: '',
+		description: '',
+		kind: '',
+		parent_project: null
+	});
 
 	function startBasicsEdit() {
 		basicsDraft = {
 			name: project.name ?? '',
 			ref_id: project.ref_id ?? '',
 			ref_link: project.ref_link ?? '',
-			description: project.description ?? ''
+			description: project.description ?? '',
+			kind: project.kind ?? '',
+			parent_project: project.parent_project?.id ?? null
 		};
 		basicsEditing = true;
 	}
@@ -530,6 +567,14 @@
 				{:else}
 					<div class="space-y-3 max-w-3xl">
 						<label class="block">
+							<span class="text-xs font-semibold text-gray-500 uppercase">{m.kind()}</span>
+							<select bind:value={basicsDraft.kind} class="select w-full mt-1">
+								{#each kindOptions as opt}
+									<option value={opt.value}>{safeTranslate(opt.value)}</option>
+								{/each}
+							</select>
+						</label>
+						<label class="block">
 							<span class="text-xs font-semibold text-gray-500 uppercase">{m.name()}</span>
 							<input type="text" bind:value={basicsDraft.name} class="input w-full mt-1" required />
 						</label>
@@ -550,6 +595,15 @@
 								class="input w-full mt-1"
 								placeholder="https://…"
 							/>
+						</label>
+						<label class="block">
+							<span class="text-xs font-semibold text-gray-500 uppercase">{m.parentProject()}</span>
+							<select bind:value={basicsDraft.parent_project} class="select w-full mt-1">
+								<option value={null}>--</option>
+								{#each projectOptions as opt}
+									<option value={opt.id}>{opt.str ?? opt.name}</option>
+								{/each}
+							</select>
 						</label>
 						<div class="block">
 							<span class="text-xs font-semibold text-gray-500 uppercase">{m.description()}</span>
@@ -644,6 +698,40 @@
 					<span class="text-xs text-gray-700 shrink-0">{progressValue}%</span>
 				</div>
 			</div>
+			<div>
+				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+					{m.parentProject()}
+				</div>
+				{#if project.parent_project}
+					<Anchor
+						href="/projects/{project.parent_project.id}"
+						class="text-sm text-primary-600 hover:text-primary-800 hover:underline truncate block"
+					>
+						{project.parent_project.str}
+					</Anchor>
+				{:else}
+					<span class="text-gray-400 text-sm">--</span>
+				{/if}
+			</div>
+			<div>
+				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+					{m.subProjects()}
+				</div>
+				{#if project.sub_projects && project.sub_projects.length > 0}
+					<div class="text-sm space-x-1 space-y-1">
+						{#each project.sub_projects as sub, i}
+							<Anchor
+								href="/projects/{sub.id}"
+								class="text-primary-600 hover:text-primary-800 hover:underline"
+							>
+								{sub.str}
+							</Anchor>{#if i < project.sub_projects.length - 1},{/if}
+						{/each}
+					</div>
+				{:else}
+					<span class="text-gray-400 text-sm">--</span>
+				{/if}
+			</div>
 		</div>
 	</div>
 
@@ -666,7 +754,7 @@
 				value="schedule"
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
-				<i class="fa-solid fa-calendar mr-2"></i>{m.schedule()}
+				<i class="fa-solid fa-calendar mr-2"></i>{m.tracking()}
 			</Tabs.Trigger>
 			{#if !isPortfolio}<Tabs.Trigger
 					value="scope"
@@ -853,7 +941,7 @@
 		<!-- SCHEDULE -->
 		<Tabs.Content value="schedule" class="p-6">
 			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-semibold">{m.schedule()}</h2>
+				<h2 class="text-lg font-semibold">{m.tracking()}</h2>
 				{#if !scheduleEditing}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startScheduleEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
@@ -1283,54 +1371,65 @@
 					{/if}
 				</div>
 
-				<div>
-					<label for="lk-parent" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.parentProject()}
+				<div class="md:col-span-2">
+					<label for="lk-matrices" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						{m.responsibilityMatrices()}
 					</label>
 					{#if linkedEditing}
-						<select id="lk-parent" bind:value={linkedDraft.parent_project} class="select w-full">
-							<option value={null}>--</option>
-							{#each projectOptions as opt}
-								<option value={opt.id}>{opt.str ?? opt.name}</option>
-							{/each}
-						</select>
-					{:else if project.parent_project}
-						<Anchor
-							href="/projects/{project.parent_project.id}"
-							class="text-primary-600 hover:text-primary-800 hover:underline text-sm"
-						>
-							{project.parent_project.str}
-						</Anchor>
-					{:else}
-						<span class="text-gray-400 text-sm">--</span>
-					{/if}
-				</div>
-
-				<div>
-					<div class="text-xs font-semibold text-gray-500 uppercase mb-1">{m.subProjects()}</div>
-					{#if project.sub_projects && project.sub_projects.length > 0}
-						<ul class="space-y-1">
-							{#each project.sub_projects as sub}
-								<li class="text-sm">
-									<Anchor
-										href="/projects/{sub.id}"
-										class="text-primary-600 hover:text-primary-800 hover:underline"
+						<div class="space-y-2">
+							<input
+								id="lk-matrices"
+								type="text"
+								class="input w-full"
+								placeholder={m.searchPlaceholder()}
+								bind:value={matrixSearchQuery}
+							/>
+							{#if linkedDraft.responsibility_matrices.length > 0}
+								<div class="flex flex-wrap gap-1">
+									{#each linkedDraft.responsibility_matrices as id}
+										{@const opt = matrixOptions.find((o: any) => o.id === id)}
+										{#if opt}
+											<span
+												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 text-xs"
+											>
+												{opt.str ?? opt.name}
+												<button
+													type="button"
+													class="hover:text-primary-600"
+													onclick={() => toggleMatrix(id)}
+												>
+													<i class="fa-solid fa-xmark text-xs"></i>
+												</button>
+											</span>
+										{/if}
+									{/each}
+								</div>
+							{/if}
+							<div class="max-h-48 overflow-y-auto border border-gray-200 rounded">
+								{#each filteredMatrixOptions as opt}
+									<label
+										class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
 									>
-										{sub.str}
-									</Anchor>
-								</li>
-							{/each}
-						</ul>
-					{:else}
-						<span class="text-gray-400 text-sm italic">{m.noSubProjects()}</span>
-					{/if}
-				</div>
-
-				<div>
-					<div class="text-xs font-semibold text-gray-500 uppercase mb-1">
-						{m.responsibilityMatrices()}
-					</div>
-					{#if project.responsibility_matrices && project.responsibility_matrices.length > 0}
+										<input
+											type="checkbox"
+											checked={linkedDraft.responsibility_matrices.includes(opt.id)}
+											onchange={() => toggleMatrix(opt.id)}
+											class="checkbox"
+										/>
+										<span class="text-sm">{opt.str ?? opt.name}</span>
+										{#if opt.folder?.str}
+											<span class="badge preset-tonal-surface text-[10px] ml-auto">
+												{opt.folder.str}
+											</span>
+										{/if}
+									</label>
+								{/each}
+								{#if filteredMatrixOptions.length === 0}
+									<div class="px-3 py-2 text-sm text-gray-400">{m.noResultsFound()}</div>
+								{/if}
+							</div>
+						</div>
+					{:else if project.responsibility_matrices && project.responsibility_matrices.length > 0}
 						<ul class="space-y-1">
 							{#each project.responsibility_matrices as matrix}
 								<li class="text-sm">

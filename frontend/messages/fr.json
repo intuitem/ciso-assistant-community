@@ -2748,6 +2748,8 @@
 	"kind": "Type",
 	"portfolio": "Portefeuille",
 	"program": "Programme",
+	"tracking": "Suivi",
+	"multiSelectHint": "Maintenir Ctrl/Cmd pour sélectionner plusieurs entrées.",
 	"accredited": "Homologué",
 	"obsolete": "Obsolète",
 	"addAccreditation": "Démarrer une homologation",
