@@ -107,6 +107,7 @@ NUMBERED_SECTION_RE = re.compile(r"^(?P<ref_id>\d+\.\d+)\s+(?P<body>.+)$")
 ANNEXE_1_RE = re.compile(r"annexe\s+1", re.IGNORECASE)
 ANNEXE_2_RE = re.compile(r"annexe\s+2", re.IGNORECASE)
 OBJECTIVE_RE = re.compile(r"^obje", re.IGNORECASE)
+NETWORK_CLASS_RE = re.compile(r"^Un réseau de classe\s+(?P<class_id>\d+)\b", re.IGNORECASE)
 RECOMMENDATION_RE = re.compile(
     r"^\s*(?P<raw_id>[A-Z0-9][A-Z0-9\s-]{1,55}[A-Z0-9])\s*:\s*(?P<body>.+)$",
     re.IGNORECASE,
@@ -211,6 +212,7 @@ def clean_text(text: str) -> str:
     text = re.sub(r"\b(qu|jusqu|lorsqu|puisqu)'\s+", r"\1'", text)
     text = re.sub(r"\bJe\b", "le", text)
     text = text.replace("ANS SI", "ANSSI").replace("A NS SI", "ANSSI")
+    text = text.replace("ANSS I", "ANSSI")
     text = text.replace("l' Etat", "l'État").replace("l'Etat", "l'État")
     text = text.replace("PSS I", "PSSI")
     text = text.replace("PSSŒ", "PSSIE")
@@ -230,6 +232,7 @@ def clean_text(text: str) -> str:
     text = text.replace("Config ur er", "Configurer")
     text = text.replace("locau x", "locaux")
     text = text.replace("rése au", "réseau")
+    text = text.replace("ré seau", "réseau")
     text = text.replace("techni~ue", "technique")
     text = text.replace("(PPSTi", "(PPST)3")
     text = text.replace("mmtmtser", "minimiser")
@@ -255,6 +258,25 @@ def clean_text(text: str) -> str:
     text = text.replace("classe l ou 2", "classe 1 ou 2")
     text = text.replace("classe l'ou 2", "classe 1 ou 2")
     text = text.replace("Restreinte l'ou", "Restreinte 1 ou")
+    text = text.replace("classe l'est", "classe 1 est")
+    text = text.replace("classe L'est", "classe 1 est")
+    text = text.replace("classe  O", "classe 0")
+    text = text.replace("classe O", "classe 0")
+    text = text.replace("d '", "d'")
+    text = text.replace("l '", "l'")
+    text = text.replace("L' interconnexion", "L'interconnexion")
+    text = text.replace("l'o bjet", "l'objet")
+    text = text.replace("d'i nterconnexion", "d'interconnexion")
+    text = text.replace("ou l'au travers", "ou 1 au travers")
+    text = text.replace("so n site", "son site")
+    text = text.replace("sécuri sée", "sécurisée")
+    text = text.replace("sécurisée»", "sécurisée »")
+    text = text.replace("pr ésentant", "présentant")
+    text = text.replace("interconnexio n", "interconnexion")
+    text = text.replace("inf ér ieure", "inférieure")
+    text = text.replace("éq uipements", "équipements")
+    text = text.replace("autorisée compris via", "autorisée y compris via")
+    text = text.replace("technique«", "technique «")
     text = re.sub(r"\b(\d+)\.l'(?=[A-ZÉÈÊÀÂ])", r"\1.1 ", text)
     text = text.replace(
         "d'informations sensibles doivent être effectuées selon une préalablement, "
@@ -426,7 +448,7 @@ def mark_footnote_reference(text: str | None, number: str) -> tuple[str | None, 
     changed = False
     blocked_previous_words = {"article", "annexe", "titre", "classe", "réseau"}
 
-    contiguous_pattern = re.compile(rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]]){number}(?!\d)")
+    contiguous_pattern = re.compile(rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]»]){number}(?!\d)")
     text, count = contiguous_pattern.subn(f"<sup>{number}</sup>", text)
     changed = changed or count > 0
 
@@ -442,8 +464,14 @@ def mark_footnote_reference(text: str | None, number: str) -> tuple[str | None, 
         suffix = " " if match.group(0).endswith(" ") else ""
         return f"<sup>{number}</sup>{suffix}"
 
-    spaced_before_punctuation = re.compile(rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]])\s+{number}(?=[.,;)])")
+    spaced_before_punctuation = re.compile(rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]])\s+{number}(?=[.,;:)])")
     text = spaced_before_punctuation.sub(replace_spaced_reference, text)
+
+    spaced_before_bullet = re.compile(rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]])\s+{number}\s*•\s*")
+    text = spaced_before_bullet.sub(replace_spaced_reference, text)
+
+    spaced_before_symbol = re.compile(rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]])\s+{number}\s*(?=[:•])")
+    text = spaced_before_symbol.sub(replace_spaced_reference, text)
 
     spaced_before_word = re.compile(rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]])\s+{number}\s+(?=[a-zà-öø-ÿ])")
     text = spaced_before_word.sub(replace_spaced_reference, text)
@@ -850,6 +878,126 @@ def extract_annexe_1_blocks(pdf_path: Path) -> list[TextBlock]:
                 blocks.append(block)
 
     return blocks
+
+
+# =============================================================================
+# Annex 2 extraction: network class definitions
+# =============================================================================
+
+def split_annexe_2_heading(text: str) -> str | None:
+    """Return the Annex 2 title without the 'Annexe 2' prefix."""
+
+    match = re.match(r"^Annexe\s+2\s*[-–]\s*(?P<title>.+)$", clean_text(text), re.IGNORECASE)
+    if not match:
+        return None
+    return clean_name(match.group("title"))
+
+
+def is_annexe_2_footnote_start(block: TextBlock) -> bool:
+    """Detect the first footer note in Annex 2."""
+
+    return block.y0 > 620 and re.match(r"^\d{1,2}\s+", block.text) is not None
+
+
+def extract_annexe_2(pdf_path: Path) -> tuple[str | None, list[TextBlock]]:
+    """Extract Annex 2 title and body blocks."""
+
+    if not pdf_path.exists():
+        raise FileNotFoundError(f"PDF not found: {pdf_path}")
+
+    doc = fitz.open(pdf_path)
+    blocks: list[TextBlock] = []
+    title: str | None = None
+    in_annexe_2 = False
+
+    for page_index, page in enumerate(doc, start=1):
+        page_footnotes = False
+        for block in extract_page_text_blocks(page, page_index):
+            if is_annexe_heading(block, ANNEXE_2_RE):
+                in_annexe_2 = True
+                title = split_annexe_2_heading(block.text)
+                continue
+
+            if not in_annexe_2:
+                continue
+
+            if is_annexe_2_footnote_start(block):
+                page_footnotes = True
+            if page_footnotes or is_noise(block):
+                continue
+
+            blocks.append(block)
+
+        if in_annexe_2 and page_footnotes:
+            return title, blocks
+
+    return title, blocks
+
+
+def split_network_class(text: str) -> tuple[str, str] | None:
+    """Detect paragraphs starting a new Annex 2 network class."""
+
+    cleaned = clean_text(text)
+    match = NETWORK_CLASS_RE.match(cleaned)
+    if not match:
+        return None
+    return match.group("class_id"), cleaned
+
+
+def append_annexe_2_description_block(
+    description: str | None, block: TextBlock, previous_block: TextBlock | None = None
+) -> str:
+    """Append Annex 2 body blocks while preserving lists and class paragraphs."""
+
+    text = clean_text(block.text)
+    if not text:
+        return description or ""
+
+    existing = description or ""
+    lines = existing.splitlines()
+    has_list = any(line.lstrip().startswith("* ") for line in lines)
+    last_line = lines[-1] if lines else ""
+    if block.x0 >= 105 and (has_list or last_line.rstrip().endswith(":")):
+        level = max(1, int((block.x0 - 105) // 45) + 1)
+        prefix = f"{'  ' * (level - 1)}* "
+        return clean_multiline_text(f"{existing}\n{prefix}{strip_list_marker(text)}")
+
+    if has_list and block.x0 < 100 and LIST_MARKER_RE.match(text) is None:
+        return clean_multiline_text(f"{existing}\n{text}")
+
+    return append_description_block(existing, block, previous_block)
+
+
+def parse_annexe_2_rows(blocks: Sequence[TextBlock]) -> list[ContentRow]:
+    """Convert Annex 2 network class paragraphs into nested rows."""
+
+    rows: list[ContentRow] = []
+    current_row: ContentRow | None = None
+
+    for block in blocks:
+        network_class = split_network_class(block.text)
+        if network_class:
+            class_id, description = network_class
+            current_row = ContentRow(
+                None,
+                2,
+                None,
+                None,
+                description,
+                block,
+            )
+            rows.append(current_row)
+            continue
+
+        if current_row is None:
+            continue
+
+        current_row.description = append_annexe_2_description_block(
+            current_row.description, block, current_row.last_description_block
+        )
+        current_row.last_description_block = block
+
+    return rows
 
 
 # =============================================================================
@@ -1278,7 +1426,20 @@ def main() -> None:
     attach_footnotes_to_rows(annexe_1_content_rows, footnotes_by_page)
     annexe_1_rows.extend(shift_depth(annexe_1_content_rows, 1))
 
-    rows = [*front_matter_rows, *annexe_1_rows]
+    annexe_2_title, annexe_2_blocks = extract_annexe_2(args.input)
+    annexe_2_rows = [
+        ContentRow(
+            None,
+            1,
+            "Annexe 2",
+            annexe_2_title or "Différentes classes de réseau",
+        )
+    ]
+    annexe_2_content_rows = parse_annexe_2_rows(annexe_2_blocks)
+    attach_footnotes_to_rows(annexe_2_content_rows, footnotes_by_page)
+    annexe_2_rows.extend(annexe_2_content_rows)
+
+    rows = [*front_matter_rows, *annexe_1_rows, *annexe_2_rows]
     build_workbook(rows, args.output)
     print(f"Wrote {args.output}")
 
