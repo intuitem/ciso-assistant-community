@@ -38,7 +38,8 @@
 	import {
 		computeRequirementScoreAndResult,
 		formatScoreValue,
-		displayScoreColor
+		displayScoreColor,
+		resultBadgeStyle
 	} from '$lib/utils/helpers';
 
 	interface Props {
@@ -821,12 +822,7 @@
 								<span class="font-medium">{m.result()}</span>
 								<span
 									class="badge text-sm font-semibold"
-									style="background-color: {complianceResultColorMap[
-										computedResult || 'not_assessed'
-									] || '#ddd'}; {complianceResultColorMap[computedResult || 'not_assessed'] ===
-									'#000000'
-										? 'color: white;'
-										: ''}"
+									style={resultBadgeStyle(computedResult || 'not_assessed')}
 								>
 									{safeTranslate(computedResult || 'not_assessed')}
 								</span>

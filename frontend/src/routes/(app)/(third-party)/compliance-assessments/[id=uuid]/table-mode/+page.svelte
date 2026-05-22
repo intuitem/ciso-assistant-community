@@ -155,7 +155,7 @@
 			[field]: value
 		});
 
-		if (invalidateAll) {
+		if (invalidateAllBool) {
 			await invalidateAll();
 		}
 

@@ -137,6 +137,7 @@ from core.utils import (
     build_answers_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
+    resolve_compute_result,
     rewrite_child_urns,
     _generate_occurrences,
     _create_task_dict,
@@ -8538,8 +8539,9 @@ class FrameworkViewSet(BaseModelViewSet):
                             c_data["description"] = c.description
                         if c.add_score is not None:
                             c_data["add_score"] = c.add_score
-                        if c.compute_result:
-                            c_data["compute_result"] = c.compute_result
+                        resolved_cr = resolve_compute_result(c.compute_result)
+                        if resolved_cr is not None:
+                            c_data["compute_result"] = resolved_cr
                         if c.color:
                             c_data["color"] = c.color
                         if c.select_implementation_groups:

@@ -190,13 +190,15 @@ def backfill_results(apps, schema_editor):
         ) = _build_answer_context(questions_qs, answers_qs)
 
         ca = ra.compliance_assessment
-        min_score = ca.min_score or 0
-        max_score = ca.max_score or 100
+        min_score = ca.min_score if ca.min_score is not None else 0
+        max_score = ca.max_score if ca.max_score is not None else 100
 
         aggregation = None
         scores_def = ca.scores_definition
         if isinstance(scores_def, dict):
-            aggregation = scores_def.get("aggregation")
+            candidate = scores_def.get("aggregation")
+            if candidate in ("sum", "mean"):
+                aggregation = candidate
         if not aggregation:
             aggregation = (
                 "sum"
@@ -269,6 +271,8 @@ def backfill_results(apps, schema_editor):
 
 
 def reverse_backfill(apps, schema_editor):
+    """No-op. Rollback is logical (schema) only; legacy true/false literals
+    and pre-fix RequirementAssessment.result values are not restored."""
     pass
 
 

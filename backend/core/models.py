@@ -8341,8 +8341,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
-        min_score = self.compliance_assessment.min_score or 0
-        max_score = self.compliance_assessment.max_score or 100
+        min_score = (
+            self.compliance_assessment.min_score
+            if self.compliance_assessment.min_score is not None
+            else 0
+        )
+        max_score = (
+            self.compliance_assessment.max_score
+            if self.compliance_assessment.max_score is not None
+            else 100
+        )
         results = []
         visible_questions = 0
         answered_visible_questions = 0
@@ -8352,7 +8360,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         scores_def = self.compliance_assessment.scores_definition
         aggregation = None
         if isinstance(scores_def, dict):
-            aggregation = scores_def.get("aggregation")
+            candidate = scores_def.get("aggregation")
+            if candidate in ("sum", "mean"):
+                aggregation = candidate
         if not aggregation:
             if (
                 self.compliance_assessment.score_calculation_method

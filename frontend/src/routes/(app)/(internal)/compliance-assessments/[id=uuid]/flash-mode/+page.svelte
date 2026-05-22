@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { complianceResultColorMap, complianceResultTailwindColorMap } from '$lib/utils/constants';
+	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import { m } from '$paraglide/messages';
@@ -8,7 +8,8 @@
 	import {
 		getFieldVisibility,
 		hasComputedResult,
-		computeRequirementScoreAndResult
+		computeRequirementScoreAndResult,
+		resultBadgeStyle
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 
@@ -434,13 +435,7 @@
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						{#if showResult}
 							{#if currentHasComputedResult}
-								<span
-									class="badge text-sm font-semibold"
-									style="background-color: {complianceResultColorMap[result ?? 'not_assessed'] ||
-										'#ddd'}; {complianceResultColorMap[result ?? 'not_assessed'] === '#000000'
-										? 'color: white;'
-										: ''}"
-								>
+								<span class="badge text-sm font-semibold" style={resultBadgeStyle(result)}>
 									{safeTranslate(result ?? 'not_assessed')}
 								</span>
 							{:else}

@@ -1,3 +1,5 @@
+import { complianceResultColorMap } from '$lib/utils/constants';
+
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
 	return date.toLocaleDateString(locale, {
@@ -253,13 +255,15 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	if (!questions) return { score: null, result: null };
 
 	const ca = requirementAssessment.compliance_assessment ?? {};
-	const min_score = ca.min_score || 0;
-	const max_score = ca.max_score || 100;
+	const min_score = ca.min_score ?? 0;
+	const max_score = ca.max_score ?? 100;
 
 	const scoresDef = ca.scores_definition;
 	let aggregation: 'sum' | 'mean' | null = null;
-	if (scoresDef && typeof scoresDef === 'object' && scoresDef.aggregation) {
-		aggregation = scoresDef.aggregation === 'sum' ? 'sum' : 'mean';
+	if (scoresDef && typeof scoresDef === 'object') {
+		if (scoresDef.aggregation === 'sum' || scoresDef.aggregation === 'mean') {
+			aggregation = scoresDef.aggregation;
+		}
 	}
 	if (!aggregation) {
 		aggregation = ca.score_calculation_method === 'sum' ? 'sum' : 'mean';
@@ -479,7 +483,9 @@ export function hasComputedResult(questions: Record<string, any> | null | undefi
 	return Object.values(questions).some(
 		(question: any) =>
 			Array.isArray(question.choices) &&
-			question.choices.some((choice: any) => choice.compute_result !== undefined)
+			question.choices.some(
+				(choice: any) => choice.compute_result !== undefined && choice.compute_result !== null
+			)
 	);
 }
 
@@ -558,6 +564,13 @@ export function choiceUrnFromAlignmentValue(value: string | null): string | unde
  * Visible to respondents when respondent_alignment visibility includes them and
  * the requirement has no framework questions of its own.
  */
+/** Background + readable text color for a compliance-result badge. */
+export function resultBadgeStyle(result: string | null | undefined): string {
+	const key = result ?? 'not_assessed';
+	const bg = complianceResultColorMap[key] || '#ddd';
+	return `background-color: ${bg};${isDark(bg) ? ' color: white;' : ''}`;
+}
+
 export function shouldShowAutoQuestion(
 	requirement: Record<string, any>,
 	viewerRole: string,
