@@ -60,6 +60,16 @@ class StrictNonceOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
     def complete_login(self, request, app, token, **kwargs):
         id_token_str = kwargs["response"].get("id_token")
         fetch_userinfo = app.settings.get("fetch_userinfo", True)
+        strict = bool(app.settings.get("strict_state_nonce", False))
+
+        # Strict mode requires an id_token so nonce can be validated.
+        if strict and not id_token_str:
+            logger.error(
+                "OIDC strict mode: id_token missing from token response",
+                provider=self.provider_id,
+            )
+            raise OAuth2Error("OIDC strict mode: id_token missing")
+
         data = {}
         if fetch_userinfo or (not id_token_str):
             data["userinfo"] = self._fetch_user_info(token.token)
@@ -69,6 +79,12 @@ class StrictNonceOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
             expected_nonce = request.session.pop(
                 f"{_STRICT_NONCE_SESSION_PREFIX}{state_id}", None
             )
+            if strict and expected_nonce is None:
+                logger.error(
+                    "OIDC strict mode: no stashed nonce for state",
+                    provider=self.provider_id,
+                )
+                raise OAuth2Error("OIDC strict mode: missing stashed nonce")
             if expected_nonce is not None:
                 if decoded.get("nonce") != expected_nonce:
                     logger.error(
