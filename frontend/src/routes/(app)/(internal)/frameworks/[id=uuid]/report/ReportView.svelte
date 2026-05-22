@@ -126,8 +126,10 @@
 	// Filter / view state — IG filter is reflected in the URL so users can deeplink
 	// -----------------------------------------------------------------------------
 
-	const initialIG = page.url.searchParams.get('implementation_group') ?? 'all';
-	let igFilter = $state<string>(initialIG);
+	// Drive directly from the URL so back/forward and any external URL update
+	// stay in sync. The dropdown is therefore one-way: `value={igFilter}` and
+	// the change handler does the goto().
+	let igFilter = $derived(page.url.searchParams.get('implementation_group') ?? 'all');
 	let view = $state<'requirement' | 'domain'>('requirement');
 	let domainDepth = $state<number>(2);
 	let expandedRow = $state<string | null>(null);
@@ -162,9 +164,10 @@
 		expandedSections = new Set();
 	}
 
-	function onIGChange() {
+	function onIGChange(event: Event) {
+		const nextIG = (event.currentTarget as HTMLSelectElement).value;
 		const url = new URL(page.url);
-		if (igFilter && igFilter !== 'all') url.searchParams.set('implementation_group', igFilter);
+		if (nextIG && nextIG !== 'all') url.searchParams.set('implementation_group', nextIG);
 		else url.searchParams.delete('implementation_group');
 		goto(url, { invalidateAll: true, keepFocus: true });
 	}
@@ -548,7 +551,7 @@
 			<label class="text-xs text-gray-500 block" for="ig-filter">{m.implementationGroup()}</label>
 			<select
 				id="ig-filter"
-				bind:value={igFilter}
+				value={igFilter}
 				onchange={onIGChange}
 				class="rounded-lg border-gray-300 text-gray-700 text-sm bg-white"
 			>
