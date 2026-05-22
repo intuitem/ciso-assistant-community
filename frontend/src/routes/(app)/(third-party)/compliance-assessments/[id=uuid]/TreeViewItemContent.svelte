@@ -170,8 +170,9 @@
 				totalCount: Object.keys(questions || {}).length
 			};
 		}
-		const visibleQuestions = Object.entries(questions || {}).filter(([_, q]) =>
-			isQuestionVisible(q, answers)
+		const questionMap = (questions || {}) as Record<string, any>;
+		const visibleQuestions = Object.entries(questionMap).filter(([_, q]) =>
+			isQuestionVisible(q, answers, questionMap)
 		);
 
 		const answeredCount = visibleQuestions.filter(([urn, _]) => {

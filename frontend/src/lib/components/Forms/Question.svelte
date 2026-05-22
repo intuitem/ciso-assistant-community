@@ -88,7 +88,7 @@
 	<div class="control whitespace-pre-line">
 		{#each Object.entries(questions) as [urn, question]}
 			<!-- Only render if visible according to depends_on -->
-			{#if isQuestionVisible(question, internalAnswers)}
+			{#if isQuestionVisible(question, internalAnswers, questions)}
 				<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 					<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
 
