@@ -454,6 +454,31 @@ def mark_footnote_reference(text: str | None, number: str) -> tuple[str | None, 
     return text, changed
 
 
+def strip_footnote_reference_from_title(
+    text: str | None, number: str
+) -> tuple[str | None, bool]:
+    """Remove a footnote call from a title while keeping the annotation link."""
+
+    if not text:
+        return text, False
+
+    cleaned = text
+    removed = False
+    for pattern in (
+        rf"<sup>{number}</sup>",
+        rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]]){number}(?!\d)",
+        rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]])\s+{number}(?=[.,;)])",
+        rf"(?<=[A-Za-zÀ-ÖØ-öø-ÿ)\]])\s+{number}$",
+    ):
+        cleaned, count = re.subn(pattern, "", cleaned)
+        removed = removed or count > 0
+
+    if not removed:
+        return text, False
+
+    return clean_name(cleaned), True
+
+
 def attach_missing_page4_note_4(row: ContentRow, footnote: Footnote) -> bool:
     """Recover footnote 4, whose call is not extracted as a visible digit."""
 
@@ -484,7 +509,9 @@ def attach_footnotes_to_rows(
             **footnotes_by_page.get(row.last_description_block.page + 1, {}),
         }
         for number, footnote in page_notes.items():
-            row.name, name_changed = mark_footnote_reference(row.name, number)
+            row.name, name_changed = strip_footnote_reference_from_title(
+                row.name, number
+            )
             row.description, description_changed = mark_footnote_reference(
                 row.description, number
             )
@@ -896,6 +923,20 @@ def collect_objective_description(
     return description, last_description_block, index
 
 
+def split_objective_name_and_description(
+    objective_text: str | None,
+) -> tuple[str | None, str | None]:
+    """Split an objective title from its extra explanatory text."""
+
+    if not objective_text:
+        return None, None
+
+    name, separator, description = objective_text.partition("\n")
+    if not separator:
+        return clean_text(name), None
+    return clean_text(name), clean_multiline_text(description)
+
+
 # =============================================================================
 # Titles I-IV parsing: titles, articles, paragraphs, and lists
 # =============================================================================
@@ -951,7 +992,7 @@ def parse_front_matter_rows(
         title = split_title(block.text)
         if title:
             current_title_label, title_description = title
-            rows.append(ContentRow(None, 1, None, current_title_label, title_description))
+            rows.append(ContentRow(None, 1, current_title_label, title_description))
             current_article_seen = False
             current_non_assessable_row = None
             title_count += 1
@@ -962,7 +1003,7 @@ def parse_front_matter_rows(
         article = split_article(block.text)
         if article:
             article_name, article_description = article
-            rows.append(ContentRow(None, 2, None, article_name, article_description))
+            rows.append(ContentRow(None, 2, article_name, article_description))
             current_article_seen = True
             current_non_assessable_row = None
             article_count += 1
@@ -1052,13 +1093,16 @@ def parse_content_rows(blocks: Sequence[TextBlock], debug: bool = False) -> list
             description, last_description_block, next_index = collect_objective_description(
                 blocks, index
             )
+            objective_name, objective_description = split_objective_name_and_description(
+                description
+            )
             rows.append(
                 ContentRow(
                     None,
                     2,
-                    str(objective_number),
                     f"Objectif {objective_number}",
-                    description,
+                    objective_name,
+                    objective_description,
                     last_description_block,
                 )
             )
@@ -1221,10 +1265,9 @@ def main() -> None:
         ContentRow(
             None,
             1,
-            None,
             "Annexe 1",
-            "Règles pour les entités situées hors du champ d'application de la PSSIE"
-            + ("<sup>9</sup>" if annexe_1_footnote else ""),
+            "Règles pour les entités situées hors du champ d'application de la PSSIE",
+            None,
             None,
             format_footnote_annotation(annexe_1_footnote)
             if annexe_1_footnote
