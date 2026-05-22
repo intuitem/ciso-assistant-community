@@ -1585,6 +1585,7 @@ export const AccreditationSchema = z.object({
 export const ProjectSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
+	kind: z.enum(['portfolio', 'program', 'project']).default('project'),
 	ref_id: z.string().optional(),
 	ref_link: z.string().url().optional().or(z.literal('')),
 	owner: z.string().uuid().optional().nullable(),

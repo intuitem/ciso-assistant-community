@@ -163,6 +163,11 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
 
 
 class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
+    class Kind(models.TextChoices):
+        PORTFOLIO = "portfolio", _("Portfolio")
+        PROGRAM = "program", _("Program")
+        PROJECT = "project", _("Project")
+
     PRIORITY = [
         (1, _("P1")),
         (2, _("P2")),
@@ -197,6 +202,12 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
             "risk": {"type": "string"},
         },
     }
+
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+        default=Kind.PROJECT,
+    )
 
     ref_id = models.CharField(max_length=100, blank=True)
     ref_link = models.URLField(blank=True)

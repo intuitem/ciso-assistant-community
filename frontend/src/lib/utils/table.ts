@@ -124,6 +124,18 @@ export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PROJECT_KIND_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'pmbok/projects/kind',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'kind',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2742,10 +2754,11 @@ export const listViewFields = {
 		}
 	},
 	projects: {
-		head: ['ref_id', 'name', 'health', 'owner', 'progress', 'folder'],
-		body: ['ref_id', 'name', 'health', 'owner', 'progress', 'folder'],
+		head: ['kind', 'ref_id', 'name', 'health', 'owner', 'progress', 'folder'],
+		body: ['kind', 'ref_id', 'name', 'health', 'owner', 'progress', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
+			kind: PROJECT_KIND_FILTER,
 			status: PROJECT_STATUS_FILTER,
 			health: PROJECT_HEALTH_FILTER,
 			filtering_labels: LABELS_FILTER

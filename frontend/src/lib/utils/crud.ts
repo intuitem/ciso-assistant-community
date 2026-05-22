@@ -2703,12 +2703,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [
 			{ field: 'folder' },
 			{ field: 'ref_id' },
+			{ field: 'kind', endpointUrl: 'pmbok/projects' },
 			{ field: 'status', endpointUrl: 'pmbok/projects' },
 			{ field: 'health', endpointUrl: 'pmbok/projects' },
 			{ field: 'priority', endpointUrl: 'pmbok/projects' }
 		],
 		filters: [
 			{ field: 'folder' },
+			{ field: 'kind' },
 			{ field: 'status' },
 			{ field: 'priority' },
 			{ field: 'health' },

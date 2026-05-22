@@ -27,6 +27,18 @@
 	let savingSection: string | null = $state(null);
 	let errorMessage = $state('');
 
+	const kindIconMap: Record<string, string> = {
+		portfolio: 'fa-solid fa-folder-tree',
+		program: 'fa-solid fa-diagram-project',
+		project: 'fa-solid fa-clipboard-list'
+	};
+	const kindColorMap: Record<string, string> = {
+		portfolio: 'bg-purple-100 text-purple-700',
+		program: 'bg-blue-100 text-blue-700',
+		project: 'bg-gray-100 text-gray-700'
+	};
+	let isPortfolio = $derived(project.kind === 'portfolio');
+
 	const statusColorMap: Record<string, string> = {
 		draft: 'bg-gray-100 text-gray-600',
 		initiated: 'bg-blue-50 text-blue-700',
@@ -477,6 +489,15 @@
 			<div class="min-w-0 grow">
 				{#if !basicsEditing}
 					<div class="group flex items-baseline gap-3">
+						<span
+							class="badge text-xs font-medium px-2 py-0.5 rounded-full self-center {kindColorMap[
+								project.kind
+							] ?? 'bg-gray-100 text-gray-700'}"
+							title={safeTranslate(project.kind)}
+						>
+							<i class="{kindIconMap[project.kind] ?? 'fa-solid fa-clipboard-list'} mr-1"></i>
+							{safeTranslate(project.kind)}
+						</span>
 						<h1 class="text-2xl font-semibold text-gray-900 truncate">{project.name}</h1>
 						{#if project.ref_id}
 							<span class="text-sm text-gray-500">{project.ref_id}</span>
@@ -647,12 +668,12 @@
 			>
 				<i class="fa-solid fa-calendar mr-2"></i>{m.schedule()}
 			</Tabs.Trigger>
-			<Tabs.Trigger
+			{#if !isPortfolio}<Tabs.Trigger
 				value="scope"
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
 				<i class="fa-solid fa-bullseye mr-2"></i>{m.scope()}
-			</Tabs.Trigger>
+			</Tabs.Trigger>{/if}
 			<Tabs.Trigger
 				value="linked"
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
@@ -1151,7 +1172,7 @@
 		</Tabs.Content>
 
 		<!-- SCOPE -->
-		<Tabs.Content value="scope" class="p-6">
+		{#if !isPortfolio}<Tabs.Content value="scope" class="p-6">
 			<div class="flex items-center justify-between mb-4">
 				<h2 class="text-lg font-semibold">{m.scope()}</h2>
 				{#if !scopeEditing}
@@ -1205,6 +1226,8 @@
 				{/each}
 			</div>
 		</Tabs.Content>
+
+{/if}
 
 		<!-- LINKED -->
 		<Tabs.Content value="linked" class="p-6">

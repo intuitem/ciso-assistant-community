@@ -86,6 +86,7 @@ class ProjectViewSet(BaseModelViewSet):
     serializers_module = "pmbok.serializers"
     filterset_fields = [
         "folder",
+        "kind",
         "status",
         "priority",
         "health",
@@ -102,6 +103,11 @@ class ProjectViewSet(BaseModelViewSet):
     @action(detail=False, name="Get Project priority choices")
     def priority(self, request):
         return Response(dict(Project.PRIORITY))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get Project kind choices")
+    def kind(self, request):
+        return Response(dict(Project.Kind.choices))
 
 
 class ResponsibilityRoleViewSet(BaseModelViewSet):
