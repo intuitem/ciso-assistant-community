@@ -246,7 +246,7 @@ export function isQuestionVisible(
 		return dependency.answers.length === 1 && dependency.answers[0] === targetAnswer;
 	}
 
-	return true;
+	return false;
 }
 
 export function computeRequirementScoreAndResult(requirementAssessment: any, answers: any) {
