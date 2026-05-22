@@ -85,7 +85,10 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 				}
 			}
 		);
-		expect(response.ok(), `PATCH failed: ${response.status()} ${await response.text()}`).toBeTruthy();
+		expect(
+			response.ok(),
+			`PATCH failed: ${response.status()} ${await response.text()}`
+		).toBeTruthy();
 		await page.goto(auditDetailUrl);
 	}
 
