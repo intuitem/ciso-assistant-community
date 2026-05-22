@@ -33,11 +33,12 @@ def _aggregate_compute_results(resolved_results):
     contributing = [r for r in resolved_results if r is not None]
     if not contributing:
         return None
-    if any(r == "not_applicable" for r in contributing):
+    non_na = [r for r in contributing if r != "not_applicable"]
+    if not non_na:
         return "not_applicable"
-    has_compliant = any(r == "compliant" for r in contributing)
-    has_non_compliant = any(r == "non_compliant" for r in contributing)
-    has_partial = any(r == "partially_compliant" for r in contributing)
+    has_compliant = any(r == "compliant" for r in non_na)
+    has_non_compliant = any(r == "non_compliant" for r in non_na)
+    has_partial = any(r == "partially_compliant" for r in non_na)
     if has_partial or (has_compliant and has_non_compliant):
         return "partially_compliant"
     if has_non_compliant:

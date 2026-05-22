@@ -566,8 +566,8 @@ class TestSemanticComputeResult:
         ra.refresh_from_db()
         assert ra.result == "partially_compliant"
 
-    def test_not_applicable_choice_vetoes_other_results(self, db):
-        """A single 'not_applicable' choice overrides other contributions."""
+    def test_not_applicable_choice_is_neutral_in_mix(self, db):
+        """A 'not_applicable' choice is dropped from the pool; other contributions decide."""
         folder = Folder.get_root_folder()
         ra, q1, q1_choices, q2, q2_choices = self._build_two_question_ra(
             folder,
@@ -589,8 +589,7 @@ class TestSemanticComputeResult:
 
         ra.compute_score_and_result()
         ra.refresh_from_db()
-        # not_applicable is a veto -> overrides the non_compliant signal
-        assert ra.result == "not_applicable"
+        assert ra.result == "non_compliant"
 
     def test_null_compute_result_stays_neutral(self, db):
         """A choice with compute_result=None does not contribute to the result."""
@@ -809,18 +808,15 @@ class TestResolveComputeResult:
             aggregate_compute_results(["not_applicable", "not_applicable"])
             == "not_applicable"
         )
-        # NA is a veto: any not_applicable in the mix forces the requirement to NA
+        # NA is neutral: dropped from the pool, other contributions decide.
         assert (
             aggregate_compute_results(["not_applicable", "non_compliant"])
-            == "not_applicable"
+            == "non_compliant"
         )
-        assert (
-            aggregate_compute_results(["not_applicable", "compliant"])
-            == "not_applicable"
-        )
+        assert aggregate_compute_results(["not_applicable", "compliant"]) == "compliant"
         assert (
             aggregate_compute_results(["not_applicable", "partially_compliant"])
-            == "not_applicable"
+            == "partially_compliant"
         )
 
 

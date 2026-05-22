@@ -349,16 +349,17 @@ function resolveComputeResult(value: unknown): string | null {
 	return null;
 }
 
-/** Aggregate resolved compute_result values: not_applicable vetoes, else worst-wins. */
+/** Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins. */
 function aggregateComputeResults(resolved: string[]): string | null {
 	const contributing = resolved.filter((r) => r !== null && r !== undefined);
 	if (contributing.length === 0) return null;
 
-	if (contributing.some((r) => r === 'not_applicable')) return 'not_applicable';
+	const nonNA = contributing.filter((r) => r !== 'not_applicable');
+	if (nonNA.length === 0) return 'not_applicable';
 
-	const hasCompliant = contributing.some((r) => r === 'compliant');
-	const hasNonCompliant = contributing.some((r) => r === 'non_compliant');
-	const hasPartial = contributing.some((r) => r === 'partially_compliant');
+	const hasCompliant = nonNA.some((r) => r === 'compliant');
+	const hasNonCompliant = nonNA.some((r) => r === 'non_compliant');
+	const hasPartial = nonNA.some((r) => r === 'partially_compliant');
 
 	if (hasPartial || (hasCompliant && hasNonCompliant)) return 'partially_compliant';
 	if (hasNonCompliant) return 'non_compliant';

@@ -335,11 +335,11 @@ The `_content` tab for a "answers" object contains the following columns:
       - `compliant` — the choice contributes to compliance
       - `non_compliant` — the choice contributes to non-compliance
       - `partially_compliant` — the choice contributes a partial compliance result
-      - `not_applicable` — **veto**: if a choice with this value is selected, the whole requirement is marked `not_applicable` regardless of the other answers. Use for scoping questions, e.g. *"Do you process personal data? → No"*. Pair the scoping question with `depends_on` on the dependent questions so they're hidden when the scoping answer is picked; otherwise the requirement stays `not_assessed` until every visible question is answered.
+      - `not_applicable` — neutral: the choice is dropped from the aggregation. The requirement is marked `not_applicable` only when every contributing choice resolves to `not_applicable`. To mark a whole requirement as out of scope based on one question (e.g. *"Do you process personal data? -> No"*), use `depends_on` so the dependent questions are hidden when the scoping answer is picked.
       - `/` or empty cell — neutral, the choice does not contribute to the result
     Legacy boolean literals are still accepted for backward compatibility with older spreadsheets: `true` is treated as `compliant`, `false` as `non_compliant`. Each value is separated by line breaks (one per choice).
 
-    Aggregation across all selected choices of a requirement: (1) neutral entries are dropped, (2) any `not_applicable` short-circuits the requirement to `not_applicable`, (3) otherwise mixed `compliant`/`non_compliant` or any `partially_compliant` yields `partially_compliant`, else the worst remaining value wins.
+    Aggregation across all selected choices of a requirement: (1) neutral entries (empty + `not_applicable`) are dropped, (2) if no contribution remains and at least one was `not_applicable`, the requirement is `not_applicable`, (3) otherwise mixed `compliant`/`non_compliant` or any `partially_compliant` yields `partially_compliant`, else the worst remaining value wins.
   - color: Hexadecimal value. Format = `#xxxxxx` ; None = `/` or empty cell. Each choice color is separated by line breaks.
 
 Note: Unsupported values should be rejected.

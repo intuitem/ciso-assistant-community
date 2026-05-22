@@ -943,15 +943,15 @@ Each choice can declare the compliance contribution it carries. Accepted values 
 - `"compliant"` — the choice contributes to compliance
 - `"non_compliant"` — the choice contributes to non-compliance
 - `"partially_compliant"` — the choice contributes a partial compliance result
-- `"not_applicable"` — **veto**: if any selected choice carries this value, the whole requirement is marked `not_applicable` (designed for scoping questions, e.g. _"Do you process personal data? → No"_)
+- `"not_applicable"` — **neutral**: the choice is dropped from the aggregation. The requirement is marked `not_applicable` only when every contributing choice resolves to `not_applicable`. To force a whole requirement to `not_applicable` based on one scoping question (e.g. _"Do you process personal data? -> No"_), use `depends_on` so the dependent questions are hidden when the scoping answer is picked.
 - `null` or omitted — the choice is **neutral** and does not contribute to the result
 
 Legacy boolean literals are still accepted for backward compatibility with older library YAMLs: `true` is treated as `"compliant"`, `false` as `"non_compliant"`.
 
 When compute_result is defined on one or more selected choices across the answered visible questions of a requirement, the overall result is aggregated as follows:
 
-1. Neutral entries (`null` / omitted) are dropped from the pool.
-2. If any remaining entry is `"not_applicable"`, the result short-circuits to `"not_applicable"` regardless of the other values.
+1. Neutral entries (`null` / omitted, and `"not_applicable"`) are dropped from the pool.
+2. If no contribution remains and at least one of the dropped entries was `"not_applicable"`, the result is `"not_applicable"`.
 3. Otherwise, if the pool contains both `"compliant"` and `"non_compliant"` entries, or any `"partially_compliant"` entry, the result is `"partially_compliant"`.
 4. Otherwise, if the pool contains only `"non_compliant"` entries, the result is `"non_compliant"`.
 5. Otherwise (pool contains only `"compliant"` entries), the result is `"compliant"`.
