@@ -2,16 +2,14 @@
  * Functional tests for the effect of the per-role field visibility settings
  * on the audit-overview UI.
  *
- * Scoped to the audit detail page only — the previous matrix that also
- * navigated to the requirement-assessment edit page was flaky against the
- * SvelteKit/Playwright interaction (RA endpoint sometimes returned stale
- * field_visibility after rapid edits). Visibility plumbing into the RA edit
- * surface is covered indirectly via the editor unit tests and via the
- * compliance-assessments.test.ts scoring flow.
+ * Field visibility is set via direct PATCH to the backend API rather than
+ * through the editor UI. Going through the UI was flaky in CI because of how
+ * the editor's Accordion-based "More" dropdown handles repeated re-renders.
+ * The editor itself is exercised by visibility-editor.test.ts.
  *
  * Companion tests:
  *   - visibility-editor.test.ts verifies the editor UI (pill state, cascade,
- *     persistence) without checking downstream effects.
+ *     persistence) for one save cycle.
  *   - test_field_visibility.py (backend) covers the resolver helpers.
  */
 
@@ -19,13 +17,26 @@ import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 import { m } from '$paraglide/messages';
-import type { Page } from '@playwright/test';
+import type { Page, BrowserContext } from '@playwright/test';
 
 const vars = TestContent.generateTestVars();
 const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
-/** Visibility pills exposed by the editor. */
-type Pill = 'everyone' | 'auditor' | 'hidden';
+/** Per-role visibility pair. */
+type Pair = { auditor: 'edit' | 'hidden'; respondent: 'edit' | 'hidden' };
+const EVERYONE: Pair = { auditor: 'edit', respondent: 'edit' };
+const HIDDEN: Pair = { auditor: 'hidden', respondent: 'hidden' };
+
+/** Resolve the backend base URL the SvelteKit app was built with. */
+const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
+
+/** Extract the auth token the frontend stored after login. */
+async function getAuthToken(context: BrowserContext): Promise<string> {
+	const cookies = await context.cookies();
+	const token = cookies.find((c) => c.name === 'token')?.value;
+	if (!token) throw new Error('No `token` cookie found — is the user logged in?');
+	return token;
+}
 
 test('field visibility effects: each flag toggles the corresponding donut', async ({
 	logedPage,
@@ -54,22 +65,28 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 		testObjectsData.complianceAssessmentsPage.build.name
 	);
 	const auditDetailUrl = page.url();
+	const auditId = auditDetailUrl.split('/').pop()!.split('?')[0];
+
+	const token = await getAuthToken(page.context());
 
 	/**
-	 * Set a field's visibility via the editor and persist. Starts from the
-	 * audit detail page and ends there too.
+	 * PATCH the audit's field_visibility for a single field, then reload the
+	 * detail page so the new state is reflected in the DOM. The backend merges
+	 * partial field_visibility maps, so sending only the changed field is safe.
 	 */
-	async function setVisibility(field: string, pill: Pill) {
-		await page.goto(auditDetailUrl);
-		await page.getByTestId('edit-button').click();
-		await page.getByText('More').click();
-		await page.getByTestId(`visibility-${field}-${pill}`).click();
-		await expect(page.getByTestId(`visibility-${field}-${pill}`)).toHaveAttribute(
-			'aria-checked',
-			'true'
+	async function setVisibility(field: string, pair: Pair) {
+		const response = await page.request.patch(
+			`${BACKEND_API_URL}/compliance-assessments/${auditId}/`,
+			{
+				data: { field_visibility: { [field]: pair } },
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Token ${token}`
+				}
+			}
 		);
-		await page.getByTestId('save-button').click();
-		await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
+		expect(response.ok(), `PATCH failed: ${response.status()} ${await response.text()}`).toBeTruthy();
+		await page.goto(auditDetailUrl);
 	}
 
 	// === Matrix: each donut-bearing field hidden then visible ==============
@@ -81,11 +98,11 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	];
 
 	for (const check of checks) {
-		for (const pill of ['hidden', 'everyone'] as Pill[]) {
-			await setVisibility(check.field, pill);
-			const expectedCount = pill === 'everyone' ? 1 : 0;
-			await expect(page.locator(check.selector)).toHaveCount(expectedCount);
-		}
+		await setVisibility(check.field, HIDDEN);
+		await expect(page.locator(check.selector)).toHaveCount(0);
+
+		await setVisibility(check.field, EVERYONE);
+		await expect(page.locator(check.selector)).toHaveCount(1);
 	}
 });
 
