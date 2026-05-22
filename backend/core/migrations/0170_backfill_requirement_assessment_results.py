@@ -207,6 +207,17 @@ def backfill_results(apps, schema_editor):
         if not questions_qs:
             return False
 
+        # No choice defines compute_result → the boolean-collapse bug never
+        # applied to this RA.  Skip to avoid wiping a manual result on
+        # score-only or plain-question assessments.
+        has_any_compute_result = any(
+            choice.compute_result is not None
+            for question in questions_qs
+            for choice in question.choices.all()
+        )
+        if not has_any_compute_result:
+            return False
+
         answers_qs = (
             ra.answers.select_related("question")
             .prefetch_related("selected_choices")
