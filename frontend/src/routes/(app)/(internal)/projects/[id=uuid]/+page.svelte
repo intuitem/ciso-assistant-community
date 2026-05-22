@@ -669,11 +669,11 @@
 				<i class="fa-solid fa-calendar mr-2"></i>{m.schedule()}
 			</Tabs.Trigger>
 			{#if !isPortfolio}<Tabs.Trigger
-				value="scope"
-				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
-			>
-				<i class="fa-solid fa-bullseye mr-2"></i>{m.scope()}
-			</Tabs.Trigger>{/if}
+					value="scope"
+					class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+				>
+					<i class="fa-solid fa-bullseye mr-2"></i>{m.scope()}
+				</Tabs.Trigger>{/if}
 			<Tabs.Trigger
 				value="linked"
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
@@ -1173,61 +1173,60 @@
 
 		<!-- SCOPE -->
 		{#if !isPortfolio}<Tabs.Content value="scope" class="p-6">
-			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-semibold">{m.scope()}</h2>
-				{#if !scopeEditing}
-					<button class="btn preset-tonal-primary btn-sm" onclick={startScopeEdit}>
-						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
-					</button>
-				{:else}
-					<div class="flex gap-2">
-						<button
-							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (scopeEditing = false)}
-							disabled={savingSection === 'scope'}>{m.cancel()}</button
-						>
-						<button
-							class="btn preset-filled-primary-500 btn-sm"
-							onclick={saveScope}
-							disabled={savingSection === 'scope'}
-						>
-							{#if savingSection === 'scope'}<i class="fa-solid fa-spinner fa-spin mr-2"
-								></i>{/if}{m.save()}
+				<div class="flex items-center justify-between mb-4">
+					<h2 class="text-lg font-semibold">{m.scope()}</h2>
+					{#if !scopeEditing}
+						<button class="btn preset-tonal-primary btn-sm" onclick={startScopeEdit}>
+							<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 						</button>
-					</div>
+					{:else}
+						<div class="flex gap-2">
+							<button
+								class="btn preset-tonal-surface btn-sm"
+								onclick={() => (scopeEditing = false)}
+								disabled={savingSection === 'scope'}>{m.cancel()}</button
+							>
+							<button
+								class="btn preset-filled-primary-500 btn-sm"
+								onclick={saveScope}
+								disabled={savingSection === 'scope'}
+							>
+								{#if savingSection === 'scope'}<i class="fa-solid fa-spinner fa-spin mr-2"
+									></i>{/if}{m.save()}
+							</button>
+						</div>
+					{/if}
+				</div>
+
+				{#if errorMessage && scopeEditing}
+					<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 				{/if}
-			</div>
 
-			{#if errorMessage && scopeEditing}
-				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
-			{/if}
-
-			<div class="space-y-6">
-				{#each scopeFields as section}
-					<div class="border-l-2 border-gray-200 pl-4">
-						<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-							{section.label}
-						</h3>
-						{#if scopeEditing}
-							<MarkdownField
-								label=""
-								bind:value={scopeDraft[section.key]}
-								rows={4}
-								placeholder={section.label}
-							/>
-						{:else if project[section.key]}
-							<div class="prose prose-sm max-w-none text-gray-900">
-								<MarkdownRenderer content={project[section.key]} />
-							</div>
-						{:else}
-							<p class="text-gray-400 italic text-sm">--</p>
-						{/if}
-					</div>
-				{/each}
-			</div>
-		</Tabs.Content>
-
-{/if}
+				<div class="space-y-6">
+					{#each scopeFields as section}
+						<div class="border-l-2 border-gray-200 pl-4">
+							<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+								{section.label}
+							</h3>
+							{#if scopeEditing}
+								<MarkdownField
+									label=""
+									bind:value={scopeDraft[section.key]}
+									rows={4}
+									placeholder={section.label}
+								/>
+							{:else if project[section.key]}
+								<div class="prose prose-sm max-w-none text-gray-900">
+									<MarkdownRenderer content={project[section.key]} />
+								</div>
+							{:else}
+								<p class="text-gray-400 italic text-sm">--</p>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			</Tabs.Content>
+		{/if}
 
 		<!-- LINKED -->
 		<Tabs.Content value="linked" class="p-6">
