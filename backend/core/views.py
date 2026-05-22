@@ -2905,6 +2905,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
         matrix.editing_draft = None
         matrix.editing_version += 1
         matrix.is_enabled = True
+        matrix.is_published = True
 
         # Apply draft metadata to the model
         update_fields = [
@@ -2913,6 +2914,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
             "editing_version",
             "editing_history",
             "is_enabled",
+            "is_published",
             "updated_at",
         ]
         for field in ("name", "description", "provider", "locale"):
@@ -10207,6 +10209,7 @@ class FrameworkViewSet(BaseModelViewSet):
             framework.editing_history = history
             framework.editing_version = framework.editing_version + 1
             framework.editing_draft = None
+            framework.is_published = True
             framework.save(
                 update_fields=[
                     "name",
@@ -10224,6 +10227,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "editing_draft",
                     "editing_version",
                     "editing_history",
+                    "is_published",
                     "updated_at",
                 ]
             )
@@ -11216,6 +11220,7 @@ class PresetViewSet(BaseModelViewSet):
         preset.version = preset.editing_version
         preset.editing_history = history
         preset.editing_draft = None
+        preset.is_published = True
         preset.save()
 
         from core.serializers import PresetReadSerializer
