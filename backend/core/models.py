@@ -8325,6 +8325,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         Does NOT save the model.
         """
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
+
+        # No questions → this RA is manual or respondent-alignment-driven.
+        # Nothing to recompute; leave score/result/is_scored untouched.
+        if not questions_qs:
+            return
+
         answers_qs = (
             self.answers.select_related("question")
             .prefetch_related("selected_choices")
