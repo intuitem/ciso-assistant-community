@@ -150,9 +150,10 @@ def _build_answer_context(questions_qs, answers_qs):
 def _normalize_legacy_choice_values(apps, db_alias):
     """Convert legacy boolean compute_result literals in QuestionChoice rows.
 
-    Existing rows may store "true"/"false" from older library imports.
-    Normalize them to the semantic values so the framework builder UI
-    (which only offers compliant/non_compliant/…) renders them correctly.
+    Existing rows may store "true"/"false" from older library imports, or
+    "True"/"False" from YAML libraries that declared compute_result as a Python
+    bool (Django CharField stringifies via str(True) -> "True"). Match
+    case-insensitively so all capitalizations are caught.
     """
     QuestionChoice = apps.get_model("core", "QuestionChoice")
     LEGACY_MAP = {
@@ -162,7 +163,7 @@ def _normalize_legacy_choice_values(apps, db_alias):
     for old, new in LEGACY_MAP.items():
         updated = (
             QuestionChoice.objects.using(db_alias)
-            .filter(compute_result=old)
+            .filter(compute_result__iexact=old)
             .update(compute_result=new)
         )
         if updated:
