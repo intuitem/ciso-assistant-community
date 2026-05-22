@@ -103,9 +103,7 @@
 		</div>
 
 		<div class="flex flex-col gap-2 shrink-0 w-64">
-			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/report/"
-				>{m.viewReport()}</a
-			>
+			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/report/">{m.insights()}</a>
 			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/excel-template/">
 				{m.downloadExcelTemplate()}
 			</a>
@@ -179,7 +177,9 @@
 				{/if}
 				{#if hasIgs}
 					<div class="flex flex-col">
-						<dt class="text-xs text-gray-500">{m.implementationGroups()}</dt>
+						<dt class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">
+							{m.implementationGroups()}
+						</dt>
 						<dd>
 							<ul class="space-y-0.5 text-xs">
 								{#each igs as ig}
