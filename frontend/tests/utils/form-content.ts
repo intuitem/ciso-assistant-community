@@ -45,6 +45,12 @@ export class FormContent {
 	}
 
 	async fill(values: { [k: string]: any }) {
+		const moreTrigger = this.page
+			.locator('[data-scope="accordion"][data-part="item-trigger"][data-state="closed"]')
+			.first();
+		if (await moreTrigger.isVisible({ timeout: 200 }).catch(() => false)) {
+			await moreTrigger.click();
+		}
 		for (const key in values) {
 			const field = this.fields.get(key);
 			for (const spinner of await this.page.locator('.loading-spinner').all()) {
