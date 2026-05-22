@@ -63,13 +63,18 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class="card bg-surface-50 p-6 w-modal max-w-2xl shadow-xl space-y-5">
+	<div class="card bg-surface-50 p-6 w-full max-w-3xl shadow-xl space-y-5">
 		<header class="flex justify-between items-center">
 			<h2 class="text-xl font-bold capitalize">{actionTitles[action]}</h2>
 			<button
 				type="button"
 				class="text-surface-500 hover:text-surface-700"
-				onclick={parent.onClose}
+				onclick={() => {
+					if (!isSubmitting) {
+						parent.onClose();
+					}
+				}}
+				disabled={isSubmitting}
 				aria-label={m.close()}
 			>
 				<i class="fa-solid fa-times text-xl"></i>
@@ -91,7 +96,11 @@
 			</div>
 
 			{#if errorMessage}
-				<div class="alert preset-filled-error-500 text-sm p-3 rounded">
+				<div
+					class="alert preset-filled-error-500 text-sm p-3 rounded"
+					role="alert"
+					aria-live="assertive"
+				>
 					{errorMessage}
 				</div>
 			{/if}
