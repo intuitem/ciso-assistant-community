@@ -290,27 +290,29 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
 	);
 
-	// Field visibility
-	const fw = data.requirementAssessment.compliance_assessment.framework;
-	const complianceAssessment = data.requirementAssessment.compliance_assessment;
-	const viewerRole: 'respondent' | 'auditor' =
-		data.viewerRole === 'auditor' ? 'auditor' : 'respondent';
-	const {
-		showAnswers,
-		showResult,
-		showExtendedResult,
-		showStatus,
-		showScore,
-		showDocumentationScore,
-		showObservation,
-		showAppliedControls,
-		showEvidences,
-		showRespondentAlignment,
-		showComments
-	} = getFieldVisibility(complianceAssessment, viewerRole);
+	// Field visibility — derived so that SvelteKit's data reload (e.g. after the
+	// audit's field_visibility is edited in another tab and the user navigates
+	// back) refreshes the flags. A plain const would capture a stale reference.
+	const fw = $derived(data.requirementAssessment.compliance_assessment.framework);
+	const complianceAssessment = $derived(data.requirementAssessment.compliance_assessment);
+	const viewerRole: 'respondent' | 'auditor' = $derived(
+		data.viewerRole === 'auditor' ? 'auditor' : 'respondent'
+	);
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
+	const showResult = $derived(fieldVis.showResult);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showScore = $derived(fieldVis.showScore);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
+	const showObservation = $derived(fieldVis.showObservation);
+	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showEvidences = $derived(fieldVis.showEvidences);
+	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	const showComments = $derived(fieldVis.showComments);
 
-	const isAuditor = viewerRole === 'auditor';
-	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+	const isAuditor = $derived(viewerRole === 'auditor');
+	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';

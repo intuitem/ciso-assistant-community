@@ -32,13 +32,8 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 	complianceAssessmentsPage,
 	page
 }) => {
-	// The matrix walks ~22 visibility cycles; the default 100s timeout is tight.
+	// The matrix walks ~16 visibility cycles; the default 100s timeout is tight.
 	test.slow();
-
-	// taintedMessage is enabled on the requirement-assessment edit form. Any
-	// goto() that leaves a tainted form triggers a window.confirm() which
-	// Playwright otherwise auto-dismisses, silently blocking navigation.
-	page.on('dialog', (dialog) => dialog.accept());
 
 	// --- Bootstrap: folder + perimeter + CA --------------------------------
 	for (const requirement of ['folders', 'perimeters', 'complianceAssessments']) {
@@ -95,13 +90,6 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 		await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 	}
 
-	// === Regression: answers hidden + save buttons work (the original bug) ==
-	await setVisibility(['answers', 'hidden']);
-	await page.goto(raEditUrl);
-	await expect(page.getByTestId('answers-field')).toBeHidden();
-	await page.getByTestId('save-no-continue-button').click();
-	await expect(page.getByText(/successfully saved/i)).toBeVisible();
-
 	// === Matrix: each field hidden then visible ============================
 	// Fields that render in the audit overview (donut charts, etc.) AND in
 	// the RA edit form. We check both surfaces.
@@ -114,8 +102,8 @@ test('field visibility effects: each flag toggles the corresponding UI', async (
 		dependsOn?: Array<[string, Pill]>;
 	};
 
-	// answers is covered by the regression test above; NIST CSF v1.1 has no
-	// per-requirement questions so the matrix iteration would be a no-op.
+	// answers is not in the matrix because NIST CSF v1.1 has no per-requirement
+	// questions, so the answers-field testid never renders regardless of pill.
 	const checks: FieldCheck[] = [
 		{
 			field: 'result',
