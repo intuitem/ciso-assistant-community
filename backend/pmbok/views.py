@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from core.constants import CURRENCY_CHOICES
 from core.views import BaseModelViewSet
 from pmbok.models import (
     GenericCollection,
@@ -102,13 +103,25 @@ class ProjectViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Project priority choices")
     def priority(self, request):
-        return Response(dict(Project.PRIORITY))
+        return Response(
+            [{"value": v, "label": str(label)} for v, label in Project.PRIORITY]
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Project kind choices")
     def kind(self, request):
         return Response(
-            [{"value": v, "label": str(l)} for v, l in Project.Kind.choices]
+            [{"value": v, "label": str(label)} for v, label in Project.Kind.choices]
+        )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get supported currency choices")
+    def currencies(self, request):
+        return Response(
+            [
+                {"value": code, "label": f"{code} – {name}"}
+                for code, name in CURRENCY_CHOICES
+            ]
         )
 
 

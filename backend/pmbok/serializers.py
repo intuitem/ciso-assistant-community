@@ -125,18 +125,8 @@ class ProjectReadSerializer(BaseModelSerializer):
     linked_collection = FieldsRelatedField()
     responsibility_matrices = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
-    status = serializers.SerializerMethodField()
-    health = serializers.SerializerMethodField()
-    priority = serializers.SerializerMethodField()
-
-    def get_status(self, obj):
-        return obj.status.name if obj.status_id else None
-
-    def get_health(self, obj):
-        return obj.health.name if obj.health_id else None
-
-    def get_priority(self, obj):
-        return dict(Project.PRIORITY).get(obj.priority) if obj.priority else None
+    status = FieldsRelatedField(["id", "name"])
+    health = FieldsRelatedField(["id", "name"])
 
     class Meta:
         model = Project

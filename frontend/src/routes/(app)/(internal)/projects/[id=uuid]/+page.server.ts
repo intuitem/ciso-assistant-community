@@ -12,43 +12,15 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
-	const [
-		statusRes,
-		healthRes,
-		priorityRes,
-		actorRes,
-		collectionRes,
-		projectRes,
-		matrixRes,
-		kindRes
-	] = await Promise.all([
-		event.fetch(
-			`${BASE_API_URL}/terminologies/?field_path=project.status&is_visible=true&limit=100`
-		),
-		event.fetch(
-			`${BASE_API_URL}/terminologies/?field_path=project.health&is_visible=true&limit=100`
-		),
+	const [priorityRes, kindRes, currenciesRes] = await Promise.all([
 		event.fetch(`${BASE_API_URL}/pmbok/projects/priority/`),
-		event.fetch(`${BASE_API_URL}/actors/?user__is_third_party=False&limit=200`),
-		event.fetch(`${BASE_API_URL}/pmbok/generic-collections/?limit=200`),
-		event.fetch(`${BASE_API_URL}/pmbok/projects/?limit=200`),
-		event.fetch(`${BASE_API_URL}/pmbok/responsibility-matrices/?limit=200`),
-		event.fetch(`${BASE_API_URL}/pmbok/projects/kind/`)
+		event.fetch(`${BASE_API_URL}/pmbok/projects/kind/`),
+		event.fetch(`${BASE_API_URL}/pmbok/projects/currencies/`)
 	]);
 
-	const statusOptions = statusRes.ok ? ((await statusRes.json()).results ?? []) : [];
-	const healthOptions = healthRes.ok ? ((await healthRes.json()).results ?? []) : [];
-	const priorityDict = priorityRes.ok ? await priorityRes.json() : {};
-	const priorityOptions = Object.entries(priorityDict).map(([value, label]) => ({
-		value: parseInt(value),
-		label: label as string
-	}));
-	const actorOptions = actorRes.ok ? ((await actorRes.json()).results ?? []) : [];
-	const collectionOptions = collectionRes.ok ? ((await collectionRes.json()).results ?? []) : [];
-	const allProjects = projectRes.ok ? ((await projectRes.json()).results ?? []) : [];
-	const projectOptions = allProjects.filter((p: any) => p.id !== event.params.id);
-	const matrixOptions = matrixRes.ok ? ((await matrixRes.json()).results ?? []) : [];
+	const priorityOptions = priorityRes.ok ? await priorityRes.json() : [];
 	const kindOptions = kindRes.ok ? await kindRes.json() : [];
+	const currencyOptions = currenciesRes.ok ? await currenciesRes.json() : [];
 
 	const snapshotsRes = await event.fetch(
 		`${BASE_API_URL}/metrology/builtin-metric-samples/for_object/?model=project&object_id=${event.params.id}`
@@ -58,14 +30,9 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		...detail,
-		statusOptions,
-		healthOptions,
 		priorityOptions,
-		actorOptions,
-		collectionOptions,
-		projectOptions,
-		matrixOptions,
 		kindOptions,
+		currencyOptions,
 		snapshots
 	};
 };

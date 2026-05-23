@@ -230,6 +230,7 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
     status = models.ForeignKey(
         Terminology,
         on_delete=models.PROTECT,
+        null=True,
         blank=True,
         related_name="project_status",
         limit_choices_to={
@@ -317,13 +318,6 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
         from datetime import date
         from decimal import Decimal
         from global_settings.models import GlobalSettings
-
-        if self.status_id is None:
-            self.status = Terminology.objects.filter(
-                field_path=Terminology.FieldPath.PROJECT_STATUS,
-                name="draft",
-                builtin=True,
-            ).first()
 
         is_new = self._state.adding
         if not self.currency and self.parent_project_id:
