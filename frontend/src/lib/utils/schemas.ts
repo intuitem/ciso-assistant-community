@@ -50,7 +50,8 @@ const CURRENCY_SYMBOLS = [
 	'PLN',
 	'NT$',
 	'฿',
-	'MYR'
+	'MYR',
+	'XPF'
 ] as const;
 
 // JSON schema
