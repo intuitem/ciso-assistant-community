@@ -127,7 +127,7 @@ export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 export const PROJECT_KIND_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'pmbok/projects/kind',
+		optionsEndpoint: 'projects/kind',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'kind',

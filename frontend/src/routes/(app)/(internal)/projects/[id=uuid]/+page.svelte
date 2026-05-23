@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { Tabs, Progress } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
+	import SliderInput from '$lib/components/Forms/SliderInput.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -16,16 +22,61 @@
 	let { data }: Props = $props();
 
 	let project = $derived(data.data);
+	let priorityOptions = $derived(data.priorityOptions);
+	let kindOptions = $derived(data.kindOptions);
+	let currencyOptions = $derived(data.currencyOptions);
 	let statusOptions = $derived(data.statusOptions);
 	let healthOptions = $derived(data.healthOptions);
-	let priorityOptions = $derived(data.priorityOptions);
-	let actorOptions = $derived(data.actorOptions);
-	let collectionOptions = $derived(data.collectionOptions);
-	let projectOptions = $derived(data.projectOptions);
-	let matrixOptions = $derived(data.matrixOptions);
-	let kindOptions = $derived(data.kindOptions);
+
+	const workspaceFieldsSchema = z.object({
+		kind: z.string().optional(),
+		parent_project: z.string().uuid().nullable().optional(),
+		status: z.string().uuid().nullable().optional(),
+		health: z.string().uuid().nullable().optional(),
+		priority: z.coerce.number().int().min(1).max(4).nullable().optional(),
+		linked_collection: z.string().uuid().nullable().optional(),
+		responsibility_matrices: z.array(z.string().uuid()).default([]),
+		filtering_labels: z.array(z.string().uuid()).default([]),
+		owner: z.string().uuid().nullable().optional(),
+		sponsor: z.string().uuid().nullable().optional(),
+		currency: z.string().nullable().optional()
+	});
+
+	function snapshotWorkspaceFields(p: any) {
+		return {
+			kind: p.kind ?? 'project',
+			parent_project: p.parent_project?.id ?? null,
+			status: p.status?.id ?? null,
+			health: p.health?.id ?? null,
+			priority: p.priority ?? null,
+			linked_collection: p.linked_collection?.id ?? null,
+			responsibility_matrices: (p.responsibility_matrices ?? []).map((m: any) => m.id),
+			filtering_labels: (p.filtering_labels ?? []).map((l: any) => l.id),
+			owner: p.owner?.id ?? null,
+			sponsor: p.sponsor?.id ?? null,
+			currency: p.currency ?? ''
+		};
+	}
+
+	const workspaceForm = superForm(
+		defaults(snapshotWorkspaceFields(data.data), zod(workspaceFieldsSchema)),
+		{
+			dataType: 'json',
+			SPA: true,
+			validators: zod(workspaceFieldsSchema)
+		}
+	);
+
+	function resetWorkspaceFields() {
+		workspaceForm.form.set(snapshotWorkspaceFields(project));
+	}
+
+	const { form: workspaceFormData } = workspaceForm;
 
 	let activeTab = $state('overview');
+	// Opening a section resets workspaceForm — only one section can edit at a time.
+	type EditSection = 'basics' | 'overview' | 'charter' | 'schedule' | 'scope' | 'linked' | 'people';
+	let editingSection: EditSection | null = $state(null);
 	let savingSection: string | null = $state(null);
 	let errorMessage = $state('');
 
@@ -38,6 +89,22 @@
 		portfolio: 'bg-purple-100 text-purple-700',
 		program: 'bg-blue-100 text-blue-700',
 		project: 'bg-gray-100 text-gray-700'
+	};
+	const kindStripeMap: Record<string, string> = {
+		portfolio: 'bg-purple-500',
+		program: 'bg-blue-500',
+		project: 'bg-slate-400'
+	};
+	const kindHeaderBgMap: Record<string, string> = {
+		portfolio: 'bg-gradient-to-br from-purple-50/70 via-white to-white',
+		program: 'bg-gradient-to-br from-blue-50/70 via-white to-white',
+		project: 'bg-gradient-to-br from-slate-50/70 via-white to-white'
+	};
+	const priorityColorMap: Record<number, string> = {
+		1: 'bg-red-100 text-red-700',
+		2: 'bg-amber-100 text-amber-700',
+		3: 'bg-blue-100 text-blue-700',
+		4: 'bg-gray-100 text-gray-600'
 	};
 	let isPortfolio = $derived(project.kind === 'portfolio');
 
@@ -69,7 +136,9 @@
 			});
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}));
-				errorMessage = typeof err === 'string' ? err : JSON.stringify(err);
+				const pick = err?.detail ?? err?.non_field_errors ?? Object.values(err ?? {})[0];
+				const text = Array.isArray(pick) ? pick[0] : pick;
+				errorMessage = String(text || `HTTP ${res.status}`);
 				return false;
 			}
 			await invalidateAll();
@@ -79,33 +148,24 @@
 		}
 	}
 
-	// --- Overview tab (lifecycle indicators) ---
-	let overviewEditing = $state(false);
-	let overviewDraft: {
-		status: string | null;
-		priority: number | null;
-		health: string | null;
-		progress: number | null;
-	} = $state({ status: null, priority: null, health: null, progress: null });
+	let overviewProgressDraft: number | null = $state(null);
 
 	function startOverviewEdit() {
-		const statusId = statusOptions.find((t: any) => t.name === project.status)?.id;
-		const healthId = healthOptions.find((t: any) => t.name === project.health)?.id;
-		const priorityValue = priorityOptions.find((p: any) => p.label === project.priority)?.value;
-		overviewDraft = {
-			status: statusId ?? null,
-			priority: priorityValue ?? null,
-			health: healthId ?? null,
-			progress: project.progress ?? null
-		};
-		overviewEditing = true;
+		resetWorkspaceFields();
+		overviewProgressDraft = project.progress ?? null;
+		editingSection = 'overview';
 	}
 
 	async function saveOverview() {
-		if ((await patchProject(overviewDraft, 'overview')) === true) overviewEditing = false;
+		const payload = {
+			status: $workspaceFormData.status,
+			health: $workspaceFormData.health,
+			priority: $workspaceFormData.priority,
+			progress: overviewProgressDraft
+		};
+		if ((await patchProject(payload, 'overview')) === true) editingSection = null;
 	}
 
-	// --- Charter tab (the why) ---
 	const charterFields = [
 		{ key: 'purpose', label: m.purpose() },
 		{ key: 'objectives', label: m.objectives() },
@@ -116,27 +176,23 @@
 		{ key: 'organizational_alignment', label: m.organizationalAlignment() }
 	] as const;
 
-	let charterEditing = $state(false);
 	let charterDraft: Record<string, string> = $state({});
 
 	function startCharterEdit() {
 		charterDraft = Object.fromEntries(charterFields.map((f) => [f.key, project[f.key] ?? '']));
-		charterEditing = true;
+		editingSection = 'charter';
 	}
 
 	async function saveCharter() {
-		if ((await patchProject(charterDraft, 'charter')) === true) charterEditing = false;
+		if ((await patchProject(charterDraft, 'charter')) === true) editingSection = null;
 	}
 
-	// --- Schedule tab (when + how much) ---
-	let scheduleEditing = $state(false);
 	let scheduleDraft: {
 		start_date: string | null;
 		end_date: string | null;
 		eta: string | null;
 		budget: number | null;
 		actual_cost: number | null;
-		currency: string;
 		tolerances: {
 			time?: { plus_days?: number; minus_days?: number };
 			cost?: { plus_pct?: number; minus_pct?: number };
@@ -151,21 +207,20 @@
 		eta: null,
 		budget: null,
 		actual_cost: null,
-		currency: '',
 		tolerances: {}
 	});
 
 	function startScheduleEdit() {
+		resetWorkspaceFields();
 		scheduleDraft = {
 			start_date: project.start_date ?? null,
 			end_date: project.end_date ?? null,
 			eta: project.eta ?? null,
 			budget: project.budget ?? null,
 			actual_cost: project.actual_cost ?? null,
-			currency: project.currency ?? '',
 			tolerances: structuredClone(project.tolerances ?? {})
 		};
-		scheduleEditing = true;
+		editingSection = 'schedule';
 	}
 
 	let budgetSpentPct = $derived(
@@ -181,10 +236,11 @@
 	);
 
 	async function saveSchedule() {
-		if ((await patchProject(scheduleDraft, 'schedule')) === true) scheduleEditing = false;
+		// Project.currency is CharField(blank=True), so null is rejected — coerce.
+		const payload = { ...scheduleDraft, currency: $workspaceFormData.currency ?? '' };
+		if ((await patchProject(payload, 'schedule')) === true) editingSection = null;
 	}
 
-	// --- Scope tab (the what) ---
 	const scopeFields = [
 		{ key: 'deliverables', label: m.deliverables() },
 		{ key: 'assumptions', label: m.assumptions() },
@@ -192,115 +248,71 @@
 		{ key: 'dependencies_note', label: m.dependenciesNote() }
 	] as const;
 
-	let scopeEditing = $state(false);
 	let scopeDraft: Record<string, string> = $state({});
 
 	function startScopeEdit() {
 		scopeDraft = Object.fromEntries(scopeFields.map((f) => [f.key, project[f.key] ?? '']));
-		scopeEditing = true;
+		editingSection = 'scope';
 	}
 
 	async function saveScope() {
-		if ((await patchProject(scopeDraft, 'scope')) === true) scopeEditing = false;
+		if ((await patchProject(scopeDraft, 'scope')) === true) editingSection = null;
 	}
-
-	// --- Linked tab (other CISO Assistant objects) ---
-	let linkedEditing = $state(false);
-	let matrixSearchQuery = $state('');
-	let filteredMatrixOptions = $derived(
-		matrixSearchQuery.trim()
-			? matrixOptions.filter((opt: any) =>
-					((opt.str ?? opt.name) as string)
-						.toLowerCase()
-						.includes(matrixSearchQuery.trim().toLowerCase())
-				)
-			: matrixOptions
-	);
-
-	function toggleMatrix(id: string) {
-		if (linkedDraft.responsibility_matrices.includes(id)) {
-			linkedDraft.responsibility_matrices = linkedDraft.responsibility_matrices.filter(
-				(v) => v !== id
-			);
-		} else {
-			linkedDraft.responsibility_matrices = [...linkedDraft.responsibility_matrices, id];
-		}
-	}
-
-	let linkedDraft: {
-		linked_collection: string | null;
-		responsibility_matrices: string[];
-	} = $state({
-		linked_collection: null,
-		responsibility_matrices: []
-	});
 
 	function startLinkedEdit() {
-		linkedDraft = {
-			linked_collection: project.linked_collection?.id ?? null,
-			responsibility_matrices: (project.responsibility_matrices ?? []).map((m: any) => m.id)
-		};
-		linkedEditing = true;
+		resetWorkspaceFields();
+		editingSection = 'linked';
 	}
 
 	async function saveLinked() {
-		if ((await patchProject(linkedDraft, 'linked')) === true) linkedEditing = false;
+		const payload = {
+			linked_collection: $workspaceFormData.linked_collection,
+			responsibility_matrices: $workspaceFormData.responsibility_matrices,
+			filtering_labels: $workspaceFormData.filtering_labels
+		};
+		if ((await patchProject(payload, 'linked')) === true) editingSection = null;
 	}
 
-	// --- People tab (owner + sponsor) ---
-	let peopleEditing = $state(false);
-	let peopleDraft: { owner: string | null; sponsor: string | null } = $state({
-		owner: null,
-		sponsor: null
-	});
-
 	function startPeopleEdit() {
-		peopleDraft = {
-			owner: project.owner?.id ?? null,
-			sponsor: project.sponsor?.id ?? null
-		};
-		peopleEditing = true;
+		resetWorkspaceFields();
+		editingSection = 'people';
 	}
 
 	async function savePeople() {
-		if ((await patchProject(peopleDraft, 'people')) === true) peopleEditing = false;
+		const payload = {
+			owner: $workspaceFormData.owner,
+			sponsor: $workspaceFormData.sponsor
+		};
+		if ((await patchProject(payload, 'people')) === true) editingSection = null;
 	}
 
-	// --- Header basics (name, ref_id, ref_link, description) ---
-	let basicsEditing = $state(false);
-	let basicsDraft: {
+	let basicsTextDraft: {
 		name: string;
 		ref_id: string;
 		ref_link: string;
 		description: string;
-		kind: string;
-		parent_project: string | null;
-	} = $state({
-		name: '',
-		ref_id: '',
-		ref_link: '',
-		description: '',
-		kind: '',
-		parent_project: null
-	});
+	} = $state({ name: '', ref_id: '', ref_link: '', description: '' });
 
 	function startBasicsEdit() {
-		basicsDraft = {
+		resetWorkspaceFields();
+		basicsTextDraft = {
 			name: project.name ?? '',
 			ref_id: project.ref_id ?? '',
 			ref_link: project.ref_link ?? '',
-			description: project.description ?? '',
-			kind: project.kind ?? '',
-			parent_project: project.parent_project?.id ?? null
+			description: project.description ?? ''
 		};
-		basicsEditing = true;
+		editingSection = 'basics';
 	}
 
 	async function saveBasics() {
-		if ((await patchProject(basicsDraft, 'basics')) === true) basicsEditing = false;
+		const payload = {
+			...basicsTextDraft,
+			kind: $workspaceFormData.kind,
+			parent_project: $workspaceFormData.parent_project
+		};
+		if ((await patchProject(payload, 'basics')) === true) editingSection = null;
 	}
 
-	// --- Analytics tab ---
 	let snapshots = $derived(data.snapshots ?? []);
 	let latestSnapshot = $derived(
 		snapshots.length > 0 ? snapshots[snapshots.length - 1].metrics : null
@@ -364,7 +376,7 @@
 		if (lifecycleChartEl) {
 			lifecycleChart?.dispose?.();
 			lifecycleChart = echarts.init(lifecycleChartEl, null, { renderer: 'svg' });
-			const seriesLabels = [m.projectStatus(), m.projectHealth(), m.projectPriority()];
+			const seriesLabels = [m.status(), m.projectHealth(), m.priority()];
 			const esc = (s: unknown) =>
 				String(s ?? '')
 					.replace(/&/g, '&amp;')
@@ -406,7 +418,7 @@
 						type: 'category',
 						data: statusYOrder,
 						gridIndex: 0,
-						name: m.projectStatus(),
+						name: m.status(),
 						nameLocation: 'middle',
 						nameGap: 78,
 						nameTextStyle: { fontSize: 10, fontWeight: 'bold' },
@@ -429,7 +441,7 @@
 						interval: 1,
 						inverse: true,
 						gridIndex: 2,
-						name: m.projectPriority(),
+						name: m.priority(),
 						nameLocation: 'middle',
 						nameGap: 78,
 						nameTextStyle: { fontSize: 10, fontWeight: 'bold' },
@@ -527,24 +539,28 @@
 </script>
 
 <div class="card bg-white shadow-sm m-4">
-	<!-- Header bar -->
-	<div class="p-6 border-b border-gray-200">
+	<div class="h-1 rounded-t-container-token {kindStripeMap[project.kind] ?? 'bg-slate-400'}"></div>
+
+	<div class="px-8 pt-6 pb-5 {kindHeaderBgMap[project.kind] ?? ''}">
 		<div class="flex items-start justify-between gap-4 flex-wrap">
 			<div class="min-w-0 grow">
-				{#if !basicsEditing}
-					<div class="group flex items-baseline gap-3">
+				{#if editingSection !== 'basics'}
+					<div class="group flex items-center gap-3 flex-wrap">
 						<span
-							class="badge text-xs font-medium px-2 py-0.5 rounded-full self-center {kindColorMap[
+							class="badge text-sm font-semibold px-3 py-1 rounded-full {kindColorMap[
 								project.kind
 							] ?? 'bg-gray-100 text-gray-700'}"
 							title={safeTranslate(project.kind)}
 						>
-							<i class="{kindIconMap[project.kind] ?? 'fa-solid fa-clipboard-list'} mr-1"></i>
+							<i class="{kindIconMap[project.kind] ?? 'fa-solid fa-clipboard-list'} mr-1.5"></i>
 							{safeTranslate(project.kind)}
 						</span>
-						<h1 class="text-2xl font-semibold text-gray-900 truncate">{project.name}</h1>
+						<h1 class="text-3xl font-bold text-gray-900 truncate">{project.name}</h1>
 						{#if project.ref_id}
-							<span class="text-sm text-gray-500">{project.ref_id}</span>
+							<span
+								class="text-xs font-mono text-gray-600 bg-white/70 border border-gray-200 px-2 py-0.5 rounded"
+								>{project.ref_id}</span
+							>
 						{/if}
 						<button
 							onclick={startBasicsEdit}
@@ -560,37 +576,41 @@
 							href={project.ref_link}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-primary-600 hover:text-primary-800 hover:underline text-sm inline-flex items-center gap-1 mt-1"
+							class="text-primary-600 hover:text-primary-800 hover:underline text-sm inline-flex items-center gap-1 mt-2"
 						>
 							<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
 							{project.ref_link}
 						</a>
 					{/if}
 					{#if project.description}
-						<div class="prose prose-sm max-w-none text-gray-700 mt-3">
+						<div class="prose prose-sm max-w-3xl text-gray-700 mt-3">
 							<MarkdownRenderer content={project.description} />
 						</div>
 					{/if}
 				{:else}
 					<div class="space-y-3 max-w-3xl">
-						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.kind()}</span>
-							<select bind:value={basicsDraft.kind} class="select w-full mt-1">
-								{#each kindOptions as opt}
-									<option value={opt.value}>{safeTranslate(opt.value)}</option>
-								{/each}
-							</select>
-						</label>
+						<Select
+							form={workspaceForm}
+							options={kindOptions}
+							field="kind"
+							label={m.kind()}
+							disableDoubleDash={true}
+						/>
 						<label class="block">
 							<span class="text-xs font-semibold text-gray-500 uppercase">{m.name()}</span>
-							<input type="text" bind:value={basicsDraft.name} class="input w-full mt-1" required />
+							<input
+								type="text"
+								bind:value={basicsTextDraft.name}
+								class="input w-full mt-1"
+								required
+							/>
 						</label>
 						<label class="block">
 							<span class="text-xs font-semibold text-gray-500 uppercase">{m.refId()}</span>
 							<input
 								type="text"
 								maxlength="100"
-								bind:value={basicsDraft.ref_id}
+								bind:value={basicsTextDraft.ref_id}
 								class="input w-full mt-1"
 							/>
 						</label>
@@ -598,35 +618,40 @@
 							<span class="text-xs font-semibold text-gray-500 uppercase">{m.refLink()}</span>
 							<input
 								type="url"
-								bind:value={basicsDraft.ref_link}
+								bind:value={basicsTextDraft.ref_link}
 								class="input w-full mt-1"
 								placeholder="https://…"
 							/>
 						</label>
-						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.parentProject()}</span>
-							<select bind:value={basicsDraft.parent_project} class="select w-full mt-1">
-								<option value={null}>--</option>
-								{#each projectOptions as opt}
-									<option value={opt.id}>{opt.str ?? opt.name}</option>
-								{/each}
-							</select>
-						</label>
+						<AutocompleteSelect
+							form={workspaceForm}
+							optionsEndpoint="projects"
+							optionsLabelField="auto"
+							optionsExtraFields={[['folder', 'str']]}
+							optionsInfoFields={{
+								fields: [{ field: 'kind', translate: true }],
+								position: 'prefix'
+							}}
+							optionsSelf={project}
+							field="parent_project"
+							nullable={true}
+							label={m.parentProject()}
+						/>
 						<div class="block">
 							<span class="text-xs font-semibold text-gray-500 uppercase">{m.description()}</span>
 							<div class="mt-1">
-								<MarkdownField label="" bind:value={basicsDraft.description} rows={4} />
+								<MarkdownField label="" bind:value={basicsTextDraft.description} rows={4} />
 							</div>
 						</div>
 					</div>
 				{/if}
 			</div>
 
-			{#if basicsEditing}
+			{#if editingSection === 'basics'}
 				<div class="shrink-0 flex gap-2">
 					<button
 						class="btn preset-tonal-surface btn-sm"
-						onclick={() => (basicsEditing = false)}
+						onclick={() => (editingSection = null)}
 						disabled={savingSection === 'basics'}>{m.cancel()}</button
 					>
 					<button
@@ -641,115 +666,137 @@
 			{/if}
 		</div>
 
-		{#if errorMessage && basicsEditing}
+		{#if errorMessage && editingSection === 'basics'}
 			<div class="card preset-tonal-error p-3 mt-3 text-sm">{errorMessage}</div>
 		{/if}
-
-		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-4">
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-					{m.projectStatus()}
+	</div>
+	<div class="px-8 py-4 border-t border-gray-200">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+			<div class="flex flex-col gap-1.5">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+					{m.status()}
 				</div>
 				{#if project.status}
 					<span
-						class="badge text-xs font-medium px-2 py-0.5 rounded-full {statusColorMap[
-							project.status
-						] ?? 'bg-gray-100 text-gray-600'}">{safeTranslate(project.status)}</span
+						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {statusColorMap[
+							project.status?.name
+						] ?? 'bg-gray-100 text-gray-600'}">{safeTranslate(project.status.name)}</span
 					>
 				{:else}
-					<span class="text-gray-400 text-sm">--</span>
+					<span class="text-gray-400 text-sm italic">—</span>
 				{/if}
 			</div>
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+
+			<div class="flex flex-col gap-1.5">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
 					{m.projectHealth()}
 				</div>
 				{#if project.health}
 					<span
-						class="badge text-xs font-medium px-2 py-0.5 rounded-full {healthColorMap[
-							project.health
-						] ?? 'bg-gray-100 text-gray-600'}">{safeTranslate(project.health)}</span
+						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {healthColorMap[
+							project.health?.name
+						] ?? 'bg-gray-100 text-gray-600'}">{safeTranslate(project.health.name)}</span
 					>
 				{:else}
-					<span class="text-gray-400 text-sm">--</span>
+					<span class="text-gray-400 text-sm italic">—</span>
+				{/if}
+			</div>
+
+			<div class="flex flex-col gap-1.5">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+					{m.priority()}
+				</div>
+				{#if project.priority}
+					<span
+						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {priorityColorMap[
+							project.priority
+						] ?? 'bg-gray-100 text-gray-600'}">P{project.priority}</span
+					>
+				{:else}
+					<span class="text-gray-400 text-sm italic">—</span>
+				{/if}
+			</div>
+
+			<div class="flex flex-col gap-1.5">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+					{m.progress()}
+				</div>
+				<div class="flex items-center gap-3">
+					<span class="text-lg font-bold text-gray-900 tabular-nums leading-none"
+						>{progressValue}%</span
+					>
+					<div class="grow h-2 rounded-full bg-gray-200 overflow-hidden">
+						<div class="h-full bg-primary-500 transition-all" style="width: {progressValue}%"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="px-8 py-3 bg-gray-50 border-t border-gray-200">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+			<div>
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+					{m.owner()}
+				</div>
+				{#if project.owner}
+					<span class="text-gray-900 truncate block">{project.owner.str}</span>
+				{:else}
+					<span class="text-gray-400 italic">—</span>
 				{/if}
 			</div>
 			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-					{m.projectPriority()}
-				</div>
-				<span class="text-sm text-gray-900">{project.priority ?? '--'}</span>
-			</div>
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-					{m.owner()}
-				</div>
-				<span class="text-sm text-gray-900 truncate block">{project.owner?.str ?? '--'}</span>
-			</div>
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
 					{m.sponsor()}
 				</div>
-				<span class="text-sm text-gray-900 truncate block">{project.sponsor?.str ?? '--'}</span>
+				{#if project.sponsor}
+					<span class="text-gray-900 truncate block">{project.sponsor.str}</span>
+				{:else}
+					<span class="text-gray-400 italic">—</span>
+				{/if}
 			</div>
 			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-					{m.progress()}
-				</div>
-				<div class="flex items-center gap-2">
-					<Progress value={progressValue} max={100}>
-						<Progress.Track class="h-2 rounded-full grow">
-							<Progress.Range class="bg-primary-500 rounded-full" />
-						</Progress.Track>
-					</Progress>
-					<span class="text-xs text-gray-700 shrink-0">{progressValue}%</span>
-				</div>
-			</div>
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
 					{m.parentProject()}
 				</div>
 				{#if project.parent_project}
 					<Anchor
 						href="/projects/{project.parent_project.id}"
-						class="text-sm text-primary-600 hover:text-primary-800 hover:underline truncate block"
+						class="text-primary-600 hover:text-primary-800 hover:underline truncate block"
 					>
 						{project.parent_project.str}
 					</Anchor>
 				{:else}
-					<span class="text-gray-400 text-sm">--</span>
+					<span class="text-gray-400 italic">—</span>
 				{/if}
 			</div>
 			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
 					{m.subProjects()}
 				</div>
 				{#if project.sub_projects && project.sub_projects.length > 0}
-					<div class="text-sm space-x-1 space-y-1">
-						{#each project.sub_projects as sub, i}
+					<div class="flex flex-wrap gap-1">
+						{#each project.sub_projects as sub}
 							<Anchor
 								href="/projects/{sub.id}"
-								class="text-primary-600 hover:text-primary-800 hover:underline"
+								class="text-xs px-2 py-0.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-100 hover:border-gray-300 truncate max-w-[10rem]"
 							>
 								{sub.str}
-							</Anchor>{#if i < project.sub_projects.length - 1},{/if}
+							</Anchor>
 						{/each}
 					</div>
 				{:else}
-					<span class="text-gray-400 text-sm">--</span>
+					<span class="text-gray-400 italic">—</span>
 				{/if}
 			</div>
 		</div>
 	</div>
-
-	<!-- Tab bar -->
 	<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)} class="w-full">
 		<Tabs.List class="border-b border-gray-200 px-4">
 			<Tabs.Trigger
 				value="overview"
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
-				<i class="fa-solid fa-chart-pie mr-2"></i>{m.overview()}
+				<i class="fa-solid fa-gauge-high mr-2"></i>{m.overview()}
 			</Tabs.Trigger>
 			<Tabs.Trigger
 				value="charter"
@@ -779,7 +826,7 @@
 				value="people"
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
-				<i class="fa-solid fa-people-arrows mr-2"></i>{m.people()}
+				<i class="fa-solid fa-users mr-2"></i>{m.people()}
 			</Tabs.Trigger>
 			<Tabs.Trigger
 				value="analytics"
@@ -788,12 +835,9 @@
 				<i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}
 			</Tabs.Trigger>
 		</Tabs.List>
-
-		<!-- OVERVIEW -->
 		<Tabs.Content value="overview" class="p-6">
-			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-semibold">{m.lifecycle()}</h2>
-				{#if !overviewEditing}
+			<div class="flex justify-end mb-4">
+				{#if editingSection !== 'overview'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startOverviewEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -801,7 +845,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (overviewEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'overview'}>{m.cancel()}</button
 						>
 						<button
@@ -816,71 +860,79 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && overviewEditing}
+			{#if errorMessage && editingSection === 'overview'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div>
-					<label for="ov-status" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.projectStatus()}
-					</label>
-					{#if overviewEditing}
-						<select id="ov-status" bind:value={overviewDraft.status} class="select w-full">
-							<option value={null}>--</option>
-							{#each statusOptions as opt}
-								<option value={opt.id}>{safeTranslate(opt.translated_name ?? opt.name)}</option>
-							{/each}
-						</select>
+					{#if editingSection === 'overview'}
+						<Select
+							form={workspaceForm}
+							options={statusOptions}
+							field="status"
+							label={m.status()}
+						/>
 					{:else}
-						<span class="text-sm text-gray-900">{safeTranslate(project.status ?? '--')}</span>
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.status()}
+						</div>
+						<span class="text-sm text-gray-900"
+							>{project.status ? safeTranslate(project.status.name) : '--'}</span
+						>
 					{/if}
 				</div>
 
 				<div>
-					<label for="ov-health" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.projectHealth()}
-					</label>
-					{#if overviewEditing}
-						<select id="ov-health" bind:value={overviewDraft.health} class="select w-full">
-							<option value={null}>--</option>
-							{#each healthOptions as opt}
-								<option value={opt.id}>{safeTranslate(opt.translated_name ?? opt.name)}</option>
-							{/each}
-						</select>
+					{#if editingSection === 'overview'}
+						<Select
+							form={workspaceForm}
+							options={healthOptions}
+							field="health"
+							label={m.projectHealth()}
+						/>
 					{:else}
-						<span class="text-sm text-gray-900">{safeTranslate(project.health ?? '--')}</span>
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.projectHealth()}
+						</div>
+						<span class="text-sm text-gray-900"
+							>{project.health ? safeTranslate(project.health.name) : '--'}</span
+						>
 					{/if}
 				</div>
 
 				<div>
-					<label for="ov-priority" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.projectPriority()}
-					</label>
-					{#if overviewEditing}
-						<select id="ov-priority" bind:value={overviewDraft.priority} class="select w-full">
-							<option value={null}>--</option>
-							{#each priorityOptions as opt}
-								<option value={opt.value}>{opt.label}</option>
-							{/each}
-						</select>
+					{#if editingSection === 'overview'}
+						<Select
+							form={workspaceForm}
+							options={priorityOptions}
+							field="priority"
+							translateOptions={false}
+							label={m.priority()}
+						/>
 					{:else}
-						<span class="text-sm text-gray-900">{project.priority ?? '--'}</span>
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.priority()}
+						</div>
+						<span class="text-sm text-gray-900"
+							>{project.priority ? `P${project.priority}` : '--'}</span
+						>
 					{/if}
 				</div>
 
 				<div>
-					<label for="ov-progress" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+					<label class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
 						{m.progress()}
 					</label>
-					{#if overviewEditing}
-						<input
-							id="ov-progress"
-							type="number"
-							min="0"
-							max="100"
-							bind:value={overviewDraft.progress}
-							class="input w-full"
+					{#if editingSection === 'overview'}
+						<SliderInput
+							mode="number"
+							value={overviewProgressDraft}
+							min={0}
+							max={100}
+							step={5}
+							ariaLabel={m.progress()}
+							onChange={(v) => (overviewProgressDraft = typeof v === 'number' ? v : null)}
 						/>
 					{:else}
 						<span class="text-sm text-gray-900">{progressValue}%</span>
@@ -888,12 +940,9 @@
 				</div>
 			</div>
 		</Tabs.Content>
-
-		<!-- CHARTER -->
 		<Tabs.Content value="charter" class="p-6">
-			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-semibold">{m.charter()}</h2>
-				{#if !charterEditing}
+			<div class="flex justify-end mb-4">
+				{#if editingSection !== 'charter'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startCharterEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -901,7 +950,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (charterEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'charter'}>{m.cancel()}</button
 						>
 						<button
@@ -916,7 +965,7 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && charterEditing}
+			{#if errorMessage && editingSection === 'charter'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
@@ -926,13 +975,8 @@
 						<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
 							{section.label}
 						</h3>
-						{#if charterEditing}
-							<MarkdownField
-								label=""
-								bind:value={charterDraft[section.key]}
-								rows={4}
-								placeholder={section.label}
-							/>
+						{#if editingSection === 'charter'}
+							<MarkdownField label="" bind:value={charterDraft[section.key]} rows={4} />
 						{:else if project[section.key]}
 							<div class="prose prose-sm max-w-none text-gray-900">
 								<MarkdownRenderer content={project[section.key]} />
@@ -944,12 +988,9 @@
 				{/each}
 			</div>
 		</Tabs.Content>
-
-		<!-- SCHEDULE -->
 		<Tabs.Content value="schedule" class="p-6">
-			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-semibold">{m.tracking()}</h2>
-				{#if !scheduleEditing}
+			<div class="flex justify-end mb-4">
+				{#if editingSection !== 'schedule'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startScheduleEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -957,7 +998,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (scheduleEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'schedule'}>{m.cancel()}</button
 						>
 						<button
@@ -972,147 +1013,148 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && scheduleEditing}
+			{#if errorMessage && editingSection === 'schedule'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-				<div>
-					<label for="sc-start" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.startDate()}
-					</label>
-					{#if scheduleEditing}
-						<input
-							id="sc-start"
-							type="date"
-							bind:value={scheduleDraft.start_date}
-							class="input w-full"
-						/>
-					{:else}
-						<span class="text-sm text-gray-900">{project.start_date ?? '--'}</span>
-					{/if}
-				</div>
-				<div>
-					<label for="sc-end" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.endDate()}
-					</label>
-					{#if scheduleEditing}
-						<input
-							id="sc-end"
-							type="date"
-							bind:value={scheduleDraft.end_date}
-							class="input w-full"
-						/>
-					{:else}
-						<span class="text-sm text-gray-900">{project.end_date ?? '--'}</span>
-					{/if}
-				</div>
-				<div>
-					<label for="sc-eta" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.eta()}
-					</label>
-					{#if scheduleEditing}
-						<input id="sc-eta" type="date" bind:value={scheduleDraft.eta} class="input w-full" />
-					{:else}
-						<span class="text-sm text-gray-900">{project.eta ?? '--'}</span>
-					{/if}
-				</div>
-				<div>
-					<div class="text-xs font-semibold text-gray-500 uppercase mb-1">{m.closedAt()}</div>
-					<span class="text-sm text-gray-900">{project.closed_at ?? '--'}</span>
-				</div>
-				<div class="md:col-span-2">
-					<div class="flex items-baseline justify-between mb-2">
-						<h3 class="text-sm font-semibold text-gray-700">{m.financials()}</h3>
-					</div>
-					{#if scheduleEditing}
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-							<label class="block">
-								<span class="text-xs font-semibold text-gray-500 uppercase">
-									{m.expectedBudget()}
-								</span>
-								<input
-									type="number"
-									step="0.01"
-									bind:value={scheduleDraft.budget}
-									class="input w-full mt-1"
-								/>
-							</label>
-							<label class="block">
-								<span class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</span>
-								<input
-									type="number"
-									step="0.01"
-									bind:value={scheduleDraft.actual_cost}
-									class="input w-full mt-1"
-								/>
-							</label>
-							<label class="block">
-								<span class="text-xs font-semibold text-gray-500 uppercase">{m.currency()}</span>
-								<input
-									type="text"
-									maxlength="3"
-									bind:value={scheduleDraft.currency}
-									class="input w-full mt-1"
-								/>
-							</label>
-						</div>
-					{:else if project.budget == null && project.actual_cost == null}
-						<span class="text-sm text-gray-400 italic">--</span>
-					{:else}
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-							<div>
-								<div class="text-xs font-semibold text-gray-500 uppercase">
-									{m.expectedBudget()}
-								</div>
-								<div class="text-sm text-gray-900">
-									{project.budget ?? '--'}
-									{project.currency ?? ''}
-								</div>
-							</div>
-							<div>
-								<div class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</div>
-								<div class="text-sm text-gray-900">
-									{project.actual_cost ?? '--'}
-									{project.currency ?? ''}
-								</div>
-							</div>
-							<div>
-								<div class="text-xs font-semibold text-gray-500 uppercase">{m.remaining()}</div>
-								<div
-									class="text-sm font-medium"
-									class:text-gray-900={budgetRemaining == null || budgetRemaining >= 0}
-									class:text-red-600={budgetRemaining != null && budgetRemaining < 0}
-								>
-									{budgetRemaining ?? '--'}
-									{project.currency ?? ''}
-								</div>
-							</div>
-						</div>
-						{#if project.budget != null && Number(project.budget) > 0}
-							<div class="flex items-center gap-2">
-								<div class="grow h-2 rounded-full bg-gray-200 overflow-hidden">
-									<div
-										class="h-full {budgetBarColor} transition-all"
-										style="width: {Math.min(budgetSpentPct, 100)}%"
-									></div>
-								</div>
-								<span class="text-xs text-gray-700 shrink-0 tabular-nums">
-									{budgetSpentPct.toFixed(0)}%
-								</span>
-							</div>
+			<section class="mb-8">
+				<h3 class="text-md font-semibold text-gray-800 border-b border-gray-200 pb-1 mb-4">
+					{m.schedule()}
+				</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<label for="sc-start" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.startDate()}
+						</label>
+						{#if editingSection === 'schedule'}
+							<input
+								id="sc-start"
+								type="date"
+								bind:value={scheduleDraft.start_date}
+								class="input w-full"
+							/>
+						{:else}
+							<span class="text-sm text-gray-900">{project.start_date ?? '--'}</span>
 						{/if}
-					{/if}
+					</div>
+					<div>
+						<label for="sc-end" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.endDate()}
+						</label>
+						{#if editingSection === 'schedule'}
+							<input
+								id="sc-end"
+								type="date"
+								bind:value={scheduleDraft.end_date}
+								class="input w-full"
+							/>
+						{:else}
+							<span class="text-sm text-gray-900">{project.end_date ?? '--'}</span>
+						{/if}
+					</div>
+					<div>
+						<label for="sc-eta" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.eta()}
+						</label>
+						{#if editingSection === 'schedule'}
+							<input id="sc-eta" type="date" bind:value={scheduleDraft.eta} class="input w-full" />
+						{:else}
+							<span class="text-sm text-gray-900">{project.eta ?? '--'}</span>
+						{/if}
+					</div>
+					<div>
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1">{m.closedAt()}</div>
+						<span class="text-sm text-gray-900">{project.closed_at ?? '--'}</span>
+					</div>
 				</div>
-			</div>
+			</section>
 
-			<div>
-				<div class="flex items-center justify-between mb-2">
-					<h3 class="text-md font-semibold">{m.tolerances()}</h3>
-				</div>
+			<section class="mb-8">
+				<h3 class="text-md font-semibold text-gray-800 border-b border-gray-200 pb-1 mb-4">
+					{m.financials()}
+				</h3>
+				{#if editingSection === 'schedule'}
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+						<label class="block">
+							<span class="text-xs font-semibold text-gray-500 uppercase">
+								{m.expectedBudget()}
+							</span>
+							<input
+								type="number"
+								step="0.01"
+								bind:value={scheduleDraft.budget}
+								class="input w-full mt-1"
+							/>
+						</label>
+						<label class="block">
+							<span class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</span>
+							<input
+								type="number"
+								step="0.01"
+								bind:value={scheduleDraft.actual_cost}
+								class="input w-full mt-1"
+							/>
+						</label>
+						<Select
+							form={workspaceForm}
+							options={currencyOptions}
+							field="currency"
+							label={m.currency()}
+							translateOptions={false}
+						/>
+					</div>
+				{:else if project.budget == null && project.actual_cost == null}
+					<span class="text-sm text-gray-400 italic">--</span>
+				{:else}
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+						<div>
+							<div class="text-xs font-semibold text-gray-500 uppercase">
+								{m.expectedBudget()}
+							</div>
+							<div class="text-sm text-gray-900">
+								{project.budget ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
+							</div>
+						</div>
+						<div>
+							<div class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</div>
+							<div class="text-sm text-gray-900">
+								{project.actual_cost ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
+							</div>
+						</div>
+						<div>
+							<div class="text-xs font-semibold text-gray-500 uppercase">{m.remaining()}</div>
+							<div
+								class="text-sm font-medium"
+								class:text-gray-900={budgetRemaining == null || budgetRemaining >= 0}
+								class:text-red-600={budgetRemaining != null && budgetRemaining < 0}
+							>
+								{budgetRemaining ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
+							</div>
+						</div>
+					</div>
+					{#if project.budget != null && Number(project.budget) > 0}
+						<div class="flex items-center gap-2">
+							<div class="grow h-2 rounded-full bg-gray-200 overflow-hidden">
+								<div
+									class="h-full {budgetBarColor} transition-all"
+									style="width: {Math.min(budgetSpentPct, 100)}%"
+								></div>
+							</div>
+							<span class="text-xs text-gray-700 shrink-0 tabular-nums">
+								{budgetSpentPct.toFixed(0)}%
+							</span>
+						</div>
+					{/if}
+				{/if}
+			</section>
+
+			<section>
+				<h3 class="text-md font-semibold text-gray-800 border-b border-gray-200 pb-1 mb-2">
+					{m.tolerances()}
+				</h3>
 				<p class="text-xs text-gray-500 mb-4">{m.tolerancesHelpText()}</p>
 
-				{#if scheduleEditing}
+				{#if editingSection === 'schedule'}
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<fieldset class="border border-gray-200 rounded p-3">
 							<legend class="text-xs font-semibold text-gray-500 uppercase px-1">{m.time()}</legend>
@@ -1263,14 +1305,11 @@
 						</dl>
 					{/if}
 				{/if}
-			</div>
+			</section>
 		</Tabs.Content>
-
-		<!-- SCOPE -->
 		{#if !isPortfolio}<Tabs.Content value="scope" class="p-6">
-				<div class="flex items-center justify-between mb-4">
-					<h2 class="text-lg font-semibold">{m.scope()}</h2>
-					{#if !scopeEditing}
+				<div class="flex justify-end mb-4">
+					{#if editingSection !== 'scope'}
 						<button class="btn preset-tonal-primary btn-sm" onclick={startScopeEdit}>
 							<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 						</button>
@@ -1278,7 +1317,7 @@
 						<div class="flex gap-2">
 							<button
 								class="btn preset-tonal-surface btn-sm"
-								onclick={() => (scopeEditing = false)}
+								onclick={() => (editingSection = null)}
 								disabled={savingSection === 'scope'}>{m.cancel()}</button
 							>
 							<button
@@ -1293,7 +1332,7 @@
 					{/if}
 				</div>
 
-				{#if errorMessage && scopeEditing}
+				{#if errorMessage && editingSection === 'scope'}
 					<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 				{/if}
 
@@ -1303,13 +1342,8 @@
 							<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
 								{section.label}
 							</h3>
-							{#if scopeEditing}
-								<MarkdownField
-									label=""
-									bind:value={scopeDraft[section.key]}
-									rows={4}
-									placeholder={section.label}
-								/>
+							{#if editingSection === 'scope'}
+								<MarkdownField label="" bind:value={scopeDraft[section.key]} rows={4} />
 							{:else if project[section.key]}
 								<div class="prose prose-sm max-w-none text-gray-900">
 									<MarkdownRenderer content={project[section.key]} />
@@ -1322,12 +1356,9 @@
 				</div>
 			</Tabs.Content>
 		{/if}
-
-		<!-- LINKED -->
 		<Tabs.Content value="linked" class="p-6">
-			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-semibold">{m.linked()}</h2>
-				{#if !linkedEditing}
+			<div class="flex justify-end mb-4">
+				{#if editingSection !== 'linked'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startLinkedEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -1335,7 +1366,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (linkedEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'linked'}>{m.cancel()}</button
 						>
 						<button
@@ -1350,117 +1381,111 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && linkedEditing}
+			{#if errorMessage && editingSection === 'linked'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div>
-					<label for="lk-coll" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.linkedCollection()}
-					</label>
-					{#if linkedEditing}
-						<select id="lk-coll" bind:value={linkedDraft.linked_collection} class="select w-full">
-							<option value={null}>--</option>
-							{#each collectionOptions as opt}
-								<option value={opt.id}>{opt.str ?? opt.name}</option>
-							{/each}
-						</select>
-					{:else if project.linked_collection}
-						<Anchor
-							href="/generic-collections/{project.linked_collection.id}"
-							class="text-primary-600 hover:text-primary-800 hover:underline text-sm"
-						>
-							{project.linked_collection.str}
-						</Anchor>
+					{#if editingSection === 'linked'}
+						<AutocompleteSelect
+							form={workspaceForm}
+							optionsEndpoint="generic-collections"
+							optionsLabelField="auto"
+							optionsExtraFields={[['folder', 'str']]}
+							field="linked_collection"
+							nullable={true}
+							label={m.linkedCollection()}
+						/>
 					{:else}
-						<span class="text-gray-400 text-sm">--</span>
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.linkedCollection()}
+						</div>
+						{#if project.linked_collection}
+							<Anchor
+								href="/generic-collections/{project.linked_collection.id}"
+								class="text-primary-600 hover:text-primary-800 hover:underline text-sm"
+							>
+								{project.linked_collection.str}
+							</Anchor>
+						{:else}
+							<span class="text-gray-400 text-sm">--</span>
+						{/if}
 					{/if}
 				</div>
 
 				<div class="md:col-span-2">
-					<label for="lk-matrices" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.responsibilityMatrices()}
-					</label>
-					{#if linkedEditing}
-						<div class="space-y-2">
-							<input
-								id="lk-matrices"
-								type="text"
-								class="input w-full"
-								placeholder={m.searchPlaceholder()}
-								bind:value={matrixSearchQuery}
-							/>
-							{#if linkedDraft.responsibility_matrices.length > 0}
-								<div class="flex flex-wrap gap-1">
-									{#each linkedDraft.responsibility_matrices as id}
-										{@const opt = matrixOptions.find((o: any) => o.id === id)}
-										{#if opt}
-											<span
-												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 text-xs"
-											>
-												{opt.str ?? opt.name}
-												<button
-													type="button"
-													class="hover:text-primary-600"
-													onclick={() => toggleMatrix(id)}
-												>
-													<i class="fa-solid fa-xmark text-xs"></i>
-												</button>
-											</span>
-										{/if}
-									{/each}
-								</div>
-							{/if}
-							<div class="max-h-48 overflow-y-auto border border-gray-200 rounded">
-								{#each filteredMatrixOptions as opt}
-									<label
-										class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-									>
-										<input
-											type="checkbox"
-											checked={linkedDraft.responsibility_matrices.includes(opt.id)}
-											onchange={() => toggleMatrix(opt.id)}
-											class="checkbox"
-										/>
-										<span class="text-sm">{opt.str ?? opt.name}</span>
-										{#if opt.folder?.str}
-											<span class="badge preset-tonal-surface text-[10px] ml-auto">
-												{opt.folder.str}
-											</span>
-										{/if}
-									</label>
-								{/each}
-								{#if filteredMatrixOptions.length === 0}
-									<div class="px-3 py-2 text-sm text-gray-400">{m.noResultsFound()}</div>
-								{/if}
-							</div>
-						</div>
-					{:else if project.responsibility_matrices && project.responsibility_matrices.length > 0}
-						<ul class="space-y-1">
-							{#each project.responsibility_matrices as matrix}
-								<li class="text-sm">
-									<Anchor
-										href="/responsibility-matrices/{matrix.id}"
-										class="text-primary-600 hover:text-primary-800 hover:underline"
-									>
-										{matrix.str}
-									</Anchor>
-								</li>
-							{/each}
-						</ul>
+					{#if editingSection === 'linked'}
+						<AutocompleteSelect
+							form={workspaceForm}
+							optionsEndpoint="responsibility-matrices"
+							optionsLabelField="auto"
+							optionsExtraFields={[['folder', 'str']]}
+							field="responsibility_matrices"
+							multiple={true}
+							label={m.responsibilityMatrices()}
+						/>
 					{:else}
-						<span class="text-gray-400 text-sm italic">{m.noResponsibilityMatrices()}</span>
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.responsibilityMatrices()}
+						</div>
+						{#if project.responsibility_matrices && project.responsibility_matrices.length > 0}
+							<ul class="space-y-1">
+								{#each project.responsibility_matrices as matrix}
+									<li class="text-sm">
+										<Anchor
+											href="/responsibility-matrices/{matrix.id}"
+											class="text-primary-600 hover:text-primary-800 hover:underline"
+										>
+											{matrix.str}
+										</Anchor>
+									</li>
+								{/each}
+							</ul>
+						{:else}
+							<span class="text-gray-400 text-sm italic">{m.noResponsibilityMatrices()}</span>
+						{/if}
+					{/if}
+				</div>
+
+				<div class="md:col-span-2">
+					{#if editingSection === 'linked'}
+						<AutocompleteSelect
+							multiple
+							form={workspaceForm}
+							createFromSelection={true}
+							optionsEndpoint="filtering-labels"
+							optionsLabelField="label"
+							field="filtering_labels"
+							helpText={m.labelsHelpText()}
+							label={m.labels()}
+							translateOptions={false}
+							allowUserOptions="append"
+						/>
+					{:else}
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.labels()}
+						</div>
+						{#if project.filtering_labels && project.filtering_labels.length > 0}
+							<div class="flex flex-wrap gap-1.5">
+								{#each project.filtering_labels as label}
+									<span
+										class="badge text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200"
+									>
+										{label.str}
+									</span>
+								{/each}
+							</div>
+						{:else}
+							<span class="text-gray-400 text-sm italic">--</span>
+						{/if}
 					{/if}
 				</div>
 			</div>
 		</Tabs.Content>
-
-		<!-- PEOPLE -->
 		<Tabs.Content value="people" class="p-6">
-			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-semibold">{m.people()}</h2>
-				{#if !peopleEditing}
+			<div class="flex justify-end mb-4">
+				{#if editingSection !== 'people'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startPeopleEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -1468,7 +1493,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (peopleEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'people'}>{m.cancel()}</button
 						>
 						<button
@@ -1483,127 +1508,175 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && peopleEditing}
+			{#if errorMessage && editingSection === 'people'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div>
-					<label for="pp-owner" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.owner()}
-					</label>
-					<p class="text-xs text-gray-500 mb-2">{m.projectOwnerHelpText()}</p>
-					{#if peopleEditing}
-						<select id="pp-owner" bind:value={peopleDraft.owner} class="select w-full">
-							<option value={null}>--</option>
-							{#each actorOptions as opt}
-								<option value={opt.id}>{opt.str ?? opt.email ?? opt.id}</option>
-							{/each}
-						</select>
+					{#if editingSection === 'people'}
+						<AutocompleteSelect
+							form={workspaceForm}
+							optionsEndpoint="actors?user__is_third_party=False"
+							optionsLabelField="str"
+							optionsInfoFields={{
+								fields: [{ field: 'type', translate: true }],
+								position: 'prefix'
+							}}
+							field="owner"
+							nullable={true}
+							label={m.owner()}
+							helpText={m.projectOwnerHelpText()}
+						/>
 					{:else}
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.owner()}
+						</div>
+						<p class="text-xs text-gray-500 mb-2">{m.projectOwnerHelpText()}</p>
 						<span class="text-sm text-gray-900">{project.owner?.str ?? '--'}</span>
 					{/if}
 				</div>
 
 				<div>
-					<label for="pp-sponsor" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-						{m.sponsor()}
-					</label>
-					<p class="text-xs text-gray-500 mb-2">{m.projectSponsorHelpText()}</p>
-					{#if peopleEditing}
-						<select id="pp-sponsor" bind:value={peopleDraft.sponsor} class="select w-full">
-							<option value={null}>--</option>
-							{#each actorOptions as opt}
-								<option value={opt.id}>{opt.str ?? opt.email ?? opt.id}</option>
-							{/each}
-						</select>
+					{#if editingSection === 'people'}
+						<AutocompleteSelect
+							form={workspaceForm}
+							optionsEndpoint="actors?user__is_third_party=False"
+							optionsLabelField="str"
+							optionsInfoFields={{
+								fields: [{ field: 'type', translate: true }],
+								position: 'prefix'
+							}}
+							field="sponsor"
+							nullable={true}
+							label={m.sponsor()}
+							helpText={m.projectSponsorHelpText()}
+						/>
 					{:else}
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.sponsor()}
+						</div>
+						<p class="text-xs text-gray-500 mb-2">{m.projectSponsorHelpText()}</p>
 						<span class="text-sm text-gray-900">{project.sponsor?.str ?? '--'}</span>
 					{/if}
 				</div>
 			</div>
 		</Tabs.Content>
-
-		<!-- ANALYTICS -->
 		<Tabs.Content value="analytics" class="p-6">
-			<h2 class="text-lg font-semibold mb-4">{m.analytics()}</h2>
-
 			{#if snapshots.length === 0}
 				<div class="text-center py-12 text-gray-400">
 					<i class="fa-solid fa-chart-line text-3xl mb-3"></i>
 					<p class="text-sm">{m.noSnapshotsYet()}</p>
 				</div>
 			{:else}
-				<!-- KPI strip -->
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+					<div
+						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+					>
+						<div class="absolute top-0 inset-x-0 h-1 bg-primary-500"></div>
+						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
 							{m.progress()}
 						</div>
 						<div class="flex items-baseline gap-2">
-							<span class="text-2xl font-bold text-gray-900">{latestSnapshot?.progress ?? 0}%</span>
-							{#if progressDelta7d != null}
-								<span
-									class="text-xs font-medium"
-									class:text-green-600={progressDelta7d > 0}
-									class:text-gray-500={progressDelta7d === 0}
-									class:text-red-600={progressDelta7d < 0}
-								>
-									{progressDelta7d >= 0 ? '+' : ''}{progressDelta7d}
-									{m.last7Days()}
-								</span>
-							{/if}
+							<span class="text-3xl font-bold text-gray-900 tabular-nums leading-none"
+								>{latestSnapshot?.progress ?? 0}<span class="text-lg text-gray-500">%</span></span
+							>
 						</div>
+						{#if progressDelta7d != null}
+							<div class="flex items-center gap-1 mt-2 text-xs font-medium">
+								{#if progressDelta7d > 0}
+									<i class="fa-solid fa-arrow-trend-up text-green-600"></i>
+									<span class="text-green-600 tabular-nums">+{progressDelta7d}</span>
+								{:else if progressDelta7d < 0}
+									<i class="fa-solid fa-arrow-trend-down text-red-600"></i>
+									<span class="text-red-600 tabular-nums">{progressDelta7d}</span>
+								{:else}
+									<i class="fa-solid fa-minus text-gray-400"></i>
+									<span class="text-gray-500 tabular-nums">0</span>
+								{/if}
+								<span class="text-gray-400">{m.last7Days()}</span>
+							</div>
+						{/if}
 					</div>
-					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-							{m.projectStatus()}
+					<div
+						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+					>
+						<div class="absolute top-0 inset-x-0 h-1 bg-blue-500"></div>
+						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+							{m.status()}
 						</div>
-						<span
-							class="badge text-sm font-medium px-2.5 py-0.5 rounded-full {statusColorMap[
-								latestSnapshot?.status
-							] ?? 'bg-gray-100 text-gray-600'}"
-						>
-							{safeTranslate(latestSnapshot?.status ?? '--')}
-						</span>
+						{#if latestSnapshot?.status}
+							<span
+								class="badge text-sm font-semibold px-3 py-1 rounded-full {statusColorMap[
+									latestSnapshot.status
+								] ?? 'bg-gray-100 text-gray-600'}"
+							>
+								{safeTranslate(latestSnapshot.status)}
+							</span>
+						{:else}
+							<span class="text-gray-400 italic text-sm">—</span>
+						{/if}
 					</div>
-					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+					<div
+						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+					>
+						<div
+							class="absolute top-0 inset-x-0 h-1 {latestSnapshot?.health === 'green'
+								? 'bg-green-500'
+								: latestSnapshot?.health === 'amber'
+									? 'bg-amber-500'
+									: latestSnapshot?.health === 'red'
+										? 'bg-red-500'
+										: 'bg-gray-300'}"
+						></div>
+						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
 							{m.projectHealth()}
 						</div>
-						<span
-							class="badge text-sm font-medium px-2.5 py-0.5 rounded-full {healthColorMap[
-								latestSnapshot?.health
-							] ?? 'bg-gray-100 text-gray-600'}"
-						>
-							{safeTranslate(latestSnapshot?.health ?? '--')}
-						</span>
+						{#if latestSnapshot?.health}
+							<span
+								class="badge text-sm font-semibold px-3 py-1 rounded-full {healthColorMap[
+									latestSnapshot.health
+								] ?? 'bg-gray-100 text-gray-600'}"
+							>
+								{safeTranslate(latestSnapshot.health)}
+							</span>
+						{:else}
+							<span class="text-gray-400 italic text-sm">—</span>
+						{/if}
 					</div>
-					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+					<div
+						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+					>
+						<div class="absolute top-0 inset-x-0 h-1 bg-amber-500"></div>
+						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
 							{m.actualCost()}
 						</div>
-						<div class="text-lg font-bold text-gray-900">
-							{latestSnapshot?.actual_cost ?? '--'}
-							{#if latestSnapshot?.budget}
-								<span class="text-xs text-gray-500 font-normal">
-									/ {latestSnapshot.budget}
-									{latestSnapshot.currency ?? ''}
+						{#if latestSnapshot?.actual_cost != null}
+							<div class="flex items-baseline gap-1">
+								<span class="text-3xl font-bold text-gray-900 tabular-nums leading-none">
+									{latestSnapshot.actual_cost}
 								</span>
+								{#if latestSnapshot.currency}
+									<span class="text-sm text-gray-500">{latestSnapshot.currency}</span>
+								{/if}
+							</div>
+							{#if latestSnapshot.budget}
+								<div class="text-xs text-gray-500 mt-2 tabular-nums">
+									of {latestSnapshot.budget}
+									{latestSnapshot.currency ?? ''}
+								</div>
 							{/if}
-						</div>
+						{:else}
+							<span class="text-gray-400 italic text-sm">—</span>
+						{/if}
 					</div>
 				</div>
-
-				<!-- Lifecycle multi-curve area chart -->
 				<div class="mb-6">
 					<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
 						{m.lifecycle()} — {m.timeline()}
 					</div>
 					<div bind:this={lifecycleChartEl} style="width: 100%; height: 320px;"></div>
 				</div>
-
-				<!-- Charts -->
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					<div>
 						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">

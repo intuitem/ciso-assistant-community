@@ -12,43 +12,26 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
-	const [
-		statusRes,
-		healthRes,
-		priorityRes,
-		actorRes,
-		collectionRes,
-		projectRes,
-		matrixRes,
-		kindRes
-	] = await Promise.all([
-		event.fetch(
-			`${BASE_API_URL}/terminologies/?field_path=project.status&is_visible=true&limit=100`
-		),
-		event.fetch(
-			`${BASE_API_URL}/terminologies/?field_path=project.health&is_visible=true&limit=100`
-		),
+	const [priorityRes, kindRes, currenciesRes, statusRes, healthRes] = await Promise.all([
 		event.fetch(`${BASE_API_URL}/pmbok/projects/priority/`),
-		event.fetch(`${BASE_API_URL}/actors/?user__is_third_party=False&limit=200`),
-		event.fetch(`${BASE_API_URL}/pmbok/generic-collections/?limit=200`),
-		event.fetch(`${BASE_API_URL}/pmbok/projects/?limit=200`),
-		event.fetch(`${BASE_API_URL}/pmbok/responsibility-matrices/?limit=200`),
-		event.fetch(`${BASE_API_URL}/pmbok/projects/kind/`)
+		event.fetch(`${BASE_API_URL}/pmbok/projects/kind/`),
+		event.fetch(`${BASE_API_URL}/pmbok/projects/currencies/`),
+		event.fetch(`${BASE_API_URL}/terminologies/?field_path=project.status&is_visible=true`),
+		event.fetch(`${BASE_API_URL}/terminologies/?field_path=project.health&is_visible=true`)
 	]);
 
-	const statusOptions = statusRes.ok ? ((await statusRes.json()).results ?? []) : [];
-	const healthOptions = healthRes.ok ? ((await healthRes.json()).results ?? []) : [];
-	const priorityDict = priorityRes.ok ? await priorityRes.json() : {};
-	const priorityOptions = Object.entries(priorityDict).map(([value, label]) => ({
-		value: parseInt(value),
-		label: label as string
-	}));
-	const actorOptions = actorRes.ok ? ((await actorRes.json()).results ?? []) : [];
-	const collectionOptions = collectionRes.ok ? ((await collectionRes.json()).results ?? []) : [];
-	const allProjects = projectRes.ok ? ((await projectRes.json()).results ?? []) : [];
-	const projectOptions = allProjects.filter((p: any) => p.id !== event.params.id);
-	const matrixOptions = matrixRes.ok ? ((await matrixRes.json()).results ?? []) : [];
+	const priorityOptions = priorityRes.ok ? await priorityRes.json() : [];
 	const kindOptions = kindRes.ok ? await kindRes.json() : [];
+	const currencyOptions = currenciesRes.ok ? await currenciesRes.json() : [];
+
+	function toEnumOptions(payload: any): { value: string; label: string }[] {
+		const items = payload?.results ?? payload ?? [];
+		return Array.isArray(items)
+			? items.map((t: any) => ({ value: t.id, label: t.translated_name ?? t.name }))
+			: [];
+	}
+	const statusOptions = statusRes.ok ? toEnumOptions(await statusRes.json()) : [];
+	const healthOptions = healthRes.ok ? toEnumOptions(await healthRes.json()) : [];
 
 	const snapshotsRes = await event.fetch(
 		`${BASE_API_URL}/metrology/builtin-metric-samples/for_object/?model=project&object_id=${event.params.id}`
@@ -58,14 +41,11 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		...detail,
+		priorityOptions,
+		kindOptions,
+		currencyOptions,
 		statusOptions,
 		healthOptions,
-		priorityOptions,
-		actorOptions,
-		collectionOptions,
-		projectOptions,
-		matrixOptions,
-		kindOptions,
 		snapshots
 	};
 };

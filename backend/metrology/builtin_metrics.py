@@ -7,14 +7,12 @@ These metrics are computed from existing data and stored in BuiltinMetricSample.
 
 from django.utils.translation import gettext_lazy as _
 
-# Metric types for frontend display
 METRIC_TYPE_NUMBER = "number"  # Single numeric value
 METRIC_TYPE_PERCENTAGE = "percentage"  # 0-100 percentage
-METRIC_TYPE_BREAKDOWN = "breakdown"  # Dictionary of category -> count
-METRIC_TYPE_STATUS = "status"  # Single status value (string)
+METRIC_TYPE_BREAKDOWN = "breakdown"  # Dict of category -> count
+METRIC_TYPE_STATUS = "status"  # Single status string
 
-# Chart types allowed per metric type
-# Maps metric_type -> list of allowed chart_type values
+# metric_type -> list of allowed chart_type values
 METRIC_TYPE_CHART_TYPES = {
     METRIC_TYPE_NUMBER: ["kpi_card", "gauge", "sparkline", "line", "area"],
     METRIC_TYPE_PERCENTAGE: ["gauge", "kpi_card", "sparkline", "line", "area"],
@@ -23,8 +21,7 @@ METRIC_TYPE_CHART_TYPES = {
 }
 
 
-# Registry of available builtin metrics per model
-# Format: model_name -> {metric_key: {label, type, description}}
+# model_name -> {metric_key: {label, type, description}}
 BUILTIN_METRICS = {
     "ComplianceAssessment": {
         "progress": {
@@ -385,48 +382,19 @@ BUILTIN_METRICS = {
 
 
 def get_available_metrics_for_model(model_name: str) -> dict:
-    """
-    Returns the available builtin metrics for a given model.
-
-    Args:
-        model_name: The Django model class name (e.g., 'ComplianceAssessment')
-
-    Returns:
-        Dictionary of metric definitions or empty dict if model not supported
-    """
     return BUILTIN_METRICS.get(model_name, {})
 
 
 def get_supported_models() -> list[str]:
-    """Returns list of model names that support builtin metrics."""
     return list(BUILTIN_METRICS.keys())
 
 
 def get_metric_choices_for_model(model_name: str) -> list[tuple[str, str]]:
-    """
-    Returns metric choices suitable for a Django form field.
-
-    Args:
-        model_name: The Django model class name
-
-    Returns:
-        List of (metric_key, label) tuples
-    """
     metrics = get_available_metrics_for_model(model_name)
     return [(key, str(meta["label"])) for key, meta in metrics.items()]
 
 
 def get_chart_types_for_metric(model_name: str, metric_key: str) -> list[str]:
-    """
-    Returns the allowed chart types for a specific metric.
-
-    Args:
-        model_name: The Django model class name
-        metric_key: The metric key
-
-    Returns:
-        List of allowed chart type values
-    """
     metrics = get_available_metrics_for_model(model_name)
     if metric_key not in metrics:
         return []
