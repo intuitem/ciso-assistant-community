@@ -24,13 +24,20 @@
 		by_csf_function: (Bucket & { csf_function: string })[];
 		eta_buckets: { key: string; count: number; total: number; total_display: string }[];
 		top_owners: {
+			key: string;
 			label: string;
 			count: number;
 			total: number;
 			total_display: string;
 			status_breakdown: { key: string; status: string; count: number }[];
 		}[];
-		top_folders: { label: string; count: number; total: number; total_display: string }[];
+		top_folders: {
+			key: string;
+			label: string;
+			count: number;
+			total: number;
+			total_display: string;
+		}[];
 	}
 
 	interface Props {
@@ -46,22 +53,29 @@
 	let fetched: AnalyticsData | null = $state(null);
 	let loading = $state(!!analyticsEndpoint && !analyticsData);
 	let error = $state(false);
+	let currentController: AbortController | null = null;
 
 	async function fetchAnalytics() {
 		if (!analyticsEndpoint) return;
+		currentController?.abort();
+		const controller = new AbortController();
+		currentController = controller;
 		loading = true;
 		error = false;
 		try {
-			const res = await fetch(analyticsEndpoint);
+			const res = await fetch(analyticsEndpoint, { signal: controller.signal });
 			if (!res.ok) {
-				error = true;
+				if (currentController === controller) error = true;
 				return;
 			}
-			fetched = await res.json();
-		} catch {
-			error = true;
+			const json = await res.json();
+			if (currentController === controller) fetched = json;
+		} catch (e) {
+			if ((e as DOMException)?.name !== 'AbortError' && currentController === controller) {
+				error = true;
+			}
 		} finally {
-			loading = false;
+			if (currentController === controller) loading = false;
 		}
 	}
 
@@ -226,7 +240,7 @@
 	</div>
 {:else if error}
 	<div class="bg-white p-6 shadow-sm rounded-lg">
-		<p class="text-sm text-rose-600">{m.noAnalyticsData()}</p>
+		<p class="text-sm text-rose-600">{m.errorLoadingData()}</p>
 	</div>
 {:else if !hasAnyData}
 	<div class="bg-white p-6 shadow-sm rounded-lg">
@@ -346,7 +360,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each data.top_owners as row (row.label)}
+							{#each data.top_owners as row (row.key)}
 								<tr class="border-b last:border-b-0">
 									<td class="py-1.5">{row.label}</td>
 									<td class="py-1.5 w-1/3">
@@ -394,7 +408,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each data.top_folders as row (row.label)}
+							{#each data.top_folders as row (row.key)}
 								<tr class="border-b last:border-b-0">
 									<td class="py-1.5">{row.label}</td>
 									<td class="py-1.5 text-right tabular-nums">{row.count}</td>

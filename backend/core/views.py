@@ -6161,7 +6161,7 @@ class ActionPlanBudgetOverview:
 
         currency = get_global_currency()
         fmt = lambda v: format_currency(v, currency)
-        today = timezone.now().date()
+        today = timezone.localdate()
 
         # Defensive prefetch: top-owner/top-folder iteration touches M2M + FK
         if hasattr(queryset, "prefetch_related"):
@@ -6262,13 +6262,14 @@ class ActionPlanBudgetOverview:
                 eta_buckets[key]["count"] += 1
                 eta_buckets[key]["total"] += cost
 
-            # top owners (M2M)
+            # top owners (M2M) — key by pk so homonyms don't collapse into one bucket
             for owner in ctrl.owner.all():
-                label = str(owner)
+                owner_key = str(owner.pk)
                 bucket = owner_counts.setdefault(
-                    label,
+                    owner_key,
                     {
-                        "label": label,
+                        "key": owner_key,
+                        "label": str(owner),
                         "count": 0,
                         "total": 0.0,
                         "status_breakdown": {},
@@ -6284,10 +6285,12 @@ class ActionPlanBudgetOverview:
                 )
                 sb_entry["count"] += 1
 
-            # top folders
-            folder_label = ctrl.folder.name if ctrl.folder_id else "_unset"
+            # top folders — same: key by folder_id so two folders sharing a name don't merge
+            folder_key = str(ctrl.folder_id) if ctrl.folder_id else "_unset"
+            folder_label = ctrl.folder.name if ctrl.folder_id else "not_set"
             bucket = folder_counts.setdefault(
-                folder_label, {"label": folder_label, "count": 0, "total": 0.0}
+                folder_key,
+                {"key": folder_key, "label": folder_label, "count": 0, "total": 0.0},
             )
             bucket["count"] += 1
             bucket["total"] += cost

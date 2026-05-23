@@ -16,7 +16,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-3">
 			<Anchor href={`${data.backUrl}${data.filterSearch}`} class="btn variant-ghost-surface">
-				<i class="fa-solid fa-arrow-left mr-2"></i>
+				<i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>
 				{safeTranslate(data.backLabel) || data.backLabel}
 			</Anchor>
 			<h1 class="text-2xl font-bold text-gray-900">{m.appliedControlsAnalytics()}</h1>
@@ -26,7 +26,7 @@
 				class="text-xs px-2 py-1 rounded-full bg-violet-100 text-violet-700 border border-violet-200"
 				title={m.analyticsFilteredHint()}
 			>
-				<i class="fa-solid fa-filter mr-1"></i>{m.analyticsFilteredHint()}
+				<i class="fa-solid fa-filter mr-1" aria-hidden="true"></i>{m.analyticsFilteredHint()}
 			</span>
 		{/if}
 	</div>
