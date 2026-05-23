@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from core.models import (
@@ -318,6 +318,7 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
 
     fields_to_check = ["ref_id", "name"]
 
+    @transaction.atomic
     def save(self, *args, **kwargs):
         is_new = self._state.adding
         if is_new:

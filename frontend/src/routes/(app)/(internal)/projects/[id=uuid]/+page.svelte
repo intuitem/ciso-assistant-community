@@ -136,12 +136,9 @@
 			});
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}));
-				const pick =
-					err?.detail ??
-					err?.non_field_errors ??
-					Object.values(err ?? {})[0] ??
-					`HTTP ${res.status}`;
-				errorMessage = String(Array.isArray(pick) ? pick[0] : pick);
+				const pick = err?.detail ?? err?.non_field_errors ?? Object.values(err ?? {})[0];
+				const text = Array.isArray(pick) ? pick[0] : pick;
+				errorMessage = String(text || `HTTP ${res.status}`);
 				return false;
 			}
 			await invalidateAll();
@@ -541,8 +538,8 @@
 	let progressValue = $derived(project.progress ?? 0);
 </script>
 
-<div class="card bg-white shadow-sm m-4 overflow-hidden">
-	<div class="h-1 {kindStripeMap[project.kind] ?? 'bg-slate-400'}"></div>
+<div class="card bg-white shadow-sm m-4">
+	<div class="h-1 rounded-t-container-token {kindStripeMap[project.kind] ?? 'bg-slate-400'}"></div>
 
 	<div class="px-8 pt-6 pb-5 {kindHeaderBgMap[project.kind] ?? ''}">
 		<div class="flex items-start justify-between gap-4 flex-wrap">

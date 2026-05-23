@@ -812,9 +812,9 @@ class BuiltinMetricSample(AbstractBaseModel):
             .annotate(count=Count("id"))
             .values_list("status", "count")
         }
-        # progress is a Python @property, so iterate; bounded by the daily snapshot cadence.
+        # N+1: progress is a @property doing 1+ queries per audit. Bounded by snapshot cadence.
         if total_audits:
-            progresses = [a.progress for a in audits_qs.only("id")]
+            progresses = [a.progress for a in audits_qs]
             audits_avg_progress = (
                 round(sum(progresses) / len(progresses)) if progresses else 0
             )
@@ -844,7 +844,7 @@ class BuiltinMetricSample(AbstractBaseModel):
             .annotate(count=Count("id"))
             .values_list("priority", "count")
         )
-        projects_priority_labels = {1: "P1", 2: "P2", 3: "P3", 4: "P4"}
+        projects_priority_labels = {k: str(v) for k, v in _Project.PRIORITY}
         projects_priority_breakdown = {
             projects_priority_labels.get(k, str(k)): v
             for k, v in projects_priority_breakdown.items()
