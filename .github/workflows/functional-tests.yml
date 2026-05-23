@@ -268,9 +268,18 @@ jobs:
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
+        timeout-minutes: 20
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 300 pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
@@ -449,9 +458,18 @@ jobs:
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
+        timeout-minutes: 20
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 300 pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
