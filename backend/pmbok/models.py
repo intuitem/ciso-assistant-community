@@ -1,7 +1,10 @@
+from datetime import date
+from decimal import Decimal
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from iam.models import FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from core.models import (
     FilteringLabelMixin,
     FindingsAssessment,
@@ -16,6 +19,7 @@ from crq.models import QuantitativeRiskStudy
 from ebios_rm.models import EbiosRMStudy
 from tprm.models import Entity, EntityAssessment
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from global_settings.models import GlobalSettings
 
 from auditlog.registry import auditlog
 
@@ -315,10 +319,6 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
     fields_to_check = ["ref_id", "name"]
 
     def save(self, *args, **kwargs):
-        from datetime import date
-        from decimal import Decimal
-        from global_settings.models import GlobalSettings
-
         is_new = self._state.adding
         if is_new:
             if not self.currency and self.parent_project_id:
@@ -362,12 +362,6 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
 
 
 class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
-    """A single role in a responsibility taxonomy (e.g. 'Responsible' in RACI).
-
-    Multiple taxonomies (RACI, RASCI, RAPID, custom) coexist; a ResponsibilityMatrix
-    references the subset of roles it uses through its `roles` M2M.
-    """
-
     class Taxonomy(models.TextChoices):
         RACI = "raci", "RACI"
         RASCI = "rasci", "RASCI"
@@ -503,13 +497,7 @@ class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
 
     @classmethod
     def create_default_roles(cls):
-        """Idempotently seed the builtin R/A/C/I/S/P/D roles in the root folder.
-
-        Called from core.startup so seeding works even when the root folder is
-        created after all migrations run (fresh installs).
-        """
-        from iam.models import Folder
-
+        # Called from core.startup so the root folder exists on fresh installs.
         root = Folder.objects.filter(content_type=Folder.ContentType.ROOT).first()
         if root is None:
             return
@@ -530,12 +518,6 @@ class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
 
 
 class ResponsibilityMatrix(NameDescriptionFolderMixin, FilteringLabelMixin):
-    """A folder-scoped responsibility matrix (RACI / RASCI / RAPID / custom).
-
-    The `roles` M2M is the authoritative scope of role options available to
-    activities within this matrix.
-    """
-
     class Preset(models.TextChoices):
         RACI = "raci", "RACI"
         RASCI = "rasci", "RASCI"
@@ -560,11 +542,8 @@ class ResponsibilityMatrix(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
 
     def save(self, *args, **kwargs):
-        # Detect a folder move and propagate to descendants so IAM scoping stays
-        # consistent. Children (activities, matrix_actors, assignments) inherit
-        # folder on their own save(), but only at create-time — bulk update is
-        # needed for moves after the fact. bulk update() skips save() so no
-        # recursion.
+        # On folder move, propagate to children — they only inherit folder at create-time,
+        # so IAM scoping would drift. bulk update() skips save() (no recursion).
         folder_changed = False
         if self.pk:
             old_folder_id = (
@@ -585,8 +564,6 @@ class ResponsibilityMatrix(NameDescriptionFolderMixin, FilteringLabelMixin):
 
 
 class ResponsibilityMatrixActivity(AbstractBaseModel, FolderMixin):
-    """A row in a responsibility matrix: the thing being done."""
-
     matrix = models.ForeignKey(
         ResponsibilityMatrix,
         on_delete=models.CASCADE,
@@ -638,7 +615,7 @@ class ResponsibilityMatrixActivity(AbstractBaseModel, FolderMixin):
         ordering = ["order", "id"]
 
     def save(self, *args, **kwargs):
-        # Inherit folder from parent matrix so IAM scoping can place this object
+        # Inherit folder from the parent matrix for IAM scoping.
         self.folder = self.matrix.folder
         super().save(*args, **kwargs)
 
@@ -647,12 +624,6 @@ class ResponsibilityMatrixActivity(AbstractBaseModel, FolderMixin):
 
 
 class ResponsibilityMatrixActor(AbstractBaseModel, FolderMixin):
-    """An actor attached to a matrix (a matrix column), with display order.
-
-    Promotes actor-on-matrix to a first-class concept so columns can be added,
-    removed, and reordered independently of any concrete assignment.
-    """
-
     matrix = models.ForeignKey(
         ResponsibilityMatrix,
         on_delete=models.CASCADE,
@@ -683,8 +654,6 @@ class ResponsibilityMatrixActor(AbstractBaseModel, FolderMixin):
 
 
 class ResponsibilityAssignment(AbstractBaseModel, FolderMixin):
-    """A single cell: (activity, actor) -> role. One role per cell."""
-
     activity = models.ForeignKey(
         ResponsibilityMatrixActivity,
         on_delete=models.CASCADE,

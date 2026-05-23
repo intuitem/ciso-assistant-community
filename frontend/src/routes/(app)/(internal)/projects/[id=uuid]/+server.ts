@@ -27,8 +27,8 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());
 	}
-	return new Response(JSON.stringify(await res.json()), {
+	return new Response(res.body, {
 		status: res.status,
-		headers: { 'Content-Type': 'application/json' }
+		headers: res.headers
 	});
 };

@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 from rest_framework import serializers
 
 from core.models import Terminology
@@ -72,13 +73,11 @@ class AccreditationReadSerializer(BaseModelSerializer):
         return obj.category.get_name_translated
 
     def get_collection_data(self, obj):
-        """Get the linked collection with all related objects"""
         if obj.linked_collection:
             return GenericCollectionReadSerializer(obj.linked_collection).data
         return None
 
     def get_checklist_progress(self, obj):
-        """Get the progress percentage of the checklist compliance assessment"""
         if obj.checklist:
             return obj.checklist.progress
         return None
@@ -94,8 +93,6 @@ class AccreditationWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
-        from dateutil.relativedelta import relativedelta
-
         commission_date = data.get(
             "commission_date",
             getattr(getattr(self, "instance", None), "commission_date", None),
@@ -105,8 +102,6 @@ class AccreditationWriteSerializer(BaseModelSerializer):
             getattr(getattr(self, "instance", None), "duration_months", None),
         )
 
-        # Auto-compute expiry_date when commission_date and duration_months are set
-        # and expiry_date is empty/null (cleared or never provided)
         if commission_date and duration_months and not data.get("expiry_date"):
             data["expiry_date"] = commission_date + relativedelta(
                 months=duration_months
@@ -322,8 +317,7 @@ class ResponsibilityAssignmentWriteSerializer(BaseModelSerializer):
                     "Add it to the matrix first or pick a role already attached."
                 }
             )
-        # Mirror the cycle_cell check: actor must be a member of the matrix.
-        # Without this, direct POST/PATCH could create rows for off-matrix actors.
+        # Mirrors cycle_cell: blocks POST/PATCH from creating rows for off-matrix actors.
         if (
             activity
             and actor

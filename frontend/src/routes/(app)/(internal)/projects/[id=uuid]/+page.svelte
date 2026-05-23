@@ -28,9 +28,6 @@
 	let statusOptions = $derived(data.statusOptions);
 	let healthOptions = $derived(data.healthOptions);
 
-	// Single client-side SuperForm that backs all picker/select fields on the
-	// page. Plain text/date inputs keep using draft state below — only fields
-	// that need AutocompleteSelect live here.
 	const workspaceFieldsSchema = z.object({
 		kind: z.string().optional(),
 		parent_project: z.string().uuid().nullable().optional(),
@@ -39,6 +36,7 @@
 		priority: z.coerce.number().int().min(1).max(4).nullable().optional(),
 		linked_collection: z.string().uuid().nullable().optional(),
 		responsibility_matrices: z.array(z.string().uuid()).default([]),
+		filtering_labels: z.array(z.string().uuid()).default([]),
 		owner: z.string().uuid().nullable().optional(),
 		sponsor: z.string().uuid().nullable().optional(),
 		currency: z.string().nullable().optional()
@@ -53,6 +51,7 @@
 			priority: p.priority ?? null,
 			linked_collection: p.linked_collection?.id ?? null,
 			responsibility_matrices: (p.responsibility_matrices ?? []).map((m: any) => m.id),
+			filtering_labels: (p.filtering_labels ?? []).map((l: any) => l.id),
 			owner: p.owner?.id ?? null,
 			sponsor: p.sponsor?.id ?? null,
 			currency: p.currency ?? ''
@@ -75,9 +74,7 @@
 	const { form: workspaceFormData } = workspaceForm;
 
 	let activeTab = $state('overview');
-	// Only one section can be in edit mode at a time. Several sections share
-	// workspaceForm — opening one closes the others, so a swap is honest
-	// rather than silently wiping the previous editor's draft.
+	// Opening a section resets workspaceForm — only one section can edit at a time.
 	type EditSection = 'basics' | 'overview' | 'charter' | 'schedule' | 'scope' | 'linked' | 'people';
 	let editingSection: EditSection | null = $state(null);
 	let savingSection: string | null = $state(null);
@@ -139,7 +136,12 @@
 			});
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}));
-				errorMessage = typeof err === 'string' ? err : JSON.stringify(err);
+				const pick =
+					err?.detail ??
+					err?.non_field_errors ??
+					Object.values(err ?? {})[0] ??
+					`HTTP ${res.status}`;
+				errorMessage = String(Array.isArray(pick) ? pick[0] : pick);
 				return false;
 			}
 			await invalidateAll();
@@ -149,7 +151,6 @@
 		}
 	}
 
-	// --- Overview tab (lifecycle indicators) ---
 	let overviewProgressDraft: number | null = $state(null);
 
 	function startOverviewEdit() {
@@ -168,7 +169,6 @@
 		if ((await patchProject(payload, 'overview')) === true) editingSection = null;
 	}
 
-	// --- Charter tab (the why) ---
 	const charterFields = [
 		{ key: 'purpose', label: m.purpose() },
 		{ key: 'objectives', label: m.objectives() },
@@ -190,7 +190,6 @@
 		if ((await patchProject(charterDraft, 'charter')) === true) editingSection = null;
 	}
 
-	// --- Schedule tab (when + how much) ---
 	let scheduleDraft: {
 		start_date: string | null;
 		end_date: string | null;
@@ -240,12 +239,11 @@
 	);
 
 	async function saveSchedule() {
-		// Backend Project.currency is CharField(blank=True), not null=True — coerce here.
+		// Project.currency is CharField(blank=True), so null is rejected — coerce.
 		const payload = { ...scheduleDraft, currency: $workspaceFormData.currency ?? '' };
 		if ((await patchProject(payload, 'schedule')) === true) editingSection = null;
 	}
 
-	// --- Scope tab (the what) ---
 	const scopeFields = [
 		{ key: 'deliverables', label: m.deliverables() },
 		{ key: 'assumptions', label: m.assumptions() },
@@ -264,7 +262,6 @@
 		if ((await patchProject(scopeDraft, 'scope')) === true) editingSection = null;
 	}
 
-	// --- Linked tab (other CISO Assistant objects) ---
 	function startLinkedEdit() {
 		resetWorkspaceFields();
 		editingSection = 'linked';
@@ -273,12 +270,12 @@
 	async function saveLinked() {
 		const payload = {
 			linked_collection: $workspaceFormData.linked_collection,
-			responsibility_matrices: $workspaceFormData.responsibility_matrices
+			responsibility_matrices: $workspaceFormData.responsibility_matrices,
+			filtering_labels: $workspaceFormData.filtering_labels
 		};
 		if ((await patchProject(payload, 'linked')) === true) editingSection = null;
 	}
 
-	// --- People tab (owner + sponsor) ---
 	function startPeopleEdit() {
 		resetWorkspaceFields();
 		editingSection = 'people';
@@ -292,7 +289,6 @@
 		if ((await patchProject(payload, 'people')) === true) editingSection = null;
 	}
 
-	// --- Header basics (name, ref_id, ref_link, description, kind, parent) ---
 	let basicsTextDraft: {
 		name: string;
 		ref_id: string;
@@ -320,7 +316,6 @@
 		if ((await patchProject(payload, 'basics')) === true) editingSection = null;
 	}
 
-	// --- Analytics tab ---
 	let snapshots = $derived(data.snapshots ?? []);
 	let latestSnapshot = $derived(
 		snapshots.length > 0 ? snapshots[snapshots.length - 1].metrics : null
@@ -547,10 +542,8 @@
 </script>
 
 <div class="card bg-white shadow-sm m-4 overflow-hidden">
-	<!-- Kind indicator stripe — anchors the project's identity visually -->
 	<div class="h-1 {kindStripeMap[project.kind] ?? 'bg-slate-400'}"></div>
 
-	<!-- Header bar -->
 	<div class="px-8 pt-6 pb-5 {kindHeaderBgMap[project.kind] ?? ''}">
 		<div class="flex items-start justify-between gap-4 flex-wrap">
 			<div class="min-w-0 grow">
@@ -680,8 +673,6 @@
 			<div class="card preset-tonal-error p-3 mt-3 text-sm">{errorMessage}</div>
 		{/if}
 	</div>
-
-	<!-- Vitals strip — the four health-of-project signals -->
 	<div class="px-8 py-4 border-t border-gray-200">
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 			<div class="flex flex-col gap-1.5">
@@ -744,8 +735,6 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- Structure & people row — quieter, secondary -->
 	<div class="px-8 py-3 bg-gray-50 border-t border-gray-200">
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
 			<div>
@@ -804,8 +793,6 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- Tab bar -->
 	<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)} class="w-full">
 		<Tabs.List class="border-b border-gray-200 px-4">
 			<Tabs.Trigger
@@ -851,8 +838,6 @@
 				<i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}
 			</Tabs.Trigger>
 		</Tabs.List>
-
-		<!-- OVERVIEW -->
 		<Tabs.Content value="overview" class="p-6">
 			<div class="flex justify-end mb-4">
 				{#if editingSection !== 'overview'}
@@ -958,8 +943,6 @@
 				</div>
 			</div>
 		</Tabs.Content>
-
-		<!-- CHARTER -->
 		<Tabs.Content value="charter" class="p-6">
 			<div class="flex justify-end mb-4">
 				{#if editingSection !== 'charter'}
@@ -1008,8 +991,6 @@
 				{/each}
 			</div>
 		</Tabs.Content>
-
-		<!-- SCHEDULE -->
 		<Tabs.Content value="schedule" class="p-6">
 			<div class="flex justify-end mb-4">
 				{#if editingSection !== 'schedule'}
@@ -1134,15 +1115,13 @@
 								{m.expectedBudget()}
 							</div>
 							<div class="text-sm text-gray-900">
-								{project.budget ?? '--'}
-								{project.currency ?? ''}
+								{project.budget ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
 							</div>
 						</div>
 						<div>
 							<div class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</div>
 							<div class="text-sm text-gray-900">
-								{project.actual_cost ?? '--'}
-								{project.currency ?? ''}
+								{project.actual_cost ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
 							</div>
 						</div>
 						<div>
@@ -1152,8 +1131,7 @@
 								class:text-gray-900={budgetRemaining == null || budgetRemaining >= 0}
 								class:text-red-600={budgetRemaining != null && budgetRemaining < 0}
 							>
-								{budgetRemaining ?? '--'}
-								{project.currency ?? ''}
+								{budgetRemaining ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
 							</div>
 						</div>
 					</div>
@@ -1332,8 +1310,6 @@
 				{/if}
 			</section>
 		</Tabs.Content>
-
-		<!-- SCOPE -->
 		{#if !isPortfolio}<Tabs.Content value="scope" class="p-6">
 				<div class="flex justify-end mb-4">
 					{#if editingSection !== 'scope'}
@@ -1383,8 +1359,6 @@
 				</div>
 			</Tabs.Content>
 		{/if}
-
-		<!-- LINKED -->
 		<Tabs.Content value="linked" class="p-6">
 			<div class="flex justify-end mb-4">
 				{#if editingSection !== 'linked'}
@@ -1476,10 +1450,42 @@
 						{/if}
 					{/if}
 				</div>
+
+				<div class="md:col-span-2">
+					{#if editingSection === 'linked'}
+						<AutocompleteSelect
+							multiple
+							form={workspaceForm}
+							createFromSelection={true}
+							optionsEndpoint="filtering-labels"
+							optionsLabelField="label"
+							field="filtering_labels"
+							helpText={m.labelsHelpText()}
+							label={m.labels()}
+							translateOptions={false}
+							allowUserOptions="append"
+						/>
+					{:else}
+						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+							{m.labels()}
+						</div>
+						{#if project.filtering_labels && project.filtering_labels.length > 0}
+							<div class="flex flex-wrap gap-1.5">
+								{#each project.filtering_labels as label}
+									<span
+										class="badge text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200"
+									>
+										{label.str}
+									</span>
+								{/each}
+							</div>
+						{:else}
+							<span class="text-gray-400 text-sm italic">--</span>
+						{/if}
+					{/if}
+				</div>
 			</div>
 		</Tabs.Content>
-
-		<!-- PEOPLE -->
 		<Tabs.Content value="people" class="p-6">
 			<div class="flex justify-end mb-4">
 				{#if editingSection !== 'people'}
@@ -1559,8 +1565,6 @@
 				</div>
 			</div>
 		</Tabs.Content>
-
-		<!-- ANALYTICS -->
 		<Tabs.Content value="analytics" class="p-6">
 			{#if snapshots.length === 0}
 				<div class="text-center py-12 text-gray-400">
@@ -1568,9 +1572,7 @@
 					<p class="text-sm">{m.noSnapshotsYet()}</p>
 				</div>
 			{:else}
-				<!-- KPI strip — each card has a top accent stripe matching its metric -->
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-					<!-- Progress -->
 					<div
 						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
 					>
@@ -1599,8 +1601,6 @@
 							</div>
 						{/if}
 					</div>
-
-					<!-- Status -->
 					<div
 						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
 					>
@@ -1620,8 +1620,6 @@
 							<span class="text-gray-400 italic text-sm">—</span>
 						{/if}
 					</div>
-
-					<!-- Health -->
 					<div
 						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
 					>
@@ -1649,8 +1647,6 @@
 							<span class="text-gray-400 italic text-sm">—</span>
 						{/if}
 					</div>
-
-					<!-- Cost -->
 					<div
 						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
 					>
@@ -1678,16 +1674,12 @@
 						{/if}
 					</div>
 				</div>
-
-				<!-- Lifecycle multi-curve area chart -->
 				<div class="mb-6">
 					<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
 						{m.lifecycle()} — {m.timeline()}
 					</div>
 					<div bind:this={lifecycleChartEl} style="width: 100%; height: 320px;"></div>
 				</div>
-
-				<!-- Charts -->
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					<div>
 						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
