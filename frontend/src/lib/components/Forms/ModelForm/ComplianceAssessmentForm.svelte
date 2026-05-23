@@ -223,19 +223,13 @@
 	cacheLock={cacheLocks['version']}
 	bind:cachedValue={formDataCache['version']}
 />
-<AutocompleteSelect
+<Select
 	{form}
-	multiple
-	optionsEndpoint="actors"
-	optionsLabelField="str"
-	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
-		position: 'prefix'
-	}}
-	field="authors"
-	cacheLock={cacheLocks['authors']}
-	bind:cachedValue={formDataCache['authors']}
-	label={m.authors()}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
 />
 <TextField
 	type="date"
@@ -332,13 +326,19 @@
 		field="evidences"
 		label={m.evidences()}
 	/>
-	<Select
+	<AutocompleteSelect
 		{form}
-		options={model.selectOptions['status']}
-		field="status"
-		label={m.status()}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
+		multiple
+		optionsEndpoint="actors"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
+		field="authors"
+		cacheLock={cacheLocks['authors']}
+		bind:cachedValue={formDataCache['authors']}
+		label={m.authors()}
 	/>
 	<AutocompleteSelect
 		{form}

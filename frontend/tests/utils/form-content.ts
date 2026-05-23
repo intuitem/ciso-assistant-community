@@ -45,6 +45,15 @@ export class FormContent {
 	}
 
 	async fill(values: { [k: string]: any }) {
+		const modal = this.page.getByTestId('modal-backdrop');
+		if (await modal.isVisible({ timeout: 100 }).catch(() => false)) {
+			const moreTrigger = modal
+				.locator('[data-scope="accordion"][data-part="item-trigger"][data-state="closed"]')
+				.first();
+			if (await moreTrigger.isVisible({ timeout: 200 }).catch(() => false)) {
+				await moreTrigger.click();
+			}
+		}
 		for (const key in values) {
 			const field = this.fields.get(key);
 			for (const spinner of await this.page.locator('.loading-spinner').all()) {
