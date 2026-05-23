@@ -6266,10 +6266,23 @@ class ActionPlanBudgetOverview:
             for owner in ctrl.owner.all():
                 label = str(owner)
                 bucket = owner_counts.setdefault(
-                    label, {"label": label, "count": 0, "total": 0.0}
+                    label,
+                    {
+                        "label": label,
+                        "count": 0,
+                        "total": 0.0,
+                        "status_breakdown": {},
+                    },
                 )
                 bucket["count"] += 1
                 bucket["total"] += cost
+                sb = bucket["status_breakdown"]
+                sb_key = ctrl.status or "_unset"
+                sb_entry = sb.setdefault(
+                    sb_key,
+                    {"key": sb_key, "status": status_label, "count": 0},
+                )
+                sb_entry["count"] += 1
 
             # top folders
             folder_label = ctrl.folder.name if ctrl.folder_id else "_unset"
@@ -6296,6 +6309,12 @@ class ActionPlanBudgetOverview:
         )[:10]
         for bucket in top_owners:
             bucket["total_display"] = fmt(bucket["total"])
+            # Flatten status_breakdown dict → list sorted by count desc for stable rendering
+            bucket["status_breakdown"] = sorted(
+                bucket["status_breakdown"].values(),
+                key=lambda x: x["count"],
+                reverse=True,
+            )
 
         top_folders = sorted(
             folder_counts.values(), key=lambda x: x["count"], reverse=True

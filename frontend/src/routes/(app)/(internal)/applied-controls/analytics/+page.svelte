@@ -15,10 +15,7 @@
 <div class="p-4 space-y-4">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-3">
-			<Anchor
-				href={`${data.backUrl}${data.filterSearch}`}
-				class="btn variant-ghost-surface"
-			>
+			<Anchor href={`${data.backUrl}${data.filterSearch}`} class="btn variant-ghost-surface">
 				<i class="fa-solid fa-arrow-left mr-2"></i>
 				{safeTranslate(data.backLabel) || data.backLabel}
 			</Anchor>

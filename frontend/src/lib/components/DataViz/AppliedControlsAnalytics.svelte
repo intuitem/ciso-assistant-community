@@ -23,7 +23,13 @@
 		by_category: (Bucket & { category: string })[];
 		by_csf_function: (Bucket & { csf_function: string })[];
 		eta_buckets: { key: string; count: number; total: number; total_display: string }[];
-		top_owners: { label: string; count: number; total: number; total_display: string }[];
+		top_owners: {
+			label: string;
+			count: number;
+			total: number;
+			total_display: string;
+			status_breakdown: { key: string; status: string; count: number }[];
+		}[];
 		top_folders: { label: string; count: number; total: number; total_display: string }[];
 	}
 
@@ -90,7 +96,19 @@
 		'#ec4899',
 		'#a855f7'
 	];
-	const csfColors = ['#FAE482', '#85C4EA', '#B29BBA', '#F7B189', '#A8D9A0', '#9ca3af'];
+	// Match the palette used by NightingaleChart on the analytics page so CSF colors
+	// stay consistent across the app. Keys are matched case-insensitively against the
+	// raw enum (e.g. "govern") or its display label (e.g. "Govern").
+	const csfColorMap: Record<string, string> = {
+		govern: '#FAE482',
+		identify: '#85C4EA',
+		protect: '#B29BBA',
+		detect: '#FAB647',
+		respond: '#E47677',
+		recover: '#8ACB93',
+		_unset: '#505372'
+	};
+	const csfFallbackColor = '#505372';
 
 	const etaLabelMap: Record<string, () => string> = {
 		overdue: () => m.overdue(),
@@ -135,6 +153,43 @@
 	let priorityValues = $derived(data ? toDonutValues(data.by_priority, 'priority') : []);
 	let categoryValues = $derived(data ? toDonutValues(data.by_category, 'category') : []);
 	let csfValues = $derived(data ? toDonutValues(data.by_csf_function, 'csf_function') : []);
+
+	// Colors aligned to csfValues order so each segment gets its CSF-specific color
+	// regardless of which functions are present and in what order.
+	let csfColorsOrdered = $derived.by(() => {
+		if (!data) return [] as string[];
+		return data.by_csf_function.map((b) => {
+			const candidates = [b.key, b.csf_function].filter(Boolean) as string[];
+			for (const c of candidates) {
+				const hit = csfColorMap[c.toLowerCase()];
+				if (hit) return hit;
+			}
+			return csfFallbackColor;
+		});
+	});
+
+	// Map status key → color, reusing the same palette as the by_status donut so the
+	// inline owner breakdown bar uses consistent colors across the page.
+	let statusColorByKey = $derived.by(() => {
+		const map: Record<string, string> = {};
+		if (!data) return map;
+		data.by_status.forEach((b, i) => {
+			if (b.key) map[b.key] = statusColors[i % statusColors.length];
+		});
+		return map;
+	});
+
+	function translateStatus(key: string, fallback: string) {
+		if (key) {
+			const translated = safeTranslate(key);
+			if (translated && translated !== key) return translated;
+		}
+		if (fallback) {
+			const translated = safeTranslate(fallback);
+			if (translated && translated !== fallback) return translated;
+		}
+		return fallback || key;
+	}
 
 	let etaBars = $derived.by(() => {
 		if (!data?.eta_buckets) return { labels: [] as string[], values: [] as number[] };
@@ -183,11 +238,7 @@
 		<div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3">
 			<SimpleCard count={String(data.count)} label={m.totalControls()} emphasis={true} />
 			{#if showBudget && data.count_with_cost > 0}
-				<SimpleCard
-					count={data.total_annual_cost_display}
-					label={m.totalAnnualCost()}
-					raw={true}
-				/>
+				<SimpleCard count={data.total_annual_cost_display} label={m.totalAnnualCost()} raw={true} />
 				<SimpleCard
 					count={`${data.count_with_cost} / ${data.count}`}
 					label={m.controlsWithCostData()}
@@ -221,6 +272,7 @@
 							name="appliedControlsAnalyticsStatus"
 							values={statusValues}
 							colors={statusColors}
+							showPercentage={true}
 						/>
 					</div>
 				</div>
@@ -233,6 +285,7 @@
 							name="appliedControlsAnalyticsPriority"
 							values={priorityValues}
 							colors={priorityColors}
+							showPercentage={true}
 						/>
 					</div>
 				</div>
@@ -245,6 +298,7 @@
 							name="appliedControlsAnalyticsCategory"
 							values={categoryValues}
 							colors={categoryColors}
+							showPercentage={true}
 						/>
 					</div>
 				</div>
@@ -256,7 +310,8 @@
 						<DonutChart
 							name="appliedControlsAnalyticsCsf"
 							values={csfValues}
-							colors={csfColors}
+							colors={csfColorsOrdered}
+							showPercentage={true}
 						/>
 					</div>
 				</div>
@@ -268,10 +323,22 @@
 			{#if data.top_owners.length > 0}
 				<div class="bg-white rounded-lg shadow-sm p-4">
 					<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.topOwners()}</h3>
+					<div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-600 mb-3">
+						{#each data.by_status as s (s.key ?? s.status)}
+							<div class="flex items-center gap-1.5">
+								<span
+									class="inline-block h-2.5 w-2.5 rounded-sm"
+									style="background-color: {statusColorByKey[s.key ?? ''] ?? '#94a3b8'};"
+								></span>
+								<span>{translateStatus(s.key ?? '', s.status)}</span>
+							</div>
+						{/each}
+					</div>
 					<table class="w-full text-sm">
 						<thead>
 							<tr class="text-left text-xs text-gray-500 border-b">
 								<th class="py-1">{m.owner()}</th>
+								<th class="py-1">{m.controlsByStatus()}</th>
 								<th class="py-1 text-right">{m.count()}</th>
 								{#if showBudget && data.count_with_cost > 0}
 									<th class="py-1 text-right">{m.cost()}</th>
@@ -282,6 +349,25 @@
 							{#each data.top_owners as row (row.label)}
 								<tr class="border-b last:border-b-0">
 									<td class="py-1.5">{row.label}</td>
+									<td class="py-1.5 w-1/3">
+										<div class="flex h-2 w-full rounded bg-gray-100">
+											{#each row.status_breakdown as seg (seg.key)}
+												{@const pct = (seg.count / row.count) * 100}
+												{@const color = statusColorByKey[seg.key] ?? '#94a3b8'}
+												{@const label = translateStatus(seg.key, seg.status)}
+												<div
+													class="relative h-full group first:rounded-l last:rounded-r"
+													style="width: {pct}%; background-color: {color};"
+												>
+													<div
+														class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs whitespace-nowrap bg-gray-900 text-white rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 shadow"
+													>
+														{label}: {seg.count}
+													</div>
+												</div>
+											{/each}
+										</div>
+									</td>
 									<td class="py-1.5 text-right tabular-nums">{row.count}</td>
 									{#if showBudget && data.count_with_cost > 0}
 										<td class="py-1.5 text-right tabular-nums text-gray-600">
