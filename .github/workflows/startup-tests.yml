@@ -64,7 +64,7 @@ jobs:
           cache: "pip"
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: "24"
       - name: Install Poetry via pipx
         shell: bash
         run: |
@@ -132,7 +132,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: "24"
       - name: Install pnpm
         uses: pnpm/action-setup@v5
         with:
@@ -215,7 +215,7 @@ jobs:
           cache: "pip"
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: "24"
       - name: Install Poetry via pipx
         shell: bash
         run: |
@@ -282,7 +282,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: "24"
       - name: Install frontend dependencies
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make pre-build
