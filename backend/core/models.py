@@ -2135,21 +2135,11 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
     @classmethod
     def create_default_project_statuses(cls):
-        for item in cls.DEFAULT_PROJECT_STATUSES:
-            Terminology.objects.update_or_create(
-                name=item["name"],
-                field_path=item["field_path"],
-                defaults=item,
-            )
+        cls._seed_defaults(cls.DEFAULT_PROJECT_STATUSES)
 
     @classmethod
     def create_default_project_health(cls):
-        for item in cls.DEFAULT_PROJECT_HEALTH:
-            Terminology.objects.update_or_create(
-                name=item["name"],
-                field_path=item["field_path"],
-                defaults=item,
-            )
+        cls._seed_defaults(cls.DEFAULT_PROJECT_HEALTH)
 
     @classmethod
     def create_default_entity_relationships(cls):
