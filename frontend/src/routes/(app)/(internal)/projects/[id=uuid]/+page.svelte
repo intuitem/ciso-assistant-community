@@ -25,6 +25,8 @@
 	let priorityOptions = $derived(data.priorityOptions);
 	let kindOptions = $derived(data.kindOptions);
 	let currencyOptions = $derived(data.currencyOptions);
+	let statusOptions = $derived(data.statusOptions);
+	let healthOptions = $derived(data.healthOptions);
 
 	// Single client-side SuperForm that backs all picker/select fields on the
 	// page. Plain text/date inputs keep using draft state below — only fields
@@ -73,6 +75,11 @@
 	const { form: workspaceFormData } = workspaceForm;
 
 	let activeTab = $state('overview');
+	// Only one section can be in edit mode at a time. Several sections share
+	// workspaceForm — opening one closes the others, so a swap is honest
+	// rather than silently wiping the previous editor's draft.
+	type EditSection = 'basics' | 'overview' | 'charter' | 'schedule' | 'scope' | 'linked' | 'people';
+	let editingSection: EditSection | null = $state(null);
 	let savingSection: string | null = $state(null);
 	let errorMessage = $state('');
 
@@ -143,13 +150,12 @@
 	}
 
 	// --- Overview tab (lifecycle indicators) ---
-	let overviewEditing = $state(false);
 	let overviewProgressDraft: number | null = $state(null);
 
 	function startOverviewEdit() {
 		resetWorkspaceFields();
 		overviewProgressDraft = project.progress ?? null;
-		overviewEditing = true;
+		editingSection = 'overview';
 	}
 
 	async function saveOverview() {
@@ -159,7 +165,7 @@
 			priority: $workspaceFormData.priority,
 			progress: overviewProgressDraft
 		};
-		if ((await patchProject(payload, 'overview')) === true) overviewEditing = false;
+		if ((await patchProject(payload, 'overview')) === true) editingSection = null;
 	}
 
 	// --- Charter tab (the why) ---
@@ -173,20 +179,18 @@
 		{ key: 'organizational_alignment', label: m.organizationalAlignment() }
 	] as const;
 
-	let charterEditing = $state(false);
 	let charterDraft: Record<string, string> = $state({});
 
 	function startCharterEdit() {
 		charterDraft = Object.fromEntries(charterFields.map((f) => [f.key, project[f.key] ?? '']));
-		charterEditing = true;
+		editingSection = 'charter';
 	}
 
 	async function saveCharter() {
-		if ((await patchProject(charterDraft, 'charter')) === true) charterEditing = false;
+		if ((await patchProject(charterDraft, 'charter')) === true) editingSection = null;
 	}
 
 	// --- Schedule tab (when + how much) ---
-	let scheduleEditing = $state(false);
 	let scheduleDraft: {
 		start_date: string | null;
 		end_date: string | null;
@@ -220,7 +224,7 @@
 			actual_cost: project.actual_cost ?? null,
 			tolerances: structuredClone(project.tolerances ?? {})
 		};
-		scheduleEditing = true;
+		editingSection = 'schedule';
 	}
 
 	let budgetSpentPct = $derived(
@@ -236,8 +240,9 @@
 	);
 
 	async function saveSchedule() {
-		const payload = { ...scheduleDraft, currency: $workspaceFormData.currency };
-		if ((await patchProject(payload, 'schedule')) === true) scheduleEditing = false;
+		// Backend Project.currency is CharField(blank=True), not null=True — coerce here.
+		const payload = { ...scheduleDraft, currency: $workspaceFormData.currency ?? '' };
+		if ((await patchProject(payload, 'schedule')) === true) editingSection = null;
 	}
 
 	// --- Scope tab (the what) ---
@@ -248,24 +253,21 @@
 		{ key: 'dependencies_note', label: m.dependenciesNote() }
 	] as const;
 
-	let scopeEditing = $state(false);
 	let scopeDraft: Record<string, string> = $state({});
 
 	function startScopeEdit() {
 		scopeDraft = Object.fromEntries(scopeFields.map((f) => [f.key, project[f.key] ?? '']));
-		scopeEditing = true;
+		editingSection = 'scope';
 	}
 
 	async function saveScope() {
-		if ((await patchProject(scopeDraft, 'scope')) === true) scopeEditing = false;
+		if ((await patchProject(scopeDraft, 'scope')) === true) editingSection = null;
 	}
 
 	// --- Linked tab (other CISO Assistant objects) ---
-	let linkedEditing = $state(false);
-
 	function startLinkedEdit() {
 		resetWorkspaceFields();
-		linkedEditing = true;
+		editingSection = 'linked';
 	}
 
 	async function saveLinked() {
@@ -273,15 +275,13 @@
 			linked_collection: $workspaceFormData.linked_collection,
 			responsibility_matrices: $workspaceFormData.responsibility_matrices
 		};
-		if ((await patchProject(payload, 'linked')) === true) linkedEditing = false;
+		if ((await patchProject(payload, 'linked')) === true) editingSection = null;
 	}
 
 	// --- People tab (owner + sponsor) ---
-	let peopleEditing = $state(false);
-
 	function startPeopleEdit() {
 		resetWorkspaceFields();
-		peopleEditing = true;
+		editingSection = 'people';
 	}
 
 	async function savePeople() {
@@ -289,11 +289,10 @@
 			owner: $workspaceFormData.owner,
 			sponsor: $workspaceFormData.sponsor
 		};
-		if ((await patchProject(payload, 'people')) === true) peopleEditing = false;
+		if ((await patchProject(payload, 'people')) === true) editingSection = null;
 	}
 
 	// --- Header basics (name, ref_id, ref_link, description, kind, parent) ---
-	let basicsEditing = $state(false);
 	let basicsTextDraft: {
 		name: string;
 		ref_id: string;
@@ -309,7 +308,7 @@
 			ref_link: project.ref_link ?? '',
 			description: project.description ?? ''
 		};
-		basicsEditing = true;
+		editingSection = 'basics';
 	}
 
 	async function saveBasics() {
@@ -318,7 +317,7 @@
 			kind: $workspaceFormData.kind,
 			parent_project: $workspaceFormData.parent_project
 		};
-		if ((await patchProject(payload, 'basics')) === true) basicsEditing = false;
+		if ((await patchProject(payload, 'basics')) === true) editingSection = null;
 	}
 
 	// --- Analytics tab ---
@@ -555,7 +554,7 @@
 	<div class="px-8 pt-6 pb-5 {kindHeaderBgMap[project.kind] ?? ''}">
 		<div class="flex items-start justify-between gap-4 flex-wrap">
 			<div class="min-w-0 grow">
-				{#if !basicsEditing}
+				{#if editingSection !== 'basics'}
 					<div class="group flex items-center gap-3 flex-wrap">
 						<span
 							class="badge text-sm font-semibold px-3 py-1 rounded-full {kindColorMap[
@@ -643,6 +642,7 @@
 								fields: [{ field: 'kind', translate: true }],
 								position: 'prefix'
 							}}
+							optionsSelf={project}
 							field="parent_project"
 							nullable={true}
 							label={m.parentProject()}
@@ -657,11 +657,11 @@
 				{/if}
 			</div>
 
-			{#if basicsEditing}
+			{#if editingSection === 'basics'}
 				<div class="shrink-0 flex gap-2">
 					<button
 						class="btn preset-tonal-surface btn-sm"
-						onclick={() => (basicsEditing = false)}
+						onclick={() => (editingSection = null)}
 						disabled={savingSection === 'basics'}>{m.cancel()}</button
 					>
 					<button
@@ -676,7 +676,7 @@
 			{/if}
 		</div>
 
-		{#if errorMessage && basicsEditing}
+		{#if errorMessage && editingSection === 'basics'}
 			<div class="card preset-tonal-error p-3 mt-3 text-sm">{errorMessage}</div>
 		{/if}
 	</div>
@@ -855,7 +855,7 @@
 		<!-- OVERVIEW -->
 		<Tabs.Content value="overview" class="p-6">
 			<div class="flex justify-end mb-4">
-				{#if !overviewEditing}
+				{#if editingSection !== 'overview'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startOverviewEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -863,7 +863,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (overviewEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'overview'}>{m.cancel()}</button
 						>
 						<button
@@ -878,19 +878,17 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && overviewEditing}
+			{#if errorMessage && editingSection === 'overview'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div>
-					{#if overviewEditing}
-						<AutocompleteSelect
+					{#if editingSection === 'overview'}
+						<Select
 							form={workspaceForm}
-							optionsEndpoint="terminologies?field_path=project.status&is_visible=true"
-							optionsLabelField="translated_name"
+							options={statusOptions}
 							field="status"
-							nullable={true}
 							label={m.status()}
 						/>
 					{:else}
@@ -904,13 +902,11 @@
 				</div>
 
 				<div>
-					{#if overviewEditing}
-						<AutocompleteSelect
+					{#if editingSection === 'overview'}
+						<Select
 							form={workspaceForm}
-							optionsEndpoint="terminologies?field_path=project.health&is_visible=true"
-							optionsLabelField="translated_name"
+							options={healthOptions}
 							field="health"
-							nullable={true}
 							label={m.projectHealth()}
 						/>
 					{:else}
@@ -924,7 +920,7 @@
 				</div>
 
 				<div>
-					{#if overviewEditing}
+					{#if editingSection === 'overview'}
 						<Select
 							form={workspaceForm}
 							options={priorityOptions}
@@ -946,7 +942,7 @@
 					<label class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
 						{m.progress()}
 					</label>
-					{#if overviewEditing}
+					{#if editingSection === 'overview'}
 						<SliderInput
 							mode="number"
 							value={overviewProgressDraft}
@@ -966,7 +962,7 @@
 		<!-- CHARTER -->
 		<Tabs.Content value="charter" class="p-6">
 			<div class="flex justify-end mb-4">
-				{#if !charterEditing}
+				{#if editingSection !== 'charter'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startCharterEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -974,7 +970,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (charterEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'charter'}>{m.cancel()}</button
 						>
 						<button
@@ -989,7 +985,7 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && charterEditing}
+			{#if errorMessage && editingSection === 'charter'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
@@ -999,7 +995,7 @@
 						<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
 							{section.label}
 						</h3>
-						{#if charterEditing}
+						{#if editingSection === 'charter'}
 							<MarkdownField label="" bind:value={charterDraft[section.key]} rows={4} />
 						{:else if project[section.key]}
 							<div class="prose prose-sm max-w-none text-gray-900">
@@ -1016,7 +1012,7 @@
 		<!-- SCHEDULE -->
 		<Tabs.Content value="schedule" class="p-6">
 			<div class="flex justify-end mb-4">
-				{#if !scheduleEditing}
+				{#if editingSection !== 'schedule'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startScheduleEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -1024,7 +1020,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (scheduleEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'schedule'}>{m.cancel()}</button
 						>
 						<button
@@ -1039,7 +1035,7 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && scheduleEditing}
+			{#if errorMessage && editingSection === 'schedule'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
@@ -1052,7 +1048,7 @@
 						<label for="sc-start" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
 							{m.startDate()}
 						</label>
-						{#if scheduleEditing}
+						{#if editingSection === 'schedule'}
 							<input
 								id="sc-start"
 								type="date"
@@ -1067,7 +1063,7 @@
 						<label for="sc-end" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
 							{m.endDate()}
 						</label>
-						{#if scheduleEditing}
+						{#if editingSection === 'schedule'}
 							<input
 								id="sc-end"
 								type="date"
@@ -1082,7 +1078,7 @@
 						<label for="sc-eta" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
 							{m.eta()}
 						</label>
-						{#if scheduleEditing}
+						{#if editingSection === 'schedule'}
 							<input id="sc-eta" type="date" bind:value={scheduleDraft.eta} class="input w-full" />
 						{:else}
 							<span class="text-sm text-gray-900">{project.eta ?? '--'}</span>
@@ -1099,7 +1095,7 @@
 				<h3 class="text-md font-semibold text-gray-800 border-b border-gray-200 pb-1 mb-4">
 					{m.financials()}
 				</h3>
-				{#if scheduleEditing}
+				{#if editingSection === 'schedule'}
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 						<label class="block">
 							<span class="text-xs font-semibold text-gray-500 uppercase">
@@ -1183,7 +1179,7 @@
 				</h3>
 				<p class="text-xs text-gray-500 mb-4">{m.tolerancesHelpText()}</p>
 
-				{#if scheduleEditing}
+				{#if editingSection === 'schedule'}
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<fieldset class="border border-gray-200 rounded p-3">
 							<legend class="text-xs font-semibold text-gray-500 uppercase px-1">{m.time()}</legend>
@@ -1340,7 +1336,7 @@
 		<!-- SCOPE -->
 		{#if !isPortfolio}<Tabs.Content value="scope" class="p-6">
 				<div class="flex justify-end mb-4">
-					{#if !scopeEditing}
+					{#if editingSection !== 'scope'}
 						<button class="btn preset-tonal-primary btn-sm" onclick={startScopeEdit}>
 							<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 						</button>
@@ -1348,7 +1344,7 @@
 						<div class="flex gap-2">
 							<button
 								class="btn preset-tonal-surface btn-sm"
-								onclick={() => (scopeEditing = false)}
+								onclick={() => (editingSection = null)}
 								disabled={savingSection === 'scope'}>{m.cancel()}</button
 							>
 							<button
@@ -1363,7 +1359,7 @@
 					{/if}
 				</div>
 
-				{#if errorMessage && scopeEditing}
+				{#if errorMessage && editingSection === 'scope'}
 					<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 				{/if}
 
@@ -1373,7 +1369,7 @@
 							<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
 								{section.label}
 							</h3>
-							{#if scopeEditing}
+							{#if editingSection === 'scope'}
 								<MarkdownField label="" bind:value={scopeDraft[section.key]} rows={4} />
 							{:else if project[section.key]}
 								<div class="prose prose-sm max-w-none text-gray-900">
@@ -1391,7 +1387,7 @@
 		<!-- LINKED -->
 		<Tabs.Content value="linked" class="p-6">
 			<div class="flex justify-end mb-4">
-				{#if !linkedEditing}
+				{#if editingSection !== 'linked'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startLinkedEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -1399,7 +1395,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (linkedEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'linked'}>{m.cancel()}</button
 						>
 						<button
@@ -1414,13 +1410,13 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && linkedEditing}
+			{#if errorMessage && editingSection === 'linked'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div>
-					{#if linkedEditing}
+					{#if editingSection === 'linked'}
 						<AutocompleteSelect
 							form={workspaceForm}
 							optionsEndpoint="generic-collections"
@@ -1448,7 +1444,7 @@
 				</div>
 
 				<div class="md:col-span-2">
-					{#if linkedEditing}
+					{#if editingSection === 'linked'}
 						<AutocompleteSelect
 							form={workspaceForm}
 							optionsEndpoint="responsibility-matrices"
@@ -1486,7 +1482,7 @@
 		<!-- PEOPLE -->
 		<Tabs.Content value="people" class="p-6">
 			<div class="flex justify-end mb-4">
-				{#if !peopleEditing}
+				{#if editingSection !== 'people'}
 					<button class="btn preset-tonal-primary btn-sm" onclick={startPeopleEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
@@ -1494,7 +1490,7 @@
 					<div class="flex gap-2">
 						<button
 							class="btn preset-tonal-surface btn-sm"
-							onclick={() => (peopleEditing = false)}
+							onclick={() => (editingSection = null)}
 							disabled={savingSection === 'people'}>{m.cancel()}</button
 						>
 						<button
@@ -1509,13 +1505,13 @@
 				{/if}
 			</div>
 
-			{#if errorMessage && peopleEditing}
+			{#if errorMessage && editingSection === 'people'}
 				<div class="card preset-tonal-error p-3 mb-4 text-sm">{errorMessage}</div>
 			{/if}
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div>
-					{#if peopleEditing}
+					{#if editingSection === 'people'}
 						<AutocompleteSelect
 							form={workspaceForm}
 							optionsEndpoint="actors?user__is_third_party=False"
@@ -1539,7 +1535,7 @@
 				</div>
 
 				<div>
-					{#if peopleEditing}
+					{#if editingSection === 'people'}
 						<AutocompleteSelect
 							form={workspaceForm}
 							optionsEndpoint="actors?user__is_third_party=False"

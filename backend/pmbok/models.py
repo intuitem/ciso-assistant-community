@@ -320,9 +320,9 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
         from global_settings.models import GlobalSettings
 
         is_new = self._state.adding
-        if not self.currency and self.parent_project_id:
-            self.currency = self.parent_project.currency or ""
         if is_new:
+            if not self.currency and self.parent_project_id:
+                self.currency = self.parent_project.currency or ""
             if not self.currency:
                 general = GlobalSettings.objects.filter(name="general").first()
                 if general:
