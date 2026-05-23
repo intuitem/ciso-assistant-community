@@ -72,5 +72,5 @@
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 	nullable={true}
-	label={m.projectStatus()}
+	label={m.status()}
 />

@@ -86,6 +86,22 @@
 		program: 'bg-blue-100 text-blue-700',
 		project: 'bg-gray-100 text-gray-700'
 	};
+	const kindStripeMap: Record<string, string> = {
+		portfolio: 'bg-purple-500',
+		program: 'bg-blue-500',
+		project: 'bg-slate-400'
+	};
+	const kindHeaderBgMap: Record<string, string> = {
+		portfolio: 'bg-gradient-to-br from-purple-50/70 via-white to-white',
+		program: 'bg-gradient-to-br from-blue-50/70 via-white to-white',
+		project: 'bg-gradient-to-br from-slate-50/70 via-white to-white'
+	};
+	const priorityColorMap: Record<number, string> = {
+		1: 'bg-red-100 text-red-700',
+		2: 'bg-amber-100 text-amber-700',
+		3: 'bg-blue-100 text-blue-700',
+		4: 'bg-gray-100 text-gray-600'
+	};
 	let isPortfolio = $derived(project.kind === 'portfolio');
 
 	const statusColorMap: Record<string, string> = {
@@ -369,7 +385,7 @@
 		if (lifecycleChartEl) {
 			lifecycleChart?.dispose?.();
 			lifecycleChart = echarts.init(lifecycleChartEl, null, { renderer: 'svg' });
-			const seriesLabels = [m.projectStatus(), m.projectHealth(), m.projectPriority()];
+			const seriesLabels = [m.status(), m.projectHealth(), m.priority()];
 			const esc = (s: unknown) =>
 				String(s ?? '')
 					.replace(/&/g, '&amp;')
@@ -411,7 +427,7 @@
 						type: 'category',
 						data: statusYOrder,
 						gridIndex: 0,
-						name: m.projectStatus(),
+						name: m.status(),
 						nameLocation: 'middle',
 						nameGap: 78,
 						nameTextStyle: { fontSize: 10, fontWeight: 'bold' },
@@ -434,7 +450,7 @@
 						interval: 1,
 						inverse: true,
 						gridIndex: 2,
-						name: m.projectPriority(),
+						name: m.priority(),
 						nameLocation: 'middle',
 						nameGap: 78,
 						nameTextStyle: { fontSize: 10, fontWeight: 'bold' },
@@ -531,25 +547,31 @@
 	let progressValue = $derived(project.progress ?? 0);
 </script>
 
-<div class="card bg-white shadow-sm m-4">
+<div class="card bg-white shadow-sm m-4 overflow-hidden">
+	<!-- Kind indicator stripe — anchors the project's identity visually -->
+	<div class="h-1 {kindStripeMap[project.kind] ?? 'bg-slate-400'}"></div>
+
 	<!-- Header bar -->
-	<div class="p-6 border-b border-gray-200">
+	<div class="px-8 pt-6 pb-5 {kindHeaderBgMap[project.kind] ?? ''}">
 		<div class="flex items-start justify-between gap-4 flex-wrap">
 			<div class="min-w-0 grow">
 				{#if !basicsEditing}
-					<div class="group flex items-baseline gap-3">
+					<div class="group flex items-center gap-3 flex-wrap">
 						<span
-							class="badge text-xs font-medium px-2 py-0.5 rounded-full self-center {kindColorMap[
+							class="badge text-sm font-semibold px-3 py-1 rounded-full {kindColorMap[
 								project.kind
 							] ?? 'bg-gray-100 text-gray-700'}"
 							title={safeTranslate(project.kind)}
 						>
-							<i class="{kindIconMap[project.kind] ?? 'fa-solid fa-clipboard-list'} mr-1"></i>
+							<i class="{kindIconMap[project.kind] ?? 'fa-solid fa-clipboard-list'} mr-1.5"></i>
 							{safeTranslate(project.kind)}
 						</span>
-						<h1 class="text-2xl font-semibold text-gray-900 truncate">{project.name}</h1>
+						<h1 class="text-3xl font-bold text-gray-900 truncate">{project.name}</h1>
 						{#if project.ref_id}
-							<span class="text-sm text-gray-500">{project.ref_id}</span>
+							<span
+								class="text-xs font-mono text-gray-600 bg-white/70 border border-gray-200 px-2 py-0.5 rounded"
+								>{project.ref_id}</span
+							>
 						{/if}
 						<button
 							onclick={startBasicsEdit}
@@ -565,14 +587,14 @@
 							href={project.ref_link}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-primary-600 hover:text-primary-800 hover:underline text-sm inline-flex items-center gap-1 mt-1"
+							class="text-primary-600 hover:text-primary-800 hover:underline text-sm inline-flex items-center gap-1 mt-2"
 						>
 							<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
 							{project.ref_link}
 						</a>
 					{/if}
 					{#if project.description}
-						<div class="prose prose-sm max-w-none text-gray-700 mt-3">
+						<div class="prose prose-sm max-w-3xl text-gray-700 mt-3">
 							<MarkdownRenderer content={project.description} />
 						</div>
 					{/if}
@@ -657,100 +679,127 @@
 		{#if errorMessage && basicsEditing}
 			<div class="card preset-tonal-error p-3 mt-3 text-sm">{errorMessage}</div>
 		{/if}
+	</div>
 
-		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-4">
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-					{m.projectStatus()}
+	<!-- Vitals strip — the four health-of-project signals -->
+	<div class="px-8 py-4 border-t border-gray-200">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+			<div class="flex flex-col gap-1.5">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+					{m.status()}
 				</div>
 				{#if project.status}
 					<span
-						class="badge text-xs font-medium px-2 py-0.5 rounded-full {statusColorMap[
+						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {statusColorMap[
 							project.status?.name
 						] ?? 'bg-gray-100 text-gray-600'}">{safeTranslate(project.status.name)}</span
 					>
 				{:else}
-					<span class="text-gray-400 text-sm">--</span>
+					<span class="text-gray-400 text-sm italic">—</span>
 				{/if}
 			</div>
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+
+			<div class="flex flex-col gap-1.5">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
 					{m.projectHealth()}
 				</div>
 				{#if project.health}
 					<span
-						class="badge text-xs font-medium px-2 py-0.5 rounded-full {healthColorMap[
+						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {healthColorMap[
 							project.health?.name
 						] ?? 'bg-gray-100 text-gray-600'}">{safeTranslate(project.health.name)}</span
 					>
 				{:else}
-					<span class="text-gray-400 text-sm">--</span>
+					<span class="text-gray-400 text-sm italic">—</span>
+				{/if}
+			</div>
+
+			<div class="flex flex-col gap-1.5">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+					{m.priority()}
+				</div>
+				{#if project.priority}
+					<span
+						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {priorityColorMap[
+							project.priority
+						] ?? 'bg-gray-100 text-gray-600'}">P{project.priority}</span
+					>
+				{:else}
+					<span class="text-gray-400 text-sm italic">—</span>
+				{/if}
+			</div>
+
+			<div class="flex flex-col gap-1.5">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+					{m.progress()}
+				</div>
+				<div class="flex items-center gap-3">
+					<span class="text-lg font-bold text-gray-900 tabular-nums leading-none"
+						>{progressValue}%</span
+					>
+					<div class="grow h-2 rounded-full bg-gray-200 overflow-hidden">
+						<div class="h-full bg-primary-500 transition-all" style="width: {progressValue}%"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Structure & people row — quieter, secondary -->
+	<div class="px-8 py-3 bg-gray-50 border-t border-gray-200">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+			<div>
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+					{m.owner()}
+				</div>
+				{#if project.owner}
+					<span class="text-gray-900 truncate block">{project.owner.str}</span>
+				{:else}
+					<span class="text-gray-400 italic">—</span>
 				{/if}
 			</div>
 			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-					{m.projectPriority()}
-				</div>
-				<span class="text-sm text-gray-900">{project.priority ? `P${project.priority}` : '--'}</span
-				>
-			</div>
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-					{m.owner()}
-				</div>
-				<span class="text-sm text-gray-900 truncate block">{project.owner?.str ?? '--'}</span>
-			</div>
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
 					{m.sponsor()}
 				</div>
-				<span class="text-sm text-gray-900 truncate block">{project.sponsor?.str ?? '--'}</span>
+				{#if project.sponsor}
+					<span class="text-gray-900 truncate block">{project.sponsor.str}</span>
+				{:else}
+					<span class="text-gray-400 italic">—</span>
+				{/if}
 			</div>
 			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-					{m.progress()}
-				</div>
-				<div class="flex items-center gap-2">
-					<Progress value={progressValue} max={100}>
-						<Progress.Track class="h-2 rounded-full grow">
-							<Progress.Range class="bg-primary-500 rounded-full" />
-						</Progress.Track>
-					</Progress>
-					<span class="text-xs text-gray-700 shrink-0">{progressValue}%</span>
-				</div>
-			</div>
-			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
 					{m.parentProject()}
 				</div>
 				{#if project.parent_project}
 					<Anchor
 						href="/projects/{project.parent_project.id}"
-						class="text-sm text-primary-600 hover:text-primary-800 hover:underline truncate block"
+						class="text-primary-600 hover:text-primary-800 hover:underline truncate block"
 					>
 						{project.parent_project.str}
 					</Anchor>
 				{:else}
-					<span class="text-gray-400 text-sm">--</span>
+					<span class="text-gray-400 italic">—</span>
 				{/if}
 			</div>
 			<div>
-				<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
 					{m.subProjects()}
 				</div>
 				{#if project.sub_projects && project.sub_projects.length > 0}
-					<div class="text-sm space-x-1 space-y-1">
-						{#each project.sub_projects as sub, i}
+					<div class="flex flex-wrap gap-1">
+						{#each project.sub_projects as sub}
 							<Anchor
 								href="/projects/{sub.id}"
-								class="text-primary-600 hover:text-primary-800 hover:underline"
+								class="text-xs px-2 py-0.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-100 hover:border-gray-300 truncate max-w-[10rem]"
 							>
 								{sub.str}
-							</Anchor>{#if i < project.sub_projects.length - 1},{/if}
+							</Anchor>
 						{/each}
 					</div>
 				{:else}
-					<span class="text-gray-400 text-sm">--</span>
+					<span class="text-gray-400 italic">—</span>
 				{/if}
 			</div>
 		</div>
@@ -763,7 +812,7 @@
 				value="overview"
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
-				<i class="fa-solid fa-chart-pie mr-2"></i>{m.overview()}
+				<i class="fa-solid fa-gauge-high mr-2"></i>{m.overview()}
 			</Tabs.Trigger>
 			<Tabs.Trigger
 				value="charter"
@@ -793,7 +842,7 @@
 				value="people"
 				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
-				<i class="fa-solid fa-people-arrows mr-2"></i>{m.people()}
+				<i class="fa-solid fa-users mr-2"></i>{m.people()}
 			</Tabs.Trigger>
 			<Tabs.Trigger
 				value="analytics"
@@ -842,11 +891,11 @@
 							optionsLabelField="translated_name"
 							field="status"
 							nullable={true}
-							label={m.projectStatus()}
+							label={m.status()}
 						/>
 					{:else}
 						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-							{m.projectStatus()}
+							{m.status()}
 						</div>
 						<span class="text-sm text-gray-900"
 							>{project.status ? safeTranslate(project.status.name) : '--'}</span
@@ -881,11 +930,11 @@
 							options={priorityOptions}
 							field="priority"
 							translateOptions={false}
-							label={m.projectPriority()}
+							label={m.priority()}
 						/>
 					{:else}
 						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
-							{m.projectPriority()}
+							{m.priority()}
 						</div>
 						<span class="text-sm text-gray-900"
 							>{project.priority ? `P${project.priority}` : '--'}</span
@@ -1523,64 +1572,114 @@
 					<p class="text-sm">{m.noSnapshotsYet()}</p>
 				</div>
 			{:else}
-				<!-- KPI strip -->
+				<!-- KPI strip — each card has a top accent stripe matching its metric -->
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+					<!-- Progress -->
+					<div
+						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+					>
+						<div class="absolute top-0 inset-x-0 h-1 bg-primary-500"></div>
+						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
 							{m.progress()}
 						</div>
 						<div class="flex items-baseline gap-2">
-							<span class="text-2xl font-bold text-gray-900">{latestSnapshot?.progress ?? 0}%</span>
-							{#if progressDelta7d != null}
-								<span
-									class="text-xs font-medium"
-									class:text-green-600={progressDelta7d > 0}
-									class:text-gray-500={progressDelta7d === 0}
-									class:text-red-600={progressDelta7d < 0}
-								>
-									{progressDelta7d >= 0 ? '+' : ''}{progressDelta7d}
-									{m.last7Days()}
-								</span>
-							{/if}
+							<span class="text-3xl font-bold text-gray-900 tabular-nums leading-none"
+								>{latestSnapshot?.progress ?? 0}<span class="text-lg text-gray-500">%</span></span
+							>
 						</div>
+						{#if progressDelta7d != null}
+							<div class="flex items-center gap-1 mt-2 text-xs font-medium">
+								{#if progressDelta7d > 0}
+									<i class="fa-solid fa-arrow-trend-up text-green-600"></i>
+									<span class="text-green-600 tabular-nums">+{progressDelta7d}</span>
+								{:else if progressDelta7d < 0}
+									<i class="fa-solid fa-arrow-trend-down text-red-600"></i>
+									<span class="text-red-600 tabular-nums">{progressDelta7d}</span>
+								{:else}
+									<i class="fa-solid fa-minus text-gray-400"></i>
+									<span class="text-gray-500 tabular-nums">0</span>
+								{/if}
+								<span class="text-gray-400">{m.last7Days()}</span>
+							</div>
+						{/if}
 					</div>
-					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-							{m.projectStatus()}
+
+					<!-- Status -->
+					<div
+						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+					>
+						<div class="absolute top-0 inset-x-0 h-1 bg-blue-500"></div>
+						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+							{m.status()}
 						</div>
-						<span
-							class="badge text-sm font-medium px-2.5 py-0.5 rounded-full {statusColorMap[
-								latestSnapshot?.status
-							] ?? 'bg-gray-100 text-gray-600'}"
-						>
-							{safeTranslate(latestSnapshot?.status ?? '--')}
-						</span>
+						{#if latestSnapshot?.status}
+							<span
+								class="badge text-sm font-semibold px-3 py-1 rounded-full {statusColorMap[
+									latestSnapshot.status
+								] ?? 'bg-gray-100 text-gray-600'}"
+							>
+								{safeTranslate(latestSnapshot.status)}
+							</span>
+						{:else}
+							<span class="text-gray-400 italic text-sm">—</span>
+						{/if}
 					</div>
-					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+
+					<!-- Health -->
+					<div
+						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+					>
+						<div
+							class="absolute top-0 inset-x-0 h-1 {latestSnapshot?.health === 'green'
+								? 'bg-green-500'
+								: latestSnapshot?.health === 'amber'
+									? 'bg-amber-500'
+									: latestSnapshot?.health === 'red'
+										? 'bg-red-500'
+										: 'bg-gray-300'}"
+						></div>
+						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
 							{m.projectHealth()}
 						</div>
-						<span
-							class="badge text-sm font-medium px-2.5 py-0.5 rounded-full {healthColorMap[
-								latestSnapshot?.health
-							] ?? 'bg-gray-100 text-gray-600'}"
-						>
-							{safeTranslate(latestSnapshot?.health ?? '--')}
-						</span>
+						{#if latestSnapshot?.health}
+							<span
+								class="badge text-sm font-semibold px-3 py-1 rounded-full {healthColorMap[
+									latestSnapshot.health
+								] ?? 'bg-gray-100 text-gray-600'}"
+							>
+								{safeTranslate(latestSnapshot.health)}
+							</span>
+						{:else}
+							<span class="text-gray-400 italic text-sm">—</span>
+						{/if}
 					</div>
-					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+
+					<!-- Cost -->
+					<div
+						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+					>
+						<div class="absolute top-0 inset-x-0 h-1 bg-amber-500"></div>
+						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
 							{m.actualCost()}
 						</div>
-						<div class="text-lg font-bold text-gray-900">
-							{latestSnapshot?.actual_cost ?? '--'}
-							{#if latestSnapshot?.budget}
-								<span class="text-xs text-gray-500 font-normal">
-									/ {latestSnapshot.budget}
-									{latestSnapshot.currency ?? ''}
+						{#if latestSnapshot?.actual_cost != null}
+							<div class="flex items-baseline gap-1">
+								<span class="text-3xl font-bold text-gray-900 tabular-nums leading-none">
+									{latestSnapshot.actual_cost}
 								</span>
+								{#if latestSnapshot.currency}
+									<span class="text-sm text-gray-500">{latestSnapshot.currency}</span>
+								{/if}
+							</div>
+							{#if latestSnapshot.budget}
+								<div class="text-xs text-gray-500 mt-2 tabular-nums">
+									of {latestSnapshot.budget}
+									{latestSnapshot.currency ?? ''}
+								</div>
 							{/if}
-						</div>
+						{:else}
+							<span class="text-gray-400 italic text-sm">—</span>
+						{/if}
 					</div>
 				</div>
 
