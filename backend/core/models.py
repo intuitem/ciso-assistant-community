@@ -2033,58 +2033,39 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     fields_to_check = ["name", "field_path"]
 
     @classmethod
-    def create_default_roto_risk_origins(cls):
-        for risk_origin in cls.DEFAULT_ROTO_RISK_ORIGINS:
-            Terminology.objects.update_or_create(
-                name=risk_origin["name"],
-                field_path=risk_origin["field_path"],
-                defaults=risk_origin,
+    def _seed_defaults(cls, items):
+        # is_visible is user-controlled — only set on insert, never on update.
+        for item in items:
+            cls.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults={k: v for k, v in item.items() if k != "is_visible"},
+                create_defaults=item,
             )
+
+    @classmethod
+    def create_default_roto_risk_origins(cls):
+        cls._seed_defaults(cls.DEFAULT_ROTO_RISK_ORIGINS)
 
     @classmethod
     def create_default_qualifications(cls):
-        for qualification in cls.DEFAULT_QUALIFICATIONS:
-            Terminology.objects.update_or_create(
-                name=qualification["name"],
-                field_path=qualification["field_path"],
-                defaults=qualification,
-            )
+        cls._seed_defaults(cls.DEFAULT_QUALIFICATIONS)
 
     @classmethod
     def create_default_accreditations_status(cls):
-        for item in cls.DEFAULT_ACCREDITATION_STATUS:
-            Terminology.objects.update_or_create(
-                name=item["name"],
-                field_path=item["field_path"],
-                defaults=item,
-            )
+        cls._seed_defaults(cls.DEFAULT_ACCREDITATION_STATUS)
 
     @classmethod
     def create_default_accreditations_category(cls):
-        for item in cls.DEFAULT_ACCREDITATION_CATEGORY:
-            Terminology.objects.update_or_create(
-                name=item["name"],
-                field_path=item["field_path"],
-                defaults=item,
-            )
+        cls._seed_defaults(cls.DEFAULT_ACCREDITATION_CATEGORY)
 
     @classmethod
     def create_default_entity_relationships(cls):
-        for item in cls.DEFAULT_ENTITY_RELATIONSHIPS:
-            Terminology.objects.update_or_create(
-                name=item["name"],
-                field_path=item["field_path"],
-                defaults=item,
-            )
+        cls._seed_defaults(cls.DEFAULT_ENTITY_RELATIONSHIPS)
 
     @classmethod
     def create_default_metric_units(cls):
-        for item in cls.DEFAULT_METRIC_UNITS:
-            Terminology.objects.update_or_create(
-                name=item["name"],
-                field_path=item["field_path"],
-                defaults=item,
-            )
+        cls._seed_defaults(cls.DEFAULT_METRIC_UNITS)
 
     @property
     def get_name_translated(self) -> str:
