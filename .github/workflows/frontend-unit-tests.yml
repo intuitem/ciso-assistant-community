@@ -6,6 +6,8 @@ on:
   push:
     paths:
       - "frontend/**"
+      - "enterprise/frontend/**"
+      - ".github/workflows/frontend-unit-tests.yml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
