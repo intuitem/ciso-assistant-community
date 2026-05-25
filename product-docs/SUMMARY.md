@@ -114,6 +114,8 @@
 * [EBIOS RM study](use-cases/ebios-rm.md)
 * [Cyber risk quantification](use-cases/quantitative-risk.md)
 * [Managing a project](use-cases/projects.md)
+* [Managing a collection](use-cases/collections.md)
+* [Managing an accreditation](use-cases/accreditations.md)
 * [Managing a responsibility matrix](use-cases/responsibility-matrix.md)
 
 ## Features
