@@ -11,16 +11,14 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Assessment** — Umbrella term covering **audits** (compliance work), **risk assessments**, **business impact analyses**, and **entity assessments**.
 - **Attack path** — In EBIOS RM, the route an attacker may take from a starting point — through stakeholders or supporting assets — to reach a target objective.
 - **Audit** — The evaluation of a perimeter against a framework, producing a per-requirement view of status, score, and evidence. Internally a `ComplianceAssessment`.
-- **Audit log** — Append-only record of significant actions taken in the platform (creations, edits, permission changes, logins). Enterprise feature.
-
+- **Audit log** — Append-only record of significant actions taken in the platform (creations, edits, permission changes, logins). PRO feature.
 ## B
 
 - **Business impact analysis** (BIA) — A structured assessment of the operational, financial, and reputational impact of disruption to specific assets or business processes. Outputs feed into resilience planning.
 
 ## C
 
-- **Campaign** — An orchestration object for running many audits in parallel — for example, one audit per perimeter against the same framework. Enterprise feature.
-- **Catalog object** — A reusable building block of CISO Assistant: framework, threat, risk matrix, reference control, mapping, security advisory, CWE. Catalog objects are packaged into libraries.
+- **Campaign** — An orchestration object for running many audits in parallel — for example, one audit per perimeter against the same framework. PRO feature.- **Catalog object** — A reusable building block of CISO Assistant: framework, threat, risk matrix, reference control, mapping, security advisory, CWE. Catalog objects are packaged into libraries.
 - **Compliance assessment** — Internal model name for an **audit**. See **Audit**.
 - **Contract** — A third-party agreement attached to a supplier entity or solution, with terms, dates, and renewal information.
 - **Control** — Generic term. Disambiguate against **applied control** (concrete instance) and **reference control** (template).
@@ -111,7 +109,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Risk assessment** (also _risk study_) — A scenario-based evaluation of risk over a perimeter.
 - **Risk matrix** — A configurable lookup table that derives risk level from probability and impact. Imported from a library. The matrix is fixed per risk assessment once the assessment is created.
 - **Risk scenario** — A building block of a risk assessment: combines threats, assets, and existing controls into a story whose probability and impact can be evaluated.
-- **Role** — A bundle of permissions. Four built-in roles ship with the platform; Enterprise editions also support custom roles.
+- **Role** — A bundle of permissions. Four built-in roles ship with the platform; PRO editions also support custom roles.
   - **Domain Manager** — can set up and access everything on a domain.
   - **Analyst** — can input and read data, but cannot change a domain's settings.
   - **Reader** — read-only on the domain's items.
@@ -143,7 +141,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## V
 
-- **Validation flow** — A configurable approval workflow that can gate state transitions on objects (e.g. risk acceptance, audit close-out). Enterprise feature.
+- **Validation flow** — A configurable approval workflow that can gate state transitions on objects (e.g. risk acceptance, audit close-out).
 - **Vulnerability** — A weakness in a system or process that could be exploited by a threat. Tracked with severity, status, and linked applied controls.
 
 ## W

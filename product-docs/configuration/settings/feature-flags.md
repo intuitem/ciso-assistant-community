@@ -33,6 +33,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 
 - **compliance** — compliance assessments (audits). Effectively master switch for the entire compliance pillar.
 - **auditee_mode** — the read-only auditee surface for external assessors. _Default off._
+- **campaigns** — bulk-orchestration of audits across many perimeters. _PRO._
 
 ## Resilience
 
@@ -57,7 +58,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 
 - **metrology** — metric definitions, instances, and dashboards.
 - **reports** — the reports surface. _Default off._
-- **advanced_analytics** — Enterprise insights views (impact analysis, priority review, timeline). _Default off._
+- **advanced_analytics** — Insights views (impact analysis, priority review, timeline). _PRO. Default off._
 
 ## Integrations and automation
 
@@ -73,6 +74,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 
 - **journeys** — preset journeys for bootstrapping new organisations or domains.
 - **comments** — comments on objects.
+- **focus_mode** — UI mode that filters the entire workspace to a single domain. _PRO. Default off._
 
 ## Experimental
 
