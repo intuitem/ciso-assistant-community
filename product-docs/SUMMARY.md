@@ -51,6 +51,11 @@
 ## Configuration
 
 * [Overview](configuration/README.md)
+* [Settings](configuration/settings/README.md)
+  * [General settings](configuration/settings/general.md)
+  * [Feature flags](configuration/settings/feature-flags.md)
+  * [Vulnerability SLA policy](configuration/settings/vulnerability-sla.md)
+  * [Security intelligence feeds](configuration/settings/sec-intel-feeds.md)
 * [Organization](configuration/organization/README.md)
   * [Add and manage users](configuration/organization/users.md)
   * [User groups](configuration/organization/user-groups.md)

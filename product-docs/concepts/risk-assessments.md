@@ -20,6 +20,16 @@ In CISO Assistant, **risk treatment is combined with the risk assessment** rathe
 
 Scenarios can be defined directly from the risk-assessment view or separately via the scenarios view. The same scenario can be reused across multiple studies.
 
+## Risk levels: inherent, current, residual
+
+CISO Assistant tracks three risk levels for each scenario, reflecting where the organisation stands along the treatment journey:
+
+- **Inherent risk** — the natural level of the scenario _without any controls in place_. The starting point. Surfaced in the UI when the `inherent_risk` feature flag is on.
+- **Current risk** — the level given the applied controls _already in place_. The state of risk today.
+- **Residual risk** — the level expected once all _planned_ applied controls have been implemented. The target state, and the figure used in risk-acceptance decisions.
+
+Each level has its own probability, impact, and overall level fields. When scoring, the platform expects monotonicity — residual should not exceed current, current should not exceed inherent — and warns if a scenario violates it.
+
 ## Risk acceptance
 
 Risk acceptance is when an organisation or individual decides to tolerate a certain level of risk without taking further action to reduce it. CISO Assistant provides a workflow to capture formal approval of risk acceptances by management — the approver must hold the **Approver** role.

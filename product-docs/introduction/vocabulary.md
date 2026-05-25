@@ -24,6 +24,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Compliance assessment** — Internal model name for an **audit**. See **Audit**.
 - **Contract** — A third-party agreement attached to a supplier entity or solution, with terms, dates, and renewal information.
 - **Control** — Generic term. Disambiguate against **applied control** (concrete instance) and **reference control** (template).
+- **Current risk** — The risk level given the **applied controls already in place** — the state of risk today. The middle tier of CISO Assistant's three-tier model: inherent (no controls) → current (existing controls) → residual (existing + planned controls).
 - **Custom field** (also _custom attribute_) — An organisation-defined attribute that can be attached to platform objects (projects, risks, assets, suppliers, contracts, and more) to capture typed, filterable, searchable metadata beyond the built-in fields.
 - **CWE** — Common Weakness Enumeration. A catalogued category of software weakness, used to tag vulnerabilities and security advisories.
 
@@ -56,6 +57,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 ## I
 
 - **Incident** — A security or operational event being investigated or tracked. Distinct from a **risk** (potential) or a **vulnerability** (weakness).
+- **Inherent risk** — The natural risk level of a scenario _without any applied controls_. The top tier of CISO Assistant's three-tier model — useful for ranking scenarios by their underlying severity, independently of the mitigation already in place. Surfaced in the UI when the `inherent_risk` feature flag is on.
 
 ## K
 
@@ -101,6 +103,8 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Representative** — The person responsible for answering the questionnaire or requirements of an entity assessment.
 - **Requirement** — A single normative statement inside a framework.
 - **Requirement assessment** — The evaluation of one requirement inside an audit (status, score, evidence, applied controls).
+- **Requirement mapping set** — Internal model name for the catalog object backing a **mapping** library. See **Mapping**.
+- **Residual risk** — The risk level expected once all _planned_ applied controls have been implemented — the target state of the action plan. The bottom tier of CISO Assistant's three-tier model (inherent → current → residual), and the figure used as input to risk-acceptance decisions.
 - **Responsibility matrix** — A RACI-style assignment of actors to activities, used in project workflows and accreditation processes.
 - **Right request** — In a privacy register, a data-subject request under GDPR or equivalent (access, rectification, deletion, portability).
 - **Risk acceptance** — Formal record of an organisation's decision to tolerate a residual risk without further treatment. Carries an approval workflow; approval requires the **Approver** role.
