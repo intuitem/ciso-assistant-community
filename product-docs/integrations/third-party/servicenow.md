@@ -106,7 +106,7 @@ This defines _where_ ServiceNow sends the data.
 This triggers the sync whenever a record changes.
 
 1. Navigate to **System Definition > Business Rules**.\
-   ![](<../../.gitbook/assets/image (72).png>)
+   ![ServiceNow navigation to System Definition > Business Rules](<../../.gitbook/assets/image (72).png>)
 2. Click **New**.
 3. **Name:** `Push to CISO Assistant`.
 4. **Table:** Select the same table you chose in Part 1 (e.g., `Control`).

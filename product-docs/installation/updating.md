@@ -25,7 +25,7 @@ In case of issues (unsupported shell, windows, etc.) here are the steps to consi
 
 1. backup your db:
    1. if you're using `sqlite`, copy the file under a different name
-   2. if it's `postgresql` you can use something like `pgdump`&#x20;
+   2. if it's `postgresql` you can use something like `pg_dump`&#x20;
 
 
 

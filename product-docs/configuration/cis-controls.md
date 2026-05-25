@@ -4,44 +4,30 @@ description: Importing CIS Controls or CSA CCM
 
 # CIS Controls / Cloud Controls Matrix (CCM)
 
-### New: import the excel directly to the app to get it converted
+CIS Controls and the Cloud Security Alliance's Cloud Controls Matrix (CCM) ship as Excel spreadsheets that CISO Assistant can convert and load directly — no command-line preparation required.
 
-
-
-1. Go the libraries and click add your own library
-
-
-
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
-
-Select the downloaded excel sheet and upload it for the engine to convert it to CISO Assistant format:\
-\
-![](<../.gitbook/assets/image (87).png>)
-
-
-
-### More
-
-
-
-{% hint style="warning" %}
-**NOTE:** This section is still under reworking. For complementary informations, please refer to the [**dedicated README on GitHub for CIS Controls**](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/excel/cis/README.md) or the [**dedicated README on GitHub for CCM**](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/excel/ccm/README.md).
+{% hint style="info" %}
+CIS and CSA have restrictive licence terms on their content, so the spreadsheets are not bundled with CISO Assistant. You have to download the official spreadsheet from CIS or CSA yourself and then upload it to the platform.
 {% endhint %}
 
-Since CSA and CIS have more restrictive terms on their licenses, users need to perform an extra action by downloading the sheet on their side and running the preparation script as described in the tools folder.
+## Direct import
 
-To import the CIS Controls, you need to prepare the file first. The easy way, once you have python and the [`convert_library_v2.py` depdencencies installed](custom-libraries.md#prerequisites), is to copy the Excel sheet as-is (`CIS_Controls_Version_8.xlsx`) into the tools folder and run `convert_cis.sh` for Linux/Mac, or `convert_cis.bat` for Windows.
+1. Download the CIS Controls or CCM spreadsheet from the relevant authority's website.
+2. In CISO Assistant, go to **Libraries** and click **Add your own library**.
 
+   <figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+3. Select the downloaded spreadsheet and upload it. CISO Assistant converts it to the platform's library format on the fly.
 
+   ![](<../.gitbook/assets/image (87).png>)
+4. Once the conversion finishes, load the new library like any other.
 
-CIS controls converter can be found under [`tools/excel/cis`](https://github.com/intuitem/ciso-assistant-community/tree/main/tools/excel/cis)
+## Advanced: customise the conversion
 
-CCM converter can be found under [`tools/excel/ccm`](https://github.com/intuitem/ciso-assistant-community/tree/main/tools/excel/ccm)
+If you need to adjust the conversion (custom packager name, modified spreadsheet, additional mappings), the conversion logic is available as standalone Python tools in the repository:
 
+- [CIS Controls converter](https://github.com/intuitem/ciso-assistant-community/tree/main/tools/excel/cis)
+- [CCM converter](https://github.com/intuitem/ciso-assistant-community/tree/main/tools/excel/ccm)
 
+The standard flow is to copy the spreadsheet into the tools folder and run `convert_cis.sh` (Linux/Mac) or `convert_cis.bat` (Windows). For finer control, run `tools/excel/cis/prep_cis.py` first to set a custom packager string, then pass the prepared spreadsheet to `convert_library_v2.py`. The output YAML can be uploaded as a custom library and loaded.
 
-Afterwards, you can upload the generated yaml file as a custom library and load it.
-
-
-
-Alternatively, you can run the prep script first (`tools/cis/prep_cis.py`) and mention any short string as the packager and then pass the new Excel sheet to the `convert_library_v2.py`
+See the [dedicated README for CIS Controls](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/excel/cis/README.md) and the [dedicated README for CCM](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/excel/ccm/README.md) for parameters and edge cases.

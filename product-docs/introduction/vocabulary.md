@@ -12,13 +12,15 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Attack path** — In EBIOS RM, the route an attacker may take from a starting point — through stakeholders or supporting assets — to reach a target objective.
 - **Audit** — The evaluation of a perimeter against a framework, producing a per-requirement view of status, score, and evidence. Internally a `ComplianceAssessment`.
 - **Audit log** — Append-only record of significant actions taken in the platform (creations, edits, permission changes, logins). PRO feature.
+
 ## B
 
 - **Business impact analysis** (BIA) — A structured assessment of the operational, financial, and reputational impact of disruption to specific assets or business processes. Outputs feed into resilience planning.
 
 ## C
 
-- **Campaign** — An orchestration object for running many audits in parallel — for example, one audit per perimeter against the same framework. PRO feature.- **Catalog object** — A reusable building block of CISO Assistant: framework, threat, risk matrix, reference control, mapping, security advisory, CWE. Catalog objects are packaged into libraries.
+- **Campaign** — An orchestration object for running many audits in parallel — for example, one audit per perimeter against the same framework. PRO feature.
+- **Catalog object** — A reusable building block of CISO Assistant: framework, threat, risk matrix, reference control, mapping, security advisory, CWE. Catalog objects are packaged into libraries.
 - **Compliance assessment** — Internal model name for an **audit**. See **Audit**.
 - **Contract** — A third-party agreement attached to a supplier entity or solution, with terms, dates, and renewal information.
 - **Control** — Generic term. Disambiguate against **applied control** (concrete instance) and **reference control** (template).

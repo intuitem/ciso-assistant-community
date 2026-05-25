@@ -10,13 +10,13 @@ CISO Assistant supports this capability and lets you create a projection of the 
 
 Mappings are library objects that can be customised, imported, and submitted to the community. To see the available ones, head to the libraries store and filter to mapping:
 
-![](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png>)
+![Mappings library filter view](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png>)
 
 Mappings are essentially a representation of the links between assessable nodes of a framework, using the convention documented on NIST's OLIR project.
 
 A mapping is a directed graph linking a SRC framework to a TGT framework, where the nodes can have one of the following relationships:
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1).png>)
+![Example mapping relationship types between framework nodes](<../.gitbook/assets/image (2) (1) (1) (1) (1).png>)
 
 To create your own, follow one of the examples under `/tools` in the repository, or bootstrap a starter using the `prepare_mapping` script.
 

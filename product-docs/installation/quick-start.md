@@ -4,7 +4,7 @@ description: Docker Compose or Helm for Kubernetes
 
 # Quick start
 
-### Config Builder
+## Config Builder
 
 Customise the local deployment according to your needs:
 

@@ -219,5 +219,5 @@ We use a "best effort" delivery system.
 
 If your receiving endpoint is behind a corporate firewall, you may need to allowlist the IP address of the CISO Assistant server.
 
-* SaaS Users: ???
+* SaaS Users: contact support to obtain the current outbound IP ranges for your region or workspace.
 * On-Prem Users: The webhooks originate from the IP address of the server running the `huey` worker process. Ensure your firewall allows inbound HTTPS traffic from this internal or external IP.

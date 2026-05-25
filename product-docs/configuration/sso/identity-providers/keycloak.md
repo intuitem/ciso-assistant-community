@@ -85,4 +85,4 @@ Go into your **Keycloak admin console**
 <mark style="color:orange;">Adding a user in your application doesn't automatically create the user on CISO Assistant</mark>
 {% endhint %}
 
-You can now [configure CISO Assistant](https://intuitem.gitbook.io/ciso-assistant/features-highlights/sso#configure-ciso-assistant-with-saml) with the <mark style="color:purple;">**parameters**</mark> you've retrieved.
+You can now [configure CISO Assistant](../saml.md#configure-ciso-assistant-with-saml) with the <mark style="color:purple;">**parameters**</mark> you've retrieved.

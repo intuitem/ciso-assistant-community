@@ -1,5 +1,5 @@
 ---
-description: Small tutorial to learn how to create your first audit
+description: Small tutorial to learn how to create your first risk assessment
 ---
 
 # Creating your first risk assessment

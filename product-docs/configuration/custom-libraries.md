@@ -828,7 +828,9 @@ For advanced or low-level options, always refer to the [dedicated README on GitH
 ### Testing your custom framework
 
 {% embed url="https://vimeo.com/948010642?fe=cm&fl=pl" %}
+{% endembed %}
 
 ### Full guide (French)
 
 {% embed url="https://youtu.be/Ze8fp4_F0I4" %}
+{% endembed %}

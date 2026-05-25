@@ -55,4 +55,4 @@ Go into your **Okta admin console** (it should look like this: `https://<your_ur
 <mark style="color:orange;">Add a user in your application doesn't automatically create the user on CISO Assistant</mark>
 {% endhint %}
 
-You can now [configure CISO Assistant](https://intuitem.gitbook.io/ciso-assistant/features-highlights/sso#configure-ciso-assistant-with-saml) with the <mark style="color:purple;">**3 parameters**</mark> you've retrieved.
+You can now [configure CISO Assistant](../saml.md#configure-ciso-assistant-with-saml) with the <mark style="color:purple;">**3 parameters**</mark> you've retrieved.
