@@ -101,23 +101,27 @@
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
 
-## Use cases
+## Guides
 
-* [Overview](use-cases/README.md)
-* [General tips](use-cases/general-tips.md)
-* [Initial setup](use-cases/initial-setup.md)
-* [Creating your first perimeter](use-cases/first-perimeter.md)
-* [Creating your first audit](use-cases/first-audit.md)
-* [Creating your first risk assessment](use-cases/first-risk-assessment.md)
-* [Basic audit](use-cases/basic-audit.md)
-* [Third-Party Risk Management](use-cases/tprm.md)
-* [EBIOS RM study](use-cases/ebios-rm.md)
-* [Cyber risk quantification](use-cases/quantitative-risk.md)
-* [Managing a project](use-cases/projects.md)
-* [Managing a collection](use-cases/collections.md)
-* [Managing an accreditation](use-cases/accreditations.md)
-* [Managing a responsibility matrix](use-cases/responsibility-matrix.md)
-* [Conducting a Business Impact Analysis](use-cases/bia.md)
+* [Overview](guides/README.md)
+* [General tips](guides/general-tips.md)
+* Getting started
+  * [Initial setup](guides/initial-setup.md)
+  * [Creating your first perimeter](guides/first-perimeter.md)
+  * [Creating your first audit](guides/first-audit.md)
+  * [Creating your first risk assessment](guides/first-risk-assessment.md)
+* Assessments
+  * [Basic audit](guides/basic-audit.md)
+  * [EBIOS RM study](guides/ebios-rm.md)
+  * [Cyber risk quantification](guides/quantitative-risk.md)
+  * [Conducting a Business Impact Analysis](guides/bia.md)
+* Programme management
+  * [Managing a project](guides/projects.md)
+  * [Managing a collection](guides/collections.md)
+  * [Managing an accreditation](guides/accreditations.md)
+  * [Managing a responsibility matrix](guides/responsibility-matrix.md)
+* Third-party
+  * [Third-Party Risk Management](guides/tprm.md)
 
 ## Features
 

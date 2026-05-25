@@ -25,5 +25,5 @@ Qualitative methods stay useful for everything else.
 
 - [Risk assessments](risk-assessments.md)
 - [EBIOS RM](ebios-rm.md)
-- [Use case → Cyber risk quantification](../use-cases/quantitative-risk.md)
+- [Guide → Cyber risk quantification](../guides/quantitative-risk.md)
 - [Vocabulary → Quantitative risk study / scenario / hypothesis](../introduction/vocabulary.md)

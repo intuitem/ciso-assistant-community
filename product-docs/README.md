@@ -19,7 +19,7 @@ CISO Assistant is an open-source GRC (Governance, Risk and Compliance) platform 
 - **Installation** — getting CISO Assistant running.
 - **Configuration** — organisation setup, IAM, SSO, and customisation.
 - **Features** — a catalogue of shipped capabilities.
-- **Use cases** — end-to-end walkthroughs for common scenarios.
+- **Guides** — task-oriented walkthroughs, both onboarding and ongoing operations.
 - **AI and Integrations** — the REST API, the MCP server, and third-party integrations.
 - **Contributing** — how to extend CISO Assistant and improve this documentation.
 

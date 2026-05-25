@@ -34,5 +34,5 @@ EBIOS RM scenarios sit alongside qualitative risk scenarios in the same risk reg
 
 - [Risk assessments](risk-assessments.md)
 - [Quantitative risk studies](quantitative-risk-studies.md)
-- [Use case → EBIOS RM study](../use-cases/ebios-rm.md)
+- [Guide → EBIOS RM study](../guides/ebios-rm.md)
 - [Vocabulary → EBIOS RM and related terms](../introduction/vocabulary.md)

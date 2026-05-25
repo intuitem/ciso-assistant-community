@@ -20,7 +20,7 @@ product-docs/
 ├── concepts/                    # the central objects (domains, audits, controls, …)
 ├── installation/                # getting CISO Assistant running
 ├── configuration/               # organisation setup, IAM, SSO, libraries, settings
-├── use-cases/                   # end-to-end walkthroughs
+├── guides/                   # end-to-end walkthroughs
 ├── features/                    # catalogue of shipped capabilities
 ├── integrations/                # API, MCP, webhooks, third-party
 └── contributing/                # this section
