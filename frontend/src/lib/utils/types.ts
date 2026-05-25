@@ -156,7 +156,10 @@ export const URL_MODEL = [
 	'document-revisions',
 	// presets/journeys
 	'presets',
-	'journeys'
+	'journeys',
+	// custom fields
+	'field-definitions',
+	'field-choices'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [
