@@ -23,11 +23,11 @@ Library content is referenced by **URN** (Uniform Resource Name), an immutable i
 - **Community libraries** are contributed by the open-source community; see [Submit a library](../contributing/submit-a-library.md).
 - **Custom libraries** can be built locally and loaded without sharing them, useful for internal frameworks or control sets.
 
-See [Designing your own libraries](../configuration/custom-libraries.md) for the format.
+See [Designing your own libraries](../configuration/libraries/custom-libraries.md) for the format.
 
 ## Lifecycle
 
-Libraries are versioned. When a newer version is available, you can upgrade in place — your existing audits keep using the version they were created with until you migrate them explicitly. See [Library upgrade](../features/library-upgrade.md) and [Library clean-up](../features/library-cleanup.md).
+Libraries are versioned. When a newer version is available, you can upgrade in place — your existing audits keep using the version they were created with until you migrate them explicitly. See [Library upgrade](../configuration/libraries/library-upgrade.md) and [Library clean-up](../configuration/libraries/library-cleanup.md).
 
 ## Related
 

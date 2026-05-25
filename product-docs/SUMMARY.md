@@ -19,6 +19,7 @@
 * [Policies](concepts/policies.md)
 * [Evidence](concepts/evidence.md)
 * [Audits](concepts/audits.md)
+  * [Manage extended result](concepts/extended-results.md)
 * [Findings assessments](concepts/findings-assessments.md)
 * [Risk assessments](concepts/risk-assessments.md)
 * [EBIOS RM](concepts/ebios-rm.md)
@@ -27,6 +28,8 @@
 * [Third-party risk](concepts/third-party-risk.md)
 * [Privacy register](concepts/privacy-register.md)
 * [Project management](concepts/project-management.md)
+* [Metrics](concepts/metrics.md)
+* [Journeys](concepts/journeys.md)
 
 ## Installation
 
@@ -44,7 +47,6 @@
 * [Setting up S3](installation/s3.md)
 * [Setting up mailer](installation/mailer.md)
 * [Updating your local instance](installation/updating.md)
-* [Upgrading a library](installation/upgrading-a-library.md)
 * [Special cases](installation/special-cases.md)
 * [Frequent questions](installation/faq.md)
 
@@ -73,11 +75,15 @@
     * [Google Workspace](configuration/sso/identity-providers/google-workspace.md)
     * [Keycloak](configuration/sso/identity-providers/keycloak.md)
 * [Multi-Factor Authentication (MFA)](configuration/mfa.md)
-* [Designing your own libraries](configuration/custom-libraries.md)
-* [Getting your custom framework](configuration/custom-frameworks.md)
-* [CIS Controls / Cloud Controls Matrix (CCM)](configuration/cis-controls.md)
+* [Libraries](configuration/libraries/README.md)
+  * [Designing your own libraries](configuration/libraries/custom-libraries.md)
+  * [Getting your custom framework](configuration/libraries/custom-frameworks.md)
+  * [CIS Controls / Cloud Controls Matrix (CCM)](configuration/libraries/cis-controls.md)
+  * [Library upgrade](configuration/libraries/library-upgrade.md)
+  * [Upgrading a library](configuration/libraries/upgrading-a-library.md)
+  * [Library clean-up](configuration/libraries/library-cleanup.md)
+* [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
-* [Domain export/import](configuration/domain-export-import.md)
 
 ## Use cases
 
@@ -88,7 +94,6 @@
 * [Creating your first audit](use-cases/first-audit.md)
 * [Creating your first risk assessment](use-cases/first-risk-assessment.md)
 * [Basic audit](use-cases/basic-audit.md)
-* [Journeys](use-cases/journeys.md)
 * [Third-Party Risk Management](use-cases/tprm.md)
 * [EBIOS RM study](use-cases/ebios-rm.md)
 * [Cyber risk quantification](use-cases/quantitative-risk.md)
@@ -101,16 +106,12 @@
 * [Multi-level support](features/multi-level-support.md)
 * [Flash mode](features/flash-mode.md)
 * [Evidences from clipboard](features/evidences-from-clipboard.md)
-* [Library upgrade](features/library-upgrade.md)
-* [Library clean-up](features/library-cleanup.md)
 * [Mappings](features/mappings.md)
 * [Mapping explorer](features/mapping-explorer.md)
-* [Metrics](features/metrics.md)
 * [X-rays](features/x-rays.md)
 * [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
-* [Manage extended result](features/extended-results.md)
-* [Data import wizard](features/data-import.md)
+* [Domain export/import](features/domain-export-import.md)
 * [Notifications](features/notifications.md)
 
 ## AI and Integrations

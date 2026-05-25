@@ -59,6 +59,11 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Incident** — A security or operational event being investigated or tracked. Distinct from a **risk** (potential) or a **vulnerability** (weakness).
 - **Inherent risk** — The natural risk level of a scenario _without any applied controls_. The top tier of CISO Assistant's three-tier model — useful for ranking scenarios by their underlying severity, independently of the mitigation already in place. Surfaced in the UI when the `inherent_risk` feature flag is on.
 
+## J
+
+- **Journey** — An instance of a [Preset](#p) applied to a domain. Carries the scaffolded objects created at apply time and a step list with per-step statuses, notes, and completion timestamps. See [Journeys](../concepts/journeys.md).
+- **Journey step** — One row of work inside a journey: a title, description, optional pointer to a target object or internal route, and a status (not started, in progress, done, skipped).
+
 ## K
 
 - **Kill chain** — In EBIOS RM, an ordered sequence of attacker steps culminating in the target objective.
@@ -87,7 +92,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Personal data** — In a privacy register, any data referring to an identified or identifiable individual.
 - **Policy** — A specific type of applied control: a document describing what is expected from some part of your stakeholders. Lives in CISO Assistant so its lifecycle can be managed alongside the rest of your controls.
 - **Processing** — In a privacy register, an activity that operates on personal data (collection, storage, transfer, deletion). Captures purpose, lawful basis, recipients, and retention.
-- **Preset** (also _preset journey_) — A bundle of pre-configured libraries and starter steps that can be loaded at once to bootstrap a fresh organisation or domain along a recognised journey (e.g. a starter SOC 2 setup).
+- **Preset** — A reusable template describing a guided workflow: a set of starter objects to scaffold (audit, risk assessment, etc.) plus an ordered list of steps to follow. Library-backed or authored locally; applied to a domain to produce a [Journey](#j).
 - **Project** — In the project-management module, a planned initiative with deliverables and milestones. Distinct from the legacy meaning of "project" in older CISO Assistant documentation — see **Perimeter**.
 - **Purpose** — In a privacy register, the lawful reason for which personal data is processed.
 

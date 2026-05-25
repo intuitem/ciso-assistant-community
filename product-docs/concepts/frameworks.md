@@ -10,7 +10,7 @@ A framework is a tree of **requirement nodes**. Most nodes are _assessable_ — 
 
 ## Built-in vs custom
 
-CISO Assistant ships with 100+ built-in frameworks covering most international standards and regulations. When none of them fits your needs, you can build your own — see [Designing your own libraries](../configuration/custom-libraries.md) and [Getting your custom framework](../configuration/custom-frameworks.md).
+CISO Assistant ships with 100+ built-in frameworks covering most international standards and regulations. When none of them fits your needs, you can build your own — see [Designing your own libraries](../configuration/libraries/custom-libraries.md) and [Getting your custom framework](../configuration/libraries/custom-frameworks.md).
 
 ## Mappings between frameworks
 

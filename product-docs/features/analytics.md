@@ -15,13 +15,3 @@ The applied-controls ranking score table is there to help you prioritise.
 {% endhint %}
 
 ![Focus on watch list](../.gitbook/assets/screenshot-2024-03-20-16-13-30.png)
-
-## Composer
-
-A specific tab where you can cross-reference analytics from different risk assessments.
-
-![Select targets](../.gitbook/assets/screenshot-2024-03-20-16-21-21.png)
-
-It will also tell you if one or more selected risk assessments should be reviewed, based on inconsistencies found by [X-rays](x-rays.md).
-
-![Composer](../.gitbook/assets/screenshot-2024-03-20-16-21-28.png)

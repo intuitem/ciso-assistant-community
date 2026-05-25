@@ -52,7 +52,7 @@ A framework is composed of:
 
 Only **requirements** can be assessed during audits.
 
-<figure><img src="../.gitbook/assets/Framework Structure.png" alt=""><figcaption><p>Hierarchy example of a framework</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Framework Structure.png" alt=""><figcaption><p>Hierarchy example of a framework</p></figcaption></figure>
 
 ### 2.2 Assessable vs Non-assessable Nodes
 
@@ -708,7 +708,7 @@ Governance → Libraries
 {% endstep %}
 
 {% step %}
-### Click on the <img src="../.gitbook/assets/image (11) (1).png" alt="Purple button with a white file in it and a &#x22;+&#x22; sign" data-size="line"> button
+### Click on the <img src="../../.gitbook/assets/image (11) (1).png" alt="Purple button with a white file in it and a &#x22;+&#x22; sign" data-size="line"> button
 
 
 {% endstep %}

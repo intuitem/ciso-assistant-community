@@ -22,3 +22,11 @@ CISO Assistant is an open-source GRC (Governance, Risk and Compliance) platform 
 - **Use cases** — end-to-end walkthroughs for common scenarios.
 - **AI and Integrations** — the REST API, the MCP server, and third-party integrations.
 - **Contributing** — how to extend CISO Assistant and improve this documentation.
+
+## More from intuitem
+
+- [Replays](https://intuitem.com/replays) — recorded demos and walkthroughs.
+- [Pricing](https://intuitem.com/pricing) — subscription tiers and what's included.
+- [Community vs PRO](https://intuitem.com/compare) — feature-by-feature comparison.
+- [Partnership](https://intuitem.com/partnership) — partner programme for integrators and resellers.
+- [Blog](https://intuitem.com/blog) — release notes and product news.

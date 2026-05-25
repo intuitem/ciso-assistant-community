@@ -16,7 +16,7 @@ CISO Assistant allows you to manage your custom frameworks. The format is a text
 
 ### Structure
 
-<figure><img src="../.gitbook/assets/Framework Structure.png" alt=""><figcaption><p>Hierarchy-based file</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Framework Structure.png" alt=""><figcaption><p>Hierarchy-based file</p></figcaption></figure>
 
 The first thing to consider is structuring your requirements into a hierarchy, as illustrated in the example above. Most standards, frameworks, and law documents are already organized this way. This is the depth concept and CISO Assistant has been tested with nodes up to the 8th level depth (documents beyond 6 are mostly hard to read anyway)
 
@@ -24,7 +24,7 @@ Then, the other vital aspect to think about will be which items are actually ass
 
 Here is what a standard file should look like accordingly:
 
-<figure><img src="../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
 This is taken from the sample file available under `/tools/sample/sample.xlsx` and can be used as a reference.
 

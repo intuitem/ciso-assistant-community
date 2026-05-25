@@ -15,10 +15,10 @@ CIS and CSA have restrictive licence terms on their content, so the spreadsheets
 1. Download the CIS Controls or CCM spreadsheet from the relevant authority's website.
 2. In CISO Assistant, go to **Libraries** and click **Add your own library**.
 
-   <figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+   <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 3. Select the downloaded spreadsheet and upload it. CISO Assistant converts it to the platform's library format on the fly.
 
-   ![](<../.gitbook/assets/image (87).png>)
+   ![](<../../.gitbook/assets/image (87).png>)
 4. Once the conversion finishes, load the new library like any other.
 
 ## Advanced: customise the conversion
