@@ -140,6 +140,8 @@
 * [Domain export/import](features/domain-export-import.md)
 * [Focus mode](features/focus-mode.md)
 * [Sync to actions](features/sync-to-actions.md)
+* [Dashboards](features/dashboards.md)
+* [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
 * [Framework-specific features](features/framework-specific/README.md)
   * [ISO 27001](features/framework-specific/iso.md)
