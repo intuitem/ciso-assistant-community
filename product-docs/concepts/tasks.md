@@ -6,6 +6,27 @@ description: Recurring and one-off operational work tracked against owners, sche
 
 Tasks are how CISO Assistant tracks the operational work that keeps controls effective: the weekly access review, the monthly backup test, the quarterly policy refresh, the one-off offboarding checklist. They are deliberately separate from applied controls — a control says _what is done_; a task says _that someone has actually done it on a given date_.
 
+## Mental model
+
+```mermaid
+graph LR
+  TT[Task template] -->|spawns| TN[Task occurrence]
+  TT -.->|recurrence| SCH[Schedule]
+  TT -->|assigned to| ACT[Actor]
+  TT -.->|maintains| AC[Applied control]
+  TN -.->|produces| EVR[Evidence revision]
+```
+
+The task template is the definition — owner, recurrence rule, expected evidence — and the task occurrence is the actual unit of work scheduled from it. The schedule is a JSON field describing the cadence (DAILY / WEEKLY / MONTHLY / YEARLY with the usual iCalendar refinements). Templates can be wired to many other objects — applied controls being the canonical one (the "maintains" semantics: this work keeps that control healthy) — and when an occurrence is completed, the evidence revision it produces is back-linked through `task_node` so the audit trail closes the loop.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Task definition / template | `TaskTemplate` | One spec, one schedule |
+| Task occurrence | `TaskNode` | One scheduled run |
+| Schedule | `schedule` JSON field on the template | iCal-style recurrence rule |
+
+_Sources: `backend/core/models.py:8977` (TaskTemplate — `SCHEDULE_JSONSCHEMA` at 8980, `is_recurrent`, `assigned_to` → Actor at 9054, `applied_controls` M2M at 9073), `9186` (TaskNode — status enum, `task_template` FK), `4464` (`EvidenceRevision.task_node` FK — the round-trip from a completed occurrence back to the revision it produced)._
+
 ## Definition vs occurrence
 
 Tasks come in two layers, mirroring the **template → instance** pattern used elsewhere in the platform:

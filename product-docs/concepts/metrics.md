@@ -7,17 +7,30 @@
 * feed data to your metric instances
 * create dashboards with builtin and custom metrics
 
-### Key concepts
+## Mental model
 
 ```mermaid
-graph TD
-  metric_definition --> metric_instance --> metric_sample
-  dashboard --> dashboard_widget_custom --> metric_instance
-  dashboard --> dashboard_widget_builtin
-  dashboard --> dashboard_text
+graph LR
+  MD[Metric definition] -->|instantiated as| MI[Metric instance]
+  D[Domain] -->|scopes| MI
+  MI -->|samples| MS[Sample]
+  DB[Dashboard] -->|comprises| W[Widget]
+  W -.->|reads| MI
+  W -.->|reads| BMS[Builtin sample]
 ```
 
+A metric definition is the catalog template — qualitative (level) or quantitative (number with unit) — and can be shipped via a library. Each instance scopes one definition to a domain and carries the operational fields: owner, target value, collection frequency (auto-stale logic kicks in when the latest sample exceeds the cadence + grace period). Samples are timestamped data points against an instance. Dashboards are independent of the metrology pipeline: they comprise widgets, and each widget either reads a custom metric instance, pulls from a **builtin sample** (a system-computed daily snapshot attached generically to any tracked object — assets, audits, projects, incidents, etc.), or just displays free text.
 
+| User-facing | Internal | Notes |
+|---|---|---|
+| Metric definition | `MetricDefinition` | Catalog template; optional `library` FK |
+| Metric instance | `MetricInstance` | One definition × one domain |
+| Sample | `CustomMetricSample` | Timestamped data point on an instance |
+| Builtin sample | `BuiltinMetricSample` | System-computed; daily; `ContentType` GFK to any object |
+| Dashboard | `Dashboard` | Container |
+| Widget | `DashboardWidget` | KPI / donut / pie / bar / line / area / gauge / sparkline / table / text |
+
+_Sources: `backend/metrology/models.py:41` (MetricDefinition — `library` FK at 46, `Category` enum at 42, `unit` FK to Terminology, `higher_is_better`, `default_target`), `114` (MetricInstance — `metric_definition` FK PROTECT at 132, `Status` / `Frequency` enums, `is_stale()` at 218), `247` (CustomMetricSample — `metric_instance` FK CASCADE at 248, optional `evidence_revision` FK at 266), `369` (BuiltinMetricSample — `ContentType` GFK at 370, unique-per-object-per-day constraint at 401), `914` (Dashboard), `941` (DashboardWidget — `ChartType` enum with 10 values at 945; three exclusive display modes documented in the class docstring at 942)._
 
 ***
 

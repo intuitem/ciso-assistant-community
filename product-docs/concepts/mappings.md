@@ -8,6 +8,28 @@ A **mapping** (also called a _crosswalk_) describes how the requirements of one 
 
 Mappings are catalog objects: defined once as a YAML library, loaded into the platform, and applied on demand.
 
+## Mental model
+
+```mermaid
+graph LR
+  L[Library] -->|bundles| MS[Mapping set]
+  SRC[Source framework] -->|src| MS
+  TGT[Target framework] -->|tgt| MS
+  MS -->|comprises| M[Mapping]
+  M -->|from| SRN[Source requirement]
+  M -->|to| TRN[Target requirement]
+```
+
+A mapping set is the unit shipped by a library — it pins exactly one source framework and one target framework. Inside the set, each individual mapping connects one source requirement node to one target requirement node and carries a relationship type (equal / subset / superset / intersect / not_related). Applying the set to an audit projects the existing requirement assessments onto the target framework: full-coverage relationships (`equal`, `superset`) copy directly; partial-coverage (`intersect`, `subset`) require manual review.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Mapping set | `RequirementMappingSet` | One per (source, target) library entry |
+| Mapping | `RequirementMapping` | Single SRC → TGT pair, typed |
+| Requirement | `RequirementNode` | Read-only catalog entry from a framework |
+
+_Sources: `backend/core/models.py:2807` (RequirementMappingSet with `source_framework` + `target_framework`), `2835` (RequirementMapping — `mapping_set` FK, `source_requirement` / `target_requirement`, `Relationship` enum at 2841, `coverage` property at 2901)._
+
 ## Why they matter
 
 Most organisations have to demonstrate compliance against multiple frameworks at once — ISO 27001 plus SOC 2 plus a sector-specific regulation, for instance. Without mappings, you re-assess the same control posture against every framework's requirement list, which is busywork. With mappings, you assess once and project.

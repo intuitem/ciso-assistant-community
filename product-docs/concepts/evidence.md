@@ -4,6 +4,27 @@
 
 Evidence is the connective tissue between what the audit asks and what the organisation actually does.
 
+## Mental model
+
+```mermaid
+graph LR
+  AC[Applied control] -->|evidenced by| EV[Evidence]
+  RA[Requirement assessment] -->|evidenced by| EV
+  F[Finding] -->|evidenced by| EV
+  EV -->|comprises| EVR[Evidence revision]
+  EVR -.->|produced by| TN[Task occurrence]
+```
+
+Evidence is the shared substantiation surface — the same record can back an applied control, a requirement assessment, and a finding at the same time, which is why a single proof can satisfy many frameworks at once. Each evidence comprises a chain of revisions; the latest revision holds the current attachment (with its SHA-256 hash) or external link. When a recurring task produces evidence, the corresponding task occurrence is recorded on the revision so the audit trail goes both ways.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Evidence | `Evidence` | Logical record (stable identity) |
+| Evidence revision | `EvidenceRevision` | Versioned payload (file or link) |
+| Task occurrence | `TaskNode` | Optional producer back-link |
+
+_Sources: `backend/core/models.py:4370` (Evidence), `4460` (EvidenceRevision; `task_node` FK at 4464; `attachment_hash` at 4483). Back-references via `evidences` M2M: AppliedControl at `4955`, RequirementAssessment at `8698`, Finding at `8104`._
+
 ## What counts as evidence
 
 - An uploaded file — PDF, screenshot, configuration export, signed approval, exported policy.

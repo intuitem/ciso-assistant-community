@@ -4,6 +4,31 @@ An **asset** is anything of value worth protecting. Assets are first-class objec
 
 Assets are always defined by the organisation and can be attached to the global domain or to a specific domain.
 
+## Mental model
+
+```mermaid
+graph LR
+  D[Domain] -->|scopes| A[Asset]
+  A -->|supports| A
+  RS[Risk scenario] -->|impacts| A
+  V[Vulnerability] -->|affects| A
+  I[Incident] -->|affects| A
+  BIA -->|assesses| A
+```
+
+The asset is a hub other surfaces point at: risk scenarios impact it, vulnerabilities affect it, incidents affect it, and a Business Impact Analysis assesses it (through an intermediate `AssetAssessment` row, one per asset in the BIA). The `supports` self-loop captures the primary/support hierarchy — a support asset is recorded as a child of its primary parent through `parent_assets`.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Asset | `Asset` | First-class; primary vs support via `type` |
+| Domain | `Folder` | Required; drives IAM scoping |
+| Risk scenario | `RiskScenario` | Lives inside a `RiskAssessment` |
+| Vulnerability | `Vulnerability` | First-class |
+| Incident | `Incident` | First-class |
+| BIA | `BusinessImpactAnalysis` | Bridges to assets via `AssetAssessment` |
+
+_Sources: `backend/core/models.py:3051` (Asset), `3144` (`parent_assets` self-M2M), `5434` (`RiskScenario.assets`), `5544` (`Vulnerability.assets`), `4635` (`Incident.assets`), `backend/resilience/models.py:184` (`AssetAssessment` bridge from BIA → Asset). Asset class, owners, applied-control links, and security exceptions are also linked but omitted from the diagram to keep the core picture clean._
+
 ## Primary vs supporting assets
 
 - **Primary assets** are core resources directly contributing to the organisation's main objectives — business processes, data, intellectual property.

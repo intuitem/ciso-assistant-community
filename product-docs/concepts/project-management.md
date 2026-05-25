@@ -6,10 +6,29 @@ It's the newest concept in the platform, and the object graph will continue to e
 
 ## Mental model
 
-- **Project** — a planned initiative with deliverables, milestones, and a target completion. The unit of work.
-- **Accreditation** — a formal authorisation that a system, environment, or product has met security and compliance requirements. Often the gate a project pushes towards.
-- **Responsibility matrix** — a RACI-style assignment of actors to activities, attached to a project or to an accreditation flow.
-- **Generic collection** — a flexible grouping object: a "bag" of related items that doesn't fit a more specific schema.
+```mermaid
+graph LR
+  D[Domain] -->|scopes| P[Project]
+  P -.->|parent of| P
+  P -->|linked to| GC[Collection]
+  P -.->|tracked by| RM[Responsibility matrix]
+  ACR[Accreditation] -.->|gates| P
+  ACR -.->|checklist| CA[Audit]
+  GC -.->|bag of| OBJ[Audits / studies / evidence / policies]
+```
+
+A project sits in a domain and can stack as a portfolio → programme → project hierarchy (the same model with three values of `kind`). On creation it's auto-paired with a **generic collection** — the flexible bag where the audits, risk studies, findings, evidences, and policies tied to the project accumulate. A **responsibility matrix** can be attached to one or more projects, encoding RACI / RASCI / RAPID assignments of actors to activities (each activity in turn references the work objects it covers). An **accreditation** is the formal authorisation event: it links its decision evidence and its compliance-assessment checklist back to the project's collection.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Project | `Project` | `kind` enum (Portfolio / Program / Project); self-FK `parent_project` |
+| Collection | `GenericCollection` | Polymorphic bag (audits, risk / EBIOS / CRQ studies, findings, evidence, policies, exceptions) |
+| Responsibility matrix | `ResponsibilityMatrix` | RACI / RASCI / RAPID / Custom; M2M to Project |
+| Activity | `ResponsibilityMatrixActivity` | Row of a matrix; many M2Ms to work objects |
+| Assignment | `ResponsibilityAssignment` | RACI cell — `(activity, actor, role)` unique |
+| Accreditation | `Accreditation` | Linked to a Collection; `checklist` FK to ComplianceAssessment |
+
+_Sources: `backend/pmbok/models.py:32` (GenericCollection — M2Ms to compliance / risk / CRQ / EBIOS / entity / findings assessments + documents + policies + exceptions; self-dep at 73), `80` (Accreditation — `linked_collection` FK at 140, `checklist` FK at 143, `decision_evidence` M2M at 160), `169` (Project — `Kind` enum at 170, `parent_project` self-FK at 308, `linked_collection` auto-created in `save` at 353), `521` (ResponsibilityMatrix — `preset`, `projects` M2M at 539, `roles` M2M), `567` (ResponsibilityMatrixActivity — `matrix` FK + M2Ms to AppliedControl / audits / BIA / etc.), `657` (ResponsibilityAssignment — `(activity, actor, role)` unique constraint)._
 
 ## Where it fits
 
