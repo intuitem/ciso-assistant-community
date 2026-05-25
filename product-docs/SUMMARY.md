@@ -117,6 +117,7 @@
 * [Managing a collection](use-cases/collections.md)
 * [Managing an accreditation](use-cases/accreditations.md)
 * [Managing a responsibility matrix](use-cases/responsibility-matrix.md)
+* [Conducting a Business Impact Analysis](use-cases/bia.md)
 
 ## Features
 

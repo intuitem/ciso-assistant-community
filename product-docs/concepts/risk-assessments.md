@@ -6,6 +6,31 @@ The platform follows the ISO 27005 risk-management workflow.
 
 ![ISO 27005 risk management workflow](../.gitbook/assets/iso27005.svg)
 
+## Object graph
+
+```mermaid
+graph LR
+  D[Domain] -->|scopes| RA[Risk assessment]
+  P[Perimeter] -.->|narrows| RA
+  RM[Risk matrix] -->|scales| RA
+  RA -->|comprises| RS[Risk scenario]
+  RS -->|impacts| A[Assets]
+  RS -->|materialises| T[Threats]
+  RS -->|mitigated by| AC[Applied controls]
+```
+
+A risk assessment always lives inside a **domain** (the mandatory IAM scope) and is bound to one **risk matrix** — fixed at creation, supplies the probability × impact scale. A **perimeter** can optionally narrow the assessment to a specific service or process inside the domain. The assessment is composed of **risk scenarios**; each scenario links to the **assets** it impacts, the **threats** it materialises, and the **applied controls** that mitigate it (split between _existing_ and _planned_ to drive the three-tier risk model below).
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Risk assessment | `RiskAssessment` | Also called "Risk study" in the UI |
+| Risk scenario | `RiskScenario` | A row inside the assessment |
+| Risk matrix | `RiskMatrix` | Fixed once the assessment is created |
+| Domain | `Folder` | Required; drives IAM scoping |
+| Threat | `Threat` | Catalog entry from a library |
+
+_Sources: `backend/core/models.py:5724` (RiskAssessment), `5661` (Assessment base — `perimeter` is `null=True, blank=True`; `folder` comes from `FolderMixin` and is required), `6191` (RiskScenario), `2282` (RiskMatrix). Scenarios also link to `Vulnerability`, `Incident`, and EBIOS RM `OperationalScenario` — omitted to keep the diagram focused._
+
 ## Risk assessment
 
 A risk assessment encompasses three steps:
