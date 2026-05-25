@@ -19,6 +19,7 @@
 ## Installation
 
 * [Overview](installation/README.md)
+* [Quick start](installation/quick-start.md)
 * [Prerequisites](installation/prerequisites.md)
 * [Local](installation/local.md)
 * [Docker rootless configuration](installation/docker-rootless.md)
@@ -59,34 +60,39 @@
 * [Changing the language](configuration/language.md)
 * [Domain export/import](configuration/domain-export-import.md)
 
+## Use cases
+
+* [Overview](use-cases/README.md)
+* [General tips](use-cases/general-tips.md)
+* [Initial setup](use-cases/initial-setup.md)
+* [Creating your first perimeter](use-cases/first-perimeter.md)
+* [Creating your first audit](use-cases/first-audit.md)
+* [Creating your first risk assessment](use-cases/first-risk-assessment.md)
+* [Basic audit](use-cases/basic-audit.md)
+* [Journeys](use-cases/journeys.md)
+* [Third-Party Risk Management](use-cases/tprm.md)
+* [EBIOS RM study](use-cases/ebios-rm.md)
+* [Cyber risk quantification](use-cases/quantitative-risk.md)
+
 ## Features
 
 * [Catalogue overview](features/README.md)
+* [Analytics](features/analytics.md)
 * [Controls autosuggestion](features/controls-autosuggestion.md)
 * [Multi-level support](features/multi-level-support.md)
 * [Flash mode](features/flash-mode.md)
 * [Evidences from clipboard](features/evidences-from-clipboard.md)
 * [Library upgrade](features/library-upgrade.md)
 * [Library clean-up](features/library-cleanup.md)
+* [Mappings](features/mappings.md)
 * [Mapping explorer](features/mapping-explorer.md)
 * [Metrics](features/metrics.md)
+* [X-rays](features/x-rays.md)
+* [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
 * [Manage extended result](features/extended-results.md)
 * [Data import wizard](features/data-import.md)
 * [Notifications](features/notifications.md)
-
-## Use cases
-
-* [Overview](use-cases/README.md)
-* [Creating your first perimeter](use-cases/first-perimeter.md)
-* [Creating your first audit](use-cases/first-audit.md)
-* [Creating your first risk assessment](use-cases/first-risk-assessment.md)
-* [Journeys](use-cases/journeys.md)
-* [Initial setup](use-cases/initial-setup.md)
-* [Basic audit](use-cases/basic-audit.md)
-* [Third-Party Risk Management](use-cases/tprm.md)
-* [EBIOS RM study](use-cases/ebios-rm.md)
-* [Cyber risk quantification](use-cases/quantitative-risk.md)
 
 ## AI and Integrations
 
