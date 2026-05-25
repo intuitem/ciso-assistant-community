@@ -52,18 +52,21 @@
 * [Overview](installation/README.md)
 * [Quick start](installation/quick-start.md)
 * [Prerequisites](installation/prerequisites.md)
-* [Local](installation/local.md)
-* [Docker rootless configuration](installation/docker-rootless.md)
-* [Remote/Virtualization](installation/remote-virtualization.md)
-* [Deploy on a VPS](installation/vps.md)
-* [Windows](installation/windows.md)
-* [Helm Chart](installation/helm-chart.md)
-* [Custom certificates](installation/custom-certificates.md)
-* [Managing secrets](installation/managing-secrets.md)
-* [Setting up S3](installation/s3.md)
-* [Setting up mailer](installation/mailer.md)
-* [Updating your local instance](installation/updating.md)
-* [Special cases](installation/special-cases.md)
+* Deployment methods
+  * [Local](installation/local.md)
+  * [Docker rootless configuration](installation/docker-rootless.md)
+  * [Remote/Virtualization](installation/remote-virtualization.md)
+  * [Deploy on a VPS](installation/vps.md)
+  * [Windows](installation/windows.md)
+  * [Helm Chart](installation/helm-chart.md)
+* Post-install setup
+  * [Custom certificates](installation/custom-certificates.md)
+  * [Managing secrets](installation/managing-secrets.md)
+  * [Setting up S3](installation/s3.md)
+  * [Setting up mailer](installation/mailer.md)
+* Maintenance
+  * [Updating your local instance](installation/updating.md)
+  * [Special cases](installation/special-cases.md)
 * [Frequent questions](installation/faq.md)
 
 ## Configuration
