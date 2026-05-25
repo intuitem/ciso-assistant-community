@@ -428,7 +428,7 @@ Before using any of the conversion or preparation tools, make sure your environm
 
 You will need:
 
-* **Python 3.12 or higher and pip (included with Python)**
+* **Python 3.14 or higher and pip (included with Python)**
 * A local copy of the community repository
 
 In the `/tools` directory, run the following commands:

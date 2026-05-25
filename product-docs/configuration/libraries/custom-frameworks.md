@@ -33,7 +33,7 @@ Implementation groups are an optional argument that can be used to create subset
 ### File conversion steps
 
 1. Clone the repo and make sure you are at its root
-2. Make sure you have Python installed (including pip), version 3.11 or higher is recommended
+2. Make sure you have Python installed (including pip), version 3.14 or higher
 3. cd to `/tools`
 4. run `pip install -r requirements.txt` to install the script dependencies
 5. copy the sample directory, including the file within, to a new directory at the same level, for instance, `myframework/my-custom-framework.xlsx`

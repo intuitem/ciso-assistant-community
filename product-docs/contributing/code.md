@@ -16,7 +16,7 @@ CISO Assistant is open source and welcomes patches — bug fixes, performance im
 
 Follow the [Local installation guide](../installation/local.md) to get a development instance running. Briefly:
 
-- **Backend:** Python 3.12+, Poetry 2.0+, run `poetry install` then `manage.py migrate` and `manage.py runserver`.
+- **Backend:** Python 3.14+, Poetry 2.0+, run `poetry install` then `manage.py migrate` and `manage.py runserver`.
 - **Frontend:** Node 22+, pnpm 9.0+, run `pnpm install` then `pnpm run dev`.
 
 A virtual environment is kept at the repo root (`.venv/`) — you can invoke `.venv/bin/python` directly.

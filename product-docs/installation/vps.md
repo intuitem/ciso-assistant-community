@@ -22,7 +22,7 @@ sudo apt upgrade
 sudo snap install docker
 
 #install python
-sudo apt install python3-pip python3.12-venv
+sudo apt install python3-pip python3.14-venv
 
 #clone the repo
 git clone https://github.com/intuitem/ciso-assistant-community.git
