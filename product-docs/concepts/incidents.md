@@ -12,6 +12,29 @@ Incidents are deliberately distinct from related concepts:
 - A **vulnerability** is a _weakness_ that could be exploited — the gap.
 - An **incident** is something that has _actually happened_ and is being handled.
 
+## Mental model
+
+```mermaid
+graph LR
+  D[Domain] -->|scopes| I[Incident]
+  I -->|affects| A[Asset]
+  I -.->|attributed to| T[Threat]
+  I -.->|owned by| ACT[Actor]
+  I -->|responded to with| AC[Applied control]
+  I -.->|triggers| TT[Task template]
+  I -->|comprises| TE[Timeline entry]
+```
+
+An incident lives in a domain and aggregates everything about the event: the assets it affected, the threats it's attributed to, the actors handling it, the applied controls invoked during response, and any task templates set up for follow-up work (post-mortem, control review). Timeline entries are the append-only log of what happened and when — detection, mitigation, observation, severity / status changes.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Incident | `Incident` | First-class operational event |
+| Threat | `Threat` | Library catalog object |
+| Actor | `Actor` | XOR(User / Team / Entity) |
+| Task template | `TaskTemplate` | Spawns occurrences |
+| Timeline entry | `TimelineEntry` | Append-only response log |
+
 ## What an incident captures
 
 - **Identifiers and classification** — a name, an optional reference ID, the severity (critical / major / moderate / minor / low / unknown), and the status through its lifecycle.

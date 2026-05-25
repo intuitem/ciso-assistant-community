@@ -4,7 +4,7 @@ A **findings assessment** — called **Follow-up** in the UI — tracks the issu
 
 It's the place where the action plan meets reality: each non-compliance, observation, or recommendation gets assigned an owner, a due date, and a status, and is followed all the way to "fixed".
 
-## Object graph
+## Mental model
 
 A findings assessment is an **assessment** scoped to a perimeter, in the same family as audits, risk assessments, and business impact analyses. Inside it sit individual **findings**, each with:
 

@@ -7,17 +7,28 @@
 * feed data to your metric instances
 * create dashboards with builtin and custom metrics
 
-### Key concepts
+## Mental model
 
 ```mermaid
-graph TD
-  metric_definition --> metric_instance --> metric_sample
-  dashboard --> dashboard_widget_custom --> metric_instance
-  dashboard --> dashboard_widget_builtin
-  dashboard --> dashboard_text
+graph LR
+  MD[Metric definition] -->|instantiated as| MI[Metric instance]
+  D[Domain] -->|scopes| MI
+  MI -->|samples| MS[Sample]
+  DB[Dashboard] -->|comprises| W[Widget]
+  W -.->|reads| MI
+  W -.->|reads| BMS[Builtin sample]
 ```
 
+A metric definition is the catalog template — qualitative (level) or quantitative (number with unit) — and can be shipped via a library. Each instance scopes one definition to a domain and carries the operational fields: owner, target value, collection frequency (auto-stale logic kicks in when the latest sample exceeds the cadence + grace period). Samples are timestamped data points against an instance. Dashboards are independent of the metrology pipeline: they comprise widgets, and each widget either reads a custom metric instance, pulls from a **builtin sample** (a system-computed daily snapshot attached generically to any tracked object — assets, audits, projects, incidents, etc.), or just displays free text.
 
+| User-facing | Internal | Notes |
+|---|---|---|
+| Metric definition | `MetricDefinition` | Catalog template; optional `library` FK |
+| Metric instance | `MetricInstance` | One definition × one domain |
+| Sample | `CustomMetricSample` | Timestamped data point on an instance |
+| Builtin sample | `BuiltinMetricSample` | System-computed; daily; `ContentType` GFK to any object |
+| Dashboard | `Dashboard` | Container |
+| Widget | `DashboardWidget` | KPI / donut / pie / bar / line / area / gauge / sparkline / table / text |
 
 ***
 
@@ -71,8 +82,6 @@ You can now instantiate this metric as you see fit for your domains.
 
 You can now instantiate this metric as needed across your domains. Keep in mind that you can also create your own metric definition directly without going through the library.
 
-
-
 ### Creating a definition
 
 Metrics can be quantitative (number with unit) or qualitative (choices):
@@ -93,8 +102,6 @@ The metric instance is the projection of the definition to a specific domain and
 
 <figure><img src="../.gitbook/assets/image (53).png" alt=""><figcaption></figcaption></figure>
 
-
-
 Parameters:
 
 * Metric definition (it will inherit its settings)
@@ -104,8 +111,6 @@ Parameters:
 * Target value: expected target of this metric for this specific domain. This is handy as you can have different targets of the same metric definition according to the domain.
 * Assigned to: owner of the metric instance and its update.
 
-
-
 ## Metric sample
 
 This is the actual data of the metric instance on a given timestamp.&#x20;
@@ -114,13 +119,9 @@ This is the actual data of the metric instance on a given timestamp.&#x20;
 
 Keep in mind that you can add the data manually or through all the supported integrations (API, n8n, etc.). Note that data cannot be in the future.
 
-
-
 <figure><img src="../.gitbook/assets/image (55).png" alt=""><figcaption></figcaption></figure>
 
 ## Dashboards
-
-
 
 Dashboards are the visual representation of the metrics and support:
 
@@ -139,8 +140,6 @@ In edit mode, you can add different widgets, place and resize them as you see fi
 Once done, you can go back to view mode to see the result:
 
 <figure><img src="../.gitbook/assets/image (58).png" alt=""><figcaption></figcaption></figure>
-
-
 
 In addition to the custom metrics for your internal KPI and KRI, you can also include some of the built-in metrics tracked by the platform:\
 \

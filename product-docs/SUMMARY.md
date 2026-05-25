@@ -52,18 +52,21 @@
 * [Overview](installation/README.md)
 * [Quick start](installation/quick-start.md)
 * [Prerequisites](installation/prerequisites.md)
-* [Local](installation/local.md)
-* [Docker rootless configuration](installation/docker-rootless.md)
-* [Remote/Virtualization](installation/remote-virtualization.md)
-* [Deploy on a VPS](installation/vps.md)
-* [Windows](installation/windows.md)
-* [Helm Chart](installation/helm-chart.md)
-* [Custom certificates](installation/custom-certificates.md)
-* [Managing secrets](installation/managing-secrets.md)
-* [Setting up S3](installation/s3.md)
-* [Setting up mailer](installation/mailer.md)
-* [Updating your local instance](installation/updating.md)
-* [Special cases](installation/special-cases.md)
+* Deployment methods
+  * [Local](installation/local.md)
+  * [Docker rootless configuration](installation/docker-rootless.md)
+  * [Remote/Virtualization](installation/remote-virtualization.md)
+  * [Deploy on a VPS](installation/vps.md)
+  * [Windows](installation/windows.md)
+  * [Helm Chart](installation/helm-chart.md)
+* Post-install setup
+  * [Custom certificates](installation/custom-certificates.md)
+  * [Managing secrets](installation/managing-secrets.md)
+  * [Setting up S3](installation/s3.md)
+  * [Setting up mailer](installation/mailer.md)
+* Maintenance
+  * [Updating your local instance](installation/updating.md)
+  * [Special cases](installation/special-cases.md)
 * [Frequent questions](installation/faq.md)
 
 ## Configuration
@@ -101,18 +104,28 @@
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
 
-## Use cases
+## Guides
 
-* [Overview](use-cases/README.md)
-* [General tips](use-cases/general-tips.md)
-* [Initial setup](use-cases/initial-setup.md)
-* [Creating your first perimeter](use-cases/first-perimeter.md)
-* [Creating your first audit](use-cases/first-audit.md)
-* [Creating your first risk assessment](use-cases/first-risk-assessment.md)
-* [Basic audit](use-cases/basic-audit.md)
-* [Third-Party Risk Management](use-cases/tprm.md)
-* [EBIOS RM study](use-cases/ebios-rm.md)
-* [Cyber risk quantification](use-cases/quantitative-risk.md)
+* [Overview](guides/README.md)
+* [General tips](guides/general-tips.md)
+* Getting started
+  * [Initial setup](guides/initial-setup.md)
+  * [Creating your first perimeter](guides/first-perimeter.md)
+  * [Creating your first audit](guides/first-audit.md)
+  * [Creating your first risk assessment](guides/first-risk-assessment.md)
+* Assessments
+  * [Basic audit](guides/basic-audit.md)
+  * [Customize your audit](guides/customize-audit.md)
+  * [EBIOS RM study](guides/ebios-rm.md)
+  * [Cyber risk quantification](guides/quantitative-risk.md)
+  * [Conducting a Business Impact Analysis](guides/bia.md)
+* Programme management
+  * [Managing a project](guides/projects.md)
+  * [Managing a collection](guides/collections.md)
+  * [Managing an accreditation](guides/accreditations.md)
+  * [Managing a responsibility matrix](guides/responsibility-matrix.md)
+* Third-party
+  * [Third-Party Risk Management](guides/tprm.md)
 
 ## Features
 
@@ -121,6 +134,8 @@
 * [Controls autosuggestion](features/controls-autosuggestion.md)
 * [Multi-level support](features/multi-level-support.md)
 * [Flash mode](features/flash-mode.md)
+* [Kanban mode](features/kanban-mode.md)
+* [Applied controls analytics](features/applied-controls-analytics.md)
 * [Evidences from clipboard](features/evidences-from-clipboard.md)
 * [Mappings](features/mappings.md)
 * [Mapping explorer](features/mapping-explorer.md)
@@ -128,6 +143,16 @@
 * [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
 * [Domain export/import](features/domain-export-import.md)
+* [Focus mode](features/focus-mode.md)
+* [Sync to actions](features/sync-to-actions.md)
+* [Dashboards](features/dashboards.md)
+* [Audit advanced analytics](features/audit-analytics.md)
+* [Framework report](features/framework-report.md)
+* [Insights](features/insights.md)
+* [Control Plan](features/control-plan.md)
+* [Context menu](features/context-menu.md)
+* [Batch actions](features/batch-actions.md)
+* [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
 * [Framework-specific features](features/framework-specific/README.md)
   * [ISO 27001](features/framework-specific/iso.md)

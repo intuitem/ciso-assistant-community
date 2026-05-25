@@ -28,13 +28,21 @@ You can also find other variants for different setups as a starting point for yo
 
 ## Helm chart
 
-Make sure the Helm binary is installed and switch to your cluster context.
+Make sure the Helm binary is installed and switch to your cluster context. The chart is published to a GitHub OCI registry — no `helm repo add` needed.
 
-1. Add the Helm repository: `helm repo add intuitem https://intuitem.github.io/ca-helm-chart/`
-2. Get the default values: `helm show values intuitem/ciso-assistant > my-values.yaml`
-3. Check and adjust them to your needs, in particular the `frontendOrigin` parameter.
-4. Create a namespace for your deployment: `kubectl create ns ciso-assistant`
-5. Install: `helm install my-octopus intuitem/ciso-assistant -f my-values.yaml -n ciso-assistant`
+1. Pull the default values:
+   ```sh
+   helm show values oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant > custom.yaml
+   ```
+2. Edit `custom.yaml` for your environment. At minimum, look at:
+   - `global.domain` — the hostname your instance will serve on.
+   - `global.tls` and `ingress.tls.*` — enable TLS.
+   - `backend.config.djangoSecretKey` — rotate from the default.
+   - `backend.config.databaseType` (`sqlite`, `pgsql`, or `externalPgsql`) and the matching `postgresql.*` / `externalPgsql.*` block.
+3. Create a namespace: `kubectl create ns ciso-assistant`
+4. Install: `helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant -f custom.yaml -n ciso-assistant`
+
+See [Helm Chart](helm-chart.md) for the full procedure (image tag pinning, values reference, and operational notes).
 
 {% hint style="info" %}
 This setup assumes Caddy will handle TLS on your behalf. If you experience SSL-related issues, you may need to patch your `ingress-nginx-controller` to enable the `enable-ssl-passthrough` flag.

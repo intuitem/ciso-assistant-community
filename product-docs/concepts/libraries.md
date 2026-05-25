@@ -4,6 +4,27 @@ A **library** is a bundled set of catalog objects — frameworks, threats, risk 
 
 Libraries are how content gets into CISO Assistant. They make the platform extensible: anything from a regulator's framework to a vendor's threat feed to your organisation's internal control catalogue is just another library.
 
+## Mental model
+
+```mermaid
+graph LR
+  SL[Stored library] -->|loaded as| LL[Loaded library]
+  LL -.->|bundles| F[Framework]
+  LL -.->|bundles| RM[Risk matrix]
+  LL -.->|bundles| T[Threats]
+  LL -.->|bundles| RC[Reference controls]
+  LL -.->|bundles| MS[Mapping set]
+  LL -->|depends on| LL
+```
+
+A library starts life as a **stored** record — its YAML is parsed and registered but contents stay inactive. Loading it materialises whatever catalog objects the YAML declares — any subset of framework, risk matrix, threats, reference controls, or mapping set (all dashed, all optional). A loaded library can also declare dependencies on other loaded libraries — for example, a framework library that ships its companion reference-control catalogue as a separate dependency.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Stored library | `StoredLibrary` | Inventory entry, contents inactive |
+| Loaded library | `LoadedLibrary` | Activated; contents visible across the platform |
+| Mapping set | `RequirementMappingSet` | Crosswalk between two frameworks |
+
 ## Stored vs loaded
 
 A library can be in one of two states:

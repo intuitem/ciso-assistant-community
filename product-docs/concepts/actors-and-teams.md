@@ -6,6 +6,28 @@ description: How CISO Assistant represents people, groups, and external parties 
 
 Almost every object in CISO Assistant has an **owner** — the applied control someone is responsible for, the audit a team is running, the contract a supplier signs. The platform represents all these counterparties through a single abstraction: the **actor**.
 
+## Mental model
+
+```mermaid
+graph LR
+  AC[Applied control] -->|owner| ACT[Actor]
+  CA[Audit] -->|author| ACT
+  TT[Task template] -->|assigned to| ACT
+  ACT -.->|user| U[User]
+  ACT -.->|team| T[Team]
+  ACT -.->|entity| E[Entity]
+  T -->|members| U
+```
+
+The actor is a one-to-one wrapper that always points at exactly one of three concrete records — a user, a team, or an entity (the three dashed edges are exclusive: a database check constraint enforces XOR). Every ownership / authorship / assignment field on the platform (applied control owner, audit author, task assignee, contract counterparty…) holds an actor, so a single code path resolves notifications and access regardless of the underlying type. Teams aggregate users via leader, deputies, and members — assigning to a team fans out to every user in it.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Actor | `Actor` | XOR(User / Team / Entity); auto-created with its target |
+| User | `iam.User` | Platform account |
+| Team | `Team` | Leader + deputies + members |
+| Entity | `tprm.Entity` | Third-party party |
+
 ## Actors
 
 An actor is the unifying handle for anyone who can own or be assigned to work in CISO Assistant. Every actor wraps exactly one of three concrete underlying objects:

@@ -4,7 +4,7 @@ A **business impact analysis** (BIA) measures the operational, financial, and re
 
 Where a risk assessment asks "what could go wrong?", a BIA asks "if it does, how bad is it, and how quickly does it become unacceptable?".
 
-## Object graph
+## Mental model
 
 A BIA is an assessment scoped to a perimeter. For each asset in scope, the platform captures:
 

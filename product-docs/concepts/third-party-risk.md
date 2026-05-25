@@ -4,7 +4,7 @@
 
 CISO Assistant treats third parties as a first-class concern with their own object graph, separate from internal compliance work.
 
-## Object graph
+## Mental model
 
 Four interlocking objects model the third-party landscape:
 
@@ -33,5 +33,5 @@ Treating third parties as a parallel surface — rather than just "another perim
 
 - [Domains](domains.md)
 - [Audits](audits.md)
-- [Use case → Third-party risk management](../use-cases/tprm.md)
+- [Guide → Third-party risk management](../guides/tprm.md)
 - [Vocabulary → Entity / Solution / Contract / Representative / Entity assessment](../introduction/vocabulary.md)

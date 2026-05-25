@@ -8,6 +8,25 @@ A **risk matrix** is a configurable lookup table that maps a `(probability, impa
 
 Risk matrices are catalog objects: defined once, packaged into libraries, loaded into the platform, and reused across many risk assessments.
 
+## Mental model
+
+```mermaid
+graph LR
+  L[Library] -->|bundles| RM[Risk matrix]
+  RM -->|defines| PROB[Probability axis]
+  RM -->|defines| IMP[Impact axis]
+  RM -->|defines| GRID[P x I grid]
+  RA[Risk assessment] -->|locked to| RM
+  RS[Risk scenario] -->|reads cell from| RM
+```
+
+A risk matrix is a JSON definition (probability axis, impact axis, risk levels, and the grid linking them) bundled in a library. Once a risk assessment is created against a matrix the binding is permanent — the FK uses `on_delete=PROTECT` — because switching matrices mid-assessment would silently change every risk level, which is what auditors don't want. Each risk scenario in the assessment reads its inherent, current, and residual risk levels from the same matrix's grid using the `(probability, impact)` pair the assessor sets at each tier.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Risk matrix | `RiskMatrix` | `json_definition` with probability / impact / risk / grid |
+| Risk assessment | `RiskAssessment` | `risk_matrix` FK is fixed at creation (`PROTECT`) |
+
 ## Anatomy
 
 A matrix has four pieces:

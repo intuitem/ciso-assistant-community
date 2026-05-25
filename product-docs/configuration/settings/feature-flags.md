@@ -58,7 +58,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 
 - **metrology** — metric definitions, instances, and dashboards.
 - **reports** — the reports surface. _Default off._
-- **advanced_analytics** — Insights views (impact analysis, priority review, timeline). _PRO. Default off._
+- **advanced_analytics** — Per-audit [Advanced Analytics](../../features/audit-analytics.md) dashboard (compliance by section, controls coverage, timeline, evidence coverage, threats, exceptions). _Default off._
 
 ## Integrations and automation
 
