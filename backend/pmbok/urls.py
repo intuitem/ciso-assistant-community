@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     GenericCollectionViewSet,
     AccreditationViewSet,
+    ProjectViewSet,
     ResponsibilityRoleViewSet,
     ResponsibilityMatrixViewSet,
     ResponsibilityMatrixActivityViewSet,
@@ -21,6 +22,11 @@ router.register(
     "accreditations",
     AccreditationViewSet,
     basename="accreditations",
+)
+router.register(
+    "projects",
+    ProjectViewSet,
+    basename="projects",
 )
 router.register(
     "responsibility-roles",
