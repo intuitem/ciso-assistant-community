@@ -8,6 +8,12 @@ coverY: 0
 
 # 👋 Welcome to CISO Assistant
 
+## Documentation update
+
+{% hint style="warning" %}
+The documentation site is going through a significant upgrade. [Checkout the new v2 structure here](https://app.gitbook.com/o/HbfwRhJ3GSwl5w6MOhZw/s/CqFeU3oPCgDWkkR386NK/).
+{% endhint %}
+
 ## A different take on Cyber Security Posture Management
 
 * explicitly decoupling compliance from cyber-security practices implementation
@@ -89,3 +95,4 @@ We've detailed our model to help you understand how everything is organized
 {% content-ref url="model/compliance/" %}
 [compliance](model/compliance/)
 {% endcontent-ref %}
+
