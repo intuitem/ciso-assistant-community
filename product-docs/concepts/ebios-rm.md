@@ -14,7 +14,7 @@ EBIOS RM organises a study around five workshops:
 4. **Operational scenarios** — drop into technical detail: kill chains, attacker techniques, supporting assets touched.
 5. **Risk treatment** — score residual risk and plan the action plan.
 
-## Object graph
+## Mental model
 
 An EBIOS RM **study** owns the following objects:
 

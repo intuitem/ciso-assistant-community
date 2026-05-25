@@ -4,7 +4,7 @@
 
 CISO Assistant treats third parties as a first-class concern with their own object graph, separate from internal compliance work.
 
-## Object graph
+## Mental model
 
 Four interlocking objects model the third-party landscape:
 

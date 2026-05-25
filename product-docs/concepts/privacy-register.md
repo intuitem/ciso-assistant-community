@@ -4,7 +4,7 @@ A **privacy register** is the catalogue of personal-data processing activities t
 
 CISO Assistant models the register as a graph of typed objects so it stays queryable, auditable, and reusable across audits.
 
-## Object graph
+## Mental model
 
 - **Processing** — an activity that operates on personal data (collect, store, transfer, delete). The central object.
 - **Purpose** — the lawful reason a processing exists. Each processing has at least one purpose.

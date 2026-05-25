@@ -4,7 +4,7 @@ An **audit** is the evaluation of a perimeter against a framework. It produces a
 
 Because applied controls are decoupled from compliance requirements, a single set of controls can be evaluated against many frameworks in parallel without re-doing the work.
 
-## Object graph
+## Mental model
 
 ```mermaid
 graph LR

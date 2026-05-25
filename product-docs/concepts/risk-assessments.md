@@ -6,7 +6,7 @@ The platform follows the ISO 27005 risk-management workflow.
 
 ![ISO 27005 risk management workflow](../.gitbook/assets/iso27005.svg)
 
-## Object graph
+## Mental model
 
 ```mermaid
 graph LR

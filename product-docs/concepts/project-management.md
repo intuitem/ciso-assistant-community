@@ -4,7 +4,7 @@ The **project-management module** brings PMBOK-style planning into CISO Assistan
 
 It's the newest concept in the platform, and the object graph will continue to evolve.
 
-## Object graph
+## Mental model
 
 - **Project** — a planned initiative with deliverables, milestones, and a target completion. The unit of work.
 - **Accreditation** — a formal authorisation that a system, environment, or product has met security and compliance requirements. Often the gate a project pushes towards.

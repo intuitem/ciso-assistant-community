@@ -4,7 +4,7 @@ An **applied control** is the main building block of the action plan: the actual
 
 A single applied control can satisfy any number of requirements across any number of frameworks — it's where _what the framework asks_ meets _what the organisation actually does_.
 
-## Object graph
+## Mental model
 
 ```mermaid
 graph LR

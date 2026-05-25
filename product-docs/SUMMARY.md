@@ -112,6 +112,7 @@
   * [Creating your first risk assessment](guides/first-risk-assessment.md)
 * Assessments
   * [Basic audit](guides/basic-audit.md)
+  * [Customize your audit](guides/customize-audit.md)
   * [EBIOS RM study](guides/ebios-rm.md)
   * [Cyber risk quantification](guides/quantitative-risk.md)
   * [Conducting a Business Impact Analysis](guides/bia.md)
@@ -137,6 +138,8 @@
 * [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
 * [Domain export/import](features/domain-export-import.md)
+* [Focus mode](features/focus-mode.md)
+* [Sync to actions](features/sync-to-actions.md)
 * [Notifications](features/notifications.md)
 * [Framework-specific features](features/framework-specific/README.md)
   * [ISO 27001](features/framework-specific/iso.md)
