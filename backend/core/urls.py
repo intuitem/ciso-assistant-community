@@ -1,4 +1,8 @@
 from .views import *
+from custom_fields.views import (
+    FieldChoiceViewSet,
+    FieldDefinitionViewSet,
+)
 from sec_intel.views import SecurityAdvisoryViewSet, CWEViewSet
 from tprm.views import (
     EntityViewSet,
@@ -127,6 +131,12 @@ router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
+router.register(
+    r"field-definitions",
+    FieldDefinitionViewSet,
+    basename="field-definitions",
+)
+router.register(r"field-choices", FieldChoiceViewSet, basename="field-choices")
 router.register(r"questions", QuestionViewSet, basename="questions")
 router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
 router.register(r"answers", AnswerViewSet, basename="answers")

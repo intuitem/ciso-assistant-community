@@ -1477,6 +1477,15 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
+    # custom fields (install-global, BI Admin only — see docs/custom_fields_shaping.md §7.3)
+    "add_fielddefinition",
+    "view_fielddefinition",
+    "change_fielddefinition",
+    "delete_fielddefinition",
+    "add_fieldchoice",
+    "view_fieldchoice",
+    "change_fieldchoice",
+    "delete_fieldchoice",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

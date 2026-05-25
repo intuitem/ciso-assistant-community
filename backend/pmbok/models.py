@@ -19,6 +19,7 @@ from crq.models import QuantitativeRiskStudy
 from ebios_rm.models import EbiosRMStudy
 from tprm.models import Entity, EntityAssessment
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from custom_fields.host import CustomFieldsMixin
 from global_settings.models import GlobalSettings
 
 from auditlog.registry import auditlog
@@ -166,7 +167,7 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
 
-class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
+class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin):
     class Kind(models.TextChoices):
         PORTFOLIO = "portfolio", _("Portfolio")
         PROGRAM = "program", _("Program")

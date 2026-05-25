@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from core.constants import CURRENCY_CHOICES
 from core.views import BaseModelViewSet
+from custom_fields.filters import CustomFieldsViewSetMixin
 from pmbok.models import (
     GenericCollection,
     Accreditation,
@@ -74,7 +75,7 @@ class AccreditationViewSet(BaseModelViewSet):
         return Response(dict(Accreditation.CATEGORY_CHOICES))
 
 
-class ProjectViewSet(BaseModelViewSet):
+class ProjectViewSet(CustomFieldsViewSetMixin, BaseModelViewSet):
     model = Project
     serializers_module = "pmbok.serializers"
     filterset_fields = [

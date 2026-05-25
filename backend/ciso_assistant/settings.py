@@ -386,6 +386,7 @@ INSTALLED_APPS = [
     "chat",
     "doc_management",
     "core",
+    "custom_fields",
     "cal",
     "django_filters",
     "library",

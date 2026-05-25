@@ -4,6 +4,7 @@ from rest_framework import serializers
 from core.models import Terminology
 from core.serializers import BaseModelSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
+from custom_fields.serializers import CustomFieldsSerializerMixin
 from pmbok.models import (
     GenericCollection,
     Accreditation,
@@ -110,7 +111,7 @@ class AccreditationWriteSerializer(BaseModelSerializer):
         return super().validate(data)
 
 
-class ProjectReadSerializer(BaseModelSerializer):
+class ProjectReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     owner = FieldsRelatedField()
@@ -128,7 +129,7 @@ class ProjectReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class ProjectWriteSerializer(BaseModelSerializer):
+class ProjectWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     status = serializers.PrimaryKeyRelatedField(
         queryset=Terminology.objects.filter(
             field_path=Terminology.FieldPath.PROJECT_STATUS, is_visible=True
