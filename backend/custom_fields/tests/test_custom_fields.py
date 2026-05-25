@@ -486,12 +486,9 @@ class TestReviewFixes:
     def test_boolean_filter_garbage_returns_none_not_false_match(
         self, project_ct, root_folder
     ):
-        from custom_fields.filters import _coerce, _ParseFailure
+        from custom_fields.filters import _PARSE_FAILURE, _coerce
 
-        # Garbage no longer coerces to False.
-        result = _coerce("garbage", "boolean")
-        assert isinstance(result, _ParseFailure)
-        # And valid values still parse:
+        assert _coerce("garbage", "boolean") is _PARSE_FAILURE
         assert _coerce("true", "boolean") is True
         assert _coerce("false", "boolean") is False
 
