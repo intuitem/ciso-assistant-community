@@ -20,6 +20,8 @@ A **policy** is a specific type of applied control: a document describing what i
 
 ## Related
 
-- [Vocabulary → Applied control / Reference control / Evidence](../introduction/vocabulary.md)
-- [Philosophy → Decoupling principle](../introduction/philosophy.md)
+- [Policies](policies.md)
 - [Audits](audits.md)
+- [Findings assessments](findings-assessments.md)
+- [Philosophy → Decoupling principle](../introduction/philosophy.md)
+- [Vocabulary → Applied control / Reference control / Evidence](../introduction/vocabulary.md)

@@ -4,7 +4,7 @@ description: >-
   linked to or contained within these objects.
 ---
 
-# 📁 Organization
+# Organization
 
 ## A folder organization
 

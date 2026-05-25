@@ -2,7 +2,6 @@
 description: >-
   CISO Assistant can send you email notifications to keep you informed about
   deadlines, assignments, and status changes.
-icon: bell
 ---
 
 # Notifications

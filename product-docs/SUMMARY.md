@@ -11,10 +11,22 @@
 
 * [Domains](concepts/domains.md)
 * [Perimeters](concepts/perimeters.md)
-* [Applied controls](concepts/applied-controls.md)
+* [Libraries](concepts/libraries.md)
+* [Frameworks](concepts/frameworks.md)
+* [Threats](concepts/threats.md)
 * [Assets](concepts/assets.md)
-* [Risk assessments](concepts/risk-assessments.md)
+* [Applied controls](concepts/applied-controls.md)
+* [Policies](concepts/policies.md)
+* [Evidence](concepts/evidence.md)
 * [Audits](concepts/audits.md)
+* [Findings assessments](concepts/findings-assessments.md)
+* [Risk assessments](concepts/risk-assessments.md)
+* [EBIOS RM](concepts/ebios-rm.md)
+* [Quantitative risk studies](concepts/quantitative-risk-studies.md)
+* [Business impact analyses](concepts/business-impact-analyses.md)
+* [Third-party risk](concepts/third-party-risk.md)
+* [Privacy register](concepts/privacy-register.md)
+* [Project management](concepts/project-management.md)
 
 ## Installation
 

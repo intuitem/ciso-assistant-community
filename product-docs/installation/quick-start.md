@@ -1,6 +1,5 @@
 ---
 description: Docker Compose or Helm for Kubernetes
-icon: desktop-arrow-down
 ---
 
 # Quick start

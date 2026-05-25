@@ -1,6 +1,5 @@
 ---
 description: Guidelines on data import format
-icon: diagram-previous
 ---
 
 # Data import wizard
@@ -58,7 +57,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 &#x20;
 
-## 📦 Assets
+## Assets
 
 ### Template
 
@@ -93,7 +92,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 
 
-## ⚙️ Applied controls
+## Applied controls
 
 ### Template
 
@@ -156,7 +155,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 
 
-## 📦 Perimeters
+## Perimeters
 
 ### Template
 
@@ -182,7 +181,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 * If the default\_assignee column is present and  empty, the import would end up cleaning existing assignee.
 
-## 📃 Audits
+## Audits
 
 ### Template
 
@@ -225,7 +224,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 
 
-## 🐞 Findings followup (eg. pentest)
+## Findings followup (eg. pentest)
 
 ### Template
 
@@ -261,7 +260,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 
 
-## 👥 Users
+## Users
 
 ### Template
 
@@ -277,7 +276,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 
 
-## ☣️ Risk assessment&#x20;
+## Risk assessment&#x20;
 
 The risk assessment is an advanced object that needs special considerations. Make sure to pick the matrix that will be used to map your labels to the values on CISO Assistant. If you have a specific matrix, you should start by including it as a custom library.
 
@@ -318,7 +317,7 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
 
 
 
-## 🏢 Business Impact Analysis
+## Business Impact Analysis
 
 The BIA export/import uses a **multi-sheet Excel file**:
 
@@ -412,7 +411,7 @@ Special considerations
 * `quali_impact` defaults to `-1` (not set) if blank
 * `quanti_impact` defaults to `0` if blank
 
-## ⚙️  Elementary actions
+## Elementary actions
 
 Elementary actions are useful to model a killchain during the 4th workshop of an EBIOS RM study.&#x20;
 
@@ -673,7 +672,7 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 
 
 
-## 📁 Folders
+## Folders
 
 Folders (domains) are the top-level organisational units in CISO Assistant. Importing them lets you pre-populate a domain hierarchy before importing other objects.
 
@@ -695,7 +694,7 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 ***
 
-## ✅ Tasks (incoming)
+## Tasks (incoming)
 
 Tasks in CISO Assistant are modelled as **TaskTemplates** (definitions) with **TaskNodes** (individual occurrences). A non-recurrent task has one node; recurrent tasks generate one node per scheduled occurrence.
 

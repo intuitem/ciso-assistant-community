@@ -2,7 +2,7 @@
 description: Small tutorial to learn how to create your first audit
 ---
 
-# 📊 Creating your first risk assessment
+# Creating your first risk assessment
 
 {% embed url="https://www.loom.com/share/8f3c55e7559444f39d1d8029336c1dee" %}
 How to create a risk assessment

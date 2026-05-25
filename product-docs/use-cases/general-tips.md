@@ -1,7 +1,3 @@
----
-icon: sparkle
----
-
 # General tips
 
 CISO Assistant is intended to be a multi-paradigm tool that suits everyone's background and approach to cyber-security programme organisation.

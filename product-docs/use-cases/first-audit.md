@@ -2,7 +2,7 @@
 description: Small tutorial to learn how to create your first audit
 ---
 
-# ✅ Creating your first Audit
+# Creating your first Audit
 
 {% embed url="https://www.loom.com/share/ee89b6a3129e4be6bef726ceb4d9c806" %}
 How to create an audit

@@ -71,7 +71,7 @@ You can choose Traefik or BunkerWeb instead of Caddy using the config builder. P
 
 
 
-### 👉 Notes
+### Notes
 
 * The generated file in the config directory will be named `docker-compose-custom.yml` For subsequent operations with compose, you'll need to specify it with `-f`
 * If you're running docker compose without the -f, it could conflict with the default one on the repository root directory.

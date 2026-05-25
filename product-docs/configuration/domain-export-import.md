@@ -1,7 +1,3 @@
----
-icon: square-this-way-up
----
-
 # Domain export/import
 
 Pro users (eg. consultants) can export a full domain with its affiliated objects

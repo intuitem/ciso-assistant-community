@@ -1,7 +1,3 @@
----
-icon: face-glasses
----
-
 # Journeys
 
 **"I'm just curious and want to see what the tool is about."**

@@ -1,6 +1,5 @@
 ---
 description: Main concepts of the mapping feature
-icon: diagram-sankey
 ---
 
 # Mappings

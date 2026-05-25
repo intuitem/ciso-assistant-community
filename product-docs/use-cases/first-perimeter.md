@@ -4,7 +4,7 @@ description: >-
   risk and audit
 ---
 
-# 🏗️ Creating your first perimeter
+# Creating your first perimeter
 
 {% hint style="warning" %}
 Perimeters were previously named "Projects", but this was misleading

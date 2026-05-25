@@ -28,5 +28,6 @@ Evidence justifies the status of a compliance requirement or proves that an appl
 ## Related
 
 - [Applied controls](applied-controls.md)
+- [Findings assessments](findings-assessments.md)
 - [Perimeters](perimeters.md)
 - [Vocabulary → Audit / Requirement / Evidence](../introduction/vocabulary.md)
