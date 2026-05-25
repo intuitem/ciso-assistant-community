@@ -22,4 +22,4 @@ A **domain** is a top-level container in CISO Assistant. It represents an organi
 ## Related
 
 - [Perimeters](perimeters.md)
-- [Philosophy → Domains as the unit of scoping](../philosophy.md)
+- [Philosophy → Domains as the unit of scoping](../introduction/philosophy.md)

@@ -5,7 +5,7 @@ This section is the running catalogue of shipped product features. Each feature 
 ## How this catalogue is maintained
 
 - **Per pull request.** When a PR ships a new feature or meaningfully changes an existing one, the PR is expected to add or update the corresponding page here. This keeps documentation drift to a minimum because docs travel with the code.
-- **From a template.** Authors copy [`_template.md`](../_template.md) at the root of `product-docs/` and fill in the sections. The template is short on purpose — feature pages should be skimmable.
+- **From a template.** Authors copy the [feature page template](../contributing/feature-page-template.md) and fill in the sections. The template is short on purpose — feature pages should be skimmable.
 - **Indexed in [`SUMMARY.md`](../SUMMARY.md).** New pages are linked from the navigation so they show up in the GitBook sidebar.
 
 ## Catalogue

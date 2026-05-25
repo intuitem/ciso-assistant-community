@@ -1,13 +1,13 @@
 # Table of contents
 
-* [Introduction](README.md)
+* [Welcome](README.md)
 
-## Foundations
+## Introduction
 
-* [Philosophy](philosophy.md)
-* [Vocabulary](vocabulary.md)
+* [Philosophy](introduction/philosophy.md)
+* [Vocabulary](introduction/vocabulary.md)
 
-## Core concepts
+## Concepts
 
 * [Domains](concepts/domains.md)
 * [Perimeters](concepts/perimeters.md)
@@ -16,14 +16,28 @@
 * [Risk assessments](concepts/risk-assessments.md)
 * [Audits](concepts/audits.md)
 
+## Installation
+
+* [Overview](installation/README.md)
+
+## Configuration
+
+* [Overview](configuration/README.md)
+
 ## Features
 
 * [Catalogue overview](features/README.md)
 
-## API & integrations
+## Use cases
 
-* [API reference](api/README.md)
+* [Overview](use-cases/README.md)
+
+## AI and Integrations
+
+* [Overview](integrations/README.md)
+* [API reference](integrations/api.md)
 
 ## Contributing
 
-* [Feature page template](_template.md)
+* [Overview](contributing/README.md)
+* [Feature page template](contributing/feature-page-template.md)

@@ -1,6 +1,12 @@
 # CISO Assistant — Product Documentation
 
-CISO Assistant is an open-source GRC (Governance, Risk and Compliance) platform that helps security and compliance teams manage frameworks, controls, assessments, and risk in one place.
+CISO Assistant is an open-source GRC (Governance, Risk and Compliance) platform — a different take on cybersecurity posture management, built on a few load-bearing ideas:
+
+- Explicitly decoupling compliance from security-operations implementation.
+- Providing simplified tools for decision-making.
+- Assessing a program, product, or whole organisation against standard frameworks.
+- Letting you bring your own framework via a simplified DSL.
+- Acting as a one-stop shop for the Governance, Risk, and Compliance layers.
 
 This handbook is the living reference for the product — written for two audiences in parallel:
 
@@ -17,7 +23,7 @@ This handbook is the living reference for the product — written for two audien
 ## Conventions
 
 - Each page leads with **what it is** in one or two sentences, then expands.
-- Feature pages follow the template in [`_template.md`](_template.md). Authors copy it when adding a new feature.
+- Feature pages follow the [feature page template](contributing/feature-page-template.md). Authors copy it when adding a new feature.
 - Pages marked _draft_ are placeholders waiting for content — contributions welcome.
 
 ## Status

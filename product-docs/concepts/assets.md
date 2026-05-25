@@ -1,15 +1,15 @@
 # Assets
 
-> _Draft — placeholder._
+An **asset** is anything of value worth protecting. Assets are first-class objects in CISO Assistant, decoupled from any specific risk study or audit, so the same asset can participate in many analyses without being duplicated.
 
-An **asset** is anything of value worth protecting: a business process, a data set, a system, a person, a location, a contract. Assets are first-class objects, decoupled from any specific risk study or audit, so the same asset can participate in many analyses without being duplicated.
+Assets are always defined by the organisation and can be attached to the global domain or to a specific domain.
 
-## What this page should cover
+## Primary vs supporting assets
 
-- Primary assets (business processes, data) vs supporting assets (systems, people, locations).
-- The relationship between assets and risk scenarios, attack paths, and feared events.
-- How assets attach to perimeters and domains.
-- Asset criticality / sensitivity attributes — and their interaction with the upcoming custom-attributes feature.
+- **Primary assets** are core resources directly contributing to the organisation's main objectives — business processes, data, intellectual property.
+- **Supporting assets** indirectly aid primary functions — IT systems, services, locations, people.
+
+The distinction matters for risk work: scenarios typically express _what can happen to a primary asset_ via _which supporting assets are involved_.
 
 ## For users
 
@@ -22,3 +22,4 @@ An **asset** is anything of value worth protecting: a business process, a data s
 ## Related
 
 - [Risk assessments](risk-assessments.md)
+- [Vocabulary → Asset](../introduction/vocabulary.md)
