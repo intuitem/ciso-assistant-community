@@ -34,5 +34,3 @@ All three share the same filter passthrough from the table.
 
 - [Applied controls](../concepts/applied-controls.md)
 - [Sync to actions](sync-to-actions.md) — how controls flow into the action plan from assessments
-
-_Sources: `frontend/src/routes/(app)/(internal)/applied-controls/kanban-mode/+page.svelte` — column definitions at `:18`–`:78`, drag-drop state at `:195`, collapsible swimlanes at `:163`, owner initials helper at `:181`, overdue check at `:127` (skips `active` / `deprecated`); `frontend/src/routes/(app)/(internal)/[model=urlmodel]/+page.svelte:274` (toolbar entry point, gated on `URLModel === 'applied-controls'`)._

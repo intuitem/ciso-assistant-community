@@ -29,8 +29,6 @@ A risk assessment always lives inside a **domain** (the mandatory IAM scope) and
 | Domain | `Folder` | Required; drives IAM scoping |
 | Threat | `Threat` | Catalog entry from a library |
 
-_Sources: `backend/core/models.py:5724` (RiskAssessment), `5661` (Assessment base — `perimeter` is `null=True, blank=True`; `folder` comes from `FolderMixin` and is required), `6191` (RiskScenario), `2282` (RiskMatrix). Scenarios also link to `Vulnerability`, `Incident`, and EBIOS RM `OperationalScenario` — omitted to keep the diagram focused._
-
 ## Risk assessment
 
 A risk assessment encompasses three steps:

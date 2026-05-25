@@ -22,8 +22,6 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 2. Click into a framework's detail page.
 3. Click the **Insights** button at the top.
 
-A naming note: the button is labelled **Insights**, but the page it opens is titled **Framework report**. Same surface, two names — that's the platform's vocabulary.
-
 ## What it shows
 
 | Surface | What it answers |
@@ -67,5 +65,3 @@ The report respects the same IAM rules as the rest of the platform:
 - [Frameworks](../concepts/frameworks.md)
 - [Audits](../concepts/audits.md)
 - [Customize your audit](../guides/customize-audit.md) — field visibility, which feeds the redaction logic on this report
-
-_Sources: `backend/core/views.py:8250` (`FrameworkViewSet.report` action — docstring at `:8252` explains `LIVE_STATUSES = ("in_progress", "in_review", "done")` at `:8281`; viewer-role resolution at `:8300`; IG filter logic at `:8345`–`:8353`; redaction via `is_field_visible_to` at `:8358`). Entry point button: `frontend/src/routes/(app)/(internal)/frameworks/[id=uuid]/+page.svelte:106` (label is `m.insights()`). Page implementation: `.../frameworks/[id=uuid]/report/+page.server.ts` (streamed) and `ReportView.svelte`. Labels quoted from `frontend/messages/en.json`: `frameworkReport`, `frameworkReportSubtitle`, `complianceFormulaShort`, `onlyLiveStatusesCounted`, `detectedComplianceAssessments`, `averageImplementationScore`, `overScoredRequirementsOnly`._

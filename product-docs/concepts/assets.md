@@ -27,8 +27,6 @@ The asset is a hub other surfaces point at: risk scenarios impact it, vulnerabil
 | Incident | `Incident` | First-class |
 | BIA | `BusinessImpactAnalysis` | Bridges to assets via `AssetAssessment` |
 
-_Sources: `backend/core/models.py:3051` (Asset), `3144` (`parent_assets` self-M2M), `5434` (`RiskScenario.assets`), `5544` (`Vulnerability.assets`), `4635` (`Incident.assets`), `backend/resilience/models.py:184` (`AssetAssessment` bridge from BIA → Asset). Asset class, owners, applied-control links, and security exceptions are also linked but omitted from the diagram to keep the core picture clean._
-
 ## Primary vs supporting assets
 
 - **Primary assets** are core resources directly contributing to the organisation's main objectives — business processes, data, intellectual property.

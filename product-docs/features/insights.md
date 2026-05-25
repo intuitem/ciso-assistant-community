@@ -18,8 +18,6 @@ Insights is the **cross-cutting / estate-wide** layer of the platform's advanced
 | **[Framework report](framework-report.md)** | One framework, every live audit using it | Community | None (permission-gated) |
 | **Insights** (this page) | Cross-cutting (impact graph, priority/effort, Gantt timeline) | Enterprise (PRO) | None (permission-gated) |
 
-The word **"Insights"** is reused in a few places — sidebar group (this page), a section header on each audit detail page (hosting "Potential threats" and "Advanced Analytics" buttons), and as the label of the button on a framework detail page that opens the [Framework report](framework-report.md). Same vocabulary, different scopes.
-
 ## Where to find it
 
 Sidebar → **Insights**. The group hosts three sub-pages.
@@ -62,5 +60,3 @@ All three views require: `view_perimeter`, `view_riskscenario`, `view_referencec
 - [Dashboards](dashboards.md)
 - [Mapping explorer](mapping-explorer.md) — different graph view (framework-to-framework)
 - [Feature flags](../configuration/settings/feature-flags.md)
-
-_Sources: `enterprise/frontend/src/lib/components/SideBar/navData.ts:67`–`106` (sidebar group + per-view permissions); `enterprise/frontend/src/routes/(app)/(internal)/insights/impact-analysis/+page.svelte` (uses `GraphExplorer`); `.../priority-review/+page.svelte` (uses `ImpactEffortMatrix`); `.../timeline-view/+page.svelte` (uses `GanttChart` — category list at `:12`–`:43`, filters at `:54`–`:57`); labels from `frontend/messages/en.json:2079`–`2082` (`insights` / `impactAnalysis` / `priorityReview` / `timelineView`), `:4426`–`4427` (`ganttChart`)._

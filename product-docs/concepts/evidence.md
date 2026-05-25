@@ -23,8 +23,6 @@ Evidence is the shared substantiation surface — the same record can back an ap
 | Evidence revision | `EvidenceRevision` | Versioned payload (file or link) |
 | Task occurrence | `TaskNode` | Optional producer back-link |
 
-_Sources: `backend/core/models.py:4370` (Evidence), `4460` (EvidenceRevision; `task_node` FK at 4464; `attachment_hash` at 4483). Back-references via `evidences` M2M: AppliedControl at `4955`, RequirementAssessment at `8698`, Finding at `8104`._
-
 ## What counts as evidence
 
 - An uploaded file — PDF, screenshot, configuration export, signed approval, exported policy.

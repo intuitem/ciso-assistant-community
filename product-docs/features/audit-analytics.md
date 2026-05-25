@@ -57,5 +57,3 @@ Eight analytical surfaces stream into the page — each loads independently, so 
 - [Applied controls analytics](applied-controls-analytics.md) — same kind of dashboard but for controls
 - [Insights](insights.md) — Enterprise cross-cutting views beyond a single audit
 - [Feature flags](../configuration/settings/feature-flags.md)
-
-_Sources: `frontend/src/routes/(app)/(internal)/compliance-assessments/[id=uuid]/advanced-analytics/+page.server.ts` (8 streamed endpoints at `:12`–`:63`); `frontend/src/routes/(app)/(third-party)/compliance-assessments/[id=uuid]/+page.svelte:1033` (the Insights section + Advanced Analytics button, gated by `featureflags.advanced_analytics`); labels from `frontend/messages/en.json:1511` (`advancedAnalytics`), `:1514–1539` (per-section labels). Backend endpoints are actions on `ComplianceAssessmentViewSet`._

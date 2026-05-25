@@ -30,8 +30,6 @@ A metric definition is the catalog template — qualitative (level) or quantitat
 | Dashboard | `Dashboard` | Container |
 | Widget | `DashboardWidget` | KPI / donut / pie / bar / line / area / gauge / sparkline / table / text |
 
-_Sources: `backend/metrology/models.py:41` (MetricDefinition — `library` FK at 46, `Category` enum at 42, `unit` FK to Terminology, `higher_is_better`, `default_target`), `114` (MetricInstance — `metric_definition` FK PROTECT at 132, `Status` / `Frequency` enums, `is_stale()` at 218), `247` (CustomMetricSample — `metric_instance` FK CASCADE at 248, optional `evidence_revision` FK at 266), `369` (BuiltinMetricSample — `ContentType` GFK at 370, unique-per-object-per-day constraint at 401), `914` (Dashboard), `941` (DashboardWidget — `ChartType` enum with 10 values at 945; three exclusive display modes documented in the class docstring at 942)._
-
 ***
 
 ## Metric definitions
@@ -84,8 +82,6 @@ You can now instantiate this metric as you see fit for your domains.
 
 You can now instantiate this metric as needed across your domains. Keep in mind that you can also create your own metric definition directly without going through the library.
 
-
-
 ### Creating a definition
 
 Metrics can be quantitative (number with unit) or qualitative (choices):
@@ -106,8 +102,6 @@ The metric instance is the projection of the definition to a specific domain and
 
 <figure><img src="../.gitbook/assets/image (53).png" alt=""><figcaption></figcaption></figure>
 
-
-
 Parameters:
 
 * Metric definition (it will inherit its settings)
@@ -117,8 +111,6 @@ Parameters:
 * Target value: expected target of this metric for this specific domain. This is handy as you can have different targets of the same metric definition according to the domain.
 * Assigned to: owner of the metric instance and its update.
 
-
-
 ## Metric sample
 
 This is the actual data of the metric instance on a given timestamp.&#x20;
@@ -127,13 +119,9 @@ This is the actual data of the metric instance on a given timestamp.&#x20;
 
 Keep in mind that you can add the data manually or through all the supported integrations (API, n8n, etc.). Note that data cannot be in the future.
 
-
-
 <figure><img src="../.gitbook/assets/image (55).png" alt=""><figcaption></figcaption></figure>
 
 ## Dashboards
-
-
 
 Dashboards are the visual representation of the metrics and support:
 
@@ -152,8 +140,6 @@ In edit mode, you can add different widgets, place and resize them as you see fi
 Once done, you can go back to view mode to see the result:
 
 <figure><img src="../.gitbook/assets/image (58).png" alt=""><figcaption></figcaption></figure>
-
-
 
 In addition to the custom metrics for your internal KPI and KRI, you can also include some of the built-in metrics tracked by the platform:\
 \

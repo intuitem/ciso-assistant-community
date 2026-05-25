@@ -6,8 +6,6 @@ description: Personal cross-cutting dashboard listing everything you (or your te
 
 **My assignments** is a personal dashboard listing every object across the platform where _you_ are owner, author, assignee, or approver. It's the answer to "what's on my plate today?" without trawling through each module.
 
-It's distinct from the [Assignments / respondent mode](assignments.md) feature, which is about dispatching audit requirement sections to teams during an audit. Same English word, completely different surface.
-
 ## Where to find it
 
 In the sidebar, under the **Overview** group: **Assignments** (link: `/my-assignments`).

@@ -60,5 +60,3 @@ Most batch actions open a confirmation modal so you don't move 200 rows by accid
 - [Context menu](context-menu.md) — the single-row sibling
 - [Applied controls](../concepts/applied-controls.md) — the model with the broadest batch-action coverage
 - [Domains](../concepts/domains.md) — the target for `change_folder`
-
-_Sources: backend endpoint at `backend/core/views.py` → `BaseModelViewSet.batch_action` (inherited by every model viewset; payload shape: `{action, ids, field, value}`). Frontend selection state in `frontend/src/lib/components/ModelTable/ModelTable.svelte` (checkbox column rendered when `hasBatchActions`); toolbar in `BatchActionBar.svelte`; confirmation modal in `frontend/src/lib/components/Modals/BatchActionModal.svelte`; SvelteKit proxy at `frontend/src/routes/(app)/(internal)/[model=urlmodel]/batch-action/+server.ts`. Per-model registry: `frontend/src/lib/utils/table.ts:3050` (`batchActions`); `BatchActionConfig` type at `:3030` lists all 8 action types including `group` and `merge`._

@@ -27,8 +27,6 @@ A risk matrix is a JSON definition (probability axis, impact axis, risk levels, 
 | Risk matrix | `RiskMatrix` | `json_definition` with probability / impact / risk / grid |
 | Risk assessment | `RiskAssessment` | `risk_matrix` FK is fixed at creation (`PROTECT`) |
 
-_Sources: `backend/core/models.py:2282` (RiskMatrix; `json_definition` and the `probability` / `impact` / `risk` / `grid` properties at 2333-2347), `5725` (`RiskAssessment.risk_matrix` — `on_delete=PROTECT`, help_text "After choosing it, you will not be able to change it")._
-
 ## Anatomy
 
 A matrix has four pieces:

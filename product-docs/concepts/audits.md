@@ -27,8 +27,6 @@ An audit always lives inside a **domain** (the mandatory IAM scope) and is asses
 | Domain | `Folder` | Required; drives IAM scoping |
 | Framework | `Framework` | Read-only library import |
 
-_Sources: `backend/core/models.py:6661` (ComplianceAssessment), `5661` (Assessment base — `perimeter` is `null=True, blank=True`; `folder` comes from `FolderMixin` and is required), `8043` (RequirementAssessment), `2488` (RequirementNode), `2374` (Framework). The audit also has direct M2Ms to assets and evidences for context that doesn't fit a specific requirement._
-
 ## Framework
 
 The fundamental input to an audit is a **framework** — a published standard such as ISO/IEC 27001:2022 or NIST CSF. Frameworks ship as YAML libraries. If you can't find one that fits your needs, you can build your own and import it.

@@ -28,8 +28,6 @@ The actor is a one-to-one wrapper that always points at exactly one of three con
 | Team | `Team` | Leader + deputies + members |
 | Entity | `tprm.Entity` | Third-party party |
 
-_Sources: `backend/core/models.py:9516` (Actor — `OneToOneField` to each concrete; XOR check constraint at 9532), `9466` (Team — `leader` / `deputies` / `members`), `9573` (`Actor.get_all_for_user` walks team membership). Representative consuming fields: `AppliedControl.owner` at 4990, `Assessment.authors` / `reviewers` at 5698 / 5692, `TaskTemplate.assigned_to` at 9054._
-
 ## Actors
 
 An actor is the unifying handle for anyone who can own or be assigned to work in CISO Assistant. Every actor wraps exactly one of three concrete underlying objects:

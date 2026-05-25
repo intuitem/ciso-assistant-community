@@ -25,8 +25,6 @@ The task template is the definition — owner, recurrence rule, expected evidenc
 | Task occurrence | `TaskNode` | One scheduled run |
 | Schedule | `schedule` JSON field on the template | iCal-style recurrence rule |
 
-_Sources: `backend/core/models.py:8977` (TaskTemplate — `SCHEDULE_JSONSCHEMA` at 8980, `is_recurrent`, `assigned_to` → Actor at 9054, `applied_controls` M2M at 9073), `9186` (TaskNode — status enum, `task_template` FK), `4464` (`EvidenceRevision.task_node` FK — the round-trip from a completed occurrence back to the revision it produced)._
-
 ## Definition vs occurrence
 
 Tasks come in two layers, mirroring the **template → instance** pattern used elsewhere in the platform:

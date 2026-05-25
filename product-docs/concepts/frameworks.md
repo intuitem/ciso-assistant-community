@@ -26,8 +26,6 @@ A framework lives inside a loaded library and is read-only. It comprises a tree 
 | Audit | `ComplianceAssessment` | One per (framework × domain × optional perimeter) |
 | Reference control | `ReferenceControl` | Template for an applied control |
 
-_Sources: `backend/core/models.py:2374` (Framework, with `library` FK at 2401), `2488` (RequirementNode — parent self-reference, `assessable` flag), `2505` (RequirementNode.reference_controls), `2807` (RequirementMappingSet linking `source_framework` + `target_framework`). The `ComplianceAssessment.framework` FK is on the audit side._
-
 ## Structure
 
 A framework is a tree of **requirement nodes**. Most nodes are _assessable_ — concrete requirements you evaluate one by one — while others act as section or chapter headings that organise the tree. Each assessable node becomes a [requirement assessment](audits.md) inside an audit, carrying its own status, score, and evidence.

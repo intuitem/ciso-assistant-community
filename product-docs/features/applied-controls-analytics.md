@@ -57,5 +57,3 @@ All three (analytics, flash, kanban) share the same filter passthrough — click
 - [Audit advanced analytics](audit-analytics.md) — equivalent dashboard scoped to a single audit
 - [Insights](insights.md) — PRO/Enterprise cross-cutting views (impact graph, priority/effort matrix, timeline)
 - [Applied controls](../concepts/applied-controls.md)
-
-_Sources: `backend/core/views.py:5353` (`AppliedControlViewSet.analytics` action calling `ActionPlanBudgetOverview.compute_budget_overview` at `:6149`); `frontend/src/routes/(app)/(internal)/applied-controls/analytics/+page.server.ts` (filter passthrough at `:6–11`); `frontend/src/routes/(app)/(internal)/[model=urlmodel]/+page.svelte:281` (table-toolbar entry point, gated on `URLModel === 'applied-controls'`). Per-audit / per-RA / per-EBIOS entry points follow the same pattern under `[id=uuid]/action-plan/analytics/`._

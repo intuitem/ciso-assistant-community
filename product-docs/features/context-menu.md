@@ -45,5 +45,3 @@ Adding a custom item for a model is a frontend change — add a component to the
 
 - [Batch actions](batch-actions.md) — the multi-row sibling
 - [Applied controls](../concepts/applied-controls.md), [Vulnerabilities](../concepts/vulnerabilities.md), [Evidence](../concepts/evidence.md), [Tasks](../concepts/tasks.md) — the models that ship custom shortcut actions today
-
-_Sources: `frontend/src/lib/components/ModelTable/ModelTable.svelte` — context-menu trigger at `:848`, content at `:1094`–`:1150`, builtin/URN gating at `:1104`, default Edit / View / Delete at `:1105`–`:1148`. Per-model registry: `frontend/src/lib/utils/table.ts:3006` (`contextMenuActions`)._

@@ -28,17 +28,11 @@ A project sits in a domain and can stack as a portfolio → programme → projec
 | Assignment | `ResponsibilityAssignment` | RACI cell — `(activity, actor, role)` unique |
 | Accreditation | `Accreditation` | Linked to a Collection; `checklist` FK to ComplianceAssessment |
 
-_Sources: `backend/pmbok/models.py:32` (GenericCollection — M2Ms to compliance / risk / CRQ / EBIOS / entity / findings assessments + documents + policies + exceptions; self-dep at 73), `80` (Accreditation — `linked_collection` FK at 140, `checklist` FK at 143, `decision_evidence` M2M at 160), `169` (Project — `Kind` enum at 170, `parent_project` self-FK at 308, `linked_collection` auto-created in `save` at 353), `521` (ResponsibilityMatrix — `preset`, `projects` M2M at 539, `roles` M2M), `567` (ResponsibilityMatrixActivity — `matrix` FK + M2Ms to AppliedControl / audits / BIA / etc.), `657` (ResponsibilityAssignment — `(activity, actor, role)` unique constraint)._
-
 ## Where it fits
 
 Project objects don't replace [Perimeters](perimeters.md) — they sit alongside. Use a perimeter to define the _scope of assessment_; use a project to plan the _work needed to bring that scope into compliance_ or through an accreditation.
 
 A single project typically references many perimeters, audits, applied controls, and findings assessments — it's the cross-cutting view the security organisation works against day-to-day.
-
-## Disambiguating "project"
-
-In older CISO Assistant documentation, "Project" used to be the name for what is now called a [Perimeter](perimeters.md). The legacy term has been retired everywhere; the **Project** described here is the new project-management object.
 
 ## Related
 

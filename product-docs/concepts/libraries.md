@@ -25,8 +25,6 @@ A library starts life as a **stored** record — its YAML is parsed and register
 | Loaded library | `LoadedLibrary` | Activated; contents visible across the platform |
 | Mapping set | `RequirementMappingSet` | Crosswalk between two frameworks |
 
-_Sources: `backend/core/models.py:512` (StoredLibrary), `1522` (LoadedLibrary with `dependencies` self-M2M at 1523). Catalog FKs back into LoadedLibrary: Threat at `2178`, ReferenceControl at `2228`, RiskMatrix at `2283`, Framework at `2401`, RequirementMappingSet at `2808`._
-
 ## Stored vs loaded
 
 A library can be in one of two states:

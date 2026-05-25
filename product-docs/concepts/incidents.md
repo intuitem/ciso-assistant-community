@@ -35,8 +35,6 @@ An incident lives in a domain and aggregates everything about the event: the ass
 | Task template | `TaskTemplate` | Spawns occurrences |
 | Timeline entry | `TimelineEntry` | Append-only response log |
 
-_Sources: `backend/core/models.py:4590` (Incident), `4623` (`threats`), `4629` (`owners` → Actor), `4635` (`assets`), `4689` (`applied_controls`), `4695` (`task_templates`), `4716` (TimelineEntry with `incident` FK)._
-
 ## What an incident captures
 
 - **Identifiers and classification** — a name, an optional reference ID, the severity (critical / major / moderate / minor / low / unknown), and the status through its lifecycle.

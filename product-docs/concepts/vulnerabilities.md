@@ -29,8 +29,6 @@ A vulnerability sits inside a domain and points outward at what it affects (asse
 | CWE | `sec_intel.CWE` | Common Weakness Enumeration |
 | SLA policy | `GlobalSettings("vulnerability-sla")` | Severity → days mapping |
 
-_Sources: `backend/core/models.py:5510` (Vulnerability), `5544` (`assets`), `5538` (`applied_controls`), `5556` (`security_advisories`), `5562` (`cwes`), `5607` (`_apply_sla_policy` — fills `due_date` from severity when blank)._
-
 ## What a vulnerability captures
 
 - **Identification** — a name, an optional reference ID (typically a CVE), a description.

@@ -29,8 +29,6 @@ The applied control sits at the centre — anything that asks for action **point
 | Task | `TaskTemplate` (definition) / `TaskNode` (occurrence) | A task definition lists which controls it keeps alive; occurrences are the recurring instances |
 | Evidence | `Evidence` | M2M; one evidence can prove several controls |
 
-_Sources: `backend/core/models.py:4894` (AppliedControl), `2210` (ReferenceControl). Demand-side M2Ms at `models.py:6267` (RiskScenario), `8127` (RequirementAssessment), `8817` (Finding), `9073` (TaskTemplate). Also referenced from `Incident`, `Vulnerability`, `AssetAssessment`, and `ResponsibilityMatrixActivity` — not shown to keep the diagram readable._
-
 ## Applied control
 
 Applied controls are fundamental for both compliance and remediation. They can derive from a **reference control** for consistency, or be created independently. They are always defined by the organisation and can be attached to the global domain or to a specific domain.

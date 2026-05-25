@@ -28,8 +28,6 @@ A mapping set is the unit shipped by a library — it pins exactly one source fr
 | Mapping | `RequirementMapping` | Single SRC → TGT pair, typed |
 | Requirement | `RequirementNode` | Read-only catalog entry from a framework |
 
-_Sources: `backend/core/models.py:2807` (RequirementMappingSet with `source_framework` + `target_framework`), `2835` (RequirementMapping — `mapping_set` FK, `source_requirement` / `target_requirement`, `Relationship` enum at 2841, `coverage` property at 2901)._
-
 ## Why they matter
 
 Most organisations have to demonstrate compliance against multiple frameworks at once — ISO 27001 plus SOC 2 plus a sector-specific regulation, for instance. Without mappings, you re-assess the same control posture against every framework's requirement list, which is busywork. With mappings, you assess once and project.
