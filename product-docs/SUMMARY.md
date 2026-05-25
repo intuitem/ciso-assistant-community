@@ -113,6 +113,7 @@
 * [Third-Party Risk Management](use-cases/tprm.md)
 * [EBIOS RM study](use-cases/ebios-rm.md)
 * [Cyber risk quantification](use-cases/quantitative-risk.md)
+* [Managing a responsibility matrix](use-cases/responsibility-matrix.md)
 
 ## Features
 
