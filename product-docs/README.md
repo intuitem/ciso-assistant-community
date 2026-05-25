@@ -1,3 +1,5 @@
+![CISO Assistant](https://github.com/intuitem/ciso-assistant-community/raw/main/gh_banner.png)
+
 # CISO Assistant — Product Documentation
 
 CISO Assistant is an open-source GRC (Governance, Risk and Compliance) platform — a different take on cybersecurity posture management, built on a few load-bearing ideas:
@@ -7,6 +9,8 @@ CISO Assistant is an open-source GRC (Governance, Risk and Compliance) platform 
 - Assessing a program, product, or whole organisation against standard frameworks.
 - Letting you bring your own framework via a simplified DSL.
 - Acting as a one-stop shop for the Governance, Risk, and Compliance layers.
+
+![One hub for governance, risk, and compliance](https://github.com/intuitem/ciso-assistant-community/raw/main/single_hub.png)
 
 ## What's inside
 
