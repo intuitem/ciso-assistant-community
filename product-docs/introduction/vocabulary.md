@@ -166,7 +166,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## V
 
-- **Validation flow** — A configurable approval workflow that can gate state transitions on objects (e.g. risk acceptance, audit close-out).
+- **Validation flow** — A configurable approval workflow that mirrors an organisation's internal review or management-approval process — peer-review, sign-off by a security lead, formal acceptance by a steering committee. Attached to objects whose state changes warrant such review (e.g. risk acceptance, audit close-out), it captures the human approval step inside the platform rather than enforcing it as a hard technical gate.
 - **Vulnerability** — A weakness in a system or process that could be exploited by a threat. Tracked with severity, status, and linked applied controls.
 
 ## W

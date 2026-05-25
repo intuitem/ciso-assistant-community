@@ -16,8 +16,12 @@
 * Catalog
   * [Libraries](concepts/libraries.md)
   * [Frameworks](concepts/frameworks.md)
+  * [Mappings](concepts/mappings.md)
+  * [Risk matrices](concepts/risk-matrices.md)
   * [Threats](concepts/threats.md)
-  * [Terminology](concepts/terminology.md)
+  * [Threat intelligence](concepts/threat-intel.md)
+  * [Metrics](concepts/metrics.md)
+  * [Journeys](concepts/journeys.md)
 * Assets and resilience
   * [Assets](concepts/assets.md)
   * [Business impact analyses](concepts/business-impact-analyses.md)
@@ -38,11 +42,10 @@
     * [Manage extended result](concepts/extended-results.md)
   * [Evidence](concepts/evidence.md)
 * Specialised modules
-  * [Metrics](concepts/metrics.md)
   * [Third-party risk](concepts/third-party-risk.md)
   * [Privacy register](concepts/privacy-register.md)
   * [Project management](concepts/project-management.md)
-  * [Journeys](concepts/journeys.md)
+  * [Terminology](concepts/terminology.md)
 
 ## Installation
 

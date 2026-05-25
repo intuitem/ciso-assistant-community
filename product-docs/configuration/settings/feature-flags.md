@@ -16,7 +16,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **risk_acceptances** — the risk-acceptance workflow.
 - **exceptions** — security-exception tracking.
 - **follow_up** — findings assessments (follow-up).
-- **validation_flows** — configurable approval workflows. _Default off._
+- **validation_flows** — configurable approval workflows that mirror internal review or management-approval processes, attached to objects whose state changes warrant sign-off. _Default off._
 - **organisation_issues** — context register: issues affecting the organisation.
 - **organisation_objectives** — context register: organisational objectives.
 - **policy_documents** — the dedicated Policies surface (a filtered view of applied controls).
