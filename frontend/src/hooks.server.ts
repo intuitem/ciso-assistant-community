@@ -14,9 +14,22 @@ defineCustomServerStrategy('custom-fallback', {
 	getLocale: (request) => fallbackLocaleStore.get(request) ?? DEFAULT_LANGUAGE
 });
 
+async function fetchWithRetry(url: string, init?: RequestInit, retries = 5, delay = 2000): Promise<Response> {
+	for (let attempt = 0; attempt < retries; attempt++) {
+		try {
+			const response = await fetch(url, { ...init, signal: AbortSignal.timeout(5000) });
+			return response;
+		} catch (error) {
+			if (attempt === retries - 1) throw error;
+			await new Promise((r) => setTimeout(r, delay * (attempt + 1)));
+		}
+	}
+	throw new Error('unreachable');
+}
+
 async function fetchDefaultLanguage(): Promise<string> {
 	try {
-		const response = await fetch(`${BASE_API_URL}/settings/general/default-language/`, {
+		const response = await fetchWithRetry(`${BASE_API_URL}/settings/general/default-language/`, {
 			headers: { 'content-type': 'application/json' }
 		});
 		if (response.ok) {
@@ -59,18 +72,22 @@ function applyUserLocale(event: RequestEvent, user: User | undefined) {
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
 	if (!csrfToken) {
-		const response = await fetch(`${BASE_API_URL}/csrf/`, {
-			credentials: 'include',
-			headers: { 'content-type': 'application/json' }
-		});
-		const data = await response.json();
-		csrfToken = data.csrfToken;
-		event.cookies.set('csrftoken', csrfToken, {
-			httpOnly: false,
-			sameSite: 'lax',
-			path: '/',
-			secure: true
-		});
+		try {
+			const response = await fetchWithRetry(`${BASE_API_URL}/csrf/`, {
+				credentials: 'include',
+				headers: { 'content-type': 'application/json' }
+			});
+			const data = await response.json();
+			csrfToken = data.csrfToken;
+			event.cookies.set('csrftoken', csrfToken, {
+				httpOnly: false,
+				sameSite: 'lax',
+				path: '/',
+				secure: true
+			});
+		} catch (error) {
+			console.error('Unable to fetch CSRF token', error);
+		}
 	}
 	return csrfToken;
 }
