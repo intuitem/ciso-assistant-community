@@ -9,27 +9,40 @@
 
 ## Concepts
 
-* [Domains](concepts/domains.md)
-* [Perimeters](concepts/perimeters.md)
-* [Libraries](concepts/libraries.md)
-* [Frameworks](concepts/frameworks.md)
-* [Threats](concepts/threats.md)
-* [Assets](concepts/assets.md)
-* [Applied controls](concepts/applied-controls.md)
-* [Policies](concepts/policies.md)
-* [Evidence](concepts/evidence.md)
-* [Audits](concepts/audits.md)
-  * [Manage extended result](concepts/extended-results.md)
-* [Findings assessments](concepts/findings-assessments.md)
-* [Risk assessments](concepts/risk-assessments.md)
-* [EBIOS RM](concepts/ebios-rm.md)
-* [Quantitative risk studies](concepts/quantitative-risk-studies.md)
-* [Business impact analyses](concepts/business-impact-analyses.md)
-* [Third-party risk](concepts/third-party-risk.md)
-* [Privacy register](concepts/privacy-register.md)
-* [Project management](concepts/project-management.md)
-* [Metrics](concepts/metrics.md)
-* [Journeys](concepts/journeys.md)
+* Foundations
+  * [Domains](concepts/domains.md)
+  * [Perimeters](concepts/perimeters.md)
+  * [Actors and teams](concepts/actors-and-teams.md)
+* Catalog
+  * [Libraries](concepts/libraries.md)
+  * [Frameworks](concepts/frameworks.md)
+  * [Threats](concepts/threats.md)
+  * [Terminology](concepts/terminology.md)
+* Assets and resilience
+  * [Assets](concepts/assets.md)
+  * [Business impact analyses](concepts/business-impact-analyses.md)
+* Operations
+  * [Applied controls](concepts/applied-controls.md)
+  * [Tasks](concepts/tasks.md)
+  * [Incidents](concepts/incidents.md)
+* Governance
+  * [Policies](concepts/policies.md)
+  * [Findings assessments](concepts/findings-assessments.md)
+* Risk
+  * [Risk assessments](concepts/risk-assessments.md)
+  * [EBIOS RM](concepts/ebios-rm.md)
+  * [Quantitative risk studies](concepts/quantitative-risk-studies.md)
+  * [Vulnerabilities](concepts/vulnerabilities.md)
+* Compliance
+  * [Audits](concepts/audits.md)
+    * [Manage extended result](concepts/extended-results.md)
+  * [Evidence](concepts/evidence.md)
+* Specialised modules
+  * [Metrics](concepts/metrics.md)
+  * [Third-party risk](concepts/third-party-risk.md)
+  * [Privacy register](concepts/privacy-register.md)
+  * [Project management](concepts/project-management.md)
+  * [Journeys](concepts/journeys.md)
 
 ## Installation
 
@@ -113,6 +126,11 @@
 * [Assignments / respondent mode](features/assignments.md)
 * [Domain export/import](features/domain-export-import.md)
 * [Notifications](features/notifications.md)
+* [Framework-specific features](features/framework-specific/README.md)
+  * [ISO 27001](features/framework-specific/iso.md)
+  * [CCB CyFun](features/framework-specific/cyfun.md)
+  * [DORA](features/framework-specific/dora.md)
+  * [MonServiceSécurisé](features/framework-specific/monservicesecurise.md)
 
 ## AI and Integrations
 
@@ -128,7 +146,8 @@
 ## Contributing
 
 * [Overview](contributing/README.md)
+* [Frameworks and libraries](contributing/framework.md)
+* [Code (features and fixes)](contributing/code.md)
+* [Translations](contributing/translation.md)
+* [Documentation](contributing/documentation.md)
 * [Feature page template](contributing/feature-page-template.md)
-* [Submit a library](contributing/submit-a-library.md)
-* [Internationalization](contributing/i18n/README.md)
-  * [Translating the interface](contributing/i18n/translating-the-interface.md)

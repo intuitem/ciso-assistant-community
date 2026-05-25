@@ -20,7 +20,7 @@ Library content is referenced by **URN** (Uniform Resource Name), an immutable i
 ## Built-in, community, and custom
 
 - **Built-in libraries** ship with the platform — over 100 frameworks plus the standard threat, matrix, and reference-control catalogues.
-- **Community libraries** are contributed by the open-source community; see [Submit a library](../contributing/submit-a-library.md).
+- **Community libraries** are contributed by the open-source community; see [Contributing a framework or library](../contributing/framework.md).
 - **Custom libraries** can be built locally and loaded without sharing them, useful for internal frameworks or control sets.
 
 See [Designing your own libraries](../configuration/libraries/custom-libraries.md) for the format.

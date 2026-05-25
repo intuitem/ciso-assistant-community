@@ -5,13 +5,15 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 ## A
 
 - **Accreditation** — Formal authorisation that a system, environment, or product has met security and compliance requirements. Captured as an object in project-management workflows, often required for go-live.
-- **Actor** — A person responsible for, or assigned to, an applied control, a requirement assessment, or a task. Actors are independent of platform user accounts: an actor can represent an external party who has no login.
+- **Actor** — The unifying handle for anyone who can own or be assigned work in CISO Assistant. An actor wraps exactly one of three underlying objects: a [User](#u), a [Team](#t), or an [Entity](#e). Auto-created when its underlying object is created — not managed directly. See [Actors and teams](../concepts/actors-and-teams.md).
 - **Applied control** — The main building block of the action plan: a concrete action your team has implemented or will implement. It can be technical, organisational, a process, a policy, a piece of documentation — anything that materially changes risk or compliance posture. Applied controls are always defined by the organisation and can be attached to the global domain or to a specific domain. They may derive from a reference control for consistency, or be created independently.
 - **Asset** — Anything of value worth protecting. **Primary assets** are core resources directly contributing to the organisation's main objectives (business processes, data, intellectual property). **Supporting assets** indirectly aid primary functions (IT systems, services, locations, people).
+- **Asset assessment** — A per-asset row inside a business impact analysis, capturing recovery posture (documented, tested, targets met), associated controls, evidence, and the escalation thresholds that describe how impact grows over time.
 - **Assessment** — Umbrella term covering **audits** (compliance work), **risk assessments**, **business impact analyses**, and **entity assessments**.
 - **Attack path** — In EBIOS RM, the route an attacker may take from a starting point — through stakeholders or supporting assets — to reach a target objective.
 - **Audit** — The evaluation of a perimeter against a framework, producing a per-requirement view of status, score, and evidence. Internally a `ComplianceAssessment`.
 - **Audit log** — Append-only record of significant actions taken in the platform (creations, edits, permission changes, logins). PRO feature.
+- **Auditee mode** — A read-only UX mode aimed at external assessors who need to inspect an audit without being granted full access to the platform. Gated by the `auditee_mode` feature flag.
 
 ## B
 
@@ -32,6 +34,11 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 - **Dashboard** — A configurable view of metrics and progress indicators, scoped to a perimeter or a domain.
 - **Data breach** — In a privacy register, an incident affecting personal data, with notification status and response actions.
+- **Data contractor** — A third party involved in a processing as data processor, sub-processor, or joint controller. Distinct from a generic supplier entity — captures the privacy-specific role.
+- **Data recipient** — A party (internal team, external service, public body) that personal data is disclosed to as part of a processing.
+- **Data subject** — The category of individuals whose personal data is processed (customers, employees, prospects, etc.). Surfaces in the privacy register and right-request workflows.
+- **Data transfer** — A record of cross-border or cross-entity movement of personal data, with destination, legal basis, and safeguards.
+- **Document revision** — A single revision of a [Managed document](#m). Carries a version number and a lifecycle status (draft → in review → change requested → validated → published → deprecated).
 - **Domain** — The top-level container in CISO Assistant: a business unit, subsidiary, project, or any boundary used for organising work and isolating permissions via role-based access control. Sub-domains nest underneath. Internally a `Folder`. _Demo_ and _Starter_ are reserved for internal features.
 
 ## E
@@ -40,13 +47,16 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Elementary action** — In EBIOS RM, an atomic step an attacker can perform. Composed into operating modes.
 - **Entity** — Scope of an external review — typically a vendor or third party.
 - **Entity assessment** — The actual review of an entity. Can trigger or be linked to an audit.
+- **Escalation threshold** — A point-in-time / impact pair attached to an asset assessment inside a BIA: "after 4 hours of outage, impact is _high_". Lets a BIA model how disruption escalates rather than recording a single worst-case impact.
 - **Evidence** — A document, screenshot, configuration sample, or any other artifact attached to an applied control or requirement assessment to substantiate compliance.
+- **Evidence revision** — A single versioned iteration of an evidence object. Replacing an attachment creates a new revision rather than overwriting the previous one; revisions carry a version number, an SHA-256 integrity hash, optional observation, and a link to the task occurrence that produced them when applicable.
 
 ## F
 
 - **Feared event** — In EBIOS RM, the undesirable outcome to be avoided on a primary asset — for example, a confidentiality breach of customer data.
 - **Filtering label** — A free-form tag that can be attached to most objects for categorisation, filtering, and reporting.
 - **Findings assessment** — A formal record tracking issues raised by an audit, a security review, or an external assessor, used to drive remediation through to closure.
+- **Focus mode** — A workspace mode that filters the entire UI to a single domain, hiding objects belonging to other domains. PRO feature.
 - **Folder** — Internal model name for a **domain**. See **Domain**.
 - **Framework** — A set of requirements covering patterns and expectations needed to comply with a regulation, prepare a certification, or establish a foundation. Shipped as a YAML library.
 
@@ -74,6 +84,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## M
 
+- **Managed document** — A document tracked through a controlled lifecycle (draft, in-review, validated, published, deprecated) and pinned to a parent object such as a policy. Each iteration is a [Document revision](#d).
 - **Mapping** — Based on the [OLIR initiative](https://csrc.nist.gov/projects/olir). Allows moving an assessment from framework A to framework B while reusing existing requirement assessments.
 - **Metric definition** — A reusable specification for a measurable indicator (formula, target, unit, scope). Defined once, instantiated per perimeter.
 - **Metric instance** — A concrete sample of a metric definition for a given scope at a given point in time.
@@ -91,8 +102,9 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Personal access token** (PAT) — A long-lived authentication token a user can issue from their profile to authenticate API calls. Alternative to session-based login; used by scripts, integrations, the CLI, and the MCP server.
 - **Personal data** — In a privacy register, any data referring to an identified or identifiable individual.
 - **Policy** — A specific type of applied control: a document describing what is expected from some part of your stakeholders. Lives in CISO Assistant so its lifecycle can be managed alongside the rest of your controls.
-- **Processing** — In a privacy register, an activity that operates on personal data (collection, storage, transfer, deletion). Captures purpose, lawful basis, recipients, and retention.
 - **Preset** — A reusable template describing a guided workflow: a set of starter objects to scaffold (audit, risk assessment, etc.) plus an ordered list of steps to follow. Library-backed or authored locally; applied to a domain to produce a [Journey](#j).
+- **Processing** — In a privacy register, an activity that operates on personal data (collection, storage, transfer, deletion). Captures purpose, lawful basis, recipients, and retention.
+- **Processing nature** — A catalogued type of processing operation (collection, storage, transfer, disclosure, deletion, …) used to characterise a processing.
 - **Project** — In the project-management module, a planned initiative with deliverables and milestones. Distinct from the legacy meaning of "project" in older CISO Assistant documentation — see **Perimeter**.
 - **Purpose** — In a privacy register, the lawful reason for which personal data is processed.
 
@@ -104,13 +116,16 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## R
 
+- **Recap** — The roll-up view of a business impact analysis, aggregating asset assessments and their escalation thresholds into a single readout.
+- **Recovery target** — A documented commitment for restoring an asset after disruption, typically a Recovery Time Objective (RTO) or Recovery Point Objective (RPO). Tracked on an asset assessment as "documented", "tested", and "targets met" flags.
 - **Reference control** — A template for an applied control. Provided by frameworks via libraries, or defined locally. Optional but recommended for keeping applied controls consistent across the organisation.
 - **Representative** — The person responsible for answering the questionnaire or requirements of an entity assessment.
 - **Requirement** — A single normative statement inside a framework.
 - **Requirement assessment** — The evaluation of one requirement inside an audit (status, score, evidence, applied controls).
 - **Requirement mapping set** — Internal model name for the catalog object backing a **mapping** library. See **Mapping**.
 - **Residual risk** — The risk level expected once all _planned_ applied controls have been implemented — the target state of the action plan. The bottom tier of CISO Assistant's three-tier model (inherent → current → residual), and the figure used as input to risk-acceptance decisions.
-- **Responsibility matrix** — A RACI-style assignment of actors to activities, used in project workflows and accreditation processes.
+- **Responsibility matrix** — An assignment of actors to activities, used in project workflows and accreditation processes. Supports RACI, RASCI, and RAPID conventions.
+- **Responsibility role** — The role attached to an actor on an activity inside a responsibility matrix (e.g. R/A/C/I in RACI, or R/A/S/C/I in RASCI). Defined per matrix.
 - **Right request** — In a privacy register, a data-subject request under GDPR or equivalent (access, rectification, deletion, portability).
 - **Risk acceptance** — Formal record of an organisation's decision to tolerate a residual risk without further treatment. Carries an approval workflow; approval requires the **Approver** role.
 - **Risk assessment** (also _risk study_) — A scenario-based evaluation of risk over a perimeter.
@@ -128,15 +143,18 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 - **Security advisory** — A catalogued security warning published by a vendor or CERT (e.g. CVE entries). Linked to vulnerabilities and affected assets.
 - **Security exception** — A documented, time-bound deviation from a control or policy, approved through a workflow and tracked for review.
+- **Severity** — The shared ordinal scale used to qualify vulnerabilities, incidents, and findings: undefined / info / low / medium / high / critical. Drives SLA escalation and visual emphasis in dashboards.
 - **Solution** — A product or service provided by an entity.
 - **Stakeholder** — In EBIOS RM, an internal or external party with a relationship to the studied system. Evaluated for trust level and dependency.
 - **Strategic scenario** — In EBIOS RM, the high-level "what" of an attack: a Risk Origin, a Target Objective, a path through stakeholders, and an outcome.
 
 ## T
 
-- **Task** — The main building block of the task-management module. Can be one-time or recurring; supports assignment.
-- **Task template** — A reusable specification for a task (default assignee, owner, schedule, expected evidence). Tasks are instantiated from templates.
-- **Team** — A named grouping of users used for collaborative ownership of objects. Distinct from a user group (which is role-scoped to a domain).
+- **Task definition** — A reusable specification of a task: default assignee, owner, recurrence rule, expected evidence. Defining a task creates one or more **task occurrences** over time. Internally a `TaskTemplate`.
+- **Task node** — Internal model name for a **task occurrence**. See **Task occurrence**.
+- **Task occurrence** — A scheduled instance of a task definition, with a due date, a status (pending → in progress → completed/cancelled), and the evidence collected when the task ran. Internally a `TaskNode`.
+- **Task template** — Internal model name for a **task definition**. See **Task definition**.
+- **Team** — A named grouping of users used for collaborative ownership of objects, with a leader, optional deputies, members, and an optional team email for notification routing. Distinct from a [User group](#u) (which is role-scoped to a domain — see the disambiguation in [Actors and teams](../concepts/actors-and-teams.md)).
 - **Terminology** — An organisation's overrides to the platform's default labels, used to align the UI with internal vocabulary.
 - **Threat** — A catalogued source of harm — reusable across scenarios. Optional: assessments can be performed without referencing threats explicitly.
 

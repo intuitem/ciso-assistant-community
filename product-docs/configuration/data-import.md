@@ -456,6 +456,30 @@ Elementary actions are useful to model a killchain during the 4th workshop of an
 
 
 
+## EBIOS RM Studies
+
+Importing a full EBIOS RM study creates the study itself plus the objects across workshops 1–4 (assets, feared events, RO/TO couples, stakeholders, strategic and operational scenarios, attack paths, elementary actions, operating modes). Three input formats are supported. All three require a **risk matrix** to be selected in the wizard — the probability and impact labels in the source are resolved against that matrix.
+
+### Agile Risk Manager (ARM) — Excel
+
+The Excel export produced by [Agile Risk Manager](https://www.all4tec.com/agile-risk-manager/) (All4Tec). The file contains 91 sheets organised by EBIOS workshop. Both French and English ARM exports are accepted; sheet and column names are matched against known variants.
+
+Selected in the wizard as **EBIOS RM Study (ARM)**.
+
+### CISO Assistant — Excel
+
+The Excel format produced by CISO Assistant's own EBIOS RM study export — sheets prefixed `1.1 Study`, `1.3 Feared Events`, `2.1 RO/TO`, and so on. This is the round-trip format: export, edit, re-import.
+
+Selected in the wizard as **EBIOS RM Study (Excel)**.
+
+### Egerie Suite — XML
+
+The XML export produced by the [Egerie Suite](https://www.egerie.eu/) risk-management platform. The only XML target supported by the wizard; everything else accepts Excel or CSV. Egerie's internal cross-references (`PA_`, `SA_`, `FE_`, `RS_`, …) are resolved automatically.
+
+Selected in the wizard as **EBIOS RM Study (Egerie XML)**.
+
+
+
 ## Reference controls
 
 \

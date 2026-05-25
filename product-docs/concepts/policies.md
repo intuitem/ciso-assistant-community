@@ -14,9 +14,18 @@ Policies are central to most compliance frameworks — almost every requirement 
 
 The Policies page in the platform is a filtered view of applied controls where the type is _policy_; everything you can do to an applied control, you can do to a policy.
 
+## Authoring options
+
+Policies can come from either side of the divide:
+
+- **Author in CISO Assistant.** Each policy can carry one or more **managed documents** — versioned documents tracked in-platform through a draft → in-review → validated → published → deprecated lifecycle. Useful when you want the policy text to live where the rest of the GRC programme lives, with revision history and approval workflow attached.
+- **Attach existing documents.** If your policies already live in Confluence, SharePoint, a DMS, or anywhere else, the policy entry can point at the external location via a link and carry evidence files (signed PDF, last-approved revision) without duplicating the source-of-truth.
+
+Both paths are first-class — you can mix them across an organisation, or even across policies in the same domain. The applied-control machinery (owner, status, linked requirements, evidence) is the same either way.
+
 ## Lifecycle
 
-Policies have their own lifecycle — drafting, review, approval, publication, periodic review, retirement. The platform tracks these states through the standard applied-control status field and the supporting evidence on each policy entry.
+Policies have their own lifecycle — drafting, review, approval, publication, periodic review, retirement. The platform tracks these states through the standard applied-control status field and the supporting evidence on each policy entry. When authoring in-platform, the managed-document revision states (draft, in review, validated, published, deprecated) provide a finer-grained workflow on top.
 
 ## Related
 
