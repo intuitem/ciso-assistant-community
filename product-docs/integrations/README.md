@@ -1,14 +1,15 @@
 # AI and Integrations
 
-CISO Assistant is designed to plug into the rest of your tooling. This section covers the REST API, the MCP server for AI assistants, and the supported third-party integrations.
+CISO Assistant is designed to plug into the rest of your tooling — through its REST API, an MCP server for AI assistants, and supported third-party integrations.
 
-> This section is being expanded.
+## Available now
 
-Material to come:
+- **[API reference](api.md)** — authentication, schema browsing, and curl examples.
 
-- **[API reference](api.md)** — REST authentication, schema browsing, common patterns.
-- Personal access tokens (PATs) — how to issue and rotate.
+## Coming soon
+
+- Personal access tokens — how to issue and rotate them.
 - MCP server — exposing CISO Assistant to AI agents and assistants.
 - Third-party integrations — Jira, ServiceNow.
 - Outgoing webhooks.
-- Chat and agentic workflows inside the product.
+- The in-product chat assistant and agentic workflows.

@@ -25,21 +25,6 @@ The evaluation of a single requirement inside an audit is called a **requirement
 
 Evidence justifies the status of a compliance requirement or proves that an applied control has been implemented. It can be a description, a link, or an uploaded file, and it can be attached to any number of applied controls or requirement assessments.
 
-## What this page should cover
-
-- The audit lifecycle from creation to closure.
-- How **extended results** (minor / major nonconformity, observation, opportunity for improvement, good practice) layer onto the standard statuses.
-- Mappings: how a single audit can be projected onto another framework via a mapping.
-- The auditee role and read-only views for external auditors.
-
-## For users
-
-> _Draft._ Creating an audit from a framework; assigning requirements to actors; scoring; attaching evidence; reviewing; exporting; using mappings to derive a sibling audit.
-
-## For implementers
-
-> _Draft._ Internally an audit is a `ComplianceAssessment`. Related models: `RequirementAssessment`, `RequirementAssignment`, `RequirementMappingSet`. The auditee filtering pattern in `backend/core/views.py`. Tree, donut, and global-score endpoints.
-
 ## Related
 
 - [Applied controls](applied-controls.md)

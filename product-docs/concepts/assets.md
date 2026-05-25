@@ -11,14 +11,6 @@ Assets are always defined by the organisation and can be attached to the global 
 
 The distinction matters for risk work: scenarios typically express _what can happen to a primary asset_ via _which supporting assets are involved_.
 
-## For users
-
-> _Draft._ Building an asset inventory; importing assets via Excel; relating assets to threats and scenarios; assigning owners.
-
-## For implementers
-
-> _Draft._ `Asset` model, the primary/supporting type discriminator, the parent/child relationship, integration with EBIOS RM and quantitative risk studies.
-
 ## Related
 
 - [Risk assessments](risk-assessments.md)

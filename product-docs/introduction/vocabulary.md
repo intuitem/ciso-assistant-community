@@ -1,6 +1,6 @@
 # Vocabulary
 
-A working glossary of the terms used throughout the platform and this handbook. Where a user-facing term differs from the internal model name, both are given so end users and implementers can cross-reference.
+A glossary of the terms used in CISO Assistant. Where a user-facing term differs from the internal model name, both are given.
 
 ## A
 

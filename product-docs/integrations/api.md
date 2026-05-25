@@ -1,6 +1,6 @@
 # API reference
 
-CISO Assistant exposes a REST API that mirrors the platform's object model. The same API powers the SvelteKit frontend, the CLI, the MCP server, and every external integration — there is no separate "public" surface to maintain. Anything you can do in the UI, you can do over HTTP.
+CISO Assistant exposes a REST API that mirrors the platform's object model. The same API powers the web frontend, the CLI, the MCP server, and every external integration. Anything you can do in the UI, you can do over HTTP.
 
 ## Authentication
 
@@ -35,13 +35,6 @@ Two ways to read the API surface:
 - **On your instance, in debug mode** — set `DJANGO_DEBUG=True`, start the backend, then browse:
   - Swagger UI: `http://127.0.0.1:8000/api/schema/swagger/`
   - ReDoc: `http://127.0.0.1:8000/api/schema/redoc/`
-
-## What this section will cover
-
-- **Resource model** — viewsets, the universal `folder` scoping field, IAM filtering rules, pagination and filtering conventions.
-- **Common patterns** — batch actions, the `for_object` action style, mass-import via `data_wizard`, exporting and importing libraries.
-- **Webhooks and async** — Huey-backed background tasks and how their results surface in the API.
-- **Integrations** — MCP server, CLI, Excel import/export, Power BI connector, library YAML format.
 
 ## Related
 

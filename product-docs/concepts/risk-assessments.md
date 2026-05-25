@@ -32,14 +32,6 @@ Risk levels are calculated as a function of the probability and impact of a scen
 
 Most organisations define an official matrix to be used for all risk assessments, but CISO Assistant lets you choose a different matrix per assessment when needed. **The matrix cannot be changed once an assessment has been created.**
 
-## For users
-
-> _Draft._ Choosing an approach (qualitative / quantitative / EBIOS RM); building a scenario; using the risk matrix; capturing inherent vs residual risk; reading the heatmap and the treatment plan.
-
-## For implementers
-
-> _Draft._ `RiskAssessment`, `RiskScenario`, `RiskMatrix` models. The `ebios_rm` Django app and its object graph. The quantitative risk study simulation pipeline.
-
 ## Related
 
 - [Assets](assets.md)
