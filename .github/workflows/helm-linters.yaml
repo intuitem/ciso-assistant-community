@@ -8,6 +8,7 @@ on:
     types: [opened, synchronize]
     paths:
       - "charts/ciso-assistant-next/**"
+      - ".github/workflows/helm-linters.yaml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)

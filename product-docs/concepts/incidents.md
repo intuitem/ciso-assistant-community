@@ -41,7 +41,7 @@ An incident lives in a domain and aggregates everything about the event: the ass
 - **Timing** — when it occurred, when it was reported, when it was resolved.
 - **Detection** — internal vs external, optionally with a link to the source signal.
 - **Scope** — the affected assets, the threats believed to be in play, the entities (third parties) involved.
-- **Owners** — the actors handling the response.
+- **Assignees** — the actors handling the response.
 - **Response and qualifications** — qualifying terminology, BCP-activation flag, resolution notes.
 - **Linked controls and tasks** — the applied controls invoked during response, plus the task definitions that should run as follow-up (e.g. a post-mortem, a control review).
 

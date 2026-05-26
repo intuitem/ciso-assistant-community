@@ -19,13 +19,13 @@ graph LR
   RS -->|mitigated by| AC[Applied controls]
 ```
 
-A risk assessment always lives inside a **domain** (the mandatory IAM scope) and is bound to one **risk matrix** — fixed at creation, supplies the probability × impact scale. A **perimeter** can optionally narrow the assessment to a specific service or process inside the domain. The assessment is composed of **risk scenarios**; each scenario links to the **assets** it impacts, the **threats** it materialises, and the **applied controls** that mitigate it (split between _existing_ and _planned_ to drive the three-tier risk model below).
+A risk assessment always lives inside a **domain** (the mandatory IAM scope) and is bound to one **risk matrix** that supplies the probability × impact scale (the matrix can be swapped later; the platform refits existing scores onto the new scale). A **perimeter** can optionally narrow the assessment to a specific service or process inside the domain. The assessment is composed of **risk scenarios**; each scenario links to the **assets** it impacts, the **threats** it materialises, and the **applied controls** that mitigate it (split between _existing_ and _planned_ to drive the three-tier risk model below).
 
 | User-facing | Internal | Notes |
 |---|---|---|
 | Risk assessment | `RiskAssessment` | Also called "Risk study" in the UI |
 | Risk scenario | `RiskScenario` | A row inside the assessment |
-| Risk matrix | `RiskMatrix` | Fixed once the assessment is created |
+| Risk matrix | `RiskMatrix` | Can be changed; the platform refits existing scenario scores onto the new scale |
 | Domain | `Folder` | Required; drives IAM scoping |
 | Threat | `Threat` | Catalog entry from a library |
 
@@ -63,7 +63,7 @@ For context on the process itself, see the [ENISA risk-management process](https
 
 Risk levels are calculated as a function of the probability and impact of a scenario, using a configurable **risk matrix**. Matrices are imported from libraries — pick one of the built-in matrices or define your own via a custom library.
 
-Most organisations define an official matrix to be used for all risk assessments, but CISO Assistant lets you choose a different matrix per assessment when needed. **The matrix cannot be changed once an assessment has been created.**
+Most organisations define an official matrix to be used for all risk assessments, but CISO Assistant lets you choose a different matrix per assessment when needed. The matrix **can be changed** after the assessment has been created — the platform performs a best-effort mapping of each scenario's existing probability and impact values onto the new scale (extra fitting computation runs to preserve as much of the prior scoring as possible). Review the migrated scenarios afterwards to confirm the new levels reflect your intent.
 
 ## Related
 
