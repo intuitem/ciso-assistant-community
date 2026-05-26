@@ -1,0 +1,942 @@
+urn: urn:intuitem:risk:library:pdpl-ksa
+locale: en
+ref_id: PDPL-KSA
+name: Personal Data Protection Law (KSA)
+description: 'Personal Data Protection Law of the Kingdom of Saudi Arabia, issued by Royal Decree No.
+  M/19 dated 9/2/1443H (16 September 2021) and amended by Royal Decree No. M/148 dated 5/9/1444H (27 March
+  2023). The Law and its Implementing Regulations entered into force on 14 September 2023, with full enforcement
+  from 14 September 2024. The Saudi Data and Artificial Intelligence Authority (SDAIA) is the Competent
+  Authority.
+
+  Note: This library covers the 43 articles of the Law itself. The Implementing Regulations and the Regulation
+  on Personal Data Transfer Outside the Kingdom are separate instruments and are not modeled here. Each
+  article is included as a node; only articles that impose operational obligations on Controllers/Processors
+  are marked assessable.
+
+  References: SDAIA (https://sdaia.gov.sa); SDAIA Data Protection Knowledge Center (https://dgp.sdaia.gov.sa).'
+copyright: Saudi Arabia legal text — Royal Decree No. M/19 (2021) as amended.
+version: 1
+publication_date: 2026-05-12
+provider: SDAIA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:pdpl-ksa
+    ref_id: PDPL-KSA
+    name: Personal Data Protection Law (KSA)
+    description: 'Personal Data Protection Law of the Kingdom of Saudi Arabia (Royal Decree M/19 of 2021,
+      as amended by M/148 of 2023). Competent Authority: SDAIA.'
+    implementation_groups_definition:
+    - ref_id: core
+      name: Core obligations
+      description: Baseline obligations that apply to any Controller processing Personal Data within the
+        scope of the Law, regardless of activity (Articles 4, 5, 7, 8, 11, 12, 13, 14, 17, 18, 19, 20,
+        21, 22, 28, 30 and 41). Always select this group.
+    - ref_id: conditional
+      name: Conditional obligations
+      description: 'Obligations whose applicability depends on the Controller''s specific activities or
+        chosen lawful basis: alternative legal bases (Article 6), restrictions on access (Article 9),
+        exceptions to direct collection (Article 10), lawful bases for Disclosure (Article 15), Health
+        Data (Article 23), Credit Data (Article 24), direct marketing (Articles 25–26), scientific or
+        statistical research (Article 27), and cross-border Transfer (Article 29). Select only the items
+        relevant to the Controller''s processing.'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-1
+      assessable: false
+      depth: 1
+      ref_id: Article 1
+      name: Definitions
+      description: 'Defines the key terms used in the Law, including: Law, Regulations, Competent Authority,
+        Personal Data, Processing, Collection, Destruction, Disclosure, Transfer, Publishing, Sensitive
+        Data, Genetic Data, Health Data, Health Services, Credit Data, Data Subject, Public Entity, Controller,
+        and Processor.'
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-2
+      assessable: false
+      depth: 1
+      ref_id: Article 2
+      name: Scope of application
+      description: The Law applies to any processing of Personal Data taking place within the Kingdom
+        by any means, including processing of Personal Data relating to individuals residing in the Kingdom
+        by any entity outside the Kingdom. It also extends to data of deceased persons that would lead
+        to identifying them or a family member. It does not apply to processing of Personal Data for personal
+        or family use as long as the Data Subject has not published or disclosed it publicly.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-3
+      assessable: false
+      depth: 1
+      ref_id: Article 3
+      name: Non-derogation
+      description: The provisions and procedures stated in this Law shall not prejudice any provision
+        that grants a right to the Data Subject or confers better protection to Personal Data pursuant
+        to any other law or an international agreement to which the Kingdom is a party.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-4
+      assessable: false
+      depth: 1
+      ref_id: Article 4
+      name: Rights of the Data Subject
+      description: The Data Subject shall have the following rights pursuant to this Law and as set out
+        in the Regulations.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-4
+      ref_id: '4.1'
+      description: The right to be informed about the legal basis and the purpose of the Collection of
+        their Personal Data.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-4
+      ref_id: '4.2'
+      description: The right to access their Personal Data held by the Controller, in accordance with
+        the rules and procedures set out in the Regulations, and without prejudice to the provisions of
+        Article (9) of this Law.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-4
+      ref_id: '4.3'
+      description: The right to request obtaining their Personal Data held by the Controller in a readable
+        and clear format, in accordance with the controls and procedures specified by the Regulations.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-4
+      ref_id: '4.4'
+      description: The right to request correcting, completing, or updating their Personal Data held by
+        the Controller.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-4
+      ref_id: '4.5'
+      description: The right to request Destruction of their Personal Data held by the Controller when
+        such Personal Data is no longer needed by the Data Subject, without prejudice to the provisions
+        of Article (18) of this Law.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-5
+      assessable: false
+      depth: 1
+      ref_id: Article 5
+      name: Consent of the Data Subject
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-5
+      ref_id: '5.1'
+      description: Except for the cases stated in this Law, neither Personal Data may be processed nor
+        the purpose of Personal Data Processing may be changed without the consent of the Data Subject.
+        The Regulations set out the conditions of consent, the cases in which the consent must be explicit,
+        and the terms and conditions related to obtaining the consent of the legal guardian if the Data
+        Subject fully or partially lacks legal capacity.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-5
+      ref_id: '5.2'
+      description: In all cases, the Data Subject may withdraw the consent at any time; the Regulations
+        determine the necessary controls for such case.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-6
+      assessable: false
+      depth: 1
+      ref_id: Article 6
+      name: Legal bases other than consent
+      description: Processing of Personal Data is exempt from the consent requirement in Article 5(1)
+        in the following cases.
+      annotation: Sub-items are alternative lawful bases, not cumulative duties. Assess each only where
+        the Controller actually relies on that basis; mark the others N/A.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-6
+      ref_id: '6.1'
+      description: Processing serves an actual interest of the Data Subject but contacting them is impossible
+        or difficult.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-6
+      ref_id: '6.2'
+      description: Processing is pursuant to another law or in implementation of a previous agreement
+        to which the Data Subject is a party.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-6
+      ref_id: '6.3'
+      description: The Controller is a Public Entity and the Processing is required for security purposes
+        or to satisfy judicial requirements.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-6
+      ref_id: '6.4'
+      description: Processing is necessary to fulfil legitimate interests of the Controller without prejudice
+        to the rights of the Data Subject, provided that no Sensitive Data is processed. Detailed conditions
+        are set out in the Regulations (including a documented Legitimate Interest Assessment).
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-7
+      assessable: true
+      depth: 1
+      ref_id: Article 7
+      name: Consent not a condition for service
+      description: Consent under Article 5(1) may not form a condition of providing a service or a benefit,
+        unless the service or benefit is directly related to the Processing of Personal Data for which
+        the consent is given.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-8
+      assessable: true
+      depth: 1
+      ref_id: Article 8
+      name: Selection and oversight of Processors
+      description: The Controller shall only select Processors providing the necessary guarantees to implement
+        the provisions of this Law and the Regulations, shall monitor the compliance of such Processors,
+        and remains responsible towards the Data Subject and the Competent Authority. The Regulations
+        set out the provisions for such selection and for any subsequent contracts conducted by the Processor.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-9
+      assessable: false
+      depth: 1
+      ref_id: Article 9
+      name: Restrictions on the right of access
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-9
+      ref_id: '9.1'
+      description: 'The Controller may restrict the Data Subject''s right of access and the right to obtain
+        a copy of Personal Data, in accordance with timeframes and controls set out in the Regulations,
+        in the following cases: (a) when necessary to protect the Data Subject or others from harm; (b)
+        when the Controller is a Public Entity and restriction is required for security, legal implementation
+        or judicial purposes.'
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-9
+      ref_id: '9.2'
+      description: The Controller shall prevent the Data Subject from accessing Personal Data in any of
+        the situations stated in paragraphs (1), (2), (3), (4), (5) and (6) of Article (16) of this Law.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-10
+      assessable: false
+      depth: 1
+      ref_id: Article 10
+      name: Direct collection and purpose limitation — exceptions
+      description: The Controller shall only collect Personal Data directly from the Data Subject and
+        may only process it for the purposes for which it has been collected, unless one of the following
+        applies (with provisions and controls in the Regulations).
+      annotation: Sub-items are alternative exceptions to the direct-collection / purpose-limitation rule,
+        not cumulative duties. Assess each only where the Controller actually relies on that exception;
+        mark the others N/A.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-10
+      ref_id: '10.1'
+      description: The Data Subject has consented in accordance with this Law.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-10
+      ref_id: '10.2'
+      description: The Personal Data is publicly available or has been collected from publicly available
+        sources.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-10
+      ref_id: '10.3'
+      description: The Controller is a Public Entity and Collection is for public interest, security,
+        legal implementation or judicial requirements.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:10.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-10
+      ref_id: '10.4'
+      description: Compliance with direct collection would harm the Data Subject or affect their vital
+        interests.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:10.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-10
+      ref_id: '10.5'
+      description: Collection or processing is necessary to protect public health, public safety, or the
+        life or health of specific individuals.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:10.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-10
+      ref_id: '10.6'
+      description: The Personal Data will be processed in a way that makes direct or indirect identification
+        of the Data Subject impossible.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:10.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-10
+      ref_id: '10.7'
+      description: Collection or processing is necessary to fulfil legitimate interests of the Controller
+        without prejudice to the rights of the Data Subject, provided no Sensitive Data is processed.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-11
+      assessable: false
+      depth: 1
+      ref_id: Article 11
+      name: Principles of Collection and Processing
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-11
+      ref_id: '11.1'
+      description: The purposes of Collection of Personal Data shall be directly related to the Controller's
+        purposes and shall comply with the provisions of laws and regulations.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:11.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-11
+      ref_id: '11.2'
+      description: The means of Collection of Personal Data shall be lawful, appropriate, direct, clear
+        and safe, and shall be free from any deception, misleading or coercion.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:11.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-11
+      ref_id: '11.3'
+      description: The content of the Personal Data shall be appropriate and limited to the minimum amount
+        necessary to achieve the purpose of Collection. Information identifying the Data Subject shall
+        be avoided once it is no longer required to achieve such purpose.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:11.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-11
+      ref_id: '11.4'
+      description: When the Personal Data is no longer needed for the purposes for which it was collected,
+        the Controller shall cease its Collection and destroy previously collected Personal Data without
+        undue delay.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-12
+      assessable: true
+      depth: 1
+      ref_id: Article 12
+      name: Privacy policy
+      description: The Controller shall use a privacy policy and make it available to Data Subjects for
+        their information prior to collecting their Personal Data. The policy shall specify the purpose
+        of Collection, the Personal Data to be collected, the means used for Collection, Processing, storage
+        and Destruction, and information about the Data Subject's rights and how to exercise such rights.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-13
+      assessable: false
+      depth: 1
+      ref_id: Article 13
+      name: Information to the Data Subject at Collection
+      description: When collecting Personal Data directly from the Data Subject, the Controller shall
+        take appropriate measures to inform the Data Subject of the following upon Collection.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:13.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-13
+      ref_id: '13.1'
+      description: The legal basis for collecting their Personal Data.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:13.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-13
+      ref_id: '13.2'
+      description: The purpose of the Collection, identifying which Personal Data is mandatory and which
+        is optional, and informing the Data Subject that the data will not be subsequently processed in
+        a manner inconsistent with the Collection purpose or in cases other than those stated in Article
+        (10) of this Law.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:13.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-13
+      ref_id: '13.3'
+      description: Unless the Collection is for security purposes, the identity of the person collecting
+        the Personal Data and the address of its representative, if necessary.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:13.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-13
+      ref_id: '13.4'
+      description: The entities to which the Personal Data will be disclosed, the capacity of such entities,
+        and whether the Personal Data will be transferred, disclosed or processed outside the Kingdom.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:13.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-13
+      ref_id: '13.5'
+      description: The potential consequences and risks that may result from not collecting the Personal
+        Data.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:13.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-13
+      ref_id: '13.6'
+      description: The rights of the Data Subject pursuant to Article (4) of this Law.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:13.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-13
+      ref_id: '13.7'
+      description: Such other elements as set out in the Regulations based on the nature of the activity
+        carried out by the Controller.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-14
+      assessable: true
+      depth: 1
+      ref_id: Article 14
+      name: Verification of accuracy before processing
+      description: The Controller may not process Personal Data without taking sufficient steps to verify
+        its accuracy, completeness, timeliness and relevance to the purpose for which it is collected,
+        in accordance with the provisions of the Law.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-15
+      assessable: false
+      depth: 1
+      ref_id: Article 15
+      name: Restrictions on Disclosure
+      description: The Controller may not disclose Personal Data except in the following cases (with provisions
+        and controls in the Regulations).
+      annotation: Sub-items are alternative lawful bases for Disclosure, not cumulative duties. Assess
+        each only where the Controller actually relies on that basis to disclose; mark the others N/A.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:15.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-15
+      ref_id: '15.1'
+      description: The Data Subject has consented to the Disclosure in accordance with this Law.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:15.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-15
+      ref_id: '15.2'
+      description: The Personal Data has been collected from a publicly available source.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:15.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-15
+      ref_id: '15.3'
+      description: The entity requesting Disclosure is a Public Entity and the Disclosure is required
+        for public interest, security, legal implementation or judicial requirements.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:15.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-15
+      ref_id: '15.4'
+      description: The Disclosure is necessary to protect public health, public safety, or the life or
+        health of specific individuals.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:15.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-15
+      ref_id: '15.5'
+      description: The Disclosure involves subsequent Processing in a manner that makes direct or indirect
+        identification of the Data Subject impossible.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:15.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-15
+      ref_id: '15.6'
+      description: The Disclosure is necessary to achieve legitimate interests of the Controller without
+        prejudice to the rights of the Data Subject, and Sensitive Data is not processed.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-16
+      assessable: false
+      depth: 1
+      ref_id: Article 16
+      name: Cases prohibiting Disclosure or access
+      description: Enumerates in six paragraphs the cases in which the Controller must prevent Disclosure
+        of Personal Data and Data Subject access; Article 9(2) of this Law cross-refers to paragraphs
+        (1)–(6) of this Article. Refer to the official text published by SDAIA for the authoritative
+        wording of each paragraph.
+      annotation: The full wording of paragraphs (1)–(6) of Article 16 could not be retrieved from the
+        secondary sources used to build this library. Verify against the official SDAIA text before deriving
+        assessment items from this article.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-17
+      assessable: true
+      depth: 1
+      ref_id: Article 17
+      name: Notification of corrections to third parties
+      description: If Personal Data is corrected, completed or updated, the Controller shall notify such
+        amendment to all the other entities to which such Personal Data has been transferred and make
+        the amendment available to them. The Regulations set out timeframes for correction and updating
+        of Personal Data, the types of correction, and the procedures required to avoid the consequences
+        of Processing incorrect, inaccurate or outdated Personal Data.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-18
+      assessable: true
+      depth: 1
+      ref_id: Article 18
+      name: Destruction of Personal Data
+      description: The Controller shall, without undue delay, destroy the Personal Data when it is no
+        longer necessary for the purpose for which it was collected. Retention is permitted only when
+        (i) the Personal Data is retained for a specific period by virtue of legal requirements, or (ii)
+        the Personal Data is related to ongoing judicial proceedings; in such cases destruction occurs
+        after the legal period expires or the judicial procedure concludes.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-19
+      assessable: true
+      depth: 1
+      ref_id: Article 19
+      name: Security of Personal Data
+      description: The Controller shall implement all the necessary organizational, administrative and
+        technical measures to protect Personal Data, including during the Transfer of Personal Data, in
+        accordance with the provisions and controls set out in the Regulations (which require alignment
+        with the standards of the National Cybersecurity Authority or comparable recognised practices).
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-20
+      assessable: false
+      depth: 1
+      ref_id: Article 20
+      name: Personal Data breach notification
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:20.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-20
+      ref_id: '20.1'
+      description: The Controller shall notify the Competent Authority upon knowing of any breach, damage,
+        or illegal access to Personal Data, in accordance with the Regulations.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:20.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-20
+      ref_id: '20.2'
+      description: The Controller shall notify the Data Subject of any breach, damage or illegal access
+        to their Personal Data that would cause damage to their data or cause prejudice to their rights
+        and interests, in accordance with the Regulations.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-21
+      assessable: true
+      depth: 1
+      ref_id: Article 21
+      name: Response to Data Subject requests
+      description: The Controller shall respond to the requests of the Data Subject pertaining to their
+        rights under this Law within such period and in such method as set out in the Regulations.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-22
+      assessable: true
+      depth: 1
+      ref_id: Article 22
+      name: Impact assessment of Processing
+      description: The Controller shall conduct an impact assessment of Personal Data Processing in relation
+        to any product or service, based on the nature of the activity carried out by the Controller,
+        in accordance with the relevant provisions of the Regulations.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-23
+      assessable: false
+      depth: 1
+      ref_id: Article 23
+      name: Additional controls for Health Data
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:23.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-23
+      ref_id: '23.1'
+      description: Access to Health Data, including medical files, shall be restricted to the minimum
+        number of employees or workers, and only to the extent necessary to provide the required Health
+        Services.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:23.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-23
+      ref_id: '23.2'
+      description: Health Data Processing procedures and operations shall be restricted to the minimum
+        extent of employees and workers necessary to provide Health Services or to offer health insurance
+        programs.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-24
+      assessable: false
+      depth: 1
+      ref_id: Article 24
+      name: Additional controls for Credit Data
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:24.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-24
+      ref_id: '24.1'
+      description: The Controller shall implement appropriate measures to verify that the Data Subject
+        has given explicit consent to the Collection of Credit Data, to changing the purpose of Collection,
+        or to Disclosure or Publishing of such data, in accordance with this Law and the Credit Information
+        Law.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:24.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-24
+      ref_id: '24.2'
+      description: The Data Subject shall be notified when a request for Disclosure of their Credit Data
+        is received from any entity.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-25
+      assessable: false
+      depth: 1
+      ref_id: Article 25
+      name: Direct marketing and awareness-raising communications
+      description: The Controller may not use personal means of communication, including postal and electronic
+        addresses, to send advertising or awareness-raising material to Data Subjects, except when the
+        following conditions are satisfied (public entities are exempt from these restrictions).
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:25.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-25
+      ref_id: '25.1'
+      description: The prior consent of the targeted recipient has been obtained.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:25.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-25
+      ref_id: '25.2'
+      description: A clear mechanism is provided to enable the recipient to request cessation of receiving
+        such materials.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-26
+      assessable: true
+      depth: 1
+      ref_id: Article 26
+      name: Processing for marketing purposes
+      description: With the exception of Sensitive Data, Personal Data may be processed for marketing
+        purposes only if it is collected directly from the Data Subject and their consent is given in
+        accordance with the provisions of the Law; the Regulations set out the controls in such regard.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-27
+      assessable: false
+      depth: 1
+      ref_id: Article 27
+      name: Processing for scientific, research and statistical purposes
+      annotation: Sub-items are alternative exceptions that allow Processing without consent for research/statistical
+        purposes, not cumulative duties. Assess each only where the Controller actually relies on that
+        exception; mark the others N/A.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:27.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-27
+      ref_id: '27.1'
+      description: Personal Data may be collected or processed without consent for scientific, research
+        or statistical purposes only if it does not specifically identify the Data Subject.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:27.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-27
+      ref_id: '27.2'
+      description: Personal Data may be collected or processed without consent for scientific, research
+        or statistical purposes if evidence of the Data Subject's identity will be destroyed during the
+        Processing and prior to Disclosure of such data to any other entity, provided it is not Sensitive
+        Data.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:27.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-27
+      ref_id: '27.3'
+      description: Personal Data may be collected or processed without consent for scientific, research
+        or statistical purposes if such Collection or Processing is required by another law or in implementation
+        of a previous agreement to which the Data Subject is a party.
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-28
+      assessable: true
+      depth: 1
+      ref_id: Article 28
+      name: Copying of official identification documents
+      description: It is not permissible to copy official documents where Data Subjects are identifiable,
+        except where it is required by law, or when a competent public authority requests copying such
+        documents pursuant to the Regulations.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-29
+      assessable: false
+      depth: 1
+      ref_id: Article 29
+      name: Transfer of Personal Data outside the Kingdom
+      annotation: 'Cross-border transfer is built as: an enumerated set of permitted purposes (29.1),
+        a set of mandatory conditions to be satisfied for every transfer (29.2), and a carve-out from
+        29.2 in cases of extreme necessity (29.3). Assess 29.1 only where the Controller transfers Personal
+        Data outside the Kingdom; 29.2 is the substantive conditional duty.'
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:29.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-29
+      ref_id: '29.1'
+      description: 'The Controller may transfer Personal Data outside the Kingdom, or disclose it to a
+        party outside the Kingdom, only for one of the following purposes: (a) to perform obligations
+        under an agreement to which the Kingdom is a party; (b) to serve interests of the Kingdom; (c)
+        to fulfil an obligation to which the Data Subject is a party; or (d) for other purposes set out
+        in the Regulations.'
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:29.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-29
+      ref_id: '29.2'
+      description: 'Any Transfer or Disclosure under paragraph (1) must satisfy each of the following
+        conditions: (a) it shall not prejudice national security or the vital interests of the Kingdom;
+        (b) the Personal Data must enjoy an adequate level of protection outside the Kingdom that is at
+        least equivalent to the level of protection guaranteed by this Law and the Regulations; (c) the
+        Transfer or Disclosure shall be limited to the minimum amount of Personal Data necessary.'
+      implementation_groups:
+      - conditional
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:29.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-29
+      ref_id: '29.3'
+      description: The conditions in paragraph (2) do not apply in cases of extreme necessity to preserve
+        the life of the Data Subject or their vital interests, or to prevent, examine or treat an infectious
+        disease.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:29.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-29
+      ref_id: '29.4'
+      description: The Regulations set out provisions, criteria, procedures, exceptions, controls and
+        oversight mechanisms for the implementation of this Article (including Standard Contractual Clauses,
+        Binding Common Rules, certifications and risk assessments).
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-30
+      assessable: false
+      depth: 1
+      ref_id: Article 30
+      name: Supervision, DPO and cooperation with the Competent Authority
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:30.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-30
+      ref_id: '30.1'
+      description: The Competent Authority oversees the implementation of this Law and the Regulations,
+        without prejudice to the powers of the Saudi Central Bank.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:30.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-30
+      ref_id: '30.2'
+      description: The Regulations identify the situations where Controllers shall appoint one or more
+        Personal Data Protection Officers, and define their responsibilities.
+      annotation: The substantive DPO appointment criteria are not in the PDPL Law itself; they live in
+        the Implementing Regulations. Assess the DPO duty against the IR library, not against this article.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:30.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-30
+      ref_id: '30.3'
+      description: The Controller shall cooperate with the Competent Authority in performing its duties
+        to supervise the implementation of this Law and the Regulations, and shall address matters referred
+        to it.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:30.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-30
+      ref_id: '30.4'
+      description: The Controller shall, when required, register in the national register of Controllers
+        maintained by the Competent Authority and shall provide the documents and information requested
+        by the Authority in exercising its supervisory functions.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:30.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pdpl-ksa:article-30
+      ref_id: '30.5'
+      description: The Competent Authority may delegate any of its supervisory and enforcement duties
+        under this Law and the Regulations to other authorities.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-31
+      assessable: false
+      depth: 1
+      ref_id: Article 31
+      name: '[Repealed]'
+      description: Article 31 has been repealed.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-32
+      assessable: false
+      depth: 1
+      ref_id: Article 32
+      name: '[Repealed]'
+      description: Article 32 has been repealed.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-33
+      assessable: false
+      depth: 1
+      ref_id: Article 33
+      name: Powers of the Competent Authority — licensing and oversight
+      description: Empowers the Competent Authority to set requirements for commercial, professional or
+        non-profit activities related to Personal Data protection, to license entities issuing accreditation
+        certificates to Controllers and Processors, to license entities conducting audits of Personal
+        Data Processing, and to specify tools and mechanisms to monitor compliance of Controllers and
+        Processors outside the Kingdom processing the data of individuals residing in the Kingdom. This
+        article addresses the regulator's powers and does not impose direct obligations on Controllers.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-34
+      assessable: false
+      depth: 1
+      ref_id: Article 34
+      name: Right to file complaints with the Competent Authority
+      description: A Data Subject may submit to the Competent Authority any complaint that may arise out
+        of the implementation of this Law and the Regulations. The Regulations set out the rules for processing
+        such complaints.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-35
+      assessable: false
+      depth: 1
+      ref_id: Article 35
+      name: Criminal penalty — unlawful disclosure of Sensitive Data
+      description: Imprisonment of up to two years and/or a fine of up to three million Saudi Riyals for
+        any person who discloses or publishes Sensitive Data in violation of the Law with the intent to
+        harm the Data Subject or to achieve a personal benefit. Public Prosecution investigates and prosecutes
+        violations; competent courts have jurisdiction; penalties may be doubled (within statutory limits)
+        in case of recidivism.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-36
+      assessable: false
+      depth: 1
+      ref_id: Article 36
+      name: Administrative penalties and Violations Committee
+      description: Warnings or fines of up to five million Saudi Riyals for violations of the Law and
+        Regulations, with penalties potentially doubled for repeat offences. A Violations Committee (minimum
+        three members including a legal advisor and a technical specialist) examines violations and proposes
+        penalties, subject to approval by the president of the Competent Authority. Penalties may be appealed
+        before competent courts.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-37
+      assessable: false
+      depth: 1
+      ref_id: Article 37
+      name: Inspection and enforcement powers
+      description: Employees and workers appointed by a decision of the president of the Competent Authority
+        have the powers to control and inspect violations of the Law and Regulations. They may seek assistance
+        from criminal investigations authorities or other competent authorities. The Competent Authority
+        has the right to seize the means or tools used in committing the violation pending a decision.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-38
+      assessable: false
+      depth: 1
+      ref_id: Article 38
+      name: Confiscation of proceeds and publication of judgments
+      description: Without prejudice to bona fide third-party rights, the competent court may order confiscation
+        of funds obtained from violations. The court or the Violations Committee may also order publication,
+        at the violator's expense, of a summary of the judgment in local newspapers or other appropriate
+        means once the judgment is final.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-39
+      assessable: false
+      depth: 1
+      ref_id: Article 39
+      name: Disciplinary action within Public Entities
+      description: Without prejudice to Articles 35 and 36(1), a Public Entity shall discipline any of
+        its employees who violate any provision of this Law and the Regulations, in accordance with the
+        disciplinary provisions and procedures prescribed by law.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-40
+      assessable: false
+      depth: 1
+      ref_id: Article 40
+      name: Right to compensation
+      description: Without prejudice to the penalties stated in this Law, any individual that suffers
+        damage as a result of any of the violations stated in this Law or the Regulations may apply to
+        a competent court for proportionate compensation for material or moral damage.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-41
+      assessable: true
+      depth: 1
+      ref_id: Article 41
+      name: Confidentiality obligation — including after end of relationship
+      description: Any person that engages in the Processing of Personal Data shall protect the confidentiality
+        of the Personal Data even after the end of such person's occupational or contractual relationship.
+      implementation_groups:
+      - core
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-42
+      assessable: false
+      depth: 1
+      ref_id: Article 42
+      name: Issuance of the Implementing Regulations
+      description: The president of the Competent Authority shall issue the Regulations within a period
+        not exceeding seven hundred and twenty (720) days from the date of publishing the Law, in coordination
+        with the Ministry of Communications and Information Technology, Ministry of Foreign Affairs, Communications,
+        Space & Technology Commission, Digital Government Authority, National Cybersecurity Authority,
+        Saudi Health Council, and Saudi Central Bank, each in its own jurisdiction.
+    - urn: urn:intuitem:risk:req_node:pdpl-ksa:article-43
+      assessable: false
+      depth: 1
+      ref_id: Article 43
+      name: Entry into force
+      description: This Law shall come into force seven hundred and twenty (720) days from the date of
+        its publication in the Official Gazette.

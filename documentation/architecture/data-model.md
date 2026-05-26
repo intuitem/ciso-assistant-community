@@ -536,7 +536,7 @@ Projects objects have the following fields:
 - ref_id (ex internal reference)
 - Name
 - Description
-- Phase: --/Initiation/Planning/Execution/Monitoring/Closure/Closed/Dropped
+- Status: --/Draft/Initiated/Planning/In Progress/On Hold/Cancelled/Closing/Closed/
 - Category: --/Portfolio/Program/Project/Initiative/Activity
 
 Here is an example of a project management structure:

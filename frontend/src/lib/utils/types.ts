@@ -137,6 +137,12 @@ export const URL_MODEL = [
 	// pmbok
 	'generic-collections',
 	'accreditations',
+	'projects',
+	'responsibility-roles',
+	'responsibility-matrices',
+	'responsibility-matrix-activities',
+	'responsibility-matrix-actors',
+	'responsibility-assignments',
 	// metrology
 	'metric-definitions',
 	'metric-instances',
@@ -147,7 +153,10 @@ export const URL_MODEL = [
 	'dashboard-builtin-widgets',
 	// policy documents
 	'managed-documents',
-	'document-revisions'
+	'document-revisions',
+	// presets/journeys
+	'presets',
+	'journeys'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

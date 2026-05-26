@@ -45,17 +45,17 @@ Users shall not:
 
 ## 6. Mobile and Remote Working
 
-- Mobile devices used for business must be secured with a passcode or biometric authentication
-- Lost or stolen devices must be reported immediately
+- Mobile devices used for business shall be secured with a passcode or biometric authentication
+- Lost or stolen devices shall be reported immediately
 - Public Wi-Fi networks shall not be used for accessing sensitive data without a VPN
-- Remote workers must ensure their work environment maintains confidentiality
+- Remote workers shall ensure their work environment maintains confidentiality
 
 ## 7. Data Handling
 
 - Data shall be handled in accordance with its classification level
 - Sensitive data shall not be stored on personal devices without authorization
 - Data shall not be transferred to external media without approval
-- Cloud storage services must be approved by IT before use
+- Cloud storage services shall be approved by IT before use
 
 ## 8. Monitoring
 

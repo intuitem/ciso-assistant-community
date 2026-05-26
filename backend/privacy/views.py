@@ -16,6 +16,7 @@ from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
 
+from core.utils import camel_case
 from iam.models import Folder, RoleAssignment
 
 from .models import (
@@ -463,24 +464,38 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         )
 
         # Aggregate data breaches by breach type
+        breach_type_labels = dict(DataBreach.BREACH_TYPE_CHOICES)
         breach_types = (
             DataBreach.objects.filter(id__in=viewable_data_breaches)
             .values("breach_type")
             .annotate(count=Count("id"))
         )
         breach_type_data = [
-            {"name": item["breach_type"], "value": item["count"]}
+            {
+                "name": breach_type_labels.get(
+                    item["breach_type"], item["breach_type"]
+                ),
+                "localName": camel_case(item["breach_type"]),
+                "value": item["count"],
+            }
             for item in breach_types
         ]
 
         # Aggregate right requests by request type
+        request_type_labels = dict(RightRequest.REQUEST_TYPE_CHOICES)
         request_types = (
             RightRequest.objects.filter(id__in=viewable_right_requests)
             .values("request_type")
             .annotate(count=Count("id"))
         )
         request_type_data = [
-            {"name": item["request_type"], "value": item["count"]}
+            {
+                "name": request_type_labels.get(
+                    item["request_type"], item["request_type"]
+                ),
+                "localName": camel_case(item["request_type"]),
+                "value": item["count"],
+            }
             for item in request_types
         ]
 
