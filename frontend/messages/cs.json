@@ -13,7 +13,7 @@
 	"hindi": "Hindština",
 	"urdu": "Urdština",
 	"czech": "Čeština",
-	"swedish": "Švédský",
+	"swedish": "Švédština",
 	"indonesian": "Indonéština",
 	"danish": "Dánština",
 	"croatian": "Chorvatština",
@@ -1871,5 +1871,7 @@
 	"builderQuestionTypeUniqueChoice": "Jedinečná volba",
 	"builderQuestionTypeMultipleChoice": "Více možností",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "změněno v",
+	"requirementWeight": "Váha",
+	"builderChangedOn": "Změněno dne"
 }

@@ -4271,5 +4271,6 @@
 	"builderQuestionTypeUniqueChoice": "단일 선택",
 	"builderQuestionTypeMultipleChoice": "복수 선택",
 	"builderQuestionTypeDate": "날짜",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "변경됨:",
+	"requirementWeight": "가중치"
 }

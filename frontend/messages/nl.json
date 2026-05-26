@@ -3479,5 +3479,6 @@
 	"builderQuestionTypeUniqueChoice": "Unieke keuze",
 	"builderQuestionTypeMultipleChoice": "Meerkeuze",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "gewijzigd in",
+	"requirementWeight": "Gewicht"
 }

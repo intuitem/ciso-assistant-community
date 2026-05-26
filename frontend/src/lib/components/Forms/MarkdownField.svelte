@@ -10,9 +10,10 @@
 	interface Props {
 		class?: string;
 		label?: string | undefined;
-		field: string;
+		field?: string;
 		helpText?: string | undefined;
-		form: any;
+		form?: any;
+		value?: string;
 		cachedValue?: string;
 		cacheLock?: CacheLock;
 		hidden?: boolean;
@@ -26,9 +27,10 @@
 	let {
 		class: _class = '',
 		label = $bindable(),
-		field,
+		field = '',
 		helpText = undefined,
-		form,
+		form = undefined,
+		value = $bindable(''),
 		cachedValue = $bindable(),
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
@@ -43,17 +45,24 @@
 	}: Props = $props();
 
 	label = label ?? field;
-	const { value, errors, constraints } = formFieldProxy(form, field);
+
+	// Form-coupled (sveltekit-superforms) vs standalone (plain bind:value).
+	// Picking one path at mount keeps the template simple.
+	const formCoupled = !!form;
+	const proxy = formCoupled ? formFieldProxy(form, field) : null;
+	const proxyValue = proxy?.value;
+	const proxyErrors = proxy?.errors;
+	const proxyConstraints = proxy?.constraints;
 
 	let showPreview = $state(defaultMode === 'preview');
 
 	run(() => {
-		cachedValue = $value;
+		if (formCoupled && proxyValue) cachedValue = $proxyValue;
 	});
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
-		if (cacheResult) $value = cacheResult;
+		if (cacheResult && formCoupled && proxyValue) $proxyValue = cacheResult;
 	});
 
 	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
@@ -71,12 +80,18 @@
 			adaptTextAreaSize(textareaElem);
 		}
 	});
+
+	let currentValue = $derived(formCoupled && proxyValue ? $proxyValue : value);
+	let currentErrors = $derived(formCoupled && proxyErrors ? $proxyErrors : undefined);
+	let currentConstraints = $derived(
+		formCoupled && proxyConstraints ? $proxyConstraints : undefined
+	);
 </script>
 
 <div class={classesDisabled(disabled)}>
-	{#if label !== undefined && !hidden}
+	{#if label !== undefined && !hidden && label !== ''}
 		<div class="flex justify-between items-center">
-			{#if $constraints?.required}
+			{#if currentConstraints?.required}
 				<label class="text-sm font-semibold" for={field}
 					>{label} <span class="text-red-500">*</span></label
 				>
@@ -104,16 +119,18 @@
 			</div>
 		</div>
 	{/if}
-	{#if $errors}
+	{#if currentErrors}
 		<div>
-			{#each $errors as error}
+			{#each currentErrors as error}
 				<p class="text-error-500 text-xs font-medium">{error}</p>
 			{/each}
 		</div>
 	{/if}
 	<div class="control">
 		{#if showPreview}
-			<input type="hidden" name={field} value={$value} />
+			{#if formCoupled}
+				<input type="hidden" name={field} value={currentValue} />
+			{/if}
 			<div
 				class="p-3 border border-surface-300 rounded-md min-h-[120px] overflow-auto max-h-[75dvh] bg-surface-50"
 				ondblclick={() => !disabled && (showPreview = false)}
@@ -127,24 +144,37 @@
 					}
 				}}
 			>
-				{#if $value}
-					<MarkdownRenderer content={$value} />
+				{#if currentValue}
+					<MarkdownRenderer content={currentValue} />
 				{:else}
 					<p class="text-gray-500 italic">{m.markdownCTA()}</p>
 				{/if}
 			</div>
-		{:else}
+		{:else if formCoupled && proxyValue}
 			<textarea
-				class="{'input ' + _class} max-h-[75dvh] {classesTextField($errors)}"
+				class="{'input ' + _class} max-h-[75dvh] {classesTextField(currentErrors)}"
 				data-testid="form-input-{field.replaceAll('_', '-')}"
 				name={field}
-				aria-invalid={$errors ? 'true' : undefined}
+				aria-invalid={currentErrors ? 'true' : undefined}
 				oninput={(event) => {
 					adaptTextAreaSize(event.target);
 				}}
 				bind:this={textareaElem}
-				bind:value={$value}
-				{...$constraints}
+				bind:value={$proxyValue}
+				{...currentConstraints}
+				{...rest}
+				{rows}
+				{cols}
+				{disabled}
+			></textarea>
+		{:else}
+			<textarea
+				class="{'input ' + _class} max-h-[75dvh]"
+				oninput={(event) => {
+					adaptTextAreaSize(event.target);
+				}}
+				bind:this={textareaElem}
+				bind:value
 				{...rest}
 				{rows}
 				{cols}

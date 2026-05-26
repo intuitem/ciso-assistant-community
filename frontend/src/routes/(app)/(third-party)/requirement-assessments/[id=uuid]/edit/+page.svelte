@@ -397,8 +397,13 @@
 {/if}
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
-		<div class="flex">
+		<div class="flex items-center gap-2">
 			<span class="code left h-min">{data.requirement.urn}</span>
+			{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
+				<span class="badge h-fit bg-indigo-100 text-indigo-800">
+					{m.requirementWeight()}: {data.requirement.weight}
+				</span>
+			{/if}
 		</div>
 		<a
 			class="text-pink-500 hover:text-pink-400"
