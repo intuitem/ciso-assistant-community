@@ -421,7 +421,8 @@
 						{ label: 'Polish Złoty (PLN)', value: 'PLN' },
 						{ label: 'Taiwan Dollar (NT$)', value: 'NT$' },
 						{ label: 'Thai Baht (฿)', value: '฿' },
-						{ label: 'Malaysian Ringgit (MYR)', value: 'MYR' }
+						{ label: 'Malaysian Ringgit (MYR)', value: 'MYR' },
+						{ label: 'CFP Franc (XPF)', value: 'XPF' }
 					]}
 					label={m.currency()}
 					helpText={m.currencyHelpText()}
