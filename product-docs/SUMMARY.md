@@ -6,6 +6,7 @@
 
 * [Philosophy](introduction/philosophy.md)
 * [Vocabulary](introduction/vocabulary.md)
+* [Community vs PRO](introduction/editions.md)
 
 ## Concepts
 
@@ -152,8 +153,11 @@
 * [Framework report](features/framework-report.md)
 * [Insights](features/insights.md)
 * [Control Plan](features/control-plan.md)
+* [Action plans](features/action-plans.md)
 * [Context menu](features/context-menu.md)
 * [Batch actions](features/batch-actions.md)
+* [Command palette](features/command-palette.md)
+* [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
 * [Framework-specific features](features/framework-specific/README.md)
