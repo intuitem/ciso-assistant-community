@@ -29,5 +29,8 @@ cli/db_backup
 /frontend/project.inlang/cache
 
 # Ignore Windows-specific dev script helpers
+# > Backend
 backend.ps1
 backend/.win_native_dev_runserver.py
+# > Tools
+tools/convert_library_v2.bat

@@ -219,6 +219,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'risk-assessments' },
+			{ field: 'perimeter', urlModel: 'findings-assessments' },
+			{ field: 'perimeter', urlModel: 'business-impact-analysis' },
 			{ field: 'perimeter', urlModel: 'entity-assessments' },
 			{ field: 'perimeters', urlModel: 'campaigns' },
 			{ field: 'perimeters', urlModel: 'processings' }
@@ -2661,6 +2663,61 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'author' },
 			{ field: 'linked_collection' },
 			{ field: 'checklist' },
+			{ field: 'filtering_labels' }
+		]
+	},
+	projects: {
+		name: 'project',
+		localName: 'project',
+		localNamePlural: 'projects',
+		verboseName: 'Project',
+		verboseNamePlural: 'Projects',
+		endpointUrl: 'pmbok/projects',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'ref_link' },
+			{ field: 'owner' },
+			{ field: 'sponsor' },
+			{ field: 'status' },
+			{ field: 'priority' },
+			{ field: 'health' },
+			{ field: 'start_date', type: 'date' },
+			{ field: 'end_date', type: 'date' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'closed_at', type: 'date' },
+			{ field: 'progress' },
+			{ field: 'budget' },
+			{ field: 'currency' },
+			{ field: 'linked_collection', urlModel: 'generic-collections' },
+			{ field: 'parent_project', urlModel: 'projects' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'owner', urlModel: 'actors' },
+			{ field: 'sponsor', urlModel: 'actors' },
+			{ field: 'linked_collection', urlModel: 'generic-collections' },
+			{ field: 'parent_project', urlModel: 'projects' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'kind', endpointUrl: 'pmbok/projects' },
+			{ field: 'priority', endpointUrl: 'pmbok/projects' }
+		],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'kind' },
+			{ field: 'status' },
+			{ field: 'priority' },
+			{ field: 'health' },
+			{ field: 'owner' },
+			{ field: 'sponsor' },
+			{ field: 'parent_project' },
+			{ field: 'linked_collection' },
 			{ field: 'filtering_labels' }
 		]
 	},
