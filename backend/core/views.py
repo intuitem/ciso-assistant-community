@@ -7493,14 +7493,15 @@ class UserGroupViewSet(BaseModelViewSet):
     ordering = ["builtin", "folder__name", "name"]
     ordering_fields = ["name"]
     filterset_fields = ["folder"]
-    search_fields = [
-        "folder__name"
-    ]  # temporary hack, filters only by folder name, not role name
+    search_fields = ["folder__name", "name"]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
         UserGroupOrderingFilter,
     ]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder")
 
     def destroy(self, request, *args, **kwargs):
         user_group = self.get_object()
