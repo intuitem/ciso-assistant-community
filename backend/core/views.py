@@ -7462,6 +7462,9 @@ class TranslatedNameOrderingFilter(filters.OrderingFilter):
         return str(obj).casefold()
 
     def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
         ordering = self.get_ordering(request, queryset, view)
         if not ordering:
             return queryset
