@@ -1595,5 +1595,6 @@
 	"builderQuestionTypeUniqueChoice": "Enskilt val",
 	"builderQuestionTypeMultipleChoice": "Flerval",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "ändrad i",
+	"requirementWeight": "Vikt"
 }

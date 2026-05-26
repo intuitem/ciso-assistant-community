@@ -2279,5 +2279,6 @@
 	"builderQuestionTypeUniqueChoice": "Μοναδική επιλογή",
 	"builderQuestionTypeMultipleChoice": "Πολλαπλή επιλογή",
 	"builderQuestionTypeDate": "Ημερομηνία",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "άλλαξε σε",
+	"requirementWeight": "Βάρος"
 }

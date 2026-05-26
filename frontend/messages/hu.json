@@ -1581,5 +1581,6 @@
 	"builderQuestionTypeUniqueChoice": "Single choice",
 	"builderQuestionTypeMultipleChoice": "Multiple choice",
 	"builderQuestionTypeDate": "Date",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "módosítva itt:",
+	"requirementWeight": "Súly"
 }

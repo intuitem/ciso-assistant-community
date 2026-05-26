@@ -2900,6 +2900,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "questions",
                 "implementation_groups",
                 "display_mode",
+                "weight",
             ]
 
     name = serializers.CharField(source="__str__")
