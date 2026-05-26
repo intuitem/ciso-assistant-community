@@ -7414,7 +7414,7 @@ class UserViewSet(BaseModelViewSet):
                 "user_groups",
                 queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
                 .select_related("folder")
-                .only("id", "builtin", "name", "folder"),
+                .only("id", "builtin", "name", "folder", "folder__name"),
             )
         )
 
