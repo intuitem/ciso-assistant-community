@@ -11,6 +11,7 @@ on:
       - "backend/**"
       - "frontend/**"
       - "enterprise/**"
+      - ".github/actions/**"
       - ".github/workflows/functional-tests.yml"
   workflow_dispatch:
 
