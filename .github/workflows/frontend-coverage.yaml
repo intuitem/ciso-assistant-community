@@ -7,6 +7,7 @@ on:
     branches: ["main"]
     paths:
       - "frontend/**"
+      - ".github/workflows/frontend-coverage.yaml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
