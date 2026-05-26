@@ -328,10 +328,8 @@ class StrategicScenarioReadSerializer(BaseModelSerializer):
         """Get feared events from the RoTo couple with their gravity"""
         feared_events_data = []
         for feared_event in obj.ro_to_couple.feared_events.all():
-            # Build display string with name and gravity
             gravity_display = feared_event.get_gravity_display()
             display_str = f"{feared_event.name} ({gravity_display['name']})"
-
             feared_events_data.append(
                 {
                     "id": str(feared_event.id),

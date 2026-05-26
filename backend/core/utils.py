@@ -124,6 +124,7 @@ _CURRENCY_FORMAT = {
     "NOK": ("after", True),
     "DKK": ("after", True),
     "PLN": ("after", True),
+    "XPF": ("after", True),
 }
 
 
