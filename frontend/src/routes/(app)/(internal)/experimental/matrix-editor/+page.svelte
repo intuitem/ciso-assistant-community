@@ -3,12 +3,9 @@
 	import LevelEditor from '$lib/components/RiskMatrixEditor/LevelEditor.svelte';
 	import GridEditor from '$lib/components/RiskMatrixEditor/GridEditor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { LOCALE_MAP, language } from '$lib/utils/locales';
 	import { onMount } from 'svelte';
-
-	$pageTitle = m.matrixEditor();
 
 	// Warn before leaving with unsaved changes + auto-load latest draft
 	onMount(() => {
@@ -300,9 +297,12 @@
 
 				const result = await res.json();
 				// Load the newly created draft
-				loadDraft({
+				await loadDraft({
 					id: result.id,
 					name: result.name,
+					description: result.description,
+					provider: result.provider,
+					locale: result.locale,
 					editing_draft: result.editing_draft
 				});
 				refreshDrafts();
@@ -577,9 +577,12 @@
 
 			const result = await res.json();
 			// Load the newly created clone
-			loadDraft({
+			await loadDraft({
 				id: result.id,
 				name: result.name,
+				description: result.description,
+				provider: result.provider,
+				locale: result.locale,
 				editing_draft: result.editing_draft
 			});
 			refreshDrafts();

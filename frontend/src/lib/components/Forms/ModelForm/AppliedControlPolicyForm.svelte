@@ -73,7 +73,12 @@
 	run(() => {
 		if (model?.selectOptions?.priority) {
 			model.selectOptions.priority.forEach((element) => {
-				element.value = parseInt(element.value);
+				element.value = element.value === '--' ? null : parseInt(element.value);
+			});
+		}
+		if (model?.selectOptions?.control_impact) {
+			model.selectOptions.control_impact.forEach((element) => {
+				element.value = element.value === '--' ? null : parseInt(element.value);
 			});
 		}
 	});

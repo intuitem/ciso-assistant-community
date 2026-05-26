@@ -10,7 +10,7 @@
 	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import { onMount } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
@@ -351,17 +351,25 @@
 			if (finalFilterValue) {
 				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
 			}
-
-			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
-			const fullPath = page.url.pathname + page.url.search;
-			if (hrefPattern.test(fullPath)) {
-				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
-			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Persist all filter values (including empty) so cleared defaults stay cleared
+		// Sync the current crumb's href with the new filter query.
+		breadcrumbs.update((crumbs) => {
+			if (crumbs.length < 2) return crumbs;
+			const last = crumbs[crumbs.length - 1];
+			const lastPath = last.href?.split('?')[0];
+			if (lastPath !== page.url.pathname) return crumbs;
+			const newHref = page.url.pathname + page.url.search;
+			if (last.href === newHref) return crumbs;
+			const next = crumbs.slice();
+			next[next.length - 1] = { ...last, href: newHref };
+			return next;
+		});
+		// untracked so resetFilters can delete the entry without retriggering us
 		if (isStandaloneTable) {
-			$tableFilterStates[filterStoreKey] = { ...filterValues };
+			untrack(() => {
+				$tableFilterStates[filterStoreKey] = { ...filterValues };
+			});
 		}
 		setTimeout(() => {
 			handler.invalidate();
@@ -533,6 +541,27 @@
 		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
 	);
 
+	async function resetFilters() {
+		for (const field of filteredFields) {
+			const defaultValue = defaultFilters[field] ?? [];
+			filterValues[field] = Array.isArray(defaultValue)
+				? defaultValue.map((v: { value: string }) => ({ ...v }))
+				: [];
+		}
+		_form.form.update((data) => {
+			for (const field of filteredFields) {
+				const dv = defaultFilters[field];
+				data[field] = Array.isArray(dv) ? dv.map((v: any) => v.value ?? v) : [];
+			}
+			return data;
+		});
+		if (!isStandaloneTable) return;
+		await tick();
+		const next = { ...$tableFilterStates };
+		delete next[filterStoreKey];
+		$tableFilterStates = next;
+	}
+
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
 	});
@@ -697,7 +726,7 @@
 												onChange={(value) => {
 													const arrayValue = Array.isArray(value) ? value : [value];
 													const sanitizedArrayValue = arrayValue.filter(
-														(v) => v !== null && v !== undefined
+														(v) => v !== null && v !== undefined && v !== ''
 													);
 
 													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
@@ -705,6 +734,21 @@
 											/>
 										{/if}
 									{/each}
+									{#if filterCount > 0}
+										<div class="flex justify-end pt-1">
+											<button
+												type="button"
+												class="btn preset-tonal-surface text-sm"
+												onclick={() => {
+													resetFilters();
+													openState = false;
+												}}
+											>
+												<i class="fa-solid fa-rotate-left mr-2"></i>
+												{m.resetFilters()}
+											</button>
+										</div>
+									{/if}
 								{/snippet}
 							</SuperForm>
 						</Popover.Content>
@@ -944,7 +988,9 @@
 															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
 														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
-																>{safeTranslate('percentageDisplay', { number: value })}</span
+																>{value != null
+																	? safeTranslate('percentageDisplay', { number: value })
+																	: '--'}</span
 															>
 														{:else if key === 'translations'}
 															{#if Object.keys(value).length > 0}

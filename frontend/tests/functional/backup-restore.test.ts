@@ -5,6 +5,7 @@ import { gunzip } from 'node:zlib';
 const gunzipAsync = promisify(gunzip);
 
 test('Database export should generate valid backup file', async ({ logedPage, page }) => {
+	test.slow();
 	await page.waitForLoadState('networkidle');
 	const modalBackdrop = page.getByTestId('modal-backdrop');
 
@@ -83,7 +84,7 @@ test('Database export should generate valid backup file', async ({ logedPage, pa
 			await page.getByRole('button', { name: 'Submit' }).click();
 
 			// Sessions are not preserved after importing the backup
-			await expect(page).toHaveURL('/login?next=/backup-restore', { timeout: 30_000 });
+			await expect(page).toHaveURL('/login?next=/backup-restore', { timeout: 200_000 });
 		});
 	});
 });

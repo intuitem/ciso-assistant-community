@@ -29,8 +29,7 @@
 
 	async function changeImpact(newImpact: string) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/control_impact`;
-		// Convert '--' to empty string to clear the field
-		const impactValue = newImpact === '--' ? '' : newImpact;
+		const impactValue = newImpact === '--' ? null : newImpact;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {

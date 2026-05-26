@@ -3,12 +3,16 @@
 	import { getBuilderContext } from './builder-state';
 	import { localeLabel } from './builder-utils.svelte';
 	import { apiPublishDraftPreview, type PublishPreview } from './builder-api';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		frameworkId: string;
+		onOpenHelp?: () => void;
+		onExpandAllCards?: () => void;
+		onCollapseAllCards?: () => void;
 	}
 
-	let { frameworkId }: Props = $props();
+	let { frameworkId, onOpenHelp, onExpandAllCards, onCollapseAllCards }: Props = $props();
 
 	const builder = getBuilderContext();
 	const {
@@ -16,6 +20,7 @@
 		errors: errorsStore,
 		unsaved: unsavedStore,
 		unpublished: unpublishedStore,
+		rootNodes: rootNodesStore,
 		framework: frameworkStore,
 		activeLanguage: activeLanguageStore
 	} = builder;
@@ -34,6 +39,14 @@
 		if (!$activeLanguageStore) return null;
 		return builder.getTranslationProgress($activeLanguageStore);
 	});
+
+	// Live-vs-draft status. The framework is always pickable by audit authors;
+	// what varies is whether any live content exists and whether the draft
+	// differs from live.
+	// - hasLiveContent: true iff the framework has ever been published (editing_version > 1).
+	// - hasDraftContent: the in-editor tree has at least one node.
+	let hasLiveContent = $derived(($frameworkStore.editing_version ?? 1) > 1);
+	let hasDraftContent = $derived($rootNodesStore.length > 0);
 
 	onMount(() => {
 		const appBar = document.querySelector('[data-scope="app-bar"]');
@@ -86,12 +99,41 @@
 
 		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
-		<!-- Draft badge (visible when draft differs from published state) -->
-		{#if $unpublishedStore}
+		<!--
+			Live-vs-draft status badge. The framework is always pickable by audit
+			authors; what varies is whether new audits will see the editor's work.
+		-->
+		{#if hasLiveContent && !$unpublishedStore}
 			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
+				title={m.builderStatusLiveTitle()}
 			>
-				Draft
+				<i class="fa-solid fa-circle-check text-[10px]"></i>
+				{m.builderStatusLive()}
+			</span>
+		{:else if hasLiveContent && $unpublishedStore}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
+				title={m.builderStatusUnpublishedChangesTitle()}
+			>
+				<i class="fa-solid fa-pen-nib text-[10px]"></i>
+				{m.builderStatusUnpublishedChanges()}
+			</span>
+		{:else if hasDraftContent}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
+				title={m.builderStatusDraftNothingLiveTitle()}
+			>
+				<i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+				{m.builderStatusDraftNothingLive()}
+			</span>
+		{:else}
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-flex items-center gap-1"
+				title={m.builderStatusEmptyTitle()}
+			>
+				<i class="fa-solid fa-file-lines text-[10px]"></i>
+				{m.builderStatusEmpty()}
 			</span>
 		{/if}
 
@@ -99,10 +141,10 @@
 		{#if $unsavedStore}
 			<span
 				class="shrink-0 text-xs text-gray-300 px-2 py-1 flex items-center gap-1 cursor-not-allowed"
-				title="Save your draft first to preview"
+				title={m.builderPreviewSaveFirst()}
 			>
 				<i class="fa-solid fa-eye text-[10px]"></i>
-				Preview
+				{m.builderPreview()}
 			</span>
 		{:else}
 			<a
@@ -110,10 +152,10 @@
 				target="_blank"
 				rel="noopener noreferrer"
 				class="shrink-0 text-xs text-purple-600 hover:text-purple-800 transition-colors px-2 py-1 flex items-center gap-1"
-				title="Preview as respondent (opens in new tab)"
+				title={m.builderPreviewAsRespondent()}
 			>
 				<i class="fa-solid fa-eye text-[10px]"></i>
-				Preview
+				{m.builderPreview()}
 			</a>
 		{/if}
 
@@ -123,11 +165,11 @@
 			class="shrink-0 text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1 flex items-center gap-1"
 			download
 			title={$unpublishedStore
-				? "Unpublished changes won't be included. Publish first to export latest edits."
-				: 'Export framework as YAML library file'}
+				? m.builderExportYamlUnpublishedWarning()
+				: m.builderExportYamlTitle()}
 		>
 			<i class="fa-solid fa-file-export text-[10px]"></i>
-			Export YAML
+			{m.exportYaml()}
 			{#if $unpublishedStore}
 				<i class="fa-solid fa-triangle-exclamation text-amber-500 text-[10px]"></i>
 			{/if}
@@ -143,7 +185,7 @@
 					class="text-xs border border-gray-200 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-white cursor-pointer"
 					onchange={(e) => builder.setActiveLanguage(e.currentTarget.value || null)}
 				>
-					<option value="">No translation</option>
+					<option value="">{m.builderNoTranslation()}</option>
 					{#each $frameworkStore.available_languages ?? [] as lang}
 						<option value={lang}>{localeLabel(lang)}</option>
 					{/each}
@@ -160,7 +202,7 @@
 				{/if}
 				{#if $activeLanguageStore}
 					{#if confirmCopyBase}
-						<span class="text-xs text-amber-600">Copy base text?</span>
+						<span class="text-xs text-amber-600">{m.builderCopyBaseQuestion()}</span>
 						<button
 							type="button"
 							class="text-xs text-amber-700 font-medium px-1.5 py-0.5 rounded bg-amber-50 hover:bg-amber-100"
@@ -169,23 +211,23 @@
 								confirmCopyBase = false;
 							}}
 						>
-							Yes
+							{m.yes()}
 						</button>
 						<button
 							type="button"
 							class="text-xs text-gray-500 px-1"
 							onclick={() => (confirmCopyBase = false)}
 						>
-							No
+							{m.no()}
 						</button>
 					{:else}
 						<button
 							type="button"
 							class="text-xs text-gray-400 hover:text-amber-600 transition-colors px-1.5 py-0.5"
-							title="Copy base language text to {$activeLanguageStore?.toUpperCase()} (won't overwrite existing translations)"
+							title={m.builderCopyBaseTitle({ lang: $activeLanguageStore?.toUpperCase() ?? '' })}
 							onclick={() => (confirmCopyBase = true)}
 						>
-							<i class="fa-solid fa-copy mr-0.5"></i>Copy base
+							<i class="fa-solid fa-copy mr-0.5"></i>{m.builderCopyBase()}
 						</button>
 					{/if}
 				{/if}
@@ -195,6 +237,43 @@
 		<!-- Spacer -->
 		<div class="ml-auto"></div>
 
+		<!-- Collapse/expand all cards -->
+		{#if onCollapseAllCards}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onCollapseAllCards}
+				title={m.builderCollapseAllCards()}
+				aria-label={m.builderCollapseAllCards()}
+			>
+				<i class="fa-solid fa-angles-up text-[10px]"></i>
+			</button>
+		{/if}
+		{#if onExpandAllCards}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onExpandAllCards}
+				title={m.builderExpandAllCards()}
+				aria-label={m.builderExpandAllCards()}
+			>
+				<i class="fa-solid fa-angles-down text-[10px]"></i>
+			</button>
+		{/if}
+
+		<!-- Keyboard shortcut help -->
+		{#if onOpenHelp}
+			<button
+				type="button"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				onclick={onOpenHelp}
+				title={m.builderKeyboardShortcutsHint()}
+				aria-label={m.builderShowKeyboardShortcuts()}
+			>
+				?
+			</button>
+		{/if}
+
 		<!-- Save button (visible when local edits not yet saved to draft) -->
 		{#if $unsavedStore}
 			<button
@@ -203,14 +282,14 @@
 					{$savingStore ? 'bg-gray-400 text-white cursor-wait' : 'bg-gray-600 text-white hover:bg-gray-700'}"
 				disabled={$savingStore}
 				onclick={() => builder.flushDraft()}
-				title="Save draft (Ctrl+S)"
+				title={m.builderSaveDraftTitle()}
 			>
 				{#if $savingStore}
 					<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
-					Saving...
+					{m.saving()}
 				{:else}
 					<i class="fa-solid fa-floppy-disk text-[10px]"></i>
-					Save
+					{m.save()}
 				{/if}
 			</button>
 		{/if}
@@ -221,14 +300,16 @@
 				class="shrink-0 text-xs text-red-600 flex items-center gap-1"
 				title={$errorsStore.get('save-draft')}
 			>
-				<i class="fa-solid fa-triangle-exclamation text-xs"></i> Save failed
+				<i class="fa-solid fa-triangle-exclamation text-xs"></i>
+				{m.builderSaveFailed()}
 			</span>
 		{/if}
 
 		<!-- Publish success -->
 		{#if publishSuccess}
 			<span class="shrink-0 text-xs text-green-600 flex items-center gap-1">
-				<i class="fa-solid fa-check text-xs"></i> Published!
+				<i class="fa-solid fa-check text-xs"></i>
+				{m.builderPublishedFlash()}
 			</span>
 		{/if}
 
@@ -236,7 +317,9 @@
 		{#if !$unpublishedStore}
 			<!-- No changes — nothing to discard or publish -->
 		{:else if confirmDiscard}
-			<span class="shrink-0 text-xs text-red-600 font-medium">Discard all changes?</span>
+			<span class="shrink-0 text-xs text-red-600 font-medium"
+				>{m.builderDiscardAllChangesQuestion()}</span
+			>
 			<button
 				type="button"
 				class="shrink-0 text-xs text-red-600 font-medium px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition-colors"
@@ -246,23 +329,23 @@
 				{#if discarding}
 					<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>
 				{/if}
-				Yes, discard
+				{m.builderYesDiscard()}
 			</button>
 			<button
 				type="button"
 				class="shrink-0 text-xs text-gray-500 px-2 py-1"
 				onclick={() => (confirmDiscard = false)}
 			>
-				Cancel
+				{m.cancel()}
 			</button>
 		{:else}
 			<button
 				type="button"
 				class="shrink-0 text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1"
-				title="Discard draft"
+				title={m.builderDiscardDraftTitle()}
 				onclick={() => (confirmDiscard = true)}
 			>
-				<i class="fa-solid fa-trash-can mr-1"></i>Discard
+				<i class="fa-solid fa-trash-can mr-1"></i>{m.builderDiscard()}
 			</button>
 		{/if}
 
@@ -273,7 +356,7 @@
 			<button
 				type="button"
 				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5"
-				title="Publish draft to live framework"
+				title={m.builderPublishDraftToLiveTitle()}
 				disabled={loadingPreview}
 				onclick={async () => {
 					loadingPreview = true;
@@ -294,7 +377,7 @@
 				{:else}
 					<i class="fa-solid fa-rocket text-[10px]"></i>
 				{/if}
-				Publish
+				{m.publish()}
 			</button>
 		{/if}
 	</div>
@@ -313,9 +396,9 @@
 			onclick={(e) => e.stopPropagation()}
 		>
 			<div class="px-5 py-4 border-b border-gray-200">
-				<h3 class="text-lg font-semibold text-gray-900">Publish draft to live</h3>
+				<h3 class="text-lg font-semibold text-gray-900">{m.builderPublishModalTitle()}</h3>
 				<p class="text-sm text-gray-500 mt-1">
-					This will update the live framework. Review the changes below.
+					{m.builderPublishModalDescription()}
 				</p>
 			</div>
 
@@ -325,14 +408,13 @@
 						<div class="p-3 bg-green-50 border-l-2 border-green-400 rounded-r">
 							<div class="text-sm font-medium text-green-800">
 								<i class="fa-solid fa-plus mr-1"></i>
-								{publishPreview.added.requirements} requirement{publishPreview.added.requirements >
-								1
-									? 's'
-									: ''} added
+								{m.builderRequirementAdded({
+									count: publishPreview.added.requirements
+								})}
 								{#if publishPreview.added.questions > 0}
-									, {publishPreview.added.questions} question{publishPreview.added.questions > 1
-										? 's'
-										: ''}
+									, {m.builderQuestionsAddedSuffix({
+										count: publishPreview.added.questions
+									})}
 								{/if}
 							</div>
 							{#if publishPreview.added.details.length > 0}
@@ -349,14 +431,13 @@
 						<div class="p-3 bg-red-50 border-l-2 border-red-400 rounded-r">
 							<div class="text-sm font-medium text-red-800">
 								<i class="fa-solid fa-trash mr-1"></i>
-								{publishPreview.removed.requirements} requirement{publishPreview.removed
-									.requirements > 1
-									? 's'
-									: ''} removed
+								{m.builderRequirementRemoved({
+									count: publishPreview.removed.requirements
+								})}
 								{#if publishPreview.removed.questions > 0}
-									, {publishPreview.removed.questions} question{publishPreview.removed.questions > 1
-										? 's'
-										: ''}
+									, {m.builderQuestionsRemovedSuffix({
+										count: publishPreview.removed.questions
+									})}
 								{/if}
 							</div>
 							{#if publishPreview.removed.details.length > 0}
@@ -373,7 +454,7 @@
 						<div class="p-3 bg-gray-50 border-l-2 border-gray-300 rounded-r">
 							<div class="text-sm text-gray-600">
 								<i class="fa-solid fa-equals mr-1"></i>
-								No structural changes detected (metadata only).
+								{m.builderNoStructuralChanges()}
 							</div>
 						</div>
 					{/if}
@@ -382,22 +463,22 @@
 						<div class="p-3 bg-orange-50 border-l-2 border-orange-500 rounded-r">
 							<div class="text-sm font-medium text-orange-800">
 								<i class="fa-solid fa-bolt mr-1"></i>
-								{publishPreview.breaking_changes.length} breaking change{publishPreview
-									.breaking_changes.length > 1
-									? 's'
-									: ''} detected
+								{m.builderBreakingChangesDetected({
+									count: publishPreview.breaking_changes.length
+								})}
 							</div>
 							<ul class="mt-1.5 text-xs text-orange-700 space-y-0.5">
 								{#each publishPreview.breaking_changes as change}
 									<li class="truncate" title="{change.type}: {change.name} ({change.field})">
-										<span class="font-mono">{change.field}</span> changed on {change.type}
+										<span class="font-mono">{change.field}</span>
+										{m.builderChangedOn()}
+										{change.type}
 										<span class="font-medium">{change.name}</span>
 									</li>
 								{/each}
 							</ul>
 							<p class="mt-1.5 text-xs text-orange-600">
-								These changes may affect scoring, visibility, or compliance results in existing
-								audits.
+								{m.builderBreakingChangesHint()}
 							</p>
 						</div>
 					{/if}
@@ -406,10 +487,9 @@
 						<div class="p-3 bg-amber-50 border-l-2 border-amber-400 rounded-r">
 							<div class="text-sm font-medium text-amber-800">
 								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-								{publishPreview.affected_audits.length} existing audit{publishPreview
-									.affected_audits.length > 1
-									? 's'
-									: ''} will be affected
+								{m.builderAffectedAudits({
+									count: publishPreview.affected_audits.length
+								})}
 							</div>
 							<ul class="mt-1.5 text-xs text-amber-700 space-y-0.5">
 								{#each publishPreview.affected_audits as audit}
@@ -418,19 +498,19 @@
 							</ul>
 							{#if publishPreview.added.requirements > 0}
 								<p class="mt-1.5 text-xs text-amber-600">
-									New requirements will be added to these audits.
+									{m.builderAffectedAuditsAddedHint()}
 								</p>
 							{/if}
 							{#if publishPreview.removed.requirements > 0}
 								<p class="mt-1.5 text-xs text-amber-600">
-									Removed requirements and their assessment data will be deleted from these audits.
+									{m.builderAffectedAuditsRemovedHint()}
 								</p>
 							{/if}
 						</div>
 					{/if}
 				{:else}
 					<div class="p-3 bg-gray-50 rounded text-sm text-gray-600">
-						Could not load impact preview. Proceed with caution.
+						{m.builderCouldNotLoadPreview()}
 					</div>
 				{/if}
 			</div>
@@ -444,7 +524,7 @@
 						publishPreview = null;
 					}}
 				>
-					Cancel
+					{m.cancel()}
 				</button>
 				<button
 					type="button"
@@ -453,9 +533,9 @@
 					onclick={handlePublish}
 				>
 					{#if publishing}
-						<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>Publishing...
+						<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>{m.builderPublishing()}
 					{:else}
-						Confirm publish
+						{m.builderConfirmPublish()}
 					{/if}
 				</button>
 			</div>
