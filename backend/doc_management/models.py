@@ -65,6 +65,62 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         return self.display_name
 
 
+class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
+    """
+    Reusable starter content for a ManagedDocument.
+
+    Built-in templates also exist as .md files on disk and are merged
+    into the listing endpoint at request time. DB rows here represent
+    user-authored templates — folder-scoped and editable in-app.
+    """
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        PUBLISHED = "published", _("Published")
+        ARCHIVED = "archived", _("Archived")
+
+    class Origin(models.TextChoices):
+        BUILTIN = "builtin", _("Built-in")
+        USER = "user", _("User")
+
+    name = models.CharField(max_length=200, verbose_name=_("Name"))
+    description = models.TextField(blank=True, verbose_name=_("Description"))
+    document_type = models.CharField(
+        max_length=20,
+        choices=ManagedDocument.DocumentType.choices,
+        default=ManagedDocument.DocumentType.POLICY,
+        verbose_name=_("Document type"),
+    )
+    content = models.TextField(blank=True, verbose_name=_("Content"))
+    ref_id = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name=_("Reference ID"),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    origin = models.CharField(
+        max_length=20,
+        choices=Origin.choices,
+        default=Origin.USER,
+        verbose_name=_("Origin"),
+    )
+
+    fields_to_check = ["name", "locale", "document_type"]
+
+    class Meta:
+        verbose_name = _("Document template")
+        verbose_name_plural = _("Document templates")
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class DocumentRevision(AbstractBaseModel, FolderMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")

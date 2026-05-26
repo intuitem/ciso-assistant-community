@@ -1759,6 +1759,17 @@ export const DocumentRevisionSchema = z.object({
 	reviewer_comments: z.string().optional().nullable()
 });
 
+export const DocumentTemplateSchema = z.object({
+	name: z.string().min(1),
+	description: z.string().optional().default(''),
+	document_type: z.string().optional().default('policy'),
+	content: z.string().optional().default(''),
+	ref_id: z.string().optional().default(''),
+	status: z.string().optional().default('draft'),
+	locale: z.string().optional().default('en'),
+	folder: z.string()
+});
+
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1849,7 +1860,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
 	teams: teamSchema,
 	'managed-documents': ManagedDocumentSchema,
-	'document-revisions': DocumentRevisionSchema
+	'document-revisions': DocumentRevisionSchema,
+	'document-templates': DocumentTemplateSchema
 };
 
 export const modelSchema = (model: string) => {

@@ -216,6 +216,12 @@ export const navData = {
 					permissions: ['view_appliedcontrol']
 				},
 				{
+					name: 'documentTemplates',
+					fa_icon: 'fa-solid fa-file-circle-plus',
+					href: '/document-templates',
+					permissions: ['view_documenttemplate']
+				},
+				{
 					name: 'organisationIssues',
 					fa_icon: 'fa-solid fa-briefcase',
 					href: '/organisation-issues',

@@ -1,0 +1,1972 @@
+urn: urn:intuitem:risk:library:mapping-ncsc-caf-3.2-and-ncsc-caf-4.0
+locale: en
+ref_id: mapping-ncsc-caf-3.2-and-ncsc-caf-4.0
+name: NCSC CAF v3.2 <-> NCSC CAF v4.0
+description: |-
+  Mapping between the NCSC Cyber Assessment Framework (CAF) version 3.2 and version 4.0. The mapping operates at the level of Indicators of Good Practice (IGPs). Coverage is 100% of CAF v3.2 IGPs (184/184) — most align 1:1, with notable restructuring in Objective C (detection) and several new principles in v4.0 (A2.b Understanding Threat, A4.b Secure Software Development and Support, C1.f Understanding User's and System's Behaviour, C2.a Threat Hunting).
+copyright: © Crown Copyright 2024. Licensed under the Open Government Licence v3.0.
+version: 1
+publication_date: '2026-05-21'
+provider: NCSC
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:ncsc-caf-3.2
+- urn:intuitem:risk:library:ncsc-caf-4.0
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-ncsc-caf-3.2-and-ncsc-caf-4.0
+    ref_id: mapping-ncsc-caf-3.2-and-ncsc-caf-4.0
+    name: NCSC CAF v3.2 <-> NCSC CAF v4.0
+    description: |-
+      Mapping between the NCSC Cyber Assessment Framework (CAF) version 3.2 and version 4.0. The mapping operates at the level of Indicators of Good Practice (IGPs). Coverage is 100% of CAF v3.2 IGPs (184/184) — most align 1:1, with notable restructuring in Objective C (detection) and several new principles in v4.0 (A2.b Understanding Threat, A4.b Secure Software Development and Support, C1.f Understanding User's and System's Behaviour, C2.a Threat Hunting).
+    source_framework_urn: urn:intuitem:risk:framework:ncsc-caf-3.2
+    target_framework_urn: urn:intuitem:risk:framework:ncsc-caf-4.0
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical text — board ownership of policy, communicated to risk decision-makers
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — regular board-level discussions informed by expert guidance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — board-level accountable individual driving discussion
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical (minor article diff) — board direction translated into organisational practices
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — key roles identified and reviewed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — capable staff with time, authority, resources
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical (minor article diff) — clarity on overall accountability
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — senior management visibility of risk decisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — decision-makers understand responsibilities and risk appetite
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — decision delegation and escalation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — regular review of risk decisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — organisational process identifies/analyses/prioritises/manages risks
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same content — 'attacker' replaced with 'threat actor', scope wording polished
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same content — threat assumptions; 4.0 broadens 'CNI' to 'wider national infrastructure'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — risk assessments informed by vulnerabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: 4.0 adds 'traceable and prioritised' — minor strengthening, same intent
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — communication of significant risk conclusions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.7
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — dynamic risk assessments; 4.0 adds 'emergent technologies' trigger
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — periodic effectiveness review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.b.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Detailed threat analysis moved from A2.a to dedicated principle A2.b in 4.0
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.b.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: |-
+        3.2's detailed threat analysis implicitly covers understanding of threat actor methods/techniques broken out in 4.0 A2.b.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — validation that security measures remain effective
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — understand and choose assurance methods
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — confidence verifiable by third party
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — assurance findings remediated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — assurance methods reviewed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — asset inventory; 4.0 explicitly scopes to NIS supporting essential function
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — supporting infrastructure dependencies recorded
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — asset prioritisation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — assigned asset responsibility
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — lifecycle management
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: |-
+        3.2 A4.a.1 includes both 'deep understanding' (4.0 A4.a.1) AND 'consider factors → risk assessment/procurement' which 4.0 splits to A4.a.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: |-
+        3.2 mentions supplier-factor consideration informing risk/procurement; 4.0 A4.a.2 adds 'approach to cyber security' criterion and explicit purchasing decisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — supply chain subversion by capable adversaries (attacker/threat actor terminology change)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same intent — supplier-held information protected from sophisticated adversaries
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.6
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: |-
+        3.2 covers both 'include security obligations in contracts' (4.0 A4.a.6) and the proactive contract mgmt plan (4.0 A4.a.7)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.7
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: 3.2 also covers proactive contract management plan, now split to 4.0 A4.a.7
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — customer/supplier ownership defined in contracts
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — network connections / data sharing managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.10
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — incident management mutual support
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: 3.2 combined documentation + cyber integration + KPIs; 4.0 split to B1.a.1 (docs)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.2
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: 3.2 also covers integration of cyber security and KPI reporting, now split to 4.0 B1.a.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — practical/usable policies; 4.0 reframes scope as 'mitigate risk to NIS'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — policies reliant on user behaviour are practical
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — regular review of policies
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — change-triggered review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — systems remain secure when policies not followed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — policy application and effectiveness evaluated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — integrated with HR trustworthiness assessments
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — communication across all levels
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — action on policy breaches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — robust initial identity verification
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — only authorised authenticated users can connect
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — minimum-necessary users/systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — MFA for all user access (4.0 adds 'strong')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — six-monthly user/system access review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — best-practice authentication
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — PAW for privileged operations
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — third-party device assurance / dedication
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — certificate-based device identity
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — regular scans for unknown devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — separate privileged accounts
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — temporary time-bound privileged rights
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — JML privileged access review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — privileged activity review/recording
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — verified user, minimum access rights, audited
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — annual + JML access reviews
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — access logging and monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — access log review and correlation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — alerting on unauthorised connection attempts
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — data identified/catalogued; 4.0 NIS scoping + 'threat actor'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — data access catalogued
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — data location/quantity/quality understanding
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — minimise unnecessary data copies
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — mobile devices/media holding data identified
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — data link understanding
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — context, limitations, dependencies of data
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.8
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — impact scenarios; 4.0 adds 'uncontrolled release'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — annual impact statement validation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — data links protected
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — protect data over untrusted carriers; 4.0 cites cryptography
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — alternative transmission paths
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — necessary copies; limited/read-only transfers
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — protect stored data
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — cryptographic protections
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — secured backups
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — archive data secured
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.d.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — mobile device cataloguing/configuration
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.d.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — remote wipe capability
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.d.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — minimise data on mobile devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.e.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — catalogue/track storage devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.e.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — sanitisation before reuse/disposal
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — appropriate design expertise
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — segregation into security zones
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — simple data flows for monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — designed to be easy to recover
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — content-based attack mitigation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — actively managed configured assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — baseline build conformance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — secure documented change management
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — regular validation of secure settings
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — only permitted software installed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: |-
+        3.2's 'standard users cannot change security settings' was dropped in 4.0; closest residual is least-privilege requirement in B2.d.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — automated decision-making technologies understood/replicable
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.7
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — generic/default accounts disabled/credentials changed; 4.0 adds 'service accounts appropriately protected'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — PAW-only administration
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — technical knowledge securely stored
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — anti-malware and unauthorised software prevention
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.d.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — vulnerability exposure understood
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.d.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — announced vulns tracked/patched
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.d.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — regular testing with third-party verification
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.d.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — maximise use of supported software/firmware/hardware
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — BCP/DR tested
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — threat-intel-driven temporary measures
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: 3.2 combined segregation + 'internet services not accessible'; 4.0 split — this maps to the segregation half
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.2
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: 3.2 also covers internet-services-not-accessible (browsing/email), now split into 4.0 B5.b.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — resource limitations mitigated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — geographical constraints mitigated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — periodic dependency assessment review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — secured backups at secondary sites
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — backups made, tested, reviewed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exec management communicates priorities
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — raising issues treated positively
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — routine concern reporting
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — visible management commitment
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — open communication
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same intent — 'participate' (3.2) vs 'collaborate' (4.0) in cyber improvements
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — training paths at all levels
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — training tracked/refreshed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — training effectiveness evaluation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — accessible cyber guidance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — monitoring grounded in network understanding and attack methods (4.0 uses 'threat actors')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — monitoring data provides sufficient detail (4.0 adds 'reviewed regularly')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: IoC detection moved from C1.a (Monitoring Coverage) in 3.2 to C1.c (Generating Alerts) in 4.0
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: |-
+        Same — extensive user activity monitoring detecting policy violations (4.0 expands to user + system + behaviour deviations)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — host-based and network monitoring coverage
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — new systems considered as monitoring data sources
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Log integrity protection moved within C1.b reorder; 4.0 adds 'verified' and 'including deletion'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — logging architecture protects itself
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — analysis on copies, master unaltered
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Time-source synchronisation moved from C1.b to C1.a in 4.0
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — log access limited; 4.0 adds 'and systems'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — all log actions traceable to unique user/system
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: 3.2's 'legitimate reasons in use policies' is partially covered by 4.0's tighter access-need wording in C1.b.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.7
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Log enrichment with network data moved to 4.0 C1.a.7 (Sources and Tools)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: 3.2 covers enrichment during investigation; 4.0 also has alert-enrichment in real time at C1.c.4
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.1
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Same — wide range of signatures/IoCs used for investigation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: 3.2's alerts-resolved-to-network-assets-in-real-time overlaps with 4.0's real-time alert enrichment
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — security alerts prioritised supporting incident management
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — logs reviewed continuously in real time
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — alerts tested to distinguish genuine incidents from false alarms (4.0 also adds tuning at C1.c.6)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: 3.2's alert-testing also relates to 4.0 C1.c.6 (alerts customised/tuned to reduce false positives)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — threat intelligence sources selected via risk-based decisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — apply new signatures/IoCs promptly
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Receiving signature updates is a precondition for applying them — partial overlap with 4.0 C1.c.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — track effectiveness of intelligence feeds, share feedback
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — monitoring/detection personnel responsible for analysis (4.0 adds 'proactive and reactive')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — defined roles and skills
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — follow policies/processes for governance reporting
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — empowered to look beyond fixed process (3.2 also calls out 'developing investigative techniques')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.8
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Tools-use-log-data moved from C1.e (Skills) in 3.2 to C1.a (Sources and Tools) in 4.0
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — personnel drive/shape new log data collection
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — personnel aware of essential function/assets, prioritise alerts
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — normal system behaviour fully understood enabling abnormality detection (moved from C2.a in 3.2 to
+        C1.f in 4.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: 3.2's abnormality descriptions from past attacks/TI overlaps with 4.0 C1.f.4 (contextualise TI to attack
+        methods)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — abnormalities monitored reflect nature of attacks/adverse activity likely to impact NIS
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — abnormality descriptions updated to reflect changes and threat intel
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.8
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — routinely search for abnormalities, generating alerts (now in C1.c Generating Alerts)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c2.a.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: |-
+        3.2's routine abnormality search also partially aligns with 4.0's threat hunting (C2.a.3 documented hypothesis-driven hunts)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c2.a.6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — justified confidence in effectiveness of searches/threat hunts; 4.0 also covers review/update
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — IR plan based on security risk understanding
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — comprehensive IR plan
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — IR plan documented and integrated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — IR plan communicated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — response resources understood
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — response information understood
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — responders have skills and authority
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — duplicated key roles, shared knowledge
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — backup mechanisms readily activated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — external IR augmentation arrangements
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exercise scenarios based on real/threat intel
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exercise scenarios documented and validated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exercises run, findings refine plans
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exercises test full response cycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.a.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — 'root cause analysis' renamed to 'post incident analysis'; same intent (routine, part of lessons learned)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.a.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — comprehensive analysis; 4.0 explicitly enumerates organisational/technical/human factors and threat
+        changes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — all incident data available to analysis team
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — documented incident review process; 4.0 adds 'including near misses'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — lessons learned cover reporting/roles/governance/skills/process and technical aspects
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — lessons learned drive security improvements
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — security improvements prioritised (3.2 'quickly' → 4.0 'promptly')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — analysis fed to senior management for risk/continuous improvement
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-ncsc-caf-3.2-and-ncsc-caf-4.0-revert
+    ref_id: mapping-ncsc-caf-3.2-and-ncsc-caf-4.0-revert
+    name: NCSC CAF v3.2 <-> NCSC CAF v4.0
+    description: |-
+      Mapping between the NCSC Cyber Assessment Framework (CAF) version 3.2 and version 4.0. The mapping operates at the level of Indicators of Good Practice (IGPs). Coverage is 100% of CAF v3.2 IGPs (184/184) — most align 1:1, with notable restructuring in Objective C (detection) and several new principles in v4.0 (A2.b Understanding Threat, A4.b Secure Software Development and Support, C1.f Understanding User's and System's Behaviour, C2.a Threat Hunting).
+    source_framework_urn: urn:intuitem:risk:framework:ncsc-caf-4.0
+    target_framework_urn: urn:intuitem:risk:framework:ncsc-caf-3.2
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical text — board ownership of policy, communicated to risk decision-makers
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — regular board-level discussions informed by expert guidance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — board-level accountable individual driving discussion
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical (minor article diff) — board direction translated into organisational practices
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — key roles identified and reviewed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — capable staff with time, authority, resources
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical (minor article diff) — clarity on overall accountability
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — senior management visibility of risk decisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — decision-makers understand responsibilities and risk appetite
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — decision delegation and escalation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a1.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — regular review of risk decisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — organisational process identifies/analyses/prioritises/manages risks
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same content — 'attacker' replaced with 'threat actor', scope wording polished
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same content — threat assumptions; 4.0 broadens 'CNI' to 'wider national infrastructure'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — risk assessments informed by vulnerabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: 4.0 adds 'traceable and prioritised' — minor strengthening, same intent
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — communication of significant risk conclusions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.7
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — dynamic risk assessments; 4.0 adds 'emergent technologies' trigger
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.a.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.8
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — periodic effectiveness review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.9
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Detailed threat analysis moved from A2.a to dedicated principle A2.b in 4.0
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.9
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: |-
+        3.2's detailed threat analysis implicitly covers understanding of threat actor methods/techniques broken out in 4.0 A2.b.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — validation that security measures remain effective
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — understand and choose assurance methods
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — confidence verifiable by third party
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — assurance findings remediated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a2.c.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — assurance methods reviewed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — asset inventory; 4.0 explicitly scopes to NIS supporting essential function
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — supporting infrastructure dependencies recorded
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — asset prioritisation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — assigned asset responsibility
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a3.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — lifecycle management
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.1
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: |-
+        3.2 A4.a.1 includes both 'deep understanding' (4.0 A4.a.1) AND 'consider factors → risk assessment/procurement' which 4.0 splits to A4.a.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: |-
+        3.2 mentions supplier-factor consideration informing risk/procurement; 4.0 A4.a.2 adds 'approach to cyber security' criterion and explicit purchasing decisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — supply chain subversion by capable adversaries (attacker/threat actor terminology change)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same intent — supplier-held information protected from sophisticated adversaries
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.4
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: |-
+        3.2 covers both 'include security obligations in contracts' (4.0 A4.a.6) and the proactive contract mgmt plan (4.0 A4.a.7)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.4
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: 3.2 also covers proactive contract management plan, now split to 4.0 A4.a.7
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — customer/supplier ownership defined in contracts
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — network connections / data sharing managed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:a4.a.10
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — incident management mutual support
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.1
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: 3.2 combined documentation + cyber integration + KPIs; 4.0 split to B1.a.1 (docs)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.1
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: 3.2 also covers integration of cyber security and KPI reporting, now split to 4.0 B1.a.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — practical/usable policies; 4.0 reframes scope as 'mitigate risk to NIS'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — policies reliant on user behaviour are practical
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — regular review of policies
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — change-triggered review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — systems remain secure when policies not followed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — policy application and effectiveness evaluated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — integrated with HR trustworthiness assessments
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — communication across all levels
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b1.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — action on policy breaches
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — robust initial identity verification
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — only authorised authenticated users can connect
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — minimum-necessary users/systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — MFA for all user access (4.0 adds 'strong')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — six-monthly user/system access review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — best-practice authentication
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — PAW for privileged operations
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — third-party device assurance / dedication
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — certificate-based device identity
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — regular scans for unknown devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — separate privileged accounts
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — temporary time-bound privileged rights
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — JML privileged access review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — privileged activity review/recording
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — verified user, minimum access rights, audited
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — annual + JML access reviews
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — access logging and monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — access log review and correlation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — alerting on unauthorised connection attempts
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — data identified/catalogued; 4.0 NIS scoping + 'threat actor'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — data access catalogued
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — data location/quantity/quality understanding
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — minimise unnecessary data copies
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — mobile devices/media holding data identified
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — data link understanding
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — context, limitations, dependencies of data
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.8
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — impact scenarios; 4.0 adds 'uncontrolled release'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.a.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.9
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — annual impact statement validation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — data links protected
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — protect data over untrusted carriers; 4.0 cites cryptography
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — alternative transmission paths
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — necessary copies; limited/read-only transfers
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — protect stored data
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — cryptographic protections
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — secured backups
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.c.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — archive data secured
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.d.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — mobile device cataloguing/configuration
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.d.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — remote wipe capability
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.d.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — minimise data on mobile devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.e.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — catalogue/track storage devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b3.e.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — sanitisation before reuse/disposal
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — appropriate design expertise
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — segregation into security zones
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — simple data flows for monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — designed to be easy to recover
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — content-based attack mitigation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — actively managed configured assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — baseline build conformance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — secure documented change management
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — regular validation of secure settings
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — only permitted software installed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b2.d.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.6
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: |-
+        3.2's 'standard users cannot change security settings' was dropped in 4.0; closest residual is least-privilege requirement in B2.d.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — automated decision-making technologies understood/replicable
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.b.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.8
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — generic/default accounts disabled/credentials changed; 4.0 adds 'service accounts appropriately protected'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — PAW-only administration
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — technical knowledge securely stored
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — anti-malware and unauthorised software prevention
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.d.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — vulnerability exposure understood
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.d.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — announced vulns tracked/patched
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.d.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — regular testing with third-party verification
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b4.d.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — maximise use of supported software/firmware/hardware
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — BCP/DR tested
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — threat-intel-driven temporary measures
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.1
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: 3.2 combined segregation + 'internet services not accessible'; 4.0 split — this maps to the segregation half
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.1
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: 3.2 also covers internet-services-not-accessible (browsing/email), now split into 4.0 B5.b.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — resource limitations mitigated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — geographical constraints mitigated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — periodic dependency assessment review
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — secured backups at secondary sites
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b5.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — backups made, tested, reviewed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exec management communicates priorities
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — raising issues treated positively
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — routine concern reporting
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — visible management commitment
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — open communication
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same intent — 'participate' (3.2) vs 'collaborate' (4.0) in cyber improvements
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — training paths at all levels
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — training tracked/refreshed
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — training effectiveness evaluation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:b6.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — accessible cyber guidance
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — monitoring grounded in network understanding and attack methods (4.0 uses 'threat actors')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — monitoring data provides sufficient detail (4.0 adds 'reviewed regularly')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.3
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: IoC detection moved from C1.a (Monitoring Coverage) in 3.2 to C1.c (Generating Alerts) in 4.0
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: |-
+        Same — extensive user activity monitoring detecting policy violations (4.0 expands to user + system + behaviour deviations)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — host-based and network monitoring coverage
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — new systems considered as monitoring data sources
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Log integrity protection moved within C1.b reorder; 4.0 adds 'verified' and 'including deletion'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — logging architecture protects itself
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — analysis on copies, master unaltered
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Time-source synchronisation moved from C1.b to C1.a in 4.0
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — log access limited; 4.0 adds 'and systems'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — all log actions traceable to unique user/system
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.7
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: 3.2's 'legitimate reasons in use policies' is partially covered by 4.0's tighter access-need wording in C1.b.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Log enrichment with network data moved to 4.0 C1.a.7 (Sources and Tools)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: 3.2 covers enrichment during investigation; 4.0 also has alert-enrichment in real time at C1.c.4
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.2
+      relationship: equal
+      strength_of_relationship: 8
+      rationale: Same — wide range of signatures/IoCs used for investigation
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: 3.2's alerts-resolved-to-network-assets-in-real-time overlaps with 4.0's real-time alert enrichment
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — security alerts prioritised supporting incident management
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.9
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — logs reviewed continuously in real time
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.6
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — alerts tested to distinguish genuine incidents from false alarms (4.0 also adds tuning at C1.c.6)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: 3.2's alert-testing also relates to 4.0 C1.c.6 (alerts customised/tuned to reduce false positives)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — threat intelligence sources selected via risk-based decisions
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — apply new signatures/IoCs promptly
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: Receiving signature updates is a precondition for applying them — partial overlap with 4.0 C1.c.2
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — track effectiveness of intelligence feeds, share feedback
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — monitoring/detection personnel responsible for analysis (4.0 adds 'proactive and reactive')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — defined roles and skills
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — follow policies/processes for governance reporting
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.4
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — empowered to look beyond fixed process (3.2 also calls out 'developing investigative techniques')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.a.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.5
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Tools-use-log-data moved from C1.e (Skills) in 3.2 to C1.a (Sources and Tools) in 4.0
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — personnel drive/shape new log data collection
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.e.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.7
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — personnel aware of essential function/assets, prioritise alerts
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — normal system behaviour fully understood enabling abnormality detection (moved from C2.a in 3.2 to
+        C1.f in 4.0)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: 3.2's abnormality descriptions from past attacks/TI overlaps with 4.0 C1.f.4 (contextualise TI to attack
+        methods)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — abnormalities monitored reflect nature of attacks/adverse activity likely to impact NIS
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.f.7
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — abnormality descriptions updated to reflect changes and threat intel
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c1.c.8
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — routinely search for abnormalities, generating alerts (now in C1.c Generating Alerts)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: |-
+        3.2's routine abnormality search also partially aligns with 4.0's threat hunting (C2.a.3 documented hypothesis-driven hunts)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:c2.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — justified confidence in effectiveness of searches/threat hunts; 4.0 also covers review/update
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — IR plan based on security risk understanding
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — comprehensive IR plan
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — IR plan documented and integrated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — IR plan communicated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — response resources understood
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — response information understood
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — responders have skills and authority
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — duplicated key roles, shared knowledge
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — backup mechanisms readily activated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.6
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — external IR augmentation arrangements
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.1
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exercise scenarios based on real/threat intel
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exercise scenarios documented and validated
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exercises run, findings refine plans
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d1.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — exercises test full response cycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — 'root cause analysis' renamed to 'post incident analysis'; same intent (routine, part of lessons learned)
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.2
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — comprehensive analysis; 4.0 explicitly enumerates organisational/technical/human factors and threat
+        changes
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — all incident data available to analysis team
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.1
+      relationship: equal
+      strength_of_relationship: 9
+      rationale: Same — documented incident review process; 4.0 adds 'including near misses'
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.2
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — lessons learned cover reporting/roles/governance/skills/process and technical aspects
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.3
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — lessons learned drive security improvements
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.4
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Same — security improvements prioritised (3.2 'quickly' → 4.0 'promptly')
+    - source_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-4.0:d2.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.5
+      relationship: equal
+      strength_of_relationship: 10
+      rationale: Identical — analysis fed to senior management for risk/continuous improvement

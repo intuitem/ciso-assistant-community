@@ -1,10 +1,8 @@
 import difflib
 import mimetypes
-from pathlib import Path
 from uuid import UUID
 
 import structlog
-import yaml
 from django.db import models
 from django.forms import ValidationError as DjangoValidationError
 from django.http import HttpResponse
@@ -27,13 +25,15 @@ from weasyprint import HTML
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder
 
-from .models import DocumentAttachment, DocumentEdit, DocumentRevision, ManagedDocument
+from .models import (
+    DocumentAttachment,
+    DocumentEdit,
+    DocumentRevision,
+    DocumentTemplate,
+    ManagedDocument,
+)
 
 logger = structlog.get_logger(__name__)
-
-TEMPLATES_BASE_DIR = (
-    Path(__file__).resolve().parent.parent / "library" / "policy_templates"
-)
 
 
 def _get_user_lang(request):
@@ -41,14 +41,6 @@ def _get_user_lang(request):
     if hasattr(request, "user") and hasattr(request.user, "get_preferences"):
         return request.user.get_preferences().get("lang", "en")
     return "en"
-
-
-def _get_templates_dir(lang: str) -> Path:
-    """Resolve the templates directory for the given language, falling back to 'en'."""
-    localized = TEMPLATES_BASE_DIR / lang
-    if localized.exists() and any(localized.glob("*.md")):
-        return localized
-    return TEMPLATES_BASE_DIR / "en"
 
 
 class ManagedDocumentViewSet(BaseModelViewSet):
@@ -62,29 +54,41 @@ class ManagedDocumentViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def templates(self, request):
-        """List available document templates. Accepts optional ?lang= query parameter."""
+        """List published document templates the caller can see.
+
+        Accepts optional ?lang= and ?document_type= query parameters. Returns
+        both built-in (seeded from disk) and user-authored rows; tell them
+        apart via the `origin` field.
+        """
         lang = request.query_params.get("lang") or _get_user_lang(request)
-        template_dir = _get_templates_dir(lang)
-        templates = []
-        if template_dir.exists():
-            for f in sorted(template_dir.glob("*.md")):
-                content = f.read_text(encoding="utf-8")
-                metadata = {
-                    "id": f.stem,
-                    "title": f.stem.replace("_", " ").title(),
-                    "lang": template_dir.name,
+        document_type_filter = request.query_params.get("document_type")
+
+        accessible_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, DocumentTemplate
+        )[0]
+        qs = DocumentTemplate.objects.filter(
+            pk__in=accessible_ids,
+            locale=lang,
+            status=DocumentTemplate.Status.PUBLISHED,
+        )
+        if document_type_filter:
+            qs = qs.filter(document_type=document_type_filter)
+
+        return Response(
+            [
+                {
+                    "id": str(tpl.id),
+                    "title": tpl.name,
+                    "description": tpl.description,
+                    "lang": tpl.locale,
+                    "document_type": tpl.document_type,
+                    "folder": str(tpl.folder_id) if tpl.folder_id else None,
+                    "ref_id": tpl.ref_id,
+                    "origin": tpl.origin,
                 }
-                if content.startswith("---"):
-                    parts = content.split("---", 2)
-                    if len(parts) >= 3:
-                        try:
-                            fm = yaml.safe_load(parts[1])
-                            if isinstance(fm, dict):
-                                metadata.update(fm)
-                        except yaml.YAMLError:
-                            pass
-                templates.append(metadata)
-        return Response(templates)
+                for tpl in qs
+            ]
+        )
 
     @action(
         detail=True,
@@ -186,6 +190,68 @@ class ManagedDocumentViewSet(BaseModelViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class DocumentTemplateViewSet(BaseModelViewSet):
+    """
+    API endpoint for managing document templates.
+
+    Both built-in (seeded from disk on startup) and user-authored templates
+    live as rows here. Built-ins are locked except for the `status` field
+    and cannot be deleted — admins archive them to retire, or duplicate them
+    to customize.
+    """
+
+    model = DocumentTemplate
+    filterset_fields = ["folder", "document_type", "locale", "status", "origin"]
+    search_fields = ["name", "description", "ref_id"]
+    serializers_module = "doc_management.serializers"
+
+    def perform_destroy(self, instance):
+        if instance.origin == DocumentTemplate.Origin.BUILTIN:
+            raise ValidationError(
+                "Built-in templates cannot be deleted. Set status to 'archived' to retire."
+            )
+        super().perform_destroy(instance)
+
+    @action(detail=True, methods=["post"])
+    def duplicate(self, request, pk=None):
+        """Create an editable user-authored copy of this template."""
+        from .serializers import (
+            DocumentTemplateReadSerializer,
+            DocumentTemplateWriteSerializer,
+        )
+
+        original = self.get_object()
+        target_folder_id = request.data.get("folder") or str(original.folder_id)
+        new_name = request.data.get("name") or f"Copy of {original.name}"
+        data = {
+            "folder": target_folder_id,
+            "name": new_name,
+            "description": original.description,
+            "document_type": original.document_type,
+            "content": original.content,
+            "locale": original.locale,
+            "ref_id": "",
+            "status": DocumentTemplate.Status.DRAFT,
+        }
+        serializer = DocumentTemplateWriteSerializer(
+            data=data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            DocumentTemplateReadSerializer(serializer.instance).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=False, name="Get document type choices")
+    def document_type(self, request):
+        return Response(dict(ManagedDocument.DocumentType.choices))
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(DocumentTemplate.Status.choices))
 
 
 class DocumentAttachmentViewSet(BaseModelViewSet):

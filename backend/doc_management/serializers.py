@@ -1,12 +1,13 @@
-from pathlib import Path
+from uuid import UUID
 
 from django.db import models, transaction
 from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
+from iam.models import Folder, RoleAssignment
 
-from .models import DocumentRevision, ManagedDocument
+from .models import DocumentRevision, DocumentTemplate, ManagedDocument
 
 
 class ManagedDocumentWriteSerializer(BaseModelSerializer):
@@ -14,16 +15,23 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         model = ManagedDocument
         fields = "__all__"
 
-    def _resolve_template_path(self, template_name, locale):
-        """Find the template file for the given locale, falling back to 'en'."""
-        base_dir = (
-            Path(__file__).resolve().parent.parent / "library" / "policy_templates"
-        )
-        for try_lang in [locale, "en"]:
-            path = base_dir / try_lang / f"{template_name}.md"
-            if path.exists():
-                return path
-        return None
+    def _resolve_template(self, template_ref, locale, request):
+        """Resolve template_used to a DocumentTemplate row, IAM-scoped.
+
+        Accepts either a UUID (preferred) or a ref_id (e.g. 'access_control')
+        for backward compatibility with the previous filesystem-based shorthand.
+        """
+        qs = DocumentTemplate.objects.all()
+        if request and hasattr(request, "user"):
+            accessible_ids = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, DocumentTemplate
+            )[0]
+            qs = qs.filter(pk__in=accessible_ids)
+        try:
+            return qs.filter(pk=UUID(str(template_ref))).first()
+        except (ValueError, TypeError, AttributeError):
+            pass
+        return qs.filter(ref_id=template_ref, locale=locale).first()
 
     def create(self, validated_data):
         # Default locale to user's preferred language
@@ -41,21 +49,12 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         # Auto-create an initial draft revision atomically with the document
         author = request.user if request else None
         content = ""
-        if template_name := validated_data.get("template_used"):
-            template_path = self._resolve_template_path(
-                template_name, validated_data.get("locale", "en")
+        if template_ref := validated_data.get("template_used"):
+            template_obj = self._resolve_template(
+                template_ref, validated_data.get("locale", "en"), request
             )
-            if template_path:
-                raw = template_path.read_text(encoding="utf-8")
-                # Strip YAML frontmatter
-                if raw.startswith("---"):
-                    parts = raw.split("---", 2)
-                    if len(parts) >= 3:
-                        content = parts[2].strip()
-                    else:
-                        content = raw
-                else:
-                    content = raw
+            if template_obj is not None:
+                content = template_obj.content
         with transaction.atomic():
             # Set default_locale inside the transaction to avoid race conditions
             # where two concurrent creates both see no siblings and both set True
@@ -147,4 +146,38 @@ class DocumentRevisionReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = DocumentRevision
+        fields = "__all__"
+
+
+class DocumentTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DocumentTemplate
+        fields = "__all__"
+        # origin is server-controlled: set by startup seed for built-ins,
+        # implicit default (USER) for everything else.
+        read_only_fields = ["origin"]
+
+    BUILTIN_MUTABLE_FIELDS = {"status"}
+
+    def update(self, instance, validated_data):
+        if instance.origin == DocumentTemplate.Origin.BUILTIN:
+            forbidden = set(validated_data.keys()) - self.BUILTIN_MUTABLE_FIELDS
+            if forbidden:
+                raise serializers.ValidationError(
+                    {
+                        field: "This field cannot be edited on a built-in template. Duplicate it first to customize."
+                        for field in forbidden
+                    }
+                )
+        return super().update(instance, validated_data)
+
+
+class DocumentTemplateReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    document_type_display = serializers.CharField(source="get_document_type_display")
+    status_display = serializers.CharField(source="get_status_display")
+    origin_display = serializers.CharField(source="get_origin_display")
+
+    class Meta:
+        model = DocumentTemplate
         fields = "__all__"

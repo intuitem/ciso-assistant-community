@@ -1849,6 +1849,10 @@ export const listViewFields = {
 		head: ['name', 'documentType', 'policy', 'locale', 'domain'],
 		body: ['name', 'document_type', 'policy', 'locale', 'folder']
 	},
+	'document-templates': {
+		head: ['name', 'documentType', 'status', 'origin', 'locale', 'domain'],
+		body: ['name', 'document_type', 'status_display', 'origin_display', 'locale', 'folder']
+	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],

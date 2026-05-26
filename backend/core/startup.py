@@ -19,6 +19,7 @@ READER_PERMISSIONS_LIST = [
     "view_manageddocument",
     "view_documentrevision",
     "view_documentattachment",
+    "view_documenttemplate",
     "view_folder",
     "view_framework",
     "view_loadedlibrary",
@@ -162,6 +163,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_manageddocument",
     "view_documentrevision",
     "view_documentattachment",
+    "view_documenttemplate",
     "view_framework",
     "view_storedlibrary",
     "view_loadedlibrary",
@@ -503,6 +505,10 @@ ANALYST_PERMISSIONS_LIST = [
     "view_documentattachment",
     "change_documentattachment",
     "delete_documentattachment",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -906,6 +912,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_documentattachment",
     "change_documentattachment",
     "delete_documentattachment",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -1133,6 +1143,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_documentattachment",
     "change_documentattachment",
     "delete_documentattachment",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_framework",
     "view_framework",
     "change_framework",
@@ -1885,6 +1899,67 @@ def startup(sender=None, **kwargs):
             sec_intel_settings.save(update_fields=["value"])
     except Exception as e:
         logger.error(f"Failed to create sec-intel-feeds settings: {e}")
+
+    # Seed built-in document templates from filesystem .md files.
+    # Idempotent: rows are skipped if (origin=builtin, locale, ref_id) already exists.
+    # Admins who customize content or hide templates won't have changes overwritten
+    # on subsequent restarts. New shipped templates appear automatically.
+    try:
+        from pathlib import Path
+
+        import yaml
+
+        from doc_management.models import DocumentTemplate, ManagedDocument
+
+        templates_dir = Path(settings.BASE_DIR) / "library" / "policy_templates"
+        if templates_dir.exists():
+            root_folder = Folder.get_root_folder()
+            seeded = 0
+            for locale_dir in templates_dir.iterdir():
+                if not locale_dir.is_dir():
+                    continue
+                locale = locale_dir.name
+                for f in sorted(locale_dir.glob("*.md")):
+                    ref_id = f.stem
+                    if DocumentTemplate.objects.filter(
+                        origin=DocumentTemplate.Origin.BUILTIN,
+                        locale=locale,
+                        ref_id=ref_id,
+                    ).exists():
+                        continue
+                    raw = f.read_text(encoding="utf-8")
+                    metadata: dict = {}
+                    content = raw
+                    if raw.startswith("---"):
+                        parts = raw.split("---", 2)
+                        if len(parts) >= 3:
+                            try:
+                                fm = yaml.safe_load(parts[1])
+                                if isinstance(fm, dict):
+                                    metadata = fm
+                                content = parts[2].strip()
+                            except yaml.YAMLError:
+                                pass
+                    DocumentTemplate.objects.create(
+                        folder=root_folder,
+                        origin=DocumentTemplate.Origin.BUILTIN,
+                        status=DocumentTemplate.Status.PUBLISHED,
+                        is_published=True,
+                        ref_id=ref_id,
+                        locale=locale,
+                        name=metadata.get("title", ref_id.replace("_", " ").title()),
+                        description=metadata.get("description", ""),
+                        document_type=metadata.get(
+                            "document_type",
+                            ManagedDocument.DocumentType.POLICY,
+                        ),
+                        content=content,
+                    )
+                    seeded += 1
+            if seeded:
+                logger.info(f"Seeded {seeded} built-in document templates")
+    except Exception as e:
+        logger.error("Failed to seed built-in document templates", error=str(e))
 
     # Pre-warm the chat knowledge graph (reads YAML files, no DB needed)
     if getattr(settings, "ENABLE_CHAT", False):

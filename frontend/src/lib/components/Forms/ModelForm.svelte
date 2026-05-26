@@ -87,6 +87,7 @@
 	import DashboardWidgetForm from './ModelForm/DashboardWidgetForm.svelte';
 	import DashboardTextWidgetForm from './ModelForm/DashboardTextWidgetForm.svelte';
 	import DashboardBuiltinWidgetForm from './ModelForm/DashboardBuiltinWidgetForm.svelte';
+	import DocumentTemplateForm from './ModelForm/DocumentTemplateForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -914,6 +915,17 @@
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
 				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'document-templates'}
+			<DocumentTemplateForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
 				{...rest}
 			/>
 		{/if}

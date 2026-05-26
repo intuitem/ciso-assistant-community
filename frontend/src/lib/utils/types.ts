@@ -154,6 +154,7 @@ export const URL_MODEL = [
 	// policy documents
 	'managed-documents',
 	'document-revisions',
+	'document-templates',
 	// presets/journeys
 	'presets',
 	'journeys'

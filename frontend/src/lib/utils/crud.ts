@@ -1006,6 +1006,33 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' }
 		]
 	},
+	'document-templates': {
+		name: 'documenttemplate',
+		localName: 'documentTemplate',
+		localNamePlural: 'documentTemplates',
+		verboseName: 'Document template',
+		verboseNamePlural: 'Document templates',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [
+			{ field: 'document_type' },
+			{ field: 'status' },
+			{ field: 'origin' }
+		],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'document_type' },
+			{ field: 'status' },
+			{ field: 'origin' },
+			{ field: 'locale' },
+			{ field: 'ref_id' },
+			{ field: 'folder' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
 		localName: 'complianceAssessment',
