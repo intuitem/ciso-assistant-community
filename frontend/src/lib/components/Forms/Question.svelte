@@ -4,6 +4,7 @@
 	import { isQuestionVisible } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import SliderInput from './SliderInput.svelte';
 
 	interface Props {
 		class?: string;
@@ -116,49 +117,63 @@
 							<p class="text-gray-400 italic">{m.noAnswer()}</p>
 						{/if}
 					{:else if question.type === 'unique_choice'}
-						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
-							{#each question.choices as option}
-								{@const selected = internalAnswers[urn] === option.urn}
-								<button
-									type="button"
-									name="question"
-									{disabled}
-									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
-										{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
-										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
-									style={selected
-										? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
-										: ''}
-									onclick={() => {
-										if (internalAnswers[urn] === option.urn) {
-											internalAnswers[urn] = null;
-											onChange(urn, null);
-										} else {
-											internalAnswers[urn] = option.urn;
-											onChange(urn, option.urn);
-										}
-									}}
-								>
-									{option.value}
-									{#if option.description}
-										<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
-											<Tooltip.Trigger>
-												{#snippet child({ props })}
-													<span {...props} class="underline"
-														><i class="ml-2 fa-solid fa-circle-info"></i></span
+						{#if question.config?.widget === 'slider' && question.choices.length >= 2}
+							<SliderInput
+								mode="choice"
+								choices={question.choices}
+								value={internalAnswers[urn] ?? null}
+								{disabled}
+								ariaLabel={question.text}
+								onChange={(v) => {
+									internalAnswers[urn] = v;
+									onChange(urn, v);
+								}}
+							/>
+						{:else}
+							<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+								{#each question.choices as option}
+									{@const selected = internalAnswers[urn] === option.urn}
+									<button
+										type="button"
+										name="question"
+										{disabled}
+										class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
+											{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
+											{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
+										style={selected
+											? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
+											: ''}
+										onclick={() => {
+											if (internalAnswers[urn] === option.urn) {
+												internalAnswers[urn] = null;
+												onChange(urn, null);
+											} else {
+												internalAnswers[urn] = option.urn;
+												onChange(urn, option.urn);
+											}
+										}}
+									>
+										{option.value}
+										{#if option.description}
+											<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
+												<Tooltip.Trigger>
+													{#snippet child({ props })}
+														<span {...props} class="underline"
+															><i class="ml-2 fa-solid fa-circle-info"></i></span
+														>
+													{/snippet}
+												</Tooltip.Trigger>
+												<Tooltip.Positioner>
+													<Tooltip.Content class="card preset-filled p-4"
+														>{option.description}</Tooltip.Content
 													>
-												{/snippet}
-											</Tooltip.Trigger>
-											<Tooltip.Positioner>
-												<Tooltip.Content class="card preset-filled p-4"
-													>{option.description}</Tooltip.Content
-												>
-											</Tooltip.Positioner>
-										</Tooltip>
-									{/if}
-								</button>
-							{/each}
-						</div>
+												</Tooltip.Positioner>
+											</Tooltip>
+										{/if}
+									</button>
+								{/each}
+							</div>
+						{/if}
 					{:else if question.type === 'multiple_choice'}
 						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
 							{#each question.choices as option}
@@ -226,7 +241,21 @@
 							{/each}
 						</div>
 					{:else if question.type === 'number'}
-						{#if form}
+						{#if question.config?.widget === 'slider'}
+							<SliderInput
+								mode="number"
+								min={Number(question.config.min ?? 0)}
+								max={Number(question.config.max ?? 100)}
+								step={Number(question.config.step ?? 1)}
+								value={internalAnswers[urn] ?? null}
+								{disabled}
+								ariaLabel={question.text}
+								onChange={(v) => {
+									internalAnswers[urn] = v;
+									onChange(urn, v);
+								}}
+							/>
+						{:else if form}
 							<input
 								type="number"
 								class="input {_class}"

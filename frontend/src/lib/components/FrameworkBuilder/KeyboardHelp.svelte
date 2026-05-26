@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { m } from '$paraglide/messages';
+
 	interface Props {
 		open: boolean;
 		onClose: () => void;
@@ -11,28 +13,28 @@
 	const altKey = isMac ? '⌥' : 'Alt';
 	const shiftKey = isMac ? '⇧' : 'Shift';
 
-	const groups = [
+	const groups = $derived([
 		{
-			title: 'Outline editing',
-			hint: 'Apply to the highlighted node.',
+			title: m.builderKbOutlineEditing(),
+			hint: m.builderKbOutlineEditingHint(),
 			shortcuts: [
-				{ keys: [altKey, '→'], label: 'Indent node' },
-				{ keys: [altKey, '←'], label: 'Outdent node' },
-				{ keys: [altKey, 'Enter'], label: 'Add child' },
-				{ keys: [altKey, shiftKey, 'Enter'], label: 'Add sibling below' },
-				{ keys: [cmdKey, '.'], label: 'Toggle assessable' }
+				{ keys: [altKey, '→'], label: m.builderKbIndentNode() },
+				{ keys: [altKey, '←'], label: m.builderKbOutdentNode() },
+				{ keys: [altKey, 'Enter'], label: m.builderKbAddChild() },
+				{ keys: [altKey, shiftKey, 'Enter'], label: m.builderKbAddSiblingBelow() },
+				{ keys: [cmdKey, '.'], label: m.builderKbToggleAssessable() }
 			]
 		},
 		{
-			title: 'Builder',
+			title: m.builderKbBuilder(),
 			hint: null,
 			shortcuts: [
-				{ keys: [cmdKey, 'S'], label: 'Save draft' },
-				{ keys: ['?'], label: 'Show this cheatsheet' },
-				{ keys: ['Esc'], label: 'Close dialog or dropdown' }
+				{ keys: [cmdKey, 'S'], label: m.builderKbSaveDraft() },
+				{ keys: ['?'], label: m.builderKbShowCheatsheet() },
+				{ keys: ['Esc'], label: m.builderKbCloseDialog() }
 			]
 		}
-	];
+	]);
 </script>
 
 {#if open}
@@ -53,12 +55,12 @@
 		>
 			<div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
 				<h3 id="keyboard-help-title" class="text-lg font-semibold text-gray-900">
-					Keyboard shortcuts
+					{m.builderKeyboardShortcuts()}
 				</h3>
 				<button
 					type="button"
 					class="text-gray-400 hover:text-gray-600 transition-colors"
-					aria-label="Close"
+					aria-label={m.close()}
 					onclick={onClose}
 				>
 					<i class="fa-solid fa-xmark"></i>

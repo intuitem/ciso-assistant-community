@@ -1,750 +1,710 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:cer-directive
 locale: en
 ref_id: CER-directive
 name: CER directive (Critical Entities Resilience)
-description:
-  Entity-facing obligations from Chapter III of Directive (EU) 2022/2557
+description: Entity-facing obligations from Chapter III of Directive (EU) 2022/2557
   of the European Parliament and of the Council of 14 December 2022 on the resilience
   of critical entities and repealing Council Directive 2008/114/EC. Covers Articles
-  12 to 17. The core scope is risk assessment (Article 12), resilience measures
-  (Article 13) and incident notification (Article 15); Article 14 (background
-  checks) is included with only its substantive content requirements assessable.
-  Articles 16 (standards) and 17 (critical entities of particular European
-  significance), umbrella and permissive paragraphs within the core articles, and
-  competent-authority follow-up duties (15.3, 15.4) are included as non-assessable
-  context.
+  12 to 17. The core scope is risk assessment (Article 12), resilience measures (Article
+  13) and incident notification (Article 15); Article 14 (background checks) is included
+  with only its substantive content requirements assessable. Articles 16 (standards)
+  and 17 (critical entities of particular European significance), umbrella and permissive
+  paragraphs within the core articles, and competent-authority follow-up duties (15.3,
+  15.4) are included as non-assessable context.
 copyright: European Union law
-version: 2
+version: 3
 publication_date: 2026-05-08
 provider: EU
 packager: intuitem
-dependencies:
-  - urn:intuitem:risk:library:doc-pol
+translations:
+  fr:
+    name: "Directive REC (R\xE9silience des entit\xE9s critiques)"
+    description: "Obligations applicables aux entit\xE9s issues du chapitre III de\
+      \ la directive (UE) 2022/2557 du Parlement europ\xE9en et du Conseil du 14 d\xE9\
+      cembre 2022 sur la r\xE9silience des entit\xE9s critiques et abrogeant la directive\
+      \ 2008/114/CE du Conseil. Couvre les articles 12 \xE0 17. P\xE9rim\xE8tre principal\
+      \ : \xE9valuation des risques (article 12), mesures de r\xE9silience (article\
+      \ 13) et notification d\u2019incidents (article 15) ; l\u2019article 14 (v\xE9\
+      rification des ant\xE9c\xE9dents) est inclus avec uniquement ses exigences de\
+      \ contenu (14.3) \xE9valuables. Les articles 16 (normes) et 17 (entit\xE9s critiques\
+      \ d\u2019importance europ\xE9enne particuli\xE8re), les paragraphes-cadres et\
+      \ permissifs (12.2.sp2, 13.1, 14.1, 14.2) ainsi que les devoirs de suivi de\
+      \ l\u2019autorit\xE9 comp\xE9tente (15.3, 15.4) sont inclus \xE0 titre informatif\
+      \ (non \xE9valuables)."
 objects:
   framework:
     urn: urn:intuitem:risk:framework:cer-directive
     ref_id: CER-directive
     name: CER directive (Critical Entities Resilience)
-    description: >-
-      Entity-facing obligations from Chapter III of Directive (EU) 2022/2557 on the
-      resilience of critical entities. Core scope: risk assessment (Article 12),
-      resilience measures (Article 13) and incident notification (Article 15);
+    description: 'Entity-facing obligations from Chapter III of Directive (EU) 2022/2557
+      on the resilience of critical entities. Core scope: risk assessment (Article
+      12), resilience measures (Article 13) and incident notification (Article 15);
       Article 14 (background checks) is included with only its substantive content
-      requirements (14.3) assessable. Articles 16 (standards) and 17 (critical
-      entities of particular European significance), umbrella and permissive
-      paragraphs (12.2.sp2, 13.1, 14.1, 14.2), and competent-authority follow-up
-      duties (15.3, 15.4) are included as non-assessable context. Member-State-level
-      duties from Chapters I, II, IV and V are out of scope and not modelled here.
-    requirement_nodes:
-      - urn: urn:intuitem:risk:req_node:cer-directive:art12
-        assessable: false
-        depth: 1
-        name: Article 12
-        description: Risk assessment by critical entities
-        translations:
-          fr:
-            name: Article 12
-            description: Évaluation des risques par les entités critiques
-      - urn: urn:intuitem:risk:req_node:cer-directive:12.1
-        assessable: true
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art12
-        ref_id: "12.1"
-        description:
-          Notwithstanding the deadline set out in Article 6(3), second subparagraph,
-          Member States shall ensure that critical entities carry out a risk assessment
-          within nine months of receiving the notification referred to in Article 6(3),
-          whenever necessary subsequently, and at least every four years, on the basis
-          of Member State risk assessments and other relevant sources of information,
-          in order to assess all relevant risks that could disrupt the provision of
-          their essential services ("critical entity risk assessment").
-        translations:
-          fr:
-            description:
-              Nonobstant le délai énoncé à l’article 6, paragraphe 3, deuxième
-              alinéa, les États membres veillent à ce que les entités critiques procèdent
-              à une évaluation des risques dans un délai de neuf mois suivant la réception
-              de la notification visée à l’article 6, paragraphe 3, selon les besoins
-              par la suite et au moins tous les quatre ans, sur la base des évaluations
-              des risques d’États membres et d’autres sources d’informations pertinentes,
-              afin d’évaluer tous les risques pertinents qui pourraient perturber la
-              fourniture de leur services essentiels (ci-après dénommée «évaluation
-              des risques d’entité critique»).
-      - urn: urn:intuitem:risk:req_node:cer-directive:12.2
-        assessable: true
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art12
-        ref_id: "12.2"
-        description:
-          Critical entity risk assessments shall account for all the relevant
-          natural and man-made risks which could lead to an incident, including those
-          of a cross-sectoral or cross-border nature, accidents, natural disasters,
-          public health emergencies and hybrid threats and other antagonistic threats,
-          including terrorist offences as provided for in Directive (EU) 2017/541. A
-          critical entity risk assessment shall take into account the extent to which
-          other sectors as set out in the Annex depend on the essential service provided
-          by the critical entity and the extent to which that critical entity depends
-          on essential services provided by other entities in such other sectors, including,
-          where relevant, in neighbouring Member States and third countries.
-        translations:
-          fr:
-            description:
-              Les évaluations des risques d’entités critiques rendent compte
-              de tous les risques naturels et d’origine humaine pertinents, susceptibles
-              d’entraîner un incident, y compris ceux qui revêtent un caractère transsectoriel
-              ou transfrontière, des accidents, des catastrophes naturelles, des urgences
-              de santé publique et des menaces hybrides et autres menaces antagonistes,
-              lesquelles comprennent les infractions terroristes prévues par la directive
-              (UE) 2017/541. Une évaluation des risques d’entité critique tient compte
-              de la mesure dans laquelle d’autres secteurs figurant à l’annexe dépendent
-              du service essentiel fourni par l’entité critique et de la mesure dans
-              laquelle cette entité critique dépend des services essentiels fournis
-              par d’autres entités de ces autres secteurs, y compris s’il y a lieu,
-              dans les États membres voisins et les pays tiers.
-      - urn: urn:intuitem:risk:req_node:cer-directive:12.2.sp2
-        assessable: false
-        depth: 3
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:12.2
-        ref_id: 12.2.sp2
-        description:
-          Where a critical entity has carried out other risk assessments
-          or drawn up documents pursuant to obligations laid down in other legal acts
-          that are relevant for its critical entity risk assessment, it may use those
-          assessments and documents to meet the requirements set out in this Article.
-          When exercising its supervisory functions, the competent authority may declare
-          an existing risk assessment carried out by a critical entity that addresses
-          the risks and extent of dependence referred to in the first subparagraph of
-          this paragraph as compliant, in whole or in part, with the obligations under
-          this Article.
-        translations:
-          fr:
-            description:
-              Lorsqu’une entité critique a réalisé d’autres évaluations des
-              risques ou établi des documents en vertu d’obligations prévues dans d’autres
-              actes juridiques qui sont pertinents pour son évaluation des risques d’entité
-              critique, elle peut utiliser ces évaluations et documents pour satisfaire
-              aux exigences énoncées dans le présent article. Dans l’exercice de ses
-              fonctions de supervision, l’autorité compétente peut déclarer qu’une évaluation
-              des risques existante réalisée par une entité critique qui porte sur les
-              risques et le degré de dépendance visés au premier alinéa du présent paragraphe
-              respecte, en tout ou en partie, les obligations prévues par le présent
-              article.
-      - urn: urn:intuitem:risk:req_node:cer-directive:art13
-        assessable: false
-        depth: 1
-        name: Article 13
-        description: Resilience measures of critical entities
-        translations:
-          fr:
-            name: Article 13
-            description: Mesures de résilience des entités critiques
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art13
-        ref_id: "13.1"
-        description:
-          "Member States shall ensure that critical entities take appropriate
-          and proportionate technical, security and organisational measures to ensure
-          their resilience, based on the relevant information provided by Member States
-          on the Member State risk assessment and on the outcomes of the critical entity
-          risk assessment, including measures necessary to:"
-        translations:
-          fr:
-            description:
-              "Les États membres veillent à ce que les entités critiques
-              prennent des mesures techniques, des mesures de sécurité et des mesures
-              organisationnelles appropriées et proportionnées pour garantir leur résilience,
-              sur la base des informations pertinentes fournies par les États membres
-              concernant l’évaluation des risques d’État membre et les résultats de
-              l’évaluation des risques d’entité critique, y compris des mesures nécessaires
-              pour:"
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.1.a
-        assessable: true
-        depth: 3
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        ref_id: 13.1.a
-        description:
-          prevent incidents from occurring, duly considering disaster risk
-          reduction and climate adaptation measures;
-        translations:
-          fr:
-            description:
-              prévenir la survenance d’incidents, en tenant dûment compte
-              de mesures de réduction des risques de catastrophe et d’adaptation au
-              changement climatique;
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.1.b
-        assessable: true
-        depth: 3
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        ref_id: 13.1.b
-        description:
-          ensure adequate physical protection of their premises and critical
-          infrastructure, duly considering, for example, fencing, barriers, perimeter
-          monitoring tools and routines, detection equipment and access controls;
-        translations:
-          fr:
-            description:
-              assurer une protection physique adéquate de leurs locaux et
-              infrastructures critiques, en prenant dûment en considération, par exemple,
-              des clôtures, des barrières, des outils et procédures de surveillance
-              des enceintes, et des équipements de détection et de contrôle des accès;
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.1.c
-        assessable: true
-        depth: 3
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        ref_id: 13.1.c
-        description:
-          respond to, resist and mitigate the consequences of incidents,
-          duly considering the implementation of risk and crisis management procedures
-          and protocols and alert routines;
-        translations:
-          fr:
-            description:
-              réagir et résister aux conséquences des incidents et les atténuer,
-              en prenant dûment en considération la mise en œuvre de procédures et protocoles
-              de gestion des risques et des crises et de procédures d’alerte;
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.1.d
-        assessable: true
-        depth: 3
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        ref_id: 13.1.d
-        description:
-          recover from incidents, duly considering business continuity measures
-          and the identification of alternative supply chains, in order to resume the
-          provision of the essential service;
-        translations:
-          fr:
-            description:
-              se rétablir d’incidents, en prenant dûment en considération
-              des mesures assurant la continuité des activités et la détermination d’autres
-              chaînes d’approvisionnement, afin de reprendre la fourniture du service
-              essentiel;
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.1.e
-        assessable: true
-        depth: 3
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        ref_id: 13.1.e
-        description:
-          ensure adequate employee security management, duly considering
-          measures such as setting out categories of personnel who exercise critical
-          functions, establishing access rights to premises, critical infrastructure
-          and sensitive information, setting up procedures for background checks in
-          accordance with Article 14 and designating the categories of persons who are
-          required to undergo such background checks, and laying down appropriate training
-          requirements and qualifications;
-        translations:
-          fr:
-            description:
-              assurer une gestion adéquate de la sécurité liée au personnel,
-              en prenant dûment en considération des mesures telles que la définition
-              des catégories de personnel qui exerce des fonctions critiques, l’établissement
-              de droits d’accès aux locaux, aux infrastructures critiques et aux informations
-              sensibles, la mise en place de procédures de vérification des antécédents
-              conformément à l’article 14, la désignation des catégories de personnes
-              tenues de faire l’objet de telles vérifications des antécédents et la
-              définition d’exigences et de qualifications appropriées en matière de
-              formation;
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.1.f
-        assessable: true
-        depth: 3
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        ref_id: 13.1.f
-        description:
-          raise awareness about the measures referred to in points (a) to
-          (e) among relevant personnel, duly considering training courses, information
-          materials and exercises.
-        translations:
-          fr:
-            description:
-              sensibiliser le personnel concerné aux mesures visées aux points
-              a) à e), en tenant dûment compte des séances de formation, du matériel
-              d’information et des exercices.
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.1.sp2
-        assessable: true
-        depth: 3
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
-        ref_id: 13.1.sp2
-        description:
-          For the purposes of the first subparagraph, point (e), Member States
-          shall ensure that critical entities take into account the personnel of external
-          service providers when setting out categories of personnel who exercise critical
-          functions.
-        translations:
-          fr:
-            description:
-              Aux fins du premier alinéa, point e), les États membres veillent
-              à ce que les entités critiques tiennent compte du personnel des prestataires
-              de services extérieurs lorsqu’ils définissent les catégories de personnel
-              qui exerce des fonctions critiques.
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.2
-        assessable: true
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art13
-        ref_id: "13.2"
-        description:
-          Member States shall ensure that critical entities have in place
-          and apply a resilience plan or equivalent document or documents which describe
-          the measures taken pursuant to paragraph 1. Where critical entities have drawn
-          up documents or taken measures pursuant to obligations laid down in other
-          legal acts that are relevant for the measures referred to in paragraph 1,
-          they may use those documents and measures to meet the requirements set out
-          in this Article. When exercising its supervisory functions, the competent
-          authority may declare existing resilience-enhancing measures taken by a critical
-          entity that address, in an appropriate and proportionate manner, the technical,
-          security and organisational measures referred to in paragraph 1 as compliant,
-          in whole or in part, with the obligations under this Article.
-        translations:
-          fr:
-            description:
-              Les États membres veillent à ce que les entités critiques aient
-              mis en place et appliquent un plan de résilience ou un ou plusieurs documents
-              équivalents, qui décrivent les mesures prises en application du paragraphe
-              1. Lorsque les entités critiques ont élaboré des documents ou pris des
-              mesures en vertu d’obligations prévues dans d’autres actes juridiques
-              qui sont pertinents pour les mesures visées au paragraphe 1, elles peuvent
-              utiliser ces documents et mesures pour satisfaire aux exigences énoncées
-              dans le présent article. Dans l’exercice de ses fonctions de supervision,
-              l’autorité compétente peut déclarer que des mesures existantes de renforcement
-              de la résilience prises par une entité critique qui portent, de manière
-              appropriée et proportionnée, sur les mesures techniques, les mesures de
-              sécurité et les mesures organisationnelles visées au paragraphe 1 respectent,
-              en tout ou en partie, les obligations prévues par le présent article.
-      - urn: urn:intuitem:risk:req_node:cer-directive:13.3
-        assessable: true
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art13
-        ref_id: "13.3"
-        description:
-          Member States shall ensure that each critical entity designates
-          a liaison officer or equivalent as the point of contact with the competent
-          authorities.
-        translations:
-          fr:
-            description:
-              Les États membres veillent à ce que chaque entité critique
-              désigne un agent de liaison ou une personne ayant une fonction équivalente
-              en tant que point de contact avec les autorités compétentes.
-      - urn: urn:intuitem:risk:req_node:cer-directive:art14
-        assessable: false
-        depth: 1
-        name: Article 14
-        description: Background checks
-        translations:
-          fr:
-            name: Article 14
-            description: Vérification des antécédents
-      - urn: urn:intuitem:risk:req_node:cer-directive:14.1
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art14
-        ref_id: "14.1"
-        description:
-          "Member States shall specify the conditions under which a critical
-          entity is permitted, in duly reasoned cases and taking into account the Member
-          State risk assessment, to submit requests for background checks on persons
-          who:
-
-          (a) hold sensitive roles in or for the benefit of the critical entity, in
-          particular in relation to the resilience of the critical entity;
-
-          (b) are authorised to directly or remotely access its premises, information
-          or control systems, including in connection with the security of the critical
-          entity;
-
-          (c) are under consideration for recruitment to positions that fall under the
-          criteria set out in point (a) or (b)."
-        translations:
-          fr:
-            description:
-              "Les États membres précisent les conditions dans lesquelles
-              une entité critique est autorisée, dans des cas dûment motivés et compte
-              tenu de l’évaluation des risques d’État membre, à présenter des demandes
-              de vérification des antécédents des personnes:
-
-              a) qui occupent des fonctions sensibles au sein de l’entité critique ou
-              au bénéfice de celle-ci, notamment en ce qui concerne la résilience de
-              l’entité critique;
-
-              b) qui sont autorisées à avoir un accès direct ou à distance aux locaux
-              et aux systèmes d’information ou de contrôle de l’entité critique, y compris
-              en lien avec sa sécurité;
-
-              c) dont le recrutement est envisagé à des postes répondant aux critères
-              énoncés au point a) ou b)."
-      - urn: urn:intuitem:risk:req_node:cer-directive:14.2
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art14
-        ref_id: "14.2"
-        description:
-          Requests as referred to in paragraph 1 of this Article shall be
-          assessed within a reasonable timeframe and processed in accordance with national
-          law and procedures and relevant and applicable Union law, including Regulation
-          (EU) 2016/679 and Directive (EU) 2016/680 of the European Parliament and of
-          the Council. Background checks shall be proportionate and strictly limited
-          to what is necessary. They shall be carried out for the sole purpose of evaluating
-          a potential security risk to the critical entity concerned.
-        translations:
-          fr:
-            description:
-              Les demandes visées au paragraphe 1 du présent article sont
-              évaluées dans un délai raisonnable et traitées conformément au droit national
-              et aux procédures nationales, ainsi qu’au droit de l’Union pertinent et
-              applicable, y compris le règlement (UE) 2016/679 et la directive (UE)
-              2016/680 du Parlement européen et du Conseil (37). Les vérifications des
-              antécédents sont proportionnées et strictement limitées à ce qui est nécessaire.
-              Elles sont effectuées dans le seul but d’évaluer un risque potentiel pour
-              la sécurité de l’entité critique concernée.
-      - urn: urn:intuitem:risk:req_node:cer-directive:14.3
-        assessable: true
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art14
-        ref_id: "14.3"
-        description:
-          "A background check as referred to in paragraph 1 shall, at least:
-
-          (a) corroborate the identity of the person who is the subject of the background
-          check;
-
-          (b) check the criminal records of that person with regards to offences which
-          would be relevant for a specific position.
-
-          When carrying out background checks, Member States shall use the European
-          Criminal Records Information System in accordance with the procedures set
-          out in Framework Decision 2009/315/JHA and, where relevant and applicable,
-          Regulation (EU) 2019/816 for the purpose of obtaining information from criminal
-          records held by other Member States. The central authorities referred to in
-          Article 3(1) of Framework Decision 2009/315/JHA and in Article 3, point (5),
-          of Regulation (EU) 2019/816 shall provide replies to requests for such information
-          within 10 working days from the date on which the request was received in
-          accordance with Article 8(1) of Framework Decision 2009/315/JHA."
-        translations:
-          fr:
-            description:
-              "À tout le moins, une vérification des antécédents visée au
-              paragraphe 1:
-
-              a) corrobore l’identité de la personne qui fait l’objet d’une demande
-              de vérification des antécédents;
-
-              b) vérifie les casiers judiciaires de cette personne en ce qui concerne
-              des infractions qui seraient pertinentes pour un poste déterminé;
-
-              Lors de la vérification des antécédents, les États membres, recourent
-              au système européen d’information sur les casiers judiciaires conformément
-              aux procédures prévues dans la décision-cadre 2009/315/JAI et, si cela
-              est pertinent et applicable, dans le règlement (UE) 2019/816, aux fins
-              de l’obtention des informations issues des casiers judiciaires détenus
-              par d’autres États membres. Les autorités centrales visées à l’article
-              3, paragraphe 1, de la décision-cadre 2009/315/JAI et à l’article 3, point
-              5, du règlement (UE) 2019/816 répondent aux demandes d’informations dans
-              un délai de dix jours ouvrables à compter de la date de réception de la
-              demande conformément à l’article 8, paragraphe 1, de la décision-cadre
-              2009/315/JAI."
-      - urn: urn:intuitem:risk:req_node:cer-directive:art15
-        assessable: false
-        depth: 1
-        name: Article 15
-        description: Incident notification
-        translations:
-          fr:
-            name: Article 15
-            description: Notification d’incidents
-      - urn: urn:intuitem:risk:req_node:cer-directive:15.1
-        assessable: true
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art15
-        ref_id: "15.1"
-        description:
-          "Member States shall ensure that critical entities notify the competent
-          authority, without undue delay, of incidents that significantly disrupt or
-          have the potential to significantly disrupt the provision of essential services.
-          Member States shall ensure that, unless operationally unable to do so, critical
-          entities submit an initial notification no later than 24 hours after becoming
-          aware of an incident, followed, where relevant, by a detailed report no later
-          than one month thereafter. In order to determine the significance of a disruption,
-          the following parameters shall, in particular, be taken into account:
-
-          (a) the number and proportion of users affected by the disruption;
-
-          (b) the duration of the disruption;
-
-          (c) the geographical area affected by the disruption, taking into account
-          whether the area is geographically isolated.
-
-          Where an incident has or might have a significant impact on the continuity
-          of the provision of essential services to or in six or more Member States,
-          the competent authorities of the Member States affected by the incident shall
-          notify the Commission of that incident."
-        translations:
-          fr:
-            description:
-              "Les États membres veillent à ce que les entités critiques
-              notifient sans retard injustifié à l’autorité compétente les incidents
-              qui perturbent ou sont susceptibles de perturber de manière importante
-              la fourniture de services essentiels. Les États membres veillent à ce
-              que, sauf à être dans l’incapacité de le faire pour des raisons opérationnelles,
-              les entités critiques présentent une première notification au plus tard
-              24 heures après avoir pris connaissance d’un incident, suivie, s’il y
-              a lieu, d’un rapport détaillé au plus tard un mois après. Afin de déterminer
-              l’importance de la perturbation, les paramètres suivants sont, en particulier,
-              pris en compte:
-
-              a) le nombre et la proportion d’utilisateurs affectés par la perturbation;
-
-              b) la durée de la perturbation;
-
-              c) la zone géographique concernée par la perturbation, en tenant compte
-              de son éventuel isolement géographique.
-
-              Lorsqu’un incident a ou pourrait avoir un impact important sur la continuité
-              de la fourniture de services essentiels à ou dans six États membres ou
-              plus, les autorités compétentes des États membres affectés par l’incident
-              notifient ledit incident à la Commission."
-      - urn: urn:intuitem:risk:req_node:cer-directive:15.2
-        assessable: true
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art15
-        ref_id: "15.2"
-        description:
-          Notifications as referred to in paragraph 1, first subparagraph,
-          shall include any available information necessary to enable the competent
-          authority to understand the nature, cause and possible consequences of the
-          incident, including any available information necessary to determine any cross-border
-          impact of the incident. Such notifications shall not subject critical entities
-          to increased liability.
-        translations:
-          fr:
-            description:
-              Les notifications visées au paragraphe 1, premier alinéa, comprennent
-              toutes les informations disponibles nécessaires pour permettre à l’autorité
-              compétente de comprendre la nature, la cause et les conséquences possibles
-              de l’incident, y compris toute information disponible nécessaire pour
-              déterminer tout impact transfrontière de l’incident. Ces notifications
-              n’ont pas pour effet de soumettre les entités critiques à une responsabilité
-              accrue.
-      - urn: urn:intuitem:risk:req_node:cer-directive:15.3
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art15
-        ref_id: "15.3"
-        description:
-          On the basis of the information provided by a critical entity in
-          a notification as referred to in paragraph 1, the relevant competent authority,
-          via the single point of contact, shall inform the single point of contact
-          of other affected Member States where the incident has or might have a significant
-          impact on critical entities and the continuity of the provision of essential
-          services to or in one or more other Member States. Single points of contact
-          sending and receiving information pursuant to the first subparagraph shall,
-          in accordance with Union or national law, treat that information in a way
-          that respects its confidentiality and protects the security and commercial
-          interest of the critical entity concerned.
-        translations:
-          fr:
-            description:
-              "Sur la base des informations fournies par une entité critique
-              dans une notification visée au paragraphe 1, l’autorité compétente concernée,
-              par l’intermédiaire du point de contact unique, informe le point de contact
-              unique des autres États membres affectés lorsque l’incident a ou pourrait
-              avoir un impact important sur les entités critiques et sur la continuité
-              de la fourniture de services essentiels à ou dans un ou plusieurs autres
-              États membres.
-
-              Les points de contact uniques qui envoient et reçoivent des informations
-              en vertu du premier alinéa traitent ces informations, conformément au
-              droit de l’Union ou au droit national, de manière à en respecter la confidentialité
-              et à préserver la sécurité et les intérêts commerciaux de l’entité critique
-              concernée."
-      - urn: urn:intuitem:risk:req_node:cer-directive:15.4
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art15
-        ref_id: "15.4"
-        description:
-          As soon as possible following a notification as referred to in
-          paragraph 1, the competent authority concerned shall provide the critical
-          entity concerned with relevant follow-up information, including information
-          that could support that critical entity's effective response to the incident
-          in question. Member States shall inform the public where they determine that
-          it would be in the public interest to do so.
-        translations:
-          fr:
-            description:
-              Dès que possible après la réception d’une notification visée
-              au paragraphe 1, l’autorité compétente concernée fournit à l’entité critique
-              concernée des informations de suivi pertinentes, y compris des informations
-              qui pourraient aider ladite entité critique à réagir efficacement à l’incident
-              en question. Les États membres informent le public lorsqu’ils estiment
-              qu’il serait dans l’intérêt général de le faire.
-      - urn: urn:intuitem:risk:req_node:cer-directive:art16
-        assessable: false
-        depth: 1
-        name: Article 16
-        description: Standards
-        translations:
-          fr:
-            name: Article 16
-            description: Normes
-      - urn: urn:intuitem:risk:req_node:cer-directive:16.1
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art16
-        ref_id: "16.1"
-        description:
-          In order to promote the convergent implementation of this Directive,
-          Member States shall, where useful and without imposing or discriminating in
-          favour of the use of a particular type of technology, encourage the use of
-          European and international standards and technical specifications relevant
-          to the security and resilience measures applicable to critical entities.
-        translations:
-          fr:
-            description:
-              Afin de favoriser la mise en œuvre convergente de la présente
-              directive, les États membres encouragent, lorsque c’est utile et sans
-              imposer ni créer de discriminations en faveur de l’utilisation d’un type
-              particulier de technologie, le recours à des normes et des spécifications
-              techniques européennes et internationales pertinentes pour les mesures
-              de sécurité et les mesures de résilience applicables aux entités critiques.
-      - urn: urn:intuitem:risk:req_node:cer-directive:art17
-        assessable: false
-        depth: 1
-        name: Article 17
-        description: Identification of critical entities of particular European significance
-        translations:
-          fr:
-            name: Article 17
-            description: Recensement des entités critiques d’importance européenne particulière
-      - urn: urn:intuitem:risk:req_node:cer-directive:17.1
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art17
-        ref_id: "17.1"
-        description:
-          "An entity shall be considered a critical entity of particular
-          European significance where it:
-
-          (a) has been identified as a critical entity pursuant to Article 6(1);
-
-          (b) provides the same or similar essential services to or in six or more Member
-          States; and
-
-          (c) has been notified pursuant to paragraph 3 of this Article."
-        translations:
-          fr:
-            description:
-              "Une entité est considérée comme une entité critique d’importance
-              européenne particulière lorsqu’elle:
-
-              a) a été désignée en tant qu’entité critique conformément à l’article
-              6, paragraphe 1;
-
-              b) fournit les mêmes services essentiels ou des services essentiels similaires
-              à ou dans six États membres ou plus; et
-
-              c) elle a fait l’objet d’une notification conformément au paragraphe 3
-              du présent article."
-      - urn: urn:intuitem:risk:req_node:cer-directive:17.2
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art17
-        ref_id: "17.2"
-        description:
-          Member States shall ensure that a critical entity, following the
-          notification referred to in Article 6(3), informs its competent authority
-          where it provides essential services to or in six or more Member States. In
-          such a case, Member States shall ensure that the critical entity informs its
-          competent authority of the essential services it provides to or in those Member
-          States and of the Member States to which or in which it provides such essential
-          services. Member States shall notify the Commission, without undue delay,
-          of the identity of such critical entities and of the information they provide
-          under this paragraph.
-        translations:
-          fr:
-            description:
-              Les États membres veillent à ce qu’une entité critique, à la
-              suite de la notification visée à l’article 6, paragraphe 3, informe son
-              autorité compétente lorsqu’elle fournit des services essentiels à ou dans
-              six États membres ou plus. En pareil cas, les États membres veillent à
-              ce que l’entité critique informe son autorité compétente au sujet des
-              services essentiels qu’elle fournit à ou dans ces États membres et au
-              sujet des États membres auxquels ou dans lesquels elle fournit ces services
-              essentiels. Les États membres notifient à la Commission, sans retard injustifié,
-              l’identité de ces entités critiques et les informations qu’elles fournissent
-              au titre du présent paragraphe.
-      - urn: urn:intuitem:risk:req_node:cer-directive:17.3
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art17
-        ref_id: "17.3"
-        description:
-          Where the Commission establishes, on the basis of the consultations
-          referred to in paragraph 2 of this Article, that the critical entity concerned
-          provides essential services to or in six or more Member States, the Commission
-          shall notify that critical entity, through its competent authority, that it
-          is considered a critical entity of particular European significance and inform
-          that critical entity of its obligations under this Chapter and the date from
-          which those obligations apply to it. Once the Commission informs the competent
-          authority of its decision to consider a critical entity as a critical entity
-          of particular European significance, the competent authority shall forward
-          that notification to that critical entity without undue delay.
-        translations:
-          fr:
-            description:
-              Lorsque la Commission établit, sur la base des consultations
-              visées au paragraphe 2 du présent article, que l’entité critique concernée
-              fournit des services essentiels à ou dans six États membres ou plus, la
-              Commission notifie à ladite entité critique, par l’intermédiaire de son
-              autorité compétente, qu’elle est considérée comme une entité critique
-              d’importance européenne particulière et l’informe des obligations qui
-              lui incombent en vertu du présent chapitre et de la date à partir de laquelle
-              ces obligations lui sont applicables. Une fois que la Commission informe
-              l’autorité compétente de sa décision de considérer une entité critique
-              comme une entité critique d’importance européenne particulière, l’autorité
-              compétente transmet ladite notification à ladite entité critique sans
-              retard injustifié.
-      - urn: urn:intuitem:risk:req_node:cer-directive:17.4
-        assessable: false
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:cer-directive:art17
-        ref_id: "17.4"
-        description:
-          This Chapter shall apply to the critical entity of particular European
-          significance concerned from the date of receipt of the notification referred
-          to in paragraph 3 of this Article.
-        translations:
-          fr:
-            description:
-              Le présent chapitre s’applique à l’entité critique d’importance
-              européenne particulière concernée à compter de la date de réception de
-              la notification visée au paragraphe 3 du présent article.
+      requirements (14.3) assessable. Articles 16 (standards) and 17 (critical entities
+      of particular European significance), umbrella and permissive paragraphs (12.2.sp2,
+      13.1, 14.1, 14.2), and competent-authority follow-up duties (15.3, 15.4) are
+      included as non-assessable context. Member-State-level duties from Chapters
+      I, II, IV and V are out of scope and not modelled here.'
     translations:
       fr:
-        name: Directive REC (Résilience des entités critiques)
-        description: >-
-          Obligations applicables aux entités issues du chapitre III de la directive
-          (UE) 2022/2557 du Parlement européen et du Conseil du 14 décembre 2022
-          sur la résilience des entités critiques et abrogeant la directive
-          2008/114/CE du Conseil. Couvre les articles 12 à 17. Périmètre principal :
-          évaluation des risques (article 12), mesures de résilience (article 13) et
-          notification d’incidents (article 15) ; l’article 14 (vérification des
-          antécédents) est inclus avec uniquement ses exigences de contenu (14.3)
-          évaluables. Les articles 16 (normes) et 17 (entités critiques d’importance
-          européenne particulière), les paragraphes-cadres et permissifs (12.2.sp2,
-          13.1, 14.1, 14.2) ainsi que les devoirs de suivi de l’autorité compétente
-          (15.3, 15.4) sont inclus à titre informatif (non évaluables).
-translations:
-  fr:
-    name: Directive REC (Résilience des entités critiques)
-    description: >-
-      Obligations applicables aux entités issues du chapitre III de la directive
-      (UE) 2022/2557 du Parlement européen et du Conseil du 14 décembre 2022 sur la
-      résilience des entités critiques et abrogeant la directive 2008/114/CE du
-      Conseil. Couvre les articles 12 à 17. Périmètre principal : évaluation des
-      risques (article 12), mesures de résilience (article 13) et notification
-      d’incidents (article 15) ; l’article 14 (vérification des antécédents) est
-      inclus avec uniquement ses exigences de contenu (14.3) évaluables. Les
-      articles 16 (normes) et 17 (entités critiques d’importance européenne
-      particulière), les paragraphes-cadres et permissifs (12.2.sp2, 13.1, 14.1,
-      14.2) ainsi que les devoirs de suivi de l’autorité compétente (15.3, 15.4)
-      sont inclus à titre informatif (non évaluables).
+        name: "Directive REC (R\xE9silience des entit\xE9s critiques)"
+        description: "Obligations applicables aux entit\xE9s issues du chapitre III\
+          \ de la directive (UE) 2022/2557 du Parlement europ\xE9en et du Conseil\
+          \ du 14 d\xE9cembre 2022 sur la r\xE9silience des entit\xE9s critiques et\
+          \ abrogeant la directive 2008/114/CE du Conseil. Couvre les articles 12\
+          \ \xE0 17. P\xE9rim\xE8tre principal : \xE9valuation des risques (article\
+          \ 12), mesures de r\xE9silience (article 13) et notification d\u2019incidents\
+          \ (article 15) ; l\u2019article 14 (v\xE9rification des ant\xE9c\xE9dents)\
+          \ est inclus avec uniquement ses exigences de contenu (14.3) \xE9valuables.\
+          \ Les articles 16 (normes) et 17 (entit\xE9s critiques d\u2019importance\
+          \ europ\xE9enne particuli\xE8re), les paragraphes-cadres et permissifs (12.2.sp2,\
+          \ 13.1, 14.1, 14.2) ainsi que les devoirs de suivi de l\u2019autorit\xE9\
+          \ comp\xE9tente (15.3, 15.4) sont inclus \xE0 titre informatif (non \xE9\
+          valuables)."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cer-directive:art12
+      assessable: false
+      depth: 1
+      name: Article 12
+      description: Risk assessment by critical entities
+      translations:
+        fr:
+          name: Article 12
+          description: "\xC9valuation des risques par les entit\xE9s critiques"
+    - urn: urn:intuitem:risk:req_node:cer-directive:12.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art12
+      ref_id: '12.1'
+      description: Notwithstanding the deadline set out in Article 6(3), second subparagraph,
+        Member States shall ensure that critical entities carry out a risk assessment
+        within nine months of receiving the notification referred to in Article 6(3),
+        whenever necessary subsequently, and at least every four years, on the basis
+        of Member State risk assessments and other relevant sources of information,
+        in order to assess all relevant risks that could disrupt the provision of
+        their essential services ("critical entity risk assessment").
+      translations:
+        fr:
+          description: "Nonobstant le d\xE9lai \xE9nonc\xE9 \xE0 l\u2019article 6,\
+            \ paragraphe 3, deuxi\xE8me alin\xE9a, les \xC9tats membres veillent \xE0\
+            \ ce que les entit\xE9s critiques proc\xE8dent \xE0 une \xE9valuation\
+            \ des risques dans un d\xE9lai de neuf mois suivant la r\xE9ception de\
+            \ la notification vis\xE9e \xE0 l\u2019article 6, paragraphe 3, selon\
+            \ les besoins par la suite et au moins tous les quatre ans, sur la base\
+            \ des \xE9valuations des risques d\u2019\xC9tats membres et d\u2019autres\
+            \ sources d\u2019informations pertinentes, afin d\u2019\xE9valuer tous\
+            \ les risques pertinents qui pourraient perturber la fourniture de leur\
+            \ services essentiels (ci-apr\xE8s d\xE9nomm\xE9e \xAB\xE9valuation des\
+            \ risques d\u2019entit\xE9 critique\xBB)."
+    - urn: urn:intuitem:risk:req_node:cer-directive:12.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art12
+      ref_id: '12.2'
+      description: Critical entity risk assessments shall account for all the relevant
+        natural and man-made risks which could lead to an incident, including those
+        of a cross-sectoral or cross-border nature, accidents, natural disasters,
+        public health emergencies and hybrid threats and other antagonistic threats,
+        including terrorist offences as provided for in Directive (EU) 2017/541. A
+        critical entity risk assessment shall take into account the extent to which
+        other sectors as set out in the Annex depend on the essential service provided
+        by the critical entity and the extent to which that critical entity depends
+        on essential services provided by other entities in such other sectors, including,
+        where relevant, in neighbouring Member States and third countries.
+      translations:
+        fr:
+          description: "Les \xE9valuations des risques d\u2019entit\xE9s critiques\
+            \ rendent compte de tous les risques naturels et d\u2019origine humaine\
+            \ pertinents, susceptibles d\u2019entra\xEEner un incident, y compris\
+            \ ceux qui rev\xEAtent un caract\xE8re transsectoriel ou transfronti\xE8\
+            re, des accidents, des catastrophes naturelles, des urgences de sant\xE9\
+            \ publique et des menaces hybrides et autres menaces antagonistes, lesquelles\
+            \ comprennent les infractions terroristes pr\xE9vues par la directive\
+            \ (UE) 2017/541. Une \xE9valuation des risques d\u2019entit\xE9 critique\
+            \ tient compte de la mesure dans laquelle d\u2019autres secteurs figurant\
+            \ \xE0 l\u2019annexe d\xE9pendent du service essentiel fourni par l\u2019\
+            entit\xE9 critique et de la mesure dans laquelle cette entit\xE9 critique\
+            \ d\xE9pend des services essentiels fournis par d\u2019autres entit\xE9\
+            s de ces autres secteurs, y compris s\u2019il y a lieu, dans les \xC9\
+            tats membres voisins et les pays tiers."
+    - urn: urn:intuitem:risk:req_node:cer-directive:12.2.sp2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:12.2
+      ref_id: 12.2.sp2
+      description: Where a critical entity has carried out other risk assessments
+        or drawn up documents pursuant to obligations laid down in other legal acts
+        that are relevant for its critical entity risk assessment, it may use those
+        assessments and documents to meet the requirements set out in this Article.
+        When exercising its supervisory functions, the competent authority may declare
+        an existing risk assessment carried out by a critical entity that addresses
+        the risks and extent of dependence referred to in the first subparagraph of
+        this paragraph as compliant, in whole or in part, with the obligations under
+        this Article.
+      translations:
+        fr:
+          description: "Lorsqu\u2019une entit\xE9 critique a r\xE9alis\xE9 d\u2019\
+            autres \xE9valuations des risques ou \xE9tabli des documents en vertu\
+            \ d\u2019obligations pr\xE9vues dans d\u2019autres actes juridiques qui\
+            \ sont pertinents pour son \xE9valuation des risques d\u2019entit\xE9\
+            \ critique, elle peut utiliser ces \xE9valuations et documents pour satisfaire\
+            \ aux exigences \xE9nonc\xE9es dans le pr\xE9sent article. Dans l\u2019\
+            exercice de ses fonctions de supervision, l\u2019autorit\xE9 comp\xE9\
+            tente peut d\xE9clarer qu\u2019une \xE9valuation des risques existante\
+            \ r\xE9alis\xE9e par une entit\xE9 critique qui porte sur les risques\
+            \ et le degr\xE9 de d\xE9pendance vis\xE9s au premier alin\xE9a du pr\xE9\
+            sent paragraphe respecte, en tout ou en partie, les obligations pr\xE9\
+            vues par le pr\xE9sent article."
+    - urn: urn:intuitem:risk:req_node:cer-directive:art13
+      assessable: false
+      depth: 1
+      name: Article 13
+      description: Resilience measures of critical entities
+      translations:
+        fr:
+          name: Article 13
+          description: "Mesures de r\xE9silience des entit\xE9s critiques"
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art13
+      ref_id: '13.1'
+      description: 'Member States shall ensure that critical entities take appropriate
+        and proportionate technical, security and organisational measures to ensure
+        their resilience, based on the relevant information provided by Member States
+        on the Member State risk assessment and on the outcomes of the critical entity
+        risk assessment, including measures necessary to:'
+      translations:
+        fr:
+          description: "Les \xC9tats membres veillent \xE0 ce que les entit\xE9s critiques\
+            \ prennent des mesures techniques, des mesures de s\xE9curit\xE9 et des\
+            \ mesures organisationnelles appropri\xE9es et proportionn\xE9es pour\
+            \ garantir leur r\xE9silience, sur la base des informations pertinentes\
+            \ fournies par les \xC9tats membres concernant l\u2019\xE9valuation des\
+            \ risques d\u2019\xC9tat membre et les r\xE9sultats de l\u2019\xE9valuation\
+            \ des risques d\u2019entit\xE9 critique, y compris des mesures n\xE9cessaires\
+            \ pour:"
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
+      ref_id: 13.1.a
+      description: prevent incidents from occurring, duly considering disaster risk
+        reduction and climate adaptation measures;
+      translations:
+        fr:
+          description: "pr\xE9venir la survenance d\u2019incidents, en tenant d\xFB\
+            ment compte de mesures de r\xE9duction des risques de catastrophe et d\u2019\
+            adaptation au changement climatique;"
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
+      ref_id: 13.1.b
+      description: ensure adequate physical protection of their premises and critical
+        infrastructure, duly considering, for example, fencing, barriers, perimeter
+        monitoring tools and routines, detection equipment and access controls;
+      translations:
+        fr:
+          description: "assurer une protection physique ad\xE9quate de leurs locaux\
+            \ et infrastructures critiques, en prenant d\xFBment en consid\xE9ration,\
+            \ par exemple, des cl\xF4tures, des barri\xE8res, des outils et proc\xE9\
+            dures de surveillance des enceintes, et des \xE9quipements de d\xE9tection\
+            \ et de contr\xF4le des acc\xE8s;"
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
+      ref_id: 13.1.c
+      description: respond to, resist and mitigate the consequences of incidents,
+        duly considering the implementation of risk and crisis management procedures
+        and protocols and alert routines;
+      translations:
+        fr:
+          description: "r\xE9agir et r\xE9sister aux cons\xE9quences des incidents\
+            \ et les att\xE9nuer, en prenant d\xFBment en consid\xE9ration la mise\
+            \ en \u0153uvre de proc\xE9dures et protocoles de gestion des risques\
+            \ et des crises et de proc\xE9dures d\u2019alerte;"
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
+      ref_id: 13.1.d
+      description: recover from incidents, duly considering business continuity measures
+        and the identification of alternative supply chains, in order to resume the
+        provision of the essential service;
+      translations:
+        fr:
+          description: "se r\xE9tablir d\u2019incidents, en prenant d\xFBment en consid\xE9\
+            ration des mesures assurant la continuit\xE9 des activit\xE9s et la d\xE9\
+            termination d\u2019autres cha\xEEnes d\u2019approvisionnement, afin de\
+            \ reprendre la fourniture du service essentiel;"
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.1.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
+      ref_id: 13.1.e
+      description: ensure adequate employee security management, duly considering
+        measures such as setting out categories of personnel who exercise critical
+        functions, establishing access rights to premises, critical infrastructure
+        and sensitive information, setting up procedures for background checks in
+        accordance with Article 14 and designating the categories of persons who are
+        required to undergo such background checks, and laying down appropriate training
+        requirements and qualifications;
+      translations:
+        fr:
+          description: "assurer une gestion ad\xE9quate de la s\xE9curit\xE9 li\xE9\
+            e au personnel, en prenant d\xFBment en consid\xE9ration des mesures telles\
+            \ que la d\xE9finition des cat\xE9gories de personnel qui exerce des fonctions\
+            \ critiques, l\u2019\xE9tablissement de droits d\u2019acc\xE8s aux locaux,\
+            \ aux infrastructures critiques et aux informations sensibles, la mise\
+            \ en place de proc\xE9dures de v\xE9rification des ant\xE9c\xE9dents conform\xE9\
+            ment \xE0 l\u2019article 14, la d\xE9signation des cat\xE9gories de personnes\
+            \ tenues de faire l\u2019objet de telles v\xE9rifications des ant\xE9\
+            c\xE9dents et la d\xE9finition d\u2019exigences et de qualifications appropri\xE9\
+            es en mati\xE8re de formation;"
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.1.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
+      ref_id: 13.1.f
+      description: raise awareness about the measures referred to in points (a) to
+        (e) among relevant personnel, duly considering training courses, information
+        materials and exercises.
+      translations:
+        fr:
+          description: "sensibiliser le personnel concern\xE9 aux mesures vis\xE9\
+            es aux points a) \xE0 e), en tenant d\xFBment compte des s\xE9ances de\
+            \ formation, du mat\xE9riel d\u2019information et des exercices."
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.1.sp2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:13.1
+      ref_id: 13.1.sp2
+      description: For the purposes of the first subparagraph, point (e), Member States
+        shall ensure that critical entities take into account the personnel of external
+        service providers when setting out categories of personnel who exercise critical
+        functions.
+      translations:
+        fr:
+          description: "Aux fins du premier alin\xE9a, point e), les \xC9tats membres\
+            \ veillent \xE0 ce que les entit\xE9s critiques tiennent compte du personnel\
+            \ des prestataires de services ext\xE9rieurs lorsqu\u2019ils d\xE9finissent\
+            \ les cat\xE9gories de personnel qui exerce des fonctions critiques."
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art13
+      ref_id: '13.2'
+      description: Member States shall ensure that critical entities have in place
+        and apply a resilience plan or equivalent document or documents which describe
+        the measures taken pursuant to paragraph 1. Where critical entities have drawn
+        up documents or taken measures pursuant to obligations laid down in other
+        legal acts that are relevant for the measures referred to in paragraph 1,
+        they may use those documents and measures to meet the requirements set out
+        in this Article. When exercising its supervisory functions, the competent
+        authority may declare existing resilience-enhancing measures taken by a critical
+        entity that address, in an appropriate and proportionate manner, the technical,
+        security and organisational measures referred to in paragraph 1 as compliant,
+        in whole or in part, with the obligations under this Article.
+      translations:
+        fr:
+          description: "Les \xC9tats membres veillent \xE0 ce que les entit\xE9s critiques\
+            \ aient mis en place et appliquent un plan de r\xE9silience ou un ou plusieurs\
+            \ documents \xE9quivalents, qui d\xE9crivent les mesures prises en application\
+            \ du paragraphe 1. Lorsque les entit\xE9s critiques ont \xE9labor\xE9\
+            \ des documents ou pris des mesures en vertu d\u2019obligations pr\xE9\
+            vues dans d\u2019autres actes juridiques qui sont pertinents pour les\
+            \ mesures vis\xE9es au paragraphe 1, elles peuvent utiliser ces documents\
+            \ et mesures pour satisfaire aux exigences \xE9nonc\xE9es dans le pr\xE9\
+            sent article. Dans l\u2019exercice de ses fonctions de supervision, l\u2019\
+            autorit\xE9 comp\xE9tente peut d\xE9clarer que des mesures existantes\
+            \ de renforcement de la r\xE9silience prises par une entit\xE9 critique\
+            \ qui portent, de mani\xE8re appropri\xE9e et proportionn\xE9e, sur les\
+            \ mesures techniques, les mesures de s\xE9curit\xE9 et les mesures organisationnelles\
+            \ vis\xE9es au paragraphe 1 respectent, en tout ou en partie, les obligations\
+            \ pr\xE9vues par le pr\xE9sent article."
+    - urn: urn:intuitem:risk:req_node:cer-directive:13.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art13
+      ref_id: '13.3'
+      description: Member States shall ensure that each critical entity designates
+        a liaison officer or equivalent as the point of contact with the competent
+        authorities.
+      translations:
+        fr:
+          description: "Les \xC9tats membres veillent \xE0 ce que chaque entit\xE9\
+            \ critique d\xE9signe un agent de liaison ou une personne ayant une fonction\
+            \ \xE9quivalente en tant que point de contact avec les autorit\xE9s comp\xE9\
+            tentes."
+    - urn: urn:intuitem:risk:req_node:cer-directive:art14
+      assessable: false
+      depth: 1
+      name: Article 14
+      description: Background checks
+      translations:
+        fr:
+          name: Article 14
+          description: "V\xE9rification des ant\xE9c\xE9dents"
+    - urn: urn:intuitem:risk:req_node:cer-directive:14.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art14
+      ref_id: '14.1'
+      description: 'Member States shall specify the conditions under which a critical
+        entity is permitted, in duly reasoned cases and taking into account the Member
+        State risk assessment, to submit requests for background checks on persons
+        who:
+
+        (a) hold sensitive roles in or for the benefit of the critical entity, in
+        particular in relation to the resilience of the critical entity;
+
+        (b) are authorised to directly or remotely access its premises, information
+        or control systems, including in connection with the security of the critical
+        entity;
+
+        (c) are under consideration for recruitment to positions that fall under the
+        criteria set out in point (a) or (b).'
+      translations:
+        fr:
+          description: "Les \xC9tats membres pr\xE9cisent les conditions dans lesquelles\
+            \ une entit\xE9 critique est autoris\xE9e, dans des cas d\xFBment motiv\xE9\
+            s et compte tenu de l\u2019\xE9valuation des risques d\u2019\xC9tat membre,\
+            \ \xE0 pr\xE9senter des demandes de v\xE9rification des ant\xE9c\xE9dents\
+            \ des personnes:\na) qui occupent des fonctions sensibles au sein de l\u2019\
+            entit\xE9 critique ou au b\xE9n\xE9fice de celle-ci, notamment en ce qui\
+            \ concerne la r\xE9silience de l\u2019entit\xE9 critique;\nb) qui sont\
+            \ autoris\xE9es \xE0 avoir un acc\xE8s direct ou \xE0 distance aux locaux\
+            \ et aux syst\xE8mes d\u2019information ou de contr\xF4le de l\u2019entit\xE9\
+            \ critique, y compris en lien avec sa s\xE9curit\xE9;\nc) dont le recrutement\
+            \ est envisag\xE9 \xE0 des postes r\xE9pondant aux crit\xE8res \xE9nonc\xE9\
+            s au point a) ou b)."
+    - urn: urn:intuitem:risk:req_node:cer-directive:14.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art14
+      ref_id: '14.2'
+      description: Requests as referred to in paragraph 1 of this Article shall be
+        assessed within a reasonable timeframe and processed in accordance with national
+        law and procedures and relevant and applicable Union law, including Regulation
+        (EU) 2016/679 and Directive (EU) 2016/680 of the European Parliament and of
+        the Council. Background checks shall be proportionate and strictly limited
+        to what is necessary. They shall be carried out for the sole purpose of evaluating
+        a potential security risk to the critical entity concerned.
+      translations:
+        fr:
+          description: "Les demandes vis\xE9es au paragraphe 1 du pr\xE9sent article\
+            \ sont \xE9valu\xE9es dans un d\xE9lai raisonnable et trait\xE9es conform\xE9\
+            ment au droit national et aux proc\xE9dures nationales, ainsi qu\u2019\
+            au droit de l\u2019Union pertinent et applicable, y compris le r\xE8glement\
+            \ (UE) 2016/679 et la directive (UE) 2016/680 du Parlement europ\xE9en\
+            \ et du Conseil (37). Les v\xE9rifications des ant\xE9c\xE9dents sont\
+            \ proportionn\xE9es et strictement limit\xE9es \xE0 ce qui est n\xE9cessaire.\
+            \ Elles sont effectu\xE9es dans le seul but d\u2019\xE9valuer un risque\
+            \ potentiel pour la s\xE9curit\xE9 de l\u2019entit\xE9 critique concern\xE9\
+            e."
+    - urn: urn:intuitem:risk:req_node:cer-directive:14.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art14
+      ref_id: '14.3'
+      description: 'A background check as referred to in paragraph 1 shall, at least:
+
+        (a) corroborate the identity of the person who is the subject of the background
+        check;
+
+        (b) check the criminal records of that person with regards to offences which
+        would be relevant for a specific position.
+
+        When carrying out background checks, Member States shall use the European
+        Criminal Records Information System in accordance with the procedures set
+        out in Framework Decision 2009/315/JHA and, where relevant and applicable,
+        Regulation (EU) 2019/816 for the purpose of obtaining information from criminal
+        records held by other Member States. The central authorities referred to in
+        Article 3(1) of Framework Decision 2009/315/JHA and in Article 3, point (5),
+        of Regulation (EU) 2019/816 shall provide replies to requests for such information
+        within 10 working days from the date on which the request was received in
+        accordance with Article 8(1) of Framework Decision 2009/315/JHA.'
+      translations:
+        fr:
+          description: "\xC0 tout le moins, une v\xE9rification des ant\xE9c\xE9dents\
+            \ vis\xE9e au paragraphe 1:\na) corrobore l\u2019identit\xE9 de la personne\
+            \ qui fait l\u2019objet d\u2019une demande de v\xE9rification des ant\xE9\
+            c\xE9dents;\nb) v\xE9rifie les casiers judiciaires de cette personne en\
+            \ ce qui concerne des infractions qui seraient pertinentes pour un poste\
+            \ d\xE9termin\xE9;\nLors de la v\xE9rification des ant\xE9c\xE9dents,\
+            \ les \xC9tats membres, recourent au syst\xE8me europ\xE9en d\u2019information\
+            \ sur les casiers judiciaires conform\xE9ment aux proc\xE9dures pr\xE9\
+            vues dans la d\xE9cision-cadre 2009/315/JAI et, si cela est pertinent\
+            \ et applicable, dans le r\xE8glement (UE) 2019/816, aux fins de l\u2019\
+            obtention des informations issues des casiers judiciaires d\xE9tenus par\
+            \ d\u2019autres \xC9tats membres. Les autorit\xE9s centrales vis\xE9es\
+            \ \xE0 l\u2019article 3, paragraphe 1, de la d\xE9cision-cadre 2009/315/JAI\
+            \ et \xE0 l\u2019article 3, point 5, du r\xE8glement (UE) 2019/816 r\xE9\
+            pondent aux demandes d\u2019informations dans un d\xE9lai de dix jours\
+            \ ouvrables \xE0 compter de la date de r\xE9ception de la demande conform\xE9\
+            ment \xE0 l\u2019article 8, paragraphe 1, de la d\xE9cision-cadre 2009/315/JAI."
+    - urn: urn:intuitem:risk:req_node:cer-directive:art15
+      assessable: false
+      depth: 1
+      name: Article 15
+      description: Incident notification
+      translations:
+        fr:
+          name: Article 15
+          description: "Notification d\u2019incidents"
+    - urn: urn:intuitem:risk:req_node:cer-directive:15.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art15
+      ref_id: '15.1'
+      description: 'Member States shall ensure that critical entities notify the competent
+        authority, without undue delay, of incidents that significantly disrupt or
+        have the potential to significantly disrupt the provision of essential services.
+        Member States shall ensure that, unless operationally unable to do so, critical
+        entities submit an initial notification no later than 24 hours after becoming
+        aware of an incident, followed, where relevant, by a detailed report no later
+        than one month thereafter. In order to determine the significance of a disruption,
+        the following parameters shall, in particular, be taken into account:
+
+        (a) the number and proportion of users affected by the disruption;
+
+        (b) the duration of the disruption;
+
+        (c) the geographical area affected by the disruption, taking into account
+        whether the area is geographically isolated.
+
+        Where an incident has or might have a significant impact on the continuity
+        of the provision of essential services to or in six or more Member States,
+        the competent authorities of the Member States affected by the incident shall
+        notify the Commission of that incident.'
+      translations:
+        fr:
+          description: "Les \xC9tats membres veillent \xE0 ce que les entit\xE9s critiques\
+            \ notifient sans retard injustifi\xE9 \xE0 l\u2019autorit\xE9 comp\xE9\
+            tente les incidents qui perturbent ou sont susceptibles de perturber de\
+            \ mani\xE8re importante la fourniture de services essentiels. Les \xC9\
+            tats membres veillent \xE0 ce que, sauf \xE0 \xEAtre dans l\u2019incapacit\xE9\
+            \ de le faire pour des raisons op\xE9rationnelles, les entit\xE9s critiques\
+            \ pr\xE9sentent une premi\xE8re notification au plus tard 24 heures apr\xE8\
+            s avoir pris connaissance d\u2019un incident, suivie, s\u2019il y a lieu,\
+            \ d\u2019un rapport d\xE9taill\xE9 au plus tard un mois apr\xE8s. Afin\
+            \ de d\xE9terminer l\u2019importance de la perturbation, les param\xE8\
+            tres suivants sont, en particulier, pris en compte:\na) le nombre et la\
+            \ proportion d\u2019utilisateurs affect\xE9s par la perturbation;\nb)\
+            \ la dur\xE9e de la perturbation;\nc) la zone g\xE9ographique concern\xE9\
+            e par la perturbation, en tenant compte de son \xE9ventuel isolement g\xE9\
+            ographique.\nLorsqu\u2019un incident a ou pourrait avoir un impact important\
+            \ sur la continuit\xE9 de la fourniture de services essentiels \xE0 ou\
+            \ dans six \xC9tats membres ou plus, les autorit\xE9s comp\xE9tentes des\
+            \ \xC9tats membres affect\xE9s par l\u2019incident notifient ledit incident\
+            \ \xE0 la Commission."
+    - urn: urn:intuitem:risk:req_node:cer-directive:15.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art15
+      ref_id: '15.2'
+      description: Notifications as referred to in paragraph 1, first subparagraph,
+        shall include any available information necessary to enable the competent
+        authority to understand the nature, cause and possible consequences of the
+        incident, including any available information necessary to determine any cross-border
+        impact of the incident. Such notifications shall not subject critical entities
+        to increased liability.
+      translations:
+        fr:
+          description: "Les notifications vis\xE9es au paragraphe 1, premier alin\xE9\
+            a, comprennent toutes les informations disponibles n\xE9cessaires pour\
+            \ permettre \xE0 l\u2019autorit\xE9 comp\xE9tente de comprendre la nature,\
+            \ la cause et les cons\xE9quences possibles de l\u2019incident, y compris\
+            \ toute information disponible n\xE9cessaire pour d\xE9terminer tout impact\
+            \ transfronti\xE8re de l\u2019incident. Ces notifications n\u2019ont pas\
+            \ pour effet de soumettre les entit\xE9s critiques \xE0 une responsabilit\xE9\
+            \ accrue."
+    - urn: urn:intuitem:risk:req_node:cer-directive:15.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art15
+      ref_id: '15.3'
+      description: On the basis of the information provided by a critical entity in
+        a notification as referred to in paragraph 1, the relevant competent authority,
+        via the single point of contact, shall inform the single point of contact
+        of other affected Member States where the incident has or might have a significant
+        impact on critical entities and the continuity of the provision of essential
+        services to or in one or more other Member States. Single points of contact
+        sending and receiving information pursuant to the first subparagraph shall,
+        in accordance with Union or national law, treat that information in a way
+        that respects its confidentiality and protects the security and commercial
+        interest of the critical entity concerned.
+      translations:
+        fr:
+          description: "Sur la base des informations fournies par une entit\xE9 critique\
+            \ dans une notification vis\xE9e au paragraphe 1, l\u2019autorit\xE9 comp\xE9\
+            tente concern\xE9e, par l\u2019interm\xE9diaire du point de contact unique,\
+            \ informe le point de contact unique des autres \xC9tats membres affect\xE9\
+            s lorsque l\u2019incident a ou pourrait avoir un impact important sur\
+            \ les entit\xE9s critiques et sur la continuit\xE9 de la fourniture de\
+            \ services essentiels \xE0 ou dans un ou plusieurs autres \xC9tats membres.\n\
+            Les points de contact uniques qui envoient et re\xE7oivent des informations\
+            \ en vertu du premier alin\xE9a traitent ces informations, conform\xE9\
+            ment au droit de l\u2019Union ou au droit national, de mani\xE8re \xE0\
+            \ en respecter la confidentialit\xE9 et \xE0 pr\xE9server la s\xE9curit\xE9\
+            \ et les int\xE9r\xEAts commerciaux de l\u2019entit\xE9 critique concern\xE9\
+            e."
+    - urn: urn:intuitem:risk:req_node:cer-directive:15.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art15
+      ref_id: '15.4'
+      description: As soon as possible following a notification as referred to in
+        paragraph 1, the competent authority concerned shall provide the critical
+        entity concerned with relevant follow-up information, including information
+        that could support that critical entity's effective response to the incident
+        in question. Member States shall inform the public where they determine that
+        it would be in the public interest to do so.
+      translations:
+        fr:
+          description: "D\xE8s que possible apr\xE8s la r\xE9ception d\u2019une notification\
+            \ vis\xE9e au paragraphe 1, l\u2019autorit\xE9 comp\xE9tente concern\xE9\
+            e fournit \xE0 l\u2019entit\xE9 critique concern\xE9e des informations\
+            \ de suivi pertinentes, y compris des informations qui pourraient aider\
+            \ ladite entit\xE9 critique \xE0 r\xE9agir efficacement \xE0 l\u2019incident\
+            \ en question. Les \xC9tats membres informent le public lorsqu\u2019ils\
+            \ estiment qu\u2019il serait dans l\u2019int\xE9r\xEAt g\xE9n\xE9ral de\
+            \ le faire."
+    - urn: urn:intuitem:risk:req_node:cer-directive:art16
+      assessable: false
+      depth: 1
+      name: Article 16
+      description: Standards
+      translations:
+        fr:
+          name: Article 16
+          description: Normes
+    - urn: urn:intuitem:risk:req_node:cer-directive:16.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art16
+      ref_id: '16.1'
+      description: In order to promote the convergent implementation of this Directive,
+        Member States shall, where useful and without imposing or discriminating in
+        favour of the use of a particular type of technology, encourage the use of
+        European and international standards and technical specifications relevant
+        to the security and resilience measures applicable to critical entities.
+      translations:
+        fr:
+          description: "Afin de favoriser la mise en \u0153uvre convergente de la\
+            \ pr\xE9sente directive, les \xC9tats membres encouragent, lorsque c\u2019\
+            est utile et sans imposer ni cr\xE9er de discriminations en faveur de\
+            \ l\u2019utilisation d\u2019un type particulier de technologie, le recours\
+            \ \xE0 des normes et des sp\xE9cifications techniques europ\xE9ennes et\
+            \ internationales pertinentes pour les mesures de s\xE9curit\xE9 et les\
+            \ mesures de r\xE9silience applicables aux entit\xE9s critiques."
+    - urn: urn:intuitem:risk:req_node:cer-directive:art17
+      assessable: false
+      depth: 1
+      name: Article 17
+      description: Identification of critical entities of particular European significance
+      translations:
+        fr:
+          name: Article 17
+          description: "Recensement des entit\xE9s critiques d\u2019importance europ\xE9\
+            enne particuli\xE8re"
+    - urn: urn:intuitem:risk:req_node:cer-directive:17.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art17
+      ref_id: '17.1'
+      description: 'An entity shall be considered a critical entity of particular
+        European significance where it:
+
+        (a) has been identified as a critical entity pursuant to Article 6(1);
+
+        (b) provides the same or similar essential services to or in six or more Member
+        States; and
+
+        (c) has been notified pursuant to paragraph 3 of this Article.'
+      translations:
+        fr:
+          description: "Une entit\xE9 est consid\xE9r\xE9e comme une entit\xE9 critique\
+            \ d\u2019importance europ\xE9enne particuli\xE8re lorsqu\u2019elle:\n\
+            a) a \xE9t\xE9 d\xE9sign\xE9e en tant qu\u2019entit\xE9 critique conform\xE9\
+            ment \xE0 l\u2019article 6, paragraphe 1;\nb) fournit les m\xEAmes services\
+            \ essentiels ou des services essentiels similaires \xE0 ou dans six \xC9\
+            tats membres ou plus; et\nc) elle a fait l\u2019objet d\u2019une notification\
+            \ conform\xE9ment au paragraphe 3 du pr\xE9sent article."
+    - urn: urn:intuitem:risk:req_node:cer-directive:17.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art17
+      ref_id: '17.2'
+      description: Member States shall ensure that a critical entity, following the
+        notification referred to in Article 6(3), informs its competent authority
+        where it provides essential services to or in six or more Member States. In
+        such a case, Member States shall ensure that the critical entity informs its
+        competent authority of the essential services it provides to or in those Member
+        States and of the Member States to which or in which it provides such essential
+        services. Member States shall notify the Commission, without undue delay,
+        of the identity of such critical entities and of the information they provide
+        under this paragraph.
+      translations:
+        fr:
+          description: "Les \xC9tats membres veillent \xE0 ce qu\u2019une entit\xE9\
+            \ critique, \xE0 la suite de la notification vis\xE9e \xE0 l\u2019article\
+            \ 6, paragraphe 3, informe son autorit\xE9 comp\xE9tente lorsqu\u2019\
+            elle fournit des services essentiels \xE0 ou dans six \xC9tats membres\
+            \ ou plus. En pareil cas, les \xC9tats membres veillent \xE0 ce que l\u2019\
+            entit\xE9 critique informe son autorit\xE9 comp\xE9tente au sujet des\
+            \ services essentiels qu\u2019elle fournit \xE0 ou dans ces \xC9tats membres\
+            \ et au sujet des \xC9tats membres auxquels ou dans lesquels elle fournit\
+            \ ces services essentiels. Les \xC9tats membres notifient \xE0 la Commission,\
+            \ sans retard injustifi\xE9, l\u2019identit\xE9 de ces entit\xE9s critiques\
+            \ et les informations qu\u2019elles fournissent au titre du pr\xE9sent\
+            \ paragraphe."
+    - urn: urn:intuitem:risk:req_node:cer-directive:17.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art17
+      ref_id: '17.3'
+      description: Where the Commission establishes, on the basis of the consultations
+        referred to in paragraph 2 of this Article, that the critical entity concerned
+        provides essential services to or in six or more Member States, the Commission
+        shall notify that critical entity, through its competent authority, that it
+        is considered a critical entity of particular European significance and inform
+        that critical entity of its obligations under this Chapter and the date from
+        which those obligations apply to it. Once the Commission informs the competent
+        authority of its decision to consider a critical entity as a critical entity
+        of particular European significance, the competent authority shall forward
+        that notification to that critical entity without undue delay.
+      translations:
+        fr:
+          description: "Lorsque la Commission \xE9tablit, sur la base des consultations\
+            \ vis\xE9es au paragraphe 2 du pr\xE9sent article, que l\u2019entit\xE9\
+            \ critique concern\xE9e fournit des services essentiels \xE0 ou dans six\
+            \ \xC9tats membres ou plus, la Commission notifie \xE0 ladite entit\xE9\
+            \ critique, par l\u2019interm\xE9diaire de son autorit\xE9 comp\xE9tente,\
+            \ qu\u2019elle est consid\xE9r\xE9e comme une entit\xE9 critique d\u2019\
+            importance europ\xE9enne particuli\xE8re et l\u2019informe des obligations\
+            \ qui lui incombent en vertu du pr\xE9sent chapitre et de la date \xE0\
+            \ partir de laquelle ces obligations lui sont applicables. Une fois que\
+            \ la Commission informe l\u2019autorit\xE9 comp\xE9tente de sa d\xE9cision\
+            \ de consid\xE9rer une entit\xE9 critique comme une entit\xE9 critique\
+            \ d\u2019importance europ\xE9enne particuli\xE8re, l\u2019autorit\xE9\
+            \ comp\xE9tente transmet ladite notification \xE0 ladite entit\xE9 critique\
+            \ sans retard injustifi\xE9."
+    - urn: urn:intuitem:risk:req_node:cer-directive:17.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cer-directive:art17
+      ref_id: '17.4'
+      description: This Chapter shall apply to the critical entity of particular European
+        significance concerned from the date of receipt of the notification referred
+        to in paragraph 3 of this Article.
+      translations:
+        fr:
+          description: "Le pr\xE9sent chapitre s\u2019applique \xE0 l\u2019entit\xE9\
+            \ critique d\u2019importance europ\xE9enne particuli\xE8re concern\xE9\
+            e \xE0 compter de la date de r\xE9ception de la notification vis\xE9e\
+            \ au paragraphe 3 du pr\xE9sent article."

@@ -571,6 +571,23 @@ DATA_WIZARD_COMMANDS = [
         "requires_matrix": True,
     },
     {
+        "command": "import_ebios_rm_study_egerie_xml",
+        "model_type": "EbiosRMStudyEgerieXML",
+        "help": (
+            "Import an EBIOS RM study from an Egerie Suite XML export (analyse_*.xml).\n"
+            "Creates the study, primary + supporting assets, feared events, RoTo couples, "
+            "stakeholders, strategic scenarios, attack paths, elementary actions, "
+            "operational scenarios, and applied controls.\n"
+            "Egerie 0..1 scales are mapped onto the chosen risk matrix; controls are "
+            "imported without scenario linking.\n"
+            "\nConflict detection: by name within the study (or folder for assets/EAs/controls)"
+        ),
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+    {
         "command": "import_vulnerabilities",
         "model_type": "Vulnerability",
         "help": "Import vulnerabilities using the Data Wizard backend.",
@@ -633,6 +650,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
         "FindingsAssessment",
         "EbiosRMStudyARM",
         "EbiosRMStudyExcel",
+        "EbiosRMStudyEgerieXML",
     }
 
     @cli.command(name=cli_name, help=help_text)

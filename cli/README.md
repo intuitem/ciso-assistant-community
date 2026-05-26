@@ -140,6 +140,7 @@ Supported Data Wizard commands:
 | `import-tprm` | TPRM | `--folder` |
 | `import-ebios-rm-study-arm` | EbiosRMStudyARM | `--folder`, `--matrix` |
 | `import-ebios-rm-study` | EbiosRMStudyExcel | `--folder`, `--matrix` |
+| `import-ebios-rm-study-egerie-xml` | EbiosRMStudyEgerieXML | `--folder`, `--matrix` |
 | `import-bia` | BusinessImpactAnalysis | — |
 Example:
 

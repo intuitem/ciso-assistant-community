@@ -360,6 +360,10 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = Vulnerability
         exclude = ["created_at", "updated_at", "is_published"]
@@ -898,6 +902,10 @@ class AssetClassWriteSerializer(BaseModelSerializer):
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = ReferenceControl
         exclude = ["translations"]
@@ -955,6 +963,10 @@ class LibraryWriteSerializer(BaseModelSerializer):
 
 
 class ThreatWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = Threat
         exclude = ["translations"]
@@ -2068,6 +2080,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
     has_editing_draft = serializers.SerializerMethodField()
+    has_compliance_assessments = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
     # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
@@ -2077,6 +2090,9 @@ class FrameworkReadSerializer(ReferentialSerializer):
 
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
+
+    def get_has_compliance_assessments(self, obj):
+        return obj.complianceassessment_set.exists()
 
     def get_scores_definition(self, obj):
         sd = obj.scores_definition
@@ -4548,6 +4564,7 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     risk_assessments = FieldsRelatedField(many=True)
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     next_occurrence = serializers.ReadOnlyField(source="get_next_occurrence")
     last_occurrence_status = serializers.ReadOnlyField(
