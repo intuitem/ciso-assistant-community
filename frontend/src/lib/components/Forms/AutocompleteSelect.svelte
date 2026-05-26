@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { getSearchTarget, normalizeSearchString } from '$lib/utils/helpers';
 	import MultiSelect from 'svelte-multiselect';
@@ -157,6 +157,16 @@
 	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
 	const default_value = nullable ? null : '';
+
+	// Seed `selected` synchronously when static options are passed and a form value
+	// already exists. Without this, the reactive `run()` below fires its first pass
+	// with selected=[] and overwrites $value to [] before onMount restores it — a
+	// race that wipes selections on remount (e.g. when a parent `{#key options}`
+	// block tears the component down on options change).
+	if (initialValue != null && options.length > 0) {
+		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
+		selected = options.filter((item) => ids.includes(item.value));
+	}
 
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
@@ -434,9 +444,11 @@
 	});
 
 	$effect(() => {
-		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {
-			const valueArray = Array.isArray($value) ? $value : [$value];
-			if (valueArray.length !== 0) {
+		if (!isInternalUpdate && optionsLoaded && $value !== initialValue) {
+			const valueArray = $value ? (Array.isArray($value) ? $value : [$value]) : [];
+			if (valueArray.length === 0) {
+				selected = [];
+			} else {
 				selected = options.filter((item) => valueArray.includes(item.value));
 			}
 		}
@@ -495,8 +507,17 @@
 	});
 
 	run(() => {
-		// Only update value after options are loaded
-		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
+		// Only update value after options are loaded.
+		// Read $value with untrack so this run() only fires on selected changes (user actions),
+		// not on external form resets — preventing fight-back against programmatic value clears.
+		if (
+			!isInternalUpdate &&
+			optionsLoaded &&
+			!arraysEqual(
+				selectedValues,
+				untrack(() => $value)
+			)
+		) {
 			isInternalUpdate = true;
 			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
 			handleSelectChange();

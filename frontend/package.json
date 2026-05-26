@@ -27,7 +27,7 @@
 		"@svelte-put/qr": "^1.2.1",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-node": "^5.5.4",
-		"@sveltejs/kit": "^2.57.1",
+		"@sveltejs/kit": "^2.60.1",
 		"@sveltejs/vite-plugin-svelte": "^5.1.1",
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.16",
@@ -51,7 +51,7 @@
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
 		"sv-typewriter": "^4.1.2",
-		"svelte": "^5.53.5",
+		"svelte": "^5.55.7",
 		"svelte-check": "^4.2.2",
 		"sveltekit-flash-message": "^2.4.6",
 		"sveltekit-rate-limiter": "^0.5.2",
@@ -87,7 +87,7 @@
 	"pnpm": {
 		"overrides": {
 			"esbuild": "^0.27.3",
-			"devalue": "^5.6.4",
+			"devalue": "^5.8.1",
 			"glob": "^10.5.0",
 			"valibot": "^1.2.0",
 			"validator": "^13.15.22",

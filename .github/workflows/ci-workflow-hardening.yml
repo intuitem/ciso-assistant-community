@@ -14,7 +14,7 @@ jobs:
     env:
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install zizmor
         shell: bash
@@ -54,9 +54,9 @@ jobs:
           SAFE_NAME="$(echo "$RAW_BRANCH" | sed -E 's/[^a-zA-Z0-9_-]/_/g')"
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> "$GITHUB_ENV"
 
-      - name: Upload zizmor reports 
+      - name: Upload zizmor reports
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-zizmor-report
           include-hidden-files: true

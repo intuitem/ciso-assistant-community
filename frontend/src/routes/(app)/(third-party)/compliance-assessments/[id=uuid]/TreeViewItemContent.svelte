@@ -155,6 +155,10 @@
 		return node.max_score;
 	}
 
+	const rawWeight = (rest as Record<string, unknown>).weight;
+	const nodeWeight: number | null =
+		typeof rawWeight === 'number' && Number.isFinite(rawWeight) ? rawWeight : null;
+
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
 	let classesPercentText = $derived((resultColor: string) =>
@@ -204,6 +208,7 @@
 							{#if canEditRequirementAssessment}
 								<Anchor
 									breadcrumbAction="push"
+									label={title || m.requirementAssessment()}
 									href="/requirement-assessments/{ra_id}/edit?next={page.url.pathname}"
 								>
 									{#if title || description}
@@ -221,6 +226,7 @@
 							{:else}
 								<Anchor
 									breadcrumbAction="push"
+									label={title || m.requirementAssessment()}
 									href="/requirement-assessments/{ra_id}?next={page.url.pathname}"
 								>
 									{#if title}
@@ -286,6 +292,11 @@
 								</span>
 							{/if}
 						{/each}
+					{/if}
+					{#if assessable && nodeWeight !== null && nodeWeight !== 1}
+						<span class="badge mr-1 bg-indigo-100 text-indigo-800" title={m.requirementWeight()}>
+							{m.requirementWeight()}: {nodeWeight}
+						</span>
 					{/if}
 					{#if node.questions}
 						{@const badgeStyles = getBadgeStyles(node.answers, node.questions)}

@@ -137,6 +137,12 @@ export const URL_MODEL = [
 	// pmbok
 	'generic-collections',
 	'accreditations',
+	'projects',
+	'responsibility-roles',
+	'responsibility-matrices',
+	'responsibility-matrix-activities',
+	'responsibility-matrix-actors',
+	'responsibility-assignments',
 	// metrology
 	'metric-definitions',
 	'metric-instances',

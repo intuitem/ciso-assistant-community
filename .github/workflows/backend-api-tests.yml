@@ -40,10 +40,10 @@ jobs:
       matrix:
         python-version: ["3.14"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
@@ -55,7 +55,7 @@ jobs:
 
       - name: Cache Virtualenv
         id: cache-venv
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
           key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
@@ -69,7 +69,7 @@ jobs:
         run: poetry run python manage.py migrate
 
       - name: Upload Database
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: prebuilt-db
           path: ${{ env.BACKEND_DIR }}/db/ciso-assistant.sqlite3
@@ -81,7 +81,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Find Test Files
         id: set-matrix
         working-directory: ${{ env.BACKEND_DIR }}
@@ -109,10 +109,10 @@ jobs:
       CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
@@ -124,7 +124,7 @@ jobs:
 
       # Restore the exact venv created in 'setup' job to skip installation
       - name: Restore Virtualenv Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-venv
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
@@ -135,7 +135,7 @@ jobs:
         run: poetry install
 
       - name: Download Database
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: prebuilt-db
           path: ${{ env.BACKEND_DIR }}/db/
@@ -165,7 +165,7 @@ jobs:
           echo "BRANCH_SANITIZED=$SAFE_BRANCH" >> "$GITHUB_ENV"
           echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-report-${{ strategy.job-index }}
