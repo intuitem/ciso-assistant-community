@@ -121,6 +121,7 @@
   * [Customize your audit](guides/customize-audit.md)
   * [EBIOS RM study](guides/ebios-rm.md)
   * [Cyber risk quantification](guides/quantitative-risk.md)
+  * [Cyber risk quantification — methodology](guides/quantitative-risk-methodology.md)
   * [Conducting a Business Impact Analysis](guides/bia.md)
 * Programme management
   * [Managing a project](guides/projects.md)
