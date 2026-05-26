@@ -96,7 +96,7 @@ const SIDEBAR_TESTID: Record<keyof typeof FLAGS, string | null> = {
 	rightRequests: 'accordion-item-right-requests',
 	dataBreaches: 'accordion-item-data-breaches',
 	terminologies: 'accordion-item-terminologies',
-	webhooks: null, 
+	webhooks: null,
 	journeys: 'accordion-item-presets',
 	experimental: 'accordion-item-experimental',
 	inherentRisk: null
@@ -141,7 +141,6 @@ const openSidebarSection = async (page: Page, sectionTestId: string | null) => {
 		await expect(triggerBtn).toHaveAttribute('aria-expanded', 'true');
 	}
 };
-
 
 const testSidebarFlag = async (page: Page, flagKey: keyof typeof FLAGS) => {
 	const flagLabel = FLAGS[flagKey];
