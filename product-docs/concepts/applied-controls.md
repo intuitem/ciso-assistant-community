@@ -104,10 +104,10 @@ $$
 
 | Symbol | Meaning |
 |---|---|
-| `B_fixed`, `B_days` | Build fixed cost and people-days |
-| `R_fixed`, `R_days` | Run fixed cost and people-days |
-| `r` | Configured daily rate (from General settings) |
-| `T` | Amortisation period, in years |
+| *B*<sub>fixed</sub>, *B*<sub>days</sub> | Build fixed cost and people-days |
+| *R*<sub>fixed</sub>, *R*<sub>days</sub> | Run fixed cost and people-days |
+| *r* | Configured daily rate (from General settings) |
+| *T* | Amortisation period, in years |
 
 That single number is what feeds every roll-up — the action plan's budget overview, the per-assignee and per-domain breakdowns, the by-status / by-priority / by-CSF-function totals. Controls without a cost set contribute zero, so partial adoption of the financial tracking still works — you fill in numbers where you have them and the totals reflect what's known.
 

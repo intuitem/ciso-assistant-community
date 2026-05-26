@@ -14,7 +14,7 @@ CISO Assistant models annual loss from a risk scenario as a **frequency × sever
 
 For each simulated year, two questions are answered independently:
 
-1. **Does the event occur this year?** A Bernoulli draw with probability $p$.
+1. **Does the event occur this year?** A Bernoulli draw with probability *p*.
 2. **If it does, how much does it cost?** A draw from a lognormal severity distribution.
 
 If the event doesn't occur, the year's loss is exactly zero. If it does, the year's loss is the sampled severity. Repeating this many times produces a distribution of annual losses — most years zero, occasional years with a sampled loss — which is the raw material for everything else on the page.
@@ -47,9 +47,9 @@ This three-number form is deliberate. Most teams cannot draw a full distribution
 
 ## From two bounds to a distribution
 
-The severity model is a **lognormal distribution** — the standard choice for "positive, right-skewed loss" quantities. The platform back-solves the distribution's two parameters $\mu$ and $\sigma$ from your LB and UB.
+The severity model is a **lognormal distribution** — the standard choice for "positive, right-skewed loss" quantities. The platform back-solves the distribution's two parameters *μ* and *σ* from your LB and UB.
 
-The derivation is short. If $X$ is lognormal, then $\ln X$ is normal with mean $\mu$ and standard deviation $\sigma$. The 5th and 95th percentiles of a standard normal sit at $\pm 1.6449$ (call them $z_{05}$ and $z_{95}$). So:
+The derivation is short. If *X* is lognormal, then ln(*X*) is normal with mean *μ* and standard deviation *σ*. The 5th and 95th percentiles of a standard normal sit at ±1.6449 (call them *z*<sub>05</sub> and *z*<sub>95</sub>). So:
 
 $$
 \ln(\text{LB}) = \mu + \sigma \cdot z_{05}, \qquad \ln(\text{UB}) = \mu + \sigma \cdot z_{95}
@@ -63,11 +63,11 @@ $$
 
 | Symbol | Meaning |
 |---|---|
-| `LB`, `UB` | The 5th and 95th percentile loss values you typed in |
-| `mu`, `sigma` | The lognormal's parameters — mean and standard deviation of `ln(loss)` |
-| `z_05`, `z_95` | Standard-normal quantiles, approximately `-1.6449` and `+1.6449` |
+| LB, UB | The 5th and 95th percentile loss values you typed in |
+| *μ*, *σ* | The lognormal's parameters — mean and standard deviation of ln(loss) |
+| *z*<sub>05</sub>, *z*<sub>95</sub> | Standard-normal quantiles, approximately −1.6449 and +1.6449 |
 
-You don't need to interact with $\mu$ and $\sigma$ — they're computed for you. The point of showing the derivation is so you understand _why doubling your UB doesn't double the resulting loss_: the distribution is fit on log-space, so a 10× UB shifts mass in the tail more than it does at the centre.
+You don't need to interact with *μ* and *σ* — they're computed for you. The point of showing the derivation is so you understand _why doubling your UB doesn't double the resulting loss_: the distribution is fit on log-space, so a 10× UB shifts mass in the tail more than it does at the centre.
 
 {% hint style="warning" %}
 LB must be **strictly positive** (`> 0`) and UB must be **strictly greater than LB**. The platform refuses to simulate otherwise — a lognormal can't be fit to non-positive values, and a zero-width interval makes the fit degenerate.
@@ -75,27 +75,27 @@ LB must be **strictly positive** (`> 0`) and UB must be **strictly greater than 
 
 ## The simulation
 
-Once the platform has $p$, $\mu$, and $\sigma$, the simulation is straightforward:
+Once the platform has *p*, *μ*, and *σ*, the simulation is straightforward:
 
 $$
 \text{loss}_i = \begin{cases} \mathrm{Lognormal}(\mu,\,\sigma) & \text{if } u_i < p \\ 0 & \text{otherwise} \end{cases} \qquad u_i \sim \mathrm{Uniform}(0,1)
 $$
 
-for $i = 1, 2, \dots, N$ with $N = 100{,}000$. The random seed is fixed for single-scenario runs so the chart stays stable between two views of the same hypothesis — if you re-open the page tomorrow without changing inputs, the LEC will look identical.
+for *i* = 1, 2, …, *N* with *N* = 100,000. The random seed is fixed for single-scenario runs so the chart stays stable between two views of the same hypothesis — if you re-open the page tomorrow without changing inputs, the LEC will look identical.
 
 ## The loss exceedance curve (LEC)
 
-The **LEC** is the curve you see at the top of every hypothesis page. It plots, for every loss level $L$, the probability of an annual loss being at least $L$:
+The **LEC** is the curve you see at the top of every hypothesis page. It plots, for every loss level *L*, the probability of an annual loss being at least *L*:
 
 $$
 \text{LEC}(L) = \Pr(\text{annual loss} \geq L)
 $$
 
-Operationally the platform computes it by sorting all $N$ simulated losses and assigning each one an exceedance probability of $1 - k/N$ where $k$ is its rank. The result is a monotonically decreasing curve starting near 1 (small losses are very likely to be exceeded) and trailing off toward 0 (huge losses are very unlikely).
+Operationally the platform computes it by sorting all *N* simulated losses and assigning each one an exceedance probability of 1 − *k*/*N*, where *k* is its rank. The result is a monotonically decreasing curve starting near 1 (small losses are very likely to be exceeded) and trailing off toward 0 (huge losses are very unlikely).
 
 A few ways to read the LEC, all equivalent:
 
-- The **height** at loss $L$ — "how often does our annual loss reach at least $L$?"
+- The **height** at loss *L* — "how often does our annual loss reach at least *L*?"
 - The **right edge** — your "1-in-a-thousand-years" tail loss.
 - The **area under the curve** — proportional to ALE, the expected annual loss.
 
@@ -107,17 +107,17 @@ Every metric on the hypothesis page is a one-line summary of the loss array. Con
 
 | Metric | Definition | What it answers |
 |---|---|---|
-| **ALE** (Mean annual loss) | $\overline{L} = \frac{1}{N}\sum_i \text{loss}_i$ | "What loss should we budget for, on average each year?" |
+| **ALE** (Mean annual loss) | Mean of all simulated annual losses — the average of *L* across the *N* iterations | "What loss should we budget for, on average each year?" |
 | **VaR 95** | 95th percentile of the loss distribution | "The 1-in-20-year bad year" |
 | **VaR 99** | 99th percentile | "The 1-in-100-year bad year" |
 | **VaR 99.9** | 99.9th percentile | "The 1-in-1000-year bad year" |
-| **Expected shortfall (99)** | Mean of losses above VaR 99: $\mathbb{E}[L \mid L \geq \text{VaR}_{99}]$ | "When the 1-in-100 year hits, how bad is it on average?" |
-| **Maximum credible loss** | $\max_i(\text{loss}_i)$ | The worst single simulated year |
-| **P(loss > threshold)** | $\frac{1}{N}\sum_i \mathbf{1}\{\text{loss}_i > \text{threshold}\}$ | "What's our chance of breaching the tolerance we set?" |
+| **Expected shortfall (99)** | Mean of every simulated loss that lands above VaR 99 — the conditional expectation *E*[*L* &#124; *L* ≥ VaR<sub>99</sub>] | "When the 1-in-100 year hits, how bad is it on average?" |
+| **Maximum credible loss** | The largest single loss across all *N* iterations | The worst single simulated year |
+| **P(loss > threshold)** | Fraction of iterations whose loss exceeds the threshold — Pr(*L* > threshold) | "What's our chance of breaching the tolerance we set?" |
 
 Two distinctions worth keeping in mind:
 
-- **ALE includes the zero-loss years.** It's the long-run average annualised loss, not the typical loss when the event happens. If you'd rather see the conditional expected loss when something does occur, look at the severity distribution directly — it's the lognormal you parameterised.
+- **ALE includes the zero-loss years.** It's the long-run average annualised loss, not the typical loss when the event happens. If you'd rather see the conditional expected loss when something does occur, look at the severity distribution directly — it's the lognormal with *μ* and *σ* you parameterised.
 - **VaR vs Expected shortfall.** VaR tells you the cutoff loss for a given tail probability; expected shortfall tells you the average loss _conditional on being in that tail_. ES is always ≥ VaR; the gap between them measures how heavy the tail is.
 
 ## Hypotheses — inherent, current, residual
@@ -177,7 +177,7 @@ A study can declare its **risk tolerance** as two anchor points: pairs of `(prob
 - _Point 1_: at a 10% annual probability, we accept losses up to €100k.
 - _Point 2_: at a 1% annual probability, we accept losses up to €1M.
 
-The platform fits a lognormal through those two points (same $\mu$, $\sigma$ derivation as before, but with the two custom probabilities instead of 5%/95%) and draws the resulting curve. Overlaid on a scenario's LEC, it gives you an instant visual check:
+The platform fits a lognormal through those two points (same *μ*, *σ* derivation as before, but with the two custom probabilities instead of 5%/95%) and draws the resulting curve. Overlaid on a scenario's LEC, it gives you an instant visual check:
 
 - **LEC sits below tolerance** — the scenario fits within your stated appetite.
 - **LEC sits above tolerance** — the scenario exceeds appetite at one or more probability levels.
@@ -196,7 +196,7 @@ $$
 \text{loss}_i^{\text{portfolio}} = \sum_{s \in \text{scenarios}} \text{loss}_i^{(s)}
 $$
 
-The portfolio LEC and metrics are then computed from `loss_portfolio` exactly the same way as for a single scenario.
+The portfolio LEC and metrics are then computed from this combined loss array exactly the same way as for a single scenario.
 
 When scenarios are genuinely correlated (a ransomware event and a data-breach event might co-occur), the platform supports a **correlation matrix** between scenario frequencies, sampled via a multivariate-normal copula. Correlation only affects the **frequency** stage — severities are still independent given that the events occurred. This is appropriate when the linkage is "if A happens, B is also more likely to happen this year", not "if A is severe, B is also severe".
 
