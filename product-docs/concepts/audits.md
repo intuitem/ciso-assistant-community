@@ -33,16 +33,65 @@ The fundamental input to an audit is a **framework** — a published standard su
 
 ## Audit
 
-An audit assesses compliance against the chosen framework. Each requirement carries one of the following statuses:
+An audit assesses compliance against the chosen framework. The evaluation of a single requirement inside an audit is called a **requirement assessment**.
 
-- **To do**
-- **In progress**
-- **Non compliant**
-- **Partially compliant**
+A requirement assessment is not a single value — it captures _several dimensions_ at once, separating **the compliance result** from **how the work got done** and from **the depth of the implementation**. The point is that the same row tracks the auditor's view, the analyst's progress, and the maturity of the underlying implementation without conflating them.
+
+### Compliance result
+
+The headline dimension — the actual answer to _"does this requirement hold?"_. Each requirement carries one of:
+
 - **Compliant**
+- **Partially compliant**
+- **Non compliant**
 - **Not applicable**
 
-The evaluation of a single requirement inside an audit is called a **requirement assessment**.
+This is the field that feeds the framework's compliance percentages, the report, and the cross-framework roll-ups.
+
+### Analyst dimension (assignee + workflow status)
+
+Independently of the compliance result, each requirement assessment captures _who is working on it_ and _where they are in their process_:
+
+- An **assignee** (an actor — user, team, or entity) — who is responsible for assessing this requirement.
+- A **workflow status** — **To do** / **In progress** / **In review** / **Done**. This is the _analyst's_ status, not the auditor's verdict.
+
+The two layers exist because the same requirement can be _Compliant_ but still _In review_ (the analyst has reached a conclusion, but a peer hasn't validated it yet) — and an _In progress_ requirement obviously doesn't have a final compliance result yet. Splitting analyst progress from compliance result lets dashboards and the campaign view show meaningful "still to do" counts without polluting the compliance percentage.
+
+### Extended results (severity of non-conformities)
+
+When you enable [extended results](extended-results.md) on the audit, each non-compliant or partially-compliant requirement can carry an additional qualification on a specific scale:
+
+- **Major nonconformity**
+- **Minor nonconformity**
+- **Observation**
+- **Opportunity for improvement**
+- **Good practice**
+
+This is the auditor's grading language, useful when the framework requires distinguishing _major_ from _minor_ non-conformities (ISO certification audits being the canonical case). It's an extra layer attached to the result — not a replacement for it.
+
+### Scoring layers
+
+Beyond the binary compliance result, each requirement assessment can carry a **score** on the framework's scale. Scoring captures _how mature or deep_ an implementation is, not just whether it exists. There are two ways to score, depending on what the audit needs:
+
+- **Maturity score** _(single layer)_ — one score per requirement, typically used for CMMI-style or NIST-CSF-style maturity assessments.
+- **Implementation + Documentation scores** _(two layers)_ — toggle on **documentation score** to split scoring into _is this implemented?_ and _is the implementation documented?_. The platform computes the maturity score as the average of the enabled layers.
+
+Together with the compliance result, the analyst dimension, the extended results, and the scoring layers, a single requirement assessment can record: _what's the compliance state_, _who is working on it and where they are_, _how severe any non-conformity is_, and _how mature the implementation is_ — all without conflating them.
+
+### Comments
+
+Each requirement assessment can carry a thread of **comments** — short, dated, author-attributed notes used for in-context conversation during the audit. They sit alongside the formal fields and don't change the compliance result or the score; they're where the back-and-forth between the analyst, the reviewer, and the auditee happens (clarifications, follow-up questions, agreed-upon next steps).
+
+Each comment has a body, an author, a creation timestamp, and an **active / processed** toggle so resolved threads can be filtered out of the default view without losing the history. Comments can be edited (the platform records the edited state), preserving who said what and when.
+
+Comments are not exclusive to requirement assessments — the same model is shared across **risk scenarios**, **applied controls**, and **findings**, so the same in-context discussion surface exists wherever it's useful to capture iterative review.
+
+#### Feature flag and visibility
+
+- The `comments` [feature flag](../configuration/settings/feature-flags.md) is the master switch. When off, the comment panel disappears from every supported surface and the per-audit visibility editor stops exposing the **Comments** field. _Default on._
+- When the flag is on, the [audit field-visibility editor](../guides/customize-audit.md) treats **Comments** like any other field — you can choose whether respondents see them, whether they're auditor-only, or whether they're hidden — per audit.
+
+This dual control means you can keep comments enabled platform-wide while still hiding the discussion thread from third-party respondents on sensitive audits.
 
 ## Evidence
 

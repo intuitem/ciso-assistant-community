@@ -40,7 +40,7 @@ Because the same applied control can satisfy many requirements across many frame
 
 ## Lifecycle
 
-Evidence isn't attached once and forgotten. Each piece carries metadata — description, timestamp, expiry, owner — and a status. Auditors regularly refresh evidence: a yearly penetration-test report needs to be re-uploaded each year; an exported configuration needs to be re-pulled after each significant change.
+Evidence isn't attached once and forgotten. Each piece carries metadata — description, timestamp, expiry, assignee — and a status. Auditors regularly refresh evidence: a yearly penetration-test report needs to be re-uploaded each year; an exported configuration needs to be re-pulled after each significant change.
 
 ## Revisions
 
