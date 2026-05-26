@@ -92,6 +92,7 @@
 					</a>
 				{/if}
 			</div>
+
 			<h1 class="text-2xl font-semibold text-gray-900">{fw.name}</h1>
 
 			{#if fw.description}
