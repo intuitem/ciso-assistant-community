@@ -116,7 +116,10 @@ class TestRequirementAssessmentsAuthenticated:
                 "folder": test.folder,
                 "compliance_assessment": compliance_assessment,
                 "requirement": RequirementNode.objects.all()[0],
-                "score": None,
+                # `score` intentionally omitted: the CA is created via
+                # .objects.create() without seeding field_visibility, so the
+                # cascade resolves score → DEFAULT_VISIBILITY (HIDDEN) and
+                # the API correctly strips score from the response.
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
@@ -240,15 +243,23 @@ class TestRequirementAssessmentsAuthenticated:
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         folder = Folder.objects.create(name="test2")
+        # Seed both CAs with score visible to the auditor so the score field
+        # round-trips through the read serializer's cascade strip.
+        score_auditor_only = {
+            "score": {"auditor": "edit", "respondent": "hidden"},
+            "is_scored": {"auditor": "edit", "respondent": "hidden"},
+        }
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
             perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
+            field_visibility=score_auditor_only,
         )
         compliance_assessment2 = ComplianceAssessment.objects.create(
             name="test2",
             perimeter=Perimeter.objects.create(name="test2", folder=folder),
             framework=Framework.objects.all()[0],
+            field_visibility=score_auditor_only,
         )
         applied_control = AppliedControl.objects.create(name="test", folder=folder)
 
