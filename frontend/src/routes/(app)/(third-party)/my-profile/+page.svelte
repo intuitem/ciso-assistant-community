@@ -82,11 +82,7 @@
 							<span class="badge preset-tonal-primary mr-2">{m.builtin()}</span>
 						{/if}
 						<p class="font-semibold text-sm">
-							{#if group.localization_dict}
-								{group.localization_dict.folder} - {group.localization_dict.role}
-							{:else}
-								{group.str}
-							{/if}
+							{group.str}
 						</p>
 					</div>
 				{/each}

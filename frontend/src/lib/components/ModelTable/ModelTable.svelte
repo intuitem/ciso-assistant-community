@@ -201,13 +201,7 @@
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
 		const preferredLabel =
-			URLModel === 'reference-controls'
-				? rowMetaData.name || rowMetaData.ref_id
-				: rowMetaData.localization_dict
-					? `${rowMetaData.localization_dict.folder} - ${rowMetaData.localization_dict.role}`
-					: URLModel === 'roles' && rowMetaData.builtin
-						? rowMetaData.name
-						: undefined;
+			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
 		const label =
 			preferredLabel ||
 			rowMetaData.str ||
@@ -913,12 +907,6 @@
 																				{@const [securityObjectiveName, securityObjectiveValue] =
 																					Object.entries(val)[0]}
 																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																			{:else if val.localization_dict && val.id && key === 'user_groups'}
-																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{val.localization_dict.folder} - {val.localization_dict
-																						.role}</Anchor
-																				>
 																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
 																				<Anchor href={itemHref} class="anchor" stopPropagation

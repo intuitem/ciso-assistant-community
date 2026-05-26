@@ -622,12 +622,6 @@
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																{:else if val.localization_dict && val.id && key === 'user_groups'}
-																	{@const itemHref = `/${data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${val.id}`}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{val.localization_dict.folder} - {val.localization_dict
-																			.role}</Anchor
-																	>
 																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
@@ -707,8 +701,6 @@
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
 												<i class="{bd.icon} {bd.colorClass}"></i>
-											{:else if key === 'name' && data.data.localization_dict}
-												{data.data.localization_dict.folder} - {data.data.localization_dict.role}
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
