@@ -3474,5 +3474,15 @@
 	"builderQuestionTypeUniqueChoice": "Einzelauswahl",
 	"builderQuestionTypeMultipleChoice": "Mehrfachauswahl",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "changed on",
+	"resetMFA": "MFA zurücksetzen",
+	"resetMFA1": "Wenn dieser Benutzer den Zugang zu seinem zweiten Faktor verloren hat, können Sie",
+	"resetMFALinkText": "seine MFA zurücksetzen",
+	"resetMFA2": "Alle MFA-Authentifikatoren werden entfernt und der Benutzer wird bei der nächsten Anmeldung zur erneuten Einrichtung aufgefordert",
+	"resetMFAExplanation": "Dadurch werden alle MFA-Authentifikatoren (TOTP, WebAuthn, Wiederherstellungscodes) für {email} entfernt. Der Benutzer wird bei der nächsten Anmeldung aufgefordert, MFA erneut einzurichten.",
+	"resetMFAWarning": "Diese Aktion kann nicht rückgängig gemacht werden. Der Benutzer verliert den Zugang zu seinem zweiten Faktor, bis er ihn erneut einrichtet.",
+	"mfaResetSuccessfully": "MFA wurde für diesen Benutzer zurückgesetzt",
+	"errorResettingMFA": "MFA dieses Benutzers konnte nicht zurückgesetzt werden",
+	"cannotResetOwnMFA": "Administratoren können ihre eigene MFA nicht über diesen Endpunkt zurücksetzen — verwenden Sie stattdessen die normale MFA-Einstellungsseite",
+	"userHasNoMFAEnabled": "Dieser Benutzer hat MFA nicht aktiviert"
 }

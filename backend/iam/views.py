@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import structlog
 from allauth.account.models import EmailAddress
+from allauth.mfa.models import Authenticator
 from django.contrib.auth import get_user_model, login, logout
 from django.db import models
 from django.db.models import Q, Exists, OuterRef
@@ -30,11 +31,13 @@ from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
+from core.permissions import IsAdministrator
 from .models import Folder, PersonalAccessToken, Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
     PersonalAccessTokenReadSerializer,
+    ResetMFASerializer,
     ResetPasswordConfirmSerializer,
     SetPasswordSerializer,
 )
@@ -458,6 +461,51 @@ class SetPasswordView(views.APIView):
                 )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class ResetMFAView(views.APIView):
+    """
+    An endpoint for resetting another user's MFA as an administrator.
+    Removes all MFA authenticators (TOTP, WebAuthn, recovery codes).
+    The user will be required to set up MFA again on their next login.
+    """
+
+    permission_classes = (permissions.IsAuthenticated, IsAdministrator)
+    serializer_class = ResetMFASerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = ResetMFASerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        target_user = serializer.validated_data.get("user")
+
+        # Block self-reset: admins must use the normal MFA disable flow
+        # (which requires their TOTP code ) so a  stolen admin session
+        # cannot silently drop the second factor.
+
+        if target_user.pk == request.user.pk:
+            return Response(
+                {"error": "cannotResetOwnMFA"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        authenticators = Authenticator.objects.filter(user=target_user)
+        if not authenticators.exists():
+            return Response(
+                {"error": "userHasNoMFAEnabled"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        deleted_count, _ = authenticators.delete()
+        logger.warning(
+            "Admin reset MFA for another user",
+            admin_id=str(request.user.id),
+            admin_email=request.user.email,
+            target_user_id=str(target_user.id),
+            target_user_email=target_user.email,
+            deleted_authenticators=deleted_count,
+        )
+        return Response(status=status.HTTP_200_OK)
 
 
 class RevokeOtherSessionsView(views.APIView):

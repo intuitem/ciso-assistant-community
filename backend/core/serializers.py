@@ -1816,6 +1816,7 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
+    has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -1833,6 +1834,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "observation",
             "expiry_date",
             "is_superuser",
+            "has_mfa_enabled",
         ]
 
     def validate_email(self, email):

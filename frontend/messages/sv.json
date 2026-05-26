@@ -1595,5 +1595,15 @@
 	"builderQuestionTypeUniqueChoice": "Enskilt val",
 	"builderQuestionTypeMultipleChoice": "Flerval",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "changed on",
+	"resetMFA": "Återställ MFA",
+	"resetMFA1": "Om den här användaren har förlorat åtkomst till sin andra faktor kan du",
+	"resetMFALinkText": "återställa deras MFA",
+	"resetMFA2": "Alla MFA-autentiserare tas bort och användaren uppmanas att registrera sig på nytt vid nästa inloggning",
+	"resetMFAExplanation": "Detta tar bort alla MFA-autentiserare (TOTP, WebAuthn, återställningskoder) för {email}. Användaren uppmanas att registrera MFA igen vid nästa inloggning.",
+	"resetMFAWarning": "Den här åtgärden kan inte ångras. Användaren förlorar åtkomst till sin andra faktor tills den är registrerad igen.",
+	"mfaResetSuccessfully": "MFA har återställts för den här användaren",
+	"errorResettingMFA": "Det gick inte att återställa MFA för den här användaren",
+	"cannotResetOwnMFA": "Administratörer kan inte återställa sin egen MFA från denna slutpunkt — använd den vanliga MFA-inställningssidan istället",
+	"userHasNoMFAEnabled": "Den här användaren har inte MFA aktiverat"
 }
