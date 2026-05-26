@@ -1112,6 +1112,7 @@ class LibraryUpdater:
                                 RequirementAssessment(
                                     compliance_assessment=ca,
                                     requirement=requirement_node_object,
+                                    target_score=requirement_node_object.target_score,
                                     folder=(
                                         ca.folder
                                         or (
@@ -6982,12 +6983,15 @@ class ComplianceAssessment(Assessment):
                         (ans.requirement_assessment.requirement_id, ans.question_id)
                     ] = ans
 
-        # Create all RequirementAssessment objects in bulk
+        # Create all RequirementAssessment objects in bulk. target_score is
+        # seeded from the requirement's library-shipped default so the value
+        # is visible/editable per-RA without forcing the operator to retype it.
         requirement_assessments = [
             RequirementAssessment(
                 compliance_assessment=self,
                 requirement=requirement,
                 folder_id=self.folder.id,
+                target_score=requirement.target_score,
             )
             for requirement in requirements
         ]
@@ -7189,10 +7193,14 @@ class ComplianceAssessment(Assessment):
         Compute a single score value using the current score_calculation_method
         (AVG, SUM, or AVG_OF_AVG).
 
-        Each RA is normalized against its resolved scale (Node override or CA)
-        before aggregation; the final value is denormalized to the CA scale.
-        For uniform-scale CAs (no Node override anywhere) this reduces to the
-        legacy raw-score formula exactly.
+        AVG and AVG_OF_AVG normalize each RA against its resolved scale (Node
+        override or CA) before aggregation, then denormalize to the CA scale —
+        this keeps mixed-scale CAs coherent. For uniform-scale CAs the result
+        is identical to the legacy raw-score formula.
+
+        SUM is intentionally kept simple: a raw weighted sum of scores on
+        whatever scale the RA carries. Only `requirement.weight` modulates the
+        contribution; no scale normalization.
 
         When anchor_na_to_target is True, N/A RAs contribute their resolved
         target (or resolved max if no target is set).
@@ -7204,6 +7212,38 @@ class ComplianceAssessment(Assessment):
         if ca_min is None or ca_max is None or ca_max <= ca_min:
             return -1
         ca_range = ca_max - ca_min
+
+        # SUM: raw weighted sum, no normalization. Kept distinct from the
+        # ratio path because summing arbitrary scales has no coherent
+        # denormalized value.
+        if self.score_calculation_method == self.CalculationMethod.SUM:
+            total = 0
+            total_weight = 0
+            for ras in requirement_assessments:
+                if ig and not (
+                    ig & set(ras.requirement.implementation_groups or [])
+                ):
+                    continue
+                weight = ras.requirement.weight or 1
+                is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
+                if is_na and anchor_na_to_target:
+                    resolved = ras.get_resolved_scoring()
+                    per_ra_target = resolved["target_score"]
+                    if per_ra_target is not None:
+                        score = per_ra_target
+                    elif self.target_score is not None:
+                        score = self.target_score
+                    elif resolved["max_score"] is not None:
+                        score = resolved["max_score"]
+                    else:
+                        score = 0
+                else:
+                    score = getattr(ras, score_field) or 0
+                total += score * weight
+                total_weight += weight
+            if total_weight == 0:
+                return -1
+            return _truncate_one_decimal(total)
 
         def _ra_ratio_weight(ras):
             if ig and not (ig & set(ras.requirement.implementation_groups or [])):
@@ -7332,7 +7372,6 @@ class ComplianceAssessment(Assessment):
             return _truncate_one_decimal(ca_min + global_ratio * ca_range)
 
         total_ratio_weighted = 0
-        total_denormalized_weighted = 0
         total_weight = 0
         for ras in requirement_assessments:
             r = _ra_ratio_weight(ras)
@@ -7340,16 +7379,12 @@ class ComplianceAssessment(Assessment):
                 continue
             ratio, weight = r
             total_ratio_weighted += ratio * weight
-            total_denormalized_weighted += (ca_min + ratio * ca_range) * weight
             total_weight += weight
 
         if total_weight == 0:
             return -1
 
-        if self.score_calculation_method == self.CalculationMethod.SUM:
-            return _truncate_one_decimal(total_denormalized_weighted)
-        # Truncate to one decimal to match the javascript frontend, with a
-        # tiny epsilon to absorb float-precision noise from the ratio path.
+        # AVG: average of weighted ratios, denormalized onto the CA scale.
         avg_ratio = total_ratio_weighted / total_weight
         return _truncate_one_decimal(ca_min + avg_ratio * ca_range)
 
@@ -7424,7 +7459,9 @@ class ComplianceAssessment(Assessment):
 
         For AVG: Returns the framework's max_score (e.g., 100) since the average is bounded by it
         For AVG_OF_AVG: Returns max_score since the average of averages is also bounded by it
-        For SUM: Returns max_score × Σ(weight) of all scored requirements
+        For SUM: Returns Σ(resolved_max × weight) so per-requirement scale
+        overrides contribute their own ceiling — a binary requirement adds 1,
+        not the CA's max — keeping 100% achievable when every RA is at its max.
         """
         if self.score_calculation_method == self.CalculationMethod.SUM:
             requirement_assessments_scored = (
@@ -7439,19 +7476,23 @@ class ComplianceAssessment(Assessment):
                 if self.selected_implementation_groups
                 else None
             )
-            total_weight = 0
+            ca_max = self.max_score if self.max_score is not None else 100
+            total_max = 0
+            any_match = False
             for ras in requirement_assessments_scored:
                 if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
                     weight = ras.requirement.weight if ras.requirement.weight else 1
-                    total_weight += weight
+                    ra_max = (
+                        ras.requirement.max_score
+                        if ras.requirement.max_score is not None
+                        else ca_max
+                    )
+                    total_max += ra_max * weight
                     if self.show_documentation_score:
-                        total_weight += weight
+                        total_max += ra_max * weight
+                    any_match = True
 
-            return (
-                (self.max_score or 100) * total_weight
-                if total_weight > 0
-                else self.max_score
-            )
+            return total_max if any_match else self.max_score
         else:
             # For AVG and AVG_OF_AVG, the score is bounded by max_score
             return self.max_score

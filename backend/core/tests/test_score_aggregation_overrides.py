@@ -183,11 +183,13 @@ class TestMixedScaleAggregation:
 
         assert ca.get_global_score()["implementation_score"] == 4.3
 
-    def test_sum_denormalizes_to_ca_scale(self, mixed_scale_setup):
-        """SUM aggregates denormalized contributions on the CA scale.
+    def test_sum_uses_raw_weighted_sum(self, mixed_scale_setup):
+        """SUM is intentionally simple: Σ(raw_score × weight), no scale
+        normalization. Scales are kept as-is — summing across mixed scales
+        is the operator's responsibility.
 
-        Denormalized scores (CA 0-5): A1=4, A2=1*5=5, B1=2, B2=5 (w=3)
-        SUM = 4*1 + 5*1 + 2*1 + 5*3 = 26.0
+        Raw scores: A1=4 (w=1), A2=1 on 0-1 (w=1), B1=2 (w=1), B2=5 (w=3)
+        SUM = 4 + 1 + 2 + 15 = 22.0
         """
         _score(mixed_scale_setup, "a1", 4)
         _score(mixed_scale_setup, "a2", 1)
@@ -198,7 +200,7 @@ class TestMixedScaleAggregation:
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == 26.0
+        assert ca.get_global_score()["implementation_score"] == 22.0
 
 
 @pytest.mark.django_db

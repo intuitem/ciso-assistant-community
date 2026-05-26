@@ -13119,7 +13119,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = get_sorted_requirement_nodes(
             requirement_nodes,
             requirement_assessments,
-            _framework.max_score,
+            compliance_assessment.max_score
+            if compliance_assessment.max_score is not None
+            else _framework.max_score,
         )
         implementation_groups = compliance_assessment.selected_implementation_groups
         if (

@@ -263,6 +263,13 @@ def get_sorted_requirement_nodes(
         str(ra.requirement_id): ra for ra in (requirements_assessed or [])
     }
 
+    def _resolved_max(req_node):
+        """Resolved max score for the RA-side display: Node override if set,
+        otherwise the framework's max_score (as fed in via *max_score*)."""
+        return (
+            req_node.max_score if req_node.max_score is not None else max_score
+        )
+
     # Build a dictionary to quickly access children nodes
     children_dict = {}
     for node in requirement_nodes:
@@ -296,7 +303,7 @@ def get_sorted_requirement_nodes(
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
-                "max_score": max_score if req_as else None,
+                "max_score": _resolved_max(node) if req_as else None,
                 "weight": node.weight if node.weight else 1,
                 "questions": node.get_questions_translated,
                 "answers": build_answers_dict(req_as.answers.all()) if req_as else None,
@@ -340,7 +347,7 @@ def get_sorted_requirement_nodes(
                     "documentation_score": child_req_as.documentation_score
                     if child_req_as
                     else None,
-                    "max_score": max_score if child_req_as else None,
+                    "max_score": _resolved_max(child) if child_req_as else None,
                     "weight": child.weight if child.weight else 1,
                     "questions": child.get_questions_translated,
                     "answers": build_answers_dict(child_req_as.answers.all())

@@ -1598,8 +1598,6 @@
 	"forgotPassword": "Forgot password",
 	"score": "Score",
 	"scoreSemiColon": "Score:",
-	"customScale": "Custom scale",
-	"customTarget": "Custom target",
 	"mappingInferenceHelpText": "These variables are fixed and will not change depending on the source.",
 	"priority": "Priority",
 	"p1": "P1",

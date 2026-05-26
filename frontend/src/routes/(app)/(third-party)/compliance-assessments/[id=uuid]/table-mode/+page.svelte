@@ -762,20 +762,19 @@
 														</div>
 													</div>
 												{:else if requirementAssessment.result !== 'not_applicable'}
-													{#if raHasCustomScale || raHasCustomTarget}
-														<div class="flex space-x-1 mb-1">
-															{#if raHasCustomScale}
-																<span class="badge preset-tonal-primary text-xs">
-																	{m.customScale?.() ?? 'Custom scale'}
-																</span>
-															{/if}
-															{#if raHasCustomTarget}
-																<span class="badge preset-tonal-secondary text-xs">
-																	{m.customTarget?.() ?? 'Custom target'}
-																</span>
-															{/if}
-														</div>
-													{/if}
+													<label class="flex flex-row items-center space-x-2 text-xs mb-1">
+														<span class="font-medium">{m.targetScore()}</span>
+														<input
+															type="number"
+															step="0.1"
+															min={raMin}
+															max={raMax}
+															class="input w-24 px-2 py-1"
+															bind:value={requirementAssessment.target_score}
+															onchange={() => update(requirementAssessment, 'target_score')}
+															disabled={isReadOnly || !requirementAssessment.is_scored}
+														/>
+													</label>
 													<Score
 														form={scoreForms[requirementAssessment.id]}
 														min_score={raMin}

@@ -1499,8 +1499,6 @@
 	"forgotPassword": "Mot de passe oublié",
 	"score": "Score",
 	"scoreSemiColon": "Score :",
-	"customScale": "Échelle personnalisée",
-	"customTarget": "Cible personnalisée",
 	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source.",
 	"priority": "Priorité",
 	"p1": "P1",

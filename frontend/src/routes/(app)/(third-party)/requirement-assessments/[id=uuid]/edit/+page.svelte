@@ -7,6 +7,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -387,9 +388,7 @@
 	const resolvedMax = ra.effective_max_score ?? page.data.compliance_assessment_score.max_score;
 	const resolvedScoresDef =
 		ra.effective_scores_definition ?? page.data.compliance_assessment_score.scores_definition;
-	const hasCustomScale =
-		req.min_score !== null || req.max_score !== null || req.scores_definition !== null;
-	const hasCustomTarget = ra.target_score !== null || req.target_score !== null;
+	const resolvedTarget = ra.effective_target_score;
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}
@@ -886,20 +885,14 @@
 						{:else if data.result !== 'not_applicable'}
 							{#if showScore}
 								<div class="flex flex-col">
-									{#if hasCustomScale || hasCustomTarget}
-										<div class="flex space-x-2 mb-1">
-											{#if hasCustomScale}
-												<span class="badge preset-tonal-primary text-xs">
-													{m.customScale?.() ?? 'Custom scale'}
-												</span>
-											{/if}
-											{#if hasCustomTarget}
-												<span class="badge preset-tonal-secondary text-xs">
-													{m.customTarget?.() ?? 'Custom target'}
-												</span>
-											{/if}
-										</div>
-									{/if}
+									<NumberField
+										{form}
+										field="target_score"
+										label={m.targetScore()}
+										step={0.1}
+										class="w-32 mb-2"
+										disabled={!data.is_scored}
+									/>
 									<Score
 										{form}
 										min_score={resolvedMin}

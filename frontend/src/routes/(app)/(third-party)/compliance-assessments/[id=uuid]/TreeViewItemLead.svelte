@@ -74,7 +74,7 @@
 						<Progress.CircleRange class={displayScoreColor(score, max_score)} />
 					</Progress.Circle>
 					<div class="absolute inset-0 flex items-center justify-center">
-						<span class="text-xs font-bold">{score}</span>
+						<span class="text-xs font-bold">{score}/{max_score}</span>
 					</div>
 				</Progress>
 			</div>
@@ -86,7 +86,7 @@
 							<Progress.CircleRange class={displayScoreColor(documentationScore, max_score)} />
 						</Progress.Circle>
 						<div class="absolute inset-0 flex items-center justify-center">
-							<span class="text-xs font-bold">{documentationScore}</span>
+							<span class="text-xs font-bold">{documentationScore}/{max_score}</span>
 						</div>
 					</Progress>
 				</div>

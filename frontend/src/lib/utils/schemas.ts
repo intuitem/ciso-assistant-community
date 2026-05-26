@@ -428,6 +428,7 @@ export const RequirementAssessmentSchema = z.object({
 	is_scored: z.boolean().optional(),
 	score: z.number().optional().nullable(),
 	documentation_score: z.number().optional().nullable(),
+	target_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
 	evidences: z.array(z.string().uuid().optional()).optional(),
