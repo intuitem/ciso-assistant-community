@@ -40,7 +40,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: lts/*
 
       - name: Cache pnpm modules for Build
         uses: actions/cache@v4
@@ -81,12 +81,12 @@ jobs:
       build_done: "true"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: lts/*
 
       - name: Cache pnpm modules for Build
         uses: actions/cache@v4
@@ -127,7 +127,7 @@ jobs:
       enterprise_test_files: ${{ steps.list_enterprise_files.outputs.test_files }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get Community Playwright Test Files
         id: list_community_files
@@ -194,7 +194,7 @@ jobs:
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.community_test_files) }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Start Keycloak
         uses: ./.github/actions/start-keycloak
@@ -232,7 +232,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: lts/*
 
       - name: Cache pnpm modules
         uses: actions/cache@v4
@@ -365,7 +365,7 @@ jobs:
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.enterprise_test_files) }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Start Keycloak
         uses: ./.github/actions/start-keycloak
@@ -409,7 +409,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: lts/*
 
       - name: Cache pnpm modules
         uses: actions/cache@v4

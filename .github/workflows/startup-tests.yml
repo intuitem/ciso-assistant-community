@@ -56,7 +56,7 @@ jobs:
         python-version: ["3.14"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -64,7 +64,7 @@ jobs:
           cache: "pip"
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: lts/*
       - name: Install Poetry via pipx
         shell: bash
         run: |
@@ -129,10 +129,10 @@ jobs:
     env:
       COMPOSE_TEST: True
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: lts/*
       - name: Install pnpm
         uses: pnpm/action-setup@v5
         with:
@@ -207,7 +207,7 @@ jobs:
         python-version: ["3.14"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -215,7 +215,7 @@ jobs:
           cache: "pip"
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: lts/*
       - name: Install Poetry via pipx
         shell: bash
         run: |
@@ -279,10 +279,10 @@ jobs:
     env:
       COMPOSE_TEST: True
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: lts/*
       - name: Install frontend dependencies
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make pre-build
