@@ -17,13 +17,13 @@ This policy applies to all third-party relationships where external parties acce
 
 ### 3.1 Risk Assessment
 
-- All prospective suppliers must undergo a security risk assessment before engagement.
-- The depth of assessment must be proportional to the sensitivity of data and criticality of services involved.
-- Assessments must evaluate the supplier's security posture, certifications, incident history, and financial stability.
+- All prospective suppliers shall undergo a security risk assessment before engagement.
+- The depth of assessment shall be proportional to the sensitivity of data and criticality of services involved.
+- Assessments shall evaluate the supplier's security posture, certifications, incident history, and financial stability.
 
 ### 3.2 Classification
 
-Suppliers must be classified based on risk:
+Suppliers shall be classified based on risk:
 
 - **Critical**: Direct access to sensitive data or critical systems.
 - **Important**: Access to internal systems or non-sensitive data.
@@ -33,7 +33,7 @@ Suppliers must be classified based on risk:
 
 ### 4.1 Security Clauses
 
-All supplier contracts must include:
+All supplier contracts shall include:
 
 - Confidentiality and non-disclosure obligations.
 - Data protection and privacy requirements.
@@ -44,32 +44,32 @@ All supplier contracts must include:
 
 ### 4.2 Service Level Agreements
 
-- Security-related SLAs must be defined for critical and important suppliers.
-- SLAs must include availability, incident response times, and patch management timelines.
+- Security-related SLAs shall be defined for critical and important suppliers.
+- SLAs shall include availability, incident response times, and patch management timelines.
 
 ## 5. Ongoing Monitoring
 
-- Critical suppliers must be reviewed at least annually.
-- Important suppliers must be reviewed at least every two years.
-- Monitoring must include security performance, compliance status, and incident reports.
-- Significant changes in a supplier's security posture must trigger a reassessment.
+- Critical suppliers shall be reviewed at least annually.
+- Important suppliers shall be reviewed at least every two years.
+- Monitoring shall include security performance, compliance status, and incident reports.
+- Significant changes in a supplier's security posture shall trigger a reassessment.
 
 ## 6. Supply Chain Security
 
-- Suppliers must demonstrate controls to protect the integrity of products and services delivered.
-- Software suppliers must provide evidence of secure development practices.
-- Hardware suppliers must ensure tamper-evidence and chain-of-custody controls.
+- Suppliers shall demonstrate controls to protect the integrity of products and services delivered.
+- Software suppliers shall provide evidence of secure development practices.
+- Hardware suppliers shall ensure tamper-evidence and chain-of-custody controls.
 
 ## 7. Incident Management
 
-- Suppliers must notify [Organization Name] of security incidents affecting shared data or services within the contractually agreed timeframe.
-- Joint incident response procedures must be established for critical suppliers.
+- Suppliers shall notify [Organization Name] of security incidents affecting shared data or services within the contractually agreed timeframe.
+- Joint incident response procedures shall be established for critical suppliers.
 
 ## 8. Termination and Transition
 
-- Upon contract termination, suppliers must return or securely destroy all [Organization Name] data.
-- Access credentials and system access must be revoked promptly upon termination.
-- Transition plans must be established for critical services.
+- Upon contract termination, suppliers shall return or securely destroy all [Organization Name] data.
+- Access credentials and system access shall be revoked promptly upon termination.
+- Transition plans shall be established for critical services.
 
 ## 9. Roles and Responsibilities
 

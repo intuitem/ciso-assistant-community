@@ -56,12 +56,18 @@ export const load: LayoutServerLoad = async (event) => {
 			}${selectField.field}/`;
 			const response = await event.fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
+				selectOptions[selectField.field] = await response.json().then((data) => {
+					if (Array.isArray(data)) {
+						return data.map((item) => ({
+							label: item.label,
+							value: selectField.valueType === 'number' ? parseInt(item.value) : item.value
+						}));
+					}
+					return Object.entries(data).map(([key, value]) => ({
 						label: value,
 						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+					}));
+				});
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}

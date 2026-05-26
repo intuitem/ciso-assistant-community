@@ -90,8 +90,9 @@
 		showResult,
 		showScore,
 		showDocumentationScore,
-		showRespondentAlignment
-	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
+		showRespondentAlignment,
+		showComments
+	} = getFieldVisibility(complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
 
@@ -135,6 +136,11 @@
 				>
 					{safeTranslate(data.requirementAssessment.respondent_alignment)}
 				</span>
+			</span>
+		{/if}
+		{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
+			<span class="badge h-fit bg-indigo-100 text-indigo-800">
+				{m.requirementWeight()}: {data.requirement.weight}
 			</span>
 		{/if}
 		{#if data.requirement.implementation_groups && data.requirement.implementation_groups.length > 0}
@@ -432,7 +438,7 @@
 			</div>
 		</div>
 	{/if}
-	{#if page.data?.featureflags?.comments}
+	{#if page.data?.featureflags?.comments && showComments}
 		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">

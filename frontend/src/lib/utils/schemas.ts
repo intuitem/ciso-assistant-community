@@ -50,7 +50,8 @@ const CURRENCY_SYMBOLS = [
 	'PLN',
 	'NT$',
 	'฿',
-	'MYR'
+	'MYR',
+	'XPF'
 ] as const;
 
 // JSON schema
@@ -165,7 +166,8 @@ export const ThreatSchema = z.object({
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const SecurityAdvisorySchema = z.object({
@@ -327,7 +329,8 @@ export const ReferenceControlSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const AssetSchema = z.object({
@@ -508,10 +511,16 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
-	scoring_enabled: z.boolean().optional().default(false),
-	show_documentation_score: z.boolean().optional().default(false),
-	extended_result_enabled: z.boolean().optional().default(false),
-	progress_status_enabled: z.boolean().optional().default(true),
+	field_visibility: z
+		.record(
+			z.string(),
+			z.object({
+				auditor: z.enum(['edit', 'read', 'hidden']),
+				respondent: z.enum(['edit', 'read', 'hidden'])
+			})
+		)
+		.optional()
+		.default({}),
 	score_calculation_method: z.string().optional().default('average'),
 	target_score: z.number().optional().nullable(),
 	anchor_na_to_target: z.boolean().optional().default(false),
@@ -870,7 +879,8 @@ export const vulnerabilitySchema = z.object({
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	security_advisories: z.string().uuid().optional().array().optional(),
 	cwes: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const BusinessImpactAnalysisSchema = z.object({
@@ -1422,6 +1432,7 @@ export const TaskTemplateSchema = z.object({
 	objectives: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
 		.object({
@@ -1573,6 +1584,82 @@ export const AccreditationSchema = z.object({
 	decision_evidence: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
+export const ProjectSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	kind: z.enum(['portfolio', 'program', 'project']).default('project'),
+	ref_id: z.string().optional(),
+	ref_link: z.string().url().optional().or(z.literal('')),
+	owner: z.string().uuid().optional().nullable(),
+	sponsor: z.string().uuid().optional().nullable(),
+	status: z.string().uuid().optional().nullable(),
+	priority: z.coerce.number().int().min(1).max(4).optional().nullable(),
+	health: z.string().uuid().optional().nullable(),
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	end_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	closed_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	progress: z.coerce.number().int().min(0).max(100).optional().nullable(),
+	purpose: z.string().optional(),
+	objectives: z.string().optional(),
+	success_criteria: z.string().optional(),
+	business_case: z.string().optional(),
+	deliverables: z.string().optional(),
+	assumptions: z.string().optional(),
+	constraints: z.string().optional(),
+	dependencies_note: z.string().optional(),
+	exit_criteria: z.string().optional(),
+	organizational_alignment: z.string().optional(),
+	approval_requirements: z.string().optional(),
+	budget: z.coerce.number().optional().nullable(),
+	actual_cost: z.coerce.number().optional().nullable(),
+	currency: z.string().max(3).optional(),
+	linked_collection: z.string().uuid().optional().nullable(),
+	parent_project: z.string().uuid().optional().nullable(),
+	tolerances: z.record(z.string(), z.unknown()).optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
+export const ResponsibilityRoleSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	code: z.string().min(1).max(8),
+	color: z.string().optional(),
+	order: z.coerce.number().int().min(0).default(0),
+	taxonomy: z.string().default('custom'),
+	is_visible: z.boolean().default(true),
+	builtin: z.boolean().default(false)
+});
+
+export const ResponsibilityMatrixSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	preset: z.enum(['raci', 'rasci', 'rapid', 'custom']).default('raci'),
+	roles: z.array(z.string().uuid().optional()).optional(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
+export const ResponsibilityMatrixActivitySchema = z.object({
+	name: z.string().min(1).max(500),
+	description: z.string().optional(),
+	order: z.coerce.number().int().min(0).default(0),
+	matrix: z.string().uuid()
+});
+
+export const ResponsibilityMatrixActorSchema = z.object({
+	matrix: z.string().uuid(),
+	actor: z.string().uuid(),
+	order: z.coerce.number().int().min(0).default(0)
+});
+
+export const ResponsibilityAssignmentSchema = z.object({
+	activity: z.string().uuid(),
+	actor: z.string().uuid(),
+	role: z.string().uuid()
 });
 
 // Metrology
@@ -1747,6 +1834,12 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
 	accreditations: AccreditationSchema,
+	projects: ProjectSchema,
+	'responsibility-roles': ResponsibilityRoleSchema,
+	'responsibility-matrices': ResponsibilityMatrixSchema,
+	'responsibility-matrix-activities': ResponsibilityMatrixActivitySchema,
+	'responsibility-matrix-actors': ResponsibilityMatrixActorSchema,
+	'responsibility-assignments': ResponsibilityAssignmentSchema,
 	'metric-definitions': MetricDefinitionSchema,
 	'metric-instances': MetricInstanceSchema,
 	'custom-metric-samples': CustomMetricSampleSchema,
@@ -1775,4 +1868,17 @@ export const webhookEndpointSchema = z.object({
 	secret: z.string().min(1).optional(),
 	target_folders: z.string().uuid().optional().array().optional(),
 	payload_format: z.enum(['thin', 'full']).default('full')
+});
+
+export const activateTOTPSchema: ZodSchema = z.object({
+	code: z
+		.string()
+		.regex(/^\d{6}$/)
+		.min(6)
+		.max(6)
+});
+
+export const registerWebAuthnSchema: ZodSchema = z.object({
+	name: z.string().min(1).max(100),
+	credential: z.any()
 });

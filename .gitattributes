@@ -1,0 +1,39 @@
+# This file keeps EOL consistent across operating systems, regardless of each user's Git "core.autocrlf" setting.
+# Most text files are checked out with LF so Linux/Docker-facing scripts keep working correctly when the repository is cloned/pulled on Windows.
+# This also prevents "docker-compose-build.ps1" from building Docker images with CRLF shell scripts that fail inside containers.
+
+
+# Keep Linux/Docker-facing files safe on Windows checkouts
+* text=auto eol=lf
+
+# PowerShell scripts are Windows-facing, use CRLF
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+
+# Windows command scripts are Windows-facing, use CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Git usually auto-detects binary files correctly, but these rules make important formats unambiguous.
+# If a binary file type causes line-ending or diff issues later, add its extension here.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.7z binary
+*.xlsx binary
+*.xls binary
+*.docx binary
+*.pptx binary
+*.mo binary
+*.sqlite binary
+*.sqlite3 binary
+*.sqlite3-* binary
+*.db binary
+*.db-* binary

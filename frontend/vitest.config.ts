@@ -12,7 +12,10 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			$lib: path.resolve(__dirname, 'src/lib')
+			$lib: path.resolve(__dirname, 'src/lib'),
+			$paraglide: path.resolve(__dirname, 'src/paraglide'),
+			'$app/environment': path.resolve(__dirname, 'vitest-mocks/app-environment.ts'),
+			'$app/navigation': path.resolve(__dirname, 'vitest-mocks/app-navigation.ts')
 		}
 	}
 });
