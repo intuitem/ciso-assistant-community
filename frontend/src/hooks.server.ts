@@ -14,20 +14,24 @@ defineCustomServerStrategy('custom-fallback', {
 	getLocale: (request) => fallbackLocaleStore.get(request) ?? DEFAULT_LANGUAGE
 });
 
+const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
+
 async function fetchWithRetry(
 	url: string,
 	init?: RequestInit,
-	retries = 5,
+	retries = 3,
 	delay = 2000
 ): Promise<Response> {
 	for (let attempt = 0; attempt < retries; attempt++) {
 		try {
-			const response = await fetch(url, { ...init, signal: AbortSignal.timeout(5000) });
-			return response;
+			const response = await fetch(url, { ...init, signal: AbortSignal.timeout(1000) });
+			if (response.ok || !RETRYABLE_STATUSES.has(response.status) || attempt === retries - 1) {
+				return response;
+			}
 		} catch (error) {
 			if (attempt === retries - 1) throw error;
-			await new Promise((r) => setTimeout(r, delay * (attempt + 1)));
 		}
+		await new Promise((r) => setTimeout(r, delay * (attempt + 1)));
 	}
 	throw new Error('unreachable');
 }
@@ -82,8 +86,17 @@ async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 				credentials: 'include',
 				headers: { 'content-type': 'application/json' }
 			});
+			if (!response.ok) {
+				console.error(`CSRF endpoint returned ${response.status}`);
+				return csrfToken;
+			}
 			const data = await response.json();
-			csrfToken = data.csrfToken;
+			const token = data?.csrfToken;
+			if (typeof token !== 'string' || token.length === 0) {
+				console.error('CSRF endpoint returned an invalid token payload');
+				return csrfToken;
+			}
+			csrfToken = token;
 			event.cookies.set('csrftoken', csrfToken, {
 				httpOnly: false,
 				sameSite: 'lax',
