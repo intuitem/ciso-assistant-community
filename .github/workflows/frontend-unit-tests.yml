@@ -3,9 +3,13 @@ permissions:
   contents: read
 
 on:
-  push:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
     paths:
       - "frontend/**"
+      - "enterprise/frontend/**"
+      - ".github/workflows/frontend-unit-tests.yml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
@@ -27,12 +31,12 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        node-version: ["22"]
+        node-version: ["24"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Set up node ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install pnpm

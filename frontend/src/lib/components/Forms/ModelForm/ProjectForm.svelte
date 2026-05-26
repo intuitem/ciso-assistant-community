@@ -1,0 +1,76 @@
+<script lang="ts">
+	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
+	import TextField from '../TextField.svelte';
+	import Select from '../Select.svelte';
+	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import type { SuperValidated } from 'sveltekit-superforms';
+	import { m } from '$paraglide/messages';
+
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: any;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {}
+	}: Props = $props();
+</script>
+
+<Select
+	{form}
+	options={model.selectOptions?.['kind'] ?? []}
+	field="kind"
+	label={m.kind()}
+	cacheLock={cacheLocks['kind']}
+	bind:cachedValue={formDataCache['kind']}
+	disableDoubleDash={true}
+/>
+
+<TextField
+	{form}
+	field="ref_id"
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+	label={m.refId()}
+/>
+
+<FolderTreeSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+/>
+
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="actors?user__is_third_party=False"
+	optionsLabelField="str"
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	nullable={true}
+	label={m.owner()}
+	helpText={m.projectOwnerHelpText()}
+/>
+
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="terminologies?field_path=project.status&is_visible=true"
+	optionsLabelField="translated_name"
+	field="status"
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+	nullable={true}
+	label={m.status()}
+/>
