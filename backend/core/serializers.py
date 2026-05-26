@@ -360,6 +360,10 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = Vulnerability
         exclude = ["created_at", "updated_at", "is_published"]
@@ -898,6 +902,10 @@ class AssetClassWriteSerializer(BaseModelSerializer):
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = ReferenceControl
         exclude = ["translations"]
@@ -955,6 +963,10 @@ class LibraryWriteSerializer(BaseModelSerializer):
 
 
 class ThreatWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = Threat
         exclude = ["translations"]
