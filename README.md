@@ -191,7 +191,7 @@ Read more here: [AI engine](backend/chat/README.md)
 46. FBI CJIS 🇺🇸👮
 47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
 48. Secure Controls Framework (SCF) 🇺🇸🌐
-49. NCSC Cyber Assessment Framework (CAF) 🇬🇧
+49. NCSC - Cyber Assessment Framework (CAF) v3.2 🇬🇧
 50. California Consumer Privacy Act (CCPA) 🇺🇸
 51. California Consumer Privacy Act Regulations 🇺🇸
 52. NCSC Cyber Essentials 🇬🇧
@@ -258,10 +258,9 @@ Read more here: [AI engine](backend/chat/README.md)
 113. CER Directive (Critical Entities Resilience) 🇪🇺
 114. EUDI ARF — EU Digital Identity Wallet High-Level Requirements (Annex 2.02) 🇪🇺
 115. UK Defence Standard 05-138 Issue 4 🇬🇧
-116. Zero Trust for Operational Technology (ZT OT) 🇺🇸🏭
-117. T.C. CBDDO Bilgi ve İletişim Güvenliği Rehberi (BİGR) 🇹🇷
-118. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
-119. Personal Data Protection Law (PDPL) 🇸🇦
+116. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
+117. Personal Data Protection Law (PDPL) 🇸🇦
+118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
 
 ### Community contributions
 
@@ -298,6 +297,8 @@ Read more here: [AI engine](backend/chat/README.md)
 31. Checklist des exigences de la Loi n° 09-08 🇲🇦
 32. Référentiel des exigences de qualification des prestataires de services cloud ☁️🇲🇦
 33. AI Defense Matrix 🤖🌐
+34. Zero Trust for Operational Technology (ZT OT) 🇺🇸🏭
+35. T.C. CBDDO Bilgi ve İletişim Güvenliği Rehberi (BİGR) 🇹🇷
 
 <br/>
 

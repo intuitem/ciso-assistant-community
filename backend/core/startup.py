@@ -1,8 +1,6 @@
 import os
 
-from django.apps import AppConfig
 from django.core.management import call_command
-from django.db.models.signals import post_migrate
 from structlog import get_logger
 
 from django.conf import settings
@@ -99,6 +97,7 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_project",
     "view_responsibilityrole",
     "view_responsibilitymatrix",
     "view_responsibilitymatrixactivity",
@@ -216,6 +215,7 @@ APPROVER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_project",
     "view_responsibilityrole",
     "view_responsibilitymatrix",
     "view_responsibilitymatrixactivity",
@@ -520,6 +520,10 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
     "view_responsibilityrole",
     "add_responsibilityrole",
     "change_responsibilityrole",
@@ -919,6 +923,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
     "view_responsibilityrole",
     "add_responsibilityrole",
     "change_responsibilityrole",
@@ -1366,6 +1374,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
     "view_responsibilityrole",
     "add_responsibilityrole",
     "change_responsibilityrole",
@@ -1526,12 +1538,25 @@ AUDITEE_PERMISSIONS_LIST = [
 ]
 
 
-def startup(sender: AppConfig, **kwargs):
+def startup(sender=None, **kwargs):
     """
-    Implement CISO Assistant 1.0 default Roles and User Groups during migrate
-    This makes sure root folder and global groups are defined before any other object is created
-    Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
+    Implement CISO Assistant 1.0 default Roles and User Groups during migrate.
+    This makes sure root folder and global groups are defined before any other
+    object is created.  Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined.
+
+    Connected to ``post_migrate`` without a sender filter.  Django emits
+    that signal once per app in ``INSTALLED_APPS`` order, but only for apps
+    that have a ``models`` module.  We wait for the last such app so that
+    every permission row (including those from apps after ``core`` such as
+    ``integrations`` and ``webhooks``) already exists when we call
+    ``role.permissions.set()``.
     """
+    from django.apps import apps
+
+    migratable = [c for c in apps.get_app_configs() if c.models_module is not None]
+    if sender != migratable[-1]:
+        return
+
     from django.contrib.auth.models import Permission
 
     from core.models import AssetCapability, AssetClass, Terminology
@@ -1541,28 +1566,9 @@ def startup(sender: AppConfig, **kwargs):
     from global_settings.models import GlobalSettings
     from integrations.models import IntegrationProvider
 
-    # first load in memory of the frameworks and mappings
     from core.mappings.engine import engine
 
     print("startup handler: initialize database")
-
-    reader_permissions = Permission.objects.filter(codename__in=READER_PERMISSIONS_LIST)
-
-    approver_permissions = Permission.objects.filter(
-        codename__in=APPROVER_PERMISSIONS_LIST
-    )
-
-    analyst_permissions = Permission.objects.filter(
-        codename__in=ANALYST_PERMISSIONS_LIST
-    )
-
-    domain_manager_permissions = Permission.objects.filter(
-        codename__in=DOMAIN_MANAGER_PERMISSIONS_LIST
-    )
-
-    administrator_permissions = Permission.objects.filter(
-        codename__in=ADMINISTRATOR_PERMISSIONS_LIST
-    )
 
     # if root folder does not exist, then create it
     if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
@@ -1575,17 +1581,22 @@ def startup(sender: AppConfig, **kwargs):
             name="Main", folder=Folder.get_root_folder(), builtin=True
         )
         main.owned_folders.add(Folder.get_root_folder())
-    # update builtin roles to facilitate migrations
-    reader, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
-    reader.permissions.set(reader_permissions)
-    approver, created = Role.objects.get_or_create(name="BI-RL-APP", builtin=True)
-    approver.permissions.set(approver_permissions)
-    analyst, created = Role.objects.get_or_create(name="BI-RL-ANA", builtin=True)
-    analyst.permissions.set(analyst_permissions)
-    domain_manager, created = Role.objects.get_or_create(name="BI-RL-DMA", builtin=True)
-    domain_manager.permissions.set(domain_manager_permissions)
-    administrator, created = Role.objects.get_or_create(name="BI-RL-ADM", builtin=True)
-    administrator.permissions.set(administrator_permissions)
+
+    # Sync builtin role permissions — all permission rows exist at this point
+    for name, perm_list in (
+        ("BI-RL-AUD", READER_PERMISSIONS_LIST),
+        ("BI-RL-APP", APPROVER_PERMISSIONS_LIST),
+        ("BI-RL-ANA", ANALYST_PERMISSIONS_LIST),
+        ("BI-RL-DMA", DOMAIN_MANAGER_PERMISSIONS_LIST),
+        ("BI-RL-ADM", ADMINISTRATOR_PERMISSIONS_LIST),
+        (
+            RoleCodename.THIRD_PARTY_RESPONDENT.value,
+            THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST,
+        ),
+        (RoleCodename.AUDITEE.value, AUDITEE_PERMISSIONS_LIST),
+    ):
+        role, _ = Role.objects.get_or_create(name=name, builtin=True)
+        role.permissions.set(Permission.objects.filter(codename__in=perm_list))
     # if global administrators user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
@@ -1652,22 +1663,6 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra2.perimeter_folders.add(global_approvers.folder)
 
-    third_party_respondent_permissions = Permission.objects.filter(
-        codename__in=THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST
-    )
-    third_party_respondent, created = Role.objects.get_or_create(
-        name=RoleCodename.THIRD_PARTY_RESPONDENT.value, builtin=True
-    )
-    third_party_respondent.permissions.set(third_party_respondent_permissions)
-
-    auditee_permissions = Permission.objects.filter(
-        codename__in=AUDITEE_PERMISSIONS_LIST
-    )
-    auditee, created = Role.objects.get_or_create(
-        name=RoleCodename.AUDITEE.value, builtin=True
-    )
-    auditee.permissions.set(auditee_permissions)
-
     # if global auditees user group does not exist, then create it
     if not UserGroup.objects.filter(
         name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
@@ -1679,7 +1674,7 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra = RoleAssignment.objects.create(
             user_group=global_auditees,
-            role=auditee,
+            role=Role.objects.get(name=RoleCodename.AUDITEE.value),
             is_recursive=True,
             builtin=True,
             folder=Folder.get_root_folder(),
@@ -1738,6 +1733,16 @@ def startup(sender: AppConfig, **kwargs):
         Terminology.create_default_metric_units()
     except Exception as e:
         logger.error("Error creating default Metric Units", exc_info=True)
+
+    try:
+        Terminology.create_default_project_statuses()
+    except Exception as e:
+        logger.error("Error creating default Project Statuses", exc_info=True)
+
+    try:
+        Terminology.create_default_project_health()
+    except Exception as e:
+        logger.error("Error creating default Project Health", exc_info=True)
 
     try:
         from pmbok.models import ResponsibilityRole
@@ -1889,14 +1894,3 @@ def startup(sender: AppConfig, **kwargs):
             get_graph()
         except Exception as e:
             logger.debug("knowledge_graph_prewarm_skipped", error=e)
-
-
-class CoreConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "core"
-    verbose_name = "Core"
-
-    def ready(self):
-        # avoid post_migrate handler if we are in the main, as it interferes with restore
-        if not os.environ.get("RUN_MAIN"):
-            post_migrate.connect(startup, sender=self)

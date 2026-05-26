@@ -427,6 +427,12 @@ export const navData = {
 					permissions: ['view_accreditation']
 				},
 				{
+					name: 'projects',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/projects',
+					permissions: ['view_project']
+				},
+				{
 					name: 'responsibilityMatrices',
 					fa_icon: 'fa-solid fa-people-arrows',
 					href: '/responsibility-matrices',

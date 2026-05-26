@@ -7,14 +7,12 @@ These metrics are computed from existing data and stored in BuiltinMetricSample.
 
 from django.utils.translation import gettext_lazy as _
 
-# Metric types for frontend display
 METRIC_TYPE_NUMBER = "number"  # Single numeric value
 METRIC_TYPE_PERCENTAGE = "percentage"  # 0-100 percentage
-METRIC_TYPE_BREAKDOWN = "breakdown"  # Dictionary of category -> count
-METRIC_TYPE_STATUS = "status"  # Single status value (string)
+METRIC_TYPE_BREAKDOWN = "breakdown"  # Dict of category -> count
+METRIC_TYPE_STATUS = "status"  # Single status string
 
-# Chart types allowed per metric type
-# Maps metric_type -> list of allowed chart_type values
+# metric_type -> list of allowed chart_type values
 METRIC_TYPE_CHART_TYPES = {
     METRIC_TYPE_NUMBER: ["kpi_card", "gauge", "sparkline", "line", "area"],
     METRIC_TYPE_PERCENTAGE: ["gauge", "kpi_card", "sparkline", "line", "area"],
@@ -23,8 +21,7 @@ METRIC_TYPE_CHART_TYPES = {
 }
 
 
-# Registry of available builtin metrics per model
-# Format: model_name -> {metric_key: {label, type, description}}
+# model_name -> {metric_key: {label, type, description}}
 BUILTIN_METRICS = {
     "ComplianceAssessment": {
         "progress": {
@@ -292,53 +289,112 @@ BUILTIN_METRICS = {
                 "Mean completion percentage across in-scope compliance assessments"
             ),
         },
+        # Projects rollup
+        "projects_total": {
+            "label": _("Total Projects"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Total projects (root folder = whole organization)"),
+        },
+        "projects_status_breakdown": {
+            "label": _("Projects Status Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Projects count per status"),
+        },
+        "projects_health_breakdown": {
+            "label": _("Projects Health Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Projects count per health (RAG)"),
+        },
+        "projects_priority_breakdown": {
+            "label": _("Projects Priority Breakdown"),
+            "type": METRIC_TYPE_BREAKDOWN,
+            "description": _("Projects count per priority level"),
+        },
+        "projects_avg_progress": {
+            "label": _("Projects Average Progress"),
+            "type": METRIC_TYPE_PERCENTAGE,
+            "description": _("Mean completion percentage across in-scope projects"),
+        },
+        "projects_total_budget": {
+            "label": _("Projects Total Budget"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Sum of expected budgets across in-scope projects"),
+        },
+        "projects_total_actual_cost": {
+            "label": _("Projects Total Actual Cost"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Sum of actual costs across in-scope projects"),
+        },
+    },
+    "Project": {
+        "status": {
+            "label": _("Status"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("Lifecycle status"),
+        },
+        "health": {
+            "label": _("Health"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("RAG indicator"),
+        },
+        "priority": {
+            "label": _("Priority"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Priority level (1-4)"),
+        },
+        "progress": {
+            "label": _("Progress"),
+            "type": METRIC_TYPE_PERCENTAGE,
+            "description": _("Completion percentage"),
+        },
+        "start_date": {
+            "label": _("Start Date"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("Planned start date"),
+        },
+        "end_date": {
+            "label": _("End Date"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("Planned end date"),
+        },
+        "eta": {
+            "label": _("ETA"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("Forecast end date"),
+        },
+        "budget": {
+            "label": _("Budget"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Expected budget"),
+        },
+        "actual_cost": {
+            "label": _("Actual Cost"),
+            "type": METRIC_TYPE_NUMBER,
+            "description": _("Consumed cost"),
+        },
+        "currency": {
+            "label": _("Currency"),
+            "type": METRIC_TYPE_STATUS,
+            "description": _("ISO 4217 currency code"),
+        },
     },
 }
 
 
 def get_available_metrics_for_model(model_name: str) -> dict:
-    """
-    Returns the available builtin metrics for a given model.
-
-    Args:
-        model_name: The Django model class name (e.g., 'ComplianceAssessment')
-
-    Returns:
-        Dictionary of metric definitions or empty dict if model not supported
-    """
     return BUILTIN_METRICS.get(model_name, {})
 
 
 def get_supported_models() -> list[str]:
-    """Returns list of model names that support builtin metrics."""
     return list(BUILTIN_METRICS.keys())
 
 
 def get_metric_choices_for_model(model_name: str) -> list[tuple[str, str]]:
-    """
-    Returns metric choices suitable for a Django form field.
-
-    Args:
-        model_name: The Django model class name
-
-    Returns:
-        List of (metric_key, label) tuples
-    """
     metrics = get_available_metrics_for_model(model_name)
     return [(key, str(meta["label"])) for key, meta in metrics.items()]
 
 
 def get_chart_types_for_metric(model_name: str, metric_key: str) -> list[str]:
-    """
-    Returns the allowed chart types for a specific metric.
-
-    Args:
-        model_name: The Django model class name
-        metric_key: The metric key
-
-    Returns:
-        List of allowed chart type values
-    """
     metrics = get_available_metrics_for_model(model_name)
     if metric_key not in metrics:
         return []
