@@ -14,7 +14,7 @@ from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, Prefetch, QuerySet
 from knox.models import AuthToken
@@ -450,6 +450,10 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
         ) or self.name
         return {"folder": self.folder.name, "role": resolved_name}
+
+    @property
+    def localization_dict(self) -> dict:
+        return self.get_localization_dict()
 
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)

@@ -1790,7 +1790,9 @@ class TeamReadSerializer(BaseModelSerializer):
 
 
 class UserReadSerializer(BaseModelSerializer):
-    user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
+    user_groups = FieldsRelatedField(
+        fields=["builtin", "id", "localization_dict"], many=True
+    )
     has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
