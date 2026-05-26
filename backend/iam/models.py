@@ -437,23 +437,15 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("user groups")
 
     def __str__(self) -> str:
-        loc = self.get_localization_dict()
-        return f"{loc['folder']} - {loc['role']}"
-
-    def get_name_display(self) -> str:
-        return self.name
-
-    def get_localization_dict(self) -> dict:
         if self.builtin:
             role_codename = BUILTIN_USERGROUP_CODENAMES.get(self.name, self.name)
             role_name = get_translated_builtin_role_name(role_codename)
         else:
             role_name = self.name
-        return {"folder": self.folder.name, "role": role_name}
+        return f"{self.folder.name} - {role_name}"
 
-    @property
-    def localization_dict(self) -> dict:
-        return self.get_localization_dict()
+    def get_name_display(self) -> str:
+        return self.name
 
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)

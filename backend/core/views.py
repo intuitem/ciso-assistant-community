@@ -7481,13 +7481,7 @@ class RoleOrderingFilter(TranslatedNameOrderingFilter):
 
 
 class UserGroupOrderingFilter(TranslatedNameOrderingFilter):
-    translated_ordering_field = "localization_dict"
-
-    def sort_key(self, obj):
-        loc_dict = obj.get_localization_dict()
-        folder_key = (loc_dict.get("folder", "") or "").casefold()
-        role_key = (loc_dict.get("role", "") or "").casefold()
-        return (folder_key, role_key)
+    translated_ordering_field = "name"
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -7497,7 +7491,7 @@ class UserGroupViewSet(BaseModelViewSet):
 
     model = UserGroup
     ordering = ["builtin", "folder__name", "name"]
-    ordering_fields = ["localization_dict"]
+    ordering_fields = ["name"]
     filterset_fields = ["folder"]
     search_fields = [
         "folder__name"
