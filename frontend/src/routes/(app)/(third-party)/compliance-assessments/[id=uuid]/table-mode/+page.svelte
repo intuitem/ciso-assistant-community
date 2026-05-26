@@ -995,6 +995,7 @@
 																			URLModel="applied-controls"
 																			baseEndpoint="/applied-controls?requirement_assessments={requirementAssessment.id}"
 																			hideFilters={true}
+																			folderId={requirementAssessment.folder.id}
 																			disableCreate={shallow || isReadOnly}
 																			canSelectObject={!shallow && !isReadOnly}
 																			expectedCount={countMasked(
@@ -1002,29 +1003,43 @@
 																			)}
 																		>
 																			{#snippet addButton()}
-																				<button
-																					class="btn preset-filled-primary-500"
-																					onclick={() =>
-																						modalMeasureCreateForm(
-																							requirementAssessment.measureCreateForm
-																						)}
-																					type="button"
-																					><i class="fa-solid fa-plus mr-2"
-																					></i>{m.addAppliedControl()}</button
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
 																				>
+																					<button
+																						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+																						data-testid="add-button"
+																						title={m.addAppliedControl()}
+																						aria-label={m.addAppliedControl()}
+																						type="button"
+																						onclick={() =>
+																							modalMeasureCreateForm(
+																								requirementAssessment.measureCreateForm
+																							)}
+																					>
+																						<i class="fa-solid fa-file-circle-plus"></i>
+																					</button>
+																				</span>
 																			{/snippet}
 																			{#snippet selectButton()}
-																				<button
-																					class="btn preset-filled-secondary-500"
-																					type="button"
-																					onclick={() =>
-																						modalUpdateForm(
-																							requirementAssessment,
-																							'selectAppliedControls'
-																						)}
-																					><i class="fa-solid fa-hand-pointer mr-2"
-																					></i>{m.selectAppliedControls()}
-																				</button>
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+																				>
+																					<button
+																						class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+																						data-testid="select-button"
+																						title={m.selectAppliedControls()}
+																						aria-label={m.selectAppliedControls()}
+																						type="button"
+																						onclick={() =>
+																							modalUpdateForm(
+																								requirementAssessment,
+																								'selectAppliedControls'
+																							)}
+																					>
+																						<i class="fa-solid fa-hand-pointer"></i>
+																					</button>
+																				</span>
 																			{/snippet}
 																		</ModelTable>
 																	{/key}
@@ -1078,33 +1093,49 @@
 																			URLModel="evidences"
 																			baseEndpoint="/evidences?requirement_assessments={requirementAssessment.id}"
 																			hideFilters={true}
+																			folderId={requirementAssessment.folder.id}
 																			disableCreate={shallow || isReadOnly}
 																			canSelectObject={!shallow && !isReadOnly}
 																			expectedCount={countMasked(requirementAssessment.evidences)}
 																		>
 																			{#snippet addButton()}
-																				<button
-																					class="btn preset-filled-primary-500"
-																					onclick={() =>
-																						modalEvidenceCreateForm(
-																							requirementAssessment.evidenceCreateForm
-																						)}
-																					type="button"
-																					data-testid="create-evidence-button"
-																					><i class="fa-solid fa-plus mr-2"
-																					></i>{m.addEvidence()}</button
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
 																				>
+																					<button
+																						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+																						data-testid="create-evidence-button"
+																						title={m.addEvidence()}
+																						aria-label={m.addEvidence()}
+																						type="button"
+																						onclick={() =>
+																							modalEvidenceCreateForm(
+																								requirementAssessment.evidenceCreateForm
+																							)}
+																					>
+																						<i class="fa-solid fa-file-circle-plus"></i>
+																					</button>
+																				</span>
 																			{/snippet}
 																			{#snippet selectButton()}
-																				<button
-																					class="btn preset-filled-secondary-500"
-																					type="button"
-																					data-testid="select-evidence-button"
-																					onclick={() =>
-																						modalUpdateForm(requirementAssessment, 'selectEvidences')}
-																					><i class="fa-solid fa-hand-pointer mr-2"
-																					></i>{m.selectEvidence()}
-																				</button>
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+																				>
+																					<button
+																						class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+																						data-testid="select-evidence-button"
+																						title={m.selectEvidence()}
+																						aria-label={m.selectEvidence()}
+																						type="button"
+																						onclick={() =>
+																							modalUpdateForm(
+																								requirementAssessment,
+																								'selectEvidences'
+																							)}
+																					>
+																						<i class="fa-solid fa-hand-pointer"></i>
+																					</button>
+																				</span>
 																			{/snippet}
 																		</ModelTable>
 																	{/key}
@@ -1154,6 +1185,7 @@
 																			URLModel="security-exceptions"
 																			baseEndpoint="/security-exceptions?requirement_assessments={requirementAssessment.id}"
 																			hideFilters={true}
+																			folderId={requirementAssessment.folder.id}
 																			disableCreate={shallow || isReadOnly}
 																			canSelectObject={!shallow && !isReadOnly}
 																			expectedCount={countMasked(
@@ -1161,29 +1193,43 @@
 																			)}
 																		>
 																			{#snippet addButton()}
-																				<button
-																					class="btn preset-filled-primary-500"
-																					onclick={() =>
-																						modalSecurityExceptionCreateForm(
-																							requirementAssessment.securityExceptionCreateForm
-																						)}
-																					type="button"
-																					><i class="fa-solid fa-plus mr-2"
-																					></i>{m.addSecurityException()}</button
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
 																				>
+																					<button
+																						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+																						data-testid="add-security-exception-button"
+																						title={m.addSecurityException()}
+																						aria-label={m.addSecurityException()}
+																						type="button"
+																						onclick={() =>
+																							modalSecurityExceptionCreateForm(
+																								requirementAssessment.securityExceptionCreateForm
+																							)}
+																					>
+																						<i class="fa-solid fa-file-circle-plus"></i>
+																					</button>
+																				</span>
 																			{/snippet}
 																			{#snippet selectButton()}
-																				<button
-																					class="btn preset-filled-secondary-500"
-																					type="button"
-																					onclick={() =>
-																						modalUpdateForm(
-																							requirementAssessment,
-																							'selectSecurityExceptions'
-																						)}
-																					><i class="fa-solid fa-hand-pointer mr-2"
-																					></i>{m.selectSecurityExceptions()}
-																				</button>
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+																				>
+																					<button
+																						class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+																						data-testid="select-security-exception-button"
+																						title={m.selectSecurityExceptions()}
+																						aria-label={m.selectSecurityExceptions()}
+																						type="button"
+																						onclick={() =>
+																							modalUpdateForm(
+																								requirementAssessment,
+																								'selectSecurityExceptions'
+																							)}
+																					>
+																						<i class="fa-solid fa-hand-pointer"></i>
+																					</button>
+																				</span>
 																			{/snippet}
 																		</ModelTable>
 																	{/key}
