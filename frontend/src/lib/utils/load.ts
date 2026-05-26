@@ -277,6 +277,9 @@ export const loadDetail = async ({ event, model, id }) => {
 	if (data.localization_dict) {
 		title = `${data.localization_dict.folder} - ${safeTranslate(data.localization_dict.role)}`;
 	}
+	if (model.urlModel === 'roles' && data.builtin) {
+		title = safeTranslate(data.name) || title;
+	}
 
 	// If any reverseForeignKeyField has addExisting, load the parent's updateForm
 	let updateForm: SuperValidated<FormDataShape> | undefined;

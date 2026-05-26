@@ -201,7 +201,13 @@
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
 		const preferredLabel =
-			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
+			URLModel === 'reference-controls'
+				? rowMetaData.name || rowMetaData.ref_id
+				: rowMetaData.localization_dict
+					? `${rowMetaData.localization_dict.folder} - ${safeTranslate(rowMetaData.localization_dict.role)}`
+					: URLModel === 'roles' && rowMetaData.builtin
+						? safeTranslate(rowMetaData.name)
+						: undefined;
 		const label =
 			preferredLabel ||
 			rowMetaData.str ||

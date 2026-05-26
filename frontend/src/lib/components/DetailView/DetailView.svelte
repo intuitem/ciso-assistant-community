@@ -622,6 +622,13 @@
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																{:else if val.localization_dict && val.id && key === 'user_groups'}
+																	{@const itemHref = `/${data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${val.id}`}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{val.localization_dict.folder} - {safeTranslate(
+																			val.localization_dict.role
+																		)}</Anchor
+																	>
 																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
@@ -703,6 +710,8 @@
 												{data.data.localization_dict.folder} - {safeTranslate(
 													data.data.localization_dict.role
 												)}
+											{:else if key === 'name' && data.urlModel === 'roles' && data.data.builtin}
+												{safeTranslate(value)}
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
