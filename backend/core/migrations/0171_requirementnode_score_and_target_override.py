@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0169_tasktemplate_filtering_labels"),
+        ("core", "0170_alter_terminology_field_path"),
     ]
 
     operations = [
