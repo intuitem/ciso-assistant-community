@@ -266,9 +266,7 @@ def get_sorted_requirement_nodes(
     def _resolved_max(req_node):
         """Resolved max score for the RA-side display: Node override if set,
         otherwise the framework's max_score (as fed in via *max_score*)."""
-        return (
-            req_node.max_score if req_node.max_score is not None else max_score
-        )
+        return req_node.max_score if req_node.max_score is not None else max_score
 
     def _resolved_min(req_node):
         return req_node.min_score if req_node.min_score is not None else 0
@@ -408,8 +406,16 @@ def annotate_tree_with_aggregated_scores(
     """
     method = compliance_assessment.score_calculation_method
     show_doc = compliance_assessment.show_documentation_score
-    ca_min = compliance_assessment.min_score if compliance_assessment.min_score is not None else 0
-    ca_max = compliance_assessment.max_score if compliance_assessment.max_score is not None else 100
+    ca_min = (
+        compliance_assessment.min_score
+        if compliance_assessment.min_score is not None
+        else 0
+    )
+    ca_max = (
+        compliance_assessment.max_score
+        if compliance_assessment.max_score is not None
+        else 100
+    )
     ca_range = ca_max - ca_min if ca_max > ca_min else 1
 
     def walk(node: dict) -> None:
@@ -427,8 +433,14 @@ def annotate_tree_with_aggregated_scores(
             weight = node.get("weight") or 1
             if is_assessed:
                 score_val = node.get("score") or 0
-                ra_min = node.get("min_score") if node.get("min_score") is not None else 0
-                ra_max = node.get("max_score") if node.get("max_score") is not None else ca_max
+                ra_min = (
+                    node.get("min_score") if node.get("min_score") is not None else 0
+                )
+                ra_max = (
+                    node.get("max_score")
+                    if node.get("max_score") is not None
+                    else ca_max
+                )
                 ra_range = ra_max - ra_min if ra_max > ra_min else 1
                 ratio = (score_val - ra_min) / ra_range
                 node["aggregated_score"] = score_val

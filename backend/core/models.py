@@ -7220,9 +7220,7 @@ class ComplianceAssessment(Assessment):
             total = 0
             total_weight = 0
             for ras in requirement_assessments:
-                if ig and not (
-                    ig & set(ras.requirement.implementation_groups or [])
-                ):
+                if ig and not (ig & set(ras.requirement.implementation_groups or [])):
                     continue
                 weight = ras.requirement.weight or 1
                 is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
