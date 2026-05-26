@@ -418,6 +418,14 @@ def annotate_tree_with_aggregated_scores(
     )
     ca_range = ca_max - ca_min if ca_max > ca_min else 1
 
+    def _clean(value):
+        """Trim float-precision noise (~1e-9) from denormalized display values
+        without losing precision for upstream rollups, which use the raw
+        _aggregated_ratio."""
+        if value is None:
+            return None
+        return round(value, 9)
+
     def walk(node: dict) -> None:
         children = node.get("children") or {}
 
@@ -512,12 +520,12 @@ def annotate_tree_with_aggregated_scores(
             if total_child_weight > 0:
                 avg_ratio = total_weighted_ratio / total_child_weight
                 node["_aggregated_ratio"] = avg_ratio
-                node["aggregated_score"] = ca_min + avg_ratio * ca_range
+                node["aggregated_score"] = _clean(ca_min + avg_ratio * ca_range)
                 node["aggregated_max_score"] = ca_max
                 if show_doc:
                     avg_doc_ratio = total_weighted_doc_ratio / total_child_weight
                     node["_aggregated_doc_ratio"] = avg_doc_ratio
-                    node["aggregated_documentation_score"] = (
+                    node["aggregated_documentation_score"] = _clean(
                         ca_min + avg_doc_ratio * ca_range
                     )
             else:
@@ -547,12 +555,12 @@ def annotate_tree_with_aggregated_scores(
             if leaf_weight > 0:
                 avg_ratio = leaf_weighted_ratio / leaf_weight
                 node["_aggregated_ratio"] = avg_ratio
-                node["aggregated_score"] = ca_min + avg_ratio * ca_range
+                node["aggregated_score"] = _clean(ca_min + avg_ratio * ca_range)
                 node["aggregated_max_score"] = ca_max
                 if show_doc:
                     avg_doc_ratio = leaf_weighted_doc_ratio / leaf_weight
                     node["_aggregated_doc_ratio"] = avg_doc_ratio
-                    node["aggregated_documentation_score"] = (
+                    node["aggregated_documentation_score"] = _clean(
                         ca_min + avg_doc_ratio * ca_range
                     )
             else:
