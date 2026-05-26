@@ -211,7 +211,7 @@
 	<div class="flex flex-col sm:flex-row gap-2">
 		<div class="card px-4 py-2 bg-white shadow-lg w-full sm:w-1/2">
 			<h4 class="h4 font-semibold">{m.scope()}</h4>
-			<div class="flex flex-row flex-wrap gap-x-4 gap-y-2 justify-between">
+			<div class="flex flex-row flex-wrap gap-x-4 gap-y-2 justify-start">
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.folder()}</p>
 					<Anchor class="anchor text-sm font-semibold" href="/folders/{data.scenario.folder.id}"
@@ -254,7 +254,7 @@
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg w-full sm:w-1/2">
 			<h4 class="h4 font-semibold">{m.status()}</h4>
-			<div class="flex flex-row flex-wrap gap-x-4 gap-y-2 justify-between">
+			<div class="flex flex-row flex-wrap gap-x-4 gap-y-2 justify-start">
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 					<p class="text-sm font-semibold">
