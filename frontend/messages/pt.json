@@ -1599,5 +1599,6 @@
 	"builderQuestionTypeUniqueChoice": "Escolha única",
 	"builderQuestionTypeMultipleChoice": "Múltipla escolha",
 	"builderQuestionTypeDate": "Data",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "alterado em",
+	"requirementWeight": "Peso"
 }

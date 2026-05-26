@@ -2333,5 +2333,6 @@
 	"builderQuestionTypeUniqueChoice": "Tek seçim",
 	"builderQuestionTypeMultipleChoice": "Çoktan seçmeli",
 	"builderQuestionTypeDate": "Tarih",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "değiştirildi:",
+	"requirementWeight": "Ağırlık"
 }

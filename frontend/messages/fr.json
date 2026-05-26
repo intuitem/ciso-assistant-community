@@ -4882,6 +4882,7 @@
 	"builderQuestionTypeMultipleChoice": "Choix multiple",
 	"builderQuestionTypeDate": "Date",
 	"builderChangedOn": "modifié le",
+	"requirementWeight": "Poids",
 	"frameworkReport": "Rapport du référentiel",
 	"scoringScale": "Échelle de notation",
 	"implementationGroup": "Groupe d'implémentation",

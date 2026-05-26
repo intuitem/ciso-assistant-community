@@ -2099,5 +2099,6 @@
 	"builderQuestionTypeUniqueChoice": "Single choice",
 	"builderQuestionTypeMultipleChoice": "Multiple choice",
 	"builderQuestionTypeDate": "Дата",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "змінено в",
+	"requirementWeight": "Вага"
 }

@@ -1597,5 +1597,6 @@
 	"builderQuestionTypeUniqueChoice": "Alegere unică",
 	"builderQuestionTypeMultipleChoice": "Alegere multiplă",
 	"builderQuestionTypeDate": "Data",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "modificat în",
+	"requirementWeight": "Pondere"
 }
