@@ -625,9 +625,8 @@
 																{:else if val.localization_dict && val.id && key === 'user_groups'}
 																	{@const itemHref = `/${data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${val.id}`}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{val.localization_dict.folder} - {safeTranslate(
-																			val.localization_dict.role
-																		)}</Anchor
+																		>{val.localization_dict.folder} - {val.localization_dict
+																			.role}</Anchor
 																	>
 																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																	{@const itemHref = `/${
@@ -644,6 +643,8 @@
 																		rel="noopener noreferrer"
 																		class="anchor">{val.str}</a
 																	>
+																{:else if val.str && key === 'permissions'}
+																	{val.str}
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
@@ -707,11 +708,7 @@
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
 												<i class="{bd.icon} {bd.colorClass}"></i>
 											{:else if key === 'name' && data.data.localization_dict}
-												{data.data.localization_dict.folder} - {safeTranslate(
-													data.data.localization_dict.role
-												)}
-											{:else if key === 'name' && data.urlModel === 'roles' && data.data.builtin}
-												{safeTranslate(value)}
+												{data.data.localization_dict.folder} - {data.data.localization_dict.role}
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}

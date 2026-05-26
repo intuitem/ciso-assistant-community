@@ -1,9 +1,4 @@
 {
-	"BI-RL-ADM": "प्रशासक",
-	"BI-RL-ANA": "विश्लेषक",
-	"BI-RL-APP": "स्वीकर्ता",
-	"BI-RL-AUD": "रीडर",
-	"BI-RL-DMA": "डोमेन प्रबंधक",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "फ्रेंच",
 	"english": "अंग्रेज़ी",

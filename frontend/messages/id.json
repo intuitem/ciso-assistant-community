@@ -1,9 +1,4 @@
 {
-	"BI-RL-ADM": "Administrator",
-	"BI-RL-ANA": "Analis",
-	"BI-RL-APP": "Penyetuju",
-	"BI-RL-AUD": "Pembaca",
-	"BI-RL-DMA": "Manajer domain",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Prancis",
 	"english": "Inggris",

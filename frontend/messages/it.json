@@ -1,9 +1,4 @@
 {
-	"BI-RL-ADM": "Amministratore",
-	"BI-RL-ANA": "Analista",
-	"BI-RL-APP": "Approvatore",
-	"BI-RL-AUD": "Lettore",
-	"BI-RL-DMA": "Gestore del dominio",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Francese",
 	"english": "Inglese",

@@ -1,11 +1,4 @@
 {
-	"BI-RL-ADE": "Répondant",
-	"BI-RL-ADM": "Administrateur",
-	"BI-RL-ANA": "Analyste",
-	"BI-RL-APP": "Approbateur",
-	"BI-RL-AUD": "Lecteur",
-	"BI-RL-DMA": "Gestionnaire de domaine",
-	"BI-RL-TPR": "Répondant tiers",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Français",
 	"english": "Anglais",

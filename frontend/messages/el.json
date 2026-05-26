@@ -1,9 +1,4 @@
 {
-	"BI-RL-ADM": "Διαχειριστής",
-	"BI-RL-ANA": "Αναλυτής",
-	"BI-RL-APP": "Εγκρίνων",
-	"BI-RL-AUD": "Αναγνώστης",
-	"BI-RL-DMA": "Υπεύθυνος τομέα",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Γαλλικά",
 	"english": "Αγγλικά",

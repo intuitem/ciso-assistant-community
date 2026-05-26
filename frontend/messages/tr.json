@@ -1,9 +1,4 @@
 {
-	"BI-RL-ADM": "Yönetici",
-	"BI-RL-ANA": "Analist",
-	"BI-RL-APP": "Onaylayan",
-	"BI-RL-AUD": "Okuyucu",
-	"BI-RL-DMA": "Etki alanı yöneticisi",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Fransızca",
 	"english": "İngilizce",

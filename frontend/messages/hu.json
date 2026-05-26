@@ -1,9 +1,4 @@
 {
-	"BI-RL-ADM": "Adminisztrátor",
-	"BI-RL-ANA": "Elemző",
-	"BI-RL-APP": "Jóváhagyó",
-	"BI-RL-AUD": "Olvasó",
-	"BI-RL-DMA": "Tartománykezelő",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Francia",
 	"english": "Angol",

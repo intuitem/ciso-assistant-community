@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
 	interface Folder {
 		str: string;
 		id: string;
@@ -22,4 +21,4 @@
 	});
 </script>
 
-<span>{fullPath} - {safeTranslate(cell.role)}</span>
+<span>{fullPath} - {cell.role}</span>

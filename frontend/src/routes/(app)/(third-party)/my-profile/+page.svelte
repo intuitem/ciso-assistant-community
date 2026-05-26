@@ -83,7 +83,7 @@
 						{/if}
 						<p class="font-semibold text-sm">
 							{#if group.localization_dict}
-								{group.localization_dict.folder} - {safeTranslate(group.localization_dict.role)}
+								{group.localization_dict.folder} - {group.localization_dict.role}
 							{:else}
 								{group.str}
 							{/if}

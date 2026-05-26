@@ -13,7 +13,6 @@ import { canPerformAction } from './access-control';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
 
 interface LoadValidationFlowFormDataParams {
 	event: { fetch: typeof fetch };
@@ -275,10 +274,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		title = hasName ? data.name : data.ref_id || title;
 	}
 	if (data.localization_dict) {
-		title = `${data.localization_dict.folder} - ${safeTranslate(data.localization_dict.role)}`;
-	}
-	if (model.urlModel === 'roles' && data.builtin) {
-		title = safeTranslate(data.name) || title;
+		title = `${data.localization_dict.folder} - ${data.localization_dict.role}`;
 	}
 
 	// If any reverseForeignKeyField has addExisting, load the parent's updateForm

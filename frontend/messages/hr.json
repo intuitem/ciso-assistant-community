@@ -1,11 +1,4 @@
 {
-	"BI-RL-ADE": "Ispitanik",
-	"BI-RL-ADM": "Administrator",
-	"BI-RL-ANA": "Analitičar",
-	"BI-RL-APP": "Odobravatelj",
-	"BI-RL-AUD": "Čitatelj",
-	"BI-RL-DMA": "Upravitelj domene",
-	"BI-RL-TPR": "Ispitanik treće strane",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Francuski",
 	"english": "Engleski",

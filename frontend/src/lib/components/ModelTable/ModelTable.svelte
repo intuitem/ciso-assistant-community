@@ -204,9 +204,9 @@
 			URLModel === 'reference-controls'
 				? rowMetaData.name || rowMetaData.ref_id
 				: rowMetaData.localization_dict
-					? `${rowMetaData.localization_dict.folder} - ${safeTranslate(rowMetaData.localization_dict.role)}`
+					? `${rowMetaData.localization_dict.folder} - ${rowMetaData.localization_dict.role}`
 					: URLModel === 'roles' && rowMetaData.builtin
-						? safeTranslate(rowMetaData.name)
+						? rowMetaData.name
 						: undefined;
 		const label =
 			preferredLabel ||
@@ -916,9 +916,8 @@
 																			{:else if val.localization_dict && val.id && key === 'user_groups'}
 																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{val.localization_dict.folder} - {safeTranslate(
-																						val.localization_dict.role
-																					)}</Anchor
+																					>{val.localization_dict.folder} - {val.localization_dict
+																						.role}</Anchor
 																				>
 																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
@@ -1039,11 +1038,9 @@
 															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{@const displayValue =
-																['name', 'description', 'ref_id'].includes(key) &&
-																URLModel !== 'roles'
-																	? (value ?? '-')
-																	: safeTranslate(value ?? '-')}
+															{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
 															{#if displayValue?.length > 300}
 																{displayValue.slice(0, 300)}...
 															{:else}

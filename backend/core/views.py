@@ -7446,66 +7446,48 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserGroupOrderingFilter(filters.OrderingFilter):
+class TranslatedNameOrderingFilter(filters.OrderingFilter):
     """
-    Custom ordering filter:
-    - Performs in-memory (Python) sorting only for `localization_dict`.
-    - The sort key is a tuple: (folder full_path OR folder.name, object.name).
-    - Supports `-localization_dict` for descending order.
-    - For all other fields, it falls back to standard SQL ordering.
+    In-memory ordering filter for models whose __str__() returns a
+    locale-translated name (e.g. Role, UserGroup).
+
+    Subclasses set ``translated_ordering_field`` and override ``sort_key(obj)``
+    to control the sort.  Falls back to SQL ordering for other fields.
+    DRF pagination works because it can slice the returned list.
     """
+
+    translated_ordering_field = "name"  # default; override in subclass
+
+    def sort_key(self, obj):
+        return str(obj).casefold()
 
     def filter_queryset(self, request, queryset, view):
         ordering = self.get_ordering(request, queryset, view)
         if not ordering:
             return queryset
 
-        # Special case: in-memory sorting for `localization_dict`
-        if len(ordering) == 1 and ordering[0].lstrip("-") == "localization_dict":
+        field = self.translated_ordering_field
+        if len(ordering) == 1 and ordering[0].lstrip("-") == field:
             desc = ordering[0].startswith("-")
-
-            # Optimize DB access: fetch the related folder in one query
-            queryset = queryset.select_related("folder")
-
-            # Materialize queryset into a list to sort in Python
             data = list(queryset)
-
-            def full_path_or_name(folder):
-                """
-                Build a string key from the folder:
-                - Prefer the full path (names of all parent folders + current).
-                - Fall back to the folder's name if no path is available.
-                """
-                if folder is None:
-                    return ""
-
-                path_list = getattr(folder, "get_folder_full_path", None)
-                if callable(path_list):
-                    items = folder.get_folder_full_path(include_root=False)
-                    names = [getattr(f, "name", "") or "" for f in items]
-                    if names:
-                        return "/".join(names)
-
-                # Fallback: just the folder name
-                return getattr(folder, "name", "") or ""
-
-            def key_func(obj):
-                # Get the folder from the object
-                folder = getattr(obj, "folder", None)
-                # If you want to be more robust, you could use:
-                # from yourapp.models import Folder
-                # folder = Folder.get_folder(obj)
-
-                path_key = full_path_or_name(folder).casefold()
-                name_key = (getattr(obj, "name", "") or "").casefold()
-                return (path_key, name_key)
-
-            # Perform stable sort, reverse if `-localization_dict`
-            data.sort(key=key_func, reverse=desc)
+            data.sort(key=self.sort_key, reverse=desc)
             return data
 
-        # Default case: fall back to SQL ordering
         return super().filter_queryset(request, queryset, view)
+
+
+class RoleOrderingFilter(TranslatedNameOrderingFilter):
+    translated_ordering_field = "name"
+
+
+class UserGroupOrderingFilter(TranslatedNameOrderingFilter):
+    translated_ordering_field = "localization_dict"
+
+    def sort_key(self, obj):
+        loc_dict = obj.get_localization_dict()
+        folder_key = (loc_dict.get("folder", "") or "").casefold()
+        role_key = (loc_dict.get("role", "") or "").casefold()
+        return (folder_key, role_key)
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -7514,7 +7496,7 @@ class UserGroupViewSet(BaseModelViewSet):
     """
 
     model = UserGroup
-    ordering = ["builtin", "name"]
+    ordering = ["builtin", "folder__name", "name"]
     ordering_fields = ["localization_dict"]
     filterset_fields = ["folder"]
     search_fields = [
@@ -7522,8 +7504,8 @@ class UserGroupViewSet(BaseModelViewSet):
     ]  # temporary hack, filters only by folder name, not role name
     filter_backends = [
         DjangoFilterBackend,
-        UserGroupOrderingFilter,
         filters.SearchFilter,
+        UserGroupOrderingFilter,
     ]
 
     def destroy(self, request, *args, **kwargs):
