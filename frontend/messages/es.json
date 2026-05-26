@@ -3619,5 +3619,6 @@
 	"builderQuestionTypeUniqueChoice": "Opción única",
 	"builderQuestionTypeMultipleChoice": "Opción múltiple",
 	"builderQuestionTypeDate": "Fecha",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "modificado en",
+	"requirementWeight": "Peso"
 }

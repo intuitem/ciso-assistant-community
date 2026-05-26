@@ -3474,5 +3474,6 @@
 	"builderQuestionTypeUniqueChoice": "Einzelauswahl",
 	"builderQuestionTypeMultipleChoice": "Mehrfachauswahl",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "geändert in",
+	"requirementWeight": "Gewicht"
 }

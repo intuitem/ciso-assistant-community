@@ -2918,12 +2918,11 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "questions",
                 "implementation_groups",
                 "display_mode",
-                # Raw override fields, used by the frontend to detect a
-                # node-level override (e.g. for the "Custom scale" badge).
                 "min_score",
                 "max_score",
                 "scores_definition",
                 "target_score",
+                "weight",
             ]
 
     name = serializers.CharField(source="__str__")
