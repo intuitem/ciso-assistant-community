@@ -2,14 +2,14 @@
 
 A **findings assessment** — called **Follow-up** in the UI — tracks the issues raised by a review and drives their remediation through to closure. Findings can come from a CISO Assistant audit, an internal security review, a penetration test, an external assessor's report, or any other source.
 
-It's the place where the action plan meets reality: each non-compliance, observation, or recommendation gets assigned an owner, a due date, and a status, and is followed all the way to "fixed".
+It's the place where the action plan meets reality: each non-compliance, observation, or recommendation gets an assignee, a due date, and a status, and is followed all the way to "fixed".
 
 ## Mental model
 
 A findings assessment is an **assessment** scoped to a perimeter, in the same family as audits, risk assessments, and business impact analyses. Inside it sit individual **findings**, each with:
 
 - A severity, often aligned with the assessor's severity scale.
-- An owner and a due date.
+- An assignee and a due date.
 - A status from _open_ → _in progress_ → _remediated_ → _closed_.
 - One or more linked applied controls that address it.
 

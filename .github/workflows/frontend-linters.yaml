@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
       - "frontend/**"
+      - ".github/workflows/frontend-linters.yaml"
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:

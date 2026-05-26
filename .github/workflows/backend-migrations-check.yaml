@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
     types: [opened, synchronize]
+    paths:
+      - "backend/**"
+      - "enterprise/backend/**"
+      - ".github/workflows/backend-migrations-check.yaml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
