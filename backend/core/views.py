@@ -7527,8 +7527,8 @@ class UserGroupFilter(TranslatedNameOrderingFilter):
     translated_ordering_field = "name"
 
     def _full_display(self, obj):
-        """Build the full display string matching frontend rendering:
-        Ancestor / ... / Folder - Role"""
+        """Build the full searchable label from the complete folder path.
+        Untruncated (unlike the frontend display) for broader matching."""
         path = obj.get_folder_full_path()
         ancestors = [f.name for f in path[:-1]]
         return " / ".join(ancestors + [str(obj)])
