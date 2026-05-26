@@ -318,14 +318,13 @@
 
 	const accordionItems: Record<string, string[]> = $state(
 		// svelte-ignore state_referenced_locally
-		requirementAssessments.reduce((acc, requirementAssessment) => {
-			const requirement =
-				requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
-			return {
-				...acc,
-				[requirementAssessment.id]: ['']
-			};
-		})
+		requirementAssessments.reduce(
+			(acc, requirementAssessment) => {
+				acc[requirementAssessment.id] = [''];
+				return acc;
+			},
+			{} as Record<string, string[]>
+		)
 	);
 
 	let tocItems: TocItem[] = $state([]);
