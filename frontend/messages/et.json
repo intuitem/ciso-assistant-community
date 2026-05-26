@@ -1,4 +1,11 @@
 {
+	"BI-RL-ADE": "Vastaja",
+	"BI-RL-ADM": "Administraator",
+	"BI-RL-ANA": "Analüütik",
+	"BI-RL-APP": "Kinnitaja",
+	"BI-RL-AUD": "Lugeja",
+	"BI-RL-DMA": "Valdkonnahaldur",
+	"BI-RL-TPR": "Kolmanda osapoole vastaja",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Prantsuse",
 	"english": "Inglise",

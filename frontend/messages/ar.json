@@ -1,4 +1,9 @@
 {
+	"BI-RL-ADM": "المسؤول",
+	"BI-RL-ANA": "المحلل",
+	"BI-RL-APP": "الموافق",
+	"BI-RL-AUD": "القارئ",
+	"BI-RL-DMA": "مدير النطاق",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "الفرنسية",
 	"english": "الإنجليزية",

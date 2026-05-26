@@ -1,4 +1,9 @@
 {
+	"BI-RL-ADM": "管理员",
+	"BI-RL-ANA": "分析师",
+	"BI-RL-APP": "审批者",
+	"BI-RL-AUD": "阅读者",
+	"BI-RL-DMA": "域管理员",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "法语",
 	"english": "英语",

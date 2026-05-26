@@ -1,4 +1,9 @@
 {
+	"BI-RL-ADM": "ایڈمنسٹریٹر",
+	"BI-RL-ANA": "تجزیہ کار",
+	"BI-RL-APP": "منظور کنندہ",
+	"BI-RL-AUD": "ریڈر",
+	"BI-RL-DMA": "ڈومین مینیجر",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "فرانسیسی",
 	"english": "انگریزی",

@@ -699,6 +699,10 @@
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
 												<i class="{bd.icon} {bd.colorClass}"></i>
+											{:else if key === 'name' && data.data.localization_dict}
+												{data.data.localization_dict.folder} - {safeTranslate(
+													data.data.localization_dict.role
+												)}
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}

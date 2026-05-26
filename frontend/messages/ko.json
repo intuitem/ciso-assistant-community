@@ -1,4 +1,11 @@
 {
+	"BI-RL-ADE": "응답자",
+	"BI-RL-ADM": "관리자",
+	"BI-RL-ANA": "분석가",
+	"BI-RL-APP": "승인자",
+	"BI-RL-AUD": "열람자",
+	"BI-RL-DMA": "도메인 관리자",
+	"BI-RL-TPR": "제3자 응답자",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "프랑스어",
 	"english": "영어",

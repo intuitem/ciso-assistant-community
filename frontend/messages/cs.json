@@ -1,4 +1,9 @@
 {
+	"BI-RL-ADM": "Administrátor",
+	"BI-RL-ANA": "Analytik",
+	"BI-RL-APP": "Schvalovatel",
+	"BI-RL-AUD": "Čtečka",
+	"BI-RL-DMA": "Správce domény",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Francouzština",
 	"english": "Angličtina",

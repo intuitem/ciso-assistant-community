@@ -1,4 +1,9 @@
 {
+	"BI-RL-ADM": "Beheerder",
+	"BI-RL-ANA": "Analist",
+	"BI-RL-APP": "Goedkeurder",
+	"BI-RL-AUD": "Lezer",
+	"BI-RL-DMA": "Domeinbeheerder",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Frans",
 	"english": "Engels",

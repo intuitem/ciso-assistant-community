@@ -81,7 +81,13 @@
 						{#if group.builtin}
 							<span class="badge preset-tonal-primary mr-2">{m.builtin()}</span>
 						{/if}
-						<p class="font-semibold text-sm">{group.str}</p>
+						<p class="font-semibold text-sm">
+							{#if group.localization_dict}
+								{group.localization_dict.folder} - {safeTranslate(group.localization_dict.role)}
+							{:else}
+								{group.str}
+							{/if}
+						</p>
 					</div>
 				{/each}
 			</div>

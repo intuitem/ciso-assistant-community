@@ -1,4 +1,11 @@
 {
+	"BI-RL-ADE": "Respondent",
+	"BI-RL-ADM": "Administrator",
+	"BI-RL-ANA": "Analyst",
+	"BI-RL-APP": "Approver",
+	"BI-RL-AUD": "Reader",
+	"BI-RL-DMA": "Domain manager",
+	"BI-RL-TPR": "Third-party respondent",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "French",
 	"english": "English",

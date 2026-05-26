@@ -1,4 +1,9 @@
 {
+	"BI-RL-ADM": "Administrador",
+	"BI-RL-ANA": "Analista",
+	"BI-RL-APP": "Aprovador",
+	"BI-RL-AUD": "Leitor",
+	"BI-RL-DMA": "Gerente de domínio",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Francês",
 	"english": "Inglês",

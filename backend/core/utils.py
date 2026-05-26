@@ -220,26 +220,28 @@ class UserGroupCodename(Enum):
 
 
 BUILTIN_ROLE_CODENAMES = {
-    str(RoleCodename.ADMINISTRATOR): "Administrator",
-    str(RoleCodename.DOMAIN_MANAGER): "Domain manager",
-    str(RoleCodename.ANALYST): "Analyst",
-    str(RoleCodename.APPROVER): "Approver",
-    str(RoleCodename.READER): "Reader",
-    str(RoleCodename.THIRD_PARTY_RESPONDENT): "Third-party respondent",
-    str(RoleCodename.AUDITEE): "Auditee",
+    str(RoleCodename.ADMINISTRATOR): str(RoleCodename.ADMINISTRATOR),
+    str(RoleCodename.DOMAIN_MANAGER): str(RoleCodename.DOMAIN_MANAGER),
+    str(RoleCodename.ANALYST): str(RoleCodename.ANALYST),
+    str(RoleCodename.APPROVER): str(RoleCodename.APPROVER),
+    str(RoleCodename.READER): str(RoleCodename.READER),
+    str(RoleCodename.THIRD_PARTY_RESPONDENT): str(RoleCodename.THIRD_PARTY_RESPONDENT),
+    str(RoleCodename.AUDITEE): str(RoleCodename.AUDITEE),
 }
 
 BUILTIN_USERGROUP_CODENAMES = {
-    str(UserGroupCodename.ADMINISTRATOR): "Administrator",
-    str(UserGroupCodename.GLOBAL_READER): "Reader",
-    str(UserGroupCodename.GLOBAL_APPROVER): "Approver",
-    str(UserGroupCodename.GLOBAL_AUDITEE): "Auditee",
-    str(UserGroupCodename.DOMAIN_MANAGER): "Domain manager",
-    str(UserGroupCodename.ANALYST): "Analyst",
-    str(UserGroupCodename.APPROVER): "Approver",
-    str(UserGroupCodename.READER): "Reader",
-    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): "Third-party respondent",
-    str(UserGroupCodename.AUDITEE): "Auditee",
+    str(UserGroupCodename.ADMINISTRATOR): str(RoleCodename.ADMINISTRATOR),
+    str(UserGroupCodename.GLOBAL_READER): str(RoleCodename.READER),
+    str(UserGroupCodename.GLOBAL_APPROVER): str(RoleCodename.APPROVER),
+    str(UserGroupCodename.GLOBAL_AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.DOMAIN_MANAGER): str(RoleCodename.DOMAIN_MANAGER),
+    str(UserGroupCodename.ANALYST): str(RoleCodename.ANALYST),
+    str(UserGroupCodename.APPROVER): str(RoleCodename.APPROVER),
+    str(UserGroupCodename.READER): str(RoleCodename.READER),
+    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): str(
+        RoleCodename.THIRD_PARTY_RESPONDENT
+    ),
+    str(UserGroupCodename.AUDITEE): str(RoleCodename.AUDITEE),
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier

@@ -1,4 +1,11 @@
 {
+	"BI-RL-ADE": "Respondentas",
+	"BI-RL-ADM": "Administratorius",
+	"BI-RL-ANA": "Analitikas",
+	"BI-RL-APP": "Tvirtintojas",
+	"BI-RL-AUD": "Skaitytojas",
+	"BI-RL-DMA": "Srities vadovas",
+	"BI-RL-TPR": "Trečiosios šalies respondentas",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Prancūzų",
 	"english": "Anglų",
