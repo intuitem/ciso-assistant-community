@@ -1,7 +1,12 @@
+import uuid
+
 import pytest
+from knox.models import AuthToken
+from rest_framework import status
 from rest_framework.test import APIClient
-from core.models import ReferenceControl, AppliedControl
-from iam.models import Folder
+from core.models import Asset, ReferenceControl, AppliedControl
+from core.utils import RoleCodename
+from iam.models import Folder, Role, RoleAssignment, User
 
 from test_utils import EndpointTestsQueries
 
@@ -252,4 +257,132 @@ class TestAppliedControlsAuthenticated:
             "category",
             AppliedControl.CATEGORY,
             user_group=test.user_group,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Helpers for the IAM post-filter masking tests below.
+#
+# `BaseModelViewSet._filter_related_fields` masks any related-field value
+# whose object lies outside the user's IAM-visible scope. Round 1 added a
+# fast path that skips that masking pass when the user can already see
+# every instance of every related model. The two tests below pin down
+# both sides of the contract:
+#
+# - admin (recursive role at the global root) must see related references
+#   fully serialised (no placeholder),
+# - a reader scoped to a single domain folder must still get the `{}`
+#   placeholder for related references that point outside that scope.
+# ---------------------------------------------------------------------------
+
+
+def _client_for(user):
+    client = APIClient()
+    _, token = AuthToken.objects.create(user=user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+    return client
+
+
+def _make_scoped_reader(folder):
+    """User with READER role recursive on `folder` and nothing else.
+    Built directly via RoleAssignment so the perimeter is exactly that
+    one folder — what the masking assertions rely on."""
+    user = User.objects.create_user(
+        f"reader-{uuid.uuid4().hex[:6]}@perf.test", is_published=True
+    )
+    role = Role.objects.get(name=RoleCodename.READER.value)
+    ra = RoleAssignment.objects.create(
+        user=user,
+        role=role,
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    )
+    ra.perimeter_folders.add(folder)
+    return user
+
+
+def _setup_cross_folder_link():
+    """AC in folder A; M2M-linked Asset in sibling folder B (unreachable
+    to a reader scoped to A)."""
+    root = Folder.get_root_folder()
+    folder_a = Folder.objects.create(
+        name=f"perf-test-A-{uuid.uuid4().hex[:6]}",
+        parent_folder=root,
+        content_type=Folder.ContentType.DOMAIN,
+    )
+    folder_b = Folder.objects.create(
+        name=f"perf-test-B-{uuid.uuid4().hex[:6]}",
+        parent_folder=root,
+        content_type=Folder.ContentType.DOMAIN,
+    )
+    ac = AppliedControl.objects.create(
+        folder=folder_a, name=f"ac-{uuid.uuid4().hex[:6]}"
+    )
+    asset_in_b = Asset.objects.create(
+        folder=folder_b,
+        name=f"asset-B-{uuid.uuid4().hex[:6]}",
+        type=Asset.Type.PRIMARY,
+    )
+    ac.assets.set([asset_in_b])
+    return folder_a, folder_b, ac, asset_in_b
+
+
+def _list(client, url):
+    r = client.get(url)
+    assert r.status_code == status.HTTP_200_OK, r.content
+    body = r.json()
+    return body.get("results", body) if isinstance(body, dict) else body
+
+
+def _find_by_id(items, obj_id):
+    target = str(obj_id)
+    for it in items:
+        if it.get("id") == target:
+            return it
+    raise AssertionError(f"id={target} not in {len(items)} list results")
+
+
+@pytest.mark.django_db
+class TestAppliedControlListIAMPostFilter:
+    """Output equivalence for the IAM post-filter on `/api/applied-controls/`."""
+
+    def test_admin_sees_unmasked_cross_folder_asset(self, authenticated_client):
+        """Admin's recursive role at the global root covers every folder
+        for every related model → fast path engages → no masking. The
+        AC's `assets` M2M MUST come back with the asset's id and str."""
+        _, _, ac, asset = _setup_cross_folder_link()
+
+        items = _list(authenticated_client, "/api/applied-controls/")
+        item = _find_by_id(items, ac.id)
+
+        assets_field = item["assets"]
+        assert isinstance(assets_field, list) and len(assets_field) == 1, (
+            f"expected exactly one asset reference, got {assets_field!r}"
+        )
+        ref = assets_field[0]
+        assert ref != {}, (
+            "admin should see a fully-serialised asset reference, "
+            f"got the post-filter placeholder: {ref!r}"
+        )
+        assert ref.get("id") == str(asset.id)
+
+    def test_scoped_reader_masks_cross_folder_asset(self):
+        """Slow-path correctness preserved: a reader scoped to folder A
+        sees the AC (it lives in A) but the AC's `assets` references an
+        asset in folder B (unreachable). `_filter_related_fields` MUST
+        replace the asset dict with the `{}` placeholder."""
+        folder_a, _, ac, _ = _setup_cross_folder_link()
+        client = _client_for(_make_scoped_reader(folder_a))
+
+        items = _list(client, "/api/applied-controls/")
+        item = _find_by_id(items, ac.id)
+
+        assets_field = item["assets"]
+        assert isinstance(assets_field, list) and len(assets_field) == 1, (
+            f"expected one masked asset reference, got {assets_field!r}"
+        )
+        # `BaseModelViewSet._placeholder_for` returns `{}` for hidden FKs.
+        assert assets_field[0] == {}, (
+            "scoped reader must NOT see the cross-folder asset's id/str; "
+            f"got {assets_field[0]!r}"
         )

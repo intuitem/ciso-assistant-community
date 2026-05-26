@@ -27,7 +27,13 @@
 		formatScoreValue,
 		getFieldVisibility,
 		hasComputedResult,
-		hasComputedScore
+		hasComputedScore,
+		shouldShowAutoQuestion,
+		buildAutoAlignmentQuestion,
+		alignmentValueFromChoiceUrn,
+		choiceUrnFromAlignmentValue,
+		alignmentColorMap,
+		AUTO_ALIGNMENT_QUESTION_URN
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -91,14 +97,13 @@
 	const viewerRole: 'respondent' | 'auditor' = $derived(
 		(data.viewerRole ?? 'auditor') as 'respondent' | 'auditor'
 	);
-	const fieldVis = $derived(
-		getFieldVisibility(complianceAssessment.framework, complianceAssessment, viewerRole)
-	);
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
+	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -449,8 +454,15 @@
 								class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
 							></div>
 
-							<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
-								{getTitle(requirementAssessment)}
+							<span
+								class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl inline-flex items-center gap-3"
+							>
+								<span>{getTitle(requirementAssessment)}</span>
+								{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1 && requirementAssessment.assessable}
+									<span class="badge text-xs font-medium bg-indigo-100 text-indigo-800">
+										{m.requirementWeight()}: {requirementAssessment.requirement.weight}
+									</span>
+								{/if}
 							</span>
 						</span>
 						<div class="h-2"></div>
@@ -583,7 +595,22 @@
 											{/if}
 										</div>
 									{/if}
-
+									<!-- Auditor badge: respondent's alignment answer -->
+									{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
+										<div class="flex flex-col items-center my-2">
+											<p class="text-xs italic text-surface-600">
+												{m.respondentAnswered()}
+											</p>
+											<span
+												class="badge text-sm font-semibold text-white"
+												style="background-color: {alignmentColorMap[
+													requirementAssessment.respondent_alignment
+												]}"
+											>
+												{safeTranslate(requirementAssessment.respondent_alignment)}
+											</span>
+										</div>
+									{/if}
 									<form
 										class="flex flex-col space-y-2 items-center justify-evenly w-full table-mode-form"
 										id="tableModeForm-{requirementAssessment.id}"
@@ -666,6 +693,32 @@
 														updateBulk(requirementAssessment, {
 															answers: { [urn]: newAnswer }
 														});
+													}}
+												/>
+											</div>
+										{/if}
+										<!-- Auto-alignment question (when no framework questions) -->
+										{#if shouldShowAutoQuestion(requirementAssessment.requirement, viewerRole, complianceAssessment)}
+											<div class="flex flex-col w-full space-y-2">
+												<Question
+													questions={buildAutoAlignmentQuestion({
+														text: m.areYouAlignedWithThisRequirement(),
+														yes: m.yes(),
+														no: m.no(),
+														inProgress: m.inProgress(),
+														notApplicable: m.notApplicable()
+													})}
+													initialValue={{
+														[AUTO_ALIGNMENT_QUESTION_URN]: choiceUrnFromAlignmentValue(
+															requirementAssessment.respondent_alignment
+														)
+													}}
+													field="respondent_alignment"
+													disabled={isReadOnly}
+													onChange={(_urn, choiceUrn) => {
+														const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
+														requirementAssessment.respondent_alignment = newAlignment;
+														update(requirementAssessment, 'respondent_alignment');
 													}}
 												/>
 											</div>

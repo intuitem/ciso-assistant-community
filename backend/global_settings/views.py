@@ -1,4 +1,4 @@
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -160,6 +160,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "allow_assignments_to_entities": False,
             "enforce_mfa": False,
             "default_language": "en",
+            "default_custom_analytics_dashboard": None,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
@@ -182,6 +183,71 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get available languages")
     def default_language(self, request, pk=None):
         choices = {code: name for code, name in settings.LANGUAGES}
+        return Response(choices)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Set default custom analytics dashboard",
+        url_path="set-default-dashboard",
+    )
+    def set_default_dashboard(self, request, pk=None):
+        """Partial update of the default_custom_analytics_dashboard key.
+
+        Guarded by change_globalsettings so non-admins can't change the
+        org-wide default from the analytics Custom tab.
+
+        Note: this bypasses GeneralSettingsSerializer.update on purpose
+        because that serializer replaces the entire `value` dict with the
+        payload (no real PATCH semantics). For this single-key change we
+        merge into the existing dict. If the general settings ever grow
+        cross-key side effects beyond currency propagation, route this
+        through the serializer instead.
+        """
+        from .serializers import validate_default_dashboard_value
+
+        perm = Permission.objects.get(codename="change_globalsettings")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(
+                {"error": "You do not have permission to change global settings."},
+                status=403,
+            )
+
+        try:
+            new_value = validate_default_dashboard_value(
+                request.data.get("dashboard_id")
+            )
+        except serializers.ValidationError as exc:
+            return Response({"error": exc.detail}, status=400)
+
+        settings_obj, _ = GlobalSettings.objects.get_or_create(name="general")
+        if not isinstance(settings_obj.value, dict):
+            settings_obj.value = {}
+        settings_obj.value["default_custom_analytics_dashboard"] = new_value
+        # Include updated_at because AbstractBaseModel uses auto_now and Django
+        # only refreshes auto_now fields named in update_fields.
+        settings_obj.save(update_fields=["value", "updated_at"])
+        return Response({"default_custom_analytics_dashboard": new_value})
+
+    @action(detail=True, name="Get available dashboards for the custom analytics tab")
+    def default_custom_analytics_dashboard(self, request, pk=None):
+        """Return a {dashboard_uuid: dashboard_name} map of dashboards
+        the requester can see, so an admin can pick one as the
+        instance default for the analytics Custom tab.
+        """
+        from metrology.models import Dashboard
+
+        accessible_ids, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Dashboard
+        )
+        dashboards = Dashboard.objects.filter(id__in=accessible_ids).order_by("name")
+        choices = {"": "—"}
+        for d in dashboards:
+            choices[str(d.id)] = d.name
         return Response(choices)
 
     @action(detail=True, methods=["post"], name="Force language for all users")

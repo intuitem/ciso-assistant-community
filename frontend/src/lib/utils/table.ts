@@ -12,7 +12,10 @@ import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeS
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
+import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
+import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -105,6 +108,40 @@ export const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'terminologies?field_path=accreditation.category',
 		optionsLabelField: 'name',
 		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.status',
+		optionsLabelField: 'name',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_KIND_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'projects/kind',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'kind',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.health',
+		optionsLabelField: 'name',
+		label: 'health',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -2170,8 +2207,24 @@ export const listViewFields = {
 		}
 	},
 	'personal-data': {
-		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', 'customName', 'processing'],
-		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
+		head: [
+			'category',
+			'isSensitive',
+			'retention',
+			'deletionPolicy',
+			'customName',
+			'assets',
+			'processing'
+		],
+		body: [
+			'category',
+			'is_sensitive',
+			'retention',
+			'deletion_policy',
+			'name',
+			'assets',
+			'processing'
+		],
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER,
@@ -2217,8 +2270,8 @@ export const listViewFields = {
 		}
 	},
 	'feared-events': {
-		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
-		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		head: ['selected', 'refId', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'ref_id', 'name', 'assets', 'description', 'qualifications', 'gravity'],
 		filters: {
 			assets: ASSET_FILTER,
 			qualifications: QUALIFICATION_FILTER,
@@ -2411,6 +2464,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'description',
 			'findings_assessment',
 			'severity',
 			'priority',
@@ -2422,6 +2476,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'description',
 			'findings_assessment',
 			'severity',
 			'priority',
@@ -2634,7 +2689,8 @@ export const listViewFields = {
 			'lastOccurrenceStatus',
 			'nextOccurrence',
 			'nextOccurrenceStatus',
-			'folder'
+			'folder',
+			'labels'
 		],
 		body: [
 			'ref_id',
@@ -2645,14 +2701,16 @@ export const listViewFields = {
 			'last_occurrence_status',
 			'next_occurrence',
 			'next_occurrence_status',
-			'folder'
+			'folder',
+			'filtering_labels'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: TASK_TEMPLATE_ASSIGNED_TO_FILTER,
 			is_recurrent: IS_RECURRENT_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
-			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER
+			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'task-nodes': {
@@ -2694,6 +2752,40 @@ export const listViewFields = {
 			authority: ACCREDITATION_AUTHORITY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
+	},
+	projects: {
+		head: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		body: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			kind: PROJECT_KIND_FILTER,
+			status: PROJECT_STATUS_FILTER,
+			health: PROJECT_HEALTH_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'responsibility-matrices': {
+		head: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		body: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'responsibility-roles': {
+		head: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		body: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		filters: {}
+	},
+	'responsibility-matrix-activities': {
+		head: ['name', 'description', 'order', 'matrix'],
+		body: ['name', 'description', 'order', 'matrix'],
+		filters: {}
+	},
+	'responsibility-assignments': {
+		head: ['activity', 'actor', 'role'],
+		body: ['activity', 'actor', 'role'],
+		filters: {}
 	},
 	'metric-definitions': {
 		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
@@ -2895,6 +2987,13 @@ export const listViewFields = {
 			gravity: undefined
 		},
 		body: ['users']
+	},
+	journeys: {
+		head: ['name', 'preset', 'folder', 'appliedVersion', 'appliedAt', 'appliedBy'],
+		body: ['name', 'preset', 'folder', 'applied_version', 'applied_at', 'applied_by'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
 	}
 } as const satisfies ListViewFieldsConfig;
 
@@ -2910,7 +3009,8 @@ export const contextMenuActions = {
 		{ component: ChangeImpact, props: {} },
 		{ component: ChangeEffort, props: {} },
 		{ component: ChangePriority, props: {} },
-		{ component: ChangeCsfFunction, props: {} }
+		{ component: ChangeCsfFunction, props: {} },
+		{ component: ReplaceWith, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
@@ -2919,7 +3019,11 @@ export const contextMenuActions = {
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
 	'operational-scenarios': [{ component: SelectObject, props: {} }],
-	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }],
+	vulnerabilities: [
+		{ component: VulnerabilityChangeStatus, props: {} },
+		{ component: VulnerabilityChangeSeverity, props: {} }
+	]
 };
 
 // Batch action configuration
@@ -2931,37 +3035,47 @@ export interface BatchActionConfig {
 		| 'add_m2m'
 		| 'remove_m2m'
 		| 'change_folder'
-		| 'group';
+		| 'group'
+		| 'merge';
 	label: string;
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
 	multiSelect?: boolean;
 	children?: BatchActionConfig[];
+	minSelection?: number;
+	maxSelection?: number;
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	'applied-controls': [
 		{
-			type: 'change_field',
-			label: 'changeStatus',
-			icon: 'fa-solid fa-arrow-right-arrow-left',
-			field: 'status',
-			optionsEndpoint: 'applied-controls/status'
-		},
-		{
-			type: 'change_field',
-			label: 'batchChangePriority',
-			icon: 'fa-solid fa-arrow-up-wide-short',
-			field: 'priority',
-			optionsEndpoint: 'applied-controls/priority'
-		},
-		{
-			type: 'change_field',
-			label: 'changeCsfFunction',
-			icon: 'fa-solid fa-shield-halved',
-			field: 'csf_function',
-			optionsEndpoint: 'applied-controls/csf_function'
+			type: 'group',
+			label: 'changeAttributes',
+			icon: 'fa-solid fa-sliders',
+			children: [
+				{
+					type: 'change_field',
+					label: 'changeStatus',
+					icon: 'fa-solid fa-arrow-right-arrow-left',
+					field: 'status',
+					optionsEndpoint: 'applied-controls/status'
+				},
+				{
+					type: 'change_field',
+					label: 'batchChangePriority',
+					icon: 'fa-solid fa-arrow-up-wide-short',
+					field: 'priority',
+					optionsEndpoint: 'applied-controls/priority'
+				},
+				{
+					type: 'change_field',
+					label: 'changeCsfFunction',
+					icon: 'fa-solid fa-shield-halved',
+					field: 'csf_function',
+					optionsEndpoint: 'applied-controls/csf_function'
+				}
+			]
 		},
 		{
 			type: 'change_m2m',
@@ -3000,6 +3114,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-folder',
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
 		},
+		{
+			type: 'merge',
+			label: 'mergeControls',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
+		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	policies: [
@@ -3015,6 +3136,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{
+			type: 'merge',
+			label: 'mergeControls',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
