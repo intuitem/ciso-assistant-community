@@ -56,6 +56,12 @@
 		tags={['agentic', 'questionnaire', 'vendor-due-diligence']}
 	/>
 	<Article
+		title="Audit Prefill"
+		desc="Point at a folder of evidences and an audit. The agent extracts AppliedControls from your docs (deduped), then proposes a result + linked controls per requirement assessment. Two-wave review."
+		link="/experimental/audit-prefill"
+		tags={['agentic', 'ai', 'audit', 'compliance', 'evidences']}
+	/>
+	<Article
 		title="Asset Whiteboard"
 		desc="Place and link assets on a freeform canvas, per domain. Drawn edges update parent_assets in real time; positions saved in your browser."
 		link="/experimental/asset-board"

@@ -1559,11 +1559,13 @@ class AgentRunViewSet(BaseModelViewSet):
     model = AgentRun
     filterset_fields = ["folder", "kind", "status", "target_object_id"]
     search_fields = ["current_step_label"]
-    # Agent runs are server-spawned: generic POST/PUT/PATCH/DELETE would let
-    # a client point a run at any ContentType+UUID and bypass the per-folder
+    # Agent runs are server-spawned: generic POST/PUT/PATCH would let a
+    # client point a run at any ContentType+UUID and bypass the per-folder
     # add_agentrun + per-target read checks done in start_questionnaire_prefill.
-    # PUT/PATCH/DELETE dropped entirely; POST stays only for @action routes.
-    http_method_names = ["get", "head", "options", "post"]
+    # PUT/PATCH dropped; POST stays only for @action routes; DELETE is
+    # allowed so users can discard orphaned QUEUED runs (e.g. from a
+    # registry error) and clean up exploration artifacts.
+    http_method_names = ["get", "head", "options", "post", "delete"]
 
     def create(self, request, *args, **kwargs):
         return Response(
@@ -1573,6 +1575,33 @@ class AgentRunViewSet(BaseModelViewSet):
             },
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
+
+    def destroy(self, request, *args, **kwargs):
+        """Allow deletion of agent runs except while actively RUNNING.
+
+        QUEUED runs can be dropped (covers the orphan-task case where the
+        worker registry didn't yet know about the task). Terminal states
+        (succeeded/failed/cancelled) are always deletable. RUNNING is
+        refused — the worker would keep writing to a row that's gone;
+        cancel first, then delete.
+
+        Cascade behavior: AgentAction.agent_run is a real FK with
+        on_delete=CASCADE so audit-trail rows go with the run. The
+        target ComplianceAssessment / QuestionnaireRun is reached only
+        through a GenericForeignKey and stays put. AppliedControls that
+        were created by approving EXTRACT_CONTROL actions stay — those
+        are committed user data.
+        """
+        instance = self.get_object()
+        if instance.status == AgentRun.Status.RUNNING:
+            return Response(
+                {
+                    "detail": "Cancel the run before deleting it — the worker "
+                    "is still writing to it."
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        return super().destroy(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1687,6 +1716,217 @@ class AgentRunViewSet(BaseModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @action(detail=False, methods=["post"], url_path="start-audit-prefill")
+    def start_audit_prefill(self, request):
+        """Create + enqueue Wave 1 of an audit-prefill agent run.
+
+        Body: {folder, compliance_assessment, strictness}. Wave 1 walks
+        Evidences in the folder and proposes AppliedControls (create or link
+        to existing). Wave 2 (per-requirement assessment) is a separate run
+        started after the user approves Wave 1.
+        """
+        from core.models import ComplianceAssessment, Evidence
+        from django.contrib.auth.models import Permission
+        from iam.models import Folder, RoleAssignment
+
+        from .serializers import StartAuditPrefillSerializer
+
+        serializer = StartAuditPrefillSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        try:
+            folder = Folder.objects.get(id=data["folder"])
+        except Folder.DoesNotExist:
+            return Response(
+                {"detail": "Folder not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            ca = ComplianceAssessment.objects.get(id=data["compliance_assessment"])
+        except ComplianceAssessment.DoesNotExist:
+            return Response(
+                {"detail": "Compliance assessment not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Two-layer permission check, mirroring start_questionnaire_prefill:
+        # the user must be able to read the target audit AND must have
+        # add_agentrun in the folder we'll spawn the run under.
+        if not RoleAssignment.is_object_readable(
+            request.user, ComplianceAssessment, ca.id
+        ):
+            return Response(
+                {"detail": "You do not have access to this audit."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            add_agentrun_perm = Permission.objects.get(codename="add_agentrun")
+        except Permission.DoesNotExist:
+            return Response(
+                {"detail": "Server permission state is inconsistent."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_agentrun_perm, folder=folder
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to start an agent "
+                    "run in this folder."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        evidence_count = Evidence.objects.filter(folder=folder).count()
+        if evidence_count == 0:
+            return Response(
+                {
+                    "detail": "No evidences in the selected folder. Upload "
+                    "documents first."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        dep_error = _check_agent_dependencies()
+        if dep_error:
+            return Response(
+                {"detail": dep_error},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        # Atomic: lock the target audit row so two concurrent starts can't
+        # both create Wave-1 runs against the same audit.
+        from django.db import transaction
+
+        with transaction.atomic():
+            ComplianceAssessment.objects.select_for_update().get(id=ca.id)
+            active_exists = AgentRun.objects.filter(
+                target_content_type=ContentType.objects.get_for_model(
+                    ComplianceAssessment
+                ),
+                target_object_id=ca.id,
+                kind=AgentRun.Kind.AUDIT_PREFILL,
+                status__in=[AgentRun.Status.QUEUED, AgentRun.Status.RUNNING],
+            ).exists()
+            if active_exists:
+                return Response(
+                    {
+                        "detail": "An audit-prefill run is already in progress "
+                        "for this audit."
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            agent_run = AgentRun.objects.create(
+                owner=request.user,
+                folder=folder,
+                kind=AgentRun.Kind.AUDIT_PREFILL,
+                strictness=data["strictness"],
+                target_content_type=ContentType.objects.get_for_model(
+                    ComplianceAssessment
+                ),
+                target_object_id=ca.id,
+                config={"wave": 1, "evidence_count": evidence_count},
+            )
+
+        from .audit_prefill import run_audit_prefill_wave1
+
+        run_audit_prefill_wave1(str(agent_run.id))
+
+        return Response(
+            {"id": str(agent_run.id), "status": agent_run.status},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="start-audit-prefill-wave2")
+    def start_audit_prefill_wave2(self, request, pk=None):
+        """Spawn Wave 2 from a finished, fully-resolved Wave 1 run.
+
+        Wave 1 (the receiver) must be SUCCEEDED and have no PROPOSED actions
+        left. We create a new AgentRun targeting the same ComplianceAssessment
+        and link it to its parent via ``config.parent_run_id``.
+        """
+        from django.db import transaction
+
+        parent = self.get_object()
+        if parent.kind != AgentRun.Kind.AUDIT_PREFILL:
+            return Response(
+                {"detail": "Parent run is not an audit_prefill run."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if parent.status != AgentRun.Status.SUCCEEDED:
+            return Response(
+                {"detail": "Wave 1 has not finished yet."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if (parent.config or {}).get("wave") != 1:
+            return Response(
+                {"detail": "Parent run is not Wave 1."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        unresolved = AgentAction.objects.filter(
+            agent_run=parent, state=AgentAction.State.PROPOSED
+        ).count()
+        if unresolved:
+            return Response(
+                {
+                    "detail": (
+                        f"{unresolved} Wave 1 proposal(s) still need approval or "
+                        "rejection before Wave 2 can start."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        dep_error = _check_agent_dependencies()
+        if dep_error:
+            return Response(
+                {"detail": dep_error},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        with transaction.atomic():
+            active_exists = AgentRun.objects.filter(
+                target_content_type=parent.target_content_type,
+                target_object_id=parent.target_object_id,
+                kind=AgentRun.Kind.AUDIT_PREFILL,
+                status__in=[AgentRun.Status.QUEUED, AgentRun.Status.RUNNING],
+            ).exists()
+            if active_exists:
+                return Response(
+                    {"detail": "Another audit-prefill run is already active."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            # Pass-through user options. Defaults to skipping not_applicable RAs
+            # because those already carry an explicit auditor decision — re-
+            # scoring them just creates no-op proposals the user has to dismiss.
+            skip_na = bool(request.data.get("skip_not_applicable", True))
+
+            wave2 = AgentRun.objects.create(
+                owner=request.user,
+                folder=parent.folder,
+                kind=AgentRun.Kind.AUDIT_PREFILL,
+                strictness=parent.strictness,
+                target_content_type=parent.target_content_type,
+                target_object_id=parent.target_object_id,
+                config={
+                    "wave": 2,
+                    "parent_run_id": str(parent.id),
+                    "skip_not_applicable": skip_na,
+                },
+            )
+
+        from .audit_prefill import run_audit_prefill_wave2
+
+        run_audit_prefill_wave2(str(wave2.id))
+
+        return Response(
+            {"id": str(wave2.id), "status": wave2.status},
+            status=status.HTTP_201_CREATED,
+        )
+
     @action(detail=True, methods=["post"], url_path="cancel")
     def cancel(self, request, pk=None):
         """Mark an active run as cancelled. The worker checks before each step."""
@@ -1723,13 +1963,12 @@ class AgentActionViewSet(BaseModelViewSet):
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
-    # Approve / reject are intentionally not exercised by the questionnaire
-    # autopilot UI — that flow uses confidence-banded review without explicit
-    # per-action approval. They're reserved for the upcoming audit-prefill
-    # page where a human signs off each RequirementAssessment proposal before
-    # it lands on the audit. State transitions stay PROPOSED → APPROVED /
-    # REJECTED; the worker also writes the terminal EXPIRED state during
-    # retry iterations (see _process_question in chat/questionnaire.py).
+    # Approve / reject. For audit-prefill, EXTRACT_CONTROL approval is the
+    # commit step that actually creates the AppliedControl in the run's
+    # folder; LINK_CONTROL_EXISTING just records the user's sign-off (the
+    # AC already exists). Wave 2 kinds wire the RA graph — see _approve_*.
+    # State transitions stay PROPOSED → APPROVED / REJECTED; the worker
+    # also writes EXPIRED during retry iterations (see _process_question).
     @action(detail=True, methods=["post"], url_path="approve")
     def approve(self, request, pk=None):
         action_obj = self.get_object()
@@ -1738,13 +1977,38 @@ class AgentActionViewSet(BaseModelViewSet):
                 {"detail": f"Action is {action_obj.state}; cannot approve."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # Optional payload override — lets the user edit name/description/etc
+        # before commit. We merge over the original (rather than replacing)
+        # so cluster_id, source_refs, and other agent-set keys survive.
+        override = (
+            request.data.get("payload") if isinstance(request.data, dict) else None
+        )
+        payload = dict(action_obj.payload or {})
+        if isinstance(override, dict):
+            payload.update(override)
+            action_obj.payload = payload
+
+        try:
+            _execute_approval_side_effects(action_obj, request.user)
+        except _ApprovalError as e:
+            return Response(
+                {"detail": str(e)},
+                status=e.status_code,
+            )
+
         action_obj.state = AgentAction.State.APPROVED
         action_obj.approved_by = request.user
         action_obj.approved_at = timezone.now()
         action_obj.save(
-            update_fields=["state", "approved_by", "approved_at", "updated_at"]
+            update_fields=[
+                "state",
+                "approved_by",
+                "approved_at",
+                "payload",
+                "updated_at",
+            ]
         )
-        return Response({"state": action_obj.state})
+        return Response({"state": action_obj.state, "payload": action_obj.payload})
 
     @action(detail=True, methods=["post"], url_path="reject")
     def reject(self, request, pk=None):
@@ -1757,6 +2021,254 @@ class AgentActionViewSet(BaseModelViewSet):
         action_obj.state = AgentAction.State.REJECTED
         action_obj.save(update_fields=["state", "updated_at"])
         return Response({"state": action_obj.state})
+
+    @action(detail=False, methods=["post"], url_path="bulk-approve")
+    def bulk_approve(self, request):
+        """Bulk-approve proposed actions in a run above a confidence threshold.
+
+        Body: {agent_run, min_confidence (default 0.7), kinds (optional list)}.
+        Returns a summary {approved, skipped, errors} so the UI can refresh.
+        """
+        run_id = request.data.get("agent_run")
+        if not run_id:
+            return Response(
+                {"detail": "agent_run is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            min_conf = float(request.data.get("min_confidence", 0.7))
+        except (TypeError, ValueError):
+            min_conf = 0.7
+        kinds = request.data.get("kinds")
+        try:
+            run = AgentRun.objects.get(id=run_id)
+        except AgentRun.DoesNotExist:
+            return Response(
+                {"detail": "Agent run not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        qs = AgentAction.objects.filter(
+            agent_run=run,
+            state=AgentAction.State.PROPOSED,
+            confidence__gte=min_conf,
+        )
+        if isinstance(kinds, list) and kinds:
+            qs = qs.filter(kind__in=kinds)
+
+        approved = 0
+        skipped = 0
+        errors: list[dict] = []
+        for action_obj in qs:
+            try:
+                _execute_approval_side_effects(action_obj, request.user)
+            except _ApprovalError as e:
+                errors.append({"id": str(action_obj.id), "detail": str(e)})
+                continue
+            except Exception as e:
+                logger.exception("bulk_approve unexpected failure")
+                errors.append({"id": str(action_obj.id), "detail": str(e)})
+                continue
+            action_obj.state = AgentAction.State.APPROVED
+            action_obj.approved_by = request.user
+            action_obj.approved_at = timezone.now()
+            action_obj.save(
+                update_fields=[
+                    "state",
+                    "approved_by",
+                    "approved_at",
+                    "payload",
+                    "updated_at",
+                ]
+            )
+            approved += 1
+
+        # Anything still proposed below the threshold (or after errors) is
+        # surfaced as skipped so the UI shows "X of Y handled".
+        skipped = AgentAction.objects.filter(
+            agent_run=run, state=AgentAction.State.PROPOSED
+        ).count()
+        return Response(
+            {"approved": approved, "remaining_proposed": skipped, "errors": errors}
+        )
+
+    @action(detail=False, methods=["post"], url_path="bulk-reject")
+    def bulk_reject(self, request):
+        """Bulk-reject proposed actions in a run.
+
+        Body: {agent_run, kinds (optional list to limit which kinds get
+        rejected — e.g. ['extract_control'] for "ignore all new suggestions")}.
+        No side effects to commit, so a single UPDATE handles everything.
+        Returns {rejected, remaining_proposed}.
+        """
+        run_id = request.data.get("agent_run")
+        if not run_id:
+            return Response(
+                {"detail": "agent_run is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        kinds = request.data.get("kinds")
+        try:
+            run = AgentRun.objects.get(id=run_id)
+        except AgentRun.DoesNotExist:
+            return Response(
+                {"detail": "Agent run not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        qs = AgentAction.objects.filter(agent_run=run, state=AgentAction.State.PROPOSED)
+        if isinstance(kinds, list) and kinds:
+            qs = qs.filter(kind__in=kinds)
+
+        rejected = qs.update(state=AgentAction.State.REJECTED)
+        remaining = AgentAction.objects.filter(
+            agent_run=run, state=AgentAction.State.PROPOSED
+        ).count()
+        return Response({"rejected": rejected, "remaining_proposed": remaining})
+
+
+class _ApprovalError(Exception):
+    """Approval-time validation failure. Carries a DRF status code."""
+
+    def __init__(self, message: str, status_code: int = status.HTTP_400_BAD_REQUEST):
+        super().__init__(message)
+        self.status_code = status_code
+
+
+def _execute_approval_side_effects(action_obj, user) -> None:
+    """Perform the ORM writes that an approval implies. Idempotent.
+
+    No-op for kinds that are pure sign-offs (PROPOSE_ANSWER, CRITIQUE,
+    RETRIEVE, LINK_CONTROL_EXISTING, LINK_EVIDENCE_CONTROL). For
+    EXTRACT_CONTROL, creates the AppliedControl in the run's folder and
+    stamps the new id back into the action's payload so Wave 2 can
+    reference it. For PROPOSE_RESULT, writes the RA verdict and wires the
+    full graph (applied controls + per-control evidences).
+    """
+    if action_obj.kind == AgentAction.Kind.EXTRACT_CONTROL:
+        _commit_extract_control(action_obj, user)
+    elif action_obj.kind == AgentAction.Kind.PROPOSE_RESULT:
+        _commit_propose_result(action_obj, user)
+
+
+def _commit_extract_control(action_obj, user) -> None:
+    from core.models import AppliedControl
+    from django.contrib.auth.models import Permission
+    from iam.models import RoleAssignment
+
+    payload = dict(action_obj.payload or {})
+    if payload.get("created_control_id"):
+        return
+
+    run = action_obj.agent_run
+    folder = run.folder
+    name = (payload.get("name") or "").strip()
+    if not name:
+        raise _ApprovalError("Cannot create control: name is required.")
+
+    try:
+        add_perm = Permission.objects.get(codename="add_appliedcontrol")
+    except Permission.DoesNotExist:
+        raise _ApprovalError(
+            "Server permission state is inconsistent.",
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    if not RoleAssignment.is_access_allowed(user=user, perm=add_perm, folder=folder):
+        raise _ApprovalError(
+            "You do not have permission to create applied controls here.",
+            status.HTTP_403_FORBIDDEN,
+        )
+
+    ac = AppliedControl.objects.create(
+        folder=folder,
+        name=name[:200],
+        description=(payload.get("description") or "")[:1000],
+        category=payload.get("category") or None,
+        csf_function=payload.get("csf_function") or None,
+        status=(payload.get("status") or "to_do"),
+    )
+    payload["created_control_id"] = str(ac.id)
+    action_obj.payload = payload
+
+
+def _commit_propose_result(action_obj, user) -> None:
+    """Write the per-RA verdict + wire applied_controls + evidence links."""
+    from core.models import AppliedControl, Evidence, RequirementAssessment
+    from django.contrib.auth.models import Permission
+    from django.db import transaction
+    from iam.models import RoleAssignment
+
+    payload = dict(action_obj.payload or {})
+
+    if not action_obj.target_object_id:
+        raise _ApprovalError("Proposal has no target RequirementAssessment.")
+    try:
+        ra = RequirementAssessment.objects.get(id=action_obj.target_object_id)
+    except RequirementAssessment.DoesNotExist:
+        raise _ApprovalError(
+            "Requirement assessment no longer exists.",
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    try:
+        change_perm = Permission.objects.get(codename="change_requirementassessment")
+    except Permission.DoesNotExist:
+        raise _ApprovalError(
+            "Server permission state is inconsistent.",
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    if not RoleAssignment.is_access_allowed(
+        user=user, perm=change_perm, folder=ra.folder
+    ):
+        raise _ApprovalError(
+            "You do not have permission to update this requirement assessment.",
+            status.HTTP_403_FORBIDDEN,
+        )
+
+    result = (payload.get("result") or "").strip()
+    valid_results = {
+        "compliant",
+        "partially_compliant",
+        "non_compliant",
+        "not_applicable",
+        "not_assessed",
+    }
+    if result not in valid_results:
+        raise _ApprovalError(f"Invalid result: {result}.")
+
+    control_ids = payload.get("control_ids") or []
+    if not isinstance(control_ids, list):
+        control_ids = []
+    # Resolve controls; silently drop anything the user no longer has access
+    # to (defense in depth — the run-level perm was already checked).
+    controls = list(AppliedControl.objects.filter(id__in=control_ids, folder=ra.folder))
+
+    evidence_links = payload.get("evidence_links") or []
+    if not isinstance(evidence_links, list):
+        evidence_links = []
+
+    with transaction.atomic():
+        ra.result = result
+        observation = (payload.get("observation") or "").strip()
+        if observation:
+            ra.observation = observation
+        ra.save(update_fields=["result", "observation", "updated_at"])
+        if controls:
+            ra.applied_controls.add(*controls)
+        for link in evidence_links:
+            if not isinstance(link, dict):
+                continue
+            cid = link.get("control_id")
+            eids = link.get("evidence_ids") or []
+            if not cid or not isinstance(eids, list):
+                continue
+            try:
+                ac = AppliedControl.objects.get(id=cid, folder=ra.folder)
+            except AppliedControl.DoesNotExist:
+                continue
+            evidences = Evidence.objects.filter(id__in=eids, folder=ra.folder)
+            if evidences.exists():
+                ac.evidences.add(*list(evidences))
 
 
 @api_view(["GET"])

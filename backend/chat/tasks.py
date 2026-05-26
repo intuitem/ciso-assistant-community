@@ -472,3 +472,13 @@ from .questionnaire import (  # noqa: F401, E402
     _VALID_AC_CSF_FUNCTIONS,
     _VALID_AC_STATUSES,
 )
+
+# ---------------------------------------------------------------------------
+# Audit Prefill — re-exports
+# ---------------------------------------------------------------------------
+# Same pattern as the questionnaire block above: importing audit_prefill here
+# is what makes its @db_task decorators register with Huey at worker startup.
+from .audit_prefill import (  # noqa: F401, E402
+    run_audit_prefill_wave1,
+    run_audit_prefill_wave2,
+)

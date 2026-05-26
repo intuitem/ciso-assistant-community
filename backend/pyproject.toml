@@ -58,6 +58,16 @@ sentence-transformers = "^4.1.0"
 PyMuPDF = "^1.25.5"
 markdown = "^3.10.2"
 rapidfuzz = "^3.14.3"
+# Docling for layout-aware PDF/DOCX extraction.
+# - rapidocr extras avoid easyocr's stale torch pins.
+# - torch/torchvision floors are required because docling's transitive
+#   constraint is "torchvision >=0,<1" — too loose for Python 3.14, the
+#   resolver otherwise lands on torchvision 0.12.0 which has no cp314 wheels.
+#   Floors: torch 2.9+ and torchvision 0.24+ are the first versions with
+#   Python 3.14 wheels published.
+docling = { version = "^2.0", extras = ["rapidocr"] }
+torch = "^2.9"
+torchvision = "^0.24"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.11.1"
