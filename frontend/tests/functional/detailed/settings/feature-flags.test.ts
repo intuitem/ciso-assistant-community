@@ -1,7 +1,6 @@
-import { TestContent, test, expect, type Page } from '../../../utils/test-utils.js';
+import { LoginPage } from '../../../utils/login-page.js';
+import { test, expect, type Page } from '../../../utils/test-utils.js';
 import { PageContent } from '../../../utils/page-content.js';
-
-const vars = TestContent.generateTestVars();
 
 const sidebar = (page: Page) => page.getByTestId('sidebar');
 
@@ -20,7 +19,6 @@ const gotoFeatureFlags = async (page: Page) => {
 const setFlag = async (page: Page, flagLabel: string, enable: boolean) => {
 	await gotoFeatureFlags(page);
 
-	// Find checkbox card by label — works for both v4 (inside panel) and v2 (on page)
 	const panel = page.locator('[id$="content-featureFlags"]');
 	const panelExists = (await panel.count()) > 0;
 	const scope = panelExists ? panel : page;
@@ -34,7 +32,7 @@ const setFlag = async (page: Page, flagLabel: string, enable: boolean) => {
 	const isChecked = (await card.getAttribute('aria-checked')) === 'true';
 	if (isChecked !== enable) {
 		await card.click();
-		await page.waitForTimeout(300);
+		await expect(card).toHaveAttribute('aria-checked', String(enable));
 		await page.getByRole('button', { name: /save/i }).click();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.waitForLoadState('networkidle');
@@ -78,7 +76,7 @@ const FLAGS = {
 	inherentRisk: 'Inherent Risk'
 } as const;
 
-const SIDEBAR_TESTID: Record<keyof typeof FLAGS, string> = {
+const SIDEBAR_TESTID: Record<keyof typeof FLAGS, string | null> = {
 	xrays: 'accordion-item-x-rays',
 	incidents: 'accordion-item-incidents',
 	tasks: 'accordion-item-task-templates',
@@ -98,13 +96,13 @@ const SIDEBAR_TESTID: Record<keyof typeof FLAGS, string> = {
 	rightRequests: 'accordion-item-right-requests',
 	dataBreaches: 'accordion-item-data-breaches',
 	terminologies: 'accordion-item-terminologies',
-	webhooks: '',
+	webhooks: null, 
 	journeys: 'accordion-item-presets',
 	experimental: 'accordion-item-experimental',
-	inherentRisk: ''
+	inherentRisk: null
 };
 
-const SIDEBAR_SECTION: Partial<Record<keyof typeof FLAGS, string | null>> = {
+const SIDEBAR_SECTION: Record<keyof typeof FLAGS, string | null> = {
 	xrays: 'accordion-item-operations',
 	incidents: 'accordion-item-operations',
 	tasks: 'accordion-item-operations',
@@ -130,34 +128,42 @@ const SIDEBAR_SECTION: Partial<Record<keyof typeof FLAGS, string | null>> = {
 	inherentRisk: null
 };
 
-/**
- * Generic sidebar visibility test with try/finally to guarantee flag restoration
- * even if an assertion fails mid-test.
- */
+const openSidebarSection = async (page: Page, sectionTestId: string | null) => {
+	await page.goto('/analytics');
+	await page.waitForLoadState('networkidle');
+	if (sectionTestId) {
+		const sectionSpan = sidebar(page).getByTestId(sectionTestId);
+		const triggerBtn = sectionSpan.locator('..');
+		const isExpanded = await triggerBtn.getAttribute('aria-expanded').catch(() => null);
+		if (isExpanded !== 'true') {
+			await sectionSpan.click();
+		}
+		await expect(triggerBtn).toHaveAttribute('aria-expanded', 'true');
+	}
+};
+
+
 const testSidebarFlag = async (page: Page, flagKey: keyof typeof FLAGS) => {
 	const flagLabel = FLAGS[flagKey];
 	const sectionTestId = SIDEBAR_SECTION[flagKey];
 	const itemTestId = SIDEBAR_TESTID[flagKey];
 
-	const openSection = async () => {
-		await page.goto('/analytics');
-		await page.waitForLoadState('networkidle');
-		if (sectionTestId) {
-			await sidebar(page).getByTestId(sectionTestId).click();
-			await page.waitForTimeout(300);
-		}
-	};
+	if (itemTestId === null) {
+		throw new Error(
+			`testSidebarFlag called for "${flagKey}" which has no sidebar item. ` +
+				`Write a dedicated test instead.`
+		);
+	}
 
 	await setFlag(page, flagLabel, true);
 	try {
-		await openSection();
+		await openSidebarSection(page, sectionTestId);
 		await expect(sidebar(page).getByTestId(itemTestId)).toBeVisible();
 
 		await setFlag(page, flagLabel, false);
-		await openSection();
+		await openSidebarSection(page, sectionTestId);
 		await expect(sidebar(page).getByTestId(itemTestId)).not.toBeVisible();
 	} finally {
-		// Always restore — prevents state leakage to subsequent tests
 		await setFlag(page, flagLabel, true);
 	}
 };
@@ -169,101 +175,116 @@ const testSidebarFlag = async (page: Page, flagKey: keyof typeof FLAGS) => {
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Feature flags', () => {
+	let page: Page;
+
+	test.beforeAll(async ({ browser }) => {
+		const context = await browser.newContext({ locale: 'en-US' });
+		page = await context.newPage();
+		const loginPage = new LoginPage(page);
+		await loginPage.goto();
+		await loginPage.login();
+		await loginPage.skipWelcome();
+	});
+
+	test.afterAll(async () => {
+		await page.context().close();
+	});
+
 	// ---------- Operations ----------
 
-	test('X-Rays visibility toggling', async ({ logedPage, page }) => {
+	test('X-Rays visibility toggling', async () => {
 		await testSidebarFlag(page, 'xrays');
 	});
 
-	test('Incidents visibility toggling', async ({ logedPage, page }) => {
+	test('Incidents visibility toggling', async () => {
 		await testSidebarFlag(page, 'incidents');
 	});
 
-	test('Tasks visibility toggling', async ({ logedPage, page }) => {
+	test('Tasks visibility toggling', async () => {
 		await testSidebarFlag(page, 'tasks');
 	});
 
 	// ---------- Organization ----------
 
-	test('Objectives (ISO) visibility toggling', async ({ logedPage, page }) => {
+	test('Objectives (ISO) visibility toggling', async () => {
 		await testSidebarFlag(page, 'objectivesIso');
 	});
 
-	test('Issues (ISO) visibility toggling', async ({ logedPage, page }) => {
+	test('Issues (ISO) visibility toggling', async () => {
 		await testSidebarFlag(page, 'issuesIso');
 	});
 
 	// ---------- Governance ----------
 
-	test('Risk Acceptances visibility toggling', async ({ logedPage, page }) => {
+	test('Risk Acceptances visibility toggling', async () => {
 		await testSidebarFlag(page, 'riskAcceptances');
 	});
 
-	test('Exceptions visibility toggling', async ({ logedPage, page }) => {
+	test('Exceptions visibility toggling', async () => {
 		await testSidebarFlag(page, 'exceptions');
 	});
 
-	test('Findings Tracking visibility toggling', async ({ logedPage, page }) => {
+	test('Findings Tracking visibility toggling', async () => {
 		await testSidebarFlag(page, 'followUp');
 	});
 
 	// ---------- Risk ----------
 
-	test('Ebios RM visibility toggling', async ({ logedPage, page }) => {
+	test('Ebios RM visibility toggling', async () => {
 		await testSidebarFlag(page, 'ebiosRm');
 	});
 
-	test('Scoring Assistant visibility toggling', async ({ logedPage, page }) => {
+	test('Scoring Assistant visibility toggling', async () => {
 		await testSidebarFlag(page, 'scoringAssistant');
 	});
 
-	test('Vulnerabilities visibility toggling', async ({ logedPage, page }) => {
+	test('Vulnerabilities visibility toggling', async () => {
 		await testSidebarFlag(page, 'vulnerabilities');
 	});
 
 	// ---------- Top-level modules ----------
 
-	test('Compliance visibility toggling', async ({ logedPage, page }) => {
+	test('Compliance visibility toggling', async () => {
 		await testSidebarFlag(page, 'compliance');
 	});
 
-	test('Third Party visibility toggling', async ({ logedPage, page }) => {
+	test('Third Party visibility toggling', async () => {
 		await testSidebarFlag(page, 'tprm');
 	});
 
 	// ---------- GDPR / Privacy ----------
 
-	test('Privacy module visibility toggling', async ({ logedPage, page }) => {
+	test('Privacy module visibility toggling', async () => {
 		await testSidebarFlag(page, 'privacy');
 	});
 
-	test('Personal Data visibility toggling', async ({ logedPage, page }) => {
+	test('Personal Data visibility toggling', async () => {
 		await setFlag(page, FLAGS.privacy, true);
 		await testSidebarFlag(page, 'personalData');
 	});
 
-	test('Purposes visibility toggling', async ({ logedPage, page }) => {
+	test('Purposes visibility toggling', async () => {
 		await setFlag(page, FLAGS.privacy, true);
 		await testSidebarFlag(page, 'purposes');
 	});
 
-	test('Right Requests visibility toggling', async ({ logedPage, page }) => {
+	test('Right Requests visibility toggling', async () => {
 		await setFlag(page, FLAGS.privacy, true);
 		await testSidebarFlag(page, 'rightRequests');
 	});
 
-	test('Data Breaches visibility toggling', async ({ logedPage, page }) => {
+	test('Data Breaches visibility toggling', async () => {
 		await setFlag(page, FLAGS.privacy, true);
 		await testSidebarFlag(page, 'dataBreaches');
 	});
 
 	// ---------- Extra ----------
 
-	test('Terminologies visibility toggling', async ({ logedPage, page }) => {
+	test('Terminologies visibility toggling', async () => {
 		await testSidebarFlag(page, 'terminologies');
 	});
 
-	test('Webhooks adds a tab in Settings', async ({ logedPage, page }) => {
+	test('Webhooks adds a tab in Settings', async () => {
 		await setFlag(page, FLAGS.webhooks, true);
 		try {
 			await page.goto('/settings');
@@ -279,44 +300,27 @@ test.describe('Feature flags', () => {
 		}
 	});
 
-	test('Journeys visibility toggling', async ({ logedPage, page }) => {
-		const openOverview = async () => {
-			await page.goto('/analytics');
-			await page.waitForLoadState('networkidle');
-			await sidebar(page).getByTestId('accordion-item-overview').click();
-			await page.waitForTimeout(300);
-		};
-
-		await setFlag(page, FLAGS.journeys, true);
-		try {
-			await openOverview();
-			await expect(sidebar(page).getByTestId('accordion-item-presets')).toBeVisible();
-
-			await setFlag(page, FLAGS.journeys, false);
-			await openOverview();
-			await expect(sidebar(page).getByTestId('accordion-item-presets')).not.toBeVisible();
-		} finally {
-			await setFlag(page, FLAGS.journeys, true);
-		}
+	test('Journeys visibility toggling', async () => {
+		await testSidebarFlag(page, 'journeys');
 	});
 
-	test('Experimental visibility toggling', async ({ logedPage, page }) => {
+	test('Experimental visibility toggling', async () => {
 		await testSidebarFlag(page, 'experimental');
 	});
 
 	// ---------- Inherent Risk (no sidebar item) ----------
 
-	test('Inherent Risk visibility on Risk Scenarios table view', async ({ logedPage, page }) => {
+	test('Inherent Risk visibility on Risk Scenarios table view', async () => {
 		const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
 
 		await setFlag(page, FLAGS.inherentRisk, true);
 		try {
 			await risksPage.goto();
-			await expect(page.getByText('Inherent Level', { exact: false })).toBeVisible();
+			await expect(page.getByText('Inherent Level', { exact: true })).toBeVisible();
 
 			await setFlag(page, FLAGS.inherentRisk, false);
 			await risksPage.goto();
-			await expect(page.getByText('Inherent Level', { exact: false })).not.toBeVisible();
+			await expect(page.getByText('Inherent Level', { exact: true })).not.toBeVisible();
 		} finally {
 			await setFlag(page, FLAGS.inherentRisk, true);
 		}
