@@ -7227,12 +7227,24 @@ class ComplianceAssessment(Assessment):
                 if is_na and anchor_na_to_target:
                     resolved = ras.get_resolved_scoring()
                     per_ra_target = resolved["target_score"]
+                    ra_min = resolved["min_score"]
+                    ra_max = resolved["max_score"]
                     if per_ra_target is not None:
                         score = per_ra_target
-                    elif self.target_score is not None:
-                        score = self.target_score
-                    elif resolved["max_score"] is not None:
-                        score = resolved["max_score"]
+                    elif (
+                        self.target_score is not None
+                        and ra_min is not None
+                        and ra_max is not None
+                        and ra_max > ra_min
+                    ):
+                        # Project the CA-wide target score onto the RA scale as a
+                        # ratio so summing across mixed scales stays coherent
+                        # (raw injection would add 80/100 onto a 0-5 RA).
+                        ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
+                        ca_ratio = (ca_target_clamped - ca_min) / ca_range
+                        score = ra_min + ca_ratio * (ra_max - ra_min)
+                    elif ra_max is not None:
+                        score = ra_max
                     else:
                         score = 0
                 else:
