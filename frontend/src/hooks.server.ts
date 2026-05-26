@@ -14,7 +14,12 @@ defineCustomServerStrategy('custom-fallback', {
 	getLocale: (request) => fallbackLocaleStore.get(request) ?? DEFAULT_LANGUAGE
 });
 
-async function fetchWithRetry(url: string, init?: RequestInit, retries = 5, delay = 2000): Promise<Response> {
+async function fetchWithRetry(
+	url: string,
+	init?: RequestInit,
+	retries = 5,
+	delay = 2000
+): Promise<Response> {
 	for (let attempt = 0; attempt < retries; attempt++) {
 		try {
 			const response = await fetch(url, { ...init, signal: AbortSignal.timeout(5000) });
