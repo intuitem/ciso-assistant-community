@@ -7476,12 +7476,93 @@ class TranslatedNameOrderingFilter(filters.OrderingFilter):
         return super().filter_queryset(request, queryset, view)
 
 
-class RoleOrderingFilter(TranslatedNameOrderingFilter):
+class RoleFilter(TranslatedNameOrderingFilter):
+    """
+    Combined search + ordering filter for roles.
+    Builtin role names are translated at runtime.
+    """
+
     translated_ordering_field = "name"
 
+    def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
 
-class UserGroupOrderingFilter(TranslatedNameOrderingFilter):
+        data = list(queryset)
+
+        # In-memory search: match against translated name and description
+        search_term = request.query_params.get("search", "").strip()
+        if search_term:
+            term = search_term.casefold()
+            data = [
+                obj
+                for obj in data
+                if term in str(obj).casefold()
+                or term in (obj.description or "").casefold()
+            ]
+
+        # In-memory ordering
+        ordering = self.get_ordering(request, queryset, view)
+        if (
+            ordering
+            and len(ordering) == 1
+            and ordering[0].lstrip("-") == self.translated_ordering_field
+        ):
+            desc = ordering[0].startswith("-")
+            data.sort(key=self.sort_key, reverse=desc)
+        else:
+            # Default: sort by translated name
+            data.sort(key=self.sort_key)
+
+        return data
+
+
+class UserGroupFilter(TranslatedNameOrderingFilter):
+    """
+    Combined search + ordering filter for user groups.
+    Both need in-memory processing because builtin group names
+    are translated at runtime and don't match their DB values.
+    """
+
     translated_ordering_field = "name"
+
+    def _full_display(self, obj):
+        """Build the full display string matching frontend rendering:
+        Ancestor / ... / Folder - Role"""
+        path = obj.get_folder_full_path()
+        ancestors = [f.name for f in path[:-1]]
+        return " / ".join(ancestors + [str(obj)])
+
+    def sort_key(self, obj):
+        path = tuple(f.name.casefold() for f in obj.get_folder_full_path())
+        return path + (str(obj).casefold(),)
+
+    def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
+        data = list(queryset)
+
+        # In-memory search: match against full rendered label
+        search_term = request.query_params.get("search", "").strip()
+        if search_term:
+            term = search_term.casefold()
+            data = [obj for obj in data if term in self._full_display(obj).casefold()]
+
+        # In-memory ordering
+        ordering = self.get_ordering(request, queryset, view)
+        if (
+            ordering
+            and len(ordering) == 1
+            and ordering[0].lstrip("-") == self.translated_ordering_field
+        ):
+            desc = ordering[0].startswith("-")
+            data.sort(key=self.sort_key, reverse=desc)
+        else:
+            # Default: sort by translated name (naturally groups by folder)
+            data.sort(key=self.sort_key)
+
+        return data
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -7490,14 +7571,11 @@ class UserGroupViewSet(BaseModelViewSet):
     """
 
     model = UserGroup
-    ordering = ["builtin", "folder__name", "name"]
     ordering_fields = ["name"]
     filterset_fields = ["folder"]
-    search_fields = ["folder__name", "name"]
     filter_backends = [
         DjangoFilterBackend,
-        filters.SearchFilter,
-        UserGroupOrderingFilter,
+        UserGroupFilter,
     ]
 
     def get_queryset(self):
