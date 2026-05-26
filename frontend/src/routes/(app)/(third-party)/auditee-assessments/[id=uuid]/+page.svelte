@@ -875,11 +875,6 @@
 							<p class="text-sm text-gray-500 mt-0.5">{requirement.ref_id}</p>
 						{/if}
 					</div>
-					{#if typeof requirement.weight === 'number' && Number.isFinite(requirement.weight) && requirement.weight !== 1 && requirementAssessment?.assessable}
-						<span class="badge h-fit bg-indigo-100 text-indigo-800">
-							{m.requirementWeight()}: {requirement.weight}
-						</span>
-					{/if}
 				</div>
 
 				<!-- Description -->
