@@ -32,7 +32,7 @@ The intent behind the two exceptions is narrow: the seat count tracks **internal
 
 ### How the count is enforced
 
-The instance compares the number of contributors against the seat allowance carried by your licence. The current count is visible on the **Settings → License** page, so you can see at any time how many seats are used and how many are available.
+The instance compares the number of contributors against the seat allowance carried by your license. The current count is visible from **About CISO Assistant**, opened via the three-dot menu next to your name in the sidebar footer — so you can see at any time how many seats are used and how many are available.
 
 ## Where PRO runs
 
@@ -45,9 +45,11 @@ You can move between the two models — there's no architectural difference, and
 
 ### Unlimited plans
 
-For organisations that don't want to track individual seats — typically large enterprises, MSSPs, public-sector deployments, or any environment where contributor headcount fluctuates often — both the on-premises and SaaS editions are available with an **unlimited plan**. Under an unlimited plan, the platform doesn't enforce a seat count and you don't need to manage role assignments around licence limits.
+For organisations that don't want to track individual seats — typically large enterprises, MSSPs, public-sector deployments, or any environment where contributor headcount fluctuates often — both the on-premises and SaaS editions are available with an **unlimited plan**. Under an unlimited plan, the platform doesn't enforce a seat count and you don't need to manage role assignments around license limits.
 
-The unlimited plan is contractual rather than technical: it changes how your licence is issued, not the platform behaviour. Reach out to intuitem if you'd like to discuss whether per-seat or unlimited is the right fit for your deployment.
+### SecNumCloud
+
+A **SecNumCloud** version is also available, with dedicated hosting under the highest available cloud-security qualification. It is offered in unlimited mode. See the [pricing page](https://intuitem.com/pricing) for details.
 
 ## Related
 

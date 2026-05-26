@@ -29,7 +29,7 @@ Open the palette and you'll see a search input over two grouped lists:
 
 ### Navigation
 
-Every destination reachable from the sidebar — Domains, Audits, Risks, Applied controls, Insights, and so on, including the **My profile** entry. Type to filter; matching is **accent-insensitive** so `frameworks` matches whether you type `frameworks`, `Frameworks`, or `framework`. Selecting a row navigates there and closes the palette.
+Every destination reachable from the sidebar — Domains, Audits, Risks, Applied controls, Insights, and so on, including the **My profile** entry. Type to filter; matching is **case- and accent-insensitive substring search**, so `framework` matches whether you type `framework`, `FRAMEWORK`, or `Framework`, and on a French instance `controles` matches `Contrôles`. Selecting a row navigates there and closes the palette.
 
 The list is automatically pruned by the same **feature-flag visibility** that hides sidebar sections — if your instance has the privacy module disabled, _Processings_ and _Personal data_ never show up in the palette either.
 
