@@ -13,6 +13,7 @@
   * [Domains](concepts/domains.md)
   * [Perimeters](concepts/perimeters.md)
   * [Actors and teams](concepts/actors-and-teams.md)
+  * [IAM and scoping](concepts/iam-and-scoping.md)
 * Catalog
   * [Libraries](concepts/libraries.md)
   * [Frameworks](concepts/frameworks.md)
@@ -32,6 +33,7 @@
 * Governance
   * [Policies](concepts/policies.md)
   * [Findings assessments](concepts/findings-assessments.md)
+  * [Validation flows](concepts/validation-flows.md)
 * Risk
   * [Risk assessments](concepts/risk-assessments.md)
   * [EBIOS RM](concepts/ebios-rm.md)

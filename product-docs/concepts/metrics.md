@@ -19,7 +19,7 @@ graph LR
   W -.->|reads| BMS[Builtin sample]
 ```
 
-A metric definition is the catalog template — qualitative (level) or quantitative (number with unit) — and can be shipped via a library. Each instance scopes one definition to a domain and carries the operational fields: owner, target value, collection frequency (auto-stale logic kicks in when the latest sample exceeds the cadence + grace period). Samples are timestamped data points against an instance. Dashboards are independent of the metrology pipeline: they comprise widgets, and each widget either reads a custom metric instance, pulls from a **builtin sample** (a system-computed daily snapshot attached generically to any tracked object — assets, audits, projects, incidents, etc.), or just displays free text.
+A metric definition is the catalog template — qualitative (level) or quantitative (number with unit) — and can be shipped via a library. Each instance scopes one definition to a domain and carries the operational fields: assignee, target value, collection frequency (auto-stale logic kicks in when the latest sample exceeds the cadence + grace period). Samples are timestamped data points against an instance. Dashboards are independent of the metrology pipeline: they comprise widgets, and each widget either reads a custom metric instance, pulls from a **builtin sample** (a system-computed daily snapshot attached generically to any tracked object — assets, audits, projects, incidents, etc.), or just displays free text.
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -109,7 +109,7 @@ Parameters:
 * Status: lifecycle of the metric. The stale is specially interesting as the application will auto-toggle it according to the data freshness
 * Collection frequency: expected collection frequency, on which we add a grace period before toggling the metric to stale status
 * Target value: expected target of this metric for this specific domain. This is handy as you can have different targets of the same metric definition according to the domain.
-* Assigned to: owner of the metric instance and its update.
+* Assigned to: actor responsible for the metric instance and its updates.
 
 ## Metric sample
 
