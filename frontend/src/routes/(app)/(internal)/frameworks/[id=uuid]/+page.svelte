@@ -92,99 +92,13 @@
 					</a>
 				{/if}
 			</div>
+			<h1 class="text-2xl font-semibold text-gray-900">{fw.name}</h1>
 
-			<div class="flex flex-col space-y-2">
-				{#each Object.entries(data.framework).filter(([key, _]) => !blacklistedKeys.has(key)) as [key, value]}
-					<div class="flex flex-col">
-						<div class="text-sm font-medium text-gray-800 capitalize-first">
-							{#if key === 'urn'}
-								{m.urn()}
-							{:else}
-								{safeTranslate(key)}
-							{/if}
-						</div>
-						<ul class="text-sm">
-							<li class="text-gray-600 list-none">
-								{#if value}
-									{#if key === 'library'}
-										{@const itemHref = `/loaded-libraries/${value.id}`}
-										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
-									{:else if key === 'scores_definition'}
-										{@const entries = Array.isArray(value) ? value : (value?.scale ?? [])}
-										{#each entries as definition}
-											<div>
-												{definition.score}.
-												{definition.name}{definition.description
-													? `: ${definition.description}`
-													: ''}
-											</div>
-										{/each}
-									{:else if key === 'implementation_groups_definition'}
-										<div>
-											<ul class="list-disc list-inside">
-												{#each Object.entries(value) as [_, definition]}
-													<li>
-														<strong> {definition.ref_id} </strong> <br />
-														{#if Object.hasOwn(definition, 'description') && definition.description}
-															<MarkdownRenderer
-																content={definition.name + ' : ' + definition.description}
-															/>
-														{:else}
-															<MarkdownRenderer content={definition.name} />
-														{/if}
-													</li>
-												{/each}
-											</ul>
-										</div>
-									{:else if Array.isArray(value)}
-										<ul>
-											{#each value as val}
-												<li>
-													{#if val.str && val.id}
-														{@const itemHref = `/${
-															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																(item) => item.field === key
-															)?.urlModel
-														}/${val.id}`}
-														<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
-													{:else}
-														{value}
-													{/if}
-												</li>
-											{/each}
-										</ul>
-									{:else if key === 'field_visibility'}
-										{#if Object.entries(value).length === 0}
-											--
-										{:else}
-											<ul>
-												{#each Object.entries(value) as [obj, who_can_see]}
-													<li>{obj} : {who_can_see}</li>
-												{/each}
-											</ul>
-										{/if}
-									{:else if value.str && value.id}
-										{@const itemHref = `/${
-											URL_MODEL_MAP['frameworks']['foreignKeyFields']?.find(
-												(item) => item.field === key
-											)?.urlModel
-										}/${value.id}`}
-										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
-									{:else if key === 'description'}
-										<MarkdownRenderer content={value} />
-									{:else}
-										{value.str ?? value}
-									{/if}
-								{:else if value === 0 && key === 'min_score'}
-									{value}
-								{:else}
-									--
-								{/if}
-							</li>
-						</ul>
-					</div>
-				{/each}
-			</div>
+			{#if fw.description}
+				<div class="prose prose-sm max-w-none mt-3 text-gray-700">
+					<MarkdownRenderer content={fw.description} />
+				</div>
+			{/if}
 		</div>
 
 		<div class="flex flex-col gap-2 shrink-0 w-64">
