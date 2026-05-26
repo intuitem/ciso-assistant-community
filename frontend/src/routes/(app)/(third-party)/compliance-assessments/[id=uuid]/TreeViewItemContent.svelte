@@ -147,8 +147,11 @@
 	}
 
 	function nodeTotalMaxScore(): number {
-		// For SUM, the total max is max_score * total_weight
-		// For AVG, the total max is just max_score
+		// Backend computes the per-node ceiling via
+		// annotate_tree_with_aggregated_scores so the donut stays coherent for
+		// mixed-scale subtrees. Falls back to node.max_score for older payloads.
+		const raw = (rest as Record<string, any>).aggregated_max_score;
+		if (typeof raw === 'number') return raw;
 		if (scoreCalculationMethod === 'sum' && resultCounts?.total_weight) {
 			return node.max_score * resultCounts['total_weight'];
 		}
@@ -409,7 +412,7 @@
 											/>
 										</Progress.Circle>
 										<div class="absolute inset-0 flex items-center justify-center">
-											<span class="text-xs font-bold">{nodeScore()}</span>
+											<span class="text-xs font-bold">{nodeScore()}/{nodeTotalMaxScore()}</span>
 										</div>
 									</Progress>
 								</div>
@@ -427,7 +430,7 @@
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
-												<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+												<span class="text-xs font-bold">{nodeDocumentationScore()}/{nodeTotalMaxScore()}</span>
 											</div>
 										</Progress>
 									</div>
@@ -448,7 +451,7 @@
 										/>
 									</Progress.Circle>
 									<div class="absolute inset-0 flex items-center justify-center">
-										<span class="text-xs font-bold">{nodeScore()}</span>
+										<span class="text-xs font-bold">{nodeScore()}/{nodeTotalMaxScore()}</span>
 									</div>
 								</Progress>
 							</div>
@@ -466,7 +469,7 @@
 											/>
 										</Progress.Circle>
 										<div class="absolute inset-0 flex items-center justify-center">
-											<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+											<span class="text-xs font-bold">{nodeDocumentationScore()}/{nodeTotalMaxScore()}</span>
 										</div>
 									</Progress>
 								</div>

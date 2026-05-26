@@ -7488,10 +7488,10 @@ class ComplianceAssessment(Assessment):
                         else ca_max
                     )
                     total_max += ra_max * weight
-                    if self.show_documentation_score:
-                        total_max += ra_max * weight
                     any_match = True
 
+            # maturity_score is the average of impl_score and doc_score, so the
+            # display ceiling is the per-layer max, not the doubled combined max.
             return total_max if any_match else self.max_score
         else:
             # For AVG and AVG_OF_AVG, the score is bounded by max_score

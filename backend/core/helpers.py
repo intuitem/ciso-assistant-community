@@ -270,6 +270,9 @@ def get_sorted_requirement_nodes(
             req_node.max_score if req_node.max_score is not None else max_score
         )
 
+    def _resolved_min(req_node):
+        return req_node.min_score if req_node.min_score is not None else 0
+
     # Build a dictionary to quickly access children nodes
     children_dict = {}
     for node in requirement_nodes:
@@ -304,6 +307,7 @@ def get_sorted_requirement_nodes(
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": _resolved_max(node) if req_as else None,
+                "min_score": _resolved_min(node) if req_as else None,
                 "weight": node.weight if node.weight else 1,
                 "questions": node.get_questions_translated,
                 "answers": build_answers_dict(req_as.answers.all()) if req_as else None,
@@ -348,6 +352,7 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "max_score": _resolved_max(child) if child_req_as else None,
+                    "min_score": _resolved_min(child) if child_req_as else None,
                     "weight": child.weight if child.weight else 1,
                     "questions": child.get_questions_translated,
                     "answers": build_answers_dict(child_req_as.answers.all())
@@ -387,28 +392,29 @@ def annotate_tree_with_aggregated_scores(
     tree: dict[str, dict], compliance_assessment
 ) -> dict[str, dict]:
     """
-    Walk the requirement tree and annotate each node with `aggregated_score`
-    (and optionally `aggregated_documentation_score`) according to the
-    compliance_assessment's score_calculation_method.
+    Walk the requirement tree and annotate each node with `aggregated_score`,
+    `aggregated_max_score` (and the documentation counterparts when enabled).
 
-    For AVG: weighted average of leaf scores in the subtree.
-    For SUM: sum of (score * weight) of leaves in the subtree.
-    For AVG_OF_AVG: weighted average of direct children's aggregated scores
-    (recursive) — matches the per-node `computed[urn]` value inside
-    ComplianceAssessment._compute_score_for_field. The overall global score
-    (ComplianceAssessment.get_global_score) uses a different top-level rule
-    for structural roots and is computed separately.
+    AVG/AVG_OF_AVG: leaves contribute a normalized ratio (against their own
+    resolved scale). The parent rolls up the weighted ratio and denormalizes
+    onto the CA scale. The display ceiling is the CA's max_score.
 
-    Leaf requirements are included only when is_scored is True, the node is
-    assessable, and the result is not N/A.
+    SUM: raw weighted sum of leaf scores, with the display ceiling being the
+    sum of per-RA resolved maxes × weight. Per-requirement scale overrides
+    contribute their own ceiling; 100% stays achievable.
+
+    Leaves are included only when is_scored is True, the node is assessable,
+    and the result is not N/A.
     """
     method = compliance_assessment.score_calculation_method
     show_doc = compliance_assessment.show_documentation_score
+    ca_min = compliance_assessment.min_score if compliance_assessment.min_score is not None else 0
+    ca_max = compliance_assessment.max_score if compliance_assessment.max_score is not None else 100
+    ca_range = ca_max - ca_min if ca_max > ca_min else 1
 
     def walk(node: dict) -> None:
         children = node.get("children") or {}
 
-        # Recurse first so children have their aggregates computed.
         for child in children.values():
             walk(child)
 
@@ -421,68 +427,138 @@ def annotate_tree_with_aggregated_scores(
             weight = node.get("weight") or 1
             if is_assessed:
                 score_val = node.get("score") or 0
+                ra_min = node.get("min_score") if node.get("min_score") is not None else 0
+                ra_max = node.get("max_score") if node.get("max_score") is not None else ca_max
+                ra_range = ra_max - ra_min if ra_max > ra_min else 1
+                ratio = (score_val - ra_min) / ra_range
                 node["aggregated_score"] = score_val
+                node["aggregated_max_score"] = ra_max
+                # Normalized to [0, 1] on the RA's own scale — the only sane
+                # axis to roll up across mixed scales.
+                node["_aggregated_ratio"] = ratio
+                node["_leaf_weighted_ratio"] = ratio * weight
                 node["_leaf_weighted_score"] = score_val * weight
+                node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
                     doc_val = node.get("documentation_score") or 0
+                    doc_ratio = (doc_val - ra_min) / ra_range
                     node["aggregated_documentation_score"] = doc_val
+                    node["_aggregated_doc_ratio"] = doc_ratio
+                    node["_leaf_weighted_doc_ratio"] = doc_ratio * weight
                     node["_leaf_weighted_doc"] = doc_val * weight
             else:
+                node["_aggregated_ratio"] = None
+                node["_aggregated_doc_ratio"] = None
+                node["_leaf_weighted_ratio"] = 0
                 node["_leaf_weighted_score"] = 0
-                node["_leaf_weighted_doc"] = 0
+                node["_leaf_weighted_max"] = 0
                 node["_leaf_weight"] = 0
+                node["_leaf_weighted_doc_ratio"] = 0
+                node["_leaf_weighted_doc"] = 0
             return
 
+        leaf_weighted_ratio = sum(
+            c.get("_leaf_weighted_ratio", 0) for c in children.values()
+        )
+        leaf_weighted_doc_ratio = sum(
+            c.get("_leaf_weighted_doc_ratio", 0) for c in children.values()
+        )
         leaf_weighted_score = sum(
             c.get("_leaf_weighted_score", 0) for c in children.values()
         )
         leaf_weighted_doc = sum(
             c.get("_leaf_weighted_doc", 0) for c in children.values()
         )
+        leaf_weighted_max = sum(
+            c.get("_leaf_weighted_max", 0) for c in children.values()
+        )
         leaf_weight = sum(c.get("_leaf_weight", 0) for c in children.values())
+        node["_leaf_weighted_ratio"] = leaf_weighted_ratio
+        node["_leaf_weighted_doc_ratio"] = leaf_weighted_doc_ratio
         node["_leaf_weighted_score"] = leaf_weighted_score
         node["_leaf_weighted_doc"] = leaf_weighted_doc
+        node["_leaf_weighted_max"] = leaf_weighted_max
         node["_leaf_weight"] = leaf_weight
 
         if method == ComplianceAssessment.CalculationMethod.AVG_OF_AVG:
-            total_weighted = 0.0
-            total_weighted_doc = 0.0
+            # Roll up children's normalized ratios (each in [0, 1] regardless
+            # of the child's own scale) weighted by the child's own weight.
+            total_weighted_ratio = 0.0
+            total_weighted_doc_ratio = 0.0
             total_child_weight = 0
             for child in children.values():
-                child_agg = child.get("aggregated_score")
-                if child_agg is None:
+                child_ratio = child.get("_aggregated_ratio")
+                if child_ratio is None:
                     continue
                 cw = child.get("weight") or 1
-                total_weighted += child_agg * cw
+                total_weighted_ratio += child_ratio * cw
                 if show_doc:
-                    total_weighted_doc += (
-                        child.get("aggregated_documentation_score") or 0
-                    ) * cw
+                    child_doc_ratio = child.get("_aggregated_doc_ratio") or 0
+                    total_weighted_doc_ratio += child_doc_ratio * cw
                 total_child_weight += cw
             if total_child_weight > 0:
-                node["aggregated_score"] = total_weighted / total_child_weight
+                avg_ratio = total_weighted_ratio / total_child_weight
+                node["_aggregated_ratio"] = avg_ratio
+                node["aggregated_score"] = ca_min + avg_ratio * ca_range
+                node["aggregated_max_score"] = ca_max
                 if show_doc:
+                    avg_doc_ratio = total_weighted_doc_ratio / total_child_weight
+                    node["_aggregated_doc_ratio"] = avg_doc_ratio
                     node["aggregated_documentation_score"] = (
-                        total_weighted_doc / total_child_weight
+                        ca_min + avg_doc_ratio * ca_range
                     )
+            else:
+                node["_aggregated_ratio"] = None
+                node["_aggregated_doc_ratio"] = None
         elif method == ComplianceAssessment.CalculationMethod.SUM:
             if leaf_weight > 0:
                 node["aggregated_score"] = leaf_weighted_score
+                node["aggregated_max_score"] = leaf_weighted_max
+                # Ratio in [0, 1] for any future consumer (e.g. nested SUM).
+                node["_aggregated_ratio"] = (
+                    leaf_weighted_score / leaf_weighted_max
+                    if leaf_weighted_max
+                    else None
+                )
                 if show_doc:
                     node["aggregated_documentation_score"] = leaf_weighted_doc
+                    node["_aggregated_doc_ratio"] = (
+                        leaf_weighted_doc / leaf_weighted_max
+                        if leaf_weighted_max
+                        else None
+                    )
+            else:
+                node["_aggregated_ratio"] = None
+                node["_aggregated_doc_ratio"] = None
         else:
             if leaf_weight > 0:
-                node["aggregated_score"] = leaf_weighted_score / leaf_weight
+                avg_ratio = leaf_weighted_ratio / leaf_weight
+                node["_aggregated_ratio"] = avg_ratio
+                node["aggregated_score"] = ca_min + avg_ratio * ca_range
+                node["aggregated_max_score"] = ca_max
                 if show_doc:
+                    avg_doc_ratio = leaf_weighted_doc_ratio / leaf_weight
+                    node["_aggregated_doc_ratio"] = avg_doc_ratio
                     node["aggregated_documentation_score"] = (
-                        leaf_weighted_doc / leaf_weight
+                        ca_min + avg_doc_ratio * ca_range
                     )
+            else:
+                node["_aggregated_ratio"] = None
+                node["_aggregated_doc_ratio"] = None
 
     def cleanup(node: dict) -> None:
-        node.pop("_leaf_weighted_score", None)
-        node.pop("_leaf_weighted_doc", None)
-        node.pop("_leaf_weight", None)
+        for key in (
+            "_aggregated_ratio",
+            "_aggregated_doc_ratio",
+            "_leaf_weighted_ratio",
+            "_leaf_weighted_doc_ratio",
+            "_leaf_weighted_score",
+            "_leaf_weighted_doc",
+            "_leaf_weighted_max",
+            "_leaf_weight",
+        ):
+            node.pop(key, None)
         for child in (node.get("children") or {}).values():
             cleanup(child)
 

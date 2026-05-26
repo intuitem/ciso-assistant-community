@@ -606,6 +606,18 @@ class TestTotalMaxScore:
         ca.save()
         assert ca.get_total_max_score() == 600
 
+    def test_sum_max_score_with_doc_not_doubled(self, scoring_setup):
+        """SUM max stays Σ(max × weight) even when documentation is shown,
+        because maturity_score is an AVG of impl and doc — not a sum.
+        Doubling the ceiling caused the maturity donut to render at 50% when
+        all RAs were maxed out.
+        """
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
+        ca.show_documentation_score = True
+        ca.save()
+        assert ca.get_total_max_score() == 600
+
 
 @pytest.mark.django_db
 class TestThreeLayerScoring:
