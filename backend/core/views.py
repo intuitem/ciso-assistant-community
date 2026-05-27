@@ -137,6 +137,7 @@ from core.utils import (
     build_answers_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
+    is_field_visible_to,
     rewrite_child_urns,
     _generate_occurrences,
     _create_task_dict,
@@ -1759,6 +1760,7 @@ class ThreatViewSet(BaseModelViewSet):
         "provider",
         "library",
         "risk_scenarios",
+        "findings",
         "filtering_labels",
         "urn",
     ]
@@ -2904,6 +2906,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
         matrix.editing_draft = None
         matrix.editing_version += 1
         matrix.is_enabled = True
+        matrix.is_published = True
 
         # Apply draft metadata to the model
         update_fields = [
@@ -2912,6 +2915,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
             "editing_version",
             "editing_history",
             "is_enabled",
+            "is_published",
             "updated_at",
         ]
         for field in ("name", "description", "provider", "locale"):
@@ -3016,6 +3020,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
             {
                 "id": str(matrix.id),
                 "name": matrix.name,
+                "description": matrix.description,
+                "provider": matrix.provider,
+                "locale": matrix.locale,
                 "status": "draft_created_from",
                 "editing_draft": matrix.editing_draft,
             },
@@ -3180,6 +3187,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
             {
                 "id": str(matrix.id),
                 "name": matrix.name,
+                "description": matrix.description,
+                "provider": matrix.provider,
+                "locale": matrix.locale,
                 "editing_draft": matrix.editing_draft,
                 "status": "imported",
             },
@@ -5341,6 +5351,16 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         return Response({"results": object_ids_change})
 
+    @action(detail=False, methods=["get"], name="Get applied controls analytics")
+    def analytics(self, request):
+        """Aggregated analytics over the filtered applied-controls queryset.
+
+        Respects the same filterset as the list endpoint, so the analytics page
+        can carry the table's current filters through verbatim.
+        """
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(ActionPlanBudgetOverview.compute_budget_overview(qs))
+
     @action(
         detail=False, name="Something"
     )  # Write a good name for the "name" keyword argument
@@ -6130,6 +6150,7 @@ class ActionPlanBudgetOverview:
     def compute_budget_overview(queryset):
         from core.utils import get_global_currency, format_currency
         from global_settings.models import GlobalSettings
+        from django.utils import timezone
 
         # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
         _f = ActionPlanBudgetOverview._safe_float
@@ -6141,12 +6162,27 @@ class ActionPlanBudgetOverview:
 
         currency = get_global_currency()
         fmt = lambda v: format_currency(v, currency)
+        today = timezone.localdate()
+
+        # Defensive prefetch: top-owner/top-folder iteration touches M2M + FK
+        if hasattr(queryset, "prefetch_related"):
+            queryset = queryset.prefetch_related("owner").select_related("folder")
 
         controls = list(queryset)
         count = len(controls)
         by_status: dict = {}
         by_priority: dict = {}
         by_category: dict = {}
+        by_csf_function: dict = {}
+        eta_buckets = {
+            "overdue": {"key": "overdue", "count": 0, "total": 0.0},
+            "due_30d": {"key": "due_30d", "count": 0, "total": 0.0},
+            "due_90d": {"key": "due_90d", "count": 0, "total": 0.0},
+            "later": {"key": "later", "count": 0, "total": 0.0},
+            "no_eta": {"key": "no_eta", "count": 0, "total": 0.0},
+        }
+        owner_counts: dict = {}
+        folder_counts: dict = {}
         total_annual_cost = 0.0
         count_with_cost = 0
 
@@ -6156,11 +6192,12 @@ class ActionPlanBudgetOverview:
                 count_with_cost += 1
             total_annual_cost += cost
 
-            # by status — use raw value as key, display value for frontend
+            # by status — keep `status` for backwards-compat; add raw `key` for i18n
             s = ctrl.status or "_unset"
             status_label = ctrl.get_status_display() if ctrl.status else "not_set"
             bucket = by_status.setdefault(
-                s, {"status": status_label, "count": 0, "total": 0.0}
+                s,
+                {"key": s, "status": status_label, "count": 0, "total": 0.0},
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6172,7 +6209,12 @@ class ActionPlanBudgetOverview:
             )
             bucket = by_priority.setdefault(
                 p,
-                {"priority": priority_label, "count": 0, "total": 0.0},
+                {
+                    "key": str(p),
+                    "priority": priority_label,
+                    "count": 0,
+                    "total": 0.0,
+                },
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6182,7 +6224,74 @@ class ActionPlanBudgetOverview:
             category_label = ctrl.get_category_display() if ctrl.category else "not_set"
             bucket = by_category.setdefault(
                 c,
-                {"category": category_label, "count": 0, "total": 0.0},
+                {"key": c, "category": category_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # by csf_function
+            f = ctrl.csf_function or "_unset"
+            csf_label = (
+                ctrl.get_csf_function_display() if ctrl.csf_function else "not_set"
+            )
+            bucket = by_csf_function.setdefault(
+                f,
+                {
+                    "key": f,
+                    "csf_function": csf_label,
+                    "count": 0,
+                    "total": 0.0,
+                },
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # eta buckets
+            if ctrl.eta is None:
+                eta_buckets["no_eta"]["count"] += 1
+                eta_buckets["no_eta"]["total"] += cost
+            else:
+                delta_days = (ctrl.eta - today).days
+                if delta_days < 0:
+                    key = "overdue"
+                elif delta_days <= 30:
+                    key = "due_30d"
+                elif delta_days <= 90:
+                    key = "due_90d"
+                else:
+                    key = "later"
+                eta_buckets[key]["count"] += 1
+                eta_buckets[key]["total"] += cost
+
+            # top owners (M2M) — key by pk so homonyms don't collapse into one bucket
+            for owner in ctrl.owner.all():
+                owner_key = str(owner.pk)
+                bucket = owner_counts.setdefault(
+                    owner_key,
+                    {
+                        "key": owner_key,
+                        "label": str(owner),
+                        "count": 0,
+                        "total": 0.0,
+                        "status_breakdown": {},
+                    },
+                )
+                bucket["count"] += 1
+                bucket["total"] += cost
+                sb = bucket["status_breakdown"]
+                sb_key = ctrl.status or "_unset"
+                sb_entry = sb.setdefault(
+                    sb_key,
+                    {"key": sb_key, "status": status_label, "count": 0},
+                )
+                sb_entry["count"] += 1
+
+            # top folders — same: key by folder_id so two folders sharing a name don't merge
+            folder_key = str(ctrl.folder_id) if ctrl.folder_id else "_unset"
+            folder_label = ctrl.folder.name if ctrl.folder_id else "not_set"
+            bucket = folder_counts.setdefault(
+                folder_key,
+                {"key": folder_key, "label": folder_label, "count": 0, "total": 0.0},
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6194,6 +6303,28 @@ class ActionPlanBudgetOverview:
             bucket["total_display"] = fmt(bucket["total"])
         for bucket in by_category.values():
             bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_csf_function.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in eta_buckets.values():
+            bucket["total_display"] = fmt(bucket["total"])
+
+        top_owners = sorted(
+            owner_counts.values(), key=lambda x: x["count"], reverse=True
+        )[:10]
+        for bucket in top_owners:
+            bucket["total_display"] = fmt(bucket["total"])
+            # Flatten status_breakdown dict → list sorted by count desc for stable rendering
+            bucket["status_breakdown"] = sorted(
+                bucket["status_breakdown"].values(),
+                key=lambda x: x["count"],
+                reverse=True,
+            )
+
+        top_folders = sorted(
+            folder_counts.values(), key=lambda x: x["count"], reverse=True
+        )[:10]
+        for bucket in top_folders:
+            bucket["total_display"] = fmt(bucket["total"])
 
         return {
             "count": count,
@@ -6204,6 +6335,10 @@ class ActionPlanBudgetOverview:
             "by_status": [v for v in by_status.values() if v["count"] > 0],
             "by_priority": [v for v in by_priority.values() if v["count"] > 0],
             "by_category": [v for v in by_category.values() if v["count"] > 0],
+            "by_csf_function": [v for v in by_csf_function.values() if v["count"] > 0],
+            "eta_buckets": list(eta_buckets.values()),
+            "top_owners": top_owners,
+            "top_folders": top_folders,
         }
 
 
@@ -7277,9 +7412,9 @@ class UserViewSet(BaseModelViewSet):
         return queryset.distinct().prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
-                    "id", "builtin"
-                ),
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
+                .select_related("folder")
+                .only("id", "builtin", "name", "folder", "folder__name"),
             )
         )
 
@@ -7311,66 +7446,126 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserGroupOrderingFilter(filters.OrderingFilter):
+class TranslatedNameOrderingFilter(filters.OrderingFilter):
     """
-    Custom ordering filter:
-    - Performs in-memory (Python) sorting only for `localization_dict`.
-    - The sort key is a tuple: (folder full_path OR folder.name, object.name).
-    - Supports `-localization_dict` for descending order.
-    - For all other fields, it falls back to standard SQL ordering.
+    In-memory ordering filter for models whose __str__() returns a
+    locale-translated name (e.g. Role, UserGroup).
+
+    Subclasses set ``translated_ordering_field`` and override ``sort_key(obj)``
+    to control the sort.  Falls back to SQL ordering for other fields.
+    DRF pagination works because it can slice the returned list.
     """
 
+    translated_ordering_field = "name"  # default; override in subclass
+
+    def sort_key(self, obj):
+        return str(obj).casefold()
+
     def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
         ordering = self.get_ordering(request, queryset, view)
         if not ordering:
             return queryset
 
-        # Special case: in-memory sorting for `localization_dict`
-        if len(ordering) == 1 and ordering[0].lstrip("-") == "localization_dict":
+        field = self.translated_ordering_field
+        if len(ordering) == 1 and ordering[0].lstrip("-") == field:
             desc = ordering[0].startswith("-")
-
-            # Optimize DB access: fetch the related folder in one query
-            queryset = queryset.select_related("folder")
-
-            # Materialize queryset into a list to sort in Python
             data = list(queryset)
-
-            def full_path_or_name(folder):
-                """
-                Build a string key from the folder:
-                - Prefer the full path (names of all parent folders + current).
-                - Fall back to the folder's name if no path is available.
-                """
-                if folder is None:
-                    return ""
-
-                path_list = getattr(folder, "get_folder_full_path", None)
-                if callable(path_list):
-                    items = folder.get_folder_full_path(include_root=False)
-                    names = [getattr(f, "name", "") or "" for f in items]
-                    if names:
-                        return "/".join(names)
-
-                # Fallback: just the folder name
-                return getattr(folder, "name", "") or ""
-
-            def key_func(obj):
-                # Get the folder from the object
-                folder = getattr(obj, "folder", None)
-                # If you want to be more robust, you could use:
-                # from yourapp.models import Folder
-                # folder = Folder.get_folder(obj)
-
-                path_key = full_path_or_name(folder).casefold()
-                name_key = (getattr(obj, "name", "") or "").casefold()
-                return (path_key, name_key)
-
-            # Perform stable sort, reverse if `-localization_dict`
-            data.sort(key=key_func, reverse=desc)
+            data.sort(key=self.sort_key, reverse=desc)
             return data
 
-        # Default case: fall back to SQL ordering
         return super().filter_queryset(request, queryset, view)
+
+
+class RoleFilter(TranslatedNameOrderingFilter):
+    """
+    Combined search + ordering filter for roles.
+    Builtin role names are translated at runtime.
+    """
+
+    translated_ordering_field = "name"
+
+    def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
+        data = list(queryset)
+
+        # In-memory search: match against translated name and description
+        search_term = request.query_params.get("search", "").strip()
+        if search_term:
+            term = search_term.casefold()
+            data = [
+                obj
+                for obj in data
+                if term in str(obj).casefold()
+                or term in (obj.description or "").casefold()
+            ]
+
+        # In-memory ordering
+        ordering = self.get_ordering(request, queryset, view)
+        if (
+            ordering
+            and len(ordering) == 1
+            and ordering[0].lstrip("-") == self.translated_ordering_field
+        ):
+            desc = ordering[0].startswith("-")
+            data.sort(key=self.sort_key, reverse=desc)
+        else:
+            # Default: sort by translated name
+            data.sort(key=self.sort_key)
+
+        return data
+
+
+class UserGroupFilter(TranslatedNameOrderingFilter):
+    """
+    Combined search + ordering filter for user groups.
+    Both need in-memory processing because builtin group names
+    are translated at runtime and don't match their DB values.
+    """
+
+    translated_ordering_field = "name"
+
+    def _full_display(self, obj):
+        """Build the full searchable label from the complete folder path.
+        Untruncated (unlike the frontend display) for broader matching."""
+        path = obj.get_folder_full_path()
+        ancestors = [f.name for f in path[:-1]]
+        return " / ".join(ancestors + [str(obj)])
+
+    def sort_key(self, obj):
+        path = tuple(f.name.casefold() for f in obj.get_folder_full_path())
+        return path + (str(obj).casefold(),)
+
+    def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
+        data = list(queryset)
+
+        # In-memory search: match against full rendered label
+        search_term = request.query_params.get("search", "").strip()
+        if search_term:
+            term = search_term.casefold()
+            data = [obj for obj in data if term in self._full_display(obj).casefold()]
+
+        # In-memory ordering
+        ordering = self.get_ordering(request, queryset, view)
+        if (
+            ordering
+            and len(ordering) == 1
+            and ordering[0].lstrip("-") == self.translated_ordering_field
+        ):
+            desc = ordering[0].startswith("-")
+            data.sort(key=self.sort_key, reverse=desc)
+        else:
+            # Default: sort by translated name (naturally groups by folder)
+            data.sort(key=self.sort_key)
+
+        return data
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -7379,17 +7574,15 @@ class UserGroupViewSet(BaseModelViewSet):
     """
 
     model = UserGroup
-    ordering = ["builtin", "name"]
-    ordering_fields = ["localization_dict"]
+    ordering_fields = ["name"]
     filterset_fields = ["folder"]
-    search_fields = [
-        "folder__name"
-    ]  # temporary hack, filters only by folder name, not role name
     filter_backends = [
         DjangoFilterBackend,
-        UserGroupOrderingFilter,
-        filters.SearchFilter,
+        UserGroupFilter,
     ]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder")
 
     def destroy(self, request, *args, **kwargs):
         user_group = self.get_object()
@@ -8111,6 +8304,208 @@ class FrameworkViewSet(BaseModelViewSet):
                 None,
                 _framework.max_score,
             )
+        )
+
+    @action(detail=True, methods=["get"])
+    def report(self, request, pk):
+        """Cross-assessment report for one framework.
+
+        Returns a flat list of RequirementAssessment rows across every
+        ComplianceAssessment using this framework that the user can read,
+        plus framework scoring metadata. Redacted fields (per CA's
+        field_visibility for the viewer's role) come back as null so the
+        row still contributes to domain/section counts.
+
+        Only "live" CAs participate by default: status in (in_progress,
+        in_review, done). This excludes planned (not yet started) and
+        deprecated (superseded by a newer audit on the same folder),
+        which would otherwise double-count requirements when multiple
+        audit cycles coexist on the same folder.
+
+        Query params:
+          - implementation_group (str): narrow to a single IG.
+            Default honors each CA's selected_implementation_groups.
+        """
+        framework = self.get_object()  # checks read permission
+
+        ig_filter = request.query_params.get("implementation_group") or None
+
+        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Statuses considered "live" for cross-CA rollups. Planned and
+        # deprecated CAs are intentionally excluded; surface them via the
+        # standard CA list page if needed.
+        LIVE_STATUSES = ("in_progress", "in_review", "done")
+
+        visible_cas_qs = ComplianceAssessment.objects.filter(
+            framework=framework,
+            id__in=viewable_ca_ids,
+        ).select_related("folder")
+
+        all_visible_cas = list(visible_cas_qs)
+
+        # Full status breakdown across all visible CAs (before live-status filter)
+        ca_status_counts: Dict[str, int] = {}
+        for ca in all_visible_cas:
+            key = ca.status or "unknown"
+            ca_status_counts[key] = ca_status_counts.get(key, 0) + 1
+
+        cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
+
+        # Per-CA viewer role: respondent if the user is an auditee on the CA's
+        # folder, auditor otherwise. Computed once per CA.
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ca_viewer_roles = {
+            ca.id: (
+                "respondent"
+                if (auditee_folders and ca.folder_id in auditee_folders)
+                else "auditor"
+            )
+            for ca in cas
+        }
+
+        ras = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment__in=cas,
+                requirement__assessable=True,
+            )
+            .select_related(
+                "requirement",
+                "compliance_assessment",
+                "compliance_assessment__folder",
+            )
+            .annotate(
+                applied_controls_count=Count("applied_controls", distinct=True),
+            )
+            .prefetch_related(
+                "evidences",
+                "applied_controls__evidences",
+            )
+        )
+
+        # Cache folder paths so we don't walk ancestry twice for the same folder.
+        folder_path_cache: Dict[Any, List[str]] = {}
+
+        def folder_path_for(folder) -> List[str]:
+            if folder is None:
+                return []
+            if folder.id in folder_path_cache:
+                return folder_path_cache[folder.id]
+            path = [f.name for f in folder.get_folder_full_path()]
+            folder_path_cache[folder.id] = path
+            return path
+
+        rows: List[Dict[str, Any]] = []
+        for ra in ras:
+            ca = ra.compliance_assessment
+            req = ra.requirement
+            ig_list = req.implementation_groups or []
+            selected = ca.selected_implementation_groups or []
+
+            # honor each CA's selected IGs (empty selection means "all")
+            if selected and not (set(ig_list) & set(selected)):
+                continue
+            # apply explicit IG filter on top
+            if ig_filter and ig_filter not in ig_list:
+                continue
+
+            viewer_role = ca_viewer_roles[ca.id]
+
+            def field(name, value):
+                return value if is_field_visible_to(ca, name, viewer_role) else None
+
+            folder_path = folder_path_for(ca.folder)
+
+            # Distinct evidences reachable from this RA: directly attached
+            # plus those attached through any of the linked applied controls.
+            direct_evidence_ids = {e.id for e in ra.evidences.all()}
+            indirect_evidence_ids: set = set()
+            for ac in ra.applied_controls.all():
+                for e in ac.evidences.all():
+                    indirect_evidence_ids.add(e.id)
+            total_evidence_ids = direct_evidence_ids | indirect_evidence_ids
+
+            rows.append(
+                {
+                    "requirement_assessment_id": str(ra.id),
+                    "requirement_urn": req.urn,
+                    "requirement_parent_urn": req.parent_urn,
+                    "requirement_ref_id": req.ref_id,
+                    "requirement_name": req.name,
+                    "assessable": req.assessable,
+                    "implementation_groups": ig_list,
+                    "result": field("result", ra.result),
+                    "extended_result": field("extended_result", ra.extended_result),
+                    "status": field("status", ra.status),
+                    "score": field("score", ra.score),
+                    "documentation_score": field(
+                        "documentation_score", ra.documentation_score
+                    ),
+                    "is_scored": field("is_scored", ra.is_scored),
+                    "compliance_assessment_id": str(ca.id),
+                    "compliance_assessment_name": ca.name,
+                    "folder_id": str(ca.folder_id) if ca.folder_id else None,
+                    "folder_path": folder_path,
+                    "folder_path_str": " / ".join(folder_path),
+                    "applied_controls_count": ra.applied_controls_count,
+                    "evidences_count": len(total_evidence_ids),
+                    "direct_evidences_count": len(direct_evidence_ids),
+                    "indirect_evidences_count": len(
+                        indirect_evidence_ids - direct_evidence_ids
+                    ),
+                }
+            )
+
+        # Per-CA summary used by the frontend "detected assessments" drawer.
+        # Includes every visible CA, counted or not, so users can see what
+        # the live-status filter excluded.
+        compliance_assessments = [
+            {
+                "id": str(ca.id),
+                "name": ca.name,
+                "status": ca.status,
+                "folder_id": str(ca.folder_id) if ca.folder_id else None,
+                "folder_path": folder_path_for(ca.folder),
+                "folder_path_str": " / ".join(folder_path_for(ca.folder)),
+                "is_counted": ca.status in LIVE_STATUSES,
+            }
+            for ca in sorted(all_visible_cas, key=lambda c: (c.name or "").lower())
+        ]
+
+        # Non-assessable nodes that act as sections (the immediate parents of
+        # assessable requirements). The frontend uses this to render the
+        # section-then-requirement hierarchy without a second roundtrip.
+        sections = [
+            {
+                "urn": node.urn,
+                "ref_id": node.ref_id,
+                "name": node.name,
+                "parent_urn": node.parent_urn,
+            }
+            for node in RequirementNode.objects.filter(
+                framework=framework, assessable=False
+            ).order_by(F("order_id").asc(nulls_last=True))
+        ]
+
+        return Response(
+            {
+                "framework": {
+                    "id": str(framework.id),
+                    "name": framework.get_name_translated or framework.name,
+                    "min_score": framework.min_score,
+                    "max_score": framework.max_score,
+                    "scores_definition": framework.scores_definition,
+                    "implementation_groups_definition": framework.implementation_groups_definition,
+                    "sections": sections,
+                },
+                "rows": rows,
+                "compliance_assessments": compliance_assessments,
+                "ca_status_counts": ca_status_counts,
+                "live_statuses": list(LIVE_STATUSES),
+                "generated_at": timezone.now().isoformat(),
+            }
         )
 
     @staticmethod
@@ -9998,6 +10393,7 @@ class FrameworkViewSet(BaseModelViewSet):
             framework.editing_history = history
             framework.editing_version = framework.editing_version + 1
             framework.editing_draft = None
+            framework.is_published = True
             framework.save(
                 update_fields=[
                     "name",
@@ -10015,6 +10411,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "editing_draft",
                     "editing_version",
                     "editing_history",
+                    "is_published",
                     "updated_at",
                 ]
             )
@@ -11007,6 +11404,7 @@ class PresetViewSet(BaseModelViewSet):
         preset.version = preset.editing_version
         preset.editing_history = history
         preset.editing_draft = None
+        preset.is_published = True
         preset.save()
 
         from core.serializers import PresetReadSerializer

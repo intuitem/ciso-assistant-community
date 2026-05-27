@@ -7,6 +7,12 @@ on:
   pull_request:
     branches: [main, develop]
     types: [opened, synchronize]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "enterprise/**"
+      - ".github/actions/**"
+      - ".github/workflows/functional-tests.yml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
@@ -35,15 +41,15 @@ jobs:
       build_done: "true"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
 
       - name: Cache pnpm modules for Build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.frontend-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
@@ -66,7 +72,7 @@ jobs:
         run: pnpm run build
 
       - name: Upload Community Frontend Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: community-frontend-build
           include-hidden-files: true
@@ -81,15 +87,15 @@ jobs:
       build_done: "true"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
 
       - name: Cache pnpm modules for Build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.enterprise-frontend-build-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.enterprise-frontend-build-directory }}/pnpm-lock.yaml') }}
@@ -108,7 +114,7 @@ jobs:
         run: make
 
       - name: Upload Enterprise Frontend Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: enterprise-frontend-build
           include-hidden-files: true
@@ -127,7 +133,7 @@ jobs:
       enterprise_test_files: ${{ steps.list_enterprise_files.outputs.test_files }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get Community Playwright Test Files
         id: list_community_files
@@ -194,19 +200,19 @@ jobs:
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.community_test_files) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Start Keycloak
         uses: ./.github/actions/start-keycloak
 
       - name: Download Community Frontend Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: community-frontend-build
           path: ${{ env.frontend-directory }}/
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -230,12 +236,12 @@ jobs:
         run: poetry install
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
 
       - name: Cache pnpm modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.frontend-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
@@ -259,7 +265,7 @@ jobs:
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
 
       - name: Cache playwright binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: playwright-cache
         with:
           path: |
@@ -268,9 +274,18 @@ jobs:
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
+        timeout-minutes: 20
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 300 pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
@@ -307,7 +322,7 @@ jobs:
         run: |
           SAFE_FILE_NAME=$(echo "$TEST_FILE" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "TEST_FILE_SANITIZED=$SAFE_FILE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}
@@ -365,19 +380,19 @@ jobs:
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.enterprise_test_files) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Start Keycloak
         uses: ./.github/actions/start-keycloak
 
       - name: Download Enterprise Frontend Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: enterprise-frontend-build
           path: ${{ env.enterprise-frontend-build-directory }}/
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -407,12 +422,12 @@ jobs:
         working-directory: ${{ env.enterprise-backend-directory }}
         run: poetry install
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
 
       - name: Cache pnpm modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.enterprise-frontend-build-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.enterprise-frontend-build-directory }}/pnpm-lock.yaml') }}
@@ -440,7 +455,7 @@ jobs:
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
 
       - name: Cache playwright binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: playwright-cache
         with:
           path: |
@@ -449,9 +464,18 @@ jobs:
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
+        timeout-minutes: 20
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 300 pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
@@ -490,7 +514,7 @@ jobs:
         run: |
           SAFE_FILE_NAME=$(echo "$TEST_FILE" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "TEST_FILE_SANITIZED=$SAFE_FILE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}

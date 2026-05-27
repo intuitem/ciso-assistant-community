@@ -50,7 +50,8 @@ const CURRENCY_SYMBOLS = [
 	'PLN',
 	'NT$',
 	'฿',
-	'MYR'
+	'MYR',
+	'XPF'
 ] as const;
 
 // JSON schema
@@ -165,7 +166,8 @@ export const ThreatSchema = z.object({
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const SecurityAdvisorySchema = z.object({
@@ -327,7 +329,8 @@ export const ReferenceControlSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const AssetSchema = z.object({
@@ -418,7 +421,7 @@ export const FilteringLabelSchema = z.object({
 });
 
 export const RequirementAssessmentSchema = z.object({
-	answers: jsonSchema,
+	answers: jsonSchema.optional().nullable(),
 	status: z.string(),
 	result: z.string(),
 	extended_result: z.string().optional().nullable(),
@@ -876,7 +879,8 @@ export const vulnerabilitySchema = z.object({
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	security_advisories: z.string().uuid().optional().array().optional(),
 	cwes: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const BusinessImpactAnalysisSchema = z.object({
@@ -1582,6 +1586,43 @@ export const AccreditationSchema = z.object({
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });
 
+export const ProjectSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	kind: z.enum(['portfolio', 'program', 'project']).default('project'),
+	ref_id: z.string().optional(),
+	ref_link: z.string().url().optional().or(z.literal('')),
+	owner: z.string().uuid().optional().nullable(),
+	sponsor: z.string().uuid().optional().nullable(),
+	status: z.string().uuid().optional().nullable(),
+	priority: z.coerce.number().int().min(1).max(4).optional().nullable(),
+	health: z.string().uuid().optional().nullable(),
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	end_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	closed_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	progress: z.coerce.number().int().min(0).max(100).optional().nullable(),
+	purpose: z.string().optional(),
+	objectives: z.string().optional(),
+	success_criteria: z.string().optional(),
+	business_case: z.string().optional(),
+	deliverables: z.string().optional(),
+	assumptions: z.string().optional(),
+	constraints: z.string().optional(),
+	dependencies_note: z.string().optional(),
+	exit_criteria: z.string().optional(),
+	organizational_alignment: z.string().optional(),
+	approval_requirements: z.string().optional(),
+	budget: z.coerce.number().optional().nullable(),
+	actual_cost: z.coerce.number().optional().nullable(),
+	currency: z.string().max(3).optional(),
+	linked_collection: z.string().uuid().optional().nullable(),
+	parent_project: z.string().uuid().optional().nullable(),
+	tolerances: z.record(z.string(), z.unknown()).optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
 export const ResponsibilityRoleSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1793,6 +1834,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
 	accreditations: AccreditationSchema,
+	projects: ProjectSchema,
 	'responsibility-roles': ResponsibilityRoleSchema,
 	'responsibility-matrices': ResponsibilityMatrixSchema,
 	'responsibility-matrix-activities': ResponsibilityMatrixActivitySchema,

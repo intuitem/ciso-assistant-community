@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
 	import { m } from '$paraglide/messages';
 	import { getLocale, locales, setLocale } from '$paraglide/runtime';
@@ -136,7 +137,7 @@
 							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 							data-testid="docs-button"><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
 						>
-						<form action="/logout" method="POST">
+						<form action="/logout" method="POST" onsubmit={() => breadcrumbs.clear()}>
 							<button class="w-full" type="submit" data-testid="logout-button">
 								<span
 									class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"

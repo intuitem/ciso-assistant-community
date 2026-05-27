@@ -303,10 +303,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.chat_mode", required=False, default=False
     )
     auditee_mode = serializers.BooleanField(
-        source="value.auditee_mode", required=False, default=False
+        source="value.auditee_mode", required=False, default=True
     )
     advanced_analytics = serializers.BooleanField(
-        source="value.advanced_analytics", required=False, default=False
+        source="value.advanced_analytics", required=False, default=True
     )
     comments = serializers.BooleanField(
         source="value.comments", required=False, default=True

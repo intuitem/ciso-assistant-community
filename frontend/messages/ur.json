@@ -1572,5 +1572,6 @@
 	"builderQuestionTypeUniqueChoice": "واحد انتخاب",
 	"builderQuestionTypeMultipleChoice": "متعدد انتخاب",
 	"builderQuestionTypeDate": "تاریخ",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "میں تبدیل ہوا",
+	"requirementWeight": "وزن"
 }

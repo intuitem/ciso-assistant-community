@@ -98,6 +98,7 @@
 		(data.viewerRole ?? 'auditor') as 'respondent' | 'auditor'
 	);
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showObservation = $derived(fieldVis.showObservation);
@@ -454,8 +455,15 @@
 								class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
 							></div>
 
-							<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
-								{getTitle(requirementAssessment)}
+							<span
+								class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl inline-flex items-center gap-3"
+							>
+								<span>{getTitle(requirementAssessment)}</span>
+								{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1 && requirementAssessment.assessable}
+									<span class="badge text-xs font-medium bg-indigo-100 text-indigo-800">
+										{m.requirementWeight()}: {requirementAssessment.requirement.weight}
+									</span>
+								{/if}
 							</span>
 						</span>
 						<div class="h-2"></div>
@@ -673,7 +681,7 @@
 												</div>
 											</div>
 										{/if}
-										{#if requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
+										{#if showAnswers && requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
 											<div class="flex flex-col w-full space-y-2">
 												<Question
 													questions={requirementAssessment.requirement.questions}
@@ -721,7 +729,7 @@
 												? 'pointer-events-none opacity-60'
 												: ''}"
 										>
-											{#if showScore && !shallow && complianceAssessment.scoring_enabled}
+											{#if showScore && !shallow}
 												{#if hasComputedScore(requirementAssessment.requirement.questions)}
 													<div class="flex flex-row items-center space-x-4">
 														<span class="font-medium">{m.score()}</span>

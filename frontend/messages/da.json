@@ -1883,5 +1883,6 @@
 	"builderQuestionTypeUniqueChoice": "Enkelt valg",
 	"builderQuestionTypeMultipleChoice": "Flere valg",
 	"builderQuestionTypeDate": "Dato",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "ændret i",
+	"requirementWeight": "Vægt"
 }
