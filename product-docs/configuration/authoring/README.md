@@ -8,6 +8,8 @@ This section gathers the **authoring guidelines** — the conventions, structure
 
 Authoring is a separate discipline from running the platform. Once content has been authored, it's loaded through the [Libraries](../libraries/README.md) section and behaves the same as any built-in content — versioned, upgradable, exportable. The pages here focus on _writing the content_, not on loading it.
 
+For frameworks, matrices, and presets, the **recommended path is the in-app visual editor** — they all ship with a dedicated builder under the `/experimental/` namespace, complete with draft/publish lifecycle, live preview, real-time validation, and multi-language support. Each guide walks through its builder in depth before covering editorial discipline. Excel-driven authoring remains the right channel for library publishing across instances.
+
 ## What's in this section
 
 - [Framework authoring](framework.md) — how to design a requirement tree, name nodes, use implementation groups, attach scoring scales and questions, and pick reference controls / threats.
