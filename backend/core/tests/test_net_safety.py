@@ -1,15 +1,19 @@
 """Tests for the SSRF guard helpers in `core.net_safety`."""
 
+import socket
 from unittest.mock import patch
 
 import pytest
 
-from core.net_safety import BlockedRequestError, assert_public_url
+from core.net_safety import BlockedRequestError, DnsLookupError, assert_public_url
 
 
 def _addrinfo(*addrs):
     """Build a fake getaddrinfo() return value for the given IP strings."""
-    return [(2, 1, 6, "", (addr, 0)) for addr in addrs]
+    return [
+        (socket.AF_INET6 if ":" in addr else socket.AF_INET, 1, 6, "", (addr, 0))
+        for addr in addrs
+    ]
 
 
 class TestAssertPublicUrl:
@@ -70,12 +74,20 @@ class TestAssertPublicUrl:
             with pytest.raises(BlockedRequestError):
                 assert_public_url("https://mixed.attacker/")
 
-    def test_blocks_unresolvable_hostname(self):
-        import socket
-
+    def test_dns_failure_raises_dns_lookup_error_not_blocked(self):
+        # Transient DNS hiccups must surface as DnsLookupError, distinct
+        # from BlockedRequestError, so callers can retry them.
         with patch("socket.getaddrinfo", side_effect=socket.gaierror("nope")):
-            with pytest.raises(BlockedRequestError, match="DNS lookup failed"):
+            with pytest.raises(DnsLookupError, match="DNS lookup failed"):
                 assert_public_url("https://nope.invalid/")
+
+    def test_blocks_rfc6598_cgnat(self):
+        # 100.64.0.0/10 is shared CGNAT space; ipaddress treats it as
+        # neither private nor global, so we reject it explicitly.
+        for ip in ("100.64.0.1", "100.127.255.254"):
+            with patch("socket.getaddrinfo", return_value=_addrinfo(ip)):
+                with pytest.raises(BlockedRequestError):
+                    assert_public_url(f"https://cgnat-{ip}.attacker/")
 
     def test_custom_allowed_schemes(self):
         """Webhook callers may want to allow http: too."""

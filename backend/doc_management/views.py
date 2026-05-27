@@ -56,23 +56,27 @@ def _get_templates_dir(lang: str) -> Path:
 _PDF_FETCH_MAX_BYTES = 10 * 1024 * 1024
 
 
+# WeasyPrint passes a configured `ssl_context` we don't thread through:
+# deployments needing a custom CA for embedded images won't get it. File
+# an issue if that becomes a real need.
 def _safe_url_fetcher(url, timeout=10, ssl_context=None):
     if url.startswith("data:"):
         return weasyprint.default_url_fetcher(url)
     assert_public_url(url, allowed_schemes=("https",))
     r = requests.get(url, timeout=timeout, allow_redirects=False, stream=True)
-    if 300 <= r.status_code < 400:
+    try:
+        status_code = r.status_code
+        final_url = r.url
+        content_type = r.headers.get("Content-Type", "application/octet-stream")
+        if 300 <= status_code < 400:
+            raise BlockedRequestError(f"Redirects not followed: {url}")
+        content = r.raw.read(_PDF_FETCH_MAX_BYTES + 1, decode_content=True)
+    finally:
         r.close()
-        raise BlockedRequestError(f"Redirects not followed: {url}")
-    content = r.raw.read(_PDF_FETCH_MAX_BYTES + 1, decode_content=True)
-    r.close()
     if len(content) > _PDF_FETCH_MAX_BYTES:
         raise BlockedRequestError(f"Response exceeds {_PDF_FETCH_MAX_BYTES} bytes")
-    mime = (
-        r.headers.get("Content-Type", "application/octet-stream").split(";")[0].strip()
-        or None
-    )
-    return {"string": content, "mime_type": mime, "redirected_url": r.url}
+    mime = content_type.split(";")[0].strip() or None
+    return {"string": content, "mime_type": mime, "redirected_url": final_url}
 
 
 class ManagedDocumentViewSet(BaseModelViewSet):

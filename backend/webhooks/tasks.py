@@ -7,11 +7,10 @@ import time
 from datetime import datetime, timezone
 
 import requests
-from django.conf import settings
 from huey.contrib.djhuey import db_task
 from django.core.serializers.json import DjangoJSONEncoder
 
-from core.net_safety import BlockedRequestError, assert_public_url
+from core.net_safety import BlockedRequestError, assert_public_url_unless_dev
 
 from .models import WebhookEndpoint
 
@@ -64,24 +63,22 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
         "webhook-signature": f"v1,{signature}",
     }
 
-    # Model.clean() only blocks IP-literal hostnames and skips DNS;
-    # re-validate at send time so DNS-based targets and post-save DNS
-    # changes are caught. WEBHOOK_ALLOW_PRIVATE_IPS is the existing
-    # dev/loopback escape hatch.
-    if not getattr(settings, "WEBHOOK_ALLOW_PRIVATE_IPS", False):
-        try:
-            assert_public_url(endpoint.url, allowed_schemes=("http", "https"))
-        except BlockedRequestError:
-            logger.error(
-                "Webhook blocked by SSRF guard",
-                endpoint_id=endpoint_id,
-                url=endpoint.url,
-                exc_info=True,
-            )
-            return "Blocked by SSRF guard"
+    # Re-validate at send time: model.clean() only blocks IP-literal
+    # hostnames, so DNS-based targets and post-save DNS changes need
+    # this. DnsLookupError is transient and propagates so Huey retries.
+    try:
+        assert_public_url_unless_dev(endpoint.url, allowed_schemes=("http", "https"))
+    except BlockedRequestError:
+        # Terminal: return (not raise) so Huey doesn't retry 5x with a
+        # fresh webhook-id — receivers would see those as distinct.
+        logger.error(
+            "Webhook blocked by SSRF guard",
+            endpoint_id=endpoint_id,
+            url=endpoint.url,
+            exc_info=True,
+        )
+        return f"Blocked: {endpoint_id} URL points to a non-public address"
 
-    # allow_redirects=False so a hostile receiver can't bounce us to an
-    # internal IP after the pre-check.
     try:
         response = requests.post(
             endpoint.url,
@@ -94,9 +91,16 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
         if 200 <= response.status_code < 300:
             return f"Success: Sent {event_type} to {endpoint.url}"
         elif 300 <= response.status_code < 400:
-            raise Exception(
-                f"Webhook target {endpoint.url} returned redirect "
-                f"(status {response.status_code}); redirects are not followed."
+            # Terminal (same reason as the SSRF-block branch above).
+            logger.warning(
+                "Webhook target returned redirect; not followed",
+                endpoint_id=endpoint_id,
+                url=endpoint.url,
+                status_code=response.status_code,
+            )
+            return (
+                f"Blocked redirect: {endpoint_id} returned "
+                f"status {response.status_code}"
             )
         else:
             raise Exception(

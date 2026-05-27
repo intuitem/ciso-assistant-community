@@ -3,6 +3,7 @@ import requests
 from structlog import get_logger
 from integrations.models import SyncMapping
 from core.models import AppliedControl
+from core.net_safety import check_integration_url
 from integrations.base import BaseIntegrationClient
 from .mapper import ServiceNowFieldMapper
 
@@ -13,6 +14,15 @@ class ServiceNowClient(BaseIntegrationClient):
     def __init__(self, configuration):
         super().__init__(configuration)
         self.base_url = self.credentials.get("instance_url", "").rstrip("/")
+        try:
+            check_integration_url(self.base_url, "ServiceNow instance_url")
+        except ValueError:
+            logger.error(
+                "ServiceNow instance_url blocked by SSRF guard",
+                base_url=self.base_url,
+                exc_info=True,
+            )
+            raise
         username = self.credentials.get("username", "")
         password = self.credentials.get("password", "")
         self.auth = (username, password)
