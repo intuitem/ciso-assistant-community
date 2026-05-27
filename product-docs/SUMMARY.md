@@ -104,6 +104,11 @@
   * [Library upgrade](configuration/libraries/library-upgrade.md)
   * [Upgrading a library](configuration/libraries/upgrading-a-library.md)
   * [Library clean-up](configuration/libraries/library-cleanup.md)
+* [Authoring](configuration/authoring/README.md)
+  * [Framework](configuration/authoring/framework.md)
+  * [Risk matrix](configuration/authoring/matrix.md)
+  * [Journey preset](configuration/authoring/preset.md)
+  * [Excel-driven authoring](configuration/authoring/excel.md)
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
 
