@@ -70,6 +70,7 @@
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
+  * [Migrate between different databases](installation/migrate-database.md)
 * [Frequent questions](installation/faq.md)
 
 ## Configuration
