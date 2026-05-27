@@ -243,12 +243,16 @@ def get_sorted_requirement_nodes(
     requirement_nodes: list,
     requirements_assessed: Optional[list] = None,
     max_score: int = 0,
+    min_score: int = 0,
 ) -> dict:
     """
     Recursive function to build framework groups tree
     requirement_nodes: the list of all requirement_nodes
     requirements_assessed: the list of all requirements_assessed
-    max_score: the maximum score. This is an attribute of the framework
+    max_score: the maximum score (CA or framework). Used as the fallback when
+    a RequirementNode has no override.
+    min_score: the minimum score (CA or framework). Used as the fallback when
+    a RequirementNode has no override; needed for offset scales (e.g. 1..4).
     Returns a dictionary containing key=name and value={"description": description, "style": "leaf|node"}}
     Values are correctly sorted based on order_id
     If order_id is missing, sorting is based on created_at
@@ -269,7 +273,7 @@ def get_sorted_requirement_nodes(
         return req_node.max_score if req_node.max_score is not None else max_score
 
     def _resolved_min(req_node):
-        return req_node.min_score if req_node.min_score is not None else 0
+        return req_node.min_score if req_node.min_score is not None else min_score
 
     # Build a dictionary to quickly access children nodes
     children_dict = {}

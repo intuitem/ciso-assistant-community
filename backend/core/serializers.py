@@ -2198,13 +2198,9 @@ class RequirementNodeWriteSerializer(BaseModelSerializer):
                 return instance
         except DjangoValidationError as e:
             raise serializers.ValidationError(getattr(e, "message_dict", e.messages))
-        except Exception as e:
-            logger.error(
-                "Failed to update RequirementNode", error=str(e), exc_info=True
-            )
-            raise serializers.ValidationError(
-                "Failed to update requirement node. Please check the input data."
-            )
+        except Exception:
+            logger.error("Failed to update RequirementNode", exc_info=True)
+            raise
 
     class Meta:
         model = RequirementNode
@@ -2902,6 +2898,17 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
 
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
     class FilteredNodeSerializer(RequirementNodeReadSerializer):
+        # scores_definition is stored as {"scale": [...]} but exposed as a bare
+        # list everywhere else in the API (FrameworkReadSerializer,
+        # effective_scores_definition). Match that shape here for consistency.
+        scores_definition = serializers.SerializerMethodField()
+
+        def get_scores_definition(self, obj):
+            sd = obj.scores_definition
+            if isinstance(sd, dict) and "scale" in sd:
+                return sd["scale"]
+            return sd
+
         class Meta:
             model = RequirementNode
             fields = [
@@ -2921,7 +2928,6 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "min_score",
                 "max_score",
                 "scores_definition",
-                "target_score",
                 "weight",
             ]
 
@@ -2950,12 +2956,11 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
     answers = serializers.SerializerMethodField()
 
-    # Effective scale and target after the Node -> CA cascade. Null when the
-    # CA has scoring disabled (no scale to expose).
+    # Effective scale after the Node -> CA cascade. Null when the CA has
+    # scoring disabled (no scale to expose).
     effective_min_score = serializers.SerializerMethodField()
     effective_max_score = serializers.SerializerMethodField()
     effective_scores_definition = serializers.SerializerMethodField()
-    effective_target_score = serializers.SerializerMethodField()
 
     def _resolved(self, obj):
         if not obj.compliance_assessment.scoring_enabled:
@@ -2973,10 +2978,6 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     def get_effective_scores_definition(self, obj):
         r = self._resolved(obj)
         return r["scores_definition"] if r else None
-
-    def get_effective_target_score(self, obj):
-        r = self._resolved(obj)
-        return r["target_score"] if r else None
 
     def get_answers(self, obj):
         """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
@@ -3146,19 +3147,6 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
     def validate_documentation_score(self, value):
         return self._clamp_to_resolved(value)
-
-    def validate_target_score(self, value):
-        if value is None or not self.instance:
-            return value
-        resolved = self.instance.get_resolved_scoring()
-        lo, hi = resolved["min_score"], resolved["max_score"]
-        if lo is None or hi is None:
-            return value
-        if not (lo <= value <= hi):
-            raise serializers.ValidationError(
-                f"target_score must be within [{lo}, {hi}]."
-            )
-        return value
 
     def get_compliance_assessment(self):
         if hasattr(self, "instance") and self.instance:

@@ -738,13 +738,6 @@
 												{@const raScoresDef =
 													requirementAssessment.effective_scores_definition ??
 													data.scores.scores_definition}
-												{@const raHasCustomScale =
-													requirementAssessment.requirement.min_score !== null ||
-													requirementAssessment.requirement.max_score !== null ||
-													requirementAssessment.requirement.scores_definition !== null}
-												{@const raHasCustomTarget =
-													requirementAssessment.target_score !== null ||
-													requirementAssessment.requirement.target_score !== null}
 												{#if hasComputedScore(requirementAssessment.requirement.questions)}
 													<div class="flex flex-row items-center space-x-4">
 														<span class="font-medium">{m.score()}</span>
@@ -769,19 +762,6 @@
 														</div>
 													</div>
 												{:else if requirementAssessment.result !== 'not_applicable'}
-													<label class="flex flex-row items-center space-x-2 text-xs mb-1">
-														<span class="font-medium">{m.targetScore()}</span>
-														<input
-															type="number"
-															step="0.1"
-															min={raMin}
-															max={raMax}
-															class="input w-24 px-2 py-1"
-															bind:value={requirementAssessment.target_score}
-															onchange={() => update(requirementAssessment, 'target_score')}
-															disabled={isReadOnly || !requirementAssessment.is_scored}
-														/>
-													</label>
 													<Score
 														form={scoreForms[requirementAssessment.id]}
 														min_score={raMin}

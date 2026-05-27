@@ -30,7 +30,6 @@ def test_yaml_library_load_creates_overrides():
     assert default_node.min_score is None
     assert default_node.max_score is None
     assert default_node.scores_definition is None
-    assert default_node.target_score is None
 
     binary_node = RequirementNode.objects.get(
         urn="urn:intuitem:test:req_node:mixed:binary"
@@ -40,11 +39,3 @@ def test_yaml_library_load_creates_overrides():
     # scores_definition is wrapped in {"scale": [...]} at storage time
     assert isinstance(binary_node.scores_definition, dict)
     assert binary_node.scores_definition.get("scale")
-    assert binary_node.target_score == 1
-
-    target_only = RequirementNode.objects.get(
-        urn="urn:intuitem:test:req_node:mixed:target-only"
-    )
-    assert target_only.min_score is None
-    assert target_only.max_score is None
-    assert target_only.target_score == 4

@@ -204,40 +204,12 @@ class TestMixedScaleAggregation:
 
 
 @pytest.mark.django_db
-class TestAnchorNAToTarget:
-    def test_anchor_uses_per_ra_target(self, mixed_scale_setup):
-        """N/A RA with its own target_score on Node uses that target,
-        not the CA-level target.
+class TestAnchorNAToTargetWithMixedScales:
+    def test_anchor_projects_ca_target_onto_ra_scale(self, mixed_scale_setup):
+        """CA target is projected via ratio onto the RA scale so mixed scales
+        stay coherent (CA target 4/5 → 80% of the RA range, applied to
+        whatever the RA's resolved scale is).
         """
-        # A2 (scale 0-1) gets a per-node target of 1
-        a2 = mixed_scale_setup["a2"]
-        a2.target_score = 1
-        a2.save()
-
-        # A1 scored normally, A2 is N/A and anchored
-        _score(mixed_scale_setup, "a1", 5)
-        _score(
-            mixed_scale_setup,
-            "a2",
-            None,
-            is_scored=False,
-            result=RequirementAssessment.Result.NOT_APPLICABLE,
-        )
-        _score(mixed_scale_setup, "b1", 5)
-        _score(mixed_scale_setup, "b2", 5)
-
-        ca = mixed_scale_setup["ca"]
-        ca.anchor_na_to_target = True
-        ca.target_score = 3  # CA target — should NOT be used for A2
-        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
-        ca.save()
-
-        # A2's ratio = (1 - 0) / 1 = 1.0 (full, from its own target)
-        # All ratios = 1.0 → global score = CA max = 5.0
-        assert ca.get_global_score()["implementation_score"] == 5.0
-
-    def test_anchor_falls_back_to_ca_target(self, mixed_scale_setup):
-        """N/A RA without per-node target uses the CA target."""
         _score(mixed_scale_setup, "a1", 5)
         _score(mixed_scale_setup, "a2", 1)
         _score(
@@ -251,7 +223,7 @@ class TestAnchorNAToTarget:
 
         ca = mixed_scale_setup["ca"]
         ca.anchor_na_to_target = True
-        ca.target_score = 4  # CA target picked up by B1 (no node override)
+        ca.target_score = 4  # CA target projected onto each N/A RA's range
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
         ca.save()
 

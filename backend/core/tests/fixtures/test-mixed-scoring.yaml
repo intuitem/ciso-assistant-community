@@ -3,7 +3,7 @@ urn: urn:intuitem:test:library:mixed-scoring
 locale: en
 ref_id: TEST-MIXED-SCORING
 name: "Test - Mixed Scoring Library"
-description: "Test fixture exercising per-requirement score scale and target overrides."
+description: "Test fixture exercising per-requirement score scale overrides."
 copyright: Test fixture, not for production use.
 version: 1
 publication_date: 2026-05-20
@@ -14,7 +14,7 @@ objects:
     urn: urn:intuitem:test:framework:mixed-scoring
     ref_id: TEST-MIXED
     name: "Mixed Scoring Framework"
-    description: "Framework on 0-5 with two assessable requirements overriding scoring."
+    description: "Framework on 0-5 with one assessable requirement overriding scoring."
     min_score: 0
     max_score: 5
     scores_definition:
@@ -51,7 +51,7 @@ objects:
         parent_urn: urn:intuitem:test:req_node:mixed:root
         ref_id: "R.2"
         name: "Binary requirement (0-1)"
-        description: "Yes/no requirement on a 0-1 scale with a target of 1."
+        description: "Yes/no requirement on a 0-1 scale."
         min_score: 0
         max_score: 1
         scores_definition:
@@ -59,13 +59,3 @@ objects:
             name: "No"
           - score: 1
             name: "Yes"
-        target_score: 1
-
-      - urn: urn:intuitem:test:req_node:mixed:target-only
-        assessable: true
-        depth: 2
-        parent_urn: urn:intuitem:test:req_node:mixed:root
-        ref_id: "R.3"
-        name: "Target-only override requirement"
-        description: "Inherits the framework 0-5 scale but overrides only the target."
-        target_score: 4

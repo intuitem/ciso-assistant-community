@@ -165,7 +165,6 @@ class TestRequirementAssessmentsAuthenticated:
                     "scores_definition": RequirementNode.objects.all()[
                         0
                     ].scores_definition,
-                    "target_score": RequirementNode.objects.all()[0].target_score,
                     "weight": RequirementNode.objects.all()[0].weight,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
@@ -334,7 +333,6 @@ class TestRequirementAssessmentsAuthenticated:
                     "scores_definition": RequirementNode.objects.all()[
                         0
                     ].scores_definition,
-                    "target_score": RequirementNode.objects.all()[0].target_score,
                     "weight": RequirementNode.objects.all()[0].weight,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(

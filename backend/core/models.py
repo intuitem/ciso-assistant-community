@@ -1112,7 +1112,6 @@ class LibraryUpdater:
                                 RequirementAssessment(
                                     compliance_assessment=ca,
                                     requirement=requirement_node_object,
-                                    target_score=requirement_node_object.target_score,
                                     folder=(
                                         ca.folder
                                         or (
@@ -2578,10 +2577,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     scores_definition = models.JSONField(
         null=True, blank=True, verbose_name=_("Score definition")
     )
-    # Independent from the scale override.
-    target_score = models.FloatField(
-        null=True, blank=True, verbose_name=_("Target score")
-    )
 
     @property
     def associated_reference_controls(self):
@@ -2690,11 +2685,11 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         return sd
 
     def clean(self):
-        """Validate the optional per-requirement scale and target override.
+        """Validate the optional per-requirement scale override.
 
-        Each field is independently null-or-set. scores_definition and
-        target_score are checked against the Node-level resolved bounds: the
-        Node's own value when set, the Framework value otherwise.
+        Each field is independently null-or-set. scores_definition is checked
+        against the Node-level resolved bounds: the Node's own value when set,
+        the Framework value otherwise.
         """
         from django.core.exceptions import ValidationError
 
@@ -2744,21 +2739,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                             )
                         }
                     )
-
-        if self.target_score is not None and resolved_min is not None:
-            if not (resolved_min <= self.target_score <= resolved_max):
-                raise ValidationError(
-                    {
-                        "target_score": _(
-                            "target_score (%(value)s) must be within [%(min)s, %(max)s]."
-                        )
-                        % {
-                            "value": self.target_score,
-                            "min": resolved_min,
-                            "max": resolved_max,
-                        }
-                    }
-                )
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -6983,15 +6963,12 @@ class ComplianceAssessment(Assessment):
                         (ans.requirement_assessment.requirement_id, ans.question_id)
                     ] = ans
 
-        # Create all RequirementAssessment objects in bulk. target_score is
-        # seeded from the requirement's library-shipped default so the value
-        # is visible/editable per-RA without forcing the operator to retype it.
+        # Create all RequirementAssessment objects in bulk.
         requirement_assessments = [
             RequirementAssessment(
                 compliance_assessment=self,
                 requirement=requirement,
                 folder_id=self.folder.id,
-                target_score=requirement.target_score,
             )
             for requirement in requirements
         ]
@@ -7226,12 +7203,9 @@ class ComplianceAssessment(Assessment):
                 is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
                 if is_na and anchor_na_to_target:
                     resolved = ras.get_resolved_scoring()
-                    per_ra_target = resolved["target_score"]
                     ra_min = resolved["min_score"]
                     ra_max = resolved["max_score"]
-                    if per_ra_target is not None:
-                        score = per_ra_target
-                    elif (
+                    if (
                         self.target_score is not None
                         and ra_min is not None
                         and ra_max is not None
@@ -7268,13 +7242,10 @@ class ComplianceAssessment(Assessment):
 
             is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
             if is_na and anchor_na_to_target:
-                # Per-RA target wins. Otherwise project the CA-wide target
-                # onto the RA scale as a ratio so mixed scales stay coherent
-                # (a CA target of 80/100 contributes 80% of the RA range).
-                per_ra_target = resolved["target_score"]
-                if per_ra_target is not None:
-                    raw = per_ra_target
-                elif self.target_score is not None:
+                # Project the CA-wide target onto the RA scale as a ratio so
+                # mixed scales stay coherent (CA target 80/100 contributes
+                # 80% of the RA range, not 80 raw).
+                if self.target_score is not None:
                     ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
                     ca_ratio = (ca_target_clamped - ca_min) / ca_range
                     raw = ra_min + ca_ratio * ra_range
@@ -7474,13 +7445,24 @@ class ComplianceAssessment(Assessment):
         not the CA's max — keeping 100% achievable when every RA is at its max.
         """
         if self.score_calculation_method == self.CalculationMethod.SUM:
-            requirement_assessments_scored = (
-                RequirementAssessment.objects.filter(compliance_assessment=self)
-                .select_related("requirement")
-                .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
-                .exclude(is_scored=False)
-                .exclude(requirement__assessable=False)
-            )
+            # Keep this set aligned with _compute_score_for_field's numerator:
+            # when anchor_na_to_target is on, N/A items contribute on the
+            # numerator side, so they must be in the max here too — otherwise
+            # the displayed ratio can exceed 100%.
+            qs = RequirementAssessment.objects.filter(
+                compliance_assessment=self,
+                requirement__assessable=True,
+            ).select_related("requirement")
+            if self.anchor_na_to_target:
+                qs = qs.exclude(
+                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
+                    is_scored=False,
+                )
+            else:
+                qs = qs.exclude(is_scored=False).exclude(
+                    result=RequirementAssessment.Result.NOT_APPLICABLE
+                )
+            requirement_assessments_scored = qs
             ig = (
                 set(self.selected_implementation_groups)
                 if self.selected_implementation_groups
@@ -8292,10 +8274,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     documentation_score = models.IntegerField(
         blank=True, null=True, verbose_name=_("Documentation Score")
     )
-    # Per-instance target override. Falls back to the RequirementNode default.
-    target_score = models.FloatField(
-        blank=True, null=True, verbose_name=_("Target score")
-    )
     evidences = models.ManyToManyField(
         Evidence,
         blank=True,
@@ -8353,14 +8331,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         )
 
     def get_resolved_scoring(self) -> dict:
-        """Resolve the effective score scale and per-requirement target.
+        """Resolve the effective score scale via the cascade Node -> CA.
 
-        Scale fields cascade Node -> CA. The per-requirement target cascades
-        RA -> Node only: the RA holds an operator override, the Node holds the
-        library-shipped default. `ComplianceAssessment.target_score` is a
-        distinct concept (the audit-wide global target) and is *not* used here
-        as a per-RA fallback. scores_definition is returned unwrapped (bare
-        list) or None.
+        Each scale field cascades independently: Node value when set, CA value
+        otherwise. scores_definition is returned unwrapped (bare list) or None.
         """
         req = self.requirement
         ca = self.compliance_assessment
@@ -8372,10 +8346,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             if req.scores_definition is not None
             else ca.scores_definition
         )
-        if self.target_score is not None:
-            target_score = self.target_score
-        else:
-            target_score = req.target_score
 
         if isinstance(scores_definition, dict) and "scale" in scores_definition:
             scores_definition = scores_definition["scale"]
@@ -8402,7 +8372,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             "min_score": min_score,
             "max_score": max_score,
             "scores_definition": scores_definition,
-            "target_score": target_score,
         }
 
     @property

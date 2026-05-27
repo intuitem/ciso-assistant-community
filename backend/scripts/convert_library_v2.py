@@ -1141,18 +1141,6 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                             f"(framework) Invalid {int_field} at row #{row[0].row}: "
                             f"{data[int_field]}. Must be an integer."
                         )
-            if (
-                "target_score" in data
-                and data["target_score"] is not None
-                and str(data["target_score"]).strip() != ""
-            ):
-                try:
-                    node["target_score"] = float(data["target_score"])
-                except (TypeError, ValueError):
-                    raise ValueError(
-                        f"(framework) Invalid target_score at row #{row[0].row}: "
-                        f"{data['target_score']}. Must be a number."
-                    )
             # scores_definition references an object_block (same mechanism as
             # the framework-level scores_definition). The cell carries the
             # block name; parsed entries are inlined under the node.

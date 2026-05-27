@@ -128,7 +128,6 @@ class RequirementNodeImporter:
             min_score=self.requirement_data.get("min_score"),
             max_score=self.requirement_data.get("max_score"),
             scores_definition=scores_definition,
-            target_score=self.requirement_data.get("target_score"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
