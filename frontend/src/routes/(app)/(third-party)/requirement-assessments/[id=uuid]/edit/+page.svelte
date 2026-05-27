@@ -884,14 +884,14 @@
 									<span class="font-medium">{m.score()}</span>
 									<div class="shrink-0 relative">
 										<Progress
-											value={formatScoreValue(computedScore || 0, resolvedMax)}
+											value={formatScoreValue(computedScore || 0, resolvedMax, false, resolvedMin)}
 											min={0}
 											max={100}
 										>
 											<Progress.Circle class="[--size:--spacing(10)]">
 												<Progress.CircleTrack />
 												<Progress.CircleRange
-													class={displayScoreColor(computedScore, resolvedMax)}
+													class={displayScoreColor(computedScore, resolvedMax, false, resolvedMin)}
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">

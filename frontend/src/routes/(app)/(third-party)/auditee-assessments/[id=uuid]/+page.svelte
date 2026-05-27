@@ -1063,20 +1063,27 @@
 							{#if showScore}
 								<div class="flex flex-col w-full place-items-center">
 									{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
+										{@const raMin =
+											requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
 										{@const raMax =
 											requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
 										<div class="flex flex-row items-center space-x-4">
 											<span class="font-medium">{m.score()}</span>
 											<div class="shrink-0 relative">
 												<Progress
-													value={formatScoreValue(requirementAssessment.score, raMax)}
+													value={formatScoreValue(requirementAssessment.score, raMax, false, raMin)}
 													min={0}
 													max={100}
 												>
 													<Progress.Circle class="[--size:--spacing(10)]">
 														<Progress.CircleTrack />
 														<Progress.CircleRange
-															class={displayScoreColor(requirementAssessment.score, raMax)}
+															class={displayScoreColor(
+																requirementAssessment.score,
+																raMax,
+																false,
+																raMin
+															)}
 														/>
 													</Progress.Circle>
 													<div class="absolute inset-0 flex items-center justify-center">

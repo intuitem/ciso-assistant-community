@@ -456,6 +456,7 @@ def annotate_tree_with_aggregated_scores(
                 ra_range = ra_max - ra_min if ra_max > ra_min else 1
                 ratio = (score_val - ra_min) / ra_range
                 node["aggregated_score"] = score_val
+                node["aggregated_min_score"] = ra_min
                 node["aggregated_max_score"] = ra_max
                 # Normalized to [0, 1] on the RA's own scale — the only sane
                 # axis to roll up across mixed scales.
@@ -525,6 +526,7 @@ def annotate_tree_with_aggregated_scores(
                 avg_ratio = total_weighted_ratio / total_child_weight
                 node["_aggregated_ratio"] = avg_ratio
                 node["aggregated_score"] = _clean(ca_min + avg_ratio * ca_range)
+                node["aggregated_min_score"] = ca_min
                 node["aggregated_max_score"] = ca_max
                 if show_doc:
                     avg_doc_ratio = total_weighted_doc_ratio / total_child_weight
@@ -539,6 +541,7 @@ def annotate_tree_with_aggregated_scores(
             if leaf_weight > 0:
                 node["aggregated_score"] = leaf_weighted_score
                 node["aggregated_max_score"] = leaf_weighted_max
+                node["aggregated_min_score"] = 0
                 # Ratio in [0, 1] for any future consumer (e.g. nested SUM).
                 node["_aggregated_ratio"] = (
                     leaf_weighted_score / leaf_weighted_max
@@ -560,6 +563,7 @@ def annotate_tree_with_aggregated_scores(
                 avg_ratio = leaf_weighted_ratio / leaf_weight
                 node["_aggregated_ratio"] = avg_ratio
                 node["aggregated_score"] = _clean(ca_min + avg_ratio * ca_range)
+                node["aggregated_min_score"] = ca_min
                 node["aggregated_max_score"] = ca_max
                 if show_doc:
                     avg_doc_ratio = leaf_weighted_doc_ratio / leaf_weight

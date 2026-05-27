@@ -258,8 +258,16 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	if (!questions) return { score: null, result: null };
 
 	let totalScore: number | null = 0;
-	const min_score = requirementAssessment.compliance_assessment.min_score || 0;
-	const max_score = requirementAssessment.compliance_assessment.max_score || 100;
+	// Use the effective scale from the cascade so per-requirement overrides
+	// clamp the preview to the same range the backend will persist to.
+	const min_score =
+		requirementAssessment.effective_min_score ??
+		requirementAssessment.compliance_assessment.min_score ??
+		0;
+	const max_score =
+		requirementAssessment.effective_max_score ??
+		requirementAssessment.compliance_assessment.max_score ??
+		100;
 	let results: boolean[] | null = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;

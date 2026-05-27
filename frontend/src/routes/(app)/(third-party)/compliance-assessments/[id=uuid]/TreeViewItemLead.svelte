@@ -18,6 +18,7 @@
 		scoringEnabled?: boolean;
 		showDocumentationScore: boolean;
 		max_score: number;
+		min_score?: number;
 		progressStatusEnabled?: boolean;
 		extendedResultEnabled?: boolean;
 		showExtendedResult?: boolean;
@@ -40,6 +41,7 @@
 		scoringEnabled = false,
 		showDocumentationScore,
 		max_score,
+		min_score = 0,
 		progressStatusEnabled = true,
 		extendedResultEnabled = false,
 		showExtendedResult = true,
@@ -72,16 +74,17 @@
 			</span>
 		{/if}
 		{#if showScore && resultI18n !== 'notApplicable' && isScored}
+			{@const range = max_score - min_score}
 			<div class="relative">
 				<Progress
-					value={(score * 100) / max_score}
+					value={range > 0 ? ((score - min_score) * 100) / range : 0}
 					min={0}
 					max={100}
 					data-testid="progress-ring-svg"
 				>
 					<Progress.Circle class="[--size:--spacing(12)]">
 						<Progress.CircleTrack />
-						<Progress.CircleRange class={displayScoreColor(score, max_score)} />
+						<Progress.CircleRange class={displayScoreColor(score, max_score, false, min_score)} />
 					</Progress.Circle>
 					<div class="absolute inset-0 flex items-center justify-center">
 						<span class="text-xs font-bold">{score}/{max_score}</span>
@@ -90,10 +93,16 @@
 			</div>
 			{#if showDocumentationScore}
 				<div class="relative">
-					<Progress value={(documentationScore * 100) / max_score} min={0} max={100}>
+					<Progress
+						value={range > 0 ? ((documentationScore - min_score) * 100) / range : 0}
+						min={0}
+						max={100}
+					>
 						<Progress.Circle class="[--size:--spacing(12)]">
 							<Progress.CircleTrack />
-							<Progress.CircleRange class={displayScoreColor(documentationScore, max_score)} />
+							<Progress.CircleRange
+								class={displayScoreColor(documentationScore, max_score, false, min_score)}
+							/>
 						</Progress.Circle>
 						<div class="absolute inset-0 flex items-center justify-center">
 							<span class="text-xs font-bold">{documentationScore}/{max_score}</span>

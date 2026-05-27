@@ -744,14 +744,24 @@
 														<span class="font-medium">{m.score()}</span>
 														<div class="shrink-0 relative">
 															<Progress
-																value={formatScoreValue(requirementAssessment.score, raMax)}
+																value={formatScoreValue(
+																	requirementAssessment.score,
+																	raMax,
+																	false,
+																	raMin
+																)}
 																min={0}
 																max={100}
 															>
 																<Progress.Circle class="[--size:--spacing(10)]">
 																	<Progress.CircleTrack />
 																	<Progress.CircleRange
-																		class={displayScoreColor(requirementAssessment.score, raMax)}
+																		class={displayScoreColor(
+																			requirementAssessment.score,
+																			raMax,
+																			false,
+																			raMin
+																		)}
 																	/>
 																</Progress.Circle>
 																<div class="absolute inset-0 flex items-center justify-center">
@@ -824,14 +834,24 @@
 													<span>{m.implementationScoreResult()}</span>
 													<div class="relative">
 														<Progress
-															value={formatScoreValue(requirementAssessment.score, raMax)}
+															value={formatScoreValue(
+																requirementAssessment.score,
+																raMax,
+																false,
+																raMin
+															)}
 															min={0}
 															max={100}
 														>
 															<Progress.Circle class="[--size:--spacing(10)]">
 																<Progress.CircleTrack />
 																<Progress.CircleRange
-																	class={displayScoreColor(requirementAssessment.score, raMax)}
+																	class={displayScoreColor(
+																		requirementAssessment.score,
+																		raMax,
+																		false,
+																		raMin
+																	)}
 																/>
 															</Progress.Circle>
 															<div class="absolute inset-0 flex items-center justify-center">
@@ -876,14 +896,24 @@
 													<span>{m.scoreResult()}</span>
 													<div class="relative">
 														<Progress
-															value={formatScoreValue(requirementAssessment.score, raMax)}
+															value={formatScoreValue(
+																requirementAssessment.score,
+																raMax,
+																false,
+																raMin
+															)}
 															min={0}
 															max={100}
 														>
 															<Progress.Circle class="[--size:--spacing(10)]">
 																<Progress.CircleTrack />
 																<Progress.CircleRange
-																	class={displayScoreColor(requirementAssessment.score, raMax)}
+																	class={displayScoreColor(
+																		requirementAssessment.score,
+																		raMax,
+																		false,
+																		raMin
+																	)}
 																/>
 															</Progress.Circle>
 															<div class="absolute inset-0 flex items-center justify-center">
