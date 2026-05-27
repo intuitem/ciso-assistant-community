@@ -268,9 +268,7 @@ class TestSerializer:
         assert data["effective_max_score"] == 1
         assert isinstance(data["effective_scores_definition"], list)
 
-    def test_effective_fields_are_none_when_scoring_disabled(
-        self, ca_05, framework_05
-    ):
+    def test_effective_fields_are_none_when_scoring_disabled(self, ca_05, framework_05):
         from core.serializers import RequirementAssessmentReadSerializer
 
         node = RequirementNode.objects.create(
@@ -291,9 +289,7 @@ class TestSerializer:
         assert data["effective_max_score"] is None
         assert data["effective_scores_definition"] is None
 
-    def test_nested_requirement_exposes_raw_override_fields(
-        self, ca_05, framework_05
-    ):
+    def test_nested_requirement_exposes_raw_override_fields(self, ca_05, framework_05):
         from core.serializers import RequirementAssessmentReadSerializer
 
         node = RequirementNode.objects.create(
