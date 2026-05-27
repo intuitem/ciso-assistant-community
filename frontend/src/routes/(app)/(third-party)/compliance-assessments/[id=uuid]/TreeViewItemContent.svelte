@@ -23,6 +23,10 @@
 		children?: Record<string, Record<string, unknown>> | undefined;
 		canEditRequirementAssessment: boolean;
 		hasParentNode: boolean;
+		showAnswers: boolean;
+		showResult: boolean;
+		showStatus: boolean;
+		showScore: boolean;
 		showDocumentationScore: boolean;
 		scoringEnabled?: boolean;
 		scoreCalculationMethod: string;
@@ -45,6 +49,10 @@
 		children = undefined,
 		canEditRequirementAssessment,
 		hasParentNode,
+		showAnswers,
+		showResult,
+		showStatus,
+		showScore,
 		showDocumentationScore,
 		scoringEnabled = false,
 		scoreCalculationMethod,
@@ -252,7 +260,7 @@
 						</p>
 					{/if}
 				</div>
-				{#if !assessable}
+				{#if showResult && !assessable}
 					<div class="flex flex-row items-end items-middle text-xs mr-2" style="width:6rem">
 						{#each orderedResultPercentages as rp}
 							{#if resultCounts && resultCounts[rp.result] !== undefined}
@@ -283,7 +291,7 @@
 					</div>
 				{/if}
 				<div>
-					{#if hasAssessableChildren}
+					{#if showStatus && hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}
 							{#if resultCounts?.status && (selectedStatus.includes(status) || selectedStatus.length === 0)}
 								<span
@@ -301,7 +309,7 @@
 							{m.requirementWeight()}: {nodeWeight}
 						</span>
 					{/if}
-					{#if node.questions}
+					{#if showAnswers && node.questions}
 						{@const badgeStyles = getBadgeStyles(node.answers, node.questions)}
 						<span
 							class="badge"
@@ -387,24 +395,26 @@
 		{/if}
 		{#if hasAssessableChildren}
 			<div class="flex max-w-96 grow items-center space-x-2">
-				<div
-					class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
-				>
-					{#each orderedResultPercentages as rp}
-						<div
-							class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
-								complianceResultColorMap[rp.result]
-							)}"
-							style="width: {rp.percentage.value}%; background-color: {complianceResultColorMap[
-								rp.result
-							]}"
-						>
-							{rp.percentage.display}%
-						</div>
-					{/each}
-				</div>
+				{#if showResult}
+					<div
+						class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
+					>
+						{#each orderedResultPercentages as rp}
+							<div
+								class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
+									complianceResultColorMap[rp.result]
+								)}"
+								style="width: {rp.percentage.value}%; background-color: {complianceResultColorMap[
+									rp.result
+								]}"
+							>
+								{rp.percentage.display}%
+							</div>
+						{/each}
+					</div>
+				{/if}
 				<div class="flex flex-row space-x-2 items-center">
-					{#if scoringEnabled}
+					{#if showScore}
 						{#if hasParentNode}
 							{#if nodeScore() !== null}
 								<div class="relative">
