@@ -4815,5 +4815,6 @@
 	"builderQuestionTypeUniqueChoice": "Üksikvalik",
 	"builderQuestionTypeMultipleChoice": "Mitmikvalik",
 	"builderQuestionTypeDate": "Kuupäev",
-	"builderChangedOn": "muudetud"
+	"builderChangedOn": "muudetud",
+	"requirementWeight": "Kaal"
 }

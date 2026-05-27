@@ -113,6 +113,40 @@ export const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.status',
+		optionsLabelField: 'name',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_KIND_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'projects/kind',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'kind',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.health',
+		optionsLabelField: 'name',
+		label: 'health',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1718,7 +1752,7 @@ export const listViewFields = {
 	},
 	'user-groups': {
 		head: ['name'],
-		body: ['localization_dict'],
+		body: ['name'],
 		meta: ['id', 'builtin']
 	},
 	roles: {
@@ -2716,6 +2750,17 @@ export const listViewFields = {
 			status: ACCREDITATION_STATUS_FILTER,
 			category: ACCREDITATION_CATEGORY_FILTER,
 			authority: ACCREDITATION_AUTHORITY_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	projects: {
+		head: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		body: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			kind: PROJECT_KIND_FILTER,
+			status: PROJECT_STATUS_FILTER,
+			health: PROJECT_HEALTH_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},

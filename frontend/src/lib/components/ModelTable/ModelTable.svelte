@@ -988,7 +988,9 @@
 															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
 														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
-																>{safeTranslate('percentageDisplay', { number: value })}</span
+																>{value != null
+																	? safeTranslate('percentageDisplay', { number: value })
+																	: '--'}</span
 															>
 														{:else if key === 'translations'}
 															{#if Object.keys(value).length > 0}

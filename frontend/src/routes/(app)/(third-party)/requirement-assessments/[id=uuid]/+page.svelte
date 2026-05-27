@@ -138,6 +138,11 @@
 				</span>
 			</span>
 		{/if}
+		{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
+			<span class="badge h-fit bg-indigo-100 text-indigo-800">
+				{m.requirementWeight()}: {data.requirement.weight}
+			</span>
+		{/if}
 		{#if data.requirement.implementation_groups && data.requirement.implementation_groups.length > 0}
 			<div class="ml-3">
 				<b class="mr-2">{m.implementationGroups()} :</b>
@@ -162,7 +167,7 @@
 					</Progress>
 				</div>
 			{/if}
-			{#if showDocumentationScore && data.complianceAssessmentScore.show_documentation_score}
+			{#if showDocumentationScore}
 				<div class="shrink-0 relative">
 					<Progress value={formatScoreValue(documentationScore, max_score)} min={0} max={100}>
 						<Progress.Circle class="[--size:--spacing(10)]">
