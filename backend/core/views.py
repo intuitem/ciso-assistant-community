@@ -1252,30 +1252,31 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         )
                     obj.delete()
 
-                elif action_type in ("add_m2m", "remove_m2m"):
-                    ids_to_modify = value if isinstance(value, list) else [value]
-                    m2m_field = getattr(obj, field_name)
-                    if action_type == "add_m2m":
-                        m2m_field.add(*ids_to_modify)
-                    else:
-                        m2m_field.remove(*ids_to_modify)
-                    obj.save(update_fields=["updated_at"])
-                    try:
-                        dispatch_webhook_event(obj, "updated")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch %s",
-                            action_type,
-                            exc_info=True,
-                        )
-
                 else:
                     # Build data dict for the serializer
                     if action_type == "change_folder":
                         data = {"folder": value}
-                    elif action_type == "change_m2m":
-                        actor_ids = value if isinstance(value, list) else [value]
-                        data = {field_name: actor_ids}
+                    elif action_type in ("change_m2m", "add_m2m", "remove_m2m"):
+                        ids_to_modify = value if isinstance(value, list) else [value]
+                        if action_type == "change_m2m":
+                            new_ids = ids_to_modify
+                        else:
+                            # Compute current ± delta and let the WriteSerializer
+                            # validate the full resulting set (incl. _check_m2m_visibility),
+                            # so the user cannot link to objects outside their scope.
+                            current_ids = {
+                                str(x)
+                                for x in getattr(obj, field_name).values_list(
+                                    "id", flat=True
+                                )
+                            }
+                            delta_ids = {str(x) for x in ids_to_modify}
+                            new_ids = list(
+                                current_ids | delta_ids
+                                if action_type == "add_m2m"
+                                else current_ids - delta_ids
+                            )
+                        data = {field_name: new_ids}
                     else:  # change_field
                         data = {field_name: value}
 

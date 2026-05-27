@@ -386,3 +386,98 @@ class TestAppliedControlListIAMPostFilter:
             "scoped reader must NOT see the cross-folder asset's id/str; "
             f"got {assets_field[0]!r}"
         )
+
+
+def _make_scoped_domain_manager(folder):
+    """User with DOMAIN_MANAGER role recursive on `folder` and nothing else.
+    Has change_appliedcontrol inside `folder` but no visibility outside it."""
+    user = User.objects.create_user(
+        f"dm-{uuid.uuid4().hex[:6]}@perf.test", is_published=True
+    )
+    role = Role.objects.get(name=RoleCodename.DOMAIN_MANAGER.value)
+    ra = RoleAssignment.objects.create(
+        user=user,
+        role=role,
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    )
+    ra.perimeter_folders.add(folder)
+    return user
+
+
+@pytest.mark.django_db
+class TestAppliedControlBatchActionM2MVisibility:
+    """`batch-action` `add_m2m`/`remove_m2m` must enforce the same per-related-model
+    visibility rule as `change_m2m`. A domain manager scoped to folder A must not
+    be able to link an asset that lives in folder B (outside their scope) onto an
+    applied control in folder A — even via the delta-style batch endpoints, which
+    historically bypassed the WriteSerializer's `_check_m2m_visibility` hook."""
+
+    def test_add_m2m_rejects_cross_folder_asset(self):
+        folder_a, folder_b, _existing_ac, _existing_asset = _setup_cross_folder_link()
+        # Use a clean AC in A whose `assets` is empty at the start.
+        ac = AppliedControl.objects.create(
+            folder=folder_a, name=f"ac-target-{uuid.uuid4().hex[:6]}"
+        )
+        asset_in_b = Asset.objects.create(
+            folder=folder_b,
+            name=f"asset-B2-{uuid.uuid4().hex[:6]}",
+            type=Asset.Type.PRIMARY,
+        )
+        client = _client_for(_make_scoped_domain_manager(folder_a))
+
+        r = client.post(
+            "/api/applied-controls/batch-action/",
+            {
+                "action": "add_m2m",
+                "ids": [str(ac.id)],
+                "field": "assets",
+                "value": [str(asset_in_b.id)],
+            },
+            format="json",
+        )
+        assert r.status_code == status.HTTP_200_OK, r.content
+        body = r.json()
+        assert body["succeeded"] == [], (
+            f"add_m2m must not silently succeed across folders; got {body!r}"
+        )
+        assert len(body["failed"]) == 1, body
+        # The serializer should surface a permission error on the `assets` field.
+        err = body["failed"][0].get("error")
+        assert "assets" in (err if isinstance(err, dict) else str(err)), (
+            f"expected per-field permission error on `assets`, got {err!r}"
+        )
+
+        ac.refresh_from_db()
+        assert list(ac.assets.values_list("id", flat=True)) == [], (
+            "no cross-folder asset must be attached after the rejected batch action"
+        )
+
+    def test_add_m2m_succeeds_for_in_scope_asset(self):
+        """Positive control: same domain manager attaching an asset that lives
+        inside their scoped folder still works."""
+        folder_a, _folder_b, _ac, _asset = _setup_cross_folder_link()
+        ac = AppliedControl.objects.create(
+            folder=folder_a, name=f"ac-target-{uuid.uuid4().hex[:6]}"
+        )
+        asset_in_a = Asset.objects.create(
+            folder=folder_a,
+            name=f"asset-A-{uuid.uuid4().hex[:6]}",
+            type=Asset.Type.PRIMARY,
+        )
+        client = _client_for(_make_scoped_domain_manager(folder_a))
+
+        r = client.post(
+            "/api/applied-controls/batch-action/",
+            {
+                "action": "add_m2m",
+                "ids": [str(ac.id)],
+                "field": "assets",
+                "value": [str(asset_in_a.id)],
+            },
+            format="json",
+        )
+        assert r.status_code == status.HTTP_200_OK, r.content
+        body = r.json()
+        assert len(body["succeeded"]) == 1 and body["failed"] == [], body
+        assert list(ac.assets.values_list("id", flat=True)) == [asset_in_a.id]
