@@ -3042,7 +3042,7 @@ const FIELD_COMPONENT_MAP = {
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'user-groups': {
-		localization_dict: UserGroupNameDisplay
+		name: UserGroupNameDisplay
 	},
 	'quantitative-risk-hypotheses': {
 		lec_data: LecChartPreview

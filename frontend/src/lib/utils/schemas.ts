@@ -421,7 +421,7 @@ export const FilteringLabelSchema = z.object({
 });
 
 export const RequirementAssessmentSchema = z.object({
-	answers: jsonSchema,
+	answers: jsonSchema.optional().nullable(),
 	status: z.string(),
 	result: z.string(),
 	extended_result: z.string().optional().nullable(),

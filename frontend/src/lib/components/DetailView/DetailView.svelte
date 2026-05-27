@@ -36,14 +36,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = [
-		'id',
-		'is_published',
-		'localization_dict',
-		'str',
-		'path',
-		'sync_mappings'
-	];
+	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
 
 	interface Props {
 		data: any;
@@ -637,6 +630,8 @@
 																		rel="noopener noreferrer"
 																		class="anchor">{val.str}</a
 																	>
+																{:else if val.str && key === 'permissions'}
+																	{val.str}
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}

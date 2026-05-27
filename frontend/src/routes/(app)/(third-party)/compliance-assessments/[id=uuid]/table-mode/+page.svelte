@@ -98,6 +98,7 @@
 		(data.viewerRole ?? 'auditor') as 'respondent' | 'auditor'
 	);
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showObservation = $derived(fieldVis.showObservation);
@@ -680,7 +681,7 @@
 												</div>
 											</div>
 										{/if}
-										{#if requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
+										{#if showAnswers && requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
 											<div class="flex flex-col w-full space-y-2">
 												<Question
 													questions={requirementAssessment.requirement.questions}
@@ -728,7 +729,7 @@
 												? 'pointer-events-none opacity-60'
 												: ''}"
 										>
-											{#if showScore && !shallow && complianceAssessment.scoring_enabled}
+											{#if showScore && !shallow}
 												{#if hasComputedScore(requirementAssessment.requirement.questions)}
 													<div class="flex flex-row items-center space-x-4">
 														<span class="font-medium">{m.score()}</span>

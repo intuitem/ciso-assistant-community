@@ -12,11 +12,15 @@
 		score: number | null;
 		documentationScore: number | null;
 		isScored: boolean;
+		showResult?: boolean;
+		showScore?: boolean;
+		showStatus?: boolean;
 		scoringEnabled?: boolean;
 		showDocumentationScore: boolean;
 		max_score: number;
 		progressStatusEnabled?: boolean;
 		extendedResultEnabled?: boolean;
+		showExtendedResult?: boolean;
 		extendedResult?: string | null;
 		extendedResultColor?: string | null;
 	}
@@ -30,11 +34,15 @@
 		score,
 		documentationScore,
 		isScored,
+		showResult = true,
+		showScore = true,
+		showStatus = true,
 		scoringEnabled = false,
 		showDocumentationScore,
 		max_score,
 		progressStatusEnabled = true,
 		extendedResultEnabled = false,
+		showExtendedResult = true,
 		extendedResult = null,
 		extendedResultColor = null
 	}: Props = $props();
@@ -48,20 +56,22 @@
 
 {#if assessable}
 	<div class="flex flex-row space-x-2 items-center">
-		{#if progressStatusEnabled}
+		{#if showStatus}
 			<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
 				{lead}
 			</span>
 		{/if}
-		<span class="badge {classesText} h-fit" style="background-color: {resultColor ?? '#d1d5db'};">
-			{leadResult}
-		</span>
-		{#if extendedResultEnabled && leadExtendedResult && extendedResultColor}
+		{#if showResult}
+			<span class="badge {classesText} h-fit" style="background-color: {resultColor ?? '#d1d5db'};">
+				{leadResult}
+			</span>
+		{/if}
+		{#if showExtendedResult && leadExtendedResult && extendedResultColor}
 			<span class="badge text-white h-fit" style="background-color: {extendedResultColor};">
 				{leadExtendedResult}
 			</span>
 		{/if}
-		{#if scoringEnabled && resultI18n !== 'notApplicable' && isScored}
+		{#if showScore && resultI18n !== 'notApplicable' && isScored}
 			<div class="relative">
 				<Progress
 					value={(score * 100) / max_score}

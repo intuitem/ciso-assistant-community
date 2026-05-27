@@ -179,7 +179,7 @@
 		if (browser) {
 			const url = new URL(window.location.href);
 			const next = getSecureRedirect(url.searchParams.get('next'));
-			if (next) window.location.href = next;
+			if (next) goto(next);
 			else history.back();
 		}
 	}
