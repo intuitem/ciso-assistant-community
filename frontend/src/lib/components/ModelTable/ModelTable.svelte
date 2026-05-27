@@ -54,7 +54,6 @@
 		type ModalComponent,
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		// Props
@@ -1030,7 +1029,11 @@
 															{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
 																? (value ?? '-')
 																: safeTranslate(value ?? '-')}
-															<MarkdownRenderer content={displayValue} />
+															{#if displayValue?.length > 300}
+																{displayValue.slice(0, 300)}...
+															{:else}
+																{displayValue}
+															{/if}
 														{/if}
 														{@render badge?.(key, row)}
 													</div>

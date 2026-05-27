@@ -65,8 +65,8 @@
 </script>
 
 <div>
-	<span class="whitespace-pre-line" style="font-weight: 300;">
-		<span class="max-w-[80ch]">
+	<div class="whitespace-pre-line" style="font-weight: 300;">
+		<div class="max-w-[80ch]">
 			{#if title || description}
 				{#if title}
 					<span style="font-weight: 600;">{title}</span>
@@ -78,8 +78,8 @@
 				<!-- This displays the first question's text -->
 				{Object.entries(node?.questions)[0][1].text}
 			{/if}
-		</span>
-	</span>
+		</div>
+	</div>
 	{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 		<div
 			role="button"
