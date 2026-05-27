@@ -7,8 +7,11 @@ import time
 from datetime import datetime, timezone
 
 import requests
+from django.conf import settings
 from huey.contrib.djhuey import db_task
 from django.core.serializers.json import DjangoJSONEncoder
+
+from core.net_safety import BlockedRequestError, assert_public_url
 
 from .models import WebhookEndpoint
 
@@ -61,17 +64,41 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
         "webhook-signature": f"v1,{signature}",
     }
 
-    # Send request (15s timeout)
+    # Model.clean() only blocks IP-literal hostnames and skips DNS;
+    # re-validate at send time so DNS-based targets and post-save DNS
+    # changes are caught. WEBHOOK_ALLOW_PRIVATE_IPS is the existing
+    # dev/loopback escape hatch.
+    if not getattr(settings, "WEBHOOK_ALLOW_PRIVATE_IPS", False):
+        try:
+            assert_public_url(endpoint.url, allowed_schemes=("http", "https"))
+        except BlockedRequestError:
+            logger.error(
+                "Webhook blocked by SSRF guard",
+                endpoint_id=endpoint_id,
+                url=endpoint.url,
+                exc_info=True,
+            )
+            return "Blocked by SSRF guard"
+
+    # allow_redirects=False so a hostile receiver can't bounce us to an
+    # internal IP after the pre-check.
     try:
         response = requests.post(
-            endpoint.url, data=json_payload.encode("utf-8"), headers=headers, timeout=15
+            endpoint.url,
+            data=json_payload.encode("utf-8"),
+            headers=headers,
+            timeout=15,
+            allow_redirects=False,
         )
 
-        # Any non-2xx status code is a failure
         if 200 <= response.status_code < 300:
             return f"Success: Sent {event_type} to {endpoint.url}"
+        elif 300 <= response.status_code < 400:
+            raise Exception(
+                f"Webhook target {endpoint.url} returned redirect "
+                f"(status {response.status_code}); redirects are not followed."
+            )
         else:
-            # Raise exception to trigger Huey retry
             raise Exception(
                 f"Webhook failed for {endpoint_id} with status {response.status_code}."
             )

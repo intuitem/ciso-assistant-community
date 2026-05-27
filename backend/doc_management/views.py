@@ -3,6 +3,7 @@ import mimetypes
 from pathlib import Path
 from uuid import UUID
 
+import requests
 import structlog
 import yaml
 from django.db import models
@@ -24,6 +25,7 @@ from rest_framework.response import Response
 import weasyprint
 from weasyprint import HTML
 
+from core.net_safety import BlockedRequestError, assert_public_url
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder
 
@@ -49,6 +51,28 @@ def _get_templates_dir(lang: str) -> Path:
     if localized.exists() and any(localized.glob("*.md")):
         return localized
     return TEMPLATES_BASE_DIR / "en"
+
+
+_PDF_FETCH_MAX_BYTES = 10 * 1024 * 1024
+
+
+def _safe_url_fetcher(url, timeout=10, ssl_context=None):
+    if url.startswith("data:"):
+        return weasyprint.default_url_fetcher(url)
+    assert_public_url(url, allowed_schemes=("https",))
+    r = requests.get(url, timeout=timeout, allow_redirects=False, stream=True)
+    if 300 <= r.status_code < 400:
+        r.close()
+        raise BlockedRequestError(f"Redirects not followed: {url}")
+    content = r.raw.read(_PDF_FETCH_MAX_BYTES + 1, decode_content=True)
+    r.close()
+    if len(content) > _PDF_FETCH_MAX_BYTES:
+        raise BlockedRequestError(f"Response exceeds {_PDF_FETCH_MAX_BYTES} bytes")
+    mime = (
+        r.headers.get("Content-Type", "application/octet-stream").split(";")[0].strip()
+        or None
+    )
+    return {"string": content, "mime_type": mime, "redirected_url": r.url}
 
 
 class ManagedDocumentViewSet(BaseModelViewSet):
@@ -642,20 +666,6 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         html_string = render_to_string(
             "doc_management/policy_document_pdf.html", context
         )
-
-        def _safe_url_fetcher(url, timeout=10, ssl_context=None):
-            """Allow data URIs and public HTTPS images, block everything else.
-
-            Prevents SSRF via file://, internal network URLs, or non-HTTPS schemes
-            while still allowing users to embed external logos/images.
-            """
-            if url.startswith("data:"):
-                return weasyprint.default_url_fetcher(url)
-            if url.startswith("https://"):
-                return weasyprint.default_url_fetcher(
-                    url, timeout=timeout, ssl_context=ssl_context
-                )
-            raise ValueError(f"Blocked resource loading for URL scheme: {url}")
 
         return HTML(string=html_string, url_fetcher=_safe_url_fetcher).write_pdf()
 
