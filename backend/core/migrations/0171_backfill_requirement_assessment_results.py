@@ -287,7 +287,7 @@ def reverse_backfill(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0169_tasktemplate_filtering_labels"),
+        ("core", "0170_alter_terminology_field_path"),
     ]
 
     operations = [
