@@ -2828,5 +2828,6 @@
 	"builderQuestionTypeUniqueChoice": "Scelta unica",
 	"builderQuestionTypeMultipleChoice": "Scelta multipla",
 	"builderQuestionTypeDate": "Data",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "modificato in",
+	"requirementWeight": "Peso"
 }

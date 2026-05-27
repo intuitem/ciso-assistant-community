@@ -160,6 +160,7 @@ class TestRequirementAssessmentsAuthenticated:
                         0
                     ].implementation_groups,
                     "display_mode": RequirementNode.objects.all()[0].display_mode,
+                    "weight": RequirementNode.objects.all()[0].weight,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -322,6 +323,7 @@ class TestRequirementAssessmentsAuthenticated:
                         0
                     ].implementation_groups,
                     "display_mode": RequirementNode.objects.all()[0].display_mode,
+                    "weight": RequirementNode.objects.all()[0].weight,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
