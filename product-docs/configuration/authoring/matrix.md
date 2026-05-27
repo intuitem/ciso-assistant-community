@@ -6,6 +6,10 @@ description: Task-oriented recipes for authoring a risk matrix — build, fork, 
 
 A risk matrix in CISO Assistant declares the **probability scale**, the **impact scale**, and the **resulting risk levels** in their combination — the inputs every risk scenario reads from. Most organisations already have an internal risk taxonomy (often 5×5, sometimes 4×4 or 3×3) and want CISO Assistant to mirror it exactly rather than impose a new one. The recommended way to author one is the **in-app matrix editor** at **`/experimental/matrix-editor`**. This page is a set of task-oriented recipes — find the one that matches what you're trying to do, follow the steps. For the complete walkthrough of every surface in the editor, see [Matrix editor — reference](matrix-editor.md).
 
+{% hint style="warning" %}
+**Experimental.** The matrix editor is exposed under the `/experimental/` namespace while its UX is being polished. The URL and menu entry are likely to move once it graduates, and individual surfaces may change between releases. The underlying data stays — your drafts and published matrices aren't at risk — but expect occasional rough edges. Feedback is welcome.
+{% endhint %}
+
 ## Tasks
 
 ### Create a 5×5 matrix from scratch

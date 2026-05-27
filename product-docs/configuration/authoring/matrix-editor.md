@@ -6,7 +6,11 @@ description: Complete reference for the in-app risk matrix editor — every surf
 
 This page is the **complete reference** for the in-app matrix editor. It covers every surface, every action, and every nuance. If you're looking for step-by-step recipes (_"how do I create a 5×5 matrix?"_, _"how do I translate one to French?"_), start with [Risk matrix authoring](matrix.md) — this page is the lookup material the recipes link into.
 
-The editor lives at **`/experimental/matrix-editor`**. It's currently exposed under the _experimental_ namespace while the UX is polished — the menu entry and URL are likely to move once it graduates, but the underlying tool is the same.
+The editor lives at **`/experimental/matrix-editor`**.
+
+{% hint style="warning" %}
+**Experimental.** The matrix editor is exposed under the `/experimental/` namespace while its UX is being polished. The URL and menu entry are likely to move once it graduates, and individual surfaces may change between releases. The underlying data stays — your drafts and published matrices aren't at risk — but expect occasional rough edges. Feedback is welcome.
+{% endhint %}
 
 ## Opening the editor
 

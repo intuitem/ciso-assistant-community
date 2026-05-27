@@ -6,6 +6,10 @@ description: Task-oriented recipes for authoring a framework — fork, build a t
 
 A framework in CISO Assistant is a tree of **requirement nodes** that gets imported from a YAML library file. The recommended way to author one is the **in-app framework builder**, which lives at **`/experimental/framework-builder`**. This page is a set of task-oriented recipes — find the one that matches what you're trying to do, follow the steps. For the complete walkthrough of every surface in the editor, see [Framework builder — reference](framework-builder.md).
 
+{% hint style="warning" %}
+**Experimental.** The framework builder is exposed under the `/experimental/` namespace while its UX is being polished. The URL and menu entry are likely to move once it graduates, and individual surfaces may change between releases. The underlying data stays — your drafts and published frameworks aren't at risk — but expect occasional rough edges. Feedback is welcome.
+{% endhint %}
+
 You don't have to start from a blank page. A common pattern is to **fork an existing framework** — take a built-in one (or any community-shared library) as a baseline, then copy and tune it: rename the URN to your own namespace, prune the requirements you don't need, add organisation-specific ones, adjust the scoring scale, and ship it as a new library. This is the fastest route for industry-specific adaptations (an ISO 27001 variant for a regulated sector), internal policy frameworks that should align with NIST CSF, or regulatory frameworks that need extra in-house requirements layered on top.
 
 ## Tasks

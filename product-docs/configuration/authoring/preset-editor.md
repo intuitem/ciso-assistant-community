@@ -6,7 +6,11 @@ description: Complete reference for the in-app journey preset editor — every s
 
 This page is the **complete reference** for the in-app journey preset editor. It covers every surface, every action, and every nuance. If you're looking for step-by-step recipes (_"how do I add a step?"_, _"how do I scaffold an audit?"_), start with [Journey preset authoring](preset.md) — this page is the lookup material the recipes link into.
 
-The editor lives at **`/experimental/preset-editor`**. It's currently exposed under the _experimental_ namespace while the UX is polished — the menu entry and URL are likely to move once it graduates, but the underlying tool is the same.
+The editor lives at **`/experimental/preset-editor`**.
+
+{% hint style="warning" %}
+**Experimental.** The preset editor is exposed under the `/experimental/` namespace while its UX is being polished. The URL and menu entry are likely to move once it graduates, and individual surfaces may change between releases. The underlying data stays — your drafts and published presets aren't at risk — but expect occasional rough edges. Feedback is welcome.
+{% endhint %}
 
 ## Opening the editor
 

@@ -6,6 +6,10 @@ description: Task-oriented recipes for authoring a journey preset — fork, buil
 
 A **journey preset** is a reusable template for a journey — the bundle of audits, risk assessments, and supporting objects that a team applies to a new perimeter (e.g. _new project intake_, _supplier onboarding_, _annual ISO recertification_). Authoring a preset well turns repeated set-up work into a one-click instantiation, with consistent naming, owners, and scope across teams. The recommended way to author one is the **in-app preset editor** at **`/experimental/preset-editor`**. This page is a set of task-oriented recipes — find the one that matches what you're trying to do, follow the steps. For the complete walkthrough of every surface in the editor, see [Preset editor — reference](preset-editor.md).
 
+{% hint style="warning" %}
+**Experimental.** The preset editor is exposed under the `/experimental/` namespace while its UX is being polished. The URL and menu entry are likely to move once it graduates, and individual surfaces may change between releases. The underlying data stays — your drafts and published presets aren't at risk — but expect occasional rough edges. Feedback is welcome.
+{% endhint %}
+
 ## Tasks
 
 ### Create a blank preset

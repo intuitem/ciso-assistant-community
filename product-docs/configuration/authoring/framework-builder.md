@@ -6,7 +6,11 @@ description: Complete reference for the in-app framework builder — every surfa
 
 This page is the **complete reference** for the in-app framework builder. It covers every surface, every action, and every nuance of the editor. If you're looking for step-by-step recipes (_"how do I fork a framework?"_, _"how do I publish?"_), start with [Framework authoring](framework.md) — this page is the lookup material the recipes link into.
 
-The builder lives at **`/experimental/framework-builder`**. It's currently exposed under the _experimental_ namespace while the UX is polished — the menu entry and URL are likely to move once it graduates, but the underlying tool is the same.
+The builder lives at **`/experimental/framework-builder`**.
+
+{% hint style="warning" %}
+**Experimental.** The framework builder is exposed under the `/experimental/` namespace while its UX is being polished. The URL and menu entry are likely to move once it graduates, and individual surfaces may change between releases. The underlying data stays — your drafts and published frameworks aren't at risk — but expect occasional rough edges. Feedback is welcome.
+{% endhint %}
 
 ## Opening the builder
 
