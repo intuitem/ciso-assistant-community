@@ -24,7 +24,7 @@
 	let { data }: Props = $props();
 
 	const user = page.data.user;
-	const validation_flow = data.validation_flow;
+	const validation_flow = $derived(data.validation_flow);
 
 	const modalStore: ModalStore = getModalStore();
 
