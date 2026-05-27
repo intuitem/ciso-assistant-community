@@ -75,6 +75,7 @@
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
+	import ProjectForm from './ModelForm/ProjectForm.svelte';
 	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
 	import ResponsibilityMatrixActivityForm from './ModelForm/ResponsibilityMatrixActivityForm.svelte';
 	import ResponsibilityAssignmentForm from './ModelForm/ResponsibilityAssignmentForm.svelte';
@@ -808,6 +809,8 @@
 			/>
 		{:else if URLModel === 'accreditations'}
 			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'projects'}
+			<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'responsibility-matrices'}
 			<ResponsibilityMatrixForm
 				{form}

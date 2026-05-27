@@ -3624,5 +3624,6 @@
 	"builderQuestionTypeUniqueChoice": "单选",
 	"builderQuestionTypeMultipleChoice": "多选",
 	"builderQuestionTypeDate": "日期",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "已变更于",
+	"requirementWeight": "权重"
 }

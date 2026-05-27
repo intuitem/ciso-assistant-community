@@ -97,6 +97,7 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_project",
     "view_responsibilityrole",
     "view_responsibilitymatrix",
     "view_responsibilitymatrixactivity",
@@ -214,6 +215,7 @@ APPROVER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_project",
     "view_responsibilityrole",
     "view_responsibilitymatrix",
     "view_responsibilitymatrixactivity",
@@ -518,6 +520,10 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
     "view_responsibilityrole",
     "add_responsibilityrole",
     "change_responsibilityrole",
@@ -917,6 +923,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
     "view_responsibilityrole",
     "add_responsibilityrole",
     "change_responsibilityrole",
@@ -1364,6 +1374,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
     "view_responsibilityrole",
     "add_responsibilityrole",
     "change_responsibilityrole",
@@ -1719,6 +1733,16 @@ def startup(sender=None, **kwargs):
         Terminology.create_default_metric_units()
     except Exception as e:
         logger.error("Error creating default Metric Units", exc_info=True)
+
+    try:
+        Terminology.create_default_project_statuses()
+    except Exception as e:
+        logger.error("Error creating default Project Statuses", exc_info=True)
+
+    try:
+        Terminology.create_default_project_health()
+    except Exception as e:
+        logger.error("Error creating default Project Health", exc_info=True)
 
     try:
         from pmbok.models import ResponsibilityRole

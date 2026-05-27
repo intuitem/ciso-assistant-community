@@ -4,6 +4,7 @@
 	import type { ActionData, PageData } from './$types';
 
 	import { page } from '$app/state';
+	import { goto } from '$lib/utils/breadcrumbs';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
@@ -69,10 +70,9 @@
 	}
 
 	function cancel(): void {
-		var currentUrl = window.location.href;
-		var url = new URL(currentUrl);
-		var nextValue = getSecureRedirect(url.searchParams.get('next'));
-		window.location.href = nextValue || complianceAssessmentURL;
+		const url = new URL(window.location.href);
+		const nextValue = getSecureRedirect(url.searchParams.get('next'));
+		goto(nextValue || complianceAssessmentURL);
 	}
 
 	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
@@ -258,7 +258,7 @@
 		applyAction: true,
 		resetForm: false,
 		validators: zod(schema),
-		taintedMessage: false,
+		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto'
 	});
 
@@ -291,25 +291,29 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
 	);
 
-	// Field visibility
-	const fw = data.requirementAssessment.compliance_assessment.framework;
-	const complianceAssessment = data.requirementAssessment.compliance_assessment;
-	const viewerRole: 'respondent' | 'auditor' =
-		data.viewerRole === 'auditor' ? 'auditor' : 'respondent';
-	const {
-		showResult,
-		showStatus,
-		showScore,
-		showDocumentationScore,
-		showObservation,
-		showAppliedControls,
-		showEvidences,
-		showRespondentAlignment,
-		showComments
-	} = getFieldVisibility(complianceAssessment, viewerRole);
+	// Field visibility — derived so that SvelteKit's data reload (e.g. after the
+	// audit's field_visibility is edited in another tab and the user navigates
+	// back) refreshes the flags. A plain const would capture a stale reference.
+	const fw = $derived(data.requirementAssessment.compliance_assessment.framework);
+	const complianceAssessment = $derived(data.requirementAssessment.compliance_assessment);
+	const viewerRole: 'respondent' | 'auditor' = $derived(
+		data.viewerRole === 'auditor' ? 'auditor' : 'respondent'
+	);
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
+	const showResult = $derived(fieldVis.showResult);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showScore = $derived(fieldVis.showScore);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
+	const showObservation = $derived(fieldVis.showObservation);
+	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showEvidences = $derived(fieldVis.showEvidences);
+	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	const showComments = $derived(fieldVis.showComments);
 
-	const isAuditor = viewerRole === 'auditor';
-	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+	const isAuditor = $derived(viewerRole === 'auditor');
+	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
@@ -394,8 +398,13 @@
 {/if}
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
-		<div class="flex">
+		<div class="flex items-center gap-2">
 			<span class="code left h-min">{data.requirement.urn}</span>
+			{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
+				<span class="badge h-fit bg-indigo-100 text-indigo-800">
+					{m.requirementWeight()}: {data.requirement.weight}
+				</span>
+			{/if}
 		</div>
 		<a
 			class="text-pink-500 hover:text-pink-400"
@@ -622,10 +631,14 @@
 						>
 							<Tabs.List>
 								{#if canShowAppliedControls}
-									<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
+									<Tabs.Trigger value="applied_controls" data-testid="applied-controls-tab"
+										>{m.appliedControls()}</Tabs.Trigger
+									>
 								{/if}
 								{#if showEvidences}
-									<Tabs.Trigger value="evidences">{m.evidences()}</Tabs.Trigger>
+									<Tabs.Trigger value="evidences" data-testid="evidences-tab"
+										>{m.evidences()}</Tabs.Trigger
+									>
 								{/if}
 								{#if isAuditor}
 									<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
@@ -786,22 +799,26 @@
 				<HiddenInput {form} field="compliance_assessment" />
 				<HiddenInput {form} field="nextRequirementAssessmentId" />
 				<div class="flex flex-col my-8 space-y-6">
-					{#if page.data.requirementAssessment.requirement.questions != null && Object.keys(page.data.requirementAssessment.requirement.questions).length !== 0}
-						<Question
-							{form}
-							field="answers"
-							questions={page.data.requirementAssessment.requirement.questions}
-							label={m.questionSingular()}
-						/>
+					{#if showAnswers && page.data.requirementAssessment.requirement.questions != null && Object.keys(page.data.requirementAssessment.requirement.questions).length !== 0}
+						<div data-testid="answers-field">
+							<Question
+								{form}
+								field="answers"
+								questions={page.data.requirementAssessment.requirement.questions}
+								label={m.questionSingular()}
+							/>
+						</div>
 					{/if}
-					{#if showStatus && page.data.requirementAssessment.compliance_assessment.progress_status_enabled}
-						<Select
-							{form}
-							options={page.data.model.selectOptions['status']}
-							field="status"
-							label={m.status()}
-							helpText={m.requirementAssessmentStatusHelpText()}
-						/>
+					{#if showStatus}
+						<div data-testid="status-field">
+							<Select
+								{form}
+								options={page.data.model.selectOptions['status']}
+								field="status"
+								label={m.status()}
+								helpText={m.requirementAssessmentStatusHelpText()}
+							/>
+						</div>
 					{/if}
 					{#if showRespondentAlignment && page.data.requirementAssessment.respondent_alignment}
 						<p class="flex flex-row items-center space-x-4">
@@ -817,34 +834,38 @@
 						</p>
 					{/if}
 					{#if showResult}
-						{#if computedResult}
-							<p class="flex flex-row items-center space-x-4">
-								<span class="font-medium">{m.result()}</span>
-								<span
-									class="badge text-sm font-semibold"
-									style={resultBadgeStyle(computedResult || 'not_assessed')}
-								>
-									{safeTranslate(computedResult || 'not_assessed')}
-								</span>
-							</p>
-						{:else}
+						<div data-testid="result-field">
+							{#if computedResult}
+								<p class="flex flex-row items-center space-x-4">
+									<span class="font-medium">{m.result()}</span>
+									<span
+										class="badge text-sm font-semibold"
+										style={resultBadgeStyle(computedResult || 'not_assessed')}
+									>
+										{safeTranslate(computedResult || 'not_assessed')}
+									</span>
+								</p>
+							{:else}
+								<Select
+									{form}
+									options={page.data.model.selectOptions['result']}
+									field="result"
+									label={m.result()}
+									helpText={m.requirementAssessmentResultHelpText()}
+								/>
+							{/if}
+						</div>
+					{/if}
+					{#if showExtendedResult}
+						<div data-testid="extended-result-field">
 							<Select
 								{form}
-								options={page.data.model.selectOptions['result']}
-								field="result"
-								label={m.result()}
-								helpText={m.requirementAssessmentResultHelpText()}
+								options={page.data.model.selectOptions['extended_result']}
+								field="extended_result"
+								label={m.extendedResult()}
+								helpText={m.extendedResultHelpText()}
 							/>
-						{/if}
-					{/if}
-					{#if showResult && page.data.requirementAssessment.compliance_assessment.extended_result_enabled}
-						<Select
-							{form}
-							options={page.data.model.selectOptions['extended_result']}
-							field="extended_result"
-							label={m.extendedResult()}
-							helpText={m.extendedResultHelpText()}
-						/>
+						</div>
 					{/if}
 					{#if page.data.compliance_assessment_score.scoring_enabled}
 						{#if computedScore !== null}
@@ -878,7 +899,7 @@
 							{/if}
 						{:else if data.result !== 'not_applicable'}
 							{#if showScore}
-								<div class="flex flex-col">
+								<div class="flex flex-col" data-testid="score-field">
 									<Score
 										{form}
 										min_score={page.data.compliance_assessment_score.min_score}
@@ -906,23 +927,27 @@
 									</Score>
 								</div>
 							{/if}
-							{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
-								<Score
-									{form}
-									min_score={page.data.compliance_assessment_score.min_score}
-									max_score={page.data.compliance_assessment_score.max_score}
-									scores_definition={page.data.compliance_assessment_score.scores_definition}
-									field="documentation_score"
-									label={m.documentationScore()}
-									isDoc={true}
-									disabled={!data.is_scored}
-								/>
+							{#if showDocumentationScore}
+								<div data-testid="documentation-score-field">
+									<Score
+										{form}
+										min_score={page.data.compliance_assessment_score.min_score}
+										max_score={page.data.compliance_assessment_score.max_score}
+										scores_definition={page.data.compliance_assessment_score.scores_definition}
+										field="documentation_score"
+										label={m.documentationScore()}
+										isDoc={true}
+										disabled={!data.is_scored}
+									/>
+								</div>
 							{/if}
 						{/if}
 					{/if}
 
 					{#if showObservation}
-						<MarkdownField {form} field="observation" label="Observation" />
+						<div data-testid="observation-field">
+							<MarkdownField {form} field="observation" label="Observation" />
+						</div>
 					{/if}
 				</div>
 				<div

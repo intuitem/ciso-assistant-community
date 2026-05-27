@@ -360,6 +360,10 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = Vulnerability
         exclude = ["created_at", "updated_at", "is_published"]
@@ -898,6 +902,10 @@ class AssetClassWriteSerializer(BaseModelSerializer):
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = ReferenceControl
         exclude = ["translations"]
@@ -955,6 +963,10 @@ class LibraryWriteSerializer(BaseModelSerializer):
 
 
 class ThreatWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
     class Meta:
         model = Threat
         exclude = ["translations"]
@@ -1895,7 +1907,6 @@ class UserWriteSerializer(BaseModelSerializer):
 class UserGroupReadSerializer(BaseModelSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
     name = serializers.CharField(source="__str__")
-    localization_dict = serializers.JSONField(source="get_localization_dict")
     folder = FieldsRelatedField()
 
     class Meta:
@@ -2888,6 +2899,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "questions",
                 "implementation_groups",
                 "display_mode",
+                "weight",
             ]
 
     name = serializers.CharField(source="__str__")

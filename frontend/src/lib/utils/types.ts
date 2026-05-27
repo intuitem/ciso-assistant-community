@@ -137,6 +137,7 @@ export const URL_MODEL = [
 	// pmbok
 	'generic-collections',
 	'accreditations',
+	'projects',
 	'responsibility-roles',
 	'responsibility-matrices',
 	'responsibility-matrix-activities',

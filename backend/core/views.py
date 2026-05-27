@@ -1761,6 +1761,7 @@ class ThreatViewSet(BaseModelViewSet):
         "provider",
         "library",
         "risk_scenarios",
+        "findings",
         "filtering_labels",
         "urn",
     ]
@@ -5351,6 +5352,16 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         return Response({"results": object_ids_change})
 
+    @action(detail=False, methods=["get"], name="Get applied controls analytics")
+    def analytics(self, request):
+        """Aggregated analytics over the filtered applied-controls queryset.
+
+        Respects the same filterset as the list endpoint, so the analytics page
+        can carry the table's current filters through verbatim.
+        """
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(ActionPlanBudgetOverview.compute_budget_overview(qs))
+
     @action(
         detail=False, name="Something"
     )  # Write a good name for the "name" keyword argument
@@ -6140,6 +6151,7 @@ class ActionPlanBudgetOverview:
     def compute_budget_overview(queryset):
         from core.utils import get_global_currency, format_currency
         from global_settings.models import GlobalSettings
+        from django.utils import timezone
 
         # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
         _f = ActionPlanBudgetOverview._safe_float
@@ -6151,12 +6163,27 @@ class ActionPlanBudgetOverview:
 
         currency = get_global_currency()
         fmt = lambda v: format_currency(v, currency)
+        today = timezone.localdate()
+
+        # Defensive prefetch: top-owner/top-folder iteration touches M2M + FK
+        if hasattr(queryset, "prefetch_related"):
+            queryset = queryset.prefetch_related("owner").select_related("folder")
 
         controls = list(queryset)
         count = len(controls)
         by_status: dict = {}
         by_priority: dict = {}
         by_category: dict = {}
+        by_csf_function: dict = {}
+        eta_buckets = {
+            "overdue": {"key": "overdue", "count": 0, "total": 0.0},
+            "due_30d": {"key": "due_30d", "count": 0, "total": 0.0},
+            "due_90d": {"key": "due_90d", "count": 0, "total": 0.0},
+            "later": {"key": "later", "count": 0, "total": 0.0},
+            "no_eta": {"key": "no_eta", "count": 0, "total": 0.0},
+        }
+        owner_counts: dict = {}
+        folder_counts: dict = {}
         total_annual_cost = 0.0
         count_with_cost = 0
 
@@ -6166,11 +6193,12 @@ class ActionPlanBudgetOverview:
                 count_with_cost += 1
             total_annual_cost += cost
 
-            # by status — use raw value as key, display value for frontend
+            # by status — keep `status` for backwards-compat; add raw `key` for i18n
             s = ctrl.status or "_unset"
             status_label = ctrl.get_status_display() if ctrl.status else "not_set"
             bucket = by_status.setdefault(
-                s, {"status": status_label, "count": 0, "total": 0.0}
+                s,
+                {"key": s, "status": status_label, "count": 0, "total": 0.0},
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6182,7 +6210,12 @@ class ActionPlanBudgetOverview:
             )
             bucket = by_priority.setdefault(
                 p,
-                {"priority": priority_label, "count": 0, "total": 0.0},
+                {
+                    "key": str(p),
+                    "priority": priority_label,
+                    "count": 0,
+                    "total": 0.0,
+                },
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6192,7 +6225,74 @@ class ActionPlanBudgetOverview:
             category_label = ctrl.get_category_display() if ctrl.category else "not_set"
             bucket = by_category.setdefault(
                 c,
-                {"category": category_label, "count": 0, "total": 0.0},
+                {"key": c, "category": category_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # by csf_function
+            f = ctrl.csf_function or "_unset"
+            csf_label = (
+                ctrl.get_csf_function_display() if ctrl.csf_function else "not_set"
+            )
+            bucket = by_csf_function.setdefault(
+                f,
+                {
+                    "key": f,
+                    "csf_function": csf_label,
+                    "count": 0,
+                    "total": 0.0,
+                },
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # eta buckets
+            if ctrl.eta is None:
+                eta_buckets["no_eta"]["count"] += 1
+                eta_buckets["no_eta"]["total"] += cost
+            else:
+                delta_days = (ctrl.eta - today).days
+                if delta_days < 0:
+                    key = "overdue"
+                elif delta_days <= 30:
+                    key = "due_30d"
+                elif delta_days <= 90:
+                    key = "due_90d"
+                else:
+                    key = "later"
+                eta_buckets[key]["count"] += 1
+                eta_buckets[key]["total"] += cost
+
+            # top owners (M2M) — key by pk so homonyms don't collapse into one bucket
+            for owner in ctrl.owner.all():
+                owner_key = str(owner.pk)
+                bucket = owner_counts.setdefault(
+                    owner_key,
+                    {
+                        "key": owner_key,
+                        "label": str(owner),
+                        "count": 0,
+                        "total": 0.0,
+                        "status_breakdown": {},
+                    },
+                )
+                bucket["count"] += 1
+                bucket["total"] += cost
+                sb = bucket["status_breakdown"]
+                sb_key = ctrl.status or "_unset"
+                sb_entry = sb.setdefault(
+                    sb_key,
+                    {"key": sb_key, "status": status_label, "count": 0},
+                )
+                sb_entry["count"] += 1
+
+            # top folders — same: key by folder_id so two folders sharing a name don't merge
+            folder_key = str(ctrl.folder_id) if ctrl.folder_id else "_unset"
+            folder_label = ctrl.folder.name if ctrl.folder_id else "not_set"
+            bucket = folder_counts.setdefault(
+                folder_key,
+                {"key": folder_key, "label": folder_label, "count": 0, "total": 0.0},
             )
             bucket["count"] += 1
             bucket["total"] += cost
@@ -6204,6 +6304,28 @@ class ActionPlanBudgetOverview:
             bucket["total_display"] = fmt(bucket["total"])
         for bucket in by_category.values():
             bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_csf_function.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in eta_buckets.values():
+            bucket["total_display"] = fmt(bucket["total"])
+
+        top_owners = sorted(
+            owner_counts.values(), key=lambda x: x["count"], reverse=True
+        )[:10]
+        for bucket in top_owners:
+            bucket["total_display"] = fmt(bucket["total"])
+            # Flatten status_breakdown dict → list sorted by count desc for stable rendering
+            bucket["status_breakdown"] = sorted(
+                bucket["status_breakdown"].values(),
+                key=lambda x: x["count"],
+                reverse=True,
+            )
+
+        top_folders = sorted(
+            folder_counts.values(), key=lambda x: x["count"], reverse=True
+        )[:10]
+        for bucket in top_folders:
+            bucket["total_display"] = fmt(bucket["total"])
 
         return {
             "count": count,
@@ -6214,6 +6336,10 @@ class ActionPlanBudgetOverview:
             "by_status": [v for v in by_status.values() if v["count"] > 0],
             "by_priority": [v for v in by_priority.values() if v["count"] > 0],
             "by_category": [v for v in by_category.values() if v["count"] > 0],
+            "by_csf_function": [v for v in by_csf_function.values() if v["count"] > 0],
+            "eta_buckets": list(eta_buckets.values()),
+            "top_owners": top_owners,
+            "top_folders": top_folders,
         }
 
 
@@ -7287,9 +7413,9 @@ class UserViewSet(BaseModelViewSet):
         return queryset.distinct().prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
-                    "id", "builtin"
-                ),
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
+                .select_related("folder")
+                .only("id", "builtin", "name", "folder", "folder__name"),
             )
         )
 
@@ -7321,66 +7447,126 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserGroupOrderingFilter(filters.OrderingFilter):
+class TranslatedNameOrderingFilter(filters.OrderingFilter):
     """
-    Custom ordering filter:
-    - Performs in-memory (Python) sorting only for `localization_dict`.
-    - The sort key is a tuple: (folder full_path OR folder.name, object.name).
-    - Supports `-localization_dict` for descending order.
-    - For all other fields, it falls back to standard SQL ordering.
+    In-memory ordering filter for models whose __str__() returns a
+    locale-translated name (e.g. Role, UserGroup).
+
+    Subclasses set ``translated_ordering_field`` and override ``sort_key(obj)``
+    to control the sort.  Falls back to SQL ordering for other fields.
+    DRF pagination works because it can slice the returned list.
     """
 
+    translated_ordering_field = "name"  # default; override in subclass
+
+    def sort_key(self, obj):
+        return str(obj).casefold()
+
     def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
         ordering = self.get_ordering(request, queryset, view)
         if not ordering:
             return queryset
 
-        # Special case: in-memory sorting for `localization_dict`
-        if len(ordering) == 1 and ordering[0].lstrip("-") == "localization_dict":
+        field = self.translated_ordering_field
+        if len(ordering) == 1 and ordering[0].lstrip("-") == field:
             desc = ordering[0].startswith("-")
-
-            # Optimize DB access: fetch the related folder in one query
-            queryset = queryset.select_related("folder")
-
-            # Materialize queryset into a list to sort in Python
             data = list(queryset)
-
-            def full_path_or_name(folder):
-                """
-                Build a string key from the folder:
-                - Prefer the full path (names of all parent folders + current).
-                - Fall back to the folder's name if no path is available.
-                """
-                if folder is None:
-                    return ""
-
-                path_list = getattr(folder, "get_folder_full_path", None)
-                if callable(path_list):
-                    items = folder.get_folder_full_path(include_root=False)
-                    names = [getattr(f, "name", "") or "" for f in items]
-                    if names:
-                        return "/".join(names)
-
-                # Fallback: just the folder name
-                return getattr(folder, "name", "") or ""
-
-            def key_func(obj):
-                # Get the folder from the object
-                folder = getattr(obj, "folder", None)
-                # If you want to be more robust, you could use:
-                # from yourapp.models import Folder
-                # folder = Folder.get_folder(obj)
-
-                path_key = full_path_or_name(folder).casefold()
-                name_key = (getattr(obj, "name", "") or "").casefold()
-                return (path_key, name_key)
-
-            # Perform stable sort, reverse if `-localization_dict`
-            data.sort(key=key_func, reverse=desc)
+            data.sort(key=self.sort_key, reverse=desc)
             return data
 
-        # Default case: fall back to SQL ordering
         return super().filter_queryset(request, queryset, view)
+
+
+class RoleFilter(TranslatedNameOrderingFilter):
+    """
+    Combined search + ordering filter for roles.
+    Builtin role names are translated at runtime.
+    """
+
+    translated_ordering_field = "name"
+
+    def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
+        data = list(queryset)
+
+        # In-memory search: match against translated name and description
+        search_term = request.query_params.get("search", "").strip()
+        if search_term:
+            term = search_term.casefold()
+            data = [
+                obj
+                for obj in data
+                if term in str(obj).casefold()
+                or term in (obj.description or "").casefold()
+            ]
+
+        # In-memory ordering
+        ordering = self.get_ordering(request, queryset, view)
+        if (
+            ordering
+            and len(ordering) == 1
+            and ordering[0].lstrip("-") == self.translated_ordering_field
+        ):
+            desc = ordering[0].startswith("-")
+            data.sort(key=self.sort_key, reverse=desc)
+        else:
+            # Default: sort by translated name
+            data.sort(key=self.sort_key)
+
+        return data
+
+
+class UserGroupFilter(TranslatedNameOrderingFilter):
+    """
+    Combined search + ordering filter for user groups.
+    Both need in-memory processing because builtin group names
+    are translated at runtime and don't match their DB values.
+    """
+
+    translated_ordering_field = "name"
+
+    def _full_display(self, obj):
+        """Build the full searchable label from the complete folder path.
+        Untruncated (unlike the frontend display) for broader matching."""
+        path = obj.get_folder_full_path()
+        ancestors = [f.name for f in path[:-1]]
+        return " / ".join(ancestors + [str(obj)])
+
+    def sort_key(self, obj):
+        path = tuple(f.name.casefold() for f in obj.get_folder_full_path())
+        return path + (str(obj).casefold(),)
+
+    def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
+        data = list(queryset)
+
+        # In-memory search: match against full rendered label
+        search_term = request.query_params.get("search", "").strip()
+        if search_term:
+            term = search_term.casefold()
+            data = [obj for obj in data if term in self._full_display(obj).casefold()]
+
+        # In-memory ordering
+        ordering = self.get_ordering(request, queryset, view)
+        if (
+            ordering
+            and len(ordering) == 1
+            and ordering[0].lstrip("-") == self.translated_ordering_field
+        ):
+            desc = ordering[0].startswith("-")
+            data.sort(key=self.sort_key, reverse=desc)
+        else:
+            # Default: sort by translated name (naturally groups by folder)
+            data.sort(key=self.sort_key)
+
+        return data
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -7389,17 +7575,15 @@ class UserGroupViewSet(BaseModelViewSet):
     """
 
     model = UserGroup
-    ordering = ["builtin", "name"]
-    ordering_fields = ["localization_dict"]
+    ordering_fields = ["name"]
     filterset_fields = ["folder"]
-    search_fields = [
-        "folder__name"
-    ]  # temporary hack, filters only by folder name, not role name
     filter_backends = [
         DjangoFilterBackend,
-        UserGroupOrderingFilter,
-        filters.SearchFilter,
+        UserGroupFilter,
     ]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder")
 
     def destroy(self, request, *args, **kwargs):
         user_group = self.get_object()

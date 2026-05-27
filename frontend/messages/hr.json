@@ -4094,5 +4094,6 @@
 	"builderQuestionTypeUniqueChoice": "Jednostruki odabir",
 	"builderQuestionTypeMultipleChoice": "Višestruki odabir",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "promijenjeno u",
+	"requirementWeight": "Težina"
 }
