@@ -273,7 +273,6 @@ export const loadDetail = async ({ event, model, id }) => {
 		const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
 		title = hasName ? data.name : data.ref_id || title;
 	}
-
 	// If any reverseForeignKeyField has addExisting, load the parent's updateForm
 	let updateForm: SuperValidated<FormDataShape> | undefined;
 	const hasAddExisting = model.reverseForeignKeyFields?.some((f) => f.addExisting);
