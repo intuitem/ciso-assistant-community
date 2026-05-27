@@ -17033,13 +17033,4 @@ def metrics_view(request):
             "Error collecting metrics", status=500, content_type="text/plain"
         )
 
-    output = (
-        "\n".join(
-            line
-            for line in generate_latest().decode("utf-8").splitlines()
-            if not line.startswith(("# HELP", "# TYPE"))
-        )
-        + "\n"
-    )
-
-    return HttpResponse(output, content_type=CONTENT_TYPE_LATEST)
+    return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)
