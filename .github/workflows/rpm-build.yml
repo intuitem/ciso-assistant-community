@@ -28,7 +28,7 @@ jobs:
           dnf install -y git
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -54,11 +54,15 @@ jobs:
             ncurses-devel \
             gdbm-devel
 
-      - name: Install Node.js and pnpm
+      - name: Install Node.js
         run: |
           curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
           dnf install -y nodejs
-          npm install -g pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Install Poetry
         run: |
@@ -94,7 +98,7 @@ jobs:
           echo "Built RPM: $RPM_NAME ($RPM_SIZE)"
 
       - name: Upload RPM as Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ciso-assistant-rpm-${{ steps.version.outputs.version }}
           path: ${{ steps.rpm.outputs.path }}

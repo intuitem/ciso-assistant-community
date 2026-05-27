@@ -14,9 +14,31 @@ defineCustomServerStrategy('custom-fallback', {
 	getLocale: (request) => fallbackLocaleStore.get(request) ?? DEFAULT_LANGUAGE
 });
 
+const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
+
+async function fetchWithRetry(
+	url: string,
+	init?: RequestInit,
+	retries = 3,
+	delay = 2000
+): Promise<Response> {
+	for (let attempt = 0; attempt < retries; attempt++) {
+		try {
+			const response = await fetch(url, { ...init, signal: AbortSignal.timeout(1000) });
+			if (response.ok || !RETRYABLE_STATUSES.has(response.status) || attempt === retries - 1) {
+				return response;
+			}
+		} catch (error) {
+			if (attempt === retries - 1) throw error;
+		}
+		await new Promise((r) => setTimeout(r, delay * (attempt + 1)));
+	}
+	throw new Error('unreachable');
+}
+
 async function fetchDefaultLanguage(): Promise<string> {
 	try {
-		const response = await fetch(`${BASE_API_URL}/settings/general/default-language/`, {
+		const response = await fetchWithRetry(`${BASE_API_URL}/settings/general/default-language/`, {
 			headers: { 'content-type': 'application/json' }
 		});
 		if (response.ok) {
@@ -59,18 +81,31 @@ function applyUserLocale(event: RequestEvent, user: User | undefined) {
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
 	if (!csrfToken) {
-		const response = await fetch(`${BASE_API_URL}/csrf/`, {
-			credentials: 'include',
-			headers: { 'content-type': 'application/json' }
-		});
-		const data = await response.json();
-		csrfToken = data.csrfToken;
-		event.cookies.set('csrftoken', csrfToken, {
-			httpOnly: false,
-			sameSite: 'lax',
-			path: '/',
-			secure: true
-		});
+		try {
+			const response = await fetchWithRetry(`${BASE_API_URL}/csrf/`, {
+				credentials: 'include',
+				headers: { 'content-type': 'application/json' }
+			});
+			if (!response.ok) {
+				console.error(`CSRF endpoint returned ${response.status}`);
+				return csrfToken;
+			}
+			const data = await response.json();
+			const token = data?.csrfToken;
+			if (typeof token !== 'string' || token.length === 0) {
+				console.error('CSRF endpoint returned an invalid token payload');
+				return csrfToken;
+			}
+			csrfToken = token;
+			event.cookies.set('csrftoken', csrfToken, {
+				httpOnly: false,
+				sameSite: 'lax',
+				path: '/',
+				secure: true
+			});
+		} catch (error) {
+			console.error('Unable to fetch CSRF token', error);
+		}
 	}
 	return csrfToken;
 }
