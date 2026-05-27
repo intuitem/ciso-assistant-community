@@ -68,7 +68,7 @@ from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
 from .serializer_fields import FieldsRelatedField
 
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -8091,24 +8091,31 @@ def get_analytics_export_xlsx(request):
     Export all analytics dashboard data as a multi-sheet XLSX file.
     Sheets: Summary, Risk Levels, Compliance, Controls, Incidents.
     """
-    try:
-        return _build_analytics_export_xlsx(request.user)
-    except Exception:
-        error_id = uuid.uuid4()
-        logger.error(
-            "Analytics XLSX export failed",
-            error_id=str(error_id),
-            exc_info=True,
-        )
-        return HttpResponse(
-            f"An unexpected error occurred while generating the export (ref: {error_id}).",
-            status=500,
-        )
-
-
-def _build_analytics_export_xlsx(user):
-    """Build the multi-sheet analytics workbook and return it as an HTTP response."""
+    user = request.user
     today = date.today()
+
+    def excel_dt(value):
+        # openpyxl rejects tz-aware datetimes; DB values are UTC, drop tzinfo.
+        if isinstance(value, datetime) and value.tzinfo is not None:
+            return value.replace(tzinfo=None)
+        return value
+
+    # Choice → English label maps. translation.override pins the locale so
+    # the export is portable across users regardless of their UI language.
+    with translation.override("en"):
+        control_status_map = {k: str(v) for k, v in AppliedControl.Status.choices}
+        control_priority_map = {k: str(v) for k, v in AppliedControl.PRIORITY}
+        assessment_status_map = {
+            k: str(v) for k, v in ComplianceAssessment.Status.choices
+        }
+        incident_status_map = {k: str(v) for k, v in Incident.Status.choices}
+        incident_severity_map = {k: str(v) for k, v in Incident.Severity.choices}
+        incident_detection_map = {k: str(v) for k, v in Incident.Detection.choices}
+
+    def label(mapping, value):
+        if value is None or value == "":
+            return ""
+        return mapping.get(value, value)
 
     wb = Workbook()
     wb.remove(wb.active)
@@ -8149,9 +8156,10 @@ def _build_analytics_export_xlsx(user):
             elif isinstance(values, list):
                 for item in values:
                     if isinstance(item, dict):
-                        ws1.append(
-                            [category, item.get("name", ""), item.get("value", "")]
-                        )
+                        # csf_functions ships display labels ("Govern", "(undefined)");
+                        # normalize back to raw choice keys so the frontend can translate.
+                        name = item.get("name", "").strip("()").lower()
+                        ws1.append([category, name, item.get("value", "")])
                     else:
                         ws1.append([category, "", str(item)])
             else:
@@ -8187,7 +8195,7 @@ def _build_analytics_export_xlsx(user):
                             assessment.get("assessment_name", ""),
                             assessment.get("perimeter", ""),
                             assessment.get("progress", 0),
-                            assessment.get("status", ""),
+                            label(assessment_status_map, assessment.get("status")),
                         ]
                     )
     auto_width(ws3)
@@ -8206,9 +8214,9 @@ def _build_analytics_export_xlsx(user):
         ws4.append(
             [
                 ctrl.get("name", ""),
-                ctrl.get("status", ""),
-                ctrl.get("priority", ""),
-                str(ctrl.get("eta", "") or ""),
+                label(control_status_map, ctrl.get("status")),
+                label(control_priority_map, ctrl.get("priority")),
+                excel_dt(ctrl.get("eta")),
                 ctrl.get("folder__name", ""),
             ]
         )
@@ -8244,11 +8252,11 @@ def _build_analytics_export_xlsx(user):
         ws5.append(
             [
                 inc.get("name", ""),
-                inc.get("status", ""),
-                inc.get("severity", ""),
-                inc.get("detection", ""),
-                str(inc.get("reported_at", "") or ""),
-                str(inc.get("resolved_at", "") or ""),
+                label(incident_status_map, inc.get("status")),
+                label(incident_severity_map, inc.get("severity")),
+                label(incident_detection_map, inc.get("detection")),
+                excel_dt(inc.get("reported_at")),
+                excel_dt(inc.get("resolved_at")),
                 inc.get("folder__name", ""),
             ]
         )
