@@ -8092,7 +8092,6 @@ def get_analytics_export_xlsx(request):
     Sheets: Summary, Risk Levels, Compliance, Controls, Incidents.
     """
     user = request.user
-    today = date.today()
 
     def excel_dt(value):
         # openpyxl rejects tz-aware datetimes; DB values are UTC, drop tzinfo.
@@ -8140,30 +8139,16 @@ def get_analytics_export_xlsx(request):
     ws1 = wb.create_sheet(title="Summary")
     ws1.append(["Category", "Metric", "Value"])
     style_header_row(ws1)
-    if metrics:
-        for category, values in metrics.items():
-            if isinstance(values, dict):
-                for key, val in values.items():
-                    ws1.append(
-                        [
-                            category,
-                            key,
-                            str(val)
-                            if not isinstance(val, (int, float, str, type(None)))
-                            else val,
-                        ]
-                    )
-            elif isinstance(values, list):
-                for item in values:
-                    if isinstance(item, dict):
-                        # csf_functions ships display labels ("Govern", "(undefined)");
-                        # normalize back to raw choice keys so the frontend can translate.
-                        name = item.get("name", "").strip("()").lower()
-                        ws1.append([category, name, item.get("value", "")])
-                    else:
-                        ws1.append([category, "", str(item)])
-            else:
-                ws1.append([category, "", values])
+    for category, values in metrics.items():
+        if isinstance(values, dict):
+            for key, val in values.items():
+                ws1.append([category, key, val])
+        elif isinstance(values, list):
+            for item in values:
+                # csf_functions ships display labels ("Govern", "(undefined)");
+                # normalize back to raw choice keys so the frontend can translate.
+                name = item.get("name", "").strip("()").lower()
+                ws1.append([category, name, item.get("value", "")])
     auto_width(ws1)
 
     # --- Sheet 2: Risk Levels ---
@@ -8266,13 +8251,11 @@ def get_analytics_export_xlsx(request):
     wb.save(buffer)
     buffer.seek(0)
 
-    filename = f"ciso-assistant-analytics-{today.isoformat()}.xlsx"
-    response = HttpResponse(
+    # Content-Disposition is set by the SvelteKit proxy.
+    return HttpResponse(
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-    return response
 
 
 # TODO: Add all the proper docstrings for the following list of functions
