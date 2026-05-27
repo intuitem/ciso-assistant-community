@@ -167,7 +167,7 @@
 					</Progress>
 				</div>
 			{/if}
-			{#if showDocumentationScore && data.complianceAssessmentScore.show_documentation_score}
+			{#if showDocumentationScore}
 				<div class="shrink-0 relative">
 					<Progress value={formatScoreValue(documentationScore, max_score)} min={0} max={100}>
 						<Progress.Circle class="[--size:--spacing(10)]">

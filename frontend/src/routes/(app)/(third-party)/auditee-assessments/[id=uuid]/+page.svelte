@@ -77,6 +77,7 @@
 	const fw = $derived(complianceAssessment.framework);
 	const viewerRole = $derived((data.viewerRole ?? 'respondent') as 'respondent' | 'auditor');
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
@@ -309,7 +310,7 @@
 			return sum + answered;
 		}, 0)
 	);
-	const useQuestionProgress = $derived(totalQuestions > 0);
+	const useQuestionProgress = $derived(showAnswers && totalQuestions > 0);
 
 	const totalAssessable = $derived(assessableItems.length);
 	const assessedCount = $derived(
@@ -920,7 +921,7 @@
 							method="post"
 						>
 							<!-- Questions (if present) -->
-							{#if requirement.questions != null && Object.keys(requirement.questions).length !== 0}
+							{#if showAnswers && requirement.questions != null && Object.keys(requirement.questions).length !== 0}
 								<div class="flex flex-col w-full space-y-2">
 									<Question
 										questions={requirement.questions}
@@ -1002,7 +1003,7 @@
 
 							<!-- Result -->
 							{#if showResult}
-								<div class="flex flex-col items-center w-full my-2">
+								<div class="flex flex-col items-center w-full my-2" data-testid="result-field">
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
 									</p>
@@ -1124,7 +1125,7 @@
 												</div>
 											{/snippet}
 										</Score>
-										{#if complianceAssessment.show_documentation_score && showDocumentationScore}
+										{#if showDocumentationScore}
 											<Score
 												form={docScoreForms[requirementAssessment.id]}
 												min_score={complianceAssessment.min_score}
