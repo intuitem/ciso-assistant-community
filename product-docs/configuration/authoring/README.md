@@ -18,6 +18,7 @@ Authoring is a separate discipline from running the platform. Once content has b
 ## When to read this section
 
 - You're building your own framework (industry-specific, internal policy, regulatory adaptation) and want to do it right the first time.
+- You're **forking an existing framework** as a baseline — copying a built-in or community library, then tuning it to your context (renaming the URN, pruning, adding in-house requirements) rather than starting from a blank page.
 - You're modelling a custom risk matrix that needs to match your enterprise's existing risk taxonomy.
 - You're standardising a journey preset for a recurring assessment pattern (yearly ISO audit, supplier onboarding, new project intake).
 - You want to understand the editorial rules behind the platform's built-in content before contributing or forking it.
