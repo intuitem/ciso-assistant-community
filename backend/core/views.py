@@ -8215,9 +8215,21 @@ def get_analytics_export_xlsx(request):
     ws2.append(["Type", "Level", "Count"])
     style_header_row(ws2)
     for entry in risk_levels.get("current", []):
-        ws2.append(["Current", entry.get("name", ""), entry.get("value", 0)])
+        ws2.append(
+            [
+                "Current",
+                escape_excel_formula(entry.get("name", "")),
+                entry.get("value", 0),
+            ]
+        )
     for entry in risk_levels.get("residual", []):
-        ws2.append(["Residual", entry.get("name", ""), entry.get("value", 0)])
+        ws2.append(
+            [
+                "Residual",
+                escape_excel_formula(entry.get("name", "")),
+                entry.get("value", 0),
+            ]
+        )
     auto_width(ws2)
 
     # --- Sheet 3: Compliance by Framework ---
@@ -8233,10 +8245,10 @@ def get_analytics_export_xlsx(request):
                 for assessment in domain.get("assessments", []):
                     ws3.append(
                         [
-                            framework_name,
-                            domain.get("domain", ""),
-                            assessment.get("assessment_name", ""),
-                            assessment.get("perimeter", ""),
+                            escape_excel_formula(framework_name),
+                            escape_excel_formula(domain.get("domain", "")),
+                            escape_excel_formula(assessment.get("assessment_name", "")),
+                            escape_excel_formula(assessment.get("perimeter", "")),
                             assessment.get("progress", 0),
                             label(assessment_status_map, assessment.get("status")),
                         ]
@@ -8256,11 +8268,11 @@ def get_analytics_export_xlsx(request):
     for ctrl in controls_qs:
         ws4.append(
             [
-                ctrl.get("name", ""),
+                escape_excel_formula(ctrl.get("name", "")),
                 label(control_status_map, ctrl.get("status")),
                 label(control_priority_map, ctrl.get("priority")),
                 excel_dt(ctrl.get("eta")),
-                ctrl.get("folder__name", ""),
+                escape_excel_formula(ctrl.get("folder__name", "")),
             ]
         )
     auto_width(ws4)
@@ -8294,13 +8306,13 @@ def get_analytics_export_xlsx(request):
     ):
         ws5.append(
             [
-                inc.get("name", ""),
+                escape_excel_formula(inc.get("name", "")),
                 label(incident_status_map, inc.get("status")),
                 label(incident_severity_map, inc.get("severity")),
                 label(incident_detection_map, inc.get("detection")),
                 excel_dt(inc.get("reported_at")),
                 excel_dt(inc.get("resolved_at")),
-                inc.get("folder__name", ""),
+                escape_excel_formula(inc.get("folder__name", "")),
             ]
         )
     auto_width(ws5)
