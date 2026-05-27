@@ -10,10 +10,12 @@ description: "RECYF constitue le r\xE9f\xE9rentiel de cybers\xE9curit\xE9 mentio
   \ (PJL). Il se compose d\u2019objectifs de s\xE9curit\xE9 et, pour chacun d\u2019\
   eux, de moyens acceptables de conformit\xE9."
 copyright: ANSSI
-version: 2
-publication_date: 2026-03-17
+version: 3
+publication_date: 2026-05-05
 provider: ANSSI
 packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
 objects:
   framework:
     urn: urn:intuitem:risk:framework:recyf
@@ -1806,7 +1808,6 @@ objects:
         \ au regard de la protection des donn\xE9es \xE0 caract\xE8re personnel et\
         \ en particulier la finalit\xE9 du traitement."
       implementation_groups:
-      - EI
       - EE
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.forensics
@@ -1895,6 +1896,7 @@ objects:
         pondre aux besoins de disponibilit\xE9 associ\xE9s aux diff\xE9rents services\
         \ et aux diff\xE9rentes activit\xE9s fournis par l\u2019entit\xE9."
       implementation_groups:
+      - EI
       - EE
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
@@ -2714,5 +2716,3 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.monitor
       - urn:intuitem:risk:function:doc-pol:pol.backup
       - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
-dependencies:
-- urn:intuitem:risk:library:doc-pol
