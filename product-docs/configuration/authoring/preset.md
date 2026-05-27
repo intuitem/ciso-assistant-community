@@ -1,233 +1,171 @@
 ---
-description: A complete guide to authoring journey presets — designing the step sequence, scaffolding objects, cross-step focus, and the draft/publish lifecycle
+description: Task-oriented recipes for authoring a journey preset — fork, build steps, scaffold objects, publish
 ---
 
 # Journey preset authoring
 
-A **journey preset** is a reusable template for a journey — the bundle of audits, risk assessments, and supporting objects that a team applies to a new perimeter (e.g. _new project intake_, _supplier onboarding_, _annual ISO recertification_). Authoring a preset well turns repeated set-up work into a one-click instantiation, with consistent naming, owners, and scope across teams. This page is a complete walkthrough of the **in-app preset editor**.
+A **journey preset** is a reusable template for a journey — the bundle of audits, risk assessments, and supporting objects that a team applies to a new perimeter (e.g. _new project intake_, _supplier onboarding_, _annual ISO recertification_). Authoring a preset well turns repeated set-up work into a one-click instantiation, with consistent naming, owners, and scope across teams. The recommended way to author one is the **in-app preset editor** at **`/experimental/preset-editor`**. This page is a set of task-oriented recipes — find the one that matches what you're trying to do, follow the steps. For the complete walkthrough of every surface in the editor, see [Preset editor — reference](preset-editor.md).
 
-## Preset editor
+## Tasks
 
-The platform ships with an **in-app preset editor** — a visual designer that lets you assemble a preset step-by-step in the UI, without touching YAML. This is the **recommended authoring pattern going forward**.
+### Create a blank preset
 
-You can reach it at **`/experimental/preset-editor`** in your instance. It's currently exposed under the _experimental_ namespace while the UX is being polished — the menu entry and URL are likely to move once it graduates, but the underlying tool is the same.
+For designing a journey from scratch:
 
-### Opening the editor
+1. Go to **`/experimental/preset-editor`**.
+2. In the **Start something new** card, type a name in the optional **Name** field (e.g. _Vendor onboarding_) — leave blank to default to _Untitled preset_.
+3. Click **Create blank preset**. The per-preset editor opens with an empty steps list.
+4. Inline-edit the **Preset name** (at the top of the editor) and add a **Description** explaining what the preset is for, who runs it, and when.
+5. Add your first step (see [Add a step](#add-a-step) below).
 
-The landing page is the **preset hub**, organised as three sections:
+### Fork from a library preset
 
-#### Start something new
+For starting from a built-in or community preset rather than from scratch:
 
-Two entry points side by side:
+1. Go to **`/experimental/preset-editor`** and click **Fork from library**. A panel expands listing every library-shipped preset.
+2. Find the preset you want to fork and click **Fork** on its card. A fresh editable copy is created and the per-preset editor opens on the clone.
+3. The original library preset stays intact — your fork is independent and won't be touched by future library upgrades.
+4. Rename, prune, add steps, and tune the scaffolds. **Save** and **Publish** when ready.
 
-- **Create blank preset** — names a fresh preset _Untitled preset_ (or any name you typed in the optional field) and opens its editor immediately. Use this when you're designing a journey from scratch.
-- **Fork from library** — expands a panel listing every library-shipped preset on the instance (name, version, URN, description). Picking _Fork_ on a library preset creates a fresh editable copy of it and opens the editor on the clone.
+### Duplicate one of your presets
 
-Library-backed presets are read-only by design — they ship from YAML libraries and stay upgradable. Forking is the only path to edit one; the original library preset stays intact, and the fork is independent (later library upgrades won't touch your fork).
+For creating a variant (_Light_ / _Full_ flavours, region-specific tweaks):
 
-#### Your presets
+1. From the preset hub, find the preset in **Your presets** and click **Duplicate**.
+2. A fresh editable copy opens with all steps and scaffolds copied.
+3. Rename, tune, and publish as a separate preset.
 
-A table of every user-authored preset on the instance, ordered by most recently updated. Columns: _Name / Version / Updated / Actions_. Actions are:
+### Add a step
 
-- **Open** — go to the per-preset editor.
-- **Duplicate** — create an editable copy (the same forking primitive used on library presets, applied here to your own work). Useful for spawning variants of an existing preset (_Light_ / _Full_ flavours).
-- **Delete** — removes the preset entirely. Confirmation required.
+1. In the per-preset editor, click **Add step** in the **Steps** header. A new step card appears at the bottom.
+2. Or hover the gap between two existing steps — a thin separator with an **Insert step** label appears; click it to splice a step in at that position.
+3. Per step, set:
+   - **Title** — the human-readable label users see at instantiation (_"Set up the perimeter"_, _"Run the audit"_).
+   - **Description** — optional context.
+   - **Key** — the internal identifier (auto-generated as `step_1`, `step_2`, …). Edit if you want a more meaningful key like `perimeter_setup`.
 
-#### Library presets (under _Fork from library_)
+### Have a step land on a specific object — pointer mode
 
-A grid of library-backed presets, each showing name, version, and URN. They're not directly editable; **Fork** is the action.
+A step can land the user on _something_ when they advance to it. Three modes:
 
-### The per-preset editor
+#### Land on an existing model
 
-Opening a preset jumps to `/experimental/preset-editor/{id}`. The layout:
+For taking the user to a list page (e.g. assets, applied controls, evidences) where they'll pick or create their own:
 
-- A **sticky toolbar** at the top with status pill and lifecycle actions.
-- An **inline metadata block** for preset name + description.
-- A **Steps section** below — the heart of the editor.
+1. In the step card, set the pointer mode to **Model**.
+2. In the **Target model** dropdown, pick the model (e.g. `applied-controls`).
+3. Leave **Target ref** blank — the user lands on the model's list page.
 
-#### The toolbar at a glance
+#### Land on a scaffolded object
 
-- **Back arrow** to the preset hub.
-- **Status pill** describing the draft state:
-  - **Unsaved changes** (amber) — the in-memory edit differs from the server-side draft. Save to persist.
-  - **Published v{n}** (green) — the draft matches the last published version.
-  - **Draft** (grey) — the preset has a draft but has never been published.
-  - **Published!** (green, transient) — flashes for ~3 seconds after a successful publish.
-- **Save** — visible only when dirty. Persists the in-memory state to `editing_draft` on the server.
-- **Discard** — with inline confirmation. Throws away the server-side draft and reloads from the last published state (or a fresh blank if this preset has never been published).
-- **Publish** — triggers a publish preview (see below). Disabled while there are unsaved changes; save first.
+For taking the user to a specific object the preset creates (e.g. the audit it spawns):
 
-A **`beforeunload`** guard prompts before the browser tab is closed or refreshed with unsaved changes, and SvelteKit's `beforeNavigate` does the same for in-app navigation. Library-backed presets opened directly (not forked) show a read-only banner instead of the editor, with a link back to the fork action.
+1. Set pointer mode to **Model**.
+2. Pick the **Target model** (e.g. `compliance-assessments`).
+3. In the same step, click **Add object** to scaffold a new audit — the new scaffold becomes the step's focus automatically.
+4. Or, in the **Target ref** dropdown, pick an existing scaffolded object (including ones owned by other steps, for cross-step focus).
 
-#### Preset metadata
+#### Land on a URL
 
-Two inline-editable fields at the top of the body:
+For external SOPs, embedded handbook links, or third-party tools:
 
-- **Preset name** — the human-readable label, e.g. _Annual ISO 27001 audit_, _Vendor onboarding_.
-- **Description** — what this preset is for, who runs it, when. Optional but recommended — this is what teammates see when picking a preset.
+1. Set pointer mode to **URL**.
+2. In the **Target URL** input, type the URL (relative or absolute).
 
-### Steps
+### Scaffold an audit on a step
 
-A preset is a **sequence of steps**, each of which represents one milestone or one screen in the instantiation flow. The pattern is: _at this step in the journey, the user is here, and the platform creates/links these objects_.
+When a step should create an audit at instantiation time:
 
-The editor renders every step as a card with a coloured left border (cycling blue / violet / amber / emerald by position) so the sequence is visible at a glance. Between every pair of cards (and above the first, below the last), a hover-only **_Insert step_** separator lets you splice a new step in at any point.
+1. Make sure the step's pointer mode is **Model** and **Target model** is `compliance-assessments`.
+2. Click **Add object** at the bottom of the step card. A new scaffold card appears.
+3. Per scaffold, set:
+   - **Ref** — the internal identifier (auto-generated; edit if you want a more meaningful one like `iso_audit`).
+   - **Name** — what the spawned audit will be called.
+   - **Framework** — pick from the dropdown of loaded framework libraries.
+   - **Implementation groups** — once a framework is picked, tick the IGs the audit should scope to. Empty selection means _all requirements_.
+   - **Description** — optional.
+4. The step's **Target ref** automatically points at this scaffold (the "create and open" pattern).
 
-#### Step controls
+### Scaffold a risk assessment
 
-Per step:
+Same flow, with a different target model:
 
-- **Reorder** — _Move up_ and _Move down_ buttons swap with the adjacent step.
-- **Delete step** — confirmation prompt. If the step owns any scaffolded objects, the prompt lists them and warns that they'll be removed too. Any other step that focused on a deleted scaffold has its focus cleared.
+1. Step's **Target model** is `risk-assessments` (or `business-impact-analysis` for a BIA, `ebios-rm` for an EBIOS RM study).
+2. Click **Add object**.
+3. Set **Ref**, **Name**, **Description**, and pick a **Risk matrix** from the dropdown of loaded matrix libraries.
 
-#### Step fields
+### Scaffold a findings assessment
 
-- **Key** — the step's stable identifier within the preset (auto-generated as `step_1`, `step_2`, etc., but editable). Used internally to link scaffolds to steps and to allow another step to focus on this step's outputs.
-- **Title** — the human-readable label shown to the user at instantiation time (_"Set up the perimeter"_, _"Run the audit"_).
-- **Description** — optional, additional context shown beneath the title.
+For pentest / audit / review tracking:
 
-### Step targets — pointer mode
+1. Step's **Target model** is `findings-assessments`.
+2. Click **Add object**.
+3. Set **Ref**, **Name**, **Description**.
+4. Pick a **Category**: `pentest`, `audit`, `review`, or `other`.
 
-Each step can _point at_ something — what the user lands on when they advance to this step. Three pointer modes, picked via a tab-style toggle:
+### Scaffold an asset
 
-- **None** — the step has no target. The user sees the title and description, and advances.
-- **Model** — the step points at a model (a route in the app, like `compliance-assessments`, `applied-controls`, `assets`). Combined with a `target_ref`, it can land the user on a specific scaffolded object.
-- **URL** — the step points at an arbitrary URL (internal or external). Useful for embedded handbook links, external SOPs, or third-party tools.
+For declaring assets the preset will create:
 
-#### Model mode — target_model and target_ref
+1. Step's **Target model** is `assets`.
+2. Click **Add object**.
+3. Set **Ref**, **Name**, **Description**.
+4. Pick an **Asset type**: `SP` (Support asset) or `PR` (Primary asset).
 
-When pointer mode is **model**, two dropdowns appear:
+### Have multiple steps focus on the same scaffold
 
-- **Target model** — every scaffoldable type plus a curated list of nav-only models (see [What can be scaffolded](#what-can-be-scaffolded) below). Examples: `compliance-assessments`, `risk-assessments`, `applied-controls`, `assets`.
-- **Target ref** — once a model is picked, this dropdown lists every scaffolded object in the preset whose type matches the model. The user can pick:
-  - An object owned by **this** step (the default — the step scaffolds it and immediately focuses on it).
-  - An object owned by **another step** (cross-step focus — multiple steps can point at the same scaffold, which is how a preset can have three steps that all act on the same audit).
-  - Nothing — the step lands on the model's list page rather than a specific object.
+For a journey where several steps act on the same audit (_"Set up"_ → _"Fill in"_ → _"Sign off"_, all on the same audit):
 
-The picker labels objects with their `ref` so you can tell which is which when several scaffolds of the same type exist.
+1. Set up the **first** step: pointer mode **Model**, target model `compliance-assessments`, click **Add object** to scaffold the audit (e.g. `ref: iso_audit`).
+2. Add a **second** step. Set its pointer mode to **Model**, target model also `compliance-assessments`.
+3. In the second step's **Target ref** dropdown, you'll see `iso_audit` listed (owned by the first step) as a cross-step candidate. Pick it.
+4. Repeat for the third step. Now all three steps land the user on the same audit, but each at a different point in the journey.
 
-#### URL mode — target_url
+> When you rename the scaffold's `ref`, the editor automatically updates every step that pointed at it, so refactors stay consistent.
 
-When pointer mode is **url**, a single text input takes the URL. No validation — anything that parses as a URL works, including relative paths.
+### Add parameters to a scaffold
 
-#### Switching pointer mode
+For seeding additional fields on the spawned object that the editor doesn't otherwise expose:
 
-Switching mode preserves the data for the mode you came from where reasonable:
+1. Inside the scaffold card, expand the **Parameters** section.
+2. Click **Add row**. Fill in:
+   - **Key** — the field name (e.g. `owner`, `priority`).
+   - **Value** — the value. Comma-separate for arrays (e.g. `tag1, tag2, tag3`).
+3. Save the draft. The parameters apply at instantiation time.
 
-- **None → Model** — empties `target_url`, asks you to pick a model.
-- **Model → URL** — empties `target_model` and `target_ref`; asks you to type the URL.
-- **Model → Model with different type** — clears `target_ref` if it pointed at a scaffold whose type doesn't match the new model. Step-owned scaffolds whose type doesn't match the new model get converted (preserving name / description / ref, resetting type-specific fields).
-- Anything → **None** — clears all target fields.
+### Reorder or delete a step
 
-### Scaffolded objects
+1. Use **Move up** / **Move down** on the step card to swap with the adjacent step.
+2. Click **Delete step** to remove. If the step owns any scaffolded objects, a confirmation prompt lists them and warns that they'll be removed too. Any other step that focused on a deleted scaffold has its focus cleared.
 
-A scaffold is a description of an object the preset will _create_ at instantiation time. Each scaffold lives in the preset's `scaffolded_objects` array and carries:
+### Save your draft
 
-- **`ref`** — a stable identifier within the preset (must be unique). Used to wire cross-step focus.
-- **`type`** — the object kind (`compliance_assessment`, `risk_assessment`, etc.).
-- **`name`** and **`description`** — defaults for the object when it gets created.
-- **`step_ref_id`** — the key of the step that "owns" this scaffold. Owned scaffolds render inline inside that step's card.
-- Type-specific fields (framework URN, risk matrix URN, category, asset type — see below).
+1. Click **Save** in the sticky toolbar at the top of the editor. The button is only active when there are unsaved changes.
+2. The status pill updates: _Draft_ if you've never published, _Published v{n}_ if the draft now matches live (rare — usually it'll show _Unsaved changes_ between save and publish).
 
-#### Adding a scaffold
+> A `beforeunload` guard prompts before browser tab close or refresh when there are unsaved changes, and SvelteKit's `beforeNavigate` does the same for in-app navigation. Save before walking away.
 
-Inside any step whose target model is set, click **Add object** to scaffold a new object of the appropriate type:
+### Publish your draft
 
-- A unique `ref` is auto-generated from `{step_key}_{type}` (with a numeric suffix if needed).
-- The type comes from the step's target model.
-- The scaffold defaults to a sensible empty state for that type (e.g. `framework: ''` for compliance assessments).
-- If the step has no `target_ref` yet, the first added scaffold becomes the step's focus automatically — a one-click "create and open" pattern.
+1. Save first — the **Publish** button is disabled while there are unsaved changes.
+2. Click **Publish**. The server runs a publish-preview:
+   - If no steps are being deleted, the publish happens immediately and the _Published!_ flash appears.
+   - If the publish would delete one or more steps from the live preset, a modal lists them. Review carefully — deleting a step from a preset already instantiated in a journey can leave that journey in a broken state.
+3. Click **Confirm publish** in the modal to commit. The status pill flips to _Published v{n+1}_.
 
-#### What can be scaffolded
+### Discard a draft
 
-The editor knows how to scaffold every primary journey object:
+To throw away in-progress edits and start over from the last published state:
 
-| Type | Target model | Extra fields |
-|---|---|---|
-| `compliance_assessment` | `compliance-assessments` | Framework (library URN), Implementation groups |
-| `risk_assessment` | `risk-assessments` | Risk matrix (library URN) |
-| `business_impact_analysis` | `business-impact-analysis` | Risk matrix (library URN) |
-| `ebios_rm_study` | `ebios-rm` | Risk matrix (library URN) |
-| `findings_assessment` | `findings-assessments` | Category (pentest / audit / review / other) |
-| `processing` | `processings` | — |
-| `entity` | `entities` | — |
-| `task_template` | `task-templates` | — |
-| `organisation_objective` | `organisation-objectives` | — |
-| `organisation_issue` | `organisation-issues` | — |
-| `perimeter` | `perimeters` | — |
-| `asset` | `assets` | Asset type (SP / PR) |
+1. Click **Discard** in the toolbar. An inline _"Discard draft?"_ prompt appears.
+2. Click **Yes, discard**. The server-side draft is deleted and the editor reloads from the live preset (or a fresh blank if the preset has never been published).
 
-#### What can be targeted but not scaffolded
+### Delete a preset
 
-A second category of models can be the step's target but the preset doesn't create them — the user is just landed on their list page:
+From the preset hub:
 
-- `accreditations`
-- `actors`
-- `applied-controls`
-- `evidences`
-- `incidents`
-- `metric-instances`
-- `policies`
-- `risk-acceptances`
-- `security-exceptions`
-
-These types exist in the platform as standalone records and don't need a preset to spawn them; the preset just routes the user to the relevant list.
-
-#### Type-specific scaffold fields
-
-##### Compliance assessment
-
-- **Framework** — a dropdown of every loaded framework library. The selection stores the **library URN**, not the framework's own URN (because the executor resolves library URNs at instantiation time, which keeps the preset portable across instances where the same library has different framework IDs).
-- **Implementation groups** — once a framework is picked, this chip list shows every IG defined on that framework. Tick the IGs the spawned audit should scope to. Empty selection means _all requirements_.
-
-##### Risk assessment / BIA / EBIOS RM study
-
-- **Risk matrix** — a dropdown of every loaded risk matrix library. Like frameworks, the stored value is the **library URN**.
-
-##### Findings assessment
-
-- **Category** — one of `pentest`, `audit`, `review`, `other`. Drives the spawned findings assessment's default category.
-
-##### Asset
-
-- **Asset type** — `SP` (Support asset) or `PR` (Primary asset).
-
-#### Parameters
-
-Every scaffold can carry a **parameters** key-value dict (`target_params`) used to seed additional fields on the spawned object. The editor exposes this as a rows-of-key-value-pairs UI: arrays are written as comma-separated values, plain strings stay as-is. Parameters are the escape hatch when a scaffold needs a field the editor doesn't otherwise expose (e.g. a default `description` template, an opinionated `owner`).
-
-#### Cross-step references
-
-A single scaffold can be focused on by multiple steps:
-
-- Step 1 (target: `perimeters`) scaffolds `perimeter_1` — the perimeter the journey is about.
-- Step 2 (target: `compliance-assessments`) scaffolds `iso_audit` — the ISO audit on that perimeter.
-- Step 3 (target: `compliance-assessments`) **focuses on `iso_audit`** via the cross-step picker, without scaffolding a second audit. Use case: split the audit work into _Setup_ and _Run_ steps that both land on the same audit page.
-- Step 4 (target: `risk-assessments`) scaffolds `risk_study` — a risk assessment also tied to `perimeter_1`.
-
-The cross-step focus dropdown lists every scaffold matching the step's target model, including ones owned by other steps. Renaming a scaffold's `ref` automatically updates every step that pointed at it, so refactors stay consistent.
-
-### The draft → publish lifecycle
-
-The preset editor uses a server-side **editing draft** that's distinct from the live preset:
-
-1. **Start editing** — the first time you open the editor for a user-authored preset, the server creates an `editing_draft` JSON from the current live state. Re-opening returns the same draft (idempotent).
-2. **Save draft** — `Save` PATCHes the in-memory state onto the server. The status pill becomes _Published v{n}_ when the draft matches live, or _Draft_ if nothing has been published.
-3. **Publish preview** — clicking **Publish** runs a preview: the server returns the list of step keys that would be **deleted** from the live preset by publishing. If the list is empty, publishing happens immediately. If it's not, a modal lists the deletions for review.
-4. **Publish** — commits the draft. The server reconciles the draft into the live preset, bumping `editing_version`.
-5. **Discard draft** — deletes the server-side draft and reloads from the last published state.
-
-Step deletions in the publish preview matter because removing a step from a preset that's already been instantiated can leave instances in a broken state — the modal exists to give you a clear "this is what you're about to lose" warning before commit.
-
-### What the editor doesn't do (yet)
-
-A few gaps to be aware of:
-
-- **YAML export** — presets currently flow library-in (via `Fork from library`) but not editor-out as a library file. A preset authored in the editor stays on this instance until that export channel ships.
-- **Translation editing** — presets carry a `translations` block on each step, but the editor doesn't yet expose it as side-by-side editing the way the framework and matrix builders do. Translations need YAML editing for now.
-- **Bulk step operations** — no multi-select, no copy/paste of steps across presets. You can _Duplicate_ a whole preset and prune; that's the workaround.
-- **Validation** — beyond required-fields checks, the editor doesn't validate cross-step focus consistency at edit time. The publish preview is the validation surface.
-
-For these, fall back to library YAML editing as described in [Designing your own libraries](../libraries/custom-libraries.md).
+1. Find the preset in **Your presets**.
+2. Click **Delete** in the row. A confirmation dialog asks before removing the preset entirely.
 
 ## Editorial discipline
 
@@ -254,7 +192,7 @@ The editor gives you a lot of flexibility; the presets that actually save teams 
 The framework and risk-matrix scaffold fields store the **library URN**, not the framework's or matrix's own URN. This matters because:
 
 - A preset shipped as a YAML library can be loaded on any instance and resolves correctly as long as the referenced framework library is also loaded.
-- If you _Save as YAML_ a preset that references a framework's own URN, that URN may not exist on another instance — but the library URN will, because libraries are designed to be portable.
+- If you stored a framework's own URN, that URN may not exist on another instance — but the library URN will, because libraries are designed to be portable.
 
 The editor handles this automatically — you pick from a "loaded library" dropdown, not a "loaded framework" dropdown. The published preset stores the right thing.
 
@@ -263,13 +201,10 @@ The editor handles this automatically — you pick from a "loaded library" dropd
 - **Domain-scoped sharing** — a preset created on one instance is available to every user who has access to it through IAM. Use the preset's folder ownership to control visibility.
 - **Forking instead of editing** — when a team wants their own variant of a shared preset, _Duplicate_ produces an independent fork. Edits on the fork don't propagate back to the source, which is usually what's wanted.
 
-## Existing material
-
-- [Journeys concept](../../concepts/journeys.md) — what a journey _is_ in the data model.
-- [Managing a project](../../guides/projects.md) — the closest existing walkthrough for a multi-assessment workflow.
-
 ## Related
 
+- [Preset editor — reference](preset-editor.md) — every surface and action in the editor.
+- [Journeys concept](../../concepts/journeys.md) — what a journey _is_ in the data model.
 - [Framework authoring](framework.md) — presets typically reference one or more frameworks you've authored.
 - [Risk matrix authoring](matrix.md) — presets typically reference a default matrix.
 - [Initial setup](../../guides/initial-setup.md) — the first journey for a fresh instance.

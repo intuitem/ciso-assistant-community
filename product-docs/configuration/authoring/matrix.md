@@ -1,232 +1,132 @@
 ---
-description: A complete guide to authoring risk matrices with the in-app editor — dimensions, palettes, multi-language support, draft/publish lifecycle, and YAML round-tripping
+description: Task-oriented recipes for authoring a risk matrix — build, fork, translate, publish
 ---
 
 # Risk matrix authoring
 
-A risk matrix in CISO Assistant declares the **probability scale**, the **impact scale**, and the **resulting risk levels** in their combination — the inputs every risk scenario reads from. Most organisations already have an internal risk taxonomy (often 5×5, sometimes 4×4 or 3×3) and want CISO Assistant to mirror it exactly rather than impose a new one. This page is a complete walkthrough of the **in-app matrix editor** — the recommended way to author a matrix — followed by design discipline and a comparison with Excel-driven authoring.
+A risk matrix in CISO Assistant declares the **probability scale**, the **impact scale**, and the **resulting risk levels** in their combination — the inputs every risk scenario reads from. Most organisations already have an internal risk taxonomy (often 5×5, sometimes 4×4 or 3×3) and want CISO Assistant to mirror it exactly rather than impose a new one. The recommended way to author one is the **in-app matrix editor** at **`/experimental/matrix-editor`**. This page is a set of task-oriented recipes — find the one that matches what you're trying to do, follow the steps. For the complete walkthrough of every surface in the editor, see [Matrix editor — reference](matrix-editor.md).
 
-## Matrix editor
+## Tasks
 
-The platform ships with an **in-app matrix editor** — a visual designer that lets you author a risk matrix directly in the UI, with live preview and real-time validation. This is the **recommended authoring pattern going forward**, especially for the many cases where a custom matrix only differs from a built-in one by axis wording, colour palette, or one or two cells.
+### Create a 5×5 matrix from scratch
 
-You can reach it at **`/experimental/matrix-editor`** in your instance. It's currently exposed under the _experimental_ namespace while the UX is being polished — the menu entry and URL are likely to move once it graduates, but the underlying tool is the same.
+The editor seeds new matrices as 3×3 by default. To get to a 5×5:
 
-### Opening the editor
+1. Go to **`/experimental/matrix-editor`** and click **New matrix**. A default 3×3 _Untitled_ matrix opens.
+2. Fill in **Matrix name** (e.g. _"5×5 Cyber Risk Matrix"_) and an optional description at the top.
+3. Open the **Probability** tab. Click **Add level** twice to get from 3 to 5 levels. For each level, set:
+   - **Abbreviation** (e.g. `VL`, `L`, `M`, `H`, `VH`).
+   - **Name** (e.g. _Very Low_, _Low_, _Medium_, _High_, _Very High_).
+   - **Description** — the criteria (_"Less than once per 5 years"_, _"More than 10 per year"_, etc.).
+4. Switch to the **Impact** tab and do the same — add 2 more levels and set abbreviations, names, descriptions.
+5. Switch to the **Risk levels** tab. Adjust the level count (4 is the default; tick **Add level** for a 5th tier or **Delete** for fewer). Set the name, description, and colour of each.
+6. Switch to the **Grid** tab. Click each cell to cycle through risk levels until the heatmap matches your desired severity zoning. Use the hover dropdown for direct selection.
+7. Scroll down to the **Matrix preview** card. Verify the rendering looks right.
+8. Click **Save draft**, then **Publish matrix** when ready. Confirm the publish dialog.
 
-The editor is single-page: list, editor, and live preview on the same screen. On first load, if any matrix has an active draft, the most recently updated one auto-opens — so resuming editing is one navigation away, not a click-through-to-find. The page is organised as:
+### Fork (clone) a library matrix and adapt it
 
-1. **Top toolbar** — _New matrix_, _Import YAML_, _Export YAML_, status pill, _Save draft_, _Publish_.
-2. **Matrix list** — every matrix on the instance, with drafts at the top.
-3. **Language switcher and metadata block** — only visible when a matrix is open.
-4. **Editor tabs** — Probability, Impact, Risk levels, Grid.
-5. **Validation warnings panel** — only shown when warnings exist.
-6. **Live preview** — the matrix rendered the way analysts see it on a risk scenario.
+To start from a built-in or library matrix rather than the default:
 
-### The matrix list
+1. Open **`/experimental/matrix-editor`**.
+2. Find the matrix you want to fork in the list (it'll have a **From library** badge).
+3. Click **Clone** in its row. A new editable matrix is created, seeded with the source's content as a draft. The source matrix stays untouched.
+4. Edit the clone — rename, retune levels, recolour, adjust the grid. The clone has no library backing, so it won't be touched by future library upgrades.
+5. **Save draft** and **Publish** when ready.
 
-Two row types share a single table, with column headers _Name / Description / Status / Locale / Actions_:
+### Import a YAML matrix
 
-- **Drafts** (top, highlighted) — matrices with an active editing draft. Each row carries a status pill: **Published** (green) if the live matrix exists too, **New** (amber) if the draft has never been published, and an _Editing_ badge to mark the draft. The action column shows **Continue editing** (or **Close** when you're already in it) and either **Discard draft** (for published matrices — reverts to the live state) or **Delete** (for unpublished — deletes the whole matrix).
-- **Published matrices without drafts** — the rest of the matrices on the instance. They carry **Published** status, an optional **From library** badge for matrices that came from a YAML library, and a version suffix (`v{n}`) when the matrix has been published more than once. The actions are **Edit** (only for matrices you authored on this instance — not for library-backed ones, which are read-only) and **Clone** (everyone — creates a fresh draft seeded from this matrix's content).
+If you have a matrix in library YAML format (from an Excel conversion, source control, or a colleague):
 
-The **Locale** column shows every language the matrix has content in (base + targets); each locale gets its own chip so multi-language matrices are easy to spot.
+1. Open **`/experimental/matrix-editor`** and click **Import YAML**.
+2. Pick the YAML file in the file picker. The platform parses it server-side and creates a new draft on the instance.
+3. The imported matrix opens automatically — name, description, all four object lists, and translations all loaded.
+4. Edit further if needed and **Publish** when ready.
 
-#### Editing a library-backed matrix
+### Add or remove a level
 
-Library matrices are intentionally read-only — they ship from a YAML library and stay upgradable. The **Edit** action isn't offered; **Clone** is the path:
+A level is a row in any of the Probability / Impact / Risk levels tabs.
 
-- Clone creates a brand-new matrix in your namespace, with its content copied from the library matrix as the starting draft.
-- The clone has no library backing, so it's free to evolve and won't be touched by future library upgrades of the source.
-- The original library matrix stays intact in the list, untouched.
+#### Add
 
-This is the canonical fork-and-tune flow for adapting a published matrix to your organisation.
+1. Switch to the right tab.
+2. Click **Add level** above the table. A new level appears at the bottom with a default abbreviation, an empty name and description, and a palette colour matching the current scheme.
+3. Fill in **Abbreviation**, **Name**, **Description**. The colour picker on the right lets you tweak the hex if you want to override the palette.
 
-### Creating a matrix
+#### Remove
 
-Three entry points:
+1. Switch to the right tab.
+2. Click the **Delete** (trash) button on the level's row. The button is disabled if only 2 levels remain (the editor enforces a minimum).
+3. The grid remaps automatically — moving a probability level drops the corresponding row; deleting a risk level falls back to the first risk level on any cell that pointed at it (the validation panel flags any side effects).
 
-#### New matrix
+> Important: deleting a risk level used by cells in the grid is the most fragile operation in the editor. Check the **Validation warnings** panel after deleting to confirm no cells ended up out of range.
 
-The **New matrix** button seeds a sensible default 3×3 matrix:
+### Edit the grid (set cell risk levels)
 
-- 3 probability levels (_Low / Medium / High_).
-- 3 impact levels (_Low / Medium / High_).
-- 4 risk levels (_Low / Medium / High / Critical_), with a green-yellow-orange-red default palette.
-- A 3×3 grid mapping `(probability, impact) → risk level` that already follows a sensible diagonal (mostly low at the bottom-left, mostly critical at the top-right).
+The grid maps every `(probability, impact)` pair to a risk level. Two ways to edit:
 
-The matrix is saved on the server immediately as a draft, so it shows up in the list right away.
+#### Click to cycle
 
-#### Import YAML
+1. Open the **Grid** tab.
+2. Click any cell. The cell cycles to the next risk level (Low → Medium → High → Critical → Low). Keep clicking to land on the level you want.
 
-The **Import YAML** button opens a file picker for a library-format YAML matrix:
+#### Hover to pick
 
-- The file is parsed server-side and turned into a new draft on the instance.
-- All four pieces (probability, impact, risk levels, grid) and metadata (name, description, locale, translations) load directly into the editor.
-- This is the right tool when you have an Excel-built matrix to bring in, or a community-shared YAML you want to tune in place.
+1. Hover any cell. A dropdown appears listing every risk level by colour and name.
+2. Click the level you want. The cell updates immediately.
 
-#### Clone
+> The dropdown flips upward for cells in the bottom half of the grid so it doesn't fall off the page.
 
-From any matrix row, **Clone** creates a fresh draft seeded from the cloned matrix's `json_definition`. The clone is yours; the source is untouched. This is the workflow for forking a library matrix (see above) and for spinning off a variant of one of your own matrices (_5×5 standard_ → _5×5 simplified_ for SaaS suppliers, etc.).
+You can also focus a cell and press `Enter` or `Space` to cycle (same as clicking).
 
-### The toolbar at a glance
+### Apply a colour palette
 
-- **New matrix** — seed a default 3×3 and start editing.
-- **Import YAML** — load a library-format YAML.
-- **Export YAML** — only available when a matrix is open. Exports the current state (auto-saves the draft first) as a library-ready YAML file. Filename comes from the server.
-- **Status pill** — visible after the first save, mirrors the toast messages briefly (_Draft saved_, _Matrix published_, etc.) before fading.
-- **Save draft** — persists the in-memory state to the server's `editing_draft`. The matrix is _not_ live yet — it's saved as a draft.
-- **Publish matrix** — promotes the draft to the live definition. A confirmation dialog runs first; on success the matrix is what risk scenarios will pick up.
+For consistent, accessible colour schemes across all three level tabs:
 
-A **beforeunload** guard prevents accidental tab close or refresh when there are unsaved local edits — the browser asks for confirmation before navigating away.
+1. Open any of the **Probability**, **Impact**, or **Risk levels** tabs.
+2. At the top of the table, click one of the four palette previews:
+   - **Classic** — green → red progression. The default.
+   - **Accessible** — Wong's colourblind-safe palette (blue / sky / yellow / orange / vermillion / pink / green / black).
+   - **Warm** — cream-to-burgundy progression.
+   - **Cool** — light-cyan-to-deep-teal progression.
+3. Every level on that tab gets its colour rewritten in order. Custom hex colours you set previously are overwritten — re-apply per level if you want to tweak.
+4. Repeat for the other two tabs to keep all three coherent.
 
-### Metadata block
+### Translate to another language
 
-When a matrix is open, the editor header carries:
+1. Open the matrix in the editor.
+2. In the **Languages** strip above the editor, open the **Add language** dropdown and pick the target locale (e.g. _French_). It's added as a translation chip.
+3. Click the new language chip to switch the editor into translation mode.
+4. Walk through all four tabs. Every translatable field (name, description on each level; name + description on the matrix metadata) splits into a base column (read-only) and a translation column (editable). The base value shows as a placeholder when the translation is empty.
+5. Translate metadata at the top of the editor too — the matrix name and description carry their own translations.
+6. **Save draft** and **Publish** when ready.
 
-- **Matrix name** — the human-readable label. Required (the validation panel flags an empty name).
-- **Description** — short note about the matrix (e.g. _"5×5 cybersecurity risk matrix, ANSSI-style"_).
+> To remove a translation entirely, click the `×` on the language chip. A confirmation prompt asks before dropping every translation for that language.
 
-Both fields are translatable — switching the language selector shows a translatable copy alongside the base content, with the base value shown as a hint below the translation input so you have context while translating.
+### Publish your draft
 
-### Languages
+1. Make sure the **Validation warnings** panel (above the live preview) is clean. The publish is blocked while any warning is unresolved.
+2. Save the draft first if it's dirty.
+3. Click **Publish matrix** in the toolbar. A confirmation dialog appears.
+4. Click **OK** to confirm. The matrix flips to published — every risk scenario referencing it picks up the new shape on next refresh.
 
-A dedicated language strip sits above the editor:
+> Publishing immediately affects every risk scenario that uses this matrix. Current and residual risk levels are recomputed against the new grid the next time a scenario is opened. If a change turns out to be wrong, use **Discard draft** + re-edit before the next risk-review cycle.
 
-- **Base language** (left pill) — the matrix's primary locale. Click any other locale chip to switch the editor into translation mode.
-- **Translation chips** — every additional language the matrix has content in. The active one is highlighted; click another to switch.
-- **Remove language** — the small `×` on a translation chip removes that translation entirely (with confirmation). The base language can't be removed.
-- **Add language** — a dropdown listing every locale not yet on the matrix. Picking one adds it as a translation target and switches the editor to it.
-- **Default locale** — when more than one language exists, a separate dropdown lets you change which is treated as the base. Changing the base re-promotes the previously-translation content into the base slot.
+### Discard a draft
 
-In translation mode, every level editor splits each field into a base column (read-only) and a translation column (editable), with the base value as a placeholder hint. The matrix metadata behaves the same way. Switching back to the base language returns the editor to normal single-column editing.
+To throw away in-progress edits and start over from the live state:
 
-### Editor tabs
+1. Find the matrix in the list. If it's a published matrix with an active draft, the **Discard draft** button appears in the row's actions.
+2. Click it. The server-side draft is deleted and a fresh draft is re-created from the live state.
+3. If the matrix has never been published, the action is **Delete** instead — it removes the whole matrix.
 
-The editor body is organised as four tabs, mirroring the YAML schema:
+### Export as a YAML library
 
-- **Probability** — the likelihood / frequency axis.
-- **Impact** — the consequence axis.
-- **Risk levels** — the resulting risk classes (Low / Medium / High / etc.).
-- **Grid** — the `(probability, impact) → risk level` cell mapping.
+To take a matrix out of this instance — for source control, sharing with another instance, or shipping to the community catalogue:
 
-#### LevelEditor (Probability, Impact, Risk levels)
-
-The three level tabs share the same editor. Each row in the table is one level, with these columns:
-
-- **`#`** — the level's index, rendered as a coloured pill (uses the level's own hex colour). Read-only.
-- **Abbreviation** — the short code (e.g. `1`, `L`, `Med`). Used in compact UI rendering.
-- **Name** — the level's display label (e.g. _Low_, _Likely_, _Significant_). Translatable.
-- **Description** — the level's criteria (e.g. _"Less than 1 occurrence per 5 years"_). Translatable.
-- **Hex colour** — a colour picker. Drives the cell colour in the grid and the level chip everywhere it's shown.
-- **Actions** — _Move up_, _Move down_, _Delete_. Minimum two levels per dimension; the delete button disables when only two remain.
-
-Above the table, a **colour palette** picker lets you apply a preset palette to every level in one click:
-
-- **Classic** — green / lime / yellow / amber / red / dark red — the default.
-- **Accessible** — Wong's colourblind-safe palette (blue / sky / yellow / orange / vermillion / pink / green / black).
-- **Warm** — cream-to-burgundy progression.
-- **Cool** — light-cyan-to-deep-teal progression.
-
-Applying a palette rewrites the hex colours on every level in order, so a 5-level scale gets the first 5 palette entries. The picker is purely a convenience — you can still hand-set individual colours afterwards.
-
-##### Adding a level
-
-The **Add level** button appends a new level with:
-
-- Auto-incremented index.
-- Default abbreviation (the index + 1).
-- Empty name and description (you fill them in).
-- A palette colour matching the current scheme.
-
-##### Reordering and deleting
-
-Moves and deletes don't just edit the level list — they **remap the grid** to keep it consistent:
-
-- Moving a probability level swaps the corresponding grid rows.
-- Moving an impact level swaps the corresponding grid columns.
-- Moving a risk level remaps every grid cell that pointed at that risk level.
-- Deleting a probability or impact level drops the corresponding row/column.
-- Deleting a risk level remaps cells that pointed at it to the first risk level (the safe fallback); the editor flags this with a validation warning if any cell ended up out of range.
-
-This is the most fragile part of authoring — adding and reordering are cheap, but deleting a risk level mid-flight is destructive. The editor lets you do it, but the validation panel surfaces the consequences inline so you can spot them.
-
-#### GridEditor
-
-The grid tab renders the `(probability × impact)` matrix as a visual table:
-
-- **Probability rows** run **top-to-bottom in descending order** (highest probability at the top) — this matches the heatmap convention used in the live RiskMatrix component, so the editor preview is unambiguous.
-- **Impact columns** run **left-to-right** in level order.
-- Each axis header carries its own coloured chip (using the level's hex colour and its abbreviation + name), so the dimensions are visible without consulting the level tabs.
-- Each cell is coloured by the risk level it maps to, with the risk level's abbreviation centred in the cell.
-
-Cells are interactive:
-
-- **Click** a cell to cycle through the risk levels in order (Low → Medium → High → Critical → Low).
-- **Hover** a cell to reveal a small dropdown listing every risk level by colour and name — click any entry to set the cell directly without cycling. The dropdown flips upward for cells in the bottom half of the grid, so it doesn't fall off the page.
-- **Keyboard** — focus a cell and press `Enter` or `Space` to cycle (same as clicking).
-
-The grid stays in sync with the level tabs automatically — adding a probability level adds a row, removing an impact level removes a column, etc. The validation panel flags any structural mismatch (rows ≠ probability levels, cols ≠ impact levels) and out-of-range cell values.
-
-### Live preview
-
-Below the editor, the **Matrix preview** card renders the matrix using the live **RiskMatrix** component — the same one analysts see on a risk scenario. The preview:
-
-- Updates instantly on every change (level rename, colour tweak, cell click).
-- Includes the legend, so you can verify the legend rendering before publishing.
-- Hides itself when the matrix is incomplete (under 2 levels per dimension), with an inline message — _"Invalid matrix — need at least 2 levels per dimension"_.
-
-The preview is the final fidelity check: scroll down, look at it, then publish.
-
-### Real-time validation
-
-A yellow **validation warnings** panel surfaces inline as you edit. It checks:
-
-- **Dimensions** — each of probability, impact, and risk levels must have ≥ 2 entries.
-- **Grid shape** — number of rows = number of probability levels; number of columns = number of impact levels.
-- **Cell values** — every grid cell's value must be a valid risk level index (0 to max).
-- **Required fields** — every level needs a name and a hex colour.
-- **Duplicate abbreviations** — within a single dimension, abbreviations should be unique (the cell badge looks confusing otherwise).
-- **Matrix name** — must not be empty.
-
-Warnings are non-blocking — you can keep editing and save drafts with warnings present — but **publishing is blocked** until the matrix is valid. The panel surfaces every warning with enough context (which level, which cell, what value) to fix without hunting.
-
-### The draft → publish lifecycle
-
-The matrix editor uses a server-side **editing draft** that's distinct from the live matrix definition (`json_definition`):
-
-1. **Create or open** — opening a matrix in the editor either starts a fresh draft from the live state (`start-editing` action) or loads the existing one. Drafts are idempotent: re-opening returns the same draft.
-2. **Save draft** — explicitly via the **Save draft** button. Persists `editing_draft` on the server. The matrix is _not_ visible to risk scenarios yet.
-3. **Publish** — promotes `editing_draft` into `json_definition`, bumping the matrix's `editing_version`. Risk scenarios immediately read the new shape. A confirmation dialog runs first; on success the toast confirms _Matrix published_.
-4. **Discard draft** — for matrices that have a live `json_definition`, this throws the draft away and re-creates a fresh one from live. The button is in the matrix list, not the toolbar — _Discard draft_ on a published matrix; _Delete_ on an unpublished one (because there's no live to revert to).
-5. **Switch away** — switching to a different matrix in the list with unsaved changes prompts a confirmation. The server-side draft is preserved either way; only in-memory edits get lost.
-
-Publishing immediately affects every risk scenario referencing this matrix — current and residual risk levels are recomputed against the new grid the next time the scenario is opened or rolled up. This is why the editor's discard path matters: it's the safe revert when a session of edits turns out to be wrong.
-
-### Exporting to YAML
-
-The **Export YAML** button auto-saves the current draft, then downloads it as a library-format YAML file with:
-
-- Metadata (`name`, `description`, `locale`, `provider`).
-- All four object lists (probability, impact, risk, grid) including hex colours and translations.
-- The matrix's URN.
-
-The exported file is ready to ship to other CISO Assistant instances, to source control, or to a community library catalogue.
-
-### What the editor doesn't do (yet)
-
-- **Bulk matrix import from a workbook** — the import is one matrix at a time. Bringing in several matrices in one shot is still an Excel-to-YAML conversion job.
-- **Symmetry helpers** — the editor doesn't have a "mirror to diagonal" or "auto-fill upper triangle" button. You set each cell explicitly. For most matrices this is fine; for large ones, the click-to-cycle pattern is faster than it sounds.
-- **Side-by-side comparison with another matrix** — useful for diffing a custom matrix against a built-in one, but not yet exposed. The preview + a second tab is the workaround.
-
-For these, fall back to [Designing your own libraries](../libraries/custom-libraries.md) or [Excel-driven authoring](excel.md).
-
-### When to use the editor vs. Excel
-
-- **Editor** — for matrices that live primarily on this instance (internal taxonomy, forked variants, in-progress drafts), and for matrices you intend to share as a library YAML afterwards (_Export as YAML_ produces a publishable file). The editor wins everywhere translations and palette tuning are part of the work.
-- **Excel** — when the matrix is part of a larger Excel workbook that also defines a framework, threats, or reference controls and you want a single conversion step. See [Excel-driven authoring](excel.md) and [Designing your own libraries](../libraries/custom-libraries.md).
-
-The two paths are compatible: an Excel-built matrix can be imported into the editor (via _Import YAML_ after conversion) and tuned in place, and an editor-built matrix can be exported as YAML for redistribution.
+1. Open the matrix in the editor. Make sure any unsaved edits are saved (export auto-saves, but the export reflects what's _live_ ideally).
+2. Click **Export YAML** in the toolbar. The browser downloads a library-format YAML file with metadata, all four object lists, hex colours, translations, and the matrix URN.
+3. The file is ready to load on another instance via the [Libraries](../libraries/README.md) section.
 
 ## Editorial discipline
 
@@ -272,15 +172,19 @@ Once a matrix is published and risk scenarios reference it, **changes ripple imm
 - **Author in the base language first.** Don't start translating before the base is settled — every level rename rewrites the translation hint.
 - **Mind the abbreviation column.** Abbreviations don't get translated (they're identifiers, not labels). A French matrix can have `name: "Faible"` and `abbreviation: "L"`, or `abbreviation: "F"` — both work, just stay consistent.
 
-## Existing material
+## When to use the editor vs. Excel
 
-- [Risk matrices concept](../../concepts/risk-matrices.md) — what a risk matrix _is_ in the data model.
-- [Designing your own libraries](../libraries/custom-libraries.md) — full Excel-to-YAML reference, including the matrix schema.
-- [`tools/custom_matrix_5x5.yaml`](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/custom_matrix_5x5.yaml) — annotated reference example shipped with the repository.
+- **Editor** — for matrices that live primarily on this instance (internal taxonomy, forked variants, in-progress drafts), and for matrices you intend to share as a library YAML afterwards (_Export as YAML_ produces a publishable file). The editor wins everywhere translations and palette tuning are part of the work.
+- **Excel** — when the matrix is part of a larger Excel workbook that also defines a framework, threats, or reference controls and you want a single conversion step. See [Excel-driven authoring](excel.md) and [Designing your own libraries](../libraries/custom-libraries.md).
+
+The two paths are compatible: an Excel-built matrix can be imported into the editor (via _Import YAML_ after conversion) and tuned in place, and an editor-built matrix can be exported as YAML for redistribution.
 
 ## Related
 
+- [Matrix editor — reference](matrix-editor.md) — every surface and action in the editor.
+- [Risk matrices concept](../../concepts/risk-matrices.md) — what a risk matrix _is_ in the data model.
 - [Framework authoring](framework.md) — frameworks often ship with a recommended matrix in the same library.
 - [Risk assessments concept](../../concepts/risk-assessments.md) — how matrices are consumed at assessment time.
 - [Excel-driven authoring](excel.md) — when to fall back to spreadsheets.
+- [`tools/custom_matrix_5x5.yaml`](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/custom_matrix_5x5.yaml) — annotated reference example shipped with the repository.
 - [Contributing → Frameworks and libraries](../../contributing/framework.md) — how to upstream a community-shareable matrix.
