@@ -2830,5 +2830,6 @@
 	"builderQuestionTypeDate": "Data",
 	"oidcStrictStateNonce": "State e nonce stringenti",
 	"oidcStrictStateNonceHelpText": "Genera un state e un nonce lunghi e URL-safe (40 caratteri da A-Z, a-z, 0-9 e dai simboli - . _ ~ ) e convalida il nonce dell'id_token al callback. Abilita solo se il tuo IdP impone questi vincoli.",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "modificato in",
+	"requirementWeight": "Peso"
 }

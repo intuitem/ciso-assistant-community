@@ -80,6 +80,39 @@ Why the lifecycle matters across the platform:
 
 The transitions aren't enforced as a strict state machine — you can move a control between any two statuses — but staying within the lifecycle above makes audit trails and analytics meaningful.
 
+## Financial tracking
+
+Applied controls carry a structured **cost** field, so the financial weight of your security programme isn't a separate spreadsheet — it's attached to the controls themselves and rolled up wherever they appear (most notably on every [action plan](../features/action-plans.md)).
+
+The platform models the **build vs run** distinction that controls actually carry in practice:
+
+| Cost type | Meaning | How it's counted |
+|---|---|---|
+| **Build** | One-shot setup cost — buying hardware, integrating a tool, drafting and approving a policy, running a project to roll out the control | Amortised over the configured **amortisation period** (in years) |
+| **Run** | Ongoing operational cost — licence renewals, the time spent every quarter on access reviews, the hours of the team that operates the control | Counted as an annual cost — applied every year for as long as the control runs |
+
+Each side accepts two inputs:
+
+- **Fixed cost** — a money amount (hardware purchase, licence fee, contractor invoice).
+- **People days** — a measure of internal effort. The platform converts this to money using the **daily rate** configured in **General settings**, so internal time is comparable with external spend.
+
+From these inputs, the platform computes an **annual cost** for every control:
+
+$$
+\text{annual cost} = \frac{B_{\text{fixed}} + B_{\text{days}} \cdot r}{T} + R_{\text{fixed}} + R_{\text{days}} \cdot r
+$$
+
+| Symbol | Meaning |
+|---|---|
+| *B*<sub>fixed</sub>, *B*<sub>days</sub> | Build fixed cost and people-days |
+| *R*<sub>fixed</sub>, *R*<sub>days</sub> | Run fixed cost and people-days |
+| *r* | Configured daily rate (from General settings) |
+| *T* | Amortisation period, in years |
+
+That single number is what feeds every roll-up — the action plan's budget overview, the per-assignee and per-domain breakdowns, the by-status / by-priority / by-CSF-function totals. Controls without a cost set contribute zero, so partial adoption of the financial tracking still works — you fill in numbers where you have them and the totals reflect what's known.
+
+The annualised view matters because cybersecurity controls are continuous (see [Why "Active" — and why no "Done"](#why-active--and-why-no-done) above). A capex-style "we paid €40k once" view doesn't compare well across controls; an "annual cost in steady state" view lets you put a single line per control on the budget and compare them like-for-like.
+
 ## Reference control
 
 A **reference control** is a template for an applied control. Reference controls facilitate the creation of applied controls and help keep them consistent across the organisation.

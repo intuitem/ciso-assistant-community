@@ -1574,5 +1574,6 @@
 	"builderQuestionTypeDate": "تاریخ",
 	"oidcStrictStateNonce": "سخت state اور nonce",
 	"oidcStrictStateNonceHelpText": "ایک طویل URL محفوظ state اور nonce تیار کریں (A-Z، a-z، 0-9 اور علامات - . _ ~ , سے 40 کریکٹر) اور کال بیک پر id_token nonce کی توثیق کریں۔ صرف اس وقت فعال کریں جب آپ کا IdP یہ پابندیاں لاگو کرتا ہو۔",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "میں تبدیل ہوا",
+	"requirementWeight": "وزن"
 }

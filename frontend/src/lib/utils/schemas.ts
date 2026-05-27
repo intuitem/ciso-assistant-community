@@ -166,7 +166,8 @@ export const ThreatSchema = z.object({
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const SecurityAdvisorySchema = z.object({
@@ -328,7 +329,8 @@ export const ReferenceControlSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const AssetSchema = z.object({
@@ -878,7 +880,8 @@ export const vulnerabilitySchema = z.object({
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	security_advisories: z.string().uuid().optional().array().optional(),
 	cwes: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const BusinessImpactAnalysisSchema = z.object({

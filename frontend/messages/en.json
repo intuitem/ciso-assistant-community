@@ -4882,6 +4882,7 @@
 	"builderQuestionTypeMultipleChoice": "Multiple choice",
 	"builderQuestionTypeDate": "Date",
 	"builderChangedOn": "changed on",
+	"requirementWeight": "Weight",
 	"frameworkReport": "Framework report",
 	"scoringScale": "Scoring scale",
 	"implementationGroup": "Implementation group",

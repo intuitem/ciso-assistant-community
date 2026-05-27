@@ -2342,5 +2342,6 @@
 	"builderQuestionTypeUniqueChoice": "Unikalny wybór",
 	"builderQuestionTypeMultipleChoice": "Wielokrotny wybór",
 	"builderQuestionTypeDate": "Data",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "zmienione w",
+	"requirementWeight": "Waga"
 }

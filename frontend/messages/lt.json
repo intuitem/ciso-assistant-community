@@ -4559,5 +4559,6 @@
 	"builderQuestionTypeUniqueChoice": "Vienas pasirinkimas",
 	"builderQuestionTypeMultipleChoice": "Keli pasirinkimai",
 	"builderQuestionTypeDate": "Data",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "pakeista",
+	"requirementWeight": "Svoris"
 }

@@ -1873,5 +1873,6 @@
 	"builderQuestionTypeDate": "Datum",
 	"oidcStrictStateNonce": "Striktní state a nonce",
 	"oidcStrictStateNonceHelpText": "Vygenerovat dlouhý a URL-safe state i nonce (40 znaků z A-Z, a-z, 0-9 a symbolů - . _ ~ ) a ověřit nonce v id_tokenu při zpětném volání. Aktivujte pouze pokud váš IdP tato omezení vyžaduje.",
-	"builderChangedOn": "Změněno dne"
+	"builderChangedOn": "změněno v",
+	"requirementWeight": "Váha"
 }

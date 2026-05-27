@@ -2281,5 +2281,6 @@
 	"builderQuestionTypeDate": "Ημερομηνία",
 	"oidcStrictStateNonce": "Αυστηρό state και nonce",
 	"oidcStrictStateNonceHelpText": "Δημιουργία μακρού state και nonce ασφαλούς για URL (40 χαρακτήρες από A-Z, a-z, 0-9 και τα σύμβολα - . _ ~ ) και επαλήθευση του nonce του id_token κατά την επιστροφή. Ενεργοποιήστε μόνο εάν ο IdP σας επιβάλλει αυτούς τους περιορισμούς.",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "άλλαξε σε",
+	"requirementWeight": "Βάρος"
 }
