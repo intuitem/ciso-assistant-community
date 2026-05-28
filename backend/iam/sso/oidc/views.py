@@ -1,7 +1,9 @@
 import secrets
 import string
 import structlog
+from allauth import app_settings as allauth_settings  # type: ignore[import-untyped]
 from allauth.account.internal.decorators import login_not_required  # type: ignore[import-untyped]
+from allauth.socialaccount.providers.base.utils import respond_to_login_on_get  # type: ignore[import-untyped]
 from allauth.account.utils import get_next_redirect_url  # type: ignore[import-untyped]
 from allauth.socialaccount.adapter import get_adapter as get_socialaccount_adapter  # type: ignore[import-untyped]
 from allauth.socialaccount.helpers import render_authentication_error  # type: ignore[import-untyped]
@@ -44,9 +46,9 @@ def _generate_oidc_token(length: int = _OIDC_TOKEN_LENGTH) -> str:
 
 class NonceValidatingOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
     """OIDC adapter that validates the id_token `nonce` claim against the value
-    stashed at the start of the authorization flow. Validation is lenient: a
-    nonce that is present must match, but an id_token that omits the nonce
-    claim only logs a warning so non-conformant IdPs are not broken."""
+    stashed at the start of the authorization flow. Per OIDC Core 3.1.3.7, if
+    a nonce was sent in the authorization request, the id_token MUST contain
+    the same value — a missing or mismatched nonce is a hard failure."""
 
     def complete_login(self, request, app, token, **kwargs):
         id_token_str = kwargs["response"].get("id_token")
@@ -64,20 +66,27 @@ class NonceValidatingOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
             if expected_nonce is not None:
                 returned_nonce = decoded.get("nonce")
                 if returned_nonce is None:
-                    logger.warning(
-                        "OIDC id_token has no nonce claim; skipping nonce validation",
+                    logger.error(
+                        "OIDC id_token missing nonce claim",
                         provider=self.provider_id,
                     )
+                    raise OAuth2Error("OIDC id_token missing nonce claim")
                 elif returned_nonce != expected_nonce:
                     logger.error(
                         "OIDC nonce mismatch",
                         provider=self.provider_id,
                     )
                     raise OAuth2Error("OIDC nonce mismatch")
-            logger.debug(
-                "OIDC id_token decoded and nonce validated",
-                provider=self.provider_id,
-            )
+                else:
+                    logger.debug(
+                        "OIDC id_token nonce validated",
+                        provider=self.provider_id,
+                    )
+            else:
+                logger.debug(
+                    "OIDC id_token decoded, no nonce to validate",
+                    provider=self.provider_id,
+                )
             data["id_token"] = decoded
         return self.get_provider().sociallogin_from_response(request, data)
 
@@ -252,6 +261,9 @@ def callback(request, provider_id):
 
 @login_not_required
 def login(request, provider_id):
+    if allauth_settings.HEADLESS_ONLY:
+        raise Http404
+
     # Sanitize referer to only log origin (domain), removing paths and query params
     referer = request.META.get("HTTP_REFERER")
     referer_origin = None
@@ -279,6 +291,11 @@ def login(request, provider_id):
         )
 
         provider = get_socialaccount_adapter().get_provider(request, provider_id)
+
+        resp = respond_to_login_on_get(request, provider)
+        if resp:
+            return resp
+
         response = oidc_redirect(request, provider)
 
         logger.debug(
