@@ -13,6 +13,7 @@ test('compliance assessments scoring is working properly', async ({
 	page
 }) => {
 	const testRequirements = ['folders', 'perimeters', 'complianceAssessments'];
+	const minScore = 1;
 	const maxScore = 4;
 	const IDAM1Score = {
 		ratio: 0.66,
@@ -31,7 +32,8 @@ test('compliance assessments scoring is working properly', async ({
 		value: 1
 	};
 	// Helper to convert raw score to percentage for tree view assertions
-	const toPercent = (score: number) => ((score / maxScore) * 100).toString();
+	const toPercent = (score: number) =>
+		(((score - minScore) / (maxScore - minScore)) * 100).toString();
 
 	for (let requirement of testRequirements) {
 		requirement += 'Page';
