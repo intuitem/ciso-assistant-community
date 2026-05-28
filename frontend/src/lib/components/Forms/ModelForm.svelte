@@ -2,91 +2,12 @@
 	import { run } from 'svelte/legacy';
 
 	import { setContext, onDestroy } from 'svelte';
+	import type { Component } from 'svelte';
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
-
-	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
-	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
-	import ThreatForm from './ModelForm/ThreatForm.svelte';
-	import SecurityAdvisoryForm from './ModelForm/SecurityAdvisoryForm.svelte';
-	import CWEForm from './ModelForm/CWEForm.svelte';
-	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
-	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
-	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
-	import RiskAcceptancesForm from './ModelForm/RiskAcceptanceForm.svelte';
-	import ValidationFlowForm from './ModelForm/ValidationFlowForm.svelte';
-	import ReferenceControlsForm from './ModelForm/ReferenceControlForm.svelte';
-	import EvidencesForm from './ModelForm/EvidenceForm.svelte';
-	import ComplianceAssessmentsForm from './ModelForm/ComplianceAssessmentForm.svelte';
-	import AssetsForm from './ModelForm/AssetForm.svelte';
-	import RequirementAssessmentsForm from './ModelForm/RequirementAssessmentForm.svelte';
-	import EntitiesForm from './ModelForm/EntityForm.svelte';
-	import EntityAssessmentForm from './ModelForm/EntityAssessmentForm.svelte';
-	import SolutionsForm from './ModelForm/SolutionForm.svelte';
-	import ContractsForm from './ModelForm/ContractForm.svelte';
-	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
-	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
-	import UsersForm from './ModelForm/UserForm.svelte';
-	import TeamForm from './ModelForm/TeamForm.svelte';
-	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
-	import FolderForm from './ModelForm/FolderForm.svelte';
-	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
-	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
-	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
-	import SecIntelFeedsSettingForm from './ModelForm/SecIntelFeedsSettingForm.svelte';
-	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
-	import PurposeForm from './ModelForm/PurposeForm.svelte';
-	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
-	import DataSubjectForm from './ModelForm/DataSubjectForm.svelte';
-	import DataRecipientForm from './ModelForm/DataRecipientForm.svelte';
-	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
-	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
-	import RightRequestForm from './ModelForm/RightRequestForm.svelte';
-	import DataBreachForm from './ModelForm/DataBreachForm.svelte';
-	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
-	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
-	import RoToForm from './ModelForm/RoToForm.svelte';
-	import StakeholderForm from './ModelForm/StakeholderForm.svelte';
-	import AttackPathForm from './ModelForm/AttackPathForm.svelte';
-	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
-	import FindingForm from './ModelForm/FindingForm.svelte';
-	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
-	import IncidentForm from './ModelForm/IncidentForm.svelte';
-	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
-	import TaskTemplateForm from './ModelForm/TaskTemplateForm.svelte';
-	import TaskNodeForm from './ModelForm/TaskNodeForm.svelte';
-	import BusinessImpactAnalysisForm from './ModelForm/BusinessImpactAnalysisForm.svelte';
-	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
-	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
-	import CampaignForm from './ModelForm/CampaignForm.svelte';
-	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
-	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
-	import KillChainForm from './ModelForm/KillChainForm.svelte';
-	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
-	import OrganisationObjectiveForm from './ModelForm/OrganisationObjectiveForm.svelte';
-	import QuantitativeRiskStudyForm from './ModelForm/QuantitativeRiskStudyForm.svelte';
-	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
-	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
-	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
-	import RoleForm from './ModelForm/RoleForm.svelte';
-	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
-	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
-	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
-	import ProjectForm from './ModelForm/ProjectForm.svelte';
-	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
-	import ResponsibilityMatrixActivityForm from './ModelForm/ResponsibilityMatrixActivityForm.svelte';
-	import ResponsibilityAssignmentForm from './ModelForm/ResponsibilityAssignmentForm.svelte';
-	import ResponsibilityRoleForm from './ModelForm/ResponsibilityRoleForm.svelte';
-	import MetricDefinitionForm from './ModelForm/MetricDefinitionForm.svelte';
-	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
-	import CustomMetricSampleForm from './ModelForm/CustomMetricSampleForm.svelte';
-	import DashboardForm from './ModelForm/DashboardForm.svelte';
-	import DashboardWidgetForm from './ModelForm/DashboardWidgetForm.svelte';
-	import DashboardTextWidgetForm from './ModelForm/DashboardTextWidgetForm.svelte';
-	import DashboardBuiltinWidgetForm from './ModelForm/DashboardBuiltinWidgetForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -100,11 +21,100 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
-	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
-	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
-	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { safeTranslate } from '$lib/utils/i18n';
+
+	type ModelFormComponent = Component<any>;
+	type ModelFormLoader = () => Promise<{ default: ModelFormComponent }>;
+
+	const modelFormLoaders: Record<string, ModelFormLoader> = {
+		perimeters: () => import('./ModelForm/PerimeterForm.svelte'),
+		folders: () => import('./ModelForm/FolderForm.svelte'),
+		'folders-import': () => import('./ModelForm/FolderForm.svelte'),
+		'risk-assessments': () => import('./ModelForm/RiskAssessmentForm.svelte'),
+		threats: () => import('./ModelForm/ThreatForm.svelte'),
+		'security-advisories': () => import('./ModelForm/SecurityAdvisoryForm.svelte'),
+		cwes: () => import('./ModelForm/CWEForm.svelte'),
+		'risk-scenarios': () => import('./ModelForm/RiskScenarioForm.svelte'),
+		'applied-controls': () => import('./ModelForm/AppliedControlPolicyForm.svelte'),
+		policies: () => import('./ModelForm/AppliedControlPolicyForm.svelte'),
+		vulnerabilities: () => import('./ModelForm/VulnerabilitiesForm.svelte'),
+		'risk-acceptances': () => import('./ModelForm/RiskAcceptanceForm.svelte'),
+		'validation-flows': () => import('./ModelForm/ValidationFlowForm.svelte'),
+		'reference-controls': () => import('./ModelForm/ReferenceControlForm.svelte'),
+		evidences: () => import('./ModelForm/EvidenceForm.svelte'),
+		'compliance-assessments': () => import('./ModelForm/ComplianceAssessmentForm.svelte'),
+		campaigns: () => import('./ModelForm/CampaignForm.svelte'),
+		assets: () => import('./ModelForm/AssetForm.svelte'),
+		'requirement-assessments': () => import('./ModelForm/RequirementAssessmentForm.svelte'),
+		entities: () => import('./ModelForm/EntityForm.svelte'),
+		'entity-assessments': () => import('./ModelForm/EntityAssessmentForm.svelte'),
+		solutions: () => import('./ModelForm/SolutionForm.svelte'),
+		contracts: () => import('./ModelForm/ContractForm.svelte'),
+		representatives: () => import('./ModelForm/RepresentativeForm.svelte'),
+		frameworks: () => import('./ModelForm/FrameworkForm.svelte'),
+		users: () => import('./ModelForm/UserForm.svelte'),
+		teams: () => import('./ModelForm/TeamForm.svelte'),
+		'sso-settings': () => import('./ModelForm/SsoSettingForm.svelte'),
+		'general-settings': () => import('./ModelForm/GeneralSettingForm.svelte'),
+		'feature-flags': () => import('./ModelForm/FeatureFlagsSettingForm.svelte'),
+		'vulnerability-sla': () => import('./ModelForm/VulnerabilitySlaSettingForm.svelte'),
+		'sec-intel-feeds': () => import('./ModelForm/SecIntelFeedsSettingForm.svelte'),
+		'filtering-labels': () => import('./ModelForm/FilteringLabelForm.svelte'),
+		'business-impact-analysis': () => import('./ModelForm/BusinessImpactAnalysisForm.svelte'),
+		'asset-assessments': () => import('./ModelForm/AssetAssessmentForm.svelte'),
+		'escalation-thresholds': () => import('./ModelForm/EscalationThresholdForm.svelte'),
+		processings: () => import('./ModelForm/ProcessingForm.svelte'),
+		purposes: () => import('./ModelForm/PurposeForm.svelte'),
+		'personal-data': () => import('./ModelForm/PersonalDataForm.svelte'),
+		'data-subjects': () => import('./ModelForm/DataSubjectForm.svelte'),
+		'data-recipients': () => import('./ModelForm/DataRecipientForm.svelte'),
+		'data-contractors': () => import('./ModelForm/DataContractorForm.svelte'),
+		'data-transfers': () => import('./ModelForm/DataTransferForm.svelte'),
+		'right-requests': () => import('./ModelForm/RightRequestForm.svelte'),
+		'data-breaches': () => import('./ModelForm/DataBreachForm.svelte'),
+		'ebios-rm': () => import('./ModelForm/EbiosRmForm.svelte'),
+		'feared-events': () => import('./ModelForm/FearedEventForm.svelte'),
+		'ro-to': () => import('./ModelForm/RoToForm.svelte'),
+		stakeholders: () => import('./ModelForm/StakeholderForm.svelte'),
+		'strategic-scenarios': () => import('./ModelForm/StrategicScenarioForm.svelte'),
+		'attack-paths': () => import('./ModelForm/AttackPathForm.svelte'),
+		'operational-scenarios': () => import('./ModelForm/OperationalScenarioForm.svelte'),
+		'security-exceptions': () => import('./ModelForm/SecurityExceptionForm.svelte'),
+		findings: () => import('./ModelForm/FindingForm.svelte'),
+		'findings-assessments': () => import('./ModelForm/FindingsAssessmentForm.svelte'),
+		incidents: () => import('./ModelForm/IncidentForm.svelte'),
+		'timeline-entries': () => import('./ModelForm/TimelineEntryForm.svelte'),
+		'task-templates': () => import('./ModelForm/TaskTemplateForm.svelte'),
+		'task-nodes': () => import('./ModelForm/TaskNodeForm.svelte'),
+		'elementary-actions': () => import('./ModelForm/ElementaryActionForm.svelte'),
+		'operating-modes': () => import('./ModelForm/OperatingModeForm.svelte'),
+		'kill-chains': () => import('./ModelForm/KillChainForm.svelte'),
+		'quantitative-risk-studies': () => import('./ModelForm/QuantitativeRiskStudyForm.svelte'),
+		'quantitative-risk-scenarios': () => import('./ModelForm/QuantitativeRiskScenarioForm.svelte'),
+		'quantitative-risk-hypotheses': () =>
+			import('./ModelForm/QuantitativeRiskHypothesisForm.svelte'),
+		'organisation-issues': () => import('./ModelForm/OrganisationIssueForm.svelte'),
+		'organisation-objectives': () => import('./ModelForm/OrganisationObjectiveForm.svelte'),
+		terminologies: () => import('./ModelForm/TerminologyForm.svelte'),
+		roles: () => import('./ModelForm/RoleForm.svelte'),
+		'evidence-revisions': () => import('./ModelForm/EvidenceRevisionForm.svelte'),
+		'generic-collections': () => import('./ModelForm/GenericCollectionForm.svelte'),
+		accreditations: () => import('./ModelForm/AccreditationForm.svelte'),
+		projects: () => import('./ModelForm/ProjectForm.svelte'),
+		'responsibility-matrices': () => import('./ModelForm/ResponsibilityMatrixForm.svelte'),
+		'responsibility-matrix-activities': () =>
+			import('./ModelForm/ResponsibilityMatrixActivityForm.svelte'),
+		'responsibility-assignments': () => import('./ModelForm/ResponsibilityAssignmentForm.svelte'),
+		'responsibility-roles': () => import('./ModelForm/ResponsibilityRoleForm.svelte'),
+		'metric-definitions': () => import('./ModelForm/MetricDefinitionForm.svelte'),
+		'metric-instances': () => import('./ModelForm/MetricInstanceForm.svelte'),
+		'custom-metric-samples': () => import('./ModelForm/CustomMetricSampleForm.svelte'),
+		dashboards: () => import('./ModelForm/DashboardForm.svelte'),
+		'dashboard-widgets': () => import('./ModelForm/DashboardWidgetForm.svelte'),
+		'dashboard-text-widgets': () => import('./ModelForm/DashboardTextWidgetForm.svelte'),
+		'dashboard-builtin-widgets': () => import('./ModelForm/DashboardBuiltinWidgetForm.svelte')
+	};
 
 	interface Props {
 		form: SuperValidated<FormDataShape>;
@@ -149,9 +159,157 @@
 	}: Props = $props();
 
 	const URLModel = model.urlModel as urlModel;
+	const modelFormPromise = modelFormLoaders[URLModel]?.();
 	const defaultFolderWritePermission =
 		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
 	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
+
+	function getModelFormProps(slotForm: any, data: any, initialData: any) {
+		const base = { form: slotForm, model, cacheLocks, formDataCache };
+		const dashboardBase = { form: slotForm, cacheLocks, formDataCache };
+		const mergedInitialData = { ...initialData, ...additionalInitialData };
+		const withInitialData = { ...base, initialData };
+		const withContext = { ...base, context };
+		const withObject = { ...base, object };
+		const withInitialDataAndContext = { ...withInitialData, context };
+		const withInitialDataAndObject = { ...withInitialData, object };
+		const withInitialDataObjectContext = { ...withInitialDataAndObject, context };
+		const withModelInitialData = { ...base, initialData: model.initialData };
+		const withModelInitialDataAndContext = { ...withModelInitialData, context };
+		const withModelInitialDataObjectContext = { ...withModelInitialData, object, context };
+		const withMergedInitialData = { ...base, initialData: mergedInitialData };
+
+		switch (URLModel) {
+			case 'perimeters':
+			case 'organisation-issues':
+			case 'organisation-objectives':
+				return withInitialData;
+			case 'folders':
+			case 'folders-import':
+				return { ...base, importFolder, initialData, object, ...rest };
+			case 'risk-assessments':
+			case 'business-impact-analysis':
+				return {
+					...withInitialDataAndObject,
+					duplicate,
+					context,
+					updated_fields,
+					...rest
+				};
+			case 'threats':
+			case 'security-advisories':
+			case 'cwes':
+			case 'risk-scenarios':
+			case 'vulnerabilities':
+			case 'reference-controls':
+			case 'solutions':
+			case 'contracts':
+			case 'feared-events':
+				return { ...withInitialData, ...rest };
+			case 'applied-controls':
+			case 'policies':
+				return {
+					...withInitialData,
+					duplicate,
+					schema,
+					origin,
+					context,
+					...rest
+				};
+			case 'risk-acceptances':
+			case 'validation-flows':
+			case 'entities':
+				return { ...withInitialDataAndObject, ...rest };
+			case 'evidences':
+			case 'compliance-assessments':
+			case 'campaigns':
+			case 'entity-assessments':
+			case 'operational-scenarios':
+				return { ...withInitialDataObjectContext, ...rest };
+			case 'assets':
+				return { ...withInitialDataAndObject, data, ...rest };
+			case 'requirement-assessments':
+			case 'processings':
+			case 'ebios-rm':
+			case 'stakeholders':
+			case 'task-nodes':
+				return { ...withContext, ...rest };
+			case 'representatives':
+				return { ...withObject, context, ...rest };
+			case 'frameworks':
+			case 'filtering-labels':
+				return { ...base, ...rest };
+			case 'users':
+			case 'teams':
+				return { ...withContext, shape, ...rest };
+			case 'sso-settings':
+			case 'general-settings':
+			case 'feature-flags':
+				return { ...base, data, ...rest };
+			case 'vulnerability-sla':
+			case 'sec-intel-feeds':
+				return { form: slotForm, model };
+			case 'asset-assessments':
+			case 'escalation-thresholds':
+			case 'personal-data':
+			case 'data-subjects':
+			case 'data-recipients':
+			case 'data-contractors':
+			case 'data-transfers':
+			case 'right-requests':
+			case 'data-breaches':
+			case 'strategic-scenarios':
+			case 'security-exceptions':
+			case 'findings':
+			case 'findings-assessments':
+			case 'incidents':
+			case 'task-templates':
+			case 'elementary-actions':
+			case 'purposes':
+			case 'ro-to':
+				return { ...withInitialDataAndContext, ...rest };
+			case 'attack-paths':
+				return { ...withInitialData, additionalInitialData, ...rest };
+			case 'timeline-entries':
+			case 'operating-modes':
+				return { ...withModelInitialDataAndContext, ...rest };
+			case 'kill-chains':
+				return { ...withModelInitialDataObjectContext, ...rest };
+			case 'quantitative-risk-studies':
+			case 'quantitative-risk-scenarios':
+			case 'quantitative-risk-hypotheses':
+				return { ...withInitialDataObjectContext, duplicate };
+			case 'terminologies':
+				return withInitialDataAndObject;
+			case 'roles':
+				return withContext;
+			case 'evidence-revisions':
+			case 'generic-collections':
+			case 'responsibility-matrices':
+			case 'responsibility-matrix-activities':
+			case 'responsibility-assignments':
+				return withInitialDataObjectContext;
+			case 'accreditations':
+			case 'projects':
+			case 'responsibility-roles':
+				return withInitialDataAndObject;
+			case 'metric-definitions':
+				return { ...withInitialData, data, ...rest };
+			case 'metric-instances':
+				return { ...withMergedInitialData, data, ...rest };
+			case 'custom-metric-samples':
+				return { ...withMergedInitialData, data, object, ...rest };
+			case 'dashboards':
+				return { ...dashboardBase, initialData: mergedInitialData, ...rest };
+			case 'dashboard-widgets':
+			case 'dashboard-builtin-widgets':
+				return { ...withMergedInitialData, object, ...rest };
+			case 'dashboard-text-widgets':
+				return { ...withMergedInitialData, data, object };
+			default:
+				return { form: slotForm };
+		}
+	}
 
 	function cancel(): void {
 		if (browser) {
@@ -360,558 +518,17 @@
 				data-focusindex="1"
 			/>
 		{/if}
-		{#if URLModel === 'perimeters'}
-			<PerimeterForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-		{:else if URLModel === 'folders' || URLModel === 'folders-import'}
-			<FolderForm
-				{form}
-				{importFolder}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{...rest}
-			/>
-		{:else if URLModel === 'risk-assessments'}
-			<RiskAssessmentForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-				{updated_fields}
-				{...rest}
-			/>
-		{:else if URLModel === 'threats'}
-			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'security-advisories'}
-			<SecurityAdvisoryForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'cwes'}
-			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'risk-scenarios'}
-			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
-			<AppliedControlsPoliciesForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{schema}
-				{origin}
-				{initialData}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'vulnerabilities'}
-			<VulnerabilitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'risk-acceptances'}
-			<RiskAcceptancesForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{object}
-				{initialData}
-				{$page}
-				{...rest}
-			/>
-		{:else if URLModel === 'validation-flows'}
-			<ValidationFlowForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{object}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'reference-controls'}
-			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'evidences'}
-			<EvidencesForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'compliance-assessments'}
-			<ComplianceAssessmentsForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'campaigns'}
-			<CampaignForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'assets'}
-			<AssetsForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{data}
-				{...rest}
-			/>
-		{:else if URLModel === 'requirement-assessments'}
-			<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
-		{:else if URLModel === 'entities'}
-			<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
-		{:else if URLModel === 'entity-assessments'}
-			<EntityAssessmentForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'solutions'}
-			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'contracts'}
-			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'representatives'}
-			<RepresentativesForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{object}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'frameworks'}
-			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
-		{:else if URLModel === 'users'}
-			<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
-		{:else if URLModel === 'teams'}
-			<TeamForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
-		{:else if URLModel === 'sso-settings'}
-			<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
-		{:else if URLModel === 'general-settings'}
-			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
-		{:else if URLModel === 'feature-flags'}
-			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
-		{:else if URLModel === 'vulnerability-sla'}
-			<VulnerabilitySlaSettingForm {form} {model} />
-		{:else if URLModel === 'sec-intel-feeds'}
-			<SecIntelFeedsSettingForm {form} {model} />
-		{:else if URLModel === 'filtering-labels'}
-			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
-		{:else if URLModel === 'business-impact-analysis'}
-			<BusinessImpactAnalysisForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-				{updated_fields}
-				{...rest}
-			/>
-		{:else if URLModel === 'asset-assessments'}
-			<AssetAssessmentForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'escalation-thresholds'}
-			<EscalationThresholdForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'processings'}
-			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
-		{:else if URLModel === 'purposes'}
-			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
-		{:else if URLModel === 'personal-data'}
-			<PersonalDataForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'data-subjects'}
-			<DataSubjectForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'data-recipients'}
-			<DataRecipientForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'data-contractors'}
-			<DataContractorForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'data-transfers'}
-			<DataTransferForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'right-requests'}
-			<RightRequestForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'data-breaches'}
-			<DataBreachForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
-		{:else if URLModel === 'feared-events'}
-			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
-		{:else if URLModel === 'ro-to'}
-			<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
-		{:else if URLModel === 'stakeholders'}
-			<StakeholderForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
-		{:else if URLModel === 'strategic-scenarios'}
-			<StrategicScenarioForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'attack-paths'}
-			<AttackPathForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{additionalInitialData}
-				{...rest}
-			/>
-		{:else if URLModel === 'operational-scenarios'}
-			<OperationalScenarioForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{object}
-				{...rest}
-			/>
-		{:else if URLModel === 'security-exceptions'}
-			<SecurityExceptionForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'findings'}
-			<FindingForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
-		{:else if URLModel === 'findings-assessments'}
-			<FindingsAssessmentForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'incidents'}
-			<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
-		{:else if URLModel === 'timeline-entries'}
-			<TimelineEntryForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				initialData={model.initialData}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'task-templates'}
-			<TaskTemplateForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'task-nodes'}
-			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
-		{:else if URLModel === 'elementary-actions'}
-			<ElementaryActionForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'operating-modes'}
-			<OperatingModeForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				initialData={model.initialData}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'kill-chains'}
-			<KillChainForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				initialData={model.initialData}
-				{object}
-				{context}
-				{...rest}
-			/>
-		{:else if URLModel === 'quantitative-risk-studies'}
-			<QuantitativeRiskStudyForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'quantitative-risk-scenarios'}
-			<QuantitativeRiskScenarioForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'quantitative-risk-hypotheses'}
-			<QuantitativeRiskHypothesisForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'organisation-issues'}
-			<OrganisationIssueForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-		{:else if URLModel === 'organisation-objectives'}
-			<OrganisationObjectiveForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-		{:else if URLModel === 'terminologies'}
-			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
-		{:else if URLModel === 'roles'}
-			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
-		{:else if URLModel === 'evidence-revisions'}
-			<EvidenceRevisionForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'generic-collections'}
-			<GenericCollectionForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'accreditations'}
-			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
-		{:else if URLModel === 'projects'}
-			<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
-		{:else if URLModel === 'responsibility-matrices'}
-			<ResponsibilityMatrixForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'responsibility-matrix-activities'}
-			<ResponsibilityMatrixActivityForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'responsibility-assignments'}
-			<ResponsibilityAssignmentForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'responsibility-roles'}
-			<ResponsibilityRoleForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
-		{:else if URLModel === 'metric-definitions'}
-			<MetricDefinitionForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{data}
-				{...rest}
-			/>
-		{:else if URLModel === 'metric-instances'}
-			<MetricInstanceForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
-				{...rest}
-			/>
-		{:else if URLModel === 'custom-metric-samples'}
-			<CustomMetricSampleForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
-				{object}
-				{...rest}
-			/>
-		{:else if URLModel === 'dashboards'}
-			<DashboardForm
-				{form}
-				{cacheLocks}
-				{formDataCache}
-				initialData={{ ...initialData, ...additionalInitialData }}
-				{...rest}
-			/>
-		{:else if URLModel === 'dashboard-widgets'}
-			<DashboardWidgetForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				initialData={{ ...initialData, ...additionalInitialData }}
-				{object}
-				{...rest}
-			/>
-		{:else if URLModel === 'dashboard-text-widgets'}
-			<DashboardTextWidgetForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
-				{object}
-			/>
-		{:else if URLModel === 'dashboard-builtin-widgets'}
-			<DashboardBuiltinWidgetForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				initialData={{ ...initialData, ...additionalInitialData }}
-				{object}
-				{...rest}
-			/>
+		{#if modelFormPromise}
+			{#await modelFormPromise}
+				<div class="flex justify-center py-4">
+					<LoadingSpinner />
+				</div>
+			{:then modelFormModule}
+				{@const ModelSpecificForm = modelFormModule.default}
+				<ModelSpecificForm {...getModelFormProps(form, data, initialData)} />
+			{:catch error}
+				<p class="text-red-600 text-sm">Unable to load form: {error?.message ?? error}</p>
+			{/await}
 		{/if}
 		<div
 			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
