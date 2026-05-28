@@ -69,8 +69,12 @@ def test_yaml_load_resolves_node_ref_through_ca():
     """Once the framework is loaded and a CA is created on it, the per-RA
     resolver looks the ref up in the CA's copy of scores_definition.alternatives.
     """
-    stored, _ = StoredLibrary.store_library_content(FIXTURE.read_bytes())
-    stored.load()
+    stored, err = StoredLibrary.store_library_content(FIXTURE.read_bytes())
+    assert err is None
+    assert stored is not None
+    load_err = stored.load()
+    assert load_err is None
+
     framework = Framework.objects.get(urn="urn:intuitem:test:framework:mixed-scoring")
 
     root = Folder.get_root_folder()
