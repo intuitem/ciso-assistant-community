@@ -11705,6 +11705,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ).select_related("requirement"),
                 )
             )
+            .order_by(Lower("folder__name"), Lower("name"))
         )
 
         for compliance_assessment in compliance_assessments:

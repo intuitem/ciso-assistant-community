@@ -7499,8 +7499,12 @@ class ComplianceAssessment(Assessment):
             extended_result_count = extended_result_to_count.get(extended_result, 0)
             extended_result_to_count[extended_result] = extended_result_count + 1
 
+        # Iterate enum values (not dict insertion order) so the emitted slices
+        # have a stable order across audits — needed for the side-by-side
+        # compare view, where ECharts renders pie slices in array order.
         compliance_assessment_results = {"values": [], "labels": []}
-        for result, count in result_to_count.items():
+        for result in RequirementAssessment.Result.values:
+            count = result_to_count.get(result, 0)
             value_entry = {
                 "name": result,
                 "localName": camel_case(result),
@@ -7512,7 +7516,8 @@ class ComplianceAssessment(Assessment):
             compliance_assessment_results["labels"].append(result)
 
         compliance_assessment_statuses = {"values": [], "labels": []}
-        for status, count in status_to_count.items():
+        for status in RequirementAssessment.Status.values:
+            count = status_to_count.get(status, 0)
             value_entry = {
                 "name": status,
                 "localName": camel_case(status),
@@ -7540,7 +7545,8 @@ class ComplianceAssessment(Assessment):
             )
             compliance_assessment_extended_results["labels"].append("not_set")
 
-            for extended_result, count in extended_result_to_count.items():
+            for extended_result in RequirementAssessment.ExtendedResult.values:
+                count = extended_result_to_count.get(extended_result, 0)
                 value_entry = {
                     "name": extended_result,
                     "localName": camel_case(extended_result),
