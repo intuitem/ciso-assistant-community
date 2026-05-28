@@ -1,4 +1,4 @@
-import { baseListViewFields } from '$lib/utils/table-fields';
+import { baseListViewFields } from '$lib/utils/table-metadata';
 import type { ParamMatcher } from '@sveltejs/kit';
 
 /**

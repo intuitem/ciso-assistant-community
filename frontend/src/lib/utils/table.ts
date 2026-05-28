@@ -2,7 +2,7 @@ import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte'
 import type { Component, ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 import type { urlModel } from './types';
-import { defineListViewFields, type BaseListViewFields } from './table-fields';
+import { defineListViewFields, type BaseListViewFields } from './table-metadata';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
@@ -41,7 +41,7 @@ export interface ListViewFilterConfig {
 	hide?: boolean;
 }
 
-// Final shape consumed by the table code after the body config in "table-fields.ts" has been merged with the UI-specific extension below.
+// Final shape consumed by the table code after the body config in "table-metadata.ts" has been merged with the UI-specific extension below.
 interface ListViewFieldsConfig {
 	[key: string]: {
 		head: readonly string[];
@@ -54,13 +54,27 @@ interface ListViewFieldsConfig {
 	};
 }
 
+// Extracts the lightweight filter key union declared for one model in "table-metadata.ts".
+type BaseFilterKeys<K extends keyof BaseListViewFields> = BaseListViewFields[K] extends {
+	filters: readonly (infer FilterKey)[];
+}
+	? FilterKey & string
+	: never;
+
+// Requires UI config for each declared filter key, and forbids filters on models that do not declare any.
+type FilterExtension<K extends keyof BaseListViewFields> = BaseListViewFields[K] extends {
+	filters: readonly string[];
+}
+	? { filters: { [F in BaseFilterKeys<K>]: ListViewFilterConfig | undefined } }
+	: { filters?: never };
+
 // Shape allowed in this file: UI metadata only.
-// `body` is intentionally forbidden here so field bodies have a single source of truth in "table-fields.ts".
+// `body` is intentionally forbidden here so field bodies have a single source of truth in "table-metadata.ts".
 type ListViewFieldsExtensionConfig = {
 	[K in keyof BaseListViewFields]: Omit<ListViewFieldsConfig[string], 'body' | 'head'> & {
 		head?: readonly string[];
 		body?: never;
-	};
+	} & FilterExtension<K>;
 };
 
 const YES_NO_OPTIONS = [

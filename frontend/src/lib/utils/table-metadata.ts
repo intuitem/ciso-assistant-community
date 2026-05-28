@@ -7,16 +7,19 @@ export const baseListViewFields = {
 			'parent_folder',
 			'create_iam_groups',
 			'filtering_labels'
-		]
+		],
+		filters: ['content_type', 'filtering_labels']
 	},
 	perimeters: {
-		body: ['ref_id', 'name', 'description', 'default_assignee', 'folder']
+		body: ['ref_id', 'name', 'description', 'default_assignee', 'folder'],
+		filters: ['folder', 'lc_status']
 	},
 	'filtering-labels': {
 		body: ['label']
 	},
 	'risk-matrices': {
-		body: ['name', 'description', 'provider', 'folder', 'is_enabled']
+		body: ['name', 'description', 'provider', 'folder', 'is_enabled'],
+		filters: ['folder', 'provider', 'is_enabled']
 	},
 	vulnerabilities: {
 		body: [
@@ -29,6 +32,15 @@ export const baseListViewFields = {
 			'applied_controls',
 			'folder',
 			'filtering_labels'
+		],
+		filters: [
+			'folder',
+			'filtering_labels',
+			'status',
+			'severity',
+			'assets',
+			'security_advisories',
+			'cwes'
 		]
 	},
 	'risk-assessments': {
@@ -41,10 +53,12 @@ export const baseListViewFields = {
 			'folder',
 			'perimeter',
 			'updated_at'
-		]
+		],
+		filters: ['folder', 'perimeter', 'status']
 	},
 	threats: {
-		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels']
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		filters: ['folder', 'provider', 'library', 'filtering_labels']
 	},
 	'security-advisories': {
 		body: [
@@ -58,10 +72,12 @@ export const baseListViewFields = {
 			'published_date',
 			'folder',
 			'filtering_labels'
-		]
+		],
+		filters: ['folder', 'source', 'filtering_labels']
 	},
 	cwes: {
-		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels']
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		filters: ['folder', 'filtering_labels']
 	},
 	'risk-scenarios': {
 		body: [
@@ -77,10 +93,25 @@ export const baseListViewFields = {
 			'residual_level',
 			'treatment',
 			'risk_assessment'
+		],
+		filters: [
+			'folder',
+			'perimeter',
+			'treatment',
+			'risk_assessment',
+			'owner',
+			'threats',
+			'assets',
+			'current_level',
+			'residual_level',
+			'within_tolerance',
+			'qualifications',
+			'filtering_labels'
 		]
 	},
 	'risk-acceptances': {
-		body: ['name', 'description', 'risk_scenarios', 'state']
+		body: ['name', 'description', 'risk_scenarios', 'state'],
+		filters: ['folder', 'state', 'approver']
 	},
 	'validation-flows': {
 		body: [
@@ -93,7 +124,8 @@ export const baseListViewFields = {
 			'linked_models',
 			'filtering_labels',
 			'folder'
-		]
+		],
+		filters: ['folder', 'status', 'requester', 'approver', 'linked_models', 'filtering_labels']
 	},
 	'applied-controls': {
 		body: [
@@ -112,6 +144,22 @@ export const baseListViewFields = {
 			'effort',
 			'linked_models',
 			'filtering_labels'
+		],
+		filters: [
+			'folder',
+			'status',
+			'assets',
+			'category',
+			'csf_function',
+			'priority',
+			'effort',
+			'control_impact',
+			'filtering_labels',
+			'reference_control',
+			'eta__lte',
+			'is_assigned',
+			'owner',
+			'linked_models'
 		]
 	},
 	policies: {
@@ -125,7 +173,8 @@ export const baseListViewFields = {
 			'owner',
 			'folder',
 			'reference_control'
-		]
+		],
+		filters: ['folder', 'status', 'csf_function', 'owner', 'priority']
 	},
 	'reference-controls': {
 		body: [
@@ -137,7 +186,8 @@ export const baseListViewFields = {
 			'provider',
 			'folder',
 			'filtering_labels'
-		]
+		],
+		filters: ['folder', 'category', 'provider', 'csf_function', 'filtering_labels']
 	},
 	assets: {
 		body: [
@@ -149,7 +199,8 @@ export const baseListViewFields = {
 			'owner',
 			'folder',
 			'filtering_labels'
-		]
+		],
+		filters: ['folder', 'type', 'filtering_labels', 'asset_class', 'is_business_function']
 	},
 	'asset-class': {
 		body: ['name', 'description']
@@ -165,7 +216,8 @@ export const baseListViewFields = {
 			'keep_local_login',
 			'is_third_party',
 			'has_mfa_enabled'
-		]
+		],
+		filters: ['is_active', 'is_third_party']
 	},
 	teams: {
 		body: ['name', 'description', 'team_email']
@@ -180,7 +232,8 @@ export const baseListViewFields = {
 		body: ['user', 'user_group', 'role', 'perimeter_folders']
 	},
 	frameworks: {
-		body: ['name', 'description', 'provider', 'compliance_assessments', 'folder']
+		body: ['name', 'description', 'provider', 'compliance_assessments', 'folder'],
+		filters: ['folder', 'provider']
 	},
 	'compliance-assessments': {
 		body: [
@@ -193,10 +246,17 @@ export const baseListViewFields = {
 			'progress',
 			'created_at',
 			'updated_at'
-		]
+		],
+		filters: ['folder', 'perimeter', 'framework', 'status']
 	},
 	'requirement-assessments': {
-		body: ['assessable', 'name', 'description', 'compliance_assessment', 'perimeter', 'result']
+		body: ['assessable', 'name', 'description', 'compliance_assessment', 'perimeter', 'result'],
+		filters: [
+			'compliance_assessment',
+			'requirement__assessable',
+			'result',
+			'compliance_assessment__perimeter'
+		]
 	},
 	evidences: {
 		body: [
@@ -207,10 +267,12 @@ export const baseListViewFields = {
 			'updated_at',
 			'filtering_labels',
 			'applied_controls'
-		]
+		],
+		filters: ['folder', 'filtering_labels', 'status', 'owner']
 	},
 	'evidence-revisions': {
-		body: ['version', 'evidence', 'attachment', 'size', 'updated_at']
+		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
+		filters: ['filtering_labels']
 	},
 	'document-revisions': {
 		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
@@ -234,13 +296,23 @@ export const baseListViewFields = {
 			'locales',
 			'objects_meta',
 			'publication_date'
+		],
+		filters: [
+			'locale',
+			'provider',
+			'object_type',
+			'is_loaded',
+			'is_custom',
+			'filtering_labels',
+			'is_update'
 		]
 	},
 	'sso-settings': {
 		body: ['name', 'provider', 'provider_id']
 	},
 	'requirement-mapping-sets': {
-		body: ['source_framework', 'target_framework']
+		body: ['source_framework', 'target_framework'],
+		filters: ['provider']
 	},
 	entities: {
 		body: [
@@ -251,7 +323,8 @@ export const baseListViewFields = {
 			'parent_entity',
 			'relationship',
 			'default_criticality'
-		]
+		],
+		filters: ['folder', 'parent_entity', 'relationship']
 	},
 	'entity-assessments': {
 		body: [
@@ -263,10 +336,12 @@ export const baseListViewFields = {
 			'criticality',
 			'conclusion',
 			'folder'
-		]
+		],
+		filters: ['perimeter', 'entity', 'status', 'criticality', 'conclusion']
 	},
 	solutions: {
-		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels']
+		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
+		filters: ['provider_entity', 'criticality', 'filtering_labels']
 	},
 	contracts: {
 		body: [
@@ -279,13 +354,16 @@ export const baseListViewFields = {
 			'provider_entity',
 			'beneficiary_entity',
 			'solutions'
-		]
+		],
+		filters: ['status', 'provider_entity', 'beneficiary_entity', 'solutions']
 	},
 	representatives: {
-		body: ['email', 'entity', 'role']
+		body: ['email', 'entity', 'role'],
+		filters: ['entity']
 	},
 	'business-impact-analysis': {
-		body: ['name', 'perimeter', 'folder', 'status']
+		body: ['name', 'perimeter', 'folder', 'status'],
+		filters: ['folder', 'perimeter', 'status']
 	},
 	'asset-assessments': {
 		body: [
@@ -312,10 +390,12 @@ export const baseListViewFields = {
 			'submitting_entity',
 			'folder',
 			'created_at'
-		]
+		],
+		filters: ['folder']
 	},
 	processings: {
-		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder']
+		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		filters: ['folder', 'assigned_to', 'status', 'nature', 'filtering_labels']
 	},
 	'right-requests': {
 		body: [
@@ -327,7 +407,8 @@ export const baseListViewFields = {
 			'requested_on',
 			'due_date',
 			'folder'
-		]
+		],
+		filters: ['folder', 'owner', 'request_type', 'status', 'processings']
 	},
 	'data-breaches': {
 		body: [
@@ -339,10 +420,12 @@ export const baseListViewFields = {
 			'status',
 			'affected_subjects_count',
 			'folder'
-		]
+		],
+		filters: ['folder', 'breach_type', 'risk_level', 'status', 'affected_processings']
 	},
 	purposes: {
-		body: ['legal_basis', 'description', 'name', 'processing']
+		body: ['legal_basis', 'description', 'name', 'processing'],
+		filters: ['processing', 'legal_basis']
 	},
 	'personal-data': {
 		body: [
@@ -353,7 +436,8 @@ export const baseListViewFields = {
 			'name',
 			'assets',
 			'processing'
-		]
+		],
+		filters: ['processing', 'category', 'deletion_policy', 'is_sensitive']
 	},
 	'data-subjects': {
 		body: ['category', 'description', 'name']
@@ -365,7 +449,8 @@ export const baseListViewFields = {
 		body: ['entity', 'relationship_type', 'country', 'name', 'documentation_link']
 	},
 	'data-transfers': {
-		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link'],
+		filters: ['transfer_mechanism']
 	},
 	'ebios-rm': {
 		body: [
@@ -376,13 +461,16 @@ export const baseListViewFields = {
 			'quotation_method',
 			'created_at',
 			'updated_at'
-		]
+		],
+		filters: ['folder', 'category', 'origin', 'status']
 	},
 	'feared-events': {
-		body: ['is_selected', 'ref_id', 'name', 'assets', 'description', 'qualifications', 'gravity']
+		body: ['is_selected', 'ref_id', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		filters: ['assets', 'qualifications', 'gravity', 'is_selected']
 	},
 	'ro-to': {
-		body: ['is_selected', 'risk_origin', 'target_objective', 'feared_events', 'pertinence']
+		body: ['is_selected', 'risk_origin', 'target_objective', 'feared_events', 'pertinence'],
+		filters: ['is_selected', 'risk_origin', 'feared_events', 'pertinence']
 	},
 	stakeholders: {
 		body: [
@@ -392,7 +480,8 @@ export const baseListViewFields = {
 			'current_criticality',
 			'applied_controls',
 			'residual_criticality'
-		]
+		],
+		filters: ['is_selected', 'entity', 'category']
 	},
 	'strategic-scenarios': {
 		body: [
@@ -404,7 +493,8 @@ export const baseListViewFields = {
 			'focused_feared_event',
 			'attack_paths',
 			'gravity'
-		]
+		],
+		filters: ['gravity']
 	},
 	'attack-paths': {
 		body: [
@@ -415,7 +505,8 @@ export const baseListViewFields = {
 			'target_objective',
 			'stakeholders',
 			'description'
-		]
+		],
+		filters: ['is_selected', 'stakeholders']
 	},
 	'operational-scenarios': {
 		body: [
@@ -425,10 +516,12 @@ export const baseListViewFields = {
 			'operating_modes',
 			'operating_modes_description',
 			'likelihood'
-		]
+		],
+		filters: ['threats', 'likelihood', 'is_selected']
 	},
 	'elementary-actions': {
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		filters: ['attack_stage']
 	},
 	'operating-modes': {
 		body: ['ref_id', 'name', 'likelihood']
@@ -446,7 +539,8 @@ export const baseListViewFields = {
 			'folder',
 			'associated_objects_count',
 			'created_at'
-		]
+		],
+		filters: ['folder', 'severity', 'status']
 	},
 	'findings-assessments': {
 		body: [
@@ -458,7 +552,8 @@ export const baseListViewFields = {
 			'treatment_progress',
 			'folder',
 			'perimeter'
-		]
+		],
+		filters: ['folder', 'perimeter', 'category']
 	},
 	findings: {
 		body: [
@@ -472,7 +567,8 @@ export const baseListViewFields = {
 			'status',
 			'applied_controls',
 			'filtering_labels'
-		]
+		],
+		filters: ['filtering_labels', 'severity', 'status', 'priority', 'owner']
 	},
 	incidents: {
 		body: [
@@ -486,13 +582,23 @@ export const baseListViewFields = {
 			'entities',
 			'reported_at',
 			'updated_at'
+		],
+		filters: [
+			'folder',
+			'qualifications',
+			'entities',
+			'status',
+			'detection',
+			'severity',
+			'filtering_labels'
 		]
 	},
 	'timeline-entries': {
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	campaigns: {
-		body: ['name', 'description', 'frameworks', 'status']
+		body: ['name', 'description', 'frameworks', 'status'],
+		filters: ['status', 'frameworks']
 	},
 	'organisation-objectives': {
 		body: [
@@ -507,7 +613,8 @@ export const baseListViewFields = {
 			'due_date',
 			'closing_date',
 			'assigned_to'
-		]
+		],
+		filters: ['folder', 'status', 'health', 'is_active']
 	},
 	'organisation-issues': {
 		body: [
@@ -519,10 +626,12 @@ export const baseListViewFields = {
 			'start_date',
 			'expiration_date',
 			'folder'
-		]
+		],
+		filters: ['folder', 'category', 'origin', 'status']
 	},
 	'quantitative-risk-studies': {
-		body: ['name', 'description', 'status', 'updated_at', 'folder']
+		body: ['name', 'description', 'status', 'updated_at', 'folder'],
+		filters: ['folder', 'status']
 	},
 	'quantitative-risk-scenarios': {
 		body: [
@@ -536,7 +645,8 @@ export const baseListViewFields = {
 			'current_ale_display',
 			'residual_ale_display',
 			'status'
-		]
+		],
+		filters: ['status', 'assets', 'threats', 'is_selected']
 	},
 	'quantitative-risk-hypotheses': {
 		body: [
@@ -550,7 +660,8 @@ export const baseListViewFields = {
 			'treatment_cost_display',
 			'roc_display',
 			'is_selected'
-		]
+		],
+		filters: ['is_selected', 'risk_stage']
 	},
 	'task-templates': {
 		body: [
@@ -564,37 +675,54 @@ export const baseListViewFields = {
 			'next_occurrence_status',
 			'folder',
 			'filtering_labels'
+		],
+		filters: [
+			'folder',
+			'assigned_to',
+			'is_recurrent',
+			'last_occurrence_status',
+			'next_occurrence_status',
+			'filtering_labels'
 		]
 	},
 	'task-nodes': {
-		body: ['due_date', 'status']
+		body: ['due_date', 'status'],
+		filters: ['status', 'past']
 	},
 	qualifications: {
 		body: ['name', 'abbreviation']
 	},
 	terminologies: {
-		body: ['field_path', 'name', 'description', 'translations', 'is_visible']
+		body: ['field_path', 'name', 'description', 'translations', 'is_visible'],
+		filters: ['field_path', 'builtin', 'is_visible']
 	},
 	'generic-collections': {
-		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder']
+		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
+		filters: ['folder', 'filtering_labels']
 	},
 	accreditations: {
-		body: ['ref_id', 'name', 'category', 'status', 'authority', 'author', 'expiry_date', 'folder']
+		body: ['ref_id', 'name', 'category', 'status', 'authority', 'author', 'expiry_date', 'folder'],
+		filters: ['folder', 'status', 'category', 'authority', 'filtering_labels']
 	},
 	projects: {
-		body: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder']
+		body: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		filters: ['folder', 'kind', 'status', 'health', 'filtering_labels']
 	},
 	'responsibility-matrices': {
-		body: ['ref_id', 'name', 'preset', 'activities_count', 'folder']
+		body: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		filters: ['folder', 'filtering_labels']
 	},
 	'responsibility-roles': {
-		body: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin']
+		body: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		filters: []
 	},
 	'responsibility-matrix-activities': {
-		body: ['name', 'description', 'order', 'matrix']
+		body: ['name', 'description', 'order', 'matrix'],
+		filters: []
 	},
 	'responsibility-assignments': {
-		body: ['activity', 'actor', 'role']
+		body: ['activity', 'actor', 'role'],
+		filters: []
 	},
 	'metric-definitions': {
 		body: [
@@ -606,7 +734,8 @@ export const baseListViewFields = {
 			'provider',
 			'filtering_labels',
 			'folder'
-		]
+		],
+		filters: ['folder', 'category', 'library', 'provider', 'filtering_labels']
 	},
 	'metric-instances': {
 		body: [
@@ -619,13 +748,15 @@ export const baseListViewFields = {
 			'status',
 			'last_refresh',
 			'folder'
-		]
+		],
+		filters: ['folder', 'metric_definition', 'status', 'owner', 'filtering_labels']
 	},
 	'custom-metric-samples': {
 		body: ['metric_instance', 'timestamp', 'display_value']
 	},
 	dashboards: {
-		body: ['ref_id', 'name', 'description', 'widget_count', 'filtering_labels', 'folder']
+		body: ['ref_id', 'name', 'description', 'widget_count', 'filtering_labels', 'folder'],
+		filters: ['folder', 'filtering_labels']
 	},
 	'dashboard-widgets': {
 		body: [
@@ -634,36 +765,50 @@ export const baseListViewFields = {
 			'chart_type_display',
 			'time_range_display',
 			'dashboard'
-		]
+		],
+		filters: ['folder', 'dashboard', 'metric_instance', 'chart_type']
 	},
 	'dashboard-text-widgets': {
-		body: ['display_title', 'dashboard']
+		body: ['display_title', 'dashboard'],
+		filters: ['folder', 'dashboard']
 	},
 	'dashboard-builtin-widgets': {
-		body: ['display_title', 'dashboard']
+		body: ['display_title', 'dashboard'],
+		filters: ['folder', 'dashboard']
 	},
 	actors: {
 		body: ['specific', 'type']
 	},
 	extra: {
-		body: ['users']
+		body: ['users'],
+		filters: ['risk', 'probability', 'impact', 'likelihood', 'gravity']
 	},
 	journeys: {
-		body: ['name', 'preset', 'folder', 'applied_version', 'applied_at', 'applied_by']
+		body: ['name', 'preset', 'folder', 'applied_version', 'applied_at', 'applied_by'],
+		filters: ['folder']
 	}
 } as const;
 
 export type BaseListViewFields = typeof baseListViewFields;
 
+// Mirrors the lightweight filter keys into the extension type so "table.ts" must provide matching filter entries and cannot add filters to models without them.
+type BaseFilterExtension<K extends keyof BaseListViewFields> = BaseListViewFields[K] extends {
+	filters: readonly (infer FilterKey)[];
+}
+	? { filters: { [F in FilterKey & string]: unknown } }
+	: { filters?: never };
+
 // UI-side extension authored in "table.ts".
 // `body` is forbidden so the base config remains the only source of truth for field bodies.
 export type ListViewFieldExtensions = {
-	[K in keyof BaseListViewFields]: Record<string, unknown> & { body?: never };
+	[K in keyof BaseListViewFields]: Record<string, unknown> & {
+		body?: never;
+	} & BaseFilterExtension<K>;
 };
 
 // Final merged type returned by defineListViewFields, with a default empty `head` when an extension does not provide one.
 type DefinedListViewFields<T extends ListViewFieldExtensions> = {
-	-readonly [K in keyof BaseListViewFields]: BaseListViewFields[K] &
+	-readonly [K in keyof BaseListViewFields]: Omit<BaseListViewFields[K], 'filters'> &
 		T[K] & {
 			head: T[K] extends { head: infer Head } ? Head : readonly [];
 		};
