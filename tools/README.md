@@ -221,7 +221,7 @@ The `_content` tab for a `framework` object contains the following columns:
 - weight: Positive integer `>= 1`. Used for score weighting. The default weight (if undefined) is `1`.
 - min_score: Integer. Override the requirement's minimum score (cascades from the ComplianceAssessment when blank).
 - max_score: Integer. Override the requirement's maximum score (cascades from the ComplianceAssessment when blank).
-- scores_definition: name of a `scores` object. Overrides the level labels for this requirement (cascades when blank).
+- scores_definition: name of a `scores` object. Overrides the level labels for this requirement (cascades when blank). When that name matches an entry in the framework's `scores_definition.alternatives` registry, the requirement stores a string reference instead of inlining the labels — multiple requirements can share the same alternative without duplication.
 - questions: 1 or several (n) questions, separated by line breaks
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
 - depends_on: Format: `question_line:choice_lines`. Set `/` (= undefined) or empty cell if the question depends on nothing. See the cell notes in `example_framework.xlsx`, at lines `41` and `43`, column `depends_on` for better understanding.

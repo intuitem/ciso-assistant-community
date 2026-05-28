@@ -2716,7 +2716,27 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                 {"max_score": _("max_score must be strictly greater than min_score.")}
             )
 
-        if self.scores_definition is not None:
+        if isinstance(self.scores_definition, str):
+            # String reference into framework.scores_definition["alternatives"].
+            # Validate the ref resolves to an existing entry.
+            fw_sd = (
+                self.framework.scores_definition
+                if self.framework is not None
+                and isinstance(self.framework.scores_definition, dict)
+                else {}
+            )
+            alternatives = fw_sd.get("alternatives") or {}
+            if self.scores_definition not in alternatives:
+                raise ValidationError(
+                    {
+                        "scores_definition": _(
+                            "scores_definition reference '%(ref)s' does not exist "
+                            "in the framework's alternatives."
+                        )
+                        % {"ref": self.scores_definition}
+                    }
+                )
+        elif self.scores_definition is not None:
             scale = self._unwrap_scores_definition()
             if not isinstance(scale, list) or not scale:
                 raise ValidationError(
@@ -8340,28 +8360,48 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         """Resolve the effective score scale via the cascade Node -> CA.
 
         Each scale field cascades independently: Node value when set, CA value
-        otherwise. scores_definition is returned unwrapped (bare list) or None.
+        otherwise. Node.scores_definition is polymorphic:
+          - None      : inherit CA's default scale
+          - str       : reference into CA.scores_definition["alternatives"][name]
+          - list/dict : inline override (wrapped or bare)
+        scores_definition is returned unwrapped (bare list) or None.
         """
         req = self.requirement
         ca = self.compliance_assessment
 
         min_score = req.min_score if req.min_score is not None else ca.min_score
         max_score = req.max_score if req.max_score is not None else ca.max_score
-        scores_definition = (
-            req.scores_definition
-            if req.scores_definition is not None
-            else ca.scores_definition
-        )
 
-        if isinstance(scores_definition, dict) and "scale" in scores_definition:
-            scores_definition = scores_definition["scale"]
+        req_sd = req.scores_definition
+        # Defensive normalization: legacy data may have a bare list at the CA
+        # level instead of the wrapped {"scale": [...]} form.
+        if isinstance(ca.scores_definition, dict):
+            ca_sd = ca.scores_definition
+        elif isinstance(ca.scores_definition, list):
+            ca_sd = {"scale": ca.scores_definition}
+        else:
+            ca_sd = {}
+        node_overrides = req_sd is not None
 
-        # Inherited scores_definition from the CA can be misaligned when the
-        # Node overrides the scale (e.g. CA labels for 0..5 vs node range 0..1).
-        # Drop the labels rather than display them out of range.
+        if req_sd is None:
+            # Inherit CA's default scale.
+            scores_definition = ca_sd.get("scale")
+        elif isinstance(req_sd, str):
+            # Reference into the CA's alternatives registry.
+            scores_definition = ca_sd.get("alternatives", {}).get(req_sd)
+        elif isinstance(req_sd, dict) and "scale" in req_sd:
+            scores_definition = req_sd["scale"]
+        elif isinstance(req_sd, list):
+            scores_definition = req_sd
+        else:
+            scores_definition = None
+
+        # Inherited scores_definition (from CA default) may not cover the
+        # Node-overridden bounds. Drop the labels rather than display them
+        # out of range.
         if (
             scores_definition is not None
-            and req.scores_definition is None
+            and not node_overrides
             and min_score is not None
             and max_score is not None
             and isinstance(scores_definition, list)

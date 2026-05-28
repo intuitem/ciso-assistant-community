@@ -42,6 +42,53 @@ The override is resolved independently for each field:
 - If a requirement defines `max_score`, that value is used; otherwise the audit-level maximum is used.
 - If a requirement defines `scores_definition`, those labels are used; otherwise the audit-level labels are used when they fit the requirement's effective range.
 
+### Alternative scales registry
+
+When several requirements share the same custom scale, the framework can declare a named **alternatives** registry alongside its default scale. Each requirement can then reference an entry by name instead of duplicating the labels:
+
+```yaml
+framework:
+  scores_definition:
+    scale:                # default scale, inherited by requirements that don't override
+      - score: 0
+        name: "N/A"
+      - score: 1
+        name: "Initial"
+      - score: 5
+        name: "Optimised"
+    alternatives:
+      binary:             # named alternative shared by several requirements
+        - score: 0
+          name: "No"
+        - score: 1
+          name: "Yes"
+  requirement_nodes:
+    - urn: ...:r1
+      min_score: 0
+      max_score: 1
+      scores_definition: binary       # ← reference by name, DRY
+    - urn: ...:r2
+      min_score: 0
+      max_score: 1
+      scores_definition: binary       # ← same reference, same scale
+    - urn: ...:r3
+      min_score: 0
+      max_score: 3
+      scores_definition:              # ← inline (escape hatch for one-off scales)
+        - score: 0
+          name: "None"
+        - score: 1
+          name: "Partial"
+        - score: 2
+          name: "Most"
+        - score: 3
+          name: "Full"
+```
+
+The audit copies the framework's `scores_definition` (default scale + alternatives) at creation, so per-requirement references resolve against the audit's own copy. This keeps the audit self-contained: customising the audit's scale later doesn't break references on its requirements.
+
+### Aggregation across mixed scales
+
 Roll-ups keep mixed scales comparable. Average-based aggregation normalises each requirement score against its effective range before computing the parent or global score, then displays the result on the audit scale. Sum-based aggregation remains a raw weighted sum, so each requirement contributes its own effective maximum.
 
 ## Built-in vs custom

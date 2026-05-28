@@ -236,6 +236,118 @@ class TestGetResolvedScoring:
         assert len(resolved["scores_definition"]) == 3
 
 
+@pytest.fixture
+def framework_with_alternatives():
+    """Framework whose scores_definition declares a 'binary' alternative."""
+    root = Folder.get_root_folder()
+    return Framework.objects.create(
+        name="0-5 Framework with alternatives",
+        urn="urn:test:fw-alt",
+        min_score=0,
+        max_score=5,
+        folder=root,
+        scores_definition={
+            "scale": _scale_def_for(0, 5)["scale"],
+            "alternatives": {
+                "binary": [
+                    {"score": 0, "name": "No"},
+                    {"score": 1, "name": "Yes"},
+                ]
+            },
+        },
+    )
+
+
+@pytest.fixture
+def ca_with_alternatives(framework_with_alternatives):
+    root = Folder.get_root_folder()
+    folder = Folder.objects.create(parent_folder=root, name="ca alt folder")
+    perimeter = Perimeter.objects.create(name="ca alt perimeter", folder=folder)
+    ca = ComplianceAssessment.objects.create(
+        name="0-5 alt CA",
+        framework=framework_with_alternatives,
+        folder=folder,
+        perimeter=perimeter,
+    )
+    ca.scoring_enabled = True
+    ca.save()
+    return ca
+
+
+@pytest.mark.django_db
+class TestPolymorphicScoresDefinition:
+    """Node.scores_definition can be a string ref into the framework's
+    alternatives, an inline dict/list, or null (inherit)."""
+
+    def _ra(self, ca, node):
+        return RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=node,
+            folder=ca.folder,
+        )
+
+    def test_node_ref_resolves_into_ca_alternatives(
+        self, ca_with_alternatives, framework_with_alternatives
+    ):
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-ref-ok",
+            framework=framework_with_alternatives,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            min_score=0,
+            max_score=1,
+            scores_definition="binary",
+        )
+        ra = self._ra(ca_with_alternatives, node)
+        resolved = ra.get_resolved_scoring()
+        assert isinstance(resolved["scores_definition"], list)
+        assert {entry["score"] for entry in resolved["scores_definition"]} == {0, 1}
+
+    def test_node_clean_rejects_dangling_ref(self, framework_with_alternatives):
+        node = RequirementNode(
+            urn="urn:test:r-ref-dangling",
+            framework=framework_with_alternatives,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            min_score=0,
+            max_score=1,
+            scores_definition="ternary",  # not in alternatives
+        )
+        with pytest.raises(ValidationError) as exc:
+            node.clean()
+        assert "scores_definition" in exc.value.message_dict
+
+    def test_ca_dissociation_preserves_alternatives(
+        self, ca_with_alternatives, framework_with_alternatives
+    ):
+        """Once the CA is customized after creation, its copy of the
+        alternatives stays accessible to per-RA ref resolution."""
+        # CA can override its own scores_definition after creation; ensure the
+        # alternatives copied at save() remain present.
+        assert ca_with_alternatives.scores_definition["alternatives"]["binary"]
+
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-ref-after-diss",
+            framework=framework_with_alternatives,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            min_score=0,
+            max_score=1,
+            scores_definition="binary",
+        )
+        ra = self._ra(ca_with_alternatives, node)
+        # Simulate the framework dropping the alternative later — the CA's
+        # copy is the source of truth, so the RA keeps resolving.
+        framework_with_alternatives.scores_definition = {
+            "scale": _scale_def_for(0, 5)["scale"]
+        }
+        framework_with_alternatives.save()
+
+        resolved = ra.get_resolved_scoring()
+        assert isinstance(resolved["scores_definition"], list)
+        assert {entry["score"] for entry in resolved["scores_definition"]} == {0, 1}
+
+
 @pytest.mark.django_db
 class TestSerializer:
     """Serializer-level behavior: effective_* exposure, visibility, clamping."""

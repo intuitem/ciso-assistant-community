@@ -89,6 +89,28 @@ The **Anchor N/A to target score** checkbox controls how _Not Applicable_ requir
 - **Off** _(default)_ — N/A requirements are excluded from the score entirely.
 - **On** — N/A requirements are included with their score replaced by the **Target score**. Use this when "we're already at our target on this dimension" should count toward the overall maturity, rather than being ignored.
 
+### Per-requirement scale override
+
+By default every requirement in an audit is scored on the same scale (e.g. 0..5). When a framework needs a few requirements scored on a different scale — for example a binary "Yes / No" check inside an otherwise maturity-style framework — those requirements can ship their own scale:
+
+- `min_score` / `max_score` override the bounds of the audit-level scale for that requirement only.
+- `scores_definition` overrides the labels. It can either be **inlined** on the requirement or, when the framework declares an **alternatives registry**, given as a **named reference**. Two requirements pointing at the same name share the same definition without duplication.
+
+Per-requirement overrides are defined when the library is authored (Excel converter or YAML loader). They are not editable through the platform UI.
+
+#### How scores aggregate
+
+Each requirement assessment is normalised against its own resolved scale before being aggregated into the global audit score:
+
+- **Average** and **Average of averages** — every requirement contributes a ratio in `[0..1]` (its score over its own range), the audit weighted-averages those ratios, then denormalises onto the audit's scale. A binary requirement scored 1/1 contributes 100%, exactly like a 5/5 on a 0..5 requirement.
+- **Sum** — kept as a raw weighted sum on each requirement's own scale. The audit's theoretical maximum aggregates the per-requirement maxes, so 100% remains achievable when every requirement hits its own ceiling.
+
+The donut display in the requirement tree mirrors the same normalisation: every node shows `score / max` against its resolved range, so an offset scale like 1..4 renders the minimum at 0% (not 25%).
+
+#### Anchor N/A with mixed scales
+
+When **Anchor N/A to target score** is on and the audit's **Target score** is set, that target is projected onto each N/A requirement's range as a ratio. A target of 4/5 contributes 80% on a 0..5 requirement and 0.8/1 on a binary one — the contribution is consistent regardless of the underlying scale.
+
 ## Lifecycle controls
 
 ### Lock
