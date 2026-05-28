@@ -211,7 +211,7 @@ def backfill_results(apps, schema_editor):
         # applied to this RA.  Skip to avoid wiping a manual result on
         # score-only or plain-question assessments.
         has_any_compute_result = any(
-            choice.compute_result is not None
+            _resolve_compute_result(choice.compute_result) is not None
             for question in questions_qs
             for choice in question.choices.all()
         )
