@@ -92,7 +92,7 @@ In YAML or Excel, set these fields on the requirement node:
 - **`max_score`** — the requirement's maximum score.
 - **`scores_definition`** — optional level labels for that requirement's effective range.
 
-The fields cascade independently. You can override only `max_score`, only the labels, or the full range. If the requirement changes range but does not define its own labels, the framework-level labels are reused only when they cover the requirement's effective range; otherwise the audit shows the numeric scale without mismatched labels.
+The fields cascade independently. You can override only `max_score`, only the labels, or the full range. At audit runtime, blank requirement fields fall back to the audit's own scoring scale (`ComplianceAssessment`), usually initialised from the framework at audit creation. If the requirement changes range but does not define its own labels, the audit-level labels are reused only when they cover the requirement's effective range; otherwise the audit shows the numeric scale without mismatched labels.
 
 Keep question scoring aligned with the effective range: any `add_score` values on choices should fit between the requirement's effective `min_score` and `max_score`.
 

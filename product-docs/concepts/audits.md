@@ -103,7 +103,7 @@ Beyond the binary compliance result, each requirement assessment can carry a **s
 - **Maturity score** _(single layer)_ — one score per requirement, typically used for CMMI-style or NIST-CSF-style maturity assessments.
 - **Implementation + Documentation scores** _(two layers)_ — toggle on **documentation score** to split scoring into _is this implemented?_ and _is the implementation documented?_. The platform computes the maturity score as the average of the enabled layers.
 
-Each requirement assessment uses an **effective scoring scale**. By default this is the audit's framework-level scale, but a requirement can define its own `min_score`, `max_score`, and level labels. The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
+Each requirement assessment uses an **effective scoring scale**. At audit runtime the fallback is the audit's own scoring scale (`ComplianceAssessment`), which is usually initialised from the framework when the audit is created. A requirement can override that audit-level scale with its own `min_score`, `max_score`, and level labels. The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
 
 When an audit contains mixed scales, average-based roll-ups normalise each requirement against its effective range before aggregating, then display the result on the audit scale. Sum-based roll-ups stay raw: they add `score x weight`, and their maximum is the sum of each requirement's effective maximum times its weight.
 

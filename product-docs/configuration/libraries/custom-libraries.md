@@ -301,7 +301,7 @@ Framework `_meta` tabs define the default scoring scale with `min_score`, `max_s
 * `max_score` — integer maximum score for this requirement.
 * `scores_definition` — name of a `scores` object block to use as the level labels for this requirement.
 
-Each field cascades independently. Leave the cells blank to inherit the audit's framework-level value. If you override the range, make sure the requirement's `scores_definition` covers every integer score from `min_score` to `max_score`; otherwise conversion or import validation will reject the library. Also keep choice `add_score` values within the requirement's effective range.
+Each field cascades independently. Leave the cells blank to inherit the audit-level value at runtime; that audit value is usually initialised from the framework when the audit is created. If you override the range, make sure the requirement's `scores_definition` covers every integer score from `min_score` to `max_score`; otherwise conversion or import validation will reject the library. Also keep choice `add_score` values within the requirement's effective range.
 
 ### 4.6 Threats
 

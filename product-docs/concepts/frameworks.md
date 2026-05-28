@@ -38,9 +38,9 @@ An individual requirement node can override that default scale with its own `min
 
 The override is resolved independently for each field:
 
-- If a requirement defines `min_score`, that value is used; otherwise the audit's framework-level minimum is used.
-- If a requirement defines `max_score`, that value is used; otherwise the audit's framework-level maximum is used.
-- If a requirement defines `scores_definition`, those labels are used; otherwise the audit's framework-level labels are used when they fit the requirement's effective range.
+- If a requirement defines `min_score`, that value is used; otherwise the audit-level minimum is used.
+- If a requirement defines `max_score`, that value is used; otherwise the audit-level maximum is used.
+- If a requirement defines `scores_definition`, those labels are used; otherwise the audit-level labels are used when they fit the requirement's effective range.
 
 Roll-ups keep mixed scales comparable. Average-based aggregation normalises each requirement score against its effective range before computing the parent or global score, then displays the result on the audit scale. Sum-based aggregation remains a raw weighted sum, so each requirement contributes its own effective maximum.
 
