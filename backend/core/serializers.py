@@ -2815,12 +2815,24 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     # overrides min_score above the CA min must not be
                     # initialised below its own range.
                     assessable_ras.update(is_scored=True)
-                    ca_min = updated_instance.min_score or 0
+                    ca_min = updated_instance.min_score
+                    framework_min = (
+                        updated_instance.framework.min_score
+                        if updated_instance.framework is not None
+                        else None
+                    )
                     for ra in assessable_ras.filter(score__isnull=True).select_related(
                         "requirement"
                     ):
                         req_min = ra.requirement.min_score
-                        ra.score = req_min if req_min is not None else ca_min
+                        if req_min is not None:
+                            ra.score = req_min
+                        elif ca_min is not None:
+                            ra.score = ca_min
+                        elif framework_min is not None:
+                            ra.score = framework_min
+                        else:
+                            ra.score = 0
                         ra.save(update_fields=["score"])
                 else:
                     # Turn off: only flip is_scored, preserve existing scores
