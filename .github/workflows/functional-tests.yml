@@ -123,6 +123,54 @@ jobs:
             ${{ env.enterprise-frontend-build-directory }}/.svelte-kit/
           retention-days: 1
 
+  prime_playwright_cache:
+    runs-on: ubuntu-24.04
+    outputs:
+      playwright-version: ${{ steps.playwright-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.frontend-directory }}/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: Install community frontend dependencies
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+
+      - name: Get installed Playwright version
+        id: playwright-version
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+          echo "version=$PLAYWRIGHT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Cache playwright binaries
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-chromium
+
+      - name: Download Playwright chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm exec playwright install chromium
+
   get_playwright_test_files:
     needs:
       - build_community_frontend
@@ -156,7 +204,9 @@ jobs:
           echo "test_files=$ENTERPRISE_TEST_FILES" >> $GITHUB_OUTPUT
 
   functional-tests:
-    needs: get_playwright_test_files
+    needs:
+      - get_playwright_test_files
+      - prime_playwright_cache
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -257,35 +307,27 @@ jobs:
         working-directory: ${{ env.frontend-directory }}
         run: pnpm i --frozen-lockfile
 
-      - name: Get installed Playwright version
-        id: playwright-version
-        working-directory: ${{ env.frontend-directory }}
-        run: |
-          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
-
-      - name: Cache playwright binaries
+      - name: Restore Playwright binaries cache
         uses: actions/cache@v5
         id: playwright-cache
+        env:
+          PLAYWRIGHT_VERSION: ${{ needs.prime_playwright_cache.outputs.playwright-version }}
         with:
-          path: |
-            ~/.cache/ms-playwright
+          path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
-      - name: Install Playwright browser ${{ matrix.playwright-browser }}
+      - name: Download Playwright browser (cache miss fallback)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
-        timeout-minutes: 20
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: |
-          for attempt in 1 2 3; do
-            if timeout 300 pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"; then
-              exit 0
-            fi
-            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
-            sleep 15
-          done
-          exit 1
+        run: pnpm exec playwright install "$PLAYWRIGHT_BROWSER"
+
+      - name: Install Playwright system deps
+        working-directory: ${{ env.frontend-directory }}
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+        run: pnpm exec playwright install-deps "$PLAYWRIGHT_BROWSER"
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
@@ -334,7 +376,9 @@ jobs:
           retention-days: 5
 
   enterprise-functional-tests:
-    needs: get_playwright_test_files
+    needs:
+      - get_playwright_test_files
+      - prime_playwright_cache
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -447,35 +491,27 @@ jobs:
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm i --frozen-lockfile
 
-      - name: Get installed Playwright version
-        id: playwright-version
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: |
-          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
-
-      - name: Cache playwright binaries
+      - name: Restore Playwright binaries cache
         uses: actions/cache@v5
         id: playwright-cache
+        env:
+          PLAYWRIGHT_VERSION: ${{ needs.prime_playwright_cache.outputs.playwright-version }}
         with:
-          path: |
-            ~/.cache/ms-playwright
+          path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
-      - name: Install Playwright browser ${{ matrix.playwright-browser }}
+      - name: Download Playwright browser (cache miss fallback)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        timeout-minutes: 20
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: |
-          for attempt in 1 2 3; do
-            if timeout 300 pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"; then
-              exit 0
-            fi
-            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
-            sleep 15
-          done
-          exit 1
+        run: pnpm exec playwright install "$PLAYWRIGHT_BROWSER"
+
+      - name: Install Playwright system deps
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+        run: pnpm exec playwright install-deps "$PLAYWRIGHT_BROWSER"
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
