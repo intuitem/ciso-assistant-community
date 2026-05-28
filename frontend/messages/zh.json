@@ -1895,8 +1895,6 @@
 	"resetClientSecret": "重置客户端密钥",
 	"oidcTokenAuthMethodHelpText": "可选的令牌端点认证方法。如果省略，将使用服务器认证令牌方法列表中的方法",
 	"oidcPKCEEnabledHelpText": "启用OAuth PKCE（代码交换证明密钥）支持。建议用于公共客户端。",
-	"oidcStrictStateNonce": "严格的 state 和 nonce",
-	"oidcStrictStateNonceHelpText": "生成长且 URL 安全的 state 和 nonce（来自 A-Z、a-z、0-9 和符号 - . _ ~ , 的 40 个字符），并在回调时验证 id_token 的 nonce。仅当您的 IdP 强制这些约束时才启用。",
 	"dataWizardSelectFile": "选择您的文件并确保与模板匹配",
 	"dataWizardChooseModel": "选择相应的模型",
 	"dataWizardSelectScope": "选择范围",

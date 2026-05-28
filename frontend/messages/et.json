@@ -2722,8 +2722,6 @@
 	"resetClientSecret": "Lähtesta kliendisaladus",
 	"oidcTokenAuthMethodHelpText": "Valikuline tokeni lõpp-punkti autentimismeetod. Kui see jäetakse tühjaks, kasutatakse serveri auth tokeni meetodite loendist sobivat meetodit",
 	"oidcPKCEEnabledHelpText": "Luba OAuth PKCE (Proof Key for Code Exchange) tugi. See on soovitatav avalikele klientidele.",
-	"oidcStrictStateNonce": "Range state ja nonce",
-	"oidcStrictStateNonceHelpText": "Loo pikk URL-i-turvaline state ja nonce (40 märki vahemikust A-Z, a-z, 0-9 ja sümbolid - . _ ~ ) ning kontrolli id_tokeni nonce'i tagasikutsel. Lülita see sisse ainult juhul, kui sinu IdP nõuab neid piiranguid.",
 	"select": "Vali",
 	"deselect": "Tühista valik",
 	"clickToUpload": "Klõpsa üleslaadimiseks",

@@ -10,8 +10,7 @@ from structlog import get_logger
 
 from .models import SSOSettings
 from iam.models import User
-from .oidc.views import strict_mode_enabled as oidc_strict_mode_enabled
-from .oidc.views import strict_redirect as oidc_strict_redirect
+from .oidc.views import oidc_redirect
 from .serializers import SSOSettingsWriteSerializer
 
 logger = get_logger(__name__)
@@ -32,12 +31,10 @@ class RedirectToProviderView(APIView):
         next_url = form.cleaned_data["callback_url"]
         process = form.cleaned_data["process"]
         try:
-            if oidc_strict_mode_enabled(provider):
-                logger.info(
-                    "Using strict state/nonce OIDC redirect",
-                    provider=provider.id,
-                )
-                return oidc_strict_redirect(
+            # OIDC uses our custom redirect to send a long, standard-compliant
+            # state + nonce. Other providers (SAML, ...) use allauth's default.
+            if provider.id == "openid_connect":
+                return oidc_redirect(
                     request,
                     provider,
                     process=process,

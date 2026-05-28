@@ -1576,8 +1576,6 @@
 	"builderQuestionTypeUniqueChoice": "اختيار فريد",
 	"builderQuestionTypeMultipleChoice": "اختيار متعدد",
 	"builderQuestionTypeDate": "التاريخ",
-	"oidcStrictStateNonce": "صرامة state و nonce",
-	"oidcStrictStateNonceHelpText": "إنشاء state و nonce طويلين وآمنين لعنوان URL (40 حرفًا من A-Z و a-z و 0-9 والرموز - . _ ~ ) والتحقق من nonce في id_token عند الرجوع. لا تفعّل هذا إلا إذا كان مزود الهوية الخاص بك يفرض هذه القيود.",
 	"builderChangedOn": "تم التغيير في",
 	"requirementWeight": "الوزن"
 }

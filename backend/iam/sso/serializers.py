@@ -68,10 +68,6 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         default=False,
         source="settings.oauth_pkce_enabled",
     )  # NOTE: Only used for OIDC
-    strict_state_nonce = serializers.BooleanField(
-        default=False,
-        source="settings.strict_state_nonce",
-    )  # NOTE: Only used for OIDC
     provider_name = serializers.CharField(
         required=False,
         allow_blank=True,

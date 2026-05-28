@@ -1756,8 +1756,6 @@
 	"resetClientSecret": "Zresetuj sekret klienta",
 	"oidcTokenAuthMethodHelpText": "Opcjonalna metoda uwierzytelniania punktu końcowego tokena. Jeśli zostanie pominięta, zastosowana jest metoda z listy metod uwierzytelniania tokena serwera",
 	"oidcPKCEEnabledHelpText": "Włącz obsługę OAuth PKCE (Proof Key for Code Exchange). Jest to zalecane dla klientów publicznych.",
-	"oidcStrictStateNonce": "Rygorystyczne state i nonce",
-	"oidcStrictStateNonceHelpText": "Generuj długi, bezpieczny dla URL state i nonce (40 znaków z A-Z, a-z, 0-9 i symboli - . _ ~ ) oraz weryfikuj nonce w id_tokenie podczas wywołania zwrotnego. Włącz tylko jeśli Twój IdP wymusza te ograniczenia.",
 	"clickToUpload": "Kliknij, aby przesłać",
 	"orDragAndDrop": "lub przeciągnij i upuść",
 	"dataWizardSelectFile": "Wybierz swój plik i upewnij się, że pasuje do szablonów",

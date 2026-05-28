@@ -1766,8 +1766,6 @@
 	"builderQuestionTypeUniqueChoice": "Pilihan unik",
 	"builderQuestionTypeMultipleChoice": "Pilihan ganda",
 	"builderQuestionTypeDate": "Tanggal",
-	"oidcStrictStateNonce": "State dan nonce ketat",
-	"oidcStrictStateNonceHelpText": "Hasilkan state dan nonce panjang yang aman untuk URL (40 karakter dari A-Z, a-z, 0-9 dan simbol - . _ ~ ) dan validasi nonce id_token saat callback. Aktifkan hanya jika IdP Anda mewajibkan batasan ini.",
 	"builderChangedOn": "diubah pada",
 	"requirementWeight": "Bobot"
 }

@@ -2373,8 +2373,6 @@
 	"resetClientSecret": "클라이언트 시크릿 재설정",
 	"oidcTokenAuthMethodHelpText": "선택적 토큰 엔드포인트 인증 방식입니다. 생략하면 서버의 인증 토큰 방식 목록에서 한 가지를 사용합니다",
 	"oidcPKCEEnabledHelpText": "OAuth PKCE(Proof Key for Code Exchange) 지원을 활성화합니다. 공개 클라이언트에 권장됩니다.",
-	"oidcStrictStateNonce": "엄격한 state 및 nonce",
-	"oidcStrictStateNonceHelpText": "URL 안전 형식의 긴 state와 nonce(A-Z, a-z, 0-9 및 기호 - . _ ~ , 중 40자)를 생성하고 콜백 시 id_token의 nonce를 검증합니다. IdP가 이러한 제약을 강제하는 경우에만 활성화하세요.",
 	"select": "선택",
 	"deselect": "선택 해제",
 	"clickToUpload": "클릭하여 업로드",

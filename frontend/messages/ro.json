@@ -1597,8 +1597,6 @@
 	"builderQuestionTypeUniqueChoice": "Alegere unică",
 	"builderQuestionTypeMultipleChoice": "Alegere multiplă",
 	"builderQuestionTypeDate": "Data",
-	"oidcStrictStateNonce": "State și nonce stricte",
-	"oidcStrictStateNonceHelpText": "Generează un state și un nonce lungi și URL-safe (40 de caractere din A-Z, a-z, 0-9 și simbolurile - . _ ~ ) și validează nonce-ul din id_token la callback. Activează doar dacă IdP-ul tău impune aceste constrângeri.",
 	"builderChangedOn": "modificat în",
 	"requirementWeight": "Pondere"
 }

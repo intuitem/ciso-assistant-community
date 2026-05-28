@@ -1599,8 +1599,6 @@
 	"builderQuestionTypeUniqueChoice": "Escolha única",
 	"builderQuestionTypeMultipleChoice": "Múltipla escolha",
 	"builderQuestionTypeDate": "Data",
-	"oidcStrictStateNonce": "State e nonce estritos",
-	"oidcStrictStateNonceHelpText": "Gerar um state e um nonce longos e URL-safe (40 caracteres de A-Z, a-z, 0-9 e dos símbolos - . _ ~ ) e validar o nonce do id_token no callback. Ative apenas se o seu IdP impuser estas restrições.",
 	"builderChangedOn": "alterado em",
 	"requirementWeight": "Peso"
 }

@@ -1883,8 +1883,6 @@
 	"builderQuestionTypeUniqueChoice": "Enkelt valg",
 	"builderQuestionTypeMultipleChoice": "Flere valg",
 	"builderQuestionTypeDate": "Dato",
-	"oidcStrictStateNonce": "Streng state og nonce",
-	"oidcStrictStateNonceHelpText": "Generér en lang URL-sikker state og nonce (40 tegn fra A-Z, a-z, 0-9 og symbolerne - . _ ~ ) og valider id_token-noncen ved tilbagekald. Aktivér kun hvis din IdP håndhæver disse begrænsninger.",
 	"builderChangedOn": "ændret i",
 	"requirementWeight": "Vægt"
 }

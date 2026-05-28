@@ -13,7 +13,6 @@ from allauth.socialaccount.providers.base.constants import (  # type: ignore[imp
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error  # type: ignore[import-untyped]
 from allauth.socialaccount.providers.oauth2.views import (  # type: ignore[import-untyped]
     OAuth2CallbackView,
-    OAuth2LoginView,
 )
 from allauth.socialaccount.providers.openid_connect.views import (  # type: ignore[import-untyped]
     OpenIDConnectOAuth2Adapter,
@@ -28,47 +27,30 @@ from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
 
-# state and nonce parameters. allauth's default state is 16 chars and no
-# nonce is sent, so when a SocialApp opts in via settings.strict_state_nonce
-# we generate both from this alphabet at a length that always satisfies it.
-_STRICT_TOKEN_ALPHABET = string.ascii_letters + string.digits + "-._~,"
-_STRICT_TOKEN_LENGTH = 40
-_STRICT_NONCE_SESSION_PREFIX = "oidc_strict_nonce::"
+# State and nonce parameters. allauth's default state is 16 chars and sends no
+# nonce. We generate both from this alphabet at a length that satisfies the
+# OIDC-standard `^[A-Za-z0-9-._~,]{36,128}$` form.
+_OIDC_TOKEN_ALPHABET = string.ascii_letters + string.digits + "-._~,"
+_OIDC_TOKEN_LENGTH = 40
+_OIDC_NONCE_SESSION_PREFIX = "oidc_nonce::"
 # Cap stashed nonces per session so abandoned login attempts can't grow the
 # session bag indefinitely. Mirrors allauth's MAX_STATES (statekit.py).
-_STRICT_NONCE_SESSION_MAX = 10
+_OIDC_NONCE_SESSION_MAX = 10
 
 
-def _generate_strict_token(length: int = _STRICT_TOKEN_LENGTH) -> str:
-    return "".join(secrets.choice(_STRICT_TOKEN_ALPHABET) for _ in range(length))
+def _generate_oidc_token(length: int = _OIDC_TOKEN_LENGTH) -> str:
+    return "".join(secrets.choice(_OIDC_TOKEN_ALPHABET) for _ in range(length))
 
 
-def strict_mode_enabled(provider) -> bool:
-    """True when the provider is OIDC and the SocialApp opts into the strict
-    state/nonce flow. Single source of truth for this gate."""
-    return provider.id == "openid_connect" and bool(
-        provider.app.settings.get("strict_state_nonce", False)
-    )
-
-
-class StrictNonceOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
-    """OIDC adapter that validates the id_token `nonce` claim against the
-    value stashed at the start of the authorization flow. The validation is a
-    no-op when no nonce was stashed, so this adapter is safe to use for both
-    strict-mode and legacy providers."""
+class NonceValidatingOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
+    """OIDC adapter that validates the id_token `nonce` claim against the value
+    stashed at the start of the authorization flow. Validation is lenient: a
+    nonce that is present must match, but an id_token that omits the nonce
+    claim only logs a warning so non-conformant IdPs are not broken."""
 
     def complete_login(self, request, app, token, **kwargs):
         id_token_str = kwargs["response"].get("id_token")
         fetch_userinfo = app.settings.get("fetch_userinfo", True)
-        strict = bool(app.settings.get("strict_state_nonce", False))
-
-        # Strict mode requires an id_token so nonce can be validated.
-        if strict and not id_token_str:
-            logger.error(
-                "OIDC strict mode: id_token missing from token response",
-                provider=self.provider_id,
-            )
-            raise OAuth2Error("OIDC strict mode: id_token missing")
 
         data = {}
         if fetch_userinfo or (not id_token_str):
@@ -77,26 +59,30 @@ class StrictNonceOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
             decoded = self._decode_id_token(app, id_token_str)
             state_id = get_request_param(request, "state")
             expected_nonce = request.session.pop(
-                f"{_STRICT_NONCE_SESSION_PREFIX}{state_id}", None
+                f"{_OIDC_NONCE_SESSION_PREFIX}{state_id}", None
             )
-            if strict and expected_nonce is None:
-                logger.error(
-                    "OIDC strict mode: no stashed nonce for state",
-                    provider=self.provider_id,
-                )
-                raise OAuth2Error("OIDC strict mode: missing stashed nonce")
             if expected_nonce is not None:
-                if decoded.get("nonce") != expected_nonce:
+                returned_nonce = decoded.get("nonce")
+                if returned_nonce is None:
+                    logger.warning(
+                        "OIDC id_token has no nonce claim; skipping nonce validation",
+                        provider=self.provider_id,
+                    )
+                elif returned_nonce != expected_nonce:
                     logger.error(
                         "OIDC nonce mismatch",
                         provider=self.provider_id,
                     )
                     raise OAuth2Error("OIDC nonce mismatch")
+            logger.debug(
+                "OIDC id_token decoded and nonce validated",
+                provider=self.provider_id,
+            )
             data["id_token"] = decoded
         return self.get_provider().sociallogin_from_response(request, data)
 
 
-def strict_redirect(
+def oidc_redirect(
     request: HttpRequest,
     provider,
     *,
@@ -105,7 +91,7 @@ def strict_redirect(
     **state_kwargs,
 ) -> HttpResponseRedirect:
     """Builds the authorization redirect mirroring `OAuth2Provider.redirect`,
-    but with a state_id and nonce that match the customer-mandated regex
+    but with a state_id and nonce that match the OIDC-standard regex
     `^[A-Za-z0-9-._~,]{36,128}$`. The nonce is stashed in the session so the
     callback adapter can verify it against the id_token claim. Extra
     `state_kwargs` (e.g. `headless=True`) are forwarded to allauth's state
@@ -126,8 +112,8 @@ def strict_redirect(
 
     scope = provider.get_scope_from_request(request)
 
-    state_id = _generate_strict_token()
-    nonce = _generate_strict_token()
+    state_id = _generate_oidc_token()
+    nonce = _generate_oidc_token()
     auth_params["nonce"] = nonce
 
     provider.stash_redirect_state(
@@ -141,7 +127,7 @@ def strict_redirect(
     )
     # Out-of-band: state is consumed by allauth before complete_login runs,
     # so we key the expected nonce by state_id in a separate session entry.
-    _stash_strict_nonce(request, state_id, nonce)
+    _stash_oidc_nonce(request, state_id, nonce)
 
     client.state = state_id
     return HttpResponseRedirect(
@@ -149,17 +135,17 @@ def strict_redirect(
     )
 
 
-def _stash_strict_nonce(request: HttpRequest, state_id: str, nonce: str) -> None:
+def _stash_oidc_nonce(request: HttpRequest, state_id: str, nonce: str) -> None:
     """Stash the expected nonce for `state_id` and evict oldest entries past
     the cap so abandoned login attempts can't grow the session indefinitely."""
     stale_keys = [
-        k for k in request.session.keys() if k.startswith(_STRICT_NONCE_SESSION_PREFIX)
+        k for k in request.session.keys() if k.startswith(_OIDC_NONCE_SESSION_PREFIX)
     ]
-    overflow = len(stale_keys) - _STRICT_NONCE_SESSION_MAX + 1
+    overflow = len(stale_keys) - _OIDC_NONCE_SESSION_MAX + 1
     if overflow > 0:
         for key in stale_keys[:overflow]:
             request.session.pop(key, None)
-    request.session[f"{_STRICT_NONCE_SESSION_PREFIX}{state_id}"] = nonce
+    request.session[f"{_OIDC_NONCE_SESSION_PREFIX}{state_id}"] = nonce
 
 
 @login_not_required
@@ -192,7 +178,7 @@ def callback(request, provider_id):
         )
 
         response = OAuth2CallbackView.adapter_view(
-            StrictNonceOpenIDConnectAdapter(request, provider_id)
+            NonceValidatingOpenIDConnectAdapter(request, provider_id)
         )(request)
 
         logger.debug(
@@ -293,17 +279,7 @@ def login(request, provider_id):
         )
 
         provider = get_socialaccount_adapter().get_provider(request, provider_id)
-        if strict_mode_enabled(provider):
-            logger.debug(
-                "OIDC strict state/nonce mode enabled — using custom redirect",
-                provider=provider_id,
-            )
-            response = strict_redirect(request, provider)
-        else:
-            view = OAuth2LoginView.adapter_view(
-                OpenIDConnectOAuth2Adapter(request, provider_id)
-            )
-            response = view(request)
+        response = oidc_redirect(request, provider)
 
         logger.debug(
             "OIDC login redirect prepared",

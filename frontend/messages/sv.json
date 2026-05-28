@@ -1595,8 +1595,6 @@
 	"builderQuestionTypeUniqueChoice": "Enskilt val",
 	"builderQuestionTypeMultipleChoice": "Flerval",
 	"builderQuestionTypeDate": "Datum",
-	"oidcStrictStateNonce": "Strikt state och nonce",
-	"oidcStrictStateNonceHelpText": "Generera ett långt URL-säkert state och nonce (40 tecken från A-Z, a-z, 0-9 och symbolerna - . _ ~ ) och validera id_token-nonce vid callback. Aktivera endast om din IdP kräver dessa begränsningar.",
 	"builderChangedOn": "ändrad i",
 	"requirementWeight": "Vikt"
 }

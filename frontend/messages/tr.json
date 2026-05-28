@@ -1751,8 +1751,6 @@
 	"resetClientSecret": "İstemci gizliliğini sıfırla",
 	"oidcTokenAuthMethodHelpText": "Opsiyonel token endpoint kimlik doğrulama yöntemi. Atlanırsa, sunucunun auth token yöntem listesinden bir yöntem kullanılır",
 	"oidcPKCEEnabledHelpText": "OAuth PKCE (Proof Key for Code Exchange) desteğini etkinleştir. Genel istemciler icin önerilir.",
-	"oidcStrictStateNonce": "Katı state ve nonce",
-	"oidcStrictStateNonceHelpText": "URL-güvenli uzun bir state ve nonce (A-Z, a-z, 0-9 ve - . _ ~ , sembollerinden 40 karakter) oluştur ve geri çağrıda id_token nonce'unu doğrula. Yalnızca IdP'niz bu kısıtlamaları zorunlu kılıyorsa etkinleştirin.",
 	"clickToUpload": "Yüklemek için tıklayın",
 	"orDragAndDrop": "veya sürükleyip bırakın",
 	"dataWizardSelectFile": "Dosyanızı seçin ve şablonlarla esleştiğinden emin olun",

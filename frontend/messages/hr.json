@@ -1791,8 +1791,6 @@
 	"resetClientSecret": "Resetiraj tajni ključ klijenta",
 	"oidcTokenAuthMethodHelpText": "Opcionalna metoda autentikacije za token endpoint. Ako se izostavi, koristi se metoda s liste auth token metoda servera.",
 	"oidcPKCEEnabledHelpText": "Omogući podršku za OAuth PKCE (Proof of Key for Code Exchange). Ovo se preporuča za javne klijente.",
-	"oidcStrictStateNonce": "Strogi state i nonce",
-	"oidcStrictStateNonceHelpText": "Generiraj dugi URL-sigurni state i nonce (40 znakova iz A-Z, a-z, 0-9 i simbola - . _ ~ ) te provjeri nonce iz id_tokena pri povratu. Uključi samo ako tvoj IdP zahtijeva ova ograničenja.",
 	"select": "Odaberi",
 	"deselect": "Poništi odabir",
 	"clickToUpload": "Kliknite za prijenos",

@@ -2099,8 +2099,6 @@
 	"builderQuestionTypeUniqueChoice": "Single choice",
 	"builderQuestionTypeMultipleChoice": "Multiple choice",
 	"builderQuestionTypeDate": "Дата",
-	"oidcStrictStateNonce": "Суворі state та nonce",
-	"oidcStrictStateNonceHelpText": "Згенерувати довгий URL-безпечний state і nonce (40 символів з A-Z, a-z, 0-9 та символів - . _ ~ ) і перевіряти nonce у id_token під час зворотного виклику. Вмикайте лише якщо ваш IdP вимагає цих обмежень.",
 	"builderChangedOn": "змінено в",
 	"requirementWeight": "Вага"
 }

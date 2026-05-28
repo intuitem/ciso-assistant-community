@@ -1581,8 +1581,6 @@
 	"builderQuestionTypeUniqueChoice": "Single choice",
 	"builderQuestionTypeMultipleChoice": "Multiple choice",
 	"builderQuestionTypeDate": "Date",
-	"oidcStrictStateNonce": "Szigorú state és nonce",
-	"oidcStrictStateNonceHelpText": "Hosszú, URL-biztos state és nonce generálása (40 karakter A-Z, a-z, 0-9 és a - . _ ~ , szimbólumok közül), valamint az id_token nonce ellenőrzése visszahíváskor. Csak akkor engedélyezze, ha az IdP-je ezeket a megszorításokat előírja.",
 	"builderChangedOn": "módosítva itt:",
 	"requirementWeight": "Súly"
 }

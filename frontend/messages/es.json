@@ -2162,8 +2162,6 @@
 	"offTrack": "Fuera de curso",
 	"oidcConfiguration": "openid-configuration",
 	"oidcPKCEEnabledHelpText": "Habilite el soporte OAuth PKCE (Proof Key for Code Exchange). Esto se recomienda para clientes públicos.",
-	"oidcStrictStateNonce": "State y nonce estrictos",
-	"oidcStrictStateNonceHelpText": "Generar un state y un nonce largos y URL-safe (40 caracteres de A-Z, a-z, 0-9 y los símbolos - . _ ~ ) y validar el nonce del id_token al regresar. Active esto solo si su IdP impone estas restricciones.",
 	"oidcTokenAuthMethodHelpText": "Método de autenticación de punto de conexión de token opcional. Si se omite, se usa un método de la lista de métodos de token de autenticación del servidor",
 	"onTrack": "En curso",
 	"oneTimeImplementationCost": "Costo de implementación único",

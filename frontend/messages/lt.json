@@ -2565,8 +2565,6 @@
 	"resetClientSecret": "Iš naujo nustatyti kliento slaptažodį",
 	"oidcTokenAuthMethodHelpText": "Neprivalomas prieigos rakto galinio taško autentifikavimo metodas. Jei praleistas, naudojamas metodas iš serverio autentifikavimo metodų sąrašo",
 	"oidcPKCEEnabledHelpText": "Įgalinti OAuth PKCE (Proof Key for Code Exchange) palaikymą. Tai rekomenduojama viešiems klientams.",
-	"oidcStrictStateNonce": "Griežti state ir nonce",
-	"oidcStrictStateNonceHelpText": "Generuoti ilgą URL saugą state ir nonce (40 simbolių iš A-Z, a-z, 0-9 ir simbolių - . _ ~ ) bei patikrinti id_token nonce per atgalinį iškvietimą. Įjunkite tik tada, jei jūsų IdP reikalauja šių apribojimų.",
 	"select": "Pasirinkti",
 	"deselect": "Panaikinti pasirinkimą",
 	"clickToUpload": "Spustelėkite, kad įkeltumėte",

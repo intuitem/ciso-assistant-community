@@ -2160,8 +2160,6 @@
 	"offTrack": "Niet op schema",
 	"oidcConfiguration": "openid-configuration",
 	"oidcPKCEEnabledHelpText": "Schakel OAuth PKCE (Proof Key for Code Exchange) ondersteuning in. Dit wordt aanbevolen voor publieke clients.",
-	"oidcStrictStateNonce": "Strikte state en nonce",
-	"oidcStrictStateNonceHelpText": "Genereer een lange URL-veilige state en nonce (40 tekens uit A-Z, a-z, 0-9 en de symbolen - . _ ~ ) en valideer de id_token-nonce bij de callback. Schakel dit alleen in als uw IdP deze beperkingen afdwingt.",
 	"oidcTokenAuthMethodHelpText": "Optionele token endpoint authenticatiemethode. Indien weggelaten, wordt een methode uit de server's auth token methodelijst gebruikt",
 	"onTrack": "Op schema",
 	"oneTimeImplementationCost": "Eenmalige implementatiekosten",

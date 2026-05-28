@@ -2664,8 +2664,6 @@
 	"resetClientSecret": "Reset client secret",
 	"oidcTokenAuthMethodHelpText": "Optional token endpoint authentication method. If omitted, a method from the server's auth token method list is used",
 	"oidcPKCEEnabledHelpText": "Enable OAuth PKCE (Proof Key for Code Exchange) support. This is recommended for public clients.",
-	"oidcStrictStateNonce": "Strict state and nonce",
-	"oidcStrictStateNonceHelpText": "Generate a long URL-safe state and nonce (40 characters from A-Z, a-z, 0-9 and the symbols - . _ ~ ) and validate the id_token nonce on callback. Enable this only if your IdP enforces these constraints.",
 	"select": "Select",
 	"deselect": "Deselect",
 	"clickToUpload": "Click to upload",

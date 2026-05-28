@@ -192,14 +192,6 @@
 						cacheLock={cacheLocks['oauth_pkce_enabled']}
 						helpText={m.oidcPKCEEnabledHelpText()}
 					/>
-					<Checkbox
-						{form}
-						field="strict_state_nonce"
-						label={m.oidcStrictStateNonce()}
-						disabled={!data.is_enabled}
-						cacheLock={cacheLocks['strict_state_nonce']}
-						helpText={m.oidcStrictStateNonceHelpText()}
-					/>
 				</div>
 			</Accordion.ItemContent>
 		</Accordion.Item>

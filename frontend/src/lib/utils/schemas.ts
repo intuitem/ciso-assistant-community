@@ -733,8 +733,7 @@ export const SSOSettingsSchema = z.object({
 		])
 		.optional()
 		.nullable(),
-	oauth_pkce_enabled: z.boolean().optional().default(false),
-	strict_state_nonce: z.boolean().default(false)
+	oauth_pkce_enabled: z.boolean().optional().default(false)
 });
 
 export const EntitiesSchema = z.object({
