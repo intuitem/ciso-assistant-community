@@ -1,7 +1,7 @@
 from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Font
 import copy
 import csv
 import hashlib
@@ -68,7 +68,7 @@ from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
 from .serializer_fields import FieldsRelatedField
 
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -6990,6 +6990,22 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     filterset_class = RiskAcceptanceFilterSet
     search_fields = ["name", "description", "justification"]
 
+    def _get_justification(self, request):
+        raw_justification = request.data.get("justification", "")
+        if not isinstance(raw_justification, str):
+            return None, Response(
+                {"error": "The justification field must be a string"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        justification = raw_justification.strip()
+        max_len = RiskAcceptance._meta.get_field("justification").max_length
+        if max_len and len(justification) > max_len:
+            return None, Response(
+                {"error": f"Justification must be at most {max_len} characters"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return justification, None
+
     def update(self, request, *args, **kwargs):
         initial_data = self.get_object()
         updated_data = request.data
@@ -7045,7 +7061,13 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can accept the risk acceptance"}
             )
-        self.get_object().set_state("accepted")
+
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.justification = justification
+        risk_acceptance.set_state("accepted")
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
@@ -7059,7 +7081,13 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can reject the risk acceptance"}
             )
-        self.get_object().set_state("rejected")
+
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.justification = justification
+        risk_acceptance.set_state("rejected")
         return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
@@ -7073,7 +7101,12 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can revoke the risk acceptance"}
             )
-        self.get_object().set_state("revoked")
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.justification = justification
+        risk_acceptance.set_state("revoked")
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
@@ -8139,6 +8172,192 @@ def get_governance_calendar_data_view(request):
     folder_id = request.query_params.get("folder", None)
     return Response(
         {"results": get_governance_calendar_data(request.user, year, folder_id)}
+    )
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def get_analytics_export_xlsx(request):
+    """
+    Export all analytics dashboard data as a multi-sheet XLSX file.
+    Sheets: Summary, Risk Levels, Compliance, Controls, Incidents.
+    """
+    user = request.user
+
+    def excel_dt(value):
+        # openpyxl rejects tz-aware datetimes; DB values are UTC, drop tzinfo.
+        if isinstance(value, datetime) and value.tzinfo is not None:
+            return value.replace(tzinfo=None)
+        return value
+
+    # Choice → English label maps. translation.override pins the locale so
+    # the export is portable across users regardless of their UI language.
+    with translation.override("en"):
+        control_status_map = {k: str(v) for k, v in AppliedControl.Status.choices}
+        control_priority_map = {k: str(v) for k, v in AppliedControl.PRIORITY}
+        assessment_status_map = {
+            k: str(v) for k, v in ComplianceAssessment.Status.choices
+        }
+        incident_status_map = {k: str(v) for k, v in Incident.Status.choices}
+        incident_severity_map = {k: str(v) for k, v in Incident.Severity.choices}
+        incident_detection_map = {k: str(v) for k, v in Incident.Detection.choices}
+
+    def label(mapping, value):
+        if value is None or value == "":
+            return ""
+        return mapping.get(value, value)
+
+    wb = Workbook()
+    wb.remove(wb.active)
+
+    header_font = Font(bold=True)
+    center = Alignment(horizontal="center", vertical="center")
+
+    def style_header_row(ws):
+        for cell in ws[1]:
+            cell.font = header_font
+            cell.alignment = center
+
+    def auto_width(ws):
+        for col in ws.columns:
+            max_len = max((len(str(c.value or "")) for c in col), default=10)
+            ws.column_dimensions[get_column_letter(col[0].column)].width = min(
+                max_len + 4, 60
+            )
+
+    # --- Sheet 1: Summary KPIs ---
+    metrics = get_metrics(user, folder_id=None)
+    ws1 = wb.create_sheet(title="Summary")
+    ws1.append(["Category", "Metric", "Value"])
+    style_header_row(ws1)
+    for category, values in metrics.items():
+        if isinstance(values, dict):
+            for key, val in values.items():
+                ws1.append([category, key, val])
+        elif isinstance(values, list):
+            for item in values:
+                # csf_functions ships display labels ("Govern", "(undefined)");
+                # normalize back to raw choice keys so the frontend can translate.
+                name = item.get("name", "").strip("()").lower()
+                ws1.append([category, name, item.get("value", "")])
+    auto_width(ws1)
+
+    # --- Sheet 2: Risk Levels ---
+    risk_levels = risks_count_per_level(user)
+    ws2 = wb.create_sheet(title="Risk Levels")
+    ws2.append(["Type", "Level", "Count"])
+    style_header_row(ws2)
+    for entry in risk_levels.get("current", []):
+        ws2.append(
+            [
+                "Current",
+                escape_excel_formula(entry.get("name", "")),
+                entry.get("value", 0),
+            ]
+        )
+    for entry in risk_levels.get("residual", []):
+        ws2.append(
+            [
+                "Residual",
+                escape_excel_formula(entry.get("name", "")),
+                entry.get("value", 0),
+            ]
+        )
+    auto_width(ws2)
+
+    # --- Sheet 3: Compliance by Framework ---
+    compliance = get_compliance_analytics(user)
+    ws3 = wb.create_sheet(title="Compliance")
+    ws3.append(
+        ["Framework", "Domain", "Assessment", "Perimeter", "Progress (%)", "Status"]
+    )
+    style_header_row(ws3)
+    if isinstance(compliance, dict):
+        for framework_name, fw_data in compliance.items():
+            for domain in fw_data.get("domains", []):
+                for assessment in domain.get("assessments", []):
+                    ws3.append(
+                        [
+                            escape_excel_formula(framework_name),
+                            escape_excel_formula(domain.get("domain", "")),
+                            escape_excel_formula(assessment.get("assessment_name", "")),
+                            escape_excel_formula(assessment.get("perimeter", "")),
+                            assessment.get("progress", 0),
+                            label(assessment_status_map, assessment.get("status")),
+                        ]
+                    )
+    auto_width(ws3)
+
+    # --- Sheet 4: Applied Controls ---
+    (viewable_controls, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )
+    controls_qs = AppliedControl.objects.filter(id__in=viewable_controls).values(
+        "name", "status", "priority", "eta", "folder__name"
+    )
+    ws4 = wb.create_sheet(title="Controls")
+    ws4.append(["Name", "Status", "Priority", "ETA", "Domain"])
+    style_header_row(ws4)
+    for ctrl in controls_qs:
+        ws4.append(
+            [
+                escape_excel_formula(ctrl.get("name", "")),
+                label(control_status_map, ctrl.get("status")),
+                label(control_priority_map, ctrl.get("priority")),
+                excel_dt(ctrl.get("eta")),
+                escape_excel_formula(ctrl.get("folder__name", "")),
+            ]
+        )
+    auto_width(ws4)
+
+    # --- Sheet 5: Incidents ---
+    (viewable_incidents, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Incident
+    )
+    incidents_qs = Incident.objects.filter(id__in=viewable_incidents)
+    ws5 = wb.create_sheet(title="Incidents")
+    ws5.append(
+        [
+            "Name",
+            "Status",
+            "Severity",
+            "Detection",
+            "Reported At",
+            "Resolved At",
+            "Domain",
+        ]
+    )
+    style_header_row(ws5)
+    for inc in incidents_qs.values(
+        "name",
+        "status",
+        "severity",
+        "detection",
+        "reported_at",
+        "resolved_at",
+        "folder__name",
+    ):
+        ws5.append(
+            [
+                escape_excel_formula(inc.get("name", "")),
+                label(incident_status_map, inc.get("status")),
+                label(incident_severity_map, inc.get("severity")),
+                label(incident_detection_map, inc.get("detection")),
+                excel_dt(inc.get("reported_at")),
+                excel_dt(inc.get("resolved_at")),
+                escape_excel_formula(inc.get("folder__name", "")),
+            ]
+        )
+    auto_width(ws5)
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    # Content-Disposition is set by the SvelteKit proxy.
+    return HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
