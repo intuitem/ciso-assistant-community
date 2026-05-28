@@ -198,9 +198,28 @@ def backfill_results(apps, schema_editor):
         "not_applicable": RESULT_NOT_APPLICABLE,
     }
 
+    # Memoize the question tree per requirement_id: many RAs reference the
+    # same RequirementNode, so we materialize the questions + choices once
+    # per distinct requirement instead of refetching per RA.
+    question_cache = {}
+
+    def get_question_data(requirement):
+        cached = question_cache.get(requirement.id)
+        if cached is not None:
+            return cached
+        questions = list(requirement.questions.prefetch_related("choices").all())
+        has_any_compute_result = any(
+            _resolve_compute_result(choice.compute_result) is not None
+            for question in questions
+            for choice in question.choices.all()
+        )
+        cached = (questions, has_any_compute_result)
+        question_cache[requirement.id] = cached
+        return cached
+
     def recompute_result(ra):
         """Recompute result only. Return True if the RA was modified."""
-        questions_qs = ra.requirement.questions.prefetch_related("choices").all()
+        questions_qs, has_any_compute_result = get_question_data(ra.requirement)
 
         # No questions → this RA is manual or respondent-alignment-driven.
         # Leave it untouched to avoid corrupting manually-set results.
@@ -210,11 +229,6 @@ def backfill_results(apps, schema_editor):
         # No choice defines compute_result → the boolean-collapse bug never
         # applied to this RA.  Skip to avoid wiping a manual result on
         # score-only or plain-question assessments.
-        has_any_compute_result = any(
-            _resolve_compute_result(choice.compute_result) is not None
-            for question in questions_qs
-            for choice in question.choices.all()
-        )
         if not has_any_compute_result:
             return False
 
