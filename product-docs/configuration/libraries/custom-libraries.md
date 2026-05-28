@@ -287,10 +287,21 @@ Important columns:
 * `description`
 * `implementation_groups` (if applicable)
 * `questions` / `answers` (if applicable)
+* `min_score`, `max_score`, `scores_definition` (optional requirement-level scoring override)
 
 {% hint style="info" %}
 Order matters: the hierarchy is inferred from row order + depth.
 {% endhint %}
+
+#### Requirement-level scoring overrides
+
+Framework `_meta` tabs define the default scoring scale with `min_score`, `max_score`, and `scores_definition`. A row in the framework `_content` tab can override that scale for a specific requirement:
+
+* `min_score` — integer minimum score for this requirement.
+* `max_score` — integer maximum score for this requirement.
+* `scores_definition` — name of a `scores` object block to use as the level labels for this requirement.
+
+Each field cascades independently. Leave the cells blank to inherit the audit's framework-level value. If you override the range, make sure the requirement's `scores_definition` covers every integer score from `min_score` to `max_score`; otherwise conversion or import validation will reject the library. Also keep choice `add_score` values within the requirement's effective range.
 
 ### 4.6 Threats
 

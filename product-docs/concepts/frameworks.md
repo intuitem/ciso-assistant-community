@@ -30,6 +30,20 @@ A framework lives inside a loaded library and is read-only. It comprises a tree 
 
 A framework is a tree of **requirement nodes**. Most nodes are _assessable_ — concrete requirements you evaluate one by one — while others act as section or chapter headings that organise the tree. Each assessable node becomes a [requirement assessment](audits.md) inside an audit, carrying its own status, score, and evidence.
 
+## Scoring scales
+
+Frameworks can define a default scoring scale with a minimum score, a maximum score, and optional level descriptions. For example, a CMMI-style framework may use `0..5`, while another framework may use `1..4` or `0..100`.
+
+An individual requirement node can override that default scale with its own `min_score`, `max_score`, and `scores_definition`. These overrides are useful when a standard mixes different scoring shapes in the same tree: for example, a mostly maturity-based framework that also contains binary pass/fail requirements.
+
+The override is resolved independently for each field:
+
+- If a requirement defines `min_score`, that value is used; otherwise the audit's framework-level minimum is used.
+- If a requirement defines `max_score`, that value is used; otherwise the audit's framework-level maximum is used.
+- If a requirement defines `scores_definition`, those labels are used; otherwise the audit's framework-level labels are used when they fit the requirement's effective range.
+
+Roll-ups keep mixed scales comparable. Average-based aggregation normalises each requirement score against its effective range before computing the parent or global score, then displays the result on the audit scale. Sum-based aggregation remains a raw weighted sum, so each requirement contributes its own effective maximum.
+
 ## Built-in vs custom
 
 CISO Assistant ships with 100+ built-in frameworks covering most international standards and regulations. When none of them fits your needs, you can build your own — see [Designing your own libraries](../configuration/libraries/custom-libraries.md) and [Getting your custom framework](../configuration/libraries/custom-frameworks.md).

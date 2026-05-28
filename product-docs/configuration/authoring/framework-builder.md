@@ -206,6 +206,12 @@ Below them, a **Scale levels** editor for the actual scoring scale entries — e
 
 This is the maturity scale your respondents will see when the audit is scored.
 
+{% hint style="info" %}
+**Incoming:** requirement-level scoring overrides will be editable directly in the builder in a future PR. The data model already supports `min_score`, `max_score`, and `scores_definition` on requirement nodes, and audits already use those values when present. Until the builder UI exposes them, author these overrides through YAML or Excel.
+{% endhint %}
+
+Use requirement-level overrides only for genuinely mixed-scale frameworks. The builder's scoring settings remain the default scale for the framework as a whole.
+
 ### Outcome rules
 
 The **OutcomesEditor** lets you author CEL expressions that compute outcome labels from the framework's score. Each rule carries:
