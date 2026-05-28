@@ -1,0 +1,124 @@
+name: Warm Playwright cache
+
+# Pre-populates the GitHub Actions cache with Playwright browser binaries on
+# the default branch's scope, so PRs targeting it restore the cache on cold
+# start instead of re-downloading from cdn.playwright.dev (which is observably
+# flaky and can hang).
+#
+# Writes two keys matching what functional-tests.yml and startup-tests.yml
+# look up:
+#   Linux-playwright-<version>-chromium   (functional-tests, chromium-only)
+#   Linux-playwright-<version>            (startup-tests, full default set)
+
+permissions:
+  contents: read
+  actions: write
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "frontend/package.json"
+      - "frontend/pnpm-lock.yaml"
+      - ".github/workflows/cache-playwright.yml"
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  frontend-directory: ./frontend
+
+jobs:
+  warm_chromium:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+
+      - name: Get installed Playwright version
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+
+      - name: Cache chromium
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-chromium
+
+      - name: Download chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.frontend-directory }}
+        timeout-minutes: 15
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 300 pnpm exec playwright install chromium; then
+              exit 0
+            fi
+            echo "::warning::Playwright chromium download attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
+
+  warm_all_browsers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+
+      - name: Get installed Playwright version
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+
+      - name: Cache full browser set
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Download full browser set
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.frontend-directory }}
+        timeout-minutes: 20
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright full-set download attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
