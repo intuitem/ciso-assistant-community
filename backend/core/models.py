@@ -2577,6 +2577,9 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     scores_definition = models.JSONField(
         null=True, blank=True, verbose_name=_("Score definition")
     )
+    target_score = models.FloatField(
+        null=True, blank=True, verbose_name=_("Target score")
+    )
 
     @property
     def associated_reference_controls(self):
@@ -8273,6 +8276,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     )
     documentation_score = models.IntegerField(
         blank=True, null=True, verbose_name=_("Documentation Score")
+    )
+    target_score = models.FloatField(
+        blank=True, null=True, verbose_name=_("Target score")
     )
     evidences = models.ManyToManyField(
         Evidence,

@@ -28,4 +28,18 @@ class Migration(migrations.Migration):
                 blank=True, null=True, verbose_name="Score definition"
             ),
         ),
+        migrations.AddField(
+            model_name="requirementnode",
+            name="target_score",
+            field=models.FloatField(
+                blank=True, null=True, verbose_name="Target score"
+            ),
+        ),
+        migrations.AddField(
+            model_name="requirementassessment",
+            name="target_score",
+            field=models.FloatField(
+                blank=True, null=True, verbose_name="Target score"
+            ),
+        ),
     ]

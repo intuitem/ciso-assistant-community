@@ -33,7 +33,7 @@ test('compliance assessments scoring is working properly', async ({
 	};
 	// Helper to convert raw score to percentage for tree view assertions
 	const toPercent = (score: number) =>
-		(((score - minScore) / (maxScore - minScore)) * 100).toString();
+		(((score - minScore) * 100) / (maxScore - minScore)).toString();
 
 	for (let requirement of testRequirements) {
 		requirement += 'Page';
