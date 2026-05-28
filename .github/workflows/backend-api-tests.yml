@@ -35,6 +35,15 @@ jobs:
       DEFAULT_FROM_EMAIL: "ciso-assistant@alsigo.net"
       CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # test credential
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       max-parallel: 4
       matrix:
@@ -64,7 +73,7 @@ jobs:
         working-directory: ${{ env.BACKEND_DIR }}
         run: poetry install
 
-      - name: Run migrations
+      - name: Run migrations (sqlite)
         working-directory: ${{ env.BACKEND_DIR }}
         run: poetry run python manage.py migrate
 
@@ -73,6 +82,32 @@ jobs:
         with:
           name: prebuilt-db
           path: ${{ env.BACKEND_DIR }}/db/ciso-assistant.sqlite3
+          retention-days: 1
+
+      - name: Restore PG dump cache
+        id: pg-dump-cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.BACKEND_DIR }}/db/prebuilt-pg.sql
+          key: pg-dump-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/poetry.lock') }}
+
+      - name: Run migrations (postgres) and dump
+        if: steps.pg-dump-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.BACKEND_DIR }}
+        env:
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          PGPASSWORD: postgres
+        run: |
+          poetry run python manage.py migrate
+          pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg.sql
+
+      - name: Upload PG dump
+        uses: actions/upload-artifact@v7
+        with:
+          name: prebuilt-pg-dump
+          path: ${{ env.BACKEND_DIR }}/db/prebuilt-pg.sql
           retention-days: 1
 
   # JOB 2: Generate Matrix
@@ -98,6 +133,16 @@ jobs:
       max-parallel: 8
       matrix:
         test-file: ${{ fromJson(needs.list-files.outputs.matrix) }}
+        backend: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # test credential
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       DJANGO_DEBUG: "True"
       DB_HOST: localhost
@@ -135,23 +180,47 @@ jobs:
         run: poetry install
 
       - name: Download Database
+        if: matrix.backend == 'sqlite'
         uses: actions/download-artifact@v8
         with:
           name: prebuilt-db
           path: ${{ env.BACKEND_DIR }}/db/
 
       - name: Prepare Test Database
+        if: matrix.backend == 'sqlite'
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
           # Copy pre-built DB to the name defined in settings.py TEST config
           cp db/ciso-assistant.sqlite3 db/test_ciso-assistant.sqlite3
+
+      - name: Download PG dump
+        if: matrix.backend == 'postgres'
+        uses: actions/download-artifact@v8
+        with:
+          name: prebuilt-pg-dump
+          path: ${{ env.BACKEND_DIR }}/db/
+
+      - name: Restore PG dump to test database
+        if: matrix.backend == 'postgres'
+        working-directory: ${{ env.BACKEND_DIR }}
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -c "CREATE DATABASE test_postgres;"
+          psql -h localhost -U postgres -d test_postgres -f db/prebuilt-pg.sql > /dev/null
 
       - name: Run Test File
         working-directory: ${{ env.BACKEND_DIR }}
         env:
           TEST_FILE: ${{ matrix.test-file }}
           JOB_INDEX: ${{ strategy.job-index }}
+          BACKEND: ${{ matrix.backend }}
         run: |
+          if [ "$BACKEND" = "postgres" ]; then
+            export POSTGRES_NAME=postgres
+            export POSTGRES_USER=postgres
+            export POSTGRES_PASSWORD=postgres
+          fi
           # Use --reuse-db to prevent pytest from destroying/recreating the DB
           poetry run pytest "$TEST_FILE" --reuse-db --html="pytest-report-${JOB_INDEX}.html" --self-contained-html
 
@@ -168,6 +237,6 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-report-${{ strategy.job-index }}
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-report-${{ matrix.backend }}-${{ strategy.job-index }}
           path: ${{ env.BACKEND_DIR }}/pytest-report-${{ strategy.job-index }}.html
           retention-days: 5

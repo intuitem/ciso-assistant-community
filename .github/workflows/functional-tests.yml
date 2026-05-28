@@ -231,6 +231,15 @@ jobs:
         shell: bash
         run: poetry --version
 
+      - name: Configure Poetry virtualenv in project
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache Virtualenv
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.backend-directory }}/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
