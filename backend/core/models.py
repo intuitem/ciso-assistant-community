@@ -8376,21 +8376,23 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             )
         else:
             scores_definition = ca_sd.get("scale")
-            # Inherited default may not cover the Node's overridden bounds.
-            # Drop the labels rather than display them out of range.
+            # Inherited default may extend beyond the Node's overridden bounds.
+            # Keep only entries that fall inside the resolved range (preserves
+            # sparse scales like 0/25/50/75/100); drop the labels entirely if
+            # nothing remains.
             if (
-                scores_definition is not None
-                and isinstance(scores_definition, list)
+                isinstance(scores_definition, list)
                 and min_score is not None
                 and max_score is not None
             ):
-                scored_values = {
-                    entry.get("score")
+                filtered = [
+                    entry
                     for entry in scores_definition
-                    if isinstance(entry, dict) and entry.get("score") is not None
-                }
-                if not set(range(min_score, max_score + 1)).issubset(scored_values):
-                    scores_definition = None
+                    if isinstance(entry, dict)
+                    and entry.get("score") is not None
+                    and min_score <= entry["score"] <= max_score
+                ]
+                scores_definition = filtered or None
 
         return {
             "min_score": min_score,
