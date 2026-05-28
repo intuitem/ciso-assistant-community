@@ -74,7 +74,6 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
         logger.error(
             "Webhook blocked by SSRF guard",
             endpoint_id=endpoint_id,
-            url=endpoint.url,
             exc_info=True,
         )
         return f"Blocked: {endpoint_id} URL points to a non-public address"
@@ -95,7 +94,6 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
             logger.warning(
                 "Webhook target returned redirect; not followed",
                 endpoint_id=endpoint_id,
-                url=endpoint.url,
                 status_code=response.status_code,
             )
             return (

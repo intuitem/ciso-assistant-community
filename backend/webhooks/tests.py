@@ -12,12 +12,13 @@ from webhooks.tasks import send_webhook_request
 
 @pytest.fixture
 def public_endpoint(db):
-    return WebhookEndpoint.objects.create(
-        name="public",
-        url="https://example.com/hook",
-        secret="x" * 32,
-        is_active=True,
-    )
+    with override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True):
+        return WebhookEndpoint.objects.create(
+            name="public",
+            url="https://example.com/hook",
+            secret="x" * 32,
+            is_active=True,
+        )
 
 
 @pytest.fixture

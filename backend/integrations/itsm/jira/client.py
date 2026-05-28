@@ -20,11 +20,7 @@ class JiraClient(BaseIntegrationClient):
         try:
             check_integration_url(server_url, "Jira server_url")
         except ValueError:
-            logger.error(
-                "Jira server_url blocked by SSRF guard",
-                server_url=server_url,
-                exc_info=True,
-            )
+            logger.error("Jira server_url blocked by SSRF guard", exc_info=True)
             raise
         self.jira = JIRA(
             server=server_url,
@@ -32,6 +28,7 @@ class JiraClient(BaseIntegrationClient):
             timeout=30,
             max_retries=3,
         )
+        self.jira._session.max_redirects = 0
         self.mapper = JiraFieldMapper(configuration)
 
     def create_remote_object(self, local_object: AppliedControl):
