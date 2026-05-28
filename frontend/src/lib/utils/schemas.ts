@@ -616,7 +616,9 @@ export const GeneralSettingsSchema = z.object({
 	chat_system_prompt: z.string().default('').optional(),
 	openai_api_base: z.string().default('http://localhost:1234/v1').optional(),
 	openai_model: z.string().default('').optional(),
-	openai_api_key: z.string().default('').optional()
+	openai_api_key: z.string().default('').optional(),
+	chat_temperature_enabled: z.boolean().default(true).optional(),
+	chat_temperature: z.coerce.number().min(0).max(2).default(0).optional()
 });
 
 export const SecIntelFeedsSchema = z.object({
