@@ -82,6 +82,20 @@ When the framework should support tiered selection (e.g. _Basic_ / _Standard_ / 
    - **Description** (criteria for reaching this level).
 5. Repeat for each level. The platform uses these definitions to render the scale in audits.
 
+### Override scoring on a requirement
+
+Use a requirement-level override when one requirement has a different valid range from the rest of the framework, for example a binary `0..1` requirement inside a `0..5` maturity framework.
+
+In YAML or Excel, set these fields on the requirement node:
+
+- **`min_score`** — the requirement's minimum score.
+- **`max_score`** — the requirement's maximum score.
+- **`scores_definition_ref`** — optional name of an alternative scale declared in the framework's `scores_definition.alternatives` registry, used as the level labels for this requirement.
+
+The fields cascade independently. You can override only `max_score`, only the labels, or the full range. At audit runtime, blank requirement fields fall back to the audit's own scoring scale (`ComplianceAssessment`), usually initialised from the framework at audit creation. If the requirement changes range but does not define its own labels, the audit-level labels are reused only when they cover the requirement's effective range; otherwise the audit shows the numeric scale without mismatched labels.
+
+Keep question scoring aligned with the effective range: any `add_score` values on choices should fit between the requirement's effective `min_score` and `max_score`.
+
 ### Add a yes/no question to a requirement
 
 1. On the requirement node card, click **Add question** at the bottom.
@@ -196,6 +210,8 @@ See [Implementation groups](../../concepts/audits.md#implementation-groups) for 
 
 - **Match the standard the framework comes from.** CMMI uses 0–5; NIST CSF 2.0 uses 1–4; ISO 27001 has no inherent scale. Don't reinvent unless the standard genuinely lacks one.
 - **Document each level.** The scale-entry description is what an analyst reads to decide whether they're at level 3 vs level 4 — make it actionable, not just a label.
+- **Use requirement-level overrides sparingly.** They are designed for genuinely mixed scoring models. If every requirement needs the same range, keep it at framework level so audits and outcomes stay easier to reason about.
+- **Check aggregation semantics.** Average-based methods normalise mixed ranges before roll-up; sum-based scoring adds raw weighted values, so a `0..1` requirement contributes much less than a `0..100` requirement unless its weight compensates for that.
 
 ### Questions
 

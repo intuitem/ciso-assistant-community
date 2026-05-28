@@ -382,6 +382,15 @@
 
 	let computedResult = $derived(computedScoreAndResult.result);
 	let computedScore = $derived(computedScoreAndResult.score);
+
+	// effective_* are resolved server-side via the Node -> CA cascade. They are
+	// null when scoring is disabled on the CA.
+	const ra = data.requirementAssessment;
+	const req = ra.requirement;
+	const resolvedMin = ra.effective_min_score ?? page.data.compliance_assessment_score.min_score;
+	const resolvedMax = ra.effective_max_score ?? page.data.compliance_assessment_score.max_score;
+	const resolvedScoresDef =
+		ra.effective_scores_definition ?? page.data.compliance_assessment_score.scores_definition;
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}
@@ -875,20 +884,14 @@
 									<span class="font-medium">{m.score()}</span>
 									<div class="shrink-0 relative">
 										<Progress
-											value={formatScoreValue(
-												computedScore || 0,
-												page.data.compliance_assessment_score.max_score
-											)}
+											value={formatScoreValue(computedScore || 0, resolvedMax, false, resolvedMin)}
 											min={0}
 											max={100}
 										>
 											<Progress.Circle class="[--size:--spacing(10)]">
 												<Progress.CircleTrack />
 												<Progress.CircleRange
-													class={displayScoreColor(
-														computedScore,
-														page.data.compliance_assessment_score.max_score
-													)}
+													class={displayScoreColor(computedScore, resolvedMax, false, resolvedMin)}
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
@@ -903,9 +906,9 @@
 								<div class="flex flex-col" data-testid="score-field">
 									<Score
 										{form}
-										min_score={page.data.compliance_assessment_score.min_score}
-										max_score={page.data.compliance_assessment_score.max_score}
-										scores_definition={page.data.compliance_assessment_score.scores_definition}
+										min_score={resolvedMin}
+										max_score={resolvedMax}
+										scores_definition={resolvedScoresDef}
 										field="score"
 										label={page.data.compliance_assessment_score.show_documentation_score
 											? m.implementationScore()
@@ -928,19 +931,17 @@
 									</Score>
 								</div>
 							{/if}
-							{#if showDocumentationScore}
-								<div data-testid="documentation-score-field">
-									<Score
-										{form}
-										min_score={page.data.compliance_assessment_score.min_score}
-										max_score={page.data.compliance_assessment_score.max_score}
-										scores_definition={page.data.compliance_assessment_score.scores_definition}
-										field="documentation_score"
-										label={m.documentationScore()}
-										isDoc={true}
-										disabled={!data.is_scored}
-									/>
-								</div>
+							{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
+								<Score
+									{form}
+									min_score={resolvedMin}
+									max_score={resolvedMax}
+									scores_definition={resolvedScoresDef}
+									field="documentation_score"
+									label={m.documentationScore()}
+									isDoc={true}
+									disabled={!data.is_scored}
+								/>
 							{/if}
 						{/if}
 					{/if}
